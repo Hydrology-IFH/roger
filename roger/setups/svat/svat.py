@@ -65,12 +65,6 @@ class SVATSetup(RogerSetup):
             var_obj = infile.variables['time']
             return onp.array(var_obj)[-1] * 60 * 60 + 24 * 60 * 60
 
-    def _get_ncr(self):
-        nc_file = BASE_PATH / 'crop_rotation.nc'
-        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables['year_season']
-            return len(onp.array(var_obj))
-
     @roger_routine
     def set_settings(self, state):
         settings = state.settings

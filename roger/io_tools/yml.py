@@ -413,7 +413,8 @@ class Config:
 
 
 def write_config(run_dir, experiment_name, output_variables,
-                 cell_width=1, enable_groundwater_boundary=False,
+                 cell_width=1, nrows=1, ncols=1,
+                 enable_groundwater_boundary=False,
                  enable_film_flow=False, enable_crop_phenology=False,
                  enable_crop_rotation=False, enable_lateral_flow=False,
                  enable_groundwater=False, enable_routing=False,
@@ -468,8 +469,8 @@ def write_config(run_dir, experiment_name, output_variables,
     dict_config['enable_crop_phenology'] = enable_crop_phenology
     dict_config['enable_crop_rotation'] = enable_crop_rotation
 
-    dict_config['nrows'] = 1
-    dict_config['ncols'] = 1
+    dict_config['nrows'] = nrows
+    dict_config['ncols'] = ncols
     dict_config['cell_width'] = cell_width
 
     dict_config['output_variables'] = output_variables

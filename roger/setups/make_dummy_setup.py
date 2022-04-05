@@ -8,9 +8,8 @@ from roger.core.event_classification import calc_event_classification
 from roger.io_tools import yml
 onp.random.seed(42)
 
-
-def make_setup(base_path, ndays=10, event_type='rain',
-               enable_groundwater_boundary=False,
+def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
+               event_type='rain', enable_groundwater_boundary=False,
                enable_film_flow=False, enable_crop_phenology=False,
                enable_crop_rotation=False, enable_lateral_flow=False,
                enable_groundwater=False, enable_routing=False,
@@ -25,13 +24,15 @@ def make_setup(base_path, ndays=10, event_type='rain',
                a=None,
                rain_sum_ff=100,
                max_dur=72,
-               z_soil_max=5000):
+               z_soil_max=5000,
+               nrows=1,
+               ncols=1):
     """
     Make dummy setup with maximum two events.
     """
     if not enable_offline_transport:
         # generate config file
-        yml.write_config(base_path, 'dummy', None,
+        yml.write_config(base_path, identifier, None, nrows=nrows, ncols=ncols,
                          enable_groundwater_boundary=enable_groundwater_boundary,
                          enable_film_flow=enable_film_flow,
                          enable_crop_phenology=enable_crop_phenology,
@@ -45,23 +46,20 @@ def make_setup(base_path, ndays=10, event_type='rain',
                          enable_deuterium=enable_deuterium,
                          enable_oxygen18=enable_oxygen18,
                          enable_nitrate=enable_nitrate)
-        # read config file
-        config_file = base_path / "config.yml"
-        config = yml.Config(config_file)
 
         # model parameters
         head_units_params = ['Unit']
         head_columns_params = ['No']
-        df_params = pd.DataFrame(index=range(config.nrows * config.ncols),
+        df_params = pd.DataFrame(index=range(nrows * ncols),
                                  columns=head_columns_params)
-        df_params.loc[:, 'No'] = range(1, config.nrows * config.ncols + 1)
+        df_params.loc[:, 'No'] = range(1, nrows * ncols + 1)
 
         # write initial values file
         head_units_initvals = ['Unit']
         head_columns_initvals = ['No']
-        df_initvals = pd.DataFrame(index=range(config.nrows * config.ncols),
+        df_initvals = pd.DataFrame(index=range(nrows * ncols),
                                    columns=head_columns_initvals)
-        df_initvals.loc[:, 'No'] = range(1, config.nrows * config.ncols + 1)
+        df_initvals.loc[:, 'No'] = range(1, nrows * ncols + 1)
 
         if event_type == 'rain':
             # generate random rainfall
@@ -262,7 +260,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
                 comment=''
             )
             # set dimensions with a dictionary
-            f.dimensions = {'x': config.nrows, 'y': config.ncols, 'time': len(df_events.index), 'scalar': 1}
+            f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_events.index), 'scalar': 1}
             v = f.create_variable('PREC', ('x', 'y', 'time'), float)
             arr = df_events['PREC'].astype(float).values
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
@@ -415,9 +413,9 @@ def make_setup(base_path, ndays=10, event_type='rain',
             head_units_crops += ['[year_season]', '[year_season]', '[year_season]', '[year_season]', '[year_season]', '[year_season]']
             year_season = ['2017_summer', '2017_winter', '2018_summer', '2018_winter', '2019_summer', '2019_winter']
             head_columns_crops += year_season
-            df_crops = pd.DataFrame(index=range(config.nrows * config.ncols),
+            df_crops = pd.DataFrame(index=range(nrows * ncols),
                                     columns=head_columns_crops)
-            df_crops.loc[:, 'No'] = range(1, config.nrows * config.ncols + 1)
+            df_crops.loc[:, 'No'] = range(1, nrows * ncols + 1)
             # df_crops.loc[:, '2017_summer'] = 599
             # df_crops.loc[:, '2017_winter'] = 557
             # df_crops.loc[:, '2018_summer'] = 599
@@ -446,11 +444,11 @@ def make_setup(base_path, ndays=10, event_type='rain',
                     comment=''
                 )
                 # set dimensions with a dictionary
-                f.dimensions = {'x': config.nrows, 'y': config.ncols, 'year_season': len(crops.columns[1:])}
-                arr = onp.full((config.nrows, config.ncols, len(crops.columns[1:])), 598, dtype=int)
-                idx = onp.arange(config.nrows * config.ncols).reshape((config.nrows, config.ncols))
-                for row in range(config.nrows):
-                    for col in range(config.ncols):
+                f.dimensions = {'x': nrows, 'y': ncols, 'year_season': len(crops.columns[1:])}
+                arr = onp.full((nrows, ncols, len(crops.columns[1:])), 598, dtype=int)
+                idx = onp.arange(nrows * ncols).reshape((nrows, ncols))
+                for row in range(nrows):
+                    for col in range(ncols):
                         arr[row, col, :] = crops.iloc[idx[row, col], 1:]
 
                 v = f.create_variable('crop', ('x', 'y', 'year_season'), int)
@@ -471,7 +469,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
 
     elif enable_offline_transport:
         # generate config file
-        yml.write_config(base_path, 'dummy', None,
+        yml.write_config(base_path, identifier, None, nrows=nrows, ncols=ncols,
                          enable_groundwater_boundary=enable_groundwater_boundary,
                          enable_film_flow=enable_film_flow,
                          enable_crop_phenology=enable_crop_phenology,
@@ -486,42 +484,39 @@ def make_setup(base_path, ndays=10, event_type='rain',
                          enable_oxygen18=enable_oxygen18,
                          enable_nitrate=enable_nitrate,
                          tm_structure=tm_structure)
-        # read config file
-        config_file = base_path / "config.yml"
-        config = yml.Config(config_file)
 
         # model parameters
         head_units_params = ['Unit']
         head_columns_params = ['No']
-        df_params = pd.DataFrame(index=range(config.nrows * config.ncols),
+        df_params = pd.DataFrame(index=range(nrows * ncols),
                                  columns=head_columns_params)
-        df_params.loc[:, 'No'] = range(1, config.nrows * config.ncols + 1)
+        df_params.loc[:, 'No'] = range(1, nrows * ncols + 1)
 
         # write initial values file
         head_units_initvals = ['Unit']
         head_columns_initvals = ['No']
-        df_initvals = pd.DataFrame(index=range(config.nrows * config.ncols),
+        df_initvals = pd.DataFrame(index=range(nrows * ncols),
                                    columns=head_columns_initvals)
-        df_initvals.loc[:, 'No'] = range(1, config.nrows * config.ncols + 1)
+        df_initvals.loc[:, 'No'] = range(1, nrows * ncols + 1)
 
         # write SAS parameter files
         head_units_sas_params_transp = ['Unit']
         head_columns_sas_params_transp = ['No']
-        df_sas_params_transp = pd.DataFrame(index=range(config.nrows * config.ncols),
+        df_sas_params_transp = pd.DataFrame(index=range(nrows * ncols),
                                             columns=head_columns_sas_params_transp)
-        df_sas_params_transp.loc[:, 'No'] = range(1, config.nrows * config.ncols + 1)
+        df_sas_params_transp.loc[:, 'No'] = range(1, nrows * ncols + 1)
 
         head_units_sas_params_q_rz = ['Unit']
         head_columns_sas_params_q_rz = ['No']
-        df_sas_params_q_rz = pd.DataFrame(index=range(config.nrows * config.ncols),
+        df_sas_params_q_rz = pd.DataFrame(index=range(nrows * ncols),
                                           columns=head_columns_sas_params_q_rz)
-        df_sas_params_q_rz.loc[:, 'No'] = range(1, config.nrows * config.ncols + 1)
+        df_sas_params_q_rz.loc[:, 'No'] = range(1, nrows * ncols + 1)
 
         head_units_sas_params_q_ss = ['Unit']
         head_columns_sas_params_q_ss = ['No']
-        df_sas_params_q_ss = pd.DataFrame(index=range(config.nrows * config.ncols),
+        df_sas_params_q_ss = pd.DataFrame(index=range(nrows * ncols),
                                           columns=head_columns_sas_params_q_ss)
-        df_sas_params_q_ss.loc[:, 'No'] = range(1, config.nrows * config.ncols + 1)
+        df_sas_params_q_ss.loc[:, 'No'] = range(1, nrows * ncols + 1)
 
         if enable_film_flow:
             pass
@@ -535,7 +530,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
         if enable_groundwater:
             pass
 
-        if config.tm_structure == 'complete-mixing':
+        if tm_structure == 'complete-mixing':
             head_units_sas_params_transp += ['']
             head_columns_sas_params_transp += ['sas_function']
             df_sas_params_transp.loc[:, 'sas_function'] = 1
@@ -548,7 +543,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
             head_columns_sas_params_q_ss += ['sas_function']
             df_sas_params_q_ss.loc[:, 'sas_function'] = 1
 
-        elif config.tm_structure == 'piston':
+        elif tm_structure == 'piston':
             head_units_sas_params_transp += ['']
             head_columns_sas_params_transp += ['sas_function']
             df_sas_params_transp.loc[:, 'sas_function'] = 21
@@ -561,7 +556,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
             head_columns_sas_params_q_ss += ['sas_function']
             df_sas_params_q_ss.loc[:, 'sas_function'] = 22
 
-        elif config.tm_structure == 'complete-mixing + advection-dispersion':
+        elif tm_structure == 'complete-mixing + advection-dispersion':
             head_units_sas_params_transp += ['', '[-]', '[-]']
             head_columns_sas_params_transp += ['sas_function', 'a', 'b']
             df_sas_params_transp.loc[:, 'sas_function'] = 1
@@ -578,7 +573,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
             df_sas_params_q_ss.loc[:, 'a'] = 3
             df_sas_params_q_ss.loc[:, 'b'] = 1
 
-        elif config.tm_structure == 'complete-mixing + time-variant advection-dispersion':
+        elif tm_structure == 'complete-mixing + time-variant advection-dispersion':
             head_units_sas_params_transp += ['', '[-]', '[-]']
             head_columns_sas_params_transp += ['sas_function', 'a', 'b']
             df_sas_params_transp.loc[:, 'sas_function'] = 1
@@ -595,7 +590,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
             df_sas_params_q_ss.loc[:, 'lower_limit'] = 1
             df_sas_params_q_ss.loc[:, 'upper_limit'] = 3
 
-        elif config.tm_structure == 'advection-dispersion':
+        elif tm_structure == 'advection-dispersion':
             head_units_sas_params_transp += ['', '[-]', '[-]']
             head_columns_sas_params_transp += ['sas_function', 'a', 'b']
             df_sas_params_transp.loc[:, 'sas_function'] = 3
@@ -614,7 +609,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
             df_sas_params_q_ss.loc[:, 'a'] = 3
             df_sas_params_q_ss.loc[:, 'b'] = 1
 
-        elif config.tm_structure == 'time-variant advection-dispersion':
+        elif tm_structure == 'time-variant advection-dispersion':
             head_units_sas_params_transp += ['', '[-]', '[-]']
             head_columns_sas_params_transp += ['sas_function', 'lower_limit', 'upper_limit']
             df_sas_params_transp.loc[:, 'sas_function'] = 31
@@ -633,7 +628,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
             df_sas_params_q_ss.loc[:, 'lower_limit'] = 1
             df_sas_params_q_ss.loc[:, 'upper_limit'] = 3
 
-        elif config.tm_structure == 'preferential':
+        elif tm_structure == 'preferential':
             head_units_sas_params_transp += ['', '[-]', '[-]']
             head_columns_sas_params_transp += ['sas_function', 'a', 'b']
             df_sas_params_transp.loc[:, 'sas_function'] = 3
@@ -652,7 +647,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
             df_sas_params_q_ss.loc[:, 'a'] = 1
             df_sas_params_q_ss.loc[:, 'b'] = 3
 
-        elif config.tm_structure == 'time-variant preferential':
+        elif tm_structure == 'time-variant preferential':
             head_units_sas_params_transp += ['', '[-]', '[-]']
             head_columns_sas_params_transp += ['sas_function', 'lower_limit', 'upper_limit']
             df_sas_params_transp.loc[:, 'sas_function'] = 31
@@ -671,7 +666,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
             df_sas_params_q_ss.loc[:, 'lower_limit'] = 1
             df_sas_params_q_ss.loc[:, 'upper_limit'] = 3
 
-        elif config.tm_structure == 'preferential + advection-dispersion':
+        elif tm_structure == 'preferential + advection-dispersion':
             head_units_sas_params_transp += ['', '[-]', '[-]']
             head_columns_sas_params_transp += ['sas_function', 'a', 'b']
             df_sas_params_transp.loc[:, 'sas_function'] = 3
@@ -690,7 +685,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
             df_sas_params_q_ss.loc[:, 'a'] = 3
             df_sas_params_q_ss.loc[:, 'b'] = 1
 
-        elif config.tm_structure == 'time-variant':
+        elif tm_structure == 'time-variant':
             head_units_sas_params_transp += ['', '[-]', '[-]']
             head_columns_sas_params_transp += ['sas_function', 'lower_limit', 'upper_limit']
             df_sas_params_transp.loc[:, 'sas_function'] = 35
@@ -738,7 +733,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
                 comment=''
             )
             # set dimensions with a dictionary
-            f.dimensions = {'x': config.nrows, 'y': config.ncols}
+            f.dimensions = {'x': nrows, 'y': ncols}
             v = f.create_variable('x', ('x',), float)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'
@@ -749,7 +744,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
             v[:] = onp.arange(f.dimensions["y"])
             for var_name in params.columns:
                 v = f.create_variable(var_name, ('x', 'y'), float)
-                v[:, :] = params[var_name].values.reshape((config.nrows, config.ncols)).astype(float)
+                v[:, :] = params[var_name].values.reshape((nrows, ncols)).astype(float)
 
         csv_file = base_path / 'sas_parameters_q_rz.csv'
         params = pd.read_csv(csv_file, sep=';', skiprows=1)
@@ -763,7 +758,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
                 comment=''
             )
             # set dimensions with a dictionary
-            f.dimensions = {'x': config.nrows, 'y': config.ncols}
+            f.dimensions = {'x': nrows, 'y': ncols}
             v = f.create_variable('x', ('x',), float)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'
@@ -774,7 +769,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
             v[:] = onp.arange(f.dimensions["y"])
             for var_name in params.columns:
                 v = f.create_variable(var_name, ('x', 'y'), float)
-                v[:, :] = params[var_name].values.reshape((config.nrows, config.ncols)).astype(float)
+                v[:, :] = params[var_name].values.reshape((nrows, ncols)).astype(float)
 
         csv_file = base_path / 'sas_parameters_q_ss.csv'
         params = pd.read_csv(csv_file, sep=';', skiprows=1)
@@ -788,7 +783,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
                 comment=''
             )
             # set dimensions with a dictionary
-            f.dimensions = {'x': config.nrows, 'y': config.ncols}
+            f.dimensions = {'x': nrows, 'y': ncols}
             v = f.create_variable('x', ('x',), float)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'
@@ -799,7 +794,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
             v[:] = onp.arange(f.dimensions["y"])
             for var_name in params.columns:
                 v = f.create_variable(var_name, ('x', 'y'), float)
-                v[:, :] = params[var_name].values.reshape((config.nrows, config.ncols)).astype(float)
+                v[:, :] = params[var_name].values.reshape((nrows, ncols)).astype(float)
 
         if enable_bromide:
             # generate bromide injection pulse
@@ -825,7 +820,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
                     comment=''
                 )
                 # set dimensions with a dictionary
-                f.dimensions = {'x': config.nrows, 'y': config.ncols, 'time': len(df_br.index), 'scalar': 1}
+                f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_br.index), 'scalar': 1}
                 v = f.create_variable('time', ('time',), float)
                 v.attrs['time_origin'] = f"{df_br.index[0]}"
                 v.attrs['units'] = 'days'
@@ -880,7 +875,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
                     comment=''
                 )
                 # set dimensions with a dictionary
-                f.dimensions = {'x': config.nrows, 'y': config.ncols, 'time': len(df_cl.index), 'scalar': 1}
+                f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_cl.index), 'scalar': 1}
                 v = f.create_variable('time', ('time',), float)
                 v.attrs['time_origin'] = f"{df_cl.index[0]}"
                 v.attrs['units'] = 'days'
@@ -934,7 +929,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
                     comment=''
                 )
                 # set dimensions with a dictionary
-                f.dimensions = {'x': config.nrows, 'y': config.ncols, 'time': len(df_d18O.index), 'scalar': 1}
+                f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_d18O.index), 'scalar': 1}
                 v = f.create_variable('time', ('time',), float)
                 v.attrs['time_origin'] = f"{df_d18O.index[0]}"
                 v.attrs['units'] = 'days'
@@ -982,7 +977,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
                     comment=''
                 )
                 # set dimensions with a dictionary
-                f.dimensions = {'x': config.nrows, 'y': config.ncols, 'time': len(df_d2H.index), 'scalar': 1}
+                f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_d2H.index), 'scalar': 1}
                 v = f.create_variable('time', ('time',), float)
                 v.attrs['time_origin'] = f"{df_d2H.index[0]}"
                 v.attrs['units'] = 'days'
@@ -1033,7 +1028,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
                     comment=''
                 )
                 # set dimensions with a dictionary
-                f.dimensions = {'x': config.nrows, 'y': config.ncols, 'time': len(df_Nin.index), 'scalar': 1}
+                f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_Nin.index), 'scalar': 1}
                 v = f.create_variable('time', ('time',), float)
                 v.attrs['time_origin'] = f"{df_Nin.index[0]}"
                 v.attrs['units'] = 'days'
@@ -1113,7 +1108,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
             comment=''
         )
         # set dimensions with a dictionary
-        f.dimensions = {'x': config.nrows, 'y': config.ncols}
+        f.dimensions = {'x': nrows, 'y': ncols}
         v = f.create_variable('x', ('x',), float)
         v.attrs['long_name'] = 'Zonal coordinate'
         v.attrs['units'] = 'meters'
@@ -1125,10 +1120,10 @@ def make_setup(base_path, ndays=10, event_type='rain',
         for var_name in params.columns:
             if var_name in ['lu_id', 'sealing', 'slope', 'dmpv', 'dmph']:
                 v = f.create_variable(var_name, ('x', 'y'), int)
-                v[:, :] = params[var_name].values.reshape((config.nrows, config.ncols)).astype(int)
+                v[:, :] = params[var_name].values.reshape((nrows, ncols)).astype(int)
             else:
                 v = f.create_variable(var_name, ('x', 'y'), float)
-                v[:, :] = params[var_name].values.reshape((config.nrows, config.ncols)).astype(float)
+                v[:, :] = params[var_name].values.reshape((nrows, ncols)).astype(float)
 
     csv_file = base_path / 'initvals.csv'
     initvals = pd.read_csv(csv_file, sep=';', skiprows=1)
@@ -1142,7 +1137,7 @@ def make_setup(base_path, ndays=10, event_type='rain',
             comment=''
         )
         # set dimensions with a dictionary
-        f.dimensions = {'x': config.nrows, 'y': config.ncols}
+        f.dimensions = {'x': nrows, 'y': ncols}
         v = f.create_variable('x', ('x',), float)
         v.attrs['long_name'] = 'Zonal coordinate'
         v.attrs['units'] = 'meters'
@@ -1153,4 +1148,4 @@ def make_setup(base_path, ndays=10, event_type='rain',
         v[:] = onp.arange(f.dimensions["y"])
         for var_name in initvals.columns:
             v = f.create_variable(var_name, ('x', 'y'), float)
-            v[:, :] = initvals[var_name].values.reshape((config.nrows, config.ncols)).astype(float)
+            v[:, :] = initvals[var_name].values.reshape((nrows, ncols)).astype(float)

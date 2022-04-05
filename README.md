@@ -17,6 +17,8 @@ distributed execution on any number of nodes, including multi-GPU architectures 
 
 To learn more about Roger, make sure to [visit our documentation](https://roger.readthedocs.io/en/latest/).
 
+Inspired by [Veros](https://veros.readthedocs.io/en/latest/).
+
 ## Features
 
 Roger provides
@@ -88,7 +90,7 @@ and model domain you want to use. This is done by subclassing the
 `RogerSetup` base class in a *setup script* that is written in Python. You
 should use the `roger copy-setup` command to copy one into your current
 folder. A good place to start is the
-[SVAT model](https://github.com/team-ocean/roger/blob/master/roger/setups/svat/svat.py):
+[SVAT model](https://github.com/schwemro/roger/blob/master/roger/setups/svat/svat.py):
 
 ```bash
 $ roger copy-setup svat
@@ -262,7 +264,7 @@ for more publications involving Roger.
 groundwater-related processes
 - implement baseflow in the groundwater routine. requires surface water depth.
 - add equations to docstrings
-- write documentation for readthedocs (see `docs/`)
+- write online documentation (see `doc/`)
 
 ## License
 This software can be distributed freely under the MIT license. Please read the LICENSE for further information.
