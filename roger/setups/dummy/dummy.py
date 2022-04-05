@@ -1,7 +1,4 @@
-import roger
-roger.runtime_settings.backend = 'numpy'
-roger.runtime_settings.force_overwrite = 'True'
-from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
+from roger import RogerSetup, roger_routine
 from roger.core.operators import numpy as npx, update, at
 from pathlib import Path
 

@@ -11,7 +11,7 @@ on:
 jobs:
   build-docs:
     name: Build documentation
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
