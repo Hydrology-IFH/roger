@@ -5,11 +5,11 @@ on:
 
   push:
     branches:
-      - master
+      - main
 
 jobs:
   pre-commit:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v2

@@ -5,7 +5,7 @@ on:
 
   push:
     branches:
-      - master
+      - main
 
 jobs:
   test-install:
@@ -20,13 +20,13 @@ jobs:
 
       matrix:
           os: [ubuntu-latest, macos-latest, windows-latest]
-          python-version: ["3.7", "3.10"]
+          python-version: ["3.8", "3.9"]
           nocc: [false]
 
           include:
             # also test whether installation without C compiler works
-            - os: ubuntu-latest
-              python-version: "3.7"
+            - os: macos-latest
+              python-version: "3.8"
               nocc: true
 
     runs-on: ${{ matrix.os }}
@@ -45,7 +45,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install nvidia-cuda-toolkit
 
-      - name: Test installing Veros
+      - name: Test installing Roger
         run: |
           if ${{ matrix.nocc }}; then export CC=foobar; fi
           python -m pip install .
@@ -53,9 +53,9 @@ jobs:
       - name: Build extensions
         if: matrix.nocc != 'true'
         run: |
-          export VEROS_REQUIRE_CYTHON_EXT=1
+          export ROGER_REQUIRE_CYTHON_EXT=1
           if [ ${{ runner.os }} = "Linux" ]; then
-            export VEROS_REQUIRE_CUDA_EXT=1
+            export ROGER_REQUIRE_CUDA_EXT=1
           fi
           pip install cython
           python setup.py build_ext --inplace
@@ -64,12 +64,12 @@ jobs:
         if: matrix.nocc != 'true'
         run: |
           if [ ${{ runner.os }} = "Windows" ]; then
-            test -f veros/core/special/tdma_cython_.*.pyd
+            test -f roger/core/special/tdma_cython_.*.pyd
           else
-            test -f veros/core/special/tdma_cython_.*.so
+            test -f roger/core/special/tdma_cython_.*.so
           fi
 
       - name: Test whether CUDA extensions are present
         if: runner.os == 'Linux' && matrix.nocc != 'true'
         run: |
-          test -f veros/core/special/tdma_cuda_.*.so
+          test -f roger/core/special/tdma_cuda_.*.so

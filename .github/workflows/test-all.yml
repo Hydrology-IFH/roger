@@ -5,7 +5,7 @@ on:
 
   push:
     branches:
-      - master
+      - main
 
 jobs:
   test:
@@ -18,17 +18,16 @@ jobs:
 
       matrix:
         os: [ubuntu-20.04]
-        python-version: ["3.7", "3.10"]
+        python-version: ["3.8", "3.9"]
         backend: [numpy, jax]
 
     env:
-      PYOM2_DIR: /home/runner/pyom2
       PETSC_VERSION: 3.15
       PETSC_DIR: /home/runner/petsc
       PETSC_ARCH: arch-linux-c-opt
       OMPI_MCA_rmaps_base_oversubscribe: "1"
       OMPI_MCA_mpi_yield_when_idle: "1"
-      VEROS_REQUIRE_CYTHON_EXT: "1"
+      ROGER_REQUIRE_CYTHON_EXT: "1"
 
     steps:
       - uses: actions/checkout@v2
@@ -49,13 +48,6 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements*.txt') }}
           restore-keys: |
             ${{ matrix.os }}-pip-
-
-      - name: Restore PyOM2 build cache
-        uses: actions/cache@v2
-        id: pyom2-cache
-        with:
-          path: ${{ env.PYOM2_DIR }}/py_src/*.so
-          key: ${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('vendor/pyom2/patches/*.patch') }}-${{ hashFiles('requirements.txt') }}
 
       - name: Restore PETSc build cache
         uses: actions/cache@v2
@@ -84,7 +76,7 @@ jobs:
           make all
           popd
 
-      - name: Install Veros
+      - name: Install Roger
         run: |
           pip install mpi4py
           if [ ${{ matrix.backend }} == "jax" ]
@@ -96,30 +88,9 @@ jobs:
           fi
           pip install petsc4py==$PETSC_VERSION --no-deps
 
-      # Build PyOM2 after Veros to make sure we have compatible versions of NumPy / f2py
-      - name: Build PyOM2
-        if: steps.pyom2-cache.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p $PYOM2_DIR
-          cp -r vendor/pyom2/* $PYOM2_DIR
-          pushd $PYOM2_DIR
-          mv pyOM2_site_specific site_specific.mk_
-          tar xzf pyOM2.1.0.tar.gz
-          git init
-          for patchfile in ./patches/*.patch; do
-            git apply --whitespace=fix $patchfile
-          done
-          make -C py_src -j 4 > /dev/null
-          popd
-
-      - name: Export paths
-        run: |
-          echo "PYOM2_LIB=$(readlink -f $PYOM2_DIR/py_src/pyOM_code.*.so)" >> $GITHUB_ENV
-          echo "PYOM2_LIB_MPI=$(readlink -f $PYOM2_DIR/py_src/pyOM_code_MPI.*.so)" >> $GITHUB_ENV
-
       - name: Run tests
         run: |
-          pytest . -v --cov --pyom2-lib $PYOM2_LIB --backend ${{ matrix.backend }}
+          pytest . -v --cov --backend ${{ matrix.backend }}
 
       - name: Upload coverage
         uses: codecov/codecov-action@v1

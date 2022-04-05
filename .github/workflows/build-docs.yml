@@ -6,12 +6,12 @@ on:
 
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build-docs:
     name: Build documentation
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
 
@@ -22,7 +22,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.8
 
       - name: Install requirements
         run: pip install -r doc/requirements.txt
