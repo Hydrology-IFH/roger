@@ -1,5 +1,5 @@
 <p align="center">
-<img src="doc/_images/Roger-logo.png?raw=true">
+<img src="doc/_images/Roger-logo.png>
 </p>
 
 <p align="center">
