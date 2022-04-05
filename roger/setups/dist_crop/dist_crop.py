@@ -7,9 +7,6 @@ import h5netcdf
 import xarray as xr
 import matplotlib.pyplot as plt
 
-import roger
-roger.runtime_settings.backend = 'numpy'
-roger.runtime_settings.force_overwrite = 'True'
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
@@ -662,54 +659,3 @@ def after_timestep_crops_kernel(state):
 model = DISTCROPSetup()
 model.setup()
 model.run()
-
-path = str(BASE_PATH / f"{model.state.settings.identifier}.*.nc")
-diag_files = glob.glob(path)
-states_hm_file = BASE_PATH / "states_hm.nc"
-with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
-    f.attrs.update(
-        date_created=datetime.datetime.today().isoformat(),
-        title='test results',
-        institution='University of Freiburg, Chair of Hydrology',
-        references='',
-        comment=''
-    )
-    for dfs in diag_files:
-        with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-            # set dimensions with a dictionary
-            if not f.dimensions:
-                f.dimensions = {'x': df.dimensions["x"], 'y': df.dimensions["y"], 'Time': len(df.variables['Time'])}
-                v = f.create_variable('x', ('x',), float)
-                v.attrs['long_name'] = 'Zonal coordinate'
-                v.attrs['units'] = 'meters'
-                v[:] = npx.arange(f.dimensions["x"])
-                v = f.create_variable('y', ('y',), float)
-                v.attrs['long_name'] = 'Meridonial coordinate'
-                v.attrs['units'] = 'meters'
-                v[:] = npx.arange(f.dimensions["y"])
-                v = f.create_variable('Time', ('Time',), float)
-                var_obj = df.variables.get('Time')
-                with h5netcdf.File(BASE_PATH / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
-                    time_origin = infile.variables['time'].attrs['time_origin']
-                v.attrs.update(time_origin=time_origin,
-                                units=var_obj.attrs["units"])
-                v[:] = npx.array(var_obj)
-            for key in list(df.variables.keys()):
-                var_obj = df.variables.get(key)
-                if key not in list(f.dimensions.keys()) and var_obj.ndim == 3:
-                    v = f.create_variable(key, ('x', 'y', 'Time'), float)
-                    vals = npx.array(var_obj)
-                    v[:, :, :] = vals.swapaxes(0, 2)
-                    v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                    units=var_obj.attrs["units"])
-
-with xr.open_dataset(states_hm_file, engine="h5netcdf") as ds:
-    time_origin = ds['Time'].attrs['time_origin']
-    days = (ds['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    date = num2date(days, units=f"days since {ds['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    ds = ds.assign_coords(date=("Time", date))
-    keys = list(ds.data_vars.keys())
-    for key in keys:
-        fig, ax = plt.subplots()
-        ds[key].isel(x=0, y=0).plot(x="date", ax=ax)
-        fig.tight_layout()

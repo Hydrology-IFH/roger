@@ -7,9 +7,6 @@ import h5netcdf
 import xarray as xr
 import matplotlib.pyplot as plt
 
-import roger
-roger.runtime_settings.backend = 'numpy'
-roger.runtime_settings.force_overwrite = 'True'
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
@@ -292,55 +289,7 @@ class SVATFILMTRANSPORTSetup(RogerSetup):
 
     @roger_routine
     def set_diagnostics(self, state):
-        diagnostics = state.diagnostics
-        settings = state.settings
-
-        diagnostics["rates"].output_variables = ["ff_drain", "ff_abs_rz", "ff_abs_ss"]
-        if settings.enable_groundwater_boundary:
-            diagnostics["rates"].output_variables += ["cpr_ss"]
-        diagnostics["rates"].output_frequency = 10 * 60
-        diagnostics["rates"].sampling_frequency = 1
-
-        diagnostics["collect"].output_variables = ["z_wf", "z_pf", "theta_rz", "theta_rz_ff", "theta_ss", "theta_ss_ff"]
-        diagnostics["collect"].output_frequency = 10 * 60
-        diagnostics["collect"].sampling_frequency = 1
-
-        # diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz"]
-        # if settings.enable_groundwater_boundary:
-        #     diagnostics["rates"].output_variables += ["cpr_ss"]
-        # diagnostics["rates"].output_frequency = 24 * 60 * 60
-        # diagnostics["rates"].sampling_frequency = 1
-
-        # diagnostics["collect"].output_variables = ["S_rz", "S_ss",
-        #                                            "S_pwp_rz", "S_fc_rz",
-        #                                            "S_sat_rz", "S_pwp_ss",
-        #                                            "S_fc_ss", "S_sat_ss"]
-        # if settings.enable_crop_phenology:
-        #     diagnostics["collect"].output_variables += ["re_rg", "re_rl", "z_root", "ground_cover"]
-        # diagnostics["collect"].output_frequency = 24 * 60 * 60
-        # diagnostics["collect"].sampling_frequency = 1
-        #
-        # diagnostics["averages"].output_variables = ["ta"]
-        # diagnostics["averages"].output_frequency = 24 * 60 * 60
-        # diagnostics["averages"].sampling_frequency = 1
-
-        # diagnostics["rates"].output_variables = ["prec", "rain_ground", "snow_ground", "q_sur", "inf_rz", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "transp", "evap_soil", "cpr_rz"]
-        # if settings.enable_groundwater_boundary:
-        #     diagnostics["rates"].output_variables += ["cpr_ss"]
-        # diagnostics["rates"].output_frequency = 24 * 60 * 60
-        # diagnostics["rates"].sampling_frequency = 1
-
-        # diagnostics["collect"].output_variables = ["S_snow", "S_int_ground", "S_rz", "S_ss",
-        #                                            "theta_rz", "theta_ss", "theta",
-        #                                            "z_wf"]
-        # if settings.enable_crop_phenology:
-        #     diagnostics["collect"].output_variables += ["re_rg", "re_rl"]
-        # diagnostics["collect"].output_frequency = 24 * 60 * 60
-        # diagnostics["collect"].sampling_frequency = 1
-
-        # diagnostics["averages"].output_variables = ["ta"]
-        # diagnostics["averages"].output_frequency = 24 * 60 * 60
-        # diagnostics["averages"].sampling_frequency = 1
+        pass
 
     @roger_routine
     def after_timestep(self, state):
@@ -807,60 +756,6 @@ def after_timestep_crops_kernel(state):
     )
 
 
-model = DUMMYFFSetup()
+model = SVATFILMTRANSPORTSetup()
 model.setup()
 model.run()
-
-path = str(BASE_PATH / f"{model.state.settings.identifier}.*.nc")
-diag_files = glob.glob(path)
-states_hm_file = BASE_PATH / "states_hm.nc"
-with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
-    f.attrs.update(
-        date_created=datetime.datetime.today().isoformat(),
-        title='test results',
-        institution='University of Freiburg, Chair of Hydrology',
-        references='',
-        comment=''
-    )
-    for dfs in diag_files:
-        with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-            # set dimensions with a dictionary
-            if not f.dimensions:
-                f.dimensions = {'x': df.dimensions["x"], 'y': df.dimensions["y"], 'Time': len(df.variables['Time'])}
-                v = f.create_variable('x', ('x',), float)
-                v.attrs['long_name'] = 'Zonal coordinate'
-                v.attrs['units'] = 'meters'
-                v[:] = npx.arange(f.dimensions["x"])
-                v = f.create_variable('y', ('y',), float)
-                v.attrs['long_name'] = 'Meridonial coordinate'
-                v.attrs['units'] = 'meters'
-                v[:] = npx.arange(f.dimensions["y"])
-                v = f.create_variable('Time', ('Time',), float)
-                var_obj = df.variables.get('Time')
-                with h5netcdf.File(BASE_PATH / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
-                    time_origin = infile.variables['time'].attrs['time_origin']
-                v.attrs.update(time_origin=time_origin,
-                                units=var_obj.attrs["units"])
-                v[:] = npx.array(var_obj)
-            for key in list(df.variables.keys()):
-                var_obj = df.variables.get(key)
-                if key not in list(f.dimensions.keys()) and var_obj.ndim == 3:
-                    v = f.create_variable(key, ('x', 'y', 'Time'), float)
-                    vals = npx.array(var_obj)
-                    v[:, :, :] = vals.swapaxes(0, 2)
-                    v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                    units=var_obj.attrs["units"])
-BASE_PATH_TM = BASE_PATH.parent / "dummytm"
-states_hm_file1 = BASE_PATH_TM / "states_hm.nc"
-shutil.copy(states_hm_file, states_hm_file1)
-
-# with xr.open_dataset(states_hm_file, engine="h5netcdf") as ds:
-#     time_origin = ds['Time'].attrs['time_origin']
-#     time = (ds['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-#     date = num2date(time, units=f"days since {ds['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-#     ds = ds.assign_coords(date=("Time", date))
-#     keys = list(ds.data_vars.keys())
-#     for key in keys:
-#         fig, ax = plt.subplots()
-#         ds[key].isel(x=0, y=0).plot(x="date", ax=ax)
-#         fig.tight_layout()

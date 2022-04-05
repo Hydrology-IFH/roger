@@ -7,9 +7,6 @@ import h5netcdf
 import xarray as xr
 import matplotlib.pyplot as plt
 
-import roger
-roger.runtime_settings.backend = 'numpy'
-roger.runtime_settings.force_overwrite = 'True'
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
@@ -618,7 +615,7 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
                     v[:, :, :] = vals.swapaxes(0, 2)
                     v.attrs.update(long_name=var_obj.attrs["long_name"],
                                     units=var_obj.attrs["units"])
-BASE_PATH_TM = BASE_PATH.parent / "dummytm"
+BASE_PATH_TM = BASE_PATH.parent / "svat_transport"
 states_hm_file1 = BASE_PATH_TM / "states_hm.nc"
 shutil.copy(states_hm_file, states_hm_file1)
 

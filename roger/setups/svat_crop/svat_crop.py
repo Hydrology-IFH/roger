@@ -7,9 +7,6 @@ import h5netcdf
 import xarray as xr
 import matplotlib.pyplot as plt
 
-import roger
-roger.runtime_settings.backend = 'numpy'
-roger.runtime_settings.force_overwrite = 'True'
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
@@ -687,74 +684,6 @@ def after_timestep_crops_kernel(state):
     )
 
 
-model = DUMMYSetup()
+model = SVATCROPSetup()
 model.setup()
 model.run()
-
-path = str(BASE_PATH / f"{model.state.settings.identifier}.*.nc")
-diag_files = glob.glob(path)
-states_hm_file = BASE_PATH / "states_hm.nc"
-with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
-    f.attrs.update(
-        date_created=datetime.datetime.today().isoformat(),
-        title='test results',
-        institution='University of Freiburg, Chair of Hydrology',
-        references='',
-        comment=''
-    )
-    for dfs in diag_files:
-        with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-            # set dimensions with a dictionary
-            if not f.dimensions:
-                f.dimensions = {'x': df.dimensions["x"], 'y': df.dimensions["y"], 'Time': len(df.variables['Time'])}
-                v = f.create_variable('x', ('x',), float)
-                v.attrs['long_name'] = 'Zonal coordinate'
-                v.attrs['units'] = 'meters'
-                v[:] = npx.arange(f.dimensions["x"])
-                v = f.create_variable('y', ('y',), float)
-                v.attrs['long_name'] = 'Meridonial coordinate'
-                v.attrs['units'] = 'meters'
-                v[:] = npx.arange(f.dimensions["y"])
-                v = f.create_variable('Time', ('Time',), float)
-                var_obj = df.variables.get('Time')
-                with h5netcdf.File(BASE_PATH / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
-                    time_origin = infile.variables['time'].attrs['time_origin']
-                v.attrs.update(time_origin=time_origin,
-                                units=var_obj.attrs["units"])
-                v[:] = npx.array(var_obj)
-            for key in list(df.variables.keys()):
-                var_obj = df.variables.get(key)
-                if key not in list(f.dimensions.keys()) and var_obj.ndim == 3:
-                    v = f.create_variable(key, ('x', 'y', 'Time'), float)
-                    vals = npx.array(var_obj)
-                    v[:, :, :] = vals.swapaxes(0, 2)
-                    v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                    units=var_obj.attrs["units"])
-BASE_PATH_TM = BASE_PATH.parent / "dummytm"
-states_hm_file1 = BASE_PATH_TM / "states_hm.nc"
-shutil.copy(states_hm_file, states_hm_file1)
-
-with xr.open_dataset(states_hm_file, engine="h5netcdf") as ds:
-    time_origin = ds['Time'].attrs['time_origin']
-    days = (ds['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    date = num2date(days, units=f"days since {ds['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    ds = ds.assign_coords(date=("Time", date))
-    keys = list(ds.data_vars.keys())
-    for key in keys:
-        fig, ax = plt.subplots()
-        ds[key].isel(x=0, y=0).plot(x="date", ax=ax)
-        fig.tight_layout()
-
-
-# vs = model.state.variables
-# doy = 307
-# mask1 = (doy >= 0) & (doy <= vs.doy_end[3,3, 0]) & (vs.doy_start[3,3, 0] != 0) & (vs.doy_end[3,3, 0] != 0)
-# mask2 = (doy >= vs.doy_start[3,3, 1]) & (doy <= vs.doy_end[3,3, 1]) & (vs.doy_start[3,3, 1] != 0) & (vs.doy_end[3,3, 1] != 0)
-# mask3 = (doy >= vs.doy_start[3,3, 2]) & (vs.doy_start[3,3, 2] != 0) & (vs.doy_end[3,3, 2] != 0)
-# mask5 = mask1 | mask2 | mask3
-# mask6 = (vs.doy_start[3,3, 0] == 0) & (vs.doy_end[3,3, 0] == 0) & ~mask2 & ~mask3
-# mask7 = (vs.doy_start[3,3, 0] == 0) & (vs.doy_end[3,3, 0] == 0) & ~mask2 & (vs.doy_start[3,3, 2] == 0) & (vs.doy_end[3,3, 2] == 0)
-# mask8 = (vs.doy_start[3,3, 2] == 0) & (vs.doy_end[3,3, 2] == 0) & ~mask1 & ~mask2
-# mask9 = (vs.doy_start[3,3, 2] == 0) & (vs.doy_end[3,3, 2] == 0) & (vs.doy_start[3,3, 1] == 0) & (vs.doy_end[3,3, 1] == 0) & ~mask3
-# mask10 = (vs.doy_start[3,3, 0] == 0) & (vs.doy_end[3,3, 0] == 0) & (vs.doy_start[3,3, 1] == 0) & (vs.doy_end[3,3, 1] == 0) & (vs.doy_start[3,3, 2] == 0) & (vs.doy_end[3,3, 2] == 0)
-# mask11 = mask6 | mask7 | mask8 | mask9 | mask10

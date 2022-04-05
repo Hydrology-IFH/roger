@@ -136,8 +136,8 @@ def _env_to_bool(envvar):
 
 
 extensions = get_extensions(
-    require_cython_ext=_env_to_bool("roger_REQUIRE_CYTHON_EXT"),
-    require_cuda_ext=_env_to_bool("roger_REQUIRE_CUDA_EXT"),
+    require_cython_ext=_env_to_bool("ROGER_REQUIRE_CYTHON_EXT"),
+    require_cuda_ext=_env_to_bool("ROGER_REQUIRE_CUDA_EXT"),
 )
 
 setup(
@@ -146,7 +146,7 @@ setup(
     author="Robin Schwemmle (University of Freiburg)",
     author_email="robin.schwemmle@hydrology.uni-freiburg.de",
     keywords="hydrology python parallel numpy multi-core geophysics hydrologic-model mpi4py jax",
-    description="The versatile hydrologic simulator, in pure Python, powered by JAX.",
+    description="Runoff Generation Research in Pure Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://roger.readthedocs.io",

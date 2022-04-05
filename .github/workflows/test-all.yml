@@ -90,7 +90,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest . -v --cov --backend ${{ matrix.backend }}
+          pytest . -v --backend ${{ matrix.backend }}
 
-      - name: Upload coverage
-        uses: codecov/codecov-action@v1
+      # - name: Upload coverage
+      #   uses: codecov/codecov-action@v1

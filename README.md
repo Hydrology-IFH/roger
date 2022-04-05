@@ -265,5 +265,5 @@ groundwater-related processes
 - write documentation for readthedocs (see `docs/`)
 
 ## License
-This software can be distributed freely under the GPL v3 license. Please read the LICENSE for further information.
+This software can be distributed freely under the MIT license. Please read the LICENSE for further information.
 © 2022, Robin Schwemmle (<robin.schwemmle@hydrology.uni-freiburg.de>)
