@@ -81,6 +81,30 @@ spyder
 **Third step:**
 Run a test case. Navigate to `roger/setups/xxx`.
 
+## Basic usage
+
+To run Roger, you need to set up a model --- i.e., specify which settings
+and model domain you want to use. This is done by subclassing the
+`RogerSetup` base class in a *setup script* that is written in Python. You
+should use the `roger copy-setup` command to copy one into your current
+folder. A good place to start is the
+[SVAT model](https://github.com/team-ocean/roger/blob/master/roger/setups/svat/svat.py):
+
+```bash
+$ roger copy-setup svat
+```
+
+After setting up your model, all you need to do is call the `setup` and
+`run` methods on your setup class. The pre-implemented setups can all be
+executed via `roger run`:
+
+```bash
+$ roger run svat.py
+```
+
+For more information on using Roger, have a look at [our
+documentation](http://roger.readthedocs.io).
+
 ## Contributing
 
 Contributions to Roger are always welcome, no matter if you spotted an
