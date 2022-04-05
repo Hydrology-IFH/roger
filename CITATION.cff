@@ -1,0 +1,24 @@
+authors:
+  - family-names: Schwemmle
+    given-names: Robin
+  - family-names: Weiler
+    given-names: Markus
+cff-version: 0.1.0
+message: "If you use this software, please cite the article from preferred-citation."
+title: Veros
+url: "https://github.com/schwemro/roger"
+preferred-citation:
+  type: article
+  title: "roger v0.1 – Runoff Generation Reasearch in pure Python"
+  authors:
+  - family-names: Schwemmle
+    given-names: Robin
+  - family-names: Weiler
+    given-names: Markus
+  year: 2023
+  journal: "Geoscientific Model Development"
+  volume: 1
+  issue:
+  pages:
+  doi:
+  url:

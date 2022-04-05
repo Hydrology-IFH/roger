@@ -1,0 +1,578 @@
+import abc
+
+# do not import roger.core here!
+from roger import settings, time, signals, distributed, progress, runtime_settings as rs, logger
+from roger.state import get_default_state
+from roger.plugins import load_plugin
+from roger.routines import roger_routine, is_roger_routine
+from roger.timer import timer_context
+
+
+class RogerSetup(metaclass=abc.ABCMeta):
+    """Main class for roger, used for building a model and running it.
+
+    Note:
+        This class is meant to be subclassed. Subclasses need to implement the
+        methods :meth:`set_parameters`, :meth:`set_topography`, :meth:`set_grid`,
+        :meth:`set_coriolis`, :meth:`set_initial_conditions`, :meth:`set_forcing`,
+        and :meth:`set_diagnostics`.
+
+    Example:
+        >>> import matplotlib.pyplot as plt
+        >>> from roger import RogerSetup
+        >>>
+        >>> class MyModel(RogerSetup):
+        >>>     ...
+        >>>
+        >>> simulation = MyModel()
+        >>> simulation.run()
+        >>> plt.imshow(simulation.state.variables.psi[..., 0])
+        >>> plt.show()
+
+    """
+
+    __roger_plugins__ = tuple()
+
+    def __init__(self, override=None):
+        self.override_settings = override or {}
+
+        # this should be the first time the core routines are imported
+        import roger.core  # noqa: F401
+
+        self._plugin_interfaces = tuple(load_plugin(p) for p in self.__roger_plugins__)
+        self._setup_done = False
+        self._warmup_done = False
+
+        self.state = get_default_state(use_plugins=self.__roger_plugins__)
+
+    @abc.abstractmethod
+    def set_settings(self, state):
+        """To be implemented by subclass.
+
+        First function to be called during setup.
+        Use this to modify the model settings.
+
+        Example:
+          >>> def set_settings(self, state):
+          >>>     settings = state.settings
+          >>>     settings.nx, settings.ny, settings.nz = (360, 120, 2)
+        """
+        pass
+
+    @abc.abstractmethod
+    def set_look_up_tables(self, state):
+        """To be implemented by subclass.
+
+        First function to be called during setup.
+        Use this to modify the model settings.
+
+        Example:
+          >>> def set_events(self, state):
+          >>>     vs = state.variables
+          >>>     vs.u = update(vs.u, at[:, :, :, vs.tau], npx.random.rand(vs.u.shape[:-1]))
+        """
+        pass
+
+    @abc.abstractmethod
+    def set_parameters(self, state):
+        """To be implemented by subclass.
+
+        First function to be called during setup.
+        Use this to modify the model settings.
+
+        Example:
+          >>> def set_parameters(self, state):
+          >>>     vs = state.variables
+          >>>     vs.u = update(vs.u, at[:, :, :, vs.tau], npx.random.rand(vs.u.shape[:-1]))
+        """
+        pass
+
+    @abc.abstractmethod
+    def set_initial_conditions(self, state):
+        """To be implemented by subclass.
+
+        May be used to set initial conditions.
+
+        Example:
+          >>> @roger_method
+          >>> def set_initial_conditions(self, state):
+          >>>     vs = state.variables
+          >>>     vs.u = update(vs.u, at[:, :, :, vs.tau], npx.random.rand(vs.u.shape[:-1]))
+        """
+        pass
+
+    @abc.abstractmethod
+    def set_grid(self, state):
+        """To be implemented by subclass.
+
+        Has to set the grid spacings :attr:`dxt`, :attr:`dyt`, and :attr:`dzt`,
+        along with the coordinates of the grid origin, :attr:`x_origin` and
+        :attr:`y_origin`.
+
+        Example:
+          >>> @roger_method
+          >>> def set_grid(self, state):
+          >>>     vs = state.variables
+          >>>     vs.x_origin, vs.y_origin = 0, 0
+          >>>     vs.dx = 1.
+          >>>     vs.dy = 1.
+          >>>     vs.dz = 2.
+        """
+        pass
+
+    @abc.abstractmethod
+    def set_topography(self, state):
+        """To be implemented by subclass.
+
+        Must specify the model topography by setting :attr:`kbot`.
+
+        Example:
+          >>> @roger_method
+          >>> def set_topography(self, state):
+          >>>     vs = state.variables
+          >>>     vs.kbot = update(vs.kbot, at[...], 10)
+        """
+        pass
+
+    @abc.abstractmethod
+    def set_forcing(self, state):
+        """To be implemented by subclass.
+
+        Called before every time step to update the external forcing, e.g. through
+        :attr:`forc_temp_surface`, :attr:`forc_salt_surface`, :attr:`surface_taux`,
+        :attr:`surface_tauy`, :attr:`forc_tke_surface`, :attr:`temp_source`, or
+        :attr:`salt_source`. Use this method to implement time-dependent forcing.
+
+        Example:
+          >>> @roger_method
+          >>> def set_forcing(self, state):
+          >>>     vs = state.variables
+          >>>     current_month = (vs.time / (31 * 24 * 60 * 60)) % 12
+          >>>     vs.surface_taux = vs._windstress_data[:, :, current_month]
+        """
+        pass
+
+    @abc.abstractmethod
+    def set_diagnostics(self, vs):
+        """To be implemented by subclass.
+
+        Called before setting up the :ref:`diagnostics <diagnostics>`. Use this method e.g. to
+        mark additional :ref:`variables <variables>` for output.
+
+        Example:
+          >>> @roger_method
+          >>> def set_diagnostics(self, state):
+          >>>     state.diagnostics['snapshot'].output_variables += ['drho', 'dsalt', 'dtemp']
+        """
+        pass
+
+    @abc.abstractmethod
+    def after_timestep(self, state):
+        """Called at the end of each time step. Can be used to define custom, setup-specific
+        events.
+        """
+        pass
+
+    def _ensure_setup_done(self):
+        if not self._setup_done:
+            raise RuntimeError("setup() method has to be called before running the model")
+
+    def _ensure_warmup_done(self):
+        if not self._warmup_done:
+            raise RuntimeError("warmup() method has to be called before running the model")
+
+    def setup(self):
+        from roger import diagnostics, restart
+        from roger.core import numerics
+
+        setup_funcs = (
+            self.set_parameters,
+            self.set_grid,
+            self.set_topography,
+            self.set_initial_conditions,
+            self.set_diagnostics,
+            self.set_forcing,
+            self.after_timestep,
+        )
+
+        for f in setup_funcs:
+            if not is_roger_routine(f):
+                raise RuntimeError(
+                    f"{f.__name__} method is not a roger routine. Please make sure to decorate it "
+                    "with @roger_routine and try again."
+                )
+
+        logger.info("Running model setup")
+
+        with self.state.timers["setup"]:
+            with self.state.settings.unlock():
+                self.set_settings(self.state)
+
+                for setting, value in self.override_settings.items():
+                    setattr(self.state.settings, setting, value)
+
+            settings.check_setting_conflicts(self.state.settings)
+            distributed.validate_decomposition(self.state.dimensions)
+
+            self.state.initialize_variables()
+
+            self.state.diagnostics.update(diagnostics.create_default_diagnostics(self.state))
+
+            for plugin in self.state.plugin_interfaces:
+                for diagnostic in plugin.diagnostics:
+                    self.state.diagnostics[diagnostic.name] = diagnostic()
+
+            self.set_grid(self.state)
+
+            self.set_topography(self.state)
+            numerics.calc_topo(self.state)
+
+            self.set_look_up_tables(self.state)
+
+            self.set_parameters(self.state)
+            numerics.calc_parameters(self.state)
+
+            self.set_initial_conditions(self.state)
+            numerics.calc_initial_conditions(self.state)
+
+            self.set_diagnostics(self.state)
+            diagnostics.initialize(self.state)
+            restart.read_restart(self.state)
+
+            self.set_forcing(self.state)
+
+        self._setup_done = True
+        if not self.state.settings.enable_offline_transport:
+            self._warmup_done = True
+
+        logger.success("Setup done\n")
+
+    @roger_routine
+    def step(self, state):
+        from roger import diagnostics, restart
+        from roger.core import surface, soil, root_zone, subsoil, groundwater, interception, snow, evapotranspiration, infiltration, film_flow, subsurface_runoff, capillary_rise, crop, groundwater_flow, numerics, transport, nitrate
+
+        self._ensure_setup_done()
+
+        vs = state.variables
+        settings = state.settings
+
+        with state.timers["diagnostics"]:
+            restart.write_restart(state)
+
+        with state.timers["main"]:
+            if not settings.enable_offline_transport:
+                with state.timers["forcing"]:
+                    self.set_forcing(state)
+                with state.timers["time-variant parameters"]:
+                    self.set_parameters(self.state)
+                if settings.enable_crop_phenology:
+                    with state.timers["crops"]:
+                        crop.calculate_crop_phenology(state)
+                with state.timers["interception"]:
+                    interception.calculate_interception(state)
+                with state.timers["evapotranspiration"]:
+                    evapotranspiration.calculate_evapotranspiration(state)
+                with state.timers["snow"]:
+                    snow.calculate_snow(state)
+                with state.timers["infiltration"]:
+                    infiltration.calculate_infiltration(state)
+                if settings.enable_film_flow:
+                    with state.timers["film flow"]:
+                        film_flow.calculate_film_flow(state)
+                with state.timers["subsurface runoff"]:
+                    subsurface_runoff.calculate_subsurface_runoff(state)
+                with state.timers["capillary rise"]:
+                    capillary_rise.calculate_capillary_rise(state)
+                with state.timers["surface"]:
+                    surface.calculate_surface(state)
+                with state.timers["root zone"]:
+                    root_zone.calculate_root_zone(state)
+                with state.timers["subsoil"]:
+                    subsoil.calculate_subsoil(state)
+                with state.timers["soil"]:
+                    soil.calculate_soil(state)
+
+                if settings.enable_groundwater:
+                    with state.timers["groundwater flow"]:
+                        groundwater_flow.calculate_groundwater_flow(state)
+                    with state.timers["groundwater"]:
+                        groundwater.calculate_groundwater(state)
+
+                if settings.enable_routing:
+                    with state.timers["routing"]:
+                        pass
+
+                with state.timers["storage"]:
+                    numerics.calc_storage(state)
+
+            elif settings.enable_offline_transport:
+                with state.timers["transport"]:
+                    with state.timers["forcing"]:
+                        self.set_forcing(state)
+                    if settings.enable_crop_phenology:
+                        with state.timers["redistribution after root growth/harvesting"]:
+                            pass
+                    with state.timers["infiltration into root zone"]:
+                        infiltration.calculate_infiltration_rz_transport(state)
+                    with state.timers["evapotranspiration"]:
+                        evapotranspiration.calculate_evapotranspiration_transport(state)
+                    with state.timers["subsurface runoff of root zone"]:
+                        subsurface_runoff.calculate_percolation_rz_transport(state)
+                    with state.timers["infiltration into subsoil"]:
+                        infiltration.calculate_infiltration_ss_transport(state)
+                    with state.timers["subsurface runoff of subsoil"]:
+                        subsurface_runoff.calculate_percolation_ss_transport(state)
+                    with state.timers["capillary rise into root zone"]:
+                        capillary_rise.calculate_capillary_rise_rz_transport(state)
+                    if settings.enable_groundwater_boundary:
+                        with state.timers["capillary rise into subsoil"]:
+                            capillary_rise.calculate_capillary_rise_ss_transport(state)
+                    if settings.enable_groundwater:
+                        pass
+                    if settings.enable_nitrate:
+                        with state.timers["nitrogen cycle"]:
+                            nitrate.calculate_nitrogen_cycle(state)
+                    with state.timers["ageing"]:
+                        transport.calculate_ageing(state)
+                    with state.timers["root zone"]:
+                        root_zone.calculate_root_zone_transport(state)
+                    with state.timers["subsoil"]:
+                        subsoil.calculate_subsoil_transport(state)
+                    with state.timers["soil"]:
+                        soil.calculate_soil_transport(state)
+                    if settings.enable_groundwater:
+                        pass
+
+        vs.itt = vs.itt + 1
+        vs.time = vs.time + vs.dt_secs
+
+        with state.timers["diagnostics"]:
+            if not numerics.sanity_check(state):
+                print(vs.S[3, 3, vs.tau] - vs.S[3, 3, vs.taum1], vs.prec[3, 3] - vs.q_sur[3, 3] - vs.aet[3, 3] - vs.q_ss[3, 3] - vs.ff_drain[3, 3])
+                print(vs.S[3, 3, vs.tau], vs.S[3, 3, vs.taum1], vs.prec[3, 3], vs.q_sur[3, 3], vs.aet[3, 3], vs.q_ss[3, 3], vs.ff_drain[3, 3])
+                # from roger.core.operators import numpy as npx
+                # print(npx.sum(vs.sa_s[3, 3, vs.tau, :], axis=-1),
+                #       npx.sum(vs.sa_s[3, 3, vs.taum1, :], axis=-1),
+                #       vs.inf_mat_rz[3, 3],
+                #       vs.inf_pf_rz[3, 3],
+                #       vs.inf_pf_ss[3, 3],
+                #       npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2)[3, 3],
+                #       npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2)[3, 3],
+                #       npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2)[3, 3])
+                #
+                # print(npx.sum(vs.sa_s[3, 3, vs.tau, :], axis=-1) -
+                #       npx.sum(vs.sa_s[3, 3, vs.taum1, :], axis=-1),
+                #       vs.inf_mat_rz[3, 3] +
+                #       vs.inf_pf_rz[3, 3] +
+                #       vs.inf_pf_ss[3, 3] -
+                #       npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2)[3, 3] -
+                #       npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2)[3, 3] -
+                #       npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2)[3, 3])
+
+                # print(npx.sum(vs.sa_s[3, 3, vs.tau, :], axis=-1) * vs.C_s[3, 3, vs.tau],
+                #       npx.sum(vs.sa_s[3, 3, vs.taum1, :], axis=-1) * vs.C_s[3, 3, vs.taum1],
+                #       vs.inf_mat_rz[3, 3] * npx.where(npx.isnan(vs.C_inf_mat_rz), 0, vs.C_inf_mat_rz)[3, 3],
+                #       vs.inf_pf_rz[3, 3] * npx.where(npx.isnan(vs.C_inf_pf_rz), 0, vs.C_inf_pf_rz)[3, 3],
+                #       vs.inf_pf_ss[3, 3] * npx.where(npx.isnan(vs.C_inf_pf_ss), 0, vs.C_inf_pf_ss)[3, 3],
+                #       npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2)[3, 3] * npx.where(npx.isnan(vs.C_evap_soil), 0, vs.C_evap_soil)[3, 3],
+                #       npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2)[3, 3] * npx.where(npx.isnan(vs.C_transp), 0, vs.C_transp)[3, 3],
+                #       npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2)[3, 3] * npx.where(npx.isnan(vs.C_q_ss), 0, vs.C_q_ss)[3, 3])
+                #
+                # print(npx.sum(vs.sa_s[3, 3, vs.tau, :], axis=-1) * vs.C_s[3, 3, vs.tau] -
+                #       npx.sum(vs.sa_s[3, 3, vs.taum1, :], axis=-1) * vs.C_s[3, 3, vs.taum1],
+                #       vs.inf_mat_rz[3, 3] * npx.where(npx.isnan(vs.C_inf_mat_rz), 0, vs.C_inf_mat_rz)[3, 3] +
+                #       vs.inf_pf_rz[3, 3] * npx.where(npx.isnan(vs.C_inf_pf_rz), 0, vs.C_inf_pf_rz)[3, 3] +
+                #       vs.inf_pf_ss[3, 3] * npx.where(npx.isnan(vs.C_inf_pf_ss), 0, vs.C_inf_pf_ss)[3, 3] -
+                #       npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2)[3, 3] * npx.where(npx.isnan(vs.C_evap_soil), 0, vs.C_evap_soil)[3, 3] -
+                #       npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2)[3, 3] * npx.where(npx.isnan(vs.C_transp), 0, vs.C_transp)[3, 3] -
+                #       npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2)[3, 3] * npx.where(npx.isnan(vs.C_q_ss), 0, vs.C_q_ss)[3, 3])
+
+                # print(npx.sum(vs.msa_s[3, 3, vs.tau, :], axis=-1),
+                #       npx.sum(vs.msa_s[3, 3, vs.taum1, :], axis=-1),
+                #       vs.inf_mat_rz[3, 3] * vs.C_inf_mat_rz[3, 3],
+                #       vs.inf_pf_rz[3, 3] * vs.C_inf_pf_rz[3, 3],
+                #       vs.inf_pf_ss[3, 3] * vs.C_inf_pf_ss[3, 3],
+                #       npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2)[3, 3] * vs.C_evap_soil[3, 3],
+                #       npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2)[3, 3] * vs.C_transp[3, 3],
+                #       npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2)[3, 3] * vs.C_q_ss[3, 3])
+                #
+                # print(npx.sum(vs.msa_s[3, 3, vs.tau, :], axis=-1) -
+                #       npx.sum(vs.msa_s[3, 3, vs.taum1, :], axis=-1),
+                #       vs.inf_mat_rz[3, 3] * vs.C_inf_mat_rz[3, 3] +
+                #       vs.inf_pf_rz[3, 3] * vs.C_inf_pf_rz[3, 3] +
+                #       vs.inf_pf_ss[3, 3] * vs.C_inf_pf_ss[3, 3] -
+                #       npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2)[3, 3] * vs.C_evap_soil[3, 3] -
+                #       npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2)[3, 3] * vs.C_transp[3, 3] -
+                #       npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2)[3, 3] * vs.C_q_ss[3, 3])
+
+                # print(npx.sum(vs.msa_s[3, 3, vs.tau, :], axis=-1),
+                #       npx.sum(vs.msa_s[3, 3, vs.taum1, :], axis=-1),
+                #       vs.inf_mat_rz[3, 3] * vs.C_inf_mat_rz[3, 3],
+                #       vs.inf_pf_rz[3, 3] * vs.C_inf_pf_rz[3, 3],
+                #       vs.inf_pf_ss[3, 3] * vs.C_inf_pf_ss[3, 3],
+                #       npx.sum(vs.ma_s, axis=2)[3, 3],
+                #       npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2)[3, 3] * vs.C_evap_soil[3, 3],
+                #       npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2)[3, 3] * vs.C_transp[3, 3],
+                #       npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2)[3, 3] * vs.C_q_ss[3, 3],
+                #       npx.sum(vs.mr_s, axis=2)[3, 3])
+                #
+                # print(npx.sum(vs.msa_s[3, 3, vs.tau, :], axis=-1) -
+                #       npx.sum(vs.msa_s[3, 3, vs.taum1, :], axis=-1),
+                #       vs.inf_mat_rz[3, 3] * vs.C_inf_mat_rz[3, 3] +
+                #       vs.inf_pf_rz[3, 3] * vs.C_inf_pf_rz[3, 3] +
+                #       vs.inf_pf_ss[3, 3] * vs.C_inf_pf_ss[3, 3] +
+                #       npx.sum(vs.ma_s, axis=2)[3, 3] -
+                #       npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2)[3, 3] * vs.C_evap_soil[3, 3] -
+                #       npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2)[3, 3] * vs.C_transp[3, 3] -
+                #       npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2)[3, 3] * vs.C_q_ss[3, 3] -
+                #       npx.sum(vs.mr_s, axis=2)[3, 3])
+
+                raise RuntimeError(f"solution diverged at iteration {vs.itt}")
+
+            if self._warmup_done:
+                diagnostics.diagnose(state)
+                diagnostics.output(state)
+
+        self.after_timestep(state)
+
+        # NOTE: benchmarks parse this, do not change / remove
+        logger.debug(" Time step took {:.2f}s", state.timers["main"].last_time)
+
+    def warmup(self):
+        """Warmup routine of the simulation.
+
+        Note:
+            Make sure to call :meth:`setup` prior to this function.
+
+        """
+        from roger.core import numerics
+
+        if self.state.settings.enable_offline_transport:
+            with self.state.timers["Running warm-up"]:
+                logger.info("\nStarting warmup")
+                self.run()
+                numerics.rescale_SA(self.state)
+                with self.state.variables.unlock():
+                    self.state.variables.itt = 0
+                    self.state.variables.time = 0
+
+        self._warmup_done = True
+
+    def run(self, show_progress_bar=None):
+        """Main routine of the simulation.
+
+        Note:
+            Make sure to call :meth:`setup` prior to this function.
+
+        Arguments:
+            show_progress_bar (:obj:`bool`, optional): Whether to show fancy progress bar via tqdm.
+                By default, only show if stdout is a terminal and roger is running on a single process.
+
+        """
+        from roger import restart
+
+        self._ensure_setup_done()
+
+        vs = self.state.variables
+        settings = self.state.settings
+
+        time_length, time_unit = time.format_time(settings.runlen)
+        logger.info(f"\nStarting calculation for {time_length:.1f} {time_unit}")
+
+        start_time = vs.time
+
+        # disable timers for first iteration
+        timer_context.active = False
+
+        pbar = progress.get_progress_bar(self.state, use_tqdm=show_progress_bar)
+
+        try:
+            with signals.signals_to_exception(), pbar:
+                while vs.time - start_time < settings.runlen:
+                    self.step(self.state)
+
+                    if not timer_context.active:
+                        timer_context.active = True
+
+                    pbar.advance_time(vs.dt_secs)
+
+        except:  # noqa: E722
+            logger.critical(f"Stopping calculation at iteration {vs.itt}")
+            raise
+
+        else:
+            if not self._warmup_done:
+                logger.success("Warmup done\n")
+            else:
+                logger.success("Calculation done\n")
+
+        finally:
+            if self._warmup_done:
+                restart.write_restart(self.state, force=True)
+                self._timing_summary()
+
+    def _timing_summary(self):
+        timing_summary = []
+
+        timing_summary.extend(
+            [
+                "",
+                "Timing summary:",
+                "(excluding first iteration)",
+                "---",
+                " setup time               = {:.2f}s".format(self.state.timers["setup"].total_time),
+                " main loop time           = {:.2f}s".format(self.state.timers["main"].total_time),
+                "   forcing                = {:.2f}s".format(self.state.timers["forcing"].total_time),
+                "   parameters             = {:.2f}s".format(self.state.timers["time-variant parameters"].total_time),
+                "   interception           = {:.2f}s".format(self.state.timers["interception"].total_time),
+                "   evapotranspiration     = {:.2f}s".format(self.state.timers["evapotranspiration"].total_time),
+                "   snow                   = {:.2f}s".format(self.state.timers["snow"].total_time),
+                "   infiltration           = {:.2f}s".format(self.state.timers["infiltration"].total_time),
+                "   percolation            = {:.2f}s".format(self.state.timers["percolation"].total_time),
+                "   capillary rise         = {:.2f}s".format(self.state.timers["capillary rise"].total_time),
+                "   subsurface runoff      = {:.2f}s".format(self.state.timers["subsurface runoff"].total_time),
+                "   groundwater flow       = {:.2f}s".format(self.state.timers["groundwater flow"].total_time),
+                "   crops                  = {:.2f}s".format(self.state.timers["crops"].total_time),
+                "   transport              = {:.2f}s".format(self.state.timers["transport"].total_time),
+                "   routing                = {:.2f}s".format(self.state.timers["routing"].total_time),
+            ]
+        )
+
+        if rs.profile_mode:
+            pass
+
+        timing_summary.extend(
+            [
+                " diagnostics and I/O      = {:.2f}s".format(self.state.timers["diagnostics"].total_time),
+                " plugins                  = {:.2f}s".format(self.state.timers["plugins"].total_time),
+            ]
+        )
+
+        timing_summary.extend(
+            [
+                "   {:<22} = {:.2f}s".format(plugin.name, self.state.timers[plugin.name].total_time)
+                for plugin in self.state._plugin_interfaces
+            ]
+        )
+
+        logger.debug("\n".join(timing_summary))
+
+        if rs.profile_mode:
+            print_profile_summary(self.state.profile_timers, self.state.timers["main"].total_time)
+
+
+def print_profile_summary(profile_timers, main_loop_time):
+    profile_timings = ["", "Profile timings:", "[total time spent (% of main loop)]", "---"]
+    maxwidth = max(len(k) for k in profile_timers.keys())
+    profile_format_string = "{{:<{}}} = {{:.2f}}s ({{:.2f}}%)".format(maxwidth)
+    main_loop_time = max(main_loop_time, 1e-8)  # prevent division by 0
+
+    for name, timer in profile_timers.items():
+        this_time = timer.total_time
+        if this_time == 0:
+            continue
+
+        profile_timings.append(profile_format_string.format(name, this_time, 100 * this_time / main_loop_time))
+
+    logger.diagnostic("\n".join(profile_timings))

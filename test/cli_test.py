@@ -1,0 +1,41 @@
+import os
+import filecmp
+import fnmatch
+import pkg_resources
+
+from click.testing import CliRunner
+import pytest
+
+import roger.cli
+
+SETUPS = (
+    "dummy",
+)
+
+
+@pytest.fixture(scope="module")
+def runner():
+    return CliRunner()
+
+
+@pytest.mark.parametrize("setup", SETUPS)
+def test_roger_copy_setup(setup, runner, tmpdir):
+    result = runner.invoke(roger.cli.roger_copy_setup.cli, [setup, "--to", os.path.join(tmpdir, setup)])
+    assert result.exit_code == 0, setup
+    assert not result.output
+
+    outpath = os.path.join(tmpdir, setup)
+    srcpath = pkg_resources.resource_filename("roger", f"setups/{setup}")
+    ignore = [
+        f
+        for f in os.listdir(srcpath)
+        if any(fnmatch.fnmatch(f, pattern) for pattern in roger.cli.roger_copy_setup.IGNORE_PATTERNS)
+    ]
+
+    comparer = filecmp.dircmp(outpath, srcpath, ignore=ignore)
+    assert not comparer.left_only and not comparer.right_only
+
+    with open(os.path.join(outpath, f"{setup}.py"), "r") as f:
+        setup_content = f.read()
+
+    assert "roger_VERSION" in setup_content

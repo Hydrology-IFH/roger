@@ -1,0 +1,18 @@
+cell_width: 1
+enable_bromide: false
+enable_chloride: false
+enable_crop_phenology: true
+enable_crop_rotation: true
+enable_deuterium: false
+enable_film_flow: false
+enable_groundwater: false
+enable_groundwater_boundary: false
+enable_lateral_flow: false
+enable_nitrate: false
+enable_offline_transport: false
+enable_oxygen18: false
+experiment_name: dummy
+ncols: 1
+nrows: 1
+output_variables:
+tm_structure:

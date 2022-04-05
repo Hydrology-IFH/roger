@@ -1,0 +1,12 @@
+click==8.0.3
+entrypoints==0.4
+requests==2.27.1
+numpy==1.21.5
+scipy==1.7.3
+h5netcdf==0.13.1
+h5py==3.6.0
+pillow==9.0.1
+loguru==0.6.0
+tqdm==4.62.3
+pandas==1.4.0
+ruamel.yaml==0.17.21

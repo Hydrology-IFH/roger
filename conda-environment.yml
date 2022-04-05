@@ -1,0 +1,23 @@
+name: roger
+
+channels:
+    - conda-forge
+
+dependencies:
+    - python=3.8
+    - pip
+    - click
+    - entrypoints
+    - requests
+    - numpy
+    - scipy
+    - pandas
+    - ruamel.yaml
+    - h5netcdf
+    - h5py
+    - pillow
+    - loguru
+    - tqdm
+    - cython
+    - pip:
+        - -e .
