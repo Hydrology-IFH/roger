@@ -1,10 +1,5 @@
 from pathlib import Path
-import glob
-import datetime
 import h5netcdf
-import xarray as xr
-import matplotlib.pyplot as plt
-
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, at, where, scipy_stats as sstx
@@ -12,53 +7,41 @@ from roger.setups.make_dummy_setup import make_setup
 from roger.io_tools import yml
 import numpy as onp
 
-# generate dummy setup
-BASE_PATH = Path(__file__).parent
-make_setup(BASE_PATH, event_type='', ndays=365,
-           enable_groundwater_boundary=False,
-           enable_film_flow=False,
-           enable_crop_phenology=False,
-           enable_crop_rotation=False,
-           enable_lateral_flow=False,
-           enable_groundwater=False,
-           enable_offline_transport=True,
-           enable_bromide=False,
-           enable_chloride=False,
-           enable_deuterium=False,
-           enable_oxygen18=False,
-           enable_nitrate=True,
-           tm_structure='complete-mixing')
-
-# read config file
-CONFIG_FILE = BASE_PATH / "config.yml"
-config = yml.Config(CONFIG_FILE)
-
 
 class DISTCROPTRANSPORTSetup(RogerSetup):
     """A distributed transport model including crop phenology/crop rotation.
     """
+    _base_path = Path(__file__).parent
+
     def _read_var_from_nc(self, var, file):
-        nc_file = BASE_PATH / file
+        nc_file = self._base_path / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables[var]
             return npx.array(var_obj)
 
     def _get_nitt(self):
-        nc_file = BASE_PATH / 'states_hm.nc'
+        nc_file = self._base_path / 'states_hm.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['Time']
             return len(onp.array(var_obj))
 
     def _get_runlen(self):
-        nc_file = BASE_PATH / 'states_hm.nc'
+        nc_file = self._base_path / 'states_hm.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['Time']
             return len(onp.array(var_obj)) * 60 * 60 * 24
+
+    def _read_config(self):
+        config_file = self._base_path / "config.yml"
+        config = yml.Config(config_file)
+        return config
 
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
         settings.identifier = "DISTCROPTRANSPORT"
+
+        config = self._read_config()
 
         settings.nx, settings.ny, settings.nz = config.nrows, config.ncols, 1
         settings.nitt = self._get_nitt()
@@ -887,9 +870,3 @@ def _ffill_3d(state, arr):
     )
 
     return arr_fill
-
-
-model = DISTCROPTRANSPORTSetup()
-model.setup()
-model.warmup()
-model.run()

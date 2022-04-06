@@ -111,6 +111,7 @@ DEFAULT_MASKS = {
     CATCH_GRID: lambda settings, vs: vs.maskCatch,
 }
 
+
 # custom mask for routing
 def _get_z0_mask(vs):
     return vs.maskCatch[:, :, -1]
@@ -2180,9 +2181,9 @@ VARIABLES = {
         time_dependent=True,
         active=lambda settings: settings.enable_groundwater,
     ),
-    "beta": Variable(
+    "dz_gw": Variable(
         "gradient of groundwater table depth",
-        CATCH_GRID + TIMESTEPS,
+        CATCH_GRID,
         "m/m",
         "gradient of groundwater table depth",
         write_to_restart=True,

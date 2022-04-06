@@ -6,13 +6,13 @@ import importlib
 
 import click
 
-from roger import runtime_settings, rogerSetup, __version__ as roger_version
+from roger import runtime_settings, RogerSetup, __version__ as roger_version
 from roger.settings import SETTINGS
 from roger.backend import BACKENDS
 from roger.runtime import LOGLEVELS, DEVICES, FLOAT_TYPES
 
 
-class rogerSetting(click.ParamType):
+class RogerSetting(click.ParamType):
     name = "setting"
     current_key = None
 
@@ -66,19 +66,19 @@ def run(setup_file, *args, **kwargs):
 
     SetupClass = None
     for obj in vars(setup_module).values():
-        if inspect.isclass(obj) and issubclass(obj, rogerSetup) and obj is not rogerSetup:
+        if inspect.isclass(obj) and issubclass(obj, RogerSetup) and obj is not RogerSetup:
             if SetupClass is not None and SetupClass is not obj:
-                raise RuntimeError("roger setups can only define one rogerSetup class")
+                raise RuntimeError("Roger setups can only define one RogerSetup class")
 
             SetupClass = obj
 
     from roger import logger
 
-    target_version = getattr(setup_module, "__roger_VERSION__", None)
+    target_version = getattr(setup_module, "__ROGER_VERSION__", None)
     if target_version and target_version != roger_version:
         logger.warning(
-            f"This is roger v{roger_version}, but the given setup was generated with v{target_version}. "
-            "Consider switching to this version of roger or updating your setup file.\n"
+            f"This is Roger v{roger_version}, but the given setup was generated with v{target_version}. "
+            "Consider switching to this version of Roger or updating your setup file.\n"
         )
 
     sim = SetupClass(*args, **kwargs)
@@ -117,7 +117,7 @@ def run(setup_file, *args, **kwargs):
     nargs=2,
     multiple=True,
     metavar="SETTING VALUE",
-    type=rogerSetting(),
+    type=RogerSetting(),
     default=tuple(),
     help="Override model setting, may be specified multiple times",
 )

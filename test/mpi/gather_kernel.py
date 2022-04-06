@@ -37,7 +37,7 @@ else:
     dimensions = dict(xt=4, yt=4)
 
     a = rst.proc_rank * npx.ones((6, 6))
-    b = gather(a, dimensions, ("xt", "yt"))
+    b = gather(a, dimensions, ("x", "y"))
 
     if rst.proc_rank == 0:
         rs.mpi_comm.Get_parent().Send(np.array(b), 0)

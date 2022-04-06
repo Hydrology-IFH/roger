@@ -8,7 +8,7 @@ except ImportError:
     have_click = False
 
 if not have_click:
-    raise ImportError("The roger command line tools require click (e.g. through `pip install click`)")
+    raise ImportError("The Roger command line tools require click (e.g. through `pip install click`)")
 
 del click
 del have_click

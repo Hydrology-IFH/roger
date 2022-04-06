@@ -9,8 +9,8 @@ from roger.io_tools import yml
 import numpy as onp
 
 
-class SVATCROPSetup(RogerSetup):
-    """A SVAT model including crop phenology/crop rotation.
+class DISTSetup(RogerSetup):
+    """A distributed model.
     """
     _base_path = Path(__file__).parent
 
@@ -38,12 +38,6 @@ class SVATCROPSetup(RogerSetup):
             var_obj = infile.variables['time']
             return onp.array(var_obj)[-1] * 60 * 60 + 24 * 60 * 60
 
-    def _get_ncr(self):
-        nc_file = self._base_path / 'crop_rotation.nc'
-        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables['year_season']
-            return len(onp.array(var_obj))
-
     def _read_config(self):
         config_file = self._base_path / "config.yml"
         config = yml.Config(config_file)
@@ -52,7 +46,7 @@ class SVATCROPSetup(RogerSetup):
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
-        settings.identifier = "SVATCROP"
+        settings.identifier = "DIST"
 
         config = self._read_config()
 
@@ -69,23 +63,9 @@ class SVATCROPSetup(RogerSetup):
         settings.x_origin = 0.0
         settings.y_origin = 0.0
 
-        settings.enable_groundwater_boundary = config.enable_groundwater_boundary
-        settings.enable_film_flow = config.enable_film_flow
-        settings.enable_crop_phenology = config.enable_crop_phenology
-        settings.enable_crop_rotation = config.enable_crop_rotation
-        settings.enable_lateral_flow = config.enable_lateral_flow
-        settings.enable_groundwater = config.enable_groundwater
-        settings.enable_offline_transport = config.enable_offline_transport
-        settings.enable_bromide = config.enable_bromide
-        settings.enable_chloride = config.enable_chloride
-        settings.enable_deuterium = config.enable_deuterium
-        settings.enable_oxygen18 = config.enable_oxygen18
-        settings.enable_nitrate = config.enable_nitrate
-        settings.enable_macropore_lower_boundary_condition = False
-
-        if settings.enable_crop_rotation:
-            settings.ncrops = 3
-            settings.ncr = self._get_ncr()
+        settings.enable_groundwater_boundary = False
+        settings.enable_lateral_flow = True
+        settings.enable_routing = False
 
     @roger_routine
     def set_grid(self, state):
@@ -111,15 +91,13 @@ class SVATCROPSetup(RogerSetup):
     @roger_routine
     def set_look_up_tables(self, state):
         vs = state.variables
-        settings = state.settings
 
         vs.lut_ilu = update(vs.lut_ilu, at[:, :], lut.ARR_ILU)
         vs.lut_gc = update(vs.lut_gc, at[:, :], lut.ARR_GC)
         vs.lut_gcm = update(vs.lut_gcm, at[:, :], lut.ARR_GCM)
         vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
         vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
-        if settings.enable_crop_phenology:
-            vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
+        vs.lut_mlms = update(vs.lut_mlms, at[:, :], lut.ARR_MLMS)
 
     @roger_routine
     def set_topography(self, state):
@@ -128,17 +106,17 @@ class SVATCROPSetup(RogerSetup):
     @roger_routine
     def set_parameters(self, state):
         vs = state.variables
-        settings = state.settings
 
         if (vs.itt == 0):
 
-            vs.lu_id = update(vs.lu_id, at[:, :], 599)
+            vs.lu_id = update(vs.lu_id, at[:, :], 8)
             vs.sealing = update(vs.sealing, at[:, :], 0)
-            vs.slope = update(vs.slope, at[:, :], 0)
+            vs.slope = update(vs.slope, at[:, :], 0.05)
             vs.slope_per = update(vs.slope_per, at[:, :], vs.slope * 100)
             vs.S_dep_tot = update(vs.S_dep_tot, at[:, :], 0)
             vs.z_soil = update(vs.z_soil, at[:, :], 2200)
             vs.dmpv = update(vs.dmpv, at[:, :], 100)
+            vs.dmph = update(vs.dmph, at[:, :], 100)
             vs.lmpv = update(vs.lmpv, at[:, :], 1000)
             vs.theta_ac = update(vs.theta_ac, at[:, :], 0.13)
             vs.theta_ufc = update(vs.theta_ufc, at[:, :], 0.24)
@@ -146,23 +124,12 @@ class SVATCROPSetup(RogerSetup):
             vs.ks = update(vs.ks, at[:, :], 25)
             vs.kf = update(vs.kf, at[:, :], 2500)
 
-            if settings.enable_crop_phenology and settings.enable_crop_rotation:
-                vs.CROP_TYPE = update(vs.CROP_TYPE, at[:, :, :], self._read_var_from_nc("crop", 'crop_rotation.nc'))
-                vs.crop_type = update(vs.crop_type, at[:, :, 0], vs.CROP_TYPE[:, :, 1])
-                vs.crop_type = update(vs.crop_type, at[:, :, 1], vs.CROP_TYPE[:, :, 2])
-                vs.crop_type = update(vs.crop_type, at[:, :, 2], vs.CROP_TYPE[:, :, 3])
-
-            if settings.enable_crop_phenology and not settings.enable_crop_rotation:
-                mask = npx.isin(vs.lu_id[:, :, npx.newaxis], npx.arange(500, 600, 1, dtype=int))
-                vs.crop_type = update(vs.crop_type, at[:, :, 0], npx.where(mask, vs.lu_id, 598))
-
         if (vs.MONTH[vs.itt] != vs.MONTH[vs.itt - 1]) & (vs.itt > 1):
             vs.update(set_parameters_monthly_kernel(state))
 
     @roger_routine
     def set_initial_conditions(self, state):
         vs = state.variables
-        settings = state.settings
 
         vs.S_int_top = update(vs.S_int_top, at[:, :, :vs.taup1], 0)
         vs.swe_top = update(vs.swe_top, at[:, :, :vs.taup1], 0)
@@ -173,114 +140,44 @@ class SVATCROPSetup(RogerSetup):
         vs.swe = update(vs.swe, at[:, :, :vs.taup1], 0)
         vs.theta_rz = update(vs.theta_rz, at[:, :, :vs.taup1], 0.4)
         vs.theta_ss = update(vs.theta_ss, at[:, :, :vs.taup1], 0.47)
-
-        if settings.enable_crop_phenology:
-            vs.z_root = update(vs.z_root, at[:, :, :vs.taup1], 0)
-            vs.z_root_crop = update(vs.z_root_crop, at[:, :, :vs.taup1, 0], 0)
-            vs.update(set_initial_conditions_crops_kernel(state))
+        vs.z_sat = update(vs.z_sat, at[:, :, :vs.taup1], 250)
 
     @roger_routine
     def set_forcing(self, state):
         vs = state.variables
-        settings = state.settings
 
         if (vs.itt == 0):
             vs.PREC = update(vs.PREC, at[:, :, :], self._read_var_from_nc("PREC", 'forcing.nc'))
             vs.TA = update(vs.TA, at[:, :, :], self._read_var_from_nc("TA", 'forcing.nc'))
             vs.PET = update(vs.PET, at[:, :, :], self._read_var_from_nc("PET", 'forcing.nc'))
             vs.EVENT_ID = update(vs.EVENT_ID, at[:, :, :], self._read_var_from_nc("EVENT_ID", 'forcing.nc'))
-            if settings.enable_crop_phenology:
-                vs.TA_MIN = update(vs.TA_MIN, at[:, :, :], self._read_var_from_nc("TA_min", 'forcing.nc'))
-                vs.TA_MAX = update(vs.TA_MAX, at[:, :, :], self._read_var_from_nc("TA_max", 'forcing.nc'))
 
         vs.update(set_forcing_kernel(state))
-        if settings.enable_crop_phenology:
-            vs.ta_min = update(vs.ta_min, at[:, :, vs.tau], vs.TA_MIN[:, :, vs.itt])
-            vs.ta_max = update(vs.ta_max, at[:, :, vs.tau], vs.TA_MAX[:, :, vs.itt])
 
     @roger_routine
     def set_diagnostics(self, state):
         diagnostics = state.diagnostics
         settings = state.settings
 
-        diagnostics["collect"].output_variables = []
-        if settings.enable_crop_phenology:
-            diagnostics["collect"].output_variables += ["z_root", "ground_cover"]
-        diagnostics["collect"].output_frequency = 24 * 60 * 60
+        diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "q_sub_rz", "q_sub_ss"]
+        if settings.enable_groundwater_boundary:
+            diagnostics["rates"].output_variables += ["cpr_ss"]
+        diagnostics["rates"].output_frequency = 60 * 60
+        diagnostics["rates"].sampling_frequency = 1
+
+        diagnostics["collect"].output_variables = ["S_rz", "S_ss",
+                                                   "S_pwp_rz", "S_fc_rz",
+                                                   "S_sat_rz", "S_pwp_ss",
+                                                   "S_fc_ss", "S_sat_ss",
+                                                   "z_sat"]
+        diagnostics["collect"].output_frequency = 60 * 60
         diagnostics["collect"].sampling_frequency = 1
-
-        # diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz"]
-        # if settings.enable_groundwater_boundary:
-        #     diagnostics["rates"].output_variables += ["cpr_ss"]
-        # diagnostics["rates"].output_frequency = 24 * 60 * 60
-        # diagnostics["rates"].sampling_frequency = 1
-
-        # diagnostics["collect"].output_variables = ["S_rz", "S_ss",
-        #                                            "S_pwp_rz", "S_fc_rz",
-        #                                            "S_sat_rz", "S_pwp_ss",
-        #                                            "S_fc_ss", "S_sat_ss"]
-        # if settings.enable_crop_phenology:
-        #     diagnostics["collect"].output_variables += ["re_rg", "re_rl", "z_root", "ground_cover"]
-        # diagnostics["collect"].output_frequency = 24 * 60 * 60
-        # diagnostics["collect"].sampling_frequency = 1
-        #
-        # diagnostics["averages"].output_variables = ["ta"]
-        # diagnostics["averages"].output_frequency = 24 * 60 * 60
-        # diagnostics["averages"].sampling_frequency = 1
-
-        # diagnostics["rates"].output_variables = ["prec", "rain_ground", "snow_ground", "q_sur", "inf_rz", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "transp", "evap_soil", "cpr_rz"]
-        # if settings.enable_groundwater_boundary:
-        #     diagnostics["rates"].output_variables += ["cpr_ss"]
-        # diagnostics["rates"].output_frequency = 24 * 60 * 60
-        # diagnostics["rates"].sampling_frequency = 1
-
-        # diagnostics["collect"].output_variables = ["S_snow", "S_int_ground", "S_rz", "S_ss",
-        #                                            "theta_rz", "theta_ss", "theta",
-        #                                            "z_wf"]
-        # if settings.enable_crop_phenology:
-        #     diagnostics["collect"].output_variables += ["re_rg", "re_rl"]
-        # diagnostics["collect"].output_frequency = 24 * 60 * 60
-        # diagnostics["collect"].sampling_frequency = 1
-
-        diagnostics["averages"].output_variables = ["ta"]
-        diagnostics["averages"].output_frequency = 24 * 60 * 60
-        diagnostics["averages"].sampling_frequency = 1
 
     @roger_routine
     def after_timestep(self, state):
         vs = state.variables
-        settings = state.settings
 
         vs.update(after_timestep_kernel(state))
-        if settings.enable_crop_phenology:
-            vs.update(after_timestep_crops_kernel(state))
-
-
-@roger_kernel
-def set_initial_conditions_crops_kernel(state):
-    vs = state.variables
-
-    # calculate time since growing
-    t_grow = allocate(state.dimensions, ("x", "y", "crops"))
-    t_grow = update(
-        t_grow,
-        at[:, :, :], npx.where(vs.z_root_crop[:, :, vs.taum1, :] > 0, (-1 / vs.root_growth_rate) * npx.log(1 / ((vs.z_root_crop[:, :, vs.taum1, :] / 1000 - vs.z_root_crop_max / 1000) * (-1 / (vs.z_root_crop_max / 1000 - vs.z_evap[:, :, npx.newaxis] / 1000)))), 0)
-    )
-
-    vs.t_grow_cc = update(
-        vs.t_grow_cc,
-        at[:, :, :2, :], t_grow[:, :, npx.newaxis, :]
-    )
-
-    vs.t_grow_root = update(
-        vs.t_grow_root,
-        at[:, :, :2, :], t_grow[:, :, npx.newaxis, :]
-    )
-
-    return KernelOutput(
-        t_grow_cc=vs.t_grow_cc,
-        t_grow_root=vs.t_grow_root,
-    )
 
 
 @roger_kernel
@@ -454,19 +351,6 @@ def set_forcing_kernel(state):
     vs.month = vs.MONTH[vs.itt]
     vs.doy = vs.DOY[vs.itt]
 
-    # reset fluxes at beginning of time step
-    q_sur = allocate(state.dimensions, ("x", "y"))
-    vs.q_sur = update(
-        vs.q_sur,
-        at[:, :], q_sur,
-    )
-
-    q_hof = allocate(state.dimensions, ("x", "y"))
-    vs.q_hof = update(
-        vs.q_hof,
-        at[:, :], q_hof,
-    )
-
     return KernelOutput(
         prec=vs.prec,
         ta=vs.ta,
@@ -477,8 +361,6 @@ def set_forcing_kernel(state):
         year=vs.year,
         month=vs.month,
         doy=vs.doy,
-        q_sur=vs.q_sur,
-        q_hof=vs.q_hof,
     )
 
 
@@ -638,27 +520,4 @@ def after_timestep_kernel(state):
         k_rz=vs.k_rz,
         k_ss=vs.k_ss,
         k=vs.k,
-    )
-
-
-@roger_kernel
-def after_timestep_crops_kernel(state):
-    vs = state.variables
-
-    vs.ta_min = update(vs.ta_min, at[:, :, vs.taum1], vs.ta_min[:, :, vs.tau])
-    vs.ta_max = update(vs.ta_max, at[:, :, vs.taum1], vs.ta_max[:, :, vs.tau])
-    vs.gdd_sum = update(vs.gdd_sum, at[:, :, vs.taum1, :], vs.gdd_sum[:, :, vs.tau, :])
-    vs.t_grow_cc = update(vs.t_grow_cc, at[:, :, vs.taum1, :], vs.t_grow_cc[:, :, vs.tau, :])
-    vs.t_grow_root = update(vs.t_grow_root, at[:, :, vs.taum1, :], vs.t_grow_root[:, :, vs.tau, :])
-    vs.ccc = update(vs.ccc, at[:, :, vs.taum1, :], vs.ccc[:, :, vs.tau, :])
-    vs.z_root_crop = update(vs.z_root_crop, at[:, :, vs.taum1, :], vs.z_root_crop[:, :, vs.tau, :])
-
-    return KernelOutput(
-        ta_min=vs.ta_min,
-        ta_max=vs.ta_max,
-        gdd_sum=vs.gdd_sum,
-        t_grow_cc=vs.t_grow_cc,
-        t_grow_root=vs.t_grow_root,
-        ccc=vs.ccc,
-        z_root_crop=vs.z_root_crop,
     )

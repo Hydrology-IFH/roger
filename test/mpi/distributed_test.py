@@ -22,5 +22,5 @@ def test_scatter():
     run_dist_kernel("scatter_kernel.py")
 
 
-def test_acc():
+def test_svat():
     run_dist_kernel("svat_kernel.py")

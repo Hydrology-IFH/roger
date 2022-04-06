@@ -39,7 +39,7 @@ def calc_q_gw(state):
     # calculates lateral groundwater flow
     vs.q_gw = update(
         vs.q_gw,
-        at[:, :, :], (vs.tt * vs.beta * settings.dx * vs.dt) * (1000/settings.dx**2) * vs.maskCatch,
+        at[:, :, :], (vs.tt * vs.dz_gw * settings.dx * vs.dt) * (1000/settings.dx**2) * vs.maskCatch,
     )
 
     vs.S_gw = update_add(
@@ -65,7 +65,7 @@ def calc_q_bf(state):
     mask1 = (vs.z_gw > vs.z_stream_tot)
     vs.q_bf = update(
         vs.q_bf,
-        at[:, :, :], (vs.kf * vs.beta * settings.dx * vs.dt) * (1000/settings.dx**2) * mask1 * vs.maskRiver,
+        at[:, :, :], (vs.kf * vs.dz_gw * settings.dx * vs.dt) * (1000/settings.dx**2) * mask1 * vs.maskRiver,
     )
 
     vs.S_gw = update_add(
@@ -82,6 +82,11 @@ def calc_q_re(state):
     Calculates groundwater recharge
     """
     vs = state.variables
+
+    vs.q_re = update(
+        vs.q_re,
+        at[:, :, :], vs.q_ss * vs.maskCatch,
+    )
 
     vs.S_gw = update_add(
         vs.S_gw,
@@ -117,9 +122,7 @@ def update_storage_bc(state):
     """
     Updates groundwater storage with boundary conditions
     """
-    vs = state.variables
-
-    return KernelOutput(S_gw=vs.S_gw)
+    pass
 
 
 @roger_routine
@@ -129,7 +132,6 @@ def calculate_groundwater(state):
     """
     vs = state.variables
 
-    vs.update(update_storage_bc(state))
     vs.update(calc_q_re(state))
     vs.update(calc_q_gw(state))
     vs.update(calc_q_bf(state))

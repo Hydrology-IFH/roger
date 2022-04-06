@@ -26,7 +26,8 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
                a=None,
                rain_sum_ff=100,
                max_dur=72,
-               z_soil_max=5000):
+               z_soil_max=5000,
+               float_type="float64"):
     """
     Make dummy setup with maximum two events.
     """
@@ -265,23 +266,23 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
             )
             # set dimensions with a dictionary
             f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_events.index), 'scalar': 1}
-            v = f.create_variable('PREC', ('x', 'y', 'time'), float)
-            arr = df_events['PREC'].astype(float).values
+            v = f.create_variable('PREC', ('x', 'y', 'time'), float_type)
+            arr = df_events['PREC'].astype(float_type).values
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
             v.attrs['long_name'] = 'Precipitation'
             v.attrs['units'] = 'mm/dt'
-            v = f.create_variable('TA', ('x', 'y', 'time'), float)
-            arr = df_events['TA'].astype(float).values
+            v = f.create_variable('TA', ('x', 'y', 'time'), float_type)
+            arr = df_events['TA'].astype(float_type).values
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
             v.attrs['long_name'] = 'air temperature'
             v.attrs['units'] = 'degC'
-            v = f.create_variable('PET', ('x', 'y', 'time'), float)
-            arr = df_events['PET'].astype(float).values
+            v = f.create_variable('PET', ('x', 'y', 'time'), float_type)
+            arr = df_events['PET'].astype(float_type).values
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
             v.attrs['long_name'] = 'Potential Evapotranspiration'
             v.attrs['units'] = 'mm/dt'
-            v = f.create_variable('dt', ('time',), float)
-            v[:] = df_events['time_step'].astype(float).values
+            v = f.create_variable('dt', ('time',), float_type)
+            v[:] = df_events['time_step'].astype(float_type).values
             v.attrs['long_name'] = 'time step (!not constant)'
             v.attrs['units'] = 'hour'
             v = f.create_variable('year', ('time',), int)
@@ -296,15 +297,15 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
             v = f.create_variable('EVENT_ID', ('time',), int)
             v[:] = df_events['EVENT_ID'].astype(int).values
             v.attrs['units'] = ''
-            v = f.create_variable('time', ('time',), float)
+            v = f.create_variable('time', ('time',), float_type)
             v.attrs['time_origin'] = f"{df_events.index[0]}"
             v.attrs['units'] = 'hours'
             v[:] = date2num(df_events.index.tolist(), units=f"hours since {df_events.index[0]}", calendar='standard')
-            v = f.create_variable('x', ('x',), float)
+            v = f.create_variable('x', ('x',), float_type)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'
             v[:] = onp.arange(f.dimensions["x"])
-            v = f.create_variable('y', ('y',), float)
+            v = f.create_variable('y', ('y',), float_type)
             v.attrs['long_name'] = 'Meridonial coordinate'
             v.attrs['units'] = 'meters'
             v[:] = onp.arange(f.dimensions["y"])
@@ -322,12 +323,12 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
                 v.attrs['long_name'] = 'Groundwater head'
                 v.attrs['units'] = 'm'
             if enable_crop_phenology:
-                v = f.create_variable('TA_min', ('x', 'y', 'time'), float)
+                v = f.create_variable('TA_min', ('x', 'y', 'time'), float_type)
                 arr = df_events['TA_min'].values - 3
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'minimum air temperature'
                 v.attrs['units'] = 'degC'
-                v = f.create_variable('TA_max', ('x', 'y', 'time'), float)
+                v = f.create_variable('TA_max', ('x', 'y', 'time'), float_type)
                 arr = df_events['TA_max'].values + 3
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'maximum air temperature'
@@ -399,14 +400,13 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
 
         if enable_groundwater:
             df_params.loc[:, 'kf'] = 900
-            head_units_params += ['[mm/h]', '[mm/h]', '[-]', '[-]', '[-]', '[m]']
-            head_columns_params += ['k_gw', 'k_leak', 'bdec', 'n0', 'npor', 'z_tot_gw']
-            df_params.loc[:, 'k_gw'] = 900
+            head_units_params += ['[mm/h]', '[-]', '[-]', '[-]', '[m]']
+            head_columns_params += ['k_leak', 'bdec', 'n0', 'npor', 'z_gw_tot']
             df_params.loc[:, 'k_leak'] = 0
             df_params.loc[:, 'bdec'] = 4
             df_params.loc[:, 'n0'] = 0.25
             df_params.loc[:, 'npor'] = 0.3
-            df_params.loc[:, 'z_tot_gw'] = 20
+            df_params.loc[:, 'z_gw_tot'] = 20
 
         if enable_crop_phenology:
             df_params.loc[:, 'lu_id'] = 557
@@ -462,11 +462,11 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
                 v = f.create_variable('year_season', ('year_season',), 'S11')
                 v.attrs['units'] = 'year_season'
                 v[:] = onp.array(crops.columns[1:].astype('S11').values, dtype='S11')
-                v = f.create_variable('x', ('x',), float)
+                v = f.create_variable('x', ('x',), float_type)
                 v.attrs['long_name'] = 'Zonal coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(f.dimensions["x"])
-                v = f.create_variable('y', ('y',), float)
+                v = f.create_variable('y', ('y',), float_type)
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(f.dimensions["y"])
@@ -738,17 +738,17 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
             )
             # set dimensions with a dictionary
             f.dimensions = {'x': nrows, 'y': ncols}
-            v = f.create_variable('x', ('x',), float)
+            v = f.create_variable('x', ('x',), float_type)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'
             v[:] = onp.arange(f.dimensions["x"])
-            v = f.create_variable('y', ('y',), float)
+            v = f.create_variable('y', ('y',), float_type)
             v.attrs['long_name'] = 'Meridonial coordinate'
             v.attrs['units'] = 'meters'
             v[:] = onp.arange(f.dimensions["y"])
             for var_name in params.columns:
-                v = f.create_variable(var_name, ('x', 'y'), float)
-                v[:, :] = params[var_name].values.reshape((nrows, ncols)).astype(float)
+                v = f.create_variable(var_name, ('x', 'y'), float_type)
+                v[:, :] = params[var_name].values.reshape((nrows, ncols)).astype(float_type)
 
         csv_file = base_path / 'sas_parameters_q_rz.csv'
         params = pd.read_csv(csv_file, sep=';', skiprows=1)
@@ -763,17 +763,17 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
             )
             # set dimensions with a dictionary
             f.dimensions = {'x': nrows, 'y': ncols}
-            v = f.create_variable('x', ('x',), float)
+            v = f.create_variable('x', ('x',), float_type)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'
             v[:] = onp.arange(f.dimensions["x"])
-            v = f.create_variable('y', ('y',), float)
+            v = f.create_variable('y', ('y',), float_type)
             v.attrs['long_name'] = 'Meridonial coordinate'
             v.attrs['units'] = 'meters'
             v[:] = onp.arange(f.dimensions["y"])
             for var_name in params.columns:
-                v = f.create_variable(var_name, ('x', 'y'), float)
-                v[:, :] = params[var_name].values.reshape((nrows, ncols)).astype(float)
+                v = f.create_variable(var_name, ('x', 'y'), float_type)
+                v[:, :] = params[var_name].values.reshape((nrows, ncols)).astype(float_type)
 
         csv_file = base_path / 'sas_parameters_q_ss.csv'
         params = pd.read_csv(csv_file, sep=';', skiprows=1)
@@ -788,17 +788,17 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
             )
             # set dimensions with a dictionary
             f.dimensions = {'x': nrows, 'y': ncols}
-            v = f.create_variable('x', ('x',), float)
+            v = f.create_variable('x', ('x',), float_type)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'
             v[:] = onp.arange(f.dimensions["x"])
-            v = f.create_variable('y', ('y',), float)
+            v = f.create_variable('y', ('y',), float_type)
             v.attrs['long_name'] = 'Meridonial coordinate'
             v.attrs['units'] = 'meters'
             v[:] = onp.arange(f.dimensions["y"])
             for var_name in params.columns:
-                v = f.create_variable(var_name, ('x', 'y'), float)
-                v[:, :] = params[var_name].values.reshape((nrows, ncols)).astype(float)
+                v = f.create_variable(var_name, ('x', 'y'), float_type)
+                v[:, :] = params[var_name].values.reshape((nrows, ncols)).astype(float_type)
 
         if enable_bromide:
             # generate bromide injection pulse
@@ -825,19 +825,19 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
                 )
                 # set dimensions with a dictionary
                 f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_br.index), 'scalar': 1}
-                v = f.create_variable('time', ('time',), float)
+                v = f.create_variable('time', ('time',), float_type)
                 v.attrs['time_origin'] = f"{df_br.index[0]}"
                 v.attrs['units'] = 'days'
                 v[:] = date2num(df_br.index.tolist(), units=f"days since {df_br.index[0]}", calendar='standard')
-                v = f.create_variable('x', ('x',), float)
+                v = f.create_variable('x', ('x',), float_type)
                 v.attrs['long_name'] = 'Zonal coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(f.dimensions["x"])
-                v = f.create_variable('y', ('y',), float)
+                v = f.create_variable('y', ('y',), float_type)
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(f.dimensions["y"])
-                v = f.create_variable('Br', ('x', 'y', 'time'), float)
+                v = f.create_variable('Br', ('x', 'y', 'time'), float_type)
                 arr = df_br['Br'].values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'mass of bromide tracer injection'
@@ -880,19 +880,19 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
                 )
                 # set dimensions with a dictionary
                 f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_cl.index), 'scalar': 1}
-                v = f.create_variable('time', ('time',), float)
+                v = f.create_variable('time', ('time',), float_type)
                 v.attrs['time_origin'] = f"{df_cl.index[0]}"
                 v.attrs['units'] = 'days'
                 v[:] = date2num(df_cl.index.tolist(), units=f"days since {df_cl.index[0]}", calendar='standard')
-                v = f.create_variable('x', ('x',), float)
+                v = f.create_variable('x', ('x',), float_type)
                 v.attrs['long_name'] = 'Zonal coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(f.dimensions["x"])
-                v = f.create_variable('y', ('y',), float)
+                v = f.create_variable('y', ('y',), float_type)
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(f.dimensions["y"])
-                v = f.create_variable('Cl', ('x', 'y', 'time'), float)
+                v = f.create_variable('Cl', ('x', 'y', 'time'), float_type)
                 arr = df_cl['Cl'].values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'chloride concentration of precipitation'
@@ -934,19 +934,19 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
                 )
                 # set dimensions with a dictionary
                 f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_d18O.index), 'scalar': 1}
-                v = f.create_variable('time', ('time',), float)
+                v = f.create_variable('time', ('time',), float_type)
                 v.attrs['time_origin'] = f"{df_d18O.index[0]}"
                 v.attrs['units'] = 'days'
                 v[:] = date2num(df_d18O.index.tolist(), units=f"days since {df_d18O.index[0]}", calendar='standard')
-                v = f.create_variable('x', ('x',), float)
+                v = f.create_variable('x', ('x',), float_type)
                 v.attrs['long_name'] = 'Zonal coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(f.dimensions["x"])
-                v = f.create_variable('y', ('y',), float)
+                v = f.create_variable('y', ('y',), float_type)
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(f.dimensions["y"])
-                v = f.create_variable('d18O', ('x', 'y', 'time'), float)
+                v = f.create_variable('d18O', ('x', 'y', 'time'), float_type)
                 arr = df_d18O['d18O'].values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'oxygen-18 signal of precipitation'
@@ -982,19 +982,19 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
                 )
                 # set dimensions with a dictionary
                 f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_d2H.index), 'scalar': 1}
-                v = f.create_variable('time', ('time',), float)
+                v = f.create_variable('time', ('time',), float_type)
                 v.attrs['time_origin'] = f"{df_d2H.index[0]}"
                 v.attrs['units'] = 'days'
                 v[:] = date2num(df_d2H.index.tolist(), units=f"days since {df_d2H.index[0]}", calendar='standard')
-                v = f.create_variable('x', ('x',), float)
+                v = f.create_variable('x', ('x',), float_type)
                 v.attrs['long_name'] = 'Zonal coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(f.dimensions["x"])
-                v = f.create_variable('y', ('y',), float)
+                v = f.create_variable('y', ('y',), float_type)
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(f.dimensions["y"])
-                v = f.create_variable('d2H', ('x', 'y', 'time'), float)
+                v = f.create_variable('d2H', ('x', 'y', 'time'), float_type)
                 arr = df_d2H['d2H'].values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'deuterium signal of precipitation'
@@ -1033,24 +1033,24 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
                 )
                 # set dimensions with a dictionary
                 f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_Nin.index), 'scalar': 1}
-                v = f.create_variable('time', ('time',), float)
+                v = f.create_variable('time', ('time',), float_type)
                 v.attrs['time_origin'] = f"{df_Nin.index[0]}"
                 v.attrs['units'] = 'days'
                 v[:] = date2num(df_Nin.index.tolist(), units=f"days since {df_Nin.index[0]}", calendar='standard')
-                v = f.create_variable('x', ('x',), float)
+                v = f.create_variable('x', ('x',), float_type)
                 v.attrs['long_name'] = 'Zonal coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(f.dimensions["x"])
-                v = f.create_variable('y', ('y',), float)
+                v = f.create_variable('y', ('y',), float_type)
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(f.dimensions["y"])
-                v = f.create_variable('Nmin', ('x', 'y', 'time'), float)
+                v = f.create_variable('Nmin', ('x', 'y', 'time'), float_type)
                 arr = df_Nin['Nmin'].values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'Mineral nitrogen fertilizer'
                 v.attrs['units'] = 'kg N/ha'
-                v = f.create_variable('Norg', ('x', 'y', 'time'), float)
+                v = f.create_variable('Norg', ('x', 'y', 'time'), float_type)
                 arr = df_Nin['Norg'].values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'Organic nitrogen fertilizer'
@@ -1113,11 +1113,11 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
         )
         # set dimensions with a dictionary
         f.dimensions = {'x': nrows, 'y': ncols}
-        v = f.create_variable('x', ('x',), float)
+        v = f.create_variable('x', ('x',), float_type)
         v.attrs['long_name'] = 'Zonal coordinate'
         v.attrs['units'] = 'meters'
         v[:] = onp.arange(f.dimensions["x"])
-        v = f.create_variable('y', ('y',), float)
+        v = f.create_variable('y', ('y',), float_type)
         v.attrs['long_name'] = 'Meridonial coordinate'
         v.attrs['units'] = 'meters'
         v[:] = onp.arange(f.dimensions["y"])
@@ -1126,8 +1126,8 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
                 v = f.create_variable(var_name, ('x', 'y'), int)
                 v[:, :] = params[var_name].values.reshape((nrows, ncols)).astype(int)
             else:
-                v = f.create_variable(var_name, ('x', 'y'), float)
-                v[:, :] = params[var_name].values.reshape((nrows, ncols)).astype(float)
+                v = f.create_variable(var_name, ('x', 'y'), float_type)
+                v[:, :] = params[var_name].values.reshape((nrows, ncols)).astype(float_type)
 
     csv_file = base_path / 'initvals.csv'
     initvals = pd.read_csv(csv_file, sep=';', skiprows=1)
@@ -1142,14 +1142,14 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
         )
         # set dimensions with a dictionary
         f.dimensions = {'x': nrows, 'y': ncols}
-        v = f.create_variable('x', ('x',), float)
+        v = f.create_variable('x', ('x',), float_type)
         v.attrs['long_name'] = 'Zonal coordinate'
         v.attrs['units'] = 'meters'
         v[:] = onp.arange(f.dimensions["x"])
-        v = f.create_variable('y', ('y',), float)
+        v = f.create_variable('y', ('y',), float_type)
         v.attrs['long_name'] = 'Meridonial coordinate'
         v.attrs['units'] = 'meters'
         v[:] = onp.arange(f.dimensions["y"])
         for var_name in initvals.columns:
-            v = f.create_variable(var_name, ('x', 'y'), float)
-            v[:, :] = initvals[var_name].values.reshape((nrows, ncols)).astype(float)
+            v = f.create_variable(var_name, ('x', 'y'), float_type)
+            v[:, :] = initvals[var_name].values.reshape((nrows, ncols)).astype(float_type)

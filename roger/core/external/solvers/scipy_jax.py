@@ -8,20 +8,20 @@ from roger.core.external.poisson_matrix import assemble_poisson_matrix
 
 @roger_kernel(static_args=("solve_fun",))
 def solve_kernel(state, rhs, x0, boundary_val, solve_fun):
-    rhs_global = distributed.gather(rhs, state.dimensions, ("xt", "yt"))
-    x0_global = distributed.gather(x0, state.dimensions, ("xt", "yt"))
+    rhs_global = distributed.gather(rhs, state.dimensions, ("x", "y"))
+    x0_global = distributed.gather(x0, state.dimensions, ("x", "y"))
 
     if boundary_val is None:
         boundary_val_global = x0_global
     else:
-        boundary_val_global = distributed.gather(boundary_val, state.dimensions, ("xt", "yt"))
+        boundary_val_global = distributed.gather(boundary_val, state.dimensions, ("x", "y"))
 
     if rst.proc_rank == 0:
         linear_solution = solve_fun(rhs_global, x0_global, boundary_val_global)
     else:
         linear_solution = npx.empty_like(rhs)
 
-    return distributed.scatter(linear_solution, state.dimensions, ("xt", "yt"))
+    return distributed.scatter(linear_solution, state.dimensions, ("x", "y"))
 
 
 class JAXSciPySolver(LinearSolver):

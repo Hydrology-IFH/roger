@@ -1,74 +1,54 @@
-import shutil
 from pathlib import Path
-import glob
-import datetime
-from cftime import num2date
 import h5netcdf
-import xarray as xr
-import matplotlib.pyplot as plt
-
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
 from roger.core.utilities import _get_row_no
 import roger.lookuptables as lut
-from roger.setups.make_dummy_setup import make_setup
 from roger.io_tools import yml
 import numpy as onp
-
-# generate dummy setup
-BASE_PATH = Path(__file__).parent
-make_setup(BASE_PATH, event_type='mixed', ndays=365*2,
-           enable_groundwater_boundary=False,
-           enable_film_flow=False,
-           enable_crop_phenology=False,
-           enable_crop_rotation=False,
-           enable_lateral_flow=False,
-           enable_groundwater=False,
-           enable_offline_transport=False,
-           enable_bromide=False,
-           enable_chloride=False,
-           enable_deuterium=False,
-           enable_oxygen18=False,
-           enable_nitrate=False,
-           tm_structure='complete-mixing')
-
-# read config file
-CONFIG_FILE = BASE_PATH / "config.yml"
-config = yml.Config(CONFIG_FILE)
 
 
 class SVATSetup(RogerSetup):
     """A SVAT model.
     """
+    _base_path = Path(__file__).parent
+
     def _read_var_from_nc(self, var, file):
-        nc_file = BASE_PATH / file
+        nc_file = self._base_path / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables[var]
             return npx.array(var_obj)
 
     def _get_nittevent(self):
-        nc_file = BASE_PATH / 'forcing.nc'
+        nc_file = self._base_path / 'forcing.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['nitt_event']
             return onp.int32(onp.array(var_obj)[0])
 
     def _get_nitt(self):
-        nc_file = BASE_PATH / 'forcing.nc'
+        nc_file = self._base_path / 'forcing.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['time']
             return len(onp.array(var_obj))
 
     def _get_runlen(self):
-        nc_file = BASE_PATH / 'forcing.nc'
+        nc_file = self._base_path / 'forcing.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['time']
             return onp.array(var_obj)[-1] * 60 * 60 + 24 * 60 * 60
+
+    def _read_config(self):
+        config_file = self._base_path / "config.yml"
+        config = yml.Config(config_file)
+        return config
 
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
         settings.identifier = "SVAT"
+
+        config = self._read_config()
 
         settings.nx, settings.ny, settings.nz = config.nrows, config.ncols, 1
         settings.nitt = self._get_nitt()
@@ -196,8 +176,6 @@ class SVATSetup(RogerSetup):
                                                    "S_pwp_rz", "S_fc_rz",
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss"]
-        if settings.enable_crop_phenology:
-            diagnostics["collect"].output_variables += ["re_rg", "re_rl", "z_root", "ground_cover"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 
@@ -564,62 +542,3 @@ def after_timestep_kernel(state):
         k_ss=vs.k_ss,
         k=vs.k,
     )
-
-
-model = SVATSetup()
-model.setup()
-model.run()
-
-path = str(BASE_PATH / f"{model.state.settings.identifier}.*.nc")
-diag_files = glob.glob(path)
-states_hm_file = BASE_PATH / "states_hm.nc"
-with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
-    f.attrs.update(
-        date_created=datetime.datetime.today().isoformat(),
-        title='test results',
-        institution='University of Freiburg, Chair of Hydrology',
-        references='',
-        comment=''
-    )
-    for dfs in diag_files:
-        with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-            # set dimensions with a dictionary
-            if not f.dimensions:
-                f.dimensions = {'x': df.dimensions["x"], 'y': df.dimensions["y"], 'Time': len(df.variables['Time'])}
-                v = f.create_variable('x', ('x',), float)
-                v.attrs['long_name'] = 'Zonal coordinate'
-                v.attrs['units'] = 'meters'
-                v[:] = npx.arange(f.dimensions["x"])
-                v = f.create_variable('y', ('y',), float)
-                v.attrs['long_name'] = 'Meridonial coordinate'
-                v.attrs['units'] = 'meters'
-                v[:] = npx.arange(f.dimensions["y"])
-                v = f.create_variable('Time', ('Time',), float)
-                var_obj = df.variables.get('Time')
-                with h5netcdf.File(BASE_PATH / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
-                    time_origin = infile.variables['time'].attrs['time_origin']
-                v.attrs.update(time_origin=time_origin,
-                                units=var_obj.attrs["units"])
-                v[:] = npx.array(var_obj)
-            for key in list(df.variables.keys()):
-                var_obj = df.variables.get(key)
-                if key not in list(f.dimensions.keys()) and var_obj.ndim == 3:
-                    v = f.create_variable(key, ('x', 'y', 'Time'), float)
-                    vals = npx.array(var_obj)
-                    v[:, :, :] = vals.swapaxes(0, 2)
-                    v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                    units=var_obj.attrs["units"])
-BASE_PATH_TM = BASE_PATH.parent / "svat_transport"
-states_hm_file1 = BASE_PATH_TM / "states_hm.nc"
-shutil.copy(states_hm_file, states_hm_file1)
-
-with xr.open_dataset(states_hm_file, engine="h5netcdf") as ds:
-    time_origin = ds['Time'].attrs['time_origin']
-    days = (ds['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    date = num2date(days, units=f"days since {ds['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    ds = ds.assign_coords(date=("Time", date))
-    keys = list(ds.data_vars.keys())
-    for key in keys:
-        fig, ax = plt.subplots()
-        ds[key].isel(x=0, y=0).plot(x="date", ax=ax)
-        fig.tight_layout()

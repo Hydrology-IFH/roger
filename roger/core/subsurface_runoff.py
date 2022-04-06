@@ -370,11 +370,11 @@ def calc_q_sub_ss(state):
     fl = allocate(state.dimensions, ("x", "y"))
     fv = update(
         fv,
-        at[:, :], (vs.q_pot_ss / (vs.q_pot_ss + vs.q_sub_pot_ss)) * vs.maskCatch,
+        at[:, :], npx.where((vs.q_pot_ss + vs.q_sub_pot_ss) > 0, vs.q_pot_ss / (vs.q_pot_ss + vs.q_sub_pot_ss), 0) * vs.maskCatch,
     )
     fl = update(
         fl,
-        at[:, :], (vs.q_sub_pot_ss / (vs.q_pot_ss + vs.q_sub_pot_ss)) * vs.maskCatch,
+        at[:, :], npx.where((vs.q_pot_ss + vs.q_sub_pot_ss) > 0, vs.q_sub_pot_ss / (vs.q_pot_ss + vs.q_sub_pot_ss), 0) * vs.maskCatch,
     )
 
     # vertical flow

@@ -1,14 +1,14 @@
 A short introduction to Roger
 =============================
 
-The vision
-----------
+The model architecture
+----------------------
 
 1. **Easy to access**: Python modules are simple to install, and projects like `Anaconda <https://www.continuum.io/anaconda-overview>`_ are doing a great job in creating platform-independent environments.
 2. **Easy to use**: Anyone with some experience can use their favorite Python tools to set up, control, and post-process Roger.
 3. **Easy to modify**: Due to Python's popularity, available abstractions, and dynamic nature, Roger can be extended and modified with relatively little effort.
 
-However, choosing Python over a compiled language like Fortran or C usually comes at a high computational cost. We overcome this gap by using `JAX <https://github.com/google/jax>`_, a framework that can act as a high-performance replacement for NumPy. JAX takes care of all performance optimizations in the background, and runs on both CPUs and GPUs.
+However, choosing Python over a compiled language like Fortran or C usually comes at a high computational cost. We overcome this gap by using `JAX <https://github.com/google/jax>`_, a framework that can act as a high-performance replacement for NumPy. JAX takes care of all performance optimizations in the background, and runs on CPUs and GPUs.
 
 Available processes
 +++++++++++++++++++
@@ -22,31 +22,34 @@ Available processes
 - rain-on-snow
 
 **Infiltration**:
-- matrix-driven infiltration based on Green-Ampt approach
-- gravity-driven infiltration based on viscous flow approach
+- matrix-driven infiltration based on Green-Ampt approach ([Weiler2005])
+- gravity-driven infiltration based on viscous flow approach ([Germann2018])
 
 **Evaporation**:
 - evaporation from interception and surface storage
-- soil evaporation based on Stage I (i.e. energy limiting stage) and Stage II (i.e. falling rate stage).
+- soil evaporation based on Stage I (i.e. energy limiting stage) and Stage II (i.e. falling rate stage) ([Torres2010]).
 
 **Transpiration**:
 - combination of residual potential evapotranspiration and vegetation-specific coeffcient
 
 **Subsurface Runoff**:
-- matrix-driven vertical soil drainage based on Buckingham-Darcy
-- gravity-driven infiltration based on viscous flow approach
+- capillary-driven vertical soil drainage based on Buckingham-Darcy
+- gravity-driven infiltration based on viscous flow approach ([Germann2018])
+- lateral subsurface runoff in the soil as described in [Steinbrich2016]
 
 **Capillary rise**:
-- ...
+- capillary-driven vertical uplift ([Salvucci1993])
 
 **Groundwater Runoff**:
-- ...
+- spatial explicit representation of shallow groundwater following [Stoll2010]
 
 **Crop phenology and crop rotation**:
-- ...
+- time-varying crop canopy cover and crop root depth is implemented as in [Steduto2009]
 
 **Offline transport**:
-- ...
+- StorAge selection (SAS) functions ([Rinaldo2015]) are used to
+calculate travel time distributions and solute concentration/mass of outgoing
+fluxes (e.g. groundwater recharge)
 
 Available model structures
 +++++++++++++++++++++++++++
@@ -58,23 +61,23 @@ Soil hydrologic parameters are approximated by Brooks-Corey scheme.
 
 **SVATCROP**:
 - same as SVAT, but crop development (i.e. varying rooting depth and varying canopy cover) is
-explicitly represented 
+explicitly represented
 
 **SVATFILM**:
-- ...
+- same as SVAT, but with gravity-driven infiltration and gravity-driven drainage
 
 **DIST**:
-- ...
+- a distributed model
 
 **DISTCROP**:
-- ...
+- a distributed model including crop phenology/crop rotation
 
 **DISTGROUNDWATER**:
-- ...
-
+- a distributed model including shallow groundwater
 
 **TRANSPORT**:
-- ...
+- calculates offline coupled solute transport based on the hydrologic states from
+one of the model structures above
 
 
 Diagnostics
@@ -101,9 +104,11 @@ Roger is still in development. There are many open issues that we would like to 
 References
 ++++++++++
 
+.. [Salvucci1993] Salvucci, G. D.: An approximate solution for steady vertical flux of moisture through an unsaturated homogeneous soil, Water Resources Research, 29, 3749-3753, 1993.
+
 .. [Weiler2005] Weiler, M.: An infiltration model based on flow variability in macropores: development, sensitivity analysis and applications, Journal of Hydrology, 310, 294-315, 2005.
 
-.. [Steduto2008] Steduto, P., Hsiao, T. C., Raes, D., and Fereres, E.: AquaCrop—The FAO Crop Model to Simulate Yield Response to Water: I. Concepts and Underlying Principles, Agronomy Journal, 101, 426-437, 2009.
+.. [Steduto2009] Steduto, P., Hsiao, T. C., Raes, D., and Fereres, E.: AquaCrop—The FAO Crop Model to Simulate Yield Response to Water: I. Concepts and Underlying Principles, Agronomy Journal, 101, 426-437, 2009.
 
 .. [Stoll2010] Stoll, S. and Weiler, M.: Explicit simulations of stream networks to guide hydrological modelling in ungauged basins, Hydrol. Earth Syst. Sci., 14, 1435-1448, 2010.
 

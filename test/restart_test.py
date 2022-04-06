@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 from roger import roger_routine
-from roger.setups.dummy import DUMMYSetup
+from roger.setups.svat import SVATSetup
 
 
 def _normalize(*arrays):
@@ -16,50 +16,53 @@ def _normalize(*arrays):
     return (a / norm for a in arrays)
 
 
-class RestartSetup(DUMMYSetup):
-    @roger_routine
-    def set_diagnostics(self, state):
-        for diag in state.diagnostics.values():
-            diag.sampling_frequency = 1
-            diag.output_frequency = float("inf")
+class RestartSetup(SVATSetup):
+    pass
+    # @roger_routine
+    # def set_diagnostics(self, state):
+    #     for diag in state.diagnostics.values():
+    #         diag.sampling_frequency = 1
+    #         diag.output_frequency = 24 * 60 * 60
 
 
 def test_restart(tmpdir):
+    from roger.setups.make_dummy_setup import make_setup  # noqa: E402
     os.chdir(tmpdir)
 
-    timesteps_1 = 24 * 5
-    timesteps_2 = 24 * 5
+    timesteps_1 = 10 * 24 * 60 * 60
+    timesteps_2 = 10 * 24 * 60 * 60
 
     restart_file = "restart.h5"
 
-    dummy_no_restart = RestartSetup(
+    svat_no_restart = RestartSetup(
         override=dict(
-            identifier="DUMMY_no_restart",
+            identifier="svat_no_restart",
             restart_input_filename=None,
             restart_output_filename=restart_file,
             runlen=timesteps_1,
         )
     )
-    dummy_no_restart.setup()
-    dummy_no_restart.run()
+    make_setup(svat_no_restart._base_path, event_type='rain', ndays=10)
+    svat_no_restart.setup()
+    svat_no_restart.run()
 
-    dummy_restart = RestartSetup(
+    svat_restart = RestartSetup(
         override=dict(
-            identifier="DUMMY_restart",
+            identifier="svat_restart",
             restart_input_filename=restart_file,
             restart_output_filename=None,
             runlen=timesteps_2,
         )
     )
-    dummy_restart.setup()
-    dummy_restart.run()
+    svat_restart.setup()
+    svat_restart.run()
 
-    with dummy_no_restart.state.settings.unlock():
-        dummy_no_restart.state.settings.runlen = timesteps_2
+    with svat_no_restart.state.settings.unlock():
+        svat_no_restart.state.settings.runlen = timesteps_2
 
-    dummy_no_restart.run()
+    svat_no_restart.run()
 
-    state_1, state_2 = dummy_restart.state, dummy_no_restart.state
+    state_1, state_2 = svat_restart.state, svat_no_restart.state
 
     for setting in state_1.settings.fields():
         if setting in ("identifier", "restart_input_filename", "restart_output_filename", "runlen"):

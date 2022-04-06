@@ -10,7 +10,7 @@ import click
 import entrypoints
 
 
-SETUPDIR_ENVVAR = "roger_SETUP_DIR"
+SETUPDIR_ENVVAR = "ROGER_SETUP_DIR"
 IGNORE_PATTERNS = ["__init__.py", "*.pyc", "__pycache__"]
 SETUPS = {}
 
@@ -20,7 +20,7 @@ for e in entrypoints.get_group_all("roger.setup_dirs"):
     try:
         setup_dirs.append(os.path.dirname(e.load().__file__))
     except ImportError:
-        click.echo(f"Warning: roger plugin {e!s} failed to import", err=True)
+        click.echo(f"Warning: Roger plugin {e!s} failed to import", err=True)
 
 for setup_dir in os.environ.get(SETUPDIR_ENVVAR, "").split(";"):
     if os.path.isdir(setup_dir):
@@ -56,11 +56,11 @@ def rewrite_main_file(target_file, setup_name):
         on {current_date:%Y-%m-%d %H:%M:%S} UTC.
         """
 
-        __roger_VERSION__ = {roger_version!r}
+        __ROGER_VERSION__ = {roger_version!r}
 
         if __name__ == "__main__":
             raise RuntimeError(
-                "roger setups cannot be executed directly. "
+                "Roger setups cannot be executed directly. "
                 f"Try `roger run {{__file__}}` instead."
             )
 
@@ -93,7 +93,7 @@ def copy_setup(setup, to=None):
 
     Example:
 
-        $ roger copy-setup global_4deg --to ~/roger-setups/4deg-lowfric
+        $ roger copy-setup svat--to ~/roger-setups/svat
 
     Further directories containing setup templates can be added to this command
     via the {setup_envvar} environment variable.

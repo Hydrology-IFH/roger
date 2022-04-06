@@ -8,20 +8,29 @@ def _ss_z(z, n0, bdec):
     return n0 * npx.exp(-z/bdec)
 
 
+def _z(z, z_gw_tot, n0, bdec, S_gw):
+    return -bdec * n0 * npx.exp(-z_gw_tot/bdec) + bdec * n0 * npx.exp(-z_gw_tot/bdec) - (S_gw/1000)
+
+
+def _zs(z_init, z_gw_tot, n0, bdec, S_gw):
+    from scipy.optimize import fsolve
+    import numpy as onp
+    return onp.vectorize(fsolve(_z, x0=z_init, args=(z_gw_tot, n0, bdec, S_gw,)))
+
+
 @roger_kernel
-def calc_S_gw(state):
+def calc_S_gw_from_z_gw(state):
     """
     Calculates groundwater storage
     """
     vs = state.variables
-    settings = state.settings
 
     # Calculates transmissivity
     dz = allocate(state.dimensions, ("x", "y"))
-    z = npx.zeros((settings.nx, settings.ny, 1001), dtype=dz.float_type)
+    z = allocate(state.dimensions, ("x", "y", 1001))
     z = update(
         z,
-        at[:, :, :], npx.linspace(vs.z_gw, vs.z_gw_tot, num=1001) * vs.maskCatch,
+        at[:, :, :], npx.linspace(vs.z_gw[:, :, vs.tau], vs.z_gw_tot, num=1001) * vs.maskCatch,
     )
 
     dz = update(
@@ -34,22 +43,22 @@ def calc_S_gw(state):
         at[:, :, vs.tau], (npx.sum(_ss_z(z, vs.n0[:, :, npx.newaxis], vs.bdec[:, :, npx.newaxis]), axis=2) * (dz/1001)) * vs.maskCatch,
     )
 
-    return KernelOutput(S_gw=vs.S_gw, tt=vs.tt)
+    return KernelOutput(S_gw=vs.S_gw)
 
 
 @roger_kernel
-def calc_dS(state):
+def calc_z_gw(state):
     """
-    Calculates storage change
+    Calculates groundwater head
     """
     vs = state.variables
 
-    vs.dS_gw = update(
-        vs.dS_gw,
-        at[:, :, vs.tau], (vs.S_gw[:, :, vs.tau] - vs.S_gw[:, :, vs.taum1]) * vs.maskCatch,
+    vs.z_gw = update(
+        vs.z_gw,
+        at[:, :, vs.tau], _zs(vs.z_gw[:, :, vs.taum1], vs.z_gw_tot, vs.n0, vs.bdec, vs.S_gw[:, :, vs.tau]) * vs.maskCatch,
     )
 
-    return KernelOutput(dS_gw=vs.dS_gw)
+    return KernelOutput(z_gw=vs.z_gw)
 
 
 @roger_routine
@@ -58,4 +67,4 @@ def calculate_groundwater(state):
     Calculates groundwater storage
     """
     vs = state.variables
-    vs.update(calc_dS(state))
+    vs.update(calc_z_gw(state))

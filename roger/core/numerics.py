@@ -1230,7 +1230,7 @@ def sanity_check(state):
         check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_ss - vs.q_sub + vs.cpr_ss, atol=1e-02)))
 
     elif settings.enable_groundwater:
-        check = False
+        check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_sub - vs.q_gw - vs.q_leak, atol=1e-02)))
 
     elif settings.enable_offline_transport and not (settings.enable_deuterium or settings.enable_oxygen18 or settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate):
         check = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[:, :, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[:, :, vs.taum1, :], axis=-1),

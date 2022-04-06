@@ -1,74 +1,55 @@
-import shutil
 from pathlib import Path
-import glob
-import datetime
-from cftime import num2date
 import h5netcdf
-import xarray as xr
-import matplotlib.pyplot as plt
 
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
 from roger.core.utilities import _get_row_no
 import roger.lookuptables as lut
-from roger.setups.make_dummy_setup import make_setup
 from roger.io_tools import yml
 import numpy as onp
-
-# generate dummy setup
-BASE_PATH = Path(__file__).parent
-make_setup(BASE_PATH, event_type='mixed', ndays=365*2,
-           enable_groundwater_boundary=False,
-           enable_film_flow=False,
-           enable_crop_phenology=True,
-           enable_crop_rotation=True,
-           enable_lateral_flow=False,
-           enable_groundwater=False,
-           enable_offline_transport=False,
-           enable_bromide=False,
-           enable_chloride=False,
-           enable_deuterium=False,
-           enable_oxygen18=False,
-           enable_nitrate=False,
-           tm_structure='complete-mixing')
-
-# read config file
-CONFIG_FILE = BASE_PATH / "config.yml"
-config = yml.Config(CONFIG_FILE)
 
 
 class DISTGROUNDWATERSetup(RogerSetup):
     """A distributed model including shallow groundwater.
     """
+    _base_path = Path(__file__).parent
+
     def _read_var_from_nc(self, var, file):
-        nc_file = BASE_PATH / file
+        nc_file = self._base_path / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables[var]
             return npx.array(var_obj)
 
     def _get_nittevent(self):
-        nc_file = BASE_PATH / 'forcing.nc'
+        nc_file = self._base_path / 'forcing.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['nitt_event']
             return onp.int32(onp.array(var_obj)[0])
 
     def _get_nitt(self):
-        nc_file = BASE_PATH / 'forcing.nc'
+        nc_file = self._base_path / 'forcing.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['time']
             return len(onp.array(var_obj))
 
     def _get_runlen(self):
-        nc_file = BASE_PATH / 'forcing.nc'
+        nc_file = self._base_path / 'forcing.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['time']
             return onp.array(var_obj)[-1] * 60 * 60 + 24 * 60 * 60
+
+    def _read_config(self):
+        config_file = self._base_path / "config.yml"
+        config = yml.Config(config_file)
+        return config
 
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
         settings.identifier = "DISTGROUNDWATER"
+
+        config = self._read_config()
 
         settings.nx, settings.ny, settings.nz = config.nrows, config.ncols, 1
         settings.nitt = self._get_nitt()
@@ -83,20 +64,9 @@ class DISTGROUNDWATERSetup(RogerSetup):
         settings.x_origin = 0.0
         settings.y_origin = 0.0
 
-        settings.enable_groundwater_boundary = config.enable_groundwater_boundary
-        settings.enable_film_flow = config.enable_film_flow
-        settings.enable_crop_phenology = config.enable_crop_phenology
-        settings.enable_crop_rotation = config.enable_crop_rotation
         settings.enable_lateral_flow = True
         settings.enable_routing = False
         settings.enable_groundwater = True
-        settings.enable_offline_transport = config.enable_offline_transport
-        settings.enable_bromide = config.enable_bromide
-        settings.enable_chloride = config.enable_chloride
-        settings.enable_deuterium = config.enable_deuterium
-        settings.enable_oxygen18 = config.enable_oxygen18
-        settings.enable_nitrate = config.enable_nitrate
-        settings.enable_macropore_lower_boundary_condition = False
 
     @roger_routine
     def set_grid(self, state):
@@ -128,6 +98,7 @@ class DISTGROUNDWATERSetup(RogerSetup):
         vs.lut_gcm = update(vs.lut_gcm, at[:, :], lut.ARR_GCM)
         vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
         vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
+        vs.lut_mlms = update(vs.lut_mlms, at[:, :], lut.ARR_MLMS)
 
     @roger_routine
     def set_topography(self, state):
@@ -139,19 +110,25 @@ class DISTGROUNDWATERSetup(RogerSetup):
 
         if (vs.itt == 0):
 
-            vs.lu_id = update(vs.lu_id, at[:, :], 599)
+            vs.lu_id = update(vs.lu_id, at[:, :], 8)
             vs.sealing = update(vs.sealing, at[:, :], 0)
-            vs.slope = update(vs.slope, at[:, :], 0)
+            vs.slope = update(vs.slope, at[:, :], 0.05)
             vs.slope_per = update(vs.slope_per, at[:, :], vs.slope * 100)
             vs.S_dep_tot = update(vs.S_dep_tot, at[:, :], 0)
             vs.z_soil = update(vs.z_soil, at[:, :], 2200)
             vs.dmpv = update(vs.dmpv, at[:, :], 100)
+            vs.dmph = update(vs.dmph, at[:, :], 100)
             vs.lmpv = update(vs.lmpv, at[:, :], 1000)
             vs.theta_ac = update(vs.theta_ac, at[:, :], 0.13)
             vs.theta_ufc = update(vs.theta_ufc, at[:, :], 0.24)
             vs.theta_pwp = update(vs.theta_pwp, at[:, :], 0.23)
             vs.ks = update(vs.ks, at[:, :], 25)
-            vs.kf = update(vs.kf, at[:, :], 2500)
+            vs.kf = update(vs.kf, at[:, :], 900)
+            vs.k_leak = update(vs.k_leak, at[:, :], 0)
+            vs.bdec = update(vs.bdec, at[:, :], 4)
+            vs.n0 = update(vs.n0, at[:, :], 0.25)
+            vs.npor = update(vs.npor, at[:, :], 0.3)
+            vs.z_gw_tot = update(vs.z_gw_tot, at[:, :], 20)
 
         if (vs.MONTH[vs.itt] != vs.MONTH[vs.itt - 1]) & (vs.itt > 1):
             vs.update(set_parameters_monthly_kernel(state))
@@ -169,6 +146,8 @@ class DISTGROUNDWATERSetup(RogerSetup):
         vs.swe = update(vs.swe, at[:, :, :vs.taup1], 0)
         vs.theta_rz = update(vs.theta_rz, at[:, :, :vs.taup1], 0.4)
         vs.theta_ss = update(vs.theta_ss, at[:, :, :vs.taup1], 0.47)
+        vs.z_gw = update(vs.z_gw, at[:, :, :vs.taup1], 12)
+        vs.dz_gw = update(vs.dz_gw, at[:, :, :vs.taup1], 0.01)
 
     @roger_routine
     def set_forcing(self, state):
@@ -197,7 +176,7 @@ class DISTGROUNDWATERSetup(RogerSetup):
                                                    "S_pwp_rz", "S_fc_rz",
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss",
-                                                   "z_sat", "S_gw", "z_gw"]
+                                                   "z_sat", "S_vad", "S_gw", "z_gw"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 
@@ -564,8 +543,3 @@ def after_timestep_kernel(state):
         S_gw=vs.S_gw,
         z_gw=vs.z_gw,
     )
-
-
-model = DISTGROUNDWATERSetup()
-model.setup()
-model.run()

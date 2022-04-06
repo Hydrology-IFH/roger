@@ -9,7 +9,7 @@ import pytest
 import roger.cli
 
 SETUPS = (
-    "dummy",
+    "svat",
 )
 
 
@@ -38,4 +38,4 @@ def test_roger_copy_setup(setup, runner, tmpdir):
     with open(os.path.join(outpath, f"{setup}.py"), "r") as f:
         setup_content = f.read()
 
-    assert "roger_VERSION" in setup_content
+    assert "ROGER_VERSION" in setup_content

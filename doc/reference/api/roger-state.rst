@@ -1,12 +1,12 @@
 Roger state class
 =================
 
-.. autoclass:: roger.state.VerosState
+.. autoclass:: roger.state.RogerState
    :members:
    :undoc-members:
 
-.. autoclass:: roger.state.VerosSettings
+.. autoclass:: roger.state.RogerSettings
    :members:
 
-.. autoclass:: roger.state.VerosVariables
+.. autoclass:: roger.state.RogerVariables
    :members:

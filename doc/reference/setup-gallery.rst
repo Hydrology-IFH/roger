@@ -8,10 +8,8 @@ Example::
    $ roger copy-setup svat
 
 
-.. seealso::
+.. toctree::
+   :hidden:
 
-   More setups are available through the `roger-extra-setups plugin <https://roger-extra-setups.readthedocs.io>`_.
-
-
-Idealized configurations
-------------------------
+   setups/svat
+   setups/svat_transport

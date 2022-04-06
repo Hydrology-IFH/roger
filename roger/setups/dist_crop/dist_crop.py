@@ -1,80 +1,61 @@
-import shutil
 from pathlib import Path
-import glob
-import datetime
-from cftime import num2date
 import h5netcdf
-import xarray as xr
-import matplotlib.pyplot as plt
-
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
 from roger.core.utilities import _get_row_no
 import roger.lookuptables as lut
-from roger.setups.make_dummy_setup import make_setup
 from roger.io_tools import yml
 import numpy as onp
-
-# generate dummy setup
-BASE_PATH = Path(__file__).parent
-make_setup(BASE_PATH, event_type='mixed', ndays=365*2,
-           enable_groundwater_boundary=False,
-           enable_film_flow=False,
-           enable_crop_phenology=True,
-           enable_crop_rotation=True,
-           enable_lateral_flow=False,
-           enable_groundwater=False,
-           enable_offline_transport=False,
-           enable_bromide=False,
-           enable_chloride=False,
-           enable_deuterium=False,
-           enable_oxygen18=False,
-           enable_nitrate=False,
-           tm_structure='complete-mixing')
-
-# read config file
-CONFIG_FILE = BASE_PATH / "config.yml"
-config = yml.Config(CONFIG_FILE)
 
 
 class DISTCROPSetup(RogerSetup):
     """A distributed model including crop phenology/crop rotation.
     """
+    _base_path = Path(__file__).parent
+
     def _read_var_from_nc(self, var, file):
-        nc_file = BASE_PATH / file
+        nc_file = self._base_path / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables[var]
             return npx.array(var_obj)
 
     def _get_nittevent(self):
-        nc_file = BASE_PATH / 'forcing.nc'
+        nc_file = self._base_path / 'forcing.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['nitt_event']
             return onp.int32(onp.array(var_obj)[0])
 
     def _get_nitt(self):
-        nc_file = BASE_PATH / 'forcing.nc'
+        nc_file = self._base_path / 'forcing.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['time']
             return len(onp.array(var_obj))
 
     def _get_runlen(self):
-        nc_file = BASE_PATH / 'forcing.nc'
+        nc_file = self._base_path / 'forcing.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['time']
             return onp.array(var_obj)[-1] * 60 * 60 + 24 * 60 * 60
 
     def _get_ncr(self):
-        nc_file = BASE_PATH / 'crop_rotation.nc'
+        nc_file = self._base_path / 'crop_rotation.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['year_season']
             return len(onp.array(var_obj))
+
+    def _read_config(self):
+        config_file = self._base_path / "config.yml"
+        config = yml.Config(config_file)
+
+        return config
 
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
         settings.identifier = "DISTCROP"
+
+        config = self._read_config()
 
         settings.nx, settings.ny, settings.nz = config.nrows, config.ncols, 1
         settings.nitt = self._get_nitt()
@@ -654,8 +635,3 @@ def after_timestep_crops_kernel(state):
         ccc=vs.ccc,
         z_root_crop=vs.z_root_crop,
     )
-
-
-model = DISTCROPSetup()
-model.setup()
-model.run()
