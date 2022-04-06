@@ -81,10 +81,7 @@ EXTRAS_REQUIRE["jax"] = parse_requirements("requirements_jax.txt")
 def get_extensions(require_cython_ext, require_cuda_ext):
     cuda_info = cuda_ext.cuda_info
 
-    extension_modules = {
-        "roger.core.special.tdma_cython_": ["tdma_cython_.pyx"],
-        "roger.core.special.tdma_cuda_": ["tdma_cuda_.pyx", "cuda_tdma_kernels.cu"],
-    }
+    extension_modules = {}
 
     def is_cuda_ext(sources):
         return any(source.endswith(".cu") for source in sources)

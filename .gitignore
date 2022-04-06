@@ -99,12 +99,16 @@ ENV/
 
 # Spyder project settings
 .spyderproject
+startup.py
 
 # Rope project settings
 .ropeproject
 
 # MacOS X file that stores custom attributes of its containing folder
-.DS_Store
+*.DS_Store
 
 # VS Code
 .vscode/
+
+# EXCEL
+*.xlsx

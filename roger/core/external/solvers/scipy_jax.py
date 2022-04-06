@@ -27,18 +27,8 @@ def solve_kernel(state, rhs, x0, boundary_val, solve_fun):
 class JAXSciPySolver(LinearSolver):
     @roger_routine(
         local_variables=(
-            "hu",
-            "hv",
-            "hvr",
-            "hur",
-            "dxu",
-            "dxt",
-            "dyu",
-            "dyt",
-            "cosu",
-            "cost",
-            "isle_boundary_mask",
-            "maskT",
+            "z0",
+            "maskCatch",
         ),
         dist_safe=False,
     )
@@ -115,7 +105,7 @@ class JAXSciPySolver(LinearSolver):
         Construct a simple Jacobi preconditioner
         """
         eps = 1e-20
-        precon = allocate(state.dimensions, ("xu", "yu"), fill=1, local=False)
+        precon = allocate(state.dimensions, ("x", "y"), fill=1, local=False)
         main_diag = matrix_diags[0][2:-2, 2:-2]
         precon = update(precon, at[2:-2, 2:-2], npx.where(npx.abs(main_diag) > eps, 1.0 / (main_diag + eps), 1.0))
         return precon

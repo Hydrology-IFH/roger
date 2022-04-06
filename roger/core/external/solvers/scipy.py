@@ -12,18 +12,8 @@ from roger.core.external.poisson_matrix import assemble_poisson_matrix
 class SciPySolver(LinearSolver):
     @roger_routine(
         local_variables=(
-            "hu",
-            "hv",
-            "hvr",
-            "hur",
-            "dxu",
-            "dxt",
-            "dyu",
-            "dyt",
-            "cosu",
-            "cost",
-            "isle_boundary_mask",
-            "maskT",
+            "z0",
+            "maskCatch",
         ),
         dist_safe=False,
     )

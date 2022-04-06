@@ -41,6 +41,7 @@ SETTINGS = {
     "runlen": Setting(0.0, float, "Length of simulation in seconds"),
     "x_origin": Setting(0, float, "Grid origin in x-direction"),
     "y_origin": Setting(0, float, "Grid origin in y-direction"),
+    "AB_eps": Setting(0.1, float, "Deviation from Adam-Bashforth weighting"),
     # Physical constants
     "pi": Setting(PI, float, "Pi"),
     "r_mp": Setting(2.5, float, "Macropore radius in mm"),

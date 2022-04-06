@@ -1,3 +1,4 @@
+import os
 import numpy as onp
 import datetime
 import pandas as pd
@@ -7,6 +8,7 @@ from cftime import date2num
 from roger.core.event_classification import calc_event_classification
 from roger.io_tools import yml
 onp.random.seed(42)
+
 
 def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
                event_type='rain', enable_groundwater_boundary=False,
@@ -24,9 +26,7 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
                a=None,
                rain_sum_ff=100,
                max_dur=72,
-               z_soil_max=5000,
-               nrows=1,
-               ncols=1):
+               z_soil_max=5000):
     """
     Make dummy setup with maximum two events.
     """
@@ -168,6 +168,10 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
             ta = onp.random.uniform(15, 20, ndays)
             # generate random potential evapotranspiration
             pet = onp.random.uniform(2, 3, ndays)
+
+        input_dir = base_path / "input"
+        if not os.path.exists(input_dir):
+            os.mkdir(input_dir)
 
         df_prec = pd.DataFrame(index=idx_prec, columns=['YYYY', 'MM', 'DD', 'hh', 'mm', 'PREC'])
         df_prec.loc[:, 'YYYY'] = df_prec.index.year

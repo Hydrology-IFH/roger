@@ -202,7 +202,7 @@ def calc_q_sub_pot(state):
                     vs.z_sat_layer_5[:, :, vs.tau] * vs.v_mp_layer_5 +
                     vs.z_sat_layer_6[:, :, vs.tau] * vs.v_mp_layer_6 +
                     vs.z_sat_layer_7[:, :, vs.tau] * vs.v_mp_layer_7 +
-                    vs.z_sat_layer_8[:, :, vs.tau] * vs.v_mp_layer_8) * vs.dt * vs.dhmp * settings.r_mp**2 * settings.pi * 1e-9) * vs.maskCatch,
+                    vs.z_sat_layer_8[:, :, vs.tau] * vs.v_mp_layer_8) * vs.dt * vs.dmph * settings.r_mp**2 * settings.pi * 1e-9) * vs.maskCatch,
     )
     vs.q_sub_mp_pot = update(
         vs.q_sub_mp_pot,
@@ -266,7 +266,7 @@ def calc_q_sub_rz(state):
     rz_share = allocate(state.dimensions, ("x", "y"))
     rz_share = update(
         rz_share,
-        at[:, :], ((vs.z_sat - (vs.z_soil - vs.z_root[:, :, vs.tau])) / vs.z_sat) * vs.maskCatch,
+        at[:, :], ((vs.z_sat[:, :, vs.tau] - (vs.z_soil - vs.z_root[:, :, vs.tau])) / vs.z_sat[:, :, vs.tau]) * vs.maskCatch,
     )
     mask1 = (vs.z_sat[:, :, vs.tau] <= vs.z_soil - vs.z_root[:, :, vs.tau])
     rz_share = update(
@@ -276,7 +276,7 @@ def calc_q_sub_rz(state):
 
     vs.S_zsat_rz = update(
         vs.S_zsat_rz,
-        at[:, :], ((vs.z_sat * rz_share) / vs.theta_ac) * vs.maskCatch,
+        at[:, :], ((vs.z_sat[:, :, vs.tau] * rz_share) / vs.theta_ac) * vs.maskCatch,
     )
 
     vs.q_sub_rz = update(
@@ -303,7 +303,7 @@ def calc_q_sub_rz(state):
     # update subsoil saturation water level
     vs.z_sat = update_add(
         vs.z_sat,
-        at[:, :], -vs.q_sub_rz/vs.theta_ac * vs.maskCatch,
+        at[:, :, vs.tau], -vs.q_sub_rz/vs.theta_ac * vs.maskCatch,
     )
 
     # update subsoil storage
@@ -337,11 +337,6 @@ def calc_q_sub_pot_ss(state):
     ss_share = update(
         ss_share,
         at[:, :], npx.where(mask2, 0, ss_share) * vs.maskCatch,
-    )
-
-    vs.S_zsat = update(
-        vs.S_zsat,
-        at[:, :], ((vs.z_sat * ss_share) / vs.theta_ac) * vs.maskCatch,
     )
 
     # subsoil subsurface runoff
@@ -383,10 +378,9 @@ def calc_q_sub_ss(state):
     )
 
     # vertical flow
-    q_ss = allocate(state.dimensions, ("x", "y"))
     vs.q_ss = update(
         vs.q_ss,
-        at[:, :], q_ss,
+        at[:, :], 0,
     )
     vs.q_ss = update(
         vs.q_ss,
@@ -415,7 +409,7 @@ def calc_q_sub_ss(state):
     # update subsoil saturation water level
     vs.z_sat = update_add(
         vs.z_sat,
-        at[:, :], -(vs.q_sub_ss/vs.theta_ac) + (vs.q_ss/vs.theta_ac) * vs.maskCatch,
+        at[:, :, vs.tau], -((vs.q_sub_ss/vs.theta_ac) + (vs.q_ss/vs.theta_ac)) * vs.maskCatch,
     )
 
     # update subsoil storage
@@ -861,6 +855,7 @@ def calculate_subsurface_runoff(state):
     if settings.enable_lateral_flow:
         vs.update(calc_perc_pot_rz(state))
         vs.update(calc_perc_rz(state))
+        vs.update(calc_S_zsat(state))
         vs.update(calc_z_sat_layer(state))
         vs.update(calc_q_sub_pot(state))
         vs.update(calc_q_sub_rz(state))

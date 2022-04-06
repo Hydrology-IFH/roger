@@ -6,9 +6,7 @@
 <i>Runoff Generation Research in Pure Python</i>
 </p>
 
-Roger, *Runoff Generation Research*, is a process-based hydrologic model that supports anything between plot and catchment scale. Roger is written in pure Python, which facilitates model setup workflows.
-
-*We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.*
+Roger, *Runoff Generation Research*, is a process-based hydrologic model that can be applied between plot and catchment scale. Roger is written in pure Python, which facilitates model setup and model workflows. We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.
 
 Roger supports a NumPy backend for small-scale problems, and a
 high-performance [JAX](https://github.com/google/jax) backend
@@ -23,16 +21,15 @@ Inspired by [Veros](https://veros.readthedocs.io/en/latest/).
 
 Roger provides
 
--   support for grid-based **SVAT models and distributed models**
+-   grid-based **SVAT models** and **distributed models**
 -   **offline solute transport** with several **StorAge selection (SAS) functions**
--   support for both **matrix-driven (Green-Ampt) and gravity driven infiltration (Viscous-Flow)**
+-   support for both **capillary-driven infiltration (Green-Ampt)** and **gravity-driven infiltration (Viscous-Flow)**
 -   several **pre-implemented diagnostics** such as hydrologic fluxes,
     variable time aggregation, travel time distributions and residence time
     distributions (written to netCDF4 output)
--   **pre-configured idealized and realistic set-ups** that are ready to
+-   **pre-configured idealized and realistic setups** that are ready to
     run and easy to adapt
--   **accessibility and extensibility** - thanks to the
-    power of Python!
+-   **accessibility and extensibility** due to high-level programming language Python
 
 ## Installation and usage on Mac
 Some instructions how to use the model from the repository. Please ensure that
@@ -79,9 +76,6 @@ Activate the anaconda environment and launch Spyder
 activate roger
 spyder
 ```
-
-**Third step:**
-Run a test case. Navigate to `roger/setups/xxx`.
 
 ## Basic usage
 
@@ -145,7 +139,7 @@ If you use Roger in scientific work, please consider citing [the following publi
 	doi = {...},
 	number = {...},
 	journal = {...},
-	author = {Schwemmle, Robin and Weiler, Markus},
+	author = {Schwemmle, Robin, and Leistert, Hannes and Weiler, Markus},
 	month = ...,
 	year = {...},
 	pages = {...},

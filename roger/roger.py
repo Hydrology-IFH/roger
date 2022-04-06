@@ -347,10 +347,12 @@ class RogerSetup(metaclass=abc.ABCMeta):
         vs.itt = vs.itt + 1
         vs.time = vs.time + vs.dt_secs
 
+        print(vs.q_sub_rz[3, 3], vs.q_sub_ss[3, 3])
+
         with state.timers["diagnostics"]:
             if not numerics.sanity_check(state):
-                print(vs.S[3, 3, vs.tau] - vs.S[3, 3, vs.taum1], vs.prec[3, 3] - vs.q_sur[3, 3] - vs.aet[3, 3] - vs.q_ss[3, 3] - vs.ff_drain[3, 3])
-                print(vs.S[3, 3, vs.tau], vs.S[3, 3, vs.taum1], vs.prec[3, 3], vs.q_sur[3, 3], vs.aet[3, 3], vs.q_ss[3, 3], vs.ff_drain[3, 3])
+                # print(vs.S[3, 3, vs.tau] - vs.S[3, 3, vs.taum1], vs.prec[3, 3] - vs.q_sur[3, 3] - vs.aet[3, 3] - vs.q_ss[3, 3] - vs.q_sub[3, 3])
+                # print(vs.S[3, 3, vs.tau], vs.S[3, 3, vs.taum1], vs.prec[3, 3], vs.q_sur[3, 3], vs.aet[3, 3], vs.q_ss[3, 3], vs.q_sub[3, 3])
                 # from roger.core.operators import numpy as npx
                 # print(npx.sum(vs.sa_s[3, 3, vs.tau, :], axis=-1),
                 #       npx.sum(vs.sa_s[3, 3, vs.taum1, :], axis=-1),

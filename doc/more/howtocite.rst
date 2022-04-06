@@ -13,7 +13,7 @@ If you use RoGeR in scientific work, please consider citing `the following publi
 		doi = {...},
 		number = {...},
 		journal = {...},
-		author = {Schwemmle, Robin and Weiler, Markus},
+		author = {Schwemmle, Robin, and Leistert, Hannes and Weiler, Markus},
 		month = ...,
 		year = {...},
 		pages = {...},

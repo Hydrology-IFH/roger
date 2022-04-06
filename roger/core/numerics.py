@@ -1,7 +1,7 @@
 from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
 from roger.distributed import global_and
-from roger.core.operators import numpy as npx, update, update_multiply, for_loop, at, where
+from roger.core.operators import numpy as npx, update, update_multiply, for_loop, at
 from roger.core import transport
 from roger.core.utilities import _get_row_no
 
@@ -230,7 +230,7 @@ def calc_topo_gw_kernel(state):
     """
     grid = allocate(state.dimensions, ("x", "y"))
     catch = allocate(state.dimensions, ("x", "y"))
-    catch = update(catch, at[...], where(vs.maskCatch, 1, 0))
+    catch = update(catch, at[...], npx.where(vs.maskCatch, 1, 0))
     vs.maskBoundGw = update(vs.maskBoundGw, at[...], npx.where(grid - catch < 0, True, False))
 
     return KernelOutput(
@@ -964,13 +964,12 @@ def calc_parameters_subsoil_kernel(state):
 @roger_kernel
 def calc_parameters_lateral_flow_kernel(state):
     vs = state.variables
-    settings = state.settings
 
-    v_mp_layer = npx.zeros(settings.nx, settings.ny, 8)
+    v_mp_layer = allocate(state.dimensions, ("x", "y", 8))
 
     # assign macropore flow velocity from look up table (in mm/h)
     def loop_body(i, v_mp_layer):
-        nrow = where(vs.lut_mlms[:, 0] == i, size=1, fill=0)[0]
+        nrow = _get_row_no(vs.lut_mlms[:, 0], i)
         # convert m/h to mm/h
         v_mp_layer = update(
             v_mp_layer,
@@ -1007,7 +1006,7 @@ def calc_parameters_lateral_flow_kernel(state):
 
         return v_mp_layer
 
-    v_mp_layer = for_loop(1, npx.max(vs.slope_per), loop_body, v_mp_layer)
+    v_mp_layer = for_loop(1, npx.max(vs.slope_per)+1, loop_body, v_mp_layer)
 
     vs.v_mp_layer_8 = update(
         vs.v_mp_layer_8,

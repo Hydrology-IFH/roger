@@ -111,6 +111,10 @@ DEFAULT_MASKS = {
     CATCH_GRID: lambda settings, vs: vs.maskCatch,
 }
 
+# custom mask for routing
+def _get_z0_mask(vs):
+    return vs.maskCatch[:, :, -1]
+
 
 def get_fill_value(dtype):
     import numpy as onp
@@ -421,6 +425,55 @@ VARIABLES = {
         "degree of surface sealing",
         time_dependent=False,
     ),
+    "z0": Variable(
+        "depth of the surface ponding",
+        CATCH_GRID + TIMESTEPS,
+        "mm",
+        "depth of the surface ponding",
+        active=lambda settings: settings.enable_routing,
+        write_to_restart=True,
+        mask=_get_z0_mask,
+    ),
+    "dz0": Variable(
+        "tendency of depth of the surface ponding",
+        CATCH_GRID + TIMESTEPS,
+        "mm/s^2",
+        "tendency of depth of the surface ponding",
+        active=lambda settings: settings.enable_routing,
+        write_to_restart=True,
+    ),
+    "vx": Variable(
+        "flow velocity in zonal direction",
+        CATCH_GRID + TIMESTEPS,
+        "mm/s",
+        "flow velocity in zonal direction",
+        active=lambda settings: settings.enable_routing,
+        write_to_restart=True,
+    ),
+    "vy": Variable(
+        "flow velocity in meridional direction",
+        CATCH_GRID + TIMESTEPS,
+        "mm/s",
+        "flow velocity in meridonial direction",
+        active=lambda settings: settings.enable_routing,
+        write_to_restart=True,
+    ),
+    "dvx": Variable(
+        "tendency of flow velocity in zonal direction",
+        CATCH_GRID + TIMESTEPS,
+        "mm/s",
+        "tendency of flow velocity in zonal direction",
+        active=lambda settings: settings.enable_routing,
+        write_to_restart=True,
+    ),
+    "dvy": Variable(
+        "tendency of flow velocity in meridional direction",
+        CATCH_GRID + TIMESTEPS,
+        "mm/s",
+        "tendency of flow velocity in meridonial direction",
+        active=lambda settings: settings.enable_routing,
+        write_to_restart=True,
+    ),
     "slope": Variable(
         "surface slope",
         CATCH_GRID,
@@ -641,7 +694,7 @@ VARIABLES = {
         "drainage area of vertical macropore",
         time_dependent=False,
     ),
-    "dhmp": Variable(
+    "dmph": Variable(
         "density of horizontal macropores",
         CATCH_GRID,
         "1/m^2",
@@ -3405,6 +3458,14 @@ VARIABLES = {
         CATCH_GRID,
         "mm/dt",
         "lateral macropore subsurface runoff in root zone",
+        time_dependent=True,
+        active=lambda settings: settings.enable_lateral_flow,
+    ),
+    "q_sub_mp_pot_rz": Variable(
+        "lateral potential macropore subsurface runoff in root zone",
+        CATCH_GRID,
+        "mm/dt",
+        "lateral potential macropore subsurface runoff in root zone",
         time_dependent=True,
         active=lambda settings: settings.enable_lateral_flow,
     ),
