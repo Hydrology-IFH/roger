@@ -113,12 +113,16 @@ def calc_cpr_ss(state):
         z = allocate(state.dimensions, ("x", "y"))
         z = update(
             z,
-            at[:, :], (vs.z_gw[:, :, vs.tau] - vs.z_root[:, :, vs.tau]) * vs.maskCatch,
+            at[:, :], (vs.z_gw[:, :, vs.tau] * 1000 - vs.z_root[:, :, vs.tau]) * vs.maskCatch,
         )
 
         vs.cpr_ss = update(
             vs.cpr_ss,
-            at[:, :], (vs.ks * vs.dt * (npx.power((z*(-1))/(vs.ha*10), -vs.exp_salv) - npx.power(vs.h_ss/vs.ha, -vs.exp_salv))/(1 + npx.power(vs.h_ss/vs.ha, -vs.exp_salv) + (vs.exp_salv - 1) * npx.power((z*-1)/(vs.ha*10), -vs.exp_salv))) * vs.maskCatch,
+            at[:, :], (vs.ks * vs.dt * (npx.power((-z)/(vs.ha*10), -vs.n_salv) - npx.power(vs.h_ss[:, :, vs.tau]/vs.ha, -vs.n_salv))/(1 + npx.power(vs.h_ss[:, :, vs.tau]/vs.ha, -vs.n_salv) + (vs.n_salv - 1) * npx.power((z*-1)/(vs.ha*10), -vs.n_salv))) * vs.maskCatch,
+        )
+        vs.cpr_ss = update(
+            vs.cpr_ss,
+            at[:, :], npx.where(npx.isnan(vs.cpr_ss), npx.power((-z)/(vs.ha*10), -vs.n_salv)/(1 + (vs.n_salv - 1) * npx.power((z*-1)/(vs.ha*10), -vs.n_salv)), vs.cpr_ss) * vs.maskCatch,
         )
         vs.cpr_ss = update(
             vs.cpr_ss,
@@ -142,7 +146,7 @@ def calc_cpr_ss(state):
         )
 
         # update subsoil storage
-        vs.S_fp_ss = update(
+        vs.S_fp_ss = update_add(
             vs.S_fp_ss,
             at[:, :], vs.cpr_ss * vs.maskCatch,
         )

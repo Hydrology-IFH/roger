@@ -447,7 +447,11 @@ def calc_dz_sat(state):
     q_lp_in = allocate(state.dimensions, ("x", "y"))
     q_lp_in = update(
         q_lp_in,
-        at[:, :], (vs.q_rz + vs.inf_ss - (vs.S_ufc_ss - vs.S_fp_ss)) * vs.maskCatch,
+        at[:, :], npx.where(vs.q_rz - (vs.S_ufc_ss - vs.S_fp_ss) > 0, vs.q_rz - (vs.S_ufc_ss - vs.S_fp_ss), 0) * vs.maskCatch,
+    )
+    q_lp_in = update_add(
+        q_lp_in,
+        at[:, :], npx.where(vs.inf_ss - (vs.S_ufc_ss - vs.S_fp_ss) > 0, vs.inf_ss - (vs.S_ufc_ss - vs.S_fp_ss), 0) * vs.maskCatch,
     )
     q_lp_in = update(
         q_lp_in,
@@ -481,11 +485,15 @@ def calc_dz_sat(state):
         z_nomp,
         at[:, :], (vs.z_soil - vs.z_root[:, :, vs.tau]) - lmpv_ss - vs.z_sat[:, :, vs.tau] * vs.maskCatch,
     )
+    z_nomp = update(
+        z_nomp,
+        at[:, :], npx.where(z_nomp < 0, 0, z_nomp),
+    )
     # non-saturated large pore storage [mm]
     S_nomp = allocate(state.dimensions, ("x", "y"))
-    z_sat_top = update(
-        z_sat_top,
-        at[:, :], vs.theta_ac * z_nomp * vs.maskCatch,
+    S_nomp = update(
+        S_nomp,
+        at[:, :], z_nomp * vs.theta_ac * vs.maskCatch,
     )
     # non-saturated distance [mm]
     z_ns = allocate(state.dimensions, ("x", "y"))
@@ -545,9 +553,9 @@ def calc_dz_sat(state):
         at[:, :], npx.where(mask4, 0, vs.dz_sat) * vs.maskCatch,
     )
 
-    vs.z_sat = update(
+    vs.z_sat = update_add(
         vs.z_sat,
-        at[:, :, vs.tau], (vs.z_sat[:, :, vs.taum1] + vs.dz_sat) * vs.maskCatch,
+        at[:, :, vs.tau], vs.dz_sat * vs.maskCatch,
     )
 
     return KernelOutput(dz_sat=vs.dz_sat, z_sat=vs.z_sat)
@@ -606,8 +614,6 @@ def calc_perc_rz(state):
         at[:, :], vs.q_pot_rz * vs.maskCatch,
     )
 
-    vs.update(calc_dz_sat(state))
-
     # update root zone storage after root zone drainage
     vs.S_lp_rz = update_add(
         vs.S_lp_rz,
@@ -630,6 +636,8 @@ def calc_perc_rz(state):
         vs.S_fp_ss,
         at[:, :], npx.where(mask, vs.S_ufc_ss, vs.S_fp_ss) * vs.maskCatch,
     )
+
+    vs.update(calc_dz_sat(state))
 
     return KernelOutput(q_rz=vs.q_rz, S_lp_rz=vs.S_lp_rz, S_fp_ss=vs.S_fp_ss, S_lp_ss=vs.S_lp_ss, dz_sat=vs.dz_sat, z_sat=vs.z_sat)
 
@@ -670,6 +678,12 @@ def calc_perc_pot_ss(state):
     vs.q_pot_ss = update(
         vs.q_pot_ss,
         at[:, :], npx.where(mask2, vs.S_zsat, vs.q_pot_ss) * vs.maskCatch,
+    )
+
+    mask3 = (perc_pot > 0) & (vs.S_lp_ss > 0) & (perc_pot > vs.S_lp_ss) & (vs.S_zsat > vs.S_lp_ss)
+    vs.q_pot_ss = update(
+        vs.q_pot_ss,
+        at[:, :], npx.where(mask3, vs.S_lp_ss, vs.q_pot_ss) * vs.maskCatch,
     )
 
     return KernelOutput(q_pot_ss=vs.q_pot_ss)

@@ -26,7 +26,7 @@ class RestartSetup(SVATSetup):
 
 
 def test_restart(tmpdir):
-    from roger.setups.make_dummy_setup import make_setup  # noqa: E402
+    from roger.tools.make_toy_setup import make_setup  # noqa: E402
     os.chdir(tmpdir)
 
     timesteps_1 = 10 * 24 * 60 * 60

@@ -64,17 +64,6 @@ class SVATSetup(RogerSetup):
         settings.y_origin = 0.0
 
         settings.enable_groundwater_boundary = config.enable_groundwater_boundary
-        settings.enable_film_flow = config.enable_film_flow
-        settings.enable_crop_phenology = config.enable_crop_phenology
-        settings.enable_crop_rotation = config.enable_crop_rotation
-        settings.enable_lateral_flow = config.enable_lateral_flow
-        settings.enable_groundwater = config.enable_groundwater
-        settings.enable_offline_transport = config.enable_offline_transport
-        settings.enable_bromide = config.enable_bromide
-        settings.enable_chloride = config.enable_chloride
-        settings.enable_deuterium = config.enable_deuterium
-        settings.enable_oxygen18 = config.enable_oxygen18
-        settings.enable_nitrate = config.enable_nitrate
         settings.enable_macropore_lower_boundary_condition = False
 
     @roger_routine
@@ -118,10 +107,8 @@ class SVATSetup(RogerSetup):
 
         if (vs.itt == 0):
 
-            vs.lu_id = update(vs.lu_id, at[:, :], 599)
+            vs.lu_id = update(vs.lu_id, at[:, :], 8)
             vs.sealing = update(vs.sealing, at[:, :], 0)
-            vs.slope = update(vs.slope, at[:, :], 0)
-            vs.slope_per = update(vs.slope_per, at[:, :], vs.slope * 100)
             vs.S_dep_tot = update(vs.S_dep_tot, at[:, :], 0)
             vs.z_soil = update(vs.z_soil, at[:, :], 2200)
             vs.dmpv = update(vs.dmpv, at[:, :], 100)

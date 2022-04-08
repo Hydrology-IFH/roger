@@ -2357,6 +2357,14 @@ VARIABLES = {
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
+    "q_re": Variable(
+        "groundwater recharge",
+        CATCH_GRID,
+        "mm/dt",
+        "groundwater recharge",
+        time_dependent=True,
+        active=lambda settings: settings.enable_groundwater,
+    ),
     "q_gw": Variable(
         "lateral groundwater flow",
         CATCH_GRID,
@@ -2420,6 +2428,14 @@ VARIABLES = {
         "solute concentration",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
+    ),
+    "q_leak": Variable(
+        "groundwater leakage",
+        CATCH_GRID,
+        "mm/dt",
+        "groundwater leakage",
+        time_dependent=True,
+        active=lambda settings: settings.enable_groundwater,
     ),
     # precipitation variables
     "prec": Variable(

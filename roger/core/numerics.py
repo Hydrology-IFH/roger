@@ -3,6 +3,7 @@ from roger.variables import allocate
 from roger.distributed import global_and
 from roger.core.operators import numpy as npx, update, update_multiply, for_loop, at
 from roger.core import transport
+from roger.core.groundwater import _ss_z
 from roger.core.utilities import _get_row_no
 
 
@@ -459,7 +460,32 @@ def calc_initial_conditions_transport_kernel(state):
 
 @roger_kernel
 def calc_initial_conditions_groundwater_kernel(state):
-    pass
+    vs = state.variables
+
+    # Calculates storativity
+    dz = allocate(state.dimensions, ("x", "y"))
+    z = allocate(state.dimensions, ("x", "y", 1001))
+    z = update(
+        z,
+        at[:, :, :], npx.linspace(vs.z_gw[:, :, vs.tau], vs.z_gw_tot, num=1001, axis=-1) * vs.maskCatch[:, :, npx.newaxis],
+    )
+
+    dz = update(
+        dz,
+        at[:, :], (z[:, :, 1] - z[:, :, 0]) * vs.maskCatch,
+    )
+
+    vs.S_gw = update(
+        vs.S_gw,
+        at[:, :, vs.taum1], (npx.sum(_ss_z(z, vs.n0[:, :, npx.newaxis], vs.bdec[:, :, npx.newaxis]), axis=-1) * dz) * 1000 * vs.maskCatch,
+    )
+
+    vs.S_gw = update(
+        vs.S_gw,
+        at[:, :, vs.tau], vs.S_gw[:, :, vs.taum1],
+    )
+
+    return KernelOutput(S_gw=vs.S_gw)
 
 
 @roger_routine
@@ -475,7 +501,6 @@ def calc_initial_conditions(state):
         vs.update(calc_initial_conditions_root_zone_kernel(state))
         vs.update(calc_initial_conditions_subsoil_kernel(state))
         vs.update(calc_initial_conditions_soil_kernel(state))
-        vs.update(calc_initial_conditions_kernel(state))
         if not settings.enable_groundwater:
             vs.update(calc_initial_conditions_kernel(state))
         elif settings.enable_groundwater:
@@ -1223,14 +1248,23 @@ def sanity_check(state):
     vs = state.variables
     settings = state.settings
 
-    if settings.enable_lateral_flow and not settings.enable_groundwater_boundary:
+    if settings.enable_lateral_flow and not settings.enable_groundwater_boundary and not settings.enable_groundwater and not settings.enable_offline_transport:
         check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_ss - vs.q_sub, atol=1e-02)))
 
-    elif settings.enable_lateral_flow and settings.enable_groundwater_boundary:
+    elif settings.enable_lateral_flow and settings.enable_groundwater_boundary and not settings.enable_offline_transport:
         check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_ss - vs.q_sub + vs.cpr_ss, atol=1e-02)))
 
-    elif settings.enable_groundwater:
+    elif settings.enable_lateral_flow and settings.enable_groundwater and not settings.enable_offline_transport:
         check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_sub - vs.q_gw - vs.q_leak, atol=1e-02)))
+
+    elif settings.enable_groundwater_boundary and not settings.enable_offline_transport:
+        check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_ss + vs.cpr_ss, atol=1e-02)))
+
+    elif settings.enable_film_flow and not settings.enable_offline_transport:
+        check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_ss - vs.ff_drain, atol=1e-02)))
+
+    elif not settings.enable_lateral_flow and not settings.enable_groundwater_boundary and not settings.enable_groundwater and not settings.enable_offline_transport:
+        check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_ss, atol=1e-02)))
 
     elif settings.enable_offline_transport and not (settings.enable_deuterium or settings.enable_oxygen18 or settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate):
         check = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[:, :, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[:, :, vs.taum1, :], axis=-1),
@@ -1266,14 +1300,5 @@ def sanity_check(state):
 
     elif settings.enable_offline_transport and settings.enable_groundwater_boundary:
         check = global_and(npx.all(npx.isclose(npx.sum(vs.SA_s[:, :, vs.tau, :], axis=-1) - npx.sum(vs.SA_s[:, :, vs.tau, 1, :], axis=-1), vs.inf_mat_rz + vs.inf_pf_rz + vs.inf_pf_ss - npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2) - npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2) - npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2) + npx.sum(vs.cpr_ss[:, :, npx.newaxis] * vs.tt_cpr_ss, axis=2), atol=1e-02)))
-
-    elif settings.enable_groundwater_boundary:
-        check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_ss + vs.cpr_ss, atol=1e-02)))
-
-    elif settings.enable_film_flow:
-        check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_ss - vs.ff_drain, atol=1e-02)))
-
-    else:
-        check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_ss, atol=1e-02)))
 
     return check

@@ -15,7 +15,7 @@ if rst.proc_num > 1:
 
 
 from roger.setups.svat import SVATSetup  # noqa: E402
-from roger.setups.make_dummy_setup import make_setup  # noqa: E402
+from roger.tools.make_toy_setup import make_setup  # noqa: E402
 
 sim = SVATSetup(
     override=dict(

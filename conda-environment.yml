@@ -4,7 +4,7 @@ channels:
     - conda-forge
 
 dependencies:
-    - python=3.8
+    - python=3.10
     - pip
     - click
     - entrypoints
@@ -19,5 +19,17 @@ dependencies:
     - loguru
     - tqdm
     - cython
-    - pip:
-        - -e .
+    # extensions
+    - spyder
+    - seaborn
+    - jaxlib
+    - jax
+    - mpi4py
+    - mpi4jax
+    - sphinx_rtd_theme
+    - ipyparallel
+    - xarray
+    - cftime
+    - salib
+    # - pip:
+    #     - -e .

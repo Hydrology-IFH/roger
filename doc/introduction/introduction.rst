@@ -22,32 +22,32 @@ Available processes
 - rain-on-snow
 
 **Infiltration**:
-- matrix-driven infiltration based on Green-Ampt approach ([Weiler2005])
-- gravity-driven infiltration based on viscous flow approach ([Germann2018])
+- matrix-driven infiltration based on Green-Ampt approach ([Weiler2005]_)
+- gravity-driven infiltration based on viscous flow approach ([Germann2018]_)
 
 **Evaporation**:
 - evaporation from interception and surface storage
-- soil evaporation based on Stage I (i.e. energy limiting stage) and Stage II (i.e. falling rate stage) ([Torres2010]).
+- soil evaporation based on Stage I (i.e. energy limiting stage) and Stage II (i.e. falling rate stage) ([Torres2010]_).
 
 **Transpiration**:
 - combination of residual potential evapotranspiration and vegetation-specific coeffcient
 
 **Subsurface Runoff**:
 - capillary-driven vertical soil drainage based on Buckingham-Darcy
-- gravity-driven infiltration based on viscous flow approach ([Germann2018])
-- lateral subsurface runoff in the soil as described in [Steinbrich2016]
+- gravity-driven infiltration based on viscous flow approach ([Germann2018]_)
+- lateral subsurface runoff in the soil as described in [Steinbrich2016]_
 
 **Capillary rise**:
-- capillary-driven vertical uplift ([Salvucci1993])
+- capillary-driven vertical uplift ([Salvucci1993]_)
 
-**Groundwater Runoff**:
-- spatial explicit representation of shallow groundwater following [Stoll2010]
+**Groundwater flow**:
+- spatial explicit representation of shallow groundwater following [Stoll2010]_
 
 **Crop phenology and crop rotation**:
-- time-varying crop canopy cover and crop root depth is implemented as in [Steduto2009]
+- time-varying crop canopy cover and crop root depth is implemented as in [Steduto2009]_
 
 **Offline transport**:
-- StorAge selection (SAS) functions ([Rinaldo2015]) are used to
+- StorAge selection (SAS) functions ([Rinaldo2015]_) are used to
 calculate travel time distributions and solute concentration/mass of outgoing
 fluxes (e.g. groundwater recharge)
 

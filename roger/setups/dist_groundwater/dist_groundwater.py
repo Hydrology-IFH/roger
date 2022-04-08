@@ -123,7 +123,7 @@ class DISTGROUNDWATERSetup(RogerSetup):
             vs.theta_ufc = update(vs.theta_ufc, at[:, :], 0.24)
             vs.theta_pwp = update(vs.theta_pwp, at[:, :], 0.23)
             vs.ks = update(vs.ks, at[:, :], 25)
-            vs.kf = update(vs.kf, at[:, :], 900)
+            vs.kf = update(vs.kf, at[:, :], 70)
             vs.k_leak = update(vs.k_leak, at[:, :], 0)
             vs.bdec = update(vs.bdec, at[:, :], 4)
             vs.n0 = update(vs.n0, at[:, :], 0.25)
@@ -146,8 +146,9 @@ class DISTGROUNDWATERSetup(RogerSetup):
         vs.swe = update(vs.swe, at[:, :, :vs.taup1], 0)
         vs.theta_rz = update(vs.theta_rz, at[:, :, :vs.taup1], 0.4)
         vs.theta_ss = update(vs.theta_ss, at[:, :, :vs.taup1], 0.47)
-        vs.z_gw = update(vs.z_gw, at[:, :, :vs.taup1], 12)
-        vs.dz_gw = update(vs.dz_gw, at[:, :, :vs.taup1], 0.01)
+        vs.z_sat = update(vs.z_sat, at[:, :, :vs.taup1], 0)
+        vs.z_gw = update(vs.z_gw, at[:, :, :vs.taup1], 5)
+        vs.dz_gw = update(vs.dz_gw, at[:, :], 0.01)
 
     @roger_routine
     def set_forcing(self, state):
@@ -543,3 +544,11 @@ def after_timestep_kernel(state):
         S_gw=vs.S_gw,
         z_gw=vs.z_gw,
     )
+
+from roger.setups.make_dummy_setup import make_setup
+model = DISTGROUNDWATERSetup()
+make_setup(model._base_path, event_type='rain', ndays=10,
+           enable_lateral_flow=True,
+           enable_groundwater=True)
+model.setup()
+model.run()

@@ -17,21 +17,6 @@ def calc_S(state):
     return KernelOutput(S_sur=vs.S_sur)
 
 
-@roger_kernel
-def calc_dS(state):
-    """
-    Calculates storage change
-    """
-    vs = state.variables
-
-    vs.dS_sur = update(
-        vs.dS_sur,
-        at[:, :], (vs.S_sur[:, :, vs.tau] - vs.S_sur[:, :, vs.taum1]) * vs.maskCatch,
-    )
-
-    return KernelOutput(dS_sur=vs.dS_sur)
-
-
 @roger_routine
 def calculate_surface(state):
     """
@@ -39,4 +24,3 @@ def calculate_surface(state):
     """
     vs = state.variables
     vs.update(calc_S(state))
-    vs.update(calc_dS(state))

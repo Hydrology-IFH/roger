@@ -15,7 +15,7 @@ def test_setup_svat_float_types(float_type):
     object.__setattr__(runtime_settings, "float_type", float_type)
 
     from roger.setups.svat import SVATSetup
-    from roger.setups.make_dummy_setup import make_setup
+    from roger.tools.make_toy_setup import make_setup
 
     sim = SVATSetup()
     make_setup(sim._base_path, event_type='rain', ndays=10,

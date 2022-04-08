@@ -351,10 +351,9 @@ def calc_snow_melt(state):
         at[:, :], (vs.S_snow[:, :, vs.tau] - vs.swe[:, :, vs.tau]) * vs.maskCatch,
     )
     mask3 = (vs.swe[:, :, vs.tau] < vs.S_snow[:, :, vs.tau]) & (vs.swe[:, :, vs.tau] > 0) & (q_ret > wtmx)
-    q_rain_on_snow = allocate(state.dimensions, ("x", "y"))
     vs.q_rain_on_snow = update(
         vs.q_rain_on_snow,
-        at[:, :], q_rain_on_snow,
+        at[:, :], 0,
     )
     vs.q_rain_on_snow = update(
         vs.q_rain_on_snow,
@@ -369,6 +368,11 @@ def calc_snow_melt(state):
     vs.q_rain_on_snow = update(
         vs.q_rain_on_snow,
         at[:, :], npx.where(mask4, vs.S_snow[:, :, vs.tau], vs.q_rain_on_snow) * vs.maskCatch,
+    )
+    mask44 = (vs.ta[:, :, vs.tau] < 0)
+    vs.q_rain_on_snow = update(
+        vs.q_rain_on_snow,
+        at[:, :], npx.where(mask44, 0, vs.q_rain_on_snow) * vs.maskCatch,
     )
 
     # energy consumption of snow melt, will be subtracted from
