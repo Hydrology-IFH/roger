@@ -496,6 +496,10 @@ def after_timestep_kernel(state):
         vs.h,
         at[:, :, vs.taum1], vs.h[:, :, vs.tau],
     )
+    vs.z0 = update(
+        vs.z0,
+        at[:, :, vs.taum1], vs.z0[:, :, vs.tau],
+    )
 
     return KernelOutput(
         ta=vs.ta,
@@ -528,4 +532,5 @@ def after_timestep_kernel(state):
         k_rz=vs.k_rz,
         k_ss=vs.k_ss,
         k=vs.k,
+        z0=vs.z0,
     )

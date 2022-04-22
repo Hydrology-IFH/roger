@@ -30,7 +30,7 @@ def calc_inf_mat(state):
     )
     l1 = update(
         l1,
-        at[:, :], npx.where(vs.q_hof > vs.ks * vs.dt, (vs.ks * vs.dt * vs.wfs * vs.theta_d) / (vs.q_hof - vs.ks * vs.dt), (vs.ks * vs.dt * vs.wfs * vs.theta_d) / (vs.ks * vs.dt)) * vs.maskCatch,
+        at[:, :], npx.where(vs.z0[:, :, vs.tau] > vs.ks * vs.dt, (vs.ks * vs.dt * vs.wfs * vs.theta_d) / (vs.z0[:, :, vs.tau] - vs.ks * vs.dt), (vs.ks * vs.dt * vs.wfs * vs.theta_d) / (vs.ks * vs.dt)) * vs.maskCatch,
     )
 
     # first wetting front
@@ -57,7 +57,7 @@ def calc_inf_mat(state):
     )
     inf_mat_pot_sat = update(
         inf_mat_pot_sat,
-        at[:, :], npx.where(mask3, vs.q_hof * (vs.t_sat - vs.t_event_sum[:, :, vs.taum1]), inf_mat_pot_sat) * vs.maskCatch,
+        at[:, :], npx.where(mask3, vs.z0[:, :, vs.tau] * (vs.t_sat - vs.t_event_sum[:, :, vs.taum1]), inf_mat_pot_sat) * vs.maskCatch,
     )
     vs.inf_mat_pot = update(
         vs.inf_mat_pot,
@@ -70,11 +70,11 @@ def calc_inf_mat(state):
     )
 
     # matrix infiltration
-    mask7 = (vs.q_hof < vs.inf_mat_pot)
-    mask8 = (vs.q_hof >= vs.inf_mat_pot)
+    mask7 = (vs.z0[:, :, vs.tau] < vs.inf_mat_pot)
+    mask8 = (vs.z0[:, :, vs.tau] >= vs.inf_mat_pot)
     vs.inf_mat = update(
         vs.inf_mat,
-        at[:, :], npx.where(mask7, vs.q_hof, vs.inf_mat) * vs.maskCatch,
+        at[:, :], npx.where(mask7, vs.z0[:, :, vs.tau], vs.inf_mat) * vs.maskCatch,
     )
     vs.inf_mat = update(
         vs.inf_mat,
@@ -86,11 +86,11 @@ def calc_inf_mat(state):
     )
 
     # matrix infiltration
-    mask9 = (vs.q_hof < vs.inf_mat_pot)
-    mask10 = (vs.q_hof >= vs.inf_mat_pot)
+    mask9 = (vs.z0[:, :, vs.tau] < vs.inf_mat_pot)
+    mask10 = (vs.z0[:, :, vs.tau] >= vs.inf_mat_pot)
     vs.inf_mat = update(
         vs.inf_mat,
-        at[:, :], npx.where(mask9, vs.q_hof, vs.inf_mat) * vs.maskCatch,
+        at[:, :], npx.where(mask9, vs.z0[:, :, vs.tau], vs.inf_mat) * vs.maskCatch,
     )
     vs.inf_mat = update(
         vs.inf_mat,
@@ -145,17 +145,13 @@ def calc_inf_mat(state):
     )
 
     # hortonian overland flow after matrix infiltration
-    vs.q_hof = update(
-        vs.q_hof,
-        at[:, :], vs.q_hof - vs.inf_mat * vs.maskCatch,
+    vs.z0 = update_add(
+        vs.z0,
+        at[:, :, vs.tau], - vs.inf_mat * vs.maskCatch,
     )
-    vs.q_hof = update(
-        vs.q_hof,
-        at[:, :], npx.where(vs.q_hof < 0, 0, vs.q_hof) * vs.maskCatch,
-    )
-    vs.q_sur = update(
-        vs.q_sur,
-        at[:, :], vs.q_hof * vs.maskCatch,
+    vs.z0 = update(
+        vs.z0,
+        at[:, :, vs.tau], npx.where(vs.z0[:, :, vs.tau] < 0, 0, vs.z0[:, :, vs.tau]) * vs.maskCatch,
     )
 
     # change in potential wetting front depth while rainfall pause
@@ -251,7 +247,7 @@ def calc_inf_mat(state):
         at[:, :], npx.where(mask17, vs.theta_d_t0, vs.theta_d) * vs.maskCatch,
     )
 
-    return KernelOutput(inf_mat_pot=vs.inf_mat_pot, inf_mat=vs.inf_mat, q_hof=vs.q_hof, q_sur=vs.q_sur, z_wf=vs.z_wf, z_wf_t0=vs.z_wf_t0, z_wf_t1=vs.z_wf_t1, theta_d_rel=vs.theta_d_rel, theta_d=vs.theta_d)
+    return KernelOutput(inf_mat_pot=vs.inf_mat_pot, inf_mat=vs.inf_mat, z0=vs.z0, z_wf=vs.z_wf, z_wf_t0=vs.z_wf_t0, z_wf_t1=vs.z_wf_t1, theta_d_rel=vs.theta_d_rel, theta_d=vs.theta_d)
 
 
 @roger_kernel
@@ -343,7 +339,7 @@ def calc_inf_mp(state):
     # 7 = c
     # 8 = inf_mp_pot_di
     # 9 = inf_mp_di
-    # 10 = q_hof_di
+    # 10 = z0_di
     # 11 = inf_mp
     # 12 = inf_mp_pot
     # 13 = inf_mp_event_csum
@@ -374,7 +370,7 @@ def calc_inf_mp(state):
         computation_steps = npx.int64(npx.round(vs.dt / (1 / 5), 0))  # based on hours
         loop_arr = update(
             loop_arr,
-            at[:, :, 10], vs.q_hof * (vs.mp_drain_area / computation_steps) * vs.maskCatch,
+            at[:, :, 10], vs.z0[:, :, vs.tau] * (vs.mp_drain_area / computation_steps) * vs.maskCatch,
         )
         loop_arr = update_add(
             loop_arr,
@@ -525,43 +521,33 @@ def calc_inf_mp(state):
 
     # potential hortonian overland flow after matrix and macropore
     # infiltration
-    vs.q_hof = update(
-        vs.q_hof,
-        at[:, :], (vs.q_hof - vs.inf_mp) * vs.maskCatch,
+    vs.z0 = update_add(
+        vs.z0,
+        at[:, :, vs.tau], - vs.inf_mp * vs.maskCatch,
     )
-    vs.q_hof = update(
-        vs.q_hof,
-        at[:, :], npx.where(vs.q_hof < 0, 0, vs.q_hof) * vs.maskCatch,
-    )
-
-    vs.q_sur = update(
-        vs.q_sur,
-        at[:, :], vs.q_hof * vs.maskCatch,
+    vs.z0 = update(
+        vs.z0,
+        at[:, :, vs.tau], npx.where(vs.z0[:, :, vs.tau] < 0, 0, vs.z0[:, :, vs.tau]) * vs.maskCatch,
     )
 
     # lower boundary condition of vertical macropores
     if settings.enable_macropore_lower_boundary_condition:
-        npx.where((vs.q_hof > vs.ks * vs.dt * vs.mp_drain_area), vs.ks * vs.dt * vs.mp_drain_area, vs.q_hof)
+        npx.where((vs.z0[:, :, vs.tau] > vs.ks * vs.dt * vs.mp_drain_area), vs.ks * vs.dt * vs.mp_drain_area, vs.z0[:, :, vs.tau])
         mask_lbc = (vs.z_wf[:, :, vs.tau] > vs.lmpv[:, :])
         vs.inf_mp = update_add(
             vs.inf_mp,
-            at[:, :], npx.where(mask_lbc, npx.where((vs.q_hof > vs.ks * vs.dt * vs.mp_drain_area), vs.ks * vs.dt * vs.mp_drain_area, vs.q_hof), 0) * vs.maskCatch,
+            at[:, :], npx.where(mask_lbc, npx.where((vs.z0[:, :, vs.tau] > vs.ks * vs.dt * vs.mp_drain_area), vs.ks * vs.dt * vs.mp_drain_area, vs.z0[:, :, vs.tau]), 0) * vs.maskCatch,
         )
-        vs.q_hof = update_add(
-            vs.q_hof,
-            at[:, :], -npx.where(mask_lbc, npx.where((vs.q_hof > vs.ks * vs.dt * vs.mp_drain_area), vs.ks * vs.dt * vs.mp_drain_area, vs.q_hof), 0) * vs.maskCatch,
+        vs.z0 = update_add(
+            vs.z0,
+            at[:, :, vs.tau], -npx.where(mask_lbc, npx.where((vs.z0[:, :, vs.tau] > vs.ks * vs.dt * vs.mp_drain_area), vs.ks * vs.dt * vs.mp_drain_area, vs.z0[:, :, vs.tau]), 0) * vs.maskCatch,
         )
-        vs.q_hof = update(
-            vs.q_hof,
-            at[:, :], npx.where(vs.q_hof < 0, 0, vs.q_hof) * vs.maskCatch,
-        )
-
-        vs.q_sur = update(
-            vs.q_sur,
-            at[:, :], vs.q_hof * vs.maskCatch,
+        vs.z0 = update(
+            vs.z0,
+            at[:, :, vs.tau], npx.where(vs.z0[:, :, vs.tau] < 0, 0, vs.z0[:, :, vs.tau]) * vs.maskCatch,
         )
 
-    return KernelOutput(inf_mp=vs.inf_mp, inf_mp_event_csum=vs.inf_mp_event_csum, y_mp=vs.y_mp, q_hof=vs.q_hof, q_sur=vs.q_sur)
+    return KernelOutput(inf_mp=vs.inf_mp, inf_mp_event_csum=vs.inf_mp_event_csum, y_mp=vs.y_mp, z0=vs.z0)
 
 
 @roger_kernel
@@ -647,7 +633,7 @@ def calc_inf_sc(state):
     # 1 = ym1
     # 2 = inf_sc_pot_di
     # 3 = inf_sc_di
-    # 4 = q_hof_di
+    # 4 = z0_di
     # 5 = inf_sc_event_csum
     # 6 = t
     # 7 = inf_sc
@@ -668,7 +654,7 @@ def calc_inf_sc(state):
         computation_steps = npx.int64(npx.round(vs.dt / (1 / 5), 0))  # based on hours
         loop_arr = update(
             loop_arr,
-            at[:, :, 4], (vs.q_hof / computation_steps) * vs.maskCatch,
+            at[:, :, 4], (vs.z0[:, :, vs.tau] / computation_steps) * vs.maskCatch,
         )
         loop_arr = update_add(
             loop_arr,
@@ -742,20 +728,16 @@ def calc_inf_sc(state):
 
     # potential hortonian overland flow after matrix and macropore
     # infiltration and shrinkage crack infiltration
-    vs.q_hof = update(
-        vs.q_hof,
-        at[:, :], (vs.q_hof - vs.inf_sc) * vs.maskCatch,
+    vs.z0 = update_add(
+        vs.z0,
+        at[:, :, vs.tau], - vs.inf_sc * vs.maskCatch,
     )
-    vs.q_hof = update(
-        vs.q_hof,
-        at[:, :], npx.where(vs.q_hof < 0, 0, vs.q_hof) * vs.maskCatch,
-    )
-    vs.q_sur = update(
-        vs.q_sur,
-        at[:, :], vs.q_hof * vs.maskCatch,
+    vs.z0 = update(
+        vs.z0,
+        at[:, :, vs.tau], npx.where(vs.z0[:, :, vs.tau] < 0, 0, vs.z0[:, :, vs.tau]) * vs.maskCatch,
     )
 
-    return KernelOutput(inf_sc=vs.inf_sc, inf_sc_event_csum=vs.inf_sc_event_csum, y_sc=vs.y_sc, q_hof=vs.q_hof, q_sur=vs.q_sur, z_sc_non_sat=vs.z_sc_non_sat)
+    return KernelOutput(inf_sc=vs.inf_sc, inf_sc_event_csum=vs.inf_sc_event_csum, y_sc=vs.y_sc, z0=vs.z0, z_sc_non_sat=vs.z_sc_non_sat)
 
 
 @roger_kernel
@@ -1757,7 +1739,7 @@ def calculate_infiltration_ss_transport_iso_kernel(state):
 
     vs.msa_ss = update(
         vs.msa_ss,
-        at[:, :, vs.tau, 0], npx.where(vs.inf_pf_ss > 0, vs.C_in, npx.NaN) * vs.maskCatch,
+        at[:, :, vs.tau, 0], npx.where(vs.inf_pf_ss > 0, vs.C_in, vs.msa_ss[:, :, vs.tau, 0]) * vs.maskCatch,
     )
 
     return KernelOutput(sa_ss=vs.sa_ss, msa_ss=vs.msa_ss, C_inf_pf_ss=vs.C_inf_pf_ss)

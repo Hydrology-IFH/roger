@@ -958,7 +958,7 @@ def calculate_percolation_rz_transport_iso_kernel(state):
 
     vs.C_q_rz = update(
         vs.C_q_rz,
-        at[:, :], transport.calc_conc_iso_flux(state, vs.mtt_q_rz, vs.tt_q_rz) * vs.maskCatch,
+        at[:, :], transport.calc_conc_iso_flux(state, vs.mtt_q_rz, vs.tt_q_rz, vs.q_rz) * vs.maskCatch,
     )
 
     # update StorAge with flux
@@ -1103,7 +1103,7 @@ def calculate_percolation_ss_transport_iso_kernel(state):
 
     vs.C_q_ss = update(
         vs.C_q_ss,
-        at[:, :], transport.calc_conc_iso_flux(state, vs.mtt_q_ss, vs.tt_q_ss) * vs.maskCatch,
+        at[:, :], transport.calc_conc_iso_flux(state, vs.mtt_q_ss, vs.tt_q_ss, vs.q_ss) * vs.maskCatch,
     )
 
     # update StorAge with flux

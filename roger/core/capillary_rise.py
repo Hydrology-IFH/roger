@@ -264,7 +264,7 @@ def calculate_capillary_rise_rz_transport_iso_kernel(state):
 
     vs.C_cpr_rz = update(
         vs.C_cpr_rz,
-        at[:, :], transport.calc_conc_iso_flux(state, vs.mtt_cpr_rz, vs.tt_cpr_rz) * vs.maskCatch,
+        at[:, :], transport.calc_conc_iso_flux(state, vs.mtt_cpr_rz, vs.tt_cpr_rz, vs.cpr_rz) * vs.maskCatch,
     )
 
     # update StorAge with flux

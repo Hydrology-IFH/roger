@@ -102,7 +102,7 @@ AVAILABLE_SETTINGS = {
     "use_io_threads": RuntimeSetting(parse_bool, False),
     "io_timeout": RuntimeSetting(float, 20),
     "hdf5_gzip_compression": RuntimeSetting(bool, True),
-    "force_overwrite": RuntimeSetting(bool, True),
+    "force_overwrite": RuntimeSetting(bool, False),
     "diskless_mode": RuntimeSetting(bool, False),
 }
 

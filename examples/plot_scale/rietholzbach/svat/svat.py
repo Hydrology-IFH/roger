@@ -7,13 +7,16 @@ import h5netcdf
 import xarray as xr
 import pandas as pd
 
+from roger import runtime_settings as rs
+rs.backend = "numpy"
+rs.force_overwrite = True
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
 from roger.core.utilities import _get_row_no
 from roger.tools.setup import write_forcing
 import roger.tools.evaluation as eval_utils
-import roger.tools.plotting_labels as labs
+import roger.tools.labels as labs
 import roger.lookuptables as lut
 from roger.io_tools import yml
 import numpy as onp
@@ -162,7 +165,7 @@ class SVATSetup(RogerSetup):
         diagnostics = state.diagnostics
         settings = state.settings
 
-        diagnostics["rates"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz"]
+        diagnostics["rates"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS"]
         if settings.enable_groundwater_boundary:
             diagnostics["rates"].output_variables += ["cpr_ss"]
         diagnostics["rates"].output_frequency = 24 * 60 * 60
@@ -171,11 +174,16 @@ class SVATSetup(RogerSetup):
         diagnostics["collect"].output_variables = ["S_rz", "S_ss",
                                                    "S_pwp_rz", "S_fc_rz",
                                                    "S_sat_rz", "S_pwp_ss",
-                                                   "S_fc_ss", "S_sat_ss"]
+                                                   "S_fc_ss", "S_sat_ss",
+                                                   "theta_rz", "theta_ss", "theta"]
         if settings.enable_crop_phenology:
             diagnostics["collect"].output_variables += ["re_rg", "re_rl", "z_root", "ground_cover"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
+
+        diagnostics["averages"].output_variables = ["ta"]
+        diagnostics["averages"].output_frequency = 24 * 60 * 60
+        diagnostics["averages"].sampling_frequency = 1
 
     @roger_routine
     def after_timestep(self, state):
@@ -355,19 +363,6 @@ def set_forcing_kernel(state):
     vs.month = vs.MONTH[vs.itt]
     vs.doy = vs.DOY[vs.itt]
 
-    # reset fluxes at beginning of time step
-    q_sur = allocate(state.dimensions, ("x", "y"))
-    vs.q_sur = update(
-        vs.q_sur,
-        at[:, :], q_sur,
-    )
-
-    q_hof = allocate(state.dimensions, ("x", "y"))
-    vs.q_hof = update(
-        vs.q_hof,
-        at[:, :], q_hof,
-    )
-
     return KernelOutput(
         prec=vs.prec,
         ta=vs.ta,
@@ -378,8 +373,6 @@ def set_forcing_kernel(state):
         year=vs.year,
         month=vs.month,
         doy=vs.doy,
-        q_sur=vs.q_sur,
-        q_hof=vs.q_hof,
     )
 
 
@@ -507,6 +500,10 @@ def after_timestep_kernel(state):
         vs.h,
         at[:, :, vs.taum1], vs.h[:, :, vs.tau],
     )
+    vs.z0 = update(
+        vs.z0,
+        at[:, :, vs.taum1], vs.z0[:, :, vs.tau],
+    )
     # set to 0 for numerical errors
     vs.S_fp_rz = update(
         vs.S_fp_rz,
@@ -556,6 +553,7 @@ def after_timestep_kernel(state):
         k_rz=vs.k_rz,
         k_ss=vs.k_ss,
         k=vs.k,
+        z0=vs.z0,
         S_fp_rz=vs.S_fp_rz,
         S_lp_rz=vs.S_lp_rz,
         S_fp_ss=vs.S_fp_ss,
@@ -599,7 +597,7 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
                 with h5netcdf.File(model._base_path / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
                     time_origin = infile.variables['time'].attrs['time_origin']
                 v.attrs.update(time_origin=time_origin,
-                               units=var_obj.attrs["units"])
+                                units=var_obj.attrs["units"])
                 v[:] = npx.array(var_obj)
             for key in list(df.variables.keys()):
                 var_obj = df.variables.get(key)
@@ -608,7 +606,7 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
                     vals = npx.array(var_obj)
                     v[:, :, :] = vals.swapaxes(0, 2)
                     v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                   units=var_obj.attrs["units"])
+                                    units=var_obj.attrs["units"])
 
 # move hydrologic states to directory of transport model
 base_path_tm = model._base_path.parent / "svat_transport"
@@ -631,8 +629,8 @@ date_sim = num2date(days, units=f"days since {ds_sim['Time'].attrs['time_origin'
 date_obs = num2date(days, units=f"days since {ds_obs['time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
 ds_sim = ds_sim.assign_coords(date=("Time", date_sim))
 ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
-vars_obs = ['PERC']
-vars_sim = ['q_ss']
+vars_obs = ['AET', 'PERC']
+vars_sim = ['aet', 'q_ss']
 for var_obs, var_sim in zip(vars_obs, vars_sim):
     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])

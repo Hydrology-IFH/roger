@@ -1213,8 +1213,14 @@ def calc_storage_kernel(state):
             at[:, :, vs.tau], vs.S_sur[:, :, vs.tau] + vs.S_s[:, :, vs.tau] + npx.sum(vs.S_f, axis=-1) * vs.maskCatch,
         )
 
+    vs.dS = update(
+        vs.dS,
+        at[:, :], vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1] * vs.maskCatch,
+    )
+
     return KernelOutput(
         S=vs.S,
+        dS=vs.dS,
         )
 
 
@@ -1227,8 +1233,14 @@ def calc_storage_with_gw_kernel(state):
         at[:, :, vs.tau], vs.S_sur[:, :, vs.tau] + vs.S_s[:, :, vs.tau] + vs.S_vad[:, :, vs.tau] + vs.S_gw[:, :, vs.tau] * vs.maskCatch,
     )
 
+    vs.dS = update(
+        vs.dS,
+        at[:, :], vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1] * vs.maskCatch,
+    )
+
     return KernelOutput(
         S=vs.S,
+        dS=vs.dS,
         )
 
 

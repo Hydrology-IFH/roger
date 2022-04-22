@@ -431,7 +431,6 @@ VARIABLES = {
         CATCH_GRID + TIMESTEPS,
         "mm",
         "depth of the surface ponding",
-        active=lambda settings: settings.enable_routing,
         write_to_restart=True,
         mask=_get_z0_mask,
     ),
@@ -562,6 +561,12 @@ VARIABLES = {
         CATCH_GRID + TIMESTEPS,
         "mm",
         "storage",
+    ),
+    "dS": Variable(
+        "storage change",
+        CATCH_GRID,
+        "mm",
+        "storage change",
     ),
     # surface variables
     "S_snow": Variable(

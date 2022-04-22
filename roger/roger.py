@@ -317,10 +317,10 @@ class RogerSetup(metaclass=abc.ABCMeta):
                         infiltration.calculate_infiltration_rz_transport(state)
                     with state.timers["evapotranspiration"]:
                         evapotranspiration.calculate_evapotranspiration_transport(state)
-                    with state.timers["subsurface runoff of root zone"]:
-                        subsurface_runoff.calculate_percolation_rz_transport(state)
                     with state.timers["infiltration into subsoil"]:
                         infiltration.calculate_infiltration_ss_transport(state)
+                    with state.timers["subsurface runoff of root zone"]:
+                        subsurface_runoff.calculate_percolation_rz_transport(state)
                     with state.timers["subsurface runoff of subsoil"]:
                         subsurface_runoff.calculate_percolation_ss_transport(state)
                     with state.timers["capillary rise into root zone"]:

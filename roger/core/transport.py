@@ -204,25 +204,13 @@ def calc_tt(state, SA, sa, flux, sas_params):
 
 
 @roger_kernel
-def calc_conc_iso_flux(state, mtt, tt):
+def calc_conc_iso_flux(state, mtt, tt, flux):
     """Calculates isotope signal of hydrologic flux.
     """
-    mask = npx.isfinite(mtt)
-    vals = allocate(state.dimensions, ("x", "y", "ages"))
-    weights = allocate(state.dimensions, ("x", "y", "ages"))
-    vals = update(
-        vals,
-        at[:, :, :], npx.where(mask, mtt, 0),
-    )
-    weights = update(
-        weights,
-        at[:, :, :], npx.where(tt * mask > 0, tt / npx.sum(tt * mask, axis=-1)[:, :, npx.newaxis], 0),
-    )
     conc = allocate(state.dimensions, ("x", "y"))
-    # calculate weighted average
     conc = update(
         conc,
-        at[:, :], npx.sum(vals * weights, axis=-1),
+        at[:, :], npx.nansum(tt * flux[:, :, npx.newaxis] * mtt, axis=-1) / npx.sum(tt * flux[:, :, npx.newaxis] , axis=-1),
     )
     conc = update(
         conc,
@@ -282,22 +270,10 @@ def calc_conc_iso_storage(state, sa, msa):
     """
     vs = state.variables
 
-    mask = npx.isfinite(msa[:, :, vs.tau, :])
-    vals = allocate(state.dimensions, ("x", "y", "ages"))
-    weights = allocate(state.dimensions, ("x", "y", "ages"))
-    vals = update(
-        vals,
-        at[:, :, :], npx.where(mask, msa[:, :, vs.tau, :], 0),
-    )
-    weights = update(
-        weights,
-        at[:, :, :], npx.where(sa[:, :, vs.tau, :] * mask > 0, sa[:, :, vs.tau, :] / npx.sum(sa[:, :, vs.tau, :] * mask, axis=-1)[:, :, npx.newaxis], 0),
-    )
     conc = allocate(state.dimensions, ("x", "y"))
-    # calculate weighted average
     conc = update(
         conc,
-        at[:, :], npx.sum(vals * weights, axis=-1),
+        at[:, :], npx.nansum(sa[:, :, vs.tau, :] * msa[:, :, vs.tau, :], axis=-1) / npx.sum(sa[:, :, vs.tau, :] , axis=-1),
     )
     conc = update(
         conc,

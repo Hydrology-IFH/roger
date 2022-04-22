@@ -108,22 +108,17 @@ def calc_int_ground(state):
         at[:, :], (vs.rain_top - vs.int_rain_top - vs.int_rain_ground) * vs.maskCatch,
     )
 
-    vs.q_hof = update(
-        vs.q_hof,
-        at[:, :], npx.where(vs.rain_ground > 0, vs.rain_ground, 0) * vs.maskCatch,
-    )
-
-    vs.q_sur = update(
-        vs.q_sur,
-        at[:, :], npx.where(vs.rain_ground > 0, vs.rain_ground, 0) * vs.maskCatch,
+    vs.z0 = update_add(
+        vs.z0,
+        at[:, :, vs.tau], npx.where(vs.S_snow[:, :, vs.tau] > 0, 0, vs.rain_ground) * vs.maskCatch,
     )
 
     vs.prec_event_sum = update_add(
         vs.prec_event_sum,
-        at[:, :, vs.tau], vs.rain_ground * vs.maskCatch,
+        at[:, :, vs.tau], npx.where(vs.S_snow[:, :, vs.tau] > 0, 0, vs.rain_ground) * vs.maskCatch,
     )
 
-    return KernelOutput(S_int_ground=vs.S_int_ground, rain_ground=vs.rain_ground, int_rain_ground=vs.int_rain_ground, q_hof=vs.q_hof, q_sur=vs.q_sur, prec_event_sum=vs.prec_event_sum)
+    return KernelOutput(S_int_ground=vs.S_int_ground, rain_ground=vs.rain_ground, int_rain_ground=vs.int_rain_ground, z0=vs.z0, prec_event_sum=vs.prec_event_sum)
 
 
 @roger_routine

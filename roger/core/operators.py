@@ -92,6 +92,11 @@ def where_numpy(*args, **kwargs):
         return np.where(args[0], args[1], args[2])
 
 
+def random_uniform_numpy(lower, upper, shape):
+    import numpy as np
+    return np.random.uniform(lower, upper, size=shape[0]*shape[1]).reshape(shape)
+
+
 def scan_numpy(f, init, xs, length=None):
     import numpy as np
 
@@ -162,6 +167,12 @@ def update_multiply_jax(arr, at, to):
     return arr.at[at].multiply(to)
 
 
+def random_uniform_jax(lower, upper, shape):
+    import jax
+    key = jax.random.PRNGKey(42)
+    return jax.random.uniform(key, shape=shape, minval=lower, maxval=upper)
+
+
 def flush_jax():
     import jax
 
@@ -188,6 +199,7 @@ if runtime_settings.backend == "numpy":
     scan = scan_numpy
     flush = noop
     where = where_numpy
+    random_uniform = random_uniform_numpy
     scipy_special = scipy.special
     scipy_stats = scipy.stats
     numpy.seterr(all="ignore")
@@ -207,6 +219,7 @@ elif runtime_settings.backend == "jax":
     scan = jax.lax.scan
     flush = flush_jax
     where = jax.numpy.where
+    random_uniform = random_uniform_jax
     scipy_special = jax.scipy.special
     scipy_stats = jax.scipy.stats
 

@@ -478,7 +478,7 @@ def calculate_evaporation_transport_iso_kernel(state):
 
     vs.C_evap_soil = update(
         vs.C_evap_soil,
-        at[:, :], transport.calc_conc_iso_flux(state, vs.mtt_evap_soil, vs.tt_evap_soil) * vs.maskCatch,
+        at[:, :], transport.calc_conc_iso_flux(state, vs.mtt_evap_soil, vs.tt_evap_soil, vs.evap_soil) * vs.maskCatch,
     )
 
     # update StorAge with flux
@@ -556,7 +556,7 @@ def calculate_transpiration_transport_iso_kernel(state):
 
     vs.C_transp = update(
         vs.C_transp,
-        at[:, :], transport.calc_conc_iso_flux(state, vs.mtt_transp, vs.tt_transp) * vs.maskCatch,
+        at[:, :], transport.calc_conc_iso_flux(state, vs.mtt_transp, vs.tt_transp, vs.transp) * vs.maskCatch,
     )
 
     # update StorAge with flux

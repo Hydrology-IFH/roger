@@ -459,14 +459,9 @@ def calc_snow_melt(state):
         at[:, :], (vs.snow_melt + vs.q_rain_on_snow) * vs.maskCatch,
     )
 
-    vs.q_hof = update(
-        vs.q_hof,
-        at[:, :], npx.where(vs.q_snow > 0, vs.q_snow, vs.rain_ground) * vs.maskCatch,
-    )
-
-    vs.q_sur = update(
-        vs.q_sur,
-        at[:, :], npx.where(vs.q_snow > 0, vs.q_snow, vs.rain_ground) * vs.maskCatch,
+    vs.z0 = update_add(
+        vs.z0,
+        at[:, :, vs.tau], vs.q_snow * vs.maskCatch,
     )
 
     vs.prec_event_sum = update_add(
@@ -474,7 +469,7 @@ def calc_snow_melt(state):
         at[:, :, vs.tau], vs.q_snow * vs.maskCatch,
     )
 
-    return KernelOutput(snow_melt=vs.snow_melt, q_rain_on_snow=vs.q_rain_on_snow, q_snow=vs.q_snow, q_hof=vs.q_hof, S_snow=vs.S_snow, swe=vs.swe, pet_res=vs.pet_res, prec_event_sum=vs.prec_event_sum)
+    return KernelOutput(snow_melt=vs.snow_melt, q_rain_on_snow=vs.q_rain_on_snow, q_snow=vs.q_snow, z0=vs.z0, S_snow=vs.S_snow, swe=vs.swe, pet_res=vs.pet_res, prec_event_sum=vs.prec_event_sum)
 
 
 @roger_routine

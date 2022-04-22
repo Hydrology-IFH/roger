@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as onp
+import scipy as sp
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import seaborn as sns
@@ -181,7 +182,7 @@ def plot_obs_sim_cum(df, y_lab, fmt_x='num', x_lab='Time'):
     df.loc[df.isna().any(axis=1)] = 0
 
     # plot observed and simulated values
-    fig, axs = plt.subplots(figsize=(9,4))
+    fig, axs = plt.subplots(figsize=(9, 4))
     axs.plot(idx, df.iloc[:, 1].cumsum(), lw=1.5, color='blue', alpha=0.5)
     axs.plot(idx, df.iloc[:, 0].cumsum(), lw=1, ls='-.', color='red')
     if ('PET' in df.columns.to_list()):
@@ -363,6 +364,7 @@ def assign_hyd_year(df, start_month_hyd_year=10):
 
     return df
 
+
 def assign_seasons(df):
     r"""
     Assign seasons.
@@ -446,3 +448,523 @@ def calc_napi(prec, w, k):
         api_mean = onp.mean(prec[(i-w):i]) * weights_sum
         napi[i] = api / api_mean
     return napi
+
+
+def calc_rmse(obs, sim):
+    """
+    Root mean square error (RMSE)
+
+    Parameters
+    ----------
+    obs : (N,)array_like
+        observed time series
+
+    sim : (N,)array_like
+        simulated time series
+
+    Returns
+    ----------
+    eff : float
+        Root mean square error (RMSE)
+    """
+    eff = onp.sqrt(onp.mean((sim - obs)**2))
+
+    return eff
+
+
+
+def calc_mae(obs, sim):
+    """
+    Mean absolute error (MAE)
+
+    Parameters
+    ----------
+    obs : (N,)array_like
+        observed time series
+
+    sim : (N,)array_like
+        simulated time series
+
+    Returns
+    ----------
+    eff : float
+        Mean absolute error (MAE)
+    """
+    abs_err = onp.abs(sim - obs)
+    eff = onp.mean(abs_err)
+
+    return eff
+
+
+def calc_mre(obs, sim):
+    """
+    Mean relative error (MRE)
+
+    Parameters
+    ----------
+    obs : (N,)array_like
+        observed time series
+
+    sim : (N,)array_like
+        simulated time series
+
+    Returns
+    ----------
+    eff : float
+        Mean relative error (MRE)
+    """
+    rel_err = (sim - obs) / obs
+    eff = onp.mean(rel_err)
+
+    return eff
+
+def calc_mare(obs, sim):
+    """
+    Mean absolute relative error (MARE)
+
+    Parameters
+    ----------
+    obs : (N,)array_like
+        observed time series
+
+    sim : (N,)array_like
+        simulated time series
+
+    Returns
+    ----------
+    eff : float
+        Mean absolute relative error (MARE)
+    """
+    abs_err = onp.abs(sim - obs)
+    rel_err = abs_err/obs
+    eff = onp.mean(rel_err)
+
+    return eff
+
+
+def calc_ve(obs, sim):
+    """
+    Volumetric efficiency (VE)
+
+    Parameters
+    ----------
+    obs : (N,)array_like
+        observed time series
+
+    sim : (N,)array_like
+        simulated time series
+
+    Returns
+    ----------
+    eff : float
+        Volumetric efficiency (VE)
+    """
+    abs_err = onp.abs(sim - obs)
+    sum_abs_err = onp.sum(abs_err)
+    sum_obs = onp.sum(obs)
+    eff = sum_abs_err/sum_obs
+
+    return eff
+
+
+def calc_rbs(obs, sim):
+    """
+    Relative bias of sums (RBS)
+
+    Parameters
+    ----------
+    obs : (N,)array_like
+        observed time series
+
+    sim : (N,)array_like
+        simulated time series
+
+    Returns
+    ----------
+    eff : float
+        relative bias of sums (RBS)
+    """
+    eff = (onp.sum(sim) - onp.sum(obs)) / onp.sum(obs)
+
+    return eff
+
+
+def calc_temp_cor(obs, sim, r="pearson"):
+    """
+    Calculate temporal correlation between observed and simulated
+    time series.
+
+    Parameters
+    ----------
+    obs : (N,)array_like
+        Observed time series as 1-D array
+
+    sim : (N,)array_like
+        Simulated time series
+
+    r : str, optional
+        Either Spearman correlation coefficient ('spearman') or Pearson
+        correlation coefficient ('pearson') can be used to describe the
+        temporalcorrelation. The default is to calculate the Pearson
+        correlation.
+
+    Returns
+    ----------
+    temp_cor : float
+        correlation between observed and simulated time series
+
+    Examples
+    --------
+    Provide arrays with equal length
+
+    >>> from de import de
+    >>> import numpy as np
+    >>> obs = onp.array([1.5, 1, 0.8, 0.85, 1.5, 2])
+    >>> sim = onp.array([1.6, 1.3, 1, 0.8, 1.2, 2.5])
+    >>> de.calc_temp_cor(obs, sim)
+    0.8940281850583509
+    """
+    if len(obs) != len(sim):
+        raise AssertionError("Arrays are not of equal length!")
+
+    if r == "spearman":
+        r = sp.stats.spearmanr(obs, sim)
+        temp_cor = r[0]
+
+        if onp.isnan(temp_cor):
+            temp_cor = 0
+
+    elif r == "pearson":
+        r = sp.stats.pearsonr(obs, sim)
+        temp_cor = r[0]
+
+        if onp.isnan(temp_cor):
+            temp_cor = 0
+
+    return temp_cor
+
+
+def calc_kge_beta(obs, sim):
+    r"""
+    Calculate the beta term of Kling-Gupta-Efficiency (KGE).
+
+    Parameters
+    ----------
+    obs : (N,)array_like
+        Observed time series as 1-D array
+
+    sim : (N,)array_like
+        Simulated time series as 1-D array
+
+    Returns
+    ----------
+    kge_beta : float
+        alpha value
+
+    Notes
+    ----------
+    .. math::
+
+        \beta = \frac{\mu_{sim}}{\mu_{obs}}
+
+    Examples
+    --------
+    Provide arrays with equal length
+
+    >>> from de import de
+    >>> import numpy as np
+    >>> obs = onp.array([1.5, 1, 0.8, 0.85, 1.5, 2])
+    >>> sim = onp.array([1.6, 1.3, 1, 0.8, 1.2, 2.5])
+    >>> de.calc_kge_beta(obs, sim)
+    1.0980392156862746
+
+    References
+    ----------
+    Gupta, H. V., Kling, H., Yilmaz, K. K., and Martinez, G. F.: Decomposition
+    of the mean squared error and NSE performance criteria: Implications for
+    improving hydrological modelling, Journal of Hydrology, 377, 80-91,
+    10.1016/j.jhydrol.2009.08.003, 2009.
+
+    Kling, H., Fuchs, M., and Paulin, M.: Runoff conditions in the upper
+    Danube basin under an ensemble of climate change scenarios, Journal of
+    Hydrology, 424-425, 264-277, 10.1016/j.jhydrol.2012.01.011, 2012.
+
+    Pool, S., Vis, M., and Seibert, J.: Evaluating model performance: towards a
+    non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences
+    Journal, 63, 1941-1953, 10.1080/02626667.2018.1552002, 2018.
+    """
+    if len(obs) != len(sim):
+        raise AssertionError("Arrays are not of equal length!")
+
+    # calculate alpha term
+    obs_mean = onp.mean(obs)
+    sim_mean = onp.mean(sim)
+    kge_beta = sim_mean / obs_mean
+
+    return kge_beta
+
+
+def calc_kge_alpha(obs, sim):
+    r"""
+    Calculate the alpha term of the Kling-Gupta-Efficiency (KGE).
+
+    Parameters
+    ----------
+    obs : (N,)array_like
+        Observed time series as 1-D array
+
+    sim : (N,)array_like
+        Simulated time series
+
+    Returns
+    ----------
+    kge_alpha : float
+        alpha value
+
+    Notes
+    ----------
+    .. math::
+
+        \alpha = \frac{\sigma_{sim}}{\sigma_{obs}}
+
+    Examples
+    --------
+    Provide arrays with equal length
+
+    >>> from de import de
+    >>> import numpy as np
+    >>> obs = onp.array([1.5, 1, 0.8, 0.85, 1.5, 2])
+    >>> sim = onp.array([1.6, 1.3, 1, 0.8, 1.2, 2.5])
+    >>> kge.calc_kge_alpha(obs, sim)
+    1.2812057455166919
+
+    References
+    ----------
+    Gupta, H. V., Kling, H., Yilmaz, K. K., and Martinez, G. F.: Decomposition
+    of the mean squared error and NSE performance criteria: Implications for
+    improving hydrological modelling, Journal of Hydrology, 377, 80-91,
+    10.1016/j.jhydrol.2009.08.003, 2009.
+
+    Kling, H., Fuchs, M., and Paulin, M.: Runoff conditions in the upper
+    Danube basin under an ensemble of climate change scenarios, Journal of
+    Hydrology, 424-425, 264-277, 10.1016/j.jhydrol.2012.01.011, 2012.
+
+    Pool, S., Vis, M., and Seibert, J.: Evaluating model performance: towards a
+    non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences
+    Journal, 63, 1941-1953, 10.1080/02626667.2018.1552002, 2018.
+    """
+    if len(obs) != len(sim):
+        raise AssertionError("Arrays are not of equal length!")
+
+    obs_std = onp.std(obs)
+    sim_std = onp.std(sim)
+    kge_alpha = sim_std / obs_std
+
+    return kge_alpha
+
+
+def calc_kge_gamma(obs, sim):
+    r"""
+    Calculate the gamma term of Kling-Gupta-Efficiency (KGE).
+
+    Parameters
+    ----------
+    obs : (N,)array_like
+        Observed time series as 1-D array
+
+    sim : (N,)array_like
+        Simulated time series as 1-D array
+
+    Returns
+    ----------
+    kge_gamma : float
+        gamma value
+
+    Notes
+    ----------
+    .. math::
+
+        \gamma = \frac{CV_{sim}}{CV_{obs}}
+
+    Examples
+    --------
+    Provide arrays with equal length
+
+    >>> from de import de
+    >>> import numpy as np
+    >>> obs = onp.array([1.5, 1, 0.8, 0.85, 1.5, 2])
+    >>> sim = onp.array([1.6, 1.3, 1, 0.8, 1.2, 2.5])
+    >>> kge.calc_kge_gamma(obs, sim)
+    1.166812375381273
+
+    References
+    ----------
+    Gupta, H. V., Kling, H., Yilmaz, K. K., and Martinez, G. F.: Decomposition
+    of the mean squared error and NSE performance criteria: Implications for
+    improving hydrological modelling, Journal of Hydrology, 377, 80-91,
+    10.1016/j.jhydrol.2009.08.003, 2009.
+
+    Kling, H., Fuchs, M., and Paulin, M.: Runoff conditions in the upper
+    Danube basin under an ensemble of climate change scenarios, Journal of
+    Hydrology, 424-425, 264-277, 10.1016/j.jhydrol.2012.01.011, 2012.
+
+    Pool, S., Vis, M., and Seibert, J.: Evaluating model performance: towards a
+    non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences
+    Journal, 63, 1941-1953, 10.1080/02626667.2018.1552002, 2018.
+    """
+    if len(obs) != len(sim):
+        raise AssertionError("Arrays are not of equal length!")
+
+    obs_mean = onp.mean(obs)
+    sim_mean = onp.mean(sim)
+    obs_std = onp.std(obs)
+    sim_std = onp.std(sim)
+    obs_cv = obs_std / obs_mean
+    sim_cv = sim_std / sim_mean
+    kge_gamma = sim_cv / obs_cv
+
+    return kge_gamma
+
+
+def calc_kge(obs, sim, r="pearson", var="std"):
+    r"""
+    Calculate Kling-Gupta-Efficiency (KGE).
+
+    Parameters
+    ----------
+    obs : (N,)array_like
+        Observed time series as 1-D array
+
+    sim : (N,)array_like
+        Simulated time series as 1-D array
+
+    r : str, optional
+        Either Spearman correlation coefficient ('spearman'; Pool et al. 2018)
+        or Pearson correlation coefficient ('pearson'; Gupta et al. 2009) can
+        be used to describe the temporal correlation. The default is to
+        calculate the Pearson correlation.
+
+    var : str, optional
+        Either coefficient of variation ('cv'; Kling et al. 2012) or standard
+        deviation ('std'; Gupta et al. 2009, Pool et al. 2018) to describe the
+        gamma term. The default is to calculate the standard deviation.
+
+    Returns
+    ----------
+    eff : float
+        Kling-Gupta-Efficiency
+
+    Examples
+    --------
+    Provide arrays with equal length
+
+    >>> from de import de
+    >>> import numpy as np
+    >>> obs = onp.array([1.5, 1, 0.8, 0.85, 1.5, 2])
+    >>> sim = onp.array([1.6, 1.3, 1, 0.8, 1.2, 2.5])
+    >>> kge.calc_kge(obs, sim)
+    0.683901305466148
+
+    Notes
+    ----------
+    .. math::
+
+        KGE = 1 - \sqrt{(\beta - 1)^2 + (\alpha - 1)^2 + (r - 1)^2}
+
+        KGE = 1 - \sqrt{(\frac{\mu_{sim}}{\mu_{obs}} - 1)^2 + (\frac{\sigma_{sim}}{\sigma_{obs}} - 1)^2 + (r - 1)^2}
+
+        KGE = 1 - \sqrt{(\beta - 1)^2 + (\gamma - 1)^2 + (r - 1)^2}
+
+        KGE = 1 - \sqrt{(\frac{\mu_{sim}}{\mu_{obs}} - 1)^2 + (\frac{CV_{sim}}{CV_{obs}} - 1)^2 + (r - 1)^2}
+
+    References
+    ----------
+    Gupta, H. V., Kling, H., Yilmaz, K. K., and Martinez, G. F.: Decomposition
+    of the mean squared error and NSE performance criteria: Implications for
+    improving hydrological modelling, Journal of Hydrology, 377, 80-91,
+    10.1016/j.jhydrol.2009.08.003, 2009.
+
+    Kling, H., Fuchs, M., and Paulin, M.: Runoff conditions in the upper
+    Danube basin under an ensemble of climate change scenarios, Journal of
+    Hydrology, 424-425, 264-277, 10.1016/j.jhydrol.2012.01.011, 2012.
+
+    Pool, S., Vis, M., and Seibert, J.: Evaluating model performance: towards a
+    non-parametric variant of the Kling-Gupta efficiency, Hydrological Sciences
+    Journal, 63, 1941-1953, 10.1080/02626667.2018.1552002, 2018.
+    """
+    if len(obs) != len(sim):
+        raise AssertionError("Arrays are not of equal length!")
+    # calculate alpha term
+    obs_mean = onp.mean(obs)
+    sim_mean = onp.mean(sim)
+    kge_beta = sim_mean / obs_mean
+
+    # calculate KGE with gamma term
+    if var == "cv":
+        kge_gamma = calc_kge_gamma(obs, sim)
+        temp_cor = calc_temp_cor(obs, sim, r=r)
+
+        eff = 1 - onp.sqrt(
+            (kge_beta - 1) ** 2 + (kge_gamma - 1) ** 2 + (temp_cor - 1) ** 2
+        )
+
+    # calculate KGE with beta term
+    elif var == "std":
+        kge_alpha = calc_kge_alpha(obs, sim)
+        temp_cor = calc_temp_cor(obs, sim, r=r)
+
+        eff = 1 - onp.sqrt(
+            (kge_beta - 1) ** 2 + (kge_alpha - 1) ** 2 + (temp_cor - 1) ** 2
+        )
+
+    return eff
+
+def calc_nse(obs, sim):
+    r"""
+    Calculate Nash-Sutcliffe-Efficiency (NSE).
+
+    Parameters
+    ----------
+    obs : (N,)array_like
+        Observed time series as 1-D array
+
+    sim : (N,)array_like
+        Simulated time series as 1-D array
+
+    Returns
+    ----------
+    eff : float
+        Nash-Sutcliffe-Efficiency
+
+    Examples
+    --------
+    Provide arrays with equal length
+
+    >>> from de import de
+    >>> import numpy as np
+    >>> obs = onp.array([1.5, 1, 0.8, 0.85, 1.5, 2])
+    >>> sim = onp.array([1.6, 1.3, 1, 0.8, 1.2, 2.5])
+    >>> nse.calc_nse(obs, sim)
+    0.5648252536640361
+
+    Notes
+    ----------
+    .. math::
+
+        NSE = 1 - \frac{\sum_{t=1}^{t=T} (Q_{sim}(t) - Q_{obs}(t))^2}{\sum_{t=1}^{t=T} (Q_{obs}(t) - \overline{Q_{obs}})^2}
+
+
+    References
+    ----------
+    Nash, J. E., and Sutcliffe, J. V.: River flow forecasting through
+    conceptual models part I - A discussion of principles, Journal of
+    Hydrology, 10, 282-290, 10.1016/0022-1694(70)90255-6, 1970.
+    """
+    if len(obs) != len(sim):
+        raise AssertionError("Arrays are not of equal length!")
+    sim_obs_diff = onp.sum((sim - obs) ** 2)
+    obs_mean = onp.mean(obs)
+    obs_diff_mean = onp.sum((obs - obs_mean) ** 2)
+    eff = 1 - (sim_obs_diff / obs_diff_mean)
+
+    return eff

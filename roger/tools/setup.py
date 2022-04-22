@@ -1,5 +1,8 @@
 from roger.core.operators import numpy as npx
 import roger.tools.event_classification as ecl
+import roger.tools.labels as labs
+import os
+from pathlib import Path
 import numpy as onp
 import pandas as pd
 import h5netcdf
@@ -8,6 +11,39 @@ import datetime
 
 import scipy.interpolate
 import scipy.spatial
+
+
+def read_tracer_input(path_to_dir: Path, tracer: str):
+    """Importing the solute input data
+
+    Data is imported from .txt files and stored in dataframes. Format of NA/NaN
+    values is -9999.
+
+    Args
+    ----------
+    path_to_dir : Path
+        path to directions which contains input data
+
+    tracer : str
+        name of tracer (e.g. d18O)
+
+    Returns
+    ----------
+    df_tracer : pd.DataFrame
+        solute input (in G/L or permil)
+    """
+    if not os.path.isdir(path_to_dir):
+        print(path_to_dir, 'does not exist')
+
+    sol_file = "%s.txt" % (tracer)
+    sol_path = path_to_dir / sol_file
+
+    df_tracer = pd.read_csv(sol_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
+                            index_col=0, names=['YYYY', 'MM', 'DD', 'hh', 'mm', tracer],
+                            na_values=-9999)
+    df_tracer.index = pd.to_datetime(df_tracer.index, format='%Y %m %d %H %M')
+
+    return df_tracer
 
 
 def interpolate(coords, var, interp_coords, missing_value=None, fill=True, kind="linear"):
@@ -271,7 +307,7 @@ def write_forcing(input_dir, nrows=1, ncols=1, hpi=5, end_prec_event=36, sf=3,
             v = f.create_variable('TA', ('x', 'y', 'time'), float_type)
             arr = df_meteo_events['TA'].astype(float_type).values
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
-            v.attrs['long_name'] = 'air temperature'
+            v.attrs['long_name'] = 'Air temperature'
             v.attrs['units'] = 'degC'
             v = f.create_variable('PET', ('x', 'y', 'time'), float_type)
             arr = df_meteo_events['PET'].astype(float_type).values
@@ -325,6 +361,74 @@ def write_forcing(input_dir, nrows=1, ncols=1, hpi=5, end_prec_event=36, sf=3,
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'maximum air temperature'
                 v.attrs['units'] = 'degC'
+
+
+def write_forcing_tracer(input_dir, tracer, nrows=1, ncols=1, uniform=True, float_type="float64"):
+    """Writes tracer forcing data
+
+    Args
+    ----------
+    input_dir : Path
+        path to directory with input data
+
+    tracer : str
+        name of tracer (e.g. d18O)
+
+    nrows : int, optional
+        number of rows
+
+    ncols : int, optional
+        number of columns
+
+    uniform : bool, optional
+        True if time series are used as input data
+    """
+    if uniform:
+        if tracer in ['Nmin', 'Norg', 'NO3']:
+            df_tracer = read_tracer_input(input_dir, 'Nmin')
+            df_tracer1 = read_tracer_input(input_dir, 'Norg')
+        else:
+            df_tracer = read_tracer_input(input_dir, tracer)
+
+        nc_file = input_dir.parent / "forcing_tracer.nc"
+        with h5netcdf.File(nc_file, 'w', decode_vlen_strings=False) as f:
+            f.attrs.update(
+                date_created=datetime.datetime.today().isoformat(),
+                title='model tracer forcing',
+                institution='University of Freiburg, Chair of Hydrology',
+                references='',
+                comment=''
+            )
+            # set dimensions with a dictionary
+            f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_tracer.index), 'scalar': 1}
+            if tracer in ['Nmin', 'Norg', 'NO3']:
+                v = f.create_variable('Nmin', ('x', 'y', 'time'), float_type)
+                arr = df_tracer['Nmin'].astype(float_type).values
+                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+                v.attrs['long_name'] = labs._LONG_NAME['Nmin']
+                v.attrs['units'] = labs._UNITS['Nmin']
+                v = f.create_variable('Norg', ('x', 'y', 'time'), float_type)
+                arr = df_tracer1['Norg'].astype(float_type).values
+                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+                v.attrs['long_name'] = labs._LONG_NAME['Norg']
+                v.attrs['units'] = labs._UNITS['Norg']
+            else:
+                v = f.create_variable(tracer, ('x', 'y', 'time'), float_type)
+                arr = df_tracer[tracer].astype(float_type).values
+                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+                v.attrs['long_name'] = labs._LONG_NAME[tracer]
+                v.attrs['units'] = labs._UNITS[tracer]
+            v = f.create_variable('time', ('time',), float_type)
+            v.attrs['time_origin'] = f"{df_tracer.index[0]}"
+            v.attrs['units'] = 'hours'
+            v[:] = date2num(df_tracer.index.tolist(), units=f"hours since {df_tracer.index[0]}", calendar='standard')
+            v = f.create_variable('x', ('x',), int)
+            v.attrs['long_name'] = 'Zonal coordinate'
+            v.attrs['units'] = 'meters'
+            v[:] = onp.arange(nrows)
+            v = f.create_variable('y', ('y',), int)
+            v.attrs['long_name'] = 'Meridonial coordinate'
+            v.attrs['units'] = 'meters'
 
 
 def validate(data: pd.DataFrame):
