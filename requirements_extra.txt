@@ -1,0 +1,11 @@
+jaxlib
+jax
+mpi4py
+mpi4jax
+spyder
+seaborn
+sphinx_rtd_theme
+xarray
+cftime
+salib
+# pip install diag-eff

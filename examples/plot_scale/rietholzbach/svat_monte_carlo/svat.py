@@ -1,5 +1,6 @@
 import shutil
 import glob
+import os
 from pathlib import Path
 import datetime
 from cftime import num2date
@@ -22,6 +23,9 @@ import roger.lookuptables as lut
 from roger.io_tools import yml
 import numpy as onp
 onp.random.seed(42)
+
+# number of monte-carlo samples
+NSAMPLES = 100
 
 
 class SVATSetup(RogerSetup):
@@ -64,7 +68,7 @@ class SVATSetup(RogerSetup):
         settings = state.settings
         settings.identifier = "SVAT"
 
-        settings.nx, settings.ny, settings.nz = 100, 1, 1
+        settings.nx, settings.ny, settings.nz = NSAMPLES, 1, 1
         settings.nitt = self._get_nitt()
         settings.nittevent = self._get_nittevent()
         settings.nittevent_p1 = settings.nittevent + 1
@@ -565,15 +569,20 @@ def after_timestep_kernel(state):
 
 model = SVATSetup()
 input_path = model._base_path / "input"
-write_forcing(input_path, nrows=104, ncols=5)
+write_forcing(input_path, nrows=NSAMPLES + 4, ncols=5)
 model.setup()
 model.run()
+
+# directory of results
+base_path_results = model._base_path / "results"
+if not os.path.exists(base_path_results):
+    os.mkdir(base_path_results)
 
 # merge model output into single file
 path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
 diag_files = glob.glob(path)
-states_hm_file = model._base_path / "states_hm_monte_carlo.nc"
-with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
+states_hm_mc_file = model._base_path / "states_hm_monte_carlo.nc"
+with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
     f.attrs.update(
         date_created=datetime.datetime.today().isoformat(),
         title='RoGeR monte carlo results at Rietholzbach Lysimeter site',
@@ -609,9 +618,17 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
                     v[:, :, :] = vals.swapaxes(0, 2)
                     v.attrs.update(long_name=var_obj.attrs["long_name"],
                                     units=var_obj.attrs["units"])
+    # write sampled parameters
+    vs = model.state.variables
+    vsm = model.state.var_meta
+    for param in ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']:
+        v = f.create_variable(param, ('x', 'y'), float)
+        v[:, :] = vs.get(param)
+        v.attrs.update(long_name=vsm[param]["name"],
+                       units=vsm[param]["units"])
 
 # load simulation
-ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf")
+ds_sim = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
 
 # load observations (measured data)
 path_obs = Path("/Users/robinschwemmle/Desktop/PhD/data/plot/rietholzbach/rietholzbach_lysimeter.nc")
@@ -830,9 +847,11 @@ for var_sim, var_obs in zip(vars_sim, vars_obs):
                 df_params_eff.loc[nrow, key_phi] = de.calc_phi(brel_mean, b_slope)
 
 df_params_eff.loc[:, 'KGE_swc'] = df_params_eff.loc[:, ['KGE_theta_rz', 'KGE_theta_ss']].mean()
-
 # Calculate multi-objective metric
 df_params_eff.loc[:, 'E_multi'] = 1/3 * df_params_eff.loc[:, 'r_dS'] + 1/3 * df_params_eff.loc[:, 'KGE_aet'] + 1/3 * df_params_eff.loc[:, 'KGE_q_ss']
+# write .txt-file
+file = base_path_results / "params_eff.txt"
+df_params_eff.to_csv(file, header=True, index=False, sep="\t")
 
 # select best model run
 idx_best = df_params_eff['E_multi'].idxmax()
@@ -875,8 +894,28 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
                 v[:, :, :] = vals[idx_best, :, :]
                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                 units=var_obj.attrs["units"])
+    # write sampled parameters
+    vs = model.state.variables
+    vsm = model.state.var_meta
+    for param in ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']:
+        v = f.create_variable(param, ('x', 'y'), float)
+        v[:, :] = vs.get(param)
+        v.attrs.update(long_name=vsm[param]["name"],
+                       units=vsm[param]["units"])
 
-# move hydrologic states to directory of transport model
+# move hydrologic states to directories of transport model
+base_path_tm = model._base_path.parent / "svat_transport_monte_carlo"
+states_hm_file1 = base_path_tm / "states_hm.nc"
+shutil.copy(states_hm_file, states_hm_file1)
+
+base_path_tm = model._base_path.parent / "svat_transport_sensitivity"
+states_hm_file1 = base_path_tm / "states_hm.nc"
+shutil.copy(states_hm_file, states_hm_file1)
+
 base_path_tm = model._base_path.parent / "svat_transport"
 states_hm_file1 = base_path_tm / "states_hm.nc"
 shutil.copy(states_hm_file, states_hm_file1)
+
+base_path_tm = model._base_path.parent / "svat_transport_monte_carlo_reverse"
+states_hm_mc_file1 = base_path_tm / "states_hm_monte_carlo.nc"
+shutil.copy(states_hm_mc_file, states_hm_mc_file1)
