@@ -36,7 +36,7 @@ class SVATSetup(RogerSetup):
     """
     _base_path = Path(__file__).parent
     # sampled parameters with Saltelli's extension of the Sobol' sequence
-    _nsamples = 2**3
+    _nsamples = 2**10
     _bounds = {
         'num_vars': 6,
         'names': ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'],
@@ -47,7 +47,7 @@ class SVATSetup(RogerSetup):
                    [0.05, 0.33],
                    [0.1, 120]]
     }
-    _params = saltelli.sample(_bounds, _nsamples)
+    _params = saltelli.sample(_bounds, _nsamples, calc_second_order=False)
     _nrows = _params.shape[0]
 
     def _read_var_from_nc(self, var, file):
