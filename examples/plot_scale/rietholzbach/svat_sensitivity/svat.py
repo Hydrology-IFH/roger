@@ -20,7 +20,7 @@ rs.backend = "numpy"
 rs.force_overwrite = True
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
-from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where, random_uniform
+from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
 from roger.core.utilities import _get_row_no
 from roger.tools.setup import write_forcing
 import roger.tools.evaluation as eval_utils

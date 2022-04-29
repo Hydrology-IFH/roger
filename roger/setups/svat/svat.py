@@ -5,7 +5,6 @@ from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
 from roger.core.utilities import _get_row_no
 import roger.lookuptables as lut
-from roger.io_tools import yml
 import numpy as onp
 
 
@@ -38,32 +37,25 @@ class SVATSetup(RogerSetup):
             var_obj = infile.variables['time']
             return onp.array(var_obj)[-1] * 60 * 60 + 24 * 60 * 60
 
-    def _read_config(self):
-        config_file = self._base_path / "config.yml"
-        config = yml.Config(config_file)
-        return config
-
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
         settings.identifier = "SVAT"
 
-        config = self._read_config()
-
-        settings.nx, settings.ny, settings.nz = config.nrows, config.ncols, 1
+        settings.nx, settings.ny, settings.nz = 1, 1, 1
         settings.nitt = self._get_nitt()
         settings.nittevent = self._get_nittevent()
         settings.nittevent_p1 = settings.nittevent + 1
         settings.runlen = self._get_runlen()
 
-        settings.dx = config.cell_width
-        settings.dy = config.cell_width
+        settings.dx = 1
+        settings.dy = 1
         settings.dz = 1
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
 
-        settings.enable_groundwater_boundary = config.enable_groundwater_boundary
+        settings.enable_groundwater_boundary = False
         settings.enable_macropore_lower_boundary_condition = False
 
     @roger_routine
@@ -84,8 +76,8 @@ class SVATSetup(RogerSetup):
         vs.doy = vs.DOY[vs.itt]
         vs.t = update(vs.t, at[:], npx.cumsum(vs.DT))
         # spatial grid
-        vs.x = update(vs.x, at[2:-2], npx.arange(1, settings.nx + 1) * (settings.dx / 2))
-        vs.y = update(vs.y, at[2:-2], npx.arange(1, settings.ny + 1) * (settings.dy / 2))
+        vs.x = update(vs.x, at[:], npx.arange(1, settings.nx + 1) * (settings.dx / 2))
+        vs.y = update(vs.y, at[:], npx.arange(1, settings.ny + 1) * (settings.dy / 2))
 
     @roger_routine
     def set_look_up_tables(self, state):
@@ -150,21 +142,7 @@ class SVATSetup(RogerSetup):
 
     @roger_routine
     def set_diagnostics(self, state):
-        diagnostics = state.diagnostics
-        settings = state.settings
-
-        diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz"]
-        if settings.enable_groundwater_boundary:
-            diagnostics["rates"].output_variables += ["cpr_ss"]
-        diagnostics["rates"].output_frequency = 24 * 60 * 60
-        diagnostics["rates"].sampling_frequency = 1
-
-        diagnostics["collect"].output_variables = ["S_rz", "S_ss",
-                                                   "S_pwp_rz", "S_fc_rz",
-                                                   "S_sat_rz", "S_pwp_ss",
-                                                   "S_fc_ss", "S_sat_ss"]
-        diagnostics["collect"].output_frequency = 24 * 60 * 60
-        diagnostics["collect"].sampling_frequency = 1
+        pass
 
     @roger_routine
     def after_timestep(self, state):

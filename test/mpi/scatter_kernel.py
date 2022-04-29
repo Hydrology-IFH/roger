@@ -17,19 +17,19 @@ global_arr = np.array(
     ]
 )
 
+proc_slices = (
+    (slice(None, -2), slice(None, -2)),
+    (slice(2, None), slice(None, -2)),
+    (slice(None, -2), slice(2, None)),
+    (slice(2, None), slice(2, None)),
+)
+
 if rst.proc_num == 1:
     import sys
 
     comm = MPI.COMM_SELF.Spawn(sys.executable, args=["-m", "mpi4py", sys.argv[-1]], maxprocs=4)
 
     res = np.empty((6, 6))
-
-    proc_slices = (
-        (slice(None, -2), slice(None, -2)),
-        (slice(2, None), slice(None, -2)),
-        (slice(None, -2), slice(2, None)),
-        (slice(2, None), slice(2, None)),
-    )
 
     for proc, idx in enumerate(proc_slices):
         comm.Recv(res, proc)
@@ -50,4 +50,7 @@ else:
 
     b = scatter(a, dimensions, ("x", "y"))
 
-    rs.mpi_comm.Get_parent().Send(np.array(b), 0)
+    idx = proc_slices[rst.proc_rank]
+    np.testing.assert_array_equal(b, global_arr[idx])
+
+    # rs.mpi_comm.Get_parent().Send(np.array(b), 0)

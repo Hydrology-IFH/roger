@@ -6,7 +6,6 @@ from mpi4py import MPI
 from roger import runtime_settings as rs, runtime_state as rst
 from roger.distributed import gather
 
-rs.linear_solver = "scipy"
 rs.diskless_mode = True
 
 if rst.proc_num > 1:
@@ -19,11 +18,12 @@ from roger.tools.make_toy_setup import make_setup  # noqa: E402
 
 sim = SVATSetup(
     override=dict(
-        nx=42,
-        ny=30
+        nx=8,
+        ny=8
     )
 )
-make_setup(sim._base_path, event_type='rain', ndays=10, nrows=42, ncols=30)
+
+#TODO: make setup safe for distributed
 
 if rst.proc_num == 1:
     comm = MPI.COMM_SELF.Spawn(sys.executable, args=["-m", "mpi4py", sys.argv[-1]], maxprocs=4)
@@ -36,15 +36,15 @@ if rst.proc_num == 1:
         comm.Abort(1)
         raise
 
-    other_swe = np.empty_like(sim.state.variables.swe)
-    comm.Recv(other_swe, 0)
+    other_theta = np.empty_like(sim.state.variables.theta)
+    comm.Recv(other_theta, 0)
 
-    np.testing.assert_allclose(sim.state.variables.swe, other_swe)
+    np.testing.assert_allclose(sim.state.variables.theta, other_theta)
 else:
     sim.setup()
     sim.run()
 
-    swe_global = gather(sim.state.variables.swe, sim.state.dimensions, ("x", "y"))
+    theta_global = gather(sim.state.variables.theta, sim.state.dimensions, ("x", "y"))
 
-    if rst.proc_rank == 0:
-        rs.mpi_comm.Get_parent().Send(np.array(swe_global), 0)
+    # if rst.proc_rank == 0:
+    #     rs.mpi_comm.Get_parent().Send(np.array(theta_global), 0)
