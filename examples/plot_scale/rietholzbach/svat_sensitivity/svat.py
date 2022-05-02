@@ -146,10 +146,10 @@ class SVATSetup(RogerSetup):
             vs.sealing = update(vs.sealing, at[:, :], 0)
             vs.S_dep_tot = update(vs.S_dep_tot, at[:, :], 0)
             vs.z_soil = update(vs.z_soil, at[:, :], 2200)
-            vs.dmpv = update(vs.dmpv, at[2:-2, :], npx.repeat(self._params[:, 0, npx.newaxis], vs.dmpv.shape[1], axis=-1))
+            vs.dmpv = update(vs.dmpv, at[2:-2, :], npx.array(npx.repeat(self._params[:, 0, npx.newaxis], vs.dmpv.shape[1], axis=-1), dtype=int))
             vs.dmpv = update(vs.dmpv, at[:2, :], 50)  # fill ghosts
             vs.dmpv = update(vs.dmpv, at[-2:, :], 50)
-            vs.lmpv = update(vs.lmpv, at[2:-2, :], npx.repeat(self._params[:, 1, npx.newaxis], vs.lmpv.shape[1], axis=-1))
+            vs.lmpv = update(vs.lmpv, at[2:-2, :], npx.array(npx.repeat(self._params[:, 1, npx.newaxis], vs.lmpv.shape[1], axis=-1), dtype=int))
             vs.lmpv = update(vs.lmpv, at[:2, :], 400)
             vs.lmpv = update(vs.lmpv, at[-2:, :], 400)
             vs.theta_ac = update(vs.theta_ac, at[2:-2, :], npx.repeat(self._params[:, 2, npx.newaxis], vs.theta_ac.shape[1], axis=-1))

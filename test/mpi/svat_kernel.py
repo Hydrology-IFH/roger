@@ -16,14 +16,25 @@ if rst.proc_num > 1:
 from roger.setups.svat import SVATSetup  # noqa: E402
 from roger.tools.make_toy_setup import make_setup  # noqa: E402
 
-sim = SVATSetup(
-    override=dict(
-        nx=8,
-        ny=8
-    )
+settings = dict(
+    nx=8,
+    ny=8
 )
 
-#TODO: make setup safe for distributed
+sim = SVATSetup(
+    override=settings
+)
+
+# run toy setup on single process and let the other processes wait
+if rst.proc_rank == 0:
+    make_setup(sim._base_path, ndays=10, nrows=settings["nx"], ncols=settings["ny"])
+    for i in range(1, rst.proc_num):
+        req = rs.comm.Isend(1, dest=i)
+        req.Wait()
+else:
+    for i in range(1, rst.proc_num):
+        req = rs.comm.Irecv(1, source=0)
+        req.Wait()
 
 if rst.proc_num == 1:
     comm = MPI.COMM_SELF.Spawn(sys.executable, args=["-m", "mpi4py", sys.argv[-1]], maxprocs=4)

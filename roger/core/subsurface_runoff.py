@@ -680,12 +680,6 @@ def calc_perc_pot_ss(state):
         at[:, :], npx.where(mask2, vs.S_zsat, vs.q_pot_ss) * vs.maskCatch,
     )
 
-    mask3 = (perc_pot > 0) & (vs.S_lp_ss > 0) & (perc_pot > vs.S_lp_ss) & (vs.S_zsat > vs.S_lp_ss)
-    vs.q_pot_ss = update(
-        vs.q_pot_ss,
-        at[:, :], npx.where(mask3, vs.S_lp_ss, vs.q_pot_ss) * vs.maskCatch,
-    )
-
     return KernelOutput(q_pot_ss=vs.q_pot_ss)
 
 
@@ -696,9 +690,10 @@ def calc_perc_ss(state):
     """
     vs = state.variables
 
+    mask = (vs.q_pot_ss > vs.S_lp_ss)
     vs.q_ss = update(
         vs.q_ss,
-        at[:, :], vs.q_pot_ss * vs.maskCatch,
+        at[:, :], npx.where(mask, vs.S_lp_ss, vs.q_pot_ss) * vs.maskCatch,
     )
 
     # update saturation water level
@@ -712,7 +707,7 @@ def calc_perc_ss(state):
         at[:, :], vs.z_sat[:, :, vs.tau] * vs.theta_ac * vs.maskCatch,
     )
 
-    # update root zone storage after root zone drainage
+    # update subsoil storage after subsoil drainage
     vs.S_lp_ss = update_add(
         vs.S_lp_ss,
         at[:, :], -vs.q_ss * vs.maskCatch,

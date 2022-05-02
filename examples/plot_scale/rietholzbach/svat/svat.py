@@ -125,10 +125,10 @@ class SVATSetup(RogerSetup):
             vs.z_soil = update(vs.z_soil, at[:, :], 2200)
             vs.dmpv = update(vs.dmpv, at[:, :], 295)
             vs.lmpv = update(vs.lmpv, at[:, :], 685)
-            vs.theta_ac = update(vs.theta_ac, at[:, :], 0.279)
-            vs.theta_ufc = update(vs.theta_ufc, at[:, :], 0.29)
-            vs.theta_pwp = update(vs.theta_pwp, at[:, :], 0.29)
-            vs.ks = update(vs.ks, at[:, :], 2.26)
+            vs.theta_ac = update(vs.theta_ac, at[:, :], 0.29294921875)
+            vs.theta_ufc = update(vs.theta_ufc, at[:, :], 0.28638671875000005)
+            vs.theta_pwp = update(vs.theta_pwp, at[:, :],  0.27955078125000005)
+            vs.ks = update(vs.ks, at[:, :], 2.266162109375)
             vs.kf = update(vs.kf, at[:, :], 2500)
 
         if (vs.MONTH[vs.itt] != vs.MONTH[vs.itt - 1]) & (vs.itt > 1):
@@ -171,7 +171,7 @@ class SVATSetup(RogerSetup):
         diagnostics["rates"].output_frequency = 24 * 60 * 60
         diagnostics["rates"].sampling_frequency = 1
 
-        diagnostics["collect"].output_variables = ["S_rz", "S_ss", "S_lp_rz", "S_fp_rz", "S_lp_ss", "S_fp_ss",
+        diagnostics["collect"].output_variables = ["S_rz", "S_ss",
                                                    "S_pwp_rz", "S_fc_rz",
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss",
