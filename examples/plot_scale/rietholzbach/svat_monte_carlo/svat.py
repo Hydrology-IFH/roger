@@ -25,7 +25,7 @@ import numpy as onp
 onp.random.seed(42)
 
 # number of monte-carlo samples
-NSAMPLES = 1000
+NSAMPLES = 5000
 
 
 class SVATSetup(RogerSetup):
@@ -623,7 +623,7 @@ with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
     vsm = model.state.var_meta
     for param in ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']:
         v = f.create_variable(param, ('x', 'y'), float)
-        v[:, :] = vs.get(param)
+        v[:, :] = vs.get(param)[2:-2, 2:-2]
         v.attrs.update(long_name=vsm[param]["name"],
                        units=vsm[param]["units"])
 

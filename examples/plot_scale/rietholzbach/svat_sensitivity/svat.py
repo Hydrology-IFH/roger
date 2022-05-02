@@ -653,7 +653,7 @@ with h5netcdf.File(states_hm_si_file, 'w', decode_vlen_strings=False) as f:
     vsm = model.state.var_meta
     for param in model._bounds['names']:
         v = f.create_variable(param, ('x', 'y'), float)
-        v[:, :] = vs.get(param)
+        v[:, :] = vs.get(param)[2:-2, 2:-2]
         v.attrs.update(long_name=vsm[param]["name"],
                        units=vsm[param]["units"])
 
