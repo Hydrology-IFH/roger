@@ -123,12 +123,12 @@ class SVATSetup(RogerSetup):
             vs.sealing = update(vs.sealing, at[:, :], 0)
             vs.S_dep_tot = update(vs.S_dep_tot, at[:, :], 0)
             vs.z_soil = update(vs.z_soil, at[:, :], 2200)
-            vs.dmpv = update(vs.dmpv, at[:, :], 50)
-            vs.lmpv = update(vs.lmpv, at[:, :], 1300)
-            vs.theta_ac = update(vs.theta_ac, at[:, :], 0.16)
-            vs.theta_ufc = update(vs.theta_ufc, at[:, :], 0.2)
-            vs.theta_pwp = update(vs.theta_pwp, at[:, :], 0.24)
-            vs.ks = update(vs.ks, at[:, :], 9)
+            vs.dmpv = update(vs.dmpv, at[:, :], 295)
+            vs.lmpv = update(vs.lmpv, at[:, :], 685)
+            vs.theta_ac = update(vs.theta_ac, at[:, :], 0.279)
+            vs.theta_ufc = update(vs.theta_ufc, at[:, :], 0.29)
+            vs.theta_pwp = update(vs.theta_pwp, at[:, :], 0.29)
+            vs.ks = update(vs.ks, at[:, :], 2.26)
             vs.kf = update(vs.kf, at[:, :], 2500)
 
         if (vs.MONTH[vs.itt] != vs.MONTH[vs.itt - 1]) & (vs.itt > 1):
@@ -171,7 +171,7 @@ class SVATSetup(RogerSetup):
         diagnostics["rates"].output_frequency = 24 * 60 * 60
         diagnostics["rates"].sampling_frequency = 1
 
-        diagnostics["collect"].output_variables = ["S_rz", "S_ss",
+        diagnostics["collect"].output_variables = ["S_rz", "S_ss", "S_lp_rz", "S_fp_rz", "S_lp_ss", "S_fp_ss",
                                                    "S_pwp_rz", "S_fc_rz",
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss",
@@ -587,11 +587,11 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
                 v = f.create_variable('x', ('x',), float)
                 v.attrs['long_name'] = 'Zonal coordinate'
                 v.attrs['units'] = 'meters'
-                v[:] = npx.arange(f.dimensions["x"].size)
+                v[:] = npx.arange(f.dimensions["x"])
                 v = f.create_variable('y', ('y',), float)
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
-                v[:] = npx.arange(f.dimensions["y"].size)
+                v[:] = npx.arange(f.dimensions["y"])
                 v = f.create_variable('Time', ('Time',), float)
                 var_obj = df.variables.get('Time')
                 with h5netcdf.File(model._base_path / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
