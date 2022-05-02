@@ -7,9 +7,11 @@ from cftime import date2num
 
 from roger.tools.event_classification import calc_event_classification
 from roger.io_tools import yml
+from roger import roger_sync
 onp.random.seed(42)
 
 
+@roger_sync
 def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
                event_type='rain', enable_groundwater_boundary=False,
                enable_film_flow=False, enable_crop_phenology=False,

@@ -569,7 +569,7 @@ def after_timestep_kernel(state):
 
 model = SVATSetup()
 input_path = model._base_path / "input"
-write_forcing(input_path, nrows=NSAMPLES + 4, ncols=5)
+write_forcing(input_path)
 model.setup()
 model.run()
 
@@ -598,11 +598,11 @@ with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
                 v = f.create_variable('x', ('x',), float)
                 v.attrs['long_name'] = 'Zonal coordinate'
                 v.attrs['units'] = 'meters'
-                v[:] = npx.arange(f.dimensions["x"].size)
+                v[:] = npx.arange(f.dimensions["x"])
                 v = f.create_variable('y', ('y',), float)
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
-                v[:] = npx.arange(f.dimensions["y"].size)
+                v[:] = npx.arange(f.dimensions["y"])
                 v = f.create_variable('Time', ('Time',), float)
                 var_obj = df.variables.get('Time')
                 with h5netcdf.File(model._base_path / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
@@ -874,11 +874,11 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
             v = f.create_variable('x', ('x',), float)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'
-            v[:] = npx.arange(f.dimensions["x"].size)
+            v[:] = npx.arange(f.dimensions["x"])
             v = f.create_variable('y', ('y',), float)
             v.attrs['long_name'] = 'Meridonial coordinate'
             v.attrs['units'] = 'meters'
-            v[:] = npx.arange(f.dimensions["y"].size)
+            v[:] = npx.arange(f.dimensions["y"])
             v = f.create_variable('Time', ('Time',), float)
             var_obj = df.variables.get('Time')
             with h5netcdf.File(model._base_path / 'forcing.nc', "r", decode_vlen_strings=False) as infile:

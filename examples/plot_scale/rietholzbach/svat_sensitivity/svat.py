@@ -598,7 +598,7 @@ def after_timestep_kernel(state):
 
 model = SVATSetup()
 input_path = model._base_path / "input"
-write_forcing(input_path, nrows=model._nrows + 4, ncols=5)
+write_forcing(input_path)
 model.setup()
 model.run()
 

@@ -1,6 +1,7 @@
 from roger.core.operators import numpy as npx
 import roger.tools.event_classification as ecl
 import roger.tools.labels as labs
+from roger import roger_sync
 import os
 from pathlib import Path
 import numpy as onp
@@ -146,6 +147,7 @@ def get_uniform_grid_steps(total_length, stepsize):
     return stepsize * npx.ones(int(total_length / stepsize))
 
 
+@roger_sync
 def write_forcing(input_dir, nrows=1, ncols=1, hpi=5, end_prec_event=36, sf=3,
                   ta_fm=0, uniform=True, enable_film_flow=False,
                   enable_crop_phenology=False,
@@ -363,6 +365,7 @@ def write_forcing(input_dir, nrows=1, ncols=1, hpi=5, end_prec_event=36, sf=3,
                 v.attrs['units'] = 'degC'
 
 
+@roger_sync
 def write_forcing_tracer(input_dir, tracer, nrows=1, ncols=1, uniform=True, float_type="float64"):
     """Writes tracer forcing data
 

@@ -635,11 +635,11 @@ model.setup()
 #                 v = f.create_variable('x', ('x',), float)
 #                 v.attrs['long_name'] = 'Zonal coordinate'
 #                 v.attrs['units'] = 'meters'
-#                 v[:] = npx.arange(f.dimensions["x"].size)
+#                 v[:] = npx.arange(f.dimensions["x"])
 #                 v = f.create_variable('y', ('y',), float)
 #                 v.attrs['long_name'] = 'Meridonial coordinate'
 #                 v.attrs['units'] = 'meters'
-#                 v[:] = npx.arange(f.dimensions["y"].size)
+#                 v[:] = npx.arange(f.dimensions["y"])
 #                 v = f.create_variable('Time', ('Time',), float)
 #                 var_obj = df.variables.get('Time')
 #                 with h5netcdf.File(model._base_path / 'forcing_tracer.nc', "r", decode_vlen_strings=False) as infile:
@@ -650,11 +650,11 @@ model.setup()
 #                 v = f.create_variable('ages', ('ages',), float)
 #                 v.attrs['long_name'] = 'Water ages'
 #                 v.attrs['units'] = 'days'
-#                 v[:] = npx.arange(1, f.dimensions["ages"].size+1)
+#                 v[:] = npx.arange(1, f.dimensions["ages"]+1)
 #                 v = f.create_variable('nages', ('nages',), float)
 #                 v.attrs['long_name'] = 'Water ages (cumulated)'
 #                 v.attrs['units'] = 'days'
-#                 v[:] = npx.arange(0, f.dimensions["nages"].size)
+#                 v[:] = npx.arange(0, f.dimensions["nages"])
 #             for var_sim in list(df.variables.keys()):
 #                 var_obj = df.variables.get(var_sim)
 #                 if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3:

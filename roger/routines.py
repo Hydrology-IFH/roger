@@ -391,3 +391,73 @@ def is_roger_routine(func):
         func = func.__self__
 
     return isinstance(func, rogerRoutine)
+
+
+# sync
+
+
+def roger_sync(function=None):
+    """Decorator that marks a function as a sync that is run on a single process
+    if backend is set to MPI.
+
+    """
+
+    def inner_decorator(function):
+        sync = rogerSync(function)
+        sync = functools.wraps(function)(sync)
+        return sync
+
+    if function is not None:
+        return inner_decorator(function)
+
+    return inner_decorator
+
+
+class rogerSync:
+    """Do not instantiate directly!"""
+
+    def __init__(self, function):
+        """Do some parameter introspection."""
+
+        # make sure function signature is in the form we need
+        self.name = _get_func_name(function)
+        self.func_sig = inspect.signature(function)
+
+        func_params = self.func_sig.parameters
+
+        allowed_param_types = (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD)
+
+        if any(p.kind not in allowed_param_types for p in func_params.values()):
+            raise ValueError(f"roger syncs do not support *args, **kwargs, or keyword-only parameters ({self.name})")
+
+        self.function = function
+
+    def __call__(self, *args, **kwargs):
+        from roger import runtime_settings, runtime_state
+        from roger.core.operators import numpy as npx
+
+        # no MPI support
+        if runtime_state.proc_num == 1:
+            out = self.function(*args, **kwargs)
+
+        # with MPI support
+        elif runtime_state.proc_num > 1:
+            # run function on a single process
+            if runtime_state.proc_rank == 0:
+                out = self.function(*args, **kwargs)
+                for i in range(1, runtime_state.proc_num):
+                    buffer = npx.empty(1, dtype=int)
+                    req = runtime_settings.mpi_comm.isend(buffer, dest=i, tag=11)
+                    req.wait()
+            # let other processes wait
+            elif runtime_state.proc_rank > 0:
+                def function():
+                    pass
+                out = function()
+                req = runtime_settings.mpi_comm.irecv(source=0, tag=11)
+                buffer = req.wait()
+
+        return out
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} {self.name} at {hex(id(self))}>"

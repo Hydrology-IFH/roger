@@ -70,6 +70,13 @@ class _PublicAPI(types.ModuleType):
 
     @property
     @_reraise_exceptions
+    def roger_sync(self):
+        from roger.routines import roger_sync
+
+        return roger_sync
+
+    @property
+    @_reraise_exceptions
     def KernelOutput(self):
         from roger.state import KernelOutput
 
