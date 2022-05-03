@@ -5,15 +5,16 @@ from roger.diagnostics.base import RogerDiagnostic
 from roger.variables import TIMESTEPS
 
 
-class Collect(RogerDiagnostic):
-    """Collect output diagnostic.
+class Constant(RogerDiagnostic):
+    """Constant output diagnostic.
 
-    All registered variables are collected when :meth:`diagnose` is called,
-    and collected upon calling :meth:`output`.
+    All registered variables are collected when :meth:`diagnose`
+    is called, and written upon calling :meth:`output` at beginning of
+    simulation.
     """
 
-    name = "collect"  #:
-    output_path = "{identifier}.collect.nc"  #: File to write to. May contain format strings that are replaced with Roger attributes.
+    name = "constant"  #:
+    output_path = "{identifier}.constant.nc"  #: File to write to. May contain format strings that are replaced with Roger attributes.
     output_variables = None  #: Iterable containing all variables to be volumed. Changes have no effect after ``initialize`` has been called.
     output_frequency = None  #: Frequency (in seconds) in which output is written.
     sampling_frequency = None  #: Frequency (in seconds) in which variables are accumulated.
@@ -65,7 +66,7 @@ class Collect(RogerDiagnostic):
                 setattr(clc_vs, key, getattr(vs, key))
 
     def output(self, state):
-        """Write Collect to netcdf file and zero array"""
+        """Write Constant to netcdf file and zero array"""
         clc_vs = self.variables
 
         if not os.path.isfile(self.get_output_file_name(state)):

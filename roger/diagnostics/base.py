@@ -11,7 +11,7 @@ from roger import distributed, runtime_settings, time
 class RogerDiagnostic(metaclass=abc.ABCMeta):
     """Base class for diagnostics. Provides an interface and wrappers for common I/O.
 
-    Any diagnostic needs to implement the 5 interface methods and set some attributes.
+    Any diagnostic needs to implement the 9 interface methods and set some attributes.
     """
 
     name = None  #: Name that identifies the current diagnostic
