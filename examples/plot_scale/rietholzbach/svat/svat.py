@@ -18,7 +18,6 @@ from roger.tools.setup import write_forcing
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
 import roger.lookuptables as lut
-from roger.io_tools import yml
 import numpy as onp
 
 
@@ -50,12 +49,6 @@ class SVATSetup(RogerSetup):
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['time']
             return onp.array(var_obj)[-1] * 60 * 60 + 24 * 60 * 60
-
-    def _read_config(self):
-        config_file = self._base_path / "config.yml"
-        config = yml.Config(config_file)
-
-        return config
 
     @roger_routine
     def set_settings(self, state):

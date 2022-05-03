@@ -16,7 +16,6 @@ from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, at
 from roger.tools.setup import write_forcing_tracer
-from roger.io_tools import yml
 import numpy as onp
 
 
@@ -48,11 +47,6 @@ class SVATTRANSPORTSetup(RogerSetup):
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['Time']
             return len(onp.array(var_obj)) * 60 * 60 * 24
-
-    def _read_config(self):
-        config_file = self._base_path / "config.yml"
-        config = yml.Config(config_file)
-        return config
 
     def _set_year(self, year):
         self._year = year
