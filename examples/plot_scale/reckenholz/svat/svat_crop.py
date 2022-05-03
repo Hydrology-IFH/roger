@@ -1,9 +1,22 @@
+import shutil
+import glob
 from pathlib import Path
+import datetime
+from cftime import num2date
 import h5netcdf
+import xarray as xr
+import pandas as pd
+
+from roger import runtime_settings as rs
+rs.backend = "numpy"
+rs.force_overwrite = True
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
 from roger.core.utilities import _get_row_no
+from roger.tools.setup import write_forcing, write_crop_rotation
+import roger.tools.evaluation as eval_utils
+import roger.tools.labels as labs
 import roger.lookuptables as lut
 from roger.io_tools import yml
 import numpy as onp
@@ -12,7 +25,7 @@ import numpy as onp
 class SVATCROPSetup(RogerSetup):
     """A SVAT model including crop phenology/crop rotation.
     """
-    _base_path = Path(__file__).parent
+    _base_path = None
 
     def _read_var_from_nc(self, var, file):
         nc_file = self._base_path / file
@@ -44,43 +57,26 @@ class SVATCROPSetup(RogerSetup):
             var_obj = infile.variables['year_season']
             return len(onp.array(var_obj))
 
-    def _read_config(self):
-        config_file = self._base_path / "config.yml"
-        config = yml.Config(config_file)
-        return config
-
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
         settings.identifier = "SVATCROP"
 
-        config = self._read_config()
-
-        settings.nx, settings.ny, settings.nz = config.nrows, config.ncols, 1
+        settings.nx, settings.ny, settings.nz = 1, 1, 1
         settings.nitt = self._get_nitt()
         settings.nittevent = self._get_nittevent()
         settings.nittevent_p1 = settings.nittevent + 1
         settings.runlen = self._get_runlen()
 
-        settings.dx = config.cell_width
-        settings.dy = config.cell_width
+        settings.dx = 1
+        settings.dy = 1
         settings.dz = 1
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
 
-        settings.enable_groundwater_boundary = config.enable_groundwater_boundary
-        settings.enable_film_flow = config.enable_film_flow
-        settings.enable_crop_phenology = config.enable_crop_phenology
-        settings.enable_crop_rotation = config.enable_crop_rotation
-        settings.enable_lateral_flow = config.enable_lateral_flow
-        settings.enable_groundwater = config.enable_groundwater
-        settings.enable_offline_transport = config.enable_offline_transport
-        settings.enable_bromide = config.enable_bromide
-        settings.enable_chloride = config.enable_chloride
-        settings.enable_deuterium = config.enable_deuterium
-        settings.enable_oxygen18 = config.enable_oxygen18
-        settings.enable_nitrate = config.enable_nitrate
+        settings.enable_crop_phenology = True
+        settings.enable_crop_rotation = True
         settings.enable_macropore_lower_boundary_condition = False
 
         if settings.enable_crop_rotation:
@@ -111,15 +107,13 @@ class SVATCROPSetup(RogerSetup):
     @roger_routine
     def set_look_up_tables(self, state):
         vs = state.variables
-        settings = state.settings
 
         vs.lut_ilu = update(vs.lut_ilu, at[:, :], lut.ARR_ILU)
         vs.lut_gc = update(vs.lut_gc, at[:, :], lut.ARR_GC)
         vs.lut_gcm = update(vs.lut_gcm, at[:, :], lut.ARR_GCM)
         vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
         vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
-        if settings.enable_crop_phenology:
-            vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
+        vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
 
     @roger_routine
     def set_topography(self, state):
@@ -203,44 +197,20 @@ class SVATCROPSetup(RogerSetup):
         diagnostics = state.diagnostics
         settings = state.settings
 
-        diagnostics["collect"].output_variables = []
+        diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz"]
+        if settings.enable_groundwater_boundary:
+            diagnostics["rates"].output_variables += ["cpr_ss"]
+        diagnostics["rates"].output_frequency = 24 * 60 * 60
+        diagnostics["rates"].sampling_frequency = 1
+
+        diagnostics["collect"].output_variables = ["S_rz", "S_ss",
+                                                   "S_pwp_rz", "S_fc_rz",
+                                                   "S_sat_rz", "S_pwp_ss",
+                                                   "S_fc_ss", "S_sat_ss"]
         if settings.enable_crop_phenology:
-            diagnostics["collect"].output_variables += ["z_root", "ground_cover"]
+            diagnostics["collect"].output_variables += ["re_rg", "re_rl", "z_root", "ground_cover"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
-
-        # diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz"]
-        # if settings.enable_groundwater_boundary:
-        #     diagnostics["rates"].output_variables += ["cpr_ss"]
-        # diagnostics["rates"].output_frequency = 24 * 60 * 60
-        # diagnostics["rates"].sampling_frequency = 1
-
-        # diagnostics["collect"].output_variables = ["S_rz", "S_ss",
-        #                                            "S_pwp_rz", "S_fc_rz",
-        #                                            "S_sat_rz", "S_pwp_ss",
-        #                                            "S_fc_ss", "S_sat_ss"]
-        # if settings.enable_crop_phenology:
-        #     diagnostics["collect"].output_variables += ["re_rg", "re_rl", "z_root", "ground_cover"]
-        # diagnostics["collect"].output_frequency = 24 * 60 * 60
-        # diagnostics["collect"].sampling_frequency = 1
-        #
-        # diagnostics["averages"].output_variables = ["ta"]
-        # diagnostics["averages"].output_frequency = 24 * 60 * 60
-        # diagnostics["averages"].sampling_frequency = 1
-
-        # diagnostics["rates"].output_variables = ["prec", "rain_ground", "snow_ground", "q_sur", "inf_rz", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "transp", "evap_soil", "cpr_rz"]
-        # if settings.enable_groundwater_boundary:
-        #     diagnostics["rates"].output_variables += ["cpr_ss"]
-        # diagnostics["rates"].output_frequency = 24 * 60 * 60
-        # diagnostics["rates"].sampling_frequency = 1
-
-        # diagnostics["collect"].output_variables = ["S_snow", "S_int_ground", "S_rz", "S_ss",
-        #                                            "theta_rz", "theta_ss", "theta",
-        #                                            "z_wf"]
-        # if settings.enable_crop_phenology:
-        #     diagnostics["collect"].output_variables += ["re_rg", "re_rl"]
-        # diagnostics["collect"].output_frequency = 24 * 60 * 60
-        # diagnostics["collect"].sampling_frequency = 1
 
         diagnostics["averages"].output_variables = ["ta"]
         diagnostics["averages"].output_frequency = 24 * 60 * 60
@@ -606,6 +576,27 @@ def after_timestep_kernel(state):
         vs.h,
         at[:, :, vs.taum1], vs.h[:, :, vs.tau],
     )
+    vs.z0 = update(
+        vs.z0,
+        at[:, :, vs.taum1], vs.z0[:, :, vs.tau],
+    )
+    # set to 0 for numerical errors
+    vs.S_fp_rz = update(
+        vs.S_fp_rz,
+        at[:, :], npx.where((vs.S_fp_rz > -1e-6) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz),
+    )
+    vs.S_lp_rz = update(
+        vs.S_lp_rz,
+        at[:, :], npx.where((vs.S_lp_rz > -1e-6) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz),
+    )
+    vs.S_fp_ss = update(
+        vs.S_fp_ss,
+        at[:, :], npx.where((vs.S_fp_ss > -1e-6) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss),
+    )
+    vs.S_lp_ss = update(
+        vs.S_lp_ss,
+        at[:, :], npx.where((vs.S_lp_ss > -1e-6) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss),
+    )
 
     return KernelOutput(
         ta=vs.ta,
@@ -638,6 +629,11 @@ def after_timestep_kernel(state):
         k_rz=vs.k_rz,
         k_ss=vs.k_ss,
         k=vs.k,
+        z0=vs.z0,
+        S_fp_rz=vs.S_fp_rz,
+        S_lp_rz=vs.S_lp_rz,
+        S_fp_ss=vs.S_fp_ss,
+        S_lp_ss=vs.S_lp_ss,
     )
 
 
@@ -662,3 +658,100 @@ def after_timestep_crops_kernel(state):
         ccc=vs.ccc,
         z_root_crop=vs.z_root_crop,
     )
+
+lys_experiments = ["lys1"]
+for lys_experiment in lys_experiments:
+    model = SVATCROPSetup()
+    model._base_path = Path(__file__).parent / lys_experiment
+    input_path = model._base_path / lys_experiment / "input"
+    write_crop_rotation(input_path)
+    write_forcing(input_path)
+    model.setup()
+    model.run()
+
+    # merge model output into single file
+    path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
+    diag_files = glob.glob(path)
+    states_hm_file = model._base_path / "states_hm.nc"
+    with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as ff:
+        f = ff.create_group(lys_experiment)
+        f.attrs.update(
+            date_created=datetime.datetime.today().isoformat(),
+            title=f'RoGeR model results at Reckenholz Lysimeter ({lys_experiment})',
+            institution='University of Freiburg, Chair of Hydrology',
+            references='',
+            comment='SVAT model with free drainage and crop phenology/crop rotation'
+        )
+        for dfs in diag_files:
+            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                # set dimensions with a dictionary
+                if not f.dimensions:
+                    f.dimensions = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+                    v = f.create_variable('x', ('x',), float)
+                    v.attrs['long_name'] = 'Zonal coordinate'
+                    v.attrs['units'] = 'meters'
+                    v[:] = npx.arange(f.dimensions["x"])
+                    v = f.create_variable('y', ('y',), float)
+                    v.attrs['long_name'] = 'Meridonial coordinate'
+                    v.attrs['units'] = 'meters'
+                    v[:] = npx.arange(f.dimensions["y"])
+                    v = f.create_variable('Time', ('Time',), float)
+                    var_obj = df.variables.get('Time')
+                    with h5netcdf.File(model._base_path / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
+                        time_origin = infile.variables['time'].attrs['time_origin']
+                    v.attrs.update(time_origin=time_origin,
+                                    units=var_obj.attrs["units"])
+                    v[:] = npx.array(var_obj)
+                for key in list(df.variables.keys()):
+                    var_obj = df.variables.get(key)
+                    if key not in list(f.dimensions.keys()) and var_obj.ndim == 3:
+                        v = f.create_variable(key, ('x', 'y', 'Time'), float)
+                        vals = npx.array(var_obj)
+                        v[:, :, :] = vals.swapaxes(0, 2)
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                        units=var_obj.attrs["units"])
+
+    # move hydrologic states to directory of transport model
+    base_path_tm = model._base_path.parent / "svat_transport"
+    states_hm_file1 = base_path_tm / "states_hm.nc"
+    shutil.copy(states_hm_file, states_hm_file1)
+
+    # load simulation
+    ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf")
+
+    # load observations (measured data)
+    path_obs = Path("/Users/robinschwemmle/Desktop/PhD/data/plot/Reckenholz/reckenholz_lysimeter.nc")
+    ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
+
+    # plot observed and simulated time series
+    base_path_figs = model._base_path / "figures"
+
+    time_origin = ds_sim['Time'].attrs['time_origin']
+    days = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    date_sim = num2date(days, units=f"days since {ds_sim['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    date_obs = num2date(days, units=f"days since {ds_obs['time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    ds_sim = ds_sim.assign_coords(date=("Time", date_sim))
+    ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
+    vars_obs = ['AET', 'PERC']
+    vars_sim = ['aet', 'q_ss']
+    for var_obs, var_sim in zip(vars_obs, vars_sim):
+        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals
+        sim_vals = ds_sim[var_sim].isel(x=0, y=0).values
+        # join observations on simulations
+        df_eval = eval_utils.join_obs_on_sim(date_sim, sim_vals, df_obs)
+        # plot observed and simulated time series
+        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim], fmt_x='date')
+        file_str = '%s.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed and simulated time series
+        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], fmt_x='date', x_lab='Time [year]')
+        file_str = '%s_cum.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = '%s_cum_year_facet.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)

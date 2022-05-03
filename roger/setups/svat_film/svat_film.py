@@ -5,7 +5,6 @@ from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
 from roger.core.utilities import _get_row_no
 import roger.lookuptables as lut
-from roger.io_tools import yml
 import numpy as onp
 
 
@@ -44,25 +43,12 @@ class SVATFILMSetup(RogerSetup):
             var_obj = infile.variables['time']
             return onp.array(var_obj)[-1] * 60 * 60 + 24 * 60 * 60
 
-    def _get_ncr(self):
-        nc_file = self._base_path / 'crop_rotation.nc'
-        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables['year_season']
-            return len(onp.array(var_obj))
-
-    def _read_config(self):
-        config_file = self._base_path / "config.yml"
-        config = yml.Config(config_file)
-        return config
-
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
         settings.identifier = "SVATFILM"
 
-        config = self._read_config()
-
-        settings.nx, settings.ny, settings.nz = config.nrows, config.ncols, 1
+        settings.nx, settings.ny, settings.nz = 1, 1, 1
         settings.nitt = self._get_nitt()
         settings.nittevent = self._get_nittevent()
         settings.nittevent_p1 = settings.nittevent + 1
@@ -71,32 +57,17 @@ class SVATFILMSetup(RogerSetup):
         settings.nittevent_ff_p1 = settings.nittevent_ff + 1
         settings.nevent_ff = self._get_nevent_ff()
 
-        settings.dx = config.cell_width
-        settings.dy = config.cell_width
+        settings.dx = 1
+        settings.dy = 1
         settings.dz = 1
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
 
-        settings.enable_groundwater_boundary = config.enable_groundwater_boundary
-        settings.enable_film_flow = config.enable_film_flow
-        settings.enable_crop_phenology = config.enable_crop_phenology
-        settings.enable_crop_rotation = config.enable_crop_rotation
-        settings.enable_lateral_flow = config.enable_lateral_flow
-        settings.enable_groundwater = config.enable_groundwater
-        settings.enable_offline_transport = config.enable_offline_transport
-        settings.enable_bromide = config.enable_bromide
-        settings.enable_chloride = config.enable_chloride
-        settings.enable_deuterium = config.enable_deuterium
-        settings.enable_oxygen18 = config.enable_oxygen18
-        settings.enable_nitrate = config.enable_nitrate
+        settings.enable_film_flow = True
         settings.enable_macropore_lower_boundary_condition = False
 
         settings.ff_tc = 0.15
-
-        if settings.enable_crop_rotation:
-            settings.ncrops = 3
-            settings.ncr = self._get_ncr()
 
     @roger_routine
     def set_grid(self, state):

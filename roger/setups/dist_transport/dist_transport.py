@@ -3,7 +3,6 @@ import h5netcdf
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, at, where, scipy_stats as sstx
-from roger.io_tools import yml
 import numpy as onp
 
 
@@ -30,11 +29,6 @@ class DISTTRANSPORTSetup(RogerSetup):
             var_obj = infile.variables['Time']
             return len(onp.array(var_obj)) * 60 * 60 * 24
 
-    def _read_config(self):
-        config_file = self._base_path / "config.yml"
-        config = yml.Config(config_file)
-        return config
-
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
@@ -55,19 +49,15 @@ class DISTTRANSPORTSetup(RogerSetup):
         settings.x_origin = 0.0
         settings.y_origin = 0.0
 
-        settings.enable_groundwater_boundary = config.enable_groundwater_boundary
-        settings.enable_film_flow = config.enable_film_flow
-        settings.enable_crop_phenology = config.enable_crop_phenology
-        settings.enable_crop_rotation = config.enable_crop_rotation
-        settings.enable_lateral_flow = config.enable_lateral_flow
-        settings.enable_groundwater = config.enable_groundwater
-        settings.enable_offline_transport = config.enable_offline_transport
-        settings.enable_bromide = config.enable_bromide
-        settings.enable_chloride = config.enable_chloride
-        settings.enable_deuterium = config.enable_deuterium
-        settings.enable_oxygen18 = config.enable_oxygen18
-        settings.enable_nitrate = config.enable_nitrate
-        settings.tm_structure = config.tm_structure
+        settings.enable_groundwater_boundary = False
+        settings.enable_lateral_flow = True
+        settings.enable_offline_transport = True
+        settings.enable_bromide = False
+        settings.enable_chloride = False
+        settings.enable_deuterium = False
+        settings.enable_oxygen18 = False
+        settings.enable_nitrate = False
+        settings.tm_structure = "complete-mixing"
 
     @roger_routine
     def set_grid(self, state):

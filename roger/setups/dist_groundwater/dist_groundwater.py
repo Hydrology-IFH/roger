@@ -6,7 +6,6 @@ from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
 from roger.core.utilities import _get_row_no
 import roger.lookuptables as lut
-from roger.io_tools import yml
 import numpy as onp
 
 
@@ -39,11 +38,6 @@ class DISTGROUNDWATERSetup(RogerSetup):
             var_obj = infile.variables['time']
             return onp.array(var_obj)[-1] * 60 * 60 + 24 * 60 * 60
 
-    def _read_config(self):
-        config_file = self._base_path / "config.yml"
-        config = yml.Config(config_file)
-        return config
-
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
@@ -51,14 +45,14 @@ class DISTGROUNDWATERSetup(RogerSetup):
 
         config = self._read_config()
 
-        settings.nx, settings.ny, settings.nz = config.nrows, config.ncols, 1
+        settings.nx, settings.ny, settings.nz = 8, 8, 1
         settings.nitt = self._get_nitt()
         settings.nittevent = self._get_nittevent()
         settings.nittevent_p1 = settings.nittevent + 1
         settings.runlen = self._get_runlen()
 
-        settings.dx = config.cell_width
-        settings.dy = config.cell_width
+        settings.dx = 1
+        settings.dy = 1
         settings.dz = 1
 
         settings.x_origin = 0.0

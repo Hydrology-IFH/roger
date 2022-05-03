@@ -1,8 +1,29 @@
 from pathlib import Path
+import glob
+import os
+import datetime
 import h5netcdf
+import matplotlib.pyplot as plt
+import xarray as xr
+from cftime import num2date
+import pandas as pd
+from SALib.sample import saltelli
+from SALib.analyze import sobol
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from matplotlib.colors import Normalize
+import seaborn as sns
+
+from roger import runtime_settings as rs
+rs.backend = "numpy"
+rs.force_overwrite = True
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
-from roger.core.operators import numpy as npx, update, at, where, scipy_stats as sstx
+from roger.core.operators import numpy as npx, update, at
+from roger.tools.setup import write_forcing_tracer
+import roger.tools.evaluation as eval_utils
+import roger.tools.labels as labs
+from roger.io_tools import yml
 import numpy as onp
 
 
@@ -10,6 +31,16 @@ class SVATTRANSPORTSetup(RogerSetup):
     """A SVAT transport model.
     """
     _base_path = Path(__file__).parent
+    _bounds = {
+        'num_vars': 6,
+        'names': ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'],
+        'bounds': [[1, 400],
+                   [1, 1500],
+                   [0.05, 0.33],
+                   [0.05, 0.33],
+                   [0.05, 0.33],
+                   [0.1, 120]]
+    }
 
     def _read_var_from_nc(self, var, file):
         nc_file = self._base_path / file
@@ -18,16 +49,27 @@ class SVATTRANSPORTSetup(RogerSetup):
             return npx.array(var_obj)
 
     def _get_nitt(self):
-        nc_file = self._base_path / 'states_hm.nc'
+        nc_file = self._base_path / 'states_hm_sensitivity.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['Time']
             return len(onp.array(var_obj))
 
+    def _get_nx(self):
+        nc_file = self._base_path / 'states_hm_sensitivity.nc'
+        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+            var_obj = infile.variables['x']
+            return len(onp.array(var_obj))
+
     def _get_runlen(self):
-        nc_file = self._base_path / 'states_hm.nc'
+        nc_file = self._base_path / 'states_hm_sensitivity.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['Time']
             return len(onp.array(var_obj)) * 60 * 60 * 24
+
+    def _read_config(self):
+        config_file = self._base_path / "config.yml"
+        config = yml.Config(config_file)
+        return config
 
     @roger_routine
     def set_settings(self, state):
@@ -40,19 +82,16 @@ class SVATTRANSPORTSetup(RogerSetup):
         settings.nages = settings.nitt + 1
         settings.runlen = self._get_runlen()
 
-        settings.dx = 1
-        settings.dy = 1
+        # lysimeter surface 3.14 square meter (2m diameter)
+        settings.dx = 2
+        settings.dy = 2
         settings.dz = 1
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
 
         settings.enable_offline_transport = True
-        settings.enable_bromide = False
-        settings.enable_chloride = False
-        settings.enable_deuterium = False
-        settings.enable_oxygen18 = False
-        settings.enable_nitrate = False
+        settings.enable_oxygen18 = True
         settings.tm_structure = "complete-mixing"
 
     @roger_routine
@@ -125,46 +164,18 @@ class SVATTRANSPORTSetup(RogerSetup):
             vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 0], 21)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 0], 22)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 0], 22)
-        elif settings.tm_structure in ["advection-dispersion", "preferential"]:
+        elif settings.tm_structure in ["advection-dispersion", "preferential", "time-variant advection-disperison", "time-variant preferential", "time-variant"]:
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[:, :, 0], 21)
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[:, :, 0], 21)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_transp.nc'))
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 1], self._read_var_from_nc("a", 'sas_parameters_transp.nc'))
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 2], self._read_var_from_nc("b", 'sas_parameters_transp.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 1], self._read_var_from_nc("a", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 2], self._read_var_from_nc("b", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_ss.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 1], self._read_var_from_nc("a", 'sas_parameters_q_ss.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 2], self._read_var_from_nc("b", 'sas_parameters_q_ss.nc'))
+            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, :], self._read_var_from_nc("sas_params_transp", f'sas_parameters_{settings.tm_structure}.nc'))
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, :], self._read_var_from_nc("sas_params_q_rz", f'sas_parameters_{settings.tm_structure}.nc'))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, :], self._read_var_from_nc("sas_params_q_ss", f'sas_parameters_{settings.tm_structure}.nc'))
         elif settings.tm_structure == "complete-mixing + advection-dispersion":
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[:, :, 0], 21)
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[:, :, 0], 21)
             vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 0], 1)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 1], self._read_var_from_nc("a", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 2], self._read_var_from_nc("b", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_ss.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 1], self._read_var_from_nc("a", 'sas_parameters_q_ss.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 2], self._read_var_from_nc("b", 'sas_parameters_q_ss.nc'))
-        elif settings.tm_structure in ["time-variant advection-disperison", "time-variant preferential"]:
-            vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[:, :, 0], 21)
-            vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[:, :, 0], 21)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_transp.nc'))
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 3], self._read_var_from_nc("lower_limit", 'sas_parameters_transp.nc'))
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 4], self._read_var_from_nc("upper_limit", 'sas_parameters_transp.nc'))
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 5], 0)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 6], vs.S_sat_rz - vs.S_pwp_rz)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 3], self._read_var_from_nc("lower_limit", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 4], self._read_var_from_nc("upper_limit", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 5], 0)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 6], vs.S_sat_rz - vs.S_pwp_rz)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_ss.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 3], self._read_var_from_nc("lower_limit", 'sas_parameters_q_ss.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 4], self._read_var_from_nc("upper_limit", 'sas_parameters_q_ss.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 5], 0)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 6], vs.S_sat_ss - vs.S_pwp_ss)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, :], self._read_var_from_nc("sas_params_q_rz", f'sas_parameters_{settings.tm_structure}.nc'))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, :], self._read_var_from_nc("sas_params_q_ss", f'sas_parameters_{settings.tm_structure}.nc'))
 
     @roger_routine
     def set_initial_conditions(self, state):
@@ -208,37 +219,9 @@ class SVATTRANSPORTSetup(RogerSetup):
             at[:, :, :, 1:], npx.cumsum(vs.sa_s, axis=3),
         )
 
-        if (settings.enable_bromide | settings.enable_chloride):
-            vs.C_rz = update(vs.C_rz, at[:, :, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[:, :, npx.newaxis])
-            vs.C_ss = update(vs.C_ss, at[:, :, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[:, :, npx.newaxis])
-            vs.msa_rz = update(
-                vs.msa_rz,
-                at[:, :, :2, :], vs.C_rz[:, :, :2, npx.newaxis] * vs.sa_rz[:, :, :2, :],
-            )
-            vs.msa_ss = update(
-                vs.msa_ss,
-                at[:, :, :2, :], vs.C_ss[:, :, :2, npx.newaxis] * vs.sa_ss[:, :, :2, :],
-            )
-            vs.msa_s = update(
-                vs.msa_s,
-                at[:, :, :, :], vs.msa_rz + vs.msa_ss,
-            )
-            vs.M_rz = update(
-                vs.M_rz,
-                at[:, :, :], npx.sum(vs.msa_rz, axis=-1),
-            )
-            vs.M_ss = update(
-                vs.M_ss,
-                at[:, :, :], npx.sum(vs.msa_ss, axis=-1),
-            )
-            vs.M_s = update(
-                vs.M_s,
-                at[:, :, :], npx.sum(vs.msa_s, axis=-1),
-            )
-
-        elif (settings.enable_oxygen18 | settings.enable_deuterium):
-            vs.C_rz = update(vs.C_rz, at[:, :, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[:, :, npx.newaxis])
-            vs.C_ss = update(vs.C_ss, at[:, :, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[:, :, npx.newaxis])
+        if (settings.enable_oxygen18 | settings.enable_deuterium):
+            vs.C_rz = update(vs.C_rz, at[:, :, :2], -13)
+            vs.C_ss = update(vs.C_ss, at[:, :, :2], -7)
             vs.msa_rz = update(
                 vs.msa_rz,
                 at[:, :, :2, :], vs.C_rz[:, :, :2, npx.newaxis],
@@ -280,38 +263,6 @@ class SVATTRANSPORTSetup(RogerSetup):
                 at[:, :, vs.taum1], vs.C_s[:, :, vs.tau] * vs.maskCatch,
             )
 
-        elif settings.enable_nitrate:
-            vs.C_rz = update(vs.C_rz, at[:, :, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[:, :, npx.newaxis])
-            vs.C_ss = update(vs.C_ss, at[:, :, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[:, :, npx.newaxis])
-            p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
-            p_dec = update(p_dec, at[:, :, :2, :], sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))[npx.newaxis, npx.newaxis, npx.newaxis, :])
-            vs.Nmin_rz = update(vs.Nmin_rz, at[:, :, :2, :], self._read_var_from_nc("Nmin_rz", 'initvals.nc')[:, :, npx.newaxis, npx.newaxis] * p_dec * settings.dx * settings.dy * 100)
-            vs.Nmin_ss = update(vs.Nmin_ss, at[:, :, :2, :], self._read_var_from_nc("Nmin_ss", 'initvals.nc')[:, :, npx.newaxis, npx.newaxis] * p_dec * settings.dx * settings.dy * 100)
-            vs.msa_rz = update(
-                vs.msa_rz,
-                at[:, :, :2, :], vs.C_rz[:, :, :2, npx.newaxis] * vs.sa_rz[:, :, :2, :],
-            )
-            vs.msa_ss = update(
-                vs.msa_ss,
-                at[:, :, :2, :], vs.C_ss[:, :, :2, npx.newaxis] * vs.sa_ss[:, :, :2, :],
-            )
-            vs.msa_s = update(
-                vs.msa_s,
-                at[:, :, :, :], vs.msa_rz + vs.msa_ss,
-            )
-            vs.M_rz = update(
-                vs.M_rz,
-                at[:, :, :], npx.sum(vs.msa_rz, axis=-1),
-            )
-            vs.M_ss = update(
-                vs.M_ss,
-                at[:, :, :], npx.sum(vs.msa_ss, axis=-1),
-            )
-            vs.M_s = update(
-                vs.M_s,
-                at[:, :, :], npx.sum(vs.msa_s, axis=-1),
-            )
-
     @roger_routine
     def set_forcing(self, state):
         vs = state.variables
@@ -328,166 +279,33 @@ class SVATTRANSPORTSetup(RogerSetup):
             vs.Q_RZ = update(vs.Q_RZ, at[:, :, :], self._read_var_from_nc("q_rz", 'states_hm.nc'))
             vs.Q_SS = update(vs.Q_SS, at[:, :, :], self._read_var_from_nc("q_ss", 'states_hm.nc'))
 
-            if settings.enable_bromide:
-                vs.M_IN = update(vs.M_IN, at[:, :, :], self._read_var_from_nc("Br", 'tracer_input.nc'))
-
-            if settings.enable_chloride:
-                vs.C_IN = update(vs.C_IN, at[:, :, :], self._read_var_from_nc("Cl", 'tracer_input.nc'))
-
             if settings.enable_deuterium:
-                vs.C_IN = update(vs.C_IN, at[:, :, :], self._read_var_from_nc("d2H", 'tracer_input.nc'))
+                vs.C_IN = update(vs.C_IN, at[:, :, :], self._read_var_from_nc("d2H", 'forcing_tracer.nc'))
 
             if settings.enable_oxygen18:
-                vs.C_IN = update(vs.C_IN, at[:, :, :], self._read_var_from_nc("d18O", 'tracer_input.nc'))
-
-            if settings.enable_nitrate:
-                # convert kg N/ha to mg/square meter
-                vs.NMIN_IN = update(vs.NMIN_IN, at[:, :, :], self._read_var_from_nc("Nmin", 'tracer_input.nc') * 100 * settings.dx * settings.dy)
-                vs.NORG_IN = update(vs.NORG_IN, at[:, :, :], self._read_var_from_nc("Norg", 'tracer_input.nc') * 100 * settings.dx * settings.dy)
-
-            if settings.enable_bromide:
-                mask_rain = (vs.PREC > 0) & (vs.TA > 0)
-                mask_sol = (vs.M_IN > 0)
-                nn_rain = npx.int64(npx.sum(npx.any(mask_rain, axis=(0, 1))))
-                nn_sol = npx.int64(npx.sum(npx.any(mask_sol, axis=(0, 1))))
-                vs.update(set_bromide_input_kernel(state, nn_rain, nn_sol))
+                vs.C_IN = update(vs.C_IN, at[:, :, :], self._read_var_from_nc("d18O", 'forcing_tracer.nc'))
 
             if settings.enable_deuterium or settings.enable_oxygen18:
                 vs.update(set_iso_input_kernel(state))
 
-            if settings.enable_nitrate:
-                mask_rain = (vs.PREC > 0) & (vs.TA > 0)
-                mask_sol = (vs.NMIN_IN > 0)
-                nn_rain = npx.int64(npx.sum(npx.any(mask_rain, axis=(0, 1))))
-                nn_sol = npx.int64(npx.sum(npx.any(mask_sol, axis=(0, 1))))
-                vs.update(set_nitrate_input_kernel(state, nn_rain, nn_sol))
-
         vs.update(set_states_kernel(state))
-        if settings.enable_bromide:
-            vs.update(set_forcing_bromide_kernel(state))
-
-        if settings.enable_chloride:
-            vs.update(set_forcing_chloride_kernel(state))
 
         if settings.enable_deuterium or settings.enable_oxygen18:
             vs.update(set_forcing_iso_kernel(state))
-
-        if settings.enable_nitrate:
-            vs.update(set_forcing_nitrate_kernel(state))
 
     @roger_routine
     def set_diagnostics(self, state):
         diagnostics = state.diagnostics
 
-        diagnostics["rates"].output_variables = ["M_transp"]
-        diagnostics["rates"].output_frequency = 24 * 60 * 60
-        diagnostics["rates"].sampling_frequency = 1
-
-        diagnostics["collect"].output_variables = ["TT_transp"]
-        diagnostics["collect"].output_frequency = 24 * 60 * 60
-        diagnostics["collect"].sampling_frequency = 1
-
-        diagnostics["averages"].output_variables = ["C_rz", "C_ss"]
+        diagnostics["averages"].output_variables = ["C_q_ss"]
         diagnostics["averages"].output_frequency = 24 * 60 * 60
         diagnostics["averages"].sampling_frequency = 1
 
     @roger_routine
     def after_timestep(self, state):
         vs = state.variables
-        settings = state.settings
 
         vs.update(after_timestep_kernel(state))
-        if settings.enable_nitrate:
-            vs.update(after_timestep_nitrate_kernel(state))
-
-
-@roger_kernel(static_args=("nn_rain", "nn_sol"))
-def set_bromide_input_kernel(state, nn_rain, nn_sol):
-    vs = state.variables
-
-    M_IN = allocate(state.dimensions, ("x", "y", "t"))
-
-    mask_rain = (vs.PREC > 0) & (vs.TA > 0)
-    mask_sol = (vs.M_IN > 0)
-    sol_idx = npx.zeros((nn_sol,), dtype=int)
-    sol_idx = update(sol_idx, at[:], where(npx.any(mask_sol, axis=(0, 1)), size=nn_sol, fill_value=0)[0])
-    rain_idx = npx.zeros((nn_rain,), dtype=int)
-    rain_idx = update(rain_idx, at[:], where(npx.any(mask_rain, axis=(0, 1)), size=nn_rain, fill_value=0)[0])
-    end_rain = npx.zeros((1,), dtype=int)
-
-    # join solute input on closest rainfall event
-    for i in range(nn_sol):
-        rain_sum = allocate(state.dimensions, ("x", "y"))
-        nn_end = allocate(state.dimensions, ("x", "y"))
-        input_itt = npx.nanargmin(npx.where(rain_idx - sol_idx[i] < 0, npx.NaN, rain_idx - sol_idx[i]))
-        start_rain = rain_idx[input_itt]
-        rain_sum = update(
-            rain_sum,
-            at[:, :], npx.max(npx.where(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1) <= 20, npx.max(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1), axis=-1), 0), axis=-1),
-        )
-        nn_end = npx.max(npx.where(npx.cumsum(vs.PREC[:, :, start_rain:]) <= 20, npx.max(npx.arange(npx.shape(vs.PREC)[2])[npx.newaxis, npx.newaxis, npx.shape(vs.PREC)[2]-start_rain], axis=-1), 0))
-        end_rain = update(end_rain, at[:], start_rain + nn_end)
-        end_rain = update(end_rain, at[:], npx.where(end_rain > npx.shape(vs.PREC)[2], npx.shape(vs.PREC)[2], end_rain))
-
-        # proportions for redistribution
-        M_IN = update(
-            M_IN,
-            at[:, :, start_rain:end_rain[0]], vs.M_IN[:, :, sol_idx[i], npx.newaxis] * (vs.PREC[:, :, start_rain:end_rain[0]] / rain_sum[:, :, npx.newaxis]),
-        )
-
-    # solute input concentration
-    vs.M_IN = update(
-        vs.M_IN,
-        at[:, :, :], M_IN,
-    )
-    vs.C_IN = update(
-        vs.C_IN,
-        at[:, :, :], npx.where(vs.PREC > 0, vs.M_IN / vs.PREC, 0),
-    )
-
-    return KernelOutput(
-        M_IN=vs.M_IN,
-        C_IN=vs.C_IN,
-    )
-
-
-@roger_kernel
-def set_forcing_bromide_kernel(state):
-    vs = state.variables
-
-    vs.M_in = update(
-        vs.M_in,
-        at[:, :], vs.M_IN[:, :, vs.itt] * vs.maskCatch,
-    )
-    vs.C_in = update(
-        vs.C_in,
-        at[:, :], vs.C_IN[:, :, vs.itt] * vs.maskCatch,
-    )
-
-    return KernelOutput(
-        M_in=vs.M_in,
-        C_in=vs.C_in,
-    )
-
-
-@roger_kernel
-def set_forcing_chloride_kernel(state):
-    vs = state.variables
-
-    vs.C_in = update(
-        vs.C_in,
-        at[:, :], npx.where((vs.PREC[:, :, vs.itt] > 0) & (vs.TA[:, :, vs.itt] > 0), vs.C_IN[:, :, vs.itt], 0) * vs.maskCatch,
-    )
-
-    vs.M_in = update(
-        vs.M_in,
-        at[:, :], vs.C_in * vs.PREC[:, :, vs.itt] * vs.maskCatch,
-    )
-
-    return KernelOutput(
-        M_in=vs.M_in,
-        C_in=vs.C_in,
-    )
 
 
 @roger_kernel
@@ -518,93 +336,6 @@ def set_forcing_iso_kernel(state):
     return KernelOutput(
         M_in=vs.M_in,
         C_in=vs.C_in,
-    )
-
-
-@roger_kernel(static_args=("nn_rain", "nn_sol"))
-def set_nitrate_input_kernel(state, nn_rain, nn_sol):
-    vs = state.variables
-
-    NMIN_IN = allocate(state.dimensions, ("x", "y", "t"))
-
-    mask_rain = (vs.PREC > 0) & (vs.TA > 0)
-    mask_sol = (vs.NMIN_IN > 0)
-    sol_idx = npx.zeros((nn_sol,), dtype=int)
-    sol_idx = update(sol_idx, at[:], where(npx.any(mask_sol, axis=(0, 1)), size=nn_sol, fill_value=0)[0])
-    rain_idx = npx.zeros((nn_rain,), dtype=int)
-    rain_idx = update(rain_idx, at[:], where(npx.any(mask_rain, axis=(0, 1)), size=nn_rain, fill_value=0)[0])
-    end_rain = npx.zeros((1,), dtype=int)
-
-    # join solute input on closest rainfall event
-    for i in range(nn_sol):
-        rain_sum = allocate(state.dimensions, ("x", "y"))
-        nn_end = allocate(state.dimensions, ("x", "y"))
-        input_itt = npx.nanargmin(npx.where(rain_idx - sol_idx[i] < 0, npx.NaN, rain_idx - sol_idx[i]))
-        start_rain = rain_idx[input_itt]
-        rain_sum = update(
-            rain_sum,
-            at[:, :], npx.max(npx.where(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1) <= 20, npx.max(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1), axis=-1), 0), axis=-1),
-        )
-        nn_end = npx.max(npx.where(npx.cumsum(vs.PREC[:, :, start_rain:]) <= 20, npx.max(npx.arange(npx.shape(vs.PREC)[2])[npx.newaxis, npx.newaxis, npx.shape(vs.PREC)[2]-start_rain], axis=-1), 0))
-        end_rain = update(end_rain, at[:], start_rain + nn_end)
-        end_rain = update(end_rain, at[:], npx.where(end_rain > npx.shape(vs.PREC)[2], npx.shape(vs.PREC)[2], end_rain))
-
-        # proportions for redistribution
-        NMIN_IN = update(
-            NMIN_IN,
-            at[:, :, start_rain:end_rain[0]], vs.M_IN[:, :, sol_idx[i], npx.newaxis] * (vs.PREC[:, :, start_rain:end_rain[0]] / rain_sum[:, :, npx.newaxis]),
-        )
-
-    # solute input concentration
-    vs.M_IN = update(
-        vs.M_IN,
-        at[:, :, :], NMIN_IN * 0.3,
-    )
-    vs.C_IN = update(
-        vs.C_IN,
-        at[:, :, :], npx.where(vs.PREC > 0, vs.M_IN / vs.PREC, 0),
-    )
-    vs.NMIN_IN = update(
-        vs.NMIN_IN,
-        at[:, :, :], NMIN_IN * 0.7,
-    )
-
-    return KernelOutput(
-        M_IN=vs.M_IN,
-        C_IN=vs.C_IN,
-        NMIN_IN=vs.NMIN_IN,
-    )
-
-
-@roger_kernel
-def set_forcing_nitrate_kernel(state):
-    vs = state.variables
-
-    vs.C_in = update(
-        vs.C_in,
-        at[:, :], vs.C_IN[:, :, vs.itt] * vs.maskCatch,
-    )
-
-    vs.M_in = update(
-        vs.M_in,
-        at[:, :], vs.M_IN[:, :, vs.itt] * vs.maskCatch,
-    )
-
-    vs.Nmin_in = update(
-        vs.Nmin_in,
-        at[:, :], vs.NMIN_IN[:, :, vs.itt] * vs.maskCatch,
-    )
-
-    vs.Norg_in = update(
-        vs.Norg_in,
-        at[:, :], vs.NORG_IN[:, :, vs.itt] * vs.maskCatch,
-    )
-
-    return KernelOutput(
-        M_in=vs.M_in,
-        C_in=vs.C_in,
-        Nmin_in=vs.Nmin_in,
-        Norg_in=vs.Norg_in,
     )
 
 
@@ -739,32 +470,6 @@ def after_timestep_kernel(state):
 
 
 @roger_kernel
-def after_timestep_nitrate_kernel(state):
-    vs = state.variables
-
-    vs.Nmin_rz = update(
-        vs.Nmin_rz,
-        at[:, :, vs.taum1, :], vs.Nmin_rz[:, :, vs.tau, :],
-        )
-
-    vs.Nmin_ss = update(
-        vs.Nmin_ss,
-        at[:, :, vs.taum1, :], vs.Nmin_ss[:, :, vs.tau, :],
-        )
-
-    vs.Nmin_s = update(
-        vs.Nmin_s,
-        at[:, :, vs.taum1, :], vs.Nmin_s[:, :, vs.tau, :],
-        )
-
-    return KernelOutput(
-        Nmin_rz=vs.Nmin_rz,
-        Nmin_ss=vs.Nmin_ss,
-        Nmin_s=vs.Nmin_s
-        )
-
-
-@roger_kernel
 def calc_conc_iso_storage(state, sa, msa):
     """Calculates isotope signal of storage.
     """
@@ -829,3 +534,248 @@ def _ffill_3d(state, arr):
     )
 
     return arr_fill
+
+
+tm_structures = ['preferential', 'advection-dispersion',
+                 'complete-mixing advection-dispersion',
+                 'time-variant preferential',
+                 'time-variant advection-dispersion']
+for tm_structure in tm_structures:
+    tms = tm_structure.replace(" ", "_")
+    model = SVATTRANSPORTSetup()
+    model._set_tm_structure(tm_structure)
+    input_path = model._base_path / "input"
+    write_forcing_tracer(input_path, 'd18O')
+    model.setup()
+    model.warmup()
+    model.run()
+
+    # directory of results
+    base_path_results = model._base_path / "results"
+    if not os.path.exists(base_path_results):
+        os.mkdir(base_path_results)
+
+    # merge model output into single file
+    path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
+    diag_files = glob.glob(path)
+    states_tm_file = model._base_path / f"states_tm_{tms}_sensitivity_reverse.nc"
+    with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
+        f.attrs.update(
+            date_created=datetime.datetime.today().isoformat(),
+            title=f'RoGeR {tm_structure} transport model saltelli results (reverse) at Rietholzbach Lysimeter site',
+            institution='University of Freiburg, Chair of Hydrology',
+            references='',
+            comment=f'SVAT {tm_structure} transport model with free drainage'
+        )
+        for dfs in diag_files:
+            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                # set dimensions with a dictionary
+                if not f.dimensions:
+                    f.dimensions = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages'])}
+                    v = f.create_variable('x', ('x',), float)
+                    v.attrs['long_name'] = 'Zonal coordinate'
+                    v.attrs['units'] = 'meters'
+                    v[:] = npx.arange(f.dimensions["x"])
+                    v = f.create_variable('y', ('y',), float)
+                    v.attrs['long_name'] = 'Meridonial coordinate'
+                    v.attrs['units'] = 'meters'
+                    v[:] = npx.arange(f.dimensions["y"])
+                    v = f.create_variable('Time', ('Time',), float)
+                    var_obj = df.variables.get('Time')
+                    with h5netcdf.File(model._base_path / 'forcing_tracer.nc', "r", decode_vlen_strings=False) as infile:
+                        time_origin = infile.variables['time'].attrs['time_origin']
+                    v.attrs.update(time_origin=time_origin,
+                                   units=var_obj.attrs["units"])
+                    v[:] = npx.array(var_obj)
+                    v = f.create_variable('ages', ('ages',), float)
+                    v.attrs['long_name'] = 'Water ages'
+                    v.attrs['units'] = 'days'
+                    v[:] = npx.arange(1, f.dimensions["ages"]+1)
+                    v = f.create_variable('nages', ('nages',), float)
+                    v.attrs['long_name'] = 'Water ages (cumulated)'
+                    v.attrs['units'] = 'days'
+                    v[:] = npx.arange(0, f.dimensions["nages"])
+                for var_sim in list(df.variables.keys()):
+                    var_obj = df.variables.get(var_sim)
+                    if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3:
+                        v = f.create_variable(var_sim, ('x', 'y', 'Time'), float)
+                        vals = npx.array(var_obj)
+                        v[:, :, :] = vals.swapaxes(0, 2)
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                    elif var_sim not in list(f.dimensions.keys()) and "ages" in var_obj.dimensions:
+                        v = f.create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
+                        vals = npx.array(var_obj)
+                        vals = vals.swapaxes(0, 3)
+                        vals = vals.swapaxes(1, 2)
+                        vals = vals.swapaxes(2, 3)
+                        v[:, :, :, :] = vals
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                    elif var_sim not in list(f.dimensions.keys()) and "nages" in var_obj.dimensions:
+                        v = f.create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
+                        vals = npx.array(var_obj)
+                        vals = vals.swapaxes(0, 3)
+                        vals = vals.swapaxes(1, 2)
+                        vals = vals.swapaxes(2, 3)
+                        v[:, :, :, :] = vals
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+
+    # load simulation
+    ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    states_hm_file = model._base_path / "states_hm_sensitivity.nc"
+    ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
+
+    # load observations (measured data)
+    path_obs = Path("/Users/robinschwemmle/Desktop/PhD/data/plot/rietholzbach/rietholzbach_lysimeter.nc")
+    ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
+
+    # assign date
+    time_origin = ds_sim_tm['Time'].attrs['time_origin']
+    days = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    date_sim = num2date(days, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    date_obs = num2date(days, units=f"days since {ds_obs['time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim))
+    ds_sim_hm = ds_sim_hm.assign_coords(date=("Time", date_sim))
+    ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
+
+    # DataFrame with sampled model parameters and the corresponding metrics
+    nx = model.state.settings.nx  # number of rows
+    ny = model.state.settings.ny  # number of columns
+    df_params_eff = pd.DataFrame(index=range(nx * ny))
+    # sampled model parameters
+    for param in ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']:
+        df_params_eff.loc[:, param] = ds_sim_hm[param].isel(y=0).values
+
+    # compare observations and simulations
+    ncol = 0
+    idx = ds_sim_tm.Time  # time index
+    for nrow in range(nx):
+        # calculate simulated oxygen-18 composite sample
+        df_perc_18O_obs = pd.DataFrame(index=idx, columns=['perc_obs', 'd18O_perc_obs'])
+        df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=nrow, y=ncol).values
+        df_perc_18O_obs.loc[:, 'd18O_perc_obs'] = ds_obs['d18O_perc'].isel(x=nrow, y=ncol).values
+        sample_no = pd.DataFrame(index=df_perc_18O_obs.dropna().index, columns=['sample_no'])
+        sample_no = sample_no.loc['1997':'2007']
+        sample_no['sample_no'] = range(len(sample_no.index))
+        df_perc_18O_sim = pd.DataFrame(index=idx, columns=['perc_sim', 'd18O_perc_sim'])
+        df_perc_18O_sim['perc_sim'] = ds_sim_hm['q_ss'].isel(x=nrow, y=ncol).values
+        df_perc_18O_sim['d18O_perc_sim'] = ds_sim_tm['C_q_ss'].isel(x=nrow, y=ncol).values
+        df_perc_18O_sim = df_perc_18O_sim.join(sample_no)
+        df_perc_18O_sim.loc[:, 'sample_no'] = df_perc_18O_sim.loc[:, 'sample_no'].fillna(method='bfill', limit=14)
+        perc_sum = df_perc_18O_sim.groupby(['sample_no']).sum().loc[:, 'perc_sim']
+        sample_no['perc_sum'] = perc_sum.values
+        df_perc_18O_sim = df_perc_18O_sim.join(sample_no['perc_sum'])
+        df_perc_18O_sim.loc[:, 'perc_sum'] = df_perc_18O_sim.loc[:, 'perc_sum'].fillna(method='bfill', limit=14)
+        df_perc_18O_sim['weight'] = df_perc_18O_sim['perc_sim'] / df_perc_18O_sim['perc_sum']
+        df_perc_18O_sim['d18O_weight'] = df_perc_18O_sim['d18O_perc_sim'] * df_perc_18O_sim['weight']
+        d18O_sample = df_perc_18O_sim.groupby(['sample_no']).sum().loc[:, 'd18O_weight']
+        sample_no['d18O_sample'] = d18O_sample.values
+        df_perc_18O_sim = df_perc_18O_sim.join(sample_no['d18O_sample'])
+        df_perc_18O_sim.loc[:, 'd18O_sample'] = df_perc_18O_sim.loc[:, 'd18O_sample'].fillna(method='bfill', limit=14)
+        cond = (df_perc_18O_sim['d18O_sample'] == 0)
+        df_perc_18O_sim.loc[cond, 'd18O_sample'] = onp.NaN
+        d18O_perc_cs = onp.zeros((1, 1, len(idx)))
+        d18O_perc_cs[nrow, ncol, :] = df_perc_18O_sim.loc[:, 'd18O_sample'].values
+        ds_sim_tm.assign(d18O_perc_cs=d18O_perc_cs)
+        # calculate observed oxygen-18 composite sample
+        df_perc_18O_obs.loc[:, 'd18O_perc_cs'] = df_perc_18O_obs['d18O_perc'].fillna(method='bfill', limit=14)
+
+        perc_sample_sum_obs = df_perc_18O_sim.join(df_perc_18O_obs).groupby(['sample_no']).sum().loc[:, 'perc_obs']
+        sample_no['perc_obs_sum'] = perc_sample_sum_obs.values
+        df_perc_18O_sim = df_perc_18O_sim.join(sample_no['perc_obs_sum'])
+        df_perc_18O_sim.loc[:, 'perc_obs_sum'] = df_perc_18O_sim.loc[:, 'perc_obs_sum'].fillna(method='bfill', limit=14)
+
+        # join observations on simulations
+        obs_vals = ds_obs['d18O_perc'].isel(x=nrow, y=ncol).values
+        sim_vals = ds_sim_tm['d18O_perc_cs'].isel(x=nrow, y=ncol).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = ds_obs['d18O_perc'].isel(x=nrow, y=ncol).values
+        df_eval = eval_utils.join_obs_on_sim(date_sim, sim_vals, df_obs)
+        df_eval = df_eval.dropna()
+
+        # calculate metrics
+        var_sim = 'C_q_ss'
+        obs_vals = df_eval.loc[:, 'obs'].values
+        sim_vals = df_eval.loc[:, 'sim'].values
+        key_kge = 'KGE_' + var_sim
+        df_params_eff.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
+        key_kge_alpha = 'KGE_alpha_' + var_sim
+        df_params_eff.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
+        key_kge_beta = 'KGE_beta_' + var_sim
+        df_params_eff.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
+        key_r = 'r_' + var_sim
+        df_params_eff.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+
+    # write to .txt
+    file = base_path_results / f"params_eff_{tm_structure}.txt"
+    df_params_eff.to_csv(file, header=True, index=False, sep="\t")
+
+    # perform sensitivity analysis
+    df_params = df_params_eff.loc[:, model._bounds['names']]
+    n_params = len(model._bounds['names'])
+    df_eff = df_params_eff.iloc[:, n_params:]
+    dict_si = {}
+    for name in df_eff.columns:
+        Y = df_eff[name].values
+        Si = sobol.analyze(model._bounds, Y)
+        Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
+        dict_si[name] = pd.DataFrame(Si_filter, index=model._bounds['names'])
+
+    base_path_figs = model._base_path / "figures"
+    if not os.path.exists(base_path_figs):
+        os.mkdir(base_path_figs)
+
+    # plot sobol indices
+    _LABS = {'KGE_C_q_ss': 'KGE',
+             'KGE_beta_C_q_ss': '$\beta$',
+             'KGE_alpha_C_q_ss': '$\alpha$',
+             'r_C_q_ss': 'r',
+             }
+    ncol = len(df_eff.columns)
+    xaxis_labels = [labs._LABS[k].split(' ')[0] for k in model._bounds['names']]
+    cmap = cm.get_cmap('Greys')
+    norm = Normalize(vmin=0, vmax=2)
+    colors = cmap(norm([0.5, 1.5]))
+    fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(14, 5))
+    for i, name in enumerate(df_eff.columns):
+        indices = dict_si[name][['S1', 'ST']]
+        err = dict_si[name][['S1_conf', 'ST_conf']]
+        indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
+        ax[i].set_xticklabels(xaxis_labels)
+        ax[i].set_title(_LABS[name])
+        ax[i].legend(["First-order", "Total"], frameon=False)
+    ax[-1].legend().set_visible(False)
+    ax[-2].legend().set_visible(False)
+    ax[-3].legend().set_visible(False)
+    ax[0].set_ylabel('Sobol index [-]')
+    fig.tight_layout()
+    file = base_path_figs / f"sobol_indices_{tms}.png"
+    fig.savefig(file, dpi=250)
+
+    # make dotty plots
+    nrow = len(df_eff.columns)
+    ncol = model._bounds['num_vars']
+    fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(14, 7))
+    for i in range(nrow):
+        for j in range(ncol):
+            y = df_eff.iloc[:, i]
+            x = df_params.iloc[:, j]
+            sns.regplot(x=x, y=y, ax=ax[i, j], ci=None, color='k',
+                        scatter_kws={'alpha': 0.2, 's': 4, 'color': 'grey'})
+            ax[i, j].set_xlabel('')
+            ax[i, j].set_ylabel('')
+
+    for j in range(ncol):
+        xlabel = labs._LABS[model._bounds['names'][j].split(' ')[0]]
+        ax[-1, j].set_xlabel(xlabel)
+
+    ax[0, 0].set_ylabel(r'$KGE$ [-]')
+    ax[1, 0].set_ylabel(r'$\alpha$ [-]')
+    ax[2, 0].set_ylabel(r'$\beta$ [-]')
+    ax[3, 0].set_ylabel(r'r [-]')
+
+    fig.subplots_adjust(wspace=0.2, hspace=0.3)
+    file = base_path_figs / f"dotty_plots_{tms}.png"
+    fig.savefig(file, dpi=250)

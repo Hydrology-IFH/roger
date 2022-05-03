@@ -434,6 +434,57 @@ def write_forcing_tracer(input_dir, tracer, nrows=1, ncols=1, uniform=True, floa
             v.attrs['units'] = 'meters'
 
 
+@roger_sync
+def write_crop_rotation(input_dir, nrows=1, ncols=1, float_type="float64"):
+    """Writes crop rotation data
+
+    Args
+    ----------
+    input_dir : Path
+        path to directory with input data
+
+    nrows : int, optional
+        number of rows
+
+    ncols : int, optional
+        number of columns
+    """
+    csv_file = input_dir / 'crop_rotation.csv'
+    crops = pd.read_csv(csv_file, sep=';', skiprows=1)
+    nc_file = input_dir / 'crop_rotation.nc'
+    with h5netcdf.File(nc_file, 'w', decode_vlen_strings=False) as f:
+        f.attrs.update(
+            date_created=datetime.datetime.today().isoformat(),
+            title='Crop rotation',
+            institution='University of Freiburg, Chair of Hydrology',
+            references='',
+            comment=''
+        )
+        # set dimensions with a dictionary
+        f.dimensions = {'x': nrows, 'y': ncols, 'year_season': len(crops.columns[1:])}
+        arr = onp.full((nrows, ncols, len(crops.columns[1:])), 598, dtype=int)
+        idx = onp.arange(nrows * ncols).reshape((nrows, ncols))
+        for row in range(nrows):
+            for col in range(ncols):
+                arr[row, col, :] = crops.iloc[idx[row, col], 1:]
+
+        v = f.create_variable('crop', ('x', 'y', 'year_season'), int)
+        v[:, :,  :] = arr
+        v.attrs['long_name'] = 'crop'
+        v.attrs['units'] = ''
+        v = f.create_variable('year_season', ('year_season',), 'S11')
+        v.attrs['units'] = 'year_season'
+        v[:] = onp.array(crops.columns[1:].astype('S11').values, dtype='S11')
+        v = f.create_variable('x', ('x',), float_type)
+        v.attrs['long_name'] = 'Zonal coordinate'
+        v.attrs['units'] = 'meters'
+        v[:] = onp.arange(nrows)
+        v = f.create_variable('y', ('y',), float_type)
+        v.attrs['long_name'] = 'Meridonial coordinate'
+        v.attrs['units'] = 'meters'
+        v[:] = onp.arange(ncols)
+
+
 def validate(data: pd.DataFrame):
     """Check if Dataframe has correct type and is numerical.
 

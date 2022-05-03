@@ -3,6 +3,7 @@ jax
 mpi4py
 mpi4jax
 spyder
+matplotlib
 seaborn
 sphinx_rtd_theme
 xarray
