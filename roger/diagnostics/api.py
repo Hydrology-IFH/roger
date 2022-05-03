@@ -6,13 +6,14 @@ def create_default_diagnostics(state):
     from roger.diagnostics.averages import Averages
     from roger.diagnostics.snapshot import Snapshot
     from roger.diagnostics.collect import Collect
+    from roger.diagnostics.constant import Constant
     from roger.diagnostics.rates import Rates
     from roger.diagnostics.minimum import Minimum
     from roger.diagnostics.maximum import Maximum
     from roger.diagnostics.tracer_monitor import TracerMonitor
     from roger.diagnostics.water_monitor import WaterMonitor
 
-    return {Diag.name: Diag(state) for Diag in (Averages, Snapshot, Collect, Rates, Minimum, Maximum, TracerMonitor, WaterMonitor)}
+    return {Diag.name: Diag(state) for Diag in (Averages, Snapshot, Collect, Constant, Rates, Minimum, Maximum, TracerMonitor, WaterMonitor)}
 
 
 def initialize(state):
@@ -42,4 +43,7 @@ def output(state):
             diagnostic.output(state)
         # 10 minutes
         elif diagnostic.output_frequency == 10 * 60 and ((vs.time % (10 * 60) == 0) or (vs.time % (60 * 60) == 0) or (vs.time % (24 * 60 * 60) == 0)):
+            diagnostic.output(state)
+        # sampling of constant values
+        elif diagnostic.output_frequency == 0 and ((vs.time == 10 * 60) or (vs.time == 60 * 60) or (vs.time == 24 * 60 * 60)):
             diagnostic.output(state)

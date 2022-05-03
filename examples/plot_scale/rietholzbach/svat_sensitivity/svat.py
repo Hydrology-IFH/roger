@@ -220,6 +220,10 @@ class SVATSetup(RogerSetup):
         diagnostics["averages"].output_frequency = 24 * 60 * 60
         diagnostics["averages"].sampling_frequency = 1
 
+        diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']
+        diagnostics["constant"].output_frequency = 0
+        diagnostics["constant"].sampling_frequency = 1
+
     @roger_routine
     def after_timestep(self, state):
         vs = state.variables
@@ -641,21 +645,18 @@ with h5netcdf.File(states_hm_si_file, 'w', decode_vlen_strings=False) as f:
                 v[:] = npx.array(var_obj)
             for var_sim in list(df.variables.keys()):
                 var_obj = df.variables.get(var_sim)
-                if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3:
+                if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] > 1:
                     v = f.create_variable(var_sim, ('x', 'y', 'Time'), float)
                     vals = npx.array(var_obj)
                     v[:, :, :] = vals.swapaxes(0, 2)
                     v.attrs.update(long_name=var_obj.attrs["long_name"],
                                    units=var_obj.attrs["units"])
-
-    # write sampled parameters
-    vs = model.state.variables
-    vsm = model.state.var_meta
-    for param in model._bounds['names']:
-        v = f.create_variable(param, ('x', 'y'), float)
-        v[:, :] = vs.get(param)[2:-2, 2:-2]
-        v.attrs.update(long_name=vsm[param].name,
-                       units=vsm[param].units)
+                elif var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] == 1:
+                    v = f.create_variable(var_sim, ('x', 'y'), float)
+                    vals = npx.array(var_obj)
+                    v[:, :] = vals.swapaxes(0, 2)[0, :, :]
+                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                   units=var_obj.attrs["units"])
 
 # move hydrologic states to directories of transport model
 base_path_tm = model._base_path.parent / "svat_transport_sensitivity_reverse"
@@ -682,16 +683,15 @@ nx = model.state.settings.nx  # number of rows
 ny = model.state.settings.ny  # number of columns
 df_params_eff = pd.DataFrame(index=range(nx * ny))
 # sampled model parameters
-vs = model.state.variables
-df_params_eff.loc[:, 'dmpv'] = vs.dmpv[2:-2, 2:-2].flatten()
-df_params_eff.loc[:, 'lmpv'] = vs.lmpv[2:-2, 2:-2].flatten()
-df_params_eff.loc[:, 'theta_ac'] = vs.theta_ac[2:-2, 2:-2].flatten()
-df_params_eff.loc[:, 'theta_ufc'] = vs.theta_ufc[2:-2, 2:-2].flatten()
-df_params_eff.loc[:, 'theta_pwp'] = vs.theta_pwp[2:-2, 2:-2].flatten()
-df_params_eff.loc[:, 'ks'] = vs.ks[2:-2, 2:-2].flatten()
+df_params_eff.loc[:, 'dmpv'] = ds_sim["dmpv"].values.flatten()
+df_params_eff.loc[:, 'lmpv'] = ds_sim["lmpv"].values.flatten()
+df_params_eff.loc[:, 'theta_ac'] = ds_sim["theta_ac"].values.flatten()
+df_params_eff.loc[:, 'theta_ufc'] = ds_sim["theta_ufc"].values.flatten()
+df_params_eff.loc[:, 'theta_pwp'] = ds_sim["theta_pwp"].values.flatten()
+df_params_eff.loc[:, 'ks'] = ds_sim["ks"].values.flatten()
 # calculate metrics
 vars_sim = ['aet', 'q_ss', 'theta', 'dS_s', 'dS']
-vars_obs = ['aet', 'q_ss', 'theta', 'dS_s', 'dS']
+vars_obs = ['AET', 'PERC', 'THETA', 'dWEIGHT', 'dWEIGHT']
 for var_sim, var_obs in zip(vars_sim, vars_obs):
     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
@@ -700,6 +700,7 @@ for var_sim, var_obs in zip(vars_sim, vars_obs):
         sim_vals = ds_sim[var_sim].isel(x=nrow, y=0).values
         # join observations on simulations
         df_eval = eval_utils.join_obs_on_sim(date_sim, sim_vals, df_obs)
+        df_eval = df_eval.dropna()
 
         if var_sim in ['theta_rz', 'theta_ss', 'theta']:
             Ni = len(df_eval.index)

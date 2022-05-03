@@ -426,6 +426,10 @@ class SVATTRANSPORTSetup(RogerSetup):
         diagnostics["averages"].output_frequency = 24 * 60 * 60
         diagnostics["averages"].sampling_frequency = 1
 
+        diagnostics["constant"].output_variables = ["sas_params_transp", "sas_params_q_rz", "sas_params_q_ss"]
+        diagnostics["constant"].output_frequency = 0
+        diagnostics["constant"].sampling_frequency = 1
+
     @roger_routine
     def after_timestep(self, state):
         vs = state.variables
@@ -697,7 +701,7 @@ for tm_structure in tm_structures:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
                 if not f.dimensions:
-                    f.dimensions = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages'])}
+                    f.dimensions = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
                     v = f.create_variable('x', ('x',), float)
                     v.attrs['long_name'] = 'Zonal coordinate'
                     v.attrs['units'] = 'meters'
@@ -721,12 +725,27 @@ for tm_structure in tm_structures:
                     v.attrs['long_name'] = 'Water ages (cumulated)'
                     v.attrs['units'] = 'days'
                     v[:] = npx.arange(0, f.dimensions["nages"])
+                    v = f.create_variable('n_sas_params', ('n_sas_params',), float)
+                    v.attrs['long_name'] = 'Number of SAS parameters'
+                    v.attrs['units'] = ''
+                    v[:] = npx.arange(0, f.dimensions["n_sas_params"])
                 for var_sim in list(df.variables.keys()):
                     var_obj = df.variables.get(var_sim)
-                    if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3:
+                    if var_sim not in list(f.dimensions.keys()) and "Time" in list(var_obj.dimensions.keys()):
                         v = f.create_variable(var_sim, ('x', 'y', 'Time'), float)
                         vals = npx.array(var_obj)
                         v[:, :, :] = vals.swapaxes(0, 2)
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                    elif var_sim not in list(f.dimensions.keys()) and var_obj.shape[-1] == f.dimensions["n_sas_params"]:
+                        v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
+                        vals = npx.array(var_obj)
+                        v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
+                        vals = npx.array(var_obj)
+                        vals = vals.swapaxes(0, 3)
+                        vals = vals.swapaxes(1, 2)
+                        vals = vals.swapaxes(2, 3)
+                        v[:, :, :] = vals[0, :, :, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
                     elif var_sim not in list(f.dimensions.keys()) and "ages" in var_obj.dimensions:
