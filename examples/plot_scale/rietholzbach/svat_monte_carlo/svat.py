@@ -618,7 +618,7 @@ with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
                 elif var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] == 1:
                     v = f.create_variable(var_sim, ('x', 'y'), float)
                     vals = npx.array(var_obj)
-                    v[:, :] = vals.swapaxes(0, 2)[0, :, :]
+                    v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
                     v.attrs.update(long_name=var_obj.attrs["long_name"],
                                    units=var_obj.attrs["units"])
 
