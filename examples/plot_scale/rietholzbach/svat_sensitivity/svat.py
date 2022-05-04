@@ -883,7 +883,7 @@ df_params_eff.to_csv(file, header=True, index=False, sep="\t")
 
 # perform sensitivity analysis
 df_params = df_params_eff.loc[:, model._bounds['names']]
-df_eff = df_params_eff.loc[:, ['KGE_et_act', 'KGE_q_ss', 'r_dS', 'E_multi']]
+df_eff = df_params_eff.loc[:, ['KGE_aet', 'KGE_q_ss', 'r_dS', 'E_multi']]
 dict_si = {}
 for name in df_eff.columns:
     Y = df_eff[name].values
