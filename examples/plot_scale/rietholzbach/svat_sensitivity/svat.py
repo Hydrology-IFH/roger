@@ -874,8 +874,6 @@ for var_sim, var_obs in zip(vars_sim, vars_obs):
                 key_phi = 'phi_' + var_sim
                 df_params_eff.loc[nrow, key_phi] = de.calc_phi(brel_mean, b_slope)
 
-df_params_eff.loc[:, 'KGE_swc'] = df_params_eff.loc[:, ['KGE_theta_rz', 'KGE_theta_ss']].mean()
-
 # Calculate multi-objective metric
 df_params_eff.loc[:, 'E_multi'] = 1/3 * df_params_eff.loc[:, 'r_dS'] + 1/3 * df_params_eff.loc[:, 'KGE_aet'] + 1/3 * df_params_eff.loc[:, 'KGE_q_ss']
 
