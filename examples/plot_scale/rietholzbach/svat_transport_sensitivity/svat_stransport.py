@@ -667,9 +667,11 @@ tm_structures = ['preferential', 'advection-dispersion',
 for tm_structure in tm_structures:
     tms = tm_structure.replace(" ", "_")
     model = SVATTRANSPORTSetup()
-    input_path = model._base_path / "input"
-    write_forcing_tracer(input_path, 'd18O', nrows=model._get_nx(), ncols=5)
     model._set_tm_structure(tm_structure)
+    input_path = model._base_path / "input"
+    forcing_path = model._base_path / "forcing_tracer.nc"
+    if not os.path.exists(forcing_path):
+        write_forcing_tracer(input_path, 'd18O')
     model.setup()
     model.warmup()
     model.run()
@@ -771,12 +773,14 @@ for tm_structure in tm_structures:
     ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
 
     # assign date
-    time_origin = ds_sim_tm['Time'].attrs['time_origin']
-    days = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    date_sim = num2date(days, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    date_obs = num2date(days, units=f"days since {ds_obs['time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim))
-    ds_sim_hm = ds_sim_hm.assign_coords(date=("Time", date_sim))
+    days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    days_obs = (ds_obs['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    date_obs = num2date(days_obs, units=f"days since {ds_obs['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    ds_sim_hm = ds_sim_hm.assign_coords(date=("Time", date_sim_hm))
+    ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
     ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
 
     # DataFrame with sampled model parameters and the corresponding metrics
@@ -853,7 +857,7 @@ for tm_structure in tm_structures:
         sim_vals = ds_sim_tm['d18O_perc_cs'].isel(x=nrow, y=ncol).values
         df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
         df_obs.loc[:, 'obs'] = ds_obs['d18O_perc'].isel(x=nrow, y=ncol).values
-        df_eval = eval_utils.join_obs_on_sim(date_sim, sim_vals, df_obs)
+        df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
         df_eval = df_eval.dropna()
 
         # calculate metrics

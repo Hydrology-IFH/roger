@@ -733,14 +733,15 @@ for tm_structure in tm_structures:
         base_path_figs = model._base_path / "figures"
 
         # assign date
-        time_origin = ds_sim_tm['Time'].attrs['time_origin']
-        days = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-        date_sim = num2date(days, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-        ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim))
-        ds_sim_hm = ds_sim_hm.assign_coords(date=("Time", date_sim))
+        days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+        days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+        date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+        date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+        ds_sim_hm = ds_sim_hm.assign_coords(date=("Time", date_sim_hm))
+        ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
 
         # plot percolation rate (in l/h) and bromide concentration (mmol/l)
-        df_perc_br = pd.DataFrame(index=date_sim, columns=['perc', 'Br_conc_mg', 'Br_conc_mmol'])
+        df_perc_br = pd.DataFrame(index=date_sim_hm, columns=['perc', 'Br_conc_mg', 'Br_conc_mmol'])
         # in liter per hour
         df_perc_br.loc[:, 'perc'] = ds_sim_hm['q_ss'].isel(x=0, y=0).values * (3.14/24)
         # in mg per liter

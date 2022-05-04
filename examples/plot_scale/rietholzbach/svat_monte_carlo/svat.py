@@ -630,10 +630,10 @@ path_obs = Path("/Users/robinschwemmle/Desktop/PhD/data/plot/rietholzbach/rietho
 ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
 
 # assign date
-time_origin = ds_sim['Time'].attrs['time_origin']
-days = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-date_sim = num2date(days - 1, units=f"days since {time_origin}", calendar='standard', only_use_cftime_datetimes=False)
-date_obs = num2date(days - 1, units=f"days since {time_origin}", calendar='standard', only_use_cftime_datetimes=False)
+days_sim = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+days_obs = (ds_obs['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+date_sim = num2date(days_sim, units=f"days since {ds_sim['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+date_obs = num2date(days_obs, units=f"days since {ds_obs['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
 ds_sim = ds_sim.assign_coords(date=("Time", date_sim))
 ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
 
