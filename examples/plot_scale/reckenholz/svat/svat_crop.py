@@ -18,7 +18,6 @@ from roger.tools.setup import write_forcing, write_crop_rotation
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
 import roger.lookuptables as lut
-from roger.io_tools import yml
 import numpy as onp
 
 
