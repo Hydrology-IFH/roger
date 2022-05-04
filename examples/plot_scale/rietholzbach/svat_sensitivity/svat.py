@@ -686,7 +686,14 @@ df_params_eff.loc[:, 'ks'] = ds_sim["ks"].isel(y=0).values.flatten()
 vars_sim = ['aet', 'q_ss', 'theta', 'dS_s', 'dS']
 vars_obs = ['AET', 'PERC', 'THETA', 'dWEIGHT', 'dWEIGHT']
 for var_sim, var_obs in zip(vars_sim, vars_obs):
-    obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+    if var_sim == 'theta':
+        obs_vals = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0)
+    elif var_sim == 'theta_rz':
+        obs_vals = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values[:5, :], axis=0)
+    elif var_sim == 'theta_ss':
+        obs_vals = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values[5:, :], axis=0)
+    else:
+        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
     df_obs.loc[:, 'obs'] = obs_vals
     for nrow in range(nx * ny):
