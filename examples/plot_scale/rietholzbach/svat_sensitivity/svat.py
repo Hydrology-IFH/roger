@@ -936,7 +936,7 @@ for i in range(nrow):
         ax[i, j].set_ylabel('')
 
 for j in range(ncol):
-    xlabel = labs._AXS_LABS[model._bounds['names'][j]]
+    xlabel = labs._LABS[model._bounds['names'][j]]
     ax[-1, j].set_xlabel(xlabel)
 
 ax[0, 0].set_ylabel('$KGE_{ET}$ [-]')
