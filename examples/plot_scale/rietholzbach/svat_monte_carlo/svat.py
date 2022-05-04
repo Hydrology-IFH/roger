@@ -593,12 +593,12 @@ with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
             if not f.dimensions:
                 f.dimensions = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
                 v = f.create_variable('x', ('x',), float)
-                v.attrs['long_name'] = 'Zonal coordinate'
-                v.attrs['units'] = 'meters'
+                v.attrs['long_name'] = 'Number of model run'
+                v.attrs['units'] = ''
                 v[:] = npx.arange(f.dimensions["x"])
                 v = f.create_variable('y', ('y',), float)
-                v.attrs['long_name'] = 'Meridonial coordinate'
-                v.attrs['units'] = 'meters'
+                v.attrs['long_name'] = ''
+                v.attrs['units'] = ''
                 v[:] = npx.arange(f.dimensions["y"])
                 v = f.create_variable('Time', ('Time',), float)
                 var_obj = df.variables.get('Time')
@@ -865,12 +865,12 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
         if not f.dimensions:
             f.dimensions = {'x': 1, 'y': 1, 'Time': len(df.variables['Time'])}
             v = f.create_variable('x', ('x',), float)
-            v.attrs['long_name'] = 'Zonal coordinate'
-            v.attrs['units'] = 'meters'
+            v.attrs['long_name'] = 'Number of model run'
+            v.attrs['units'] = ''
             v[:] = npx.arange(f.dimensions["x"])
             v = f.create_variable('y', ('y',), float)
-            v.attrs['long_name'] = 'Meridonial coordinate'
-            v.attrs['units'] = 'meters'
+            v.attrs['long_name'] = ''
+            v.attrs['units'] = ''
             v[:] = npx.arange(f.dimensions["y"])
             v = f.create_variable('Time', ('Time',), float)
             var_obj = df.variables.get('Time')
@@ -890,7 +890,7 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
             elif var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 2:
                 v = f.create_variable(var_sim, ('x', 'y'), float)
                 vals = npx.array(var_obj)
-                v[:, :] = vals
+                v[:, :] = vals[idx_best, :]
                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                units=var_obj.attrs["units"])
 
