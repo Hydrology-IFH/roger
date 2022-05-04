@@ -607,7 +607,7 @@ def _ffill_3d(state, arr):
 
 model = SVATTRANSPORTSetup()
 input_path = model._base_path / "input"
-model._set_tm_structure('advection-dispersion')
+model._set_tm_structure('preferential')
 write_forcing_tracer(input_path, 'd18O')
 model.setup()
 model.warmup()
