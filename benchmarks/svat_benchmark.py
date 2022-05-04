@@ -1,21 +1,51 @@
 from benchmark_base import benchmark_cli
 from pathlib import Path
-BASE_PATH = Path(__file__).parent
+import h5netcdf
+import numpy as onp
+import os
+
 
 @benchmark_cli
 def main(timesteps, size):
-    from roger import roger_routine
+    from roger import roger_routine, roger_kernel, KernelOutput
     from roger.setups.svat import SVATSetup
-    from roger.variables import Variable, allocate
-    from roger.distributed import global_min, global_max
-    from roger.core.operators import update, at, numpy as npx
-    from roger.setups.make_dummy_setup import make_setup
+    from roger.variables import allocate
+    from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
+    import roger.lookuptables as lut
+    from roger.core.utilities import _get_row_no
+    from roger.tools.make_toy_setup import make_forcing
 
     class SVAT2Benchmark(SVATSetup):
+        _base_path = Path(__file__).parent
+
+        def _read_var_from_nc(self, var, file):
+            nc_file = self._base_path / file
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables[var]
+                return npx.array(var_obj)
+
+        def _get_nittevent(self):
+            nc_file = self._base_path / 'forcing.nc'
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables['nitt_event']
+                return onp.int32(onp.array(var_obj)[0])
+
+        def _get_nitt(self):
+            nc_file = self._base_path / 'forcing.nc'
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables['time']
+                return len(onp.array(var_obj))
+
+        def _get_runlen(self):
+            nc_file = self._base_path / 'forcing.nc'
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables['time']
+                return onp.array(var_obj)[-1] * 60 * 60 + 24 * 60 * 60
+
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = "SVAT"
+            settings.identifier = "SVAT2Benchmark"
 
             settings.nx, settings.ny = size
             settings.nz = 1
@@ -72,14 +102,11 @@ def main(timesteps, size):
 
             if (vs.itt == 0):
 
-                vs.lu_id = update(vs.lu_id, at[:, :], 599)
+                vs.lu_id = update(vs.lu_id, at[:, :], 8)
                 vs.sealing = update(vs.sealing, at[:, :], 0)
-                vs.slope = update(vs.slope, at[:, :], 0)
-                vs.slope_per = update(vs.slope_per, at[:, :], vs.slope * 100)
-                vs.S_dep_tot = update(vs.S_dep_tot, at[:, :], 0)
                 vs.z_soil = update(vs.z_soil, at[:, :], 2200)
-                vs.dmpv = update(vs.dmpv, at[:, :], 100)
-                vs.lmpv = update(vs.lmpv, at[:, :], 1000)
+                vs.dmpv = update(vs.dmpv, at[:, :], 50)
+                vs.lmpv = update(vs.lmpv, at[:, :], 300)
                 vs.theta_ac = update(vs.theta_ac, at[:, :], 0.13)
                 vs.theta_ufc = update(vs.theta_ufc, at[:, :], 0.24)
                 vs.theta_pwp = update(vs.theta_pwp, at[:, :], 0.23)
@@ -100,8 +127,8 @@ def main(timesteps, size):
             vs.S_dep = update(vs.S_dep, at[:, :, :vs.taup1], 0)
             vs.S_snow = update(vs.S_snow, at[:, :, :vs.taup1], 0)
             vs.swe = update(vs.swe, at[:, :, :vs.taup1], 0)
-            vs.theta_rz = update(vs.theta_rz, at[:, :, :vs.taup1], 0.4)
-            vs.theta_ss = update(vs.theta_ss, at[:, :, :vs.taup1], 0.47)
+            vs.theta_rz = update(vs.theta_rz, at[:, :, :vs.taup1], 0.46)
+            vs.theta_ss = update(vs.theta_ss, at[:, :, :vs.taup1], 0.44)
 
         @roger_routine
         def set_forcing(self, state):
@@ -117,7 +144,7 @@ def main(timesteps, size):
 
         @roger_routine
         def set_diagnostics(self, state):
-            state.diagnostics.clear()
+            pass
 
         @roger_routine
         def after_timestep(self, state):
@@ -125,9 +152,8 @@ def main(timesteps, size):
 
             vs.update(after_timestep_kernel(state))
 
-
-        @roger_kernel
-        def set_parameters_monthly_kernel(state):
+    @roger_kernel
+    def set_parameters_monthly_kernel(state):
         vs = state.variables
 
         # land use dependent upper interception storage
@@ -281,9 +307,8 @@ def main(timesteps, size):
             basal_evap_coeff=vs.basal_evap_coeff
         )
 
-
-        @roger_kernel
-        def set_forcing_kernel(state):
+    @roger_kernel
+    def set_forcing_kernel(state):
         vs = state.variables
 
         vs.prec = update(vs.prec, at[:, :], vs.PREC[:, :, vs.itt])
@@ -297,19 +322,6 @@ def main(timesteps, size):
         vs.month = vs.MONTH[vs.itt]
         vs.doy = vs.DOY[vs.itt]
 
-        # reset fluxes at beginning of time step
-        q_sur = allocate(state.dimensions, ("x", "y"))
-        vs.q_sur = update(
-            vs.q_sur,
-            at[:, :], q_sur,
-        )
-
-        q_hof = allocate(state.dimensions, ("x", "y"))
-        vs.q_hof = update(
-            vs.q_hof,
-            at[:, :], q_hof,
-        )
-
         return KernelOutput(
             prec=vs.prec,
             ta=vs.ta,
@@ -320,13 +332,10 @@ def main(timesteps, size):
             year=vs.year,
             month=vs.month,
             doy=vs.doy,
-            q_sur=vs.q_sur,
-            q_hof=vs.q_hof,
         )
 
-
-        @roger_kernel
-        def after_timestep_kernel(state):
+    @roger_kernel
+    def after_timestep_kernel(state):
         vs = state.variables
 
         vs.ta = update(
@@ -449,6 +458,27 @@ def main(timesteps, size):
             vs.h,
             at[:, :, vs.taum1], vs.h[:, :, vs.tau],
         )
+        vs.z0 = update(
+            vs.z0,
+            at[:, :, vs.taum1], vs.z0[:, :, vs.tau],
+        )
+        # set to 0 for numerical errors
+        vs.S_fp_rz = update(
+            vs.S_fp_rz,
+            at[:, :], npx.where((vs.S_fp_rz > -1e-6) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz),
+        )
+        vs.S_lp_rz = update(
+            vs.S_lp_rz,
+            at[:, :], npx.where((vs.S_lp_rz > -1e-6) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz),
+        )
+        vs.S_fp_ss = update(
+            vs.S_fp_ss,
+            at[:, :], npx.where((vs.S_fp_ss > -1e-6) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss),
+        )
+        vs.S_lp_ss = update(
+            vs.S_lp_ss,
+            at[:, :], npx.where((vs.S_lp_ss > -1e-6) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss),
+        )
 
         return KernelOutput(
             ta=vs.ta,
@@ -481,13 +511,17 @@ def main(timesteps, size):
             k_rz=vs.k_rz,
             k_ss=vs.k_ss,
             k=vs.k,
+            z0=vs.z0,
+            S_fp_rz=vs.S_fp_rz,
+            S_lp_rz=vs.S_lp_rz,
+            S_fp_ss=vs.S_fp_ss,
+            S_lp_ss=vs.S_lp_ss,
         )
 
-    # generate setup
-    make_setup(BASE_PATH, "SVAT-BENCHMARK", nrows=size, ncols=size,
-               event_type='mixed', ndays=timesteps)
-
     model = SVAT2Benchmark()
+    forcing_path = model._base_path / "forcing.nc"
+    if not os.path.exists(forcing_path):
+        make_forcing(model._base_path, ndays=10)
     model.setup()
     model.run()
     return

@@ -885,7 +885,7 @@ for tm_structure in tm_structures:
     dict_si = {}
     for name in df_eff.columns:
         Y = df_eff[name].values
-        Si = sobol.analyze(model._bounds, Y)
+        Si = sobol.analyze(model._bounds, Y, calc_second_order=False)
         Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
         dict_si[name] = pd.DataFrame(Si_filter, index=model._bounds['names'])
 

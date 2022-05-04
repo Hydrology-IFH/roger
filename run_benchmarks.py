@@ -19,7 +19,8 @@ Runs selected Roger benchmarks back to back and writes timing results to a JSON 
 
 TESTDIR = os.path.join(os.path.dirname(__file__), os.path.relpath("benchmarks"))
 
-COMPONENTS = ["numpy", "numpy-mpi", "jax", "jax-gpu", "jax-mpi", "jax-gpu-mpi"]
+COMPONENTS = ["numpy", "numpy-mpi", "jax", "jax-mpi"]
+# COMPONENTS = ["numpy", "numpy-mpi", "jax", "jax-gpu", "jax-mpi", "jax-gpu-mpi"]
 
 STATIC_SETTINGS = " --size {nx} {ny} {nz} --timesteps {timesteps} --float-type {float_type}"
 

@@ -6,13 +6,12 @@ import h5netcdf
 from cftime import date2num
 
 from roger.tools.event_classification import calc_event_classification
-from roger.io_tools import yml
 from roger import roger_sync
 onp.random.seed(42)
 
 
 @roger_sync
-def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
+def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                event_type='rain', enable_groundwater_boundary=False,
                enable_film_flow=False, enable_crop_phenology=False,
                enable_crop_rotation=False, enable_lateral_flow=False,
@@ -34,22 +33,6 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
     Make toy setup with synthetic input data.
     """
     if not enable_offline_transport:
-        # generate config file
-        yml.write_config(base_path, identifier, None, nrows=nrows, ncols=ncols,
-                         enable_groundwater_boundary=enable_groundwater_boundary,
-                         enable_film_flow=enable_film_flow,
-                         enable_crop_phenology=enable_crop_phenology,
-                         enable_crop_rotation=enable_crop_rotation,
-                         enable_lateral_flow=enable_lateral_flow,
-                         enable_groundwater=enable_groundwater,
-                         enable_routing=enable_routing,
-                         enable_offline_transport=enable_offline_transport,
-                         enable_bromide=enable_bromide,
-                         enable_chloride=enable_chloride,
-                         enable_deuterium=enable_deuterium,
-                         enable_oxygen18=enable_oxygen18,
-                         enable_nitrate=enable_nitrate)
-
         # model parameters
         head_units_params = ['Unit']
         head_columns_params = ['No']
@@ -476,23 +459,6 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
                 v[:] = onp.arange(ncols)
 
     elif enable_offline_transport:
-        # generate config file
-        yml.write_config(base_path, identifier, None, nrows=nrows, ncols=ncols,
-                         enable_groundwater_boundary=enable_groundwater_boundary,
-                         enable_film_flow=enable_film_flow,
-                         enable_crop_phenology=enable_crop_phenology,
-                         enable_crop_rotation=enable_crop_rotation,
-                         enable_lateral_flow=enable_lateral_flow,
-                         enable_groundwater=enable_groundwater,
-                         enable_routing=enable_routing,
-                         enable_offline_transport=enable_offline_transport,
-                         enable_bromide=enable_bromide,
-                         enable_chloride=enable_chloride,
-                         enable_deuterium=enable_deuterium,
-                         enable_oxygen18=enable_oxygen18,
-                         enable_nitrate=enable_nitrate,
-                         tm_structure=tm_structure)
-
         # model parameters
         head_units_params = ['Unit']
         head_columns_params = ['No']
@@ -1157,3 +1123,292 @@ def make_setup(base_path, identifier="dummy", ndays=10, nrows=1, ncols=1,
         for var_name in initvals.columns:
             v = f.create_variable(var_name, ('x', 'y'), float_type)
             v[:, :] = initvals[var_name].values.reshape((nrows, ncols)).astype(float_type)
+
+
+@roger_sync
+def make_forcing(base_path, ndays=10, nrows=1, ncols=1,
+                 event_type='rain', enable_groundwater_boundary=False,
+                 enable_film_flow=False,
+                 enable_crop_phenology=False,
+                 z_soil=None,
+                 a=None,
+                 rain_sum_ff=100,
+                 max_dur=72,
+                 z_soil_max=5000,
+                 float_type="float64"):
+    """
+    Make toy forcing with synthetic data.
+    """
+    if event_type == 'rain':
+        # generate random rainfall
+        prec_rnd = onp.random.uniform(0, 1, 18)
+        n_prec_rnd = len(prec_rnd)
+        n_prec = ndays*24*6
+        prec = onp.zeros((n_prec))
+        prec[12:12+n_prec_rnd] = prec_rnd
+        prec[int(n_prec/2):int(n_prec/2)+n_prec_rnd] = prec_rnd
+        idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
+        # generate random air temperature
+        idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
+        ta = onp.random.uniform(15, 20, ndays)
+        # generate random potential evapotranspiration
+        pet = onp.random.uniform(2, 3, ndays)
+
+    elif event_type == 'snow':
+        # generate random rainfall
+        prec_rnd = onp.random.uniform(0, 1, 18)
+        n_prec_rnd = len(prec_rnd)
+        n_prec = ndays*24*6
+        prec = onp.zeros((n_prec))
+        prec[12:12+n_prec_rnd] = prec_rnd
+        prec[int(n_prec/2):int(n_prec/2)+n_prec_rnd] = prec_rnd
+        idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
+        # generate random air temperature
+        idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
+        ta = onp.random.uniform(-3, -1, ndays)
+        # generate random potential evapotranspiration
+        pet = onp.random.uniform(1, 2, ndays)
+
+    elif event_type == 'snow+rain':
+        # generate random rainfall
+        prec_rnd = onp.random.uniform(0, 1, 18)
+        n_prec_rnd = len(prec_rnd)
+        n_prec = ndays*24*6
+        prec = onp.zeros((n_prec))
+        prec[12:12+n_prec_rnd] = prec_rnd
+        prec[int(n_prec/2):int(n_prec/2)+n_prec_rnd] = prec_rnd
+        idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
+        # generate random air temperature
+        idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
+        ta = onp.random.uniform(0, 3, ndays)
+        ta[:2] = -1
+        # generate random potential evapotranspiration
+        pet = onp.random.uniform(1, 2, ndays)
+
+    elif event_type == 'heavyrain':
+        prec_rnd = onp.random.uniform(0.1, 6, 12*6)
+        n_prec_rnd = len(prec_rnd)
+        n_prec = ndays*24*6
+        prec = onp.zeros((n_prec))
+        prec[12:12+n_prec_rnd] = prec_rnd
+        prec[int(n_prec/2):int(n_prec/2)+n_prec_rnd] = prec_rnd
+        idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
+        # generate random air temperature
+        idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
+        ta = onp.random.uniform(15, 20, ndays)
+        # generate random potential evapotranspiration
+        pet = onp.random.uniform(2, 3, ndays)
+
+    elif event_type == 'mixed':
+        x1 = onp.unique(onp.random.randint(low=0, high=ndays * 24 * 6, size=(int(100 * (ndays/365)),)))
+        x2 = onp.zeros((int(100 * (ndays/365)),), dtype=int)
+        for i in range(int(100 * (ndays/365)) - 1):
+            if x1[i+1] - x1[i] <= 1:
+                high = 2
+            else:
+                high = x1[i+1] - x1[i]
+            x2[i] = x1[i] + onp.random.randint(low=1, high=high)
+        x2[x2 > ndays * 24 * 6] = ndays * 24 * 6
+        x2[-1] = onp.random.randint(low=x1[-1] + 1, high=ndays * 24 * 6)
+
+        prec = onp.zeros((ndays * 24 * 6,))
+        for i, ii in zip(x1, x2):
+            lam = onp.random.weibull(1, 1)
+            if lam > 5.5:
+                prec[i:ii] = onp.random.poisson(lam, ii - i) * 0.5
+            else:
+                prec[i:ii] = onp.random.poisson(lam, ii - i) * onp.random.uniform(0.01, 0.1, ii - i)
+        idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
+        # generate random air temperature
+        idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
+        ta_init = -5
+        ta_off = 35
+        pet_init = 1.5
+        pet_off = 4
+        ta = onp.zeros((ndays,))
+        pet = onp.zeros((ndays,))
+        scale = onp.sin(onp.linspace(0, onp.pi, 365))
+        ii = 0
+        for i in range(ndays):
+            if i % 365 == 0:
+                ii = 0
+            ta[i] = onp.random.uniform(ta_init - 1 + scale[ii] * ta_off, ta_init + 1 + scale[ii] * ta_off, 1)
+            # generate random potential evapotranspiration
+            pet[i] = onp.random.uniform(pet_init - 1 + scale[ii] * pet_off, pet_init + 1 + scale[ii] * pet_off, 1)
+            ii += 1
+
+    elif event_type == 'norain':
+        # generate random rainfall
+        prec = onp.zeros((ndays*24*6))
+        idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
+        # generate random air temperature
+        idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
+        ta = onp.random.uniform(15, 20, ndays)
+        # generate random potential evapotranspiration
+        pet = onp.random.uniform(2, 3, ndays)
+
+    input_dir = base_path / "input"
+    if not os.path.exists(input_dir):
+        os.mkdir(input_dir)
+
+    df_prec = pd.DataFrame(index=idx_prec, columns=['YYYY', 'MM', 'DD', 'hh', 'mm', 'PREC'])
+    df_prec.loc[:, 'YYYY'] = df_prec.index.year
+    df_prec.loc[:, 'MM'] = df_prec.index.month
+    df_prec.loc[:, 'DD'] = df_prec.index.day
+    df_prec.loc[:, 'hh'] = df_prec.index.hour
+    df_prec.loc[:, 'mm'] = df_prec.index.minute
+    df_prec.loc[:, 'PREC'] = prec
+    file = base_path / "input" / "PREC.txt"
+    df_prec.to_csv(file, header=True, index=False, sep=" ")
+
+    df_ta = pd.DataFrame(index=idx_ta_pet, columns=['YYYY', 'MM', 'DD', 'hh', 'mm', 'TA'])
+    df_ta.loc[:, 'YYYY'] = df_ta.index.year
+    df_ta.loc[:, 'MM'] = df_ta.index.month
+    df_ta.loc[:, 'DD'] = df_ta.index.day
+    df_ta.loc[:, 'hh'] = df_ta.index.hour
+    df_ta.loc[:, 'mm'] = df_ta.index.minute
+    df_ta.loc[:, 'TA'] = ta
+    if enable_crop_phenology:
+        df_ta.loc[:, 'TA_min'] = ta - 3
+        df_ta.loc[:, 'TA_max'] = ta + 3
+    file = base_path / "input" / "TA.txt"
+    df_ta.to_csv(file, header=True, index=False, sep=" ")
+
+    df_pet = pd.DataFrame(index=idx_ta_pet, columns=['YYYY', 'MM', 'DD', 'hh', 'mm', 'PET'])
+    df_pet.loc[:, 'YYYY'] = df_pet.index.year
+    df_pet.loc[:, 'MM'] = df_pet.index.month
+    df_pet.loc[:, 'DD'] = df_pet.index.day
+    df_pet.loc[:, 'hh'] = df_pet.index.hour
+    df_pet.loc[:, 'mm'] = df_pet.index.minute
+    df_pet.loc[:, 'PET'] = pet
+    file = base_path / "input" / "PET.txt"
+    df_pet.to_csv(file, header=True, index=False, sep=" ")
+
+    input_dir = base_path / "input"
+    if not enable_film_flow:
+        res = calc_event_classification(input_dir)
+        NITT_EVENT = res['nitt_event']
+        df_events = pd.DataFrame(index=res['meteo'].index, columns=['YYYY', 'MM', 'DOY', 'hh', 'EVENT_ID', 'time_step', 'PREC', 'PET', 'TA'])
+        df_events.loc[:, 'time_step'] = res['time_steps']
+        df_events.loc[:, 'YYYY'] = res['years']
+        df_events.loc[:, 'MM'] = res['months']
+        df_events.loc[:, 'DOY'] = res['days_of_year']
+        df_events.loc[:, 'hh'] = res['hours']
+        df_events.loc[:, 'EVENT_ID'] = res['meteo']['event_no'].values
+        df_events.loc[:, 'PREC'] = res['meteo']['PREC'].values
+        df_events.loc[:, 'TA'] = res['meteo']['TA'].values
+        if enable_crop_phenology:
+            df_events.loc[:, 'TA_min'] = res['meteo']['TA_min'].values
+            df_events.loc[:, 'TA_max'] = res['meteo']['TA_max'].values
+        df_events.loc[:, 'PET'] = res['meteo']['PET'].values
+        df_events.loc[:, 'itt'] = range(len(df_events.index))
+
+    elif enable_film_flow:
+        res = calc_event_classification(input_dir, enable_film_flow=enable_film_flow,
+                                        z_soil=z_soil, a=a, rain_sum_ff=rain_sum_ff,
+                                        max_dur=max_dur, z_soil_max=z_soil_max)
+        NITT_EVENT = res['nitt_event']
+        NEVENT_FF = res['nevent_ff']
+        df_events = pd.DataFrame(index=res['meteo'].index, columns=['YYYY', 'MM', 'DOY', 'hh', 'EVENT_ID', 'EVENT_ID_FF', 'time_step', 'PREC', 'PET', 'TA'])
+        df_events.loc[:, 'time_step'] = res['time_steps']
+        df_events.loc[:, 'YYYY'] = res['years']
+        df_events.loc[:, 'MM'] = res['months']
+        df_events.loc[:, 'DOY'] = res['days_of_year']
+        df_events.loc[:, 'hh'] = res['hours']
+        df_events.loc[:, 'EVENT_ID'] = res['meteo']['event_no'].values
+        df_events.loc[:, 'EVENT_ID_FF'] = res['meteo']['event_no_ff'].values
+        df_events.loc[:, 'PREC'] = res['meteo']['PREC'].values
+        df_events.loc[:, 'TA'] = res['meteo']['TA'].values
+        if enable_crop_phenology:
+            df_events.loc[:, 'TA_min'] = res['meteo']['TA_min'].values
+            df_events.loc[:, 'TA_max'] = res['meteo']['TA_max'].values
+        df_events.loc[:, 'PET'] = res['meteo']['PET'].values
+        df_events.loc[:, 'itt'] = range(len(df_events.index))
+
+    if enable_groundwater_boundary:
+        offset = onp.sin(onp.linspace(-onp.pi, onp.pi, ndays)) / 2
+        df_events.loc[:, 'Z_GW'] = 4 + offset
+
+    file = base_path / "input" / "EVENTS.txt"
+    df_events.to_csv(file, header=True, index=False, sep=" ")
+
+    nc_file = base_path / "forcing.nc"
+    with h5netcdf.File(nc_file, 'w', decode_vlen_strings=False) as f:
+        f.attrs.update(
+            date_created=datetime.datetime.today().isoformat(),
+            title='test forcing',
+            institution='University of Freiburg, Chair of Hydrology',
+            references='',
+            comment=''
+        )
+        # set dimensions with a dictionary
+        f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_events.index), 'scalar': 1}
+        v = f.create_variable('PREC', ('x', 'y', 'time'), float_type)
+        arr = df_events['PREC'].astype(float_type).values
+        v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+        v.attrs['long_name'] = 'Precipitation'
+        v.attrs['units'] = 'mm/dt'
+        v = f.create_variable('TA', ('x', 'y', 'time'), float_type)
+        arr = df_events['TA'].astype(float_type).values
+        v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+        v.attrs['long_name'] = 'air temperature'
+        v.attrs['units'] = 'degC'
+        v = f.create_variable('PET', ('x', 'y', 'time'), float_type)
+        arr = df_events['PET'].astype(float_type).values
+        v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+        v.attrs['long_name'] = 'Potential Evapotranspiration'
+        v.attrs['units'] = 'mm/dt'
+        v = f.create_variable('dt', ('time',), float_type)
+        v[:] = df_events['time_step'].astype(float_type).values
+        v.attrs['long_name'] = 'time step (!not constant)'
+        v.attrs['units'] = 'hour'
+        v = f.create_variable('year', ('time',), int)
+        v[:] = df_events['YYYY'].astype(int).values
+        v.attrs['units'] = 'year'
+        v = f.create_variable('month', ('time',), int)
+        v[:] = df_events['MM'].astype(int).values
+        v.attrs['units'] = 'month'
+        v = f.create_variable('doy', ('time',), int)
+        v[:] = df_events['DOY'].astype(int).values
+        v.attrs['units'] = 'day of year'
+        v = f.create_variable('EVENT_ID', ('time',), int)
+        v[:] = df_events['EVENT_ID'].astype(int).values
+        v.attrs['units'] = ''
+        v = f.create_variable('time', ('time',), float_type)
+        v.attrs['time_origin'] = f"{df_events.index[0]}"
+        v.attrs['units'] = 'hours'
+        v[:] = date2num(df_events.index.tolist(), units=f"hours since {df_events.index[0]}", calendar='standard')
+        v = f.create_variable('x', ('x',), int)
+        v.attrs['long_name'] = 'grid number in x-direction'
+        v.attrs['units'] = ''
+        v[:] = onp.arange(nrows)
+        v = f.create_variable('y', ('y',), int)
+        v.attrs['long_name'] = 'grid number in y-direction'
+        v.attrs['units'] = ''
+        v[:] = onp.arange(ncols)
+        v = f.create_variable('nitt_event', ('scalar',), int)
+        v.attrs['long_name'] = 'Number of iterations of longest event'
+        v[:] = NITT_EVENT
+        if enable_film_flow:
+            v = f.create_variable('EVENT_ID_FF', ('time',), int)
+            v[:] = df_events['EVENT_ID_FF'].astype(int).values
+            v.attrs['units'] = ''
+            v = f.create_variable('nevent_ff', ('scalar',), int)
+            v.attrs['long_name'] = 'Number of film flow events'
+            v[:] = NEVENT_FF
+        if enable_groundwater_boundary:
+            arr = df_events['Z_GW'].values
+            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+            v.attrs['long_name'] = 'Groundwater head'
+            v.attrs['units'] = 'm'
+        if enable_crop_phenology:
+            v = f.create_variable('TA_min', ('x', 'y', 'time'), float_type)
+            arr = df_events['TA_min'].values - 3
+            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+            v.attrs['long_name'] = 'minimum air temperature'
+            v.attrs['units'] = 'degC'
+            v = f.create_variable('TA_max', ('x', 'y', 'time'), float_type)
+            arr = df_events['TA_max'].values + 3
+            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+            v.attrs['long_name'] = 'maximum air temperature'
+            v.attrs['units'] = 'degC'
