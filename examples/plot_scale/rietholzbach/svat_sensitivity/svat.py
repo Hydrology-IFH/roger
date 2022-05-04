@@ -676,12 +676,12 @@ nx = model.state.settings.nx  # number of rows
 ny = model.state.settings.ny  # number of columns
 df_params_eff = pd.DataFrame(index=range(nx * ny))
 # sampled model parameters
-df_params_eff.loc[:, 'dmpv'] = ds_sim["dmpv"].isel(Time=0, y=0).values.flatten()
-df_params_eff.loc[:, 'lmpv'] = ds_sim["lmpv"].isel(Time=0, y=0).values.flatten()
-df_params_eff.loc[:, 'theta_ac'] = ds_sim["theta_ac"].isel(Time=0, y=0).values.flatten()
-df_params_eff.loc[:, 'theta_ufc'] = ds_sim["theta_ufc"].isel(Time=0, y=0).values.flatten()
-df_params_eff.loc[:, 'theta_pwp'] = ds_sim["theta_pwp"].isel(Time=0, y=0).values.flatten()
-df_params_eff.loc[:, 'ks'] = ds_sim["ks"].isel(Time=0, y=0).values.flatten()
+df_params_eff.loc[:, 'dmpv'] = ds_sim["dmpv"].isel(y=0).values.flatten()
+df_params_eff.loc[:, 'lmpv'] = ds_sim["lmpv"].isel(y=0).values.flatten()
+df_params_eff.loc[:, 'theta_ac'] = ds_sim["theta_ac"].isel(y=0).values.flatten()
+df_params_eff.loc[:, 'theta_ufc'] = ds_sim["theta_ufc"].isel(y=0).values.flatten()
+df_params_eff.loc[:, 'theta_pwp'] = ds_sim["theta_pwp"].isel(y=0).values.flatten()
+df_params_eff.loc[:, 'ks'] = ds_sim["ks"].isel(y=0).values.flatten()
 # calculate metrics
 vars_sim = ['aet', 'q_ss', 'theta', 'dS_s', 'dS']
 vars_obs = ['AET', 'PERC', 'THETA', 'dWEIGHT', 'dWEIGHT']
