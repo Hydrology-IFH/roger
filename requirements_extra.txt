@@ -1,7 +1,5 @@
 jaxlib
 jax
-mpi4py
-mpi4jax
 spyder
 matplotlib
 seaborn
@@ -9,4 +7,6 @@ sphinx_rtd_theme
 xarray
 cftime
 salib
+# mpi4py
+# mpi4jax
 # pip install diag-eff

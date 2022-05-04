@@ -9,9 +9,11 @@ import xarray as xr
 import pandas as pd
 from de import de
 
-from roger import runtime_settings as rs
+from roger import runtime_settings as rs, runtime_state as rst
 rs.backend = "numpy"
 rs.force_overwrite = True
+if rs.mpi_comm:
+    rs.num_proc = (rst.proc_num, 1)
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where, random_uniform
@@ -95,8 +97,8 @@ class SVATSetup(RogerSetup):
         vs.doy = vs.DOY[vs.itt]
         vs.t = update(vs.t, at[:], npx.cumsum(vs.DT))
         # spatial grid
-        vs.x = update(vs.x, at[2:-2], npx.arange(1, settings.nx + 1) * (settings.dx / 2))
-        vs.y = update(vs.y, at[2:-2], npx.arange(1, settings.ny + 1) * (settings.dy / 2))
+        vs.x = update(vs.x, at[:], settings.dx)
+        vs.y = update(vs.y, at[:], settings.dy)
 
     @roger_routine
     def set_look_up_tables(self, state):

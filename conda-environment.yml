@@ -4,7 +4,7 @@ channels:
     - conda-forge
 
 dependencies:
-    - python=3.10
+    - python=3.9
     - pip
     - click
     - entrypoints
@@ -13,11 +13,11 @@ dependencies:
     - scipy
     - pandas
     - ruamel.yaml
-    - h5netcdf
-    - h5py
     - pillow
     - loguru
     - tqdm
     - cython
+    # - h5netcdf
+    # - h5py
     # - pip:
     #     - -e .
