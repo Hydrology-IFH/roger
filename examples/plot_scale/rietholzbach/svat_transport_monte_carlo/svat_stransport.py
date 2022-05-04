@@ -613,12 +613,12 @@ for tm_structure in tm_structures:
                 if not f.dimensions:
                     f.dimensions = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
                     v = f.create_variable('x', ('x',), float)
-                    v.attrs['long_name'] = 'Zonal coordinate'
-                    v.attrs['units'] = 'meters'
+                    v.attrs['long_name'] = 'Number of model run'
+                    v.attrs['units'] = ''
                     v[:] = npx.arange(f.dimensions["x"])
                     v = f.create_variable('y', ('y',), float)
-                    v.attrs['long_name'] = 'Meridonial coordinate'
-                    v.attrs['units'] = 'meters'
+                    v.attrs['long_name'] = ''
+                    v.attrs['units'] = ''
                     v[:] = npx.arange(f.dimensions["y"])
                     v = f.create_variable('Time', ('Time',), float)
                     var_obj = df.variables.get('Time')
