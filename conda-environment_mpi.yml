@@ -1,4 +1,4 @@
-name: roger
+name: roger-mpi
 
 channels:
     - conda-forge
@@ -17,7 +17,5 @@ dependencies:
     - loguru
     - tqdm
     - cython
-    - h5netcdf
-    - h5py
     # - pip:
     #     - -e .

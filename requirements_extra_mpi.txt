@@ -1,0 +1,14 @@
+jaxlib
+jax
+spyder
+matplotlib
+seaborn
+sphinx_rtd_theme
+xarray
+cftime
+salib
+# install parallel hdf5
+# install h5py from binary
+# install h5netcdf without dependencies
+# mpi4jax
+# pip install diag-eff
