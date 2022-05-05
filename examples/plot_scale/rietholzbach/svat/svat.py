@@ -80,6 +80,13 @@ class SVATSetup(RogerSetup):
         vs.month = vs.MONTH[vs.itt]
         vs.doy = vs.DOY[vs.itt]
         vs.t = update(vs.t, at[:], npx.cumsum(vs.DT))
+        # spatial grid
+        dx = allocate(state.dimensions, ("x"))
+        dx = update(dx, at[:], settings.dx)
+        dy = allocate(state.dimensions, ("y"))
+        dy = update(dy, at[:], settings.dy)
+        vs.x = update(vs.x, at[1:], npx.cumsum(dx[1:]))
+        vs.y = update(vs.y, at[1:], npx.cumsum(dy[1:]))
 
     @roger_routine
     def set_look_up_tables(self, state):
