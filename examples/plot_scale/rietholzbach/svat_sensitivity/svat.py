@@ -81,10 +81,19 @@ class SVATSetup(RogerSetup):
 
         settings.enable_macropore_lower_boundary_condition = False
 
-    @roger_routine
+    @roger_routine(
+        dist_safe=False,
+        local_variables=[
+            "DT_SECS",
+            "DT",
+            "MONTH",
+            "DOY",
+            "x",
+            "y",
+        ],
+    )
     def set_grid(self, state):
         vs = state.variables
-        settings = state.settings
 
         # temporal grid
         vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", 'forcing.nc'))
@@ -98,6 +107,13 @@ class SVATSetup(RogerSetup):
         vs.month = vs.MONTH[vs.itt]
         vs.doy = vs.DOY[vs.itt]
         vs.t = update(vs.t, at[:], npx.cumsum(vs.DT))
+        # grid of model runs
+        dx = allocate(state.dimensions, ("x"))
+        dx = update(dx, at[:], 1)
+        dy = allocate(state.dimensions, ("y"))
+        dy = update(dy, at[:], 1)
+        vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
+        vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
 
     @roger_routine
     def set_look_up_tables(self, state):
@@ -113,7 +129,17 @@ class SVATSetup(RogerSetup):
     def set_topography(self, state):
         pass
 
-    @roger_routine
+    @roger_routine(
+        dist_safe=False,
+        local_variables=[
+            "dmpv",
+            "lmpv",
+            "theta_ac",
+            "theta_ufc",
+            "theta_pwp",
+            "ks",
+        ],
+    )
     def set_parameters(self, state):
         vs = state.variables
 
@@ -160,7 +186,15 @@ class SVATSetup(RogerSetup):
         vs.theta_rz = update(vs.theta_rz, at[:, :, :vs.taup1], npx.where(0.46 > vs.theta_sat[:, :, npx.newaxis], vs.theta_sat[:, :, npx.newaxis], 0.46))
         vs.theta_ss = update(vs.theta_ss, at[:, :, :vs.taup1], npx.where(0.44 > vs.theta_sat[:, :, npx.newaxis], vs.theta_sat[:, :, npx.newaxis], 0.44))
 
-    @roger_routine
+    @roger_routine(
+        dist_safe=False,
+        local_variables=[
+            "PREC",
+            "TA",
+            "PET",
+            "EVENT_ID",
+        ],
+    )
     def set_forcing(self, state):
         vs = state.variables
 

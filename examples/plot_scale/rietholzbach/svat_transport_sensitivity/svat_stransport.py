@@ -3,16 +3,7 @@ import glob
 import os
 import datetime
 import h5netcdf
-import matplotlib.pyplot as plt
-import xarray as xr
-from cftime import num2date
-import pandas as pd
 from SALib.sample import saltelli
-from SALib.analyze import sobol
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-from matplotlib.colors import Normalize
-import seaborn as sns
 
 from roger import runtime_settings as rs, runtime_state as rst
 rs.backend = "numpy"
@@ -154,7 +145,13 @@ class SVATTRANSPORTSetup(RogerSetup):
         settings.enable_oxygen18 = True
         settings.tm_structure = self._tm_structure
 
-    @roger_routine
+    @roger_routine(
+        dist_safe=False,
+        local_variables=[
+            "x",
+            "y",
+        ],
+    )
     def set_grid(self, state):
         vs = state.variables
         settings = state.settings
@@ -167,6 +164,13 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs.t = update(vs.t, at[:], npx.cumsum(vs.DT))
         vs.ages = update(vs.ages, at[:], npx.arange(1, settings.nages))
         vs.nages = update(vs.nages, at[:], npx.arange(settings.nages))
+        # grid of model runs
+        dx = allocate(state.dimensions, ("x"))
+        dx = update(dx, at[:], 1)
+        dy = allocate(state.dimensions, ("y"))
+        dy = update(dy, at[:], 1)
+        vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
+        vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
 
     @roger_routine
     def set_look_up_tables(self, state):
@@ -176,7 +180,18 @@ class SVATTRANSPORTSetup(RogerSetup):
     def set_topography(self, state):
         pass
 
-    @roger_routine
+    @roger_routine(
+        dist_safe=False,
+        local_variables=[
+            "S_PWP_RZ",
+            "S_PWP_SS",
+            "S_SAT_RZ",
+            "S_SAT_SS",
+            "sas_params_transp",
+            "sas_params_q_rz",
+            "sas_params_q_ss",
+        ],
+    )
     def set_parameters(self, state):
         vs = state.variables
         settings = state.settings
@@ -293,7 +308,13 @@ class SVATTRANSPORTSetup(RogerSetup):
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 5], 0)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 6], vs.S_sat_ss - vs.S_pwp_ss)
 
-    @roger_routine
+    @roger_routine(
+        dist_safe=False,
+        local_variables=[
+            "S_RZ",
+            "S_SS",
+        ],
+    )
     def set_initial_conditions(self, state):
         vs = state.variables
         settings = state.settings
@@ -379,7 +400,21 @@ class SVATTRANSPORTSetup(RogerSetup):
                 at[:, :, vs.taum1], vs.C_s[:, :, vs.tau] * vs.maskCatch,
             )
 
-    @roger_routine
+    @roger_routine(
+        dist_safe=False,
+        local_variables=[
+            "PREC",
+            "TA",
+            "INF_MAT_RZ",
+            "INF_PF_RZ",
+            "INF_PF_SS",
+            "TRANSP",
+            "EVAP_SOIL",
+            "Q_RZ",
+            "Q_SS",
+            "C_IN",
+        ],
+    )
     def set_forcing(self, state):
         vs = state.variables
         settings = state.settings

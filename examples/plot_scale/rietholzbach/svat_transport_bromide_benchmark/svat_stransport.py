@@ -87,6 +87,13 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs.t = update(vs.t, at[:], npx.cumsum(vs.DT))
         vs.ages = update(vs.ages, at[:], npx.arange(1, settings.nages))
         vs.nages = update(vs.nages, at[:], npx.arange(settings.nages))
+        # grid of model runs
+        dx = allocate(state.dimensions, ("x"))
+        dx = update(dx, at[:], 1)
+        dy = allocate(state.dimensions, ("y"))
+        dy = update(dy, at[:], 1)
+        vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
+        vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
 
     @roger_routine
     def set_look_up_tables(self, state):

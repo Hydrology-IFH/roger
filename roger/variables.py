@@ -386,7 +386,6 @@ VARIABLES = {
         lambda settings: "degrees_east" if settings.coord_degree else "m",
         "Zonal (x) coordinate of grid center point",
         time_dependent=False,
-        scale=lambda settings: 1 if settings.coord_degree else 1e-3,
     ),
     "y": Variable(
         "Meridional coordinate",
@@ -394,7 +393,6 @@ VARIABLES = {
         lambda settings: "degrees_north" if settings.coord_degree else "m",
         "Meridional (y) coordinate of grid center point",
         time_dependent=False,
-        scale=lambda settings: 1 if settings.coord_degree else 1e-3,
     ),
     "z": Variable(
         "Vertical coordinate of grid center point",
