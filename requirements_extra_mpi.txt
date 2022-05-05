@@ -6,8 +6,13 @@ sphinx_rtd_theme
 xarray
 cftime
 salib
-# install parallel hdf5
-# install h5py from binary
-# install h5netcdf without dependencies
-# mpi4jax
+# install parallel hdf5 from https://www.hdfgroup.org/downloads/hdf5/source-code/
+# CC=/usr/local/openmpi/bin/mpicc ./configure --enable-shared --enable-parallel --enable-hl --prefix /usr/local
+# make
+# make check
+# sudo make
+# h5pcc --showconfig
+# CC="mpicc" HDF5_MPI="ON" HDF5_DIR=/usr/local pip install --no-binary=h5py h5py
+# conda install h5netcdf --no-deps
+# pip install mpi4jax --no-build-isolation
 # pip install diag-eff
