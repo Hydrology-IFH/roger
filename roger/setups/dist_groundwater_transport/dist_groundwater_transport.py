@@ -70,9 +70,6 @@ class DISTGROUNDWATERTRANSPORTSetup(RogerSetup):
         vs.t = update(vs.t, at[:], npx.cumsum(vs.DT))
         vs.ages = update(vs.ages, at[:], npx.arange(1, settings.nages))
         vs.nages = update(vs.nages, at[:], npx.arange(settings.nages))
-        # spatial grid
-        vs.x = update(vs.x, at[2:-2], npx.arange(1, settings.nx + 1) * (settings.dx / 2))
-        vs.y = update(vs.y, at[2:-2], npx.arange(1, settings.ny + 1) * (settings.dy / 2))
 
     @roger_routine
     def set_look_up_tables(self, state):

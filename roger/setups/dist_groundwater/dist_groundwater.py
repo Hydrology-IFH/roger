@@ -79,9 +79,6 @@ class DISTGROUNDWATERSetup(RogerSetup):
         vs.month = vs.MONTH[vs.itt]
         vs.doy = vs.DOY[vs.itt]
         vs.t = update(vs.t, at[:], npx.cumsum(vs.DT))
-        # spatial grid
-        vs.x = update(vs.x, at[2:-2], npx.arange(1, settings.nx + 1) * (settings.dx / 2))
-        vs.y = update(vs.y, at[2:-2], npx.arange(1, settings.ny + 1) * (settings.dy / 2))
 
     @roger_routine
     def set_look_up_tables(self, state):

@@ -95,9 +95,6 @@ class SVATSetup(RogerSetup):
         vs.month = vs.MONTH[vs.itt]
         vs.doy = vs.DOY[vs.itt]
         vs.t = update(vs.t, at[:], npx.cumsum(vs.DT))
-        # spatial grid
-        vs.x = update(vs.x, at[:], settings.dx)
-        vs.y = update(vs.y, at[:], settings.dy)
 
     @roger_routine
     def set_look_up_tables(self, state):
