@@ -1,6 +1,5 @@
 jaxlib
 jax
-spyder
 matplotlib
 seaborn
 sphinx_rtd_theme
