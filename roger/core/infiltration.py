@@ -22,7 +22,7 @@ def calc_inf_mat(state):
     mask3 = (vs.t_sat > vs.t_event_sum[:, :, vs.taum1]) & (vs.t_sat < vs.t_event_sum[:, :, vs.tau])
     a = update(
         a,
-        at[2:-2, 2:-2], vs.ks * (vs.t_event_sum[2:-2, 2:-2, vs.tau] - vs.t_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], vs.ks[2:-2, 2:-2] * (vs.t_event_sum[2:-2, 2:-2, vs.tau] - vs.t_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     b = update(
         b,
@@ -164,7 +164,7 @@ def calc_inf_mat(state):
         vs.z_wf_t0,
         at[2:-2, 2:-2, vs.tau], npx.where(npx.isfinite(dz_wf_t0[2:-2, 2:-2]), dz_wf_t0[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
-    mask17 = (vs.z_wf_t0[2:-2, 2:-2, vs.tau] > vs.z_wf_fc[2:-2, 2:-2]) & (vs.z_wf_fc[2:-2, 2:-2] > 0)
+    mask17 = (vs.z_wf_t0[:, :, vs.tau] > vs.z_wf_fc) & (vs.z_wf_fc > 0)
     vs.z_wf_t0 = update(
         vs.z_wf_t0,
         at[2:-2, 2:-2, vs.tau], npx.where(mask17[2:-2, 2:-2], vs.z_wf_fc[2:-2, 2:-2], vs.z_wf_t0[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
@@ -324,7 +324,7 @@ def calc_inf_mp(state):
 
     vs.lmpv_non_sat = update(
         vs.lmpv_non_sat,
-        at[2:-2, 2:-2], npx.where(computation_steps == 1, vs.lmpv_non_sat[2:-2, 2:-2] + dz_wf[2:-2, 2:-2] / 1.39, vs.lmpv_non_sat[2:-2, 2:-2][2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(computation_steps == 1, vs.lmpv_non_sat[2:-2, 2:-2] + dz_wf[2:-2, 2:-2] / 1.39, vs.lmpv_non_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # variables to calculate y(t)
@@ -411,10 +411,6 @@ def calc_inf_mp(state):
             loop_arr,
             at[2:-2, 2:-2, 1], (loop_arr[2:-2, 2:-2, 4] / (loop_arr[2:-2, 2:-2, 6]**(1/3))) * 0.5 * vs.maskCatch[2:-2, 2:-2],
         )
-        # loop_arr = update(
-        #     loop_arr,
-        #     at[2:-2, 2:-2, 2], npx.where(loop_arr[2:-2, 2:-2, 6] <= 0, 0, loop_arr[2:-2, 2:-2, 3]) * vs.maskCatch,
-        # )
         loop_arr = update(
             loop_arr,
             at[2:-2, 2:-2, 15], (loop_arr[2:-2, 2:-2, 0] + loop_arr[2:-2, 2:-2, 1] + loop_arr[2:-2, 2:-2, 2]) * vs.maskCatch[2:-2, 2:-2],
@@ -862,7 +858,7 @@ def calc_inf(state):
 
     vs.inf = update(
         vs.inf,
-        at[2:-2, 2:-2], (vs.inf_rz + vs.inf_ss) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.inf_rz[2:-2, 2:-2] + vs.inf_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(inf=vs.inf)
@@ -878,11 +874,11 @@ def calc_z_wf_fc(state):
     z_wf_fc = allocate(state.dimensions, ("x", "y"))
     z_wf_fc = update(
         z_wf_fc,
-        at[2:-2, 2:-2], npx.where(vs.theta_d_fp > 0, vs.inf_mat_event_csum / vs.theta_d_fp, vs.z_wf[2:-2, 2:-2, vs.tau]) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.theta_d_fp[2:-2, 2:-2] > 0, vs.inf_mat_event_csum[2:-2, 2:-2] / vs.theta_d_fp[2:-2, 2:-2], vs.z_wf[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
     z_wf_fc = update(
         z_wf_fc,
-        at[2:-2, 2:-2], npx.where(z_wf_fc > vs.z_soil, vs.z_soil, z_wf_fc) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(z_wf_fc[2:-2, 2:-2] > vs.z_soil[2:-2, 2:-2], vs.z_soil[2:-2, 2:-2], z_wf_fc[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return z_wf_fc
@@ -897,18 +893,18 @@ def calc_theta_d(state):
 
     theta_d = allocate(state.dimensions, ("x", "y"))
 
-    mask1 = (vs.z_root[2:-2, 2:-2, vs.tau] > 0)
+    mask1 = (vs.z_root[:, :, vs.tau] > 0)
     theta_d = update(
         theta_d,
-        at[2:-2, 2:-2], (vs.theta_sat - vs.theta_rz[2:-2, 2:-2, vs.tau]) * (1 - vs.sealing/100) * mask1 * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_sat[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau]) * (1 - vs.sealing[2:-2, 2:-2]/100) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d = update(
         theta_d,
-        at[2:-2, 2:-2], npx.where(vs.z_soil <= 0, 0.01, theta_d) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.z_soil[2:-2, 2:-2] <= 0, 0.01, theta_d[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d = update(
         theta_d,
-        at[2:-2, 2:-2], npx.where(theta_d <= 0, 0.01, theta_d) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(theta_d[2:-2, 2:-2] <= 0, 0.01, theta_d[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return theta_d
@@ -923,18 +919,18 @@ def calc_theta_d_rel(state):
 
     theta_d_rel = allocate(state.dimensions, ("x", "y"))
 
-    mask1 = (vs.z_root[2:-2, 2:-2, vs.tau] > 0)
+    mask1 = (vs.z_root[:, :, vs.tau] > 0)
     theta_d_rel = update(
         theta_d_rel,
-        at[2:-2, 2:-2], ((vs.theta_sat - vs.theta_rz[2:-2, 2:-2, vs.tau]) / (vs.theta_sat - vs.theta_pwp)) * (1 - vs.sealing/100) * mask1 * vs.maskCatch,
+        at[2:-2, 2:-2], ((vs.theta_sat[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau]) / (vs.theta_sat[2:-2, 2:-2] - vs.theta_pwp[2:-2, 2:-2])) * (1 - vs.sealing[2:-2, 2:-2]/100) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d_rel = update(
         theta_d_rel,
-        at[2:-2, 2:-2], npx.where(vs.z_soil <= 0, 0.01, theta_d_rel) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.z_soil[2:-2, 2:-2] <= 0, 0.01, theta_d_rel[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d_rel = update(
         theta_d_rel,
-        at[2:-2, 2:-2], npx.where(theta_d_rel <= 0, 0.01, theta_d_rel) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(theta_d_rel[2:-2, 2:-2] <= 0, 0.01, theta_d_rel[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return theta_d_rel
@@ -951,15 +947,15 @@ def _calc_theta_d_rel(state):
     mask1 = (vs.z_soil > 0)
     theta_d_rel = update(
         theta_d_rel,
-        at[2:-2, 2:-2], (vs.theta_d / (vs.theta_sat - vs.theta_pwp)) * (1 - vs.sealing/100) * mask1 * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_d[2:-2, 2:-2] / (vs.theta_sat[2:-2, 2:-2] - vs.theta_pwp[2:-2, 2:-2])) * (1 - vs.sealing[2:-2, 2:-2]/100) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d_rel = update(
         theta_d_rel,
-        at[2:-2, 2:-2], npx.where(vs.z_soil <= 0, 0.01, theta_d_rel) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.z_soil[2:-2, 2:-2] <= 0, 0.01, theta_d_rel[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d_rel = update(
         theta_d_rel,
-        at[2:-2, 2:-2], npx.where(theta_d_rel <= 0, 0.01, theta_d_rel) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(theta_d_rel[2:-2, 2:-2] <= 0, 0.01, theta_d_rel[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return theta_d_rel
@@ -977,15 +973,15 @@ def calc_theta_d_fp(state):
     mask1 = (vs.z_soil > 0)
     theta_d_fp = update(
         theta_d_fp,
-        at[2:-2, 2:-2], (vs.theta_fc - vs.theta_rz[2:-2, 2:-2, vs.tau]) * (1 - vs.sealing/100) * mask1 * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_fc[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau]) * (1 - vs.sealing[2:-2, 2:-2]/100) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d_fp = update(
         theta_d_fp,
-        at[2:-2, 2:-2], npx.where(vs.z_soil <= 0, 0.01, theta_d_fp) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.z_soil[2:-2, 2:-2] <= 0, 0.01, theta_d_fp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d_fp = update(
         theta_d_fp,
-        at[2:-2, 2:-2], npx.where(theta_d_fp <= 0, 0.01, theta_d_fp) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(theta_d_fp[2:-2, 2:-2] <= 0, 0.01, theta_d_fp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return theta_d_fp
@@ -1002,24 +998,24 @@ def calc_sat_itt(state):
 
     def loop_body(i, sat_itt):
         # mask1 = ((vs.ks * vs.DT_event[i] * vs.theta_d * vs.wfs) / vs.prec_event[2:-2, 2:-2, i] - (vs.ks * vs.DT_event[i]) == vs.prec_event_csum[2:-2, 2:-2, i+1]) & (sat_itt <= 0)
-        mask2 = ((vs.prec_event[2:-2, 2:-2, i] * (1 / vs.DT_event[i]) - vs.ks) * vs.prec_event_csum[2:-2, 2:-2, i+1] >= vs.ks * vs.theta_d * vs.wfs) & (sat_itt <= 0)
+        mask2 = ((vs.prec_event[:, :, i] * (1 / vs.DT_event[i]) - vs.ks) * vs.prec_event_csum[:, :, i+1] >= vs.ks * vs.theta_d * vs.wfs) & (sat_itt <= 0)
         # sat_itt = update(
         #     sat_itt,
         #     at[2:-2, 2:-2], npx.where(mask1, i, sat_itt),
         # )
         sat_itt = update(
             sat_itt,
-            at[2:-2, 2:-2], npx.where(mask2, i, sat_itt),
+            at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], i, sat_itt[2:-2, 2:-2]),
         )
 
         return sat_itt
 
     sat_itt = for_loop(0, npx.int64(vs.event_end-vs.event_start), loop_body, sat_itt)
 
-    mask1 = npx.all(vs.prec_event * (1 / vs.DT_event[npx.newaxis, npx.newaxis, :]) < vs.ks[2:-2, 2:-2, npx.newaxis] * vs.DT_event[npx.newaxis, npx.newaxis, :], axis=-1)
+    mask1 = npx.all(vs.prec_event * (1 / vs.DT_event[npx.newaxis, npx.newaxis, :]) < vs.ks[:, :, npx.newaxis] * vs.DT_event[npx.newaxis, npx.newaxis, :], axis=-1)
     sat_itt = update(
         sat_itt,
-        at[2:-2, 2:-2], npx.where(mask1, npx.argmax(vs.prec_event_csum, axis=-1) - 1, sat_itt),
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], npx.argmax(vs.prec_event_csum[2:-2, 2:-2, :], axis=-1) - 1, sat_itt[2:-2, 2:-2]),
     )
 
     return sat_itt
@@ -1038,7 +1034,7 @@ def calc_pi_gr(state, sat_itt):
         mask1 = (sat_itt == i)
         pi_gr = update(
             pi_gr,
-            at[2:-2, 2:-2], npx.where(mask1, vs.ks * (((vs.theta_d * vs.wfs)/vs.prec_event_csum[2:-2, 2:-2, i]) + 1), pi_gr) * vs.maskCatch,
+            at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], vs.ks[2:-2, 2:-2] * (((vs.theta_d[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2])/vs.prec_event_csum[2:-2, 2:-2, i]) + 1), pi_gr[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
 
         return pi_gr
@@ -1061,7 +1057,7 @@ def calc_pi_m(state, sat_itt):
         mask = (sat_itt == i)
         pi_m = update(
             pi_m,
-            at[2:-2, 2:-2], npx.where(mask, vs.prec_event[2:-2, 2:-2, i] * (1 / vs.DT_event[i]), pi_m) * vs.maskCatch,
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.prec_event[2:-2, 2:-2, i] * (1 / vs.DT_event[i]), pi_m[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
 
         return pi_m
@@ -1082,14 +1078,14 @@ def calc_sat_time(state, pi_m, pi_gr, sat_itt):
 
     def loop_body(i, tsum):
         mask1 = (sat_itt == i) & (vs.pi_m > vs.pi_gr)
-        mask2 = ((vs.prec_event[2:-2, 2:-2, i] * (1 / vs.DT_event[i]) - vs.ks) * vs.prec_event_csum[2:-2, 2:-2, i+1] > vs.ks * vs.theta_d * vs.wfs) & (sat_itt == i) & (vs.pi_m < vs.pi_gr)
+        mask2 = ((vs.prec_event[:, :, i] * (1 / vs.DT_event[i]) - vs.ks) * vs.prec_event_csum[:, :, i+1] > vs.ks * vs.theta_d * vs.wfs) & (sat_itt == i) & (vs.pi_m < vs.pi_gr)
         tsum = update(
             tsum,
-            at[2:-2, 2:-2], npx.where(mask1, vs.t_event_csum[i], tsum),
+            at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], vs.t_event_csum[i], tsum[2:-2, 2:-2]),
         )
         tsum = update(
             tsum,
-            at[2:-2, 2:-2], npx.where(mask2, vs.t_event_csum[i] + ((vs.ks * vs.theta_d * vs.wfs) / (vs.pi_m * (vs.pi_m * - vs.ks))) - (vs.DT_event[i] / vs.pi_m) * vs.prec_event_csum[2:-2, 2:-2, i], tsum),
+            at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.t_event_csum[i] + ((vs.ks[2:-2, 2:-2] * vs.theta_d[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2]) / (vs.pi_m[2:-2, 2:-2] * (vs.pi_m[2:-2, 2:-2] * - vs.ks[2:-2, 2:-2]))) - (vs.DT_event[i] / vs.pi_m[2:-2, 2:-2]) * vs.prec_event_csum[2:-2, 2:-2, i], tsum[2:-2, 2:-2]),
         )
 
         return tsum
@@ -1099,7 +1095,7 @@ def calc_sat_time(state, pi_m, pi_gr, sat_itt):
     sat_time = allocate(state.dimensions, ("x", "y"))
     sat_time = update(
         sat_time,
-        at[2:-2, 2:-2], tsum * vs.maskCatch,
+        at[2:-2, 2:-2], tsum[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return sat_time
@@ -1116,11 +1112,11 @@ def calc_Fs(state, pi_m):
 
     Fs = update(
         Fs,
-        at[2:-2, 2:-2], ((vs.ks * vs.theta_d * vs.wfs) / (pi_m - vs.ks)) * vs.maskCatch,
+        at[2:-2, 2:-2], ((vs.ks[2:-2, 2:-2] * vs.theta_d[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2]) / (pi_m[2:-2, 2:-2] - vs.ks[2:-2, 2:-2])) * vs.maskCatch[2:-2, 2:-2],
     )
     Fs = update(
         Fs,
-        at[2:-2, 2:-2], npx.where(pi_m <= vs.ks, pi_m, Fs) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(pi_m[2:-2, 2:-2] <= vs.ks[2:-2, 2:-2], pi_m[2:-2, 2:-2], Fs[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return Fs
@@ -1135,29 +1131,29 @@ def calc_depth_shrinkage_cracks(state):
 
     vs.z_sc = update(
         vs.z_sc,
-        at[2:-2, 2:-2], npx.where(vs.theta_rz[2:-2, 2:-2, vs.tau] < vs.theta_4, vs.z_sc_max, npx.where((vs.theta_rz[2:-2, 2:-2, vs.tau] >= vs.theta_4) & (vs.theta_rz[2:-2, 2:-2, vs.tau] < vs.theta_27), (vs.theta_rz[2:-2, 2:-2, vs.tau] - vs.theta_4) / (vs.theta_27 - vs.theta_4), 0) * vs.z_sc_max) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.theta_rz[2:-2, 2:-2, vs.tau] < vs.theta_4[2:-2, 2:-2], vs.z_sc_max[2:-2, 2:-2], npx.where((vs.theta_rz[2:-2, 2:-2, vs.tau] >= vs.theta_4[2:-2, 2:-2]) & (vs.theta_rz[2:-2, 2:-2, vs.tau] < vs.theta_27[2:-2, 2:-2]), (vs.theta_rz[2:-2, 2:-2, vs.tau] - vs.theta_4[2:-2, 2:-2]) / (vs.theta_27[2:-2, 2:-2] - vs.theta_4[2:-2, 2:-2]), 0) * vs.z_sc_max[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.z_sc = update(
         vs.z_sc,
-        at[2:-2, 2:-2], npx.where(vs.theta_rz[2:-2, 2:-2, vs.tau] < vs.theta_4, vs.z_sc_max, vs.z_sc[2:-2, 2:-2]) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.theta_rz[2:-2, 2:-2, vs.tau] < vs.theta_4[2:-2, 2:-2], vs.z_sc_max[2:-2, 2:-2], vs.z_sc[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.z_sc = update(
         vs.z_sc,
-        at[2:-2, 2:-2], npx.where(vs.theta_rz[2:-2, 2:-2, vs.tau] > vs.theta_27, 0, vs.z_sc[2:-2, 2:-2]) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.theta_rz[2:-2, 2:-2, vs.tau] > vs.theta_27[2:-2, 2:-2], 0, vs.z_sc[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.z_sc = update(
         vs.z_sc,
-        at[2:-2, 2:-2], ((1. - vs.sealing/100.) * vs.z_sc[2:-2, 2:-2]) * vs.maskCatch,
-    )
-
-    vs.z_sc = update(
-        vs.z_sc,
-        at[2:-2, 2:-2], npx.where(vs.z_sc[2:-2, 2:-2] > vs.z_root[2:-2, 2:-2, vs.tau], vs.z_root[2:-2, 2:-2, vs.tau], vs.z_sc[2:-2, 2:-2]) * vs.maskCatch,
+        at[2:-2, 2:-2], ((1. - vs.sealing[2:-2, 2:-2]/100.) * vs.z_sc[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.z_sc = update(
         vs.z_sc,
-        at[2:-2, 2:-2], npx.where((vs.lu_id == 13), 0, vs.z_sc[2:-2, 2:-2]) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.z_sc[2:-2, 2:-2] > vs.z_root[2:-2, 2:-2, vs.tau], vs.z_root[2:-2, 2:-2, vs.tau], vs.z_sc[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.z_sc = update(
+        vs.z_sc,
+        at[2:-2, 2:-2], npx.where((vs.lu_id[2:-2, 2:-2] == 13), 0, vs.z_sc[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(z_sc=vs.z_sc)
@@ -1172,7 +1168,7 @@ def set_event_vars(state):
 
     vs.no_wf = update(
         vs.no_wf,
-        at[2:-2, 2:-2], 1 * vs.maskCatch,
+        at[2:-2, 2:-2], 1 * vs.maskCatch[2:-2, 2:-2],
     )
 
     # wetting front depth (in mm)
@@ -1234,25 +1230,25 @@ def set_event_vars(state):
     theta_d = calc_theta_d(state)
     vs.theta_d = update(
         vs.theta_d,
-        at[2:-2, 2:-2], theta_d * vs.maskCatch,
+        at[2:-2, 2:-2], theta_d[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d_rel = calc_theta_d_rel(state)
     vs.theta_d_rel = update(
         vs.theta_d_rel,
-        at[2:-2, 2:-2], theta_d_rel * vs.maskCatch,
+        at[2:-2, 2:-2], theta_d_rel[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.theta_d_t0 = update(
         vs.theta_d_t0,
-        at[2:-2, 2:-2], theta_d * vs.maskCatch,
+        at[2:-2, 2:-2], theta_d[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.theta_d_rel_t0 = update(
         vs.theta_d_rel_t0,
-        at[2:-2, 2:-2], theta_d_rel * vs.maskCatch,
+        at[2:-2, 2:-2], theta_d_rel[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d_fp = calc_theta_d_fp(state)
     vs.theta_d_fp = update(
         vs.theta_d_fp,
-        at[2:-2, 2:-2], theta_d_fp * vs.maskCatch,
+        at[2:-2, 2:-2], theta_d_fp[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     # accumulated precipitation wihin event (in mm)
     vs.prec_event_csum = update(
@@ -1261,7 +1257,7 @@ def set_event_vars(state):
     )
     vs.prec_event_csum = update(
         vs.prec_event_csum,
-        at[2:-2, 2:-2, 1:], npx.cumsum(vs.prec_event, axis=-1),
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.prec_event[2:-2, 2:-2, :], axis=-1),
     )
     # accumulated time during an event (in mm)
     vs.t_event_sum = update(
@@ -1281,31 +1277,31 @@ def set_event_vars(state):
     sat_itt = calc_sat_itt(state)
     vs.sat_itt = update(
         vs.sat_itt,
-        at[2:-2, 2:-2], sat_itt * vs.maskCatch,
+        at[2:-2, 2:-2], sat_itt[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     # threshold intensity (mm/h)
     pi_gr = calc_pi_gr(state, sat_itt)
     vs.pi_gr = update(
         vs.pi_gr,
-        at[2:-2, 2:-2], pi_gr * vs.maskCatch,
+        at[2:-2, 2:-2], pi_gr[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     # precipitation intensity at saturation (mm/h)
     pi_m = calc_pi_m(state, sat_itt)
     vs.pi_m = update(
         vs.pi_m,
-        at[2:-2, 2:-2], pi_m * vs.maskCatch,
+        at[2:-2, 2:-2], pi_m[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     # saturation time (hours)
     t_sat = calc_sat_time(state, pi_m, pi_gr, sat_itt)
     vs.t_sat = update(
         vs.t_sat,
-        at[2:-2, 2:-2], npx.round(t_sat, 2) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.round(t_sat[2:-2, 2:-2], 2) * vs.maskCatch[2:-2, 2:-2],
     )
     # infiltration at saturation (mm)
     Fs = calc_Fs(state, pi_m)
     vs.Fs = update(
         vs.Fs,
-        at[2:-2, 2:-2], Fs * vs.maskCatch,
+        at[2:-2, 2:-2], Fs[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     # reset accumulated soil evaporation deficit
     vs.de = update(
@@ -1353,7 +1349,7 @@ def set_event_vars_start_rainfall_pause(state):
 
     vs.z_wf_fc = update(
         vs.z_wf_fc,
-        at[2:-2, 2:-2], z_wf_fc * vs.maskCatch,
+        at[2:-2, 2:-2], z_wf_fc[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(z_wf_fc=vs.z_wf_fc)
@@ -1368,18 +1364,18 @@ def set_event_vars_end_rainfall_pause(state):
 
     vs.no_wf = update(
         vs.no_wf,
-        at[2:-2, 2:-2], 2 * vs.maskCatch,
+        at[2:-2, 2:-2], 2,
     )
 
     theta_d = calc_theta_d(state)
     vs.theta_d = update(
         vs.theta_d,
-        at[2:-2, 2:-2], theta_d * vs.maskCatch,
+        at[2:-2, 2:-2], theta_d[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d_rel = calc_theta_d_rel(state)
     vs.theta_d_rel = update(
         vs.theta_d_rel,
-        at[2:-2, 2:-2], theta_d_rel * vs.maskCatch,
+        at[2:-2, 2:-2], theta_d_rel[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     # second wetting front
     vs.z_wf_t1 = update(
@@ -1394,7 +1390,7 @@ def set_event_vars_end_rainfall_pause(state):
     )
     vs.prec_event_csum = update(
         vs.prec_event_csum,
-        at[2:-2, 2:-2, 1:], npx.cumsum(vs.prec_event, axis=-1),
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.prec_event[2:-2, 2:-2, :], axis=-1),
     )
     # accumulated time during an event (in mm)
     vs.t_event_sum = update(
@@ -1414,31 +1410,31 @@ def set_event_vars_end_rainfall_pause(state):
     sat_itt = calc_sat_itt(state)
     vs.sat_itt = update(
         vs.sat_itt,
-        at[2:-2, 2:-2], sat_itt * vs.maskCatch,
+        at[2:-2, 2:-2], sat_itt[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     # threshold intensity (mm/h)
     pi_gr = calc_pi_gr(state, sat_itt)
     vs.pi_gr = update(
         vs.pi_gr,
-        at[2:-2, 2:-2], pi_gr * vs.maskCatch,
+        at[2:-2, 2:-2], pi_gr[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     # precipitation intensity at saturation (mm/h)
     pi_m = calc_pi_m(state, sat_itt)
     vs.pi_m = update(
         vs.pi_m,
-        at[2:-2, 2:-2], pi_m * vs.maskCatch,
+        at[2:-2, 2:-2], pi_m[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     # saturation time (hours)
     t_sat = calc_sat_time(state, pi_m, pi_gr, sat_itt)
     vs.t_sat = update(
         vs.t_sat,
-        at[2:-2, 2:-2], t_sat * vs.maskCatch,
+        at[2:-2, 2:-2], t_sat[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     # infiltration at saturation (mm)
     Fs = calc_Fs(state, pi_m)
     vs.Fs = update(
         vs.Fs,
-        at[2:-2, 2:-2], Fs * vs.maskCatch,
+        at[2:-2, 2:-2], Fs[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(no_wf=vs.no_wf,
@@ -1493,11 +1489,11 @@ def reset_event_vars(state):
     theta_d = calc_theta_d(state)
     vs.theta_d = update(
         vs.theta_d,
-        at[2:-2, 2:-2], theta_d * vs.maskCatch,
+        at[2:-2, 2:-2], theta_d[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.theta_d_t0 = update(
         vs.theta_d_t0,
-        at[2:-2, 2:-2], theta_d * vs.maskCatch,
+        at[2:-2, 2:-2], theta_d[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.sat_itt = update(
         vs.sat_itt,
@@ -1627,12 +1623,12 @@ def calculate_infiltration_rz_transport_kernel(state):
 
     vs.sa_rz = update_add(
         vs.sa_rz,
-        at[2:-2, 2:-2, vs.tau, 0], vs.inf_mat_rz * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau, 0], vs.inf_mat_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.sa_rz = update_add(
         vs.sa_rz,
-        at[2:-2, 2:-2, vs.tau, 0], vs.inf_pf_rz * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau, 0], vs.inf_pf_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(sa_rz=vs.sa_rz)
@@ -1648,19 +1644,19 @@ def calculate_infiltration_rz_transport_iso_kernel(state):
     # isotope ratio of infiltration
     vs.C_inf_mat_rz = update(
         vs.C_inf_mat_rz,
-        at[2:-2, 2:-2], npx.where(vs.inf_mat_rz > 0, vs.C_in, npx.NaN) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], npx.NaN) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.C_inf_pf_rz = update(
         vs.C_inf_pf_rz,
-        at[2:-2, 2:-2], npx.where(vs.inf_pf_rz > 0, vs.C_in, npx.NaN) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], npx.NaN) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.sa_rz = update_add(
         vs.sa_rz,
-        at[2:-2, 2:-2, vs.tau, 0], vs.inf_mat_rz + vs.inf_pf_rz * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau, 0], vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.msa_rz = update(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, 0], npx.where(vs.inf_mat_rz + vs.inf_pf_rz > 0, vs.C_in, npx.NaN) * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau, 0], npx.where(vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], npx.NaN) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(sa_rz=vs.sa_rz, msa_rz=vs.msa_rz, C_inf_mat_rz=vs.C_inf_mat_rz, C_inf_pf_rz=vs.C_inf_pf_rz)
@@ -1676,28 +1672,28 @@ def calculate_infiltration_rz_transport_anion_kernel(state):
     # solute concentration of infiltration
     vs.C_inf_mat_rz = update(
         vs.C_inf_mat_rz,
-        at[2:-2, 2:-2], npx.where(vs.inf_mat_rz > 0, vs.C_in, 0) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.C_inf_pf_rz = update(
         vs.C_inf_pf_rz,
-        at[2:-2, 2:-2], npx.where(vs.inf_pf_rz > 0, vs.C_in, 0) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
     # solute mass of infiltration
     vs.M_inf_mat_rz = update(
         vs.M_inf_mat_rz,
-        at[2:-2, 2:-2], vs.C_inf_mat_rz * vs.inf_mat_rz * vs.maskCatch,
+        at[2:-2, 2:-2], vs.C_inf_mat_rz[2:-2, 2:-2] * vs.inf_mat_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.M_inf_pf_rz = update(
         vs.C_inf_pf_rz,
-        at[2:-2, 2:-2], vs.C_inf_pf_rz * vs.inf_pf_rz * vs.maskCatch,
+        at[2:-2, 2:-2], vs.C_inf_pf_rz[2:-2, 2:-2] * vs.inf_pf_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.sa_rz = update_add(
         vs.sa_rz,
-        at[2:-2, 2:-2, vs.tau, 0], vs.inf_mat_rz + vs.inf_pf_rz * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau, 0], vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.msa_rz = update_add(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, 0], vs.M_inf_mat_rz + vs.M_inf_pf_rz * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau, 0], vs.M_inf_mat_rz[2:-2, 2:-2] + vs.M_inf_pf_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(sa_rz=vs.sa_rz, msa_rz=vs.msa_rz, C_inf_mat_rz=vs.C_inf_mat_rz, C_inf_pf_rz=vs.C_inf_pf_rz, M_inf_mat_rz=vs.M_inf_mat_rz, M_inf_pf_rz=vs.M_inf_pf_rz)
@@ -1712,7 +1708,7 @@ def calculate_infiltration_ss_transport_kernel(state):
 
     vs.sa_ss = update_add(
         vs.sa_ss,
-        at[2:-2, 2:-2, vs.tau, 0], vs.inf_mat_ss * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau, 0], vs.inf_mat_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(sa_ss=vs.sa_ss)
@@ -1728,17 +1724,17 @@ def calculate_infiltration_ss_transport_iso_kernel(state):
     # isotope ratio of infiltration
     vs.C_inf_pf_ss = update(
         vs.C_inf_pf_ss,
-        at[2:-2, 2:-2], npx.where(vs.inf_pf_ss > 0, vs.C_in, npx.NaN) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], npx.NaN) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.sa_ss = update_add(
         vs.sa_ss,
-        at[2:-2, 2:-2, vs.tau, 0], vs.inf_pf_ss * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau, 0], vs.inf_pf_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.msa_ss = update(
         vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, 0], npx.where(vs.inf_pf_ss > 0, vs.C_in, vs.msa_ss[2:-2, 2:-2, vs.tau, 0]) * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau, 0], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], vs.msa_ss[2:-2, 2:-2, vs.tau, 0]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(sa_ss=vs.sa_ss, msa_ss=vs.msa_ss, C_inf_pf_ss=vs.C_inf_pf_ss)
@@ -1754,20 +1750,20 @@ def calculate_infiltration_ss_transport_anion_kernel(state):
     # solute concentration of infiltration
     vs.C_inf_pf_ss = update(
         vs.C_inf_pf_ss,
-        at[2:-2, 2:-2], npx.where(vs.inf_pf_ss > 0, vs.C_in, 0) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatc[2:-2, 2:-2],
     )
     # solute mass of infiltration
     vs.M_inf_pf_ss = update(
         vs.C_inf_pf_ss,
-        at[2:-2, 2:-2], vs.C_inf_pf_ss * vs.inf_pf_ss * vs.maskCatch,
+        at[2:-2, 2:-2], vs.C_inf_pf_ss[2:-2, 2:-2] * vs.inf_pf_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.sa_ss = update_add(
         vs.sa_ss,
-        at[2:-2, 2:-2, vs.tau, 0], vs.inf_pf_ss * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau, 0], vs.inf_pf_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.msa_ss = update_add(
         vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, 0], vs.M_inf_pf_ss * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau, 0], vs.M_inf_pf_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(sa_ss=vs.sa_ss, msa_ss=vs.msa_ss, C_inf_pf_ss=vs.C_inf_pf_ss, M_inf_pf_ss=vs.M_inf_pf_ss)

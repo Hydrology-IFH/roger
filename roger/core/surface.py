@@ -11,7 +11,7 @@ def calc_S(state):
 
     vs.S_sur = update(
         vs.S_sur,
-        at[2:-2, 2:-2, vs.tau], (vs.S_int_top[2:-2, 2:-2, vs.tau] + vs.S_int_ground[2:-2, 2:-2, vs.tau] + vs.S_dep[2:-2, 2:-2, vs.tau] + vs.S_snow[2:-2, 2:-2, vs.tau] + vs.z0[2:-2, 2:-2, vs.tau]) * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau], (vs.S_int_top[2:-2, 2:-2, vs.tau] + vs.S_int_ground[2:-2, 2:-2, vs.tau] + vs.S_dep[2:-2, 2:-2, vs.tau] + vs.S_snow[2:-2, 2:-2, vs.tau] + vs.z0[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(S_sur=vs.S_sur)

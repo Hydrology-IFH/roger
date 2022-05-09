@@ -34,34 +34,34 @@ def rescale_SA_soil_kernel(state):
 
     vs.SA_rz = update(
         vs.SA_rz,
-        at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_rz[2:-2, 2:-2, :2, :], axis=-1),
+        at[2:-2, 2:-2, :vs.taup1, 1:], npx.cumsum(vs.sa_rz[2:-2, 2:-2, :vs.taup1, :], axis=-1),
     )
     vs.SA_rz = update(
         vs.SA_rz,
-        at[2:-2, 2:-2, :2, 0], 0,
+        at[2:-2, 2:-2, :vs.taup1, 0], 0,
     )
 
     vs.SA_ss = update(
         vs.SA_ss,
-        at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_ss[2:-2, 2:-2, :2, :], axis=-1),
+        at[2:-2, 2:-2, :vs.taup1, 1:], npx.cumsum(vs.sa_ss[2:-2, 2:-2, :vs.taup1, :], axis=-1),
     )
     vs.SA_ss = update(
         vs.SA_ss,
-        at[2:-2, 2:-2, :2, 0], 0,
+        at[2:-2, 2:-2, :vs.taup1, 0], 0,
     )
 
     vs.sa_s = update(
         vs.sa_s,
-        at[2:-2, 2:-2, :2, :], vs.sa_rz[2:-2, 2:-2, :2, :] + vs.sa_ss[2:-2, 2:-2, :2, :],
+        at[2:-2, 2:-2, :vs.taup1, :], vs.sa_rz[2:-2, 2:-2, :vs.taup1, :] + vs.sa_ss[2:-2, 2:-2, :vs.taup1, :],
     )
 
     vs.SA_s = update(
         vs.SA_s,
-        at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_s[2:-2, 2:-2, :2, :], axis=-1),
+        at[2:-2, 2:-2, :vs.taup1, 1:], npx.cumsum(vs.sa_s[2:-2, 2:-2, :vs.taup1, :], axis=-1),
     )
     vs.SA_s = update(
         vs.SA_s,
-        at[2:-2, 2:-2, :2, 0], 0,
+        at[2:-2, 2:-2, :vs.taup1, 0], 0,
     )
 
     return KernelOutput(
@@ -96,28 +96,28 @@ def rescale_conc_soil_kernel(state):
     elif (settings.enable_chloride | settings.enable_nitrate):
         vs.C_rz = update(
             vs.C_rz,
-            at[2:-2, 2:-2, :2], npx.sum(vs.msa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis],
+            at[2:-2, 2:-2, :vs.taup1], npx.sum(vs.msa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis],
         )
 
         vs.C_ss = update(
             vs.C_ss,
-            at[2:-2, 2:-2, :2], npx.sum(vs.msa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis],
+            at[2:-2, 2:-2, :vs.taup1], npx.sum(vs.msa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis],
         )
 
         vs.C_s = update(
             vs.C_s,
-            at[2:-2, 2:-2, :2], npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis],
+            at[2:-2, 2:-2, :vs.taup1], npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis],
         )
 
     elif (settings.enable_oxygen18 | settings.enable_deuterium):
         vs.C_rz = update(
             vs.C_rz,
-            at[2:-2, 2:-2, :2], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2, npx.newaxis],
+            at[2:-2, 2:-2, :vs.taup1], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2, npx.newaxis],
         )
 
         vs.C_ss = update(
             vs.C_ss,
-            at[2:-2, 2:-2, :2], transport.calc_conc_iso_storage(state, vs.sa_ss, vs.msa_ss)[2:-2, 2:-2, npx.newaxis],
+            at[2:-2, 2:-2, :vs.taup1], transport.calc_conc_iso_storage(state, vs.sa_ss, vs.msa_ss)[2:-2, 2:-2, npx.newaxis],
         )
 
         iso_rz = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
@@ -170,15 +170,15 @@ def rescale_SA(state):
     if settings.enable_bromide:
         vs.msa_rz = update(
             vs.msa_rz,
-            at[2:-2, 2:-2, :2, :], 0,
+            at[2:-2, 2:-2, :vs.taup1, :], 0,
         )
         vs.msa_ss = update(
             vs.msa_ss,
-            at[2:-2, 2:-2, :2, :], 0,
+            at[2:-2, 2:-2, :vs.taup1, :], 0,
         )
         vs.msa_s = update(
             vs.msa_s,
-            at[2:-2, 2:-2, :2, :], 0,
+            at[2:-2, 2:-2, :vs.taup1, :], 0,
         )
 
     if settings.enable_offline_transport & settings.enable_groundwater:
@@ -276,7 +276,7 @@ def calc_initial_conditions_surface_kernel(state):
 
     vs.S_sur = update(
         vs.S_sur,
-        at[2:-2, 2:-2, 0:2], (vs.S_int_top[2:-2, 2:-2, 0:2] + vs.S_int_ground[2:-2, 2:-2, 0:2] + vs.S_dep[2:-2, 2:-2, 0:2] + vs.S_snow[2:-2, 2:-2, 0:2]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, 0:vs.taup1], (vs.S_int_top[2:-2, 2:-2, 0:vs.taup1] + vs.S_int_ground[2:-2, 2:-2, 0:vs.taup1] + vs.S_dep[2:-2, 2:-2, 0:vs.taup1] + vs.S_snow[2:-2, 2:-2, 0:vs.taup1]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(
@@ -300,7 +300,7 @@ def calc_initial_conditions_soil_kernel(state):
 
     vs.S_s = update(
         vs.S_s,
-        at[2:-2, 2:-2, 0:2], (vs.S_rz[2:-2, 2:-2, 0:2] + vs.S_ss[2:-2, 2:-2, 0:2]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, 0:vs.taup1], (vs.S_rz[2:-2, 2:-2, 0:vs.taup1] + vs.S_ss[2:-2, 2:-2, 0:vs.taup1]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(
@@ -353,7 +353,7 @@ def calc_initial_conditions_root_zone_kernel(state):
 
     vs.S_rz = update(
         vs.S_rz,
-        at[2:-2, 2:-2, 0:2], (vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_fp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_lp_rz[2:-2, 2:-2, npx.newaxis]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, 0:vs.taup1], (vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_fp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_lp_rz[2:-2, 2:-2, npx.newaxis]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(
@@ -408,7 +408,7 @@ def calc_initial_conditions_subsoil_kernel(state):
 
     vs.S_ss = update(
         vs.S_ss,
-        at[2:-2, 2:-2, 0:2], (vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis] + vs.S_fp_ss[2:-2, 2:-2, npx.newaxis] + vs.S_lp_ss[2:-2, 2:-2, npx.newaxis]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, 0:vs.taup1], (vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis] + vs.S_fp_ss[2:-2, 2:-2, npx.newaxis] + vs.S_lp_ss[2:-2, 2:-2, npx.newaxis]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(
@@ -426,7 +426,7 @@ def calc_initial_conditions_kernel(state):
 
     vs.S = update(
         vs.S,
-        at[2:-2, 2:-2, :2], vs.S_sur[2:-2, 2:-2, :2] + vs.S_s[2:-2, 2:-2, :2] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :vs.taup1], vs.S_sur[2:-2, 2:-2, :vs.taup1] + vs.S_s[2:-2, 2:-2, :vs.taup1] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(
@@ -440,7 +440,7 @@ def calc_initial_conditions_with_gw_kernel(state):
 
     vs.S = update(
         vs.S,
-        at[2:-2, 2:-2, :2], vs.S_sur[2:-2, 2:-2, :2] + vs.S_s[2:-2, 2:-2, :2] + vs.S_vad[2:-2, 2:-2, :2] + vs.S_gw[2:-2, 2:-2, :2] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :vs.taup1], vs.S_sur[2:-2, 2:-2, :vs.taup1] + vs.S_s[2:-2, 2:-2, :vs.taup1] + vs.S_vad[2:-2, 2:-2, :vs.taup1] + vs.S_gw[2:-2, 2:-2, :vs.taup1] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(
@@ -521,7 +521,7 @@ def calc_parameters_surface_kernel(state):
     trees_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
     trees_cond = update(
         trees_cond,
-        at[2:-2, 2:-2], npx.isin(vs.lu_id, npx.array([10, 11, 12, 15])) * vs.maskCatch[2:-2, 2:-2],
+        at[:, :], npx.isin(vs.lu_id, npx.array([10, 11, 12, 15])) * vs.maskCatch[2:-2, 2:-2],
     )
 
     def loop_body_S_int_top_tot(i, S_int_top_tot):
@@ -547,7 +547,7 @@ def calc_parameters_surface_kernel(state):
     ground_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
     ground_cond = update(
         ground_cond,
-        at[2:-2, 2:-2], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 13, 98, 31, 32, 33, 40, 41, 50, 98])) * vs.maskCatch[2:-2, 2:-2]
+        at[:, :], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 13, 98, 31, 32, 33, 40, 41, 50, 98])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     def loop_body_S_int_ground_tot(i, S_int_ground_tot):
@@ -563,7 +563,7 @@ def calc_parameters_surface_kernel(state):
     trees_ground_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
     trees_ground_cond = update(
         trees_ground_cond,
-        at[2:-2, 2:-2], npx.isin(vs.lu_id, npx.array([10, 11, 12, 15])) * vs.maskCatch[2:-2, 2:-2]
+        at[:, :], npx.isin(vs.lu_id, npx.array([10, 11, 12, 15])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     def loop_body_S_int_ground_tot_trees(i, S_int_ground_tot):
@@ -589,7 +589,7 @@ def calc_parameters_surface_kernel(state):
     cc_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
     cc_cond = update(
         cc_cond,
-        at[2:-2, 2:-2], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 98, 31, 32, 33, 40, 41, 50, 98])) * vs.maskCatch[2:-2, 2:-2]
+        at[:, :], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 98, 31, 32, 33, 40, 41, 50, 98])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     def loop_body_ground_cover(i, ground_cover):
@@ -771,7 +771,7 @@ def calc_parameters_soil_kernel(state):
     # calculate clay content
     vs.clay = update(
         vs.clay,
-        at[2:-2, 2:-2], (settings.clay_max[2:-2, 2:-2] * (vs.theta_6[2:-2, 2:-2] - settings.clay_min) / 0.3) * vs.maskCatch[2:-2, 2:-2]
+        at[2:-2, 2:-2], (settings.clay_max * (vs.theta_6[2:-2, 2:-2] - settings.clay_min) / 0.3) * vs.maskCatch[2:-2, 2:-2]
     )
     vs.clay = update(
         vs.clay,
@@ -854,7 +854,7 @@ def calc_parameters_root_zone_kernel(state):
     cc_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
     cc_cond = update(
         cc_cond,
-        at[2:-2, 2:-2], npx.isin(vs.lu_id[2:-2, 2:-2], npx.array([0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 98, 31, 32, 33, 40, 41, 50, 98])) * vs.maskCatch[2:-2, 2:-2]
+        at[:, :], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 98, 31, 32, 33, 40, 41, 50, 98]))
     )
 
     # assign land use specific root depth
@@ -932,7 +932,7 @@ def calc_parameters_root_zone_kernel(state):
 
     vs.S_fc_rz = update(
         vs.S_fc_rz,
-        at[2:-2, 2:-2], ((vs.theta_ufc[2:-2, 2:-2][2:-2, 2:-2] + vs.theta_pwp[2:-2, 2:-2]) * vs.z_root[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2]
+        at[2:-2, 2:-2], ((vs.theta_ufc[2:-2, 2:-2] + vs.theta_pwp[2:-2, 2:-2]) * vs.z_root[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     return KernelOutput(
@@ -1002,7 +1002,7 @@ def calc_parameters_lateral_flow_kernel(state):
         )
         v_mp_layer = update(
             v_mp_layer,
-            at[2:-2, 2:-2, 6], npx.where(vs.slope_per[2:-2, 2:-2][2:-2, 2:-2] == i, vs.lut_mlms[nrow, 2]*1000, v_mp_layer[2:-2, 2:-2, 6]) * vs.maskCatch[2:-2, 2:-2]
+            at[2:-2, 2:-2, 6], npx.where(vs.slope_per[2:-2, 2:-2]== i, vs.lut_mlms[nrow, 2]*1000, v_mp_layer[2:-2, 2:-2, 6]) * vs.maskCatch[2:-2, 2:-2]
         )
         v_mp_layer = update(
             v_mp_layer,
@@ -1294,7 +1294,7 @@ def sanity_check(state):
 
     elif settings.enable_offline_transport and (settings.enable_bromide or settings.enable_chloride):
         check1 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
-                                                vs.inf_mat_rz[2:-2, 2:-2][2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] -
+                                                vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] -
                                                 npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp, axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=1e-02)))
         check2 = global_and(npx.all(npx.isclose(npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.msa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
                                                 vs.inf_mat_rz[2:-2, 2:-2] * vs.C_inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] * vs.C_inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] * vs.C_inf_pf_ss[2:-2, 2:-2] -

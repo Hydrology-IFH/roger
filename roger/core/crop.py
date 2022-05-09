@@ -220,7 +220,7 @@ def calc_t_half_mid(state):
     """
     vs = state.variables
 
-    mask = (vs.ccc[2:-2, 2:-2, vs.taum1, :] <= (vs.ccc_max / 2))
+    mask = (vs.ccc[:, :, vs.taum1, :] <= (vs.ccc_max / 2))
     vs.t_half_mid = update(
         vs.t_half_mid,
         at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.t_grow_cc[2:-2, 2:-2, vs.tau, :], vs.t_half_mid[2:-2, 2:-2, :]),
@@ -348,7 +348,7 @@ def calc_canopy_cover(state):
     )
 
     mask16 = mask_571 & (vs.doy < vs.doy_start)
-    mask17 = mask_571 & (vs.doy >= vs.doy_start) & (vs.ccc[2:-2, 2:-2, vs.tau, :] < vs.ccc_max) & (vs.doy <= vs.doy_end)
+    mask17 = mask_571 & (vs.doy >= vs.doy_start) & (vs.ccc[:, :, vs.tau, :] < vs.ccc_max) & (vs.doy <= vs.doy_end)
     # before growing period
     vs.ccc = update(
         vs.ccc,
@@ -603,7 +603,7 @@ def calc_root_growth(state):
     )
 
     # root growth stops if 95 % of total soil depth is reached
-    mask_stop_growth = (vs.z_root_crop[2:-2, 2:-2, vs.tau, :] >= 0.9 * vs.z_soil[2:-2, 2:-2, npx.newaxis])
+    mask_stop_growth = (vs.z_root_crop[:, :, vs.tau, :] >= 0.9 * vs.z_soil[:, :, npx.newaxis])
     vs.z_root_crop = update(
         vs.z_root_crop,
         at[2:-2, 2:-2, vs.tau, :], npx.where(mask_stop_growth[2:-2, 2:-2, :], 0.9 * vs.z_soil[2:-2, 2:-2, npx.newaxis], vs.z_root_crop[2:-2, 2:-2, vs.tau, :]),
@@ -936,8 +936,8 @@ def redistribution(state):
     drain_root_loss_lp = allocate(state.dimensions, ("x", "y"))
     drain_root_loss_fp = allocate(state.dimensions, ("x", "y"))
 
-    mask_root_growth = (vs.z_root[2:-2, 2:-2, vs.tau] > vs.z_root[2:-2, 2:-2, vs.taum1])
-    mask_root_loss = (vs.z_root[2:-2, 2:-2, vs.tau] < vs.z_root[2:-2, 2:-2, vs.taum1])
+    mask_root_growth = (vs.z_root[:, :, vs.tau] > vs.z_root[:, :, vs.taum1])
+    mask_root_loss = (vs.z_root[:, :, vs.tau] < vs.z_root[:, :, vs.taum1])
 
     uplift_root_growth_lp = update(
         uplift_root_growth_lp,
@@ -958,11 +958,11 @@ def redistribution(state):
 
     drain_root_loss_lp = update(
         drain_root_loss_lp,
-        at[2:-2, 2:-2], ((vs.z_root[2:-2, 2:-2, vs.taum1] - vs.z_root[2:-2, 2:-2, vs.tau]) / vs.z_root[2:-2, 2:-2, vs.taum1]) * vs.S_lp_rz * mask_root_loss
+        at[2:-2, 2:-2], ((vs.z_root[2:-2, 2:-2, vs.taum1] - vs.z_root[2:-2, 2:-2, vs.tau]) / vs.z_root[2:-2, 2:-2, vs.taum1]) * vs.S_lp_rz[2:-2, 2:-2] * mask_root_loss[2:-2, 2:-2]
     )
     drain_root_loss_fp = update(
         drain_root_loss_fp,
-        at[2:-2, 2:-2], ((vs.z_root[2:-2, 2:-2, vs.taum1] - vs.z_root[2:-2, 2:-2, vs.tau]) / vs.z_root[2:-2, 2:-2, vs.taum1]) * vs.S_fp_rz * mask_root_loss
+        at[2:-2, 2:-2], ((vs.z_root[2:-2, 2:-2, vs.taum1] - vs.z_root[2:-2, 2:-2, vs.tau]) / vs.z_root[2:-2, 2:-2, vs.taum1]) * vs.S_fp_rz[2:-2, 2:-2] * mask_root_loss[2:-2, 2:-2]
     )
     drain_root_loss_lp = update(
         drain_root_loss_lp,

@@ -13,14 +13,14 @@ def denit_soil(state, msa, km, Dmax, sa, S_sat, S_pwp):
     S = allocate(state.dimensions, ("x", "y"))
     S = update(
         S,
-        at[2:-2, 2:-2], npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # air temperature coefficient
     ta_coeff = allocate(state.dimensions, ("x", "y"))
     ta_coeff = update(
         ta_coeff,
-        at[2:-2, 2:-2], npx.where(((vs.ta[2:-2, 2:-2, vs.tau] >= 5) & (vs.ta[2:-2, 2:-2, vs.tau] <= 50)), vs.ta[2:-2, 2:-2, vs.tau] / (50 - 5), 0) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(((vs.ta[2:-2, 2:-2, vs.tau] >= 5) & (vs.ta[2:-2, 2:-2, vs.tau] <= 50)), vs.ta[2:-2, 2:-2, vs.tau] / (50 - 5), 0) * vs.maskCatch[2:-2, 2:-2],
     )
     # calculate denitrification rate
     mr = allocate(state.dimensions, ("x", "y", "ages"))
@@ -52,14 +52,14 @@ def nit_soil(state, Nmin, knit, Dnit, sa, S_sat, S_pwp):
     S = allocate(state.dimensions, ("x", "y"))
     S = update(
         S,
-        at[2:-2, 2:-2], npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # air temperature coefficient
     ta_coeff = allocate(state.dimensions, ("x", "y"))
     ta_coeff = update(
         ta_coeff,
-        at[2:-2, 2:-2], npx.where(((vs.ta[2:-2, 2:-2, vs.tau] >= 1) & (vs.ta[2:-2, 2:-2, vs.tau] <= 30)), vs.ta[2:-2, 2:-2, vs.tau] / (30 - 1), 0) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(((vs.ta[2:-2, 2:-2, vs.tau] >= 1) & (vs.ta[2:-2, 2:-2, vs.tau] <= 30)), vs.ta[2:-2, 2:-2, vs.tau] / (30 - 1), 0) * vs.maskCatch[2:-2, 2:-2],
     )
     # calculate nitrification rate
     ma = allocate(state.dimensions, ("x", "y", "ages"))
@@ -76,7 +76,7 @@ def nit_soil(state, Nmin, knit, Dnit, sa, S_sat, S_pwp):
     # limit denitrification to available solute mass
     ma = update(
         ma,
-        at[2:-2, 2:-2, :], npx.where(ma > Nmin[2:-2, 2:-2, vs.tau, :], Nmin[2:-2, 2:-2, vs.tau, :], ma) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.where(ma[2:-2, 2:-2, :] > Nmin[2:-2, 2:-2, vs.tau, :], Nmin[2:-2, 2:-2, vs.tau, :], ma[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return ma
@@ -93,13 +93,13 @@ def min_soil(state, kmin):
     ta_coeff = allocate(state.dimensions, ("x", "y"))
     ta_coeff = update(
         ta_coeff,
-        at[2:-2, 2:-2], npx.where(((vs.ta[2:-2, 2:-2, vs.tau] >= 0) & (vs.ta[2:-2, 2:-2, vs.tau] <= 50)), vs.ta[2:-2, 2:-2, vs.tau] / (50 - 0), 0) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(((vs.ta[2:-2, 2:-2, vs.tau] >= 0) & (vs.ta[2:-2, 2:-2, vs.tau] <= 50)), vs.ta[2:-2, 2:-2, vs.tau] / (50 - 0), 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
     ma = allocate(state.dimensions, ("x", "y"))
     ma = update(
         ma,
-        at[2:-2, 2:-2], kmin * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100 * ta_coeff * vs.maskCatch,
+        at[2:-2, 2:-2], kmin[2:-2, 2:-2] * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100 * ta_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return ma
@@ -120,12 +120,12 @@ def denit_gw(state, msa, k):
     )
     mr = update(
         mr,
-        at[2:-2, 2:-2, :], msa * k[2:-2, 2:-2, npx.newaxis] * npx.exp(-k[2:-2, 2:-2, npx.newaxis] * age) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], msa[2:-2, 2:-2, :] * k[2:-2, 2:-2, npx.newaxis] * npx.exp(-k[2:-2, 2:-2, npx.newaxis] * age[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     # limit denitrification to available solute mass
     mr = update(
         mr,
-        at[2:-2, 2:-2, :], npx.where(mr > msa[2:-2, 2:-2, vs.tau, :], msa[2:-2, 2:-2, vs.tau, :], mr) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.where(mr[2:-2, 2:-2, :] > msa[2:-2, 2:-2, vs.tau, :], msa[2:-2, 2:-2, vs.tau, :], mr[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return mr
@@ -137,72 +137,72 @@ def calculate_nitrogen_cycle_kernel(state):
 
     vs.Nmin_rz = update_add(
         vs.Nmin_rz,
-        at[2:-2, 2:-2, vs.tau, 0], min_soil(state, vs.kmin_rz) * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau, 0], min_soil(state, vs.kmin_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.Nmin_ss = update_add(
         vs.Nmin_ss,
-        at[2:-2, 2:-2, vs.tau, 0], min_soil(state, vs.kmin_ss) * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau, 0], min_soil(state, vs.kmin_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.ma_rz = update(
         vs.ma_rz,
-        at[2:-2, 2:-2, :], nit_soil(state, vs.Nmin_rz, vs.km_nit_rz, vs.dmax_nit_rz, vs.sa_rz, vs.S_sat_rz, vs.S_pwp_rz) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], nit_soil(state, vs.Nmin_rz, vs.km_nit_rz, vs.dmax_nit_rz, vs.sa_rz, vs.S_sat_rz, vs.S_pwp_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.Nmin_rz = update_add(
         vs.Nmin_rz,
-        at[2:-2, 2:-2, vs.tau, :], - vs.ma_rz,
+        at[2:-2, 2:-2, vs.tau, :], - vs.ma_rz[2:-2, 2:-2, :],
     )
 
     vs.msa_rz = update_add(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, 0], npx.sum(vs.ma_rz, axis=-1),
+        at[2:-2, 2:-2, vs.tau, 0], npx.sum(vs.ma_rz[2:-2, 2:-2, :], axis=-1),
     )
 
     vs.ma_ss = update(
         vs.ma_ss,
-        at[2:-2, 2:-2, :], nit_soil(state, vs.Nmin_ss, vs.km_nit_ss, vs.dmax_nit_ss, vs.sa_ss, vs.S_sat_ss, vs.S_pwp_ss) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], nit_soil(state, vs.Nmin_ss, vs.km_nit_ss, vs.dmax_nit_ss, vs.sa_ss, vs.S_sat_ss, vs.S_pwp_ss)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.Nmin_ss = update_add(
         vs.Nmin_ss,
-        at[2:-2, 2:-2, vs.tau, :], - vs.ma_ss,
+        at[2:-2, 2:-2, vs.tau, :], - vs.ma_ss[2:-2, 2:-2, :],
     )
 
     vs.msa_ss = update_add(
         vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, 0], npx.sum(vs.ma_ss, axis=-1),
+        at[2:-2, 2:-2, vs.tau, 0], npx.sum(vs.ma_ss[2:-2, 2:-2, :], axis=-1),
     )
 
     vs.mr_rz = update(
         vs.mr_rz,
-        at[2:-2, 2:-2, :], denit_soil(state, vs.msa_rz, vs.km_denit_rz, vs.dmax_denit_rz, vs.sa_rz, vs.S_sat_rz, vs.S_pwp_rz) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], denit_soil(state, vs.msa_rz, vs.km_denit_rz, vs.dmax_denit_rz, vs.sa_rz, vs.S_sat_rz, vs.S_pwp_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.msa_rz = update_add(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], - vs.mr_rz,
+        at[2:-2, 2:-2, vs.tau, :], - vs.mr_rz[2:-2, 2:-2, :],
     )
 
     vs.mr_ss = update(
         vs.mr_ss,
-        at[2:-2, 2:-2, :], denit_soil(state, vs.msa_ss, vs.km_denit_ss, vs.dmax_denit_ss, vs.sa_ss, vs.S_sat_ss, vs.S_pwp_ss) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], denit_soil(state, vs.msa_ss, vs.km_denit_ss, vs.dmax_denit_ss, vs.sa_ss, vs.S_sat_ss, vs.S_pwp_ss)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.msa_ss = update_add(
         vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, :], - vs.mr_ss,
+        at[2:-2, 2:-2, vs.tau, :], - vs.mr_ss[2:-2, 2:-2, :],
     )
 
     vs.ma_s = update(
         vs.ma_s,
-        at[2:-2, 2:-2, :], vs.ma_rz + vs.ma_ss,
+        at[2:-2, 2:-2, :], vs.ma_rz[2:-2, 2:-2, :] + vs.ma_ss[2:-2, 2:-2, :],
     )
 
     vs.mr_s = update(
         vs.mr_s,
-        at[2:-2, 2:-2, :], vs.mr_rz + vs.mr_ss,
+        at[2:-2, 2:-2, :], vs.mr_rz[2:-2, 2:-2, :] + vs.mr_ss[2:-2, 2:-2, :],
     )
 
     vs.Nmin_s = update(
@@ -219,12 +219,12 @@ def calculate_nitrogen_cycle_gw_kernel(state):
 
     vs.mr_gw = update(
         vs.mr_gw,
-        at[2:-2, 2:-2, :], denit_gw(state, vs.msa_gw, vs.k_denit_gw) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], denit_gw(state, vs.msa_gw, vs.k_denit_gw)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.msa_gw = update_add(
         vs.msa_gw,
-        at[2:-2, 2:-2, vs.tau, :], - vs.mr_gw,
+        at[2:-2, 2:-2, vs.tau, :], - vs.mr_gw[2:-2, 2:-2, :],
     )
 
     return KernelOutput(msa_rz=vs.msa_rz, msa_ss=vs.msa_ss)

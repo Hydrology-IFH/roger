@@ -65,7 +65,7 @@ def calc_evap_int_ground(state):
     # interception storage will not be fully evaporated
     vs.evap_int_ground = update_add(
         vs.evap_int_ground,
-        at[2:-2, 2:-2], vs.pet_res * mask1 * vs.maskCatch,
+        at[2:-2, 2:-2], vs.pet_res[2:-2, 2:-2] * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.pet_res = update(
         vs.pet_res,
@@ -110,7 +110,7 @@ def calc_evap_dep(state):
     )
     vs.evap_dep = update_add(
         vs.evap_dep,
-        at[2:-2, 2:-2], vs.S_dep[2:-2, 2:-2, vs.tau] * mask1[2:-2, 2:-2][2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], vs.S_dep[2:-2, 2:-2, vs.tau] * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.pet_res = update_add(
         vs.pet_res,
@@ -186,12 +186,12 @@ def calc_evap_soil(state):
     evap_fp = allocate(state.dimensions, ("x", "y"))
     pevap_soil = update(
         pevap_soil,
-        at[2:-2, 2:-2], vs.pet_res * vs.evap_coeff * vs.maskCatch,
+        at[2:-2, 2:-2], vs.pet_res[2:-2, 2:-2] * vs.evap_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     # conditions for evaporation from fine storage
-    mask1 = (vs.S_fp_rz > 0) & (pevap_soil <= vs.S_fp_rz) & (pevap_soil > 0) & (vs.swe[2:-2, 2:-2, vs.tau] <= 0) & (vs.prec <= 0)
-    mask2 = (vs.S_fp_rz > 0) & (pevap_soil > vs.S_fp_rz) & (pevap_soil > 0) & (vs.swe[2:-2, 2:-2, vs.tau] <= 0) & (vs.prec <= 0)
+    mask1 = (vs.S_fp_rz > 0) & (pevap_soil <= vs.S_fp_rz) & (pevap_soil > 0) & (vs.swe[:, :, vs.tau] <= 0) & (vs.prec <= 0)
+    mask2 = (vs.S_fp_rz > 0) & (pevap_soil > vs.S_fp_rz) & (pevap_soil > 0) & (vs.swe[:, :, vs.tau] <= 0) & (vs.prec <= 0)
 
     # water evaporates from fine pores in root zone
     # some water remains
@@ -282,7 +282,7 @@ def calc_transp(state):
 
     # water transpires from large pores in root zone
     # some water remains
-    mask1 = (vs.S_lp_rz > 0) & (vs.ptransp_res <= vs.S_lp_rz) & (vs.ptransp > 0) & (vs.swe[2:-2, 2:-2, vs.tau] <= 0) & (vs.prec <= 0)
+    mask1 = (vs.S_lp_rz > 0) & (vs.ptransp_res <= vs.S_lp_rz) & (vs.ptransp > 0) & (vs.swe[:, :, vs.tau] <= 0) & (vs.prec <= 0)
     transp_lp = update_add(
         transp_lp,
         at[2:-2, 2:-2], vs.ptransp_res[2:-2, 2:-2] * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
@@ -294,7 +294,7 @@ def calc_transp(state):
 
     # water transpires from large pores in root zone
     # no water remains
-    mask2 = (vs.S_lp_rz > 0) & (vs.ptransp_res > vs.S_lp_rz) & (vs.ptransp > 0) & (vs.swe[2:-2, 2:-2, vs.tau] <= 0) & (vs.prec <= 0)
+    mask2 = (vs.S_lp_rz > 0) & (vs.ptransp_res > vs.S_lp_rz) & (vs.ptransp > 0) & (vs.swe[:, :, vs.tau] <= 0) & (vs.prec <= 0)
     transp_lp = update_add(
         transp_lp,
         at[2:-2, 2:-2], vs.S_lp_rz[2:-2, 2:-2] * mask2[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
@@ -306,7 +306,7 @@ def calc_transp(state):
 
     # water transpires from fine pores in root zone
     # some water remains
-    mask3 = (vs.S_fp_rz > 0) & (vs.ptransp_res <= vs.S_fp_rz) & (vs.S_lp_rz <= 0) & (vs.ptransp > 0) & (vs.swe[2:-2, 2:-2, vs.tau] <= 0) & (vs.prec <= 0)
+    mask3 = (vs.S_fp_rz > 0) & (vs.ptransp_res <= vs.S_fp_rz) & (vs.S_lp_rz <= 0) & (vs.ptransp > 0) & (vs.swe[:, :, vs.tau] <= 0) & (vs.prec <= 0)
     transp_fp = update_add(
         transp_fp,
         at[2:-2, 2:-2], vs.ptransp_res[2:-2, 2:-2] * mask3[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
@@ -318,7 +318,7 @@ def calc_transp(state):
 
     # water transpires from fine pores in root zone
     # no water remains
-    mask4 = (vs.S_fp_rz > 0) & (vs.ptransp_res > vs.S_fp_rz) & (vs.S_lp_rz <= 0) & (vs.ptransp > 0) & (vs.swe[2:-2, 2:-2, vs.tau] <= 0) & (vs.prec <= 0)
+    mask4 = (vs.S_fp_rz > 0) & (vs.ptransp_res > vs.S_fp_rz) & (vs.S_lp_rz <= 0) & (vs.ptransp > 0) & (vs.swe[:, :, vs.tau] <= 0) & (vs.prec <= 0)
     transp_fp = update_add(
         transp_fp,
         at[2:-2, 2:-2], vs.S_fp_rz[2:-2, 2:-2] * mask4[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
@@ -423,22 +423,22 @@ def calculate_evaporation_transport_kernel(state):
 
     vs.SA_rz = update(
         vs.SA_rz,
-        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.tt_evap_soil = update(
         vs.tt_evap_soil,
-        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.evap_soil, vs.sas_params_evap_soil) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.evap_soil, vs.sas_params_evap_soil)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.TT_evap_soil = update(
         vs.TT_evap_soil,
-        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_evap_soil, axis=2),
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_evap_soil[2:-2, 2:-2, :], axis=-1),
     )
 
     vs.sa_rz = update(
         vs.sa_rz,
-        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     return KernelOutput(sa_rz=vs.sa_rz, tt_evap_soil=vs.tt_evap_soil, TT_evap_soil=vs.TT_evap_soil)
@@ -453,35 +453,35 @@ def calculate_evaporation_transport_iso_kernel(state):
 
     vs.SA_rz = update(
         vs.SA_rz,
-        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.tt_evap_soil = update(
         vs.tt_evap_soil,
-        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.evap_soil, vs.sas_params_evap_soil) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.evap_soil, vs.sas_params_evap_soil)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.TT_evap_soil = update(
         vs.TT_evap_soil,
-        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_evap_soil, axis=2),
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_evap_soil[2:-2, 2:-2, :], axis=-1),
     )
 
     # calculate solute travel time distribution
     alpha = allocate(state.dimensions, ("x", "y"), fill=1)
     vs.mtt_evap_soil = update(
         vs.mtt_evap_soil,
-        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil, vs.msa_rz, alpha) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil, vs.msa_rz, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.C_evap_soil = update(
         vs.C_evap_soil,
-        at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_evap_soil, vs.tt_evap_soil, vs.evap_soil) * vs.maskCatch,
+        at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_evap_soil, vs.tt_evap_soil, vs.evap_soil)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update StorAge with flux
     vs.sa_rz = update(
         vs.sa_rz,
-        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
     # update solute StorAge
     vs.msa_rz = update(
@@ -501,22 +501,22 @@ def calculate_transpiration_transport_kernel(state):
 
     vs.SA_rz = update(
         vs.SA_rz,
-        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.tt_transp = update(
         vs.tt_transp,
-        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.transp, vs.sas_params_transp) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.transp, vs.sas_params_transp)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.TT_transp = update(
         vs.TT_transp,
-        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_transp, axis=2),
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_transp[2:-2, 2:-2, :], axis=2),
     )
 
     vs.sa_rz = update(
         vs.sa_rz,
-        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_transp, vs.transp) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_transp, vs.transp)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     return KernelOutput(sa_rz=vs.sa_rz, tt_transp=vs.tt_transp, TT_transp=vs.TT_transp)
@@ -531,35 +531,35 @@ def calculate_transpiration_transport_iso_kernel(state):
 
     vs.SA_rz = update(
         vs.SA_rz,
-        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.tt_transp = update(
         vs.tt_transp,
-        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.transp, vs.sas_params_transp) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.transp, vs.sas_params_transp)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.TT_transp = update(
         vs.TT_transp,
-        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_transp, axis=2),
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_transp[2:-2, 2:-2, :], axis=-1),
     )
 
     # calculate solute travel time distribution
     alpha = allocate(state.dimensions, ("x", "y"), fill=1)
     vs.mtt_transp = update(
         vs.mtt_transp,
-        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_transp, vs.transp, vs.msa_rz, alpha) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_transp, vs.transp, vs.msa_rz, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.C_transp = update(
         vs.C_transp,
-        at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_transp, vs.tt_transp, vs.transp) * vs.maskCatch,
+        at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_transp, vs.tt_transp, vs.transp)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update StorAge with flux
     vs.sa_rz = update(
         vs.sa_rz,
-        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_transp, vs.transp) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_transp, vs.transp)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
     # update solute StorAge
     vs.msa_rz = update(
@@ -579,39 +579,39 @@ def calculate_transpiration_transport_anion_kernel(state):
 
     vs.SA_rz = update(
         vs.SA_rz,
-        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.tt_transp = update(
         vs.tt_transp,
-        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.transp, vs.sas_params_transp) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.transp, vs.sas_params_transp)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.TT_transp = update(
         vs.TT_transp,
-        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_transp, axis=2),
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_transp[2:-2, 2:-2, :], axis=2),
     )
 
     # calculate isotope travel time distribution
     vs.mtt_transp = update(
         vs.mtt_transp,
-        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_transp, vs.transp, vs.msa_rz, vs.alpha_transp) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_transp, vs.transp, vs.msa_rz, vs.alpha_transp)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.C_transp = update(
         vs.C_transp,
-        at[2:-2, 2:-2], npx.where(vs.transp > 0, npx.sum(vs.mtt_transp, axis=2) / vs.transp, 0) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.transp > 0, npx.sum(vs.mtt_transp, axis=2) / vs.transp, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update StorAge with flux
     vs.sa_rz = update(
         vs.sa_rz,
-        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_transp, vs.transp) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_transp, vs.transp)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
     # update solute StorAge of root zone
     vs.msa_rz = update(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], vs.msa_rz[2:-2, 2:-2, vs.tau, :] - vs.mtt_transp * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], vs.msa_rz[2:-2, 2:-2, vs.tau, :] - vs.mtt_transp[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(sa_rz=vs.sa_rz, tt_transp=vs.tt_transp, TT_transp=vs.TT_transp, msa_rz=vs.msa_rz, mtt_transp=vs.mtt_transp, C_transp=vs.C_transp)

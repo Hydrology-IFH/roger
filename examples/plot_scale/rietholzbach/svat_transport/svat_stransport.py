@@ -217,26 +217,32 @@ class SVATTRANSPORTSetup(RogerSetup):
         pass
 
     @roger_routine
+    def set_initial_conditions_setup(self, state):
+        pass
+
+    @roger_routine
     def set_initial_conditions(self, state):
         vs = state.variables
         settings = state.settings
 
+        vs.S_SNOW = update(vs.S_SNOW, at[2:-2, 2:-2, :], self._read_var_from_nc("S_snow", 'states_hm.nc'))
         vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", 'states_hm.nc'))
         vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", 'states_hm.nc'))
         vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ + vs.S_SS)
 
-        vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :2], vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-        vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :2], vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
-        vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :2], vs.S_S[2:-2, 2:-2, 0, npx.newaxis] - (vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis]))
+        vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], vs.S_SNOW[2:-2, 2:-2, 0, npx.newaxis])
+        vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
+        vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+        vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_S[2:-2, 2:-2, 0, npx.newaxis] - (vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis]))
 
         arr0 = allocate(state.dimensions, ("x", "y"))
         vs.sa_rz = update(
             vs.sa_rz,
-            at[2:-2, 2:-2, :2, 1:], npx.diff(npx.linspace(arr0, vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
+            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0, vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
         )
         vs.sa_ss = update(
             vs.sa_ss,
-            at[2:-2, 2:-2, :2, 1:], npx.diff(npx.linspace(arr0, vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
+            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0, vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
         )
 
         vs.SA_rz = update(
@@ -259,23 +265,24 @@ class SVATTRANSPORTSetup(RogerSetup):
         )
 
         if (settings.enable_oxygen18 | settings.enable_deuterium):
-            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :2], -13)
-            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :2], -7)
+            vs.C_snow = update(vs.C_snow, at[2:-2, 2:-2, :vs.taup1], npx.NaN)
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], -13)
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], -7)
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[2:-2, 2:-2, :2, :], vs.C_rz[2:-2, 2:-2, :2, npx.newaxis],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis],
             )
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[2:-2, 2:-2, :2, 0], npx.NaN,
+                at[2:-2, 2:-2, :vs.taup1, 0], npx.NaN,
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[2:-2, 2:-2, :2, :], vs.C_ss[2:-2, 2:-2, :2, npx.newaxis],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_ss[2:-2, 2:-2, :vs.taup1, npx.newaxis],
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[2:-2, 2:-2, :2, 0], npx.NaN,
+                at[2:-2, 2:-2, :vs.taup1, 0], npx.NaN,
             )
             iso_rz = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
             iso_ss = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
@@ -294,12 +301,12 @@ class SVATTRANSPORTSetup(RogerSetup):
 
             vs.C_s = update(
                 vs.C_s,
-                at[2:-2, 2:-2, vs.tau], calc_conc_iso_storage(state, vs.sa_s, vs.msa_s) * vs.maskCatch,
+                at[2:-2, 2:-2, vs.tau], calc_conc_iso_storage(state, vs.sa_s, vs.msa_s) * vs.maskCatch[2:-2, 2:-2],
             )
 
             vs.C_s = update(
                 vs.C_s,
-                at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau] * vs.maskCatch,
+                at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2],
             )
 
     @roger_routine
@@ -359,18 +366,15 @@ class SVATTRANSPORTSetup(RogerSetup):
     @roger_routine
     def after_timestep(self, state):
         vs = state.variables
-        settings = state.settings
 
         vs.update(after_timestep_kernel(state))
-        if settings.enable_nitrate:
-            vs.update(after_timestep_nitrate_kernel(state))
 
 
 @roger_kernel
 def set_iso_input_kernel(state):
     vs = state.variables
 
-    vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], _ffill_3d(state, vs.C_IN))
+    vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], _ffill_3d(state, vs.C_IN)[2:-2, 2:-2, :])
 
     return KernelOutput(
         C_IN=vs.C_IN,
@@ -381,19 +385,30 @@ def set_iso_input_kernel(state):
 def set_forcing_iso_kernel(state):
     vs = state.variables
 
+    vs.C_snow = update(
+        vs.C_snow,
+        at[2:-2, 2:-2, vs.tau], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] > 0, npx.where(npx.isnan(vs.C_snow[2:-2, 2:-2, vs.tau]), vs.C_IN[2:-2, 2:-2, vs.itt], (vs.PREC[2:-2, 2:-2, vs.itt] / (vs.PREC[2:-2, 2:-2, vs.itt] + vs.S_SNOW[2:-2, 2:-2, vs.itt])) * vs.C_IN[2:-2, 2:-2, vs.itt] + (vs.S_SNOW[2:-2, 2:-2, vs.itt] / (vs.PREC[2:-2, 2:-2, vs.itt] + vs.S_SNOW[2:-2, 2:-2, vs.itt])) * vs.C_snow[2:-2, 2:-2, vs.taum1]), npx.NaN) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.C_snow = update(
+        vs.C_snow,
+        at[2:-2, 2:-2, vs.tau], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] <= 0, npx.NaN, vs.C_snow[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     vs.C_in = update(
         vs.C_in,
-        at[2:-2, 2:-2], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.NaN) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] > 0, vs.C_snow[2:-2, 2:-2, vs.tau], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.NaN)) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.M_in = update(
         vs.M_in,
-        at[2:-2, 2:-2], vs.C_in * vs.PREC[2:-2, 2:-2, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.C_in[2:-2, 2:-2] * vs.PREC[2:-2, 2:-2, vs.itt] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(
         M_in=vs.M_in,
         C_in=vs.C_in,
+        C_snow=vs.C_snow,
     )
 
 
@@ -413,6 +428,7 @@ def set_states_kernel(state):
     vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], vs.S_RZ[2:-2, 2:-2, vs.itt])
     vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], vs.S_SS[2:-2, 2:-2, vs.itt])
     vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_S[2:-2, 2:-2, vs.itt])
+    vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, vs.tau], vs.S_SNOW[2:-2, 2:-2, vs.itt])
 
     return KernelOutput(
         inf_mat_rz=vs.inf_mat_rz,
@@ -425,6 +441,7 @@ def set_states_kernel(state):
         cpr_rz=vs.cpr_rz,
         S_rz=vs.S_rz,
         S_ss=vs.S_ss,
+        S_snow=vs.S_snow,
     )
 
 
@@ -504,6 +521,10 @@ def after_timestep_kernel(state):
         vs.C_s,
         at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau],
     )
+    vs.C_snow = update(
+        vs.C_snow,
+        at[2:-2, 2:-2, vs.taum1], vs.C_snow[2:-2, 2:-2, vs.tau],
+    )
 
     return KernelOutput(
         SA_rz=vs.SA_rz,
@@ -524,32 +545,7 @@ def after_timestep_kernel(state):
         msa_s=vs.msa_s,
         M_s=vs.M_s,
         C_s=vs.C_s,
-        )
-
-
-@roger_kernel
-def after_timestep_nitrate_kernel(state):
-    vs = state.variables
-
-    vs.Nmin_rz = update(
-        vs.Nmin_rz,
-        at[2:-2, 2:-2, vs.taum1, :], vs.Nmin_rz[2:-2, 2:-2, vs.tau, :],
-        )
-
-    vs.Nmin_ss = update(
-        vs.Nmin_ss,
-        at[2:-2, 2:-2, vs.taum1, :], vs.Nmin_ss[2:-2, 2:-2, vs.tau, :],
-        )
-
-    vs.Nmin_s = update(
-        vs.Nmin_s,
-        at[2:-2, 2:-2, vs.taum1, :], vs.Nmin_s[2:-2, 2:-2, vs.tau, :],
-        )
-
-    return KernelOutput(
-        Nmin_rz=vs.Nmin_rz,
-        Nmin_ss=vs.Nmin_ss,
-        Nmin_s=vs.Nmin_s
+        C_snow=vs.C_snow,
         )
 
 
@@ -559,12 +555,12 @@ def calc_conc_iso_storage(state, sa, msa):
     """
     vs = state.variables
 
-    mask = npx.isfinite(msa[2:-2, 2:-2, vs.tau, :])
+    mask = npx.isfinite(msa[:, :, vs.tau, :])
     vals = allocate(state.dimensions, ("x", "y", "ages"))
     weights = allocate(state.dimensions, ("x", "y", "ages"))
     vals = update(
         vals,
-        at[2:-2, 2:-2, :], npx.where(mask, msa[2:-2, 2:-2, vs.tau, :], 0),
+        at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], msa[2:-2, 2:-2, vs.tau, :], 0),
     )
     weights = update(
         weights,

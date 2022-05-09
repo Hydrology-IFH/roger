@@ -193,18 +193,18 @@ class SVATTRANSPORTSetup(RogerSetup):
 
         vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ + vs.S_SS)
 
-        vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :2], vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-        vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :2], vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
-        vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :2], vs.S_S[2:-2, 2:-2, 0, npx.newaxis] - (vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis]))
+        vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
+        vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+        vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_S[2:-2, 2:-2, 0, npx.newaxis] - (vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis]))
 
         arr0 = allocate(state.dimensions, ("x", "y"))
         vs.sa_rz = update(
             vs.sa_rz,
-            at[2:-2, 2:-2, :2, 1:], npx.diff(npx.linspace(arr0, vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
+            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0, vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
         )
         vs.sa_ss = update(
             vs.sa_ss,
-            at[2:-2, 2:-2, :2, 1:], npx.diff(npx.linspace(arr0, vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
+            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0, vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
         )
 
         vs.SA_rz = update(
@@ -227,23 +227,23 @@ class SVATTRANSPORTSetup(RogerSetup):
         )
 
         if (settings.enable_oxygen18 | settings.enable_deuterium):
-            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :2], -13)
-            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :2], -7)
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], -13)
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], -7)
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[2:-2, 2:-2, :2, :], vs.C_rz[2:-2, 2:-2, :2, npx.newaxis],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis],
             )
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[2:-2, 2:-2, :2, 0], npx.NaN,
+                at[2:-2, 2:-2, :vs.taup1, 0], npx.NaN,
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[2:-2, 2:-2, :2, :], vs.C_ss[2:-2, 2:-2, :2, npx.newaxis],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_ss[2:-2, 2:-2, :vs.taup1, npx.newaxis],
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[2:-2, 2:-2, :2, 0], npx.NaN,
+                at[2:-2, 2:-2, :vs.taup1, 0], npx.NaN,
             )
             iso_rz = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
             iso_ss = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
@@ -262,12 +262,12 @@ class SVATTRANSPORTSetup(RogerSetup):
 
             vs.C_s = update(
                 vs.C_s,
-                at[2:-2, 2:-2, vs.tau], calc_conc_iso_storage(state, vs.sa_s, vs.msa_s) * vs.maskCatch,
+                at[2:-2, 2:-2, vs.tau], calc_conc_iso_storage(state, vs.sa_s, vs.msa_s) * vs.maskCatch[2:-2, 2:-2],
             )
 
             vs.C_s = update(
                 vs.C_s,
-                at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau] * vs.maskCatch,
+                at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2],
             )
 
     @roger_routine(
@@ -364,12 +364,12 @@ def set_forcing_iso_kernel(state):
 
     vs.C_in = update(
         vs.C_in,
-        at[2:-2, 2:-2], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.NaN) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.NaN) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.M_in = update(
         vs.M_in,
-        at[2:-2, 2:-2], vs.C_in * vs.PREC[2:-2, 2:-2, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.C_in * vs.PREC[2:-2, 2:-2, vs.itt] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(

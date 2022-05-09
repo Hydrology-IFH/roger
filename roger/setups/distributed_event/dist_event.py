@@ -8,8 +8,8 @@ import roger.lookuptables as lut
 import numpy as onp
 
 
-class DISTSetup(RogerSetup):
-    """A distributed model.
+class DISTEVENTSetup(RogerSetup):
+    """A distributed model for a single event.
     """
     _base_path = Path(__file__).parent
 
@@ -19,23 +19,11 @@ class DISTSetup(RogerSetup):
             var_obj = infile.variables[var]
             return npx.array(var_obj)
 
-    def _get_nittevent(self):
-        nc_file = self._base_path / 'forcing.nc'
-        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables['nitt_event']
-            return onp.int32(onp.array(var_obj)[0])
-
     def _get_nitt(self):
         nc_file = self._base_path / 'forcing.nc'
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['time']
             return len(onp.array(var_obj))
-
-    def _get_runlen(self):
-        nc_file = self._base_path / 'forcing.nc'
-        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables['time']
-            return onp.array(var_obj)[-1] * 60 * 60 + 24 * 60 * 60
 
     @roger_routine
     def set_settings(self, state):
@@ -44,9 +32,9 @@ class DISTSetup(RogerSetup):
 
         settings.nx, settings.ny, settings.nz = 8, 8, 1
         settings.nitt = self._get_nitt()
-        settings.nittevent = self._get_nittevent()
+        settings.nittevent = self._get_nitt()
         settings.nittevent_p1 = settings.nittevent + 1
-        settings.runlen = self._get_runlen()
+        settings.runlen = settings.nitt * 10 * 60
 
         settings.dx = 1
         settings.dy = 1
@@ -62,19 +50,12 @@ class DISTSetup(RogerSetup):
     @roger_routine
     def set_grid(self, state):
         vs = state.variables
+        settings = state.settings
 
         # temporal grid
-        vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", 'forcing.nc'))
-        vs.DT = update(vs.DT, at[:], vs.DT_SECS / (60 * 60))
-        vs.YEAR = update(vs.YEAR, at[:], self._read_var_from_nc("year", 'forcing.nc'))
-        vs.MONTH = update(vs.MONTH, at[:], self._read_var_from_nc("month", 'forcing.nc'))
-        vs.DOY = update(vs.DOY, at[:], self._read_var_from_nc("doy", 'forcing.nc'))
-        vs.dt_secs = vs.DT_SECS[vs.itt]
-        vs.dt = vs.DT[vs.itt]
-        vs.year = vs.YEAR[vs.itt]
-        vs.month = vs.MONTH[vs.itt]
-        vs.doy = vs.DOY[vs.itt]
-        vs.t = update(vs.t, at[:], npx.cumsum(vs.DT))
+        vs.dt_secs = 10 * 60
+        vs.dt = (10 * 60) / (60 * 60)
+        vs.t = update(vs.t, at[:], npx.linspace(0, vs.dt * settings.nitt, num=settings.nitt))
 
     @roger_routine
     def set_look_up_tables(self, state):
@@ -92,28 +73,27 @@ class DISTSetup(RogerSetup):
         pass
 
     @roger_routine
-    def set_parameters(self, state):
+    def set_parameters_setup(self, state):
         vs = state.variables
 
-        if (vs.itt == 0):
+        vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
+        vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
+        vs.slope = update(vs.slope, at[2:-2, 2:-2], 0.05)
+        vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope * 100)
+        vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
+        vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
+        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 100)
+        vs.dmph = update(vs.dmph, at[2:-2, 2:-2], 100)
+        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1000)
+        vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.13)
+        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.24)
+        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.23)
+        vs.ks = update(vs.ks, at[2:-2, 2:-2], 25)
+        vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
-            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
-            vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
-            vs.slope = update(vs.slope, at[2:-2, 2:-2], 0.05)
-            vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope * 100)
-            vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
-            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 100)
-            vs.dmph = update(vs.dmph, at[2:-2, 2:-2], 100)
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1000)
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.13)
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.24)
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.23)
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], 25)
-            vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
-
-        if (vs.MONTH[vs.itt] != vs.MONTH[vs.itt - 1]) & (vs.itt > 1):
-            vs.update(set_parameters_monthly_kernel(state))
+    @roger_routine
+    def set_parameters(self, state):
+        pass
 
     @roger_routine
     def set_initial_conditions_setup(self, state):
@@ -135,14 +115,16 @@ class DISTSetup(RogerSetup):
         vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 250)
 
     @roger_routine
-    def set_forcing(self, state):
+    def set_forcing_setup(self, state):
         vs = state.variables
 
-        if (vs.itt == 0):
-            vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", 'forcing.nc'))
-            vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", 'forcing.nc'))
-            vs.PET = update(vs.PET, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", 'forcing.nc'))
-            vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID", 'forcing.nc'))
+        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", 'forcing.nc'))
+        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", 'forcing.nc'))
+        vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, 1:], 1)
+
+    @roger_routine
+    def set_forcing(self, state):
+        vs = state.variables
 
         vs.update(set_forcing_kernel(state))
 
@@ -173,186 +155,15 @@ class DISTSetup(RogerSetup):
 
 
 @roger_kernel
-def set_parameters_monthly_kernel(state):
-    vs = state.variables
-
-    # land use dependent upper interception storage
-    def loop_body_S_int_top_tot(i, S_int_top_tot):
-        arr_i = allocate(state.dimensions, ("x", "y"))
-        arr_i = update(
-            arr_i,
-            at[2:-2, 2:-2], i * (vs.lu_id == i),
-        )
-        mask = (vs.lu_id == i) & npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
-        row_no = _get_row_no(vs.lut_ilu[:, 0], i)
-        S_int_top_tot = update(
-            S_int_top_tot,
-            at[2:-2, 2:-2], npx.where(mask, vs.lut_ilu[row_no, vs.month], 0),
-        )
-
-        return S_int_top_tot
-
-    S_int_top_tot = allocate(state.dimensions, ("x", "y"))
-
-    S_int_top_tot = for_loop(10, 17, loop_body_S_int_top_tot, S_int_top_tot)
-    mask = npx.isin(vs.lu_id, npx.array([10, 11, 12, 15, 16]))
-    vs.S_int_top_tot = update(
-        vs.S_int_top_tot,
-        at[2:-2, 2:-2], npx.where(mask, S_int_top_tot, vs.S_int_top_tot),
-    )
-
-    # land use dependent lower interception storage
-    S_int_ground_tot = allocate(state.dimensions, ("x", "y"))
-
-    def loop_body_S_int_ground_tot(i, S_int_ground_tot):
-        arr_i = allocate(state.dimensions, ("x", "y"))
-        arr_i = update(
-            arr_i,
-            at[2:-2, 2:-2], i * vs.maskCatch,
-        )
-        mask = (vs.lu_id == i) & ~npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
-        row_no = _get_row_no(vs.lut_ilu[:, 0], i)
-        S_int_ground_tot = update_add(
-            S_int_ground_tot,
-            at[2:-2, 2:-2], npx.where(mask, vs.lut_ilu[row_no, vs.month], 0),
-        )
-
-        return S_int_ground_tot
-
-    def loop_body_S_int_ground_tot_trees(i, S_int_ground_tot):
-        arr_i = allocate(state.dimensions, ("x", "y"))
-        arr_i = update(
-            arr_i,
-            at[2:-2, 2:-2], i * vs.maskCatch,
-        )
-        mask = (vs.lu_id == i) & npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
-        S_int_ground_tot = update_add(
-            S_int_ground_tot,
-            at[2:-2, 2:-2], npx.where(mask, 1, 0),
-        )
-
-        return S_int_ground_tot
-
-    S_int_ground_tot = update(
-        S_int_ground_tot,
-        at[2:-2, 2:-2], for_loop(0, 51, loop_body_S_int_ground_tot, S_int_ground_tot),
-    )
-    S_int_ground_tot = update(
-        S_int_ground_tot,
-        at[2:-2, 2:-2], for_loop(10, 17, loop_body_S_int_ground_tot_trees, S_int_ground_tot),
-    )
-
-    mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
-    vs.S_int_ground_tot = update(
-        vs.S_int_ground_tot,
-        at[2:-2, 2:-2], npx.where(mask, S_int_ground_tot, vs.S_int_ground_tot),
-    )
-
-    # land use dependent ground cover (canopy cover)
-    ground_cover = allocate(state.dimensions, ("x", "y"))
-
-    def loop_body_ground_cover(i, ground_cover):
-        mask = (vs.lu_id == i)
-        row_no = _get_row_no(vs.lut_gc[:, 0], i)
-        ground_cover = update_add(
-            ground_cover,
-            at[2:-2, 2:-2], npx.where(mask, vs.lut_gc[row_no, vs.month], 0),
-        )
-
-        return ground_cover
-
-    ground_cover = for_loop(0, 51, loop_body_ground_cover, ground_cover)
-
-    mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
-    vs.ground_cover = update(
-        vs.ground_cover,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask, ground_cover, vs.ground_cover[2:-2, 2:-2, vs.tau]),
-    )
-
-    # land use dependent transpiration coeffcient
-    basal_transp_coeff = allocate(state.dimensions, ("x", "y"))
-
-    def loop_body_basal_transp_coeff(i, basal_transp_coeff):
-        mask = (vs.lu_id == i)
-        row_no = _get_row_no(vs.lut_gc[:, 0], i)
-        basal_transp_coeff = update_add(
-            basal_transp_coeff,
-            at[2:-2, 2:-2], npx.where(mask, vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1], 0),
-        )
-
-        return basal_transp_coeff
-
-    basal_transp_coeff = update(
-        basal_transp_coeff,
-        at[2:-2, 2:-2], where(vs.maskRiver | vs.maskLake, 0, for_loop(0, 51, loop_body_basal_transp_coeff, basal_transp_coeff)),
-    )
-
-    mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
-    vs.basal_transp_coeff = update(
-        vs.basal_transp_coeff,
-        at[2:-2, 2:-2], npx.where(mask, basal_transp_coeff, vs.basal_transp_coeff),
-    )
-
-    # land use dependent evaporation coeffcient
-    basal_evap_coeff = allocate(state.dimensions, ("x", "y"))
-
-    def loop_body_basal_evap_coeff(i, basal_evap_coeff):
-        mask = (vs.lu_id == i)
-        row_no = _get_row_no(vs.lut_gc[:, 0], i)
-        basal_evap_coeff = update_add(
-            basal_evap_coeff,
-            at[2:-2, 2:-2], npx.where(mask, 1 - ((vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1]) * vs.lut_gcm[row_no, 1]), 0),
-        )
-
-        return basal_evap_coeff
-
-    basal_evap_coeff = for_loop(0, 51, loop_body_basal_evap_coeff, basal_evap_coeff)
-
-    basal_evap_coeff = update(
-        basal_evap_coeff,
-        at[2:-2, 2:-2], where(vs.maskRiver | vs.maskLake, 1, basal_evap_coeff),
-    )
-
-    mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
-    vs.basal_evap_coeff = update(
-        vs.basal_evap_coeff,
-        at[2:-2, 2:-2], npx.where(mask, basal_evap_coeff, vs.basal_evap_coeff),
-    )
-
-    return KernelOutput(
-        S_int_top_tot=vs.S_int_top_tot,
-        S_int_ground_tot=vs.S_int_ground_tot,
-        ground_cover=vs.ground_cover,
-        basal_transp_coeff=vs.basal_transp_coeff,
-        basal_evap_coeff=vs.basal_evap_coeff
-    )
-
-
-@roger_kernel
 def set_forcing_kernel(state):
     vs = state.variables
 
     vs.prec = update(vs.prec, at[2:-2, 2:-2], vs.PREC[2:-2, 2:-2, vs.itt])
     vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[2:-2, 2:-2, vs.itt])
-    vs.pet = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
-    vs.pet_res = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
-
-    vs.dt_secs = vs.DT_SECS[vs.itt]
-    vs.dt = vs.DT[vs.itt]
-    vs.year = vs.YEAR[vs.itt]
-    vs.month = vs.MONTH[vs.itt]
-    vs.doy = vs.DOY[vs.itt]
 
     return KernelOutput(
         prec=vs.prec,
         ta=vs.ta,
-        pet=vs.pet,
-        pet_res=vs.pet_res,
-        dt=vs.dt,
-        dt_secs=vs.dt_secs,
-        year=vs.year,
-        month=vs.month,
-        doy=vs.doy,
     )
 
 

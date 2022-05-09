@@ -151,6 +151,10 @@ class SVATFILMTRANSPORTSetup(RogerSetup):
             vs.update(set_parameters_monthly_kernel(state))
 
     @roger_routine
+    def set_initial_conditions_setup(self, state):
+        pass
+
+    @roger_routine
     def set_initial_conditions(self, state):
         vs = state.variables
         settings = state.settings
@@ -269,12 +273,12 @@ def set_initial_conditions_crops_kernel(state):
 
     vs.t_grow_cc = update(
         vs.t_grow_cc,
-        at[2:-2, 2:-2, :2, :], t_grow[2:-2, 2:-2, npx.newaxis, :]
+        at[2:-2, 2:-2, :vs.taup1, :], t_grow[2:-2, 2:-2, npx.newaxis, :]
     )
 
     vs.t_grow_root = update(
         vs.t_grow_root,
-        at[2:-2, 2:-2, :2, :], t_grow[2:-2, 2:-2, npx.newaxis, :]
+        at[2:-2, 2:-2, :vs.taup1, :], t_grow[2:-2, 2:-2, npx.newaxis, :]
     )
 
     return KernelOutput(

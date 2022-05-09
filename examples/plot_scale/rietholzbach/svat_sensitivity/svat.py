@@ -171,6 +171,10 @@ class SVATSetup(RogerSetup):
             vs.update(set_parameters_monthly_kernel(state))
 
     @roger_routine
+    def set_initial_conditions_setup(self, state):
+        pass
+
+    @roger_routine
     def set_initial_conditions(self, state):
         vs = state.variables
 
@@ -216,9 +220,8 @@ class SVATSetup(RogerSetup):
                                                    "S_pwp_rz", "S_fc_rz",
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss",
-                                                   "theta_rz", "theta_ss", "theta"]
-        if settings.enable_crop_phenology:
-            diagnostics["collect"].output_variables += ["re_rg", "re_rl", "z_root", "ground_cover"]
+                                                   "theta_rz", "theta_ss", "theta",
+                                                   "S_snow"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 
@@ -246,13 +249,13 @@ def set_parameters_monthly_kernel(state):
         arr_i = allocate(state.dimensions, ("x", "y"))
         arr_i = update(
             arr_i,
-            at[2:-2, 2:-2], i * (vs.lu_id == i),
+            at[:, :], i * (vs.lu_id == i),
         )
         mask = (vs.lu_id == i) & npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
         row_no = _get_row_no(vs.lut_ilu[:, 0], i)
         S_int_top_tot = update(
             S_int_top_tot,
-            at[2:-2, 2:-2], npx.where(mask, vs.lut_ilu[row_no, vs.month], 0),
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_ilu[row_no, vs.month], 0),
         )
 
         return S_int_top_tot
@@ -263,7 +266,7 @@ def set_parameters_monthly_kernel(state):
     mask = npx.isin(vs.lu_id, npx.array([10, 11, 12, 15, 16]))
     vs.S_int_top_tot = update(
         vs.S_int_top_tot,
-        at[2:-2, 2:-2], npx.where(mask, S_int_top_tot, vs.S_int_top_tot),
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], S_int_top_tot[2:-2, 2:-2], vs.S_int_top_tot[2:-2, 2:-2]),
     )
 
     # land use dependent lower interception storage
@@ -273,13 +276,13 @@ def set_parameters_monthly_kernel(state):
         arr_i = allocate(state.dimensions, ("x", "y"))
         arr_i = update(
             arr_i,
-            at[2:-2, 2:-2], i * vs.maskCatch,
+            at[:, :], i * vs.maskCatch,
         )
         mask = (vs.lu_id == i) & ~npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
         row_no = _get_row_no(vs.lut_ilu[:, 0], i)
         S_int_ground_tot = update_add(
             S_int_ground_tot,
-            at[2:-2, 2:-2], npx.where(mask, vs.lut_ilu[row_no, vs.month], 0),
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_ilu[row_no, vs.month], 0),
         )
 
         return S_int_ground_tot
@@ -288,29 +291,29 @@ def set_parameters_monthly_kernel(state):
         arr_i = allocate(state.dimensions, ("x", "y"))
         arr_i = update(
             arr_i,
-            at[2:-2, 2:-2], i * vs.maskCatch,
+            at[:, :], i * vs.maskCatch,
         )
         mask = (vs.lu_id == i) & npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
         S_int_ground_tot = update_add(
             S_int_ground_tot,
-            at[2:-2, 2:-2], npx.where(mask, 1, 0),
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 1, 0),
         )
 
         return S_int_ground_tot
 
     S_int_ground_tot = update(
         S_int_ground_tot,
-        at[2:-2, 2:-2], for_loop(0, 51, loop_body_S_int_ground_tot, S_int_ground_tot),
+        at[:, :], for_loop(0, 51, loop_body_S_int_ground_tot, S_int_ground_tot),
     )
     S_int_ground_tot = update(
         S_int_ground_tot,
-        at[2:-2, 2:-2], for_loop(10, 17, loop_body_S_int_ground_tot_trees, S_int_ground_tot),
+        at[:, :], for_loop(10, 17, loop_body_S_int_ground_tot_trees, S_int_ground_tot),
     )
 
     mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
     vs.S_int_ground_tot = update(
         vs.S_int_ground_tot,
-        at[2:-2, 2:-2], npx.where(mask, S_int_ground_tot, vs.S_int_ground_tot),
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], S_int_ground_tot[2:-2, 2:-2], vs.S_int_ground_tot[2:-2, 2:-2]),
     )
 
     # land use dependent ground cover (canopy cover)
@@ -321,7 +324,7 @@ def set_parameters_monthly_kernel(state):
         row_no = _get_row_no(vs.lut_gc[:, 0], i)
         ground_cover = update_add(
             ground_cover,
-            at[2:-2, 2:-2], npx.where(mask, vs.lut_gc[row_no, vs.month], 0),
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_gc[row_no, vs.month], 0),
         )
 
         return ground_cover
@@ -331,7 +334,7 @@ def set_parameters_monthly_kernel(state):
     mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
     vs.ground_cover = update(
         vs.ground_cover,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask, ground_cover, vs.ground_cover[2:-2, 2:-2, vs.tau]),
+        at[2:-2, 2:-2, vs.tau], npx.where(mask[2:-2, 2:-2], ground_cover[2:-2, 2:-2], vs.ground_cover[2:-2, 2:-2, vs.tau]),
     )
 
     # land use dependent transpiration coeffcient
@@ -342,20 +345,20 @@ def set_parameters_monthly_kernel(state):
         row_no = _get_row_no(vs.lut_gc[:, 0], i)
         basal_transp_coeff = update_add(
             basal_transp_coeff,
-            at[2:-2, 2:-2], npx.where(mask, vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1], 0),
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1], 0),
         )
 
         return basal_transp_coeff
 
     basal_transp_coeff = update(
         basal_transp_coeff,
-        at[2:-2, 2:-2], where(vs.maskRiver | vs.maskLake, 0, for_loop(0, 51, loop_body_basal_transp_coeff, basal_transp_coeff)),
+        at[:, :], where(vs.maskRiver | vs.maskLake, 0, for_loop(0, 51, loop_body_basal_transp_coeff, basal_transp_coeff)),
     )
 
     mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
     vs.basal_transp_coeff = update(
         vs.basal_transp_coeff,
-        at[2:-2, 2:-2], npx.where(mask, basal_transp_coeff, vs.basal_transp_coeff),
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], basal_transp_coeff[2:-2, 2:-2], vs.basal_transp_coeff[2:-2, 2:-2]),
     )
 
     # land use dependent evaporation coeffcient
@@ -366,7 +369,7 @@ def set_parameters_monthly_kernel(state):
         row_no = _get_row_no(vs.lut_gc[:, 0], i)
         basal_evap_coeff = update_add(
             basal_evap_coeff,
-            at[2:-2, 2:-2], npx.where(mask, 1 - ((vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1]) * vs.lut_gcm[row_no, 1]), 0),
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 1 - ((vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1]) * vs.lut_gcm[row_no, 1]), 0),
         )
 
         return basal_evap_coeff
@@ -375,13 +378,13 @@ def set_parameters_monthly_kernel(state):
 
     basal_evap_coeff = update(
         basal_evap_coeff,
-        at[2:-2, 2:-2], where(vs.maskRiver | vs.maskLake, 1, basal_evap_coeff),
+        at[:, :], where(vs.maskRiver | vs.maskLake, 1, basal_evap_coeff),
     )
 
     mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
     vs.basal_evap_coeff = update(
         vs.basal_evap_coeff,
-        at[2:-2, 2:-2], npx.where(mask, basal_evap_coeff, vs.basal_evap_coeff),
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], basal_evap_coeff[2:-2, 2:-2], vs.basal_evap_coeff[2:-2, 2:-2]),
     )
 
     return KernelOutput(
@@ -552,19 +555,19 @@ def after_timestep_kernel(state):
     # set to 0 for numerical errors
     vs.S_fp_rz = update(
         vs.S_fp_rz,
-        at[2:-2, 2:-2], npx.where((vs.S_fp_rz > -1e-6) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz),
+        at[2:-2, 2:-2], npx.where((vs.S_fp_rz > -1e-6) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz)[2:-2, 2:-2],
     )
     vs.S_lp_rz = update(
         vs.S_lp_rz,
-        at[2:-2, 2:-2], npx.where((vs.S_lp_rz > -1e-6) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz),
+        at[2:-2, 2:-2], npx.where((vs.S_lp_rz > -1e-6) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz)[2:-2, 2:-2],
     )
     vs.S_fp_ss = update(
         vs.S_fp_ss,
-        at[2:-2, 2:-2], npx.where((vs.S_fp_ss > -1e-6) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss),
+        at[2:-2, 2:-2], npx.where((vs.S_fp_ss > -1e-6) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss)[2:-2, 2:-2],
     )
     vs.S_lp_ss = update(
         vs.S_lp_ss,
-        at[2:-2, 2:-2], npx.where((vs.S_lp_ss > -1e-6) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss),
+        at[2:-2, 2:-2], npx.where((vs.S_lp_ss > -1e-6) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss)[2:-2, 2:-2],
     )
 
     return KernelOutput(

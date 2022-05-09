@@ -236,6 +236,10 @@ class SVATTRANSPORTSetup(RogerSetup):
         pass
 
     @roger_routine
+    def set_initial_conditions_setup(self, state):
+        pass
+
+    @roger_routine
     def set_initial_conditions(self, state):
         vs = state.variables
         settings = state.settings
@@ -244,18 +248,18 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", 'states_hm.nc'))
         vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ + vs.S_SS)
 
-        vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :2], vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-        vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :2], vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
-        vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :2], vs.S_S[2:-2, 2:-2, 0, npx.newaxis] - (vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis]))
+        vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
+        vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+        vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_S[2:-2, 2:-2, 0, npx.newaxis] - (vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis]))
 
         arr0 = allocate(state.dimensions, ("x", "y"))
         vs.sa_rz = update(
             vs.sa_rz,
-            at[2:-2, 2:-2, :2, 1:], npx.diff(npx.linspace(arr0, vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
+            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0, vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
         )
         vs.sa_ss = update(
             vs.sa_ss,
-            at[2:-2, 2:-2, :2, 1:], npx.diff(npx.linspace(arr0, vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
+            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0, vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
         )
 
         vs.SA_rz = update(
@@ -278,15 +282,15 @@ class SVATTRANSPORTSetup(RogerSetup):
         )
 
         if (settings.enable_bromide | settings.enable_chloride):
-            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
-            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[2:-2, 2:-2, :2, :], vs.C_rz[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :2, :],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :vs.taup1, :],
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[2:-2, 2:-2, :2, :], vs.C_ss[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_ss[2:-2, 2:-2, :2, :],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_ss[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_ss[2:-2, 2:-2, :vs.taup1, :],
             )
             vs.msa_s = update(
                 vs.msa_s,
@@ -306,23 +310,23 @@ class SVATTRANSPORTSetup(RogerSetup):
             )
 
         elif (settings.enable_oxygen18 | settings.enable_deuterium):
-            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
-            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[2:-2, 2:-2, :2, :], vs.C_rz[2:-2, 2:-2, :2, npx.newaxis],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis],
             )
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[2:-2, 2:-2, :2, 0], npx.NaN,
+                at[2:-2, 2:-2, :vs.taup1, 0], npx.NaN,
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[2:-2, 2:-2, :2, :], vs.C_ss[2:-2, 2:-2, :2, npx.newaxis],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_ss[2:-2, 2:-2, :vs.taup1, npx.newaxis],
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[2:-2, 2:-2, :2, 0], npx.NaN,
+                at[2:-2, 2:-2, :vs.taup1, 0], npx.NaN,
             )
             iso_rz = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
             iso_ss = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
@@ -341,28 +345,28 @@ class SVATTRANSPORTSetup(RogerSetup):
 
             vs.C_s = update(
                 vs.C_s,
-                at[2:-2, 2:-2, vs.tau], calc_conc_iso_storage(state, vs.sa_s, vs.msa_s) * vs.maskCatch,
+                at[2:-2, 2:-2, vs.tau], calc_conc_iso_storage(state, vs.sa_s, vs.msa_s) * vs.maskCatch[2:-2, 2:-2],
             )
 
             vs.C_s = update(
                 vs.C_s,
-                at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau] * vs.maskCatch,
+                at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2],
             )
 
         elif settings.enable_nitrate:
-            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
-            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
             p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
-            p_dec = update(p_dec, at[2:-2, 2:-2, :2, :], sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))[npx.newaxis, npx.newaxis, npx.newaxis, :])
-            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :2, :], self._read_var_from_nc("Nmin_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis, npx.newaxis] * p_dec * settings.dx * settings.dy * 100)
-            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :2, :], self._read_var_from_nc("Nmin_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis, npx.newaxis] * p_dec * settings.dx * settings.dy * 100)
+            p_dec = update(p_dec, at[2:-2, 2:-2, :vs.taup1, :], sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))[npx.newaxis, npx.newaxis, npx.newaxis, :])
+            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], self._read_var_from_nc("Nmin_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis, npx.newaxis] * p_dec * settings.dx * settings.dy * 100)
+            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], self._read_var_from_nc("Nmin_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis, npx.newaxis] * p_dec * settings.dx * settings.dy * 100)
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[2:-2, 2:-2, :2, :], vs.C_rz[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :2, :],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :vs.taup1, :],
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[2:-2, 2:-2, :2, :], vs.C_ss[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_ss[2:-2, 2:-2, :2, :],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_ss[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_ss[2:-2, 2:-2, :vs.taup1, :],
             )
             vs.msa_s = update(
                 vs.msa_s,
@@ -511,11 +515,11 @@ def set_bromide_input_kernel(state, nn_rain, nn_sol):
     # solute input concentration
     vs.M_IN = update(
         vs.M_IN,
-        at[2:-2, 2:-2, :], M_IN,
+        at[2:-2, 2:-2, :], M_IN[2:-2, 2:-2, :],
     )
     vs.C_IN = update(
         vs.C_IN,
-        at[2:-2, 2:-2, :], npx.where(vs.PREC > 0, vs.M_IN / vs.PREC, 0),
+        at[2:-2, 2:-2, :], npx.where(vs.PREC[2:-2, 2:-2, :] > 0, vs.M_IN[2:-2, 2:-2, :] / vs.PREC[2:-2, 2:-2, :], 0),
     )
 
     return KernelOutput(
@@ -530,11 +534,11 @@ def set_forcing_bromide_kernel(state):
 
     vs.M_in = update(
         vs.M_in,
-        at[2:-2, 2:-2], vs.M_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.M_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.C_in = update(
         vs.C_in,
-        at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(
@@ -549,12 +553,12 @@ def set_forcing_chloride_kernel(state):
 
     vs.C_in = update(
         vs.C_in,
-        at[2:-2, 2:-2], npx.where((vs.PREC[2:-2, 2:-2, vs.itt] > 0) & (vs.TA[2:-2, 2:-2, vs.itt] > 0), vs.C_IN[2:-2, 2:-2, vs.itt], 0) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where((vs.PREC[2:-2, 2:-2, vs.itt] > 0) & (vs.TA[2:-2, 2:-2, vs.itt] > 0), vs.C_IN[2:-2, 2:-2, vs.itt], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.M_in = update(
         vs.M_in,
-        at[2:-2, 2:-2], vs.C_in * vs.PREC[2:-2, 2:-2, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.C_in[2:-2, 2:-2] * vs.PREC[2:-2, 2:-2, vs.itt] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(
@@ -567,7 +571,7 @@ def set_forcing_chloride_kernel(state):
 def set_iso_input_kernel(state):
     vs = state.variables
 
-    vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], _ffill_3d(state, vs.C_IN))
+    vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], _ffill_3d(state, vs.C_IN)[2:-2, 2:-2, :])
 
     return KernelOutput(
         C_IN=vs.C_IN,
@@ -580,12 +584,12 @@ def set_forcing_iso_kernel(state):
 
     vs.C_in = update(
         vs.C_in,
-        at[2:-2, 2:-2], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.NaN) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.NaN) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.M_in = update(
         vs.M_in,
-        at[2:-2, 2:-2], vs.C_in * vs.PREC[2:-2, 2:-2, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.C_in[2:-2, 2:-2] * vs.PREC[2:-2, 2:-2, vs.itt] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(
@@ -631,7 +635,7 @@ def set_nitrate_input_kernel(state, nn_rain, nn_sol):
     # solute input concentration
     vs.M_IN = update(
         vs.M_IN,
-        at[2:-2, 2:-2, :], NMIN_IN * 0.3,
+        at[2:-2, 2:-2, :], NMIN_IN[2:-2, 2:-2, :] * 0.3,
     )
     vs.C_IN = update(
         vs.C_IN,
@@ -639,7 +643,7 @@ def set_nitrate_input_kernel(state, nn_rain, nn_sol):
     )
     vs.NMIN_IN = update(
         vs.NMIN_IN,
-        at[2:-2, 2:-2, :], NMIN_IN * 0.7,
+        at[2:-2, 2:-2, :], NMIN_IN[2:-2, 2:-2, :] * 0.7,
     )
 
     return KernelOutput(
@@ -655,22 +659,22 @@ def set_forcing_nitrate_kernel(state):
 
     vs.C_in = update(
         vs.C_in,
-        at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.M_in = update(
         vs.M_in,
-        at[2:-2, 2:-2], vs.M_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.M_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.Nmin_in = update(
         vs.Nmin_in,
-        at[2:-2, 2:-2], vs.NMIN_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.NMIN_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.Norg_in = update(
         vs.Norg_in,
-        at[2:-2, 2:-2], vs.NORG_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.NORG_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(
@@ -843,26 +847,26 @@ def calc_conc_iso_storage(state, sa, msa):
     """
     vs = state.variables
 
-    mask = npx.isfinite(msa[2:-2, 2:-2, vs.tau, :])
+    mask = npx.isfinite(msa[:, :, vs.tau, :])
     vals = allocate(state.dimensions, ("x", "y", "ages"))
     weights = allocate(state.dimensions, ("x", "y", "ages"))
     vals = update(
         vals,
-        at[2:-2, 2:-2, :], npx.where(mask, msa[2:-2, 2:-2, vs.tau, :], 0),
+        at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], msa[2:-2, 2:-2, vs.tau, :], 0),
     )
     weights = update(
         weights,
-        at[2:-2, 2:-2, :], npx.where(sa[2:-2, 2:-2, vs.tau, :] * mask > 0, sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :] * mask, axis=-1)[2:-2, 2:-2, npx.newaxis], 0),
+        at[2:-2, 2:-2, :], npx.where(sa[2:-2, 2:-2, vs.tau, :] * mask[2:-2, 2:-2, :] > 0, sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :] * mask[2:-2, 2:-2, :], axis=-1)[2:-2, 2:-2, npx.newaxis], 0),
     )
     conc = allocate(state.dimensions, ("x", "y"))
     # calculate weighted average
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.sum(vals * weights, axis=-1),
+        at[2:-2, 2:-2], npx.sum(vals[2:-2, 2:-2, :] * weights[2:-2, 2:-2, :], axis=-1),
     )
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.where(conc != 0, conc, npx.NaN),
+        at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], npx.NaN),
     )
 
     return conc

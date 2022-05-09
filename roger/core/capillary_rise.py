@@ -45,7 +45,7 @@ def calc_cpr_rz(state):
     # limit uplift to available fine pore storage in subsoil
     vs.cpr_rz = update(
         vs.cpr_rz,
-        at[2:-2, 2:-2], npx.where(vs.cpr_rz[2:-2, 2:-2] > vs.S_fp_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2], vs.cpr_rz[2:-2, 2:-2]) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.cpr_rz[2:-2, 2:-2] > vs.S_fp_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2], vs.cpr_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update root zone storage and subsoil storage
@@ -107,7 +107,7 @@ def calc_cpr_ss(state):
     z = allocate(state.dimensions, ("x", "y"))
 
     # subsoil is saturated
-    mask1 = (vs.z_sat[2:-2, 2:-2, vs.tau] > 0)
+    mask1 = (vs.z_sat[:, :, vs.tau] > 0)
     # capillary rise from groundwater table towards subsoil
     if settings.enable_groundwater_boundary | settings.enable_groundwater:
         z = allocate(state.dimensions, ("x", "y"))
@@ -155,7 +155,7 @@ def calc_cpr_ss(state):
         mask3 = (vs.S_fp_ss > vs.S_ufc_ss)
         vs.S_lp_ss = update_add(
             vs.S_lp_ss,
-            at[2:-2, 2:-2], mask3[2:-2, 2:-2] * (vs.S_fp_ss[2:-2, 2:-2] - vs.S_ufc_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2][2:-2, 2:-2],
+            at[2:-2, 2:-2], mask3[2:-2, 2:-2] * (vs.S_fp_ss[2:-2, 2:-2] - vs.S_ufc_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.S_fp_ss = update(
             vs.S_fp_ss,
@@ -207,27 +207,27 @@ def calculate_capillary_rise_rz_transport_kernel(state):
 
     vs.SA_ss = update(
         vs.SA_ss,
-        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.tt_cpr_rz = update(
         vs.tt_cpr_rz,
-        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_ss, vs.sa_ss, vs.cpr_rz, vs.sas_params_cpr_rz) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_ss, vs.sa_ss, vs.cpr_rz, vs.sas_params_cpr_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.TT_cpr_rz = update(
         vs.TT_cpr_rz,
-        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_cpr_rz, axis=2),
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_cpr_rz[2:-2, 2:-2, :], axis=-1),
     )
 
     vs.sa_ss = update(
         vs.sa_ss,
-        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_cpr_rz, vs.cpr_rz) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_cpr_rz, vs.cpr_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.sa_rz = update_add(
         vs.sa_rz,
-        at[2:-2, 2:-2, vs.tau, :], vs.tt_cpr_rz * vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(sa_ss=vs.sa_ss, tt_cpr_rz=vs.tt_cpr_rz, TT_cpr_rz=vs.TT_cpr_rz, sa_rz=vs.sa_rz)
@@ -242,50 +242,50 @@ def calculate_capillary_rise_rz_transport_iso_kernel(state):
 
     vs.SA_ss = update(
         vs.SA_ss,
-        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.tt_cpr_rz = update(
         vs.tt_cpr_rz,
-        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_ss, vs.sa_ss, vs.cpr_rz, vs.sas_params_cpr_rz) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_ss, vs.sa_ss, vs.cpr_rz, vs.sas_params_cpr_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.TT_cpr_rz = update(
         vs.TT_cpr_rz,
-        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_cpr_rz, axis=2),
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_cpr_rz[2:-2, 2:-2, :], axis=-1),
     )
 
     # calculate solute travel time distribution
     alpha = allocate(state.dimensions, ("x", "y"), fill=1)
     vs.mtt_cpr_rz = update(
         vs.mtt_cpr_rz,
-        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_ss, vs.tt_cpr_rz, vs.cpr_rz, vs.msa_ss, alpha) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_ss, vs.tt_cpr_rz, vs.cpr_rz, vs.msa_ss, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.C_cpr_rz = update(
         vs.C_cpr_rz,
-        at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_cpr_rz, vs.tt_cpr_rz, vs.cpr_rz) * vs.maskCatch,
+        at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_cpr_rz, vs.tt_cpr_rz, vs.cpr_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update StorAge with flux
     vs.sa_ss = update(
         vs.sa_ss,
-        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_cpr_rz, vs.cpr_rz) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_cpr_rz, vs.cpr_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
     # update solute StorAge
     vs.msa_ss = update(
         vs.msa_ss,
-        at[2:-2, 2:-2, :, :], npx.where((vs.sa_ss > 0), vs.msa_ss, npx.NaN) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], npx.where((vs.sa_ss[2:-2, 2:-2, :, :] > 0), vs.msa_ss[2:-2, 2:-2, :, :], npx.NaN) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.msa_rz = update(
         vs.msa_rz,
-        at[2:-2, 2:-2, :, :], transport.calc_msa_iso(state, vs.sa_rz, vs.msa_rz, vs.cpr_rz, vs.tt_cpr_rz, vs.mtt_cpr_rz) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.calc_msa_iso(state, vs.sa_rz, vs.msa_rz, vs.cpr_rz, vs.tt_cpr_rz, vs.mtt_cpr_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.sa_rz = update_add(
         vs.sa_rz,
-        at[2:-2, 2:-2, vs.tau, :], vs.tt_cpr_rz * vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(sa_ss=vs.sa_ss, msa_ss=vs.msa_ss, tt_cpr_rz=vs.tt_cpr_rz, TT_cpr_rz=vs.TT_cpr_rz, mtt_cpr_rz=vs.mtt_cpr_rz, C_cpr_rz=vs.C_cpr_rz, sa_rz=vs.sa_rz, msa_rz=vs.msa_rz)
@@ -300,50 +300,50 @@ def calculate_capillary_rise_rz_transport_anion_kernel(state):
 
     vs.SA_ss = update(
         vs.SA_ss,
-        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.tt_cpr_rz = update(
         vs.tt_cpr_rz,
-        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_ss, vs.sa_ss, vs.cpr_rz, vs.sas_params_cpr_rz) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_ss, vs.sa_ss, vs.cpr_rz, vs.sas_params_cpr_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.TT_cpr_rz = update(
         vs.TT_cpr_rz,
-        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_cpr_rz, axis=2),
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_cpr_rz[2:-2, 2:-2, :], axis=2),
     )
 
     # calculate isotope travel time distribution
     vs.mtt_cpr_rz = update(
         vs.mtt_cpr_rz,
-        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_ss, vs.tt_cpr_rz, vs.cpr_rz, vs.msa_ss, vs.alpha_q) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_ss, vs.tt_cpr_rz, vs.cpr_rz, vs.msa_ss, vs.alpha_q)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.C_cpr_rz = update(
         vs.C_cpr_rz,
-        at[2:-2, 2:-2], npx.where(vs.cpr_rz > 0, npx.sum(vs.mtt_cpr_rz, axis=2) / vs.cpr_rz, 0) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.cpr_rz[2:-2, 2:-2] > 0, npx.sum(vs.mtt_cpr_rz[2:-2, 2:-2, :], axis=-1) / vs.cpr_rz[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update StorAge with flux
     vs.sa_ss = update(
         vs.sa_ss,
-        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_cpr_rz, vs.cpr_rz) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_cpr_rz, vs.cpr_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
     # update solute StorAge
     vs.msa_ss = update_add(
         vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, :], - vs.mtt_cpr_rz * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], - vs.mtt_cpr_rz[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     # update StorAge with flux
     vs.sa_rz = update_add(
         vs.sa_rz,
-        at[2:-2, 2:-2, vs.tau, :], vs.tt_cpr_rz * vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     # update solute StorAge
     vs.msa_rz = update_add(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], vs.mtt_cpr_rz * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], vs.mtt_cpr_rz[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(sa_ss=vs.sa_ss, msa_ss=vs.msa_ss, tt_cpr_rz=vs.tt_cpr_rz, TT_cpr_rz=vs.TT_cpr_rz, mtt_cpr_rz=vs.mtt_cpr_rz, C_cpr_rz=vs.C_cpr_rz, sa_rz=vs.sa_rz, msa_rz=vs.msa_rz)

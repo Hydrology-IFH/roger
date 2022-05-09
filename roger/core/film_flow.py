@@ -429,7 +429,7 @@ def calc_abstraction(state):
     # update subsoil storage after abtraction from film flow
     vs.S_fp_ss = update_add(
         vs.S_fp_ss,
-        at[2:-2, 2:-2], npx.sum(vs.ff_abs_ss, axis=-1) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.sum(vs.ff_abs_ss, axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # subsoil fine pore excess fills subsoil large pores

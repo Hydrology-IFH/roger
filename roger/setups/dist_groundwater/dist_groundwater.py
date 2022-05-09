@@ -122,6 +122,10 @@ class DISTGROUNDWATERSetup(RogerSetup):
             vs.update(set_parameters_monthly_kernel(state))
 
     @roger_routine
+    def set_initial_conditions_setup(self, state):
+        pass
+
+    @roger_routine
     def set_initial_conditions(self, state):
         vs = state.variables
 

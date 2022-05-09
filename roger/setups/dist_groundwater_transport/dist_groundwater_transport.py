@@ -216,6 +216,10 @@ class DISTGROUNDWATERTRANSPORTSetup(RogerSetup):
             vs.sas_params_q_sub_ss = update(vs.sas_params_q_sub_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss - vs.S_pwp_ss)
 
     @roger_routine
+    def set_initial_conditions_setup(self, state):
+        pass
+
+    @roger_routine
     def set_initial_conditions(self, state):
         vs = state.variables
         settings = state.settings
@@ -226,20 +230,20 @@ class DISTGROUNDWATERTRANSPORTSetup(RogerSetup):
         vs.S_VAD = update(vs.S_VAD, at[2:-2, 2:-2, :], self._read_var_from_nc("S_gw", 'states_hm.nc'))
         vs.S_GW = update(vs.S_GW, at[2:-2, 2:-2, :], self._read_var_from_nc("S_gw", 'states_hm.nc'))
 
-        vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :2], vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-        vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :2], vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
-        vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :2], vs.S_S[2:-2, 2:-2, 0, npx.newaxis] - (vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis]))
-        vs.S_vad = update(vs.S_vad, at[2:-2, 2:-2, :2], vs.S_VAD[2:-2, 2:-2, 0, npx.newaxis])
-        vs.S_gw = update(vs.S_gw, at[2:-2, 2:-2, :2], vs.S_GW[2:-2, 2:-2, 0, npx.newaxis])
+        vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
+        vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+        vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_S[2:-2, 2:-2, 0, npx.newaxis] - (vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis]))
+        vs.S_vad = update(vs.S_vad, at[2:-2, 2:-2, :vs.taup1], vs.S_VAD[2:-2, 2:-2, 0, npx.newaxis])
+        vs.S_gw = update(vs.S_gw, at[2:-2, 2:-2, :vs.taup1], vs.S_GW[2:-2, 2:-2, 0, npx.newaxis])
 
         arr0 = allocate(state.dimensions, ("x", "y"))
         vs.sa_rz = update(
             vs.sa_rz,
-            at[2:-2, 2:-2, :2, 1:], npx.diff(npx.linspace(arr0, vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
+            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0, vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
         )
         vs.sa_ss = update(
             vs.sa_ss,
-            at[2:-2, 2:-2, :2, 1:], npx.diff(npx.linspace(arr0, vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
+            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0, vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
         )
 
         vs.SA_rz = update(
@@ -263,7 +267,7 @@ class DISTGROUNDWATERTRANSPORTSetup(RogerSetup):
 
         vs.sa_vad = update(
             vs.sa_vad,
-            at[2:-2, 2:-2, :2, 1:], npx.diff(npx.linspace(arr0, vs.S_vad[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
+            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0, vs.S_vad[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
         )
         vs.SA_vad = update(
             vs.SA_vad,
@@ -271,7 +275,7 @@ class DISTGROUNDWATERTRANSPORTSetup(RogerSetup):
         )
         vs.sa_gw = update(
             vs.sa_gw,
-            at[2:-2, 2:-2, :2, 1:], npx.diff(npx.linspace(arr0, vs.S_gw[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
+            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0, vs.S_gw[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
         )
         vs.SA_gw = update(
             vs.SA_gw,
@@ -279,17 +283,17 @@ class DISTGROUNDWATERTRANSPORTSetup(RogerSetup):
         )
 
         if (settings.enable_bromide | settings.enable_chloride):
-            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
-            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
-            vs.C_vad = update(vs.C_vad, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_vad", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
-            vs.C_gw = update(vs.C_gw, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_gw", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_vad = update(vs.C_vad, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_vad", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_gw = update(vs.C_gw, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_gw", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[2:-2, 2:-2, :2, :], vs.C_rz[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :2, :],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :vs.taup1, :],
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[2:-2, 2:-2, :2, :], vs.C_ss[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_ss[2:-2, 2:-2, :2, :],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_ss[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_ss[2:-2, 2:-2, :vs.taup1, :],
             )
             vs.msa_s = update(
                 vs.msa_s,
@@ -309,7 +313,7 @@ class DISTGROUNDWATERTRANSPORTSetup(RogerSetup):
             )
             vs.msa_vad = update(
                 vs.msa_vad,
-                at[2:-2, 2:-2, :2, :], vs.C_vad[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_vad[2:-2, 2:-2, :2, :],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_vad[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_vad[2:-2, 2:-2, :vs.taup1, :],
             )
             vs.M_vad = update(
                 vs.M_vad,
@@ -317,7 +321,7 @@ class DISTGROUNDWATERTRANSPORTSetup(RogerSetup):
             )
             vs.msa_gw = update(
                 vs.msa_gw,
-                at[2:-2, 2:-2, :2, :], vs.C_gw[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_gw[2:-2, 2:-2, :2, :],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_gw[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_gw[2:-2, 2:-2, :vs.taup1, :],
             )
             vs.M_gw = update(
                 vs.M_gw,
@@ -325,25 +329,25 @@ class DISTGROUNDWATERTRANSPORTSetup(RogerSetup):
             )
 
         elif (settings.enable_oxygen18 | settings.enable_deuterium):
-            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
-            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
-            vs.C_vad = update(vs.C_vad, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_vad", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
-            vs.C_gw = update(vs.C_gw, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_gw", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_vad = update(vs.C_vad, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_vad", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_gw = update(vs.C_gw, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_gw", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[2:-2, 2:-2, :2, :], vs.C_rz[2:-2, 2:-2, :2, npx.newaxis],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis],
             )
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[2:-2, 2:-2, :2, 0], npx.NaN,
+                at[2:-2, 2:-2, :vs.taup1, 0], npx.NaN,
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[2:-2, 2:-2, :2, :], vs.C_ss[2:-2, 2:-2, :2, npx.newaxis],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_ss[2:-2, 2:-2, :vs.taup1, npx.newaxis],
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[2:-2, 2:-2, :2, 0], npx.NaN,
+                at[2:-2, 2:-2, :vs.taup1, 0], npx.NaN,
             )
             iso_rz = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
             iso_ss = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
@@ -372,37 +376,37 @@ class DISTGROUNDWATERTRANSPORTSetup(RogerSetup):
 
             vs.msa_vad = update(
                 vs.msa_vad,
-                at[2:-2, 2:-2, :2, :], vs.C_vad[2:-2, 2:-2, :2, npx.newaxis],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_vad[2:-2, 2:-2, :vs.taup1, npx.newaxis],
             )
             vs.msa_vad = update(
                 vs.msa_vad,
-                at[2:-2, 2:-2, :2, 0], npx.NaN,
+                at[2:-2, 2:-2, :vs.taup1, 0], npx.NaN,
             )
             vs.msa_gw = update(
                 vs.msa_gw,
-                at[2:-2, 2:-2, :2, :], vs.C_gw[2:-2, 2:-2, :2, npx.newaxis],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_gw[2:-2, 2:-2, :vs.taup1, npx.newaxis],
             )
             vs.msa_gw = update(
                 vs.msa_gw,
-                at[2:-2, 2:-2, :2, 0], npx.NaN,
+                at[2:-2, 2:-2, :vs.taup1, 0], npx.NaN,
             )
 
         elif settings.enable_nitrate:
-            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
-            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
-            vs.C_vad = update(vs.C_vad, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_vad", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
-            vs.C_gw = update(vs.C_gw, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_gw", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_vad = update(vs.C_vad, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_vad", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_gw = update(vs.C_gw, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("C_gw", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
             p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
-            p_dec = update(p_dec, at[2:-2, 2:-2, :2, :], sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))[npx.newaxis, npx.newaxis, npx.newaxis, :])
-            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :2, :], self._read_var_from_nc("Nmin_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis, npx.newaxis] * p_dec * settings.dx * settings.dy * 100)
-            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :2, :], self._read_var_from_nc("Nmin_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis, npx.newaxis] * p_dec * settings.dx * settings.dy * 100)
+            p_dec = update(p_dec, at[2:-2, 2:-2, :vs.taup1, :], sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))[npx.newaxis, npx.newaxis, npx.newaxis, :])
+            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], self._read_var_from_nc("Nmin_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis, npx.newaxis] * p_dec * settings.dx * settings.dy * 100)
+            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], self._read_var_from_nc("Nmin_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis, npx.newaxis] * p_dec * settings.dx * settings.dy * 100)
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[2:-2, 2:-2, :2, :], vs.C_rz[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :2, :],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :vs.taup1, :],
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[2:-2, 2:-2, :2, :], vs.C_ss[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_ss[2:-2, 2:-2, :2, :],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_ss[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_ss[2:-2, 2:-2, :vs.taup1, :],
             )
             vs.msa_s = update(
                 vs.msa_s,
@@ -422,11 +426,11 @@ class DISTGROUNDWATERTRANSPORTSetup(RogerSetup):
             )
             vs.msa_vad = update(
                 vs.msa_vad,
-                at[2:-2, 2:-2, :2, :], vs.C_vad[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_vad[2:-2, 2:-2, :2, :],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_vad[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_vad[2:-2, 2:-2, :vs.taup1, :],
             )
             vs.msa_gw = update(
                 vs.msa_gw,
-                at[2:-2, 2:-2, :2, :], vs.C_gw[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_gw[2:-2, 2:-2, :2, :],
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_gw[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_gw[2:-2, 2:-2, :vs.taup1, :],
             )
             vs.M_vad = update(
                 vs.M_vad,
