@@ -13,7 +13,7 @@ def calc_k(state):
 
     vs.k = update(
         vs.k,
-        at[:, :, vs.tau], (vs.ks/(1 + (vs.theta[:, :, vs.tau]/vs.theta_sat)**(-vs.m_bc))) * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau], (vs.ks/(1 + (vs.theta[2:-2, 2:-2, vs.tau]/vs.theta_sat)**(-vs.m_bc))) * vs.maskCatch,
     )
 
     return KernelOutput(k=vs.k)
@@ -28,7 +28,7 @@ def calc_h(state):
 
     vs.h = update(
         vs.h,
-        at[:, :, vs.tau], (vs.ha/((vs.theta[:, :, vs.tau]/vs.theta_sat)**(1/vs.lambda_bc))) * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau], (vs.ha/((vs.theta[2:-2, 2:-2, vs.tau]/vs.theta_sat)**(1/vs.lambda_bc))) * vs.maskCatch,
     )
 
     return KernelOutput(h=vs.h)
@@ -43,7 +43,7 @@ def calc_theta(state):
 
     vs.theta = update(
         vs.theta,
-        at[:, :, vs.tau], ((vs.S_fp_s + vs.S_lp_s)/vs.z_soil + vs.theta_pwp) * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau], ((vs.S_fp_s + vs.S_lp_s)/vs.z_soil + vs.theta_pwp) * vs.maskCatch,
     )
 
     return KernelOutput(theta=vs.theta)
@@ -58,7 +58,7 @@ def calc_theta_ff(state):
 
     vs.theta_ff = update(
         vs.theta_ff,
-        at[:, :, vs.tau], npx.sum(vs.S_f, axis=-1) / vs.z_soil + vs.theta[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.tau], npx.sum(vs.S_f, axis=-1) / vs.z_soil + vs.theta[2:-2, 2:-2, vs.tau],
     )
 
     return KernelOutput(
@@ -75,17 +75,17 @@ def calc_S(state):
 
     vs.S_fp_s = update(
         vs.S_fp_s,
-        at[:, :], (vs.S_fp_rz + vs.S_fp_ss) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.S_fp_rz + vs.S_fp_ss) * vs.maskCatch,
     )
 
     vs.S_lp_s = update(
         vs.S_lp_s,
-        at[:, :], (vs.S_lp_rz + vs.S_lp_ss) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.S_lp_rz + vs.S_lp_ss) * vs.maskCatch,
     )
 
     vs.S_s = update(
         vs.S_s,
-        at[:, :, vs.tau], (vs.S_pwp_s + vs.S_fp_s + vs.S_lp_s) * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau], (vs.S_pwp_s + vs.S_fp_s + vs.S_lp_s) * vs.maskCatch,
     )
 
     return KernelOutput(S_fp_s=vs.S_fp_s, S_lp_s=vs.S_lp_s, S_s=vs.S_s)
@@ -100,7 +100,7 @@ def calc_dS(state):
 
     vs.dS_s = update(
         vs.dS_s,
-        at[:, :], (vs.S_s[:, :, vs.tau] - vs.S_s[:, :, vs.taum1]) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.S_s[2:-2, 2:-2, vs.tau] - vs.S_s[2:-2, 2:-2, vs.taum1]) * vs.maskCatch,
     )
 
     return KernelOutput(dS_s=vs.dS_s)
@@ -133,12 +133,12 @@ def calculate_soil_transport_kernel(state):
 
     vs.sa_s = update(
         vs.sa_s,
-        at[:, :, vs.tau, :], vs.sa_rz[:, :, vs.tau, :] + vs.sa_ss[:, :, vs.tau, :] * vs.maskCatch[:, :, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], vs.sa_rz[2:-2, 2:-2, vs.tau, :] + vs.sa_ss[2:-2, 2:-2, vs.tau, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.SA_s = update(
         vs.SA_s,
-        at[:, :, :, :], transport.calc_SA(state, vs.SA_s, vs.sa_s) * vs.maskCatch[:, :, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_s, vs.sa_s) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     return KernelOutput(sa_s=vs.sa_s, SA_s=vs.SA_s)
@@ -153,36 +153,36 @@ def calculate_soil_transport_iso_kernel(state):
 
     vs.sa_s = update(
         vs.sa_s,
-        at[:, :, :, :], vs.sa_rz + vs.sa_ss * vs.maskCatch[:, :, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], vs.sa_rz + vs.sa_ss * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.SA_s = update(
         vs.SA_s,
-        at[:, :, :, :], transport.calc_SA(state, vs.SA_s, vs.sa_s) * vs.maskCatch[:, :, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_s, vs.sa_s) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     iso_rz = allocate(state.dimensions, ("x", "y", "ages"))
     iso_ss = allocate(state.dimensions, ("x", "y", "ages"))
     iso_rz = update(
         iso_rz,
-        at[:, :, :], npx.where(npx.isnan(vs.msa_rz[:, :, vs.tau, :]), 0, vs.msa_rz[:, :, vs.tau, :]),
+        at[2:-2, 2:-2, :], npx.where(npx.isnan(vs.msa_rz[2:-2, 2:-2, vs.tau, :]), 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]),
     )
     iso_ss = update(
         iso_ss,
-        at[:, :, :], npx.where(npx.isnan(vs.msa_ss[:, :, vs.tau, :]), 0, vs.msa_ss[:, :, vs.tau, :]),
+        at[2:-2, 2:-2, :], npx.where(npx.isnan(vs.msa_ss[2:-2, 2:-2, vs.tau, :]), 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :]),
     )
     vs.msa_s = update(
         vs.msa_s,
-        at[:, :, vs.tau, :], (vs.sa_rz[:, :, vs.tau, :] / vs.sa_s[:, :, vs.tau, :]) * iso_rz + (vs.sa_ss[:, :, vs.tau, :] / vs.sa_s[:, :, vs.tau, :]) * iso_ss,
+        at[2:-2, 2:-2, vs.tau, :], (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / vs.sa_s[2:-2, 2:-2, vs.tau, :]) * iso_rz + (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / vs.sa_s[2:-2, 2:-2, vs.tau, :]) * iso_ss,
     )
     vs.msa_s = update(
         vs.msa_s,
-        at[:, :, vs.tau, :], npx.where(vs.msa_s[:, :, vs.tau, :] == 0, npx.NaN, vs.msa_s[:, :, vs.tau, :]),
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.msa_s[2:-2, 2:-2, vs.tau, :] == 0, npx.NaN, vs.msa_s[2:-2, 2:-2, vs.tau, :]),
     )
 
     vs.C_s = update(
         vs.C_s,
-        at[:, :, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_s, vs.msa_s) * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_s, vs.msa_s) * vs.maskCatch,
     )
 
     return KernelOutput(sa_s=vs.sa_s, SA_s=vs.SA_s, msa_s=vs.msa_s, C_s=vs.C_s)
@@ -197,32 +197,32 @@ def calculate_soil_transport_anion_kernel(state):
 
     vs.sa_s = update(
         vs.sa_s,
-        at[:, :, :, :], vs.sa_rz + vs.sa_ss * vs.maskCatch[:, :, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], vs.sa_rz + vs.sa_ss * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.SA_s = update(
         vs.SA_s,
-        at[:, :, :, :], transport.calc_SA(state, vs.SA_s, vs.sa_s) * vs.maskCatch[:, :, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_s, vs.sa_s) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.msa_s = update(
         vs.msa_s,
-        at[:, :, :, :], vs.msa_rz + vs.msa_ss * vs.maskCatch[:, :, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], vs.msa_rz + vs.msa_ss * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.MSA_s = update(
         vs.MSA_s,
-        at[:, :, :, :], transport.calc_MSA(state, vs.MSA_s, vs.msa_s) * vs.maskCatch[:, :, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], transport.calc_MSA(state, vs.MSA_s, vs.msa_s) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.M_s = update(
         vs.M_s,
-        at[:, :, vs.tau], npx.sum(vs.msa_s[:, :, vs.tau, :], axis=-1) * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau], npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch,
     )
 
     vs.C_s = update(
         vs.C_s,
-        at[:, :, vs.tau], vs.M_s[:, :, vs.tau] / npx.sum(vs.sa_s[:, :, vs.tau, :], axis=-1),
+        at[2:-2, 2:-2, vs.tau], vs.M_s[2:-2, 2:-2, vs.tau] / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1),
     )
 
     return KernelOutput(sa_s=vs.sa_s, SA_s=vs.SA_s, msa_s=vs.msa_s, MSA_s=vs.MSA_s, C_s=vs.C_s, M_s=vs.M_s)

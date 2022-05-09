@@ -72,7 +72,6 @@ class SVATFILMSetup(RogerSetup):
     @roger_routine
     def set_grid(self, state):
         vs = state.variables
-        settings = state.settings
 
         # temporal grid
         vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", 'forcing.nc'))
@@ -111,31 +110,31 @@ class SVATFILMSetup(RogerSetup):
 
         if (vs.itt == 0):
 
-            vs.lu_id = update(vs.lu_id, at[:, :], 8)
-            vs.sealing = update(vs.sealing, at[:, :], 0)
-            vs.slope = update(vs.slope, at[:, :], 0)
-            vs.slope_per = update(vs.slope_per, at[:, :], vs.slope * 100)
-            vs.S_dep_tot = update(vs.S_dep_tot, at[:, :], 0)
-            vs.z_soil = update(vs.z_soil, at[:, :], 1350)
-            vs.dmpv = update(vs.dmpv, at[:, :], 100)
-            vs.lmpv = update(vs.lmpv, at[:, :], 1000)
-            vs.theta_ac = update(vs.theta_ac, at[:, :], 0.13)
-            vs.theta_ufc = update(vs.theta_ufc, at[:, :], 0.24)
-            vs.theta_pwp = update(vs.theta_pwp, at[:, :], 0.23)
-            vs.ks = update(vs.ks, at[:, :], 25)
-            vs.kf = update(vs.kf, at[:, :], 2500)
-            vs.a_ff = update(vs.a_ff, at[:, :], 0.19)
-            vs.c_ff = update(vs.c_ff, at[:, :], 0.001)
+            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
+            vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
+            vs.slope = update(vs.slope, at[2:-2, 2:-2], 0)
+            vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope * 100)
+            vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
+            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1350)
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 100)
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1000)
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.13)
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.24)
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.23)
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], 25)
+            vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
+            vs.a_ff = update(vs.a_ff, at[2:-2, 2:-2], 0.19)
+            vs.c_ff = update(vs.c_ff, at[2:-2, 2:-2], 0.001)
 
             if settings.enable_crop_phenology and settings.enable_crop_rotation:
-                vs.CROP_TYPE = update(vs.CROP_TYPE, at[:, :, :], self._read_var_from_nc("crop", 'crop_rotation.nc'))
-                vs.crop_type = update(vs.crop_type, at[:, :, 0], vs.CROP_TYPE[:, :, 1])
-                vs.crop_type = update(vs.crop_type, at[:, :, 1], vs.CROP_TYPE[:, :, 2])
-                vs.crop_type = update(vs.crop_type, at[:, :, 2], vs.CROP_TYPE[:, :, 3])
+                vs.CROP_TYPE = update(vs.CROP_TYPE, at[2:-2, 2:-2, :], self._read_var_from_nc("crop", 'crop_rotation.nc'))
+                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.CROP_TYPE[2:-2, 2:-2, 1])
+                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], vs.CROP_TYPE[2:-2, 2:-2, 2])
+                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], vs.CROP_TYPE[2:-2, 2:-2, 3])
 
             if settings.enable_crop_phenology and not settings.enable_crop_rotation:
-                mask = npx.isin(vs.lu_id[:, :, npx.newaxis], npx.arange(500, 600, 1, dtype=int))
-                vs.crop_type = update(vs.crop_type, at[:, :, 0], npx.where(mask, vs.lu_id, 598))
+                mask = npx.isin(vs.lu_id[2:-2, 2:-2, npx.newaxis], npx.arange(500, 600, 1, dtype=int))
+                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], npx.where(mask, vs.lu_id, 598))
 
         if (vs.MONTH[vs.itt] != vs.MONTH[vs.itt - 1]) & (vs.itt > 1):
             vs.update(set_parameters_monthly_kernel(state))
@@ -145,19 +144,19 @@ class SVATFILMSetup(RogerSetup):
         vs = state.variables
         settings = state.settings
 
-        vs.S_int_top = update(vs.S_int_top, at[:, :, :vs.taup1], 0)
-        vs.swe_top = update(vs.swe_top, at[:, :, :vs.taup1], 0)
-        vs.S_int_ground = update(vs.S_int_ground, at[:, :, :vs.taup1], 0)
-        vs.swe_ground = update(vs.swe_ground, at[:, :, :vs.taup1], 0)
-        vs.S_dep = update(vs.S_dep, at[:, :, :vs.taup1], 0)
-        vs.S_snow = update(vs.S_snow, at[:, :, :vs.taup1], 0)
-        vs.swe = update(vs.swe, at[:, :, :vs.taup1], 0)
-        vs.theta_rz = update(vs.theta_rz, at[:, :, :vs.taup1], 0.4)
-        vs.theta_ss = update(vs.theta_ss, at[:, :, :vs.taup1], 0.47)
+        vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, :vs.taup1], 0)
+        vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, :vs.taup1], 0)
+        vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, :vs.taup1], 0)
+        vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, :vs.taup1], 0)
+        vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
+        vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
+        vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
+        vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.4)
+        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.47)
 
         if settings.enable_crop_phenology:
-            vs.z_root = update(vs.z_root, at[:, :, :vs.taup1], 0)
-            vs.z_root_crop = update(vs.z_root_crop, at[:, :, :vs.taup1, 0], 0)
+            vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :vs.taup1], 0)
+            vs.z_root_crop = update(vs.z_root_crop, at[2:-2, 2:-2, :vs.taup1, 0], 0)
             vs.update(set_initial_conditions_crops_kernel(state))
 
     @roger_routine
@@ -166,14 +165,14 @@ class SVATFILMSetup(RogerSetup):
         settings = state.settings
 
         if (vs.itt == 0):
-            vs.PREC = update(vs.PREC, at[:, :, :], self._read_var_from_nc("PREC", 'forcing.nc'))
-            vs.TA = update(vs.TA, at[:, :, :], self._read_var_from_nc("TA", 'forcing.nc'))
-            vs.PET = update(vs.PET, at[:, :, :], self._read_var_from_nc("PET", 'forcing.nc'))
-            vs.EVENT_ID = update(vs.EVENT_ID, at[:, :, :], self._read_var_from_nc("EVENT_ID", 'forcing.nc'))
-            vs.EVENT_ID_FF = update(vs.EVENT_ID_FF, at[:, :, :], self._read_var_from_nc("EVENT_ID_FF", 'forcing.nc'))
+            vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", 'forcing.nc'))
+            vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", 'forcing.nc'))
+            vs.PET = update(vs.PET, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", 'forcing.nc'))
+            vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID", 'forcing.nc'))
+            vs.EVENT_ID_FF = update(vs.EVENT_ID_FF, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID_FF", 'forcing.nc'))
             if settings.enable_crop_phenology:
-                vs.TA_MIN = update(vs.TA_MIN, at[:, :, :], self._read_var_from_nc("TA_min", 'forcing.nc'))
-                vs.TA_MAX = update(vs.TA_MAX, at[:, :, :], self._read_var_from_nc("TA_max", 'forcing.nc'))
+                vs.TA_MIN = update(vs.TA_MIN, at[2:-2, 2:-2, :], self._read_var_from_nc("TA_min", 'forcing.nc'))
+                vs.TA_MAX = update(vs.TA_MAX, at[2:-2, 2:-2, :], self._read_var_from_nc("TA_max", 'forcing.nc'))
 
         vs.itt_event_ff = update(
             vs.itt_event_ff,
@@ -182,13 +181,13 @@ class SVATFILMSetup(RogerSetup):
         arr_itt = allocate(state.dimensions, ("x", "y"))
         arr_itt = update(
             arr_itt,
-            at[:, :], vs.itt,
+            at[2:-2, 2:-2], vs.itt,
         )
-        cond1 = ((vs.EVENT_ID_FF[:, :, vs.itt-1] == 0) & (vs.EVENT_ID_FF[:, :, vs.itt] >= 1) & (arr_itt >= 1))
+        cond1 = ((vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt-1] == 0) & (vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt] >= 1) & (arr_itt >= 1))
         if cond1.any():
             vs.event_no_ff = vs.event_no_ff + 1
             # number of event
-            vs.event_id_ff = npx.max(vs.EVENT_ID_FF[:, :, vs.itt])
+            vs.event_id_ff = npx.max(vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt])
             # iteration at event start
             vs.event_start_ff = update(vs.event_start_ff, at[vs.event_no_ff - 1], vs.itt)
             # iteration at event end
@@ -197,38 +196,38 @@ class SVATFILMSetup(RogerSetup):
                 vs.event_end_ff = update(vs.event_end_ff, at[vs.event_no_ff - 1], settings.nitt)
             vs.rain_event = update(
                 vs.rain_event,
-                at[:, :, :], 0,
+                at[2:-2, 2:-2, :], 0,
             )
             vs.rain_event = update(
                 vs.rain_event,
-                at[:, :, 0:vs.event_end_ff[vs.event_no_ff - 1]-vs.event_start_ff[vs.event_no_ff - 1]], npx.where(vs.EVENT_ID_FF == vs.event_id_ff, vs.PREC, 0)[:, :, vs.event_start_ff[vs.event_no_ff - 1]:vs.event_end_ff[vs.event_no_ff - 1]],
+                at[2:-2, 2:-2, 0:vs.event_end_ff[vs.event_no_ff - 1]-vs.event_start_ff[vs.event_no_ff - 1]], npx.where(vs.EVENT_ID_FF == vs.event_id_ff, vs.PREC, 0)[2:-2, 2:-2, vs.event_start_ff[vs.event_no_ff - 1]:vs.event_end_ff[vs.event_no_ff - 1]],
             )
             vs.rain_event_sum = update(
                 vs.rain_event_sum,
-                at[:, :], npx.sum(vs.rain_event, axis=-1),
+                at[2:-2, 2:-2], npx.sum(vs.rain_event, axis=-1),
             )
             vs.rain_event_csum = update(
                 vs.rain_event_csum,
-                at[:, :, :], npx.cumsum(vs.rain_event, axis=-1),
+                at[2:-2, 2:-2, :], npx.cumsum(vs.rain_event, axis=-1),
             )
             # subtract interception storage
             vs.rain_event = update(
                 vs.rain_event,
-                at[:, :, 0], vs.rain_event[:, :, 0] - (vs.S_int_top_tot - vs.S_int_top[:, :, vs.tau]) + (vs.S_int_ground_tot - vs.S_int_ground[:, :, vs.tau]),
+                at[2:-2, 2:-2, 0], vs.rain_event[2:-2, 2:-2, 0] - (vs.S_int_top_tot - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot - vs.S_int_ground[2:-2, 2:-2, vs.tau]),
             )
             vs.rain_event = update(
                 vs.rain_event,
-                at[:, :, 1:], npx.diff(npx.where(npx.cumsum(vs.rain_event, axis=-1) < 0, 0, npx.cumsum(vs.rain_event, axis=-1)), axis=-1),
+                at[2:-2, 2:-2, 1:], npx.diff(npx.where(npx.cumsum(vs.rain_event, axis=-1) < 0, 0, npx.cumsum(vs.rain_event, axis=-1)), axis=-1),
             )
             vs.rain_event = update(
                 vs.rain_event,
-                at[:, :, 0], npx.where(vs.rain_event[:, :, 0] < 0, 0, vs.rain_event[:, :, 0]),
+                at[2:-2, 2:-2, 0], npx.where(vs.rain_event[2:-2, 2:-2, 0] < 0, 0, vs.rain_event[2:-2, 2:-2, 0]),
             )
 
         vs.update(set_forcing_kernel(state))
         if settings.enable_crop_phenology:
-            vs.ta_min = update(vs.ta_min, at[:, :, vs.tau], vs.TA_MIN[:, :, vs.itt])
-            vs.ta_max = update(vs.ta_max, at[:, :, vs.tau], vs.TA_MAX[:, :, vs.itt])
+            vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2, vs.tau], vs.TA_MIN[2:-2, 2:-2, vs.itt])
+            vs.ta_max = update(vs.ta_max, at[2:-2, 2:-2, vs.tau], vs.TA_MAX[2:-2, 2:-2, vs.itt])
 
     @roger_routine
     def set_diagnostics(self, state):
@@ -265,17 +264,17 @@ def set_initial_conditions_crops_kernel(state):
     t_grow = allocate(state.dimensions, ("x", "y", "crops"))
     t_grow = update(
         t_grow,
-        at[:, :, :], npx.where(vs.z_root_crop[:, :, vs.taum1, :] > 0, (-1 / vs.root_growth_rate) * npx.log(1 / ((vs.z_root_crop[:, :, vs.taum1, :] / 1000 - vs.z_root_crop_max / 1000) * (-1 / (vs.z_root_crop_max / 1000 - vs.z_evap[:, :, npx.newaxis] / 1000)))), 0)
+        at[2:-2, 2:-2, :], npx.where(vs.z_root_crop[2:-2, 2:-2, vs.taum1, :] > 0, (-1 / vs.root_growth_rate) * npx.log(1 / ((vs.z_root_crop[2:-2, 2:-2, vs.taum1, :] / 1000 - vs.z_root_crop_max / 1000) * (-1 / (vs.z_root_crop_max / 1000 - vs.z_evap[2:-2, 2:-2, npx.newaxis] / 1000)))), 0)
     )
 
     vs.t_grow_cc = update(
         vs.t_grow_cc,
-        at[:, :, :2, :], t_grow[:, :, npx.newaxis, :]
+        at[2:-2, 2:-2, :2, :], t_grow[2:-2, 2:-2, npx.newaxis, :]
     )
 
     vs.t_grow_root = update(
         vs.t_grow_root,
-        at[:, :, :2, :], t_grow[:, :, npx.newaxis, :]
+        at[2:-2, 2:-2, :2, :], t_grow[2:-2, 2:-2, npx.newaxis, :]
     )
 
     return KernelOutput(
@@ -293,13 +292,13 @@ def set_parameters_monthly_kernel(state):
         arr_i = allocate(state.dimensions, ("x", "y"))
         arr_i = update(
             arr_i,
-            at[:, :], i * (vs.lu_id == i),
+            at[2:-2, 2:-2], i * (vs.lu_id == i),
         )
         mask = (vs.lu_id == i) & npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
         row_no = _get_row_no(vs.lut_ilu[:, 0], i)
         S_int_top_tot = update(
             S_int_top_tot,
-            at[:, :], npx.where(mask, vs.lut_ilu[row_no, vs.month], 0),
+            at[2:-2, 2:-2], npx.where(mask, vs.lut_ilu[row_no, vs.month], 0),
         )
 
         return S_int_top_tot
@@ -310,7 +309,7 @@ def set_parameters_monthly_kernel(state):
     mask = npx.isin(vs.lu_id, npx.array([10, 11, 12, 15, 16]))
     vs.S_int_top_tot = update(
         vs.S_int_top_tot,
-        at[:, :], npx.where(mask, S_int_top_tot, vs.S_int_top_tot),
+        at[2:-2, 2:-2], npx.where(mask, S_int_top_tot, vs.S_int_top_tot),
     )
 
     # land use dependent lower interception storage
@@ -320,13 +319,13 @@ def set_parameters_monthly_kernel(state):
         arr_i = allocate(state.dimensions, ("x", "y"))
         arr_i = update(
             arr_i,
-            at[:, :], i * vs.maskCatch,
+            at[2:-2, 2:-2], i * vs.maskCatch,
         )
         mask = (vs.lu_id == i) & ~npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
         row_no = _get_row_no(vs.lut_ilu[:, 0], i)
         S_int_ground_tot = update_add(
             S_int_ground_tot,
-            at[:, :], npx.where(mask, vs.lut_ilu[row_no, vs.month], 0),
+            at[2:-2, 2:-2], npx.where(mask, vs.lut_ilu[row_no, vs.month], 0),
         )
 
         return S_int_ground_tot
@@ -335,29 +334,29 @@ def set_parameters_monthly_kernel(state):
         arr_i = allocate(state.dimensions, ("x", "y"))
         arr_i = update(
             arr_i,
-            at[:, :], i * vs.maskCatch,
+            at[2:-2, 2:-2], i * vs.maskCatch,
         )
         mask = (vs.lu_id == i) & npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
         S_int_ground_tot = update_add(
             S_int_ground_tot,
-            at[:, :], npx.where(mask, 1, 0),
+            at[2:-2, 2:-2], npx.where(mask, 1, 0),
         )
 
         return S_int_ground_tot
 
     S_int_ground_tot = update(
         S_int_ground_tot,
-        at[:, :], for_loop(0, 51, loop_body_S_int_ground_tot, S_int_ground_tot),
+        at[2:-2, 2:-2], for_loop(0, 51, loop_body_S_int_ground_tot, S_int_ground_tot),
     )
     S_int_ground_tot = update(
         S_int_ground_tot,
-        at[:, :], for_loop(10, 17, loop_body_S_int_ground_tot_trees, S_int_ground_tot),
+        at[2:-2, 2:-2], for_loop(10, 17, loop_body_S_int_ground_tot_trees, S_int_ground_tot),
     )
 
     mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
     vs.S_int_ground_tot = update(
         vs.S_int_ground_tot,
-        at[:, :], npx.where(mask, S_int_ground_tot, vs.S_int_ground_tot),
+        at[2:-2, 2:-2], npx.where(mask, S_int_ground_tot, vs.S_int_ground_tot),
     )
 
     # land use dependent ground cover (canopy cover)
@@ -368,7 +367,7 @@ def set_parameters_monthly_kernel(state):
         row_no = _get_row_no(vs.lut_gc[:, 0], i)
         ground_cover = update_add(
             ground_cover,
-            at[:, :], npx.where(mask, vs.lut_gc[row_no, vs.month], 0),
+            at[2:-2, 2:-2], npx.where(mask, vs.lut_gc[row_no, vs.month], 0),
         )
 
         return ground_cover
@@ -378,7 +377,7 @@ def set_parameters_monthly_kernel(state):
     mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
     vs.ground_cover = update(
         vs.ground_cover,
-        at[:, :, vs.tau], npx.where(mask, ground_cover, vs.ground_cover[:, :, vs.tau]),
+        at[2:-2, 2:-2, vs.tau], npx.where(mask, ground_cover, vs.ground_cover[2:-2, 2:-2, vs.tau]),
     )
 
     # land use dependent transpiration coeffcient
@@ -389,20 +388,20 @@ def set_parameters_monthly_kernel(state):
         row_no = _get_row_no(vs.lut_gc[:, 0], i)
         basal_transp_coeff = update_add(
             basal_transp_coeff,
-            at[:, :], npx.where(mask, vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1], 0),
+            at[2:-2, 2:-2], npx.where(mask, vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1], 0),
         )
 
         return basal_transp_coeff
 
     basal_transp_coeff = update(
         basal_transp_coeff,
-        at[:, :], where(vs.maskRiver | vs.maskLake, 0, for_loop(0, 51, loop_body_basal_transp_coeff, basal_transp_coeff)),
+        at[2:-2, 2:-2], where(vs.maskRiver | vs.maskLake, 0, for_loop(0, 51, loop_body_basal_transp_coeff, basal_transp_coeff)),
     )
 
     mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
     vs.basal_transp_coeff = update(
         vs.basal_transp_coeff,
-        at[:, :], npx.where(mask, basal_transp_coeff, vs.basal_transp_coeff),
+        at[2:-2, 2:-2], npx.where(mask, basal_transp_coeff, vs.basal_transp_coeff),
     )
 
     # land use dependent evaporation coeffcient
@@ -413,7 +412,7 @@ def set_parameters_monthly_kernel(state):
         row_no = _get_row_no(vs.lut_gc[:, 0], i)
         basal_evap_coeff = update_add(
             basal_evap_coeff,
-            at[:, :], npx.where(mask, 1 - ((vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1]) * vs.lut_gcm[row_no, 1]), 0),
+            at[2:-2, 2:-2], npx.where(mask, 1 - ((vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1]) * vs.lut_gcm[row_no, 1]), 0),
         )
 
         return basal_evap_coeff
@@ -422,13 +421,13 @@ def set_parameters_monthly_kernel(state):
 
     basal_evap_coeff = update(
         basal_evap_coeff,
-        at[:, :], where(vs.maskRiver | vs.maskLake, 1, basal_evap_coeff),
+        at[2:-2, 2:-2], where(vs.maskRiver | vs.maskLake, 1, basal_evap_coeff),
     )
 
     mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
     vs.basal_evap_coeff = update(
         vs.basal_evap_coeff,
-        at[:, :], npx.where(mask, basal_evap_coeff, vs.basal_evap_coeff),
+        at[2:-2, 2:-2], npx.where(mask, basal_evap_coeff, vs.basal_evap_coeff),
     )
 
     return KernelOutput(
@@ -445,15 +444,15 @@ def set_forcing_kernel(state):
     vs = state.variables
 
     # update precipitation with available interception storage while film flow event
-    mask_noff = (vs.EVENT_ID_FF[:, :, vs.itt] == 0)
-    vs.prec = update(vs.prec, at[:, :], 0)
-    vs.prec = update_add(vs.prec, at[:, :],
-                         npx.where((vs.EVENT_ID_FF[:, :, vs.itt] >= 1) & ((vs.S_int_top_tot - vs.S_int_top[:, :, vs.tau]) + (vs.S_int_ground_tot - vs.S_int_ground[:, :, vs.tau]) > 0),
-                         npx.where(vs.PREC[:, :, vs.itt] > (vs.S_int_top_tot - vs.S_int_top[:, :, vs.tau]) + (vs.S_int_ground_tot - vs.S_int_ground[:, :, vs.tau]), (vs.S_int_top_tot - vs.S_int_top[:, :, vs.tau]) + (vs.S_int_ground_tot - vs.S_int_ground[:, :, vs.tau]), vs.PREC[:, :, vs.itt]), 0))
-    vs.prec = update(vs.prec, at[:, :], npx.where(mask_noff, vs.PREC[:, :, vs.itt], 0))
-    vs.ta = update(vs.ta, at[:, :, vs.tau], vs.TA[:, :, vs.itt])
-    vs.pet = update(vs.pet, at[:, :], vs.PET[:, :, vs.itt])
-    vs.pet_res = update(vs.pet, at[:, :], vs.PET[:, :, vs.itt])
+    mask_noff = (vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt] == 0)
+    vs.prec = update(vs.prec, at[2:-2, 2:-2], 0)
+    vs.prec = update_add(vs.prec, at[2:-2, 2:-2],
+                         npx.where((vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt] >= 1) & ((vs.S_int_top_tot - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot - vs.S_int_ground[2:-2, 2:-2, vs.tau]) > 0),
+                         npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > (vs.S_int_top_tot - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot - vs.S_int_ground[2:-2, 2:-2, vs.tau]), (vs.S_int_top_tot - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot - vs.S_int_ground[2:-2, 2:-2, vs.tau]), vs.PREC[2:-2, 2:-2, vs.itt]), 0))
+    vs.prec = update(vs.prec, at[2:-2, 2:-2], npx.where(mask_noff, vs.PREC[2:-2, 2:-2, vs.itt], 0))
+    vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[2:-2, 2:-2, vs.itt])
+    vs.pet = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
+    vs.pet_res = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
 
     vs.dt_secs = vs.DT_SECS[vs.itt]
     vs.dt = vs.DT[vs.itt]
@@ -465,13 +464,13 @@ def set_forcing_kernel(state):
     q_sur = allocate(state.dimensions, ("x", "y"))
     vs.q_sur = update(
         vs.q_sur,
-        at[:, :], q_sur,
+        at[2:-2, 2:-2], q_sur,
     )
 
     q_hof = allocate(state.dimensions, ("x", "y"))
     vs.q_hof = update(
         vs.q_hof,
-        at[:, :], q_hof,
+        at[2:-2, 2:-2], q_hof,
     )
 
     return KernelOutput(
@@ -495,123 +494,123 @@ def after_timestep_kernel(state):
 
     vs.ta = update(
         vs.ta,
-        at[:, :, vs.taum1], vs.ta[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.ta[2:-2, 2:-2, vs.tau],
     )
     vs.z_root = update(
         vs.z_root,
-        at[:, :, vs.taum1], vs.z_root[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.z_root[2:-2, 2:-2, vs.tau],
     )
     vs.ground_cover = update(
         vs.ground_cover,
-        at[:, :, vs.taum1], vs.ground_cover[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.ground_cover[2:-2, 2:-2, vs.tau],
     )
     vs.S_sur = update(
         vs.S_sur,
-        at[:, :, vs.taum1], vs.S_sur[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.S_sur[2:-2, 2:-2, vs.tau],
     )
     vs.S_int_top = update(
         vs.S_int_top,
-        at[:, :, vs.taum1], vs.S_int_top[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.S_int_top[2:-2, 2:-2, vs.tau],
     )
     vs.S_int_ground = update(
         vs.S_int_ground,
-        at[:, :, vs.taum1], vs.S_int_ground[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.S_int_ground[2:-2, 2:-2, vs.tau],
     )
     vs.S_dep = update(
         vs.S_dep,
-        at[:, :, vs.taum1], vs.S_dep[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.S_dep[2:-2, 2:-2, vs.tau],
     )
     vs.S_snow = update(
         vs.S_snow,
-        at[:, :, vs.taum1], vs.S_snow[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.S_snow[2:-2, 2:-2, vs.tau],
     )
     vs.swe = update(
         vs.swe,
-        at[:, :, vs.taum1], vs.swe[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.swe[2:-2, 2:-2, vs.tau],
     )
     vs.S_rz = update(
         vs.S_rz,
-        at[:, :, vs.taum1], vs.S_rz[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.S_rz[2:-2, 2:-2, vs.tau],
     )
     vs.S_ss = update(
         vs.S_ss,
-        at[:, :, vs.taum1], vs.S_ss[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.S_ss[2:-2, 2:-2, vs.tau],
     )
     vs.S_s = update(
         vs.S_s,
-        at[:, :, vs.taum1], vs.S_s[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.S_s[2:-2, 2:-2, vs.tau],
     )
     vs.S = update(
         vs.S,
-        at[:, :, vs.taum1], vs.S[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.S[2:-2, 2:-2, vs.tau],
     )
     vs.z_sat = update(
         vs.z_sat,
-        at[:, :, vs.taum1], vs.z_sat[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.z_sat[2:-2, 2:-2, vs.tau],
     )
     vs.z_wf = update(
         vs.z_wf,
-        at[:, :, vs.taum1], vs.z_wf[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.z_wf[2:-2, 2:-2, vs.tau],
     )
     vs.z_wf_t0 = update(
         vs.z_wf_t0,
-        at[:, :, vs.taum1], vs.z_wf_t0[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.z_wf_t0[2:-2, 2:-2, vs.tau],
     )
     vs.z_wf_t1 = update(
         vs.z_wf_t1,
-        at[:, :, vs.taum1], vs.z_wf_t1[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.z_wf_t1[2:-2, 2:-2, vs.tau],
     )
     vs.y_mp = update(
         vs.y_mp,
-        at[:, :, vs.taum1], vs.y_mp[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.y_mp[2:-2, 2:-2, vs.tau],
     )
     vs.y_sc = update(
         vs.y_sc,
-        at[:, :, vs.taum1], vs.y_sc[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.y_sc[2:-2, 2:-2, vs.tau],
     )
     vs.prec_event_sum = update(
         vs.prec_event_sum,
-        at[:, :, vs.taum1], vs.prec_event_sum[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.prec_event_sum[2:-2, 2:-2, vs.tau],
     )
     vs.t_event_sum = update(
         vs.t_event_sum,
-        at[:, :, vs.taum1], vs.t_event_sum[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.t_event_sum[2:-2, 2:-2, vs.tau],
     )
     vs.theta_rz = update(
         vs.theta_rz,
-        at[:, :, vs.taum1], vs.theta_rz[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.theta_rz[2:-2, 2:-2, vs.tau],
     )
     vs.theta_ss = update(
         vs.theta_ss,
-        at[:, :, vs.taum1], vs.theta_ss[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.theta_ss[2:-2, 2:-2, vs.tau],
     )
     vs.theta = update(
         vs.theta,
-        at[:, :, vs.taum1], vs.theta[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.theta[2:-2, 2:-2, vs.tau],
     )
     vs.k_rz = update(
         vs.k_rz,
-        at[:, :, vs.taum1], vs.k_rz[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.k_rz[2:-2, 2:-2, vs.tau],
     )
     vs.k_ss = update(
         vs.k_ss,
-        at[:, :, vs.taum1], vs.k_ss[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.k_ss[2:-2, 2:-2, vs.tau],
     )
     vs.k = update(
         vs.k,
-        at[:, :, vs.taum1], vs.k[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.k[2:-2, 2:-2, vs.tau],
     )
     vs.h_rz = update(
         vs.h_rz,
-        at[:, :, vs.taum1], vs.h_rz[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.h_rz[2:-2, 2:-2, vs.tau],
     )
     vs.h_ss = update(
         vs.h_ss,
-        at[:, :, vs.taum1], vs.h_ss[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.h_ss[2:-2, 2:-2, vs.tau],
     )
     vs.h = update(
         vs.h,
-        at[:, :, vs.taum1], vs.h[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.h[2:-2, 2:-2, vs.tau],
     )
 
     return KernelOutput(
@@ -654,27 +653,27 @@ def after_timestep_film_flow_kernel(state):
 
     vs.z_wf_ff = update(
         vs.z_wf_ff,
-        at[:, :, :, vs.taum1], vs.z_wf_ff[:, :, :, vs.tau],
+        at[2:-2, 2:-2, :, vs.taum1], vs.z_wf_ff[2:-2, 2:-2, :, vs.tau],
     )
     vs.z_pf_ff = update(
         vs.z_pf_ff,
-        at[:, :, :, vs.taum1], vs.z_pf_ff[:, :, :, vs.tau],
+        at[2:-2, 2:-2, :, vs.taum1], vs.z_pf_ff[2:-2, 2:-2, :, vs.tau],
     )
     vs.theta_rz_ff = update(
         vs.theta_rz_ff,
-        at[:, :, vs.taum1], vs.theta_rz_ff[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.theta_rz_ff[2:-2, 2:-2, vs.tau],
     )
     vs.theta_ss_ff = update(
         vs.theta_ss_ff,
-        at[:, :, vs.taum1], vs.theta_ss_ff[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.theta_ss_ff[2:-2, 2:-2, vs.tau],
     )
     vs.theta_ff = update(
         vs.theta_ff,
-        at[:, :, vs.taum1], vs.theta_ff[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.theta_ff[2:-2, 2:-2, vs.tau],
     )
     vs.z_pf = update(
         vs.z_pf,
-        at[:, :, vs.taum1], vs.z_pf[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.z_pf[2:-2, 2:-2, vs.tau],
     )
 
     return KernelOutput(
@@ -691,13 +690,13 @@ def after_timestep_film_flow_kernel(state):
 def after_timestep_crops_kernel(state):
     vs = state.variables
 
-    vs.ta_min = update(vs.ta_min, at[:, :, vs.taum1], vs.ta_min[:, :, vs.tau])
-    vs.ta_max = update(vs.ta_max, at[:, :, vs.taum1], vs.ta_max[:, :, vs.tau])
-    vs.gdd_sum = update(vs.gdd_sum, at[:, :, vs.taum1, :], vs.gdd_sum[:, :, vs.tau, :])
-    vs.t_grow_cc = update(vs.t_grow_cc, at[:, :, vs.taum1, :], vs.t_grow_cc[:, :, vs.tau, :])
-    vs.t_grow_root = update(vs.t_grow_root, at[:, :, vs.taum1, :], vs.t_grow_root[:, :, vs.tau, :])
-    vs.ccc = update(vs.ccc, at[:, :, vs.taum1, :], vs.ccc[:, :, vs.tau, :])
-    vs.z_root_crop = update(vs.z_root_crop, at[:, :, vs.taum1, :], vs.z_root_crop[:, :, vs.tau, :])
+    vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2, vs.taum1], vs.ta_min[2:-2, 2:-2, vs.tau])
+    vs.ta_max = update(vs.ta_max, at[2:-2, 2:-2, vs.taum1], vs.ta_max[2:-2, 2:-2, vs.tau])
+    vs.gdd_sum = update(vs.gdd_sum, at[2:-2, 2:-2, vs.taum1, :], vs.gdd_sum[2:-2, 2:-2, vs.tau, :])
+    vs.t_grow_cc = update(vs.t_grow_cc, at[2:-2, 2:-2, vs.taum1, :], vs.t_grow_cc[2:-2, 2:-2, vs.tau, :])
+    vs.t_grow_root = update(vs.t_grow_root, at[2:-2, 2:-2, vs.taum1, :], vs.t_grow_root[2:-2, 2:-2, vs.tau, :])
+    vs.ccc = update(vs.ccc, at[2:-2, 2:-2, vs.taum1, :], vs.ccc[2:-2, 2:-2, vs.tau, :])
+    vs.z_root_crop = update(vs.z_root_crop, at[2:-2, 2:-2, vs.taum1, :], vs.z_root_crop[2:-2, 2:-2, vs.tau, :])
 
     return KernelOutput(
         ta_min=vs.ta_min,

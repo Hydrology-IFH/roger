@@ -14,7 +14,7 @@ def _calc_theta_d_rel(state, theta):
     theta_d_rel = allocate(state.dimensions, ("x", "y"))
     theta_d_rel = update(
         theta_d_rel,
-        at[:, :], ((vs.theta_sat - theta) / (vs.theta_sat - vs.theta_pwp)) * vs.maskCatch,
+        at[2:-2, 2:-2], ((vs.theta_sat[2:-2, 2:-2] - theta[2:-2, 2:-2]) / (vs.theta_sat[2:-2, 2:-2] - vs.theta_pwp[2:-2, 2:-2])) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return theta_d_rel
@@ -31,7 +31,7 @@ def calc_theta_d_rel(state):
     itt_event = allocate(state.dimensions, ("x", "y", "timesteps_event_ff"))
     itt_event = update(
         itt_event,
-        at[:, :, :], npx.arange(0, settings.nittevent_ff, 1)[npx.newaxis, npx.newaxis, :],
+        at[2:-2, 2:-2, :], npx.arange(0, settings.nittevent_ff, 1)[npx.newaxis, npx.newaxis, :],
     )
 
     vs.theta_d_rel_rz_ff = update(
@@ -60,12 +60,12 @@ def calc_t_end(state):
     itt_event = allocate(state.dimensions, ("x", "y", "timesteps_event_ff"), dtype=int)
     itt_event = update(
         itt_event,
-        at[:, :, :], npx.arange(0, settings.nittevent_ff, 1)[npx.newaxis, npx.newaxis, :],
+        at[2:-2, 2:-2, :], npx.arange(0, settings.nittevent_ff, 1)[npx.newaxis, npx.newaxis, :],
     )
 
     vs.t_end_ff = update(
         vs.t_end_ff,
-        at[:, :, vs.event_no_ff - 1], npx.min(npx.where(itt_event > vs.ts_ff[:, :, vs.event_no_ff - 1, npx.newaxis], npx.where(vs.rain_int_ff[:, :, vs.event_no_ff - 1, npx.newaxis] * ((vs.ti_ff[:, :, vs.event_no_ff - 1, npx.newaxis] - vs.ts_ff[:, :, vs.event_no_ff - 1, npx.newaxis]) / (itt_event - vs.ts_ff[:, :, vs.event_no_ff - 1, npx.newaxis]))**(3/2) <= vs.rain_int_ff[:, :, vs.event_no_ff - 1, npx.newaxis] * settings.ff_tc, itt_event, settings.nittevent_ff), settings.nittevent_ff), axis=-1),
+        at[2:-2, 2:-2, vs.event_no_ff - 1], npx.min(npx.where(itt_event[2:-2, 2:-2, :] > vs.ts_ff[2:-2, 2:-2, vs.event_no_ff - 1, npx.newaxis], npx.where(vs.rain_int_ff[2:-2, 2:-2, vs.event_no_ff - 1, npx.newaxis] * ((vs.ti_ff[2:-2, 2:-2, vs.event_no_ff - 1, npx.newaxis] - vs.ts_ff[2:-2, 2:-2, vs.event_no_ff - 1, npx.newaxis]) / (itt_event[2:-2, 2:-2, :] - vs.ts_ff[2:-2, 2:-2, vs.event_no_ff - 1, npx.newaxis]))**(3/2) <= vs.rain_int_ff[2:-2, 2:-2, vs.event_no_ff - 1, npx.newaxis] * settings.ff_tc, itt_event[2:-2, 2:-2, :], settings.nittevent_ff), settings.nittevent_ff), axis=-1),
     )
 
     return KernelOutput(
@@ -84,7 +84,7 @@ def calc_volume_flux_density(state):
     itt_event = allocate(state.dimensions, ("x", "y", "timesteps_event_ff"))
     itt_event = update(
         itt_event,
-        at[:, :, :], npx.arange(0, settings.nittevent_ff, 1)[npx.newaxis, npx.newaxis, :],
+        at[2:-2, 2:-2, :], npx.arange(0, settings.nittevent_ff, 1)[npx.newaxis, npx.newaxis, :],
     )
 
     # define lower and upper quartile of rainfall
@@ -92,11 +92,11 @@ def calc_volume_flux_density(state):
     idx_rain_75 = allocate(state.dimensions, ("x", "y"))
     idx_rain_25 = update(
         idx_rain_25,
-        at[:, :], npx.max(npx.where(vs.rain_event_csum <= 0.25 * vs.rain_event_sum[:, :, npx.newaxis], itt_event, 0), axis=-1),
+        at[2:-2, 2:-2], npx.max(npx.where(vs.rain_event_csum[2:-2, 2:-2, :] <= 0.25 * vs.rain_event_sum[2:-2, 2:-2, npx.newaxis], itt_event[2:-2, 2:-2, :], 0), axis=-1),
     )
     idx_rain_75 = update(
         idx_rain_75,
-        at[:, :], npx.min(npx.where(vs.rain_event_csum >= 0.75 * vs.rain_event_sum[:, :, npx.newaxis], itt_event, settings.nittevent_ff), axis=-1),
+        at[2:-2, 2:-2], npx.min(npx.where(vs.rain_event_csum[2:-2, 2:-2, :] >= 0.75 * vs.rain_event_sum[2:-2, 2:-2, npx.newaxis], itt_event[2:-2, 2:-2, :], settings.nittevent_ff), axis=-1),
     )
 
     idx_reg = allocate(state.dimensions, ("x", "y", "timesteps_event_ff"))
@@ -106,39 +106,39 @@ def calc_volume_flux_density(state):
     params_reg = allocate(state.dimensions, ("x", "y", 2))
     idx_reg = update(
         idx_reg,
-        at[:, :, :], npx.where((itt_event >= idx_rain_25[:, :, npx.newaxis]) & (itt_event <= idx_rain_75[:, :, npx.newaxis]), itt_event, 0),
+        at[2:-2, 2:-2, :], npx.where((itt_event >= idx_rain_25[2:-2, 2:-2, npx.newaxis]) & (itt_event <= idx_rain_75[2:-2, 2:-2, npx.newaxis]), itt_event, 0),
     )
     rain_init = update(
         rain_init,
-        at[:, :], npx.max(npx.where(vs.rain_event_csum <= 0.25 * vs.rain_event_sum[:, :, npx.newaxis], vs.rain_event_csum, 0), axis=-1),
+        at[2:-2, 2:-2], npx.max(npx.where(vs.rain_event_csum <= 0.25 * vs.rain_event_sum[2:-2, 2:-2, npx.newaxis], vs.rain_event_csum, 0), axis=-1),
     )
     rain_reg = update(
         rain_reg,
-        at[:, :, :], npx.where((itt_event >= idx_rain_25[:, :, npx.newaxis]) & (itt_event <= idx_rain_75[:, :, npx.newaxis]), vs.rain_event, 0),
+        at[2:-2, 2:-2, :], npx.where((itt_event >= idx_rain_25[2:-2, 2:-2, npx.newaxis]) & (itt_event <= idx_rain_75[2:-2, 2:-2, npx.newaxis]), vs.rain_event, 0),
     )
     rain_csum_reg = update(
         rain_csum_reg,
-        at[:, :, :], npx.cumsum(rain_reg, axis=-1) + rain_init[:, :, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.cumsum(rain_reg, axis=-1) + rain_init[2:-2, 2:-2, npx.newaxis],
     )
     # linear regression to determine volume flux density
     params_reg = update(
         params_reg,
-        at[:, :, :], linear_regression(idx_reg, rain_csum_reg, params_reg),
+        at[2:-2, 2:-2, :], linear_regression(idx_reg[2:-2, 2:-2, :], rain_csum_reg[2:-2, 2:-2, :], params_reg[2:-2, 2:-2, :]),
     )
 
     vs.qs_ff = update(
         vs.qs_ff,
-        at[:, :, vs.event_no_ff - 1], params_reg[:, :, 0]/600/1000,
+        at[2:-2, 2:-2, vs.event_no_ff - 1], params_reg[2:-2, 2:-2, 0]/600/1000,
     )
 
     vs.tb_ff = update(
         vs.tb_ff,
-        at[:, :, vs.event_no_ff - 1], npx.where(-params_reg[:, :, 1]/params_reg[:, :, 0] >= 0, -params_reg[:, :, 1]/params_reg[:, :, 0], 0),
+        at[2:-2, 2:-2, vs.event_no_ff - 1], npx.where(-params_reg[2:-2, 2:-2, 1]/params_reg[2:-2, 2:-2, 0] >= 0, -params_reg[2:-2, 2:-2, 1]/params_reg[2:-2, 2:-2, 0], 0),
     )
 
     vs.ts_ff = update(
         vs.ts_ff,
-        at[:, :, vs.event_no_ff - 1], vs.tb_ff[:, :, vs.event_no_ff - 1] + (vs.rain_event_sum - params_reg[:, :, 1])/params_reg[:, :, 0],
+        at[2:-2, 2:-2, vs.event_no_ff - 1], vs.tb_ff[2:-2, 2:-2, vs.event_no_ff - 1] + (vs.rain_event_sum - params_reg[2:-2, 2:-2, 1])/params_reg[2:-2, 2:-2, 0],
     )
 
     return KernelOutput(
@@ -159,28 +159,28 @@ def calc_rain_pulse(state):
     itt_event = allocate(state.dimensions, ("x", "y", "timesteps_event_ff"))
     itt_event = update(
         itt_event,
-        at[:, :, :], npx.arange(0, settings.nittevent_ff, 1)[npx.newaxis, npx.newaxis, :],
+        at[2:-2, 2:-2, :], npx.arange(0, settings.nittevent_ff, 1)[npx.newaxis, npx.newaxis, :],
     )
 
     ts = allocate(state.dimensions, ("x", "y"))
     tb = allocate(state.dimensions, ("x", "y"))
     ts = update(
         ts,
-        at[:, :], (vs.ts_ff[:, :, vs.event_no_ff - 1] - vs.ts_ff[:, :, vs.event_no_ff - 1] % 1) + 1,
+        at[2:-2, 2:-2], (vs.ts_ff[2:-2, 2:-2, vs.event_no_ff - 1] - vs.ts_ff[2:-2, 2:-2, vs.event_no_ff - 1] % 1) + 1,
     )
     tb = update(
         tb,
-        at[:, :], npx.where(vs.tb_ff[:, :, vs.event_no_ff - 1] - vs.tb_ff[:, :, vs.event_no_ff - 1] % 1 > 0, vs.tb_ff[:, :, vs.event_no_ff - 1] - vs.tb_ff[:, :, vs.event_no_ff - 1] % 1, 0)
+        at[2:-2, 2:-2], npx.where(vs.tb_ff[2:-2, 2:-2, vs.event_no_ff - 1] - vs.tb_ff[2:-2, 2:-2, vs.event_no_ff - 1] % 1 > 0, vs.tb_ff[2:-2, 2:-2, vs.event_no_ff - 1] - vs.tb_ff[2:-2, 2:-2, vs.event_no_ff - 1] % 1, 0)
     )
 
     vs.rain_int_ff = update(
         vs.rain_int_ff,
-        at[:, :, vs.event_no_ff - 1], (vs.qs_ff[:, :, vs.event_no_ff - 1] * 600 * 1000 * (vs.ts_ff[:, :, vs.event_no_ff - 1] - vs.tb_ff[:, :, vs.event_no_ff - 1])) / (ts - tb),
+        at[2:-2, 2:-2, vs.event_no_ff - 1], (vs.qs_ff[2:-2, 2:-2, vs.event_no_ff - 1] * 600 * 1000 * (vs.ts_ff[2:-2, 2:-2, vs.event_no_ff - 1] - vs.tb_ff[2:-2, 2:-2, vs.event_no_ff - 1])) / (ts[2:-2, 2:-2] - tb[2:-2, 2:-2]),
     )
 
     vs.rain_event_ff = update(
         vs.rain_event_ff,
-        at[:, :, :], npx.where((itt_event >= tb[:, :, npx.newaxis]) & (itt_event <= ts[:, :, npx.newaxis]), vs.rain_int_ff[:, :, vs.event_no_ff - 1, npx.newaxis], 0),
+        at[2:-2, 2:-2, :], npx.where((itt_event >= tb[2:-2, 2:-2, npx.newaxis]) & (itt_event <= ts[2:-2, 2:-2, npx.newaxis]), vs.rain_int_ff[2:-2, 2:-2, vs.event_no_ff - 1, npx.newaxis], 0),
     )
 
     return KernelOutput(
@@ -198,12 +198,12 @@ def calc_velocity(state):
 
     vs.v_wf = update(
         vs.v_wf,
-        at[:, :, vs.event_no_ff - 1], vs.a_ff * vs.qs_ff[:, :, vs.event_no_ff - 1]**(2/3) * 600 * 1000,
+        at[2:-2, 2:-2, vs.event_no_ff - 1], vs.a_ff[2:-2, 2:-2] * vs.qs_ff[2:-2, 2:-2, vs.event_no_ff - 1]**(2/3) * 600 * 1000,
     )
 
     vs.v_perc = update(
         vs.v_perc,
-        at[:, :, vs.event_no_ff - 1], vs.v_wf[:, :, vs.event_no_ff - 1] * 3,
+        at[2:-2, 2:-2, vs.event_no_ff - 1], vs.v_wf[2:-2, 2:-2, vs.event_no_ff - 1] * 3,
     )
 
     return KernelOutput(
@@ -222,12 +222,12 @@ def calc_intersection(state):
 
     vs.ti_ff = update(
         vs.ti_ff,
-        at[:, :, vs.event_no_ff - 1], vs.tb_ff[:, :, vs.event_no_ff - 1] + 0.5 * (3 * (vs.ts_ff[:, :, vs.event_no_ff - 1] - vs.tb_ff[:, :, vs.event_no_ff - 1])),
+        at[2:-2, 2:-2, vs.event_no_ff - 1], vs.tb_ff[2:-2, 2:-2, vs.event_no_ff - 1] + 0.5 * (3 * (vs.ts_ff[2:-2, 2:-2, vs.event_no_ff - 1] - vs.tb_ff[2:-2, 2:-2, vs.event_no_ff - 1])),
     )
 
     vs.zi_ff = update(
         vs.zi_ff,
-        at[:, :, vs.event_no_ff - 1], ((3 * vs.v_wf[:, :, vs.event_no_ff - 1]) / 2) * (vs.ts_ff[:, :, vs.event_no_ff - 1] - vs.tb_ff[:, :, vs.event_no_ff - 1]),
+        at[2:-2, 2:-2, vs.event_no_ff - 1], ((3 * vs.v_wf[2:-2, 2:-2, vs.event_no_ff - 1]) / 2) * (vs.ts_ff[2:-2, 2:-2, vs.event_no_ff - 1] - vs.tb_ff[2:-2, 2:-2, vs.event_no_ff - 1]),
     )
 
     return KernelOutput(
@@ -246,12 +246,12 @@ def calc_intersection_at_soil_depth(state):
 
     vs.tw_ff = update(
         vs.tw_ff,
-        at[:, :, vs.event_no_ff - 1], vs.tb_ff[:, :, vs.event_no_ff - 1] + vs.z_soil / vs.v_wf[:, :, vs.event_no_ff - 1],
+        at[2:-2, 2:-2, vs.event_no_ff - 1], vs.tb_ff[2:-2, 2:-2, vs.event_no_ff - 1] + vs.z_soil[2:-2, 2:-2] / vs.v_wf[2:-2, 2:-2, vs.event_no_ff - 1],
     )
 
     vs.tp_ff = update(
         vs.tp_ff,
-        at[:, :, vs.event_no_ff - 1], vs.ts_ff[:, :, vs.event_no_ff - 1] + vs.z_soil / vs.v_perc[:, :, vs.event_no_ff - 1],
+        at[2:-2, 2:-2, vs.event_no_ff - 1], vs.ts_ff[2:-2, 2:-2, vs.event_no_ff - 1] + vs.z_soil[2:-2, 2:-2] / vs.v_perc[2:-2, 2:-2, vs.event_no_ff - 1],
     )
 
     return KernelOutput(
@@ -269,15 +269,15 @@ def calc_infiltration(state):
 
     vs.rain_ff = update(
         vs.rain_ff,
-        at[:, :], vs.rain_event_ff[:, :, vs.itt_event_ff[vs.event_no_ff - 1]],
+        at[2:-2, 2:-2], vs.rain_event_ff[2:-2, 2:-2, vs.itt_event_ff[vs.event_no_ff - 1]],
     )
     vs.prec = update_add(
         vs.prec,
-        at[:, :], vs.rain_ff,
+        at[2:-2, 2:-2], vs.rain_ff[2:-2, 2:-2],
     )
     vs.S_f = update_add(
         vs.S_f,
-        at[:, :, vs.event_no_ff - 1], vs.rain_ff,
+        at[2:-2, 2:-2, vs.event_no_ff - 1], vs.rain_ff[2:-2, 2:-2],
     )
 
     return KernelOutput(
@@ -296,22 +296,22 @@ def calc_wetting_front_depth(state):
 
     vs.z_wf_ff = update(
         vs.z_wf_ff,
-        at[:, :, :, vs.tau], npx.where((vs.itt_event_ff[npx.newaxis, npx.newaxis, :] > vs.tb_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] < vs.ti_ff) & (vs.S_f > 0), vs.v_wf * (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] - vs.tb_ff), vs.z_wf_ff[:, :, :, vs.tau]),
+        at[2:-2, 2:-2, :, vs.tau], npx.where((vs.itt_event_ff[npx.newaxis, npx.newaxis, :] > vs.tb_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] < vs.ti_ff[2:-2, 2:-2, :]) & (vs.S_f[2:-2, 2:-2, :] > 0), vs.v_wf[2:-2, 2:-2, :] * (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] - vs.tb_ff[2:-2, 2:-2, :]), vs.z_wf_ff[2:-2, 2:-2, :, vs.tau]),
     )
 
     vs.z_wf_ff = update(
         vs.z_wf_ff,
-        at[:, :, :, vs.tau], npx.where((vs.itt_event_ff[npx.newaxis, npx.newaxis, :] > vs.ti_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] < vs.t_end_ff) & (vs.S_f > 0), vs.v_perc * (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] - vs.ts_ff)**(1/3) * ((vs.ts_ff - vs.tb_ff) / 2)**(2/3), vs.z_wf_ff[:, :, :, vs.tau]),
+        at[2:-2, 2:-2, :, vs.tau], npx.where((vs.itt_event_ff[npx.newaxis, npx.newaxis, :] > vs.ti_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] < vs.t_end_ff[2:-2, 2:-2, :]) & (vs.S_f[2:-2, 2:-2, :] > 0), vs.v_perc[2:-2, 2:-2, :] * (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] - vs.ts_ff[2:-2, 2:-2, :])**(1/3) * ((vs.ts_ff[2:-2, 2:-2, :] - vs.tb_ff[2:-2, 2:-2, :]) / 2)**(2/3), vs.z_wf_ff[2:-2, 2:-2, :, vs.tau]),
     )
 
     vs.z_wf_ff = update(
         vs.z_wf_ff,
-        at[:, :, :, :], npx.where(vs.itt_event_ff[npx.newaxis, npx.newaxis, :, npx.newaxis] >= vs.t_end_ff[:, :, :, npx.newaxis], 0, vs.z_wf_ff),
+        at[2:-2, 2:-2, :, :], npx.where(vs.itt_event_ff[npx.newaxis, npx.newaxis, :, npx.newaxis] >= vs.t_end_ff[2:-2, 2:-2, :, npx.newaxis], 0, vs.z_wf_ff[2:-2, 2:-2, :]),
     )
 
     vs.z_wf = update(
         vs.z_wf,
-        at[:, :, vs.tau], npx.max(vs.z_wf_ff[:, :, :, vs.tau], axis=2),
+        at[2:-2, 2:-2, vs.tau], npx.max(vs.z_wf_ff[2:-2, 2:-2, :, vs.tau], axis=2),
     )
 
     return KernelOutput(
@@ -329,22 +329,22 @@ def calc_percolation_front_depth(state):
 
     vs.z_pf_ff = update(
         vs.z_pf_ff,
-        at[:, :, :, vs.tau], npx.where((vs.itt_event_ff[npx.newaxis, npx.newaxis, :] > vs.ts_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] <= vs.ti_ff) & (vs.S_f > 0), vs.v_perc * (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] - vs.ts_ff), vs.z_pf_ff[:, :, :, vs.tau]),
+        at[2:-2, 2:-2, :, vs.tau], npx.where((vs.itt_event_ff[npx.newaxis, npx.newaxis, :] > vs.ts_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] <= vs.ti_ff[2:-2, 2:-2, :]) & (vs.S_f[2:-2, 2:-2, :] > 0), vs.v_perc[2:-2, 2:-2, :] * (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] - vs.ts_ff[2:-2, 2:-2, :]), vs.z_pf_ff[2:-2, 2:-2, :, vs.tau]),
     )
 
     vs.z_pf_ff = update(
         vs.z_pf_ff,
-        at[:, :, :, vs.tau], npx.where(vs.z_pf_ff[:, :, :, vs.tau] > vs.z_soil[:, :, npx.newaxis], vs.z_soil[:, :, npx.newaxis], vs.z_pf_ff[:, :, :, vs.tau]),
+        at[2:-2, 2:-2, :, vs.tau], npx.where(vs.z_pf_ff[2:-2, 2:-2, :, vs.tau] > vs.z_soil[2:-2, 2:-2, npx.newaxis], vs.z_soil[2:-2, 2:-2, npx.newaxis], vs.z_pf_ff[2:-2, 2:-2, :, vs.tau]),
     )
 
     vs.z_pf_ff = update(
         vs.z_pf_ff,
-        at[:, :, :, :], npx.where(vs.itt_event_ff[npx.newaxis, npx.newaxis, :, npx.newaxis] >= vs.t_end_ff[:, :, :, npx.newaxis], 0, vs.z_pf_ff),
+        at[2:-2, 2:-2, :, :], npx.where(vs.itt_event_ff[npx.newaxis, npx.newaxis, :, npx.newaxis] >= vs.t_end_ff[2:-2, 2:-2, :, npx.newaxis], 0, vs.z_pf_ff[2:-2, 2:-2, :]),
     )
 
     vs.z_pf = update(
         vs.z_pf,
-        at[:, :, vs.tau], npx.max(vs.z_pf_ff[:, :, :, vs.tau], axis=2),
+        at[2:-2, 2:-2, vs.tau], npx.max(vs.z_pf_ff[2:-2, 2:-2, :, vs.tau], axis=2),
     )
 
     return KernelOutput(
@@ -362,85 +362,85 @@ def calc_abstraction(state):
 
     vs.ff_abs_rz = update(
         vs.ff_abs_rz,
-        at[:, :, :], npx.where(((vs.z_wf_ff[:, :, :, vs.tau] - vs.z_wf_ff[:, :, :, vs.taum1]) > 0) & (vs.z_wf_ff[:, :, :, vs.tau] < vs.z_root[:, :, vs.tau, npx.newaxis]), vs.theta_d_rel_rz_ff * vs.wfs[:, :, npx.newaxis] * vs.ks[:, :, npx.newaxis] * vs.dt * ((vs.wfs[:, :, npx.newaxis] + (vs.z_wf_ff[:, :, :, vs.tau] - vs.z_wf_ff[:, :, :, vs.taum1])) / (vs.z_wf_ff[:, :, :, vs.tau] - vs.z_wf_ff[:, :, :, vs.taum1])) * vs.c_ff[:, :, npx.newaxis], 0),
+        at[2:-2, 2:-2, :], npx.where(((vs.z_wf_ff[2:-2, 2:-2, :, vs.tau] - vs.z_wf_ff[2:-2, 2:-2, :, vs.taum1]) > 0) & (vs.z_wf_ff[2:-2, 2:-2, :, vs.tau] < vs.z_root[2:-2, 2:-2, vs.tau, npx.newaxis]), vs.theta_d_rel_rz_ff[2:-2, 2:-2, :] * vs.wfs[2:-2, 2:-2, npx.newaxis] * vs.ks[2:-2, 2:-2, npx.newaxis] * vs.dt * ((vs.wfs[2:-2, 2:-2, npx.newaxis] + (vs.z_wf_ff[2:-2, 2:-2, :, vs.tau] - vs.z_wf_ff[2:-2, 2:-2, :, vs.taum1])) / (vs.z_wf_ff[2:-2, 2:-2, :, vs.tau] - vs.z_wf_ff[2:-2, 2:-2, :, vs.taum1])) * vs.c_ff[2:-2, 2:-2, npx.newaxis], 0),
     )
     vs.ff_abs_rz = update(
         vs.ff_abs_rz,
-        at[:, :, :], npx.where(vs.ff_abs_rz >= vs.S_f, vs.S_f, vs.ff_abs_rz),
+        at[2:-2, 2:-2, :], npx.where(vs.ff_abs_rz[2:-2, 2:-2, :] >= vs.S_f[2:-2, 2:-2, :], vs.S_f[2:-2, 2:-2, :], vs.ff_abs_rz[2:-2, 2:-2, :]),
     )
     vs.S_f = update_add(
         vs.S_f,
-        at[:, :, :], npx.where(vs.ff_abs_rz > 0, -vs.ff_abs_rz, 0),
+        at[2:-2, 2:-2, :], npx.where(vs.ff_abs_rz[2:-2, 2:-2, :] > 0, -vs.ff_abs_rz[2:-2, 2:-2, :], 0),
     )
 
     vs.ff_abs_ss = update(
         vs.ff_abs_ss,
-        at[:, :, :], npx.where(((vs.z_wf_ff[:, :, :, vs.tau] - vs.z_wf_ff[:, :, :, vs.taum1]) > 0) & (vs.z_wf_ff[:, :, :, vs.tau] >= vs.z_root[:, :, vs.tau, npx.newaxis]) & (vs.z_wf_ff[:, :, :, vs.tau] <= vs.z_soil[:, :, npx.newaxis]), vs.theta_d_rel_ss_ff * vs.wfs[:, :, npx.newaxis] * vs.ks[:, :, npx.newaxis] * vs.dt * ((vs.wfs[:, :, npx.newaxis] + (vs.z_wf_ff[:, :, :, vs.tau] - vs.z_wf_ff[:, :, :, vs.taum1])) / (vs.z_wf_ff[:, :, :, vs.tau] - vs.z_wf_ff[:, :, :, vs.taum1])) * vs.c_ff[:, :, npx.newaxis], 0),
+        at[2:-2, 2:-2, :], npx.where(((vs.z_wf_ff[2:-2, 2:-2, :, vs.tau] - vs.z_wf_ff[2:-2, 2:-2, :, vs.taum1]) > 0) & (vs.z_wf_ff[2:-2, 2:-2, :, vs.tau] >= vs.z_root[2:-2, 2:-2, vs.tau, npx.newaxis]) & (vs.z_wf_ff[2:-2, 2:-2, :, vs.tau] <= vs.z_soil[2:-2, 2:-2, npx.newaxis]), vs.theta_d_rel_ss_ff[2:-2, 2:-2, :] * vs.wfs[2:-2, 2:-2, npx.newaxis] * vs.ks[2:-2, 2:-2, npx.newaxis] * vs.dt * ((vs.wfs[2:-2, 2:-2, npx.newaxis] + (vs.z_wf_ff[2:-2, 2:-2, :, vs.tau] - vs.z_wf_ff[2:-2, 2:-2, :, vs.taum1])) / (vs.z_wf_ff[2:-2, 2:-2, :, vs.tau] - vs.z_wf_ff[2:-2, 2:-2, :, vs.taum1])) * vs.c_ff[2:-2, 2:-2, npx.newaxis], 0),
     )
     vs.ff_abs_ss = update(
         vs.ff_abs_ss,
-        at[:, :, :], npx.where(vs.ff_abs_ss >= vs.S_f, vs.S_f, vs.ff_abs_ss),
+        at[2:-2, 2:-2, :], npx.where(vs.ff_abs_ss[2:-2, 2:-2, :] >= vs.S_f[2:-2, 2:-2, :], vs.S_f[2:-2, 2:-2, :], vs.ff_abs_ss[2:-2, 2:-2, :]),
     )
     vs.ff_abs_ss = update(
         vs.ff_abs_ss,
-        at[:, :, :], npx.where(vs.ff_abs_ss >= vs.S_f, vs.S_f, vs.ff_abs_ss),
+        at[2:-2, 2:-2, :], npx.where(vs.ff_abs_ss[2:-2, 2:-2, :] >= vs.S_f[2:-2, 2:-2, :], vs.S_f[2:-2, 2:-2, :], vs.ff_abs_ss[2:-2, 2:-2, :]),
     )
     vs.S_f = update_add(
         vs.S_f,
-        at[:, :, :], npx.where(vs.ff_abs_ss > 0, -vs.ff_abs_ss, 0),
+        at[2:-2, 2:-2, :], npx.where(vs.ff_abs_ss[2:-2, 2:-2, :] > 0, -vs.ff_abs_ss[2:-2, 2:-2, :], 0),
     )
 
     # abstraction of the residual film at the end of the event
     vs.ff_abs_rz = update(
         vs.ff_abs_rz,
-        at[:, :, :], npx.where(vs.itt_event_ff[npx.newaxis, npx.newaxis, :] >= vs.t_end_ff, vs.S_f_rz, vs.ff_abs_rz),
+        at[2:-2, 2:-2, :], npx.where(vs.itt_event_ff[npx.newaxis, npx.newaxis, :] >= vs.t_end_ff[2:-2, 2:-2, :], vs.S_f_rz[2:-2, 2:-2, :], vs.ff_abs_rz[2:-2, 2:-2, :]),
     )
     vs.ff_abs_ss = update(
         vs.ff_abs_ss,
-        at[:, :, :], npx.where(vs.itt_event_ff[npx.newaxis, npx.newaxis, :] >= vs.t_end_ff, vs.S_f_ss, vs.ff_abs_ss),
+        at[2:-2, 2:-2, :], npx.where(vs.itt_event_ff[npx.newaxis, npx.newaxis, :] >= vs.t_end_ff[2:-2, 2:-2, :], vs.S_f_ss[2:-2, 2:-2, :], vs.ff_abs_ss[2:-2, 2:-2, :]),
     )
     vs.S_f = update(
         vs.S_f,
-        at[:, :, :], npx.where(vs.itt_event_ff[npx.newaxis, npx.newaxis, :] >= vs.t_end_ff, 0, vs.S_f),
+        at[2:-2, 2:-2, :], npx.where(vs.itt_event_ff[npx.newaxis, npx.newaxis, :] >= vs.t_end_ff[2:-2, 2:-2, :], 0, vs.S_f[2:-2, 2:-2, :]),
     )
 
     vs.ff_abs = update(
         vs.ff_abs,
-        at[:, :, :], vs.ff_abs_rz + vs.ff_abs_ss,
+        at[2:-2, 2:-2, :], vs.ff_abs_rz[2:-2, 2:-2, :] + vs.ff_abs_ss[2:-2, 2:-2, :],
     )
 
     # update root zone storage after abtraction from film flow
     vs.S_fp_rz = update_add(
         vs.S_fp_rz,
-        at[:, :], npx.sum(vs.ff_abs_rz, axis=-1) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.sum(vs.ff_abs_rz[2:-2, 2:-2, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # root zone fine pore excess fills root zone large pores
     mask = (vs.S_fp_rz > vs.S_ufc_rz)
     vs.S_lp_rz = update_add(
         vs.S_lp_rz,
-        at[:, :], (vs.S_fp_rz - vs.S_ufc_rz) * mask * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.S_fp_rz[2:-2, 2:-2] - vs.S_ufc_rz[2:-2, 2:-2]) * mask[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.S_fp_rz = update(
         vs.S_fp_rz,
-        at[:, :], npx.where(mask, vs.S_ufc_rz, vs.S_fp_rz) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.S_ufc_rz[2:-2, 2:-2], vs.S_fp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update subsoil storage after abtraction from film flow
     vs.S_fp_ss = update_add(
         vs.S_fp_ss,
-        at[:, :], npx.sum(vs.ff_abs_ss, axis=-1) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.sum(vs.ff_abs_ss, axis=-1) * vs.maskCatch,
     )
 
     # subsoil fine pore excess fills subsoil large pores
     mask = (vs.S_fp_ss > vs.S_ufc_ss)
     vs.S_lp_ss = update_add(
         vs.S_lp_ss,
-        at[:, :], (vs.S_fp_ss - vs.S_ufc_ss) * mask * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.S_fp_ss[2:-2, 2:-2] - vs.S_ufc_ss[2:-2, 2:-2]) * mask[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.S_fp_ss = update(
         vs.S_fp_ss,
-        at[:, :], npx.where(mask, vs.S_ufc_ss, vs.S_fp_ss) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(
@@ -466,43 +466,43 @@ def calc_drainage(state):
 
     ff_drain_pot = update(
         ff_drain_pot,
-        at[:, :, :], npx.where((vs.tp_ff < vs.ti_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] >= vs.tw_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] <= vs.tp_ff), vs.rain_int_ff, 0),
+        at[2:-2, 2:-2, :], npx.where((vs.tp_ff[2:-2, 2:-2, :] < vs.ti_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] >= vs.tw_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] <= vs.tp_ff[2:-2, 2:-2, :]), vs.rain_int_ff[2:-2, 2:-2, :], 0),
     )
     ff_drain_pot = update(
         ff_drain_pot,
-        at[:, :, :], npx.where((vs.tp_ff < vs.ti_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] > vs.tp_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] < vs.ti_ff), vs.rain_int_ff * (vs.tp_ff - vs.ts_ff) / (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] - vs.ts_ff)**(3/2), ff_drain_pot),
+        at[2:-2, 2:-2, :], npx.where((vs.tp_ff[2:-2, 2:-2, :] < vs.ti_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] > vs.tp_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] < vs.ti_ff[2:-2, 2:-2, :]), vs.rain_int_ff[2:-2, 2:-2, :] * (vs.tp_ff[2:-2, 2:-2, :] - vs.ts_ff[2:-2, 2:-2, :]) / (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] - vs.ts_ff[2:-2, 2:-2, :])**(3/2), ff_drain_pot[2:-2, 2:-2, :]),
     )
     ff_drain_pot = update(
         ff_drain_pot,
-        at[:, :, :], npx.where((vs.tp_ff < vs.ti_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] > vs.ti_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] < vs.t_end_ff), (vs.S_f / 2) * (vs.tw_ff - vs.ts_ff)**(1/2) * (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] - vs.ts_ff)**(-3/2), ff_drain_pot),
+        at[2:-2, 2:-2, :], npx.where((vs.tp_ff[2:-2, 2:-2, :] < vs.ti_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] > vs.ti_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] < vs.t_end_ff[2:-2, 2:-2, :]), (vs.S_f[2:-2, 2:-2, :] / 2) * (vs.tw_ff[2:-2, 2:-2, :] - vs.ts_ff[2:-2, 2:-2, :])**(1/2) * (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] - vs.ts_ff[2:-2, 2:-2, :])**(-3/2), ff_drain_pot[2:-2, 2:-2, :]),
     )
     ff_drain_pot = update(
         ff_drain_pot,
-        at[:, :, :], npx.where((vs.tp_ff >= vs.ti_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] >= vs.tw_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] <= vs.ti_ff), vs.rain_int_ff, ff_drain_pot),
+        at[2:-2, 2:-2, :], npx.where((vs.tp_ff[2:-2, 2:-2, :] >= vs.ti_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] >= vs.tw_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] <= vs.ti_ff[2:-2, 2:-2, :]), vs.rain_int_ff[2:-2, 2:-2, :], ff_drain_pot[2:-2, 2:-2, :]),
     )
     ff_drain_pot = update(
         ff_drain_pot,
-        at[:, :, :], npx.where((vs.tp_ff >= vs.ti_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] > vs.ti_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] < vs.t_end_ff), (vs.S_f / 2) * (vs.tw_ff - vs.ts_ff)**(1/2) * (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] - vs.ts_ff)**(-3/2), ff_drain_pot),
+        at[2:-2, 2:-2, :], npx.where((vs.tp_ff[2:-2, 2:-2, :] >= vs.ti_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] > vs.ti_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] < vs.t_end_ff[2:-2, 2:-2, :]), (vs.S_f[2:-2, 2:-2, :] / 2) * (vs.tw_ff[2:-2, 2:-2, :] - vs.ts_ff[2:-2, 2:-2, :])**(1/2) * (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] - vs.ts_ff[2:-2, 2:-2, :])**(-3/2), ff_drain_pot[2:-2, 2:-2, :]),
     )
     ff_drain_pot = update(
         ff_drain_pot,
-        at[:, :, :], npx.where((vs.tw_ff < vs.ts_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] > vs.ti_ff) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] < vs.t_end_ff), (vs.S_f / 2) * (vs.tw_ff - vs.tb_ff)**(1/2) * (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] - vs.tb_ff)**(-3/2), ff_drain_pot),
+        at[2:-2, 2:-2, :], npx.where((vs.tw_ff[2:-2, 2:-2, :] < vs.ts_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] > vs.ti_ff[2:-2, 2:-2, :]) & (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] < vs.t_end_ff[2:-2, 2:-2, :]), (vs.S_f[2:-2, 2:-2, :] / 2) * (vs.tw_ff[2:-2, 2:-2, :] - vs.tb_ff[2:-2, 2:-2, :])**(1/2) * (vs.itt_event_ff[npx.newaxis, npx.newaxis, :] - vs.tb_ff[2:-2, 2:-2, :])**(-3/2), ff_drain_pot[2:-2, 2:-2, :]),
     )
     ff_drain_pot = update(
         ff_drain_pot,
-        at[:, :, :], npx.where(vs.z_wf_ff[:, :, :, vs.tau] < vs.z_soil[:, :, npx.newaxis], 0, ff_drain_pot),
+        at[2:-2, 2:-2, :], npx.where(vs.z_wf_ff[2:-2, 2:-2, :, vs.tau] < vs.z_soil[2:-2, 2:-2, npx.newaxis], 0, ff_drain_pot[2:-2, 2:-2, :]),
     )
     vs.ff_drain = update(
         vs.ff_drain,
-        at[:, :], npx.nansum(npx.where(vs.S_f < ff_drain_pot, vs.S_f, ff_drain_pot), axis=-1),
+        at[2:-2, 2:-2], npx.nansum(npx.where(vs.S_f[2:-2, 2:-2, :] < ff_drain_pot[2:-2, 2:-2, :], vs.S_f[2:-2, 2:-2, :], ff_drain_pot[2:-2, 2:-2, :]), axis=-1),
     )
     vs.ff_drain = update(
         vs.ff_drain,
-        at[:, :], npx.where(vs.ff_drain < 0, 0, vs.ff_drain),
+        at[2:-2, 2:-2], npx.where(vs.ff_drain[2:-2, 2:-2] < 0, 0, vs.ff_drain[2:-2, 2:-2]),
     )
     vs.S_f = update_add(
         vs.S_f,
-        at[:, :, :], -npx.where(vs.S_f < ff_drain_pot, vs.S_f, ff_drain_pot),
+        at[2:-2, 2:-2, :], -npx.where(vs.S_f[2:-2, 2:-2, :] < ff_drain_pot[2:-2, 2:-2, :], vs.S_f[2:-2, 2:-2, :], ff_drain_pot[2:-2, 2:-2, :]),
     )
 
     return KernelOutput(
@@ -520,11 +520,11 @@ def update_film_volume(state):
 
     vs.S_f_rz = update(
         vs.S_f_rz,
-        at[:, :, :], npx.where(vs.z_wf_ff[:, :, :, vs.tau] <= vs.z_root[:, :, vs.tau, npx.newaxis], vs.S_f, (vs.z_root[:, :, vs.tau, npx.newaxis]/vs.z_wf_ff[:, :, :, vs.tau]) * vs.S_f),
+        at[2:-2, 2:-2, :], npx.where(vs.z_wf_ff[2:-2, 2:-2, :, vs.tau] <= vs.z_root[2:-2, 2:-2, vs.tau, npx.newaxis], vs.S_f[2:-2, 2:-2, :], (vs.z_root[2:-2, 2:-2, vs.tau, npx.newaxis]/vs.z_wf_ff[2:-2, 2:-2, :, vs.tau]) * vs.S_f[2:-2, 2:-2, :]),
     )
     vs.S_f_ss = update(
         vs.S_f_ss,
-        at[:, :, :], npx.where(vs.z_wf_ff[:, :, :, vs.tau] > vs.z_root[:, :, vs.tau, npx.newaxis], ((vs.z_wf_ff[:, :, :, vs.tau] - vs.z_root[:, :, vs.tau, npx.newaxis]) / vs.z_wf_ff[:, :, :, vs.tau]) * vs.S_f, 0),
+        at[2:-2, 2:-2, :], npx.where(vs.z_wf_ff[2:-2, 2:-2, :, vs.tau] > vs.z_root[2:-2, 2:-2, vs.tau, npx.newaxis], ((vs.z_wf_ff[2:-2, 2:-2, :, vs.tau] - vs.z_root[2:-2, 2:-2, vs.tau, npx.newaxis]) / vs.z_wf_ff[2:-2, 2:-2, :, vs.tau]) * vs.S_f[2:-2, 2:-2, :], 0),
     )
 
     return KernelOutput(
@@ -549,18 +549,18 @@ def calculate_film_flow(state):
     arr_itt = allocate(state.dimensions, ("x", "y"))
     arr_itt = update(
         arr_itt,
-        at[:, :], vs.itt,
+        at[2:-2, 2:-2], vs.itt,
     )
-    cond1 = ((vs.EVENT_ID_FF[:, :, vs.itt-1] == 0) & (vs.EVENT_ID_FF[:, :, vs.itt] >= 1) & (arr_itt >= 1))
+    cond1 = ((vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt-1] == 0) & (vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt] >= 1) & (arr_itt >= 1))
 
     if cond1.any():
         vs.z_wf_ff = update(
             vs.z_wf_ff,
-            at[:, :, vs.event_no_ff - 1, :], 0,
+            at[2:-2, 2:-2, vs.event_no_ff - 1, :], 0,
         )
         vs.z_pf_ff = update(
             vs.z_pf_ff,
-            at[:, :, vs.event_no_ff - 1, :], 0,
+            at[2:-2, 2:-2, vs.event_no_ff - 1, :], 0,
         )
         #TODO: hortonian overland flow
 

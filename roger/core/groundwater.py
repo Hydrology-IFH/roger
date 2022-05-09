@@ -34,17 +34,17 @@ def calc_S_gw_from_z_gw(state):
     z = allocate(state.dimensions, ("x", "y", 1001))
     z = update(
         z,
-        at[:, :, :], npx.linspace(vs.z_gw[:, :, vs.tau], vs.z_gw_tot, num=1001, axis=-1) * vs.maskCatch[:, :, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.linspace(vs.z_gw[2:-2, 2:-2, vs.tau], vs.z_gw_tot, num=1001, axis=-1) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     dz = update(
         dz,
-        at[:, :], (z[:, :, 1] - z[:, :, 0]) * vs.maskCatch,
+        at[2:-2, 2:-2], (z[2:-2, 2:-2, 1] - z[2:-2, 2:-2, 0]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.S_gw = update(
         vs.S_gw,
-        at[:, :, vs.tau], (npx.sum(_ss_z(z, vs.n0[:, :, npx.newaxis], vs.bdec[:, :, npx.newaxis]), axis=-1) * dz) * 1000 * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau], (npx.sum(_ss_z(z, vs.n0[2:-2, 2:-2, npx.newaxis], vs.bdec[2:-2, 2:-2, npx.newaxis]), axis=-1) * dz[2:-2, 2:-2]) * 1000 * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(S_gw=vs.S_gw)
@@ -59,7 +59,7 @@ def calc_z_gw(state):
 
     vs.z_gw = update(
         vs.z_gw,
-        at[:, :, vs.tau], _zsv(vs.z_gw[:, :, vs.taum1], vs.z_gw_tot, vs.n0, vs.bdec, vs.S_gw[:, :, vs.tau]/1000) * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau], _zsv(vs.z_gw[2:-2, 2:-2, vs.taum1], vs.z_gw_tot[2:-2, 2:-2], vs.n0[2:-2, 2:-2], vs.bdec[2:-2, 2:-2], vs.S_gw[2:-2, 2:-2, vs.tau]/1000) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(z_gw=vs.z_gw)

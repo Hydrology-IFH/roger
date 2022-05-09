@@ -50,7 +50,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
         """To be implemented by subclass.
 
         First function to be called during setup.
-        Use this to modify the model settings.
+        Use this functions to modify the model settings.
 
         Example:
           >>> def set_settings(self, state):
@@ -63,13 +63,25 @@ class RogerSetup(metaclass=abc.ABCMeta):
     def set_look_up_tables(self, state):
         """To be implemented by subclass.
 
-        First function to be called during setup.
-        Use this to modify the model settings.
+        Use this function to set the look-up tables.
 
         Example:
-          >>> def set_events(self, state):
+          >>> def set_look_up_tables(self, state):
           >>>     vs = state.variables
-          >>>     vs.u = update(vs.u, at[:, :, :, vs.tau], npx.random.rand(vs.u.shape[:-1]))
+          >>>     vs.lut_ilu = update(vs.lut_ilu, at[:, :], lut.ARR_ILU)
+        """
+        pass
+
+    @abc.abstractmethod
+    def set_parameters_setup(self, state):
+        """To be implemented by subclass.
+
+        Use this function to set initial or constant model parameters.
+
+        Example:
+          >>> def set_parameters_setup(self, state):
+          >>>     vs = state.variables
+          >>>     vs.dmpv = update(vs.dmpv, at[:, :, :, vs.tau], npx.random.rand(vs.dmpv.shape[:-1]))
         """
         pass
 
@@ -77,13 +89,26 @@ class RogerSetup(metaclass=abc.ABCMeta):
     def set_parameters(self, state):
         """To be implemented by subclass.
 
-        First function to be called during setup.
-        Use this to modify the model settings.
+        Use this function to modify the model parameters.
 
         Example:
           >>> def set_parameters(self, state):
           >>>     vs = state.variables
-          >>>     vs.u = update(vs.u, at[:, :, :, vs.tau], npx.random.rand(vs.u.shape[:-1]))
+          >>>     vs.dmpv = update(vs.dmpv, at[:, :, :, vs.tau], npx.random.rand(vs.dmpv.shape[:-1]))
+        """
+        pass
+
+    @abc.abstractmethod
+    def set_initial_conditions_setup(self, state):
+        """To be implemented by subclass.
+
+        May be used to set initial conditions.
+
+        Example:
+          >>> @roger_method
+          >>> def set_initial_conditions_setup(self, state):
+          >>>     vs = state.variables
+          >>>     vs.theta_rz = update(vs.theta_rz, at[:, :, :, vs.tau], 0.4)
         """
         pass
 
@@ -97,7 +122,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
           >>> @roger_method
           >>> def set_initial_conditions(self, state):
           >>>     vs = state.variables
-          >>>     vs.u = update(vs.u, at[:, :, :, vs.tau], npx.random.rand(vs.u.shape[:-1]))
+          >>>     vs.theta_rz = update(vs.theta_rz, at[:, :, :, vs.tau], 0.4)
         """
         pass
 
@@ -105,7 +130,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
     def set_grid(self, state):
         """To be implemented by subclass.
 
-        Has to set the grid spacings :attr:`dxt`, :attr:`dyt`, and :attr:`dzt`,
+        Has to set the grid spacings :attr:`x` and :attr:`y`,
         along with the coordinates of the grid origin, :attr:`x_origin` and
         :attr:`y_origin`.
 
@@ -114,9 +139,9 @@ class RogerSetup(metaclass=abc.ABCMeta):
           >>> def set_grid(self, state):
           >>>     vs = state.variables
           >>>     vs.x_origin, vs.y_origin = 0, 0
-          >>>     vs.dx = 1.
-          >>>     vs.dy = 1.
-          >>>     vs.dz = 2.
+          >>>     vs.x = 1.
+          >>>     vs.y = 1.
+          >>>     vs.z = 1.
         """
         pass
 
@@ -124,13 +149,28 @@ class RogerSetup(metaclass=abc.ABCMeta):
     def set_topography(self, state):
         """To be implemented by subclass.
 
-        Must specify the model topography by setting :attr:`kbot`.
+        Must specify the model topography by setting :attr:`slope`.
 
         Example:
           >>> @roger_method
           >>> def set_topography(self, state):
           >>>     vs = state.variables
-          >>>     vs.kbot = update(vs.kbot, at[...], 10)
+          >>>     vs.slope = update(vs.slope, at[...], 10)
+        """
+        pass
+
+    @abc.abstractmethod
+    def set_forcing_setup(self, state):
+        """To be implemented by subclass.
+
+        Called within setup, e.g. through
+        :attr:`PREC`, :attr:`TA`, :attr:`PET`.
+
+        Example:
+          >>> @roger_method
+          >>> def set_forcing_setup(self, state):
+          >>>     vs = state.variables
+          >>>     vs.TA = vs._ta_data
         """
         pass
 
@@ -139,16 +179,13 @@ class RogerSetup(metaclass=abc.ABCMeta):
         """To be implemented by subclass.
 
         Called before every time step to update the external forcing, e.g. through
-        :attr:`forc_temp_surface`, :attr:`forc_salt_surface`, :attr:`surface_taux`,
-        :attr:`surface_tauy`, :attr:`forc_tke_surface`, :attr:`temp_source`, or
-        :attr:`salt_source`. Use this method to implement time-dependent forcing.
+        :attr:`prec`, :attr:`ta`, :attr:`pet`.
 
         Example:
           >>> @roger_method
           >>> def set_forcing(self, state):
           >>>     vs = state.variables
-          >>>     current_month = (vs.time / (31 * 24 * 60 * 60)) % 12
-          >>>     vs.surface_taux = vs._windstress_data[:, :, current_month]
+          >>>     vs.ta = vs.TA[:, :, vs.itt]
         """
         pass
 
@@ -186,12 +223,13 @@ class RogerSetup(metaclass=abc.ABCMeta):
         from roger.core import numerics
 
         setup_funcs = (
-            self.set_parameters,
+            self.set_parameters_setup,
             self.set_grid,
             self.set_topography,
+            self.set_initial_conditions_setup,
             self.set_initial_conditions,
             self.set_diagnostics,
-            self.set_forcing,
+            self.set_forcing_setup,
             self.after_timestep,
         )
 
@@ -229,9 +267,10 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
             self.set_look_up_tables(self.state)
 
-            self.set_parameters(self.state)
+            self.set_parameters_setup(self.state)
             numerics.calc_parameters(self.state)
 
+            self.set_initial_conditions_setup(self.state)
             self.set_initial_conditions(self.state)
             numerics.calc_initial_conditions(self.state)
 
@@ -239,7 +278,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
             diagnostics.initialize(self.state)
             restart.read_restart(self.state)
 
-            self.set_forcing(self.state)
+            self.set_forcing_setup(self.state)
 
         self._setup_done = True
         if not self.state.settings.enable_offline_transport:
@@ -265,7 +304,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
                 with state.timers["forcing"]:
                     self.set_forcing(state)
                 with state.timers["time-variant parameters"]:
-                    self.set_parameters(self.state)
+                    self.set_parameters(state)
                 if settings.enable_crop_phenology:
                     with state.timers["crops"]:
                         crop.calculate_crop_phenology(state)

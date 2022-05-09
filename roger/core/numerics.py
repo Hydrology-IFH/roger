@@ -16,52 +16,52 @@ def rescale_SA_soil_kernel(state):
 
     vs.sa_rz = update_multiply(
         vs.sa_rz,
-        at[:, :, 0, :], (vs.S_RZ[:, :, 0, npx.newaxis] - vs.S_PWP_RZ[:, :, 0, npx.newaxis]) / npx.sum(vs.sa_rz[:, :, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        at[2:-2, 2:-2, 0, :], (vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_PWP_RZ[2:-2, 2:-2, 0, npx.newaxis]) / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis],
     )
     vs.sa_ss = update_multiply(
         vs.sa_ss,
-        at[:, :, 0, :], (vs.S_SS[:, :, 0, npx.newaxis] - vs.S_PWP_SS[:, :, 0, npx.newaxis]) / npx.sum(vs.sa_ss[:, :, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        at[2:-2, 2:-2, 0, :], (vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_PWP_SS[2:-2, 2:-2, 0, npx.newaxis]) / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.sa_rz = update_multiply(
         vs.sa_rz,
-        at[:, :, 1, :], (vs.S_RZ[:, :, 0, npx.newaxis] - vs.S_PWP_RZ[:, :, 0, npx.newaxis]) / npx.sum(vs.sa_rz[:, :, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        at[2:-2, 2:-2, 1, :], (vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_PWP_RZ[2:-2, 2:-2, 0, npx.newaxis]) / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis],
     )
     vs.sa_ss = update_multiply(
         vs.sa_ss,
-        at[:, :, 1, :], (vs.S_SS[:, :, 0, npx.newaxis] - vs.S_PWP_SS[:, :, 0, npx.newaxis]) / npx.sum(vs.sa_ss[:, :, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        at[2:-2, 2:-2, 1, :], (vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_PWP_SS[2:-2, 2:-2, 0, npx.newaxis]) / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.SA_rz = update(
         vs.SA_rz,
-        at[:, :, :2, 1:], npx.cumsum(vs.sa_rz[:, :, :2, :], axis=-1),
+        at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_rz[2:-2, 2:-2, :2, :], axis=-1),
     )
     vs.SA_rz = update(
         vs.SA_rz,
-        at[:, :, :2, 0], 0,
+        at[2:-2, 2:-2, :2, 0], 0,
     )
 
     vs.SA_ss = update(
         vs.SA_ss,
-        at[:, :, :2, 1:], npx.cumsum(vs.sa_ss[:, :, :2, :], axis=-1),
+        at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_ss[2:-2, 2:-2, :2, :], axis=-1),
     )
     vs.SA_ss = update(
         vs.SA_ss,
-        at[:, :, :2, 0], 0,
+        at[2:-2, 2:-2, :2, 0], 0,
     )
 
     vs.sa_s = update(
         vs.sa_s,
-        at[:, :, :2, :], vs.sa_rz[:, :, :2, :] + vs.sa_ss[:, :, :2, :],
+        at[2:-2, 2:-2, :2, :], vs.sa_rz[2:-2, 2:-2, :2, :] + vs.sa_ss[2:-2, 2:-2, :2, :],
     )
 
     vs.SA_s = update(
         vs.SA_s,
-        at[:, :, :2, 1:], npx.cumsum(vs.sa_s[:, :, :2, :], axis=-1),
+        at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_s[2:-2, 2:-2, :2, :], axis=-1),
     )
     vs.SA_s = update(
         vs.SA_s,
-        at[:, :, :2, 0], 0,
+        at[2:-2, 2:-2, :2, 0], 0,
     )
 
     return KernelOutput(
@@ -80,64 +80,64 @@ def rescale_conc_soil_kernel(state):
     if settings.enable_bromide:
         vs.C_rz = update(
             vs.C_rz,
-            at[:, :, :], 0,
+            at[2:-2, 2:-2, :], 0,
         )
 
         vs.C_ss = update(
             vs.C_ss,
-            at[:, :, :], 0,
+            at[2:-2, 2:-2, :], 0,
         )
 
         vs.C_s = update(
             vs.C_s,
-            at[:, :, :], 0,
+            at[2:-2, 2:-2, :], 0,
         )
 
     elif (settings.enable_chloride | settings.enable_nitrate):
         vs.C_rz = update(
             vs.C_rz,
-            at[:, :, :2], npx.sum(vs.msa_rz[:, :, vs.tau, :], axis=-1)[:, :, npx.newaxis] / npx.sum(vs.sa_rz[:, :, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+            at[2:-2, 2:-2, :2], npx.sum(vs.msa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis],
         )
 
         vs.C_ss = update(
             vs.C_ss,
-            at[:, :, :2], npx.sum(vs.msa_ss[:, :, vs.tau, :], axis=-1)[:, :, npx.newaxis] / npx.sum(vs.sa_ss[:, :, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+            at[2:-2, 2:-2, :2], npx.sum(vs.msa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis],
         )
 
         vs.C_s = update(
             vs.C_s,
-            at[:, :, :2], npx.sum(vs.msa_s[:, :, vs.tau, :], axis=-1)[:, :, npx.newaxis] / npx.sum(vs.sa_s[:, :, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+            at[2:-2, 2:-2, :2], npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis],
         )
 
     elif (settings.enable_oxygen18 | settings.enable_deuterium):
         vs.C_rz = update(
             vs.C_rz,
-            at[:, :, :2], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[:, :, npx.newaxis],
+            at[2:-2, 2:-2, :2], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2, npx.newaxis],
         )
 
         vs.C_ss = update(
             vs.C_ss,
-            at[:, :, :2], transport.calc_conc_iso_storage(state, vs.sa_ss, vs.msa_ss)[:, :, npx.newaxis],
+            at[2:-2, 2:-2, :2], transport.calc_conc_iso_storage(state, vs.sa_ss, vs.msa_ss)[2:-2, 2:-2, npx.newaxis],
         )
 
         iso_rz = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
         iso_ss = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
         iso_rz = update(
             iso_rz,
-            at[:, :, :, :], npx.where(npx.isnan(vs.msa_rz), 0, vs.msa_rz),
+            at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_rz), 0, vs.msa_rz)[2:-2, 2:-2, :, :],
         )
         iso_ss = update(
             iso_ss,
-            at[:, :, :, :], npx.where(npx.isnan(vs.msa_ss), 0, vs.msa_ss),
+            at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_ss), 0, vs.msa_ss)[2:-2, 2:-2, :, :],
         )
         vs.msa_s = update(
             vs.msa_s,
-            at[:, :, :, :], (vs.sa_rz / vs.sa_s) * iso_rz + (vs.sa_ss / vs.sa_s) * iso_ss,
+            at[2:-2, 2:-2, :, :], (vs.sa_rz[2:-2, 2:-2, :, :] / vs.sa_s[2:-2, 2:-2, :, :]) * iso_rz[2:-2, 2:-2, :, :] + (vs.sa_ss[2:-2, 2:-2, :, :] / vs.sa_s[2:-2, 2:-2, :, :]) * iso_ss[2:-2, 2:-2, :, :],
         )
 
         vs.C_s = update(
             vs.C_s,
-            at[:, :, :], transport.calc_conc_iso_storage(state, vs.sa_s, vs.msa_s)[:, :, npx.newaxis],
+            at[2:-2, 2:-2, :], transport.calc_conc_iso_storage(state, vs.sa_s, vs.msa_s)[2:-2, 2:-2, npx.newaxis],
         )
 
     return KernelOutput(
@@ -170,15 +170,15 @@ def rescale_SA(state):
     if settings.enable_bromide:
         vs.msa_rz = update(
             vs.msa_rz,
-            at[:, :, :2, :], 0,
+            at[2:-2, 2:-2, :2, :], 0,
         )
         vs.msa_ss = update(
             vs.msa_ss,
-            at[:, :, :2, :], 0,
+            at[2:-2, 2:-2, :2, :], 0,
         )
         vs.msa_s = update(
             vs.msa_s,
-            at[:, :, :2, :], 0,
+            at[2:-2, 2:-2, :2, :], 0,
         )
 
     if settings.enable_offline_transport & settings.enable_groundwater:
@@ -256,7 +256,7 @@ def calc_topo_urban_kernel(state):
 @roger_routine
 def calc_topo(state):
     """
-    calulate masks
+    Calulates masks
     """
     vs = state.variables
     settings = state.settings
@@ -276,7 +276,7 @@ def calc_initial_conditions_surface_kernel(state):
 
     vs.S_sur = update(
         vs.S_sur,
-        at[:, :, 0:2], (vs.S_int_top[:, :, 0:2] + vs.S_int_ground[:, :, 0:2] + vs.S_dep[:, :, 0:2] + vs.S_snow[:, :, 0:2]) * vs.maskCatch[:, :, npx.newaxis],
+        at[2:-2, 2:-2, 0:2], (vs.S_int_top[2:-2, 2:-2, 0:2] + vs.S_int_ground[2:-2, 2:-2, 0:2] + vs.S_dep[2:-2, 2:-2, 0:2] + vs.S_snow[2:-2, 2:-2, 0:2]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(
@@ -290,17 +290,17 @@ def calc_initial_conditions_soil_kernel(state):
 
     vs.S_fp_s = update(
         vs.S_fp_s,
-        at[:, :], (vs.S_fp_rz + vs.S_fp_ss) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.S_fp_rz[2:-2, 2:-2] + vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_lp_s = update(
         vs.S_lp_s,
-        at[:, :], (vs.S_lp_rz + vs.S_lp_ss) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.S_lp_rz[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_s = update(
         vs.S_s,
-        at[:, :, 0:2], (vs.S_rz[:, :, 0:2] + vs.S_ss[:, :, 0:2]) * vs.maskCatch[:, :, npx.newaxis],
+        at[2:-2, 2:-2, 0:2], (vs.S_rz[2:-2, 2:-2, 0:2] + vs.S_ss[2:-2, 2:-2, 0:2]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(
@@ -318,42 +318,42 @@ def calc_initial_conditions_root_zone_kernel(state):
     mask2 = (vs.theta_rz[:, :, vs.tau] <= vs.theta_pwp)
     vs.theta_fp_rz = update(
         vs.theta_fp_rz,
-        at[:, :], npx.where(mask1, vs.theta_rz[:, :, vs.tau] - vs.theta_pwp, vs.theta_fp_rz) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], vs.theta_rz[2:-2, 2:-2, vs.tau] - vs.theta_pwp[2:-2, 2:-2], vs.theta_fp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.theta_fp_rz = update(
         vs.theta_fp_rz,
-        at[:, :], npx.where(mask2, 0, vs.theta_fp_rz) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], 0, vs.theta_fp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     mask3 = (vs.theta_fp_rz >= vs.theta_ufc)
     vs.theta_fp_rz = update(
         vs.theta_fp_rz,
-        at[:, :], npx.where(mask3, vs.theta_ufc, vs.theta_fp_rz) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2], vs.theta_ufc[2:-2, 2:-2], vs.theta_fp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     mask4 = (vs.theta_rz[:, :, vs.tau] > vs.theta_fc)
     mask5 = (vs.theta_rz[:, :, vs.tau] <= vs.theta_fc)
     vs.theta_lp_rz = update(
         vs.theta_lp_rz,
-        at[:, :], npx.where(mask4, vs.theta_rz[:, :, vs.tau] - vs.theta_fc, vs.theta_lp_rz) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask4[2:-2, 2:-2], vs.theta_rz[2:-2, 2:-2, vs.tau] - vs.theta_fc[2:-2, 2:-2], vs.theta_lp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.theta_lp_rz = update(
         vs.theta_lp_rz,
-        at[:, :], npx.where(mask5, 0, vs.theta_lp_rz) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask5[2:-2, 2:-2], 0, vs.theta_lp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.S_fp_rz = update(
         vs.S_fp_rz,
-        at[:, :], (vs.theta_fp_rz * vs.z_root[:, :, vs.tau]) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_fp_rz[2:-2, 2:-2] * vs.z_root[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.S_lp_rz = update(
         vs.S_lp_rz,
-        at[:, :], (vs.theta_lp_rz * vs.z_root[:, :, vs.tau]) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_lp_rz[2:-2, 2:-2] * vs.z_root[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.S_rz = update(
         vs.S_rz,
-        at[:, :, 0:2], (vs.S_pwp_rz[:, :, npx.newaxis] + vs.S_fp_rz[:, :, npx.newaxis] + vs.S_lp_rz[:, :, npx.newaxis]) * vs.maskCatch[:, :, npx.newaxis],
+        at[2:-2, 2:-2, 0:2], (vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_fp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_lp_rz[2:-2, 2:-2, npx.newaxis]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(
@@ -373,42 +373,42 @@ def calc_initial_conditions_subsoil_kernel(state):
     mask7 = (vs.theta_ss[:, :, vs.tau] <= vs.theta_pwp)
     vs.theta_fp_ss = update(
         vs.theta_fp_ss,
-        at[:, :], npx.where(mask6, vs.theta_ss[:, :, vs.tau] - vs.theta_pwp, vs.theta_fp_ss) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask6[2:-2, 2:-2], vs.theta_ss[2:-2, 2:-2, vs.tau] - vs.theta_pwp[2:-2, 2:-2], vs.theta_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.theta_fp_ss = update(
         vs.theta_fp_ss,
-        at[:, :], npx.where(mask7, 0, vs.theta_fp_ss) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask7[2:-2, 2:-2], 0, vs.theta_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     mask8 = (vs.theta_fp_ss >= vs.theta_ufc)
     vs.theta_fp_ss = update(
         vs.theta_fp_ss,
-        at[:, :], npx.where(mask8, vs.theta_ufc, vs.theta_fp_ss) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask8[2:-2, 2:-2], vs.theta_ufc[2:-2, 2:-2], vs.theta_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     mask9 = (vs.theta_ss[:, :, vs.tau] > vs.theta_fc)
     mask10 = (vs.theta_ss[:, :, vs.tau] <= vs.theta_fc)
     vs.theta_lp_ss = update(
         vs.theta_lp_ss,
-        at[:, :], npx.where(mask9, vs.theta_ss[:, :, vs.tau] - vs.theta_fc, vs.theta_lp_ss) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask9[2:-2, 2:-2], vs.theta_ss[2:-2, 2:-2, vs.tau] - vs.theta_fc[2:-2, 2:-2], vs.theta_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
     vs.theta_lp_ss = update(
         vs.theta_lp_ss,
-        at[:, :], npx.where(mask10, 0, vs.theta_lp_ss) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask10[2:-2, 2:-2], 0, vs.theta_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.S_fp_ss = update(
         vs.S_fp_ss,
-        at[:, :], (vs.theta_fp_ss * (vs.z_soil - vs.z_root[:, :, vs.tau])) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_fp_ss[2:-2, 2:-2] * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.S_lp_ss = update(
         vs.S_lp_ss,
-        at[:, :], (vs.theta_lp_ss * (vs.z_soil - vs.z_root[:, :, vs.tau])) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_lp_ss[2:-2, 2:-2] * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_ss = update(
         vs.S_ss,
-        at[:, :, 0:2], (vs.S_pwp_ss[:, :, npx.newaxis] + vs.S_fp_ss[:, :, npx.newaxis] + vs.S_lp_ss[:, :, npx.newaxis]) * vs.maskCatch[:, :, npx.newaxis],
+        at[2:-2, 2:-2, 0:2], (vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis] + vs.S_fp_ss[2:-2, 2:-2, npx.newaxis] + vs.S_lp_ss[2:-2, 2:-2, npx.newaxis]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(
@@ -426,7 +426,7 @@ def calc_initial_conditions_kernel(state):
 
     vs.S = update(
         vs.S,
-        at[:, :, :2], vs.S_sur[:, :, :2] + vs.S_s[:, :, :2] * vs.maskCatch[:, :, npx.newaxis],
+        at[2:-2, 2:-2, :2], vs.S_sur[2:-2, 2:-2, :2] + vs.S_s[2:-2, 2:-2, :2] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(
@@ -440,7 +440,7 @@ def calc_initial_conditions_with_gw_kernel(state):
 
     vs.S = update(
         vs.S,
-        at[:, :, :2], vs.S_sur[:, :, :2] + vs.S_s[:, :, :2] + vs.S_vad[:, :, :2] + vs.S_gw[:, :, :2] * vs.maskCatch[:, :, npx.newaxis],
+        at[2:-2, 2:-2, :2], vs.S_sur[2:-2, 2:-2, :2] + vs.S_s[2:-2, 2:-2, :2] + vs.S_vad[2:-2, 2:-2, :2] + vs.S_gw[2:-2, 2:-2, :2] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(
@@ -467,22 +467,22 @@ def calc_initial_conditions_groundwater_kernel(state):
     z = allocate(state.dimensions, ("x", "y", 1001))
     z = update(
         z,
-        at[:, :, :], npx.linspace(vs.z_gw[:, :, vs.tau], vs.z_gw_tot, num=1001, axis=-1) * vs.maskCatch[:, :, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.linspace(vs.z_gw[2:-2, 2:-2, vs.tau], vs.z_gw_tot, num=1001, axis=-1) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     dz = update(
         dz,
-        at[:, :], (z[:, :, 1] - z[:, :, 0]) * vs.maskCatch,
+        at[2:-2, 2:-2], (z[2:-2, 2:-2, 1] - z[2:-2, 2:-2, 0]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.S_gw = update(
         vs.S_gw,
-        at[:, :, vs.taum1], (npx.sum(_ss_z(z, vs.n0[:, :, npx.newaxis], vs.bdec[:, :, npx.newaxis]), axis=-1) * dz) * 1000 * vs.maskCatch,
+        at[2:-2, 2:-2, vs.taum1], (npx.sum(_ss_z(z, vs.n0[2:-2, 2:-2, npx.newaxis], vs.bdec[2:-2, 2:-2, npx.newaxis]), axis=-1) * dz) * 1000 * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.S_gw = update(
         vs.S_gw,
-        at[:, :, vs.tau], vs.S_gw[:, :, vs.taum1],
+        at[2:-2, 2:-2, vs.tau], vs.S_gw[2:-2, 2:-2, vs.taum1],
     )
 
     return KernelOutput(S_gw=vs.S_gw)
@@ -521,7 +521,7 @@ def calc_parameters_surface_kernel(state):
     trees_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
     trees_cond = update(
         trees_cond,
-        at[:, :], npx.isin(vs.lu_id, npx.array([10, 11, 12, 15])) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.isin(vs.lu_id, npx.array([10, 11, 12, 15])) * vs.maskCatch[2:-2, 2:-2],
     )
 
     def loop_body_S_int_top_tot(i, S_int_top_tot):
@@ -529,7 +529,7 @@ def calc_parameters_surface_kernel(state):
         row_no = _get_row_no(vs.lut_ilu[:, 0], i)
         S_int_top_tot = update(
             S_int_top_tot,
-            at[:, :], npx.where(mask, vs.lut_ilu[row_no, vs.month], S_int_top_tot) * vs.maskCatch,
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_ilu[row_no, vs.month], S_int_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
         )
 
         return S_int_top_tot
@@ -538,7 +538,7 @@ def calc_parameters_surface_kernel(state):
 
     vs.S_int_top_tot = update(
         vs.S_int_top_tot,
-        at[:, :], S_int_top_tot * vs.maskCatch,
+        at[2:-2, 2:-2], S_int_top_tot[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
     )
 
     # land use dependent lower interception storage
@@ -547,7 +547,7 @@ def calc_parameters_surface_kernel(state):
     ground_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
     ground_cond = update(
         ground_cond,
-        at[:, :], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 13, 98, 31, 32, 33, 40, 41, 50, 98])) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 13, 98, 31, 32, 33, 40, 41, 50, 98])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     def loop_body_S_int_ground_tot(i, S_int_ground_tot):
@@ -555,7 +555,7 @@ def calc_parameters_surface_kernel(state):
         row_no = _get_row_no(vs.lut_ilu[:, 0], i)
         S_int_ground_tot = update(
             S_int_ground_tot,
-            at[:, :], npx.where(mask, vs.lut_ilu[row_no, vs.month], S_int_ground_tot) * vs.maskCatch,
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_ilu[row_no, vs.month], S_int_ground_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
         )
 
         return S_int_ground_tot
@@ -563,14 +563,14 @@ def calc_parameters_surface_kernel(state):
     trees_ground_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
     trees_ground_cond = update(
         trees_ground_cond,
-        at[:, :], npx.isin(vs.lu_id, npx.array([10, 11, 12, 15])) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.isin(vs.lu_id, npx.array([10, 11, 12, 15])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     def loop_body_S_int_ground_tot_trees(i, S_int_ground_tot):
         mask = (vs.lu_id == i) & trees_ground_cond
         S_int_ground_tot = update(
             S_int_ground_tot,
-            at[:, :], npx.where(mask, 1, S_int_ground_tot) * vs.maskCatch,
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 1, S_int_ground_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
         )
 
         return S_int_ground_tot
@@ -580,7 +580,7 @@ def calc_parameters_surface_kernel(state):
 
     vs.S_int_ground_tot = update(
         vs.S_int_ground_tot,
-        at[:, :], S_int_ground_tot * vs.maskCatch,
+        at[2:-2, 2:-2], S_int_ground_tot[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
     )
 
     # land use dependent ground cover (canopy cover)
@@ -589,7 +589,7 @@ def calc_parameters_surface_kernel(state):
     cc_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
     cc_cond = update(
         cc_cond,
-        at[:, :], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 98, 31, 32, 33, 40, 41, 50, 98])) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 98, 31, 32, 33, 40, 41, 50, 98])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     def loop_body_ground_cover(i, ground_cover):
@@ -597,7 +597,7 @@ def calc_parameters_surface_kernel(state):
         row_no = _get_row_no(vs.lut_gc[:, 0], i)
         ground_cover = update(
             ground_cover,
-            at[:, :], npx.where(mask, vs.lut_gc[row_no, vs.month], ground_cover) * vs.maskCatch,
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_gc[row_no, vs.month], ground_cover[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
         )
 
         return ground_cover
@@ -606,12 +606,12 @@ def calc_parameters_surface_kernel(state):
 
     vs.ground_cover = update(
         vs.ground_cover,
-        at[:, :, vs.taup1], ground_cover * vs.maskCatch,
+        at[2:-2, 2:-2, vs.taup1], ground_cover[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.ground_cover = update(
         vs.ground_cover,
-        at[:, :, vs.tau], ground_cover * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau], ground_cover[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
     )
 
     # land use dependent transpiration coeffcient
@@ -622,7 +622,7 @@ def calc_parameters_surface_kernel(state):
         row_no = _get_row_no(vs.lut_gc[:, 0], i)
         basal_transp_coeff = update(
             basal_transp_coeff,
-            at[:, :], npx.where(mask, vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1], basal_transp_coeff) * vs.maskCatch,
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1], basal_transp_coeff[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
         )
 
         return basal_transp_coeff
@@ -631,12 +631,12 @@ def calc_parameters_surface_kernel(state):
 
     basal_transp_coeff = update(
         basal_transp_coeff,
-        at[:, :], npx.where(vs.maskRiver | vs.maskLake, 0, basal_transp_coeff),
+        at[2:-2, 2:-2], npx.where(vs.maskRiver[2:-2, 2:-2] | vs.maskLake[2:-2, 2:-2], 0, basal_transp_coeff[2:-2, 2:-2]),
     )
 
     vs.basal_transp_coeff = update(
         vs.basal_transp_coeff,
-        at[:, :], basal_transp_coeff * vs.maskCatch,
+        at[2:-2, 2:-2], basal_transp_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
     )
 
     # land use dependent evaporation coeffcient
@@ -647,7 +647,7 @@ def calc_parameters_surface_kernel(state):
         row_no = _get_row_no(vs.lut_gc[:, 0], i)
         basal_evap_coeff = update(
             basal_evap_coeff,
-            at[:, :], npx.where(mask, 1 - ((vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1]) * vs.lut_gcm[row_no, 1]), basal_evap_coeff) * vs.maskCatch,
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 1 - ((vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1]) * vs.lut_gcm[row_no, 1]), basal_evap_coeff[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
         )
 
         return basal_evap_coeff
@@ -656,12 +656,12 @@ def calc_parameters_surface_kernel(state):
 
     basal_evap_coeff = update(
         basal_evap_coeff,
-        at[:, :], npx.where(vs.maskRiver | vs.maskLake, 1, basal_evap_coeff),
+        at[2:-2, 2:-2], npx.where(vs.maskRiver[2:-2, 2:-2] | vs.maskLake[2:-2, 2:-2], 1, basal_evap_coeff[2:-2, 2:-2]),
     )
 
     vs.basal_evap_coeff = update(
         vs.basal_evap_coeff,
-        at[:, :], basal_evap_coeff * vs.maskCatch,
+        at[2:-2, 2:-2], basal_evap_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
     )
 
     return KernelOutput(
@@ -680,115 +680,115 @@ def calc_parameters_soil_kernel(state):
 
     vs.S_ac_s = update(
         vs.S_ac_s,
-        at[:, :], (vs.z_soil * vs.theta_ac) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.z_soil[2:-2, 2:-2] * vs.theta_ac[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_ufc_s = update(
         vs.S_ufc_s,
-        at[:, :], (vs.z_soil * vs.theta_ufc) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.z_soil[2:-2, 2:-2] * vs.theta_ufc[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_pwp_s = update(
         vs.S_pwp_s,
-        at[:, :], (vs.z_soil * vs.theta_pwp) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.z_soil[2:-2, 2:-2] * vs.theta_pwp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_fc_s = update(
         vs.S_fc_s,
-        at[:, :], (vs.z_soil * (vs.theta_ufc + vs.theta_pwp)) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.z_soil[2:-2, 2:-2] * (vs.theta_ufc[2:-2, 2:-2] + vs.theta_pwp[2:-2, 2:-2])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_sat_s = update(
         vs.S_sat_s,
-        at[:, :], (vs.z_soil * (vs.theta_ac + vs.theta_ufc + vs.theta_pwp)) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.z_soil[2:-2, 2:-2] * (vs.theta_ac[2:-2, 2:-2] + vs.theta_ufc[2:-2, 2:-2] + vs.theta_pwp[2:-2, 2:-2])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.theta_sat = update(
         vs.theta_sat,
-        at[:, :], (vs.theta_ac + vs.theta_ufc + vs.theta_pwp) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_ac[2:-2, 2:-2] + vs.theta_ufc[2:-2, 2:-2] + vs.theta_pwp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.theta_fc = update(
         vs.theta_fc,
-        at[:, :], (vs.theta_ufc + vs.theta_pwp) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_ufc[2:-2, 2:-2] + vs.theta_pwp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     # pore-size distribution index
     vs.lambda_bc = update(
         vs.lambda_bc,
-        at[:, :], ((npx.log(vs.theta_fc/vs.theta_sat) - npx.log(vs.theta_pwp/vs.theta_sat)) / (npx.log(15850) - npx.log(63))) * vs.maskCatch,
+        at[2:-2, 2:-2], ((npx.log(vs.theta_fc[2:-2, 2:-2]/vs.theta_sat[2:-2, 2:-2]) - npx.log(vs.theta_pwp[2:-2, 2:-2]/vs.theta_sat[2:-2, 2:-2])) / (npx.log(15850) - npx.log(63))) * vs.maskCatch[2:-2, 2:-2]
     )
     # air entry value (or bubbling pressure)
     vs.ha = update(
         vs.ha,
-        at[:, :], ((vs.theta_pwp/vs.theta_sat)**(1./vs.lambda_bc)*(-15850)) * vs.maskCatch,
+        at[2:-2, 2:-2], ((vs.theta_pwp[2:-2, 2:-2]/vs.theta_sat[2:-2, 2:-2])**(1./vs.lambda_bc[2:-2, 2:-2])*(-15850)) * vs.maskCatch[2:-2, 2:-2]
     )
     # pore-connectivity parameter
     vs.m_bc = update(
         vs.m_bc,
-        at[:, :], ((settings.a_bc + settings.b_bc * vs.lambda_bc) / vs.lambda_bc) * vs.maskCatch,
+        at[2:-2, 2:-2], ((settings.a_bc + settings.b_bc * vs.lambda_bc[2:-2, 2:-2]) / vs.lambda_bc[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
     # salvucci exponent
     vs.n_salv = update(
         vs.n_salv,
-        at[:, :], (settings.a_bc + settings.b_bc * vs.lambda_bc) * vs.maskCatch,
+        at[2:-2, 2:-2], (settings.a_bc + settings.b_bc * vs.lambda_bc[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
     # wetting front suction (in mm)
     # *(-10) for conversion to mm
     vs.wfs = update(
         vs.wfs,
-        at[:, :], (((2+3*vs.lambda_bc)/(1+3*vs.lambda_bc)*vs.ha/2) * (-10)) * vs.maskCatch,
+        at[2:-2, 2:-2], (((2+3*vs.lambda_bc[2:-2, 2:-2])/(1+3*vs.lambda_bc[2:-2, 2:-2])*vs.ha[2:-2, 2:-2]/2) * (-10)) * vs.maskCatch[2:-2, 2:-2]
     )
 
     # soil water content at different soil water potentials
     vs.theta_27 = update(
         vs.theta_27,
-        at[:, :], ((vs.ha/(-(10**2.7)))**vs.lambda_bc*vs.theta_sat) * vs.maskCatch,
+        at[2:-2, 2:-2], ((vs.ha[2:-2, 2:-2]/(-(10**2.7)))**vs.lambda_bc[2:-2, 2:-2]*vs.theta_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
     vs.theta_4 = update(
         vs.theta_4,
-        at[:, :], ((vs.ha/(-(10**4)))**vs.lambda_bc*vs.theta_sat) * vs.maskCatch,
+        at[2:-2, 2:-2], ((vs.ha[2:-2, 2:-2]/(-(10**4)))**vs.lambda_bc[2:-2, 2:-2]*vs.theta_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
     vs.theta_6 = update(
         vs.theta_6,
-        at[:, :], ((vs.ha/(-(10**6)))**vs.lambda_bc*vs.theta_sat) * vs.maskCatch,
+        at[2:-2, 2:-2], ((vs.ha[2:-2, 2:-2]/(-(10**6)))**vs.lambda_bc[2:-2, 2:-2]*vs.theta_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     # calculate sand content
     vs.sand = update(
         vs.sand,
-        at[:, :], (1 * (vs.theta_ac / 0.24)) * vs.maskCatch,
+        at[2:-2, 2:-2], (1 * (vs.theta_ac[2:-2, 2:-2] / 0.24)) * vs.maskCatch[2:-2, 2:-2]
     )
     vs.sand = update(
         vs.sand,
-        at[:, :], npx.where(vs.sand < 0, 0, vs.sand) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.sand[2:-2, 2:-2] < 0, 0, vs.sand[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
     vs.sand = update(
         vs.sand,
-        at[:, :], npx.where(vs.sand > 1, 1, vs.sand) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.sand[2:-2, 2:-2] > 1, 1, vs.sand[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     # calculate clay content
     vs.clay = update(
         vs.clay,
-        at[:, :], (settings.clay_max * (vs.theta_6 - settings.clay_min) / 0.3) * vs.maskCatch,
+        at[2:-2, 2:-2], (settings.clay_max[2:-2, 2:-2] * (vs.theta_6[2:-2, 2:-2] - settings.clay_min) / 0.3) * vs.maskCatch[2:-2, 2:-2]
     )
     vs.clay = update(
         vs.clay,
-        at[:, :], npx.where(vs.clay < settings.clay_min, settings.clay_min, vs.clay) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.clay[2:-2, 2:-2] < settings.clay_min, settings.clay_min, vs.clay[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     # calculate maximum depth of shrinkage cracks (in mm) which depends on
     # soil clay content
     vs.z_sc_max = update(
         vs.z_sc_max,
-        at[:, :], (vs.clay * 700) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.clay[2:-2, 2:-2] * 700) * vs.maskCatch[2:-2, 2:-2]
     )
 
     # calculate drainage area aof vertical macropores
     vs.mp_drain_area = update(
         vs.mp_drain_area,
-        at[:, :], 1 - npx.exp((-1) * (vs.dmpv/82)**0.887) * vs.maskCatch,
+        at[2:-2, 2:-2], 1 - npx.exp((-1) * (vs.dmpv[2:-2, 2:-2]/82)**0.887) * vs.maskCatch[2:-2, 2:-2]
     )
 
     return KernelOutput(
@@ -825,27 +825,27 @@ def calc_parameters_root_zone_kernel(state):
     mask3 = (vs.theta_pwp > settings.theta_rew_max)
     vs.rew = update(
         vs.rew,
-        at[:, :], npx.where(mask1, settings.rew_min, vs.rew) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], settings.rew_min, vs.rew[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
     vs.rew = update(
         vs.rew,
-        at[:, :], npx.where(mask2, vs.theta_pwp / settings.theta_rew_max, vs.rew) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.theta_pwp[2:-2, 2:-2] / settings.theta_rew_max, vs.rew[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
     vs.rew = update(
         vs.rew,
-        at[:, :], npx.where(mask3, settings.rew_max, vs.rew) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2], settings.rew_max, vs.rew[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     # evaporation depth
     vs.z_evap = update(
         vs.z_evap,
-        at[:, :], ((vs.rew / settings.rew_max) * settings.z_evap_max) * vs.maskCatch,
+        at[2:-2, 2:-2], ((vs.rew[2:-2, 2:-2] / settings.rew_max) * settings.z_evap_max) * vs.maskCatch[2:-2, 2:-2]
     )
 
     # total evaporable water
     vs.tew = update(
         vs.tew,
-        at[:, :], ((vs.theta_fc - 0.5 * vs.theta_pwp) * vs.z_evap) * vs.maskCatch,
+        at[2:-2, 2:-2], ((vs.theta_fc[2:-2, 2:-2] - 0.5 * vs.theta_pwp[2:-2, 2:-2]) * vs.z_evap[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     # root depth
@@ -854,7 +854,7 @@ def calc_parameters_root_zone_kernel(state):
     cc_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
     cc_cond = update(
         cc_cond,
-        at[:, :], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 98, 31, 32, 33, 40, 41, 50, 98])) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.isin(vs.lu_id[2:-2, 2:-2], npx.array([0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 98, 31, 32, 33, 40, 41, 50, 98])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     # assign land use specific root depth
@@ -863,7 +863,7 @@ def calc_parameters_root_zone_kernel(state):
         row_no = _get_row_no(vs.lut_rdlu[:, 0], i)
         z_root = update(
             z_root,
-            at[:, :], npx.where(mask, vs.lut_rdlu[row_no, 1], z_root) * vs.maskCatch,
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_rdlu[row_no, 1], z_root[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
         )
 
         return z_root
@@ -872,67 +872,67 @@ def calc_parameters_root_zone_kernel(state):
 
     z_root = update(
         z_root,
-        at[:, :], npx.where(vs.maskRiver | vs.maskLake, 0, z_root),
+        at[2:-2, 2:-2], npx.where(vs.maskRiver[2:-2, 2:-2] | vs.maskLake[2:-2, 2:-2], 0, z_root[2:-2, 2:-2]),
     )
 
     z_root = update(
         z_root,
-        at[:, :], npx.where(((vs.lu_id == 10) | (vs.lu_id == 11) | (vs.lu_id == 12) | (vs.lu_id == 15) | (vs.lu_id == 16)), 1500, z_root) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(((vs.lu_id[2:-2, 2:-2] == 10) | (vs.lu_id[2:-2, 2:-2] == 11) | (vs.lu_id[2:-2, 2:-2] == 12) | (vs.lu_id[2:-2, 2:-2] == 15) | (vs.lu_id[2:-2, 2:-2] == 16)), 1500, z_root[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     z_root = update(
         z_root,
-        at[:, :], npx.where((vs.lu_id == 100), 300, z_root) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where((vs.lu_id[2:-2, 2:-2] == 100), 300, z_root[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     z_root = update(
         z_root,
-        at[:, :], npx.where((z_root > vs.z_soil), 0.95 * vs.z_soil, z_root) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where((z_root[2:-2, 2:-2] > vs.z_soil[2:-2, 2:-2]), 0.95 * vs.z_soil[2:-2, 2:-2], z_root[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.z_root = update(
         vs.z_root,
-        at[:, :, 0], z_root * vs.maskCatch,
+        at[2:-2, 2:-2, 0], z_root[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.z_root = update(
         vs.z_root,
-        at[:, :, 1], z_root * vs.maskCatch,
+        at[2:-2, 2:-2, 1], z_root[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
     )
 
     mask_crops = npx.isin(vs.lu_id, npx.arange(500, 600, 1, dtype=int))
     vs.z_root = update(
         vs.z_root,
-        at[:, :, 0], npx.where(mask_crops, vs.z_evap, vs.z_root[:, :, 0]) * vs.maskCatch,
+        at[2:-2, 2:-2, 0], npx.where(mask_crops[2:-2, 2:-2], vs.z_evap[2:-2, 2:-2], vs.z_root[2:-2, 2:-2, 0]) * vs.maskCatch[2:-2, 2:-2]
     )
     vs.z_root = update(
         vs.z_root,
-        at[:, :, 1], npx.where(mask_crops, vs.z_evap, vs.z_root[:, :, 1]) * vs.maskCatch,
+        at[2:-2, 2:-2, 1], npx.where(mask_crops[2:-2, 2:-2], vs.z_evap[2:-2, 2:-2], vs.z_root[2:-2, 2:-2, 1]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_ac_rz = update(
         vs.S_ac_rz,
-        at[:, :], (vs.theta_ac * vs.z_root[:, :, vs.tau]) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_ac[2:-2, 2:-2] * vs.z_root[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_ufc_rz = update(
         vs.S_ufc_rz,
-        at[:, :], (vs.theta_ufc * vs.z_root[:, :, vs.tau]) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_ufc[2:-2, 2:-2] * vs.z_root[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_pwp_rz = update(
         vs.S_pwp_rz,
-        at[:, :], (vs.theta_pwp * vs.z_root[:, :, vs.tau]) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_pwp[2:-2, 2:-2] * vs.z_root[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_sat_rz = update(
         vs.S_sat_rz,
-        at[:, :], ((vs.theta_ac + vs.theta_ufc + vs.theta_pwp) * vs.z_root[:, :, vs.tau]) * vs.maskCatch,
+        at[2:-2, 2:-2], ((vs.theta_ac[2:-2, 2:-2] + vs.theta_ufc[2:-2, 2:-2] + vs.theta_pwp[2:-2, 2:-2]) * vs.z_root[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_fc_rz = update(
         vs.S_fc_rz,
-        at[:, :], ((vs.theta_ufc + vs.theta_pwp) * vs.z_root[:, :, vs.tau]) * vs.maskCatch,
+        at[2:-2, 2:-2], ((vs.theta_ufc[2:-2, 2:-2][2:-2, 2:-2] + vs.theta_pwp[2:-2, 2:-2]) * vs.z_root[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2]
     )
 
     return KernelOutput(
@@ -954,27 +954,27 @@ def calc_parameters_subsoil_kernel(state):
 
     vs.S_ac_ss = update(
         vs.S_ac_ss,
-        at[:, :], (vs.theta_ac * (vs.z_soil - vs.z_root[:, :, vs.tau])) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_ac[2:-2, 2:-2] * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_ufc_ss = update(
         vs.S_ufc_ss,
-        at[:, :], (vs.theta_ufc * (vs.z_soil - vs.z_root[:, :, vs.tau])) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_ufc[2:-2, 2:-2] * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_pwp_ss = update(
         vs.S_pwp_ss,
-        at[:, :], (vs.theta_pwp * (vs.z_soil - vs.z_root[:, :, vs.tau])) * vs.maskCatch,
+        at[2:-2, 2:-2], (vs.theta_pwp[2:-2, 2:-2] * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_sat_ss = update(
         vs.S_sat_ss,
-        at[:, :], ((vs.theta_ac + vs.theta_ufc + vs.theta_pwp) * (vs.z_soil - vs.z_root[:, :, vs.tau])) * vs.maskCatch,
+        at[2:-2, 2:-2], ((vs.theta_ac[2:-2, 2:-2] + vs.theta_ufc[2:-2, 2:-2] + vs.theta_pwp[2:-2, 2:-2]) * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.S_fc_ss = update(
         vs.S_fc_ss,
-        at[:, :], ((vs.theta_ufc + vs.theta_pwp) * (vs.z_soil - vs.z_root[:, :, vs.tau])) * vs.maskCatch,
+        at[2:-2, 2:-2], ((vs.theta_ufc[2:-2, 2:-2] + vs.theta_pwp[2:-2, 2:-2]) * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2]
     )
 
     return KernelOutput(
@@ -998,35 +998,35 @@ def calc_parameters_lateral_flow_kernel(state):
         # convert m/h to mm/h
         v_mp_layer = update(
             v_mp_layer,
-            at[:, :, 7], npx.where(vs.slope_per == i, vs.lut_mlms[nrow, 1]*1000, v_mp_layer[:, :, 7]) * vs.maskCatch,
+            at[2:-2, 2:-2, 7], npx.where(vs.slope_per[2:-2, 2:-2] == i, vs.lut_mlms[nrow, 1]*1000, v_mp_layer[2:-2, 2:-2, 7]) * vs.maskCatch[2:-2, 2:-2]
         )
         v_mp_layer = update(
             v_mp_layer,
-            at[:, :, 6], npx.where(vs.slope_per == i, vs.lut_mlms[nrow, 2]*1000, v_mp_layer[:, :, 6]) * vs.maskCatch,
+            at[2:-2, 2:-2, 6], npx.where(vs.slope_per[2:-2, 2:-2][2:-2, 2:-2] == i, vs.lut_mlms[nrow, 2]*1000, v_mp_layer[2:-2, 2:-2, 6]) * vs.maskCatch[2:-2, 2:-2]
         )
         v_mp_layer = update(
             v_mp_layer,
-            at[:, :, 5], npx.where(vs.slope_per == i, vs.lut_mlms[nrow, 3]*1000, v_mp_layer[:, :, 5]) * vs.maskCatch,
+            at[2:-2, 2:-2, 5], npx.where(vs.slope_per[2:-2, 2:-2] == i, vs.lut_mlms[nrow, 3]*1000, v_mp_layer[2:-2, 2:-2, 5]) * vs.maskCatch[2:-2, 2:-2]
         )
         v_mp_layer = update(
             v_mp_layer,
-            at[:, :, 4], npx.where(vs.slope_per == i, vs.lut_mlms[nrow, 4]*1000, v_mp_layer[:, :, 4]) * vs.maskCatch,
+            at[2:-2, 2:-2, 4], npx.where(vs.slope_per[2:-2, 2:-2] == i, vs.lut_mlms[nrow, 4]*1000, v_mp_layer[2:-2, 2:-2, 4]) * vs.maskCatch[2:-2, 2:-2]
         )
         v_mp_layer = update(
             v_mp_layer,
-            at[:, :, 3], npx.where(vs.slope_per == i, vs.lut_mlms[nrow, 5]*1000, v_mp_layer[:, :, 3]) * vs.maskCatch,
+            at[2:-2, 2:-2, 3], npx.where(vs.slope_per[2:-2, 2:-2] == i, vs.lut_mlms[nrow, 5]*1000, v_mp_layer[2:-2, 2:-2, 3]) * vs.maskCatch[2:-2, 2:-2]
         )
         v_mp_layer = update(
             v_mp_layer,
-            at[:, :, 2], npx.where(vs.slope_per == i, vs.lut_mlms[nrow, 6]*1000, v_mp_layer[:, :, 2]) * vs.maskCatch,
+            at[2:-2, 2:-2, 2], npx.where(vs.slope_per[2:-2, 2:-2] == i, vs.lut_mlms[nrow, 6]*1000, v_mp_layer[2:-2, 2:-2, 2]) * vs.maskCatch[2:-2, 2:-2]
         )
         v_mp_layer = update(
             v_mp_layer,
-            at[:, :, 1], npx.where(vs.slope_per == i, vs.lut_mlms[nrow, 7]*1000, v_mp_layer[:, :, 1]) * vs.maskCatch,
+            at[2:-2, 2:-2, 1], npx.where(vs.slope_per[2:-2, 2:-2] == i, vs.lut_mlms[nrow, 7]*1000, v_mp_layer[2:-2, 2:-2, 1]) * vs.maskCatch[2:-2, 2:-2]
         )
         v_mp_layer = update(
             v_mp_layer,
-            at[:, :, 0], npx.where(vs.slope_per == i, vs.lut_mlms[nrow, 8]*1000, v_mp_layer[:, :, 0]) * vs.maskCatch,
+            at[2:-2, 2:-2, 0], npx.where(vs.slope_per[2:-2, 2:-2] == i, vs.lut_mlms[nrow, 8]*1000, v_mp_layer[2:-2, 2:-2, 0]) * vs.maskCatch[2:-2, 2:-2]
         )
 
         return v_mp_layer
@@ -1035,35 +1035,35 @@ def calc_parameters_lateral_flow_kernel(state):
 
     vs.v_mp_layer_8 = update(
         vs.v_mp_layer_8,
-        at[:, :], v_mp_layer[:, :, 7] * vs.maskCatch,
+        at[2:-2, 2:-2], v_mp_layer[2:-2, 2:-2, 7] * vs.maskCatch[2:-2, 2:-2]
     )
     vs.v_mp_layer_7 = update(
         vs.v_mp_layer_7,
-        at[:, :], v_mp_layer[:, :, 6] * vs.maskCatch,
+        at[2:-2, 2:-2], v_mp_layer[2:-2, 2:-2, 6] * vs.maskCatch[2:-2, 2:-2]
     )
     vs.v_mp_layer_6 = update(
         vs.v_mp_layer_6,
-        at[:, :], v_mp_layer[:, :, 5] * vs.maskCatch,
+        at[2:-2, 2:-2], v_mp_layer[2:-2, 2:-2, 5] * vs.maskCatch[2:-2, 2:-2]
     )
     vs.v_mp_layer_5 = update(
         vs.v_mp_layer_5,
-        at[:, :], v_mp_layer[:, :, 4] * vs.maskCatch,
+        at[2:-2, 2:-2], v_mp_layer[2:-2, 2:-2, 4] * vs.maskCatch[2:-2, 2:-2]
     )
     vs.v_mp_layer_4 = update(
         vs.v_mp_layer_4,
-        at[:, :], v_mp_layer[:, :, 3] * vs.maskCatch,
+        at[2:-2, 2:-2], v_mp_layer[2:-2, 2:-2, 3] * vs.maskCatch[2:-2, 2:-2]
     )
     vs.v_mp_layer_3 = update(
         vs.v_mp_layer_3,
-        at[:, :], v_mp_layer[:, :, 2] * vs.maskCatch,
+        at[2:-2, 2:-2], v_mp_layer[2:-2, 2:-2, 2] * vs.maskCatch[2:-2, 2:-2]
     )
     vs.v_mp_layer_2 = update(
         vs.v_mp_layer_2,
-        at[:, :], v_mp_layer[:, :, 1] * vs.maskCatch,
+        at[2:-2, 2:-2], v_mp_layer[2:-2, 2:-2, 1] * vs.maskCatch[2:-2, 2:-2]
     )
     vs.v_mp_layer_1 = update(
         vs.v_mp_layer_1,
-        at[:, :], v_mp_layer[:, :, 0] * vs.maskCatch,
+        at[2:-2, 2:-2], v_mp_layer[2:-2, 2:-2, 0] * vs.maskCatch[2:-2, 2:-2]
     )
 
     return KernelOutput(
@@ -1087,64 +1087,64 @@ def calc_parameters_crops_kernel(state):
         row_no = _get_row_no(vs.lut_crops[:, 0], i)
         vs.doy_start = update(
             vs.doy_start,
-            at[:, :, :], npx.where(mask, vs.lut_crops[row_no, 1], vs.doy_start),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 1], vs.doy_start),
         )
         vs.doy_mid = update(
             vs.doy_mid,
-            at[:, :, :], npx.where(mask, vs.lut_crops[row_no, 2], vs.doy_mid),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 2], vs.doy_mid),
         )
         vs.doy_dec = update(
             vs.doy_dec,
-            at[:, :, :], npx.where(mask, vs.lut_crops[row_no, 3], vs.doy_dec),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 3], vs.doy_dec),
         )
         vs.doy_end = update(
             vs.doy_end,
-            at[:, :, :], npx.where(mask, vs.lut_crops[row_no, 4], vs.doy_end),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 4], vs.doy_end),
         )
         vs.ta_base = update(
             vs.ta_base,
-            at[:, :, :], npx.where(mask, vs.lut_crops[row_no, 11], vs.ta_base),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 11], vs.ta_base),
         )
         vs.ta_ceil = update(
             vs.ta_ceil,
-            at[:, :, :], npx.where(mask, vs.lut_crops[row_no, 12], vs.ta_ceil),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 12], vs.ta_ceil),
         )
         vs.ccc_min = update(
             vs.ccc_min,
-            at[:, :, :], npx.where(mask, vs.lut_crops[row_no, 13], vs.ccc_min),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 13], vs.ccc_min),
         )
         vs.ccc_max = update(
             vs.ccc_max,
-            at[:, :, :], npx.where(mask, vs.lut_crops[row_no, 14], vs.ccc_max),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 14], vs.ccc_max),
         )
         vs.crop_height_max = update(
             vs.crop_height_max,
-            at[:, :, :], npx.where(mask, vs.lut_crops[row_no, 16] * 1000, vs.crop_height_max),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 16] * 1000, vs.crop_height_max),
         )
         vs.ccc_growth_rate = update(
             vs.ccc_growth_rate,
-            at[:, :, :], npx.where(mask, vs.lut_crops[row_no, 18], vs.ccc_growth_rate),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 18], vs.ccc_growth_rate),
         )
         vs.basal_crop_coeff_mid = update(
             vs.basal_crop_coeff_mid,
-            at[:, :, :], npx.where(mask, vs.lut_crops[row_no, 21], vs.basal_crop_coeff_mid),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 21], vs.basal_crop_coeff_mid),
         )
         vs.z_root_crop_max = update(
             vs.z_root_crop_max,
-            at[:, :, :], npx.where(mask, vs.lut_crops[row_no, 15] * 1000, vs.z_root_crop_max),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 15] * 1000, vs.z_root_crop_max),
         )
         vs.root_growth_rate = update(
             vs.root_growth_rate,
-            at[:, :, :], npx.where(mask, vs.lut_crops[row_no, 19], vs.root_growth_rate),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 19], vs.root_growth_rate),
         )
         vs.water_stress_coeff_crop = update(
             vs.water_stress_coeff_crop,
-            at[:, :, :], npx.where(mask, vs.lut_crops[row_no, 20], vs.water_stress_coeff_crop),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 20], vs.water_stress_coeff_crop),
         )
 
     vs.theta_water_stress_crop = update(
         vs.theta_water_stress_crop,
-        at[:, :, :], (1 - vs.water_stress_coeff_crop) * (vs.theta_fc[:, :, npx.newaxis] - vs.theta_pwp[:, :, npx.newaxis]) + vs.theta_pwp[:, :, npx.newaxis],
+        at[2:-2, 2:-2, :], (1 - vs.water_stress_coeff_crop[2:-2, 2:-2]) * (vs.theta_fc[2:-2, 2:-2, npx.newaxis] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis]) + vs.theta_pwp[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(
@@ -1204,18 +1204,18 @@ def calc_storage_kernel(state):
     if not settings.enable_film_flow:
         vs.S = update(
             vs.S,
-            at[:, :, vs.tau], vs.S_sur[:, :, vs.tau] + vs.S_s[:, :, vs.tau] * vs.maskCatch,
+            at[2:-2, 2:-2, vs.tau], vs.S_sur[2:-2, 2:-2, vs.tau] + vs.S_s[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2]
         )
 
     elif settings.enable_film_flow:
         vs.S = update(
             vs.S,
-            at[:, :, vs.tau], vs.S_sur[:, :, vs.tau] + vs.S_s[:, :, vs.tau] + npx.sum(vs.S_f, axis=-1) * vs.maskCatch,
+            at[2:-2, 2:-2, vs.tau], vs.S_sur[2:-2, 2:-2, vs.tau] + vs.S_s[2:-2, 2:-2, vs.tau] + npx.sum(vs.S_f[2:-2, 2:-2, :], axis=-1) * vs.maskCatch[2:-2, 2:-2]
         )
 
     vs.dS = update(
         vs.dS,
-        at[:, :], vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1] * vs.maskCatch[2:-2, 2:-2]
     )
 
     return KernelOutput(
@@ -1230,12 +1230,12 @@ def calc_storage_with_gw_kernel(state):
 
     vs.S = update(
         vs.S,
-        at[:, :, vs.tau], vs.S_sur[:, :, vs.tau] + vs.S_s[:, :, vs.tau] + vs.S_vad[:, :, vs.tau] + vs.S_gw[:, :, vs.tau] * vs.maskCatch,
+        at[2:-2, 2:-2, vs.tau], vs.S_sur[2:-2, 2:-2, vs.tau] + vs.S_s[2:-2, 2:-2, vs.tau] + vs.S_vad[2:-2, 2:-2, vs.tau] + vs.S_gw[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2]
     )
 
     vs.dS = update(
         vs.dS,
-        at[:, :], vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1] * vs.maskCatch[2:-2, 2:-2]
     )
 
     return KernelOutput(
@@ -1261,56 +1261,56 @@ def sanity_check(state):
     settings = state.settings
 
     if settings.enable_lateral_flow and not settings.enable_groundwater_boundary and not settings.enable_groundwater and not settings.enable_offline_transport:
-        check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_ss - vs.q_sub, atol=1e-02)))
+        check = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.q_sub[2:-2, 2:-2], atol=1e-02)))
 
     elif settings.enable_lateral_flow and settings.enable_groundwater_boundary and not settings.enable_offline_transport:
-        check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_ss - vs.q_sub + vs.cpr_ss, atol=1e-02)))
+        check = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.q_sub[2:-2, 2:-2] + vs.cpr_ss[2:-2, 2:-2], atol=1e-02)))
 
     elif settings.enable_lateral_flow and settings.enable_groundwater and not settings.enable_offline_transport:
-        check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_sub - vs.q_gw - vs.q_leak, atol=1e-02)))
+        check = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_sub[2:-2, 2:-2] - vs.q_gw[2:-2, 2:-2] - vs.q_leak[2:-2, 2:-2], atol=1e-02)))
 
     elif settings.enable_groundwater_boundary and not settings.enable_offline_transport:
-        check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_ss + vs.cpr_ss, atol=1e-02)))
+        check = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] + vs.cpr_ss[2:-2, 2:-2], atol=1e-02)))
 
     elif settings.enable_film_flow and not settings.enable_offline_transport:
-        check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_ss - vs.ff_drain, atol=1e-02)))
+        check = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.ff_drain[2:-2, 2:-2], atol=1e-02)))
 
     elif not settings.enable_lateral_flow and not settings.enable_groundwater_boundary and not settings.enable_groundwater and not settings.enable_offline_transport:
-        check = global_and(npx.all(npx.isclose(vs.S[:, :, vs.tau] - vs.S[:, :, vs.taum1], vs.prec - vs.q_sur - vs.aet - vs.q_ss, atol=1e-02)))
+        check = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2], atol=1e-02)))
 
     elif settings.enable_offline_transport and not (settings.enable_deuterium or settings.enable_oxygen18 or settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate):
-        check = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[:, :, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[:, :, vs.taum1, :], axis=-1),
-                                               vs.inf_mat_rz + vs.inf_pf_rz + vs.inf_pf_ss -
-                                               npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2) - npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2) - npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2), atol=1e-02)))
+        check = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
+                                               vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] -
+                                               npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=1e-02)))
 
     elif settings.enable_offline_transport and (settings.enable_deuterium or settings.enable_oxygen18):
-        check1 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[:, :, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[:, :, vs.taum1, :], axis=-1),
-                                                vs.inf_mat_rz + vs.inf_pf_rz + vs.inf_pf_ss -
-                                                npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2) - npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2) - npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2), atol=1e-02)))
-        check2 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[:, :, vs.tau, :], axis=-1) * vs.C_s[:, :, vs.tau] - npx.sum(vs.sa_s[:, :, vs.taum1, :], axis=-1) * vs.C_s[:, :, vs.taum1],
-                                                vs.inf_mat_rz * npx.where(npx.isnan(vs.C_inf_mat_rz), 0, vs.C_inf_mat_rz) + vs.inf_pf_rz * npx.where(npx.isnan(vs.C_inf_pf_rz), 0, vs.C_inf_pf_rz) + vs.inf_pf_ss * npx.where(npx.isnan(vs.C_inf_pf_ss), 0, vs.C_inf_pf_ss) -
-                                                npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2) * npx.where(npx.isnan(vs.C_evap_soil), 0, vs.C_evap_soil) - npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2) * npx.where(npx.isnan(vs.C_transp), 0, vs.C_transp) - npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2) * npx.where(npx.isnan(vs.C_q_ss), 0, vs.C_q_ss), atol=1e-02)))
+        check1 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
+                                                vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] -
+                                                npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=1e-02)))
+        check2 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.tau] - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.taum1],
+                                                vs.inf_mat_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) + vs.inf_pf_ss[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2]) -
+                                                npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2]), atol=1e-02)))
         check = check1 & check2
 
     elif settings.enable_offline_transport and (settings.enable_bromide or settings.enable_chloride):
-        check1 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[:, :, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[:, :, vs.taum1, :], axis=-1),
-                                                vs.inf_mat_rz + vs.inf_pf_rz + vs.inf_pf_ss -
-                                                npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2) - npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2) - npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2), atol=1e-02)))
-        check2 = global_and(npx.all(npx.isclose(npx.sum(vs.msa_s[:, :, vs.tau, :], axis=-1) - npx.sum(vs.msa_s[:, :, vs.taum1, :], axis=-1),
-                                                vs.inf_mat_rz * vs.C_inf_mat_rz + vs.inf_pf_rz * vs.C_inf_pf_rz + vs.inf_pf_ss * vs.C_inf_pf_ss -
-                                                npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2) * vs.C_transp - npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2) * vs.C_q_ss, atol=1e-02)))
+        check1 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
+                                                vs.inf_mat_rz[2:-2, 2:-2][2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] -
+                                                npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp, axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=1e-02)))
+        check2 = global_and(npx.all(npx.isclose(npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.msa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
+                                                vs.inf_mat_rz[2:-2, 2:-2] * vs.C_inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] * vs.C_inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] * vs.C_inf_pf_ss[2:-2, 2:-2] -
+                                                npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * vs.C_transp[2:-2, 2:-2] - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * vs.C_q_ss[2:-2, 2:-2], atol=1e-02)))
         check = check1 & check2
 
     elif settings.enable_offline_transport and settings.enable_nitrate:
-        check1 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[:, :, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[:, :, vs.taum1, :], axis=-1),
-                                                vs.inf_mat_rz + vs.inf_pf_rz + vs.inf_pf_ss -
-                                                npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2) - npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2) - npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2), atol=1e-02)))
-        check2 = global_and(npx.all(npx.isclose(npx.sum(vs.msa_s[:, :, vs.tau, :], axis=-1) - npx.sum(vs.msa_s[:, :, vs.taum1, :], axis=-1),
-                                                vs.inf_mat_rz * vs.C_inf_mat_rz + vs.inf_pf_rz * vs.C_inf_pf_rz + vs.inf_pf_ss * vs.C_inf_pf_ss + npx.sum(vs.ma_s, axis=2) -
-                                                npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2) * vs.C_transp - npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2) * vs.C_q_ss - npx.sum(vs.mr_s, axis=2), atol=1e-02)))
+        check1 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
+                                                vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] -
+                                                npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil, axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=1e-02)))
+        check2 = global_and(npx.all(npx.isclose(npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.msa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
+                                                vs.inf_mat_rz[2:-2, 2:-2] * vs.C_inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] * vs.C_inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] * vs.C_inf_pf_ss[2:-2, 2:-2] + npx.sum(vs.ma_s, axis=2) -
+                                                npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * vs.C_transp[2:-2, 2:-2] - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * vs.C_q_ss[2:-2, 2:-2] - npx.sum(vs.mr_s, axis=2), atol=1e-02)))
         check = check1 & check2
 
     elif settings.enable_offline_transport and settings.enable_groundwater_boundary:
-        check = global_and(npx.all(npx.isclose(npx.sum(vs.SA_s[:, :, vs.tau, :], axis=-1) - npx.sum(vs.SA_s[:, :, vs.tau, 1, :], axis=-1), vs.inf_mat_rz + vs.inf_pf_rz + vs.inf_pf_ss - npx.sum(vs.evap_soil[:, :, npx.newaxis] * vs.tt_evap_soil, axis=2) - npx.sum(vs.transp[:, :, npx.newaxis] * vs.tt_transp, axis=2) - npx.sum(vs.q_ss[:, :, npx.newaxis] * vs.tt_q_ss, axis=2) + npx.sum(vs.cpr_ss[:, :, npx.newaxis] * vs.tt_cpr_ss, axis=2), atol=1e-02)))
+        check = global_and(npx.all(npx.isclose(npx.sum(vs.SA_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.SA_s[2:-2, 2:-2, vs.tau, 1, :], axis=-1), vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil, axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp, axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss, axis=2) + npx.sum(vs.cpr_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_ss, axis=2), atol=1e-02)))
 
     return check

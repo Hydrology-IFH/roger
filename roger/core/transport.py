@@ -13,11 +13,11 @@ def calc_SA(state, SA, sa):
     # cumulative StorAge (residence time distribution)
     SA = update(
         SA,
-        at[:, :, vs.tau, 1:], npx.cumsum(sa[:, :, vs.tau, :], axis=-1),
+        at[2:-2, 2:-2, vs.tau, 1:], npx.cumsum(sa[2:-2, 2:-2, vs.tau, :], axis=-1),
     )
     SA = update(
         SA,
-        at[:, :, vs.tau, 0], 0,
+        at[2:-2, 2:-2, vs.tau, 0], 0,
     )
 
     return SA
@@ -32,11 +32,11 @@ def calc_MSA(state, MSA, msa):
     # cumulative StorAge (residence time distribution)
     MSA = update(
         MSA,
-        at[:, :, vs.tau, 1:], npx.cumsum(msa[:, :, vs.tau, :], axis=-1),
+        at[2:-2, 2:-2, vs.tau, 1:], npx.cumsum(msa[2:-2, 2:-2, vs.tau, :], axis=-1),
     )
     MSA = update(
         MSA,
-        at[:, :, vs.tau, 0], 0,
+        at[2:-2, 2:-2, vs.tau, 0], 0,
     )
 
     return MSA
@@ -53,74 +53,74 @@ def calc_tt(state, SA, sa, flux, sas_params):
     # cumulative backward travel time distribution
     TT = update_add(
         TT,
-        at[:, :, :], sas.uniform(state, SA, sas_params),
+        at[2:-2, 2:-2, :], sas.uniform(state, SA, sas_params),
     )
     TT = update_add(
         TT,
-        at[:, :, :], sas.dirac(state, sas_params),
+        at[2:-2, 2:-2, :], sas.dirac(state, sas_params),
     )
     TT = update_add(
         TT,
-        at[:, :, :], sas.kumaraswami(state, SA, sas_params),
+        at[2:-2, 2:-2, :], sas.kumaraswami(state, SA, sas_params),
     )
     TT = update_add(
         TT,
-        at[:, :, :], sas.gamma(state, SA, sas_params),
+        at[2:-2, 2:-2, :], sas.gamma(state, SA, sas_params),
     )
     TT = update_add(
         TT,
-        at[:, :, :], sas.exponential(state, SA, sas_params),
+        at[2:-2, 2:-2, :], sas.exponential(state, SA, sas_params),
     )
     TT = update_add(
         TT,
-        at[:, :, :], sas.power(state, SA, sas_params),
+        at[2:-2, 2:-2, :], sas.power(state, SA, sas_params),
     )
 
     # travel time distribution
-    mask_old = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([1, 22, 32, 34, 52, 62])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis]))
-    mask_young = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([21, 31, 33, 4, 41, 51, 61])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3])) & (sas_params[:, :, 1, npx.newaxis] < sas_params[:, :, 2, npx.newaxis]))
+    mask_old = npx.isin(sas_params[2:-2, 2:-2, 0, npx.newaxis], npx.array([1, 22, 32, 34, 52, 62])) | (npx.isin(sas_params[2:-2, 2:-2, 0, npx.newaxis], npx.array([3])) & (sas_params[2:-2, 2:-2, 1, npx.newaxis] >= sas_params[2:-2, 2:-2, 2, npx.newaxis]))
+    mask_young = npx.isin(sas_params[2:-2, 2:-2, 0, npx.newaxis], npx.array([21, 31, 33, 4, 41, 51, 61])) | (npx.isin(sas_params[2:-2, 2:-2, 0, npx.newaxis], npx.array([3])) & (sas_params[2:-2, 2:-2, 1, npx.newaxis] < sas_params[2:-2, 2:-2, 2, npx.newaxis]))
 
     tt = update(
         tt,
-        at[:, :, :], npx.diff(TT, axis=2),
+        at[2:-2, 2:-2, :], npx.diff(TT, axis=2),
     )
     # set travel time distribution for dirac function
     tt = update(
         tt,
-        at[:, :, :], npx.where(sas_params[:, :, 0, npx.newaxis] == 21, 0, tt),
+        at[2:-2, 2:-2, :], npx.where(sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21, 0, tt),
     )
     tt = update(
         tt,
-        at[:, :, 0], npx.where(sas_params[:, :, 0] == 21, 1, tt[:, :, 0]),
+        at[2:-2, 2:-2, 0], npx.where(sas_params[2:-2, 2:-2, 0] == 21, 1, tt[2:-2, 2:-2, 0]),
     )
     tt = update(
         tt,
-        at[:, :, :], npx.where(sas_params[:, :, 0, npx.newaxis] == 22, 0, tt),
+        at[2:-2, 2:-2, :], npx.where(sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22, 0, tt),
     )
     tt = update(
         tt,
-        at[:, :, -1], npx.where(sas_params[:, :, 0] == 22, 1, tt[:, :, -1]),
+        at[2:-2, 2:-2, -1], npx.where(sas_params[2:-2, 2:-2, 0] == 22, 1, tt[2:-2, 2:-2, -1]),
     )
     # outflux
     flux_tt = allocate(state.dimensions, ("x", "y", "ages"))
     flux_tt = update(
         flux_tt,
-        at[:, :, :], flux[:, :, npx.newaxis] * tt,
+        at[2:-2, 2:-2, :], flux[2:-2, 2:-2, npx.newaxis] * tt,
     )
 
     # set travel time distribution to zero if no outflux
     tt = update(
         tt,
-        at[:, :, :], npx.where(flux_tt > 0, tt, 0),
+        at[2:-2, 2:-2, :], npx.where(flux_tt > 0, tt, 0),
     )
 
     TT = update(
         TT,
-        at[:, :, 1:], npx.cumsum(tt, axis=2),
+        at[2:-2, 2:-2, 1:], npx.cumsum(tt, axis=2),
     )
     TT = update(
         TT,
-        at[:, :, 0], 0,
+        at[2:-2, 2:-2, 0], 0,
     )
 
     # outflux is greater than StorAge
@@ -139,65 +139,65 @@ def calc_tt(state, SA, sa, flux, sas_params):
     # difference between outflux and StorAge
     flux_tt_init = update(
         flux_tt_init,
-        at[:, :, :], flux_tt,
+        at[2:-2, 2:-2, :], flux_tt,
     )
     diff_q = update(
         diff_q,
-        at[:, :, :], flux_tt - sa[:, :, vs.tau, :],
+        at[2:-2, 2:-2, :], flux_tt - sa[2:-2, 2:-2, vs.tau, :],
     )
     q_re = update(
         q_re,
-        at[:, :, :], npx.where((diff_q < 0), 0, diff_q),
+        at[2:-2, 2:-2, :], npx.where((diff_q < 0), 0, diff_q),
     )
     q_re_sum = update(
         q_re_sum,
-        at[:, :], npx.sum(q_re, axis=-1),
+        at[2:-2, 2:-2], npx.sum(q_re, axis=-1),
     )
     # available StorAge for sampling
     sa_free = update(
         sa_free,
-        at[:, :, :], npx.where((diff_q > 0), 0, sa[:, :, vs.tau, :] - flux_tt),
+        at[2:-2, 2:-2, :], npx.where((diff_q > 0), 0, sa[2:-2, 2:-2, vs.tau, :] - flux_tt),
     )
     # normalize StorAge with outflux of age T
     sa_free_norm = update(
         sa_free_norm,
-        at[:, :, :], npx.where((q_re_sum[:, :, npx.newaxis] > 0), sa_free / q_re_sum[:, :, npx.newaxis], 0),
+        at[2:-2, 2:-2, :], npx.where((q_re_sum[2:-2, 2:-2, npx.newaxis] > 0), sa_free / q_re_sum[2:-2, 2:-2, npx.newaxis], 0),
     )
     SA_re = update(
         SA_re,
-        at[:, :, 1:], npx.where(mask_old, npx.cumsum(sa_free_norm[..., ::-1], axis=-1)[..., ::-1], SA_re[:, :, 1:]),
+        at[2:-2, 2:-2, 1:], npx.where(mask_old, npx.cumsum(sa_free_norm[..., ::-1], axis=-1)[..., ::-1], SA_re[2:-2, 2:-2, 1:]),
     )
     SA_re = update(
         SA_re,
-        at[:, :, 1:], npx.where(mask_young, npx.cumsum(sa_free_norm, axis=-1), SA_re[:, :, 1:]),
+        at[2:-2, 2:-2, 1:], npx.where(mask_young, npx.cumsum(sa_free_norm, axis=-1), SA_re[2:-2, 2:-2, 1:]),
     )
     # cumulative probability to redistribute outflux
     Omega_re = update(
         Omega_re,
-        at[:, :, :], npx.where(SA_re < 1, SA_re, 1),
+        at[2:-2, 2:-2, :], npx.where(SA_re < 1, SA_re, 1),
     )
     # probability to redistribute outflux
     omega_re = update(
         omega_re,
-        at[:, :, :], npx.diff(Omega_re, axis=-1),
+        at[2:-2, 2:-2, :], npx.diff(Omega_re, axis=-1),
     )
     # redistribute outflux
     flux_tt_re = update(
         flux_tt_re,
-        at[:, :, :], q_re_sum[:, :, npx.newaxis] * omega_re,
+        at[2:-2, 2:-2, :], q_re_sum[2:-2, 2:-2, npx.newaxis] * omega_re,
     )
     flux_tt = update(
         flux_tt,
-        at[:, :, :], npx.where((flux_tt_re > 0), flux_tt_re + flux_tt, flux_tt),
+        at[2:-2, 2:-2, :], npx.where((flux_tt_re > 0), flux_tt_re + flux_tt, flux_tt),
     )
     flux_tt = update(
         flux_tt,
-        at[:, :, :], npx.where((diff_q > 0), flux_tt - diff_q, flux_tt),
+        at[2:-2, 2:-2, :], npx.where((diff_q > 0), flux_tt - diff_q, flux_tt),
     )
     # recalculate travel time distribution
     tt = update(
         tt,
-        at[:, :, :], npx.where(npx.any(flux_tt_init > sa[:, :, vs.tau, :], axis=-1)[:, :, npx.newaxis], flux_tt/flux[:, :, npx.newaxis], tt),
+        at[2:-2, 2:-2, :], npx.where(npx.any(flux_tt_init > sa[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis], flux_tt/flux[2:-2, 2:-2, npx.newaxis], tt),
     )
 
     return tt
@@ -210,11 +210,11 @@ def calc_conc_iso_flux(state, mtt, tt, flux):
     conc = allocate(state.dimensions, ("x", "y"))
     conc = update(
         conc,
-        at[:, :], npx.nansum(tt * flux[:, :, npx.newaxis] * mtt, axis=-1) / npx.sum(tt * flux[:, :, npx.newaxis] , axis=-1),
+        at[2:-2, 2:-2], npx.nansum(tt * flux[2:-2, 2:-2, npx.newaxis] * mtt, axis=-1) / npx.sum(tt * flux[2:-2, 2:-2, npx.newaxis] , axis=-1),
     )
     conc = update(
         conc,
-        at[:, :], npx.where(conc != 0, conc, npx.NaN),
+        at[2:-2, 2:-2], npx.where(conc != 0, conc, npx.NaN),
     )
 
     return conc
@@ -233,32 +233,32 @@ def calc_msa_iso(state, sa, msa, flux, tt, mtt):
     msa3 = allocate(state.dimensions, ("x", "y", "ages"))
     flux_in = update(
         flux_in,
-        at[:, :, :], flux[:, :, npx.newaxis] * tt,
+        at[2:-2, 2:-2, :], flux[2:-2, 2:-2, npx.newaxis] * tt,
     )
     sa1 = update(
         sa1,
-        at[:, :, :], sa[:, :, vs.tau, :] + flux_in,
+        at[2:-2, 2:-2, :], sa[2:-2, 2:-2, vs.tau, :] + flux_in,
     )
     # weighted average isotope ratios of influx and storage
     msa1 = update(
         msa1,
-        at[:, :, :], (msa[:, :, vs.tau, :] * (sa[:, :, vs.tau, :]/sa1)) + (mtt * (flux_in/sa1)),
+        at[2:-2, 2:-2, :], (msa[2:-2, 2:-2, vs.tau, :] * (sa[2:-2, 2:-2, vs.tau, :]/sa1)) + (mtt * (flux_in/sa1)),
     )
     msa2 = update(
         msa2,
-        at[:, :, :], npx.where(npx.isnan(msa1), msa[:, :, vs.tau, :], msa1),
+        at[2:-2, 2:-2, :], npx.where(npx.isnan(msa1), msa[2:-2, 2:-2, vs.tau, :], msa1),
     )
     msa3 = update(
         msa3,
-        at[:, :, :], npx.where(npx.isnan(msa2), mtt, msa2),
+        at[2:-2, 2:-2, :], npx.where(npx.isnan(msa2), mtt, msa2),
     )
     msa = update(
         msa,
-        at[:, :, vs.tau, :], msa3,
+        at[2:-2, 2:-2, vs.tau, :], msa3,
     )
     msa = update(
         msa,
-        at[:, :, vs.tau, :], npx.where((msa[:, :, vs.tau, :] != 0), msa[:, :, vs.tau, :], npx.NaN),
+        at[2:-2, 2:-2, vs.tau, :], npx.where((msa[2:-2, 2:-2, vs.tau, :] != 0), msa[2:-2, 2:-2, vs.tau, :], npx.NaN),
     )
 
     return msa
@@ -273,11 +273,11 @@ def calc_conc_iso_storage(state, sa, msa):
     conc = allocate(state.dimensions, ("x", "y"))
     conc = update(
         conc,
-        at[:, :], npx.nansum(sa[:, :, vs.tau, :] * msa[:, :, vs.tau, :], axis=-1) / npx.sum(sa[:, :, vs.tau, :] , axis=-1),
+        at[2:-2, 2:-2], npx.nansum(sa[2:-2, 2:-2, vs.tau, :] * msa[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(sa[2:-2, 2:-2, vs.tau, :] , axis=-1),
     )
     conc = update(
         conc,
-        at[:, :], npx.where(conc != 0, conc, npx.NaN),
+        at[2:-2, 2:-2], npx.where(conc != 0, conc, npx.NaN),
     )
 
     return conc
@@ -296,21 +296,21 @@ def calc_mtt(state, sa, tt, flux, msa, alpha):
         # isotope travel time distribution at current time step
         mtt = update(
             mtt,
-            at[:, :, :], npx.where(tt > 0, msa[:, :, vs.tau, :], npx.NaN),
+            at[2:-2, 2:-2, :], npx.where(tt > 0, msa[2:-2, 2:-2, vs.tau, :], npx.NaN),
         )
 
     else:
         # solute travel time distribution at current time step
-        mask = (tt > 0) & (sa[:, :, vs.tau, :] > 0) & (msa[:, :, vs.tau, :] > 0)
+        mask = (tt > 0) & (sa[2:-2, 2:-2, vs.tau, :] > 0) & (msa[2:-2, 2:-2, vs.tau, :] > 0)
         mtt = update(
             mtt,
-            at[:, :, :], npx.where(mask, (msa[:, :, vs.tau, :] / sa[:, :, vs.tau, :]) * alpha[:, :, npx.newaxis] * tt * flux[:, :, npx.newaxis], 0.),
+            at[2:-2, 2:-2, :], npx.where(mask, (msa[2:-2, 2:-2, vs.tau, :] / sa[2:-2, 2:-2, vs.tau, :]) * alpha[2:-2, 2:-2, npx.newaxis] * tt * flux[2:-2, 2:-2, npx.newaxis], 0.),
         )
 
-        mask1 = (mtt > msa[:, :, vs.tau, :])
+        mask1 = (mtt > msa[2:-2, 2:-2, vs.tau, :])
         mtt = update(
             mtt,
-            at[:, :, :], npx.where(mask1, msa[:, :, vs.tau, :], mtt),
+            at[2:-2, 2:-2, :], npx.where(mask1, msa[2:-2, 2:-2, vs.tau, :], mtt),
         )
 
     return mtt
@@ -326,14 +326,14 @@ def update_sa(state, sa, tt, flux):
     # remove outflux
     sa = update_add(
         sa,
-        at[:, :, vs.tau, :], -flux[:, :, npx.newaxis] * tt,
+        at[2:-2, 2:-2, vs.tau, :], -flux[2:-2, 2:-2, npx.newaxis] * tt,
     )
 
     # avoid numerical errors
-    mask0 = (sa[:, :, vs.tau, :] > -0.001) & (sa[:, :, vs.tau, :] < 0)
+    mask0 = (sa[2:-2, 2:-2, vs.tau, :] > -0.001) & (sa[2:-2, 2:-2, vs.tau, :] < 0)
     sa = update(
         sa,
-        at[:, :, vs.tau, :], npx.where(mask0, 0, sa[:, :, vs.tau, :]),
+        at[2:-2, 2:-2, vs.tau, :], npx.where(mask0, 0, sa[2:-2, 2:-2, vs.tau, :]),
     )
 
     return sa
@@ -348,20 +348,20 @@ def calc_ageing_sa(state, sa):
     sam1 = allocate(state.dimensions, ("x", "y", "ages"))
     sam1 = update(
         sam1,
-        at[:, :, :], sa[:, :, vs.tau, :],
+        at[2:-2, 2:-2, :], sa[2:-2, 2:-2, vs.tau, :],
     )
     sa = update(
         sa,
-        at[:, :, vs.tau, 1:], sam1[:, :, :-1],
+        at[2:-2, 2:-2, vs.tau, 1:], sam1[2:-2, 2:-2, :-1],
     )
     sa = update(
         sa,
-        at[:, :, vs.tau, 0], 0,
+        at[2:-2, 2:-2, vs.tau, 0], 0,
     )
     # merge oldest water
     sa = update_add(
         sa,
-        at[:, :, vs.tau, -1], sam1[:, :, -1],
+        at[2:-2, 2:-2, vs.tau, -1], sam1[2:-2, 2:-2, -1],
     )
 
     return sa
@@ -376,20 +376,20 @@ def calc_ageing_msa(state, msa):
     msam1 = allocate(state.dimensions, ("x", "y", "ages"))
     msam1 = update(
         msam1,
-        at[:, :, :], msa[:, :, vs.tau, :],
+        at[2:-2, 2:-2, :], msa[2:-2, 2:-2, vs.tau, :],
     )
     msa = update(
         msa,
-        at[:, :, vs.tau, 1:], msam1[:, :, :-1],
+        at[2:-2, 2:-2, vs.tau, 1:], msam1[2:-2, 2:-2, :-1],
     )
     msa = update(
         msa,
-        at[:, :, vs.tau, 0], 0,
+        at[2:-2, 2:-2, vs.tau, 0], 0,
     )
     # merge oldest water
     msa = update_add(
         msa,
-        at[:, :, vs.tau, -1], msam1[:, :, -1],
+        at[2:-2, 2:-2, vs.tau, -1], msam1[2:-2, 2:-2, -1],
     )
 
     return msa
@@ -404,30 +404,30 @@ def calc_ageing_iso(state, sa, msa):
     sam1 = allocate(state.dimensions, ("x", "y", "ages"))
     sam1 = update(
         sam1,
-        at[:, :, :], sa[:, :, vs.tau, :],
+        at[2:-2, 2:-2, :], sa[2:-2, 2:-2, vs.tau, :],
     )
     sa = update(
         sa,
-        at[:, :, vs.tau, 1:], sam1[:, :, :-1],
+        at[2:-2, 2:-2, vs.tau, 1:], sam1[2:-2, 2:-2, :-1],
     )
     sa = update(
         sa,
-        at[:, :, vs.tau, 0], 0,
+        at[2:-2, 2:-2, vs.tau, 0], 0,
     )
     # isotope ageing
     msam1 = allocate(state.dimensions, ("x", "y", "ages"))
     msam1 = update(
         msam1,
-        at[:, :, :], msa[:, :, vs.tau, :],
+        at[2:-2, 2:-2, :], msa[2:-2, 2:-2, vs.tau, :],
     )
     msa = update(
         msa,
-        at[:, :, vs.tau, 1:], msam1[:, :, :-1],
+        at[2:-2, 2:-2, vs.tau, 1:], msam1[2:-2, 2:-2, :-1],
     )
     # add youngest isotope input to isotope StorAge
     msa = update(
         msa,
-        at[:, :, vs.tau, 0], npx.NaN,
+        at[2:-2, 2:-2, vs.tau, 0], npx.NaN,
     )
     # merge oldest isotopes
     sum_old = allocate(state.dimensions, ("x", "y"))
@@ -435,24 +435,24 @@ def calc_ageing_iso(state, sa, msa):
     iso_old2 = allocate(state.dimensions, ("x", "y"))
     sum_old = update(
         sum_old,
-        at[:, :], sam1[:, :, -1] + sa[:, :, vs.tau, -1],
+        at[2:-2, 2:-2], sam1[2:-2, 2:-2, -1] + sa[2:-2, 2:-2, vs.tau, -1],
     )
     iso_old1 = update(
         iso_old1,
-        at[:, :], (msam1[:, :, -1] * (sam1[:, :, -1]/sum_old)) + (msa[:, :, vs.tau, -1] * (sa[:, :, vs.tau, -1]/sum_old)),
+        at[2:-2, 2:-2], (msam1[2:-2, 2:-2, -1] * (sam1[2:-2, 2:-2, -1]/sum_old)) + (msa[2:-2, 2:-2, vs.tau, -1] * (sa[2:-2, 2:-2, vs.tau, -1]/sum_old)),
     )
     iso_old2 = update(
         iso_old2,
-        at[:, :], npx.where(npx.isnan(iso_old1), npx.where(npx.isnan(msam1[:, :, -1]), msa[:, :, vs.tau, -1], msam1[:, :, -1]), iso_old1),
+        at[2:-2, 2:-2], npx.where(npx.isnan(iso_old1), npx.where(npx.isnan(msam1[2:-2, 2:-2, -1]), msa[2:-2, 2:-2, vs.tau, -1], msam1[2:-2, 2:-2, -1]), iso_old1),
     )
     msa = update(
         msa,
-        at[:, :, vs.tau, -1], iso_old2,
+        at[2:-2, 2:-2, vs.tau, -1], iso_old2,
     )
     # merge oldest water
     sa = update_add(
         sa,
-        at[:, :, vs.tau, -1], sam1[:, :, -1],
+        at[2:-2, 2:-2, vs.tau, -1], sam1[2:-2, 2:-2, -1],
     )
 
     return sa, msa
@@ -466,12 +466,12 @@ def calculate_ageing_sa_kernel(state):
 
     vs.sa_rz = update(
         vs.sa_rz,
-        at[:, :, :, :], calc_ageing_sa(state, vs.sa_rz),
+        at[2:-2, 2:-2, :, :], calc_ageing_sa(state, vs.sa_rz),
     )
 
     vs.sa_ss = update(
         vs.sa_ss,
-        at[:, :, :, :], calc_ageing_sa(state, vs.sa_ss),
+        at[2:-2, 2:-2, :, :], calc_ageing_sa(state, vs.sa_ss),
     )
 
     return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss)
@@ -485,12 +485,12 @@ def calculate_ageing_msa_kernel(state):
 
     vs.msa_rz = update(
         vs.msa_rz,
-        at[:, :, :, :], calc_ageing_msa(state, vs.msa_rz),
+        at[2:-2, 2:-2, :, :], calc_ageing_msa(state, vs.msa_rz),
     )
 
     vs.msa_ss = update(
         vs.msa_ss,
-        at[:, :, :, :], calc_ageing_msa(state, vs.msa_ss),
+        at[2:-2, 2:-2, :, :], calc_ageing_msa(state, vs.msa_ss),
     )
 
     return KernelOutput(msa_rz=vs.msa_rz, msa_ss=vs.msa_ss)
@@ -506,24 +506,24 @@ def calculate_ageing_iso_kernel(state):
 
     vs.sa_rz = update(
         vs.sa_rz,
-        at[:, :, vs.tau, :], sa_rz[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.tau, :], sa_rz[2:-2, 2:-2, vs.tau, :],
     )
 
     vs.msa_rz = update(
         vs.msa_rz,
-        at[:, :, vs.tau, :], msa_rz[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.tau, :], msa_rz[2:-2, 2:-2, vs.tau, :],
     )
 
     sa_ss, msa_ss = calc_ageing_iso(state, vs.sa_ss, vs.msa_ss)
 
     vs.sa_ss = update(
         vs.sa_ss,
-        at[:, :, vs.tau, :], sa_ss[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.tau, :], sa_ss[2:-2, 2:-2, vs.tau, :],
     )
 
     vs.msa_ss = update(
         vs.msa_ss,
-        at[:, :, vs.tau, :], msa_ss[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.tau, :], msa_ss[2:-2, 2:-2, vs.tau, :],
     )
 
     return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss)
@@ -537,17 +537,17 @@ def calculate_ageing_Nmin_kernel(state):
 
     vs.Nmin_rz = update(
         vs.Nmin_rz,
-        at[:, :, :, :], calc_ageing_msa(state, vs.Nmin_rz),
+        at[2:-2, 2:-2, :, :], calc_ageing_msa(state, vs.Nmin_rz),
     )
 
     vs.Nmin_ss = update(
         vs.Nmin_ss,
-        at[:, :, :, :], calc_ageing_msa(state, vs.Nmin_ss),
+        at[2:-2, 2:-2, :, :], calc_ageing_msa(state, vs.Nmin_ss),
     )
 
     vs.Nmin_s = update(
         vs.Nmin_s,
-        at[:, :, :, :], calc_ageing_msa(state, vs.Nmin_s),
+        at[2:-2, 2:-2, :, :], calc_ageing_msa(state, vs.Nmin_s),
     )
 
     return KernelOutput(Nmin_rz=vs.Nmin_rz, Nmin_ss=vs.Nmin_ss, Nmin_s=vs.Nmin_s)

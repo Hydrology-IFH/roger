@@ -36,11 +36,23 @@ class DUMMYSetup(RogerSetup):
         pass
 
     @roger_routine
+    def set_parameters_setup(self, state):
+        pass
+
+    @roger_routine
     def set_parameters(self, state):
         pass
 
     @roger_routine
+    def set_initial_conditions_setup(self, state):
+        pass
+
+    @roger_routine
     def set_initial_conditions(self, state):
+        pass
+
+    @roger_routine
+    def set_forcing_setup(self, state):
         pass
 
     @roger_routine

@@ -2167,10 +2167,10 @@ VARIABLES = {
         active=lambda settings: settings.enable_groundwater,
     ),
     "tt": Variable(
-        "transmissivity",
+        "transmissivity of aquifer",
         CATCH_GRID,
         "m^2/h",
-        "transmissivity",
+        "transmissivity of aquifer",
         time_dependent=False,
         active=lambda settings: settings.enable_groundwater,
     ),

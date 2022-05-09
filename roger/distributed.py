@@ -253,13 +253,13 @@ def exchange_overlap(arr, var_grid):
     else:
         d1, d2 = var_grid[:2]
 
-    if d1 not in SCATTERED_DIMENSIONS[0] and d1 not in SCATTERED_DIMENSIONS[1] and d2 not in SCATTERED_DIMENSIONS[1]:
+    if d1 not in SCATTERED_DIMENSIONS[0] and d1 not in SCATTERED_DIMENSIONS[1] and not d2:
         # neither x nor y dependent, nothing to do
         return arr
 
     proc_neighbors = get_process_neighbors()
 
-    if d1 in SCATTERED_DIMENSIONS[0] and d2 in SCATTERED_DIMENSIONS[1]:
+    if str(d1) in SCATTERED_DIMENSIONS[0] and str(d2) in SCATTERED_DIMENSIONS[1]:
         overlap_slices_from = dict(
             west=(slice(2, 4), slice(0, None), Ellipsis),
             south=(slice(0, None), slice(2, 4), Ellipsis),
@@ -499,11 +499,11 @@ def gather(arr, dimensions, var_grid):
     else:
         d1, d2 = var_grid[:2]
 
-    if d1 not in SCATTERED_DIMENSIONS[0] and d1 not in SCATTERED_DIMENSIONS[1] and d2 not in SCATTERED_DIMENSIONS[1]:
+    if d1 not in SCATTERED_DIMENSIONS[0] and d1 not in SCATTERED_DIMENSIONS[1] and not d2:
         # neither x nor y dependent, nothing to do
         return arr
 
-    if d1 in SCATTERED_DIMENSIONS[0] and d2 not in SCATTERED_DIMENSIONS[1]:
+    if d1 in SCATTERED_DIMENSIONS[0] and not d2:
         # only x dependent
         return _gather_1d(nx, ny, arr, 0)
 
@@ -602,11 +602,11 @@ def scatter(arr, dimensions, var_grid):
 
     arr = npx.asarray(arr)
 
-    if d1 not in SCATTERED_DIMENSIONS[0] and d1 not in SCATTERED_DIMENSIONS[1] and d2 not in SCATTERED_DIMENSIONS[1]:
+    if d1 not in SCATTERED_DIMENSIONS[0] and d1 not in SCATTERED_DIMENSIONS[1] and not d2:
         # neither x nor y dependent
         return _scatter_constant(arr)
 
-    if d1 in SCATTERED_DIMENSIONS[0] and d2 not in SCATTERED_DIMENSIONS[1]:
+    if d1 in SCATTERED_DIMENSIONS[0] and not d2:
         # only x dependent
         return _scatter_1d(nx, ny, arr, 0)
 

@@ -34,8 +34,6 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
         settings = state.settings
         settings.identifier = "SVATCROPTRANSPORT"
 
-        config = self._read_config()
-
         settings.nx, settings.ny, settings.nz = 1, 1, 1
         settings.nitt = self._get_nitt()
         settings.ages = settings.nitt
@@ -87,230 +85,230 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
         settings = state.settings
 
         if (vs.itt == 0):
-            vs.S_PWP_RZ = update(vs.S_PWP_RZ, at[:, :, :], self._read_var_from_nc("S_pwp_rz", 'states_hm.nc'))
-            vs.S_PWP_SS = update(vs.S_PWP_SS, at[:, :, :], self._read_var_from_nc("S_pwp_ss", 'states_hm.nc'))
-            vs.S_SAT_RZ = update(vs.S_SAT_RZ, at[:, :, :], self._read_var_from_nc("S_sat_rz", 'states_hm.nc'))
-            vs.S_SAT_SS = update(vs.S_SAT_SS, at[:, :, :], self._read_var_from_nc("S_sat_ss", 'states_hm.nc'))
+            vs.S_PWP_RZ = update(vs.S_PWP_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_rz", 'states_hm.nc'))
+            vs.S_PWP_SS = update(vs.S_PWP_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_ss", 'states_hm.nc'))
+            vs.S_SAT_RZ = update(vs.S_SAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_rz", 'states_hm.nc'))
+            vs.S_SAT_SS = update(vs.S_SAT_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_ss", 'states_hm.nc'))
 
-            vs.S_pwp_rz = update(vs.S_pwp_rz, at[:, :], vs.S_PWP_RZ[:, :, 0])
-            vs.S_pwp_ss = update(vs.S_pwp_ss, at[:, :], vs.S_PWP_SS[:, :, 0])
-            vs.S_sat_rz = update(vs.S_sat_rz, at[:, :], vs.S_SAT_RZ[:, :, 0])
-            vs.S_sat_ss = update(vs.S_sat_ss, at[:, :], vs.S_SAT_SS[:, :, 0])
+            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], vs.S_PWP_RZ[2:-2, 2:-2, 0])
+            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], vs.S_PWP_SS[2:-2, 2:-2, 0])
+            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], vs.S_SAT_RZ[2:-2, 2:-2, 0])
+            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], vs.S_SAT_SS[2:-2, 2:-2, 0])
 
             if (settings.enable_bromide | settings.enable_chloride):
-                vs.alpha_transp = update(vs.alpha_transp, at[:, :], self._read_var_from_nc("alpha_transp", 'parameters.nc'))
-                vs.alpha_q = update(vs.alpha_q, at[:, :], self._read_var_from_nc("alpha_q", 'parameters.nc'))
+                vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], self._read_var_from_nc("alpha_transp", 'parameters.nc'))
+                vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], self._read_var_from_nc("alpha_q", 'parameters.nc'))
             if settings.enable_nitrate:
-                vs.alpha_transp = update(vs.alpha_transp, at[:, :], self._read_var_from_nc("alpha_transp", 'parameters.nc'))
-                vs.alpha_q = update(vs.alpha_q, at[:, :], self._read_var_from_nc("alpha_q", 'parameters.nc'))
-                vs.km_denit_rz = update(vs.km_denit_rz, at[:, :], self._read_var_from_nc("km_denit_rz", 'parameters.nc'))
-                vs.km_denit_ss = update(vs.km_denit_ss, at[:, :], self._read_var_from_nc("km_denit_ss", 'parameters.nc'))
-                vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[:, :], self._read_var_from_nc("dmax_denit_rz", 'parameters.nc'))
-                vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[:, :], self._read_var_from_nc("dmax_denit_ss", 'parameters.nc'))
-                vs.km_nit_rz = update(vs.km_nit_rz, at[:, :], self._read_var_from_nc("km_nit_rz", 'parameters.nc'))
-                vs.km_nit_ss = update(vs.km_nit_ss, at[:, :], self._read_var_from_nc("km_nit_ss", 'parameters.nc'))
-                vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[:, :], self._read_var_from_nc("dmax_nit_rz", 'parameters.nc'))
-                vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[:, :], self._read_var_from_nc("dmax_nit_ss", 'parameters.nc'))
-                vs.kmin_rz = update(vs.kmin_rz, at[:, :], self._read_var_from_nc("kmin_rz", 'parameters.nc'))
-                vs.kmin_ss = update(vs.kmin_ss, at[:, :], self._read_var_from_nc("kmin_ss", 'parameters.nc'))
+                vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], self._read_var_from_nc("alpha_transp", 'parameters.nc'))
+                vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], self._read_var_from_nc("alpha_q", 'parameters.nc'))
+                vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_denit_rz", 'parameters.nc'))
+                vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("km_denit_ss", 'parameters.nc'))
+                vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit_rz", 'parameters.nc'))
+                vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit_ss", 'parameters.nc'))
+                vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_nit_rz", 'parameters.nc'))
+                vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], self._read_var_from_nc("km_nit_ss", 'parameters.nc'))
+                vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_nit_rz", 'parameters.nc'))
+                vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], self._read_var_from_nc("dmax_nit_ss", 'parameters.nc'))
+                vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], self._read_var_from_nc("kmin_rz", 'parameters.nc'))
+                vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], self._read_var_from_nc("kmin_ss", 'parameters.nc'))
 
         if settings.tm_structure == "complete-mixing":
-            vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[:, :, 0], 1)
-            vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[:, :, 0], 1)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 0], 1)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 0], 1)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 0], 1)
+            vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 1)
+            vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 1)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 1)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 1)
         elif settings.tm_structure == "piston":
-            vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[:, :, 0], 21)
-            vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[:, :, 0], 21)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 0], 21)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 0], 22)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 0], 22)
+            vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
+            vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 21)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 22)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 22)
         elif settings.tm_structure in ["advection-dispersion", "preferential"]:
-            vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[:, :, 0], 21)
-            vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[:, :, 0], 21)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_transp.nc'))
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 1], self._read_var_from_nc("a", 'sas_parameters_transp.nc'))
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 2], self._read_var_from_nc("b", 'sas_parameters_transp.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 1], self._read_var_from_nc("a", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 2], self._read_var_from_nc("b", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_ss.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 1], self._read_var_from_nc("a", 'sas_parameters_q_ss.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 2], self._read_var_from_nc("b", 'sas_parameters_q_ss.nc'))
+            vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
+            vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], self._read_var_from_nc("sas_function", 'sas_parameters_transp.nc'))
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], self._read_var_from_nc("a", 'sas_parameters_transp.nc'))
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], self._read_var_from_nc("b", 'sas_parameters_transp.nc'))
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_rz.nc'))
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._read_var_from_nc("a", 'sas_parameters_q_rz.nc'))
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], self._read_var_from_nc("b", 'sas_parameters_q_rz.nc'))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_ss.nc'))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._read_var_from_nc("a", 'sas_parameters_q_ss.nc'))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], self._read_var_from_nc("b", 'sas_parameters_q_ss.nc'))
         elif settings.tm_structure == "complete-mixing + advection-dispersion":
-            vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[:, :, 0], 21)
-            vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[:, :, 0], 21)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 0], 1)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 1], self._read_var_from_nc("a", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 2], self._read_var_from_nc("b", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_ss.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 1], self._read_var_from_nc("a", 'sas_parameters_q_ss.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 2], self._read_var_from_nc("b", 'sas_parameters_q_ss.nc'))
+            vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
+            vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_rz.nc'))
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._read_var_from_nc("a", 'sas_parameters_q_rz.nc'))
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], self._read_var_from_nc("b", 'sas_parameters_q_rz.nc'))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_ss.nc'))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._read_var_from_nc("a", 'sas_parameters_q_ss.nc'))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], self._read_var_from_nc("b", 'sas_parameters_q_ss.nc'))
         elif settings.tm_structure in ["time-variant advection-disperison", "time-variant preferential"]:
-            vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[:, :, 0], 21)
-            vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[:, :, 0], 21)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_transp.nc'))
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 3], self._read_var_from_nc("lower_limit", 'sas_parameters_transp.nc'))
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 4], self._read_var_from_nc("upper_limit", 'sas_parameters_transp.nc'))
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 5], 0)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[:, :, 6], vs.S_sat_rz - vs.S_pwp_rz)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 3], self._read_var_from_nc("lower_limit", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 4], self._read_var_from_nc("upper_limit", 'sas_parameters_q_rz.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 5], 0)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[:, :, 6], vs.S_sat_rz - vs.S_pwp_rz)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_ss.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 3], self._read_var_from_nc("lower_limit", 'sas_parameters_q_ss.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 4], self._read_var_from_nc("upper_limit", 'sas_parameters_q_ss.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 5], 0)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[:, :, 6], vs.S_sat_ss - vs.S_pwp_ss)
+            vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
+            vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], self._read_var_from_nc("sas_function", 'sas_parameters_transp.nc'))
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], self._read_var_from_nc("lower_limit", 'sas_parameters_transp.nc'))
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], self._read_var_from_nc("upper_limit", 'sas_parameters_transp.nc'))
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz - vs.S_pwp_rz)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_rz.nc'))
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], self._read_var_from_nc("lower_limit", 'sas_parameters_q_rz.nc'))
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._read_var_from_nc("upper_limit", 'sas_parameters_q_rz.nc'))
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz - vs.S_pwp_rz)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], self._read_var_from_nc("sas_function", 'sas_parameters_q_ss.nc'))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], self._read_var_from_nc("lower_limit", 'sas_parameters_q_ss.nc'))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._read_var_from_nc("upper_limit", 'sas_parameters_q_ss.nc'))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss - vs.S_pwp_ss)
 
     @roger_routine
     def set_initial_conditions(self, state):
         vs = state.variables
         settings = state.settings
 
-        vs.S_RZ = update(vs.S_RZ, at[:, :, :], self._read_var_from_nc("S_rz", 'states_hm.nc'))
-        vs.S_SS = update(vs.S_SS, at[:, :, :], self._read_var_from_nc("S_ss", 'states_hm.nc'))
-        vs.S_S = update(vs.S_S, at[:, :, :], vs.S_RZ + vs.S_SS)
+        vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", 'states_hm.nc'))
+        vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", 'states_hm.nc'))
+        vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ + vs.S_SS)
 
-        vs.S_rz = update(vs.S_rz, at[:, :, :2], vs.S_RZ[:, :, 0, npx.newaxis] - vs.S_pwp_rz[:, :, npx.newaxis])
-        vs.S_ss = update(vs.S_ss, at[:, :, :2], vs.S_SS[:, :, 0, npx.newaxis] - vs.S_pwp_ss[:, :, npx.newaxis])
-        vs.S_s = update(vs.S_s, at[:, :, :2], vs.S_S[:, :, 0, npx.newaxis] - (vs.S_pwp_rz[:, :, npx.newaxis] + vs.S_pwp_ss[:, :, npx.newaxis]))
+        vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :2], vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
+        vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :2], vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+        vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :2], vs.S_S[2:-2, 2:-2, 0, npx.newaxis] - (vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis]))
 
         arr0 = allocate(state.dimensions, ("x", "y"))
         vs.sa_rz = update(
             vs.sa_rz,
-            at[:, :, :2, 1:], npx.diff(npx.linspace(arr0, vs.S_rz[:, :, vs.tau], settings.ages, axis=-1), axis=-1)[:, :, npx.newaxis, :],
+            at[2:-2, 2:-2, :2, 1:], npx.diff(npx.linspace(arr0, vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
         )
         vs.sa_ss = update(
             vs.sa_ss,
-            at[:, :, :2, 1:], npx.diff(npx.linspace(arr0, vs.S_ss[:, :, vs.tau], settings.ages, axis=-1), axis=-1)[:, :, npx.newaxis, :],
+            at[2:-2, 2:-2, :2, 1:], npx.diff(npx.linspace(arr0, vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
         )
 
         vs.SA_rz = update(
             vs.SA_rz,
-            at[:, :, :, 1:], npx.cumsum(vs.sa_rz, axis=3),
+            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_rz, axis=3),
         )
 
         vs.SA_ss = update(
             vs.SA_ss,
-            at[:, :, :, 1:], npx.cumsum(vs.sa_rz, axis=3),
+            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_rz, axis=3),
         )
 
         vs.sa_s = update(
             vs.sa_s,
-            at[:, :, :, :], vs.sa_rz + vs.sa_ss,
+            at[2:-2, 2:-2, :, :], vs.sa_rz + vs.sa_ss,
         )
         vs.SA_s = update(
             vs.SA_s,
-            at[:, :, :, 1:], npx.cumsum(vs.sa_s, axis=3),
+            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_s, axis=3),
         )
 
         if (settings.enable_bromide | settings.enable_chloride):
-            vs.C_rz = update(vs.C_rz, at[:, :, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[:, :, npx.newaxis])
-            vs.C_ss = update(vs.C_ss, at[:, :, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[:, :, npx.newaxis])
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[:, :, :2, :], vs.C_rz[:, :, :2, npx.newaxis] * vs.sa_rz[:, :, :2, :],
+                at[2:-2, 2:-2, :2, :], vs.C_rz[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :2, :],
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[:, :, :2, :], vs.C_ss[:, :, :2, npx.newaxis] * vs.sa_ss[:, :, :2, :],
+                at[2:-2, 2:-2, :2, :], vs.C_ss[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_ss[2:-2, 2:-2, :2, :],
             )
             vs.msa_s = update(
                 vs.msa_s,
-                at[:, :, :, :], vs.msa_rz + vs.msa_ss,
+                at[2:-2, 2:-2, :, :], vs.msa_rz + vs.msa_ss,
             )
             vs.M_rz = update(
                 vs.M_rz,
-                at[:, :, :], npx.sum(vs.msa_rz, axis=-1),
+                at[2:-2, 2:-2, :], npx.sum(vs.msa_rz, axis=-1),
             )
             vs.M_ss = update(
                 vs.M_ss,
-                at[:, :, :], npx.sum(vs.msa_ss, axis=-1),
+                at[2:-2, 2:-2, :], npx.sum(vs.msa_ss, axis=-1),
             )
             vs.M_s = update(
                 vs.M_s,
-                at[:, :, :], npx.sum(vs.msa_s, axis=-1),
+                at[2:-2, 2:-2, :], npx.sum(vs.msa_s, axis=-1),
             )
 
         elif (settings.enable_oxygen18 | settings.enable_deuterium):
-            vs.C_rz = update(vs.C_rz, at[:, :, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[:, :, npx.newaxis])
-            vs.C_ss = update(vs.C_ss, at[:, :, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[:, :, npx.newaxis])
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[:, :, :2, :], vs.C_rz[:, :, :2, npx.newaxis],
+                at[2:-2, 2:-2, :2, :], vs.C_rz[2:-2, 2:-2, :2, npx.newaxis],
             )
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[:, :, :2, 0], npx.NaN,
+                at[2:-2, 2:-2, :2, 0], npx.NaN,
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[:, :, :2, :], vs.C_ss[:, :, :2, npx.newaxis],
+                at[2:-2, 2:-2, :2, :], vs.C_ss[2:-2, 2:-2, :2, npx.newaxis],
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[:, :, :2, 0], npx.NaN,
+                at[2:-2, 2:-2, :2, 0], npx.NaN,
             )
             iso_rz = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
             iso_ss = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
             iso_rz = update(
                 iso_rz,
-                at[:, :, :, :], npx.where(npx.isnan(vs.msa_rz), 0, vs.msa_rz),
+                at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_rz), 0, vs.msa_rz),
             )
             iso_ss = update(
                 iso_ss,
-                at[:, :, :, :], npx.where(npx.isnan(vs.msa_ss), 0, vs.msa_ss),
+                at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_ss), 0, vs.msa_ss),
             )
             vs.msa_s = update(
                 vs.msa_s,
-                at[:, :, :, :], (vs.sa_rz / vs.sa_s) * iso_rz + (vs.sa_ss / vs.sa_s) * iso_ss,
+                at[2:-2, 2:-2, :, :], (vs.sa_rz / vs.sa_s) * iso_rz + (vs.sa_ss / vs.sa_s) * iso_ss,
             )
 
             vs.C_s = update(
                 vs.C_s,
-                at[:, :, vs.tau], calc_conc_iso_storage(state, vs.sa_s, vs.msa_s) * vs.maskCatch,
+                at[2:-2, 2:-2, vs.tau], calc_conc_iso_storage(state, vs.sa_s, vs.msa_s) * vs.maskCatch,
             )
 
             vs.C_s = update(
                 vs.C_s,
-                at[:, :, vs.taum1], vs.C_s[:, :, vs.tau] * vs.maskCatch,
+                at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau] * vs.maskCatch,
             )
 
         elif settings.enable_nitrate:
-            vs.C_rz = update(vs.C_rz, at[:, :, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[:, :, npx.newaxis])
-            vs.C_ss = update(vs.C_ss, at[:, :, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[:, :, npx.newaxis])
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("C_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis])
             p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
-            p_dec = update(p_dec, at[:, :, :2, :], sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))[npx.newaxis, npx.newaxis, npx.newaxis, :])
-            vs.Nmin_rz = update(vs.Nmin_rz, at[:, :, :2, :], self._read_var_from_nc("Nmin_rz", 'initvals.nc')[:, :, npx.newaxis, npx.newaxis] * p_dec * settings.dx * settings.dy * 100)
-            vs.Nmin_ss = update(vs.Nmin_ss, at[:, :, :2, :], self._read_var_from_nc("Nmin_ss", 'initvals.nc')[:, :, npx.newaxis, npx.newaxis] * p_dec * settings.dx * settings.dy * 100)
+            p_dec = update(p_dec, at[2:-2, 2:-2, :2, :], sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))[npx.newaxis, npx.newaxis, npx.newaxis, :])
+            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :2, :], self._read_var_from_nc("Nmin_rz", 'initvals.nc')[2:-2, 2:-2, npx.newaxis, npx.newaxis] * p_dec * settings.dx * settings.dy * 100)
+            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :2, :], self._read_var_from_nc("Nmin_ss", 'initvals.nc')[2:-2, 2:-2, npx.newaxis, npx.newaxis] * p_dec * settings.dx * settings.dy * 100)
             vs.msa_rz = update(
                 vs.msa_rz,
-                at[:, :, :2, :], vs.C_rz[:, :, :2, npx.newaxis] * vs.sa_rz[:, :, :2, :],
+                at[2:-2, 2:-2, :2, :], vs.C_rz[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :2, :],
             )
             vs.msa_ss = update(
                 vs.msa_ss,
-                at[:, :, :2, :], vs.C_ss[:, :, :2, npx.newaxis] * vs.sa_ss[:, :, :2, :],
+                at[2:-2, 2:-2, :2, :], vs.C_ss[2:-2, 2:-2, :2, npx.newaxis] * vs.sa_ss[2:-2, 2:-2, :2, :],
             )
             vs.msa_s = update(
                 vs.msa_s,
-                at[:, :, :, :], vs.msa_rz + vs.msa_ss,
+                at[2:-2, 2:-2, :, :], vs.msa_rz + vs.msa_ss,
             )
             vs.M_rz = update(
                 vs.M_rz,
-                at[:, :, :], npx.sum(vs.msa_rz, axis=-1),
+                at[2:-2, 2:-2, :], npx.sum(vs.msa_rz, axis=-1),
             )
             vs.M_ss = update(
                 vs.M_ss,
-                at[:, :, :], npx.sum(vs.msa_ss, axis=-1),
+                at[2:-2, 2:-2, :], npx.sum(vs.msa_ss, axis=-1),
             )
             vs.M_s = update(
                 vs.M_s,
-                at[:, :, :], npx.sum(vs.msa_s, axis=-1),
+                at[2:-2, 2:-2, :], npx.sum(vs.msa_s, axis=-1),
             )
 
     @roger_routine
@@ -319,32 +317,32 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
         settings = state.settings
 
         if (vs.itt == 0):
-            vs.TA = update(vs.TA, at[:, :, :], self._read_var_from_nc("ta", 'states_hm.nc'))
-            vs.PREC = update(vs.PREC, at[:, :, :], self._read_var_from_nc("prec", 'states_hm.nc'))
-            vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[:, :, :], self._read_var_from_nc("inf_mat_rz", 'states_hm.nc'))
-            vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[:, :, :], self._read_var_from_nc("inf_mp_rz", 'states_hm.nc') + self._read_var_from_nc("inf_sc_rz", 'states_hm.nc'))
-            vs.INF_PF_SS = update(vs.INF_PF_SS, at[:, :, :], self._read_var_from_nc("inf_ss", 'states_hm.nc'))
-            vs.TRANSP = update(vs.TRANSP, at[:, :, :], self._read_var_from_nc("transp", 'states_hm.nc'))
-            vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[:, :, :], self._read_var_from_nc("evap_soil", 'states_hm.nc'))
-            vs.Q_RZ = update(vs.Q_RZ, at[:, :, :], self._read_var_from_nc("q_rz", 'states_hm.nc'))
-            vs.Q_SS = update(vs.Q_SS, at[:, :, :], self._read_var_from_nc("q_ss", 'states_hm.nc'))
+            vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("ta", 'states_hm.nc'))
+            vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", 'states_hm.nc'))
+            vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", 'states_hm.nc'))
+            vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", 'states_hm.nc') + self._read_var_from_nc("inf_sc_rz", 'states_hm.nc'))
+            vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", 'states_hm.nc'))
+            vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", 'states_hm.nc'))
+            vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", 'states_hm.nc'))
+            vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", 'states_hm.nc'))
+            vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", 'states_hm.nc'))
 
             if settings.enable_bromide:
-                vs.M_IN = update(vs.M_IN, at[:, :, :], self._read_var_from_nc("Br", 'tracer_input.nc'))
+                vs.M_IN = update(vs.M_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("Br", 'tracer_input.nc'))
 
             if settings.enable_chloride:
-                vs.C_IN = update(vs.C_IN, at[:, :, :], self._read_var_from_nc("Cl", 'tracer_input.nc'))
+                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("Cl", 'tracer_input.nc'))
 
             if settings.enable_deuterium:
-                vs.C_IN = update(vs.C_IN, at[:, :, :], self._read_var_from_nc("d2H", 'tracer_input.nc'))
+                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d2H", 'tracer_input.nc'))
 
             if settings.enable_oxygen18:
-                vs.C_IN = update(vs.C_IN, at[:, :, :], self._read_var_from_nc("d18O", 'tracer_input.nc'))
+                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d18O", 'tracer_input.nc'))
 
             if settings.enable_nitrate:
                 # convert kg N/ha to mg/square meter
-                vs.NMIN_IN = update(vs.NMIN_IN, at[:, :, :], self._read_var_from_nc("Nmin", 'tracer_input.nc') * 100 * settings.dx * settings.dy)
-                vs.NORG_IN = update(vs.NORG_IN, at[:, :, :], self._read_var_from_nc("Norg", 'tracer_input.nc') * 100 * settings.dx * settings.dy)
+                vs.NMIN_IN = update(vs.NMIN_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("Nmin", 'tracer_input.nc') * 100 * settings.dx * settings.dy)
+                vs.NORG_IN = update(vs.NORG_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("Norg", 'tracer_input.nc') * 100 * settings.dx * settings.dy)
 
             if settings.enable_bromide:
                 mask_rain = (vs.PREC > 0) & (vs.TA > 0)
@@ -424,26 +422,26 @@ def set_bromide_input_kernel(state, nn_rain, nn_sol):
         start_rain = rain_idx[input_itt]
         rain_sum = update(
             rain_sum,
-            at[:, :], npx.max(npx.where(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1) <= 20, npx.max(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1), axis=-1), 0), axis=-1),
+            at[2:-2, 2:-2], npx.max(npx.where(npx.cumsum(vs.PREC[2:-2, 2:-2, start_rain:], axis=-1) <= 20, npx.max(npx.cumsum(vs.PREC[2:-2, 2:-2, start_rain:], axis=-1), axis=-1), 0), axis=-1),
         )
-        nn_end = npx.max(npx.where(npx.cumsum(vs.PREC[:, :, start_rain:]) <= 20, npx.max(npx.arange(npx.shape(vs.PREC)[2])[npx.newaxis, npx.newaxis, npx.shape(vs.PREC)[2]-start_rain], axis=-1), 0))
+        nn_end = npx.max(npx.where(npx.cumsum(vs.PREC[2:-2, 2:-2, start_rain:]) <= 20, npx.max(npx.arange(npx.shape(vs.PREC)[2])[npx.newaxis, npx.newaxis, npx.shape(vs.PREC)[2]-start_rain], axis=-1), 0))
         end_rain = update(end_rain, at[:], start_rain + nn_end)
         end_rain = update(end_rain, at[:], npx.where(end_rain > npx.shape(vs.PREC)[2], npx.shape(vs.PREC)[2], end_rain))
 
         # proportions for redistribution
         M_IN = update(
             M_IN,
-            at[:, :, start_rain:end_rain[0]], vs.M_IN[:, :, sol_idx[i], npx.newaxis] * (vs.PREC[:, :, start_rain:end_rain[0]] / rain_sum[:, :, npx.newaxis]),
+            at[2:-2, 2:-2, start_rain:end_rain[0]], vs.M_IN[2:-2, 2:-2, sol_idx[i], npx.newaxis] * (vs.PREC[2:-2, 2:-2, start_rain:end_rain[0]] / rain_sum[2:-2, 2:-2, npx.newaxis]),
         )
 
     # solute input concentration
     vs.M_IN = update(
         vs.M_IN,
-        at[:, :, :], M_IN,
+        at[2:-2, 2:-2, :], M_IN,
     )
     vs.C_IN = update(
         vs.C_IN,
-        at[:, :, :], npx.where(vs.PREC > 0, vs.M_IN / vs.PREC, 0),
+        at[2:-2, 2:-2, :], npx.where(vs.PREC > 0, vs.M_IN / vs.PREC, 0),
     )
 
     return KernelOutput(
@@ -458,11 +456,11 @@ def set_forcing_bromide_kernel(state):
 
     vs.M_in = update(
         vs.M_in,
-        at[:, :], vs.M_IN[:, :, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.M_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch,
     )
     vs.C_in = update(
         vs.C_in,
-        at[:, :], vs.C_IN[:, :, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch,
     )
 
     return KernelOutput(
@@ -477,12 +475,12 @@ def set_forcing_chloride_kernel(state):
 
     vs.C_in = update(
         vs.C_in,
-        at[:, :], npx.where((vs.PREC[:, :, vs.itt] > 0) & (vs.TA[:, :, vs.itt] > 0), vs.C_IN[:, :, vs.itt], 0) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where((vs.PREC[2:-2, 2:-2, vs.itt] > 0) & (vs.TA[2:-2, 2:-2, vs.itt] > 0), vs.C_IN[2:-2, 2:-2, vs.itt], 0) * vs.maskCatch,
     )
 
     vs.M_in = update(
         vs.M_in,
-        at[:, :], vs.C_in * vs.PREC[:, :, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.C_in * vs.PREC[2:-2, 2:-2, vs.itt] * vs.maskCatch,
     )
 
     return KernelOutput(
@@ -495,7 +493,7 @@ def set_forcing_chloride_kernel(state):
 def set_iso_input_kernel(state):
     vs = state.variables
 
-    vs.C_IN = update(vs.C_IN, at[:, :, :], _ffill_3d(state, vs.C_IN))
+    vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], _ffill_3d(state, vs.C_IN))
 
     return KernelOutput(
         C_IN=vs.C_IN,
@@ -508,12 +506,12 @@ def set_forcing_iso_kernel(state):
 
     vs.C_in = update(
         vs.C_in,
-        at[:, :], npx.where(vs.PREC[:, :, vs.itt] > 0, vs.C_IN[:, :, vs.itt], npx.NaN) * vs.maskCatch,
+        at[2:-2, 2:-2], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.NaN) * vs.maskCatch,
     )
 
     vs.M_in = update(
         vs.M_in,
-        at[:, :], vs.C_in * vs.PREC[:, :, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.C_in * vs.PREC[2:-2, 2:-2, vs.itt] * vs.maskCatch,
     )
 
     return KernelOutput(
@@ -544,30 +542,30 @@ def set_nitrate_input_kernel(state, nn_rain, nn_sol):
         start_rain = rain_idx[input_itt]
         rain_sum = update(
             rain_sum,
-            at[:, :], npx.max(npx.where(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1) <= 20, npx.max(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1), axis=-1), 0), axis=-1),
+            at[2:-2, 2:-2], npx.max(npx.where(npx.cumsum(vs.PREC[2:-2, 2:-2, start_rain:], axis=-1) <= 20, npx.max(npx.cumsum(vs.PREC[2:-2, 2:-2, start_rain:], axis=-1), axis=-1), 0), axis=-1),
         )
-        nn_end = npx.max(npx.where(npx.cumsum(vs.PREC[:, :, start_rain:]) <= 20, npx.max(npx.arange(npx.shape(vs.PREC)[2])[npx.newaxis, npx.newaxis, npx.shape(vs.PREC)[2]-start_rain], axis=-1), 0))
+        nn_end = npx.max(npx.where(npx.cumsum(vs.PREC[2:-2, 2:-2, start_rain:]) <= 20, npx.max(npx.arange(npx.shape(vs.PREC)[2])[npx.newaxis, npx.newaxis, npx.shape(vs.PREC)[2]-start_rain], axis=-1), 0))
         end_rain = update(end_rain, at[:], start_rain + nn_end)
         end_rain = update(end_rain, at[:], npx.where(end_rain > npx.shape(vs.PREC)[2], npx.shape(vs.PREC)[2], end_rain))
 
         # proportions for redistribution
         NMIN_IN = update(
             NMIN_IN,
-            at[:, :, start_rain:end_rain[0]], vs.M_IN[:, :, sol_idx[i], npx.newaxis] * (vs.PREC[:, :, start_rain:end_rain[0]] / rain_sum[:, :, npx.newaxis]),
+            at[2:-2, 2:-2, start_rain:end_rain[0]], vs.M_IN[2:-2, 2:-2, sol_idx[i], npx.newaxis] * (vs.PREC[2:-2, 2:-2, start_rain:end_rain[0]] / rain_sum[2:-2, 2:-2, npx.newaxis]),
         )
 
     # solute input concentration
     vs.M_IN = update(
         vs.M_IN,
-        at[:, :, :], NMIN_IN * 0.3,
+        at[2:-2, 2:-2, :], NMIN_IN * 0.3,
     )
     vs.C_IN = update(
         vs.C_IN,
-        at[:, :, :], npx.where(vs.PREC > 0, vs.M_IN / vs.PREC, 0),
+        at[2:-2, 2:-2, :], npx.where(vs.PREC > 0, vs.M_IN / vs.PREC, 0),
     )
     vs.NMIN_IN = update(
         vs.NMIN_IN,
-        at[:, :, :], NMIN_IN * 0.7,
+        at[2:-2, 2:-2, :], NMIN_IN * 0.7,
     )
 
     return KernelOutput(
@@ -583,22 +581,22 @@ def set_forcing_nitrate_kernel(state):
 
     vs.C_in = update(
         vs.C_in,
-        at[:, :], vs.C_IN[:, :, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch,
     )
 
     vs.M_in = update(
         vs.M_in,
-        at[:, :], vs.M_IN[:, :, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.M_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch,
     )
 
     vs.Nmin_in = update(
         vs.Nmin_in,
-        at[:, :], vs.NMIN_IN[:, :, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.NMIN_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch,
     )
 
     vs.Norg_in = update(
         vs.Norg_in,
-        at[:, :], vs.NORG_IN[:, :, vs.itt] * vs.maskCatch,
+        at[2:-2, 2:-2], vs.NORG_IN[2:-2, 2:-2, vs.itt] * vs.maskCatch,
     )
 
     return KernelOutput(
@@ -613,18 +611,18 @@ def set_forcing_nitrate_kernel(state):
 def set_states_kernel(state):
     vs = state.variables
 
-    vs.inf_mat_rz = update(vs.inf_mat_rz, at[:, :], vs.INF_MAT_RZ[:, :, vs.itt])
-    vs.inf_pf_rz = update(vs.inf_pf_rz, at[:, :], vs.INF_PF_RZ[:, :, vs.itt])
-    vs.inf_pf_ss = update(vs.inf_pf_ss, at[:, :], vs.INF_PF_SS[:, :, vs.itt])
-    vs.transp = update(vs.transp, at[:, :], vs.TRANSP[:, :, vs.itt])
-    vs.evap_soil = update(vs.evap_soil, at[:, :], vs.EVAP_SOIL[:, :, vs.itt])
-    vs.q_rz = update(vs.q_rz, at[:, :], vs.Q_RZ[:, :, vs.itt])
-    vs.q_ss = update(vs.q_ss, at[:, :], vs.Q_SS[:, :, vs.itt])
-    vs.cpr_rz = update(vs.cpr_ss, at[:, :], vs.CPR_RZ[:, :, vs.itt])
+    vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], vs.INF_MAT_RZ[2:-2, 2:-2, vs.itt])
+    vs.inf_pf_rz = update(vs.inf_pf_rz, at[2:-2, 2:-2], vs.INF_PF_RZ[2:-2, 2:-2, vs.itt])
+    vs.inf_pf_ss = update(vs.inf_pf_ss, at[2:-2, 2:-2], vs.INF_PF_SS[2:-2, 2:-2, vs.itt])
+    vs.transp = update(vs.transp, at[2:-2, 2:-2], vs.TRANSP[2:-2, 2:-2, vs.itt])
+    vs.evap_soil = update(vs.evap_soil, at[2:-2, 2:-2], vs.EVAP_SOIL[2:-2, 2:-2, vs.itt])
+    vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], vs.Q_RZ[2:-2, 2:-2, vs.itt])
+    vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], vs.Q_SS[2:-2, 2:-2, vs.itt])
+    vs.cpr_rz = update(vs.cpr_ss, at[2:-2, 2:-2], vs.CPR_RZ[2:-2, 2:-2, vs.itt])
 
-    vs.S_rz = update(vs.S_rz, at[:, :, vs.tau], vs.S_RZ[:, :, vs.itt])
-    vs.S_ss = update(vs.S_ss, at[:, :, vs.tau], vs.S_SS[:, :, vs.itt])
-    vs.S_s = update(vs.S_s, at[:, :, vs.tau], vs.S_S[:, :, vs.itt])
+    vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], vs.S_RZ[2:-2, 2:-2, vs.itt])
+    vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], vs.S_SS[2:-2, 2:-2, vs.itt])
+    vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_S[2:-2, 2:-2, vs.itt])
 
     return KernelOutput(
         inf_mat_rz=vs.inf_mat_rz,
@@ -646,75 +644,75 @@ def after_timestep_kernel(state):
 
     vs.SA_rz = update(
         vs.SA_rz,
-        at[:, :, vs.taum1, :], vs.SA_rz[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.SA_rz[2:-2, 2:-2, vs.tau, :],
     )
     vs.sa_rz = update(
         vs.sa_rz,
-        at[:, :, vs.taum1, :], vs.sa_rz[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.sa_rz[2:-2, 2:-2, vs.tau, :],
     )
     vs.MSA_rz = update(
         vs.MSA_rz,
-        at[:, :, vs.taum1, :], vs.MSA_rz[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.MSA_rz[2:-2, 2:-2, vs.tau, :],
     )
     vs.msa_rz = update(
         vs.msa_rz,
-        at[:, :, vs.taum1, :], vs.msa_rz[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.msa_rz[2:-2, 2:-2, vs.tau, :],
     )
     vs.M_rz = update(
         vs.M_rz,
-        at[:, :, vs.taum1], vs.M_rz[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.M_rz[2:-2, 2:-2, vs.tau],
     )
     vs.C_rz = update(
         vs.C_rz,
-        at[:, :, vs.taum1], vs.C_rz[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.C_rz[2:-2, 2:-2, vs.tau],
     )
     vs.SA_ss = update(
         vs.SA_ss,
-        at[:, :, vs.taum1, :], vs.SA_ss[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.SA_ss[2:-2, 2:-2, vs.tau, :],
     )
     vs.sa_ss = update(
         vs.sa_ss,
-        at[:, :, vs.taum1, :], vs.sa_ss[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.sa_ss[2:-2, 2:-2, vs.tau, :],
     )
     vs.MSA_ss = update(
         vs.MSA_ss,
-        at[:, :, vs.taum1, :], vs.MSA_ss[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.MSA_ss[2:-2, 2:-2, vs.tau, :],
     )
     vs.msa_ss = update(
         vs.msa_ss,
-        at[:, :, vs.taum1, :], vs.msa_ss[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.msa_ss[2:-2, 2:-2, vs.tau, :],
     )
     vs.M_ss = update(
         vs.M_ss,
-        at[:, :, vs.taum1], vs.M_ss[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.M_ss[2:-2, 2:-2, vs.tau],
     )
     vs.C_ss = update(
         vs.C_ss,
-        at[:, :, vs.taum1], vs.C_ss[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.C_ss[2:-2, 2:-2, vs.tau],
     )
     vs.SA_s = update(
         vs.SA_s,
-        at[:, :, vs.taum1, :], vs.SA_s[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.SA_s[2:-2, 2:-2, vs.tau, :],
     )
     vs.sa_s = update(
         vs.sa_s,
-        at[:, :, vs.taum1, :], vs.sa_s[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.sa_s[2:-2, 2:-2, vs.tau, :],
     )
     vs.MSA_s = update(
         vs.MSA_s,
-        at[:, :, vs.taum1, :], vs.MSA_s[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.MSA_s[2:-2, 2:-2, vs.tau, :],
     )
     vs.msa_s = update(
         vs.msa_s,
-        at[:, :, vs.taum1, :], vs.msa_s[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.msa_s[2:-2, 2:-2, vs.tau, :],
     )
     vs.M_s = update(
         vs.M_s,
-        at[:, :, vs.taum1], vs.M_s[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.M_s[2:-2, 2:-2, vs.tau],
     )
     vs.C_s = update(
         vs.C_s,
-        at[:, :, vs.taum1], vs.C_s[:, :, vs.tau],
+        at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau],
     )
 
     return KernelOutput(
@@ -745,17 +743,17 @@ def after_timestep_nitrate_kernel(state):
 
     vs.Nmin_rz = update(
         vs.Nmin_rz,
-        at[:, :, vs.taum1, :], vs.Nmin_rz[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.Nmin_rz[2:-2, 2:-2, vs.tau, :],
         )
 
     vs.Nmin_ss = update(
         vs.Nmin_ss,
-        at[:, :, vs.taum1, :], vs.Nmin_ss[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.Nmin_ss[2:-2, 2:-2, vs.tau, :],
         )
 
     vs.Nmin_s = update(
         vs.Nmin_s,
-        at[:, :, vs.taum1, :], vs.Nmin_s[:, :, vs.tau, :],
+        at[2:-2, 2:-2, vs.taum1, :], vs.Nmin_s[2:-2, 2:-2, vs.tau, :],
         )
 
     return KernelOutput(
@@ -771,26 +769,26 @@ def calc_conc_iso_storage(state, sa, msa):
     """
     vs = state.variables
 
-    mask = npx.isfinite(msa[:, :, vs.tau, :])
+    mask = npx.isfinite(msa[2:-2, 2:-2, vs.tau, :])
     vals = allocate(state.dimensions, ("x", "y", "ages"))
     weights = allocate(state.dimensions, ("x", "y", "ages"))
     vals = update(
         vals,
-        at[:, :, :], npx.where(mask, msa[:, :, vs.tau, :], 0),
+        at[2:-2, 2:-2, :], npx.where(mask, msa[2:-2, 2:-2, vs.tau, :], 0),
     )
     weights = update(
         weights,
-        at[:, :, :], npx.where(sa[:, :, vs.tau, :] * mask > 0, sa[:, :, vs.tau, :] / npx.sum(sa[:, :, vs.tau, :] * mask, axis=-1)[:, :, npx.newaxis], 0),
+        at[2:-2, 2:-2, :], npx.where(sa[2:-2, 2:-2, vs.tau, :] * mask > 0, sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :] * mask, axis=-1)[2:-2, 2:-2, npx.newaxis], 0),
     )
     conc = allocate(state.dimensions, ("x", "y"))
     # calculate weighted average
     conc = update(
         conc,
-        at[:, :], npx.sum(vals * weights, axis=-1),
+        at[2:-2, 2:-2], npx.sum(vals * weights, axis=-1),
     )
     conc = update(
         conc,
-        at[:, :], npx.where(conc != 0, conc, npx.NaN),
+        at[2:-2, 2:-2], npx.where(conc != 0, conc, npx.NaN),
     )
 
     return conc
@@ -806,11 +804,11 @@ def _ffill_3d(state, arr):
     arr_fill = allocate(state.dimensions, ("x", "y", "t"))
     idx = update(
         idx,
-        at[:, :, :], npx.where(npx.isfinite(arr), npx.arange(npx.shape(arr)[2])[idx_shape], 0),
+        at[2:-2, 2:-2, :], npx.where(npx.isfinite(arr), npx.arange(npx.shape(arr)[2])[idx_shape], 0),
     )
     idx = update(
         idx,
-        at[:, :, :], npx.maximum.accumulate(idx, axis=-1),
+        at[2:-2, 2:-2, :], npx.maximum.accumulate(idx, axis=-1),
     )
     arr1 = update(
         arr1,
@@ -822,11 +820,11 @@ def _ffill_3d(state, arr):
     )
     arr3 = update(
         arr3,
-        at[:, :, :], idx,
+        at[2:-2, 2:-2, :], idx,
     )
     arr_fill = update(
         arr_fill,
-        at[:, :, :], arr[arr1, arr2, arr3],
+        at[2:-2, 2:-2, :], arr[arr1, arr2, arr3],
     )
 
     return arr_fill
