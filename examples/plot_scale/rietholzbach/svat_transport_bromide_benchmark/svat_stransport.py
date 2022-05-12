@@ -550,13 +550,11 @@ def after_timestep_kernel(state):
         )
 
 
-tm_structures = ['complete-mixing']
-
-# tm_structures = ['complete-mixing', 'piston',
-#                  'preferential', 'advection-dispersion',
-#                  'complete-mixing advection-dispersion',
-#                  'time-variant preferential',
-#                  'time-variant advection-dispersion']
+tm_structures = ['complete-mixing', 'piston',
+                 'preferential', 'advection-dispersion',
+                 'complete-mixing advection-dispersion',
+                 'time-variant preferential',
+                 'time-variant advection-dispersion']
 years = onp.arange(1997, 2007).tolist()
 for tm_structure in tm_structures:
     for year in years:

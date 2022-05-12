@@ -363,9 +363,6 @@ for rainfall_scenario in rainfall_scenarios:
     model = DISTEVENTSetup()
     path_scenario = model._base_path / "input" / rainfall_scenario
     model._set_input_dir(path_scenario)
-    input_dir = model._base_path / "input"
-    if not os.path.exists(input_dir):
-        os.mkdir(input_dir)
     if not os.path.exists(path_scenario):
         os.mkdir(path_scenario)
     make_forcing_event(path_scenario, nhours=5, event_type=rainfall_scenario)
