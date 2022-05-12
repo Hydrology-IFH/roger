@@ -17,7 +17,7 @@ import numpy as onp
 onp.random.seed(42)
 
 # number of monte-carlo samples
-NSAMPLES = 100
+NSAMPLES = 10000
 
 
 class SVATSetup(RogerSetup):
