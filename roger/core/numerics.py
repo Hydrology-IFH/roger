@@ -521,7 +521,7 @@ def calc_parameters_surface_kernel(state):
     trees_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
     trees_cond = update(
         trees_cond,
-        at[:, :], npx.isin(vs.lu_id, npx.array([10, 11, 12, 15])) * vs.maskCatch[2:-2, 2:-2],
+        at[:, :], npx.isin(vs.lu_id, npx.array([10, 11, 12, 15])),
     )
 
     def loop_body_S_int_top_tot(i, S_int_top_tot):
@@ -547,7 +547,7 @@ def calc_parameters_surface_kernel(state):
     ground_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
     ground_cond = update(
         ground_cond,
-        at[:, :], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 13, 98, 31, 32, 33, 40, 41, 50, 98])) * vs.maskCatch[2:-2, 2:-2]
+        at[:, :], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 13, 98, 31, 32, 33, 40, 41, 50, 98]))
     )
 
     def loop_body_S_int_ground_tot(i, S_int_ground_tot):
@@ -563,7 +563,7 @@ def calc_parameters_surface_kernel(state):
     trees_ground_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
     trees_ground_cond = update(
         trees_ground_cond,
-        at[:, :], npx.isin(vs.lu_id, npx.array([10, 11, 12, 15])) * vs.maskCatch[2:-2, 2:-2]
+        at[:, :], npx.isin(vs.lu_id, npx.array([10, 11, 12, 15]))
     )
 
     def loop_body_S_int_ground_tot_trees(i, S_int_ground_tot):
@@ -589,7 +589,7 @@ def calc_parameters_surface_kernel(state):
     cc_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
     cc_cond = update(
         cc_cond,
-        at[:, :], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 98, 31, 32, 33, 40, 41, 50, 98])) * vs.maskCatch[2:-2, 2:-2]
+        at[:, :], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 98, 31, 32, 33, 40, 41, 50, 98]))
     )
 
     def loop_body_ground_cover(i, ground_cover):

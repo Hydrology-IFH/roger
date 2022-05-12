@@ -64,10 +64,10 @@ class SVATSetup(RogerSetup):
         settings.identifier = "SVAT"
 
         settings.nx, settings.ny, settings.nz = NSAMPLES, 1, 1
-        settings.nitt = self._get_nitt(self.input_dir, 'forcing.nc')
-        settings.nittevent = self._get_nittevent(self.input_dir, 'forcing.nc')
+        settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
+        settings.nittevent = self._get_nittevent(self._input_dir, 'forcing.nc')
         settings.nittevent_p1 = settings.nittevent + 1
-        settings.runlen = self._get_runlen(self.input_dir, 'forcing.nc')
+        settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
         # lysimeter surface 3.14 square meter (2m diameter)
         settings.dx = 2
@@ -102,11 +102,11 @@ class SVATSetup(RogerSetup):
         vs = state.variables
 
         # temporal grid
-        vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", self.input_dir, 'forcing.nc'))
+        vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", self._input_dir, 'forcing.nc'))
         vs.DT = update(vs.DT, at[:], vs.DT_SECS / (60 * 60))
-        vs.YEAR = update(vs.YEAR, at[:], self._read_var_from_nc("year", self.input_dir, 'forcing.nc'))
-        vs.MONTH = update(vs.MONTH, at[:], self._read_var_from_nc("month", self.input_dir, 'forcing.nc'))
-        vs.DOY = update(vs.DOY, at[:], self._read_var_from_nc("doy", self.input_dir, 'forcing.nc'))
+        vs.YEAR = update(vs.YEAR, at[:], self._read_var_from_nc("year", self._input_dir, 'forcing.nc'))
+        vs.MONTH = update(vs.MONTH, at[:], self._read_var_from_nc("month", self._input_dir, 'forcing.nc'))
+        vs.DOY = update(vs.DOY, at[:], self._read_var_from_nc("doy", self._input_dir, 'forcing.nc'))
         vs.dt_secs = vs.DT_SECS[vs.itt]
         vs.dt = vs.DT[vs.itt]
         vs.year = vs.YEAR[vs.itt]
@@ -195,10 +195,10 @@ class SVATSetup(RogerSetup):
     def set_forcing_setup(self, state):
         vs = state.variables
 
-        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self.input_dir, 'forcing.nc'))
-        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self.input_dir, 'forcing.nc'))
-        vs.PET = update(vs.PET, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self.input_dir, 'forcing.nc'))
-        vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID", self.input_dir, 'forcing.nc'))
+        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
+        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
+        vs.PET = update(vs.PET, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc'))
+        vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc'))
 
     @roger_routine
     def set_forcing(self, state):
