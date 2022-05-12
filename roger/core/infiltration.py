@@ -132,7 +132,7 @@ def calc_inf_mat(state):
         vs.z_wf_t1,
         at[2:-2, 2:-2, vs.tau], npx.where(npx.isfinite(dz_wf[2:-2, 2:-2]), dz_wf[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
-    mask13 = (vs.z_wf_t0[:, :, vs.tau] > vs.z_soil[2:-2, 2:-2])
+    mask13 = (vs.z_wf_t0[:, :, vs.tau] > vs.z_soil)
     vs.z_wf_t0 = update(
         vs.z_wf_t0,
         at[2:-2, 2:-2, vs.tau], npx.where(mask13[2:-2, 2:-2], vs.z_soil[2:-2, 2:-2], vs.z_wf_t0[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
@@ -235,7 +235,7 @@ def calc_inf_mat(state):
         at[2:-2, 2:-2], npx.where(mask20[2:-2, 2:-2], vs.theta_d_rel_t0[2:-2, 2:-2], vs.theta_d_rel[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    mask16 = (vs.z_wf[:, :, vs.tau] > vs.z_soil[2:-2, 2:-2])
+    mask16 = (vs.z_wf[:, :, vs.tau] > vs.z_soil)
     vs.z_wf = update(
         vs.z_wf,
         at[2:-2, 2:-2, vs.tau], npx.where(mask16[2:-2, 2:-2], vs.z_soil[2:-2, 2:-2], vs.z_wf[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
@@ -858,7 +858,7 @@ def calc_surface_runoff(state):
 
     vs.q_hof = update(
         vs.q_hof,
-        at[2:-2, 2:-2], npx.where((vs.z0[2:-2, 2:-2] > 0) & (vs.S_rz[2:-2, 2:-2] < vs.S_sat_rz[2:-2, 2:-2]), vs.z0[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where((vs.z0[2:-2, 2:-2, vs.tau] > 0) & (vs.S_rz[2:-2, 2:-2, vs.tau] < vs.S_sat_rz[2:-2, 2:-2]), vs.z0[2:-2, 2:-2, vs.tau], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.z0 = update_add(
@@ -868,7 +868,7 @@ def calc_surface_runoff(state):
 
     vs.q_sof = update(
         vs.q_sof,
-        at[2:-2, 2:-2], npx.where((vs.z0[2:-2, 2:-2] > 0) & (vs.S_rz[2:-2, 2:-2] >= vs.S_sat_rz[2:-2, 2:-2]), vs.z0[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where((vs.z0[2:-2, 2:-2, vs.tau] > 0) & (vs.S_rz[2:-2, 2:-2, vs.tau] >= vs.S_sat_rz[2:-2, 2:-2]), vs.z0[2:-2, 2:-2, vs.tau], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.z0 = update_add(
@@ -1583,10 +1583,10 @@ def calculate_infiltration(state):
         arr_itt,
         at[2:-2, 2:-2], vs.itt,
     )
-    cond1 = ((vs.EVENT_ID[2:-2, 2:-2, vs.itt-1] == 0) & (vs.EVENT_ID[2:-2, 2:-2, vs.itt] >= 1) & (arr_itt >= 1))
-    cond2 = ((vs.PREC[2:-2, 2:-2, vs.itt] == 0) & (vs.PREC[2:-2, 2:-2, vs.itt - 1] != 0) & (vs.EVENT_ID[2:-2, 2:-2, vs.itt - 1] >= 1) & (arr_itt >= 1))
-    cond3 = ((vs.PREC[2:-2, 2:-2, vs.itt] != 0) & (vs.PREC[2:-2, 2:-2, vs.itt - 1] == 0) & (vs.EVENT_ID[2:-2, 2:-2, vs.itt - 1] == vs.EVENT_ID[2:-2, 2:-2, vs.itt]) & (arr_itt >= 1))
-    cond4 = ((vs.EVENT_ID[2:-2, 2:-2, vs.itt-1] >= 1) & (vs.EVENT_ID[2:-2, 2:-2, vs.itt] == 0) & (arr_itt >= 1))
+    cond1 = ((vs.EVENT_ID[2:-2, 2:-2, vs.itt-1] == 0) & (vs.EVENT_ID[2:-2, 2:-2, vs.itt] >= 1) & (arr_itt[2:-2, 2:-2] >= 1))
+    cond2 = ((vs.PREC[2:-2, 2:-2, vs.itt] == 0) & (vs.PREC[2:-2, 2:-2, vs.itt - 1] != 0) & (vs.EVENT_ID[2:-2, 2:-2, vs.itt - 1] >= 1) & (arr_itt[2:-2, 2:-2] >= 1))
+    cond3 = ((vs.PREC[2:-2, 2:-2, vs.itt] != 0) & (vs.PREC[2:-2, 2:-2, vs.itt - 1] == 0) & (vs.EVENT_ID[2:-2, 2:-2, vs.itt - 1] == vs.EVENT_ID[2:-2, 2:-2, vs.itt]) & (arr_itt[2:-2, 2:-2] >= 1))
+    cond4 = ((vs.EVENT_ID[2:-2, 2:-2, vs.itt-1] >= 1) & (vs.EVENT_ID[2:-2, 2:-2, vs.itt] == 0) & (arr_itt[2:-2, 2:-2] >= 1))
     cond5 = (vs.EVENT_ID[2:-2, 2:-2, vs.itt] >= 1)
     if cond1.any():
         # number of event
