@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import h5netcdf
 from SALib.sample import saltelli
 
