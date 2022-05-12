@@ -983,7 +983,7 @@ def calculate_percolation_rz_transport_anion_kernel(state):
 
     vs.tt_q_rz = update(
         vs.tt_q_rz,
-        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.q_rz, vs.sas_params_q_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.q_rz, vs.sas_params_q_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.TT_q_rz = update(

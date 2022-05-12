@@ -1,7 +1,6 @@
 import os
 import numpy as np
 
-from roger import roger_routine
 from roger.setups.svat import SVATSetup
 
 
@@ -18,12 +17,6 @@ def _normalize(*arrays):
 
 class RestartSetup(SVATSetup):
     pass
-    # @roger_routine
-    # def set_diagnostics(self, state):
-    #     for diag in state.diagnostics.values():
-    #         diag.sampling_frequency = 1
-    #         diag.output_frequency = 24 * 60 * 60
-
 
 def test_restart(tmpdir):
     from roger.tools.make_toy_setup import make_setup  # noqa: E402

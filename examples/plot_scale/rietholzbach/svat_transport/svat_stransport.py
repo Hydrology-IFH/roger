@@ -1,11 +1,6 @@
 from pathlib import Path
-import glob
-import datetime
 import h5netcdf
-import matplotlib.pyplot as plt
-import xarray as xr
-from cftime import num2date
-import pandas as pd
+import os
 
 from roger import runtime_settings as rs
 rs.backend = "numpy"
@@ -22,21 +17,30 @@ class SVATTRANSPORTSetup(RogerSetup):
     """
     _base_path = Path(__file__).parent
     _tm_structure = None
+    _input_dir = None
 
-    def _read_var_from_nc(self, var, file):
-        nc_file = self._base_path / file
+    def _set_input_dir(self, path):
+        if os.path.exists(path):
+            self._input_dir = path
+        else:
+            self._input_dir = path
+            if not os.path.exists(self._input_dir):
+                os.mkdir(self._input_dir)
+
+    def _read_var_from_nc(self, var, path_dir, file):
+        nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables[var]
             return npx.array(var_obj)
 
-    def _get_nitt(self):
-        nc_file = self._base_path / 'states_hm.nc'
+    def _get_nitt(self, path_dir, file):
+        nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['Time']
             return len(onp.array(var_obj))
 
-    def _get_runlen(self):
-        nc_file = self._base_path / 'states_hm.nc'
+    def _get_runlen(self, path_dir, file):
+        nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['Time']
             return len(onp.array(var_obj)) * 60 * 60 * 24
@@ -50,10 +54,11 @@ class SVATTRANSPORTSetup(RogerSetup):
         settings.identifier = "SVATTRANSPORT"
 
         settings.nx, settings.ny, settings.nz = 1, 1, 1
-        settings.nitt = self._get_nitt()
+        settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
         settings.ages = settings.nitt
         settings.nages = settings.nitt + 1
-        settings.runlen = self._get_runlen()
+        # settings.runlen = self._get_runlen()
+        settings.runlen = 10 * 24 * 60 * 60
 
         # lysimeter surface 3.14 square meter (2m diameter)
         settings.dx = 2
@@ -65,7 +70,7 @@ class SVATTRANSPORTSetup(RogerSetup):
 
         settings.enable_offline_transport = True
         settings.enable_oxygen18 = True
-        settings.tm_structure = "complete-mixing"
+        settings.tm_structure = self._tm_structure
 
     @roger_routine
     def set_grid(self, state):
@@ -101,10 +106,10 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs = state.variables
         settings = state.settings
 
-        vs.S_PWP_RZ = update(vs.S_PWP_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_rz", 'states_hm.nc'))
-        vs.S_PWP_SS = update(vs.S_PWP_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_ss", 'states_hm.nc'))
-        vs.S_SAT_RZ = update(vs.S_SAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_rz", 'states_hm.nc'))
-        vs.S_SAT_SS = update(vs.S_SAT_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_ss", 'states_hm.nc'))
+        vs.S_PWP_RZ = update(vs.S_PWP_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.nc'))
+        vs.S_PWP_SS = update(vs.S_PWP_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.nc'))
+        vs.S_SAT_RZ = update(vs.S_SAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc'))
+        vs.S_SAT_SS = update(vs.S_SAT_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.nc'))
 
         vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], vs.S_PWP_RZ[2:-2, 2:-2, 0])
         vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], vs.S_PWP_SS[2:-2, 2:-2, 0])
@@ -164,17 +169,17 @@ class SVATTRANSPORTSetup(RogerSetup):
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 1)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 30)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz - vs.S_pwp_rz)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 32)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 2)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz - vs.S_pwp_rz)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 32)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 3)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss - vs.S_pwp_ss)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
         elif settings.tm_structure == "time-variant preferential":
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
@@ -182,17 +187,17 @@ class SVATTRANSPORTSetup(RogerSetup):
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 1)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 30)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz - vs.S_pwp_rz)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 31)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 3)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz - vs.S_pwp_rz)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 31)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 2)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss - vs.S_pwp_ss)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
         elif settings.tm_structure == "time-variant":
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
@@ -200,17 +205,17 @@ class SVATTRANSPORTSetup(RogerSetup):
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 1)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 30)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz - vs.S_pwp_rz)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 35)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 3)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz - vs.S_pwp_rz)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 35)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 2)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss - vs.S_pwp_ss)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
 
     @roger_routine
     def set_parameters(self, state):
@@ -218,18 +223,18 @@ class SVATTRANSPORTSetup(RogerSetup):
 
     @roger_routine
     def set_initial_conditions_setup(self, state):
-        pass
+        vs = state.variables
+
+        vs.S_SNOW = update(vs.S_SNOW, at[2:-2, 2:-2, :], self._read_var_from_nc("S_snow", self._base_path, 'states_hm.nc'))
+        vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc'))
+        vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc'))
 
     @roger_routine
     def set_initial_conditions(self, state):
         vs = state.variables
         settings = state.settings
 
-        vs.S_SNOW = update(vs.S_SNOW, at[2:-2, 2:-2, :], self._read_var_from_nc("S_snow", 'states_hm.nc'))
-        vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", 'states_hm.nc'))
-        vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", 'states_hm.nc'))
-        vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ + vs.S_SS)
-
+        vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
         vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], vs.S_SNOW[2:-2, 2:-2, 0, npx.newaxis])
         vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
         vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
@@ -238,30 +243,30 @@ class SVATTRANSPORTSetup(RogerSetup):
         arr0 = allocate(state.dimensions, ("x", "y"))
         vs.sa_rz = update(
             vs.sa_rz,
-            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0, vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
+            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[:, :, npx.newaxis, :],
         )
         vs.sa_ss = update(
             vs.sa_ss,
-            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0, vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
+            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[:, :, npx.newaxis, :],
         )
 
         vs.SA_rz = update(
             vs.SA_rz,
-            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_rz, axis=3),
+            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_rz[2:-2, 2:-2, :, :], axis=-1),
         )
 
         vs.SA_ss = update(
             vs.SA_ss,
-            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_rz, axis=3),
+            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_rz[2:-2, 2:-2, :, :], axis=-1),
         )
 
         vs.sa_s = update(
             vs.sa_s,
-            at[2:-2, 2:-2, :, :], vs.sa_rz + vs.sa_ss,
+            at[2:-2, 2:-2, :, :], vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :],
         )
         vs.SA_s = update(
             vs.SA_s,
-            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_s, axis=3),
+            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_s[2:-2, 2:-2, :, :], axis=-1),
         )
 
         if (settings.enable_oxygen18 | settings.enable_deuterium):
@@ -288,20 +293,20 @@ class SVATTRANSPORTSetup(RogerSetup):
             iso_ss = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
             iso_rz = update(
                 iso_rz,
-                at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_rz), 0, vs.msa_rz),
+                at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_rz), 0, vs.msa_rz)[2:-2, 2:-2, :, :],
             )
             iso_ss = update(
                 iso_ss,
-                at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_ss), 0, vs.msa_ss),
+                at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_ss), 0, vs.msa_ss)[2:-2, 2:-2, :, :],
             )
             vs.msa_s = update(
                 vs.msa_s,
-                at[2:-2, 2:-2, :, :], (vs.sa_rz / vs.sa_s) * iso_rz + (vs.sa_ss / vs.sa_s) * iso_ss,
+                at[2:-2, 2:-2, :, :], (vs.sa_rz[2:-2, 2:-2, :, :] / vs.sa_s[2:-2, 2:-2, :, :]) * iso_rz[2:-2, 2:-2, :, :] + (vs.sa_ss[2:-2, 2:-2, :, :] / vs.sa_s[2:-2, 2:-2, :, :]) * iso_ss[2:-2, 2:-2, :, :],
             )
 
             vs.C_s = update(
                 vs.C_s,
-                at[2:-2, 2:-2, vs.tau], calc_conc_iso_storage(state, vs.sa_s, vs.msa_s) * vs.maskCatch[2:-2, 2:-2],
+                at[2:-2, 2:-2, vs.tau], calc_conc_iso_storage(state, vs.sa_s, vs.msa_s)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
             )
 
             vs.C_s = update(
@@ -314,21 +319,22 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs = state.variables
         settings = state.settings
 
-        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("ta", 'states_hm.nc'))
-        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", 'states_hm.nc'))
-        vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", 'states_hm.nc'))
-        vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", 'states_hm.nc') + self._read_var_from_nc("inf_sc_rz", 'states_hm.nc'))
-        vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", 'states_hm.nc'))
-        vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", 'states_hm.nc'))
-        vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", 'states_hm.nc'))
-        vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", 'states_hm.nc'))
-        vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", 'states_hm.nc'))
+        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("ta", self._base_path, 'states_hm.nc'))
+        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._base_path, 'states_hm.nc'))
+        vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", self._base_path, 'states_hm.nc'))
+        vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", self._base_path, 'states_hm.nc') + self._read_var_from_nc("inf_sc_rz", self._base_path, 'states_hm.nc'))
+        vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._base_path, 'states_hm.nc'))
+        vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._base_path, 'states_hm.nc'))
+        vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", self._base_path, 'states_hm.nc'))
+        vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._base_path, 'states_hm.nc'))
+        vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.nc'))
+        vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc'))
 
         if settings.enable_deuterium:
-            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d2H", 'forcing_tracer.nc'))
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d2H", self._input_dir, 'forcing_tracer.nc'))
 
         if settings.enable_oxygen18:
-            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d18O", 'forcing_tracer.nc'))
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
 
         if settings.enable_deuterium or settings.enable_oxygen18:
             vs.update(set_iso_input_kernel(state))
@@ -336,12 +342,9 @@ class SVATTRANSPORTSetup(RogerSetup):
     @roger_routine
     def set_forcing(self, state):
         vs = state.variables
-        settings = state.settings
 
         vs.update(set_states_kernel(state))
-
-        if settings.enable_deuterium or settings.enable_oxygen18:
-            vs.update(set_forcing_iso_kernel(state))
+        vs.update(set_forcing_iso_kernel(state))
 
     @roger_routine
     def set_diagnostics(self, state):
@@ -355,7 +358,7 @@ class SVATTRANSPORTSetup(RogerSetup):
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 
-        diagnostics["averages"].output_variables = ["C_rz", "C_ss", "C_s", "C_q_ss"]
+        diagnostics["averages"].output_variables = ["C_rz", "C_ss", "C_s", "C_q_ss", "C_in"]
         diagnostics["averages"].output_frequency = 24 * 60 * 60
         diagnostics["averages"].sampling_frequency = 1
 
@@ -385,21 +388,21 @@ def set_iso_input_kernel(state):
 def set_forcing_iso_kernel(state):
     vs = state.variables
 
+    # mixing of isotopes while snow accumulation
     vs.C_snow = update(
         vs.C_snow,
         at[2:-2, 2:-2, vs.tau], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] > 0, npx.where(npx.isnan(vs.C_snow[2:-2, 2:-2, vs.tau]), vs.C_IN[2:-2, 2:-2, vs.itt], (vs.PREC[2:-2, 2:-2, vs.itt] / (vs.PREC[2:-2, 2:-2, vs.itt] + vs.S_SNOW[2:-2, 2:-2, vs.itt])) * vs.C_IN[2:-2, 2:-2, vs.itt] + (vs.S_SNOW[2:-2, 2:-2, vs.itt] / (vs.PREC[2:-2, 2:-2, vs.itt] + vs.S_SNOW[2:-2, 2:-2, vs.itt])) * vs.C_snow[2:-2, 2:-2, vs.taum1]), npx.NaN) * vs.maskCatch[2:-2, 2:-2],
     )
-
     vs.C_snow = update(
         vs.C_snow,
         at[2:-2, 2:-2, vs.tau], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] <= 0, npx.NaN, vs.C_snow[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
+    # mix isotopes from snow melt and rainfall
     vs.C_in = update(
         vs.C_in,
         at[2:-2, 2:-2], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] > 0, vs.C_snow[2:-2, 2:-2, vs.tau], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.NaN)) * vs.maskCatch[2:-2, 2:-2],
     )
-
     vs.M_in = update(
         vs.M_in,
         at[2:-2, 2:-2], vs.C_in[2:-2, 2:-2] * vs.PREC[2:-2, 2:-2, vs.itt] * vs.maskCatch[2:-2, 2:-2],
@@ -564,17 +567,17 @@ def calc_conc_iso_storage(state, sa, msa):
     )
     weights = update(
         weights,
-        at[2:-2, 2:-2, :], npx.where(sa[2:-2, 2:-2, vs.tau, :] * mask > 0, sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :] * mask, axis=-1)[2:-2, 2:-2, npx.newaxis], 0),
+        at[2:-2, 2:-2, :], npx.where(sa[2:-2, 2:-2, vs.tau, :] * mask[2:-2, 2:-2, :] > 0, sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :] * mask[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis], 0),
     )
     conc = allocate(state.dimensions, ("x", "y"))
     # calculate weighted average
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.sum(vals * weights, axis=-1),
+        at[2:-2, 2:-2], npx.sum(vals[2:-2, 2:-2, :] * weights[2:-2, 2:-2, :], axis=-1),
     )
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.where(conc != 0, conc, npx.NaN),
+        at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], npx.NaN),
     )
 
     return conc
@@ -590,11 +593,11 @@ def _ffill_3d(state, arr):
     arr_fill = allocate(state.dimensions, ("x", "y", "t"))
     idx = update(
         idx,
-        at[2:-2, 2:-2, :], npx.where(npx.isfinite(arr), npx.arange(npx.shape(arr)[2])[idx_shape], 0),
+        at[:, :, :], npx.where(npx.isfinite(arr), npx.arange(npx.shape(arr)[2])[idx_shape], 0),
     )
     idx = update(
         idx,
-        at[2:-2, 2:-2, :], npx.maximum.accumulate(idx, axis=-1),
+        at[:, :, :], npx.maximum.accumulate(idx, axis=-1),
     )
     arr1 = update(
         arr1,
@@ -606,20 +609,30 @@ def _ffill_3d(state, arr):
     )
     arr3 = update(
         arr3,
-        at[2:-2, 2:-2, :], idx,
+        at[:, :, :], idx,
     )
     arr_fill = update(
         arr_fill,
-        at[2:-2, 2:-2, :], arr[arr1, arr2, arr3],
+        at[:, :, :], arr[arr1, arr2, arr3],
     )
 
     return arr_fill
 
 
-model = SVATTRANSPORTSetup()
-input_path = model._base_path / "input"
-model._set_tm_structure('preferential')
-write_forcing_tracer(input_path, 'd18O')
-model.setup()
-model.warmup()
-model.run()
+tm_structures = ['complete-mixing', 'piston',
+                 'preferential', 'advection-dispersion',
+                 'complete-mixing advection-dispersion',
+                 'time-variant preferential',
+                 'time-variant advection-dispersion',
+                 'time-variant']
+for i in range(len(tm_structures)):
+    model = SVATTRANSPORTSetup()
+    model._set_tm_structure(tm_structures[i])
+    input_path = model._base_path / "input"
+    model._set_input_dir(input_path)
+    forcing_path = model._input_dir / "forcing_tracer.nc"
+    if not os.path.exists(forcing_path):
+        write_forcing_tracer(input_path, 'd18O')
+    model.setup()
+    model.warmup()
+    model.run()

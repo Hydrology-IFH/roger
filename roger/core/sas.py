@@ -15,7 +15,7 @@ def uniform(state, SA, sas_params):
     Omega = allocate(state.dimensions, ("x", "y", "nages"))
     S = update(
         S,
-        at[2:-2, 2:-2, :], npx.max(SA[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis] * mask * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.max(SA[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     lam = update(
         lam,
@@ -49,7 +49,7 @@ def kumaraswami(state, SA, sas_params):
     Omega = allocate(state.dimensions, ("x", "y", "nages"))
     S = update(
         S,
-        at[2:-2, 2:-2, :], npx.max(SA[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.max(SA[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     # make parameters storage dependent
@@ -132,7 +132,7 @@ def gamma(state, SA, sas_params):
     Omega = allocate(state.dimensions, ("x", "y", "nages"))
     S = update(
         S,
-        at[2:-2, 2:-2, :], npx.max(SA[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis] * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.max(SA[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     lam = update(
         lam,
@@ -157,14 +157,14 @@ def exponential(state, SA, sas_params):
     """Exponential SAS function"""
     vs = state.variables
 
-    mask51 = (sas_params[2:-2, 2:-2, 0, npx.newaxis] == 51)
-    mask52 = (sas_params[2:-2, 2:-2, 0, npx.newaxis] == 52)
+    mask51 = (sas_params[:, :, 0, npx.newaxis] == 51)
+    mask52 = (sas_params[:, :, 0, npx.newaxis] == 52)
 
     S = allocate(state.dimensions, ("x", "y", 1))
     Omega = allocate(state.dimensions, ("x", "y", "nages"))
     S = update(
         S,
-        at[2:-2, 2:-2, :], npx.max(SA[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.max(SA[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     Omega = update(
         Omega,
@@ -185,14 +185,14 @@ def power(state, SA, sas_params):
     """Power SAS function"""
     vs = state.variables
 
-    mask61 = (sas_params[2:-2, 2:-2, 0, npx.newaxis] == 61)
-    mask62 = (sas_params[2:-2, 2:-2, 0, npx.newaxis] == 62)
+    mask61 = (sas_params[:, :, 0, npx.newaxis] == 61)
+    mask62 = (sas_params[:, :, 0, npx.newaxis] == 62)
 
     S = allocate(state.dimensions, ("x", "y", 1))
     Omega = allocate(state.dimensions, ("x", "y", "nages"))
     S = update(
         S,
-        at[2:-2, 2:-2, :], npx.max(SA[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.max(SA[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     Omega = update(
         Omega,
@@ -213,8 +213,8 @@ def dirac(state, sas_params):
     """Dirac SAS function"""
     vs = state.variables
 
-    mask21 = (sas_params[2:-2, 2:-2, 0] == 21)
-    mask22 = (sas_params[2:-2, 2:-2, 0] == 22)
+    mask21 = (sas_params[:, :, 0] == 21)
+    mask22 = (sas_params[:, :, 0] == 22)
 
     Omega = allocate(state.dimensions, ("x", "y", "nages"))
     Omega = update(

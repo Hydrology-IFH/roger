@@ -42,6 +42,7 @@ SETTINGS = {
     "x_origin": Setting(0, float, "Grid origin in x-direction"),
     "y_origin": Setting(0, float, "Grid origin in y-direction"),
     "AB_eps": Setting(0.1, float, "Deviation from Adam-Bashforth weighting"),
+    "nsas": Setting(8, int, "Grid points of array containing SAS parameters"),
     # Physical constants
     "pi": Setting(PI, float, "Pi"),
     "r_mp": Setting(2.5, float, "Macropore radius in mm"),

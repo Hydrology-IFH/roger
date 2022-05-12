@@ -1,13 +1,8 @@
 from pathlib import Path
-import glob
 import os
-import datetime
-import h5netcdf
-import matplotlib.pyplot as plt
 import xarray as xr
 from cftime import num2date
 import pandas as pd
-from SALib.sample import saltelli
 from SALib.analyze import sobol
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -88,11 +83,9 @@ tm_structures = ['preferential', 'advection-dispersion',
 for tm_structure in tm_structures:
     tms = tm_structure.replace(" ", "_")
 
-    states_tm_file = base_path / f"states_tm_{tms}_sensitivity.nc"
-
     # load simulation
-    states_tm_file = base_path / f"states_tm_{tms}_sensitivity.nc"
-    ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    states_tm_file = base_path / f"states_tm_sensitivity.nc"
+    ds_sim_tm = xr.open_dataset(states_tm_file, f"{tm_structure}", engine="h5netcdf")
 
     # assign date
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))

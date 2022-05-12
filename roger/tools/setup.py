@@ -1,5 +1,6 @@
 from roger.core.operators import numpy as npx
 import roger.tools.event_classification as ecl
+from roger.io_tools.csv import read_meteo
 import roger.tools.labels as labs
 from roger import roger_sync
 import os
@@ -9,6 +10,7 @@ import pandas as pd
 import h5netcdf
 from cftime import date2num
 import datetime
+from datetime import timedelta
 
 import scipy.interpolate
 import scipy.spatial
@@ -210,7 +212,7 @@ def write_forcing(input_dir, nrows=1, ncols=1, hpi=5, end_prec_event=36, sf=3,
         maximum soil depth to scale rainfall threshold (in mm)
     """
     if uniform:
-        df_PREC, df_PET, df_TA = ecl.read_meteo(input_dir)
+        df_PREC, df_PET, df_TA = read_meteo(input_dir)
         validate(df_PREC)
         validate(df_PET)
         validate(df_TA)
@@ -290,7 +292,7 @@ def write_forcing(input_dir, nrows=1, ncols=1, hpi=5, end_prec_event=36, sf=3,
         file = input_dir / "EVENTS.txt"
         df_meteo_events.to_csv(file, header=True, index=False, sep=" ")
 
-        nc_file = input_dir.parent / "forcing.nc"
+        nc_file = input_dir / "forcing.nc"
         with h5netcdf.File(nc_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
@@ -300,42 +302,44 @@ def write_forcing(input_dir, nrows=1, ncols=1, hpi=5, end_prec_event=36, sf=3,
                 comment=''
             )
             # set dimensions with a dictionary
-            f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_meteo_events.index), 'scalar': 1}
-            v = f.create_variable('PREC', ('x', 'y', 'time'), float_type)
+            dict_dim = {'x': nrows, 'y': ncols, 'Time': len(df_meteo_events.index), 'scalar': 1}
+            f.dimensions = dict_dim
+            v = f.create_variable('PREC', ('x', 'y', 'Time'), float_type)
             arr = df_meteo_events['PREC'].astype(float_type).values
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
             v.attrs['long_name'] = 'Precipitation'
             v.attrs['units'] = 'mm/dt'
-            v = f.create_variable('TA', ('x', 'y', 'time'), float_type)
+            v = f.create_variable('TA', ('x', 'y', 'Time'), float_type)
             arr = df_meteo_events['TA'].astype(float_type).values
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
             v.attrs['long_name'] = 'Air temperature'
             v.attrs['units'] = 'degC'
-            v = f.create_variable('PET', ('x', 'y', 'time'), float_type)
+            v = f.create_variable('PET', ('x', 'y', 'Time'), float_type)
             arr = df_meteo_events['PET'].astype(float_type).values
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
             v.attrs['long_name'] = 'Potential Evapotranspiration'
             v.attrs['units'] = 'mm/dt'
-            v = f.create_variable('dt', ('time',), float_type)
+            v = f.create_variable('dt', ('Time',), float_type)
             v[:] = dict_events['time_steps']
             v.attrs['long_name'] = 'time step (!not constant)'
             v.attrs['units'] = 'hour'
-            v = f.create_variable('year', ('time',), int)
+            v = f.create_variable('year', ('Time',), int)
             v[:] = dict_events['years']
             v.attrs['units'] = 'year'
-            v = f.create_variable('month', ('time',), int)
+            v = f.create_variable('month', ('Time',), int)
             v[:] = dict_events['months']
             v.attrs['units'] = 'month'
-            v = f.create_variable('doy', ('time',), int)
+            v = f.create_variable('doy', ('Time',), int)
             v[:] = dict_events['days_of_year']
             v.attrs['units'] = 'day of year'
-            v = f.create_variable('EVENT_ID', ('time',), int)
+            v = f.create_variable('EVENT_ID', ('Time',), int)
             v[:] = dict_events['EVENT_ID']
             v.attrs['units'] = ''
-            v = f.create_variable('time', ('time',), float_type)
-            v.attrs['time_origin'] = f"{df_meteo_events.index[0]}"
+            v = f.create_variable('Time', ('Time',), float_type)
+            time_origin = df_meteo_events.index[0] - timedelta(hours=1)
+            v.attrs['time_origin'] = f"{time_origin}"
             v.attrs['units'] = 'hours'
-            v[:] = date2num(df_meteo_events.index.tolist(), units=f"hours since {df_meteo_events.index[0]}", calendar='standard')
+            v[:] = date2num(df_meteo_events.index.tolist(), units=f"hours since {time_origin}", calendar='standard')
             v = f.create_variable('x', ('x',), int)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'
@@ -347,18 +351,18 @@ def write_forcing(input_dir, nrows=1, ncols=1, hpi=5, end_prec_event=36, sf=3,
             v = f.create_variable('nitt_event', ('scalar',), int)
             v[:] = dict_events['nitt_event']
             if enable_film_flow:
-                v = f.create_variable('EVENT_ID_FF', ('time',), int)
+                v = f.create_variable('EVENT_ID_FF', ('Time',), int)
                 v[:] = dict_events['EVENT_ID_FF']
                 v.attrs['units'] = ''
                 v = f.create_variable('nevent_ff', ('scalar',), int)
                 v[:] = dict_events['nevent_ff']
             if enable_crop_phenology:
-                v = f.create_variable('TA_min', ('x', 'y', 'time'), float_type)
+                v = f.create_variable('TA_min', ('x', 'y', 'Time'), float_type)
                 arr = df_meteo_events['TA_min'].values - 3
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'minimum air temperature'
                 v.attrs['units'] = 'degC'
-                v = f.create_variable('TA_max', ('x', 'y', 'time'), float_type)
+                v = f.create_variable('TA_max', ('x', 'y', 'Time'), float_type)
                 arr = df_meteo_events['TA_max'].values + 3
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'maximum air temperature'
@@ -393,7 +397,7 @@ def write_forcing_tracer(input_dir, tracer, nrows=1, ncols=1, uniform=True, floa
         else:
             df_tracer = read_tracer_input(input_dir, tracer)
 
-        nc_file = input_dir.parent / "forcing_tracer.nc"
+        nc_file = input_dir / "forcing_tracer.nc"
         with h5netcdf.File(nc_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
@@ -403,28 +407,30 @@ def write_forcing_tracer(input_dir, tracer, nrows=1, ncols=1, uniform=True, floa
                 comment=''
             )
             # set dimensions with a dictionary
-            f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_tracer.index), 'scalar': 1}
+            dict_dim = {'x': nrows, 'y': ncols, 'Time': len(df_tracer.index), 'scalar': 1}
+            f.dimensions = dict_dim
             if tracer in ['Nmin', 'Norg', 'NO3']:
-                v = f.create_variable('Nmin', ('x', 'y', 'time'), float_type)
+                v = f.create_variable('Nmin', ('x', 'y', 'Time'), float_type)
                 arr = df_tracer['Nmin'].astype(float_type).values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = labs._LONG_NAME['Nmin']
                 v.attrs['units'] = labs._UNITS['Nmin']
-                v = f.create_variable('Norg', ('x', 'y', 'time'), float_type)
+                v = f.create_variable('Norg', ('x', 'y', 'Time'), float_type)
                 arr = df_tracer1['Norg'].astype(float_type).values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = labs._LONG_NAME['Norg']
                 v.attrs['units'] = labs._UNITS['Norg']
             else:
-                v = f.create_variable(tracer, ('x', 'y', 'time'), float_type)
+                v = f.create_variable(tracer, ('x', 'y', 'Time'), float_type)
                 arr = df_tracer[tracer].astype(float_type).values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = labs._LONG_NAME[tracer]
                 v.attrs['units'] = labs._UNITS[tracer]
-            v = f.create_variable('time', ('time',), float_type)
-            v.attrs['time_origin'] = f"{df_tracer.index[0]}"
+            v = f.create_variable('Time', ('Time',), float_type)
+            time_origin = df_tracer.index[0] - timedelta(hours=1)
+            v.attrs['time_origin'] = f"{time_origin}"
             v.attrs['units'] = 'hours'
-            v[:] = date2num(df_tracer.index.tolist(), units=f"hours since {df_tracer.index[0]}", calendar='standard')
+            v[:] = date2num(df_tracer.index.tolist(), units=f"hours since {time_origin}", calendar='standard')
             v = f.create_variable('x', ('x',), int)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'
@@ -461,7 +467,8 @@ def write_crop_rotation(input_dir, nrows=1, ncols=1, float_type="float64"):
             comment=''
         )
         # set dimensions with a dictionary
-        f.dimensions = {'x': nrows, 'y': ncols, 'year_season': len(crops.columns[1:])}
+        dict_dim = {'x': nrows, 'y': ncols, 'year_season': len(crops.columns[1:])}
+        f.dimensions = dict_dim
         arr = onp.full((nrows, ncols, len(crops.columns[1:])), 598, dtype=int)
         idx = onp.arange(nrows * ncols).reshape((nrows, ncols))
         for row in range(nrows):
@@ -483,6 +490,96 @@ def write_crop_rotation(input_dir, nrows=1, ncols=1, float_type="float64"):
         v.attrs['long_name'] = 'Meridonial coordinate'
         v.attrs['units'] = 'meters'
         v[:] = onp.arange(ncols)
+
+
+@roger_sync
+def write_forcing_event(input_dir, nrows=1, ncols=1, uniform=True, prec_correction=True, float_type="float64"):
+    """Writes forcing data for a single event (i.e. no event classification is
+    required)
+
+    Args
+    ----------
+    input_dir : Path
+        path to directory with input data
+
+    nrows : int, optional
+        number of rows
+
+    ncols : int, optional
+        number of columns
+
+    uniform : bool, optional
+        True if time series are used as input data
+
+    prec_correction : str, optional
+        if True precipitation is corrected according to Richter (1995)
+    """
+    if uniform:
+        if not os.path.isdir(input_dir):
+            raise ValueError(input_dir, 'does not exist')
+
+        PREC_path = input_dir / "PREC.txt"
+        df_PREC = pd.read_csv(PREC_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
+                              index_col=0, na_values=-9999)
+        df_PREC.index = pd.to_datetime(df_PREC.index, format='%Y %m %d %H %M')
+
+        TA_path = input_dir / "TA.txt"
+        df_TA = pd.read_csv(TA_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
+                            index_col=0, na_values=-9999)
+        df_TA.index = pd.to_datetime(df_TA.index, format='%Y %m %d %H %M')
+
+        validate(df_PREC)
+        validate(df_TA)
+        df_meteo = df_PREC.join(df_TA)
+        df_meteo = df_meteo.ffill()
+        if prec_correction:
+            prec_corr = ecl.precipitation_correction(df_meteo['PREC'].values,
+                                                     df_meteo['TA'].values,
+                                                     df_meteo.index.month,
+                                                     horizontal_shielding=prec_correction)
+            df_meteo['PREC'] = prec_corr
+
+        nc_file = input_dir / "forcing.nc"
+        with h5netcdf.File(nc_file, 'w', decode_vlen_strings=False) as f:
+            f.attrs.update(
+                date_created=datetime.datetime.today().isoformat(),
+                title='model forcing',
+                institution='University of Freiburg, Chair of Hydrology',
+                references='',
+                comment=''
+            )
+            # set dimensions with a dictionary
+            dict_dim = {'x': nrows, 'y': ncols, 'Time': len(df_meteo.index), 'scalar': 1}
+            f.dimensions = dict_dim
+            v = f.create_variable('PREC', ('x', 'y', 'Time'), float_type)
+            arr = df_meteo['PREC'].astype(float_type).values
+            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+            v.attrs['long_name'] = 'Precipitation'
+            v.attrs['units'] = 'mm/dt'
+            v = f.create_variable('TA', ('x', 'y', 'Time'), float_type)
+            arr = df_meteo['TA'].astype(float_type).values
+            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+            v.attrs['long_name'] = 'Air temperature'
+            v.attrs['units'] = 'degC'
+            v = f.create_variable('dt', ('Time',), float_type)
+            time_steps = df_meteo.index.diff() / onp.timedelta64(1, 's')
+            v[:-1] = time_steps.values[1:]
+            v[-1] = time_steps.values[-1]
+            v.attrs['long_name'] = 'time step'
+            v.attrs['units'] = 'hour'
+            time_origin = df_meteo.index[0]
+            v = f.create_variable('Time', ('Time',), float_type)
+            v.attrs['time_origin'] = f"{time_origin}"
+            v.attrs['units'] = 'hours'
+            v[:] = date2num(df_meteo.index.tolist(), units=f"hours since {time_origin}", calendar='standard')
+            v = f.create_variable('x', ('x',), int)
+            v.attrs['long_name'] = 'Zonal coordinate'
+            v.attrs['units'] = 'meters'
+            v[:] = onp.arange(nrows)
+            v = f.create_variable('y', ('y',), int)
+            v.attrs['long_name'] = 'Meridonial coordinate'
+            v.attrs['units'] = 'meters'
+            v[:] = onp.arange(ncols)
 
 
 def validate(data: pd.DataFrame):

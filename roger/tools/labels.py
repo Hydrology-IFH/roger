@@ -1,12 +1,21 @@
 # y-axis labels
 _Y_LABS_DAILY = {'prec': r'$PREC$ [mm $day^{-1}$]',
                  'aet': r'$ET$ [mm $day^{-1}$]',
+                 'transp': r'$TRANSP$ [mm $day^{-1}$]',
+                 'evap_soil': r'$EVAP_{soil}$ [mm $day^{-1}$]',
                  'q_ss': r'$PERC$ [mm $day^{-1}$]',
+                 'inf': r'$INF$ [mm $day^{-1}$]',
+                 'inf_mat': r'$INF_{mat}$ [mm $day^{-1}$]',
+                 'inf_mp': r'$INF_{mp}$ [mm $day^{-1}$]',
+                 'inf_sc': r'$INF_{sc}$ [mm $day^{-1}$]',
                  'dS': r'$\Delta$$S$ [mm $day^{-1}$]',
                  'S': r'$S$ [mm]',
                  'theta': r'$\theta$ [-]',
                  'theta_rz': r'$\theta_{roots}$ [-]',
                  'theta_ss': r'$\theta_{subsoil}$ [-]',
+                 'S_snow': r'$S_{snow}$ [mm]',
+                 'S': r'$S$ [mm]',
+                 'S_s': r'$S_s$ [mm]',
                  }
 
 _Y_LABS_CUM = {'prec': r'$PREC$ [mm]',

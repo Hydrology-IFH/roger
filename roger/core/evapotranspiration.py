@@ -584,7 +584,7 @@ def calculate_transpiration_transport_anion_kernel(state):
 
     vs.tt_transp = update(
         vs.tt_transp,
-        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.transp, vs.sas_params_transp)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.transp, vs.sas_params_transp)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.TT_transp = update(

@@ -28,19 +28,20 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
         with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
             # set dimensions with a dictionary
             if not f.dimensions:
-                f.dimensions = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+                f.dimensions = dict_dim
                 v = f.create_variable('x', ('x',), float)
                 v.attrs['long_name'] = 'Zonal coordinate'
                 v.attrs['units'] = 'meters'
-                v[:] = onp.arange(f.dimensions["x"])
+                v[:] = onp.arange(dict_dim["x"])
                 v = f.create_variable('y', ('y',), float)
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
-                v[:] = onp.arange(f.dimensions["y"])
+                v[:] = onp.arange(dict_dim["y"])
                 v = f.create_variable('Time', ('Time',), float)
                 var_obj = df.variables.get('Time')
-                with h5netcdf.File(base_path / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
-                    time_origin = infile.variables['time'].attrs['time_origin']
+                with h5netcdf.File(base_path / "input" / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
+                    time_origin = infile.variables['Time'].attrs['time_origin']
                 v.attrs.update(time_origin=time_origin,
                                 units=var_obj.attrs["units"])
                 v[:] = onp.array(var_obj)
@@ -98,5 +99,17 @@ for var_obs, var_sim in zip(vars_obs, vars_sim):
     fig.savefig(path_fig, dpi=250)
     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
     file_str = '%s_cum_year_facet.pdf' % (var_sim)
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=250)
+
+# plot simulations
+vars_sim = ['S_snow']
+for var_sim in vars_sim:
+    sim_vals = ds_sim[var_sim].isel(x=0, y=0).values
+    df_sim = pd.DataFrame(index=date_sim, columns=['sim'])
+    df_sim.loc[:, 'sim'] = sim_vals
+    # plot observed and simulated time series
+    fig = eval_utils.plot_sim(df_sim, labs._Y_LABS_DAILY[var_sim], fmt_x='date')
+    file_str = '%s_sim.pdf' % (var_sim)
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=250)

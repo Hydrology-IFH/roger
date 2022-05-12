@@ -66,7 +66,7 @@ def initialize_file(state, ncfile, extra_dimensions=None, create_time_dimension=
         nc_dim_var_time = ncfile.create_variable("Time", ("Time",), float)
         nc_dim_var_time.attrs.update(
             long_name="Time",
-            units="days",
+            units="hours",
             time_origin="01-JAN-1900 00:00:00",
         )
 

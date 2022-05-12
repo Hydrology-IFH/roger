@@ -31,8 +31,8 @@ for tm_structure in tm_structures:
     tms = tm_structure.replace(" ", "_")
 
     # load simulation
-    states_tm_file = base_path / f"states_tm_{tms}_monte_carlo_reverse.nc"
-    ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    states_tm_file = base_path / "states_tm_monte_carlo_reverse.nc"
+    ds_sim_tm = xr.open_dataset(states_tm_file, f"{tm_structure}", engine="h5netcdf")
 
     # assign date
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))

@@ -53,27 +53,27 @@ def calc_tt(state, SA, sa, flux, sas_params):
     # cumulative backward travel time distribution
     TT = update_add(
         TT,
-        at[:, :, :], sas.uniform(state, SA, sas_params),
+        at[2:-2, 2:-2, :], sas.uniform(state, SA, sas_params)[2:-2, 2:-2, :],
     )
     TT = update_add(
         TT,
-        at[:, :, :], sas.dirac(state, sas_params),
+        at[2:-2, 2:-2, :], sas.dirac(state, sas_params)[2:-2, 2:-2, :],
     )
     TT = update_add(
         TT,
-        at[:, :, :], sas.kumaraswami(state, SA, sas_params),
+        at[2:-2, 2:-2, :], sas.kumaraswami(state, SA, sas_params)[2:-2, 2:-2, :],
     )
     TT = update_add(
         TT,
-        at[:, :, :], sas.gamma(state, SA, sas_params),
+        at[2:-2, 2:-2, :], sas.gamma(state, SA, sas_params)[2:-2, 2:-2, :],
     )
     TT = update_add(
         TT,
-        at[:, :, :], sas.exponential(state, SA, sas_params),
+        at[2:-2, 2:-2, :], sas.exponential(state, SA, sas_params)[2:-2, 2:-2, :],
     )
     TT = update_add(
         TT,
-        at[:, :, :], sas.power(state, SA, sas_params),
+        at[2:-2, 2:-2, :], sas.power(state, SA, sas_params)[2:-2, 2:-2, :],
     )
 
     # travel time distribution
@@ -165,7 +165,7 @@ def calc_tt(state, SA, sa, flux, sas_params):
     )
     SA_re = update(
         SA_re,
-        at[2:-2, 2:-2, 1:], npx.where(mask_old[2:-2, 2:-2, :], npx.cumsum(sa_free_norm[2:-2, 2:-2, ::-1], axis=-1)[2:-2, 2:-2, ::-1], SA_re[2:-2, 2:-2, 1:]),
+        at[2:-2, 2:-2, 1:], npx.where(mask_old[2:-2, 2:-2, :], npx.cumsum(sa_free_norm[2:-2, 2:-2, ::-1], axis=-1)[:, :, ::-1], SA_re[2:-2, 2:-2, 1:]),
     )
     SA_re = update(
         SA_re,
@@ -197,7 +197,7 @@ def calc_tt(state, SA, sa, flux, sas_params):
     # recalculate travel time distribution
     tt = update(
         tt,
-        at[2:-2, 2:-2, :], npx.where(npx.any(flux_tt_init[2:-2, 2:-2, :] > sa[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2, npx.newaxis], flux_tt[2:-2, 2:-2, :]/flux[2:-2, 2:-2, npx.newaxis], tt[2:-2, 2:-2, :]),
+        at[2:-2, 2:-2, :], npx.where(npx.any(flux_tt_init[2:-2, 2:-2, :] > sa[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis], flux_tt[2:-2, 2:-2, :]/flux[2:-2, 2:-2, npx.newaxis], tt[2:-2, 2:-2, :]),
     )
 
     return tt

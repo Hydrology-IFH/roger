@@ -119,43 +119,42 @@ class SVATCROPSetup(RogerSetup):
         pass
 
     @roger_routine
+    def set_parameters_setup(self, state):
+        vs = state.variables
+
+        vs.lu_id = update(vs.lu_id, at[:, :], 599)
+        vs.sealing = update(vs.sealing, at[:, :], 0)
+        vs.slope = update(vs.slope, at[:, :], 0)
+        vs.slope_per = update(vs.slope_per, at[:, :], vs.slope * 100)
+        vs.S_dep_tot = update(vs.S_dep_tot, at[:, :], 0)
+        vs.z_soil = update(vs.z_soil, at[:, :], 2200)
+        vs.dmpv = update(vs.dmpv, at[:, :], 100)
+        vs.lmpv = update(vs.lmpv, at[:, :], 1000)
+        vs.theta_ac = update(vs.theta_ac, at[:, :], 0.13)
+        vs.theta_ufc = update(vs.theta_ufc, at[:, :], 0.24)
+        vs.theta_pwp = update(vs.theta_pwp, at[:, :], 0.23)
+        vs.ks = update(vs.ks, at[:, :], 25)
+        vs.kf = update(vs.kf, at[:, :], 2500)
+
+        vs.CROP_TYPE = update(vs.CROP_TYPE, at[:, :, :], self._read_var_from_nc("crop", 'crop_rotation.nc'))
+        vs.crop_type = update(vs.crop_type, at[:, :, 0], vs.CROP_TYPE[:, :, 1])
+        vs.crop_type = update(vs.crop_type, at[:, :, 1], vs.CROP_TYPE[:, :, 2])
+        vs.crop_type = update(vs.crop_type, at[:, :, 2], vs.CROP_TYPE[:, :, 3])
+
+    @roger_routine
     def set_parameters(self, state):
         vs = state.variables
-        settings = state.settings
-
-        if (vs.itt == 0):
-
-            vs.lu_id = update(vs.lu_id, at[:, :], 599)
-            vs.sealing = update(vs.sealing, at[:, :], 0)
-            vs.slope = update(vs.slope, at[:, :], 0)
-            vs.slope_per = update(vs.slope_per, at[:, :], vs.slope * 100)
-            vs.S_dep_tot = update(vs.S_dep_tot, at[:, :], 0)
-            vs.z_soil = update(vs.z_soil, at[:, :], 2200)
-            vs.dmpv = update(vs.dmpv, at[:, :], 100)
-            vs.lmpv = update(vs.lmpv, at[:, :], 1000)
-            vs.theta_ac = update(vs.theta_ac, at[:, :], 0.13)
-            vs.theta_ufc = update(vs.theta_ufc, at[:, :], 0.24)
-            vs.theta_pwp = update(vs.theta_pwp, at[:, :], 0.23)
-            vs.ks = update(vs.ks, at[:, :], 25)
-            vs.kf = update(vs.kf, at[:, :], 2500)
-
-            if settings.enable_crop_phenology and settings.enable_crop_rotation:
-                vs.CROP_TYPE = update(vs.CROP_TYPE, at[:, :, :], self._read_var_from_nc("crop", 'crop_rotation.nc'))
-                vs.crop_type = update(vs.crop_type, at[:, :, 0], vs.CROP_TYPE[:, :, 1])
-                vs.crop_type = update(vs.crop_type, at[:, :, 1], vs.CROP_TYPE[:, :, 2])
-                vs.crop_type = update(vs.crop_type, at[:, :, 2], vs.CROP_TYPE[:, :, 3])
-
-            if settings.enable_crop_phenology and not settings.enable_crop_rotation:
-                mask = npx.isin(vs.lu_id[:, :, npx.newaxis], npx.arange(500, 600, 1, dtype=int))
-                vs.crop_type = update(vs.crop_type, at[:, :, 0], npx.where(mask, vs.lu_id, 598))
 
         if (vs.MONTH[vs.itt] != vs.MONTH[vs.itt - 1]) & (vs.itt > 1):
             vs.update(set_parameters_monthly_kernel(state))
 
     @roger_routine
+    def set_initial_conditions_setup(self, state):
+        pass
+
+    @roger_routine
     def set_initial_conditions(self, state):
         vs = state.variables
-        settings = state.settings
 
         vs.S_int_top = update(vs.S_int_top, at[:, :, :vs.taup1], 0)
         vs.swe_top = update(vs.swe_top, at[:, :, :vs.taup1], 0)
@@ -167,29 +166,26 @@ class SVATCROPSetup(RogerSetup):
         vs.theta_rz = update(vs.theta_rz, at[:, :, :vs.taup1], 0.4)
         vs.theta_ss = update(vs.theta_ss, at[:, :, :vs.taup1], 0.47)
 
-        if settings.enable_crop_phenology:
-            vs.z_root = update(vs.z_root, at[:, :, :vs.taup1], 0)
-            vs.z_root_crop = update(vs.z_root_crop, at[:, :, :vs.taup1, 0], 0)
-            vs.update(set_initial_conditions_crops_kernel(state))
+        vs.z_root = update(vs.z_root, at[:, :, :vs.taup1], 0)
+        vs.z_root_crop = update(vs.z_root_crop, at[:, :, :vs.taup1, 0], 0)
+        vs.update(set_initial_conditions_crops_kernel(state))
+
+    @roger_routine
+    def set_forcing_setup(self, state):
+        vs = state.variables
+
+        vs.PREC = update(vs.PREC, at[:, :, :], self._read_var_from_nc("PREC", 'forcing.nc'))
+        vs.TA = update(vs.TA, at[:, :, :], self._read_var_from_nc("TA", 'forcing.nc'))
+        vs.PET = update(vs.PET, at[:, :, :], self._read_var_from_nc("PET", 'forcing.nc'))
+        vs.EVENT_ID = update(vs.EVENT_ID, at[:, :, :], self._read_var_from_nc("EVENT_ID", 'forcing.nc'))
+        vs.TA_MIN = update(vs.TA_MIN, at[:, :, :], self._read_var_from_nc("TA_min", 'forcing.nc'))
+        vs.TA_MAX = update(vs.TA_MAX, at[:, :, :], self._read_var_from_nc("TA_max", 'forcing.nc'))
 
     @roger_routine
     def set_forcing(self, state):
         vs = state.variables
-        settings = state.settings
-
-        if (vs.itt == 0):
-            vs.PREC = update(vs.PREC, at[:, :, :], self._read_var_from_nc("PREC", 'forcing.nc'))
-            vs.TA = update(vs.TA, at[:, :, :], self._read_var_from_nc("TA", 'forcing.nc'))
-            vs.PET = update(vs.PET, at[:, :, :], self._read_var_from_nc("PET", 'forcing.nc'))
-            vs.EVENT_ID = update(vs.EVENT_ID, at[:, :, :], self._read_var_from_nc("EVENT_ID", 'forcing.nc'))
-            if settings.enable_crop_phenology:
-                vs.TA_MIN = update(vs.TA_MIN, at[:, :, :], self._read_var_from_nc("TA_min", 'forcing.nc'))
-                vs.TA_MAX = update(vs.TA_MAX, at[:, :, :], self._read_var_from_nc("TA_max", 'forcing.nc'))
 
         vs.update(set_forcing_kernel(state))
-        if settings.enable_crop_phenology:
-            vs.ta_min = update(vs.ta_min, at[:, :, vs.tau], vs.TA_MIN[:, :, vs.itt])
-            vs.ta_max = update(vs.ta_max, at[:, :, vs.tau], vs.TA_MAX[:, :, vs.itt])
 
     @roger_routine
     def set_diagnostics(self, state):
@@ -416,6 +412,8 @@ def set_forcing_kernel(state):
     vs.ta = update(vs.ta, at[:, :, vs.tau], vs.TA[:, :, vs.itt])
     vs.pet = update(vs.pet, at[:, :], vs.PET[:, :, vs.itt])
     vs.pet_res = update(vs.pet, at[:, :], vs.PET[:, :, vs.itt])
+    vs.ta_min = update(vs.ta_min, at[:, :, vs.tau], vs.TA_MIN[:, :, vs.itt])
+    vs.ta_max = update(vs.ta_max, at[:, :, vs.tau], vs.TA_MAX[:, :, vs.itt])
 
     vs.dt_secs = vs.DT_SECS[vs.itt]
     vs.dt = vs.DT[vs.itt]
@@ -439,6 +437,8 @@ def set_forcing_kernel(state):
     return KernelOutput(
         prec=vs.prec,
         ta=vs.ta,
+        ta_min=vs.ta_min,
+        ta_max=vs.ta_max,
         pet=vs.pet,
         pet_res=vs.pet_res,
         dt=vs.dt,

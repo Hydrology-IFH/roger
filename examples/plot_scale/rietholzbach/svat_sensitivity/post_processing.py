@@ -35,6 +35,10 @@ base_path = Path(__file__).parent
 base_path_results = base_path / "results"
 if not os.path.exists(base_path_results):
     os.mkdir(base_path_results)
+# directory of figures
+base_path_figs = base_path / "figures"
+if not os.path.exists(base_path_figs):
+    os.mkdir(base_path_figs)
 
 # merge model output into single file
 path = str(base_path / "SVAT.*.nc")
@@ -52,21 +56,22 @@ with h5netcdf.File(states_hm_si_file, 'w', decode_vlen_strings=False) as f:
         with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
             # set dimensions with a dictionary
             if not f.dimensions:
-                f.dimensions = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+                f.dimensions = dict_dim
                 v = f.create_variable('x', ('x',), float)
-                v.attrs['long_name'] = 'Number of model run'
-                v.attrs['units'] = ''
-                v[:] = onp.arange(f.dimensions["x"])
+                v.attrs['long_name'] = 'Zonal coordinate'
+                v.attrs['units'] = 'meters'
+                v[:] = onp.arange(dict_dim["x"])
                 v = f.create_variable('y', ('y',), float)
-                v.attrs['long_name'] = ''
-                v.attrs['units'] = ''
-                v[:] = onp.arange(f.dimensions["y"])
+                v.attrs['long_name'] = 'Meridonial coordinate'
+                v.attrs['units'] = 'meters'
+                v[:] = onp.arange(dict_dim["y"])
                 v = f.create_variable('Time', ('Time',), float)
                 var_obj = df.variables.get('Time')
-                with h5netcdf.File(base_path / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
-                    time_origin = infile.variables['time'].attrs['time_origin']
+                with h5netcdf.File(base_path / "input" / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
+                    time_origin = infile.variables['Time'].attrs['time_origin']
                 v.attrs.update(time_origin=time_origin,
-                               units=var_obj.attrs["units"])
+                                units=var_obj.attrs["units"])
                 v[:] = onp.array(var_obj)
             for var_sim in list(df.variables.keys()):
                 var_obj = df.variables.get(var_sim)
@@ -322,10 +327,6 @@ for name in df_eff.columns:
     Si = sobol.analyze(bounds, Y, calc_second_order=False)
     Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
     dict_si[name] = pd.DataFrame(Si_filter, index=bounds['names'])
-
-base_path_figs = base_path / "figures"
-if not os.path.exists(base_path_figs):
-    os.mkdir(base_path_figs)
 
 # plot sobol indices
 _LABS = {'KGE_aet': 'evapotranspiration',

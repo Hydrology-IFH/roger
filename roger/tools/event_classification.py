@@ -1,63 +1,9 @@
 import roger.lookuptables as lut
-from pathlib import Path
-import os
 import numpy as onp
 import pandas as pd
 from datetime import datetime, timedelta
 
-
-def read_meteo(path_to_dir: Path):
-    """Reads the meteorological data
-
-    Data is imported from .txt files and stored in dataframes. Format of NA/NaN
-    values is -9999.
-
-    Args
-    ----------
-    path_to_dir : Path
-        path to directions which contains input data
-
-    Returns
-    ----------
-    prec_10mins : pd.DataFrame
-        precipitation (in mm/10 mins)
-
-    df_ta : pd.DataFrame
-        air temperature (in °C)
-
-    df_pet : pd.DataFrame
-        potential evapotranspiration (in mm/day)
-    """
-    if not os.path.isdir(path_to_dir):
-        raise ValueError(path_to_dir, 'does not exist')
-
-    Ta_path = path_to_dir / "TA.txt"
-    PREC_path = path_to_dir / "PREC.txt"
-    PET_path = path_to_dir / "PET.txt"
-
-    df_PREC = pd.read_csv(PREC_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
-                          index_col=0, na_values=-9999)
-    df_PREC.index = pd.to_datetime(df_PREC.index, format='%Y %m %d %H %M')
-
-    df_pet = pd.read_csv(PET_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
-                         index_col=0, na_values=-9999)
-    df_pet.index = pd.to_datetime(df_pet.index, format='%Y %m %d %H %M')
-
-    df_ta = pd.read_csv(Ta_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
-                        index_col=0, na_values=-9999)
-    df_ta.index = pd.to_datetime(df_ta.index, format='%Y %m %d %H %M')
-
-    # reset index of precipitation time series
-    # time series starts on first day at 00:00 and ends on last day at 23:50
-    prec_ind = df_PREC.index
-    new_prec_ind = pd.date_range(start=datetime(prec_ind[0].year, prec_ind[0].month, prec_ind[0].day, 0, 0),
-                              end=datetime(prec_ind[-1].year, prec_ind[-1].month, prec_ind[-1].day, 23, 50),
-                              freq='10T')
-    prec_10mins = pd.DataFrame(index=new_prec_ind)
-    prec_10mins['PREC'] = 0
-    prec_10mins.loc[df_PREC.index, 'PREC'] = df_PREC['PREC'].values
-
-    return prec_10mins, df_pet, df_ta
+from roger.io_tools.csv import read_meteo
 
 
 def join_meteo(prec_var_time: pd.DataFrame, df_pet: pd.DataFrame,

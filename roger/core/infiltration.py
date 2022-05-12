@@ -850,6 +850,41 @@ def calc_inf_ss(state):
 
 
 @roger_kernel
+def calc_surface_runoff(state):
+    """
+    Calculates surface runoff
+    """
+    vs = state.variables
+
+    vs.q_hof = update(
+        vs.q_hof,
+        at[2:-2, 2:-2], npx.where((vs.z0[2:-2, 2:-2] > 0) & (vs.S_rz[2:-2, 2:-2] < vs.S_sat_rz[2:-2, 2:-2]), vs.z0[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.z0 = update_add(
+        vs.z0,
+        at[2:-2, 2:-2, vs.tau], -vs.q_hof[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.q_sof = update(
+        vs.q_sof,
+        at[2:-2, 2:-2], npx.where((vs.z0[2:-2, 2:-2] > 0) & (vs.S_rz[2:-2, 2:-2] >= vs.S_sat_rz[2:-2, 2:-2]), vs.z0[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.z0 = update_add(
+        vs.z0,
+        at[2:-2, 2:-2, vs.tau], -vs.q_sof[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.q_sur = update(
+        vs.q_sur,
+        at[2:-2, 2:-2], vs.q_hof[2:-2, 2:-2] + vs.q_sof[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    return KernelOutput(q_hof=vs.q_hof, q_sof=vs.q_sof, q_sur=vs.q_sur, z0=vs.z0)
+
+
+@roger_kernel
 def calc_inf(state):
     """
     Calculates infiltration
@@ -1608,6 +1643,7 @@ def calculate_infiltration(state):
     vs.update(calc_inf_rz(state))
     vs.update(calc_inf_ss(state))
     vs.update(calc_inf(state))
+    vs.update(calc_surface_runoff(state))
 
     if cond4.any():
         vs.event_id = 0
@@ -1750,7 +1786,7 @@ def calculate_infiltration_ss_transport_anion_kernel(state):
     # solute concentration of infiltration
     vs.C_inf_pf_ss = update(
         vs.C_inf_pf_ss,
-        at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatc[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
     # solute mass of infiltration
     vs.M_inf_pf_ss = update(

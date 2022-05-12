@@ -173,7 +173,7 @@ def calculate_soil_transport_iso_kernel(state):
     )
     vs.msa_s = update(
         vs.msa_s,
-        at[2:-2, 2:-2, vs.tau, :], (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / vs.sa_s[2:-2, 2:-2, vs.tau, :]) * iso_rz[2:-2, 2:-2, :] + (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / vs.sa_s[2:-2, 2:-2, vs.tau, :]) * iso_ss,
+        at[2:-2, 2:-2, vs.tau, :], (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / vs.sa_s[2:-2, 2:-2, vs.tau, :]) * iso_rz[2:-2, 2:-2, :] + (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / vs.sa_s[2:-2, 2:-2, vs.tau, :]) * iso_ss[2:-2, 2:-2, :],
     )
     vs.msa_s = update(
         vs.msa_s,
@@ -217,7 +217,7 @@ def calculate_soil_transport_anion_kernel(state):
 
     vs.M_s = update(
         vs.M_s,
-        at[2:-2, 2:-2, vs.tau], npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau], npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.C_s = update(

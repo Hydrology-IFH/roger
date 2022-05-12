@@ -174,10 +174,10 @@ def get_chunk_slices(nx, ny, dim_grid, proc_idx=None, include_overlap=False):
 
     for dim in dim_grid:
         if dim:
-            if dim in SCATTERED_DIMENSIONS[0]:
+            if str(dim) in SCATTERED_DIMENSIONS[0]:
                 global_slice.append(slice(sxl + px * nxl, sxu + px * nxl))
                 local_slice.append(slice(sxl, sxu))
-            elif dim in SCATTERED_DIMENSIONS[1]:
+            elif str(dim) in SCATTERED_DIMENSIONS[1]:
                 global_slice.append(slice(syl + py * nyl, syu + py * nyl))
                 local_slice.append(slice(syl, syu))
             else:

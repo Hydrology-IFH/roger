@@ -83,7 +83,7 @@ NAGES = ("nages",)
 NEVENTS_FF = ("events_ff",)
 CROPS = ("crops",)
 CR = ("cr",)
-N_SAS_PARAMS = (8,)
+N_SAS_PARAMS = ("n_sas_params",)
 
 # those are written to netCDF output by default
 BASE_DIMENSIONS = X + Y
@@ -105,6 +105,7 @@ DIM_TO_SHAPE_VAR = {
     "crops": "ncrops",
     "cr": "ncr",
     "events_ff": "nevent_ff",
+    "n_sas_params": "nsas",
 }
 
 DEFAULT_MASKS = {
@@ -3862,7 +3863,7 @@ VARIABLES = {
         "film flow",
         CATCH_GRID + TIME,
         "mm/dt",
-        "preferential infiltration into root zone",
+        "film flow",
         write_to_restart=False,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport & settings.enable_film_flow,

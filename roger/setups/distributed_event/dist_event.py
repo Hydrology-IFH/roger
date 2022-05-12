@@ -1,9 +1,9 @@
 from pathlib import Path
+import os
 import h5netcdf
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
-from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
-from roger.core.utilities import _get_row_no
+from roger.core.operators import numpy as npx, update, at
 import roger.lookuptables as lut
 import numpy as onp
 
@@ -12,27 +12,36 @@ class DISTEVENTSetup(RogerSetup):
     """A distributed model for a single event.
     """
     _base_path = Path(__file__).parent
+    _input_dir = None
 
-    def _read_var_from_nc(self, var, file):
-        nc_file = self._base_path / file
+    def _set_input_dir(self, path):
+        if os.path.exists(path):
+            self._input_dir = path
+        else:
+            self._input_dir = path
+            if not os.path.exists(self._input_dir):
+                os.mkdir(self._input_dir)
+
+    def _read_var_from_nc(self, var, path_dir, file):
+        nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables[var]
             return npx.array(var_obj)
 
-    def _get_nitt(self):
-        nc_file = self._base_path / 'forcing.nc'
+    def _get_nitt(self, path_dir, file):
+        nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables['time']
+            var_obj = infile.variables['Time']
             return len(onp.array(var_obj))
 
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
-        settings.identifier = "DIST"
+        settings.identifier = "DISTEVENT"
 
         settings.nx, settings.ny, settings.nz = 8, 8, 1
-        settings.nitt = self._get_nitt()
-        settings.nittevent = self._get_nitt()
+        settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
+        settings.nittevent = self._get_nitt(self._input_dir, 'forcing.nc')
         settings.nittevent_p1 = settings.nittevent + 1
         settings.runlen = settings.nitt * 10 * 60
 
@@ -47,15 +56,36 @@ class DISTEVENTSetup(RogerSetup):
         settings.enable_lateral_flow = True
         settings.enable_routing = False
 
-    @roger_routine
+    @roger_routine(
+        dist_safe=False,
+        local_variables=[
+            "DT_SECS",
+            "DT",
+            "dt_secs",
+            "dt",
+            "t",
+            "itt",
+            "x",
+            "y",
+        ],
+    )
     def set_grid(self, state):
         vs = state.variables
         settings = state.settings
 
         # temporal grid
-        vs.dt_secs = 10 * 60
-        vs.dt = (10 * 60) / (60 * 60)
+        vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", self._input_dir, 'forcing.nc'))
+        vs.DT = update(vs.DT, at[:], vs.DT_SECS / (60 * 60))
+        vs.dt_secs = vs.DT_SECS[vs.itt]
+        vs.dt = vs.DT[vs.itt]
         vs.t = update(vs.t, at[:], npx.linspace(0, vs.dt * settings.nitt, num=settings.nitt))
+        # spatial grid
+        dx = allocate(state.dimensions, ("x"))
+        dx = update(dx, at[:], 1)
+        dy = allocate(state.dimensions, ("y"))
+        dy = update(dy, at[:], 1)
+        vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
+        vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
 
     @roger_routine
     def set_look_up_tables(self, state):
@@ -118,8 +148,8 @@ class DISTEVENTSetup(RogerSetup):
     def set_forcing_setup(self, state):
         vs = state.variables
 
-        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", 'forcing.nc'))
-        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", 'forcing.nc'))
+        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
+        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
         vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, 1:], 1)
 
     @roger_routine
@@ -130,22 +160,7 @@ class DISTEVENTSetup(RogerSetup):
 
     @roger_routine
     def set_diagnostics(self, state):
-        diagnostics = state.diagnostics
-        settings = state.settings
-
-        diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "q_sub_rz", "q_sub_ss"]
-        if settings.enable_groundwater_boundary:
-            diagnostics["rates"].output_variables += ["cpr_ss"]
-        diagnostics["rates"].output_frequency = 60 * 60
-        diagnostics["rates"].sampling_frequency = 1
-
-        diagnostics["collect"].output_variables = ["S_rz", "S_ss",
-                                                   "S_pwp_rz", "S_fc_rz",
-                                                   "S_sat_rz", "S_pwp_ss",
-                                                   "S_fc_ss", "S_sat_ss",
-                                                   "z_sat"]
-        diagnostics["collect"].output_frequency = 60 * 60
-        diagnostics["collect"].sampling_frequency = 1
+        pass
 
     @roger_routine
     def after_timestep(self, state):
@@ -161,9 +176,14 @@ def set_forcing_kernel(state):
     vs.prec = update(vs.prec, at[2:-2, 2:-2], vs.PREC[2:-2, 2:-2, vs.itt])
     vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[2:-2, 2:-2, vs.itt])
 
+    vs.dt_secs = vs.DT_SECS[vs.itt]
+    vs.dt = vs.DT[vs.itt]
+
     return KernelOutput(
         prec=vs.prec,
         ta=vs.ta,
+        dt=vs.dt,
+        dt_secs=vs.dt_secs,
     )
 
 

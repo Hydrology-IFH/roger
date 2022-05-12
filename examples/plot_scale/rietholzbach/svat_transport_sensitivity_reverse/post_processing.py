@@ -1,13 +1,8 @@
 from pathlib import Path
-import glob
 import os
-import datetime
-import h5netcdf
-import matplotlib.pyplot as plt
 import xarray as xr
 from cftime import num2date
 import pandas as pd
-from SALib.sample import saltelli
 from SALib.analyze import sobol
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -52,14 +47,8 @@ for tm_structure in tm_structures:
     tms = tm_structure.replace(" ", "_")
 
     # load simulation
-    states_tm_file = base_path / f"states_tm_{tms}_sensitivity_reverse.nc"
-    ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-    states_hm_file = base_path / "states_hm_sensitivity.nc"
-    ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
-
-    # load observations (measured data)
-    path_obs = Path("/Users/robinschwemmle/Desktop/PhD/data/plot/rietholzbach/rietholzbach_lysimeter.nc")
-    ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
+    states_tm_file = base_path / "states_tm_sensitivity_reverse.nc"
+    ds_sim_tm = xr.open_dataset(states_tm_file, f"{tm_structure}", engine="h5netcdf")
 
     # assign date
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))

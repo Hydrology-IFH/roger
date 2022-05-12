@@ -167,7 +167,7 @@ def calculate_root_zone_transport_anion_kernel(state):
 
     vs.M_rz = update(
         vs.M_rz,
-        at[2:-2, 2:-2, vs.tau], npx.sum(vs.msa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau], npx.sum(vs.msa_rz[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.C_rz = update(

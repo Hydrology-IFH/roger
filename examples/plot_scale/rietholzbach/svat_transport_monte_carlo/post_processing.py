@@ -36,8 +36,8 @@ for tm_structure in tm_structures:
     tms = tm_structure.replace(" ", "_")
 
     # load transport simulation
-    states_tm_file = base_path / f"states_tm_{tms}_monte_carlo.nc"
-    ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    states_tm_file = base_path / "states_tm_monte_carlo.nc"
+    ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{tm_structure}", engine="h5netcdf")
 
     # assign date
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
@@ -157,19 +157,20 @@ for tm_structure in tm_structures:
             references='',
             comment=f'SVAT {tm_structure} transport model with free drainage'
         )
-        f.dimensions = {'x': nx, 'y': 1, 'n_sas_params': 8}
+        dict_dim = {'x': nx, 'y': 1, 'n_sas_params': 8}
+        f.dimensions = dict_dim
         v = f.create_variable('x', ('x',), float)
         v.attrs['long_name'] = 'Zonal coordinate'
         v.attrs['units'] = 'meters'
-        v[:] = onp.arange(f.dimensions["x"])
+        v[:] = onp.arange(dict_dim["x"])
         v = f.create_variable('y', ('y',), float)
         v.attrs['long_name'] = 'Meridonial coordinate'
         v.attrs['units'] = 'meters'
-        v[:] = onp.arange(f.dimensions["y"])
+        v[:] = onp.arange(dict_dim["y"])
         v = f.create_variable('n_sas_params', ('n_sas_params',), float)
         v.attrs['long_name'] = 'Number of SAS parameters'
         v.attrs['units'] = ' '
-        v[:] = onp.arange(f.dimensions["n_sas_params"])
+        v[:] = onp.arange(dict_dim["n_sas_params"])
 
         if tm_structure in ['preferential', 'advection-dispersion',
                             'time-variant preferential',

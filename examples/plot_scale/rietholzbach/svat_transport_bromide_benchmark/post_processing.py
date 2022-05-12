@@ -30,8 +30,8 @@ for tm_structure in tm_structures:
     fig, axes = plt.subplots(1, 1, figsize=(10, 6))
     for year in years:
         # load simulation
-        states_tm_file = base_path / f"states_tm_{tms}_{year}.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+        states_tm_file = base_path / "states_tm.nc"
+        ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{tm_structure}-{year}", engine="h5netcdf")
 
         # plot observed and simulated time series
         base_path_figs = base_path / "figures"
@@ -57,7 +57,7 @@ for tm_structure in tm_structures:
         fig, axes = plt.subplots(1, 1, figsize=(10, 6))
         axes.plot(idx, df_perc_br['Br_conc_mmol'], color='black', ls='-', colors=cmap(norm(year)))
         axes.set_ylabel('Br [mmol $l^{-1}$]')
-        axes.set_xlabel('Time [days since injection]')
+        axes.set_xlabel('Time [hours since injection]')
         axes.set_ylim(0,)
         axes.set_xlim(0,)
         ax2 = axes.twinx()
@@ -71,7 +71,7 @@ for tm_structure in tm_structures:
         fig_year, axes_year = plt.subplots(1, 1, figsize=(10, 6))
         axes_year.plot(idx, df_perc_br['Br_conc_mmol'], color='black', ls='-')
         axes_year.set_ylabel('Br [mmol $l^{-1}$]')
-        axes_year.set_xlabel('Time [days since injection]')
+        axes_year.set_xlabel('Time [hours since injection]')
         axes_year.set_ylim(0,)
         axes_year.set_xlim(0,)
         ax2_year = axes.twinx()

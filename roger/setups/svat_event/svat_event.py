@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import h5netcdf
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
@@ -11,17 +12,26 @@ class SVATEVENTSetup(RogerSetup):
     """A SVAT model for a single event.
     """
     _base_path = Path(__file__).parent
+    _input_dir = None
 
-    def _read_var_from_nc(self, var, file):
-        nc_file = self._base_path / file
+    def _set_input_dir(self, path):
+        if os.path.exists(path):
+            self._input_dir = path
+        else:
+            self._input_dir = path
+            if not os.path.exists(self._input_dir):
+                os.mkdir(self._input_dir)
+
+    def _read_var_from_nc(self, var, path_dir, file):
+        nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables[var]
             return npx.array(var_obj)
 
-    def _get_nitt(self):
-        nc_file = self._base_path / 'forcing.nc'
+    def _get_nitt(self, path_dir, file):
+        nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables['time']
+            var_obj = infile.variables['Time']
             return len(onp.array(var_obj))
 
     @roger_routine
@@ -30,8 +40,8 @@ class SVATEVENTSetup(RogerSetup):
         settings.identifier = "SVATEVENT"
 
         settings.nx, settings.ny, settings.nz = 1, 1, 1
-        settings.nitt = self._get_nitt()
-        settings.nittevent = self._get_nitt()
+        settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
+        settings.nittevent = self._get_nitt(self._input_dir, 'forcing.nc')
         settings.nittevent_p1 = settings.nittevent + 1
         settings.runlen = settings.nitt * 10 * 60
 
@@ -62,8 +72,10 @@ class SVATEVENTSetup(RogerSetup):
         settings = state.settings
 
         # temporal grid
-        vs.dt_secs = 60 * 10
-        vs.dt = 60 * 10 / 60 * 60
+        vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", self._input_dir, 'forcing.nc'))
+        vs.DT = update(vs.DT, at[:], vs.DT_SECS / (60 * 60))
+        vs.dt_secs = vs.DT_SECS[vs.itt]
+        vs.dt = vs.DT[vs.itt]
         vs.t = update(vs.t, at[:], npx.linspace(0, vs.dt * settings.nitt, num=settings.nitt))
         # spatial grid
         dx = allocate(state.dimensions, ("x"))
@@ -129,8 +141,8 @@ class SVATEVENTSetup(RogerSetup):
     def set_forcing_setup(self, state):
         vs = state.variables
 
-        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", 'forcing.nc'))
-        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", 'forcing.nc'))
+        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
+        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
         vs.PET = update(vs.PET, at[2:-2, 2:-2, :], 0)
         vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, 1:], 1)
 
@@ -169,11 +181,14 @@ def set_forcing_kernel(state):
         at[2:-2, 2:-2], 0,
     )
 
+    vs.dt_secs = vs.DT_SECS[vs.itt]
+    vs.dt = vs.DT[vs.itt]
+
     return KernelOutput(
         prec=vs.prec,
         ta=vs.ta,
-        q_sur=vs.q_sur,
-        q_hof=vs.q_hof,
+        dt=vs.dt,
+        dt_secs=vs.dt_secs,
     )
 
 

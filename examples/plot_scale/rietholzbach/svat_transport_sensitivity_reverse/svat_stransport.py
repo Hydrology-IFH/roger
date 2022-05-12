@@ -1,5 +1,6 @@
 from pathlib import Path
 import glob
+import os
 import datetime
 import h5netcdf
 
@@ -29,41 +30,50 @@ class SVATTRANSPORTSetup(RogerSetup):
                    [0.05, 0.33],
                    [0.1, 120]]
     }
+    _input_dir = None
 
-    def _read_var_from_nc(self, var, file):
-        nc_file = self._base_path / file
+    def _set_input_dir(self, path):
+        if os.path.exists(path):
+            self._input_dir = path
+        else:
+            self._input_dir = path
+            if not os.path.exists(self._input_dir):
+                os.mkdir(self._input_dir)
+
+    def _read_var_from_nc(self, var, path_dir, file):
+        nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables[var]
             return npx.array(var_obj)
 
-    def _get_nitt(self):
-        nc_file = self._base_path / 'states_hm_sensitivity.nc'
+    def _get_nitt(self, path_dir, file):
+        nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['Time']
             return len(onp.array(var_obj))
 
-    def _get_nx(self):
-        nc_file = self._base_path / 'states_hm_sensitivity.nc'
-        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables['x']
-            return len(onp.array(var_obj))
-
-    def _get_runlen(self):
-        nc_file = self._base_path / 'states_hm_sensitivity.nc'
+    def _get_runlen(self, path_dir, file):
+        nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['Time']
             return len(onp.array(var_obj)) * 60 * 60 * 24
+
+    def _get_nx(self, path_dir, file):
+        nc_file = path_dir / file
+        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+            var_obj = infile.variables['x']
+            return len(onp.array(var_obj))
 
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
         settings.identifier = "SVATTRANSPORT"
 
-        settings.nx, settings.ny, settings.nz = 1, 1, 1
-        settings.nitt = self._get_nitt()
+        settings.nx, settings.ny, settings.nz = self._get_nx(self._base_path, 'states_hm_sensitivity.nc'), 1, 1
+        settings.nitt = self._get_nitt(self._base_path, 'states_hm_sensitivity.nc')
         settings.ages = settings.nitt
         settings.nages = settings.nitt + 1
-        settings.runlen = self._get_runlen()
+        settings.runlen = self._get_runlen(self._base_path, 'states_hm_sensitivity.nc')
 
         # lysimeter surface 3.14 square meter (2m diameter)
         settings.dx = 2
@@ -142,33 +152,15 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs = state.variables
         settings = state.settings
 
-        if (vs.itt == 0):
-            vs.S_PWP_RZ = update(vs.S_PWP_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_rz", 'states_hm.nc'))
-            vs.S_PWP_SS = update(vs.S_PWP_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_ss", 'states_hm.nc'))
-            vs.S_SAT_RZ = update(vs.S_SAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_rz", 'states_hm.nc'))
-            vs.S_SAT_SS = update(vs.S_SAT_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_ss", 'states_hm.nc'))
+        vs.S_PWP_RZ = update(vs.S_PWP_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm_sensitivity.nc'))
+        vs.S_PWP_SS = update(vs.S_PWP_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm_sensitivity.nc'))
+        vs.S_SAT_RZ = update(vs.S_SAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm_sensitivity.nc'))
+        vs.S_SAT_SS = update(vs.S_SAT_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm_sensitivity.nc'))
 
-            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], vs.S_PWP_RZ[2:-2, 2:-2, 0])
-            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], vs.S_PWP_SS[2:-2, 2:-2, 0])
-            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], vs.S_SAT_RZ[2:-2, 2:-2, 0])
-            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], vs.S_SAT_SS[2:-2, 2:-2, 0])
-
-            if (settings.enable_bromide | settings.enable_chloride):
-                vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], self._read_var_from_nc("alpha_transp", 'parameters.nc'))
-                vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], self._read_var_from_nc("alpha_q", 'parameters.nc'))
-            if settings.enable_nitrate:
-                vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], self._read_var_from_nc("alpha_transp", 'parameters.nc'))
-                vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], self._read_var_from_nc("alpha_q", 'parameters.nc'))
-                vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_denit_rz", 'parameters.nc'))
-                vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("km_denit_ss", 'parameters.nc'))
-                vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit_rz", 'parameters.nc'))
-                vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit_ss", 'parameters.nc'))
-                vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_nit_rz", 'parameters.nc'))
-                vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], self._read_var_from_nc("km_nit_ss", 'parameters.nc'))
-                vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_nit_rz", 'parameters.nc'))
-                vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], self._read_var_from_nc("dmax_nit_ss", 'parameters.nc'))
-                vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], self._read_var_from_nc("kmin_rz", 'parameters.nc'))
-                vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], self._read_var_from_nc("kmin_ss", 'parameters.nc'))
+        vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], vs.S_PWP_RZ[2:-2, 2:-2, 0])
+        vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], vs.S_PWP_SS[2:-2, 2:-2, 0])
+        vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], vs.S_SAT_RZ[2:-2, 2:-2, 0])
+        vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], vs.S_SAT_SS[2:-2, 2:-2, 0])
 
         if settings.tm_structure == "complete-mixing":
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 1)
@@ -185,15 +177,15 @@ class SVATTRANSPORTSetup(RogerSetup):
         elif settings.tm_structure in ["advection-dispersion", "preferential", "time-variant advection-disperison", "time-variant preferential", "time-variant"]:
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_transp", f'sas_parameters_{settings.tm_structure}.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", f'sas_parameters_{settings.tm_structure}.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", f'sas_parameters_{settings.tm_structure}.nc'))
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_transp", self._base_path, f'states_tm_{settings.tm_structure}_sensitivity.nc'))
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", self._base_path, f'states_tm_{settings.tm_structure}_sensitivity.nc'))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", self._base_path, f'states_tm_{settings.tm_structure}_sensitivity.nc'))
         elif settings.tm_structure == "complete-mixing + advection-dispersion":
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", f'sas_parameters_{settings.tm_structure}.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", f'sas_parameters_{settings.tm_structure}.nc'))
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", self._base_path, f'states_tm_{settings.tm_structure}_sensitivity.nc'))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", self._base_path, f'states_tm_{settings.tm_structure}_sensitivity.nc'))
 
     @roger_routine
     def set_parameters(self, state):
@@ -202,6 +194,7 @@ class SVATTRANSPORTSetup(RogerSetup):
     @roger_routine(
         dist_safe=False,
         local_variables=[
+            "S_SNOW",
             "S_RZ",
             "S_SS",
         ],
@@ -209,8 +202,9 @@ class SVATTRANSPORTSetup(RogerSetup):
     def set_initial_conditions_setup(self, state):
         vs = state.variables
 
-        vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", 'states_hm.nc'))
-        vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", 'states_hm.nc'))
+        vs.S_SNOW = update(vs.S_SNOW, at[2:-2, 2:-2, :], self._read_var_from_nc("S_snow", self._base_path, 'states_hm_sensitivity.nc'))
+        vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._base_path, 'states_hm_sensitivity.nc'))
+        vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._base_path, 'states_hm_sensitivity.nc'))
 
     @roger_routine
     def set_initial_conditions(self, state):
@@ -226,33 +220,34 @@ class SVATTRANSPORTSetup(RogerSetup):
         arr0 = allocate(state.dimensions, ("x", "y"))
         vs.sa_rz = update(
             vs.sa_rz,
-            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0, vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
+            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[:, :, npx.newaxis, :],
         )
         vs.sa_ss = update(
             vs.sa_ss,
-            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0, vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[2:-2, 2:-2, npx.newaxis, :],
+            at[2:-2, 2:-2, :vs.taup1, 1:], npx.diff(npx.linspace(arr0[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[:, :, npx.newaxis, :],
         )
 
         vs.SA_rz = update(
             vs.SA_rz,
-            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_rz, axis=3),
+            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_rz[2:-2, 2:-2, :, :], axis=-1),
         )
 
         vs.SA_ss = update(
             vs.SA_ss,
-            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_rz, axis=3),
+            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_rz[2:-2, 2:-2, :, :], axis=-1),
         )
 
         vs.sa_s = update(
             vs.sa_s,
-            at[2:-2, 2:-2, :, :], vs.sa_rz + vs.sa_ss,
+            at[2:-2, 2:-2, :, :], vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :],
         )
         vs.SA_s = update(
             vs.SA_s,
-            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_s, axis=3),
+            at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_s[2:-2, 2:-2, :, :], axis=-1),
         )
 
         if (settings.enable_oxygen18 | settings.enable_deuterium):
+            vs.C_snow = update(vs.C_snow, at[2:-2, 2:-2, :vs.taup1], npx.NaN)
             vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], -13)
             vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], -7)
             vs.msa_rz = update(
@@ -275,20 +270,20 @@ class SVATTRANSPORTSetup(RogerSetup):
             iso_ss = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
             iso_rz = update(
                 iso_rz,
-                at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_rz), 0, vs.msa_rz),
+                at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_rz), 0, vs.msa_rz)[2:-2, 2:-2, :, :],
             )
             iso_ss = update(
                 iso_ss,
-                at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_ss), 0, vs.msa_ss),
+                at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_ss), 0, vs.msa_ss)[2:-2, 2:-2, :, :],
             )
             vs.msa_s = update(
                 vs.msa_s,
-                at[2:-2, 2:-2, :, :], (vs.sa_rz / vs.sa_s) * iso_rz + (vs.sa_ss / vs.sa_s) * iso_ss,
+                at[2:-2, 2:-2, :, :], (vs.sa_rz[2:-2, 2:-2, :, :] / vs.sa_s[2:-2, 2:-2, :, :]) * iso_rz[2:-2, 2:-2, :, :] + (vs.sa_ss[2:-2, 2:-2, :, :] / vs.sa_s[2:-2, 2:-2, :, :]) * iso_ss[2:-2, 2:-2, :, :],
             )
 
             vs.C_s = update(
                 vs.C_s,
-                at[2:-2, 2:-2, vs.tau], calc_conc_iso_storage(state, vs.sa_s, vs.msa_s) * vs.maskCatch[2:-2, 2:-2],
+                at[2:-2, 2:-2, vs.tau], calc_conc_iso_storage(state, vs.sa_s, vs.msa_s)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
             )
 
             vs.C_s = update(
@@ -306,6 +301,7 @@ class SVATTRANSPORTSetup(RogerSetup):
             "INF_PF_SS",
             "TRANSP",
             "EVAP_SOIL",
+            "CPR_RZ",
             "Q_RZ",
             "Q_SS",
             "C_IN",
@@ -315,21 +311,22 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs = state.variables
         settings = state.settings
 
-        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("ta", 'states_hm.nc'))
-        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", 'states_hm.nc'))
-        vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", 'states_hm.nc'))
-        vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", 'states_hm.nc') + self._read_var_from_nc("inf_sc_rz", 'states_hm.nc'))
-        vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", 'states_hm.nc'))
-        vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", 'states_hm.nc'))
-        vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", 'states_hm.nc'))
-        vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", 'states_hm.nc'))
-        vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", 'states_hm.nc'))
+        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("ta", self._base_path, 'states_hm_sensitivity.nc'))
+        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._base_path, 'states_hm_sensitivity.nc'))
+        vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", self._base_path, 'states_hm_sensitivity.nc'))
+        vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", self._base_path, 'states_hm_sensitivity.nc') + self._read_var_from_nc("inf_sc_rz", self._base_path, 'states_hm_sensitivity.nc'))
+        vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._base_path, 'states_hm_sensitivity.nc'))
+        vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._base_path, 'states_hm_sensitivity.nc'))
+        vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", self._base_path, 'states_hm_sensitivity.nc'))
+        vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._base_path, 'states_hm_sensitivity.nc'))
+        vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._base_path, 'states_hm_sensitivity.nc'))
+        vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, 'states_hm_sensitivity.nc'))
 
         if settings.enable_deuterium:
-            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d2H", 'forcing_tracer.nc'))
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d2H", self._input_dir, 'forcing_tracer.nc'))
 
         if settings.enable_oxygen18:
-            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d18O", 'forcing_tracer.nc'))
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
 
         if settings.enable_deuterium or settings.enable_oxygen18:
             vs.update(set_iso_input_kernel(state))
@@ -363,7 +360,7 @@ class SVATTRANSPORTSetup(RogerSetup):
 def set_iso_input_kernel(state):
     vs = state.variables
 
-    vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], _ffill_3d(state, vs.C_IN))
+    vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], _ffill_3d(state, vs.C_IN)[2:-2, 2:-2, :])
 
     return KernelOutput(
         C_IN=vs.C_IN,
@@ -374,19 +371,30 @@ def set_iso_input_kernel(state):
 def set_forcing_iso_kernel(state):
     vs = state.variables
 
-    vs.C_in = update(
-        vs.C_in,
-        at[2:-2, 2:-2], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.NaN) * vs.maskCatch[2:-2, 2:-2],
+    # mixing of isotopes while snow accumulation
+    vs.C_snow = update(
+        vs.C_snow,
+        at[2:-2, 2:-2, vs.tau], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] > 0, npx.where(npx.isnan(vs.C_snow[2:-2, 2:-2, vs.tau]), vs.C_IN[2:-2, 2:-2, vs.itt], (vs.PREC[2:-2, 2:-2, vs.itt] / (vs.PREC[2:-2, 2:-2, vs.itt] + vs.S_SNOW[2:-2, 2:-2, vs.itt])) * vs.C_IN[2:-2, 2:-2, vs.itt] + (vs.S_SNOW[2:-2, 2:-2, vs.itt] / (vs.PREC[2:-2, 2:-2, vs.itt] + vs.S_SNOW[2:-2, 2:-2, vs.itt])) * vs.C_snow[2:-2, 2:-2, vs.taum1]), npx.NaN) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.C_snow = update(
+        vs.C_snow,
+        at[2:-2, 2:-2, vs.tau], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] <= 0, npx.NaN, vs.C_snow[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
+    # mix isotopes from snow melt and rainfall
+    vs.C_in = update(
+        vs.C_in,
+        at[2:-2, 2:-2], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] > 0, vs.C_snow[2:-2, 2:-2, vs.tau], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.NaN)) * vs.maskCatch[2:-2, 2:-2],
+    )
     vs.M_in = update(
         vs.M_in,
-        at[2:-2, 2:-2], vs.C_in * vs.PREC[2:-2, 2:-2, vs.itt] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], vs.C_in[2:-2, 2:-2] * vs.PREC[2:-2, 2:-2, vs.itt] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(
         M_in=vs.M_in,
         C_in=vs.C_in,
+        C_snow=vs.C_snow,
     )
 
 
@@ -406,6 +414,7 @@ def set_states_kernel(state):
     vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], vs.S_RZ[2:-2, 2:-2, vs.itt])
     vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], vs.S_SS[2:-2, 2:-2, vs.itt])
     vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_S[2:-2, 2:-2, vs.itt])
+    vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, vs.tau], vs.S_SNOW[2:-2, 2:-2, vs.itt])
 
     return KernelOutput(
         inf_mat_rz=vs.inf_mat_rz,
@@ -418,6 +427,7 @@ def set_states_kernel(state):
         cpr_rz=vs.cpr_rz,
         S_rz=vs.S_rz,
         S_ss=vs.S_ss,
+        S_snow=vs.S_snow,
     )
 
 
@@ -497,6 +507,10 @@ def after_timestep_kernel(state):
         vs.C_s,
         at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau],
     )
+    vs.C_snow = update(
+        vs.C_snow,
+        at[2:-2, 2:-2, vs.taum1], vs.C_snow[2:-2, 2:-2, vs.tau],
+    )
 
     return KernelOutput(
         SA_rz=vs.SA_rz,
@@ -517,6 +531,7 @@ def after_timestep_kernel(state):
         msa_s=vs.msa_s,
         M_s=vs.M_s,
         C_s=vs.C_s,
+        C_snow=vs.C_snow,
         )
 
 
@@ -526,26 +541,26 @@ def calc_conc_iso_storage(state, sa, msa):
     """
     vs = state.variables
 
-    mask = npx.isfinite(msa[2:-2, 2:-2, vs.tau, :])
+    mask = npx.isfinite(msa[:, :, vs.tau, :])
     vals = allocate(state.dimensions, ("x", "y", "ages"))
     weights = allocate(state.dimensions, ("x", "y", "ages"))
     vals = update(
         vals,
-        at[2:-2, 2:-2, :], npx.where(mask, msa[2:-2, 2:-2, vs.tau, :], 0),
+        at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], msa[2:-2, 2:-2, vs.tau, :], 0),
     )
     weights = update(
         weights,
-        at[2:-2, 2:-2, :], npx.where(sa[2:-2, 2:-2, vs.tau, :] * mask > 0, sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :] * mask, axis=-1)[2:-2, 2:-2, npx.newaxis], 0),
+        at[2:-2, 2:-2, :], npx.where(sa[2:-2, 2:-2, vs.tau, :] * mask[2:-2, 2:-2, :] > 0, sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :] * mask[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis], 0),
     )
     conc = allocate(state.dimensions, ("x", "y"))
     # calculate weighted average
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.sum(vals * weights, axis=-1),
+        at[2:-2, 2:-2], npx.sum(vals[2:-2, 2:-2, :] * weights[2:-2, 2:-2, :], axis=-1),
     )
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.where(conc != 0, conc, npx.NaN),
+        at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], npx.NaN),
     )
 
     return conc
@@ -561,11 +576,11 @@ def _ffill_3d(state, arr):
     arr_fill = allocate(state.dimensions, ("x", "y", "t"))
     idx = update(
         idx,
-        at[2:-2, 2:-2, :], npx.where(npx.isfinite(arr), npx.arange(npx.shape(arr)[2])[idx_shape], 0),
+        at[:, :, :], npx.where(npx.isfinite(arr), npx.arange(npx.shape(arr)[2])[idx_shape], 0),
     )
     idx = update(
         idx,
-        at[2:-2, 2:-2, :], npx.maximum.accumulate(idx, axis=-1),
+        at[:, :, :], npx.maximum.accumulate(idx, axis=-1),
     )
     arr1 = update(
         arr1,
@@ -577,11 +592,11 @@ def _ffill_3d(state, arr):
     )
     arr3 = update(
         arr3,
-        at[2:-2, 2:-2, :], idx,
+        at[:, :, :], idx,
     )
     arr_fill = update(
         arr_fill,
-        at[2:-2, 2:-2, :], arr[arr1, arr2, arr3],
+        at[:, :, :], arr[arr1, arr2, arr3],
     )
 
     return arr_fill
@@ -596,7 +611,10 @@ for tm_structure in tm_structures:
     model = SVATTRANSPORTSetup()
     model._set_tm_structure(tm_structure)
     input_path = model._base_path / "input"
-    write_forcing_tracer(input_path, 'd18O')
+    model._set_input_dir(input_path)
+    forcing_path = model._input_dir / "forcing_tracer.nc"
+    if not os.path.exists(forcing_path):
+        write_forcing_tracer(input_path, 'd18O')
     model.setup()
     model.warmup()
     model.run()
@@ -604,8 +622,9 @@ for tm_structure in tm_structures:
     # merge model output into single file
     path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
     diag_files = glob.glob(path)
-    states_tm_file = model._base_path / f"states_tm_{tms}_sensitivity_reverse.nc"
-    with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
+    states_tm_file = model._base_path / "states_tm_sensitivity_reverse.nc"
+    with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as ff:
+        f = ff.create_group(tm_structure)
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title=f'RoGeR {tm_structure} transport model saltelli results (reverse) at Rietholzbach Lysimeter site',
@@ -617,30 +636,31 @@ for tm_structure in tm_structures:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
                 if not f.dimensions:
-                    f.dimensions = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages'])}
+                    dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages'])}
+                    f.dimensions = dict_dim
                     v = f.create_variable('x', ('x',), float)
                     v.attrs['long_name'] = 'Number of model run'
                     v.attrs['units'] = ''
-                    v[:] = npx.arange(f.dimensions["x"])
+                    v[:] = npx.arange(dict_dim["x"])
                     v = f.create_variable('y', ('y',), float)
                     v.attrs['long_name'] = ''
                     v.attrs['units'] = ''
-                    v[:] = npx.arange(f.dimensions["y"])
+                    v[:] = npx.arange(dict_dim["y"])
                     v = f.create_variable('Time', ('Time',), float)
                     var_obj = df.variables.get('Time')
-                    with h5netcdf.File(model._base_path / 'forcing_tracer.nc', "r", decode_vlen_strings=False) as infile:
-                        time_origin = infile.variables['time'].attrs['time_origin']
+                    with h5netcdf.File(model._base_path / "input" / 'forcing_tracer.nc', "r", decode_vlen_strings=False) as infile:
+                        time_origin = infile.variables['Time'].attrs['time_origin']
                     v.attrs.update(time_origin=time_origin,
                                    units=var_obj.attrs["units"])
                     v[:] = npx.array(var_obj)
                     v = f.create_variable('ages', ('ages',), float)
                     v.attrs['long_name'] = 'Water ages'
                     v.attrs['units'] = 'days'
-                    v[:] = npx.arange(1, f.dimensions["ages"]+1)
+                    v[:] = npx.arange(1, dict_dim["ages"]+1)
                     v = f.create_variable('nages', ('nages',), float)
                     v.attrs['long_name'] = 'Water ages (cumulated)'
                     v.attrs['units'] = 'days'
-                    v[:] = npx.arange(0, f.dimensions["nages"])
+                    v[:] = npx.arange(0, dict_dim["nages"])
                 for var_sim in list(df.variables.keys()):
                     var_obj = df.variables.get(var_sim)
                     if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3:

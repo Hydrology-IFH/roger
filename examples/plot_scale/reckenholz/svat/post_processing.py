@@ -1,25 +1,12 @@
-import shutil
-import glob
 import os
 from pathlib import Path
-import datetime
 from cftime import num2date
-import h5netcdf
 import xarray as xr
 import pandas as pd
+import numpy as onp
 
-from roger import runtime_settings as rs
-rs.backend = "numpy"
-rs.force_overwrite = True
-from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
-from roger.variables import allocate
-from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
-from roger.core.utilities import _get_row_no
-from roger.tools.setup import write_forcing, write_crop_rotation
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
-import roger.lookuptables as lut
-import numpy as onp
 
 base_path = Path(__file__).parent
 

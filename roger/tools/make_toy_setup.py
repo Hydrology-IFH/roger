@@ -2,6 +2,7 @@ import os
 import numpy as onp
 import datetime
 import pandas as pd
+import scipy.special as sps
 import h5netcdf
 from cftime import date2num
 
@@ -49,7 +50,7 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
 
         if event_type == 'rain':
             # generate random rainfall
-            prec_rnd = onp.random.uniform(0, 1, 18)
+            prec_rnd = rng.uniform(0, 1, 18)
             n_prec_rnd = len(prec_rnd)
             n_prec = ndays*24*6
             prec = onp.zeros((n_prec))
@@ -58,13 +59,13 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
             idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
             # generate random air temperature
             idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
-            ta = onp.random.uniform(15, 20, ndays)
+            ta = rng.uniform(15, 20, ndays)
             # generate random potential evapotranspiration
-            pet = onp.random.uniform(2, 3, ndays)
+            pet = rng.uniform(2, 3, ndays)
 
         elif event_type == 'snow':
             # generate random rainfall
-            prec_rnd = onp.random.uniform(0, 1, 18)
+            prec_rnd = rng.uniform(0, 1, 18)
             n_prec_rnd = len(prec_rnd)
             n_prec = ndays*24*6
             prec = onp.zeros((n_prec))
@@ -73,13 +74,13 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
             idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
             # generate random air temperature
             idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
-            ta = onp.random.uniform(-3, -1, ndays)
+            ta = rng.uniform(-3, -1, ndays)
             # generate random potential evapotranspiration
-            pet = onp.random.uniform(1, 2, ndays)
+            pet = rng.uniform(1, 2, ndays)
 
         elif event_type == 'snow+rain':
             # generate random rainfall
-            prec_rnd = onp.random.uniform(0, 1, 18)
+            prec_rnd = rng.uniform(0, 1, 18)
             n_prec_rnd = len(prec_rnd)
             n_prec = ndays*24*6
             prec = onp.zeros((n_prec))
@@ -88,13 +89,13 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
             idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
             # generate random air temperature
             idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
-            ta = onp.random.uniform(0, 3, ndays)
+            ta = rng.uniform(0, 3, ndays)
             ta[:2] = -1
             # generate random potential evapotranspiration
-            pet = onp.random.uniform(1, 2, ndays)
+            pet = rng.uniform(1, 2, ndays)
 
         elif event_type == 'heavyrain':
-            prec_rnd = onp.random.uniform(0.1, 6, 12*6)
+            prec_rnd = rng.uniform(0.1, 6, 12*6)
             n_prec_rnd = len(prec_rnd)
             n_prec = ndays*24*6
             prec = onp.zeros((n_prec))
@@ -103,29 +104,29 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
             idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
             # generate random air temperature
             idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
-            ta = onp.random.uniform(15, 20, ndays)
+            ta = rng.uniform(15, 20, ndays)
             # generate random potential evapotranspiration
-            pet = onp.random.uniform(2, 3, ndays)
+            pet = rng.uniform(2, 3, ndays)
 
         elif event_type == 'mixed':
-            x1 = onp.unique(onp.random.randint(low=0, high=ndays * 24 * 6, size=(int(100 * (ndays/365)),)))
+            x1 = onp.unique(rng.randint(low=0, high=ndays * 24 * 6, size=(int(100 * (ndays/365)),)))
             x2 = onp.zeros((int(100 * (ndays/365)),), dtype=int)
             for i in range(int(100 * (ndays/365)) - 1):
                 if x1[i+1] - x1[i] <= 1:
                     high = 2
                 else:
                     high = x1[i+1] - x1[i]
-                x2[i] = x1[i] + onp.random.randint(low=1, high=high)
+                x2[i] = x1[i] + rng.randint(low=1, high=high)
             x2[x2 > ndays * 24 * 6] = ndays * 24 * 6
-            x2[-1] = onp.random.randint(low=x1[-1] + 1, high=ndays * 24 * 6)
+            x2[-1] = rng.randint(low=x1[-1] + 1, high=ndays * 24 * 6)
 
             prec = onp.zeros((ndays * 24 * 6,))
             for i, ii in zip(x1, x2):
-                lam = onp.random.weibull(1, 1)
+                lam = rng.weibull(1, 1)
                 if lam > 5.5:
-                    prec[i:ii] = onp.random.poisson(lam, ii - i) * 0.5
+                    prec[i:ii] = rng.poisson(lam, ii - i) * 0.5
                 else:
-                    prec[i:ii] = onp.random.poisson(lam, ii - i) * onp.random.uniform(0.01, 0.1, ii - i)
+                    prec[i:ii] = rng.poisson(lam, ii - i) * rng.uniform(0.01, 0.1, ii - i)
             idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
             # generate random air temperature
             idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
@@ -140,9 +141,9 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
             for i in range(ndays):
                 if i % 365 == 0:
                     ii = 0
-                ta[i] = onp.random.uniform(ta_init - 1 + scale[ii] * ta_off, ta_init + 1 + scale[ii] * ta_off, 1)
+                ta[i] = rng.uniform(ta_init - 1 + scale[ii] * ta_off, ta_init + 1 + scale[ii] * ta_off, 1)
                 # generate random potential evapotranspiration
-                pet[i] = onp.random.uniform(pet_init - 1 + scale[ii] * pet_off, pet_init + 1 + scale[ii] * pet_off, 1)
+                pet[i] = rng.uniform(pet_init - 1 + scale[ii] * pet_off, pet_init + 1 + scale[ii] * pet_off, 1)
                 ii += 1
 
         elif event_type == 'norain':
@@ -151,9 +152,9 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
             idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
             # generate random air temperature
             idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
-            ta = onp.random.uniform(15, 20, ndays)
+            ta = rng.uniform(15, 20, ndays)
             # generate random potential evapotranspiration
-            pet = onp.random.uniform(2, 3, ndays)
+            pet = rng.uniform(2, 3, ndays)
 
         input_dir = base_path / "input"
         if not os.path.exists(input_dir):
@@ -250,39 +251,40 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                 comment=''
             )
             # set dimensions with a dictionary
-            f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_events.index), 'scalar': 1}
-            v = f.create_variable('PREC', ('x', 'y', 'time'), float_type)
+            dict_dim = {'x': nrows, 'y': ncols, 'Time': len(df_events.index), 'scalar': 1}
+            f.dimensions = dict_dim
+            v = f.create_variable('PREC', ('x', 'y', 'Time'), float_type)
             arr = df_events['PREC'].astype(float_type).values
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
             v.attrs['long_name'] = 'Precipitation'
             v.attrs['units'] = 'mm/dt'
-            v = f.create_variable('TA', ('x', 'y', 'time'), float_type)
+            v = f.create_variable('TA', ('x', 'y', 'Time'), float_type)
             arr = df_events['TA'].astype(float_type).values
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
             v.attrs['long_name'] = 'air temperature'
             v.attrs['units'] = 'degC'
-            v = f.create_variable('PET', ('x', 'y', 'time'), float_type)
+            v = f.create_variable('PET', ('x', 'y', 'Time'), float_type)
             arr = df_events['PET'].astype(float_type).values
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
             v.attrs['long_name'] = 'Potential Evapotranspiration'
             v.attrs['units'] = 'mm/dt'
-            v = f.create_variable('dt', ('time',), float_type)
+            v = f.create_variable('dt', ('Time',), float_type)
             v[:] = df_events['time_step'].astype(float_type).values
             v.attrs['long_name'] = 'time step (!not constant)'
             v.attrs['units'] = 'hour'
-            v = f.create_variable('year', ('time',), int)
+            v = f.create_variable('year', ('Time',), int)
             v[:] = df_events['YYYY'].astype(int).values
             v.attrs['units'] = 'year'
-            v = f.create_variable('month', ('time',), int)
+            v = f.create_variable('month', ('Time',), int)
             v[:] = df_events['MM'].astype(int).values
             v.attrs['units'] = 'month'
-            v = f.create_variable('doy', ('time',), int)
+            v = f.create_variable('doy', ('Time',), int)
             v[:] = df_events['DOY'].astype(int).values
             v.attrs['units'] = 'day of year'
-            v = f.create_variable('EVENT_ID', ('time',), int)
+            v = f.create_variable('EVENT_ID', ('Time',), int)
             v[:] = df_events['EVENT_ID'].astype(int).values
             v.attrs['units'] = ''
-            v = f.create_variable('time', ('time',), float_type)
+            v = f.create_variable('Time', ('Time',), float_type)
             v.attrs['time_origin'] = f"{df_events.index[0]}"
             v.attrs['units'] = 'hours'
             v[:] = date2num(df_events.index.tolist(), units=f"hours since {df_events.index[0]}", calendar='standard')
@@ -298,7 +300,7 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
             v.attrs['long_name'] = 'Number of iterations of longest event'
             v[:] = NITT_EVENT
             if enable_film_flow:
-                v = f.create_variable('EVENT_ID_FF', ('time',), int)
+                v = f.create_variable('EVENT_ID_FF', ('Time',), int)
                 v[:] = df_events['EVENT_ID_FF'].astype(int).values
                 v.attrs['units'] = ''
                 v = f.create_variable('nevent_ff', ('scalar',), int)
@@ -310,12 +312,12 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                 v.attrs['long_name'] = 'Groundwater head'
                 v.attrs['units'] = 'm'
             if enable_crop_phenology:
-                v = f.create_variable('TA_min', ('x', 'y', 'time'), float_type)
+                v = f.create_variable('TA_min', ('x', 'y', 'Time'), float_type)
                 arr = df_events['TA_min'].values - 3
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'minimum air temperature'
                 v.attrs['units'] = 'degC'
-                v = f.create_variable('TA_max', ('x', 'y', 'time'), float_type)
+                v = f.create_variable('TA_max', ('x', 'y', 'Time'), float_type)
                 arr = df_events['TA_max'].values + 3
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'maximum air temperature'
@@ -435,7 +437,8 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                     comment=''
                 )
                 # set dimensions with a dictionary
-                f.dimensions = {'x': nrows, 'y': ncols, 'year_season': len(crops.columns[1:])}
+                dict_dim = {'x': nrows, 'y': ncols, 'year_season': len(crops.columns[1:])}
+                f.dimensions = dict_dim
                 arr = onp.full((nrows, ncols, len(crops.columns[1:])), 598, dtype=int)
                 idx = onp.arange(nrows * ncols).reshape((nrows, ncols))
                 for row in range(nrows):
@@ -707,7 +710,8 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                 comment=''
             )
             # set dimensions with a dictionary
-            f.dimensions = {'x': nrows, 'y': ncols}
+            dict_dim = {'x': nrows, 'y': ncols}
+            f.dimensions = dict_dim
             v = f.create_variable('x', ('x',), float_type)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'
@@ -732,7 +736,8 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                 comment=''
             )
             # set dimensions with a dictionary
-            f.dimensions = {'x': nrows, 'y': ncols}
+            dict_dim = {'x': nrows, 'y': ncols}
+            f.dimensions = dict_dim
             v = f.create_variable('x', ('x',), float_type)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'
@@ -757,7 +762,8 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                 comment=''
             )
             # set dimensions with a dictionary
-            f.dimensions = {'x': nrows, 'y': ncols}
+            dict_dim = {'x': nrows, 'y': ncols}
+            f.dimensions = dict_dim
             v = f.create_variable('x', ('x',), float_type)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'
@@ -794,8 +800,9 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                     comment=''
                 )
                 # set dimensions with a dictionary
-                f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_br.index), 'scalar': 1}
-                v = f.create_variable('time', ('time',), float_type)
+                dict_dim = {'x': nrows, 'y': ncols, 'Time': len(df_br.index), 'scalar': 1}
+                f.dimensions = dict_dim
+                v = f.create_variable('Time', ('Time',), float_type)
                 v.attrs['time_origin'] = f"{df_br.index[0]}"
                 v.attrs['units'] = 'days'
                 v[:] = date2num(df_br.index.tolist(), units=f"days since {df_br.index[0]}", calendar='standard')
@@ -807,7 +814,7 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(ncols)
-                v = f.create_variable('Br', ('x', 'y', 'time'), float_type)
+                v = f.create_variable('Br', ('x', 'y', 'Time'), float_type)
                 arr = df_br['Br'].values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'mass of bromide tracer injection'
@@ -849,8 +856,9 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                     comment=''
                 )
                 # set dimensions with a dictionary
-                f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_cl.index), 'scalar': 1}
-                v = f.create_variable('time', ('time',), float_type)
+                dict_dim = {'x': nrows, 'y': ncols, 'Time': len(df_cl.index), 'scalar': 1}
+                f.dimensions = dict_dim
+                v = f.create_variable('Time', ('Time',), float_type)
                 v.attrs['time_origin'] = f"{df_cl.index[0]}"
                 v.attrs['units'] = 'days'
                 v[:] = date2num(df_cl.index.tolist(), units=f"days since {df_cl.index[0]}", calendar='standard')
@@ -862,7 +870,7 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(ncols)
-                v = f.create_variable('Cl', ('x', 'y', 'time'), float_type)
+                v = f.create_variable('Cl', ('x', 'y', 'Time'), float_type)
                 arr = df_cl['Cl'].values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'chloride concentration of precipitation'
@@ -883,7 +891,7 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
         if enable_oxygen18:
             # generate oxygen-18 input signal
             idx_d18O = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
-            d18O = onp.random.uniform(-16, -14, ndays)
+            d18O = rng.uniform(-16, -14, ndays)
             df_d18O = pd.DataFrame(index=idx_d18O, columns=['YYYY', 'MM', 'DD', 'hh', 'mm', 'd18O'])
             df_d18O.loc[:, 'YYYY'] = df_d18O.index.year
             df_d18O.loc[:, 'MM'] = df_d18O.index.month
@@ -903,8 +911,9 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                     comment=''
                 )
                 # set dimensions with a dictionary
-                f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_d18O.index), 'scalar': 1}
-                v = f.create_variable('time', ('time',), float_type)
+                dict_dim = {'x': nrows, 'y': ncols, 'Time': len(df_d18O.index), 'scalar': 1}
+                f.dimensions = dict_dim
+                v = f.create_variable('Time', ('Time',), float_type)
                 v.attrs['time_origin'] = f"{df_d18O.index[0]}"
                 v.attrs['units'] = 'days'
                 v[:] = date2num(df_d18O.index.tolist(), units=f"days since {df_d18O.index[0]}", calendar='standard')
@@ -916,7 +925,7 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(ncols)
-                v = f.create_variable('d18O', ('x', 'y', 'time'), float_type)
+                v = f.create_variable('d18O', ('x', 'y', 'Time'), float_type)
                 arr = df_d18O['d18O'].values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'oxygen-18 signal of precipitation'
@@ -931,7 +940,7 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
         if enable_deuterium:
             # generate deuterium input signal
             idx_d2H = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
-            d2H = onp.random.uniform(-81, -79, ndays)
+            d2H = rng.uniform(-81, -79, ndays)
             df_d2H = pd.DataFrame(index=idx_d2H, columns=['YYYY', 'MM', 'DD', 'hh', 'mm', 'd2H'])
             df_d2H.loc[:, 'YYYY'] = df_d2H.index.year
             df_d2H.loc[:, 'MM'] = df_d2H.index.month
@@ -951,8 +960,9 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                     comment=''
                 )
                 # set dimensions with a dictionary
-                f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_d2H.index), 'scalar': 1}
-                v = f.create_variable('time', ('time',), float_type)
+                dict_dim = {'x': nrows, 'y': ncols, 'Time': len(df_d2H.index), 'scalar': 1}
+                f.dimensions = dict_dim
+                v = f.create_variable('Time', ('Time',), float_type)
                 v.attrs['time_origin'] = f"{df_d2H.index[0]}"
                 v.attrs['units'] = 'days'
                 v[:] = date2num(df_d2H.index.tolist(), units=f"days since {df_d2H.index[0]}", calendar='standard')
@@ -964,7 +974,7 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(ncols)
-                v = f.create_variable('d2H', ('x', 'y', 'time'), float_type)
+                v = f.create_variable('d2H', ('x', 'y', 'Time'), float_type)
                 arr = df_d2H['d2H'].values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'deuterium signal of precipitation'
@@ -1002,8 +1012,9 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                     comment=''
                 )
                 # set dimensions with a dictionary
-                f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_Nin.index), 'scalar': 1}
-                v = f.create_variable('time', ('time',), float_type)
+                dict_dim = {'x': nrows, 'y': ncols, 'Time': len(df_Nin.index), 'scalar': 1}
+                f.dimensions = dict_dim
+                v = f.create_variable('Time', ('Time',), float_type)
                 v.attrs['time_origin'] = f"{df_Nin.index[0]}"
                 v.attrs['units'] = 'days'
                 v[:] = date2num(df_Nin.index.tolist(), units=f"days since {df_Nin.index[0]}", calendar='standard')
@@ -1015,12 +1026,12 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(ncols)
-                v = f.create_variable('Nmin', ('x', 'y', 'time'), float_type)
+                v = f.create_variable('Nmin', ('x', 'y', 'Time'), float_type)
                 arr = df_Nin['Nmin'].values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'Mineral nitrogen fertilizer'
                 v.attrs['units'] = 'kg N/ha'
-                v = f.create_variable('Norg', ('x', 'y', 'time'), float_type)
+                v = f.create_variable('Norg', ('x', 'y', 'Time'), float_type)
                 arr = df_Nin['Norg'].values
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs['long_name'] = 'Organic nitrogen fertilizer'
@@ -1082,7 +1093,8 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
             comment=''
         )
         # set dimensions with a dictionary
-        f.dimensions = {'x': nrows, 'y': ncols}
+        dict_dim = {'x': nrows, 'y': ncols}
+        f.dimensions = dict_dim
         v = f.create_variable('x', ('x',), float_type)
         v.attrs['long_name'] = 'Zonal coordinate'
         v.attrs['units'] = 'meters'
@@ -1111,7 +1123,8 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
             comment=''
         )
         # set dimensions with a dictionary
-        f.dimensions = {'x': nrows, 'y': ncols}
+        dict_dim = {'x': nrows, 'y': ncols}
+        f.dimensions = dict_dim
         v = f.create_variable('x', ('x',), float_type)
         v.attrs['long_name'] = 'Zonal coordinate'
         v.attrs['units'] = 'meters'
@@ -1139,9 +1152,10 @@ def make_forcing(base_path, ndays=10, nrows=1, ncols=1,
     """
     Make toy forcing with synthetic data.
     """
+    rng = onp.random.default_rng(42)
     if event_type == 'rain':
         # generate random rainfall
-        prec_rnd = onp.random.uniform(0, 1, 18)
+        prec_rnd = rng.uniform(0, 1, 18)
         n_prec_rnd = len(prec_rnd)
         n_prec = ndays*24*6
         prec = onp.zeros((n_prec))
@@ -1150,13 +1164,13 @@ def make_forcing(base_path, ndays=10, nrows=1, ncols=1,
         idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
         # generate random air temperature
         idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
-        ta = onp.random.uniform(15, 20, ndays)
+        ta = rng.uniform(15, 20, ndays)
         # generate random potential evapotranspiration
-        pet = onp.random.uniform(2, 3, ndays)
+        pet = rng.uniform(2, 3, ndays)
 
     elif event_type == 'snow':
         # generate random rainfall
-        prec_rnd = onp.random.uniform(0, 1, 18)
+        prec_rnd = rng.uniform(0, 1, 18)
         n_prec_rnd = len(prec_rnd)
         n_prec = ndays*24*6
         prec = onp.zeros((n_prec))
@@ -1165,13 +1179,13 @@ def make_forcing(base_path, ndays=10, nrows=1, ncols=1,
         idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
         # generate random air temperature
         idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
-        ta = onp.random.uniform(-3, -1, ndays)
+        ta = rng.uniform(-3, -1, ndays)
         # generate random potential evapotranspiration
-        pet = onp.random.uniform(1, 2, ndays)
+        pet = rng.uniform(1, 2, ndays)
 
     elif event_type == 'snow+rain':
         # generate random rainfall
-        prec_rnd = onp.random.uniform(0, 1, 18)
+        prec_rnd = rng.uniform(0, 1, 18)
         n_prec_rnd = len(prec_rnd)
         n_prec = ndays*24*6
         prec = onp.zeros((n_prec))
@@ -1180,13 +1194,13 @@ def make_forcing(base_path, ndays=10, nrows=1, ncols=1,
         idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
         # generate random air temperature
         idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
-        ta = onp.random.uniform(0, 3, ndays)
+        ta = rng.uniform(0, 3, ndays)
         ta[:2] = -1
         # generate random potential evapotranspiration
-        pet = onp.random.uniform(1, 2, ndays)
+        pet = rng.uniform(1, 2, ndays)
 
     elif event_type == 'heavyrain':
-        prec_rnd = onp.random.uniform(0.1, 6, 12*6)
+        prec_rnd = rng.uniform(0.1, 6, 12*6)
         n_prec_rnd = len(prec_rnd)
         n_prec = ndays*24*6
         prec = onp.zeros((n_prec))
@@ -1195,29 +1209,29 @@ def make_forcing(base_path, ndays=10, nrows=1, ncols=1,
         idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
         # generate random air temperature
         idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
-        ta = onp.random.uniform(15, 20, ndays)
+        ta = rng.uniform(15, 20, ndays)
         # generate random potential evapotranspiration
-        pet = onp.random.uniform(2, 3, ndays)
+        pet = rng.uniform(2, 3, ndays)
 
     elif event_type == 'mixed':
-        x1 = onp.unique(onp.random.randint(low=0, high=ndays * 24 * 6, size=(int(100 * (ndays/365)),)))
+        x1 = onp.unique(rng.randint(low=0, high=ndays * 24 * 6, size=(int(100 * (ndays/365)),)))
         x2 = onp.zeros((int(100 * (ndays/365)),), dtype=int)
         for i in range(int(100 * (ndays/365)) - 1):
             if x1[i+1] - x1[i] <= 1:
                 high = 2
             else:
                 high = x1[i+1] - x1[i]
-            x2[i] = x1[i] + onp.random.randint(low=1, high=high)
+            x2[i] = x1[i] + rng.randint(low=1, high=high)
         x2[x2 > ndays * 24 * 6] = ndays * 24 * 6
-        x2[-1] = onp.random.randint(low=x1[-1] + 1, high=ndays * 24 * 6)
+        x2[-1] = rng.randint(low=x1[-1] + 1, high=ndays * 24 * 6)
 
         prec = onp.zeros((ndays * 24 * 6,))
         for i, ii in zip(x1, x2):
-            lam = onp.random.weibull(1, 1)
+            lam = rng.weibull(1, 1)
             if lam > 5.5:
-                prec[i:ii] = onp.random.poisson(lam, ii - i) * 0.5
+                prec[i:ii] = rng.poisson(lam, ii - i) * 0.5
             else:
-                prec[i:ii] = onp.random.poisson(lam, ii - i) * onp.random.uniform(0.01, 0.1, ii - i)
+                prec[i:ii] = rng.poisson(lam, ii - i) * rng.uniform(0.01, 0.1, ii - i)
         idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
         # generate random air temperature
         idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
@@ -1232,9 +1246,9 @@ def make_forcing(base_path, ndays=10, nrows=1, ncols=1,
         for i in range(ndays):
             if i % 365 == 0:
                 ii = 0
-            ta[i] = onp.random.uniform(ta_init - 1 + scale[ii] * ta_off, ta_init + 1 + scale[ii] * ta_off, 1)
+            ta[i] = rng.uniform(ta_init - 1 + scale[ii] * ta_off, ta_init + 1 + scale[ii] * ta_off, 1)
             # generate random potential evapotranspiration
-            pet[i] = onp.random.uniform(pet_init - 1 + scale[ii] * pet_off, pet_init + 1 + scale[ii] * pet_off, 1)
+            pet[i] = rng.uniform(pet_init - 1 + scale[ii] * pet_off, pet_init + 1 + scale[ii] * pet_off, 1)
             ii += 1
 
     elif event_type == 'norain':
@@ -1243,9 +1257,9 @@ def make_forcing(base_path, ndays=10, nrows=1, ncols=1,
         idx_prec = pd.date_range(start='1/1/2018', periods=ndays*24*6, freq='10T')
         # generate random air temperature
         idx_ta_pet = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
-        ta = onp.random.uniform(15, 20, ndays)
+        ta = rng.uniform(15, 20, ndays)
         # generate random potential evapotranspiration
-        pet = onp.random.uniform(2, 3, ndays)
+        pet = rng.uniform(2, 3, ndays)
 
     input_dir = base_path / "input"
     if not os.path.exists(input_dir):
@@ -1342,39 +1356,40 @@ def make_forcing(base_path, ndays=10, nrows=1, ncols=1,
             comment=''
         )
         # set dimensions with a dictionary
-        f.dimensions = {'x': nrows, 'y': ncols, 'time': len(df_events.index), 'scalar': 1}
-        v = f.create_variable('PREC', ('x', 'y', 'time'), float_type)
+        dict_dim = {'x': nrows, 'y': ncols, 'Time': len(df_events.index), 'scalar': 1}
+        f.dimensions = dict_dim
+        v = f.create_variable('PREC', ('x', 'y', 'Time'), float_type)
         arr = df_events['PREC'].astype(float_type).values
         v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
         v.attrs['long_name'] = 'Precipitation'
         v.attrs['units'] = 'mm/dt'
-        v = f.create_variable('TA', ('x', 'y', 'time'), float_type)
+        v = f.create_variable('TA', ('x', 'y', 'Time'), float_type)
         arr = df_events['TA'].astype(float_type).values
         v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
         v.attrs['long_name'] = 'air temperature'
         v.attrs['units'] = 'degC'
-        v = f.create_variable('PET', ('x', 'y', 'time'), float_type)
+        v = f.create_variable('PET', ('x', 'y', 'Time'), float_type)
         arr = df_events['PET'].astype(float_type).values
         v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
         v.attrs['long_name'] = 'Potential Evapotranspiration'
         v.attrs['units'] = 'mm/dt'
-        v = f.create_variable('dt', ('time',), float_type)
+        v = f.create_variable('dt', ('Time',), float_type)
         v[:] = df_events['time_step'].astype(float_type).values
         v.attrs['long_name'] = 'time step (!not constant)'
         v.attrs['units'] = 'hour'
-        v = f.create_variable('year', ('time',), int)
+        v = f.create_variable('year', ('Time',), int)
         v[:] = df_events['YYYY'].astype(int).values
         v.attrs['units'] = 'year'
-        v = f.create_variable('month', ('time',), int)
+        v = f.create_variable('month', ('Time',), int)
         v[:] = df_events['MM'].astype(int).values
         v.attrs['units'] = 'month'
-        v = f.create_variable('doy', ('time',), int)
+        v = f.create_variable('doy', ('Time',), int)
         v[:] = df_events['DOY'].astype(int).values
         v.attrs['units'] = 'day of year'
-        v = f.create_variable('EVENT_ID', ('time',), int)
+        v = f.create_variable('EVENT_ID', ('Time',), int)
         v[:] = df_events['EVENT_ID'].astype(int).values
         v.attrs['units'] = ''
-        v = f.create_variable('time', ('time',), float_type)
+        v = f.create_variable('Time', ('Time',), float_type)
         v.attrs['time_origin'] = f"{df_events.index[0]}"
         v.attrs['units'] = 'hours'
         v[:] = date2num(df_events.index.tolist(), units=f"hours since {df_events.index[0]}", calendar='standard')
@@ -1390,7 +1405,7 @@ def make_forcing(base_path, ndays=10, nrows=1, ncols=1,
         v.attrs['long_name'] = 'Number of iterations of longest event'
         v[:] = NITT_EVENT
         if enable_film_flow:
-            v = f.create_variable('EVENT_ID_FF', ('time',), int)
+            v = f.create_variable('EVENT_ID_FF', ('Time',), int)
             v[:] = df_events['EVENT_ID_FF'].astype(int).values
             v.attrs['units'] = ''
             v = f.create_variable('nevent_ff', ('scalar',), int)
@@ -1402,13 +1417,131 @@ def make_forcing(base_path, ndays=10, nrows=1, ncols=1,
             v.attrs['long_name'] = 'Groundwater head'
             v.attrs['units'] = 'm'
         if enable_crop_phenology:
-            v = f.create_variable('TA_min', ('x', 'y', 'time'), float_type)
+            v = f.create_variable('TA_min', ('x', 'y', 'Time'), float_type)
             arr = df_events['TA_min'].values - 3
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
             v.attrs['long_name'] = 'minimum air temperature'
             v.attrs['units'] = 'degC'
-            v = f.create_variable('TA_max', ('x', 'y', 'time'), float_type)
+            v = f.create_variable('TA_max', ('x', 'y', 'Time'), float_type)
             arr = df_events['TA_max'].values + 3
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
             v.attrs['long_name'] = 'maximum air temperature'
             v.attrs['units'] = 'degC'
+
+
+@roger_sync
+def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, event_type='rain', float_type="float64"):
+    """
+    Make toy forcing with synthetic data.
+    """
+    rng = onp.random.default_rng(42)
+    if event_type == 'rain':
+        # generate random rainfall
+        n_prec = int(nhours * (60/dt))
+        prec = rng.uniform(0.1, 1, n_prec)
+
+    elif event_type == 'block-rain':
+        prec = 2.5 / (60/dt)
+
+    elif event_type == 'rain-with-break':
+        # generate random rainfall
+        n_prec = int(nhours * (60/dt))
+        prec = rng.uniform(0.1, 1, n_prec)
+        start = int(n_prec/2) - 2
+        end = int(n_prec/2) + 2
+        prec[start:end] = 0
+
+    elif event_type == 'heavyrain':
+        # generate random rainfall
+        n_prec = int(nhours * (60/dt))
+        prec = rng.uniform(1, 3, n_prec)
+
+    elif event_type == 'heavyrain-normal':
+        # generate rainfall with normal distribution
+        n_prec = int(nhours * (60/dt))
+        mu = 2
+        sigma = 0.5
+        s = rng.normal(mu, sigma, 1000)
+        _, bins = onp.histogram(s, bins=n_prec-1)
+        prec = 1/(sigma * onp.sqrt(2 * onp.pi)) * onp.exp(-(bins - mu)**2 / (2 * sigma**2))
+
+    elif event_type == 'heavyrain-gamma':
+        # generate rainfall with light tail
+        n_prec = int(nhours * (60/dt))
+        shape, scale = 2., 2.
+        s = rng.gamma(shape, scale, 1000)
+        _, bins = onp.histogram(s, bins=n_prec-1)
+        pp = bins**(shape-1)*(onp.exp(-bins/scale) / (sps.gamma(shape)*scale**shape))
+        prec = pp * 20
+
+    elif event_type == 'heavyrain-gamma-reverse':
+        # generate rainfall with heavy tail
+        n_prec = int(nhours * (60/dt))
+        shape, scale = 2., 2.
+        s = rng.gamma(shape, scale, 1000)
+        _, bins = onp.histogram(s, bins=n_prec-1)
+        pp = bins**(shape-1)*(onp.exp(-bins/scale) / (sps.gamma(shape)*scale**shape))
+        prec = pp[::-1] * 20
+
+    elif event_type == 'block-heavyrain':
+        prec = 10 / (60/dt)
+
+    if not os.path.exists(base_path):
+        os.mkdir(base_path)
+
+    idx = onp.arange(n_prec) * dt
+
+    df_prec = pd.DataFrame(index=idx, columns=['DD', 'hh', 'mm', 'PREC'])
+    df_prec.loc[:, 'DD'] = idx / (60 * 60)
+    df_prec.loc[:, 'hh'] = idx / 60
+    df_prec.loc[:, 'mm'] = idx
+    df_prec.loc[:, 'PREC'] = prec
+    df_prec.loc[0, 'PREC'] = 0
+    file = base_path / "input" / "PREC.txt"
+    df_prec.to_csv(file, header=True, index=False, sep=" ")
+
+    df_ta = pd.DataFrame(index=idx, columns=['DD', 'hh', 'mm', 'TA'])
+    df_ta.loc[:, 'DD'] = idx / (60 * 60)
+    df_ta.loc[:, 'hh'] = idx / 60
+    df_ta.loc[:, 'mm'] = idx
+    df_ta.loc[:, 'TA'] = ta
+    file = base_path / "input" / "TA.txt"
+    df_ta.to_csv(file, header=True, index=False, sep=" ")
+
+    nc_file = base_path / "forcing.nc"
+    with h5netcdf.File(nc_file, 'w', decode_vlen_strings=False) as f:
+        f.attrs.update(
+            date_created=datetime.datetime.today().isoformat(),
+            title='toy forcing',
+            institution='University of Freiburg, Chair of Hydrology',
+            references='',
+            comment=''
+        )
+        # set dimensions with a dictionary
+        dict_dim = {'x': nrows, 'y': ncols, 'Time': len(idx)}
+        f.dimensions = dict_dim
+        v = f.create_variable('PREC', ('x', 'y', 'Time'), float_type)
+        arr = df_prec['PREC'].astype(float_type).values
+        v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+        v.attrs['long_name'] = 'Precipitation'
+        v.attrs['units'] = 'mm/dt'
+        v = f.create_variable('TA', ('x', 'y', 'Time'), float_type)
+        arr = df_ta['TA'].astype(float_type).values
+        v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+        v.attrs['long_name'] = 'air temperature'
+        v.attrs['units'] = 'degC'
+        v = f.create_variable('dt', ('Time',), float_type)
+        v[:] = dt
+        v.attrs['long_name'] = 'time step'
+        v.attrs['units'] = 'hour'
+        v = f.create_variable('Time', ('Time',), float_type)
+        v.attrs['units'] = 'hours'
+        v[:] = idx / 60
+        v = f.create_variable('x', ('x',), int)
+        v.attrs['long_name'] = 'grid number in x-direction'
+        v.attrs['units'] = ''
+        v[:] = onp.arange(nrows)
+        v = f.create_variable('y', ('y',), int)
+        v.attrs['long_name'] = 'grid number in y-direction'
+        v.attrs['units'] = ''
+        v[:] = onp.arange(ncols)

@@ -8,15 +8,22 @@ import h5netcdf
 import xarray as xr
 import pandas as pd
 from de import de
+import matplotlib.pyplot as plt
+import seaborn as sns
 import numpy as onp
 
 import roger.tools.evaluation as eval_utils
+import roger.tools.labels as labs
 
 base_path = Path(__file__).parent
 # directory of results
 base_path_results = base_path / "results"
 if not os.path.exists(base_path_results):
     os.mkdir(base_path_results)
+# directory of figures
+base_path_figs = base_path / "figures"
+if not os.path.exists(base_path_figs):
+    os.mkdir(base_path_figs)
 
 # merge model output into single file
 path = str(base_path / "SVAT.*.nc")
@@ -34,19 +41,20 @@ with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
         with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
             # set dimensions with a dictionary
             if not f.dimensions:
-                f.dimensions = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+                f.dimensions = dict_dim
                 v = f.create_variable('x', ('x',), float)
-                v.attrs['long_name'] = 'Number of model run'
-                v.attrs['units'] = ''
-                v[:] = onp.arange(f.dimensions["x"])
+                v.attrs['long_name'] = 'Zonal coordinate'
+                v.attrs['units'] = 'meters'
+                v[:] = onp.arange(dict_dim["x"])
                 v = f.create_variable('y', ('y',), float)
-                v.attrs['long_name'] = ''
-                v.attrs['units'] = ''
-                v[:] = onp.arange(f.dimensions["y"])
+                v.attrs['long_name'] = 'Meridonial coordinate'
+                v.attrs['units'] = 'meters'
+                v[:] = onp.arange(dict_dim["y"])
                 v = f.create_variable('Time', ('Time',), float)
                 var_obj = df.variables.get('Time')
-                with h5netcdf.File(base_path / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
-                    time_origin = infile.variables['time'].attrs['time_origin']
+                with h5netcdf.File(base_path / "input" / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
+                    time_origin = infile.variables['Time'].attrs['time_origin']
                 v.attrs.update(time_origin=time_origin,
                                 units=var_obj.attrs["units"])
                 v[:] = onp.array(var_obj)
@@ -289,6 +297,35 @@ df_params_eff.loc[:, 'E_multi'] = 1/3 * df_params_eff.loc[:, 'r_dS'] + 1/3 * df_
 file = base_path_results / "params_eff.txt"
 df_params_eff.to_csv(file, header=True, index=False, sep="\t")
 
+# dotty plots
+df_eff = df_params_eff.loc[:, ['KGE_aet', 'KGE_q_ss', 'r_dS', 'E_multi']]
+df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+nrow = len(df_eff.columns)
+ncol = len(df_params.columns)
+fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(14, 7))
+for i in range(nrow):
+    for j in range(ncol):
+        y = df_eff.iloc[:, i]
+        x = df_params.iloc[:, j]
+        sns.regplot(x=x, y=y, ax=ax[i, j], ci=None, color='k',
+                    scatter_kws={'alpha': 0.2, 's': 4, 'color': 'grey'})
+        ax[i, j].set_xlabel('')
+        ax[i, j].set_ylabel('')
+
+for j in range(ncol):
+    xlabel = labs._LABS[df_params.columns[j]]
+    ax[-1, j].set_xlabel(xlabel)
+
+ax[0, 0].set_ylabel('$KGE_{ET}$ [-]')
+ax[1, 0].set_ylabel('$KGE_{PERC}$ [-]')
+ax[2, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
+ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
+
+fig.subplots_adjust(wspace=0.2, hspace=0.3)
+file = base_path_figs / "dotty_plots.png"
+fig.savefig(file, dpi=250)
+
+
 # select best model run
 idx_best = df_params_eff['E_multi'].idxmax()
 
@@ -318,7 +355,7 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
             v = f.create_variable('Time', ('Time',), float)
             var_obj = df.variables.get('Time')
             with h5netcdf.File(base_path / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
-                time_origin = infile.variables['time'].attrs['time_origin']
+                time_origin = infile.variables['Time'].attrs['time_origin']
             v.attrs.update(time_origin=time_origin,
                             units=var_obj.attrs["units"])
             v[:] = onp.array(var_obj)

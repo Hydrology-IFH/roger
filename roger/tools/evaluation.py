@@ -46,6 +46,53 @@ def join_obs_on_sim(idx, sim_vals, df_obs, rm_na=False):
     return df
 
 
+def plot_sim(df, y_lab='', fmt_x='num', ls_obs='line', x_lab='Time'):
+    """Plot simulated values.
+
+    Args
+    ----------
+    df : pd.DataFrame
+        Dataframe with simulated and observed values
+
+    y_lab : str
+        label of y-axis
+
+    fmt_x : str, optional
+        Format of x-axis. Default is numerical ('num'). Alternatively, date
+        format can be used ('date').
+
+    ls_obs : str, optional
+        linestyle of observations
+
+    x_lab : str, optional
+        label of x-axis
+
+    Returns
+    ----------
+    fig : Figure
+        Plot for observed and simulated values
+    """
+    if fmt_x == 'num':
+        # convert datetime index to numerical index
+        idx = time_to_num(df.index, time='days')
+    elif fmt_x == 'date':
+        idx = df.index
+
+    # plot observed and simulated values
+    fig, axs = plt.subplots(figsize=(9, 4))
+    axs.plot(idx, df.iloc[:, 0], lw=1, ls='-', color='black')
+    axs.set_xlim((idx[0], idx[-1]))
+    if y_lab == r'$\delta^{18}$O [permil]':
+        axs.set_ylim((-20, 5))
+    elif y_lab == r'$\delta^{2}$H [permil]':
+        axs.set_ylim((-160, -20))
+    axs.set_ylabel(y_lab)
+    axs.set_xlabel(x_lab)
+    fig.tight_layout()
+
+    return fig
+
+
 def plot_obs_sim(df, y_lab='', fmt_x='num', ls_obs='line', x_lab='Time'):
     """Plot observed and simulated values.
 
@@ -79,7 +126,7 @@ def plot_obs_sim(df, y_lab='', fmt_x='num', ls_obs='line', x_lab='Time'):
         idx = df.index
 
     # plot observed and simulated values
-    fig, axs = plt.subplots(figsize=(9,4))
+    fig, axs = plt.subplots(figsize=(9, 4))
     if (ls_obs == 'line'):
         axs.plot(idx, df.iloc[:, 1], lw=1.5, color='blue', alpha=0.5)
     axs.scatter(idx, df.iloc[:, 1], color='blue', s=1, alpha=0.5)
