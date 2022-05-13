@@ -140,8 +140,6 @@ class SVATSetup(RogerSetup):
         dist_safe=False,
         local_variables=[
             "lu_id",
-            "sealing",
-            "S_dep_tot",
             "z_soil",
             "dmpv",
             "lmpv",
@@ -156,8 +154,6 @@ class SVATSetup(RogerSetup):
         vs = state.variables
 
         vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
-        vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
-        vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
         vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
         vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], npx.array(random_uniform(1, 400, vs.dmpv.shape), dtype=int)[2:-2, 2:-2])
         vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], npx.array(random_uniform(1, 1500, vs.lmpv.shape), dtype=int)[2:-2, 2:-2])

@@ -146,20 +146,21 @@ class SVATSetup(RogerSetup):
     @roger_routine(
         dist_safe=False,
         local_variables=[
+            "lu_id",
+            "z_soil",
             "dmpv",
             "lmpv",
             "theta_ac",
             "theta_ufc",
             "theta_pwp",
             "ks",
+            "kf",
         ],
     )
     def set_parameters_setup(self, state):
         vs = state.variables
 
         vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
-        vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
-        vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
         vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
         vs.dmpv = update(vs.dmpv, at[2:-2, :], npx.array(self._params[:, 0, npx.newaxis], dtype=int))
         vs.lmpv = update(vs.lmpv, at[2:-2, :], npx.array(self._params[:, 1, npx.newaxis], dtype=int))
