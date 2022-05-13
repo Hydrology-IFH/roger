@@ -583,7 +583,7 @@ for meteo_station in meteo_stations:
     model.run()
 
     # merge model output into single file
-    path = str(model._base_path / "SVAT.*.nc")
+    path = str(model._base_path / "DIST.*.nc")
     diag_files = glob.glob(path)
     states_hm_file = model._base_path / "states_hm.nc"
     with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:

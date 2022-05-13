@@ -378,7 +378,7 @@ for rainfall_scenario in rainfall_scenarios:
     model.run()
 
     # merge model output into single file
-    path = str(model._base_path / "SVAT.*.nc")
+    path = str(model._base_path / "DISTEVENT.*.nc")
     diag_files = glob.glob(path)
     states_hm_file = model._base_path / f"states_hm_{rainfall_scenario}.nc"
     with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
