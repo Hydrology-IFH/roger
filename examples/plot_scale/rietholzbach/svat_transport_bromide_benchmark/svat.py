@@ -72,6 +72,7 @@ class SVATSetup(RogerSetup):
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
+        settings.time_origin = "1996-12-31 00:00:00"
 
         settings.enable_macropore_lower_boundary_condition = False
 
@@ -625,10 +626,8 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
                 v[:] = npx.arange(dict_dim["y"])
                 v = f.create_variable('Time', ('Time',), float)
                 var_obj = df.variables.get('Time')
-                with h5netcdf.File(model._base_path / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
-                    time_origin = infile.variables['time'].attrs['time_origin']
-                v.attrs.update(time_origin=time_origin,
-                               units=var_obj.attrs["units"])
+                v.attrs.update(time_origin=var_obj.attrs["time_origin"],
+                                units=var_obj.attrs["units"])
                 v[:] = npx.array(var_obj)
             for key in list(df.variables.keys()):
                 var_obj = df.variables.get(key)

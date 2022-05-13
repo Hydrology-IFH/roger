@@ -76,6 +76,7 @@ class SVATTRANSPORTSetup(RogerSetup):
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
+        settings.time_origin = "1996-12-31 00:00:00"
 
         settings.enable_offline_transport = True
         settings.enable_oxygen18 = True

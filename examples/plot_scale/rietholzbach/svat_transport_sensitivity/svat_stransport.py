@@ -149,6 +149,7 @@ class SVATTRANSPORTSetup(RogerSetup):
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
+        settings.time_origin = "1996-12-31 00:00:00"
 
         settings.enable_offline_transport = True
         settings.enable_oxygen18 = True
@@ -791,10 +792,8 @@ for tm_structure in tm_structures:
                     v[:] = npx.arange(dict_dim["y"])
                     v = f.create_variable('Time', ('Time',), float)
                     var_obj = df.variables.get('Time')
-                    with h5netcdf.File(model._base_path / "input" / 'forcing_tracer.nc', "r", decode_vlen_strings=False) as infile:
-                        time_origin = infile.variables['Time'].attrs['time_origin']
-                    v.attrs.update(time_origin=time_origin,
-                                   units=var_obj.attrs["units"])
+                    v.attrs.update(time_origin=var_obj.attrs["time_origin"],
+                                    units=var_obj.attrs["units"])
                     v[:] = npx.array(var_obj)
                     v = f.create_variable('ages', ('ages',), float)
                     v.attrs['long_name'] = 'Water ages'

@@ -76,6 +76,7 @@ class SVATTRANSPORTSetup(RogerSetup):
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
+        settings.time_origin = "1996-12-31 00:00:00"
 
         settings.enable_offline_transport = True
         settings.enable_oxygen18 = True
@@ -707,34 +708,33 @@ for tm_structure in tm_structures:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
                 if not f.dimensions:
-                    f.dimensions = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
+                    dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
+                    f.dimensions = dict_dim
                     v = f.create_variable('x', ('x',), float)
                     v.attrs['long_name'] = 'Number of model run'
                     v.attrs['units'] = ''
-                    v[:] = npx.arange(f.dimensions["x"])
+                    v[:] = npx.arange(dict_dim["x"])
                     v = f.create_variable('y', ('y',), float)
                     v.attrs['long_name'] = ''
                     v.attrs['units'] = ''
-                    v[:] = npx.arange(f.dimensions["y"])
+                    v[:] = npx.arange(dict_dim["y"])
                     v = f.create_variable('Time', ('Time',), float)
                     var_obj = df.variables.get('Time')
-                    with h5netcdf.File(model._base_path / "input" / 'forcing_tracer.nc', "r", decode_vlen_strings=False) as infile:
-                        time_origin = infile.variables['Time'].attrs['time_origin']
-                    v.attrs.update(time_origin=time_origin,
-                                   units=var_obj.attrs["units"])
+                    v.attrs.update(time_origin=var_obj.attrs["time_origin"],
+                                    units=var_obj.attrs["units"])
                     v[:] = npx.array(var_obj)
                     v = f.create_variable('ages', ('ages',), float)
                     v.attrs['long_name'] = 'Water ages'
                     v.attrs['units'] = 'days'
-                    v[:] = npx.arange(1, f.dimensions["ages"]+1)
+                    v[:] = npx.arange(1, dict_dim["ages"]+1)
                     v = f.create_variable('nages', ('nages',), float)
                     v.attrs['long_name'] = 'Water ages (cumulated)'
                     v.attrs['units'] = 'days'
-                    v[:] = npx.arange(0, f.dimensions["nages"])
+                    v[:] = npx.arange(0, dict_dim["nages"])
                     v = f.create_variable('n_sas_params', ('n_sas_params',), float)
                     v.attrs['long_name'] = 'Number of SAS parameters'
                     v.attrs['units'] = ''
-                    v[:] = npx.arange(0, f.dimensions["n_sas_params"])
+                    v[:] = npx.arange(0, dict_dim["n_sas_params"])
                 for var_sim in list(df.variables.keys()):
                     var_obj = df.variables.get(var_sim)
                     if var_sim not in list(f.dimensions.keys()) and "Time" in list(var_obj.dimensions.keys()):
@@ -743,7 +743,7 @@ for tm_structure in tm_structures:
                         v[2:-2, 2:-2, :] = vals.swapaxes(0, 2)
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
-                    elif var_sim not in list(f.dimensions.keys()) and var_obj.shape[-1] == f.dimensions["n_sas_params"]:
+                    elif var_sim not in list(f.dimensions.keys()) and var_obj.shape[-1] == dict_dim["n_sas_params"]:
                         v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
                         vals = npx.array(var_obj)
                         vals = vals.swapaxes(0, 3)

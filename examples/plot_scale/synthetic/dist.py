@@ -80,6 +80,7 @@ class DISTSetup(RogerSetup):
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
+        settings.time_origin = "2010-09-30 00:00:00"
 
         settings.enable_groundwater_boundary = False
         settings.enable_lateral_flow = True
@@ -605,9 +606,7 @@ for meteo_station in meteo_stations:
                     v[:] = onp.arange(dict_dim["y"])
                     v = f.create_variable('Time', ('Time',), float)
                     var_obj = df.variables.get('Time')
-                    with h5netcdf.File(model._input_dir / meteo_station / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
-                        time_origin = infile.variables['Time'].attrs['time_origin']
-                    v.attrs.update(time_origin=time_origin,
+                    v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                     units=var_obj.attrs["units"])
                     v[:] = onp.array(var_obj)
                 for key in list(df.variables.keys()):

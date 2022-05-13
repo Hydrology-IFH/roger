@@ -336,7 +336,7 @@ def write_forcing(input_dir, nrows=1, ncols=1, hpi=5, end_prec_event=36, sf=3,
             v[:] = dict_events['EVENT_ID']
             v.attrs['units'] = ''
             v = f.create_variable('Time', ('Time',), float_type)
-            time_origin = df_meteo_events.index[0] - timedelta(hours=1)
+            time_origin = df_meteo_events.index[0] - timedelta(days=1)
             v.attrs['time_origin'] = f"{time_origin}"
             v.attrs['units'] = 'hours'
             v[:] = date2num(df_meteo_events.index.tolist(), units=f"hours since {time_origin}", calendar='standard')
@@ -427,7 +427,7 @@ def write_forcing_tracer(input_dir, tracer, nrows=1, ncols=1, uniform=True, floa
                 v.attrs['long_name'] = labs._LONG_NAME[tracer]
                 v.attrs['units'] = labs._UNITS[tracer]
             v = f.create_variable('Time', ('Time',), float_type)
-            time_origin = df_tracer.index[0] - timedelta(hours=1)
+            time_origin = df_tracer.index[0] - timedelta(days=1)
             v.attrs['time_origin'] = f"{time_origin}"
             v.attrs['units'] = 'hours'
             v[:] = date2num(df_tracer.index.tolist(), units=f"hours since {time_origin}", calendar='standard')

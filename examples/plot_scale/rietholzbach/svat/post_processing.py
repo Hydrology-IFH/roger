@@ -40,9 +40,7 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
                 v[:] = onp.arange(dict_dim["y"])
                 v = f.create_variable('Time', ('Time',), float)
                 var_obj = df.variables.get('Time')
-                with h5netcdf.File(base_path / "input" / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
-                    time_origin = infile.variables['Time'].attrs['time_origin']
-                v.attrs.update(time_origin=time_origin,
+                v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                 units=var_obj.attrs["units"])
                 v[:] = onp.array(var_obj)
             for key in list(df.variables.keys()):

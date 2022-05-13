@@ -398,10 +398,7 @@ for rainfall_scenario in rainfall_scenarios:
                     v[:] = onp.arange(dict_dim["y"])
                     v = f.create_variable('Time', ('Time',), float)
                     var_obj = df.variables.get('Time')
-                    with h5netcdf.File(model._input_dir / rainfall_scenario / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
-                        time_origin = infile.variables['Time'].attrs['time_origin']
-                    v.attrs.update(time_origin=time_origin,
-                                    units=var_obj.attrs["units"])
+                    v.attrs.update(units=var_obj.attrs["units"])
                     v[:] = onp.array(var_obj)
                 for key in list(df.variables.keys()):
                     var_obj = df.variables.get(key)

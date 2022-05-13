@@ -70,6 +70,7 @@ class SVATSetup(RogerSetup):
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
+        settings.time_origin = "1996-12-31 00:00:00"
 
         settings.enable_macropore_lower_boundary_condition = False
 
