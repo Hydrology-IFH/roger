@@ -114,5 +114,5 @@ startup.py
 *.xlsx
 
 # Examples
-examples/*/*/*/results/
-examples/*/*/*/figures/
+#examples/*/*/*/results/
+#examples/*/*/*/figures/
