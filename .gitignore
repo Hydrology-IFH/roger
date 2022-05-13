@@ -112,3 +112,7 @@ startup.py
 
 # EXCEL
 *.xlsx
+
+# Examples
+examples/*/*/*/results/
+examples/*/*/*/figures/
