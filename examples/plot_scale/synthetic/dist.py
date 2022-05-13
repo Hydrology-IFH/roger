@@ -191,7 +191,7 @@ class DISTSetup(RogerSetup):
         vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
         vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
         vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
-        vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 250)
+        vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 0)
 
     @roger_routine
     def set_forcing_setup(self, state):

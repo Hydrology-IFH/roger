@@ -608,37 +608,37 @@ for tm_structure in tm_structures:
                     if not f.dimensions:
                         dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages'])}
                         f.dimensions = dict_dim
-                        v = f.create_variable('x', ('x',), float)
+                        v = f.groups[f"{tm_structure}-{year}"].create_variable('x', ('x',), float)
                         v.attrs['long_name'] = 'Number of model run'
                         v.attrs['units'] = ''
                         v[:] = npx.arange(dict_dim["x"])
-                        v = f.create_variable('y', ('y',), float)
+                        v = f.groups[f"{tm_structure}-{year}"].create_variable('y', ('y',), float)
                         v.attrs['long_name'] = ''
                         v.attrs['units'] = ''
                         v[:] = npx.arange(dict_dim["y"])
-                        v = f.create_variable('Time', ('Time',), float)
+                        v = f.groups[f"{tm_structure}-{year}"].create_variable('Time', ('Time',), float)
                         var_obj = df.variables.get('Time')
                         v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                         units=var_obj.attrs["units"])
                         v[:] = npx.array(var_obj)
-                        v = f.create_variable('ages', ('ages',), float)
+                        v = f.groups[f"{tm_structure}-{year}"].create_variable('ages', ('ages',), float)
                         v.attrs['long_name'] = 'Water ages'
                         v.attrs['units'] = 'days'
                         v[:] = npx.arange(1, dict_dim["ages"]+1)
-                        v = f.create_variable('nages', ('nages',), float)
+                        v = f.groups[f"{tm_structure}-{year}"].create_variable('nages', ('nages',), float)
                         v.attrs['long_name'] = 'Water ages (cumulated)'
                         v.attrs['units'] = 'days'
                         v[:] = npx.arange(0, dict_dim["nages"])
                     for var_sim in list(df.variables.keys()):
                         var_obj = df.variables.get(var_sim)
                         if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3:
-                            v = f.create_variable(var_sim, ('x', 'y', 'Time'), float)
+                            v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'Time'), float)
                             vals = npx.array(var_obj)
                             v[:, :, :] = vals.swapaxes(0, 2)
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(f.dimensions.keys()) and "ages" in var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
+                            v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
                             vals = npx.array(var_obj)
                             vals = vals.swapaxes(0, 3)
                             vals = vals.swapaxes(1, 2)
@@ -647,7 +647,7 @@ for tm_structure in tm_structures:
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(f.dimensions.keys()) and "nages" in var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
+                            v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
                             vals = npx.array(var_obj)
                             vals = vals.swapaxes(0, 3)
                             vals = vals.swapaxes(1, 2)

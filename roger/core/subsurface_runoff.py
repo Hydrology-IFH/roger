@@ -400,7 +400,12 @@ def calc_q_sub_ss(state):
     # update subsoil saturation water level
     vs.z_sat = update_add(
         vs.z_sat,
-        at[2:-2, 2:-2, vs.tau], -((vs.q_sub_ss[2:-2, 2:-2]/vs.theta_ac[2:-2, 2:-2]) + (vs.q_ss[2:-2, 2:-2]/vs.theta_ac[2:-2, 2:-2])) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau], -((vs.q_sub_ss[2:-2, 2:-2] + vs.q_ss[2:-2, 2:-2])/vs.theta_ac[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.S_zsat = update(
+        vs.S_zsat,
+        at[2:-2, 2:-2], vs.z_sat[2:-2, 2:-2, vs.tau] * vs.theta_ac[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update subsoil storage
@@ -433,21 +438,6 @@ def calc_dz_sat(state):
     Calculates change of saturation water level in subsoil
     """
     vs = state.variables
-
-    # root zone drainage which fills up large pore storae
-    q_lp_in = allocate(state.dimensions, ("x", "y"))
-    q_lp_in = update(
-        q_lp_in,
-        at[2:-2, 2:-2], npx.where(vs.q_rz[2:-2, 2:-2] - (vs.S_ufc_ss[2:-2, 2:-2] - vs.S_fp_ss[2:-2, 2:-2]) > 0, vs.q_rz[2:-2, 2:-2] - (vs.S_ufc_ss[2:-2, 2:-2] - vs.S_fp_ss[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
-    )
-    q_lp_in = update_add(
-        q_lp_in,
-        at[2:-2, 2:-2], npx.where(vs.inf_ss[2:-2, 2:-2] - (vs.S_ufc_ss[2:-2, 2:-2] - vs.S_fp_ss[2:-2, 2:-2]) > 0, vs.inf_ss[2:-2, 2:-2] - (vs.S_ufc_ss[2:-2, 2:-2] - vs.S_fp_ss[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
-    )
-    q_lp_in = update(
-        q_lp_in,
-        at[2:-2, 2:-2], npx.where(q_lp_in[2:-2, 2:-2] < 0, 0, q_lp_in[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
 
     # vertical length of macropores reaching into subsoil
     lmpv_ss = allocate(state.dimensions, ("x", "y"))
@@ -525,8 +515,8 @@ def calc_dz_sat(state):
     # change in saturation water level
     mask1 = (f_vr > 0) & (f_vr < 1) & (vs.ks * vs.dt < z_ns)
     mask2 = (f_vr > 0) & (f_vr < 1) & (vs.ks * vs.dt >= z_ns)
-    mask3 = (f_vr >= 1) & (q_lp_in > 0)
-    mask4 = (f_vr >= 1) & (q_lp_in <= 0)
+    mask3 = (f_vr >= 1) & (vs.S_lp_ss > 0)
+    mask4 = (f_vr >= 1) & (vs.S_lp_ss <= 0)
     vs.dz_sat = update(
         vs.dz_sat,
         at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], (qv[2:-2, 2:-2] * f_vr[2:-2, 2:-2]) / vs.theta_ac[2:-2, 2:-2], vs.dz_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
@@ -537,16 +527,15 @@ def calc_dz_sat(state):
     )
     vs.dz_sat = update(
         vs.dz_sat,
-        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2], q_lp_in[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], vs.dz_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.dz_sat = update(
-        vs.dz_sat,
         at[2:-2, 2:-2], npx.where(mask4[2:-2, 2:-2], 0, vs.dz_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
-
     vs.z_sat = update_add(
         vs.z_sat,
         at[2:-2, 2:-2, vs.tau], vs.dz_sat[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.z_sat = update(
+        vs.z_sat,
+        at[2:-2, 2:-2, vs.tau], npx.where(mask3[2:-2, 2:-2], 0, vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(dz_sat=vs.dz_sat, z_sat=vs.z_sat)
@@ -795,11 +784,11 @@ def calc_perc_pot_ss_ff(state):
 
     # where drainage occurs
     if settings.enable_groundwater_boundary | settings.enable_groundwater:
-        mask1 = (perc_pot > 0) & ((vs.S_lp_ss > 0) | (vs.z_soil < vs.z_gw[:, :, vs.tau])) & (perc_pot <= vs.S_lp_ss)
-        mask2 = (perc_pot > 0) & ((vs.S_lp_ss > 0) | (vs.z_soil < vs.z_gw[:, :, vs.tau])) & (perc_pot > vs.S_lp_ss)
+        mask1 = (perc_pot > 0) & ((vs.S_zsat > 0) | (vs.z_soil < vs.z_gw[:, :, vs.tau])) & (perc_pot <= vs.S_zsat)
+        mask2 = (perc_pot > 0) & ((vs.S_zsat > 0) | (vs.z_soil < vs.z_gw[:, :, vs.tau])) & (perc_pot > vs.S_zsat)
     else:
-        mask1 = (perc_pot > 0) & (vs.S_lp_ss > 0) & (perc_pot <= vs.S_lp_ss)
-        mask2 = (perc_pot > 0) & (vs.S_lp_ss > 0) & (perc_pot > vs.S_lp_ss)
+        mask1 = (perc_pot > 0) & (vs.S_zsat > 0) & (perc_pot <= vs.S_zsat)
+        mask2 = (perc_pot > 0) & (vs.S_zsat > 0) & (perc_pot > vs.S_zsat)
 
     # vertical drainage of subsoil
     vs.q_pot_ss = update(

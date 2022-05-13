@@ -149,8 +149,8 @@ for tm_structure in tm_structures:
 
     # write SAS parameters of best model run
     params_tm_file = base_path / "sas_params.nc"
-    with h5netcdf.File(params_tm_file, 'a', decode_vlen_strings=False) as ff:
-        f = ff.create_group(tm_structure)
+    with h5netcdf.File(params_tm_file, 'a', decode_vlen_strings=False) as f:
+        f.create_group(tm_structure)
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title=f'RoGeR SAS parameters of best monte carlo run of {tm_structure} transport model at Rietholzbach Lysimeter site',
@@ -160,15 +160,15 @@ for tm_structure in tm_structures:
         )
         dict_dim = {'x': nx, 'y': 1, 'n_sas_params': 8}
         f.dimensions = dict_dim
-        v = f.create_variable('x', ('x',), float)
+        v = f.groups[tm_structure].create_variable('x', ('x',), float)
         v.attrs['long_name'] = 'Zonal coordinate'
         v.attrs['units'] = 'meters'
         v[:] = onp.arange(dict_dim["x"])
-        v = f.create_variable('y', ('y',), float)
+        v = f.groups[tm_structure].create_variable('y', ('y',), float)
         v.attrs['long_name'] = 'Meridonial coordinate'
         v.attrs['units'] = 'meters'
         v[:] = onp.arange(dict_dim["y"])
-        v = f.create_variable('n_sas_params', ('n_sas_params',), float)
+        v = f.groups[tm_structure].create_variable('n_sas_params', ('n_sas_params',), float)
         v.attrs['long_name'] = 'Number of SAS parameters'
         v.attrs['units'] = ' '
         v[:] = onp.arange(dict_dim["n_sas_params"])
@@ -177,17 +177,17 @@ for tm_structure in tm_structures:
                             'time-variant preferential',
                             'time-variant advection-dispersion',
                             'time-variant']:
-            v = f.create_variable('sas_params_transp', ('x', 'y', 'n_sas_params'), float)
+            v = f.groups[tm_structure].create_variable('sas_params_transp', ('x', 'y', 'n_sas_params'), float)
             v[:, :, :] = ds_sim_tm["sas_params_transp"].isel(x=idx_best)
             v.attrs.update(long_name="SAS parameters of transpiration",
                            units=" ")
 
-        v = f.create_variable('sas_params_q_rz', ('x', 'y', 'n_sas_params'), float)
+        v = f.groups[tm_structure].create_variable('sas_params_q_rz', ('x', 'y', 'n_sas_params'), float)
         v[:, :, :] = ds_sim_tm["sas_params_q_rz"].isel(x=idx_best)
         v.attrs.update(long_name="SAS parameters of root zone percolation",
                        units=" ")
 
-        v = f.create_variable('sas_params_q_ss', ('x', 'y', 'n_sas_params'), float)
+        v = f.groups[tm_structure].create_variable('sas_params_q_ss', ('x', 'y', 'n_sas_params'), float)
         v[:, :, :] = ds_sim_tm["sas_params_q_ss"].isel(x=idx_best)
         v.attrs.update(long_name="SAS parameters of subsoil percolation",
                        units=" ")
