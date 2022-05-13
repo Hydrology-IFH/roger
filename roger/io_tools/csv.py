@@ -103,7 +103,7 @@ def write_meteo_csv_from_dwd(path_to_dir: Path):
                               freq='10T')
     prec_10mins = pd.DataFrame(index=new_prec_ind)
     prec_10mins['PREC'] = 0
-    prec_10mins.loc[df_prec.index, 'PREC'] = df_prec['P'].values
+    prec_10mins.loc[df_prec.index, 'PREC'] = df_prec['N'].values
 
     Ta_path = path_to_dir / "TA.txt"
     PREC_path = path_to_dir / "PREC.txt"
