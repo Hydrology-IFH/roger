@@ -594,7 +594,8 @@ for tm_structure in tm_structures:
         diag_files = glob.glob(path)
         states_tm_file = model._base_path / f"states_tm_{tms}_{year}.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as ff:
-            f = ff.create_group(f"{tm_structure}-{year}")
+            ff.create_group(f"{tm_structure}-{year}")
+            f = ff.groups[f"{tm_structure}-{year}"]
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
                 title=f'RoGeR {model._tm_structure} ({year} - {year + 1}) transport model results for bromide benchmark at Rietholzbach Lysimeter site',
