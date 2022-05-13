@@ -586,9 +586,8 @@ for meteo_station in meteo_stations:
     path = str(model._base_path / "SVAT.*.nc")
     diag_files = glob.glob(path)
     states_hm_file = model._base_path / "states_hm.nc"
-    with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as ff:
-        ff.create_group(meteo_station)
-        f = ff.groups[meteo_station]
+    with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
+        f.create_group(meteo_station)
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title=f'RoGeR model results for parameter grid and input from DWD station {meteo_station}',
@@ -602,15 +601,15 @@ for meteo_station in meteo_stations:
                 if not f.dimensions:
                     dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
                     f.dimensions = dict_dim
-                    v = f.create_variable('x', ('x',), float)
+                    v = f.Group[meteo_station].create_variable('x', ('x',), float)
                     v.attrs['long_name'] = 'Zonal coordinate'
                     v.attrs['units'] = 'meters'
                     v[:] = onp.arange(dict_dim["x"])
-                    v = f.create_variable('y', ('y',), float)
+                    v = f.Group[meteo_station].create_variable('y', ('y',), float)
                     v.attrs['long_name'] = 'Meridonial coordinate'
                     v.attrs['units'] = 'meters'
                     v[:] = onp.arange(dict_dim["y"])
-                    v = f.create_variable('Time', ('Time',), float)
+                    v = f.Group[meteo_station].create_variable('Time', ('Time',), float)
                     var_obj = df.variables.get('Time')
                     v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                     units=var_obj.attrs["units"])
@@ -618,7 +617,7 @@ for meteo_station in meteo_stations:
                 for key in list(df.variables.keys()):
                     var_obj = df.variables.get(key)
                     if key not in list(f.dimensions.keys()) and var_obj.ndim == 3:
-                        v = f.create_variable(key, ('x', 'y', 'Time'), float)
+                        v = f.Group[meteo_station].create_variable(key, ('x', 'y', 'Time'), float)
                         vals = onp.array(var_obj)
                         v[:, :, :] = vals.swapaxes(0, 2)
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
