@@ -35,15 +35,15 @@ class DISTSetup(RogerSetup):
             return npx.array(var_obj)
 
     def _read_var_from_csv(self, var, path_dir, file):
-        csv_file = self._input_dir / file
-        with pd.read_csv(csv_file, sep=';', skiprows=1) as infile:
-            var_obj = infile.loc[:, var]
-            return npx.array(var_obj)
+        csv_file = path_dir / file
+        infile = pd.read_csv(csv_file, sep=';', skiprows=1)
+        var_obj = infile.loc[:, var]
+        return npx.array(var_obj)
 
     def _get_nx(self, path_dir, file):
-        csv_file = self._input_dir / file
-        with pd.read_csv(csv_file, sep=';', skiprows=1) as infile:
-            return len(infile.index)
+        csv_file = path_dir / file
+        infile = pd.read_csv(csv_file, sep=';', skiprows=1)
+        return len(infile.index)
 
     def _get_nittevent(self, path_dir, file):
         nc_file = self._input_dir / file
