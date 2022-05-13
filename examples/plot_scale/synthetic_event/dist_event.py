@@ -36,7 +36,7 @@ class DISTEVENTSetup(RogerSetup):
         csv_file = path_dir / file
         infile = pd.read_csv(csv_file, sep=';', skiprows=1)
         var_obj = infile.loc[:, var]
-        return npx.array(var_obj)
+        return npx.array(var_obj)[:, npx.newaxis]
 
     def _get_nx(self, path_dir, file):
         csv_file = path_dir / file
