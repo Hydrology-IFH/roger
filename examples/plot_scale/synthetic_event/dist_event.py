@@ -34,14 +34,14 @@ class DISTEVENTSetup(RogerSetup):
 
     def _read_var_from_csv(self, var, path_dir, file):
         csv_file = path_dir / file
-        infile = pd.read_csv(csv_file, sep=';', skiprows=1)
-        var_obj = infile.loc[:, var]
-        return npx.array(var_obj)
+        with pd.read_csv(csv_file, sep=';', skiprows=1) as infile:
+            var_obj = infile.loc[:, var]
+            return npx.array(var_obj)
 
     def _get_nx(self, path_dir, file):
         csv_file = path_dir / file
-        infile = pd.read_csv(csv_file, sep=';', skiprows=1)
-        return len(infile.index)
+        with pd.read_csv(csv_file, sep=';', skiprows=1) as infile:
+            return len(infile.index)
 
     def _get_nitt(self, path_dir, file):
         nc_file = path_dir / file
@@ -54,7 +54,7 @@ class DISTEVENTSetup(RogerSetup):
         settings = state.settings
         settings.identifier = "DISTEVENT"
 
-        settings.nx, settings.ny, settings.nz = self._get_nx(self._input_dir, 'forcing.nc'), 1, 1
+        settings.nx, settings.ny, settings.nz = self._get_nx(self._input_dir, 'parameter_grid.csv''), 1, 1
         settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
         settings.nittevent = self._get_nitt(self._input_dir, 'forcing.nc')
         settings.nittevent_p1 = settings.nittevent + 1
