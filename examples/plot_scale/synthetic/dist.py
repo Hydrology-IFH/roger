@@ -4,6 +4,11 @@ import glob
 import os
 import h5netcdf
 import pandas as pd
+from roger import runtime_settings as rs, runtime_state as rst
+rs.backend = "numpy"
+rs.force_overwrite = True
+if rs.mpi_comm:
+    rs.num_proc = (rst.proc_num, 1)
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
