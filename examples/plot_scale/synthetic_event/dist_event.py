@@ -396,22 +396,22 @@ for rainfall_scenario in rainfall_scenarios:
                 if not f.dimensions:
                     dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
                     f.dimensions = dict_dim
-                    v = f.Group(rainfall_scenario).create_variable('x', ('x',), float)
+                    v = f.groups[rainfall_scenario].create_variable('x', ('x',), float)
                     v.attrs['long_name'] = 'Model run'
                     v.attrs['units'] = ''
                     v[:] = onp.arange(dict_dim["x"])
-                    v = f.Group(rainfall_scenario).create_variable('y', ('y',), float)
+                    v = f.groups[rainfall_scenario].create_variable('y', ('y',), float)
                     v.attrs['long_name'] = ''
                     v.attrs['units'] = ''
                     v[:] = onp.arange(dict_dim["y"])
-                    v = f.Group(rainfall_scenario).create_variable('Time', ('Time',), float)
+                    v = f.groups[rainfall_scenario].create_variable('Time', ('Time',), float)
                     var_obj = df.variables.get('Time')
                     v.attrs.update(units="hours")
                     v[:] = onp.array(var_obj)
                 for key in list(df.variables.keys()):
                     var_obj = df.variables.get(key)
                     if key not in list(f.dimensions.keys()) and var_obj.ndim == 3:
-                        v = f.Group(rainfall_scenario).create_variable(key, ('x', 'y', 'Time'), float)
+                        v = f.groups[rainfall_scenario].create_variable(key, ('x', 'y', 'Time'), float)
                         vals = onp.array(var_obj)
                         v[:, :, :] = vals.swapaxes(0, 2)
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
