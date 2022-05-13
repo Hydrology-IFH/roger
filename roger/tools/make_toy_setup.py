@@ -1528,9 +1528,9 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
         v.attrs['long_name'] = 'air temperature'
         v.attrs['units'] = 'degC'
         v = f.create_variable('dt', ('Time',), float_type)
-        v[:] = dt
+        v[:] = dt * 60
         v.attrs['long_name'] = 'time step'
-        v.attrs['units'] = 'hour'
+        v.attrs['units'] = 'seconds'
         v = f.create_variable('Time', ('Time',), float_type)
         v.attrs['units'] = 'hours'
         v[:] = idx / 60
