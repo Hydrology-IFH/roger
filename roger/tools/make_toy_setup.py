@@ -1435,9 +1435,10 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
     Make toy forcing with synthetic data.
     """
     rng = onp.random.default_rng(42)
+    n_prec = int(nhours * (60/dt))  # number of rainfall intervals
+
     if event_type == 'rain':
         # generate random rainfall
-        n_prec = int(nhours * (60/dt))
         prec = rng.uniform(0.1, 1, n_prec)
 
     elif event_type == 'block-rain':
@@ -1445,7 +1446,6 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
 
     elif event_type == 'rain-with-break':
         # generate random rainfall
-        n_prec = int(nhours * (60/dt))
         prec = rng.uniform(0.1, 1, n_prec)
         start = int(n_prec/2) - 2
         end = int(n_prec/2) + 2
@@ -1453,12 +1453,10 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
 
     elif event_type == 'heavyrain':
         # generate random rainfall
-        n_prec = int(nhours * (60/dt))
         prec = rng.uniform(1, 3, n_prec)
 
     elif event_type == 'heavyrain-normal':
         # generate rainfall with normal distribution
-        n_prec = int(nhours * (60/dt))
         mu = 2
         sigma = 0.5
         s = rng.normal(mu, sigma, 1000)
@@ -1467,7 +1465,6 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
 
     elif event_type == 'heavyrain-gamma':
         # generate rainfall with light tail
-        n_prec = int(nhours * (60/dt))
         shape, scale = 2., 2.
         s = rng.gamma(shape, scale, 1000)
         _, bins = onp.histogram(s, bins=n_prec-1)
@@ -1476,7 +1473,6 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
 
     elif event_type == 'heavyrain-gamma-reverse':
         # generate rainfall with heavy tail
-        n_prec = int(nhours * (60/dt))
         shape, scale = 2., 2.
         s = rng.gamma(shape, scale, 1000)
         _, bins = onp.histogram(s, bins=n_prec-1)
@@ -1487,7 +1483,6 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
         prec = 10 / (60/dt)
 
     idx = onp.arange(n_prec) * dt
-
     df_prec = pd.DataFrame(index=idx, columns=['DD', 'hh', 'mm', 'PREC'])
     df_prec.loc[:, 'DD'] = idx / (60 * 60)
     df_prec.loc[:, 'hh'] = idx / 60
