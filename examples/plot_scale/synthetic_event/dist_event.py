@@ -383,7 +383,7 @@ for rainfall_scenario in rainfall_scenarios:
     states_hm_file = model._base_path / "states_hm.nc"
     with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as ff:
         ff.create_group(rainfall_scenario)
-        f = ff.group["meteo_station"]
+        f = ff.groups["meteo_station"]
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title=f'RoGeR model results for parameter grid and {rainfall_scenario} as input',
