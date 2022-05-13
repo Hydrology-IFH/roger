@@ -361,8 +361,11 @@ rainfall_scenarios = ["rain", "block-rain", "rain-with-break", "heavyrain",
 
 for rainfall_scenario in rainfall_scenarios:
     model = DISTEVENTSetup()
+    path_input = model._base_path / "input"
     path_scenario = model._base_path / "input" / rainfall_scenario
     model._set_input_dir(path_scenario)
+    if not os.path.exists(path_input):
+        os.mkdir(path_input)
     if not os.path.exists(path_scenario):
         os.mkdir(path_scenario)
     make_forcing_event(path_scenario, nhours=5, event_type=rainfall_scenario)

@@ -1486,9 +1486,6 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
     elif event_type == 'block-heavyrain':
         prec = 10 / (60/dt)
 
-    if not os.path.exists(base_path):
-        os.mkdir(base_path)
-
     idx = onp.arange(n_prec) * dt
 
     df_prec = pd.DataFrame(index=idx, columns=['DD', 'hh', 'mm', 'PREC'])
@@ -1497,7 +1494,7 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
     df_prec.loc[:, 'mm'] = idx
     df_prec.loc[:, 'PREC'] = prec
     df_prec.loc[0, 'PREC'] = 0
-    file = base_path / "input" / "PREC.txt"
+    file = base_path / "PREC.txt"
     df_prec.to_csv(file, header=True, index=False, sep=" ")
 
     df_ta = pd.DataFrame(index=idx, columns=['DD', 'hh', 'mm', 'TA'])
@@ -1505,7 +1502,7 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
     df_ta.loc[:, 'hh'] = idx / 60
     df_ta.loc[:, 'mm'] = idx
     df_ta.loc[:, 'TA'] = ta
-    file = base_path / "input" / "TA.txt"
+    file = base_path / "TA.txt"
     df_ta.to_csv(file, header=True, index=False, sep=" ")
 
     nc_file = base_path / "forcing.nc"
