@@ -90,11 +90,6 @@ def write_meteo_csv_from_dwd(path_to_dir: Path):
                         index_col=0, na_values=-9999)
     df_ta.index = pd.to_datetime(df_ta.index, format='%Y %m %d')
 
-    # remove old files
-    os.remove(Ta_path)
-    os.remove(PREC_path)
-    os.remove(PET_path)
-
     # reset index of precipitation time series
     # time series starts on first day at 00:00 and ends on last day at 23:50
     prec_ind = df_prec.index
