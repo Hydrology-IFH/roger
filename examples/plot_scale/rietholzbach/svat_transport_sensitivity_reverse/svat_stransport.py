@@ -40,11 +40,16 @@ class SVATTRANSPORTSetup(RogerSetup):
             if not os.path.exists(self._input_dir):
                 os.mkdir(self._input_dir)
 
-    def _read_var_from_nc(self, var, path_dir, file):
+    def _read_var_from_nc(self, var, path_dir, file, group=None):
         nc_file = path_dir / file
-        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables[var]
-            return npx.array(var_obj)
+        if group:
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.groups[group].variables[var]
+                return npx.array(var_obj)
+        else:
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables[var]
+                return npx.array(var_obj)
 
     def _get_nitt(self, path_dir, file):
         nc_file = path_dir / file
@@ -178,15 +183,15 @@ class SVATTRANSPORTSetup(RogerSetup):
         elif settings.tm_structure in ["advection-dispersion", "preferential", "time-variant advection-disperison", "time-variant preferential", "time-variant"]:
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_transp", self._base_path, f'states_tm_{settings.tm_structure}_sensitivity.nc'))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", self._base_path, f'states_tm_{settings.tm_structure}_sensitivity.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", self._base_path, f'states_tm_{settings.tm_structure}_sensitivity.nc'))
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_transp", self._base_path, 'sas_params.nc', group=settings.tm_structure))
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", self._base_path, 'sas_params.nc', group=settings.tm_structure))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", self._base_path, 'sas_params.nc', group=settings.tm_structure))
         elif settings.tm_structure == "complete-mixing + advection-dispersion":
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", self._base_path, f'states_tm_{settings.tm_structure}_sensitivity.nc'))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", self._base_path, f'states_tm_{settings.tm_structure}_sensitivity.nc'))
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", self._base_path, 'sas_params.nc', group=settings.tm_structure))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", self._base_path, 'sas_params.nc', group=settings.tm_structure))
 
     @roger_routine
     def set_parameters(self, state):
@@ -603,8 +608,8 @@ def _ffill_3d(state, arr):
     return arr_fill
 
 
-tm_structures = ['preferential', 'advection-dispersion',
-                 'complete-mixing advection-dispersion',
+tm_structures = ['complete-mixing', 'piston',
+                 'preferential', 'advection-dispersion',
                  'time-variant preferential',
                  'time-variant advection-dispersion']
 for tm_structure in tm_structures:
@@ -624,7 +629,7 @@ for tm_structure in tm_structures:
     path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
     diag_files = glob.glob(path)
     states_tm_file = model._base_path / "states_tm_sensitivity_reverse.nc"
-    with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as ff:
+    with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as ff:
         f = ff.create_group(tm_structure)
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),

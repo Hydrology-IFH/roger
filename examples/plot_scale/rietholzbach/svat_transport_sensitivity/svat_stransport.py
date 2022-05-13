@@ -746,14 +746,15 @@ def _ffill_3d(state, arr):
     return arr_fill
 
 
+nsamples = 2**10  # number of samples
 tm_structures = ['preferential', 'advection-dispersion',
-                 'complete-mixing advection-dispersion',
                  'time-variant preferential',
                  'time-variant advection-dispersion']
 for tm_structure in tm_structures:
     tms = tm_structure.replace(" ", "_")
     model = SVATTRANSPORTSetup()
     model._set_tm_structure(tm_structure)
+    model._make_params(nsamples)
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)
     forcing_path = model._input_dir / "forcing_tracer.nc"
@@ -767,7 +768,7 @@ for tm_structure in tm_structures:
     path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
     diag_files = glob.glob(path)
     states_tm_file = model._base_path / "states_tm_sensitivity.nc"
-    with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as ff:
+    with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as ff:
         f = ff.create_group(tm_structure)
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),

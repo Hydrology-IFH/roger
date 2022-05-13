@@ -78,15 +78,15 @@ def write_meteo_csv_from_dwd(path_to_dir: Path):
     PREC_path = glob.glob(str(path_to_dir / "N_*.txt"))[0]
     PET_path = glob.glob(str(path_to_dir / "ET_*.txt"))[0]
 
-    df_prec = pd.read_csv(PREC_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
+    df_prec = pd.read_csv(PREC_path, sep=r"\s+", skiprows=2, header=0, parse_dates=[[0, 1, 2, 3, 4]],
                           index_col=0, na_values=-9999)
     df_prec.index = pd.to_datetime(df_prec.index, format='%Y %m %d %H %M')
 
-    df_pet = pd.read_csv(PET_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2]],
+    df_pet = pd.read_csv(PET_path, sep=r"\s+", skiprows=2, header=0, parse_dates=[[0, 1, 2]],
                          index_col=0, na_values=-9999)
     df_pet.index = pd.to_datetime(df_pet.index, format='%Y %m %d')
 
-    df_ta = pd.read_csv(Ta_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2]],
+    df_ta = pd.read_csv(Ta_path, sep=r"\s+", skiprows=2, header=0, parse_dates=[[0, 1, 2]],
                         index_col=0, na_values=-9999)
     df_ta.index = pd.to_datetime(df_ta.index, format='%Y %m %d')
 

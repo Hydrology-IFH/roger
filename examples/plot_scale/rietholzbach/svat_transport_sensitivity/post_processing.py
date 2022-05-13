@@ -77,7 +77,6 @@ ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
 
 dict_params_eff = {}
 tm_structures = ['preferential', 'advection-dispersion',
-                 'complete-mixing advection-dispersion',
                  'time-variant preferential',
                  'time-variant advection-dispersion']
 for tm_structure in tm_structures:

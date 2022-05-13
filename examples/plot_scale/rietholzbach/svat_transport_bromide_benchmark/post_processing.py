@@ -18,8 +18,8 @@ if not os.path.exists(base_path_results):
 states_hm_file = base_path / "states_hm.nc"
 ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
-tm_structures = ['preferential', 'advection-dispersion',
-                 'complete-mixing advection-dispersion',
+tm_structures = ['complete-mixing', 'piston',
+                 'preferential', 'advection-dispersion',
                  'time-variant preferential',
                  'time-variant advection-dispersion']
 years = onp.arange(1997, 2007).tolist()

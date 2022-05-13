@@ -567,11 +567,9 @@ def write_forcing_event(input_dir, nrows=1, ncols=1, uniform=True, prec_correcti
             v[-1] = time_steps.values[-1]
             v.attrs['long_name'] = 'time step'
             v.attrs['units'] = 'hour'
-            time_origin = df_meteo.index[0]
             v = f.create_variable('Time', ('Time',), float_type)
-            v.attrs['time_origin'] = f"{time_origin}"
             v.attrs['units'] = 'hours'
-            v[:] = date2num(df_meteo.index.tolist(), units=f"hours since {time_origin}", calendar='standard')
+            v[:] = df_meteo.index.hour.values
             v = f.create_variable('x', ('x',), int)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'

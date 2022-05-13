@@ -63,7 +63,12 @@ class SVATTRANSPORTSetup(RogerSetup):
         settings = state.settings
         settings.identifier = "SVATTRANSPORT"
 
-        settings.nx, settings.ny, settings.nz = 100, 1, 1
+        if self._tm_structure in ["complete-mixing", "piston"]:
+            nrow = 1
+        else:
+            nrow = 100
+
+        settings.nx, settings.ny, settings.nz = nrow, 1, 1
         settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
         settings.ages = settings.nitt
         settings.nages = settings.nitt + 1
@@ -674,8 +679,8 @@ def _ffill_3d(state, arr):
     return arr_fill
 
 
-tm_structures = ['preferential', 'advection-dispersion',
-                 'complete-mixing advection-dispersion',
+tm_structures = ['complete-mixing', 'piston',
+                 'preferential', 'advection-dispersion',
                  'time-variant preferential',
                  'time-variant advection-dispersion']
 for tm_structure in tm_structures:
@@ -695,7 +700,7 @@ for tm_structure in tm_structures:
     path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
     diag_files = glob.glob(path)
     states_tm_file = model._base_path / "states_tm_monte_carlo.nc"
-    with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as ff:
+    with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as ff:
         f = ff.create_group(tm_structure)
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),

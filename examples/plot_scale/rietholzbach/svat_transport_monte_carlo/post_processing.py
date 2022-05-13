@@ -28,8 +28,8 @@ ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
 
 
 dict_params_eff = {}
-tm_structures = ['preferential', 'advection-dispersion',
-                 'complete-mixing advection-dispersion',
+tm_structures = ['complete-mixing', 'piston',
+                 'preferential', 'advection-dispersion',
                  'time-variant preferential',
                  'time-variant advection-dispersion']
 for tm_structure in tm_structures:
@@ -145,11 +145,12 @@ for tm_structure in tm_structures:
     dict_params_eff[tm_structure] = df_params_eff
 
     # select best model run
-    idx_best = df_params_eff['KGE_C_q_ss'].idxmax() + 2
+    idx_best = df_params_eff['KGE_C_q_ss'].idxmax()
 
     # write SAS parameters of best model run
-    params_tm_file = base_path / f"sas_params_{tm_structure}.nc"
-    with h5netcdf.File(params_tm_file, 'w', decode_vlen_strings=False) as f:
+    params_tm_file = base_path / "sas_params.nc"
+    with h5netcdf.File(params_tm_file, 'a', decode_vlen_strings=False) as ff:
+        f = ff.create_group(tm_structure)
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title=f'RoGeR SAS parameters of best monte carlo run of {tm_structure} transport model at Rietholzbach Lysimeter site',
@@ -191,11 +192,11 @@ for tm_structure in tm_structures:
         v.attrs.update(long_name="SAS parameters of subsoil percolation",
                        units=" ")
 
-    # move hydrologic states to directories of transport model
-    base_path_tm = base_path.parent / "svat_transport_monte_carlo_reverse"
-    params_tm_file1 = base_path_tm / f"sas_params_{tm_structure}.nc"
-    shutil.copy(states_hm_file, params_tm_file1)
+# move hydrologic states to directories of transport model
+base_path_tm = base_path.parent / "svat_transport_monte_carlo_reverse"
+params_tm_file1 = base_path_tm / "sas_params.nc"
+shutil.copy(states_hm_file, params_tm_file1)
 
-    base_path_tm = base_path.parent / "svat_transport_sensitivity_reverse"
-    params_tm_file1 = base_path_tm / f"sas_params_{tm_structure}.nc"
-    shutil.copy(states_hm_file, params_tm_file1)
+base_path_tm = base_path.parent / "svat_transport_sensitivity_reverse"
+params_tm_file1 = base_path_tm / "sas_params.nc"
+shutil.copy(states_hm_file, params_tm_file1)

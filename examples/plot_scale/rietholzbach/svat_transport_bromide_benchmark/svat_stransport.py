@@ -553,7 +553,6 @@ def after_timestep_kernel(state):
 
 tm_structures = ['complete-mixing', 'piston',
                  'preferential', 'advection-dispersion',
-                 'complete-mixing advection-dispersion',
                  'time-variant preferential',
                  'time-variant advection-dispersion']
 years = onp.arange(1997, 2007).tolist()
@@ -594,7 +593,7 @@ for tm_structure in tm_structures:
         path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
         diag_files = glob.glob(path)
         states_tm_file = model._base_path / f"states_tm_{tms}_{year}.nc"
-        with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as ff:
+        with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as ff:
             f = ff.create_group(f"{tm_structure}-{year}")
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),

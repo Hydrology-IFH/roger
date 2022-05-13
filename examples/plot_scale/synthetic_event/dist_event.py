@@ -373,7 +373,7 @@ for rainfall_scenario in rainfall_scenarios:
     path = str(model._base_path / "SVAT.*.nc")
     diag_files = glob.glob(path)
     states_hm_file = model._base_path / "states_hm.nc"
-    with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as ff:
+    with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as ff:
         f = ff.create_group(rainfall_scenario)
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
