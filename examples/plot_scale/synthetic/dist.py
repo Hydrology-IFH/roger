@@ -68,7 +68,7 @@ class DISTSetup(RogerSetup):
         settings = state.settings
         settings.identifier = "DIST"
 
-        settings.nx, settings.ny, settings.nz = self._get_nx(self._input_dir, 'parameter_grid.csv'), 1, 1
+        settings.nx, settings.ny, settings.nz = self._get_nx(self._base_path, 'parameter_grid.csv'), 1, 1
         settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
         settings.nittevent = self._get_nittevent(self._input_dir, 'forcing.nc')
         settings.nittevent_p1 = settings.nittevent + 1
