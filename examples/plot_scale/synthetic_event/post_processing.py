@@ -6,7 +6,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import roger.tools.labels as labs
 
-	
 sns.set_context("talk", font_scale=1.2)
 
 base_path = Path(__file__).parent
@@ -41,9 +40,11 @@ for i, rainfall_scenario in enumerate(rainfall_scenarios):
     df = pd.DataFrame(index=range(nx))
     for var_sim in vars_sim:
         df.loc[:, var_sim] = ds_sim_sum[var_sim].values.flatten()
-        df.loc[:, 'rainfall_scenario'] = rainfall_scenario
-        df.loc[:, 'idx'] = df.index
-
+    
+    file = base_path_results / f"summary_{rainfall_scenario}.txt"
+    df.to_csv(file, header=True, index=False, sep="\t")
+    df.loc[:, 'rainfall_scenario'] = rainfall_scenario
+    df.loc[:, 'idx'] = df.index
     ll_df_sim_sum.append(df)
 
     # total sums
@@ -51,7 +52,7 @@ for i, rainfall_scenario in enumerate(rainfall_scenarios):
     df = pd.DataFrame(index=["sum"])
     for j, var_sim in enumerate(vars_sim):
         df.loc[:, var_sim] = ds_sim_sum_tot[var_sim].values
-        df.loc[:, 'rainfall_scenario'] = rainfall_scenario
+    df.loc[:, 'rainfall_scenario'] = rainfall_scenario
 
     ll_df_sim_sum_tot.append(df)
 
@@ -95,10 +96,26 @@ for i, rainfall_scenario in enumerate(rainfall_scenarios):
         ax.flatten()[j].bar(data1['idx'], data1['value'], color='black', edgecolor='black', width=1, align="edge")
         ax.flatten()[j].set_xlabel('')
         ax.flatten()[j].set_ylabel(labs._Y_LABS_CUM[var_sim])
-        
+
     ax[2,1].remove()
     ax[2,2].remove()
     ax[2,3].remove()
     fig.tight_layout()
     file = base_path_figs / f"sums_per_grid_{rainfall_scenario}.png"
     fig.savefig(file, dpi=250)
+
+# plot rainfall scenarios
+fig, ax = plt.subplots(2, 4, sharey=True, figsize=(16, 8))
+for j, rainfall_scenario in enumerate(rainfall_scenarios):
+	prec_file = base_path / "input" / rainfall_scenario / "PREC.txt"
+	df_prec = pd.read_csv(prec_file, sep=r"\s+", header=0)
+	ax.flatten()[j].bar(df_prec['hh'], df_prec['PREC'], color='black', edgecolor='black', width=10/60, align="edge")
+	ax.flatten()[j].set_xlabel('Time [hours]')
+	ax.flatten()[j].set_ylabel('')
+	ax.flatten()[j].set_title(rainfall_scenario)
+
+ax[0, 0].set_ylabel('[mm/10 minutes]')
+ax[1, 0].set_ylabel('[mm/10 minutes]')
+fig.tight_layout()
+file = base_path_figs / "rainfall_scenarios.png"
+fig.savefig(file, dpi=250)

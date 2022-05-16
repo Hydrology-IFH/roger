@@ -38,8 +38,11 @@ for i, meteo_station in enumerate(meteo_stations):
     df = pd.DataFrame(index=range(nx))
     for var_sim in vars_sim:
         df.loc[:, var_sim] = ds_sim_sum[var_sim].values.flatten()
-        df.loc[:, 'meteo_station'] = meteo_station
-        df.loc[:, 'idx'] = df.index
+
+    file = base_path_results / f"summary_{meteo_station}.txt"
+    df.to_csv(file, header=True, index=False, sep="\t")
+    df.loc[:, 'meteo_station'] = meteo_station
+    df.loc[:, 'idx'] = df.index
 
     ll_df_sim_sum.append(df)
 
@@ -48,7 +51,7 @@ for i, meteo_station in enumerate(meteo_stations):
     df = pd.DataFrame(index=["sum"])
     for j, var_sim in enumerate(vars_sim):
         df.loc[:, var_sim] = ds_sim_sum_tot[var_sim].values
-        df.loc[:, 'meteo_station'] = meteo_station
+    df.loc[:, 'meteo_station'] = meteo_station
 
     ll_df_sim_sum_tot.append(df)
 
@@ -65,7 +68,7 @@ for i, meteo_station in enumerate(meteo_stations):
 
 # compare total sums
 ax = sns.catplot(x="variable", y="value", hue="meteo_station",
-               data=df_sim_sum_tot, height=7, aspect=2, palette="RdPu", kind="bar")
+                data=df_sim_sum_tot, height=7, aspect=2, palette="RdPu", kind="bar")
 xticklabels = [labs._TICKLABS[var_sim] for var_sim in vars_sim]
 ax.set_xticklabels(xticklabels)
 ax.set(xlabel='', ylabel='[mm]')
@@ -75,7 +78,7 @@ ax.savefig(file, dpi=250)
 
 # compare sums per grid
 ax = sns.catplot(x="variable", y="value", hue="meteo_station",
-               data=df_sim_sum, kind="box", height=7, aspect=2, palette="RdPu", whis=[0, 100])
+                data=df_sim_sum, kind="box", height=7, aspect=2, palette="RdPu", whis=[0, 100])
 xticklabels = [labs._TICKLABS[var_sim] for var_sim in vars_sim]
 ax.set_xticklabels(xticklabels)
 ax.set(xlabel='', ylabel='[mm]')
