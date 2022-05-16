@@ -33,6 +33,7 @@ def make_setup(base_path, ndays=10, nrows=1, ncols=1,
     """
     Make toy setup with synthetic input data.
     """
+    rng = onp.random.default_rng(42)
     if not enable_offline_transport:
         # model parameters
         head_units_params = ['Unit']
@@ -1430,7 +1431,7 @@ def make_forcing(base_path, ndays=10, nrows=1, ncols=1,
 
 
 @roger_sync
-def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, event_type='rain', float_type="float64"):
+def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, event_type='rain', rain_sum=10, heavyrain_sum=60, float_type="float64"):
     """
     Make toy forcing with synthetic data.
     """
@@ -1439,21 +1440,27 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
 
     if event_type == 'rain':
         # generate random rainfall
-        prec = rng.uniform(0.1, 1, n_prec)
+        pp = rng.uniform(0.1, 1, n_prec)
+        scale = rain_sum / onp.sum(pp)
+        prec = pp * scale
 
     elif event_type == 'block-rain':
-        prec = 2.5 / (60/dt)
+        prec = (rain_sum / nhours) / (60/dt)
 
     elif event_type == 'rain-with-break':
         # generate random rainfall
-        prec = rng.uniform(0.1, 1, n_prec)
+        pp = rng.uniform(0.1, 1, n_prec)
         start = int(n_prec/2) - 2
         end = int(n_prec/2) + 2
-        prec[start:end] = 0
+        pp[start:end] = 0
+        scale = rain_sum / onp.sum(pp)
+        prec = pp * scale
 
     elif event_type == 'heavyrain':
         # generate random rainfall
-        prec = rng.uniform(1, 3, n_prec)
+        pp = rng.uniform(0.1, 1, n_prec)
+        scale = heavyrain_sum / onp.sum(pp)
+        prec = pp * scale
 
     elif event_type == 'heavyrain-normal':
         # generate rainfall with normal distribution
@@ -1462,7 +1469,8 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
         s = rng.normal(mu, sigma, 1000)
         _, bins = onp.histogram(s, bins=n_prec-1)
         pp = 1/(sigma * onp.sqrt(2 * onp.pi)) * onp.exp(-(bins - mu)**2 / (2 * sigma**2))
-        prec = pp * 3
+        scale = heavyrain_sum / onp.sum(pp)
+        prec = pp * scale
 
     elif event_type == 'heavyrain-gamma':
         # generate rainfall with light tail
@@ -1470,7 +1478,8 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
         s = rng.gamma(shape, scale, 1000)
         _, bins = onp.histogram(s, bins=n_prec-1)
         pp = bins**(shape-1)*(onp.exp(-bins/scale) / (sps.gamma(shape)*scale**shape))
-        prec = pp * 20
+        scale = heavyrain_sum / onp.sum(pp)
+        prec = pp * scale
 
     elif event_type == 'heavyrain-gamma-reverse':
         # generate rainfall with heavy tail
@@ -1478,10 +1487,11 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
         s = rng.gamma(shape, scale, 1000)
         _, bins = onp.histogram(s, bins=n_prec-1)
         pp = bins**(shape-1)*(onp.exp(-bins/scale) / (sps.gamma(shape)*scale**shape))
-        prec = pp[::-1] * 20
+        scale = heavyrain_sum / onp.sum(pp)
+        prec = pp[::-1] * scale
 
     elif event_type == 'block-heavyrain':
-        prec = 10 / (60/dt)
+        prec = (heavyrain_sum / nhours) / (60/dt)
 
     idx = onp.arange(n_prec) * dt
     df_prec = pd.DataFrame(index=idx, columns=['DD', 'hh', 'mm', 'PREC'])

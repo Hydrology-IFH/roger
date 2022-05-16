@@ -1,0 +1,104 @@
+import os
+from pathlib import Path
+import xarray as xr
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import roger.tools.labels as labs
+
+	
+sns.set_context("talk", font_scale=1.2)
+
+base_path = Path(__file__).parent
+# directory of results
+base_path_results = base_path / "results"
+if not os.path.exists(base_path_results):
+    os.mkdir(base_path_results)
+# directory of figures
+base_path_figs = base_path / "figures"
+if not os.path.exists(base_path_figs):
+    os.mkdir(base_path_figs)
+
+rainfall_scenarios = ["rain", "block-rain", "rain-with-break", "heavyrain",
+                      "heavyrain-normal", "heavyrain-gamma",
+                      "heavyrain-gamma-reverse", "block-heavyrain"]
+vars_sim = ['inf_mat', 'inf_mp', 'inf_sc', 'q_hof',
+            'q_sof', 'q_sub', 'q_sub_mat', 'q_sub_mp', 'q_ss']
+ll_df_sim_sum = []
+ll_df_sim_sum_tot = []
+for i, rainfall_scenario in enumerate(rainfall_scenarios):
+    # load simulation
+    states_hm_file = base_path / "states_hm.nc"
+    ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf", group=rainfall_scenario)
+
+    # assign date
+    days_sim = ds_sim.Time.values + 1
+    ds_sim = ds_sim.assign_coords(date=("Time", days_sim))
+
+    # sums per grid
+    ds_sim_sum = ds_sim.sum(dim="Time")
+    nx = ds_sim_sum.dims['x']  # number of rows
+    df = pd.DataFrame(index=range(nx))
+    for var_sim in vars_sim:
+        df.loc[:, var_sim] = ds_sim_sum[var_sim].values.flatten()
+        df.loc[:, 'rainfall_scenario'] = rainfall_scenario
+        df.loc[:, 'idx'] = df.index
+
+    ll_df_sim_sum.append(df)
+
+    # total sums
+    ds_sim_sum_tot = ds_sim.sum()
+    df = pd.DataFrame(index=["sum"])
+    for j, var_sim in enumerate(vars_sim):
+        df.loc[:, var_sim] = ds_sim_sum_tot[var_sim].values
+        df.loc[:, 'rainfall_scenario'] = rainfall_scenario
+
+    ll_df_sim_sum_tot.append(df)
+
+# concatenate dataframes
+df_sim_sum = pd.concat(ll_df_sim_sum, sort=False)
+df_sim_sum_tot = pd.concat(ll_df_sim_sum_tot, sort=False)
+
+# convert from wide to long
+df_sim_sum = pd.melt(df_sim_sum, id_vars=['rainfall_scenario', 'idx'])
+df_sim_sum_tot = pd.melt(df_sim_sum_tot, id_vars=['rainfall_scenario'])
+for i, rainfall_scenario in enumerate(rainfall_scenarios):
+    df_sim_sum_tot.loc[df_sim_sum_tot['rainfall_scenario'] == rainfall_scenario, 'idx'] = range(len(vars_sim))
+
+
+# compare total sums
+ax = sns.catplot(x="variable", y="value", hue="rainfall_scenario",
+                 data=df_sim_sum_tot, height=7, aspect=2, palette="RdPu", kind="bar")
+xticklabels = [labs._TICKLABS[var_sim] for var_sim in vars_sim]
+ax.set_xticklabels(xticklabels)
+ax.set(xlabel='', ylabel='[mm]')
+ax._legend.set_title("Rainfall scenario")
+file = base_path_figs / "total_sums.png"
+ax.savefig(file, dpi=250)
+
+# compare sums per grid
+ax = sns.catplot(x="variable", y="value", hue="rainfall_scenario",
+                 data=df_sim_sum, kind="box", height=7, aspect=2, palette="RdPu", whis=[0, 100])
+xticklabels = [labs._TICKLABS[var_sim] for var_sim in vars_sim]
+ax.set_xticklabels(xticklabels)
+ax.set(xlabel='', ylabel='[mm]')
+ax._legend.set_title("Rainfall scenario")
+file = base_path_figs / "sums_per_grid_box.png"
+ax.savefig(file, dpi=250)
+
+#TODO: compare differences
+for i, rainfall_scenario in enumerate(rainfall_scenarios):
+    fig, ax = plt.subplots(3, 4, sharey=False, figsize=(16, 8))
+    data = df_sim_sum.loc[df_sim_sum['rainfall_scenario'] == rainfall_scenario, :]
+    for j, var_sim in enumerate(vars_sim):
+        data1 = data.loc[data['variable'] == var_sim, :]
+        ax.flatten()[j].bar(data1['idx'], data1['value'], color='black', edgecolor='black', width=1, align="edge")
+        ax.flatten()[j].set_xlabel('')
+        ax.flatten()[j].set_ylabel(labs._Y_LABS_CUM[var_sim])
+        
+    ax[2,1].remove()
+    ax[2,2].remove()
+    ax[2,3].remove()
+    fig.tight_layout()
+    file = base_path_figs / f"sums_per_grid_{rainfall_scenario}.png"
+    fig.savefig(file, dpi=250)
