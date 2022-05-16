@@ -448,12 +448,14 @@ class rogerSync:
                 for i in range(1, runtime_state.proc_num):
                     buffer = npx.empty(1, dtype=int)
                     runtime_settings.mpi_comm.isend(buffer, dest=i, tag=10)
+                runtime_settings.mpi_comm.barrier()
             # let other processes wait
             elif runtime_state.proc_rank > 0:
                 def function():
                     pass
                 out = function()
                 runtime_settings.mpi_comm.irecv(source=0, tag=10)
+                runtime_settings.mpi_comm.barrier()
 
         return out
 

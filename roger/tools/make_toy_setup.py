@@ -1457,7 +1457,7 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
 
     elif event_type == 'heavyrain-normal':
         # generate rainfall with normal distribution
-        mu = 2
+        mu = 4
         sigma = 0.5
         s = rng.normal(mu, sigma, 1000)
         _, bins = onp.histogram(s, bins=n_prec-1)
