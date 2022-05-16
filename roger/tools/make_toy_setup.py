@@ -1457,11 +1457,12 @@ def make_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, even
 
     elif event_type == 'heavyrain-normal':
         # generate rainfall with normal distribution
-        mu = 4
+        mu = 2
         sigma = 0.5
         s = rng.normal(mu, sigma, 1000)
         _, bins = onp.histogram(s, bins=n_prec-1)
-        prec = 1/(sigma * onp.sqrt(2 * onp.pi)) * onp.exp(-(bins - mu)**2 / (2 * sigma**2))
+        pp = 1/(sigma * onp.sqrt(2 * onp.pi)) * onp.exp(-(bins - mu)**2 / (2 * sigma**2))
+        prec = pp * 3
 
     elif event_type == 'heavyrain-gamma':
         # generate rainfall with light tail
