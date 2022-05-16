@@ -424,12 +424,22 @@ def calc_q_sub(state):
     """
     vs = state.variables
 
+    vs.q_sub_mat = update(
+        vs.q_sub_mat,
+        at[2:-2, 2:-2], (vs.q_sub_mat_rz[2:-2, 2:-2] + vs.q_sub_mat_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.q_sub_mp = update(
+        vs.q_sub_mp,
+        at[2:-2, 2:-2], (vs.q_sub_mp_rz[2:-2, 2:-2] + vs.q_sub_mp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     vs.q_sub = update(
         vs.q_sub,
         at[2:-2, 2:-2], (vs.q_sub_rz[2:-2, 2:-2] + vs.q_sub_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(q_sub=vs.q_sub)
+    return KernelOutput(q_sub_amt=vs.q_sub_mat, q_sub_mp=vs.q_sub_mp, q_sub=vs.q_sub)
 
 
 @roger_kernel

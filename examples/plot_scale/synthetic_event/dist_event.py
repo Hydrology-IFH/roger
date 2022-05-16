@@ -393,9 +393,9 @@ for rainfall_scenario in rainfall_scenarios:
         for dfs in diag_files:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
-                if not f.dimensions:
+                if not f.groups[rainfall_scenario].dimensions:
                     dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
-                    f.dimensions = dict_dim
+                    f.groups[rainfall_scenario].dimensions = dict_dim
                     v = f.groups[rainfall_scenario].create_variable('x', ('x',), float)
                     v.attrs['long_name'] = 'Model run'
                     v.attrs['units'] = ''
