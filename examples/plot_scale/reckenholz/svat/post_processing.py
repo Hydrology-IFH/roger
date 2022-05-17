@@ -10,7 +10,7 @@ import roger.tools.labels as labs
 
 base_path = Path(__file__).parent
 
-lys_experiments = ["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9"]
+lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9"]
 for lys_experiment in lys_experiments:
     # load simulation
     states_hm_file = base_path / lys_experiment / "states_hm.nc"
