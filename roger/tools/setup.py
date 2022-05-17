@@ -493,7 +493,7 @@ def write_crop_rotation(input_dir, nrows=1, ncols=1, float_type="float64"):
 
 
 @roger_sync
-def write_forcing_event(input_dir, nrows=1, ncols=1, uniform=True, prec_correction=True, float_type="float64"):
+def write_forcing_event(input_dir, nrows=1, ncols=1, uniform=True, prec_correction=False, float_type="float64"):
     """Writes forcing data for a single event (i.e. no event classification is
     required)
 

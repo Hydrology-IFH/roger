@@ -46,7 +46,7 @@ def join_obs_on_sim(idx, sim_vals, df_obs, rm_na=False):
     return df
 
 
-def plot_sim(df, y_lab='', fmt_x='num', ls_obs='line', x_lab='Time'):
+def plot_sim(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
     """Plot simulated values.
 
     Args
@@ -57,33 +57,26 @@ def plot_sim(df, y_lab='', fmt_x='num', ls_obs='line', x_lab='Time'):
     y_lab : str
         label of y-axis
 
-    fmt_x : str, optional
-        Format of x-axis. Default is numerical ('num'). Alternatively, date
-        format can be used ('date').
-
     ls_obs : str, optional
         linestyle of observations
 
     x_lab : str, optional
         label of x-axis
 
+    ylim : tuple, optional
+        y-axis limits
+
     Returns
     ----------
     fig : Figure
         Plot for observed and simulated values
     """
-    if fmt_x == 'num':
-        # convert datetime index to numerical index
-        idx = time_to_num(df.index, time='days')
-    elif fmt_x == 'date':
-        idx = df.index
-
     # plot observed and simulated values
     fig, axs = plt.subplots(figsize=(9, 4))
-    axs.plot(idx, df.iloc[:, 0], lw=1, ls='-', color='black')
-    axs.set_xlim((idx[0], idx[-1]))
-    if y_lab == r'$\delta^{18}$O [permil]':
-        axs.set_ylim((-20, 5))
+    axs.plot(df.index, df.iloc[:, 0], lw=1, ls='-', color='black')
+    axs.set_xlim((df.index[0], df.index[-1]))
+    if ylim:
+        axs.set_ylim(ylim)
     elif y_lab == r'$\delta^{2}$H [permil]':
         axs.set_ylim((-160, -20))
     axs.set_ylabel(y_lab)
@@ -93,7 +86,45 @@ def plot_sim(df, y_lab='', fmt_x='num', ls_obs='line', x_lab='Time'):
     return fig
 
 
-def plot_obs_sim(df, y_lab='', fmt_x='num', ls_obs='line', x_lab='Time'):
+def plot_sim_cum(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
+    """Plot simulated values.
+
+    Args
+    ----------
+    df : pd.DataFrame
+        Dataframe with simulated and observed values
+
+    y_lab : str
+        label of y-axis
+
+    ls_obs : str, optional
+        linestyle of observations
+
+    x_lab : str, optional
+        label of x-axis
+
+    ylim : tuple, optional
+        y-axis limits
+
+    Returns
+    ----------
+    fig : Figure
+        Plot for observed and simulated values
+    """
+    # plot observed and simulated values
+    fig, axs = plt.subplots(figsize=(9, 4))
+    axs.plot(df.index, df.iloc[:, 0].cumsum(), lw=1, ls='-', color='black')
+    axs.set_xlim((df.index[0], df.index[-1]))
+    if ylim:
+        axs.set_ylim(ylim)
+    axs.set_ylabel(y_lab)
+    axs.set_xlabel(x_lab)
+    fig.tight_layout()
+
+    return fig
+
+
+def plot_obs_sim(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
     """Plot observed and simulated values.
 
     Args
@@ -114,28 +145,23 @@ def plot_obs_sim(df, y_lab='', fmt_x='num', ls_obs='line', x_lab='Time'):
     x_lab : str, optional
         label of x-axis
 
+    ylim : tuple, optional
+        y-axis limits
+
     Returns
     ----------
     fig : Figure
         Plot for observed and simulated values
     """
-    if fmt_x == 'num':
-        # convert datetime index to numerical index
-        idx = time_to_num(df.index, time='days')
-    elif fmt_x == 'date':
-        idx = df.index
-
     # plot observed and simulated values
     fig, axs = plt.subplots(figsize=(9, 4))
     if (ls_obs == 'line'):
-        axs.plot(idx, df.iloc[:, 1], lw=1.5, color='blue', alpha=0.5)
-    axs.scatter(idx, df.iloc[:, 1], color='blue', s=1, alpha=0.5)
-    axs.plot(idx, df.iloc[:, 0], lw=1, ls='-.', color='red')
-    axs.set_xlim((idx[0], idx[-1]))
-    if y_lab == r'$\delta^{18}$O [permil]':
-        axs.set_ylim((-20, 5))
-    elif y_lab == r'$\delta^{2}$H [permil]':
-        axs.set_ylim((-160, -20))
+        axs.plot(df.index, df.iloc[:, 1], lw=1.5, color='blue', alpha=0.5)
+    axs.scatter(df.index, df.iloc[:, 1], color='blue', s=1, alpha=0.5)
+    axs.plot(df.index, df.iloc[:, 0], lw=1, ls='-.', color='red')
+    axs.set_xlim((df.index[0], df.index[-1]))
+    if ylim:
+        axs.set_ylim(ylim)
     axs.set_ylabel(y_lab)
     axs.set_xlabel(x_lab)
     fig.tight_layout()
@@ -143,7 +169,7 @@ def plot_obs_sim(df, y_lab='', fmt_x='num', ls_obs='line', x_lab='Time'):
     return fig
 
 
-def plot_obs_sim_year(df, y_lab, start_month_hyd_year=10, ls_obs='line', x_lab='Time'):
+def plot_obs_sim_year(df, y_lab, start_month_hyd_year=10, ls_obs='line', x_lab='Time', ylim=None):
     """Plot observed and simulated values.
 
     Args
@@ -163,6 +189,9 @@ def plot_obs_sim_year(df, y_lab, start_month_hyd_year=10, ls_obs='line', x_lab='
     x_lab : str, optional
         label of x-axis
 
+    ylim : tuple, optional
+        y-axis limits
+
     Returns
     ----------
     figs : list
@@ -181,10 +210,8 @@ def plot_obs_sim_year(df, y_lab, start_month_hyd_year=10, ls_obs='line', x_lab='
         axs.scatter(df_year.index, df_year.iloc[:, 1], color='blue', s=1, alpha=0.5)
         axs.plot(df_year.index, df_year.iloc[:, 0], lw=1, ls='-.', color='red')
         axs.set_xlim((df_year.index[0], df_year.index[-1]))
-        if y_lab == r'$\delta^{18}$O [permil]':
-            axs.set_ylim((-20, 5))
-        elif y_lab == r'$\delta^{2}$H [permil]':
-            axs.set_ylim((-160, -20))
+        if ylim:
+            axs.set_ylim(ylim)
         axs.set_ylabel(y_lab)
         axs.set_xlabel(str(year))
         if (len(df_year.index) > 120):
@@ -197,7 +224,7 @@ def plot_obs_sim_year(df, y_lab, start_month_hyd_year=10, ls_obs='line', x_lab='
     return figs
 
 
-def plot_obs_sim_cum(df, y_lab, fmt_x='num', x_lab='Time'):
+def plot_obs_sim_cum(df, y_lab, x_lab='Time'):
     """Plot cumulated observed and simulated values.
 
     Args
@@ -208,10 +235,6 @@ def plot_obs_sim_cum(df, y_lab, fmt_x='num', x_lab='Time'):
     y_lab : str
         label of y-axis
 
-    fmt_x : str, optional
-        Format of x-axis. Default is numerical ('num'). Alternatively, date
-        format can be used ('date').
-
     x_lab : str, optional
         label of x-axis
 
@@ -220,21 +243,15 @@ def plot_obs_sim_cum(df, y_lab, fmt_x='num', x_lab='Time'):
     fig : Figure
         Plot for observed and simulated values
     """
-    if fmt_x == 'num':
-        # convert datetime index to numerical index
-        idx = time_to_num(df.index, time='days')
-    elif fmt_x == 'date':
-        idx = df.index
-
     df.loc[df.isna().any(axis=1)] = 0
 
     # plot observed and simulated values
     fig, axs = plt.subplots(figsize=(9, 4))
-    axs.plot(idx, df.iloc[:, 1].cumsum(), lw=1.5, color='blue', alpha=0.5)
-    axs.plot(idx, df.iloc[:, 0].cumsum(), lw=1, ls='-.', color='red')
+    axs.plot(df.index, df.iloc[:, 1].cumsum(), lw=1.5, color='blue', alpha=0.5)
+    axs.plot(df.index, df.iloc[:, 0].cumsum(), lw=1, ls='-.', color='red')
     if ('PET' in df.columns.to_list()):
-        axs.plot(idx, df.loc[:, 'PET'].cumsum(), lw=1.5, ls=':', color='silver')
-    axs.set_xlim((idx[0], idx[-1]))
+        axs.plot(df.index, df.loc[:, 'PET'].cumsum(), lw=1.5, ls=':', color='silver')
+    axs.set_xlim((df.index[0], df.index[-1]))
     axs.set_ylabel(y_lab)
     axs.set_xlabel(x_lab)
     fig.tight_layout()
