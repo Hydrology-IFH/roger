@@ -150,7 +150,8 @@ for tm_structure in tm_structures:
     # write SAS parameters of best model run
     params_tm_file = base_path / "sas_params.nc"
     with h5netcdf.File(params_tm_file, 'a', decode_vlen_strings=False) as f:
-        f.create_group(tm_structure)
+        if tm_structure not in list(f.groups.keys()):
+            f.create_group(tm_structure)
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title=f'RoGeR SAS parameters of best monte carlo run of {tm_structure} transport model at Rietholzbach Lysimeter site',
@@ -200,3 +201,7 @@ shutil.copy(states_hm_file, params_tm_file1)
 base_path_tm = base_path.parent / "svat_transport_sensitivity_reverse"
 params_tm_file1 = base_path_tm / "sas_params.nc"
 shutil.copy(states_hm_file, params_tm_file1)
+
+# compare best model runs
+
+# duration curve of 18O in percolation

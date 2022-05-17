@@ -587,7 +587,8 @@ for meteo_station in meteo_stations:
     diag_files = glob.glob(path)
     states_hm_file = model._base_path / "states_hm.nc"
     with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
-        f.create_group(meteo_station)
+        if meteo_station not in list(f.groups.keys()):
+            f.create_group(meteo_station)
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title=f'RoGeR model results for parameter grid and input from DWD station {meteo_station}',

@@ -217,7 +217,7 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs = state.variables
         settings = state.settings
 
-        vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ + vs.S_SS)
+        vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
 
         vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
         vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
@@ -630,7 +630,8 @@ for tm_structure in tm_structures:
     diag_files = glob.glob(path)
     states_tm_file = model._base_path / "states_tm_sensitivity_reverse.nc"
     with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
-        f.create_group(tm_structure)
+        if tm_structure not in list(f.groups.keys()):
+            f.create_group(tm_structure)
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title=f'RoGeR {tm_structure} transport model saltelli results (reverse) at Rietholzbach Lysimeter site',

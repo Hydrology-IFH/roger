@@ -42,3 +42,7 @@ def test_setup_svat_film():
 
 def test_setup_dist():
     pass
+
+
+def test_setup_dist_event():
+    pass

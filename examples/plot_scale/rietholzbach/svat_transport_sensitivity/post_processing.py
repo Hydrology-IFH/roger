@@ -258,3 +258,5 @@ for tm_structure in tm_structures:
     fig.subplots_adjust(wspace=0.2, hspace=0.3)
     file = base_path_figs / f"dotty_plots_{tms}.png"
     fig.savefig(file, dpi=250)
+
+# compare sobol indices between model structures
