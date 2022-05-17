@@ -147,7 +147,7 @@ def calc_tt(state, SA, sa, flux, sas_params):
     )
     q_re = update(
         q_re,
-        at[2:-2, 2:-2, :], npx.where((diff_q[2:-2, 2:-2, :] < 0), 0, diff_q[2:-2, 2:-2, :]),
+        at[2:-2, 2:-2, :], npx.where((diff_q[2:-2, 2:-2, :] > 0), 0, diff_q[2:-2, 2:-2, :]),
     )
     q_re_sum = update(
         q_re_sum,
@@ -179,7 +179,11 @@ def calc_tt(state, SA, sa, flux, sas_params):
     # probability to redistribute outflux
     omega_re = update(
         omega_re,
-        at[2:-2, 2:-2, :], npx.diff(Omega_re[2:-2, 2:-2, :], axis=-1),
+        at[2:-2, 2:-2, :], npx.where(mask_old[2:-2, 2:-2, :], npx.diff(Omega_re[2:-2, 2:-2, ::-1], axis=-1)[:, :, ::-1], omega_re[2:-2, 2:-2, :]),
+    )
+    omega_re = update(
+        omega_re,
+        at[2:-2, 2:-2, :], npx.where(mask_young[2:-2, 2:-2, :], npx.diff(Omega_re[2:-2, 2:-2, :], axis=-1), omega_re[2:-2, 2:-2, :]),
     )
     # redistribute outflux
     flux_tt_re = update(
