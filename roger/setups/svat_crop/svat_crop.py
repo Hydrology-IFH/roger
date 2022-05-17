@@ -59,10 +59,10 @@ class SVATCROPSetup(RogerSetup):
         settings.identifier = "SVATCROP"
 
         settings.nx, settings.ny, settings.nz = 1, 1, 1
-        settings.nitt = self._get_nitt()
-        settings.nittevent = self._get_nittevent()
+        settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
+        settings.nittevent = self._get_nittevent(self._input_dir, 'forcing.nc')
         settings.nittevent_p1 = settings.nittevent + 1
-        settings.runlen = self._get_runlen()
+        settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
         settings.dx = 1
         settings.dy = 1
@@ -70,6 +70,7 @@ class SVATCROPSetup(RogerSetup):
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
+        settings.time_origin = "1996-12-31 00:00:00"
 
         settings.enable_crop_phenology = True
         settings.enable_crop_rotation = True

@@ -811,7 +811,7 @@ for tm_structure in tm_structures:
                     v[:] = npx.arange(0, dict_dim["n_sas_params"])
                 for var_sim in list(df.variables.keys()):
                     var_obj = df.variables.get(var_sim)
-                    if var_sim not in list(dict_dim.keys()) and "Time" in list(var_obj.dimensions.keys()):
+                    if var_sim not in list(dict_dim.keys()) and "Time" in var_obj.dimensions:
                         v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time'), float)
                         vals = npx.array(var_obj)
                         v[2:-2, 2:-2, :] = vals.swapaxes(0, 2)
