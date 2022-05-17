@@ -40,8 +40,8 @@ with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
     for dfs in diag_files:
         with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
             # set dimensions with a dictionary
+            dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
             if not f.dimensions:
-                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
                 f.dimensions = dict_dim
                 v = f.create_variable('x', ('x',), float)
                 v.attrs['long_name'] = 'Zonal coordinate'
@@ -340,8 +340,8 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
     )
     with h5netcdf.File(states_hm_mc_file, 'r', decode_vlen_strings=False) as df:
         # set dimensions with a dictionary
+        dict_dim = {'x': 1, 'y': 1, 'Time': len(df.variables['Time'])}
         if not f.dimensions:
-            dict_dim = {'x': 1, 'y': 1, 'Time': len(df.variables['Time'])}
             f.dimensions = dict_dim
             v = f.create_variable('x', ('x',), float)
             v.attrs['long_name'] = 'Number of model run'

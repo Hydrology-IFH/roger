@@ -25,8 +25,8 @@ with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
     for dfs in diag_files:
         with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
             # set dimensions with a dictionary
+            dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
             if not f.dimensions:
-                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
                 f.dimensions = dict_dim
                 v = f.create_variable('x', ('x',), float)
                 v.attrs['long_name'] = 'Number of model run'
