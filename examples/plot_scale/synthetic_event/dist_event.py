@@ -391,6 +391,8 @@ for rainfall_scenario in rainfall_scenarios:
             references='',
             comment='1D model with free drainage'
         )
+        if rainfall_scenario not in list(f.groups.keys()):
+            f.create_group(rainfall_scenario)
         for dfs in diag_files:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
