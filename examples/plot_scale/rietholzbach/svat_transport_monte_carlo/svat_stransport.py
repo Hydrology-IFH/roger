@@ -460,7 +460,7 @@ def set_forcing_iso_kernel(state):
     # mix isotopes from snow melt and rainfall
     vs.C_in = update(
         vs.C_in,
-        at[2:-2, 2:-2], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] > 0, vs.C_snow[2:-2, 2:-2, vs.tau], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.NaN)) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(npx.isfinite(vs.C_snow[2:-2, 2:-2, vs.taum1]), vs.C_snow[2:-2, 2:-2, vs.taum1], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.NaN)) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.M_in = update(
         vs.M_in,
@@ -679,7 +679,7 @@ def _ffill_3d(state, arr):
 
 
 nsamples = 10  # number of samples
-tm_structures = ['complete-mixing', 'piston',
+tm_structures = ['piston',
                  'preferential', 'advection-dispersion',
                  'time-variant preferential',
                  'time-variant advection-dispersion']
@@ -792,3 +792,6 @@ for tm_structure in tm_structures:
 
 # npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.tau] - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.taum1]
 # vs.inf_mat_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) + vs.inf_pf_ss[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2]) - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2])
+
+# cond1 = (vs.sa_s[2:-2, 2:-2, vs.taum1, :] > 0) & npx.isnan(vs.msa_s[2:-2, 2:-2, vs.taum1, :])
+# cond = (vs.sa_s[2:-2, 2:-2, vs.tau, :] > 0) & npx.isnan(vs.msa_s[2:-2, 2:-2, vs.tau, :])

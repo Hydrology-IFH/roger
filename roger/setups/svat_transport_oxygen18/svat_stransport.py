@@ -424,7 +424,7 @@ def set_forcing_iso_kernel(state):
     # mix isotopes from snow melt and rainfall
     vs.C_in = update(
         vs.C_in,
-        at[2:-2, 2:-2], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] > 0, vs.C_snow[2:-2, 2:-2, vs.tau], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.NaN)) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(npx.isfinite(vs.C_snow[2:-2, 2:-2, vs.taum1]), vs.C_snow[2:-2, 2:-2, vs.taum1], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.NaN)) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.M_in = update(
         vs.M_in,
