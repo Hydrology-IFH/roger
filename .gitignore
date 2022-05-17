@@ -116,3 +116,5 @@ startup.py
 # Examples
 examples/*/*/results/
 examples/*/*/figures/
+examples/*/*/*/results/
+examples/*/*/*/figures/

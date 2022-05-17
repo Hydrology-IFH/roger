@@ -78,7 +78,7 @@ class SVATCROPSetup(RogerSetup):
 
         if settings.enable_crop_rotation:
             settings.ncrops = 3
-            settings.ncr = self._get_ncr()
+            settings.ncr = self._get_ncr(self._input_dir, 'crop_rotation.nc')
 
     @roger_routine(
         dist_safe=False,
@@ -103,11 +103,11 @@ class SVATCROPSetup(RogerSetup):
         vs = state.variables
 
         # temporal grid
-        vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", 'forcing.nc'))
+        vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", self._input_dir, 'forcing.nc'))
         vs.DT = update(vs.DT, at[:], vs.DT_SECS / (60 * 60))
-        vs.YEAR = update(vs.YEAR, at[:], self._read_var_from_nc("year", 'forcing.nc'))
-        vs.MONTH = update(vs.MONTH, at[:], self._read_var_from_nc("month", 'forcing.nc'))
-        vs.DOY = update(vs.DOY, at[:], self._read_var_from_nc("doy", 'forcing.nc'))
+        vs.YEAR = update(vs.YEAR, at[:], self._read_var_from_nc("year", self._input_dir, 'forcing.nc'))
+        vs.MONTH = update(vs.MONTH, at[:], self._read_var_from_nc("month", self._input_dir, 'forcing.nc'))
+        vs.DOY = update(vs.DOY, at[:], self._read_var_from_nc("doy", self._input_dir, 'forcing.nc'))
         vs.dt_secs = vs.DT_SECS[vs.itt]
         vs.dt = vs.DT[vs.itt]
         vs.year = vs.YEAR[vs.itt]
@@ -141,8 +141,6 @@ class SVATCROPSetup(RogerSetup):
         dist_safe=False,
         local_variables=[
             "lu_id",
-            "sealing",
-            "S_dep_tot",
             "z_soil",
             "dmpv",
             "lmpv",
@@ -159,10 +157,6 @@ class SVATCROPSetup(RogerSetup):
         vs = state.variables
 
         vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 599)
-        vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
-        vs.slope = update(vs.slope, at[2:-2, 2:-2], 0)
-        vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope * 100)
-        vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
         vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
         vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 100)
         vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1000)
@@ -172,7 +166,7 @@ class SVATCROPSetup(RogerSetup):
         vs.ks = update(vs.ks, at[2:-2, 2:-2], 25)
         vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
-        vs.CROP_TYPE = update(vs.CROP_TYPE, at[2:-2, 2:-2, :], self._read_var_from_nc("crop", 'crop_rotation.nc'))
+        vs.CROP_TYPE = update(vs.CROP_TYPE, at[2:-2, 2:-2, :], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc'))
         vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.CROP_TYPE[2:-2, 2:-2, 1])
         vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], vs.CROP_TYPE[2:-2, 2:-2, 2])
         vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], vs.CROP_TYPE[2:-2, 2:-2, 3])
@@ -210,12 +204,12 @@ class SVATCROPSetup(RogerSetup):
     def set_forcing_setup(self, state):
         vs = state.variables
 
-        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", 'forcing.nc'))
-        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", 'forcing.nc'))
-        vs.PET = update(vs.PET, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", 'forcing.nc'))
-        vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID", 'forcing.nc'))
-        vs.TA_MIN = update(vs.TA_MIN, at[2:-2, 2:-2, :], self._read_var_from_nc("TA_min", 'forcing.nc'))
-        vs.TA_MAX = update(vs.TA_MAX, at[2:-2, 2:-2, :], self._read_var_from_nc("TA_max", 'forcing.nc'))
+        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
+        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
+        vs.PET = update(vs.PET, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc'))
+        vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc'))
+        vs.TA_MIN = update(vs.TA_MIN, at[2:-2, 2:-2, :], self._read_var_from_nc("TA_min", self._input_dir, 'forcing.nc'))
+        vs.TA_MAX = update(vs.TA_MAX, at[2:-2, 2:-2, :], self._read_var_from_nc("TA_max", self._input_dir, 'forcing.nc'))
 
     @roger_routine
     def set_forcing(self, state):

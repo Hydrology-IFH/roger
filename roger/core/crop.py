@@ -23,7 +23,7 @@ def calc_gdd(state):
     )
     vs.gdd_sum = update_add(
         vs.gdd_sum,
-        at[2:-2, 2:-2, vs.tau, :], vs.gdd,
+        at[2:-2, 2:-2, vs.tau, :], vs.gdd[2:-2, 2:-2, :],
     )
 
     return KernelOutput(gdd=vs.gdd, gdd_sum=vs.gdd_sum)
@@ -126,7 +126,7 @@ def calc_t_grow(state):
     mask12 = mask_my_init & (vs.doy > vs.doy_end) & (vs.doy < vs.doy_start)
     vs.t_grow_cc = update_add(
         vs.t_grow_cc,
-        at[2:-2, 2:-2, vs.tau, :], vs.gdd * vs.k_stress_transp_crop * mask11,
+        at[2:-2, 2:-2, vs.tau, :], vs.gdd[2:-2, 2:-2, :] * vs.k_stress_transp_crop[2:-2, 2:-2, :] * mask11[2:-2, 2:-2, :],
     )
     vs.t_grow_cc = update(
         vs.t_grow_cc,
@@ -277,7 +277,7 @@ def calc_canopy_cover(state):
     # harvesting
     vs.ccc = update(
         vs.ccc,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(mask5, 0, vs.ccc[2:-2, 2:-2, vs.tau, :]),
+        at[2:-2, 2:-2, vs.tau, :], npx.where(mask5[2:-2, 2:-2, :], 0, vs.ccc[2:-2, 2:-2, vs.tau, :]),
     )
 
     mask6 = mask_winter & (vs.doy > vs.doy_mid) & (vs.doy < vs.doy_dec)
@@ -429,7 +429,7 @@ def calc_crop_dev_coeff(state):
     )
     vs.crop_dev_coeff = update(
         vs.crop_dev_coeff,
-        at[2:-2, 2:-2, :], npx.nanmin(crop_dev_coeff, axis=-1),
+        at[2:-2, 2:-2, :], npx.nanmin(crop_dev_coeff[2:-2, 2:-2, :], axis=-1),
     )
 
     return KernelOutput(crop_dev_coeff=vs.crop_dev_coeff)
@@ -535,7 +535,7 @@ def calc_root_growth(state):
     # harvesting
     vs.z_root_crop = update(
         vs.z_root_crop,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(mask3, vs.z_evap[2:-2, 2:-2, npx.newaxis], vs.z_root_crop[2:-2, 2:-2, vs.tau, :]),
+        at[2:-2, 2:-2, vs.tau, :], npx.where(mask3[2:-2, 2:-2, :], vs.z_evap[2:-2, 2:-2, npx.newaxis], vs.z_root_crop[2:-2, 2:-2, vs.tau, :]),
     )
 
     mask4 = mask_winter & (vs.t_grow_root[:, :, vs.tau, :] <= 0)
@@ -586,7 +586,7 @@ def calc_root_growth(state):
     # root growth
     vs.z_root_crop = update(
         vs.z_root_crop,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(mask11[2:-2, 2:-2, :], ((vs.z_root_crop_max / 1000) - ((vs.z_root_crop_max[2:-2, 2:-2, :] - vs.z_evap[2:-2, 2:-2, npx.newaxis]) / 1000) * npx.exp(vs.root_growth_rate[2:-2, 2:-2, :] * vs.t_grow_root[2:-2, 2:-2, vs.tau, :])) * 1000, vs.z_root_crop[2:-2, 2:-2, vs.tau, :]),
+        at[2:-2, 2:-2, vs.tau, :], npx.where(mask11[2:-2, 2:-2, :], ((vs.z_root_crop_max[2:-2, 2:-2, :] / 1000) - ((vs.z_root_crop_max[2:-2, 2:-2, :] - vs.z_evap[2:-2, 2:-2, npx.newaxis]) / 1000) * npx.exp(vs.root_growth_rate[2:-2, 2:-2, :] * vs.t_grow_root[2:-2, 2:-2, vs.tau, :])) * 1000, vs.z_root_crop[2:-2, 2:-2, vs.tau, :]),
     )
 
     mask12 = mask_572 & (vs.t_grow_root[:, :, vs.tau, :] <= 0)
@@ -643,15 +643,15 @@ def update_lu_id(state):
     )
     vs.lu_id = update(
         vs.lu_id,
-        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.crop_type[:, :, 0], vs.lu_id)
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 0], vs.lu_id[2:-2, 2:-2])
     )
     vs.lu_id = update(
         vs.lu_id,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.crop_type[:, :, 1], vs.lu_id)
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 1], vs.lu_id[2:-2, 2:-2])
     )
     vs.lu_id = update(
         vs.lu_id,
-        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2], vs.crop_type[:, :, 2], vs.lu_id)
+        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 2], vs.lu_id[2:-2, 2:-2])
     )
     vs.lu_id = update(
         vs.lu_id,
@@ -772,15 +772,15 @@ def update_basal_transp_coeff(state):
 
     vs.basal_transp_coeff = update(
         vs.basal_transp_coeff,
-        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.basal_crop_coeff[:, :, 0], vs.basal_transp_coeff[2:-2, 2:-2])
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.basal_crop_coeff[2:-2, 2:-2, 0], vs.basal_transp_coeff[2:-2, 2:-2])
     )
     vs.basal_transp_coeff = update(
         vs.basal_transp_coeff,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.basal_crop_coeff[:, :, 1], vs.basal_transp_coeff[2:-2, 2:-2])
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.basal_crop_coeff[2:-2, 2:-2, 1], vs.basal_transp_coeff[2:-2, 2:-2])
     )
     vs.basal_transp_coeff = update(
         vs.basal_transp_coeff,
-        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2], vs.basal_crop_coeff[:, :, 2], vs.basal_transp_coeff[2:-2, 2:-2])
+        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2], vs.basal_crop_coeff[2:-2, 2:-2, 2], vs.basal_transp_coeff[2:-2, 2:-2])
     )
     vs.basal_transp_coeff = update(
         vs.basal_transp_coeff,
@@ -815,15 +815,15 @@ def update_basal_evap_coeff(state):
 
     vs.basal_evap_coeff = update(
         vs.basal_evap_coeff,
-        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.basal_evap_coeff_crop[:, :, 0], vs.basal_evap_coeff[2:-2, 2:-2])
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.basal_evap_coeff_crop[2:-2, 2:-2, 0], vs.basal_evap_coeff[2:-2, 2:-2])
     )
     vs.basal_evap_coeff = update(
         vs.basal_evap_coeff,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.basal_evap_coeff_crop[:, :, 1], vs.basal_evap_coeff[2:-2, 2:-2])
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.basal_evap_coeff_crop[2:-2, 2:-2, 1], vs.basal_evap_coeff[2:-2, 2:-2])
     )
     vs.basal_evap_coeff = update(
         vs.basal_evap_coeff,
-        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2], vs.basal_evap_coeff_crop[:, :, 2], vs.basal_evap_coeff[2:-2, 2:-2])
+        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2], vs.basal_evap_coeff_crop[2:-2, 2:-2, 2], vs.basal_evap_coeff[2:-2, 2:-2])
     )
     vs.basal_evap_coeff = update(
         vs.basal_evap_coeff,
@@ -870,14 +870,14 @@ def update_S_int_ground_tot(state):
     )
     vs.S_int_ground_tot = update(
         vs.S_int_ground_tot,
-        at[2:-2, 2:-2], npx.where(~mask5, 0, vs.S_int_ground_tot)
+        at[2:-2, 2:-2], npx.where(~mask5[2:-2, 2:-2], 0, vs.S_int_ground_tot[2:-2, 2:-2])
     )
     vs.S_int_ground_tot = update(
         vs.S_int_ground_tot,
-        at[2:-2, 2:-2], npx.where(mask11, 0, vs.S_int_ground_tot)
+        at[2:-2, 2:-2], npx.where(mask11[2:-2, 2:-2], 0, vs.S_int_ground_tot[2:-2, 2:-2])
     )
 
-    return KernelOutput(ground_cover=vs.ground_cover)
+    return KernelOutput(S_int_ground_tot=vs.S_int_ground_tot)
 
 
 @roger_kernel
@@ -913,11 +913,11 @@ def update_z_root(state):
     )
     vs.z_root = update(
         vs.z_root,
-        at[2:-2, 2:-2, vs.tau], npx.where(~mask5[2:-2, 2:-2], vs.z_evap, vs.z_root[2:-2, 2:-2, vs.tau])
+        at[2:-2, 2:-2, vs.tau], npx.where(~mask5[2:-2, 2:-2], vs.z_evap[2:-2, 2:-2], vs.z_root[2:-2, 2:-2, vs.tau])
     )
     vs.z_root = update(
         vs.z_root,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask11[2:-2, 2:-2], vs.z_evap, vs.z_root[2:-2, 2:-2, vs.tau])
+        at[2:-2, 2:-2, vs.tau], npx.where(mask11[2:-2, 2:-2], vs.z_evap[2:-2, 2:-2], vs.z_root[2:-2, 2:-2, vs.tau])
     )
 
     return KernelOutput(z_root=vs.z_root)
