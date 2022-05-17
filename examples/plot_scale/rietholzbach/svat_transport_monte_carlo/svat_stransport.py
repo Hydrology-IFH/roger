@@ -679,7 +679,7 @@ def _ffill_3d(state, arr):
 
 
 nsamples = 10  # number of samples
-tm_structures = ['piston',
+tm_structures = ['complete-mixing', 'piston',
                  'preferential', 'advection-dispersion',
                  'time-variant preferential',
                  'time-variant advection-dispersion']
