@@ -67,9 +67,9 @@ class SVATTRANSPORTSetup(RogerSetup):
             self._bounds = {
                 'num_vars': 3,
                 'names': ['b_transp', 'b_q_rz', 'b_q_ss'],
-                'bounds': [[1, 100],
-                           [1, 100],
-                           [1, 100]]
+                'bounds': [[1, 20],
+                           [1, 20],
+                           [1, 20]]
             }
             self._params = saltelli.sample(self._bounds, nsamples)
             self._nrows = self._params.shape[0]
@@ -78,9 +78,9 @@ class SVATTRANSPORTSetup(RogerSetup):
             self._bounds = {
                 'num_vars': 3,
                 'names': ['b_transp', 'a_q_rz', 'a_q_ss'],
-                'bounds': [[1, 100],
-                           [1, 100],
-                           [1, 100]]
+                'bounds': [[1, 20],
+                           [1, 20],
+                           [1, 20]]
             }
             self._params = saltelli.sample(self._bounds, nsamples)
             self._nrows = self._params.shape[0]
@@ -89,8 +89,8 @@ class SVATTRANSPORTSetup(RogerSetup):
             self._bounds = {
                 'num_vars': 2,
                 'names': ['a_q_rz', 'a_q_ss'],
-                'bounds': [[1, 100],
-                           [1, 100]]
+                'bounds': [[1, 20],
+                           [1, 20]]
             }
             self._params = saltelli.sample(self._bounds, nsamples)
             self._nrows = self._params.shape[0]
@@ -99,9 +99,9 @@ class SVATTRANSPORTSetup(RogerSetup):
             self._bounds = {
                 'num_vars': 3,
                 'names': ['b_transp', 'b_q_rz', 'b_q_ss'],
-                'bounds': [[1, 100],
-                           [1, 100],
-                           [1, 100]]
+                'bounds': [[1, 20],
+                           [1, 20],
+                           [1, 20]]
             }
             self._params = saltelli.sample(self._bounds, nsamples)
             self._nrows = self._params.shape[0]
@@ -110,9 +110,9 @@ class SVATTRANSPORTSetup(RogerSetup):
             self._bounds = {
                 'num_vars': 3,
                 'names': ['b_transp', 'a_q_rz', 'a_q_ss'],
-                'bounds': [[1, 100],
-                           [1, 100],
-                           [1, 100]]
+                'bounds': [[1, 20],
+                           [1, 20],
+                           [1, 20]]
             }
             self._params = saltelli.sample(self._bounds, nsamples)
             self._nrows = self._params.shape[0]
@@ -121,12 +121,12 @@ class SVATTRANSPORTSetup(RogerSetup):
             self._bounds = {
                 'num_vars': 6,
                 'names': ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss'],
-                'bounds': [[1, 100],
-                           [1, 100],
-                           [1, 100],
-                           [1, 100],
-                           [1, 100],
-                           [1, 100]]
+                'bounds': [[1, 20],
+                           [1, 20],
+                           [1, 20],
+                           [1, 20],
+                           [1, 20],
+                           [1, 20]]
             }
             self._params = saltelli.sample(self._bounds, nsamples)
             self._nrows = self._params.shape[0]
