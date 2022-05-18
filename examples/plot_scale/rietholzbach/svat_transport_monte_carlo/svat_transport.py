@@ -688,6 +688,9 @@ for tm_structure in tm_structures:
     model = SVATTRANSPORTSetup()
     if tm_structure not in ['complete-mixing', 'piston']:
         model._set_nsamples(nsamples)
+    else:
+        if rs.mpi_comm:
+            model._set_nsamples(rst.proc_num)
     model._set_tm_structure(tm_structure)
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)
