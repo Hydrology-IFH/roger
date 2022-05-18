@@ -194,7 +194,6 @@ class SVATCROPSetup(RogerSetup):
         vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.4)
         vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.47)
 
-        vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :vs.taup1], 0)
         vs.z_root_crop = update(vs.z_root_crop, at[2:-2, 2:-2, :vs.taup1, 0], 0)
         vs.update(set_initial_conditions_crops_kernel(state))
 
@@ -250,6 +249,23 @@ class SVATCROPSetup(RogerSetup):
 @roger_kernel
 def set_initial_conditions_crops_kernel(state):
     vs = state.variables
+
+    # set initial root depth if start of simulation is within growing period
+    mask1 = npx.isin(vs.crop_type[:, :, 0], [556, 557, 558, 559, 560, 564, 569, 570, 572])
+    vs.z_root_crop = update(
+        vs.z_root_crop,
+        at[2:-2, 2:-2, :2, 0], npx.where(mask1[2:-2, 2:-2, npx.newaxis], 300, 0)
+    )
+    mask2 = (vs.z_root_crop[:, :, vs.taum1, 0] > vs.z_soil)
+    vs.z_root_crop = update(
+        vs.z_root_crop,
+        at[2:-2, 2:-2, :2, 0], npx.where(mask2[2:-2, 2:-2], vs.z_soil[2:-2, 2:-2] * .33, 0)
+    )
+    mask3 = (vs.z_root_crop[:, :, vs.taum1, 0] > 0)
+    vs.z_root = update(
+        vs.z_root,
+        at[2:-2, 2:-2, :2], npx.where(mask3[2:-2, 2:-2], vs.z_root_crop[2:-2, 2:-2, vs.taum1, 0], vs.z_root[2:-2, 2:-2, :2])
+    )
 
     # calculate time since growing
     t_grow = allocate(state.dimensions, ("x", "y", "crops"))
@@ -741,9 +757,3 @@ for lys_experiment in lys_experiments:
                         v[:, :, :] = vals.swapaxes(0, 2)
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                         units=var_obj.attrs["units"])
-            
-vs = model.state.variables
-vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1]
-vs.prec[2:-2, 2:-2] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2]
-vs.transp[2:-2, 2:-2]
-

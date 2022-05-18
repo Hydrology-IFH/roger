@@ -1132,64 +1132,64 @@ def set_crop_params(state):
         row_no = _get_row_no(vs.lut_crops[:, 0], i)
         vs.doy_start = update(
             vs.doy_start,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 1], vs.doy_start),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 1], vs.doy_start[2:-2, 2:-2, :]),
         )
         vs.doy_mid = update(
             vs.doy_mid,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 2], vs.doy_mid),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 2], vs.doy_mid[2:-2, 2:-2, :]),
         )
         vs.doy_dec = update(
             vs.doy_dec,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 3], vs.doy_dec),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 3], vs.doy_dec[2:-2, 2:-2, :]),
         )
         vs.doy_end = update(
             vs.doy_end,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 4], vs.doy_end),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 4], vs.doy_end[2:-2, 2:-2, :]),
         )
         vs.ta_base = update(
             vs.ta_base,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 11], vs.ta_base),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 11], vs.ta_base[2:-2, 2:-2, :]),
         )
         vs.ta_ceil = update(
             vs.ta_ceil,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 12], vs.ta_ceil),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 12], vs.ta_ceil[2:-2, 2:-2, :]),
         )
         vs.ccc_min = update(
             vs.ccc_min,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 13], vs.ccc_min),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 13], vs.ccc_min[2:-2, 2:-2, :]),
         )
         vs.ccc_max = update(
             vs.ccc_max,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 14], vs.ccc_max),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 14], vs.ccc_max[2:-2, 2:-2, :]),
         )
         vs.crop_height_max = update(
             vs.crop_height_max,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 16] * 1000, vs.crop_height_max),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 16] * 1000, vs.crop_height_max[2:-2, 2:-2, :]),
         )
         vs.ccc_growth_rate = update(
             vs.ccc_growth_rate,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 18], vs.ccc_growth_rate),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 18], vs.ccc_growth_rate[2:-2, 2:-2, :]),
         )
         vs.basal_crop_coeff_mid = update(
             vs.basal_crop_coeff_mid,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 21], vs.basal_crop_coeff_mid),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 21], vs.basal_crop_coeff_mid[2:-2, 2:-2, :]),
         )
         vs.z_root_crop_max = update(
             vs.z_root_crop_max,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 15] * 1000, vs.z_root_crop_max),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 15] * 1000, vs.z_root_crop_max[2:-2, 2:-2, :]),
         )
         vs.root_growth_rate = update(
             vs.root_growth_rate,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 19], vs.root_growth_rate),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 19], vs.root_growth_rate[2:-2, 2:-2, :]),
         )
         vs.water_stress_coeff_crop = update(
             vs.water_stress_coeff_crop,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 20], vs.water_stress_coeff_crop),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 20], vs.water_stress_coeff_crop[2:-2, 2:-2, :]),
         )
 
     vs.theta_water_stress_crop = update(
         vs.theta_water_stress_crop,
-        at[2:-2, 2:-2, :], (1 - vs.water_stress_coeff_crop) * (vs.theta_fc[2:-2, 2:-2, npx.newaxis] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis]) + vs.theta_pwp[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], (1 - vs.water_stress_coeff_crop[2:-2, 2:-2, :]) * (vs.theta_fc[2:-2, 2:-2, npx.newaxis] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis]) + vs.theta_pwp[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(
