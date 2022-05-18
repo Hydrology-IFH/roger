@@ -15,7 +15,6 @@ from roger.core.utilities import _get_row_no
 from roger.tools.setup import write_forcing
 import roger.lookuptables as lut
 import numpy as onp
-onp.random.seed(42)
 
 
 class SVATSetup(RogerSetup):

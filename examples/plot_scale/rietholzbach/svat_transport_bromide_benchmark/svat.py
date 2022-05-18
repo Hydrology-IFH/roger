@@ -194,8 +194,6 @@ class SVATSetup(RogerSetup):
         settings = state.settings
 
         diagnostics["rates"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS"]
-        if settings.enable_groundwater_boundary:
-            diagnostics["rates"].output_variables += ["cpr_ss"]
         diagnostics["rates"].output_frequency = 24 * 60 * 60
         diagnostics["rates"].sampling_frequency = 1
 

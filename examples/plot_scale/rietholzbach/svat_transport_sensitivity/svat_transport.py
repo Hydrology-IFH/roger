@@ -67,9 +67,9 @@ class SVATTRANSPORTSetup(RogerSetup):
             self._bounds = {
                 'num_vars': 3,
                 'names': ['b_transp', 'b_q_rz', 'b_q_ss'],
-                'bounds': [[1, 20],
-                           [1, 20],
-                           [1, 20]]
+                'bounds': [[1, 90],
+                           [1, 90],
+                           [1, 90]]
             }
             self._params = saltelli.sample(self._bounds, nsamples)
             self._nrows = self._params.shape[0]
@@ -78,9 +78,9 @@ class SVATTRANSPORTSetup(RogerSetup):
             self._bounds = {
                 'num_vars': 3,
                 'names': ['b_transp', 'a_q_rz', 'a_q_ss'],
-                'bounds': [[1, 20],
-                           [1, 20],
-                           [1, 20]]
+                'bounds': [[1, 90],
+                           [1, 90],
+                           [1, 90]]
             }
             self._params = saltelli.sample(self._bounds, nsamples)
             self._nrows = self._params.shape[0]
@@ -89,8 +89,8 @@ class SVATTRANSPORTSetup(RogerSetup):
             self._bounds = {
                 'num_vars': 2,
                 'names': ['a_q_rz', 'a_q_ss'],
-                'bounds': [[1, 20],
-                           [1, 20]]
+                'bounds': [[1, 90],
+                           [1, 90]]
             }
             self._params = saltelli.sample(self._bounds, nsamples)
             self._nrows = self._params.shape[0]
@@ -99,9 +99,9 @@ class SVATTRANSPORTSetup(RogerSetup):
             self._bounds = {
                 'num_vars': 3,
                 'names': ['b_transp', 'b_q_rz', 'b_q_ss'],
-                'bounds': [[1, 20],
-                           [1, 20],
-                           [1, 20]]
+                'bounds': [[1, 90],
+                           [1, 90],
+                           [1, 90]]
             }
             self._params = saltelli.sample(self._bounds, nsamples)
             self._nrows = self._params.shape[0]
@@ -110,9 +110,9 @@ class SVATTRANSPORTSetup(RogerSetup):
             self._bounds = {
                 'num_vars': 3,
                 'names': ['b_transp', 'a_q_rz', 'a_q_ss'],
-                'bounds': [[1, 20],
-                           [1, 20],
-                           [1, 20]]
+                'bounds': [[1, 90],
+                           [1, 90],
+                           [1, 90]]
             }
             self._params = saltelli.sample(self._bounds, nsamples)
             self._nrows = self._params.shape[0]
@@ -121,12 +121,12 @@ class SVATTRANSPORTSetup(RogerSetup):
             self._bounds = {
                 'num_vars': 6,
                 'names': ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss'],
-                'bounds': [[1, 20],
-                           [1, 20],
-                           [1, 20],
-                           [1, 20],
-                           [1, 20],
-                           [1, 20]]
+                'bounds': [[1, 90],
+                           [1, 90],
+                           [1, 90],
+                           [1, 90],
+                           [1, 90],
+                           [1, 90]]
             }
             self._params = saltelli.sample(self._bounds, nsamples)
             self._nrows = self._params.shape[0]
@@ -765,82 +765,83 @@ for tm_structure in tm_structures:
     model.run()
 
     # merge model output into single file
-    path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
-    diag_files = glob.glob(path)
-    states_tm_file = model._base_path / "states_tm_sensitivity.nc"
-    with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
-        if tm_structure not in list(f.groups.keys()):
-            f.create_group(tm_structure)
-        f.attrs.update(
-            date_created=datetime.datetime.today().isoformat(),
-            title=f'RoGeR {tm_structure} transport model saltelli results at Rietholzbach Lysimeter site',
-            institution='University of Freiburg, Chair of Hydrology',
-            references='',
-            comment=f'SVAT {tm_structure} transport model with free drainage'
-        )
-        for dfs in diag_files:
-            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                # set dimensions with a dictionary
-                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
-                if not f.dimensions:
-                    f.dimensions = dict_dim
-                    v = f.groups[tm_structure].create_variable('x', ('x',), float)
-                    v.attrs['long_name'] = 'Number of model run'
-                    v.attrs['units'] = ''
-                    v[:] = npx.arange(dict_dim["x"])
-                    v = f.groups[tm_structure].create_variable('y', ('y',), float)
-                    v.attrs['long_name'] = ''
-                    v.attrs['units'] = ''
-                    v[:] = npx.arange(dict_dim["y"])
-                    v = f.groups[tm_structure].create_variable('Time', ('Time',), float)
-                    var_obj = df.variables.get('Time')
-                    v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                                    units=var_obj.attrs["units"])
-                    v[:] = npx.array(var_obj)
-                    v = f.groups[tm_structure].create_variable('ages', ('ages',), float)
-                    v.attrs['long_name'] = 'Water ages'
-                    v.attrs['units'] = 'days'
-                    v[:] = npx.arange(1, dict_dim["ages"]+1)
-                    v = f.groups[tm_structure].create_variable('nages', ('nages',), float)
-                    v.attrs['long_name'] = 'Water ages (cumulated)'
-                    v.attrs['units'] = 'days'
-                    v[:] = npx.arange(0, dict_dim["nages"])
-                    v = f.groups[tm_structure].create_variable('n_sas_params', ('n_sas_params',), float)
-                    v.attrs['long_name'] = 'Number of SAS parameters'
-                    v.attrs['units'] = ''
-                    v[:] = npx.arange(0, dict_dim["n_sas_params"])
-                for var_sim in list(df.variables.keys()):
-                    var_obj = df.variables.get(var_sim)
-                    if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions:
-                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time'), float)
-                        vals = npx.array(var_obj)
-                        v[:, :, :] = vals.swapaxes(0, 2)
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                       units=var_obj.attrs["units"])
-                    elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
-                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
-                        vals = npx.array(var_obj)
-                        vals = vals.swapaxes(0, 3)
-                        vals = vals.swapaxes(1, 2)
-                        vals = vals.swapaxes(2, 3)
-                        v[:, :, :] = vals[:, :, :, 0]
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                       units=var_obj.attrs["units"])
-                    elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
-                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
-                        vals = npx.array(var_obj)
-                        vals = vals.swapaxes(0, 3)
-                        vals = vals.swapaxes(1, 2)
-                        vals = vals.swapaxes(2, 3)
-                        v[:, :, :, :] = vals
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                       units=var_obj.attrs["units"])
-                    elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
-                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
-                        vals = npx.array(var_obj)
-                        vals = vals.swapaxes(0, 3)
-                        vals = vals.swapaxes(1, 2)
-                        vals = vals.swapaxes(2, 3)
-                        v[:, :, :, :] = vals
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                       units=var_obj.attrs["units"])
+    if rst.proc_rank == 0 or not rs.mpi_comm:
+        path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
+        diag_files = glob.glob(path)
+        states_tm_file = model._base_path / "states_tm_sensitivity.nc"
+        with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+            if tm_structure not in list(f.groups.keys()):
+                f.create_group(tm_structure)
+            f.attrs.update(
+                date_created=datetime.datetime.today().isoformat(),
+                title=f'RoGeR {tm_structure} transport model saltelli results at Rietholzbach Lysimeter site',
+                institution='University of Freiburg, Chair of Hydrology',
+                references='',
+                comment=f'SVAT {tm_structure} transport model with free drainage'
+            )
+            for dfs in diag_files:
+                with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                    # set dimensions with a dictionary
+                    dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
+                    if not f.dimensions:
+                        f.dimensions = dict_dim
+                        v = f.groups[tm_structure].create_variable('x', ('x',), float)
+                        v.attrs['long_name'] = 'Number of model run'
+                        v.attrs['units'] = ''
+                        v[:] = npx.arange(dict_dim["x"])
+                        v = f.groups[tm_structure].create_variable('y', ('y',), float)
+                        v.attrs['long_name'] = ''
+                        v.attrs['units'] = ''
+                        v[:] = npx.arange(dict_dim["y"])
+                        v = f.groups[tm_structure].create_variable('Time', ('Time',), float)
+                        var_obj = df.variables.get('Time')
+                        v.attrs.update(time_origin=var_obj.attrs["time_origin"],
+                                        units=var_obj.attrs["units"])
+                        v[:] = npx.array(var_obj)
+                        v = f.groups[tm_structure].create_variable('ages', ('ages',), float)
+                        v.attrs['long_name'] = 'Water ages'
+                        v.attrs['units'] = 'days'
+                        v[:] = npx.arange(1, dict_dim["ages"]+1)
+                        v = f.groups[tm_structure].create_variable('nages', ('nages',), float)
+                        v.attrs['long_name'] = 'Water ages (cumulated)'
+                        v.attrs['units'] = 'days'
+                        v[:] = npx.arange(0, dict_dim["nages"])
+                        v = f.groups[tm_structure].create_variable('n_sas_params', ('n_sas_params',), float)
+                        v.attrs['long_name'] = 'Number of SAS parameters'
+                        v.attrs['units'] = ''
+                        v[:] = npx.arange(0, dict_dim["n_sas_params"])
+                    for var_sim in list(df.variables.keys()):
+                        var_obj = df.variables.get(var_sim)
+                        if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions:
+                            v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time'), float)
+                            vals = npx.array(var_obj)
+                            v[:, :, :] = vals.swapaxes(0, 2)
+                            v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                           units=var_obj.attrs["units"])
+                        elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
+                            v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
+                            vals = npx.array(var_obj)
+                            vals = vals.swapaxes(0, 3)
+                            vals = vals.swapaxes(1, 2)
+                            vals = vals.swapaxes(2, 3)
+                            v[:, :, :] = vals[:, :, :, 0]
+                            v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                           units=var_obj.attrs["units"])
+                        elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
+                            v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
+                            vals = npx.array(var_obj)
+                            vals = vals.swapaxes(0, 3)
+                            vals = vals.swapaxes(1, 2)
+                            vals = vals.swapaxes(2, 3)
+                            v[:, :, :, :] = vals
+                            v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                           units=var_obj.attrs["units"])
+                        elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
+                            v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
+                            vals = npx.array(var_obj)
+                            vals = vals.swapaxes(0, 3)
+                            vals = vals.swapaxes(1, 2)
+                            vals = vals.swapaxes(2, 3)
+                            v[:, :, :, :] = vals
+                            v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                           units=var_obj.attrs["units"])

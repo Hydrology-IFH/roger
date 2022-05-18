@@ -21,6 +21,10 @@ class SVATCROPSetup(RogerSetup):
     """
     _base_path = Path(__file__).parent
     _input_dir = None
+    _identifier = None
+
+    def _set_identifier(self, identifier):
+        self._identifier = identifier
 
     def _set_input_dir(self, path):
         if os.path.exists(path):
@@ -30,11 +34,16 @@ class SVATCROPSetup(RogerSetup):
             if not os.path.exists(self._input_dir):
                 os.mkdir(self._input_dir)
 
-    def _read_var_from_nc(self, var, path_dir, file):
+    def _read_var_from_nc(self, var, path_dir, file, group=None):
         nc_file = path_dir / file
-        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables[var]
-            return npx.array(var_obj)
+        if group:
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.groups[group].variables[var]
+                return npx.array(var_obj)
+        else:
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables[var]
+                return npx.array(var_obj)
 
     def _get_nittevent(self, path_dir, file):
         nc_file = path_dir / file
@@ -145,6 +154,8 @@ class SVATCROPSetup(RogerSetup):
         vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
         vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
         vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
+        # increase basal crop coeffcient to account for oasis effect
+        vs.lut_crops = update(vs.lut_crops, at[:, -2], vs.lut_crops[:, -2] * 1.5)
 
     @roger_routine
     def set_topography(self, state):
@@ -191,10 +202,9 @@ class SVATCROPSetup(RogerSetup):
         vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
         vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
         vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.4)
-        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.47)
+        vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("theta_rz", self._base_path, 'initvals.nc', group=self._identifier))
+        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("theta_ss", self._base_path, 'initvals.nc', group=self._identifier))
 
-        vs.z_root_crop = update(vs.z_root_crop, at[2:-2, 2:-2, :vs.taup1, 0], 0)
         vs.update(set_initial_conditions_crops_kernel(state))
 
     @roger_routine
@@ -220,17 +230,15 @@ class SVATCROPSetup(RogerSetup):
         settings = state.settings
 
         diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz"]
-        if settings.enable_groundwater_boundary:
-            diagnostics["rates"].output_variables += ["cpr_ss"]
         diagnostics["rates"].output_frequency = 24 * 60 * 60
         diagnostics["rates"].sampling_frequency = 1
 
         diagnostics["collect"].output_variables = ["S_rz", "S_ss",
                                                    "S_pwp_rz", "S_fc_rz",
                                                    "S_sat_rz", "S_pwp_ss",
-                                                   "S_fc_ss", "S_sat_ss"]
-        if settings.enable_crop_phenology:
-            diagnostics["collect"].output_variables += ["re_rg", "re_rl", "z_root", "ground_cover"]
+                                                   "S_fc_ss", "S_sat_ss",
+                                                   "re_rg", "re_rl",
+                                                   "z_root", "ground_cover"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 
@@ -706,6 +714,7 @@ for lys_experiment in lys_experiments:
     model = SVATCROPSetup()
     input_path = model._base_path / lys_experiment / "input"
     model._set_input_dir(input_path)
+    model._set_identifier(lys_experiment)
     forcing_path = model._input_dir / "forcing.nc"
     if not os.path.exists(forcing_path):
         write_forcing(input_path, enable_crop_phenology=True)
@@ -732,19 +741,20 @@ for lys_experiment in lys_experiments:
         for dfs in diag_files:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
+                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
                 if not f.dimensions:
-                    f.dimensions = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+                    f.dimensions = dict_dim
                     v = f.groups[lys_experiment].create_variable('x', ('x',), float)
                     v.attrs['long_name'] = 'Zonal coordinate'
                     v.attrs['units'] = 'meters'
-                    v[:] = npx.arange(f.dimensions["x"])
+                    v[:] = npx.arange(dict_dim["x"])
                     v = f.groups[lys_experiment].create_variable('y', ('y',), float)
                     v.attrs['long_name'] = 'Meridonial coordinate'
                     v.attrs['units'] = 'meters'
-                    v[:] = npx.arange(f.dimensions["y"])
+                    v[:] = npx.arange(dict_dim["y"])
                     v = f.groups[lys_experiment].create_variable('Time', ('Time',), float)
                     var_obj = df.variables.get('Time')
-                    with h5netcdf.File(model._base_path / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
+                    with h5netcdf.File(model._input_dir / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
                         time_origin = infile.variables['Time'].attrs['time_origin']
                     v.attrs.update(time_origin=time_origin,
                                     units=var_obj.attrs["units"])
