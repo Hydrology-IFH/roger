@@ -760,7 +760,7 @@ for tm_structure in tm_structures:
                         vals = vals.swapaxes(0, 3)
                         vals = vals.swapaxes(1, 2)
                         vals = vals.swapaxes(2, 3)
-                        v[:, :, :] = vals[0, :, :, :]
+                        v[:, :, :] = vals[:, :, :, 0]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
                     elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
