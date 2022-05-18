@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import h5netcdf
 import matplotlib.pyplot as plt
 import xarray as xr
 from cftime import num2date
@@ -56,11 +57,12 @@ for tm_structure in tm_structures:
     # compare observations and simulations
     ncol = 0
     idx = ds_sim_tm.Time  # time index
+    d18O_perc_cs = onp.zeros((nx, 1, len(idx)))
     for nrow in range(nx):
         # calculate simulated oxygen-18 composite sample
         df_perc_18O_obs = pd.DataFrame(index=idx, columns=['perc_obs', 'd18O_perc_obs'])
         df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=nrow, y=ncol).values
-        df_perc_18O_obs.loc[:, 'd18O_perc_obs'] = ds_obs['d18O_perc'].isel(x=nrow, y=ncol).values
+        df_perc_18O_obs.loc[:, 'd18O_perc_obs'] = ds_obs['d18O_PERC'].isel(x=nrow, y=ncol).values
         sample_no = pd.DataFrame(index=df_perc_18O_obs.dropna().index, columns=['sample_no'])
         sample_no = sample_no.loc['1997':'2007']
         sample_no['sample_no'] = range(len(sample_no.index))
@@ -81,11 +83,9 @@ for tm_structure in tm_structures:
         df_perc_18O_sim.loc[:, 'd18O_sample'] = df_perc_18O_sim.loc[:, 'd18O_sample'].fillna(method='bfill', limit=14)
         cond = (df_perc_18O_sim['d18O_sample'] == 0)
         df_perc_18O_sim.loc[cond, 'd18O_sample'] = onp.NaN
-        d18O_perc_cs = onp.zeros((1, 1, len(idx)))
         d18O_perc_cs[nrow, ncol, :] = df_perc_18O_sim.loc[:, 'd18O_sample'].values
-        ds_sim_tm.assign(d18O_perc_cs=d18O_perc_cs)
         # calculate observed oxygen-18 composite sample
-        df_perc_18O_obs.loc[:, 'd18O_perc_cs'] = df_perc_18O_obs['d18O_perc'].fillna(method='bfill', limit=14)
+        df_perc_18O_obs.loc[:, 'd18O_perc_cs'] = df_perc_18O_obs['d18O_perc_obs'].fillna(method='bfill', limit=14)
 
         perc_sample_sum_obs = df_perc_18O_sim.join(df_perc_18O_obs).groupby(['sample_no']).sum().loc[:, 'perc_obs']
         sample_no['perc_obs_sum'] = perc_sample_sum_obs.values
@@ -93,25 +93,33 @@ for tm_structure in tm_structures:
         df_perc_18O_sim.loc[:, 'perc_obs_sum'] = df_perc_18O_sim.loc[:, 'perc_obs_sum'].fillna(method='bfill', limit=14)
 
         # join observations on simulations
-        obs_vals = ds_obs['d18O_perc'].isel(x=nrow, y=ncol).values
-        sim_vals = ds_sim_tm['d18O_perc_cs'].isel(x=nrow, y=ncol).values
+        obs_vals = ds_obs['d18O_PERC'].isel(x=nrow, y=ncol).values
+        sim_vals = d18O_perc_cs[nrow, ncol, :]
         df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-        df_obs.loc[:, 'obs'] = ds_obs['d18O_perc'].isel(x=nrow, y=ncol).values
-        df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
+        df_obs.loc[:, 'obs'] = obs_vals
+        df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
         df_eval = df_eval.dropna()
 
         # calculate metrics
         var_sim = 'C_q_ss'
         obs_vals = df_eval.loc[:, 'obs'].values
         sim_vals = df_eval.loc[:, 'sim'].values
-        key_kge = 'KGE_' + var_sim
+        key_kge = f'KGE_{var_sim}'
         df_params_eff.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-        key_kge_alpha = 'KGE_alpha_' + var_sim
+        key_kge_alpha = f'KGE_alpha_{var_sim}'
         df_params_eff.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
-        key_kge_beta = 'KGE_beta_' + var_sim
+        key_kge_beta = f'KGE_beta_{var_sim}'
         df_params_eff.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
-        key_r = 'r_' + var_sim
+        key_r = f'r_{var_sim}'
         df_params_eff.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+
+    # write composite sample to output file
+    states_tm_file = base_path / "states_tm_monte_carlo_reverse.nc"
+    with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+        v = f.groups[tm_structure].create_variable('d18O_perc_cs', ('x', 'y', 'Time'), float)
+        v[:, :, :] = d18O_perc_cs
+        v.attrs.update(long_name="composite sample of d18O in percolation",
+                       units="permil")
 
     # write to .txt
     file = base_path_results / f"params_eff_{tm_structure}.txt"

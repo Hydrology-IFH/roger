@@ -116,10 +116,11 @@ ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
 nrow = 0
 ncol = 0
 idx = ds_sim_tm.Time  # time index
+d18O_perc_cs = onp.zeros((1, 1, len(idx)))
 # calculate simulated oxygen-18 composite sample
 df_perc_18O_obs = pd.DataFrame(index=idx, columns=['perc_obs', 'd18O_perc_obs'])
 df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=nrow, y=ncol).values
-df_perc_18O_obs.loc[:, 'd18O_perc_obs'] = ds_obs['d18O_perc'].isel(x=nrow, y=ncol).values
+df_perc_18O_obs.loc[:, 'd18O_perc_obs'] = ds_obs['d18O_PERC'].isel(x=nrow, y=ncol).values
 sample_no = pd.DataFrame(index=df_perc_18O_obs.dropna().index, columns=['sample_no'])
 sample_no = sample_no.loc['1997':'2007']
 sample_no['sample_no'] = range(len(sample_no.index))
@@ -140,11 +141,9 @@ df_perc_18O_sim = df_perc_18O_sim.join(sample_no['d18O_sample'])
 df_perc_18O_sim.loc[:, 'd18O_sample'] = df_perc_18O_sim.loc[:, 'd18O_sample'].fillna(method='bfill', limit=14)
 cond = (df_perc_18O_sim['d18O_sample'] == 0)
 df_perc_18O_sim.loc[cond, 'd18O_sample'] = onp.NaN
-d18O_perc_cs = onp.zeros((1, 1, len(idx)))
 d18O_perc_cs[nrow, ncol, :] = df_perc_18O_sim.loc[:, 'd18O_sample'].values
-ds_sim_tm.assign(d18O_perc_cs=d18O_perc_cs)
 # calculate observed oxygen-18 composite sample
-df_perc_18O_obs.loc[:, 'd18O_perc_cs'] = df_perc_18O_obs['d18O_perc'].fillna(method='bfill', limit=14)
+df_perc_18O_obs.loc[:, 'd18O_perc_cs'] = df_perc_18O_obs['d18O_perc_obs'].fillna(method='bfill', limit=14)
 
 perc_sample_sum_obs = df_perc_18O_sim.join(df_perc_18O_obs).groupby(['sample_no']).sum().loc[:, 'perc_obs']
 sample_no['perc_obs_sum'] = perc_sample_sum_obs.values

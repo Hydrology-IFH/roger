@@ -746,7 +746,7 @@ def _ffill_3d(state, arr):
     return arr_fill
 
 
-nsamples = 2**2  # number of samples
+nsamples = 2**6  # number of samples
 tm_structures = ['preferential', 'advection-dispersion',
                  'time-variant preferential',
                  'time-variant advection-dispersion']
@@ -814,7 +814,7 @@ for tm_structure in tm_structures:
                     if var_sim not in list(dict_dim.keys()) and "Time" in var_obj.dimensions:
                         v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time'), float)
                         vals = npx.array(var_obj)
-                        v[2:-2, 2:-2, :] = vals.swapaxes(0, 2)
+                        v[:, :, :] = vals.swapaxes(0, 2)
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
                     elif var_sim not in list(dict_dim.keys()) and var_obj.shape[-1] == dict_dim["n_sas_params"]:
@@ -823,7 +823,7 @@ for tm_structure in tm_structures:
                         vals = vals.swapaxes(0, 3)
                         vals = vals.swapaxes(1, 2)
                         vals = vals.swapaxes(2, 3)
-                        v[2:-2, 2:-2, :] = vals[0, :, :, :]
+                        v[:, :, :] = vals[0, :, :, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
                     elif var_sim not in list(dict_dim.keys()) and "ages" in var_obj.dimensions:
@@ -832,7 +832,7 @@ for tm_structure in tm_structures:
                         vals = vals.swapaxes(0, 3)
                         vals = vals.swapaxes(1, 2)
                         vals = vals.swapaxes(2, 3)
-                        v[2:-2, 2:-2, :, :] = vals
+                        v[:, :, :, :] = vals
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
                     elif var_sim not in list(dict_dim.keys()) and "nages" in var_obj.dimensions:
@@ -841,6 +841,6 @@ for tm_structure in tm_structures:
                         vals = vals.swapaxes(0, 3)
                         vals = vals.swapaxes(1, 2)
                         vals = vals.swapaxes(2, 3)
-                        v[2:-2, 2:-2, :, :] = vals
+                        v[:, :, :, :] = vals
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
