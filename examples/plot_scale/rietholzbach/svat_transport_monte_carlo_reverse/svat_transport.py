@@ -678,13 +678,22 @@ for tm_structure in tm_structures:
                     v[:] = npx.arange(0, dict_dim["nages"])
                 for var_sim in list(df.variables.keys()):
                     var_obj = df.variables.get(var_sim)
-                    if var_sim not in list(dict_dim.keys()) and var_obj.ndim == 3:
+                    if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions:
                         v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time'), float)
                         vals = npx.array(var_obj)
                         v[:, :, :] = vals.swapaxes(0, 2)
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
-                    elif var_sim not in list(dict_dim.keys()) and "ages" in var_obj.dimensions:
+                    elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
+                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
+                        vals = npx.array(var_obj)
+                        vals = vals.swapaxes(0, 3)
+                        vals = vals.swapaxes(1, 2)
+                        vals = vals.swapaxes(2, 3)
+                        v[:, :, :] = vals[0, :, :, :]
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                    elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
                         v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
                         vals = npx.array(var_obj)
                         vals = vals.swapaxes(0, 3)
@@ -693,7 +702,7 @@ for tm_structure in tm_structures:
                         v[:, :, :, :] = vals
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
-                    elif var_sim not in list(dict_dim.keys()) and "nages" in var_obj.dimensions:
+                    elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
                         v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
                         vals = npx.array(var_obj)
                         vals = vals.swapaxes(0, 3)
