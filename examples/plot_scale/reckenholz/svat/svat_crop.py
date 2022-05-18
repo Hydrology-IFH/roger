@@ -741,3 +741,9 @@ for lys_experiment in lys_experiments:
                         v[:, :, :] = vals.swapaxes(0, 2)
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                         units=var_obj.attrs["units"])
+            
+vs = model.state.variables
+vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1]
+vs.prec[2:-2, 2:-2] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2]
+vs.transp[2:-2, 2:-2]
+

@@ -450,7 +450,14 @@ def calc_initial_conditions_with_gw_kernel(state):
 
 @roger_kernel
 def calc_initial_conditions_crops_kernel(state):
-    pass
+    vs = state.variables
+
+    # calculate time since growing from initial rooting depth
+    mask = npx.isin(vs.crop_type, npx.arange(500, 600, 1, dtype=int) & (vs.z_root > vs.z_evap)
+
+    return KernelOutput(
+        S=vs.S,
+        )
 
 
 @roger_kernel
