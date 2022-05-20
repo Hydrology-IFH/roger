@@ -194,8 +194,6 @@ def calc_t_grow(state):
         at[2:-2, 2:-2, vs.tau, :], npx.where(mask12[2:-2, 2:-2, :], 0, vs.t_grow_root[2:-2, 2:-2, vs.tau, :]),
     )
 
-    print(vs.t_grow_root[2:-2, 2:-2, vs.tau, 0], vs.t_grow_cc[2:-2, 2:-2, vs.tau, 0], vs.t_grow_root[2:-2, 2:-2, vs.tau, 2], vs.t_grow_cc[2:-2, 2:-2, vs.tau, 2])
-
     return KernelOutput(t_grow_cc=vs.t_grow_cc, t_grow_root=vs.t_grow_root)
 
 
@@ -389,8 +387,6 @@ def calc_canopy_cover(state):
         vs.ccc,
         at[2:-2, 2:-2, vs.tau, :], npx.where(vs.ccc[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.ccc[2:-2, 2:-2, vs.tau, :]),
     )
-
-    print(vs.ccc[2:-2, 2:-2, vs.tau, 0], vs.ccc[2:-2, 2:-2, vs.tau, 2], vs.doy)
 
     return KernelOutput(ccc=vs.ccc)
 
@@ -619,8 +615,6 @@ def calc_root_growth(state):
         at[2:-2, 2:-2, vs.tau, :], npx.where(mask_bare[2:-2, 2:-2, :], vs.z_evap[2:-2, 2:-2, npx.newaxis], vs.z_root_crop[2:-2, 2:-2, vs.tau, :]),
     )
 
-    print(vs.z_root_crop[2:-2, 2:-2, vs.tau, 0], vs.z_root_crop[2:-2, 2:-2, vs.tau, 2], vs.doy)
-
     return KernelOutput(z_root_crop=vs.z_root_crop)
 
 
@@ -634,38 +628,23 @@ def update_lu_id(state):
     arr0 = allocate(state.dimensions, ("x", "y"))
     mask1 = (vs.doy >= arr0) & (vs.doy <= vs.doy_end[:, :, 0]) & (vs.doy_start[:, :, 0] != 0) & (vs.doy_end[:, :, 0] != 0)
     mask2 = (vs.doy >= vs.doy_start[:, :, 1]) & (vs.doy <= vs.doy_end[:, :, 1]) & (vs.doy_start[:, :, 1] != 0) & (vs.doy_end[:, :, 1] != 0)
-    mask3 = (vs.doy >= vs.doy_end[:, :, 2]) & (vs.doy_start[:, :, 2] != 0) & (vs.doy_end[:, :, 2] != 0)
-    mask5 = mask1 | mask2 | mask3
-    mask6 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & ~mask2 & ~mask3
-    mask7 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & ~mask2 & (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0)
-    mask8 = (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0) & ~mask1 & ~mask2
-    mask9 = (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0) & (vs.doy_start[:, :, 1] == 0) & (vs.doy_end[:, :, 1] == 0) & ~mask3
-    mask10 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & (vs.doy_start[:, :, 1] == 0) & (vs.doy_end[:, :, 1] == 0) & (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0)
-    mask11 = mask6 | mask7 | mask8 | mask9 | mask10
+    mask3 = (vs.doy >= vs.doy_start[:, :, 2]) & (vs.doy > vs.doy_end[:, :, 0]) & (vs.doy_start[:, :, 2] != 0) & (vs.doy_end[:, :, 2] != 0)
 
     vs.lu_id = update(
         vs.lu_id,
-        at[2:-2, 2:-2], 599
+        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.lu_id[2:-2, 2:-2], 599)
     )
     vs.lu_id = update(
         vs.lu_id,
-        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 0], vs.lu_id[2:-2, 2:-2])
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 0], vs.lu_id[2:-2, 2:-2])
     )
     vs.lu_id = update(
         vs.lu_id,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 1], vs.lu_id[2:-2, 2:-2])
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 1], vs.lu_id[2:-2, 2:-2])
     )
     vs.lu_id = update(
         vs.lu_id,
-        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 2], vs.lu_id[2:-2, 2:-2])
-    )
-    vs.lu_id = update(
-        vs.lu_id,
-        at[2:-2, 2:-2], npx.where(~mask5[2:-2, 2:-2], 599, vs.lu_id[2:-2, 2:-2])
-    )
-    vs.lu_id = update(
-        vs.lu_id,
-        at[2:-2, 2:-2], npx.where(mask11[2:-2, 2:-2], 599, vs.lu_id[2:-2, 2:-2])
+        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 2], vs.lu_id[2:-2, 2:-2])
     )
 
     return KernelOutput(lu_id=vs.lu_id)
@@ -678,37 +657,16 @@ def update_ground_cover(state):
     """
     vs = state.variables
 
-    arr0 = allocate(state.dimensions, ("x", "y"))
-    mask1 = (vs.doy >= arr0) & (vs.doy <= vs.doy_end[:, :, 0]) & (vs.doy_start[:, :, 0] != 0) & (vs.doy_end[:, :, 0] != 0)
-    mask2 = (vs.doy >= vs.doy_start[:, :, 1]) & (vs.doy <= vs.doy_end[:, :, 1]) & (vs.doy_start[:, :, 1] != 0) & (vs.doy_end[:, :, 1] != 0)
-    mask3 = (vs.doy >= vs.doy_start[:, :, 2]) & (vs.doy_start[:, :, 2] != 0) & (vs.doy_end[:, :, 2] != 0)
-    mask5 = mask1 | mask2 | mask3
-    mask6 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & ~mask2 & ~mask3
-    mask7 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & ~mask2 & (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0)
-    mask8 = (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0) & ~mask1 & ~mask2
-    mask9 = (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0) & (vs.doy_start[:, :, 1] == 0) & (vs.doy_end[:, :, 1] == 0) & ~mask3
-    mask10 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & (vs.doy_start[:, :, 1] == 0) & (vs.doy_end[:, :, 1] == 0) & (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0)
-    mask11 = mask6 | mask7 | mask8 | mask9 | mask10
+    mask = (vs.lu_id[:, :, npx.newaxis] == vs.crop_type)
 
-    vs.ground_cover = update(
-        vs.ground_cover,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.ccc[2:-2, 2:-2, vs.tau, 0], vs.ground_cover[2:-2, 2:-2, vs.tau])
+    ccc = allocate(state.dimensions, ("x", "y", "crops"))
+    ccc = update(
+        ccc,
+        at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.ccc[2:-2, 2:-2, vs.tau, :], 0)
     )
     vs.ground_cover = update(
         vs.ground_cover,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask2[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.ccc[2:-2, 2:-2, vs.tau, 1], vs.ground_cover[2:-2, 2:-2, vs.tau])
-    )
-    vs.ground_cover = update(
-        vs.ground_cover,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask3[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2], vs.ccc[2:-2, 2:-2, vs.tau, 2], vs.ground_cover[2:-2, 2:-2, vs.tau])
-    )
-    vs.ground_cover = update(
-        vs.ground_cover,
-        at[2:-2, 2:-2, vs.tau], npx.where(~mask5[2:-2, 2:-2], 0, vs.ground_cover[2:-2, 2:-2, vs.tau])
-    )
-    vs.ground_cover = update(
-        vs.ground_cover,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask11[2:-2, 2:-2], 0, vs.ground_cover[2:-2, 2:-2, vs.tau])
+        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.ground_cover[2:-2, 2:-2], npx.max(ccc[2:-2, 2:-2, :], axis=-1))
     )
 
     return KernelOutput(ground_cover=vs.ground_cover)
@@ -721,37 +679,16 @@ def update_k_stress_transp(state):
     """
     vs = state.variables
 
-    arr0 = allocate(state.dimensions, ("x", "y"))
-    mask1 = (vs.doy >= arr0) & (vs.doy <= vs.doy_end[:, :, 0]) & (vs.doy_start[:, :, 0] != 0) & (vs.doy_end[:, :, 0] != 0)
-    mask2 = (vs.doy >= vs.doy_start[:, :, 1]) & (vs.doy <= vs.doy_end[:, :, 1]) & (vs.doy_start[:, :, 1] != 0) & (vs.doy_end[:, :, 1] != 0)
-    mask3 = (vs.doy >= vs.doy_start[:, :, 2]) & (vs.doy_start[:, :, 2] != 0) & (vs.doy_end[:, :, 2] != 0)
-    mask5 = mask1 | mask2 | mask3
-    mask6 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & ~mask2 & ~mask3
-    mask7 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & ~mask2 & (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0)
-    mask8 = (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0) & ~mask1 & ~mask2
-    mask9 = (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0) & (vs.doy_start[:, :, 1] == 0) & (vs.doy_end[:, :, 1] == 0) & ~mask3
-    mask10 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & (vs.doy_start[:, :, 1] == 0) & (vs.doy_end[:, :, 1] == 0) & (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0)
-    mask11 = mask6 | mask7 | mask8 | mask9 | mask10
+    mask = (vs.lu_id[:, :, npx.newaxis] == vs.crop_type)
 
-    vs.k_stress_transp = update(
-        vs.k_stress_transp,
-        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.k_stress_transp_crop[2:-2, 2:-2, 0], vs.k_stress_transp[2:-2, 2:-2])
+    k_stress_transp_crop = allocate(state.dimensions, ("x", "y", "crops"))
+    k_stress_transp_crop = update(
+        k_stress_transp_crop,
+        at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.k_stress_transp_crop[2:-2, 2:-2, :], 0)
     )
     vs.k_stress_transp = update(
         vs.k_stress_transp,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.k_stress_transp_crop[2:-2, 2:-2, 1], vs.k_stress_transp[2:-2, 2:-2])
-    )
-    vs.k_stress_transp = update(
-        vs.k_stress_transp,
-        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2], vs.k_stress_transp_crop[2:-2, 2:-2, 2], vs.k_stress_transp[2:-2, 2:-2])
-    )
-    vs.k_stress_transp = update(
-        vs.k_stress_transp,
-        at[2:-2, 2:-2], npx.where(~mask5[2:-2, 2:-2], 0, vs.k_stress_transp[2:-2, 2:-2])
-    )
-    vs.k_stress_transp = update(
-        vs.k_stress_transp,
-        at[2:-2, 2:-2], npx.where(mask11[2:-2, 2:-2], 0, vs.k_stress_transp[2:-2, 2:-2])
+        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.k_stress_transp[2:-2, 2:-2], npx.max(k_stress_transp_crop[2:-2, 2:-2, :], axis=-1))
     )
 
     return KernelOutput(k_stress_transp=vs.k_stress_transp)
@@ -764,37 +701,16 @@ def update_basal_transp_coeff(state):
     """
     vs = state.variables
 
-    arr0 = allocate(state.dimensions, ("x", "y"))
-    mask1 = (vs.doy >= arr0) & (vs.doy <= vs.doy_end[:, :, 0]) & (vs.doy_start[:, :, 0] != 0) & (vs.doy_end[:, :, 0] != 0)
-    mask2 = (vs.doy >= vs.doy_start[:, :, 1]) & (vs.doy <= vs.doy_end[:, :, 1]) & (vs.doy_start[:, :, 1] != 0) & (vs.doy_end[:, :, 1] != 0)
-    mask3 = (vs.doy >= vs.doy_start[:, :, 2]) & (vs.doy_start[:, :, 2] != 0) & (vs.doy_end[:, :, 2] != 0)
-    mask5 = mask1 | mask2 | mask3
-    mask6 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & ~mask2 & ~mask3
-    mask7 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & ~mask2 & (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0)
-    mask8 = (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0) & ~mask1 & ~mask2
-    mask9 = (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0) & (vs.doy_start[:, :, 1] == 0) & (vs.doy_end[:, :, 1] == 0) & ~mask3
-    mask10 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & (vs.doy_start[:, :, 1] == 0) & (vs.doy_end[:, :, 1] == 0) & (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0)
-    mask11 = mask6 | mask7 | mask8 | mask9 | mask10
+    mask = (vs.lu_id[:, :, npx.newaxis] == vs.crop_type)
 
-    vs.basal_transp_coeff = update(
-        vs.basal_transp_coeff,
-        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.basal_crop_coeff[2:-2, 2:-2, 0], vs.basal_transp_coeff[2:-2, 2:-2])
+    basal_crop_coeff = allocate(state.dimensions, ("x", "y", "crops"))
+    basal_crop_coeff = update(
+        basal_crop_coeff,
+        at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.basal_crop_coeff[2:-2, 2:-2, :], 0)
     )
     vs.basal_transp_coeff = update(
         vs.basal_transp_coeff,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.basal_crop_coeff[2:-2, 2:-2, 1], vs.basal_transp_coeff[2:-2, 2:-2])
-    )
-    vs.basal_transp_coeff = update(
-        vs.basal_transp_coeff,
-        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2], vs.basal_crop_coeff[2:-2, 2:-2, 2], vs.basal_transp_coeff[2:-2, 2:-2])
-    )
-    vs.basal_transp_coeff = update(
-        vs.basal_transp_coeff,
-        at[2:-2, 2:-2], npx.where(~mask5[2:-2, 2:-2], 0, vs.basal_transp_coeff[2:-2, 2:-2])
-    )
-    vs.basal_transp_coeff = update(
-        vs.basal_transp_coeff,
-        at[2:-2, 2:-2], npx.where(mask11[2:-2, 2:-2], 0, vs.basal_transp_coeff[2:-2, 2:-2])
+        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.basal_transp_coeff[2:-2, 2:-2], npx.max(basal_crop_coeff[2:-2, 2:-2, :], axis=-1))
     )
 
     return KernelOutput(basal_transp_coeff=vs.basal_transp_coeff)
@@ -807,37 +723,16 @@ def update_basal_evap_coeff(state):
     """
     vs = state.variables
 
-    arr0 = allocate(state.dimensions, ("x", "y"))
-    mask1 = (vs.doy >= arr0) & (vs.doy <= vs.doy_end[:, :, 0]) & (vs.doy_start[:, :, 0] != 0) & (vs.doy_end[:, :, 0] != 0)
-    mask2 = (vs.doy >= vs.doy_start[:, :, 1]) & (vs.doy <= vs.doy_end[:, :, 1]) & (vs.doy_start[:, :, 1] != 0) & (vs.doy_end[:, :, 1] != 0)
-    mask3 = (vs.doy >= vs.doy_start[:, :, 2]) & (vs.doy_start[:, :, 2] != 0) & (vs.doy_end[:, :, 2] != 0)
-    mask5 = mask1 | mask2 | mask3
-    mask6 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & ~mask2 & ~mask3
-    mask7 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & ~mask2 & (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0)
-    mask8 = (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0) & ~mask1 & ~mask2
-    mask9 = (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0) & (vs.doy_start[:, :, 1] == 0) & (vs.doy_end[:, :, 1] == 0) & ~mask3
-    mask10 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & (vs.doy_start[:, :, 1] == 0) & (vs.doy_end[:, :, 1] == 0) & (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0)
-    mask11 = mask6 | mask7 | mask8 | mask9 | mask10
+    mask = (vs.lu_id[:, :, npx.newaxis] == vs.crop_type)
 
-    vs.basal_evap_coeff = update(
-        vs.basal_evap_coeff,
-        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.basal_evap_coeff_crop[2:-2, 2:-2, 0], vs.basal_evap_coeff[2:-2, 2:-2])
+    basal_evap_coeff_crop = allocate(state.dimensions, ("x", "y", "crops"))
+    basal_evap_coeff_crop = update(
+        basal_evap_coeff_crop,
+        at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.basal_evap_coeff_crop[2:-2, 2:-2, :], 0)
     )
     vs.basal_evap_coeff = update(
         vs.basal_evap_coeff,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.basal_evap_coeff_crop[2:-2, 2:-2, 1], vs.basal_evap_coeff[2:-2, 2:-2])
-    )
-    vs.basal_evap_coeff = update(
-        vs.basal_evap_coeff,
-        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2], vs.basal_evap_coeff_crop[2:-2, 2:-2, 2], vs.basal_evap_coeff[2:-2, 2:-2])
-    )
-    vs.basal_evap_coeff = update(
-        vs.basal_evap_coeff,
-        at[2:-2, 2:-2], npx.where(~mask5[2:-2, 2:-2], 1, vs.basal_evap_coeff[2:-2, 2:-2])
-    )
-    vs.basal_evap_coeff = update(
-        vs.basal_evap_coeff,
-        at[2:-2, 2:-2], npx.where(mask11[2:-2, 2:-2], 1, vs.basal_evap_coeff[2:-2, 2:-2])
+        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.basal_evap_coeff[2:-2, 2:-2], npx.max(basal_evap_coeff_crop[2:-2, 2:-2, :], axis=-1))
     )
 
     return KernelOutput(basal_evap_coeff=vs.basal_evap_coeff)
@@ -850,37 +745,16 @@ def update_S_int_ground_tot(state):
     """
     vs = state.variables
 
-    arr0 = allocate(state.dimensions, ("x", "y"))
-    mask1 = (vs.doy >= arr0) & (vs.doy <= vs.doy_end[:, :, 0]) & (vs.doy_start[:, :, 0] != 0) & (vs.doy_end[:, :, 0] != 0)
-    mask2 = (vs.doy >= vs.doy_start[:, :, 1]) & (vs.doy <= vs.doy_end[:, :, 1]) & (vs.doy_start[:, :, 1] != 0) & (vs.doy_end[:, :, 1] != 0)
-    mask3 = (vs.doy >= vs.doy_start[:, :, 2]) & (vs.doy_start[:, :, 2] != 0) & (vs.doy_end[:, :, 2] != 0)
-    mask5 = mask1 | mask2 | mask3
-    mask6 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & ~mask2 & ~mask3
-    mask7 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & ~mask2 & (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0)
-    mask8 = (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0) & ~mask1 & ~mask2
-    mask9 = (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0) & (vs.doy_start[:, :, 1] == 0) & (vs.doy_end[:, :, 1] == 0) & ~mask3
-    mask10 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & (vs.doy_start[:, :, 1] == 0) & (vs.doy_end[:, :, 1] == 0) & (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0)
-    mask11 = mask6 | mask7 | mask8 | mask9 | mask10
+    mask = (vs.lu_id[:, :, npx.newaxis] == vs.crop_type)
 
-    vs.S_int_ground_tot = update(
-        vs.S_int_ground_tot,
-        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.S_int_tot_crop[2:-2, 2:-2, 0], vs.S_int_ground_tot[2:-2, 2:-2])
+    S_int_tot_crop = allocate(state.dimensions, ("x", "y", "crops"))
+    S_int_tot_crop = update(
+        S_int_tot_crop,
+        at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.S_int_tot_crop[2:-2, 2:-2, :], 0)
     )
     vs.S_int_ground_tot = update(
         vs.S_int_ground_tot,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.S_int_tot_crop[2:-2, 2:-2, 1], vs.S_int_ground_tot[2:-2, 2:-2])
-    )
-    vs.S_int_ground_tot = update(
-        vs.S_int_ground_tot,
-        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2], vs.S_int_tot_crop[2:-2, 2:-2, 2], vs.S_int_ground_tot[2:-2, 2:-2])
-    )
-    vs.S_int_ground_tot = update(
-        vs.S_int_ground_tot,
-        at[2:-2, 2:-2], npx.where(~mask5[2:-2, 2:-2], 0, vs.S_int_ground_tot[2:-2, 2:-2])
-    )
-    vs.S_int_ground_tot = update(
-        vs.S_int_ground_tot,
-        at[2:-2, 2:-2], npx.where(mask11[2:-2, 2:-2], 0, vs.S_int_ground_tot[2:-2, 2:-2])
+        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.S_int_ground_tot[2:-2, 2:-2], npx.max(S_int_tot_crop[2:-2, 2:-2, :], axis=-1))
     )
 
     return KernelOutput(S_int_ground_tot=vs.S_int_ground_tot)
@@ -893,37 +767,16 @@ def update_z_root(state):
     """
     vs = state.variables
 
-    arr0 = allocate(state.dimensions, ("x", "y"))
-    mask1 = (vs.doy >= arr0) & (vs.doy <= vs.doy_end[:, :, 0]) & (vs.doy_start[:, :, 0] != 0) & (vs.doy_end[:, :, 0] != 0)
-    mask2 = (vs.doy >= vs.doy_start[:, :, 1]) & (vs.doy <= vs.doy_end[:, :, 1]) & (vs.doy_start[:, :, 1] != 0) & (vs.doy_end[:, :, 1] != 0)
-    mask3 = (vs.doy >= vs.doy_start[:, :, 2]) & (vs.doy_start[:, :, 2] != 0) & (vs.doy_end[:, :, 2] != 0)
-    mask5 = mask1 | mask2 | mask3
-    mask6 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & ~mask2 & ~mask3
-    mask7 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & ~mask2 & (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0)
-    mask8 = (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0) & ~mask1 & ~mask2
-    mask9 = (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0) & (vs.doy_start[:, :, 1] == 0) & (vs.doy_end[:, :, 1] == 0) & ~mask3
-    mask10 = (vs.doy_start[:, :, 0] == 0) & (vs.doy_end[:, :, 0] == 0) & (vs.doy_start[:, :, 1] == 0) & (vs.doy_end[:, :, 1] == 0) & (vs.doy_start[:, :, 2] == 0) & (vs.doy_end[:, :, 2] == 0)
-    mask11 = mask6 | mask7 | mask8 | mask9 | mask10
+    mask = (vs.lu_id[:, :, npx.newaxis] == vs.crop_type)
 
-    vs.z_root = update(
-        vs.z_root,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.z_root_crop[2:-2, 2:-2, vs.tau, 0], vs.z_root[2:-2, 2:-2, vs.tau])
+    z_root_crop = allocate(state.dimensions, ("x", "y", "crops"))
+    z_root_crop = update(
+        z_root_crop,
+        at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.z_root_crop[2:-2, 2:-2, vs.tau, :], vs.z_evap[2:-2, 2:-2, npx.newaxis])
     )
     vs.z_root = update(
         vs.z_root,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask2[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask3[2:-2, 2:-2], vs.z_root_crop[2:-2, 2:-2, vs.tau, 1], vs.z_root[2:-2, 2:-2, vs.tau])
-    )
-    vs.z_root = update(
-        vs.z_root,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask3[2:-2, 2:-2] & ~mask1[2:-2, 2:-2] & ~mask2[2:-2, 2:-2], vs.z_root_crop[2:-2, 2:-2, vs.tau, 2], vs.z_root[2:-2, 2:-2, vs.tau])
-    )
-    vs.z_root = update(
-        vs.z_root,
-        at[2:-2, 2:-2, vs.tau], npx.where(~mask5[2:-2, 2:-2], vs.z_evap[2:-2, 2:-2], vs.z_root[2:-2, 2:-2, vs.tau])
-    )
-    vs.z_root = update(
-        vs.z_root,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask11[2:-2, 2:-2], vs.z_evap[2:-2, 2:-2], vs.z_root[2:-2, 2:-2, vs.tau])
+        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.z_root[2:-2, 2:-2], npx.max(z_root_crop[2:-2, 2:-2, :], axis=-1))
     )
 
     return KernelOutput(z_root=vs.z_root)
@@ -1226,33 +1079,6 @@ def calculate_crop_phenology(state):
     settings = state.settings
 
     if not settings.enable_offline_transport:
-        if vs.time % (24 * 60 * 60) == 0:
-            if settings.enable_crop_water_stress:
-                vs.update(calc_k_stress_transp_crop(state))
-                vs.update(calc_k_stress_root_growth(state))
-            vs.update(calc_gdd(state))
-            vs.update(calc_t_grow(state))
-            vs.update(calc_t_half_mid(state))
-            vs.update(calc_t_decay(state))
-            vs.update(calc_canopy_cover(state))
-            vs.update(calc_crop_height(state))
-            vs.update(calc_crop_dev_coeff(state))
-            vs.update(calc_basal_crop_coeff(state))
-            vs.update(calc_basal_evap_coeff_crop(state))
-            vs.update(calc_S_int_tot(state))
-            vs.update(calc_root_growth(state))
-
-        if (vs.event_id == 0) & (vs.time % (24 * 60 * 60) == 0):
-            vs.update(update_lu_id(state))
-            vs.update(update_ground_cover(state))
-            vs.update(update_k_stress_transp(state))
-            vs.update(update_basal_transp_coeff(state))
-            vs.update(update_basal_evap_coeff(state))
-            vs.update(update_S_int_ground_tot(state))
-            vs.update(update_z_root(state))
-            vs.update(recalc_soil_params(state))
-            vs.update(redistribution(state))
-
         if (vs.YEAR[vs.itt] > vs.YEAR[vs.itt-1]) & (vs.itt > 1):
             if settings.enable_crop_rotation:
                 vs.itt_cr = vs.itt_cr + 2
@@ -1263,9 +1089,17 @@ def calculate_crop_phenology(state):
                     vs.ccc,
                     at[2:-2, 2:-2, :2, 0], vs.ccc[2:-2, 2:-2, :2, 2],
                 )
+                vs.ccc = update(
+                    vs.ccc,
+                    at[2:-2, 2:-2, :2, 1:], 0,
+                )
                 vs.z_root_crop = update(
                     vs.z_root_crop,
                     at[2:-2, 2:-2, :2, 0], vs.z_root_crop[2:-2, 2:-2, :2, 2],
+                )
+                vs.z_root_crop = update(
+                    vs.z_root_crop,
+                    at[2:-2, 2:-2, :2, 1:], vs.z_evap[2:-2, 2:-2, npx.newaxis, npx.newaxis],
                 )
                 vs.t_grow_cc = update(
                     vs.t_grow_cc,
@@ -1281,11 +1115,7 @@ def calculate_crop_phenology(state):
                 )
                 vs.t_grow_root = update(
                     vs.t_grow_root,
-                    at[2:-2, 2:-2, :, 1], 0,
-                )
-                vs.t_grow_root = update(
-                    vs.t_grow_root,
-                    at[2:-2, 2:-2, :, 2], 0,
+                    at[2:-2, 2:-2, :, 1:], 0,
                 )
                 vs.gdd_sum = update(
                     vs.gdd_sum,
@@ -1335,3 +1165,30 @@ def calculate_crop_phenology(state):
                 )
 
             vs.update(set_crop_params(state))
+
+        if vs.time % (24 * 60 * 60) == 0:
+            if settings.enable_crop_water_stress:
+                vs.update(calc_k_stress_transp_crop(state))
+                vs.update(calc_k_stress_root_growth(state))
+            vs.update(calc_gdd(state))
+            vs.update(calc_t_grow(state))
+            vs.update(calc_t_half_mid(state))
+            vs.update(calc_t_decay(state))
+            vs.update(calc_canopy_cover(state))
+            vs.update(calc_crop_height(state))
+            vs.update(calc_crop_dev_coeff(state))
+            vs.update(calc_basal_crop_coeff(state))
+            vs.update(calc_basal_evap_coeff_crop(state))
+            vs.update(calc_S_int_tot(state))
+            vs.update(calc_root_growth(state))
+
+        if (vs.event_id == 0):
+            vs.update(update_lu_id(state))
+            vs.update(update_ground_cover(state))
+            vs.update(update_k_stress_transp(state))
+            vs.update(update_basal_transp_coeff(state))
+            vs.update(update_basal_evap_coeff(state))
+            vs.update(update_S_int_ground_tot(state))
+            vs.update(update_z_root(state))
+            vs.update(recalc_soil_params(state))
+            vs.update(redistribution(state))

@@ -239,7 +239,7 @@ class SVATCROPSetup(RogerSetup):
                                                    "re_rg", "re_rl",
                                                    "z_root", "ground_cover",
                                                    "lu_id",
-                                                   "z_root_crop", "ccc"]
+                                                   "crop_type", "z_root_crop", "ccc"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 
