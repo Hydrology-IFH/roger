@@ -3,6 +3,7 @@ import copy
 
 from roger.diagnostics.base import RogerDiagnostic
 from roger.variables import TIMESTEPS, Variable
+from roger.core.operators import numpy as npx
 
 
 class Averages(RogerDiagnostic):
@@ -54,7 +55,7 @@ class Averages(RogerDiagnostic):
         avg_vs.average_nitts = avg_vs.average_nitts + 1
 
         for key in self.output_variables:
-            var_data = getattr(avg_vs, key)
+            var_data = npx.where(npx.isnan(getattr(avg_vs, key)), 0, getattr(avg_vs, key))
             if self._has_timestep_dim(state, key):
                 setattr(avg_vs, key, var_data + getattr(vs, key)[..., vs.tau])
             else:
