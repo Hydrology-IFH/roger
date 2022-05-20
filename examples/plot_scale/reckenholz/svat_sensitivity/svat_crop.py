@@ -1,10 +1,20 @@
 from pathlib import Path
 import os
 import h5netcdf
+import glob
+import datetime
+from SALib.sample import saltelli
+
+from roger import runtime_settings as rs, runtime_state as rst
+rs.backend = "numpy"
+rs.force_overwrite = True
+if rs.mpi_comm:
+    rs.num_proc = (rst.proc_num, 1)
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
 from roger.core.utilities import _get_row_no
+from roger.tools.setup import write_forcing, write_crop_rotation
 import roger.lookuptables as lut
 import numpy as onp
 
@@ -13,6 +23,20 @@ class SVATCROPSetup(RogerSetup):
     """A SVAT model including crop phenology/crop rotation.
     """
     _base_path = Path(__file__).parent
+    # sampled parameters with Saltelli's extension of the Sobol' sequence
+    _nsamples = 2**10
+    _bounds = {
+        'num_vars': 6,
+        'names': ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'],
+        'bounds': [[1, 400],
+                   [1, 1500],
+                   [0.05, 0.33],
+                   [0.05, 0.33],
+                   [0.05, 0.33],
+                   [0.1, 120]]
+    }
+    _params = saltelli.sample(_bounds, _nsamples, calc_second_order=False)
+    _nrows = _params.shape[0]
     _input_dir = None
 
     def _set_input_dir(self, path):
@@ -47,6 +71,12 @@ class SVATCROPSetup(RogerSetup):
             var_obj = infile.variables['Time']
             return onp.array(var_obj)[-1] * 60 * 60
 
+    def _get_time_origin(self, path_dir, file):
+        nc_file = path_dir / file
+        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+            var_obj = infile.variables['Time'].attrs['time_origin']
+            return str(var_obj)
+
     def _get_ncr(self, path_dir, file):
         nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
@@ -58,7 +88,7 @@ class SVATCROPSetup(RogerSetup):
         settings = state.settings
         settings.identifier = "SVATCROP"
 
-        settings.nx, settings.ny, settings.nz = 1, 1, 1
+        settings.nx, settings.ny, settings.nz = self._nrows, 1, 1
         settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
         settings.nittevent = self._get_nittevent(self._input_dir, 'forcing.nc')
         settings.nittevent_p1 = settings.nittevent + 1
@@ -70,7 +100,7 @@ class SVATCROPSetup(RogerSetup):
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
-        settings.time_origin = "1996-12-31 00:00:00"
+        settings.time_origin = self._get_time_origin(self._input_dir, 'forcing.nc')
 
         settings.enable_crop_phenology = True
         settings.enable_crop_rotation = True
@@ -132,6 +162,8 @@ class SVATCROPSetup(RogerSetup):
         vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
         vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
         vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
+        # increase basal crop coeffcient to account for oasis effect
+        vs.lut_crops = update(vs.lut_crops, at[:, -2], vs.lut_crops[:, -2] * 1.5)
 
     @roger_routine
     def set_topography(self, state):
@@ -156,14 +188,14 @@ class SVATCROPSetup(RogerSetup):
     def set_parameters_setup(self, state):
         vs = state.variables
 
-        vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 599)
+        vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
         vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
-        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 100)
-        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1000)
-        vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.13)
-        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.24)
-        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.23)
-        vs.ks = update(vs.ks, at[2:-2, 2:-2], 25)
+        vs.dmpv = update(vs.dmpv, at[2:-2, :], npx.array(self._params[:, 0, npx.newaxis], dtype=int))
+        vs.lmpv = update(vs.lmpv, at[2:-2, :], npx.array(self._params[:, 1, npx.newaxis], dtype=int))
+        vs.theta_ac = update(vs.theta_ac, at[2:-2, :], self._params[:, 2, npx.newaxis])
+        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, :], self._params[:, 3, npx.newaxis])
+        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, :], self._params[:, 4, npx.newaxis])
+        vs.ks = update(vs.ks, at[2:-2, :], self._params[:, 5, npx.newaxis])
         vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
         vs.CROP_TYPE = update(vs.CROP_TYPE, at[2:-2, 2:-2, :], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc'))
@@ -217,7 +249,25 @@ class SVATCROPSetup(RogerSetup):
 
     @roger_routine
     def set_diagnostics(self, state):
-        pass
+        diagnostics = state.diagnostics
+        settings = state.settings
+
+        diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz"]
+        diagnostics["rates"].output_frequency = 24 * 60 * 60
+        diagnostics["rates"].sampling_frequency = 1
+
+        diagnostics["collect"].output_variables = ["S_rz", "S_ss",
+                                                   "S_pwp_rz", "S_fc_rz",
+                                                   "S_sat_rz", "S_pwp_ss",
+                                                   "S_fc_ss", "S_sat_ss",
+                                                   "re_rg", "re_rl",
+                                                   "z_root", "ground_cover"]
+        diagnostics["collect"].output_frequency = 24 * 60 * 60
+        diagnostics["collect"].sampling_frequency = 1
+
+        diagnostics["averages"].output_variables = ["ta"]
+        diagnostics["averages"].output_frequency = 24 * 60 * 60
+        diagnostics["averages"].sampling_frequency = 1
 
     @roger_routine
     def after_timestep(self, state):
@@ -232,7 +282,7 @@ def set_initial_conditions_crops_kernel(state):
     vs = state.variables
 
     # set initial root depth if start of simulation is within growing period
-    mask1 = npx.isin(vs.crop_type[:, :, 0], npx.array([556, 557, 558, 559, 560, 564, 569, 570, 572]))
+    mask1 = npx.isin(vs.crop_type[:, :, 0], [556, 557, 558, 559, 560, 564, 569, 570, 572])
     vs.z_root_crop = update(
         vs.z_root_crop,
         at[2:-2, 2:-2, :2, 0], npx.where(mask1[2:-2, 2:-2, npx.newaxis], 300, 0)
@@ -240,7 +290,7 @@ def set_initial_conditions_crops_kernel(state):
     mask2 = (vs.z_root_crop[:, :, vs.taum1, 0] > vs.z_soil)
     vs.z_root_crop = update(
         vs.z_root_crop,
-        at[2:-2, 2:-2, :2, 0], npx.where(mask2[2:-2, 2:-2], vs.z_soil[2:-2, 2:-2] * .33, vs.z_root_crop[2:-2, 2:-2, :2, 0])
+        at[2:-2, 2:-2, :2, 0], npx.where(mask2[2:-2, 2:-2], vs.z_soil[2:-2, 2:-2] * .33, 0)
     )
     mask3 = (vs.z_root_crop[:, :, vs.taum1, 0] > 0)
     vs.z_root = update(
@@ -431,12 +481,12 @@ def set_parameters_monthly_kernel(state):
 def set_forcing_kernel(state):
     vs = state.variables
 
-    vs.prec = update(vs.prec, at[2:-2, 2:-2], vs.PREC[2:-2, 2:-2, vs.itt])
-    vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[2:-2, 2:-2, vs.itt])
-    vs.pet = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
-    vs.pet_res = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
-    vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2, vs.tau], vs.TA_MIN[2:-2, 2:-2, vs.itt])
-    vs.ta_max = update(vs.ta_max, at[2:-2, 2:-2, vs.tau], vs.TA_MAX[2:-2, 2:-2, vs.itt])
+    vs.prec = update(vs.prec, at[:, :], vs.PREC[:, :, vs.itt])
+    vs.ta = update(vs.ta, at[:, :, vs.tau], vs.TA[:, :, vs.itt])
+    vs.pet = update(vs.pet, at[:, :], vs.PET[:, :, vs.itt])
+    vs.pet_res = update(vs.pet, at[:, :], vs.PET[:, :, vs.itt])
+    vs.ta_min = update(vs.ta_min, at[:, :, vs.tau], vs.TA_MIN[:, :, vs.itt])
+    vs.ta_max = update(vs.ta_max, at[:, :, vs.tau], vs.TA_MAX[:, :, vs.itt])
 
     vs.dt_secs = vs.DT_SECS[vs.itt]
     vs.dt = vs.DT[vs.itt]
@@ -445,13 +495,16 @@ def set_forcing_kernel(state):
     vs.doy = vs.DOY[vs.itt]
 
     # reset fluxes at beginning of time step
+    q_sur = allocate(state.dimensions, ("x", "y"))
     vs.q_sur = update(
         vs.q_sur,
-        at[2:-2, 2:-2], 0,
+        at[:, :], q_sur,
     )
+
+    q_hof = allocate(state.dimensions, ("x", "y"))
     vs.q_hof = update(
         vs.q_hof,
-        at[2:-2, 2:-2], 0,
+        at[:, :], q_hof,
     )
 
     return KernelOutput(
@@ -677,3 +730,62 @@ def after_timestep_crops_kernel(state):
         ccc=vs.ccc,
         z_root_crop=vs.z_root_crop,
     )
+
+
+lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9"]
+for lys_experiment in lys_experiments:
+    model = SVATCROPSetup()
+    input_path = model._base_path / lys_experiment / "input"
+    model._set_input_dir(input_path)
+    forcing_path = model._input_dir / "forcing.nc"
+    if not os.path.exists(forcing_path):
+        write_forcing(input_path, enable_crop_phenology=True)
+    crop_rotation_path = model._input_dir / "crop_rotation.nc"
+    if not os.path.exists(crop_rotation_path):
+        write_crop_rotation(input_path)
+    model.setup()
+    model.run()
+
+    # merge model output into single file
+    path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
+    diag_files = glob.glob(path)
+    states_hm_file = model._base_path / "states_hm.nc"
+    with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
+        if lys_experiment not in list(f.groups.keys()):
+            f.create_group(lys_experiment)
+        f.attrs.update(
+            date_created=datetime.datetime.today().isoformat(),
+            title=f'RoGeR model results at Reckenholz Lysimeter ({lys_experiment})',
+            institution='University of Freiburg, Chair of Hydrology',
+            references='',
+            comment='SVAT model with free drainage and crop phenology/crop rotation'
+        )
+        for dfs in diag_files:
+            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                # set dimensions with a dictionary
+                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+                if not f.dimensions:
+                    f.dimensions = dict_dim
+                    v = f.groups[lys_experiment].create_variable('x', ('x',), float)
+                    v.attrs['long_name'] = 'Zonal coordinate'
+                    v.attrs['units'] = 'meters'
+                    v[:] = npx.arange(dict_dim["x"])
+                    v = f.groups[lys_experiment].create_variable('y', ('y',), float)
+                    v.attrs['long_name'] = 'Meridonial coordinate'
+                    v.attrs['units'] = 'meters'
+                    v[:] = npx.arange(dict_dim["y"])
+                    v = f.groups[lys_experiment].create_variable('Time', ('Time',), float)
+                    var_obj = df.variables.get('Time')
+                    with h5netcdf.File(model._input_dir / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
+                        time_origin = infile.variables['Time'].attrs['time_origin']
+                    v.attrs.update(time_origin=time_origin,
+                                    units=var_obj.attrs["units"])
+                    v[:] = npx.array(var_obj)
+                for key in list(df.variables.keys()):
+                    var_obj = df.variables.get(key)
+                    if key not in list(f.dimensions.keys()) and var_obj.ndim == 3:
+                        v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time'), float)
+                        vals = npx.array(var_obj)
+                        v[:, :, :] = vals.swapaxes(0, 2)
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                        units=var_obj.attrs["units"])

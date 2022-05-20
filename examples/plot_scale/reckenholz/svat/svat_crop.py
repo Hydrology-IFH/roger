@@ -227,7 +227,6 @@ class SVATCROPSetup(RogerSetup):
     @roger_routine
     def set_diagnostics(self, state):
         diagnostics = state.diagnostics
-        settings = state.settings
 
         diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz"]
         diagnostics["rates"].output_frequency = 24 * 60 * 60
@@ -238,7 +237,9 @@ class SVATCROPSetup(RogerSetup):
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss",
                                                    "re_rg", "re_rl",
-                                                   "z_root", "ground_cover"]
+                                                   "z_root", "ground_cover",
+                                                   "lu_id",
+                                                   "z_root_crop", "ccc"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 
@@ -259,7 +260,7 @@ def set_initial_conditions_crops_kernel(state):
     vs = state.variables
 
     # set initial root depth if start of simulation is within growing period
-    mask1 = npx.isin(vs.crop_type[:, :, 0], [556, 557, 558, 559, 560, 564, 569, 570, 572])
+    mask1 = npx.isin(vs.crop_type[:, :, 0], npx.array([556, 557, 558, 559, 560, 564, 569, 570, 572]))
     vs.z_root_crop = update(
         vs.z_root_crop,
         at[2:-2, 2:-2, :2, 0], npx.where(mask1[2:-2, 2:-2, npx.newaxis], 300, 0)
@@ -267,7 +268,7 @@ def set_initial_conditions_crops_kernel(state):
     mask2 = (vs.z_root_crop[:, :, vs.taum1, 0] > vs.z_soil)
     vs.z_root_crop = update(
         vs.z_root_crop,
-        at[2:-2, 2:-2, :2, 0], npx.where(mask2[2:-2, 2:-2], vs.z_soil[2:-2, 2:-2] * .33, 0)
+        at[2:-2, 2:-2, :2, 0], npx.where(mask2[2:-2, 2:-2], vs.z_soil[2:-2, 2:-2] * .33, vs.z_root_crop[2:-2, 2:-2, :2, 0])
     )
     mask3 = (vs.z_root_crop[:, :, vs.taum1, 0] > 0)
     vs.z_root = update(
@@ -709,7 +710,8 @@ def after_timestep_crops_kernel(state):
     )
 
 
-lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9"]
+lys_experiments = ["lys2"]
+# lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9"]
 for lys_experiment in lys_experiments:
     model = SVATCROPSetup()
     input_path = model._base_path / lys_experiment / "input"
@@ -742,8 +744,8 @@ for lys_experiment in lys_experiments:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
                 dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
-                if not f.dimensions:
-                    f.dimensions = dict_dim
+                if not f.groups[lys_experiment].dimensions:
+                    f.groups[lys_experiment].dimensions = dict_dim
                     v = f.groups[lys_experiment].create_variable('x', ('x',), float)
                     v.attrs['long_name'] = 'Zonal coordinate'
                     v.attrs['units'] = 'meters'

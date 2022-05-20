@@ -194,6 +194,8 @@ def calc_t_grow(state):
         at[2:-2, 2:-2, vs.tau, :], npx.where(mask12[2:-2, 2:-2, :], 0, vs.t_grow_root[2:-2, 2:-2, vs.tau, :]),
     )
 
+    print(vs.t_grow_root[2:-2, 2:-2, vs.tau, 0], vs.t_grow_cc[2:-2, 2:-2, vs.tau, 0], vs.t_grow_root[2:-2, 2:-2, vs.tau, 2], vs.t_grow_cc[2:-2, 2:-2, vs.tau, 2])
+
     return KernelOutput(t_grow_cc=vs.t_grow_cc, t_grow_root=vs.t_grow_root)
 
 
@@ -387,6 +389,8 @@ def calc_canopy_cover(state):
         vs.ccc,
         at[2:-2, 2:-2, vs.tau, :], npx.where(vs.ccc[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.ccc[2:-2, 2:-2, vs.tau, :]),
     )
+
+    print(vs.ccc[2:-2, 2:-2, vs.tau, 0], vs.ccc[2:-2, 2:-2, vs.tau, 2], vs.doy)
 
     return KernelOutput(ccc=vs.ccc)
 
@@ -614,6 +618,8 @@ def calc_root_growth(state):
         vs.z_root_crop,
         at[2:-2, 2:-2, vs.tau, :], npx.where(mask_bare[2:-2, 2:-2, :], vs.z_evap[2:-2, 2:-2, npx.newaxis], vs.z_root_crop[2:-2, 2:-2, vs.tau, :]),
     )
+
+    print(vs.z_root_crop[2:-2, 2:-2, vs.tau, 0], vs.z_root_crop[2:-2, 2:-2, vs.tau, 2], vs.doy)
 
     return KernelOutput(z_root_crop=vs.z_root_crop)
 

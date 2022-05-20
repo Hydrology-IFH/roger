@@ -101,7 +101,7 @@ def initialize_variable(state, key, var, ncfile):
 
     fillvalue = variables.get_fill_value(dtype)
 
-    # transpose all dimensions in netCDF output (convention in most ocean models)
+    # transpose all dimensions in netCDF output (convention in most models)
     v = ncfile.create_variable(key, dims[::-1], dtype, fillvalue=fillvalue, chunks=tuple(chunksize[::-1]), **kwargs)
     v.missing_value = fillvalue
     v.attrs.update(long_name=var.name, units=var.units, **var.extra_attributes)
