@@ -167,7 +167,7 @@ class SVATTRANSPORTSetup(RogerSetup):
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 3)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1)
-        elif settings.tm_structure == "time-variant advection-disperison":
+        elif settings.tm_structure == "time-variant advection-dispersion":
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 31)

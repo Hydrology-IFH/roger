@@ -204,7 +204,7 @@ class SVATTRANSPORTSetup(RogerSetup):
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 3)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1)
-        elif settings.tm_structure == "time-variant advection-disperison":
+        elif settings.tm_structure == "time-variant advection-dispersion":
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 31)
@@ -643,7 +643,6 @@ for tm_structure in tm_structures:
                             vals = npx.array(var_obj)
                             vals = vals.swapaxes(0, 3)
                             vals = vals.swapaxes(1, 2)
-                            vals = vals.swapaxes(2, 3)
                             v[:, :, :] = vals[:, :, :, 0]
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])

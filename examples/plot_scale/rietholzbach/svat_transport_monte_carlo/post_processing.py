@@ -80,18 +80,18 @@ for tm_structure in tm_structures:
 
     # compare observations and simulations
     ncol = 0
-    idx = ds_sim_tm.Time  # time index
+    idx = ds_sim_tm.date.values  # time index
     d18O_perc_cs = onp.zeros((nx, 1, len(idx)))
     for nrow in range(nx):
         # calculate simulated oxygen-18 composite sample
         df_perc_18O_obs = pd.DataFrame(index=idx, columns=['perc_obs', 'd18O_perc_obs'])
-        df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=nrow, y=ncol).values
-        df_perc_18O_obs.loc[:, 'd18O_perc_obs'] = ds_obs['d18O_PERC'].isel(x=nrow, y=ncol).values
+        df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=0, y=0).values
+        df_perc_18O_obs.loc[:, 'd18O_perc_obs'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
         sample_no = pd.DataFrame(index=df_perc_18O_obs.dropna().index, columns=['sample_no'])
         sample_no = sample_no.loc['1997':'2007']
         sample_no['sample_no'] = range(len(sample_no.index))
         df_perc_18O_sim = pd.DataFrame(index=idx, columns=['perc_sim', 'd18O_perc_sim'])
-        df_perc_18O_sim['perc_sim'] = ds_sim_hm['q_ss'].isel(x=nrow, y=ncol).values
+        df_perc_18O_sim['perc_sim'] = ds_sim_hm['q_ss'].isel(x=0, y=0).values
         df_perc_18O_sim['d18O_perc_sim'] = ds_sim_tm['C_q_ss'].isel(x=nrow, y=ncol).values
         df_perc_18O_sim = df_perc_18O_sim.join(sample_no)
         df_perc_18O_sim.loc[:, 'sample_no'] = df_perc_18O_sim.loc[:, 'sample_no'].fillna(method='bfill', limit=14)
@@ -117,7 +117,7 @@ for tm_structure in tm_structures:
         df_perc_18O_sim.loc[:, 'perc_obs_sum'] = df_perc_18O_sim.loc[:, 'perc_obs_sum'].fillna(method='bfill', limit=14)
 
         # join observations on simulations
-        obs_vals = ds_obs['d18O_PERC'].isel(x=nrow, y=ncol).values
+        obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
         sim_vals = d18O_perc_cs[nrow, ncol, :]
         df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
         df_obs.loc[:, 'obs'] = obs_vals
@@ -165,19 +165,20 @@ for tm_structure in tm_structures:
             comment=f'SVAT {tm_structure} transport model with free drainage'
         )
         dict_dim = {'x': nx, 'y': 1, 'n_sas_params': 8}
-        f.dimensions = dict_dim
-        v = f.groups[tm_structure].create_variable('x', ('x',), float)
-        v.attrs['long_name'] = 'Zonal coordinate'
-        v.attrs['units'] = 'meters'
-        v[:] = onp.arange(dict_dim["x"])
-        v = f.groups[tm_structure].create_variable('y', ('y',), float)
-        v.attrs['long_name'] = 'Meridonial coordinate'
-        v.attrs['units'] = 'meters'
-        v[:] = onp.arange(dict_dim["y"])
-        v = f.groups[tm_structure].create_variable('n_sas_params', ('n_sas_params',), float)
-        v.attrs['long_name'] = 'Number of SAS parameters'
-        v.attrs['units'] = ' '
-        v[:] = onp.arange(dict_dim["n_sas_params"])
+        if not f.groups[tm_structure].dimensions:
+            f.groups[tm_structure].dimensions = dict_dim
+            v = f.groups[tm_structure].create_variable('x', ('x',), float)
+            v.attrs['long_name'] = 'Zonal coordinate'
+            v.attrs['units'] = 'meters'
+            v[:] = onp.arange(dict_dim["x"])
+            v = f.groups[tm_structure].create_variable('y', ('y',), float)
+            v.attrs['long_name'] = 'Meridonial coordinate'
+            v.attrs['units'] = 'meters'
+            v[:] = onp.arange(dict_dim["y"])
+            v = f.groups[tm_structure].create_variable('n_sas_params', ('n_sas_params',), float)
+            v.attrs['long_name'] = 'Number of SAS parameters'
+            v.attrs['units'] = ' '
+            v[:] = onp.arange(dict_dim["n_sas_params"])
 
         if tm_structure in ['preferential', 'advection-dispersion',
                             'time-variant preferential',

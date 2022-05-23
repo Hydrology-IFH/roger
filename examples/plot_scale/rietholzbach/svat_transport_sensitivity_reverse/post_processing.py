@@ -72,13 +72,13 @@ for tm_structure in tm_structures:
 
     # compare observations and simulations
     ncol = 0
-    idx = ds_sim_tm.Time  # time index
+    idx = ds_sim_tm.date.values  # time index
     d18O_perc_cs = onp.zeros((nx, 1, len(idx)))
     for nrow in range(nx):
         # calculate simulated oxygen-18 composite sample
         df_perc_18O_obs = pd.DataFrame(index=idx, columns=['perc_obs', 'd18O_perc_obs'])
-        df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=nrow, y=ncol).values
-        df_perc_18O_obs.loc[:, 'd18O_perc_obs'] = ds_obs['d18O_PERC'].isel(x=nrow, y=ncol).values
+        df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=0, y=0).values
+        df_perc_18O_obs.loc[:, 'd18O_perc_obs'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
         sample_no = pd.DataFrame(index=df_perc_18O_obs.dropna().index, columns=['sample_no'])
         sample_no = sample_no.loc['1997':'2007']
         sample_no['sample_no'] = range(len(sample_no.index))
@@ -109,7 +109,7 @@ for tm_structure in tm_structures:
         df_perc_18O_sim.loc[:, 'perc_obs_sum'] = df_perc_18O_sim.loc[:, 'perc_obs_sum'].fillna(method='bfill', limit=14)
 
         # join observations on simulations
-        obs_vals = ds_obs['d18O_PERC'].isel(x=nrow, y=ncol).values
+        obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
         sim_vals = d18O_perc_cs[nrow, ncol, :]
         df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
         df_obs.loc[:, 'obs'] = obs_vals
