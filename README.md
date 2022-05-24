@@ -53,7 +53,6 @@ conda install --yes --file requirements_extra.txt
 Activate the anaconda environment and launch Spyder
 ```bash
 conda activate roger
-spyder
 ```
 
 ## Installation and usage on Windows
@@ -78,7 +77,6 @@ conda install --yes --file requirements_extra.txt
 Activate the anaconda environment and launch Spyder
 ```bash
 activate roger
-spyder
 ```
 
 ## Basic usage
