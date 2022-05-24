@@ -444,11 +444,11 @@ class rogerSync:
         elif runtime_state.proc_num > 1:
             # run function on a single process
             if runtime_state.proc_rank == 0:
-                distributed.barrier()
                 out = self.function(*args, **kwargs)
                 for i in range(1, runtime_state.proc_num):
                     buffer = npx.empty(1, dtype=int)
                     runtime_settings.mpi_comm.isend(buffer, dest=i, tag=10)
+                distributed.barrier()
             # let other processes wait
             elif runtime_state.proc_rank > 0:
                 def function():
