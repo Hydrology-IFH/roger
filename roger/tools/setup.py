@@ -245,8 +245,8 @@ def write_forcing(input_dir, nrows=1, ncols=1, hpi=5, end_prec_event=36, sf=3,
         # number of time steps
         no_time_steps = len(df_meteo_events.index)
         # time steps (in hours)
-        time_steps = onp.ones((no_time_steps), dtype=float_type)
-        time_steps[:] = df_meteo_events['dt'].astype(float_type).values
+        time_steps = onp.ones((no_time_steps), dtype=int)
+        time_steps[:] = df_meteo_events['dt'].astype(int).values
         dict_events['time_steps'] = time_steps
         # years
         years = onp.zeros((no_time_steps), dtype=int)
@@ -519,18 +519,14 @@ def write_forcing_event(input_dir, nrows=1, ncols=1, uniform=True, prec_correcti
             raise ValueError(input_dir, 'does not exist')
 
         PREC_path = input_dir / "PREC.txt"
-        df_PREC = pd.read_csv(PREC_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
-                              index_col=0, na_values=-9999)
-        df_PREC.index = pd.to_datetime(df_PREC.index, format='%Y %m %d %H %M')
+        df_PREC = pd.read_csv(PREC_path, sep=r"\s+", skiprows=0, header=0, na_values=-9999)
 
         TA_path = input_dir / "TA.txt"
-        df_TA = pd.read_csv(TA_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
-                            index_col=0, na_values=-9999)
-        df_TA.index = pd.to_datetime(df_TA.index, format='%Y %m %d %H %M')
+        df_TA = pd.read_csv(TA_path, sep=r"\s+", skiprows=0, header=0, na_values=-9999)
 
         validate(df_PREC)
         validate(df_TA)
-        df_meteo = df_PREC.join(df_TA)
+        df_meteo = df_PREC.join(df_TA["TA"].to_frame())
         df_meteo = df_meteo.ffill()
         if prec_correction:
             prec_corr = ecl.precipitation_correction(df_meteo['PREC'].values,
@@ -561,15 +557,15 @@ def write_forcing_event(input_dir, nrows=1, ncols=1, uniform=True, prec_correcti
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
             v.attrs['long_name'] = 'Air temperature'
             v.attrs['units'] = 'degC'
-            v = f.create_variable('dt', ('Time',), float_type)
-            time_steps = df_meteo.index.diff() / onp.timedelta64(1, 's')
-            v[:-1] = time_steps.values[1:]
-            v[-1] = time_steps.values[-1]
+            v = f.create_variable('dt', ('Time',), int)
+            time_steps = onp.around(onp.diff(df_meteo["hh"].values) * 60 * 60, 1)
+            v[:-1] = time_steps.astype(int)
+            v[-1] = time_steps[-1].astype(int)
             v.attrs['long_name'] = 'time step'
-            v.attrs['units'] = 'hour'
+            v.attrs['units'] = 'seconds'
             v = f.create_variable('Time', ('Time',), float_type)
             v.attrs['units'] = 'hours'
-            v[:] = df_meteo.index.hour.values
+            v[:] = df_meteo["hh"].values
             v = f.create_variable('x', ('x',), int)
             v.attrs['long_name'] = 'Zonal coordinate'
             v.attrs['units'] = 'meters'

@@ -24,8 +24,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
         >>> class MyModel(RogerSetup):
         >>>     ...
         >>>
-        >>> simulation = MyModel()
-        >>> simulation.run()
+        >>> model = MyModel()
+        >>> model.run()
         >>> plt.imshow(simulation.state.variables.psi[..., 0])
         >>> plt.show()
 
@@ -50,7 +50,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
         """To be implemented by subclass.
 
         First function to be called during setup.
-        Use this functions to modify the model settings.
+        Use this functions to set the model settings and define physical
+        constants.
 
         Example:
           >>> def set_settings(self, state):
@@ -102,7 +103,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
     def set_initial_conditions_setup(self, state):
         """To be implemented by subclass.
 
-        May be used to set initial conditions.
+        Use this function to set the initial conditions.
 
         Example:
           >>> @roger_method

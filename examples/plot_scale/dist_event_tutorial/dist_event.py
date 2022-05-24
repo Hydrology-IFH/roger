@@ -1,14 +1,9 @@
 from pathlib import Path
-import datetime
-import glob
 import os
 import h5netcdf
 import pandas as pd
-from roger import runtime_settings as rs, runtime_state as rst
-rs.backend = "numpy"
+from roger import runtime_settings as rs
 rs.force_overwrite = True
-if rs.mpi_comm:
-    rs.num_proc = (rst.proc_num, 1)
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, at
@@ -18,18 +13,19 @@ import numpy as onp
 
 
 class DISTEVENTSetup(RogerSetup):
-    """A distributed model for a single event.
+    """A 1D model for a single event.
     """
     _base_path = Path(__file__).parent
     _input_dir = None
 
+    # custom helper functions
     def _set_input_dir(self, path):
         if os.path.exists(path):
             self._input_dir = path
         else:
-            self._input_dir = path
-            if not os.path.exists(self._input_dir):
+            if not os.path.exists(path):
                 os.mkdir(self._input_dir)
+                self._input_dir = path
 
     def _read_var_from_nc(self, var, path_dir, file):
         nc_file = path_dir / file
@@ -49,17 +45,27 @@ class DISTEVENTSetup(RogerSetup):
             var_obj = infile.variables['Time']
             return len(onp.array(var_obj))
 
+    def _get_runlen(self, path_dir, file):
+        nc_file = path_dir / file
+        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+            var_obj = infile.variables['dt']
+            return npx.sum(var_obj)
+
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
         settings.identifier = "DISTEVENT"
 
+        # total grid numbers in x-,y- and z-direction
         settings.nx, settings.ny, settings.nz = 1, 1, 1
+        # derive total number of time steps from forcing
         settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
+        # derive total number of time steps of event with longest duration from forcing
         settings.nittevent = self._get_nitt(self._input_dir, 'forcing.nc')
         settings.nittevent_p1 = settings.nittevent + 1
-        settings.runlen = settings.nitt * 10 * 60
+        settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
+        # spatial discretization (in meters)
         settings.dx = 1
         settings.dy = 1
         settings.dz = 1
@@ -67,6 +73,7 @@ class DISTEVENTSetup(RogerSetup):
         settings.x_origin = 0.0
         settings.y_origin = 0.0
 
+        # enable specific processes
         settings.enable_groundwater_boundary = False
         settings.enable_lateral_flow = True
         settings.enable_routing = False
@@ -106,11 +113,17 @@ class DISTEVENTSetup(RogerSetup):
     def set_look_up_tables(self, state):
         vs = state.variables
 
+        # land use-dependent interception storage
         vs.lut_ilu = update(vs.lut_ilu, at[:, :], lut.ARR_ILU)
+        # land use-dependent ground cover
         vs.lut_gc = update(vs.lut_gc, at[:, :], lut.ARR_GC)
+        # land use-dependent maximum ground cover
         vs.lut_gcm = update(vs.lut_gcm, at[:, :], lut.ARR_GCM)
+        # land use-dependent maximum ground cover
         vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
+        # land use-dependent rooting depth
         vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
+        # macropore flow velocities
         vs.lut_mlms = update(vs.lut_mlms, at[:, :], lut.ARR_MLMS)
 
     @roger_routine
@@ -121,19 +134,33 @@ class DISTEVENTSetup(RogerSetup):
     def set_parameters_setup(self, state):
         vs = state.variables
 
+        # land use ID (see README for description)
         vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
+        # degree of sealing (-)
         vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
+        # surface slope (-)
         vs.slope = update(vs.slope, at[2:-2, 2:-2], 0.05)
+        # convert slope to percentage
         vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
+        # total surface depression storage (mm)
         vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
+        # soil depth (mm)
         vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1000)
-        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 100)
+        # density of vertical macropores (1/m2)
+        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
+        # density of horizontal macropores (1/m2)
         vs.dmph = update(vs.dmph, at[2:-2, 2:-2], 300)
-        vs.lmpv = update(vs.lmpv, 125)
+        # total length of vertical macropores (mm)
+        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 300)
+        # air capacity (-)
         vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.08)
+        # usable field capacity (-)
         vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.15)
+        # permanent wilting point (-)
         vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.17)
+        # saturated hydraulic conductivity (-)
         vs.ks = update(vs.ks, at[2:-2, 2:-2], 9.2)
+        # hydraulic conductivity of bedrock/saturated zone (-)
         vs.kf = update(vs.kf, at[2:-2, 2:-2], 5)
 
     @roger_routine
@@ -148,15 +175,25 @@ class DISTEVENTSetup(RogerSetup):
     def set_initial_conditions(self, state):
         vs = state.variables
 
+        # interception storage of upper surface layer (mm)
         vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, :vs.taup1], 0)
+        # snow water equivalent stored in upper surface layer (mm)
         vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, :vs.taup1], 0)
+        # interception storage of lower surface layer (mm)
         vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, :vs.taup1], 0)
+        # snow water equivalent stored in lower surface layer (mm)
         vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, :vs.taup1], 0)
+        # surface depression storage (mm)
         vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
+        # snow cover storage (mm)
         vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
+        # snow water equivalent of snow cover (mm)
         vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
+        # soil water content of root zone/upper soil layer (mm)
         vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.32)
+        # soil water content of subsoil/lower soil layer (mm)
         vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.32)
+        # thickness of saturation water table (mm)
         vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 0)
 
     @roger_routine
@@ -171,20 +208,25 @@ class DISTEVENTSetup(RogerSetup):
     def set_forcing(self, state):
         vs = state.variables
 
+        # set precipitation, potential evapotranspiration and air temperature
+        # at beginning of each time step
         vs.update(set_forcing_kernel(state))
 
     @roger_routine
     def set_diagnostics(self, state):
         diagnostics = state.diagnostics
 
+        # variables written to output files
         diagnostics["rates"].output_variables = ["inf_mat", "inf_mp", "inf_sc", "q_ss", "q_sub", "q_sub_mp", "q_sub_mat", "q_hof", "q_sof"]
-        diagnostics["rates"].output_frequency = 10 * 60
+        # required to be equal or greater than time increments of input
+        diagnostics["rates"].output_frequency = 10 * 60  # in seconds
         diagnostics["rates"].sampling_frequency = 1
 
     @roger_routine
     def after_timestep(self, state):
         vs = state.variables
 
+        # shift variables backwards
         vs.update(after_timestep_kernel(state))
 
 
@@ -355,48 +397,15 @@ def after_timestep_kernel(state):
     )
 
 
-model = DISTEVENTSetup()
-path_input = model._base_path / "input"
-model._set_input_dir(path_input)
-write_forcing_event(path_input)
-model.setup()
-model.run()
-
-# merge model output into single file
-path = str(model._base_path / "DISTEVENT.*.nc")
-diag_files = glob.glob(path)
-states_hm_file = model._base_path / "states_hm.nc"
-with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
-    f.attrs.update(
-        date_created=datetime.datetime.today().isoformat(),
-        title='RoGeR model results for a single event (Tutorial)',
-        institution='University of Freiburg, Chair of Hydrology',
-        references='',
-        comment='1D model with free drainage'
-    )
-    for dfs in diag_files:
-        with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-            # set dimensions with a dictionary
-            if not f.dimensions:
-                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
-                f.dimensions = dict_dim
-                v = f.create_variable('x', ('x',), float)
-                v.attrs['long_name'] = 'Model run'
-                v.attrs['units'] = ''
-                v[:] = onp.arange(dict_dim["x"])
-                v = f.create_variable('y', ('y',), float)
-                v.attrs['long_name'] = ''
-                v.attrs['units'] = ''
-                v[:] = onp.arange(dict_dim["y"])
-                v = f.create_variable('Time', ('Time',), float)
-                var_obj = df.variables.get('Time')
-                v.attrs.update(units="hours")
-                v[:] = onp.array(var_obj)
-            for key in list(df.variables.keys()):
-                var_obj = df.variables.get(key)
-                if key not in list(f.dimensions.keys()) and var_obj.ndim == 3:
-                    v = f.create_variable(key, ('x', 'y', 'Time'), float)
-                    vals = onp.array(var_obj)
-                    v[:, :, :] = vals.swapaxes(0, 2)
-                    v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                    units=var_obj.attrs["units"])
+if __name__ == "__main__":
+    # initialize the model structure
+    model = DISTEVENTSetup()
+    # set path to directory containing the input files
+    path_input = model._base_path / "input"
+    model._set_input_dir(path_input)
+    # writes the forcing
+    write_forcing_event(path_input)
+    # runs the model setup
+    model.setup()
+    # iterates over time steps
+    model.run()

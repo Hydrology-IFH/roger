@@ -438,7 +438,7 @@ def time_delta(events):
 
     cond_prec_daily = (events['d'] == True)
     prec_daily = events[cond_prec_daily]
-    events.loc[prec_daily.index, 'dt'] = 24* 60 * 60
+    events.loc[prec_daily.index, 'dt'] = 24 * 60 * 60
 
     cond_prec_10mins = (events['10mins'] == True)
     prec_10mins = events[cond_prec_10mins]

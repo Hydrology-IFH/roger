@@ -459,10 +459,6 @@ def calc_dz_sat(state):
         lmpv_ss,
         at[2:-2, 2:-2], npx.where(vs.lmpv[2:-2, 2:-2] < vs.z_root[2:-2, 2:-2, vs.tau], 0, lmpv_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
-    lmpv_ss = update(
-        lmpv_ss,
-        at[2:-2, 2:-2], npx.where(vs.lmpv[2:-2, 2:-2] < vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau], vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau], lmpv_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
 
     # saturation from top [mm]
     z_sat_top = allocate(state.dimensions, ("x", "y"))

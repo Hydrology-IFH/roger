@@ -253,7 +253,6 @@ for more publications involving Roger.
 - implement runoff and channel routing (e.g. kinematic wave or hydraulic approach)
 - implement RoGeR-Urban
 - implement distributed model with run-on infiltration
-- implement online-coupled solute transport
 - use coarser spatial and temporal resolution for computation of
 groundwater-related processes
 - implement baseflow in the groundwater routine. requires surface water depth.
