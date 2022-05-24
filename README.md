@@ -18,7 +18,7 @@ Inspired by [Veros](https://veros.readthedocs.io/en/latest/).
 ## Documentation
 
 The documentation is still under construction. However, the latest build of the
-documentation can be accessed locally by opening doc/_build/html/index.html
+documentation can be accessed locally by opening `doc/_build/html/index.html`
 in your browser.
 
 Future Online-Documentation:
