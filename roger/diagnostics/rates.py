@@ -2,12 +2,11 @@ import os
 import copy
 
 from roger.diagnostics.base import RogerDiagnostic
-from roger.core.operators import numpy as npx
 from roger.variables import TIMESTEPS, AGES, NEVENTS_FF
 
 
 class Rates(RogerDiagnostic):
-    """Time average output diagnostic.
+    """Rates output diagnostic.
 
     All registered variables are summed up when :meth:`diagnose` is called,
     and output upon calling :meth:`output`.

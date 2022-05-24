@@ -95,12 +95,11 @@
 <span class="kn">import</span> <span class="nn">copy</span>
 
 <span class="kn">from</span> <span class="nn">roger.diagnostics.base</span> <span class="kn">import</span> <span class="n">RogerDiagnostic</span>
-<span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span>
 <span class="kn">from</span> <span class="nn">roger.variables</span> <span class="kn">import</span> <span class="n">TIMESTEPS</span><span class="p">,</span> <span class="n">AGES</span><span class="p">,</span> <span class="n">NEVENTS_FF</span>
 
 
 <div class="viewcode-block" id="Rates"><a class="viewcode-back" href="../../../reference/diagnostics.html#roger.diagnostics.rates.Rates">[docs]</a><span class="k">class</span> <span class="nc">Rates</span><span class="p">(</span><span class="n">RogerDiagnostic</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Time average output diagnostic.</span>
+    <span class="sd">&quot;&quot;&quot;Rates output diagnostic.</span>
 
 <span class="sd">    All registered variables are summed up when :meth:`diagnose` is called,</span>
 <span class="sd">    and output upon calling :meth:`output`.</span>

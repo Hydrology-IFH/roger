@@ -7,7 +7,7 @@ from roger.core.operators import numpy as npx
 
 
 class Minimum(RogerDiagnostic):
-    """Time minimum output diagnostic.
+    """Minimum output diagnostic.
 
     All registered variables are stacked when :meth:`diagnose` is called,
     and returns minimum and output upon calling :meth:`output`.

@@ -11,8 +11,8 @@ DEFAULT_OUTPUT_VARS = [
 
 
 class Snapshot(RogerDiagnostic):
-    """Writes snapshots of the current solution. Also reads and writes the main restart
-    data required for restarting a Roger simulation.
+    """Writes snapshots of the current solution. Also reads and writes the main
+    restart data required for restarting a Roger simulation.
     """
 
     output_path = "{identifier}.snapshot.nc"

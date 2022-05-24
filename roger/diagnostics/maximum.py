@@ -7,7 +7,7 @@ from roger.core.operators import numpy as npx
 
 
 class Maximum(RogerDiagnostic):
-    """Time maximum output diagnostic.
+    """Maximum output diagnostic.
 
     All registered variables are stacked when :meth:`diagnose` is called,
     and returns maximum and output upon calling :meth:`output`.

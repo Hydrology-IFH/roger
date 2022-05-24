@@ -171,8 +171,8 @@ virtual functions.</p>
 <dt class="sig sig-object py" id="roger.diagnostics.snapshot.Snapshot">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.diagnostics.snapshot.</span></span><span class="sig-name descname"><span class="pre">Snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/diagnostics/snapshot.html#Snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.diagnostics.snapshot.Snapshot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roger.diagnostics.base.RogerDiagnostic" title="roger.diagnostics.base.RogerDiagnostic"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.diagnostics.base.RogerDiagnostic</span></code></a></p>
-<p>Writes snapshots of the current solution. Also reads and writes the main restart
-data required for restarting a Roger simulation.</p>
+<p>Writes snapshots of the current solution. Also reads and writes the main
+restart data required for restarting a Roger simulation.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="roger.diagnostics.snapshot.Snapshot.output_path">
 <span class="sig-name descname"><span class="pre">output_path</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'{identifier}.snapshot.nc'</span></em><a class="headerlink" href="#roger.diagnostics.snapshot.Snapshot.output_path" title="Permalink to this definition">¶</a></dt>
@@ -199,7 +199,7 @@ data required for restarting a Roger simulation.</p>
 <dt class="sig sig-object py" id="roger.diagnostics.averages.Averages">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.diagnostics.averages.</span></span><span class="sig-name descname"><span class="pre">Averages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/diagnostics/averages.html#Averages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.diagnostics.averages.Averages" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roger.diagnostics.base.RogerDiagnostic" title="roger.diagnostics.base.RogerDiagnostic"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.diagnostics.base.RogerDiagnostic</span></code></a></p>
-<p>Time average output diagnostic.</p>
+<p>Average output diagnostic.</p>
 <p>All registered variables are summed up when <code class="xref py py-meth docutils literal notranslate"><span class="pre">diagnose()</span></code> is called,
 and averaged and output upon calling <code class="xref py py-meth docutils literal notranslate"><span class="pre">output()</span></code>.</p>
 <dl class="py attribute">
@@ -240,7 +240,7 @@ and averaged and output upon calling <code class="xref py py-meth docutils liter
 <dt class="sig sig-object py" id="roger.diagnostics.minimum.Minimum">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.diagnostics.minimum.</span></span><span class="sig-name descname"><span class="pre">Minimum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/diagnostics/minimum.html#Minimum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.diagnostics.minimum.Minimum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roger.diagnostics.base.RogerDiagnostic" title="roger.diagnostics.base.RogerDiagnostic"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.diagnostics.base.RogerDiagnostic</span></code></a></p>
-<p>Time minimum output diagnostic.</p>
+<p>Minimum output diagnostic.</p>
 <p>All registered variables are stacked when <code class="xref py py-meth docutils literal notranslate"><span class="pre">diagnose()</span></code> is called,
 and returns minimum and output upon calling <code class="xref py py-meth docutils literal notranslate"><span class="pre">output()</span></code>.</p>
 <dl class="py attribute">
@@ -281,7 +281,7 @@ and returns minimum and output upon calling <code class="xref py py-meth docutil
 <dt class="sig sig-object py" id="roger.diagnostics.maximum.Maximum">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.diagnostics.maximum.</span></span><span class="sig-name descname"><span class="pre">Maximum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/diagnostics/maximum.html#Maximum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.diagnostics.maximum.Maximum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roger.diagnostics.base.RogerDiagnostic" title="roger.diagnostics.base.RogerDiagnostic"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.diagnostics.base.RogerDiagnostic</span></code></a></p>
-<p>Time maximum output diagnostic.</p>
+<p>Maximum output diagnostic.</p>
 <p>All registered variables are stacked when <code class="xref py py-meth docutils literal notranslate"><span class="pre">diagnose()</span></code> is called,
 and returns maximum and output upon calling <code class="xref py py-meth docutils literal notranslate"><span class="pre">output()</span></code>.</p>
 <dl class="py attribute">
@@ -322,7 +322,7 @@ and returns maximum and output upon calling <code class="xref py py-meth docutil
 <dt class="sig sig-object py" id="roger.diagnostics.rates.Rates">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.diagnostics.rates.</span></span><span class="sig-name descname"><span class="pre">Rates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/diagnostics/rates.html#Rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.diagnostics.rates.Rates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roger.diagnostics.base.RogerDiagnostic" title="roger.diagnostics.base.RogerDiagnostic"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.diagnostics.base.RogerDiagnostic</span></code></a></p>
-<p>Time average output diagnostic.</p>
+<p>Rates output diagnostic.</p>
 <p>All registered variables are summed up when <code class="xref py py-meth docutils literal notranslate"><span class="pre">diagnose()</span></code> is called,
 and output upon calling <code class="xref py py-meth docutils literal notranslate"><span class="pre">output()</span></code>.</p>
 <dl class="py attribute">

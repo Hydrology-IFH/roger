@@ -7,7 +7,7 @@ from roger.core.operators import numpy as npx
 
 
 class Averages(RogerDiagnostic):
-    """Time average output diagnostic.
+    """Average output diagnostic.
 
     All registered variables are summed up when :meth:`diagnose` is called,
     and averaged and output upon calling :meth:`output`.
