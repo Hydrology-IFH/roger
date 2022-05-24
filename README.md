@@ -13,9 +13,15 @@ high-performance [JAX](https://github.com/google/jax) backend
 with CPU and GPU support. It is fully parallelized via MPI and supports
 distributed execution on any number of nodes, including multi-GPU architectures (see also ...).
 
-To learn more about Roger, make sure to [visit our documentation](https://roger.readthedocs.io/en/latest/).
-
 Inspired by [Veros](https://veros.readthedocs.io/en/latest/).
+
+## Documentation
+
+The documentation is still under construction. However, the documentation can be
+accessed locally by opening doc/_build/html/index.html in your browser.
+
+Future Online-Documentation:
+To learn more about Roger, make sure to [visit our documentation](https://roger.readthedocs.io/en/latest/).
 
 ## Features
 
