@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>roger.runtime &mdash; RoGeR 0+unknown documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> RoGeR
+          </a>
+              <div class="version">
+                0+unknown
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">A short introduction to Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/get-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/advanced-installation.html">Advanced installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/cluster.html">Running Roger on a cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/dev.html">Making changes in Roger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/settings.html">Model settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/variables.html">Model variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/cli.html">Command line tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/public-api.html">Python API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../more/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../more/howtocite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../more/publications.html">Publications involving Roger</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">RoGeR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>roger.runtime</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for roger.runtime</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">local</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="kn">from</span> <span class="nn">roger.backend</span> <span class="kn">import</span> <span class="n">BACKENDS</span>
+<span class="kn">from</span> <span class="nn">roger.logs</span> <span class="kn">import</span> <span class="n">LOGLEVELS</span>
+
+
+<span class="c1"># globals</span>
+<span class="n">log_args</span> <span class="o">=</span> <span class="n">local</span><span class="p">()</span>
+<span class="n">log_args</span><span class="o">.</span><span class="n">log_all_processes</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">log_args</span><span class="o">.</span><span class="n">loglevel</span> <span class="o">=</span> <span class="s2">&quot;info&quot;</span>
+
+
+<span class="c1"># MPI helpers</span>
+
+
+<span class="k">def</span> <span class="nf">_default_mpi_comm</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+
+
+<span class="c1"># validators</span>
+
+
+<span class="k">def</span> <span class="nf">parse_two_ints</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+
+<span class="k">def</span> <span class="nf">parse_choice</span><span class="p">(</span><span class="n">choices</span><span class="p">,</span> <span class="n">preserve_case</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="n">choice</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">choice</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">preserve_case</span><span class="p">:</span>
+            <span class="n">choice</span> <span class="o">=</span> <span class="n">choice</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">choice</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">choices</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;must be one of </span><span class="si">{</span><span class="n">choices</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">choice</span>
+
+    <span class="k">return</span> <span class="n">validate</span>
+
+
+<span class="k">def</span> <span class="nf">parse_bool</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;on&quot;</span><span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">check_mpi_comm</span><span class="p">(</span><span class="n">comm</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">comm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">comm</span><span class="p">,</span> <span class="n">MPI</span><span class="o">.</span><span class="n">Comm</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;mpi_comm must be Comm instance or None&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">comm</span>
+
+
+<span class="k">def</span> <span class="nf">set_loglevel</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">logs</span>
+
+    <span class="n">log_args</span><span class="o">.</span><span class="n">loglevel</span> <span class="o">=</span> <span class="n">parse_choice</span><span class="p">(</span><span class="n">LOGLEVELS</span><span class="p">)(</span><span class="n">val</span><span class="p">)</span>
+    <span class="n">logs</span><span class="o">.</span><span class="n">setup_logging</span><span class="p">(</span><span class="n">loglevel</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">loglevel</span><span class="p">,</span> <span class="n">log_all_processes</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">log_all_processes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">log_args</span><span class="o">.</span><span class="n">loglevel</span>
+
+
+<span class="k">def</span> <span class="nf">set_log_all_processes</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">logs</span>
+
+    <span class="n">log_args</span><span class="o">.</span><span class="n">log_all_processes</span> <span class="o">=</span> <span class="n">parse_bool</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="n">logs</span><span class="o">.</span><span class="n">setup_logging</span><span class="p">(</span><span class="n">loglevel</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">loglevel</span><span class="p">,</span> <span class="n">log_all_processes</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">log_all_processes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">log_args</span><span class="o">.</span><span class="n">log_all_processes</span>
+
+
+<span class="n">DEVICES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="s2">&quot;gpu&quot;</span><span class="p">,</span> <span class="s2">&quot;tpu&quot;</span><span class="p">)</span>
+<span class="n">FLOAT_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">,</span> <span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+<span class="n">LINEAR_SOLVERS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;scipy&quot;</span><span class="p">,</span> <span class="s2">&quot;scipy_jax&quot;</span><span class="p">,</span> <span class="s2">&quot;petsc&quot;</span><span class="p">,</span> <span class="s2">&quot;best&quot;</span><span class="p">)</span>
+
+
+<span class="c1"># settings</span>
+
+<span class="n">RuntimeSetting</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;RuntimeSetting&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="s2">&quot;read_from_env&quot;</span><span class="p">))</span>
+<span class="n">RuntimeSetting</span><span class="o">.</span><span class="fm">__new__</span><span class="o">.</span><span class="vm">__defaults__</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+<span class="n">AVAILABLE_SETTINGS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">parse_choice</span><span class="p">(</span><span class="n">BACKENDS</span><span class="p">),</span> <span class="s2">&quot;numpy&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">parse_choice</span><span class="p">(</span><span class="n">DEVICES</span><span class="p">),</span> <span class="s2">&quot;cpu&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;float_type&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">parse_choice</span><span class="p">(</span><span class="n">FLOAT_TYPES</span><span class="p">),</span> <span class="s2">&quot;float64&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;petsc_options&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;monitor_water_balance&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">parse_bool</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="s2">&quot;monitor_tracer_balance&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">parse_bool</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="s2">&quot;num_proc&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">parse_two_ints</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">read_from_env</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="s2">&quot;profile_mode&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">parse_bool</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="s2">&quot;loglevel&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">set_loglevel</span><span class="p">,</span> <span class="s2">&quot;info&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;mpi_comm&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">check_mpi_comm</span><span class="p">,</span> <span class="n">_default_mpi_comm</span><span class="p">(),</span> <span class="n">read_from_env</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="s2">&quot;log_all_processes&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">set_log_all_processes</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="s2">&quot;use_io_threads&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">parse_bool</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="s2">&quot;io_timeout&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+    <span class="s2">&quot;hdf5_gzip_compression&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="s2">&quot;force_overwrite&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="s2">&quot;diskless_mode&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="RuntimeSettings"><a class="viewcode-back" href="../../reference/api/runtime.html#roger.runtime.RuntimeSettings">[docs]</a><span class="k">class</span> <span class="nc">RuntimeSettings</span><span class="p">:</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;__locked__&quot;</span><span class="p">,</span> <span class="s2">&quot;__setting_types__&quot;</span><span class="p">,</span> <span class="s2">&quot;__settings__&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">AVAILABLE_SETTINGS</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__locked__</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__setting_types__</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">setting</span> <span class="ow">in</span> <span class="n">AVAILABLE_SETTINGS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">setting_envvar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;ROGER_</span><span class="si">{</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">setting</span><span class="o">.</span><span class="n">read_from_env</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">setting_envvar</span><span class="p">,</span> <span class="n">setting</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">setting</span><span class="o">.</span><span class="n">default</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__setting_types__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">setting</span><span class="o">.</span><span class="n">type</span>
+            <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__settings__</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__setting_types__</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<div class="viewcode-block" id="RuntimeSettings.update"><a class="viewcode-back" href="../../reference/api/runtime.html#roger.runtime.RuntimeSettings.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;__locked__&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Runtime settings cannot be modified after import of core modules&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="c1"># coerce type</span>
+        <span class="n">stype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__setting_types__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">stype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">stype</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Got invalid value for runtime setting &quot;</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s1">&quot;: </span><span class="si">{</span><span class="n">e</span><span class="si">!s}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">setval</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__settings__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">setval</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+
+
+<span class="c1"># state</span>
+
+
+<div class="viewcode-block" id="RuntimeState"><a class="viewcode-back" href="../../reference/api/runtime.html#roger.runtime.RuntimeState">[docs]</a><span class="k">class</span> <span class="nc">RuntimeState</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Unifies attributes from various modules in a simple read-only object&quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">proc_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">runtime_settings</span>
+
+        <span class="n">comm</span> <span class="o">=</span> <span class="n">runtime_settings</span><span class="o">.</span><span class="n">mpi_comm</span>
+
+        <span class="k">if</span> <span class="n">comm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">proc_num</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">runtime_settings</span>
+
+        <span class="n">comm</span> <span class="o">=</span> <span class="n">runtime_settings</span><span class="o">.</span><span class="n">mpi_comm</span>
+
+        <span class="k">if</span> <span class="n">comm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_size</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">proc_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">distributed</span>
+
+        <span class="k">return</span> <span class="n">distributed</span><span class="o">.</span><span class="n">proc_rank_to_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc_rank</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">backend_module</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">backend</span><span class="p">,</span> <span class="n">runtime_settings</span>
+
+        <span class="k">return</span> <span class="n">backend</span><span class="o">.</span><span class="n">get_backend_module</span><span class="p">(</span><span class="n">runtime_settings</span><span class="o">.</span><span class="n">backend</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot modify </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> objects&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, The RoGeR Team, University of Freiburg.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

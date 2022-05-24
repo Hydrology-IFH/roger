@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Making changes in Roger &mdash; RoGeR 0+unknown documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Setup gallery" href="../reference/setup-gallery.html" />
+    <link rel="prev" title="Running Roger on a cluster" href="cluster.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> RoGeR
+          </a>
+              <div class="version">
+                0+unknown
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/introduction.html">A short introduction to Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/get-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/advanced-installation.html">Advanced installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cluster.html">Running Roger on a cluster</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Making changes in Roger</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#code-conventions">Code conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#distributed-memory-support">Distributed memory support</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-dist-safe-keyword">The dist_safe keyword</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-tests-and-benchmarks">Running tests and benchmarks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-tweaks">Performance tweaks</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/settings.html">Model settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/variables.html">Model variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">Command line tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/public-api.html">Python API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../more/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../more/howtocite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../more/publications.html">Publications involving Roger</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RoGeR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Making changes in Roger</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorial/dev.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="making-changes-in-roger">
+<h1>Making changes in Roger<a class="headerlink" href="#making-changes-in-roger" title="Permalink to this headline">¶</a></h1>
+<section id="code-conventions">
+<h2>Code conventions<a class="headerlink" href="#code-conventions" title="Permalink to this headline">¶</a></h2>
+<p>When contributing to Roger, please adhere to the following general guidelines:</p>
+<ul>
+<li><p>Your first guide should be the surrounding Roger code. Look around, and be consistent with your modifications.</p></li>
+<li><p>Unless you have a very good reason not to do so, please stick to <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">the PEP8 style guide</a> throughout your code. One exception we make in Roger is in regard to the maximum line length - since numerical operations can take up quite a lot of horizontal space, you may use longer lines if it increases readability.</p></li>
+<li><p>In particular, please follow the PEP8 naming conventions, and use meaningful, telling names for your variables, functions, and classes. The variable name <code class="xref py py-data docutils literal notranslate"><span class="pre">stretching_factor</span></code> is infinitely more meaningful than <code class="xref py py-data docutils literal notranslate"><span class="pre">k</span></code>. This is especially important for settings and generic helper functions.</p></li>
+<li><p>Document your functions using <a class="reference external" href="http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html">Google-style docstrings</a>. This is especially important if you are implementing a user-facing API (such as a diagnostic, a setup, or tools that are meant to be called from setups).</p></li>
+<li><p>We use <code class="docutils literal notranslate"><span class="pre">flake8</span></code> for linting and <code class="docutils literal notranslate"><span class="pre">black</span></code> for code formatting. We automatically validate all changes to Roger through a pre-commit hook. To install it, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>   $ pip install pre-commit
+   $ pre-commit install
+
+After this, black and flake8 will run automatically on every commit.
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="distributed-memory-support">
+<h2>Distributed memory support<a class="headerlink" href="#distributed-memory-support" title="Permalink to this headline">¶</a></h2>
+<p>By default, all core routines should support distributed execution via MPI.
+In this case, every processor only operates on a chunk of the total data.
+By using <code class="xref py py-func docutils literal notranslate"><span class="pre">roger.variables.allocate()</span></code>, you can make sure that allocated data always has the right shape.</p>
+<p>Since none of the processes have access to the global data, you need to take special care during reductions (e.g. <code class="docutils literal notranslate"><span class="pre">sum</span></code>) and accumulations (e.g. <code class="docutils literal notranslate"><span class="pre">cumsum</span></code>) along horizontal dimensions.
+Use functions from <a class="reference internal" href="../reference/api/distributed.html#module-roger.distributed" title="roger.distributed"><code class="xref py py-mod docutils literal notranslate"><span class="pre">roger.distributed</span></code></a> (e.g. <code class="xref py py-func docutils literal notranslate"><span class="pre">roger.distributed.global_max()</span></code>) where appropriate.</p>
+<section id="the-dist-safe-keyword">
+<h3>The dist_safe keyword<a class="headerlink" href="#the-dist-safe-keyword" title="Permalink to this headline">¶</a></h3>
+<p>If you are not comfortable writing code that is safe for distributed execution, you can use the <code class="docutils literal notranslate"><span class="pre">dist_safe</span></code> keyword to <code class="xref py py-func docutils literal notranslate"><span class="pre">roger.decorators.roger_routine()</span></code>::</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@roger_routine</span><span class="p">(</span><span class="n">dist_safe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">local_variables</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;temp&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">my_function</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+    <span class="c1"># this function is now guaranteed to be executed on the main process</span>
+    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
+
+    <span class="c1"># since temp is declared as a local variable, we have access to all of the data</span>
+    <span class="n">vs</span><span class="o">.</span><span class="n">ta</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">ta</span><span class="p">,</span> <span class="n">at</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">ta</span><span class="p">))</span>
+
+    <span class="c1"># this would throw an error, since salt is not in local_variables</span>
+    <span class="c1"># vs.S = vs.S * 0</span>
+
+    <span class="c1"># after execution, the updated contents of vs.temp are scattered to all processes,</span>
+    <span class="c1"># and distributed execution continues</span>
+</pre></div>
+</div>
+<p>When encountering a <code class="docutils literal notranslate"><span class="pre">roger_routine</span></code> that is marked as not safe for distributed execution (<code class="docutils literal notranslate"><span class="pre">dist_safe=False</span></code>), Roger gathers all relevant data from the worker processes,
+copies it to the main process, and executes the function there.
+This ensures that you can write your code exactly as in the non-distributed case (but it comes with a performance penalty).</p>
+</section>
+</section>
+<section id="running-tests-and-benchmarks">
+<h2>Running tests and benchmarks<a class="headerlink" href="#running-tests-and-benchmarks" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="performance-tweaks">
+<h2>Performance tweaks<a class="headerlink" href="#performance-tweaks" title="Permalink to this headline">¶</a></h2>
+<p>If your changes to Roger turn out to have a negative effect on the runtime of the model, there several ways to investigate and solve performance problems:</p>
+<ul class="simple">
+<li><p>Run your model with the <code class="docutils literal notranslate"><span class="pre">-v</span> <span class="pre">debug</span></code>, <code class="docutils literal notranslate"><span class="pre">-v</span> <span class="pre">trace</span></code>, and / or <code class="docutils literal notranslate"><span class="pre">--profile-mode</span></code> options to get additional debugging output (such as timings for each time step, and a timing summary after the run has finished).</p></li>
+<li><p>You should try and avoid explicit loops over arrays at all cost (but if you have to, you can use <code class="xref py py-func docutils literal notranslate"><span class="pre">roger.core.operators.for_loop()</span></code>, which is reasonably efficient in JAX). You should always try to work on the whole array at once.</p></li>
+<li><p>If you are still having trouble, don’t hesitate to ask for help (e.g. <a class="reference external" href="https://github.com/schwemro/roger/issues">on GitHub</a>).</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cluster.html" class="btn btn-neutral float-left" title="Running Roger on a cluster" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../reference/setup-gallery.html" class="btn btn-neutral float-right" title="Setup gallery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, The RoGeR Team, University of Freiburg.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 *.h5
 
 # documentation and profiler output
-*.html
+#*.html
 
 # benchmark output
 benchmark_*.json
@@ -63,19 +63,19 @@ coverage.xml
 *.mo
 *.pot
 
-# Django stuff:
+# Django stuff
 *.log
 local_settings.py
 
-# Flask stuff:
+# Flask stuff
 instance/
 .webassets-cache
 
-# Scrapy stuff:
+# Scrapy stuff
 .scrapy
 
 # Sphinx documentation
-doc/_build/
+#doc/_build/
 doc/_generated/
 
 # PyBuilder

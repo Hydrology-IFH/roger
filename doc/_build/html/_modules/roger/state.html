@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>roger.state &mdash; RoGeR 0+unknown documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> RoGeR
+          </a>
+              <div class="version">
+                0+unknown
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">A short introduction to Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/get-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/advanced-installation.html">Advanced installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/cluster.html">Running Roger on a cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/dev.html">Making changes in Roger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/settings.html">Model settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/variables.html">Model variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/cli.html">Command line tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/public-api.html">Python API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../more/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../more/howtocite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../more/publications.html">Publications involving Roger</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">RoGeR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>roger.state</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for roger.state</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Mapping</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">timer</span><span class="p">,</span>
+    <span class="n">plugins</span><span class="p">,</span>
+    <span class="n">settings</span> <span class="k">as</span> <span class="n">settings_mod</span><span class="p">,</span>
+    <span class="n">variables</span> <span class="k">as</span> <span class="n">var_mod</span><span class="p">,</span>
+    <span class="n">runtime_settings</span> <span class="k">as</span> <span class="n">rs</span><span class="p">,</span>
+    <span class="n">runtime_state</span> <span class="k">as</span> <span class="n">rst</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">make_namedtuple</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;KernelOutput&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()))(</span><span class="o">*</span><span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+
+<span class="n">KernelOutput</span> <span class="o">=</span> <span class="n">make_namedtuple</span>
+
+
+<span class="k">class</span> <span class="nc">StrictContainer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A mutable container with fixed fields (optionally typed).&quot;&quot;&quot;</span>
+
+    <span class="n">__fields__</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">__field_types__</span> <span class="o">=</span> <span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">field_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span> <span class="o">=</span> <span class="n">fields</span>
+
+        <span class="k">if</span> <span class="n">field_types</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__field_types__</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_types</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">field_types</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="nb">set</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;field_types must be a dict with fields as keys&quot;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__field_types__</span> <span class="o">=</span> <span class="n">field_types</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Name collision: </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fields cannot start with _ (got: </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span>
+
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown attribute </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__field_types__</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__field_types__</span><span class="p">[</span><span class="n">key</span><span class="p">](</span><span class="n">val</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span>
+
+    <span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span>
+
+    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">new_fields</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">other</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">new_fields</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either other or new_fields can be given&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">&quot;_fields&quot;</span><span class="p">):</span>
+                <span class="c1"># other is namedtuple</span>
+                <span class="n">new_fields</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_fields</span><span class="p">,</span> <span class="n">other</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">StrictContainer</span><span class="p">)):</span>
+                <span class="n">new_fields</span> <span class="o">=</span> <span class="n">other</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot update from </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2"> type&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">new_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown attribute </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">new_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">attr_str</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># poor-man&#39;s check for array-compatible types</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">):</span>
+                <span class="n">val_repr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="si">}</span><span class="s2"> with shape </span><span class="si">{</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, dtype </span><span class="si">{</span><span class="n">val</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">val_repr</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+            <span class="n">attr_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">val_repr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">attr_str</span> <span class="o">=</span> <span class="s2">&quot;,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">attr_str</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__qualname__</span><span class="si">}</span><span class="s2">(</span><span class="se">\n</span><span class="si">{</span><span class="n">attr_str</span><span class="si">}</span><span class="se">\n</span><span class="s2">)&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">Lockable</span><span class="p">:</span>
+    <span class="n">__locked__</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">unlock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">lock_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__locked__</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__locked__</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">yield</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__locked__</span> <span class="o">=</span> <span class="n">lock_state</span>
+
+    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">lock_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__locked__</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__locked__</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">yield</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__locked__</span> <span class="o">=</span> <span class="n">lock_state</span>
+
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__locked__</span><span class="p">:</span>
+            <span class="n">clsname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__qualname__</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">clsname</span><span class="si">}</span><span class="s2"> is locked to modifications. If you know what you are doing, &quot;</span>
+                <span class="sa">f</span><span class="s1">&#39;you can unlock it via the &quot;</span><span class="si">{</span><span class="n">clsname</span><span class="si">}</span><span class="s1">.unlock()&quot; context manager.&#39;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">StaticDictProxy</span><span class="p">(</span><span class="n">Mapping</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">writeback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrapped</span> <span class="o">=</span> <span class="n">content</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_writeback</span> <span class="o">=</span> <span class="n">writeback</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrapped</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrapped</span><span class="o">.</span><span class="fm">__iter__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrapped</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Cannot overwrite existing values&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_writeback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_writeback</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrapped</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__qualname__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrapped</span><span class="si">!r}</span><span class="s2">)&quot;</span>
+
+
+<div class="viewcode-block" id="RogerSettings"><a class="viewcode-back" href="../../reference/api/roger-state.html#roger.state.RogerSettings">[docs]</a><span class="k">class</span> <span class="nc">RogerSettings</span><span class="p">(</span><span class="n">Lockable</span><span class="p">,</span> <span class="n">StrictContainer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings_meta</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__metadata__</span> <span class="o">=</span> <span class="n">settings_meta</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="n">settings_meta</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="n">default_settings</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">meta</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">settings_meta</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">unlock</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">default_settings</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__metadata__</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__metadata__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RogerVariables"><a class="viewcode-back" href="../../reference/api/roger-state.html#roger.state.RogerVariables">[docs]</a><span class="k">class</span> <span class="nc">RogerVariables</span><span class="p">(</span><span class="n">Lockable</span><span class="p">,</span> <span class="n">StrictContainer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_meta</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__metadata__</span> <span class="o">=</span> <span class="n">var_meta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dimensions__</span> <span class="o">=</span> <span class="n">dimensions</span>
+
+        <span class="n">active_vars</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">var_meta</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">active</span><span class="p">]</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="n">active_vars</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">unlock</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">var_meta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">val</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">allocate_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">val</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">initial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">allocate_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">fill</span><span class="o">=</span><span class="n">val</span><span class="o">.</span><span class="n">initial</span><span class="p">)</span>
+
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">var_mod</span><span class="o">.</span><span class="n">allocate</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">val</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="o">**</span><span class="n">allocate_kwargs</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+        <span class="n">orig_getattr</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattribute__</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">orig_getattr</span><span class="p">(</span><span class="s2">&quot;__metadata__&quot;</span><span class="p">)[</span><span class="n">attr</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">orig_getattr</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">var</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Variable </span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2"> is not active in this configuration. Check your settings and try again.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">orig_getattr</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__metadata__</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__metadata__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="c1"># check whether variable is active</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">var</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Variable </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> is not active in this configuration. Check your settings and try again.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># validate array type, shape and dtype</span>
+        <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">expected_dtype</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">dtype</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">expected_dtype</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="n">float_type</span>
+
+        <span class="n">val</span> <span class="o">=</span> <span class="n">rst</span><span class="o">.</span><span class="n">backend_module</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">expected_dtype</span><span class="p">)</span>
+
+        <span class="n">expected_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_expected_shape</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">expected_shape</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Got unexpected shape for variable </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> (expected: </span><span class="si">{</span><span class="n">expected_shape</span><span class="si">}</span><span class="s2">, got: </span><span class="si">{</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_expected_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dims</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">var_mod</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__dimensions__</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">DistSafeVariableWrapper</span><span class="p">(</span><span class="n">RogerVariables</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_state</span><span class="p">,</span> <span class="n">local_variables</span><span class="p">):</span>
+        <span class="c1"># set internal attributes to be identical to given variables object</span>
+        <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">parent_state</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__parent_state__</span> <span class="o">=</span> <span class="n">parent_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__local_variables__</span> <span class="o">=</span> <span class="n">local_variables</span>
+
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+        <span class="n">orig_getattr</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattribute__</span>
+        <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">orig_getattr</span><span class="p">(</span><span class="s2">&quot;__metadata__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">orig_getattr</span><span class="p">(</span><span class="s2">&quot;__local_variables__&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Cannot access variable </span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2"> because it was not collected. &quot;</span>
+                <span class="s2">&quot;Consider adding it to the local_variables argument of @roger_routine.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">orig_getattr</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__metadata__</span> <span class="ow">and</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__local_variables__</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Cannot access variable </span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2"> because it was not collected. &quot;</span>
+                <span class="s2">&quot;Consider adding it to the local_variables argument of @roger_routine.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_gather_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">roger.distributed</span> <span class="kn">import</span> <span class="n">gather</span>
+
+        <span class="n">var_meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__metadata__</span>
+
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__local_variables__</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">var</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var_meta</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;encountered unknown variable </span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2"> in local variables&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">var_meta</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">gathered_var</span> <span class="o">=</span> <span class="n">gather</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parent_state__</span><span class="p">,</span> <span class="n">var</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dimensions__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__metadata__</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">gathered_var</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_scatter_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">roger.distributed</span> <span class="kn">import</span> <span class="n">scatter</span><span class="p">,</span> <span class="n">barrier</span>
+
+        <span class="n">barrier</span><span class="p">()</span>
+        <span class="n">var_meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__metadata__</span>
+
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__local_variables__</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">var</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var_meta</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;encountered unknown variable </span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2"> in local variables&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">var_meta</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">scattered_var</span> <span class="o">=</span> <span class="n">scatter</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dimensions__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__metadata__</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parent_state__</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">scattered_var</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_expected_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dims</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">var_mod</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__dimensions__</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="n">local</span><span class="o">=</span><span class="n">rst</span><span class="o">.</span><span class="n">proc_rank</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__qualname__</span><span class="si">}</span><span class="s2">(parent_state=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__parent_state__</span><span class="si">}</span><span class="s2">, local_variables=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__local_variables__</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+
+<div class="viewcode-block" id="RogerState"><a class="viewcode-back" href="../../reference/api/roger-state.html#roger.state.RogerState">[docs]</a><span class="k">class</span> <span class="nc">RogerState</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Holds all settings and model state for a given roger run.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_meta</span><span class="p">,</span> <span class="n">setting_meta</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">,</span> <span class="n">diagnostics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plugin_interfaces</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_var_meta</span> <span class="o">=</span> <span class="n">var_meta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span> <span class="o">=</span> <span class="n">RogerSettings</span><span class="p">(</span><span class="n">setting_meta</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
+
+        <span class="k">if</span> <span class="n">diagnostics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_diagnostics</span> <span class="o">=</span> <span class="n">diagnostics</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_diagnostics</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">plugin_interfaces</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_interfaces</span> <span class="o">=</span> <span class="n">plugin_interfaces</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_interfaces</span> <span class="o">=</span> <span class="p">()</span>
+
+        <span class="n">timer_factory</span> <span class="o">=</span> <span class="n">timer</span><span class="o">.</span><span class="n">Timer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timers</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">timer_factory</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">profile_timers</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">timer_factory</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">textwrap</span> <span class="kn">import</span> <span class="n">indent</span>
+
+        <span class="n">attr_str</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;settings&quot;</span><span class="p">,</span> <span class="s2">&quot;dimensions&quot;</span><span class="p">,</span> <span class="s2">&quot;variables&quot;</span><span class="p">,</span> <span class="s2">&quot;diagnostics&quot;</span><span class="p">,</span> <span class="s2">&quot;plugin_interfaces&quot;</span><span class="p">):</span>
+            <span class="c1"># indent all lines of attr repr except the first</span>
+            <span class="n">attr_val</span> <span class="o">=</span> <span class="n">indent</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)),</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)[</span><span class="mi">4</span><span class="p">:]</span>
+            <span class="n">attr_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    </span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">attr_val</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">attr_str</span> <span class="o">=</span> <span class="s2">&quot;,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">attr_str</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__qualname__</span><span class="si">}</span><span class="s2">(</span><span class="se">\n</span><span class="si">{</span><span class="n">attr_str</span><span class="si">}</span><span class="se">\n</span><span class="s2">)&quot;</span>
+
+<div class="viewcode-block" id="RogerState.initialize_variables"><a class="viewcode-back" href="../../reference/api/roger-state.html#roger.state.RogerState.initialize_variables">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Variables are already initialized.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_var_meta</span> <span class="o">=</span> <span class="n">var_mod</span><span class="o">.</span><span class="n">manifest_metadata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_var_meta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span> <span class="o">=</span> <span class="n">RogerVariables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_var_meta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manifest_dimensions</span><span class="p">())</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">var_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_var_meta</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Variables have not been initialized yet.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span>
+
+    <span class="k">def</span> <span class="nf">_manifest_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">concrete_dimensions</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">dim_name</span><span class="p">,</span> <span class="n">dim_target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dimensions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dim_target</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">dim_size</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">,</span> <span class="n">dim_target</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dim_size</span> <span class="o">=</span> <span class="n">dim_target</span>
+
+            <span class="n">concrete_dimensions</span><span class="p">[</span><span class="n">dim_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dim_size</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">concrete_dimensions</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">concrete_dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manifest_dimensions</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">StaticDictProxy</span><span class="p">(</span><span class="n">concrete_dimensions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dimensions</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">diagnostics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_diagnostics</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">plugin_interfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_interfaces</span>
+
+<div class="viewcode-block" id="RogerState.to_xarray"><a class="viewcode-back" href="../../reference/api/roger-state.html#roger.state.RogerState.to_xarray">[docs]</a>    <span class="k">def</span> <span class="nf">to_xarray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+        <span class="n">vs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span>
+
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">data_vars</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">var_meta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_meta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">var_meta</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="n">var_mod</span><span class="o">.</span><span class="n">remove_ghosts</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">var_name</span><span class="p">),</span> <span class="n">var_meta</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
+
+            <span class="n">data_vars</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">,</span>
+                <span class="n">dims</span><span class="o">=</span><span class="n">var_meta</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">var_name</span><span class="p">,</span>
+                <span class="n">attrs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">long_description</span><span class="o">=</span><span class="n">var_meta</span><span class="o">.</span><span class="n">long_description</span><span class="p">,</span>
+                    <span class="n">units</span><span class="o">=</span><span class="n">var_meta</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+                    <span class="n">scale</span><span class="o">=</span><span class="n">var_meta</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">var_meta</span><span class="o">.</span><span class="n">dims</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">var_meta</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">dim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
+                    <span class="n">coords</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">var_mod</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="p">(</span><span class="n">dim</span><span class="p">,),</span> <span class="n">include_ghosts</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">data_vars</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data_vars</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">}</span>
+
+        <span class="n">attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">data_vars</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">get_default_state</span><span class="p">(</span><span class="n">use_plugins</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">use_plugins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plugin_interfaces</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">plugins</span><span class="o">.</span><span class="n">load_plugin</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">use_plugins</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plugin_interfaces</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+
+    <span class="n">default_settings</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">settings_mod</span><span class="o">.</span><span class="n">SETTINGS</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">plugin_interfaces</span><span class="p">:</span>
+        <span class="n">default_settings</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">plugin</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
+
+    <span class="n">default_dimensions</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">var_mod</span><span class="o">.</span><span class="n">DIM_TO_SHAPE_VAR</span><span class="p">)</span>
+    <span class="n">var_meta</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">var_mod</span><span class="o">.</span><span class="n">VARIABLES</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">plugin</span> <span class="ow">in</span> <span class="n">plugin_interfaces</span><span class="p">:</span>
+        <span class="n">var_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">plugin</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">RogerState</span><span class="p">(</span><span class="n">var_meta</span><span class="p">,</span> <span class="n">default_settings</span><span class="p">,</span> <span class="n">default_dimensions</span><span class="p">,</span> <span class="n">plugin_interfaces</span><span class="o">=</span><span class="n">plugin_interfaces</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">roger_state_pytree_flatten</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+    <span class="n">aux_data</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">state</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">&quot;_variables&quot;</span><span class="p">)</span>
+
+    <span class="c1"># ensure that functions are re-traced when settings change</span>
+    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">unlock</span><span class="p">():</span>
+        <span class="n">pseudo_hash</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+
+    <span class="k">return</span> <span class="p">([</span><span class="n">state</span><span class="o">.</span><span class="n">variables</span><span class="p">],</span> <span class="p">(</span><span class="n">aux_data</span><span class="p">,</span> <span class="n">pseudo_hash</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">roger_state_pytree_unflatten</span><span class="p">(</span><span class="n">aux_data</span><span class="p">,</span> <span class="n">leaves</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">leaves</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="n">leaves</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># by-pass __init__ and set attributes manually</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">RogerState</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">RogerState</span><span class="p">)</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">_variables</span> <span class="o">=</span> <span class="n">variables</span>
+
+    <span class="n">state_attrs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">aux_data</span>
+    <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">state_attrs</span><span class="p">:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">state</span>
+
+
+<span class="k">def</span> <span class="nf">roger_variables_pytree_flatten</span><span class="p">(</span><span class="n">variables</span><span class="p">):</span>
+    <span class="n">aux_attrs</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;__dimensions__&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__metadata__&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__fields__&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__locked__&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">leaves</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">variables</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">aux_data</span> <span class="o">=</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">variables</span><span class="o">.</span><span class="n">fields</span><span class="p">()),</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span> <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">aux_attrs</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">leaves</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">roger_variables_pytree_unflatten</span><span class="p">(</span><span class="n">aux_data</span><span class="p">,</span> <span class="n">leaves</span><span class="p">):</span>
+    <span class="n">keys</span><span class="p">,</span> <span class="n">aux_attrs</span> <span class="o">=</span> <span class="n">aux_data</span>
+
+    <span class="c1"># by-pass __init__ and set attributes manually</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="n">RogerVariables</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">RogerVariables</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">aux_attrs</span><span class="p">:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">variables</span><span class="o">.</span><span class="n">unlock</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">leaves</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">variables</span>
+
+
+<span class="k">def</span> <span class="nf">dist_safe_wrapper_pytree_flatten</span><span class="p">(</span><span class="n">variables</span><span class="p">):</span>
+    <span class="n">aux_attrs</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;__dimensions__&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__metadata__&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__fields__&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__locked__&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__local_variables__&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;__parent_state__&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">with</span> <span class="n">variables</span><span class="o">.</span><span class="n">unlock</span><span class="p">():</span>
+        <span class="n">leaves</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">variables</span><span class="o">.</span><span class="n">__local_variables__</span><span class="p">]</span>
+
+    <span class="n">aux_data</span> <span class="o">=</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">variables</span><span class="o">.</span><span class="n">__local_variables__</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span> <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">aux_attrs</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">leaves</span><span class="p">,</span> <span class="n">aux_data</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">dist_safe_wrapper_pytree_unflatten</span><span class="p">(</span><span class="n">aux_data</span><span class="p">,</span> <span class="n">leaves</span><span class="p">):</span>
+    <span class="n">keys</span><span class="p">,</span> <span class="n">aux_attrs</span> <span class="o">=</span> <span class="n">aux_data</span>
+
+    <span class="c1"># by-pass __init__ and set attributes manually</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="n">DistSafeVariableWrapper</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">DistSafeVariableWrapper</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">aux_attrs</span><span class="p">:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">variables</span><span class="o">.</span><span class="n">unlock</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">leaves</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">variables</span>
+
+
+<span class="k">def</span> <span class="nf">resize_dimension</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">new_size</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Resize a dimension of an existing RogerState object.</span>
+
+<span class="sd">    This re-allocates all variables using the dimension to 0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">_dimensions</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_size</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">__dimensions__</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_size</span>
+
+    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">unlock</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">fields</span><span class="p">():</span>
+            <span class="n">var_meta</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">__metadata__</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+            <span class="n">var_dims</span> <span class="o">=</span> <span class="n">var_meta</span><span class="o">.</span><span class="n">dims</span>
+
+            <span class="k">if</span> <span class="n">var_dims</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">dimension</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">var_dims</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">variables</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">var_mod</span><span class="o">.</span><span class="n">allocate</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">var_meta</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">var_meta</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, The RoGeR Team, University of Freiburg.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

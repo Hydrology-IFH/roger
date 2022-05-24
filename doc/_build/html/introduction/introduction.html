@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A short introduction to Roger &mdash; RoGeR 0+unknown documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Getting started" href="get-started.html" />
+    <link rel="prev" title="Runoff Generation Research in Pure Python" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> RoGeR
+          </a>
+              <div class="version">
+                0+unknown
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">A short introduction to Roger</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-model-architecture">The model architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#available-processes">Available processes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#available-model-structures">Available model structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#diagnostics">Diagnostics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pre-configured-model-setups">Pre-configured model setups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#current-limitations">Current limitations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="get-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-installation.html">Advanced installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/cluster.html">Running Roger on a cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/dev.html">Making changes in Roger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/settings.html">Model settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/variables.html">Model variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/cli.html">Command line tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/public-api.html">Python API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../more/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../more/howtocite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../more/publications.html">Publications involving Roger</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RoGeR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>A short introduction to Roger</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/introduction/introduction.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="a-short-introduction-to-roger">
+<h1>A short introduction to Roger<a class="headerlink" href="#a-short-introduction-to-roger" title="Permalink to this headline">¶</a></h1>
+<section id="the-model-architecture">
+<h2>The model architecture<a class="headerlink" href="#the-model-architecture" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li><p><strong>Easy to access</strong>: Python modules are simple to install, and projects like <a class="reference external" href="https://www.continuum.io/anaconda-overview">Anaconda</a> are doing a great job in creating platform-independent environments.</p></li>
+<li><p><strong>Easy to use</strong>: Anyone with some experience can use their favorite Python tools to set up, control, and post-process Roger.</p></li>
+<li><p><strong>Easy to modify</strong>: Due to Python’s popularity, available abstractions, and dynamic nature, Roger can be extended and modified with relatively little effort.</p></li>
+</ol>
+<p>However, choosing Python over a compiled language like Fortran or C usually comes at a high computational cost. We overcome this gap by using <a class="reference external" href="https://github.com/google/jax">JAX</a>, a framework that can act as a high-performance replacement for NumPy. JAX takes care of all performance optimizations in the background, and runs on CPUs and GPUs.</p>
+<section id="available-processes">
+<h3>Available processes<a class="headerlink" href="#available-processes" title="Permalink to this headline">¶</a></h3>
+<p><strong>Interception</strong>:
+- rainfall and snowfall interception by vegetation</p>
+<p><strong>Snow</strong>:
+- snow accumulation
+- snow melt based on day-degree approach
+- rain-on-snow</p>
+<p><strong>Infiltration</strong>:
+- matrix-driven infiltration based on Green-Ampt approach (<a class="reference internal" href="#weiler2005" id="id1"><span>[Weiler2005]</span></a>)
+- gravity-driven infiltration based on viscous flow approach (<a class="reference internal" href="#germann2018" id="id2"><span>[Germann2018]</span></a>)</p>
+<p><strong>Evaporation</strong>:
+- evaporation from interception and surface storage
+- soil evaporation based on Stage I (i.e. energy limiting stage) and Stage II (i.e. falling rate stage) (<a class="reference internal" href="#torres2010" id="id3"><span>[Torres2010]</span></a>).</p>
+<p><strong>Transpiration</strong>:
+- combination of residual potential evapotranspiration and vegetation-specific coeffcient</p>
+<p><strong>Subsurface Runoff</strong>:
+- capillary-driven vertical soil drainage based on Buckingham-Darcy
+- gravity-driven infiltration based on viscous flow approach (<a class="reference internal" href="#germann2018" id="id4"><span>[Germann2018]</span></a>)
+- lateral subsurface runoff in the soil as described in <a class="reference internal" href="#steinbrich2016" id="id5"><span>[Steinbrich2016]</span></a></p>
+<p><strong>Capillary rise</strong>:
+- capillary-driven vertical uplift ([Salvucci1993])</p>
+<p><strong>Groundwater flow</strong>:
+- spatial explicit representation of shallow groundwater following <a class="reference internal" href="#stoll2010" id="id6"><span>[Stoll2010]</span></a></p>
+<p><strong>Crop phenology and crop rotation</strong>:
+- time-varying crop canopy cover and crop root depth is implemented as in <a class="reference internal" href="#steduto2009" id="id7"><span>[Steduto2009]</span></a></p>
+<p><strong>Offline transport</strong>:
+- StorAge selection (SAS) functions ([Rinaldo2015]) are used to
+calculate travel time distributions and solute concentration/mass of outgoing
+fluxes (e.g. groundwater recharge)</p>
+</section>
+<section id="available-model-structures">
+<h3>Available model structures<a class="headerlink" href="#available-model-structures" title="Permalink to this headline">¶</a></h3>
+<p>Soil hydrologic parameters are approximated by Brooks-Corey scheme.</p>
+<p><strong>SVAT</strong>:
+- only vertical processes are considered
+- no lateral processes (i.e. no lateral exchange between grid cells)</p>
+<p><strong>SVATCROP</strong>:
+- same as SVAT, but crop development (i.e. varying rooting depth and varying canopy cover) is
+explicitly represented</p>
+<p><strong>SVATFILM</strong>:
+- same as SVAT, but with gravity-driven infiltration and gravity-driven drainage</p>
+<p><strong>DIST</strong>:
+- a distributed model</p>
+<p><strong>DISTCROP</strong>:
+- a distributed model including crop phenology/crop rotation</p>
+<p><strong>DISTGROUNDWATER</strong>:
+- a distributed model including shallow groundwater</p>
+<p><strong>TRANSPORT</strong>:
+- calculates offline coupled solute transport based on the hydrologic states from
+one of the model structures above</p>
+</section>
+<section id="diagnostics">
+<h3>Diagnostics<a class="headerlink" href="#diagnostics" title="Permalink to this headline">¶</a></h3>
+<p>Diagnostics are responsible for handling all model output, runtime checks of the solution, and restart file handling. They are implemented in a modular fashion, so additional diagnostics can be implemented easily. Already implemented diagnostics handle snapshot output, aggregation of variables, and monitoring of mass balance.</p>
+<p>For more information, see <a class="reference internal" href="../reference/diagnostics.html"><span class="doc">Diagnostics</span></a>.</p>
+</section>
+<section id="pre-configured-model-setups">
+<h3>Pre-configured model setups<a class="headerlink" href="#pre-configured-model-setups" title="Permalink to this headline">¶</a></h3>
+<p>Roger supports a wide range of model configurations. Several setups are already implemented that highlight some of the capabilities of Roger, and that serve as a basis for users to set up their own configuration: <a class="reference internal" href="../reference/setup-gallery.html"><span class="doc">Setup gallery</span></a>.</p>
+</section>
+<section id="current-limitations">
+<h3>Current limitations<a class="headerlink" href="#current-limitations" title="Permalink to this headline">¶</a></h3>
+<p>Roger is still in development. There are many open issues that we would like to fix later on:</p>
+<ul class="simple">
+<li><p>…</p></li>
+</ul>
+</section>
+<section id="references">
+<h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
+<dl class="citation">
+<dt class="label" id="salvucci1993"><span class="brackets">Salvucci1993</span></dt>
+<dd><p>Salvucci, G. D.: An approximate solution for steady vertical flux of moisture through an unsaturated homogeneous soil, Water Resources Research, 29, 3749-3753, 1993.</p>
+</dd>
+<dt class="label" id="weiler2005"><span class="brackets">Weiler2005</span></dt>
+<dd><p>Weiler, M.: An infiltration model based on flow variability in macropores: development, sensitivity analysis and applications, Journal of Hydrology, 310, 294-315, 2005.</p>
+</dd>
+<dt class="label" id="steduto2009"><span class="brackets">Steduto2009</span></dt>
+<dd><p>Steduto, P., Hsiao, T. C., Raes, D., and Fereres, E.: AquaCrop—The FAO Crop Model to Simulate Yield Response to Water: I. Concepts and Underlying Principles, Agronomy Journal, 101, 426-437, 2009.</p>
+</dd>
+<dt class="label" id="stoll2010"><span class="brackets">Stoll2010</span></dt>
+<dd><p>Stoll, S. and Weiler, M.: Explicit simulations of stream networks to guide hydrological modelling in ungauged basins, Hydrol. Earth Syst. Sci., 14, 1435-1448, 2010.</p>
+</dd>
+<dt class="label" id="torres2010"><span class="brackets">Torres2010</span></dt>
+<dd><p>Torres, E. A. and Calera, A.: Bare soil evaporation under high evaporation demand: a proposed modification to the FAO-56 model, Hydrological Sciences Journal, 55, 303-315, 2010.</p>
+</dd>
+<dt class="label" id="rinaldo2015"><span class="brackets">Rinaldo2015</span></dt>
+<dd><p>Rinaldo, A., Benettin, P., Harman, C. J., Hrachowitz, M., McGuire, K. J., van der Velde, Y., Bertuzzo, E., and Botter, G.: Storage selection functions: A coherent framework for quantifying how catchments store and release water and solutes, Water Resources Research, 51, 4840-4847, 2015.</p>
+</dd>
+<dt class="label" id="steinbrich2016"><span class="brackets">Steinbrich2016</span></dt>
+<dd><p>Steinbrich, A., Leistert, H., and Weiler, M.: Model-based quantification of runoff generation processes at high spatial and temporal resolution, Environmental Earth Sciences, 75, 1423, 2016.</p>
+</dd>
+<dt class="label" id="germann2018"><span class="brackets">Germann2018</span></dt>
+<dd><p>Germann, P. F. and Prasuhn, V.: Viscous Flow Approach to Rapid Infiltration and Drainage in a Weighing Lysimeter, Vadose Zone Journal, 17, 170020, 2018.</p>
+</dd>
+</dl>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Runoff Generation Research in Pure Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="get-started.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, The RoGeR Team, University of Freiburg.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

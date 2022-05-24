@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>roger.routines &mdash; RoGeR 0+unknown documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> RoGeR
+          </a>
+              <div class="version">
+                0+unknown
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">A short introduction to Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/get-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/advanced-installation.html">Advanced installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/cluster.html">Running Roger on a cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/dev.html">Making changes in Roger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/settings.html">Model settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/variables.html">Model variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/cli.html">Command line tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/public-api.html">Python API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../more/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../more/howtocite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../more/publications.html">Publications involving Roger</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">RoGeR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>roger.routines</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for roger.routines</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">ExitStack</span><span class="p">,</span> <span class="n">contextmanager</span>
+
+<span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">from</span> <span class="nn">roger.state</span> <span class="kn">import</span> <span class="n">RogerState</span>
+
+
+<span class="c1"># stack helpers</span>
+
+
+<span class="k">class</span> <span class="nc">RoutineStack</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keep_full_stack</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stack</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_idx</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stack_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_idx</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stack</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_idx</span><span class="p">:</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="p">))</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">val</span><span class="p">,</span> <span class="p">[]])</span>
+
+    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stack</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_idx</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_full_stack</span><span class="p">:</span>
+            <span class="n">last_val</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">last_val</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">pop</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_idx</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">last_val</span>
+
+
+<span class="c1"># global context</span>
+
+<span class="n">CURRENT_CONTEXT</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">local</span><span class="p">()</span>
+<span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">is_dist_safe</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">routine_stack</span> <span class="o">=</span> <span class="n">RoutineStack</span><span class="p">()</span>
+<span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<span class="nd">@contextmanager</span>
+<span class="k">def</span> <span class="nf">nullcontext</span><span class="p">():</span>
+    <span class="k">yield</span>
+
+
+<span class="nd">@contextmanager</span>
+<span class="k">def</span> <span class="nf">enter_routine</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">routine_obj</span><span class="p">,</span> <span class="n">timer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dist_safe</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">runtime_state</span> <span class="k">as</span> <span class="n">rst</span>
+    <span class="kn">from</span> <span class="nn">roger.distributed</span> <span class="kn">import</span> <span class="n">abort</span>
+
+    <span class="n">stack</span> <span class="o">=</span> <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">routine_stack</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="n">stack</span><span class="o">.</span><span class="n">stack_level</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">routine_obj</span><span class="p">)</span>
+
+    <span class="n">reset_dist_safe</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">is_dist_safe</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dist_safe</span> <span class="ow">and</span> <span class="n">rst</span><span class="o">.</span><span class="n">proc_num</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">is_dist_safe</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">reset_dist_safe</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">timer_ctx</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">()</span> <span class="k">if</span> <span class="n">timer</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">timer</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">timer_ctx</span><span class="p">:</span>
+            <span class="k">yield</span>
+
+    <span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa: E722</span>
+        <span class="k">if</span> <span class="n">reset_dist_safe</span><span class="p">:</span>
+            <span class="n">abort</span><span class="p">()</span>
+        <span class="k">raise</span>
+
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">reset_dist_safe</span><span class="p">:</span>
+            <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">is_dist_safe</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">r</span> <span class="ow">is</span> <span class="n">routine_obj</span>
+
+        <span class="n">exec_time</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">timer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">exec_time</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">timer</span><span class="o">.</span><span class="n">last_time</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">s)&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="n">stack</span><span class="o">.</span><span class="n">stack_level</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">exec_time</span><span class="p">)</span>
+
+
+<span class="c1"># helper functions</span>
+
+
+<span class="k">def</span> <span class="nf">_get_func_name</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inspect</span><span class="o">.</span><span class="n">getmodule</span><span class="p">(</span><span class="n">function</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">function</span><span class="o">.</span><span class="vm">__qualname__</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">_is_method</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># hack for unbound methods: check if first argument is called &quot;self&quot;</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getfullargspec</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">spec</span><span class="o">.</span><span class="n">args</span> <span class="ow">and</span> <span class="n">spec</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;self&quot;</span>
+
+
+<span class="c1"># routine</span>
+
+
+<div class="viewcode-block" id="roger_routine"><a class="viewcode-back" href="../../reference/api/routines.html#roger.roger_routine">[docs]</a><span class="k">def</span> <span class="nf">roger_routine</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dist_safe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">local_variables</span><span class="o">=</span><span class="p">()):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    .. note::</span>
+
+<span class="sd">      This decorator should be applied to all functions that access the roger state object</span>
+<span class="sd">      (even when subclassing :class:`roger.rogerSetup`).</span>
+
+<span class="sd">    The first argument to the decorated function must be a RogerState instance.</span>
+
+<span class="sd">    roger routines cannot return anything. All changes must be applied to the passed state object.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        dist_safe (bool): If set to False, all variables specified in local_variables are synced</span>
+<span class="sd">            to the root process before execution and synced back after. This means that the routine</span>
+<span class="sd">            will only be executed on rank 0. Has no effect in non-distributed contexts.</span>
+
+<span class="sd">        local_variables (Tuple[str]): List of variable names to be synced if dist_safe=False. This</span>
+<span class="sd">            must include all variables retrieved from the state object throughout the routine (inputs</span>
+<span class="sd">            *and* outputs).</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">       &gt;&gt;&gt; from roger import rogerSetup, roger_routine</span>
+<span class="sd">       &gt;&gt;&gt;</span>
+<span class="sd">       &gt;&gt;&gt; class MyModel(rogerSetup):</span>
+<span class="sd">       &gt;&gt;&gt;     @roger_routine</span>
+<span class="sd">       &gt;&gt;&gt;     def set_topography(self, state):</span>
+<span class="sd">       &gt;&gt;&gt;         vs = state.variables</span>
+<span class="sd">       &gt;&gt;&gt;         settings = state.settings</span>
+<span class="sd">       &gt;&gt;&gt;         vs.kbot = npx.random.randint(0, settings.nz, size=vs.kbot.shape)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">inner_decorator</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+        <span class="n">narg</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">_is_method</span><span class="p">(</span><span class="n">function</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">num_params</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">function</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">narg</span> <span class="o">&gt;=</span> <span class="n">num_params</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;roger routines must take at least one argument&quot;</span><span class="p">)</span>
+
+        <span class="n">routine</span> <span class="o">=</span> <span class="n">rogerRoutine</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">state_argnum</span><span class="o">=</span><span class="n">narg</span><span class="p">,</span> <span class="n">dist_safe</span><span class="o">=</span><span class="n">dist_safe</span><span class="p">,</span> <span class="n">local_variables</span><span class="o">=</span><span class="n">local_variables</span><span class="p">)</span>
+        <span class="n">routine</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)(</span><span class="n">routine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">routine</span>
+
+    <span class="k">if</span> <span class="n">function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">inner_decorator</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner_decorator</span></div>
+
+
+<span class="k">class</span> <span class="nc">rogerRoutine</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Do not instantiate directly!&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">dist_safe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">local_variables</span><span class="o">=</span><span class="p">(),</span> <span class="n">state_argnum</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">local_variables</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">local_variables</span> <span class="o">=</span> <span class="p">(</span><span class="n">local_variables</span><span class="p">,)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_safe</span> <span class="o">=</span> <span class="n">dist_safe</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_variables</span> <span class="o">=</span> <span class="n">local_variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_argnum</span> <span class="o">=</span> <span class="n">state_argnum</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">_get_func_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">runtime_state</span> <span class="k">as</span> <span class="n">rst</span>
+        <span class="kn">from</span> <span class="nn">roger.state</span> <span class="kn">import</span> <span class="n">RogerState</span><span class="p">,</span> <span class="n">DistSafeVariableWrapper</span>
+        <span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">flush</span>
+
+        <span class="n">roger_state</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state_argnum</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">roger_state</span><span class="p">,</span> <span class="n">RogerState</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Argument </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">state_argnum</span><span class="si">}</span><span class="s2"> to this roger routine must be a RogerState object&quot;</span><span class="p">)</span>
+
+        <span class="n">timer</span> <span class="o">=</span> <span class="n">roger_state</span><span class="o">.</span><span class="n">profile_timers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+
+        <span class="k">with</span> <span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+            <span class="n">vars_initialized</span> <span class="o">=</span> <span class="n">roger_state</span><span class="o">.</span><span class="n">_variables</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">vars_initialized</span><span class="p">:</span>
+                <span class="n">es</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">roger_state</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">unlock</span><span class="p">())</span>
+
+            <span class="n">execute</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">restore_vars</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_safe</span><span class="p">:</span>
+                <span class="n">orig_vars</span> <span class="o">=</span> <span class="n">roger_state</span><span class="o">.</span><span class="n">_variables</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">orig_vars</span><span class="p">,</span> <span class="n">DistSafeVariableWrapper</span><span class="p">):</span>
+                    <span class="n">restore_vars</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">roger_state</span><span class="o">.</span><span class="n">_variables</span> <span class="o">=</span> <span class="n">DistSafeVariableWrapper</span><span class="p">(</span><span class="n">orig_vars</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_variables</span><span class="p">)</span>
+                    <span class="n">roger_state</span><span class="o">.</span><span class="n">_variables</span><span class="o">.</span><span class="n">_gather_variables</span><span class="p">()</span>
+
+                <span class="n">execute</span> <span class="o">=</span> <span class="n">rst</span><span class="o">.</span><span class="n">proc_rank</span> <span class="o">==</span> <span class="mi">0</span>
+
+            <span class="n">routine_ctx</span> <span class="o">=</span> <span class="n">enter_routine</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">routine_obj</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="o">=</span><span class="n">timer</span><span class="p">,</span> <span class="n">dist_safe</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_safe</span><span class="p">)</span>
+
+            <span class="n">out</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">routine_ctx</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">execute</span><span class="p">:</span>
+                        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">restore_vars</span><span class="p">:</span>
+                    <span class="n">roger_state</span><span class="o">.</span><span class="n">_variables</span><span class="o">.</span><span class="n">_scatter_variables</span><span class="p">()</span>
+                    <span class="n">roger_state</span><span class="o">.</span><span class="n">_variables</span> <span class="o">=</span> <span class="n">orig_vars</span>
+
+                <span class="n">flush</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Routine </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> returned object of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="si">}</span><span class="s2">. Return objects are silently dropped.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__call__</span><span class="p">,</span> <span class="n">instance</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
+
+
+<span class="c1"># kernel</span>
+
+
+<div class="viewcode-block" id="roger_kernel"><a class="viewcode-back" href="../../reference/api/routines.html#roger.roger_kernel">[docs]</a><span class="k">def</span> <span class="nf">roger_kernel</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">static_args</span><span class="o">=</span><span class="p">()):</span>
+    <span class="sd">&quot;&quot;&quot;Decorator that marks a function as a kernel that can be JIT compiled if supported</span>
+<span class="sd">    by the backend.</span>
+
+<span class="sd">    Kernels cannot modify the roger state object. Instead, all modifications have to be</span>
+<span class="sd">    returned explicitly.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        static_args (Tuple[str]): Names of kernel arguments that should be static.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; from roger import roger_kernel, KernelOutput</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; @roger_kernel</span>
+<span class="sd">        &gt;&gt;&gt; def double_psi(state):</span>
+<span class="sd">        &gt;&gt;&gt;     vs = state.variables</span>
+<span class="sd">        &gt;&gt;&gt;     vs.psi = 2 * vs.psi</span>
+<span class="sd">        &gt;&gt;&gt;     return KernelOutput(psi=vs.psi)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">inner_decorator</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+        <span class="n">kernel</span> <span class="o">=</span> <span class="n">rogerKernel</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">static_args</span><span class="o">=</span><span class="n">static_args</span><span class="p">)</span>
+        <span class="n">kernel</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)(</span><span class="n">kernel</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">kernel</span>
+
+    <span class="k">if</span> <span class="n">function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">inner_decorator</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner_decorator</span></div>
+
+
+<span class="k">class</span> <span class="nc">rogerKernel</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Do not instantiate directly!&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">static_args</span><span class="o">=</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;Do some parameter introspection.&quot;&quot;&quot;</span>
+
+        <span class="c1"># make sure function signature is in the form we need</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">_get_func_name</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func_sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+
+        <span class="n">func_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">func_sig</span><span class="o">.</span><span class="n">parameters</span>
+
+        <span class="n">allowed_param_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_ONLY</span><span class="p">,</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_OR_KEYWORD</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_param_types</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">func_params</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;roger kernels do not support *args, **kwargs, or keyword-only parameters (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+        <span class="c1"># parse static args</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">static_args</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">static_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">static_args</span><span class="p">,)</span>
+
+        <span class="n">func_argnames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">func_params</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">static_argnums</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">static_arg</span> <span class="ow">in</span> <span class="n">static_args</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">arg_index</span> <span class="o">=</span> <span class="n">func_argnames</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">static_arg</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;roger kernel </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has no argument &quot;</span><span class="si">{</span><span class="n">static_arg</span><span class="si">}</span><span class="s1">&quot;, but it is given in static_args&#39;</span>
+                <span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">static_argnums</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg_index</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">function</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">runtime_settings</span><span class="p">,</span> <span class="n">runtime_state</span>
+        <span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">flush</span>
+
+        <span class="n">inject_tokens</span> <span class="o">=</span> <span class="n">runtime_settings</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;jax&quot;</span> <span class="ow">and</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_num</span> <span class="o">&gt;</span> <span class="mi">1</span>
+
+        <span class="c1"># apply JIT</span>
+        <span class="k">if</span> <span class="n">runtime_settings</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;jax&quot;</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">jax</span>
+
+            <span class="n">CompiledFunction</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="n">CompiledFunction</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">inject_tokens</span><span class="p">:</span>
+                    <span class="n">function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span>
+
+                    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+                    <span class="k">def</span> <span class="nf">token_wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+                        <span class="n">inputs</span> <span class="o">=</span> <span class="n">args</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">token</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span> <span class="o">=</span> <span class="n">token</span>
+                        <span class="n">out</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">)</span>
+                        <span class="n">token</span> <span class="o">=</span> <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span>
+                        <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">token</span>
+
+                    <span class="k">if</span> <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">create_token</span><span class="p">()</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">token_wrapper</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">static_argnums</span><span class="p">)</span>
+
+        <span class="c1"># JAX only accepts positional args when using static_argnums</span>
+        <span class="c1"># so convert everything to positional for consistency</span>
+        <span class="n">bound_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">func_sig</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">bound_args</span><span class="o">.</span><span class="n">apply_defaults</span><span class="p">()</span>
+
+        <span class="n">roger_state</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">argval</span> <span class="ow">in</span> <span class="n">bound_args</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">argval</span><span class="p">,</span> <span class="n">RogerState</span><span class="p">):</span>
+                <span class="n">roger_state</span> <span class="o">=</span> <span class="n">argval</span>
+                <span class="k">break</span>
+
+        <span class="n">called_with_state</span> <span class="o">=</span> <span class="n">roger_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="c1"># when profiling, make sure all inputs are ready before starting the timer</span>
+        <span class="k">if</span> <span class="n">runtime_settings</span><span class="o">.</span><span class="n">profile_mode</span><span class="p">:</span>
+            <span class="n">flush</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">called_with_state</span><span class="p">:</span>
+            <span class="n">timer</span> <span class="o">=</span> <span class="n">roger_state</span><span class="o">.</span><span class="n">profile_timers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">timer</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">with</span> <span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">called_with_state</span><span class="p">:</span>
+                <span class="n">es</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">roger_state</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">unlock</span><span class="p">())</span>
+
+            <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bound_args</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="n">inject_tokens</span><span class="p">:</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">enter_routine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">runtime_settings</span><span class="o">.</span><span class="n">profile_mode</span><span class="p">:</span>
+                    <span class="n">flush</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">inject_tokens</span><span class="p">:</span>
+                <span class="n">out</span><span class="p">,</span> <span class="n">token</span> <span class="o">=</span> <span class="n">out</span>
+                <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span> <span class="o">=</span> <span class="n">token</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">is_roger_routine</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">):</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">func</span>
+
+    <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__self__</span>
+
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">rogerRoutine</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, The RoGeR Team, University of Freiburg.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

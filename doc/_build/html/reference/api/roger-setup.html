@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roger setup class &mdash; RoGeR 0+unknown documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Roger state class" href="roger-state.html" />
+    <link rel="prev" title="Python API" href="../public-api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> RoGeR
+          </a>
+              <div class="version">
+                0+unknown
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">A short introduction to Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/get-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/advanced-installation.html">Advanced installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/cluster.html">Running Roger on a cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/dev.html">Making changes in Roger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../settings.html">Model settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../variables.html">Model variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command line tools</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../public-api.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Roger setup class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="roger-state.html">Roger state class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="routines.html">roger_routine and roger_kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="runtime.html">Runtime settings &amp; state</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools.html">Tools &amp; utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="operators.html">Numerical operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed.html">Distributed communication primitives</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../more/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../more/howtocite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../more/publications.html">Publications involving Roger</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">RoGeR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../public-api.html">Python API</a> &raquo;</li>
+      <li>Roger setup class</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/reference/api/roger-setup.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="roger-setup-class">
+<h1>Roger setup class<a class="headerlink" href="#roger-setup-class" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="roger.RogerSetup">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.</span></span><span class="sig-name descname"><span class="pre">RogerSetup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Main class for roger, used for building a model and running it.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This class is meant to be subclassed. Subclasses need to implement the
+methods <a class="reference internal" href="#roger.RogerSetup.set_parameters" title="roger.RogerSetup.set_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_parameters()</span></code></a>, <a class="reference internal" href="#roger.RogerSetup.set_topography" title="roger.RogerSetup.set_topography"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_topography()</span></code></a>, <a class="reference internal" href="#roger.RogerSetup.set_grid" title="roger.RogerSetup.set_grid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_grid()</span></code></a>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">set_coriolis()</span></code>, <a class="reference internal" href="#roger.RogerSetup.set_initial_conditions" title="roger.RogerSetup.set_initial_conditions"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_initial_conditions()</span></code></a>, <a class="reference internal" href="#roger.RogerSetup.set_forcing" title="roger.RogerSetup.set_forcing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_forcing()</span></code></a>,
+and <a class="reference internal" href="#roger.RogerSetup.set_diagnostics" title="roger.RogerSetup.set_diagnostics"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_diagnostics()</span></code></a>.</p>
+</div>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">RogerSetup</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">RogerSetup</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simulation</span> <span class="o">=</span> <span class="n">MyModel</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">psi</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.RogerSetup.set_settings">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>To be implemented by subclass.</p>
+<p>First function to be called during setup.
+Use this to modify the model settings.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">settings</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">settings</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">settings</span><span class="o">.</span><span class="n">nx</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ny</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">nz</span> <span class="o">=</span> <span class="p">(</span><span class="mi">360</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.RogerSetup.set_look_up_tables">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_look_up_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_look_up_tables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_look_up_tables" title="Permalink to this definition">¶</a></dt>
+<dd><p>To be implemented by subclass.</p>
+<p>First function to be called during setup.
+Use this to modify the model settings.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">u</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">u</span><span class="p">,</span> <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">],</span> <span class="n">npx</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.RogerSetup.set_parameters">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>To be implemented by subclass.</p>
+<p>First function to be called during setup.
+Use this to modify the model settings.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">u</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">u</span><span class="p">,</span> <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">],</span> <span class="n">npx</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.RogerSetup.set_initial_conditions">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_initial_conditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_initial_conditions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_initial_conditions" title="Permalink to this definition">¶</a></dt>
+<dd><p>To be implemented by subclass.</p>
+<p>May be used to set initial conditions.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@roger_method</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_initial_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">u</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">u</span><span class="p">,</span> <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">],</span> <span class="n">npx</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.RogerSetup.set_grid">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>To be implemented by subclass.</p>
+<p>Has to set the grid spacings <code class="xref py py-attr docutils literal notranslate"><span class="pre">dxt</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">dyt</span></code>, and <code class="xref py py-attr docutils literal notranslate"><span class="pre">dzt</span></code>,
+along with the coordinates of the grid origin, <code class="xref py py-attr docutils literal notranslate"><span class="pre">x_origin</span></code> and
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">y_origin</span></code>.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@roger_method</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">x_origin</span><span class="p">,</span> <span class="n">vs</span><span class="o">.</span><span class="n">y_origin</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="mf">1.</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">dy</span> <span class="o">=</span> <span class="mf">1.</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">dz</span> <span class="o">=</span> <span class="mf">2.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.RogerSetup.set_topography">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_topography</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_topography"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_topography" title="Permalink to this definition">¶</a></dt>
+<dd><p>To be implemented by subclass.</p>
+<p>Must specify the model topography by setting <code class="xref py py-attr docutils literal notranslate"><span class="pre">kbot</span></code>.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@roger_method</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_topography</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">kbot</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">kbot</span><span class="p">,</span> <span class="n">at</span><span class="p">[</span><span class="o">...</span><span class="p">],</span> <span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.RogerSetup.set_forcing">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_forcing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_forcing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_forcing" title="Permalink to this definition">¶</a></dt>
+<dd><p>To be implemented by subclass.</p>
+<p>Called before every time step to update the external forcing, e.g. through
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">forc_temp_surface</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">forc_salt_surface</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">surface_taux</span></code>,
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">surface_tauy</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">forc_tke_surface</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">temp_source</span></code>, or
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">salt_source</span></code>. Use this method to implement time-dependent forcing.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@roger_method</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_forcing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">current_month</span> <span class="o">=</span> <span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">time</span> <span class="o">/</span> <span class="p">(</span><span class="mi">31</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">))</span> <span class="o">%</span> <span class="mi">12</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">surface_taux</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">_windstress_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">current_month</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.RogerSetup.set_diagnostics">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_diagnostics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_diagnostics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_diagnostics" title="Permalink to this definition">¶</a></dt>
+<dd><p>To be implemented by subclass.</p>
+<p>Called before setting up the <a class="reference internal" href="../diagnostics.html#diagnostics"><span class="std std-ref">diagnostics</span></a>. Use this method e.g. to
+mark additional <a class="reference internal" href="../variables.html#variables"><span class="std std-ref">variables</span></a> for output.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@roger_method</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_diagnostics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">state</span><span class="o">.</span><span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;snapshot&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output_variables</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;drho&#39;</span><span class="p">,</span> <span class="s1">&#39;dsalt&#39;</span><span class="p">,</span> <span class="s1">&#39;dtemp&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.RogerSetup.after_timestep">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">after_timestep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.after_timestep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.after_timestep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the end of each time step. Can be used to define custom, setup-specific
+events.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.RogerSetup.warmup">
+<span class="sig-name descname"><span class="pre">warmup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.warmup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.warmup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Warmup routine of the simulation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Make sure to call <code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code> prior to this function.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.RogerSetup.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">show_progress_bar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main routine of the simulation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Make sure to call <code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code> prior to this function.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>show_progress_bar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, optional) – Whether to show fancy progress bar via tqdm.
+By default, only show if stdout is a terminal and roger is running on a single process.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../public-api.html" class="btn btn-neutral float-left" title="Python API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="roger-state.html" class="btn btn-neutral float-right" title="Roger state class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, The RoGeR Team, University of Freiburg.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

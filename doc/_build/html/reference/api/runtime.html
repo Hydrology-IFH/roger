@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Runtime settings &amp; state &mdash; RoGeR 0+unknown documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Tools &amp; utilities" href="tools.html" />
+    <link rel="prev" title="roger_routine and roger_kernel" href="routines.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> RoGeR
+          </a>
+              <div class="version">
+                0+unknown
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">A short introduction to Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/get-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/advanced-installation.html">Advanced installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/cluster.html">Running Roger on a cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/dev.html">Making changes in Roger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../settings.html">Model settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../variables.html">Model variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command line tools</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../public-api.html">Python API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="roger-setup.html">Roger setup class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="roger-state.html">Roger state class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="routines.html">roger_routine and roger_kernel</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Runtime settings &amp; state</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#runtime-settings">Runtime settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#runtime-state">Runtime state</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tools.html">Tools &amp; utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="operators.html">Numerical operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="distributed.html">Distributed communication primitives</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../more/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../more/howtocite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../more/publications.html">Publications involving Roger</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">RoGeR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../public-api.html">Python API</a> &raquo;</li>
+      <li>Runtime settings &amp; state</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/reference/api/runtime.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="runtime-settings-state">
+<h1>Runtime settings &amp; state<a class="headerlink" href="#runtime-settings-state" title="Permalink to this headline">¶</a></h1>
+<section id="runtime-settings">
+<h2>Runtime settings<a class="headerlink" href="#runtime-settings" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.runtime.</span></span><span class="sig-name descname"><span class="pre">RuntimeSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/runtime.html#RuntimeSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.runtime.RuntimeSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/runtime.html#RuntimeSettings.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.runtime.RuntimeSettings.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.backend">
+<span class="sig-name descname"><span class="pre">backend</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.backend" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.device">
+<span class="sig-name descname"><span class="pre">device</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.device" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.float_type">
+<span class="sig-name descname"><span class="pre">float_type</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.float_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.petsc_options">
+<span class="sig-name descname"><span class="pre">petsc_options</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.petsc_options" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.monitor_water_balance">
+<span class="sig-name descname"><span class="pre">monitor_water_balance</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.monitor_water_balance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.monitor_tracer_balance">
+<span class="sig-name descname"><span class="pre">monitor_tracer_balance</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.monitor_tracer_balance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.num_proc">
+<span class="sig-name descname"><span class="pre">num_proc</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.num_proc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.profile_mode">
+<span class="sig-name descname"><span class="pre">profile_mode</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.profile_mode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.loglevel">
+<span class="sig-name descname"><span class="pre">loglevel</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.loglevel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.mpi_comm">
+<span class="sig-name descname"><span class="pre">mpi_comm</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.mpi_comm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.log_all_processes">
+<span class="sig-name descname"><span class="pre">log_all_processes</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.log_all_processes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.use_io_threads">
+<span class="sig-name descname"><span class="pre">use_io_threads</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.use_io_threads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.io_timeout">
+<span class="sig-name descname"><span class="pre">io_timeout</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.io_timeout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.hdf5_gzip_compression">
+<span class="sig-name descname"><span class="pre">hdf5_gzip_compression</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.hdf5_gzip_compression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.force_overwrite">
+<span class="sig-name descname"><span class="pre">force_overwrite</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.force_overwrite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeSettings.diskless_mode">
+<span class="sig-name descname"><span class="pre">diskless_mode</span></span><a class="headerlink" href="#roger.runtime.RuntimeSettings.diskless_mode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="runtime-state">
+<h2>Runtime state<a class="headerlink" href="#runtime-state" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.runtime.</span></span><span class="sig-name descname"><span class="pre">RuntimeState</span></span><a class="reference internal" href="../../_modules/roger/runtime.html#RuntimeState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.runtime.RuntimeState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Unifies attributes from various modules in a simple read-only object</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeState.proc_rank">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proc_rank</span></span><a class="headerlink" href="#roger.runtime.RuntimeState.proc_rank" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeState.proc_num">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proc_num</span></span><a class="headerlink" href="#roger.runtime.RuntimeState.proc_num" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeState.proc_idx">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proc_idx</span></span><a class="headerlink" href="#roger.runtime.RuntimeState.proc_idx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roger.runtime.RuntimeState.backend_module">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backend_module</span></span><a class="headerlink" href="#roger.runtime.RuntimeState.backend_module" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="routines.html" class="btn btn-neutral float-left" title="roger_routine and roger_kernel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tools.html" class="btn btn-neutral float-right" title="Tools &amp; utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, The RoGeR Team, University of Freiburg.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

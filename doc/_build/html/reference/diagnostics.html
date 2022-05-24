@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagnostics &mdash; RoGeR 0+unknown documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Command line tools" href="cli.html" />
+    <link rel="prev" title="Model variables" href="variables.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> RoGeR
+          </a>
+              <div class="version">
+                0+unknown
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/introduction.html">A short introduction to Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/get-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/advanced-installation.html">Advanced installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/cluster.html">Running Roger on a cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/dev.html">Making changes in Roger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Model settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="variables.html">Model variables</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Diagnostics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#base-class">Base class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#available-diagnostics">Available diagnostics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#snapshot">Snapshot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#averages">Averages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rates">Rates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#collect">Collect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tracer-monitor">Tracer monitor</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command line tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="public-api.html">Python API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../more/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../more/howtocite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../more/publications.html">Publications involving Roger</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RoGeR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Diagnostics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/reference/diagnostics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="diagnostics">
+<span id="id1"></span><h1>Diagnostics<a class="headerlink" href="#diagnostics" title="Permalink to this headline">¶</a></h1>
+<p>Diagnostics are separate objects (instances of subclasses of <code class="xref py py-class docutils literal notranslate"><span class="pre">RogerDiagnostic</span></code>)
+responsible for handling I/O, restart mechanics, and monitoring of the numerical
+solution. All available diagnostics are instantiated and added to a dictionary
+attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">RogerState.diagnostics</span></code> (with a key determined by their <cite>name</cite> attribute).
+Options for diagnostics may be set during the <code class="xref py py-meth docutils literal notranslate"><span class="pre">RogerSetup.set_diagnostics()</span></code> method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyModelSetup</span><span class="p">(</span><span class="n">RogerSetup</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="k">def</span> <span class="nf">set_diagnostics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">diagnostics</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">diagnostics</span>
+        <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output_variables</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;transp&#39;</span><span class="p">,</span><span class="s1">&#39;q_ss&#39;</span><span class="p">]</span>
+        <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sampling_frequency</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sampling_frequency</span> <span class="o">=</span>  <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span>
+</pre></div>
+</div>
+<section id="base-class">
+<h2>Base class<a class="headerlink" href="#base-class" title="Permalink to this headline">¶</a></h2>
+<p>This class implements some common logic for all diagnostics. This makes it easy
+to write your own diagnostics: Just derive from this class, and implement the
+virtual functions.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="roger.diagnostics.base.RogerDiagnostic">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.diagnostics.base.</span></span><span class="sig-name descname"><span class="pre">RogerDiagnostic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/diagnostics/base.html#RogerDiagnostic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.diagnostics.base.RogerDiagnostic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Base class for diagnostics. Provides an interface and wrappers for common I/O.</p>
+<p>Any diagnostic needs to implement the 5 interface methods and set some attributes.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.base.RogerDiagnostic.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#roger.diagnostics.base.RogerDiagnostic.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name that identifies the current diagnostic</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.diagnostics.base.RogerDiagnostic.initialize">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/diagnostics/base.html#RogerDiagnostic.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.diagnostics.base.RogerDiagnostic.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called at the end of setup. Use this to process user settings and handle setup.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.diagnostics.base.RogerDiagnostic.diagnose">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">diagnose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/diagnostics/base.html#RogerDiagnostic.diagnose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.diagnostics.base.RogerDiagnostic.diagnose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called with frequency <code class="docutils literal notranslate"><span class="pre">sampling_frequency</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.diagnostics.base.RogerDiagnostic.output">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/diagnostics/base.html#RogerDiagnostic.output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.diagnostics.base.RogerDiagnostic.output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called with frequency <code class="docutils literal notranslate"><span class="pre">output_frequency</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="available-diagnostics">
+<h2>Available diagnostics<a class="headerlink" href="#available-diagnostics" title="Permalink to this headline">¶</a></h2>
+<p>Currently, the following diagnostics are implemented and added to
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">RogerState.diagnostics</span></code>:</p>
+<section id="snapshot">
+<h3>Snapshot<a class="headerlink" href="#snapshot" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="roger.diagnostics.snapshot.Snapshot">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.diagnostics.snapshot.</span></span><span class="sig-name descname"><span class="pre">Snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/diagnostics/snapshot.html#Snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.diagnostics.snapshot.Snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roger.diagnostics.base.RogerDiagnostic" title="roger.diagnostics.base.RogerDiagnostic"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.diagnostics.base.RogerDiagnostic</span></code></a></p>
+<p>Writes snapshots of the current solution. Also reads and writes the main restart
+data required for restarting a Roger simulation.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.snapshot.Snapshot.output_path">
+<span class="sig-name descname"><span class="pre">output_path</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'{identifier}.snapshot.nc'</span></em><a class="headerlink" href="#roger.diagnostics.snapshot.Snapshot.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>File to write to. May contain format strings that are replaced with Roger attributes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.snapshot.Snapshot.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'snapshot'</span></em><a class="headerlink" href="#roger.diagnostics.snapshot.Snapshot.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.snapshot.Snapshot.output_frequency">
+<span class="sig-name descname"><span class="pre">output_frequency</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#roger.diagnostics.snapshot.Snapshot.output_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frequency (in seconds) in which output is written.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="averages">
+<h3>Averages<a class="headerlink" href="#averages" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="roger.diagnostics.averages.Averages">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.diagnostics.averages.</span></span><span class="sig-name descname"><span class="pre">Averages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/diagnostics/averages.html#Averages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.diagnostics.averages.Averages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roger.diagnostics.base.RogerDiagnostic" title="roger.diagnostics.base.RogerDiagnostic"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.diagnostics.base.RogerDiagnostic</span></code></a></p>
+<p>Time average output diagnostic.</p>
+<p>All registered variables are summed up when <code class="xref py py-meth docutils literal notranslate"><span class="pre">diagnose()</span></code> is called,
+and averaged and output upon calling <code class="xref py py-meth docutils literal notranslate"><span class="pre">output()</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.averages.Averages.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'averages'</span></em><a class="headerlink" href="#roger.diagnostics.averages.Averages.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.averages.Averages.output_path">
+<span class="sig-name descname"><span class="pre">output_path</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'{identifier}.averages.nc'</span></em><a class="headerlink" href="#roger.diagnostics.averages.Averages.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>File to write to. May contain format strings that are replaced with Roger attributes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.averages.Averages.output_frequency">
+<span class="sig-name descname"><span class="pre">output_frequency</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#roger.diagnostics.averages.Averages.output_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frequency (in seconds) in which output is written.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.averages.Averages.sampling_frequency">
+<span class="sig-name descname"><span class="pre">sampling_frequency</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#roger.diagnostics.averages.Averages.sampling_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frequency (in seconds) in which variables are accumulated.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.averages.Averages.output_variables">
+<span class="sig-name descname"><span class="pre">output_variables</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#roger.diagnostics.averages.Averages.output_variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterable containing all variables to be averaged. Changes have no effect after <code class="docutils literal notranslate"><span class="pre">initialize</span></code> has been called.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="rates">
+<h3>Rates<a class="headerlink" href="#rates" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="roger.diagnostics.rates.Rates">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.diagnostics.rates.</span></span><span class="sig-name descname"><span class="pre">Rates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/diagnostics/rates.html#Rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.diagnostics.rates.Rates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roger.diagnostics.base.RogerDiagnostic" title="roger.diagnostics.base.RogerDiagnostic"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.diagnostics.base.RogerDiagnostic</span></code></a></p>
+<p>Time average output diagnostic.</p>
+<p>All registered variables are summed up when <code class="xref py py-meth docutils literal notranslate"><span class="pre">diagnose()</span></code> is called,
+and output upon calling <code class="xref py py-meth docutils literal notranslate"><span class="pre">output()</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.rates.Rates.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'rates'</span></em><a class="headerlink" href="#roger.diagnostics.rates.Rates.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.rates.Rates.output_path">
+<span class="sig-name descname"><span class="pre">output_path</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'{identifier}.rates.nc'</span></em><a class="headerlink" href="#roger.diagnostics.rates.Rates.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>File to write to. May contain format strings that are replaced with Roger attributes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.rates.Rates.output_frequency">
+<span class="sig-name descname"><span class="pre">output_frequency</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#roger.diagnostics.rates.Rates.output_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frequency (in hours) in which output is written.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.rates.Rates.sampling_frequency">
+<span class="sig-name descname"><span class="pre">sampling_frequency</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#roger.diagnostics.rates.Rates.sampling_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frequency (in hours) in which variables are accumulated.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.rates.Rates.output_variables">
+<span class="sig-name descname"><span class="pre">output_variables</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#roger.diagnostics.rates.Rates.output_variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterable containing all variables to be averaged. Changes have no effect after <code class="docutils literal notranslate"><span class="pre">initialize</span></code> has been called.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="collect">
+<h3>Collect<a class="headerlink" href="#collect" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="roger.diagnostics.collect.Collect">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.diagnostics.collect.</span></span><span class="sig-name descname"><span class="pre">Collect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/diagnostics/collect.html#Collect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.diagnostics.collect.Collect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roger.diagnostics.base.RogerDiagnostic" title="roger.diagnostics.base.RogerDiagnostic"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.diagnostics.base.RogerDiagnostic</span></code></a></p>
+<p>Collect output diagnostic.</p>
+<p>All registered variables are colleced when <code class="xref py py-meth docutils literal notranslate"><span class="pre">diagnose()</span></code> is called,
+and collected upon calling <code class="xref py py-meth docutils literal notranslate"><span class="pre">output()</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.collect.Collect.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'collect'</span></em><a class="headerlink" href="#roger.diagnostics.collect.Collect.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.collect.Collect.output_path">
+<span class="sig-name descname"><span class="pre">output_path</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'{identifier}.collect.nc'</span></em><a class="headerlink" href="#roger.diagnostics.collect.Collect.output_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>File to write to. May contain format strings that are replaced with Roger attributes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.collect.Collect.output_frequency">
+<span class="sig-name descname"><span class="pre">output_frequency</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#roger.diagnostics.collect.Collect.output_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frequency (in seconds) in which output is written.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.collect.Collect.sampling_frequency">
+<span class="sig-name descname"><span class="pre">sampling_frequency</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#roger.diagnostics.collect.Collect.sampling_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frequency (in seconds) in which variables are accumulated.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.collect.Collect.output_variables">
+<span class="sig-name descname"><span class="pre">output_variables</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#roger.diagnostics.collect.Collect.output_variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterable containing all variables to be volumed. Changes have no effect after <code class="docutils literal notranslate"><span class="pre">initialize</span></code> has been called.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="tracer-monitor">
+<h3>Tracer monitor<a class="headerlink" href="#tracer-monitor" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="roger.diagnostics.tracer_monitor.TracerMonitor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.diagnostics.tracer_monitor.</span></span><span class="sig-name descname"><span class="pre">TracerMonitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/diagnostics/tracer_monitor.html#TracerMonitor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.diagnostics.tracer_monitor.TracerMonitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roger.diagnostics.base.RogerDiagnostic" title="roger.diagnostics.base.RogerDiagnostic"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.diagnostics.base.RogerDiagnostic</span></code></a></p>
+<p>Diagnostic monitoring tracer contents / fluxes.</p>
+<p>Writes output to stdout (no binary output).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="roger.diagnostics.tracer_monitor.TracerMonitor.output_frequency">
+<span class="sig-name descname"><span class="pre">output_frequency</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#roger.diagnostics.tracer_monitor.TracerMonitor.output_frequency" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="variables.html" class="btn btn-neutral float-left" title="Model variables" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cli.html" class="btn btn-neutral float-right" title="Command line tools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, The RoGeR Team, University of Freiburg.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
