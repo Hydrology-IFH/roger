@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>A short introduction to Roger &mdash; RoGeR 0+unknown documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -104,9 +103,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="a-short-introduction-to-roger">
+  <div class="section" id="a-short-introduction-to-roger">
 <h1>A short introduction to Roger<a class="headerlink" href="#a-short-introduction-to-roger" title="Permalink to this headline">¶</a></h1>
-<section id="the-model-architecture">
+<div class="section" id="the-model-architecture">
 <h2>The model architecture<a class="headerlink" href="#the-model-architecture" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p><strong>Easy to access</strong>: Python modules are simple to install, and projects like <a class="reference external" href="https://www.continuum.io/anaconda-overview">Anaconda</a> are doing a great job in creating platform-independent environments.</p></li>
@@ -114,7 +113,7 @@
 <li><p><strong>Easy to modify</strong>: Due to Python’s popularity, available abstractions, and dynamic nature, Roger can be extended and modified with relatively little effort.</p></li>
 </ol>
 <p>However, choosing Python over a compiled language like Fortran or C usually comes at a high computational cost. We overcome this gap by using <a class="reference external" href="https://github.com/google/jax">JAX</a>, a framework that can act as a high-performance replacement for NumPy. JAX takes care of all performance optimizations in the background, and runs on CPUs and GPUs.</p>
-<section id="available-processes">
+<div class="section" id="available-processes">
 <h3>Available processes<a class="headerlink" href="#available-processes" title="Permalink to this headline">¶</a></h3>
 <p><strong>Interception</strong>:
 - rainfall and snowfall interception by vegetation</p>
@@ -135,17 +134,17 @@
 - gravity-driven infiltration based on viscous flow approach (<a class="reference internal" href="#germann2018" id="id4"><span>[Germann2018]</span></a>)
 - lateral subsurface runoff in the soil as described in <a class="reference internal" href="#steinbrich2016" id="id5"><span>[Steinbrich2016]</span></a></p>
 <p><strong>Capillary rise</strong>:
-- capillary-driven vertical uplift ([Salvucci1993])</p>
+- capillary-driven vertical uplift (<a class="reference internal" href="#salvucci1993" id="id6"><span>[Salvucci1993]</span></a>)</p>
 <p><strong>Groundwater flow</strong>:
-- spatial explicit representation of shallow groundwater following <a class="reference internal" href="#stoll2010" id="id6"><span>[Stoll2010]</span></a></p>
+- spatial explicit representation of shallow groundwater following <a class="reference internal" href="#stoll2010" id="id7"><span>[Stoll2010]</span></a></p>
 <p><strong>Crop phenology and crop rotation</strong>:
-- time-varying crop canopy cover and crop root depth is implemented as in <a class="reference internal" href="#steduto2009" id="id7"><span>[Steduto2009]</span></a></p>
+- time-varying crop canopy cover and crop root depth is implemented as in <a class="reference internal" href="#steduto2009" id="id8"><span>[Steduto2009]</span></a></p>
 <p><strong>Offline transport</strong>:
-- StorAge selection (SAS) functions ([Rinaldo2015]) are used to
+- StorAge selection (SAS) functions (<a class="reference internal" href="#rinaldo2015" id="id9"><span>[Rinaldo2015]</span></a>) are used to
 calculate travel time distributions and solute concentration/mass of outgoing
 fluxes (e.g. groundwater recharge)</p>
-</section>
-<section id="available-model-structures">
+</div>
+<div class="section" id="available-model-structures">
 <h3>Available model structures<a class="headerlink" href="#available-model-structures" title="Permalink to this headline">¶</a></h3>
 <p>Soil hydrologic parameters are approximated by Brooks-Corey scheme.</p>
 <p><strong>SVAT</strong>:
@@ -165,24 +164,24 @@ explicitly represented</p>
 <p><strong>TRANSPORT</strong>:
 - calculates offline coupled solute transport based on the hydrologic states from
 one of the model structures above</p>
-</section>
-<section id="diagnostics">
+</div>
+<div class="section" id="diagnostics">
 <h3>Diagnostics<a class="headerlink" href="#diagnostics" title="Permalink to this headline">¶</a></h3>
 <p>Diagnostics are responsible for handling all model output, runtime checks of the solution, and restart file handling. They are implemented in a modular fashion, so additional diagnostics can be implemented easily. Already implemented diagnostics handle snapshot output, aggregation of variables, and monitoring of mass balance.</p>
 <p>For more information, see <a class="reference internal" href="../reference/diagnostics.html"><span class="doc">Diagnostics</span></a>.</p>
-</section>
-<section id="pre-configured-model-setups">
+</div>
+<div class="section" id="pre-configured-model-setups">
 <h3>Pre-configured model setups<a class="headerlink" href="#pre-configured-model-setups" title="Permalink to this headline">¶</a></h3>
 <p>Roger supports a wide range of model configurations. Several setups are already implemented that highlight some of the capabilities of Roger, and that serve as a basis for users to set up their own configuration: <a class="reference internal" href="../reference/setup-gallery.html"><span class="doc">Setup gallery</span></a>.</p>
-</section>
-<section id="current-limitations">
+</div>
+<div class="section" id="current-limitations">
 <h3>Current limitations<a class="headerlink" href="#current-limitations" title="Permalink to this headline">¶</a></h3>
 <p>Roger is still in development. There are many open issues that we would like to fix later on:</p>
 <ul class="simple">
 <li><p>…</p></li>
 </ul>
-</section>
-<section id="references">
+</div>
+<div class="section" id="references">
 <h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
 <dl class="citation">
 <dt class="label" id="salvucci1993"><span class="brackets">Salvucci1993</span></dt>
@@ -210,9 +209,9 @@ one of the model structures above</p>
 <dd><p>Germann, P. F. and Prasuhn, V.: Viscous Flow Approach to Rapid Infiltration and Drainage in a Weighing Lysimeter, Vadose Zone Journal, 17, 170020, 2018.</p>
 </dd>
 </dl>
-</section>
-</section>
-</section>
+</div>
+</div>
+</div>
 
 
            </div>

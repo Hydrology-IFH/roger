@@ -96,7 +96,7 @@
 <span class="kn">import</span> <span class="nn">threading</span>
 <span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">ExitStack</span><span class="p">,</span> <span class="n">contextmanager</span>
 
-<span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">logger</span><span class="p">,</span> <span class="n">distributed</span>
 
 <span class="kn">from</span> <span class="nn">roger.state</span> <span class="kn">import</span> <span class="n">RogerState</span>
 
@@ -484,6 +484,76 @@
         <span class="n">func</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__self__</span>
 
     <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">rogerRoutine</span><span class="p">)</span>
+
+
+<span class="c1"># sync</span>
+
+
+<span class="k">def</span> <span class="nf">roger_sync</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decorator that marks a function as a sync that is run on a single process</span>
+<span class="sd">    if backend is set to MPI.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">inner_decorator</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+        <span class="n">sync</span> <span class="o">=</span> <span class="n">rogerSync</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+        <span class="n">sync</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)(</span><span class="n">sync</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sync</span>
+
+    <span class="k">if</span> <span class="n">function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">inner_decorator</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner_decorator</span>
+
+
+<span class="k">class</span> <span class="nc">rogerSync</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Do not instantiate directly!&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Do some parameter introspection.&quot;&quot;&quot;</span>
+
+        <span class="c1"># make sure function signature is in the form we need</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">_get_func_name</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func_sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+
+        <span class="n">func_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">func_sig</span><span class="o">.</span><span class="n">parameters</span>
+
+        <span class="n">allowed_param_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_ONLY</span><span class="p">,</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_OR_KEYWORD</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_param_types</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">func_params</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;roger syncs do not support *args, **kwargs, or keyword-only parameters (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">function</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">runtime_settings</span><span class="p">,</span> <span class="n">runtime_state</span>
+        <span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span>
+
+        <span class="c1"># no MPI support</span>
+        <span class="k">if</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_num</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># with MPI support</span>
+        <span class="k">elif</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_num</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># run function on a single process</span>
+            <span class="k">if</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_num</span><span class="p">):</span>
+                    <span class="n">buffer</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+                    <span class="n">runtime_settings</span><span class="o">.</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">isend</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+                <span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+            <span class="c1"># let other processes wait</span>
+            <span class="k">elif</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_rank</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">def</span> <span class="nf">function</span><span class="p">():</span>
+                    <span class="k">pass</span>
+                <span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">function</span><span class="p">()</span>
+                <span class="n">runtime_settings</span><span class="o">.</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">irecv</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 </pre></div>
 
            </div>

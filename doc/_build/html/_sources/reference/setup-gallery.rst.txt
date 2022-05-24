@@ -13,3 +13,6 @@ Example::
 
    setups/svat
    setups/svat_transport
+   setups/svat_crop
+   setups/oneD
+   setups/oneD_event

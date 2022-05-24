@@ -11,7 +11,7 @@ import numpy as onp
 
 
 class DISTGROUNDWATERSetup(RogerSetup):
-    """A distributed model including shallow groundwater.
+    """A 1D model including shallow groundwater.
     """
     _base_path = Path(__file__).parent
     _input_dir = None

@@ -47,6 +47,18 @@ Averages
 .. autoclass:: roger.diagnostics.averages.Averages
    :members: name, output_variables, sampling_frequency, output_frequency, output_path
 
+Minimum
++++++++
+
+.. autoclass:: roger.diagnostics.minimum.Minimum
+  :members: name, output_variables, sampling_frequency, output_frequency, output_path
+
+Maximum
++++++++
+
+.. autoclass:: roger.diagnostics.maximum.Maximum
+  :members: name, output_variables, sampling_frequency, output_frequency, output_path
+
 Rates
 +++++++++++
 
@@ -54,9 +66,20 @@ Rates
    :members: name, output_variables, sampling_frequency, output_frequency, output_path
 
 Collect
-++++++
++++++++
 .. autoclass:: roger.diagnostics.collect.Collect
    :members: name, output_variables, sampling_frequency, output_frequency, output_path
+
+Constant
+++++++++
+.. autoclass:: roger.diagnostics.constant.Constant
+  :members: name, output_variables, sampling_frequency, output_frequency, output_path
+
+Water monitor
++++++++++++++
+
+.. autoclass:: roger.diagnostics.water_monitor.WaterMonitor
+ :members: name, sampling_frequency, output_frequency
 
 Tracer monitor
 ++++++++++++++

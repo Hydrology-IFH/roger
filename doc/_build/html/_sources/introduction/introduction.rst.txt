@@ -38,7 +38,7 @@ Available processes
 - lateral subsurface runoff in the soil as described in [Steinbrich2016]_
 
 **Capillary rise**:
-- capillary-driven vertical uplift ([Salvucci1993])
+- capillary-driven vertical uplift ([Salvucci1993]_)
 
 **Groundwater flow**:
 - spatial explicit representation of shallow groundwater following [Stoll2010]_
@@ -47,7 +47,7 @@ Available processes
 - time-varying crop canopy cover and crop root depth is implemented as in [Steduto2009]_
 
 **Offline transport**:
-- StorAge selection (SAS) functions ([Rinaldo2015]) are used to
+- StorAge selection (SAS) functions ([Rinaldo2015]_) are used to
 calculate travel time distributions and solute concentration/mass of outgoing
 fluxes (e.g. groundwater recharge)
 

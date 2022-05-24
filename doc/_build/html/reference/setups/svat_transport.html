@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SVAT transport model &mdash; RoGeR 0+unknown documentation</title>
+  <title>SVAT transport model(s) &mdash; RoGeR 0+unknown documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,7 +17,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Model settings" href="../settings.html" />
+    <link rel="next" title="SVAT model" href="svat_crop.html" />
     <link rel="prev" title="SVAT model" href="svat.html" /> 
 </head>
 
@@ -56,7 +55,10 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../setup-gallery.html">Setup gallery</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="svat.html">SVAT model</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">SVAT transport model</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">SVAT transport model(s)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="svat_crop.html">SVAT model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="oneD.html">1D model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="oneD_event.html">1D event model</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../settings.html">Model settings</a></li>
@@ -88,7 +90,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../setup-gallery.html">Setup gallery</a> &raquo;</li>
-      <li>SVAT transport model</li>
+      <li>SVAT transport model(s)</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/reference/setups/svat_transport.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -98,16 +100,30 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="svat-transport-model">
-<h1>SVAT transport model<a class="headerlink" href="#svat-transport-model" title="Permalink to this headline">¶</a></h1>
-</section>
+  <div class="section" id="svat-transport-model-s">
+<h1>SVAT transport model(s)<a class="headerlink" href="#svat-transport-model-s" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="roger.setups.svat_transport_bromide.SVATTRANSPORTSetup">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.setups.svat_transport_bromide.</span></span><span class="sig-name descname"><span class="pre">SVATTRANSPORTSetup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/setups/svat_transport_bromide/svat_transport.html#SVATTRANSPORTSetup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.setups.svat_transport_bromide.SVATTRANSPORTSetup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../api/roger-setup.html#roger.RogerSetup" title="roger.roger.RogerSetup"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.roger.RogerSetup</span></code></a></p>
+<p>A SVAT transport model for bromide.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="roger.setups.svat_transport_oxygen18.SVATTRANSPORTSetup">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.setups.svat_transport_oxygen18.</span></span><span class="sig-name descname"><span class="pre">SVATTRANSPORTSetup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/setups/svat_transport_oxygen18/svat_transport.html#SVATTRANSPORTSetup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.setups.svat_transport_oxygen18.SVATTRANSPORTSetup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../api/roger-setup.html#roger.RogerSetup" title="roger.roger.RogerSetup"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.roger.RogerSetup</span></code></a></p>
+<p>A SVAT transport model for oxygen-18.</p>
+</dd></dl>
+
+</div>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="svat.html" class="btn btn-neutral float-left" title="SVAT model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../settings.html" class="btn btn-neutral float-right" title="Model settings" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="svat_crop.html" class="btn btn-neutral float-right" title="SVAT model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -10,7 +10,7 @@ import numpy as onp
 
 
 class DISTCROPSetup(RogerSetup):
-    """A distributed model including crop phenology/crop rotation.
+    """A 1D model including crop phenology/crop rotation.
     """
     _base_path = Path(__file__).parent
     _input_dir = None

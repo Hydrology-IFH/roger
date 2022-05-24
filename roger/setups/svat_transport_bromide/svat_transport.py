@@ -8,7 +8,7 @@ import numpy as onp
 
 
 class SVATTRANSPORTSetup(RogerSetup):
-    """A SVAT transport model.
+    """A SVAT transport model for bromide.
     """
     _base_path = Path(__file__).parent
     _input_dir = None
@@ -20,6 +20,7 @@ class SVATTRANSPORTSetup(RogerSetup):
             self._input_dir = path
             if not os.path.exists(self._input_dir):
                 os.mkdir(self._input_dir)
+
     def _read_var_from_nc(self, var, path_dir, file):
         nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:

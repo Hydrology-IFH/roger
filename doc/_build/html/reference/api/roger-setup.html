@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Roger setup class &mdash; RoGeR 0+unknown documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -103,7 +102,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="roger-setup-class">
+  <div class="section" id="roger-setup-class">
 <h1>Roger setup class<a class="headerlink" href="#roger-setup-class" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="roger.RogerSetup">
@@ -124,8 +123,8 @@ and <a class="reference internal" href="#roger.RogerSetup.set_diagnostics" title
 <span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">RogerSetup</span><span class="p">):</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="o">...</span>
 <span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">simulation</span> <span class="o">=</span> <span class="n">MyModel</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">simulation</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">MyModel</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">simulation</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">psi</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -135,7 +134,8 @@ and <a class="reference internal" href="#roger.RogerSetup.set_diagnostics" title
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>To be implemented by subclass.</p>
 <p>First function to be called during setup.
-Use this to modify the model settings.</p>
+Use this functions to set the model settings and define physical
+constants.</p>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">settings</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">settings</span>
@@ -148,12 +148,24 @@ Use this to modify the model settings.</p>
 <dt class="sig sig-object py" id="roger.RogerSetup.set_look_up_tables">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_look_up_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_look_up_tables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_look_up_tables" title="Permalink to this definition">¶</a></dt>
 <dd><p>To be implemented by subclass.</p>
-<p>First function to be called during setup.
-Use this to modify the model settings.</p>
+<p>Use this function to set the look-up tables.</p>
 <p class="rubric">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_look_up_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">u</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">u</span><span class="p">,</span> <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">],</span> <span class="n">npx</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">lut_ilu</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">lut_ilu</span><span class="p">,</span> <span class="n">at</span><span class="p">[:,</span> <span class="p">:],</span> <span class="n">lut</span><span class="o">.</span><span class="n">ARR_ILU</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.RogerSetup.set_parameters_setup">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_parameters_setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_parameters_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_parameters_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>To be implemented by subclass.</p>
+<p>Use this function to set initial or constant model parameters.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_parameters_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">dmpv</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">dmpv</span><span class="p">,</span> <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">],</span> <span class="n">npx</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">dmpv</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -162,12 +174,25 @@ Use this to modify the model settings.</p>
 <dt class="sig sig-object py" id="roger.RogerSetup.set_parameters">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>To be implemented by subclass.</p>
-<p>First function to be called during setup.
-Use this to modify the model settings.</p>
+<p>Use this function to modify the model parameters.</p>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">u</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">u</span><span class="p">,</span> <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">],</span> <span class="n">npx</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">dmpv</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">dmpv</span><span class="p">,</span> <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">],</span> <span class="n">npx</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">dmpv</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.RogerSetup.set_initial_conditions_setup">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_initial_conditions_setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_initial_conditions_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_initial_conditions_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>To be implemented by subclass.</p>
+<p>Use this function to set the initial conditions.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@roger_method</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_initial_conditions_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">theta_rz</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">theta_rz</span><span class="p">,</span> <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">],</span> <span class="mf">0.4</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -181,7 +206,7 @@ Use this to modify the model settings.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@roger_method</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_initial_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">u</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">u</span><span class="p">,</span> <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">],</span> <span class="n">npx</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">theta_rz</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">theta_rz</span><span class="p">,</span> <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">],</span> <span class="mf">0.4</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -190,7 +215,7 @@ Use this to modify the model settings.</p>
 <dt class="sig sig-object py" id="roger.RogerSetup.set_grid">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_grid" title="Permalink to this definition">¶</a></dt>
 <dd><p>To be implemented by subclass.</p>
-<p>Has to set the grid spacings <code class="xref py py-attr docutils literal notranslate"><span class="pre">dxt</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">dyt</span></code>, and <code class="xref py py-attr docutils literal notranslate"><span class="pre">dzt</span></code>,
+<p>Has to set the grid spacings <code class="xref py py-attr docutils literal notranslate"><span class="pre">x</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">y</span></code>,
 along with the coordinates of the grid origin, <code class="xref py py-attr docutils literal notranslate"><span class="pre">x_origin</span></code> and
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">y_origin</span></code>.</p>
 <p class="rubric">Example</p>
@@ -198,9 +223,9 @@ along with the coordinates of the grid origin, <code class="xref py py-attr docu
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">x_origin</span><span class="p">,</span> <span class="n">vs</span><span class="o">.</span><span class="n">y_origin</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="mf">1.</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">dy</span> <span class="o">=</span> <span class="mf">1.</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">dz</span> <span class="o">=</span> <span class="mf">2.</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mf">1.</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="mf">1.</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="mf">1.</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -209,12 +234,27 @@ along with the coordinates of the grid origin, <code class="xref py py-attr docu
 <dt class="sig sig-object py" id="roger.RogerSetup.set_topography">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_topography</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_topography"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_topography" title="Permalink to this definition">¶</a></dt>
 <dd><p>To be implemented by subclass.</p>
-<p>Must specify the model topography by setting <code class="xref py py-attr docutils literal notranslate"><span class="pre">kbot</span></code>.</p>
+<p>Must specify the model topography by setting <code class="xref py py-attr docutils literal notranslate"><span class="pre">slope</span></code>.</p>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@roger_method</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_topography</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">kbot</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">kbot</span><span class="p">,</span> <span class="n">at</span><span class="p">[</span><span class="o">...</span><span class="p">],</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">slope</span><span class="p">,</span> <span class="n">at</span><span class="p">[</span><span class="o">...</span><span class="p">],</span> <span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roger.RogerSetup.set_forcing_setup">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_forcing_setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_forcing_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_forcing_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>To be implemented by subclass.</p>
+<p>Called within setup, e.g. through
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">PREC</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">TA</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">PET</span></code>.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@roger_method</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_forcing_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">TA</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">_ta_data</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -224,15 +264,12 @@ along with the coordinates of the grid origin, <code class="xref py py-attr docu
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_forcing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup.set_forcing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup.set_forcing" title="Permalink to this definition">¶</a></dt>
 <dd><p>To be implemented by subclass.</p>
 <p>Called before every time step to update the external forcing, e.g. through
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">forc_temp_surface</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">forc_salt_surface</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">surface_taux</span></code>,
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">surface_tauy</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">forc_tke_surface</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">temp_source</span></code>, or
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">salt_source</span></code>. Use this method to implement time-dependent forcing.</p>
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">prec</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">ta</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">pet</span></code>.</p>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@roger_method</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">set_forcing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">current_month</span> <span class="o">=</span> <span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">time</span> <span class="o">/</span> <span class="p">(</span><span class="mi">31</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">))</span> <span class="o">%</span> <span class="mi">12</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">surface_taux</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">_windstress_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">current_month</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">vs</span><span class="o">.</span><span class="n">ta</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">TA</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">vs</span><span class="o">.</span><span class="n">itt</span><span class="p">]</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -286,7 +323,7 @@ By default, only show if stdout is a terminal and roger is running on a single p
 
 </dd></dl>
 
-</section>
+</div>
 
 
            </div>

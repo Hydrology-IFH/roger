@@ -8,7 +8,7 @@ import numpy as onp
 
 
 class DISTCROPTRANSPORTSetup(RogerSetup):
-    """A distributed transport model including crop phenology/crop rotation.
+    """A 1D transport model for nitrate including crop phenology/crop rotation.
     """
     _base_path = Path(__file__).parent
     _input_dir = None

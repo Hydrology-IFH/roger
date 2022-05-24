@@ -10,7 +10,8 @@ import numpy as onp
 
 
 class SVATFILMTRANSPORTSetup(RogerSetup):
-    """A SVAT transport model including film flow.
+    """A SVAT transport model including including gravity-driven infiltration
+    and percolation.
     """
     _base_path = Path(__file__).parent
     _input_dir = None

@@ -101,7 +101,7 @@
 <div class="viewcode-block" id="Collect"><a class="viewcode-back" href="../../../reference/diagnostics.html#roger.diagnostics.collect.Collect">[docs]</a><span class="k">class</span> <span class="nc">Collect</span><span class="p">(</span><span class="n">RogerDiagnostic</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Collect output diagnostic.</span>
 
-<span class="sd">    All registered variables are colleced when :meth:`diagnose` is called,</span>
+<span class="sd">    All registered variables are collected when :meth:`diagnose` is called,</span>
 <span class="sd">    and collected upon calling :meth:`output`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -126,6 +126,9 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_timestep_dim</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
                 <span class="n">var_meta</span><span class="o">.</span><span class="n">dims</span> <span class="o">=</span> <span class="n">var_meta</span><span class="o">.</span><span class="n">dims</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_fourth_dim</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+                <span class="n">var_meta</span><span class="o">.</span><span class="n">dims</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">var_meta</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">var_meta</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">var_meta</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">var_meta</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_meta</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">initialize_variables</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
@@ -139,7 +142,7 @@
         <span class="k">return</span> <span class="n">state</span><span class="o">.</span><span class="n">var_meta</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">TIMESTEPS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_has_timestep_ages_dim</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_has_fourth_dim</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">var_meta</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
@@ -152,7 +155,7 @@
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_variables</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_timestep_dim</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="n">clc_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">key</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">])</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_timestep_ages_dim</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_fourth_dim</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="n">clc_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">key</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">,</span> <span class="p">:])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="n">clc_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>

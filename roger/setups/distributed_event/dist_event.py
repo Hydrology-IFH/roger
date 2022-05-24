@@ -9,7 +9,7 @@ import numpy as onp
 
 
 class DISTEVENTSetup(RogerSetup):
-    """A distributed model for a single event.
+    """A 1D model for a single event.
     """
     _base_path = Path(__file__).parent
     _input_dir = None

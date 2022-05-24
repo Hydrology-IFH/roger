@@ -8,7 +8,7 @@ import numpy as onp
 
 
 class DISTTRANSPORTSetup(RogerSetup):
-    """A distributed transport model.
+    """A 1D transport model for oxygen-18.
     """
     _base_path = Path(__file__).parent
     _input_dir = None

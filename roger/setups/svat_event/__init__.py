@@ -1,1 +1,1 @@
-from roger.setups.svat.svat import SVATEVENTSetup  # noqa: F401
+from roger.setups.svat_event.svat_event import SVATEVENTSetup  # noqa: F401

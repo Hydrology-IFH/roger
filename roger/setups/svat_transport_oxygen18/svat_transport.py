@@ -8,7 +8,7 @@ import numpy as onp
 
 
 class SVATTRANSPORTSetup(RogerSetup):
-    """A SVAT transport model.
+    """A SVAT transport model for oxygen-18.
     """
     _base_path = Path(__file__).parent
     _input_dir = None

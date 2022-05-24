@@ -96,6 +96,7 @@
 
 <span class="kn">from</span> <span class="nn">roger.diagnostics.base</span> <span class="kn">import</span> <span class="n">RogerDiagnostic</span>
 <span class="kn">from</span> <span class="nn">roger.variables</span> <span class="kn">import</span> <span class="n">TIMESTEPS</span><span class="p">,</span> <span class="n">Variable</span>
+<span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span>
 
 
 <div class="viewcode-block" id="Averages"><a class="viewcode-back" href="../../../reference/diagnostics.html#roger.diagnostics.averages.Averages">[docs]</a><span class="k">class</span> <span class="nc">Averages</span><span class="p">(</span><span class="n">RogerDiagnostic</span><span class="p">):</span>
@@ -147,7 +148,7 @@
         <span class="n">avg_vs</span><span class="o">.</span><span class="n">average_nitts</span> <span class="o">=</span> <span class="n">avg_vs</span><span class="o">.</span><span class="n">average_nitts</span> <span class="o">+</span> <span class="mi">1</span>
 
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_variables</span><span class="p">:</span>
-            <span class="n">var_data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">avg_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="n">var_data</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">npx</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">avg_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">)),</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">avg_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_timestep_dim</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="n">avg_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">var_data</span> <span class="o">+</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">key</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>

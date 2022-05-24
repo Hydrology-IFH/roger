@@ -117,8 +117,8 @@
 <span class="sd">        &gt;&gt;&gt; class MyModel(RogerSetup):</span>
 <span class="sd">        &gt;&gt;&gt;     ...</span>
 <span class="sd">        &gt;&gt;&gt;</span>
-<span class="sd">        &gt;&gt;&gt; simulation = MyModel()</span>
-<span class="sd">        &gt;&gt;&gt; simulation.run()</span>
+<span class="sd">        &gt;&gt;&gt; model = MyModel()</span>
+<span class="sd">        &gt;&gt;&gt; model.run()</span>
 <span class="sd">        &gt;&gt;&gt; plt.imshow(simulation.state.variables.psi[..., 0])</span>
 <span class="sd">        &gt;&gt;&gt; plt.show()</span>
 
@@ -143,7 +143,8 @@
         <span class="sd">&quot;&quot;&quot;To be implemented by subclass.</span>
 
 <span class="sd">        First function to be called during setup.</span>
-<span class="sd">        Use this to modify the model settings.</span>
+<span class="sd">        Use this functions to set the model settings and define physical</span>
+<span class="sd">        constants.</span>
 
 <span class="sd">        Example:</span>
 <span class="sd">          &gt;&gt;&gt; def set_settings(self, state):</span>
@@ -156,13 +157,25 @@
     <span class="k">def</span> <span class="nf">set_look_up_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;To be implemented by subclass.</span>
 
-<span class="sd">        First function to be called during setup.</span>
-<span class="sd">        Use this to modify the model settings.</span>
+<span class="sd">        Use this function to set the look-up tables.</span>
 
 <span class="sd">        Example:</span>
-<span class="sd">          &gt;&gt;&gt; def set_events(self, state):</span>
+<span class="sd">          &gt;&gt;&gt; def set_look_up_tables(self, state):</span>
 <span class="sd">          &gt;&gt;&gt;     vs = state.variables</span>
-<span class="sd">          &gt;&gt;&gt;     vs.u = update(vs.u, at[:, :, :, vs.tau], npx.random.rand(vs.u.shape[:-1]))</span>
+<span class="sd">          &gt;&gt;&gt;     vs.lut_ilu = update(vs.lut_ilu, at[:, :], lut.ARR_ILU)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="RogerSetup.set_parameters_setup"><a class="viewcode-back" href="../../reference/api/roger-setup.html#roger.RogerSetup.set_parameters_setup">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">set_parameters_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;To be implemented by subclass.</span>
+
+<span class="sd">        Use this function to set initial or constant model parameters.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">          &gt;&gt;&gt; def set_parameters_setup(self, state):</span>
+<span class="sd">          &gt;&gt;&gt;     vs = state.variables</span>
+<span class="sd">          &gt;&gt;&gt;     vs.dmpv = update(vs.dmpv, at[:, :, :, vs.tau], npx.random.rand(vs.dmpv.shape[:-1]))</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
@@ -170,13 +183,26 @@
     <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;To be implemented by subclass.</span>
 
-<span class="sd">        First function to be called during setup.</span>
-<span class="sd">        Use this to modify the model settings.</span>
+<span class="sd">        Use this function to modify the model parameters.</span>
 
 <span class="sd">        Example:</span>
 <span class="sd">          &gt;&gt;&gt; def set_parameters(self, state):</span>
 <span class="sd">          &gt;&gt;&gt;     vs = state.variables</span>
-<span class="sd">          &gt;&gt;&gt;     vs.u = update(vs.u, at[:, :, :, vs.tau], npx.random.rand(vs.u.shape[:-1]))</span>
+<span class="sd">          &gt;&gt;&gt;     vs.dmpv = update(vs.dmpv, at[:, :, :, vs.tau], npx.random.rand(vs.dmpv.shape[:-1]))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="RogerSetup.set_initial_conditions_setup"><a class="viewcode-back" href="../../reference/api/roger-setup.html#roger.RogerSetup.set_initial_conditions_setup">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">set_initial_conditions_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;To be implemented by subclass.</span>
+
+<span class="sd">        Use this function to set the initial conditions.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">          &gt;&gt;&gt; @roger_method</span>
+<span class="sd">          &gt;&gt;&gt; def set_initial_conditions_setup(self, state):</span>
+<span class="sd">          &gt;&gt;&gt;     vs = state.variables</span>
+<span class="sd">          &gt;&gt;&gt;     vs.theta_rz = update(vs.theta_rz, at[:, :, :, vs.tau], 0.4)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
@@ -190,7 +216,7 @@
 <span class="sd">          &gt;&gt;&gt; @roger_method</span>
 <span class="sd">          &gt;&gt;&gt; def set_initial_conditions(self, state):</span>
 <span class="sd">          &gt;&gt;&gt;     vs = state.variables</span>
-<span class="sd">          &gt;&gt;&gt;     vs.u = update(vs.u, at[:, :, :, vs.tau], npx.random.rand(vs.u.shape[:-1]))</span>
+<span class="sd">          &gt;&gt;&gt;     vs.theta_rz = update(vs.theta_rz, at[:, :, :, vs.tau], 0.4)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
@@ -198,7 +224,7 @@
     <span class="k">def</span> <span class="nf">set_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;To be implemented by subclass.</span>
 
-<span class="sd">        Has to set the grid spacings :attr:`dxt`, :attr:`dyt`, and :attr:`dzt`,</span>
+<span class="sd">        Has to set the grid spacings :attr:`x` and :attr:`y`,</span>
 <span class="sd">        along with the coordinates of the grid origin, :attr:`x_origin` and</span>
 <span class="sd">        :attr:`y_origin`.</span>
 
@@ -207,9 +233,9 @@
 <span class="sd">          &gt;&gt;&gt; def set_grid(self, state):</span>
 <span class="sd">          &gt;&gt;&gt;     vs = state.variables</span>
 <span class="sd">          &gt;&gt;&gt;     vs.x_origin, vs.y_origin = 0, 0</span>
-<span class="sd">          &gt;&gt;&gt;     vs.dx = 1.</span>
-<span class="sd">          &gt;&gt;&gt;     vs.dy = 1.</span>
-<span class="sd">          &gt;&gt;&gt;     vs.dz = 2.</span>
+<span class="sd">          &gt;&gt;&gt;     vs.x = 1.</span>
+<span class="sd">          &gt;&gt;&gt;     vs.y = 1.</span>
+<span class="sd">          &gt;&gt;&gt;     vs.z = 1.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
@@ -217,13 +243,28 @@
     <span class="k">def</span> <span class="nf">set_topography</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;To be implemented by subclass.</span>
 
-<span class="sd">        Must specify the model topography by setting :attr:`kbot`.</span>
+<span class="sd">        Must specify the model topography by setting :attr:`slope`.</span>
 
 <span class="sd">        Example:</span>
 <span class="sd">          &gt;&gt;&gt; @roger_method</span>
 <span class="sd">          &gt;&gt;&gt; def set_topography(self, state):</span>
 <span class="sd">          &gt;&gt;&gt;     vs = state.variables</span>
-<span class="sd">          &gt;&gt;&gt;     vs.kbot = update(vs.kbot, at[...], 10)</span>
+<span class="sd">          &gt;&gt;&gt;     vs.slope = update(vs.slope, at[...], 10)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="RogerSetup.set_forcing_setup"><a class="viewcode-back" href="../../reference/api/roger-setup.html#roger.RogerSetup.set_forcing_setup">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">set_forcing_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;To be implemented by subclass.</span>
+
+<span class="sd">        Called within setup, e.g. through</span>
+<span class="sd">        :attr:`PREC`, :attr:`TA`, :attr:`PET`.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">          &gt;&gt;&gt; @roger_method</span>
+<span class="sd">          &gt;&gt;&gt; def set_forcing_setup(self, state):</span>
+<span class="sd">          &gt;&gt;&gt;     vs = state.variables</span>
+<span class="sd">          &gt;&gt;&gt;     vs.TA = vs._ta_data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
@@ -232,16 +273,13 @@
         <span class="sd">&quot;&quot;&quot;To be implemented by subclass.</span>
 
 <span class="sd">        Called before every time step to update the external forcing, e.g. through</span>
-<span class="sd">        :attr:`forc_temp_surface`, :attr:`forc_salt_surface`, :attr:`surface_taux`,</span>
-<span class="sd">        :attr:`surface_tauy`, :attr:`forc_tke_surface`, :attr:`temp_source`, or</span>
-<span class="sd">        :attr:`salt_source`. Use this method to implement time-dependent forcing.</span>
+<span class="sd">        :attr:`prec`, :attr:`ta`, :attr:`pet`.</span>
 
 <span class="sd">        Example:</span>
 <span class="sd">          &gt;&gt;&gt; @roger_method</span>
 <span class="sd">          &gt;&gt;&gt; def set_forcing(self, state):</span>
 <span class="sd">          &gt;&gt;&gt;     vs = state.variables</span>
-<span class="sd">          &gt;&gt;&gt;     current_month = (vs.time / (31 * 24 * 60 * 60)) % 12</span>
-<span class="sd">          &gt;&gt;&gt;     vs.surface_taux = vs._windstress_data[:, :, current_month]</span>
+<span class="sd">          &gt;&gt;&gt;     vs.ta = vs.TA[:, :, vs.itt]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
@@ -279,12 +317,13 @@
         <span class="kn">from</span> <span class="nn">roger.core</span> <span class="kn">import</span> <span class="n">numerics</span>
 
         <span class="n">setup_funcs</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters_setup</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_grid</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_topography</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_initial_conditions_setup</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_initial_conditions</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_diagnostics</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_forcing</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_forcing_setup</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">after_timestep</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -322,9 +361,10 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">set_look_up_tables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters_setup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
             <span class="n">numerics</span><span class="o">.</span><span class="n">calc_parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_initial_conditions_setup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_initial_conditions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
             <span class="n">numerics</span><span class="o">.</span><span class="n">calc_initial_conditions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 
@@ -332,7 +372,7 @@
             <span class="n">diagnostics</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
             <span class="n">restart</span><span class="o">.</span><span class="n">read_restart</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_forcing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_forcing_setup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_done</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">:</span>
@@ -358,7 +398,7 @@
                 <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;forcing&quot;</span><span class="p">]:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">set_forcing</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;time-variant parameters&quot;</span><span class="p">]:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_crop_phenology</span><span class="p">:</span>
                     <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;crops&quot;</span><span class="p">]:</span>
                         <span class="n">crop</span><span class="o">.</span><span class="n">calculate_crop_phenology</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
@@ -410,10 +450,10 @@
                         <span class="n">infiltration</span><span class="o">.</span><span class="n">calculate_infiltration_rz_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
                     <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;evapotranspiration&quot;</span><span class="p">]:</span>
                         <span class="n">evapotranspiration</span><span class="o">.</span><span class="n">calculate_evapotranspiration_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;subsurface runoff of root zone&quot;</span><span class="p">]:</span>
-                        <span class="n">subsurface_runoff</span><span class="o">.</span><span class="n">calculate_percolation_rz_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
                     <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;infiltration into subsoil&quot;</span><span class="p">]:</span>
                         <span class="n">infiltration</span><span class="o">.</span><span class="n">calculate_infiltration_ss_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;subsurface runoff of root zone&quot;</span><span class="p">]:</span>
+                        <span class="n">subsurface_runoff</span><span class="o">.</span><span class="n">calculate_percolation_rz_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
                     <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;subsurface runoff of subsoil&quot;</span><span class="p">]:</span>
                         <span class="n">subsurface_runoff</span><span class="o">.</span><span class="n">calculate_percolation_ss_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
                     <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;capillary rise into root zone&quot;</span><span class="p">]:</span>

@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Model variables &mdash; RoGeR 0+unknown documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -97,7 +96,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="model-variables">
+  <div class="section" id="model-variables">
 <span id="variables"></span><h1>Model variables<a class="headerlink" href="#model-variables" title="Permalink to this headline">¶</a></h1>
 <p>The variable meta-data (i.e., all instances of <a class="reference internal" href="#roger.variables.Variable" title="roger.variables.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a>)
 are available in a dictionary as the attribute <a class="reference internal" href="api/roger-state.html#roger.state.RogerState.var_meta" title="roger.state.RogerState.var_meta"><code class="xref py py-attr docutils literal notranslate"><span class="pre">RogerState.var_meta</span></code></a>. The actual
@@ -106,7 +105,7 @@ data arrays are attributes of <a class="reference internal" href="api/roger-stat
 <span class="n">state</span><span class="o">.</span><span class="n">var_meta</span><span class="p">[</span><span class="s2">&quot;theta&quot;</span><span class="p">]</span>  <span class="c1"># metadata for variable theta</span>
 </pre></div>
 </div>
-<section id="variable-class">
+<div class="section" id="variable-class">
 <h2>Variable class<a class="headerlink" href="#variable-class" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="roger.variables.Variable">
@@ -114,8 +113,8 @@ data arrays are attributes of <a class="reference internal" href="api/roger-stat
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 </dd></dl>
 
-</section>
-<section id="available-variables">
+</div>
+<div class="section" id="available-variables">
 <h2>Available variables<a class="headerlink" href="#available-variables" title="Permalink to this headline">¶</a></h2>
 <p>There are two kinds of variables in Roger. Main variables are always present in a
 simulation, while conditional variables are only available if their respective
@@ -857,11 +856,8 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
 </dd>
-<dt class="field-even">Condition</dt>
-<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">settings:</span> <span class="pre">settings.enable_routing</span></code></p>
-</dd>
-<dt class="field-odd">Attributes</dt>
-<dd class="field-odd"><p><em class="fa fa-clock-o"></em> <em class="fa fa-question-circle"></em> <em class="fa fa-repeat"></em></p>
+<dt class="field-even">Attributes</dt>
+<dd class="field-even"><p><em class="fa fa-clock-o"></em> <em class="fa fa-repeat"></em></p>
 </dd>
 </dl>
 <p>depth of the surface ponding</p>
@@ -1277,6 +1273,26 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </dd>
 </dl>
 <p>storage</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.dS">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">dS</span></span><a class="headerlink" href="#RogerVariables.dS" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>mm</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Attributes</dt>
+<dd class="field-even"><p><em class="fa fa-clock-o"></em></p>
+</dd>
+</dl>
+<p>storage change</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -5780,7 +5796,7 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 <dd class="field-odd"><p><em class="fa fa-question-circle"></em></p>
 </dd>
 </dl>
-<p>transmissivity</p>
+<p>transmissivity of aquifer</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -6345,7 +6361,7 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </ul>
 </dd>
 <dt class="field-even">Dimensions</dt>
-<dd class="field-even"><p>(x, y, 8)</p>
+<dd class="field-even"><p>(x, y, n_sas_params)</p>
 </dd>
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
@@ -7975,7 +7991,7 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </ul>
 </dd>
 <dt class="field-even">Dimensions</dt>
-<dd class="field-even"><p>(x, y, 8)</p>
+<dd class="field-even"><p>(x, y, n_sas_params)</p>
 </dd>
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
@@ -8146,7 +8162,7 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </ul>
 </dd>
 <dt class="field-even">Dimensions</dt>
-<dd class="field-even"><p>(x, y, 8)</p>
+<dd class="field-even"><p>(x, y, n_sas_params)</p>
 </dd>
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
@@ -8460,7 +8476,7 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </ul>
 </dd>
 <dt class="field-even">Dimensions</dt>
-<dd class="field-even"><p>(x, y, 8)</p>
+<dd class="field-even"><p>(x, y, n_sas_params)</p>
 </dd>
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
@@ -8631,7 +8647,7 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </ul>
 </dd>
 <dt class="field-even">Dimensions</dt>
-<dd class="field-even"><p>(x, y, 8)</p>
+<dd class="field-even"><p>(x, y, n_sas_params)</p>
 </dd>
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
@@ -8865,7 +8881,7 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </ul>
 </dd>
 <dt class="field-even">Dimensions</dt>
-<dd class="field-even"><p>(x, y, 8)</p>
+<dd class="field-even"><p>(x, y, n_sas_params)</p>
 </dd>
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
@@ -9036,7 +9052,7 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </ul>
 </dd>
 <dt class="field-even">Dimensions</dt>
-<dd class="field-even"><p>(x, y, 8)</p>
+<dd class="field-even"><p>(x, y, n_sas_params)</p>
 </dd>
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
@@ -9721,7 +9737,7 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </ul>
 </dd>
 <dt class="field-even">Dimensions</dt>
-<dd class="field-even"><p>(x, y, 8)</p>
+<dd class="field-even"><p>(x, y, n_sas_params)</p>
 </dd>
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
@@ -9892,7 +9908,7 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </ul>
 </dd>
 <dt class="field-even">Dimensions</dt>
-<dd class="field-even"><p>(x, y, 8)</p>
+<dd class="field-even"><p>(x, y, n_sas_params)</p>
 </dd>
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
@@ -10414,6 +10430,29 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.C_snow">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">C_snow</span></span><a class="headerlink" href="#RogerVariables.C_snow" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>mg/l or per mil</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y, timesteps)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Condition</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">settings:</span> <span class="pre">settings.enable_offline_transport</span> <span class="pre">&amp;</span> <span class="pre">(settings.enable_chloride</span> <span class="pre">|</span> <span class="pre">settings.enable_bromide</span> <span class="pre">|</span> <span class="pre">settings.enable_oxygen18</span> <span class="pre">|</span> <span class="pre">settings.enable_deuterium</span> <span class="pre">|</span> <span class="pre">settings.enable_nitrate)</span></code></p>
+</dd>
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><p><em class="fa fa-question-circle"></em></p>
+</dd>
+</dl>
+<p>solute concentration of snow cover</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="RogerVariables.M_IN">
 <span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">M_IN</span></span><a class="headerlink" href="#RogerVariables.M_IN" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -10571,7 +10610,7 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 <dd class="field-odd"><p><em class="fa fa-question-circle"></em></p>
 </dd>
 </dl>
-<p>preferential infiltration into root zone</p>
+<p>film flow</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -10779,6 +10818,29 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </dd>
 </dl>
 <p>capillary rise from groundwater into subsoil</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.S_SNOW">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">S_SNOW</span></span><a class="headerlink" href="#RogerVariables.S_SNOW" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>mm</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y, t)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Condition</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">settings:</span> <span class="pre">settings.enable_offline_transport</span></code></p>
+</dd>
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><p><em class="fa fa-question-circle"></em></p>
+</dd>
+</dl>
+<p>storage of snow cover</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -11976,8 +12038,8 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 <p>Look-up-table of crop specific parameters</p>
 </dd></dl>
 
-</section>
-</section>
+</div>
+</div>
 
 
            </div>

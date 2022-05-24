@@ -10,7 +10,7 @@ import numpy as onp
 
 
 class DISTSetup(RogerSetup):
-    """A distributed model.
+    """A 1D model.
     """
     _base_path = Path(__file__).parent
     _input_dir = None

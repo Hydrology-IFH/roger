@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Model settings &mdash; RoGeR 0+unknown documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -93,7 +92,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="model-settings">
+  <div class="section" id="model-settings">
 <h1>Model settings<a class="headerlink" href="#model-settings" title="Permalink to this headline">¶</a></h1>
 <p>The following list of available settings is automatically created from the file <code class="file docutils literal notranslate"><span class="pre">settings.py</span></code> in the Roger main folder.
 They are available as attributes of the <a class="reference internal" href="api/roger-state.html#roger.state.RogerSettings" title="roger.state.RogerSettings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Roger</span> <span class="pre">settings</span> <span class="pre">object</span></code></a>, e.g.:</p>
@@ -246,10 +245,22 @@ They are available as attributes of the <a class="reference internal" href="api/
 <dd><p>Grid origin in y-direction</p>
 </dd></dl>
 
+<span class="target" id="setting-time-origin"></span><dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RogerSettings.time_origin</span> <span class="pre">=</span> <span class="pre">1900-01-01</span> <span class="pre">00:00:00</span></span></dt>
+<dd><p>time origin</p>
+</dd></dl>
+
 <span class="target" id="setting-ab-eps"></span><dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">RogerSettings.AB_eps</span> <span class="pre">=</span> <span class="pre">0.1</span></span></dt>
 <dd><p>Deviation from Adam-Bashforth weighting</p>
+</dd></dl>
+
+<span class="target" id="setting-nsas"></span><dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RogerSettings.nsas</span> <span class="pre">=</span> <span class="pre">8</span></span></dt>
+<dd><p>Grid points of array containing SAS parameters</p>
 </dd></dl>
 
 <span class="target" id="setting-pi"></span><dl class="py attribute">
@@ -528,7 +539,7 @@ They are available as attributes of the <a class="reference internal" href="api/
 <dd><p>Frequency (in hours) to write restart data</p>
 </dd></dl>
 
-</section>
+</div>
 
 
            </div>

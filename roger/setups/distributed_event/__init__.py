@@ -1,1 +1,1 @@
-from roger.setups.distributed.dist import DISTEVENTSetup  # noqa: F401
+from roger.setups.distributed_event.dist_event import DISTEVENTSetup  # noqa: F401
