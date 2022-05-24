@@ -68,9 +68,7 @@ states_hm_file = base_path / "states_hm.nc"
 ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
 # assign date
-days = ds_sim['Time'].values * 24
-seconds = onp.around(days.astype('timedelta64[s]').astype(float), 1)
-hours_sim = seconds / (60 * 60)
+hours_sim = onp.around(ds_sim['Time'].values.astype('timedelta64[s]').astype(float) / (60 * 60), 3)
 ds_sim = ds_sim.assign_coords(date=("Time", hours_sim))
 
 # plot simulated time series
