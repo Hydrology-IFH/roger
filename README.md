@@ -52,13 +52,13 @@ GIT:
 git clone https://github.com/schwemro/roger.git
 cd roger
 conda env create -f conda-environment.yml
-# packages for post-processing (optional)
-conda install --yes --file requirements_extra.txt
 ```
 **Second step:**
 Activate the anaconda environment and launch Spyder
 ```bash
 conda activate roger
+# packages for post-processing (optional)
+conda install --yes --file requirements_extra.txt
 ```
 
 ## Installation and usage on Windows
@@ -76,13 +76,13 @@ GIT:
 git clone https://github.com/schwemro/roger.git
 cd roger
 conda env create -f conda-environment.yml
-# packages for post-processing (optional)
-conda install --yes --file requirements_extra.txt
 ```
 **Second step:**
 Activate the anaconda environment and launch Spyder
 ```bash
 activate roger
+# packages for post-processing (optional)
+conda install --yes --file requirements_extra.txt
 ```
 
 ## Basic usage
