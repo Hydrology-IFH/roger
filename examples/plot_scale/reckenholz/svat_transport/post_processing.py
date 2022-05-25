@@ -52,8 +52,11 @@ for lys_experiment in lys_experiments:
         idx = ds_sim_tm.date.values  # time index
         Br_perc_cs = onp.zeros((1, 1, len(idx)))
         Br_mass_perc_cs = onp.zeros((1, 1, len(idx)))
+        df_idx_cs = pd.DataFrame(index=date_obs, columns=['sol'])
+        df_idx_cs.loc[:, 'sol'] = ds_obs['BR_PERC'].isel(x=0, y=0).values
+        idx_cs = df_idx_cs['sol'].dropna().index
         # calculate simulated Bromide composite sample
-        sample_no = pd.DataFrame(index=idx, columns=['sample_no'])
+        sample_no = pd.DataFrame(index=idx_cs, columns=['sample_no'])
         sample_no['sample_no'] = range(len(sample_no.index))
         df_perc_Br_sim = pd.DataFrame(index=idx, columns=['perc', 'Br'])
         df_perc_Br_sim['perc'] = ds_sim_hm['q_ss'].isel(x=0, y=0).values
@@ -106,7 +109,7 @@ for lys_experiment in lys_experiments:
         ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf", group=f'{lys_experiment}/{tm_structure}')
 
         # load observations (measured data)
-        path_obs = Path("/Users/robinschwemmle/Desktop/PhD/data/plot/rietholzbach/rietholzbach_lysimeter.nc")
+        path_obs = Path("/Users/robinschwemmle/Desktop/PhD/data/plot/reckenholz/reckenholz_lysimeter.nc")
         ds_obs = xr.open_dataset(path_obs, engine="h5netcdf", group=lys_experiment)
 
         # assign date
@@ -126,8 +129,11 @@ for lys_experiment in lys_experiments:
         idx = ds_sim_tm.date.values  # time index
         NO3_perc_cs = onp.zeros((1, 1, len(idx)))
         NO3_mass_perc_cs = onp.zeros((1, 1, len(idx)))
+        df_idx_cs = pd.DataFrame(index=date_obs, columns=['sol'])
+        df_idx_cs.loc[:, 'sol'] = ds_obs['NO3_PERC'].isel(x=0, y=0).values
+        idx_cs = df_idx_cs['sol'].dropna().index
         # calculate simulated nitrate composite samples
-        sample_no = pd.DataFrame(index=idx, columns=['sample_no'])
+        sample_no = pd.DataFrame(index=idx_cs, columns=['sample_no'])
         sample_no['sample_no'] = range(len(sample_no.index))
         df_perc_NO3_sim_obs = pd.DataFrame(index=idx, columns=['perc_sim', 'NO3_mass_sim', 'perc_obs', 'NO3_conc_obs'])
         df_perc_NO3_sim_obs['perc_sim'] = ds_sim_hm['q_ss'].isel(x=0, y=0).values

@@ -115,10 +115,13 @@ ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
 # compare observations and simulations
 nrow = 0
 ncol = 0
-idx = ds_sim_tm.Time  # time index
+idx = ds_sim_tm.date.values  # time index
 d18O_perc_cs = onp.zeros((1, 1, len(idx)))
 # calculate simulated oxygen-18 composite sample
-df_perc_18O_obs = pd.DataFrame(index=idx, columns=['perc_obs', 'd18O_perc_obs'])
+df_idx_cs = pd.DataFrame(index=date_obs, columns=['sol'])
+df_idx_cs.loc[:, 'sol'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+idx_cs = df_idx_cs['sol'].dropna().index
+df_perc_18O_obs = pd.DataFrame(index=idx_cs, columns=['perc_obs', 'd18O_perc_obs'])
 df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=nrow, y=ncol).values
 df_perc_18O_obs.loc[:, 'd18O_perc_obs'] = ds_obs['d18O_PERC'].isel(x=nrow, y=ncol).values
 sample_no = pd.DataFrame(index=df_perc_18O_obs.dropna().index, columns=['sample_no'])
