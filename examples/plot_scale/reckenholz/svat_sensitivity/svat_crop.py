@@ -24,20 +24,25 @@ class SVATCROPSetup(RogerSetup):
     """
     _base_path = Path(__file__).parent
     # sampled parameters with Saltelli's extension of the Sobol' sequence
-    _nsamples = 2**10
+    _nsamples = 2**2
     _bounds = {
         'num_vars': 6,
-        'names': ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'],
+        'names': ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'crop_scale'],
         'bounds': [[1, 400],
-                   [1, 1500],
+                   [1, 1200],
                    [0.05, 0.33],
                    [0.05, 0.33],
                    [0.05, 0.33],
-                   [0.1, 120]]
+                   [0.1, 120],
+                   [0.5, 2]]
     }
     _params = saltelli.sample(_bounds, _nsamples, calc_second_order=False)
     _nrows = _params.shape[0]
     _input_dir = None
+    _identifier = None
+
+    def _set_identifier(self, identifier):
+        self._identifier = identifier
 
     def _set_input_dir(self, path):
         if os.path.exists(path):
@@ -47,11 +52,16 @@ class SVATCROPSetup(RogerSetup):
             if not os.path.exists(self._input_dir):
                 os.mkdir(self._input_dir)
 
-    def _read_var_from_nc(self, var, path_dir, file):
+    def _read_var_from_nc(self, var, path_dir, file, group=None):
         nc_file = path_dir / file
-        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables[var]
-            return npx.array(var_obj)
+        if group:
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.groups[group].variables[var]
+                return npx.array(var_obj)
+        else:
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables[var]
+                return npx.array(var_obj)
 
     def _get_nittevent(self, path_dir, file):
         nc_file = path_dir / file
@@ -162,8 +172,6 @@ class SVATCROPSetup(RogerSetup):
         vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
         vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
         vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
-        # increase basal crop coeffcient to account for oasis effect
-        vs.lut_crops = update(vs.lut_crops, at[:, -2], vs.lut_crops[:, -2] * 1.5)
 
     @roger_routine
     def set_topography(self, state):
@@ -181,6 +189,7 @@ class SVATCROPSetup(RogerSetup):
             "theta_pwp",
             "ks",
             "kf",
+            "crop_scale",
             "CROP_TYPE",
             "crop_type",
         ],
@@ -189,7 +198,7 @@ class SVATCROPSetup(RogerSetup):
         vs = state.variables
 
         vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
-        vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
+        vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1350)
         vs.dmpv = update(vs.dmpv, at[2:-2, :], npx.array(self._params[:, 0, npx.newaxis], dtype=int))
         vs.lmpv = update(vs.lmpv, at[2:-2, :], npx.array(self._params[:, 1, npx.newaxis], dtype=int))
         vs.theta_ac = update(vs.theta_ac, at[2:-2, :], self._params[:, 2, npx.newaxis])
@@ -197,6 +206,7 @@ class SVATCROPSetup(RogerSetup):
         vs.theta_pwp = update(vs.theta_pwp, at[2:-2, :], self._params[:, 4, npx.newaxis])
         vs.ks = update(vs.ks, at[2:-2, :], self._params[:, 5, npx.newaxis])
         vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
+        vs.crop_scale = update(vs.crop_scale, at[2:-2, :], self._params[:, 6, npx.newaxis])
 
         vs.CROP_TYPE = update(vs.CROP_TYPE, at[2:-2, 2:-2, :], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc'))
         vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.CROP_TYPE[2:-2, 2:-2, 1])
@@ -218,15 +228,10 @@ class SVATCROPSetup(RogerSetup):
     def set_initial_conditions(self, state):
         vs = state.variables
 
-        vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.4)
-        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.47)
+        theta_rz = self._read_var_from_nc("theta_rz", self._base_path, 'initvals.nc', group=self._identifier)
+        vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], npx.where(theta_rz > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_sat[2:-2, 2:-2, npx.newaxis], theta_rz))
+        theta_ss = self._read_var_from_nc("theta_ss", self._base_path, 'initvals.nc', group=self._identifier)
+        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], npx.where(theta_ss > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_sat[2:-2, 2:-2, npx.newaxis], theta_ss))
 
         vs.update(set_initial_conditions_crops_kernel(state))
 
@@ -250,13 +255,12 @@ class SVATCROPSetup(RogerSetup):
     @roger_routine
     def set_diagnostics(self, state):
         diagnostics = state.diagnostics
-        settings = state.settings
 
         diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz"]
         diagnostics["rates"].output_frequency = 24 * 60 * 60
         diagnostics["rates"].sampling_frequency = 1
 
-        diagnostics["collect"].output_variables = ["S_rz", "S_ss",
+        diagnostics["collect"].output_variables = ["S_rz", "S_ss", "S_s", "S",
                                                    "S_pwp_rz", "S_fc_rz",
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss",
@@ -290,12 +294,12 @@ def set_initial_conditions_crops_kernel(state):
     mask2 = (vs.z_root_crop[:, :, vs.taum1, 0] > vs.z_soil)
     vs.z_root_crop = update(
         vs.z_root_crop,
-        at[2:-2, 2:-2, :2, 0], npx.where(mask2[2:-2, 2:-2], vs.z_soil[2:-2, 2:-2] * .33, 0)
+        at[2:-2, 2:-2, :2, 0], npx.where(mask2[2:-2, 2:-2, npx.newaxis], vs.z_soil[2:-2, 2:-2, npx.newaxis] * .33, vs.z_root_crop[2:-2, 2:-2, :2, 0])
     )
     mask3 = (vs.z_root_crop[:, :, vs.taum1, 0] > 0)
     vs.z_root = update(
         vs.z_root,
-        at[2:-2, 2:-2, :2], npx.where(mask3[2:-2, 2:-2], vs.z_root_crop[2:-2, 2:-2, vs.taum1, 0], vs.z_root[2:-2, 2:-2, :2])
+        at[2:-2, 2:-2, :2], npx.where(mask3[2:-2, 2:-2, npx.newaxis], vs.z_root_crop[2:-2, 2:-2, :2, 0], vs.z_root[2:-2, 2:-2, :2])
     )
 
     # calculate time since growing
@@ -732,11 +736,12 @@ def after_timestep_crops_kernel(state):
     )
 
 
-lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9"]
+lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
 for lys_experiment in lys_experiments:
     model = SVATCROPSetup()
-    input_path = model._base_path / lys_experiment / "input"
+    input_path = model._base_path / "input" / lys_experiment
     model._set_input_dir(input_path)
+    model._set_identifier(lys_experiment)
     forcing_path = model._input_dir / "forcing.nc"
     if not os.path.exists(forcing_path):
         write_forcing(input_path, enable_crop_phenology=True)
@@ -764,8 +769,8 @@ for lys_experiment in lys_experiments:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
                 dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
-                if not f.dimensions:
-                    f.dimensions = dict_dim
+                if not f.groups[lys_experiment].dimensions:
+                    f.groups[lys_experiment].dimensions = dict_dim
                     v = f.groups[lys_experiment].create_variable('x', ('x',), float)
                     v.attrs['long_name'] = 'Zonal coordinate'
                     v.attrs['units'] = 'meters'
@@ -779,13 +784,13 @@ for lys_experiment in lys_experiments:
                     with h5netcdf.File(model._input_dir / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
                         time_origin = infile.variables['Time'].attrs['time_origin']
                     v.attrs.update(time_origin=time_origin,
-                                    units=var_obj.attrs["units"])
+                                   units=var_obj.attrs["units"])
                     v[:] = npx.array(var_obj)
                 for key in list(df.variables.keys()):
                     var_obj = df.variables.get(key)
-                    if key not in list(f.dimensions.keys()) and var_obj.ndim == 3:
+                    if key not in list(f.groups[lys_experiment].dimensions.keys()) and var_obj.ndim == 3:
                         v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time'), float)
                         vals = npx.array(var_obj)
                         v[:, :, :] = vals.swapaxes(0, 2)
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                        units=var_obj.attrs["units"])
+                                       units=var_obj.attrs["units"])

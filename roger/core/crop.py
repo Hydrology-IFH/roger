@@ -112,7 +112,7 @@ def calc_t_grow(state):
         vs.t_grow_cc,
         at[2:-2, 2:-2, vs.tau, :], npx.where(mask8[2:-2, 2:-2, :], 0, vs.t_grow_cc[2:-2, 2:-2, vs.tau, :]),
     )
-    mask9 = mask_winter_catch & ((vs.doy >= vs.doy_start) | ((vs.doy <= vs.doy_end) & (vs.doy > arr0) & (vs.ccc[2:-2, 2:-2, vs.tau, :] > 0)))
+    mask9 = mask_winter_catch & ((vs.doy >= vs.doy_start) | ((vs.doy <= vs.doy_end) & (vs.doy > arr0) & (vs.ccc[:, :, vs.tau, :] > 0)))
     mask10 = mask_winter_catch & (vs.doy > vs.doy_end) & (vs.doy < vs.doy_start)
     vs.t_grow_cc = update_add(
         vs.t_grow_cc,
@@ -163,7 +163,7 @@ def calc_t_grow(state):
         vs.t_grow_root,
         at[2:-2, 2:-2, vs.tau, :], npx.where(mask6[2:-2, 2:-2, :], 0, vs.t_grow_root[2:-2, 2:-2, vs.tau, :]),
     )
-    mask7 = mask_winter & ((vs.doy >= vs.doy_start) | ((vs.doy <= vs.doy_end) & (vs.doy > arr0) & (vs.ccc[2:-2, 2:-2, vs.tau, :] > 0)))
+    mask7 = mask_winter & ((vs.doy >= vs.doy_start) | ((vs.doy <= vs.doy_end) & (vs.doy > arr0) & (vs.ccc[:, :, vs.tau, :] > 0)))
     mask8 = mask_winter & (vs.doy > vs.doy_end) & (vs.doy < vs.doy_start)
     vs.t_grow_root = update_add(
         vs.t_grow_root,
@@ -173,7 +173,7 @@ def calc_t_grow(state):
         vs.t_grow_root,
         at[2:-2, 2:-2, vs.tau, :], npx.where(mask8[2:-2, 2:-2, :], 0, vs.t_grow_root[2:-2, 2:-2, vs.tau, :]),
     )
-    mask9 = mask_winter_catch & ((vs.doy >= vs.doy_start) | ((vs.doy <= vs.doy_end) & (vs.doy > arr0) & (vs.ccc[2:-2, 2:-2, vs.tau, :] > 0)))
+    mask9 = mask_winter_catch & ((vs.doy >= vs.doy_start) | ((vs.doy <= vs.doy_end) & (vs.doy > arr0) & (vs.ccc[:, :, vs.tau, :] > 0)))
     mask10 = mask_winter_catch & (vs.doy > vs.doy_end) & (vs.doy < vs.doy_start)
     vs.t_grow_root = update_add(
         vs.t_grow_root,
@@ -539,7 +539,7 @@ def calc_root_growth(state):
     )
 
     mask4 = mask_winter & (vs.t_grow_root[:, :, vs.tau, :] <= 0)
-    mask5 = mask_winter & ((vs.doy >= vs.doy_start) | (vs.doy <= vs.doy_mid) & (vs.doy > arr0) & (vs.t_grow_root[2:-2, 2:-2, vs.tau, :] > 0))
+    mask5 = mask_winter & ((vs.doy >= vs.doy_start) | (vs.doy <= vs.doy_mid) & (vs.doy > arr0) & (vs.t_grow_root[:, :, vs.tau, :] > 0))
     mask6 = mask_winter & (vs.doy > vs.doy_end) & (vs.doy < vs.doy_start)
     # before growing period
     vs.z_root_crop = update(
@@ -666,7 +666,7 @@ def update_ground_cover(state):
     )
     vs.ground_cover = update(
         vs.ground_cover,
-        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.ground_cover[2:-2, 2:-2], npx.max(ccc[2:-2, 2:-2, :], axis=-1))
+        at[2:-2, 2:-2, vs.tau], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.ground_cover[2:-2, 2:-2, vs.tau], npx.max(ccc[2:-2, 2:-2, :], axis=-1))
     )
 
     return KernelOutput(ground_cover=vs.ground_cover)
@@ -776,7 +776,7 @@ def update_z_root(state):
     )
     vs.z_root = update(
         vs.z_root,
-        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.z_root[2:-2, 2:-2], npx.max(z_root_crop[2:-2, 2:-2, :], axis=-1))
+        at[2:-2, 2:-2, vs.tau], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.z_root[2:-2, 2:-2, vs.tau], npx.max(z_root_crop[2:-2, 2:-2, :], axis=-1))
     )
 
     return KernelOutput(z_root=vs.z_root)
@@ -1031,7 +1031,7 @@ def set_crop_params(state):
         )
         vs.basal_crop_coeff_mid = update(
             vs.basal_crop_coeff_mid,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 21], vs.basal_crop_coeff_mid[2:-2, 2:-2, :]),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 21], vs.basal_crop_coeff_mid[2:-2, 2:-2, :] * vs.crop_scale[2:-2, 2:-2, npx.newaxis]),
         )
         vs.z_root_crop_max = update(
             vs.z_root_crop_max,

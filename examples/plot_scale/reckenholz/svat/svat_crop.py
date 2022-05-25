@@ -154,8 +154,6 @@ class SVATCROPSetup(RogerSetup):
         vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
         vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
         vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
-        # increase basal crop coeffcient to account for oasis effect
-        vs.lut_crops = update(vs.lut_crops, at[:, -2], vs.lut_crops[:, -2] * 1.5)
 
     @roger_routine
     def set_topography(self, state):
@@ -165,7 +163,7 @@ class SVATCROPSetup(RogerSetup):
     def set_parameters_setup(self, state):
         vs = state.variables
 
-        vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 599)
+        vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
         vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1350)
         vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 100)
         vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1000)
@@ -174,6 +172,7 @@ class SVATCROPSetup(RogerSetup):
         vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.23)
         vs.ks = update(vs.ks, at[2:-2, 2:-2], 25)
         vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
+        vs.crop_scale = update(vs.crop_scale, at[2:-2, 2:-2], 1)
 
         vs.CROP_TYPE = update(vs.CROP_TYPE, at[2:-2, 2:-2, :], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc'))
         vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.CROP_TYPE[2:-2, 2:-2, 1])
@@ -195,15 +194,10 @@ class SVATCROPSetup(RogerSetup):
     def set_initial_conditions(self, state):
         vs = state.variables
 
-        vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("theta_rz", self._base_path, 'initvals.nc', group=self._identifier))
-        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("theta_ss", self._base_path, 'initvals.nc', group=self._identifier))
+        theta_rz = self._read_var_from_nc("theta_rz", self._base_path, 'initvals.nc', group=self._identifier)
+        vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], npx.where(theta_rz > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_sat[2:-2, 2:-2, npx.newaxis], theta_rz))
+        theta_ss = self._read_var_from_nc("theta_ss", self._base_path, 'initvals.nc', group=self._identifier)
+        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], npx.where(theta_ss > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_sat[2:-2, 2:-2, npx.newaxis], theta_ss))
 
         vs.update(set_initial_conditions_crops_kernel(state))
 
@@ -232,7 +226,7 @@ class SVATCROPSetup(RogerSetup):
         diagnostics["rates"].output_frequency = 24 * 60 * 60
         diagnostics["rates"].sampling_frequency = 1
 
-        diagnostics["collect"].output_variables = ["S_rz", "S_ss",
+        diagnostics["collect"].output_variables = ["S_rz", "S_ss", "S_s", "S",
                                                    "S_pwp_rz", "S_fc_rz",
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss",
@@ -268,12 +262,12 @@ def set_initial_conditions_crops_kernel(state):
     mask2 = (vs.z_root_crop[:, :, vs.taum1, 0] > vs.z_soil)
     vs.z_root_crop = update(
         vs.z_root_crop,
-        at[2:-2, 2:-2, :2, 0], npx.where(mask2[2:-2, 2:-2], vs.z_soil[2:-2, 2:-2] * .33, vs.z_root_crop[2:-2, 2:-2, :2, 0])
+        at[2:-2, 2:-2, :2, 0], npx.where(mask2[2:-2, 2:-2, npx.newaxis], vs.z_soil[2:-2, 2:-2, npx.newaxis] * .33, vs.z_root_crop[2:-2, 2:-2, :2, 0])
     )
     mask3 = (vs.z_root_crop[:, :, vs.taum1, 0] > 0)
     vs.z_root = update(
         vs.z_root,
-        at[2:-2, 2:-2, :2], npx.where(mask3[2:-2, 2:-2], vs.z_root_crop[2:-2, 2:-2, vs.taum1, 0], vs.z_root[2:-2, 2:-2, :2])
+        at[2:-2, 2:-2, :2], npx.where(mask3[2:-2, 2:-2, npx.newaxis], vs.z_root_crop[2:-2, 2:-2, :2, 0], vs.z_root[2:-2, 2:-2, :2])
     )
 
     # calculate time since growing
@@ -473,16 +467,14 @@ def set_forcing_kernel(state):
     vs.doy = vs.DOY[vs.itt]
 
     # reset fluxes at beginning of time step
-    q_sur = allocate(state.dimensions, ("x", "y"))
     vs.q_sur = update(
         vs.q_sur,
-        at[:, :], q_sur,
+        at[:, :], 0,
     )
 
-    q_hof = allocate(state.dimensions, ("x", "y"))
     vs.q_hof = update(
         vs.q_hof,
-        at[:, :], q_hof,
+        at[:, :], 0,
     )
 
     return KernelOutput(
@@ -710,10 +702,10 @@ def after_timestep_crops_kernel(state):
     )
 
 
-lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9"]
+lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
 for lys_experiment in lys_experiments:
     model = SVATCROPSetup()
-    input_path = model._base_path / lys_experiment / "input"
+    input_path = model._base_path / "input" / lys_experiment
     model._set_input_dir(input_path)
     model._set_identifier(lys_experiment)
     forcing_path = model._input_dir / "forcing.nc"
@@ -758,7 +750,7 @@ for lys_experiment in lys_experiments:
                     with h5netcdf.File(model._input_dir / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
                         time_origin = infile.variables['Time'].attrs['time_origin']
                     v.attrs.update(time_origin=time_origin,
-                                    units=var_obj.attrs["units"])
+                                   units=var_obj.attrs["units"])
                     v[:] = npx.array(var_obj)
                 for key in list(df.variables.keys()):
                     var_obj = df.variables.get(key)
@@ -767,4 +759,4 @@ for lys_experiment in lys_experiments:
                         vals = npx.array(var_obj)
                         v[:, :, :] = vals.swapaxes(0, 2)
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                        units=var_obj.attrs["units"])
+                                       units=var_obj.attrs["units"])

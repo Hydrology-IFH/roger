@@ -4281,6 +4281,15 @@ VARIABLES = {
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
+    "crop_scale": Variable(
+        "scaling factor of crop parameters",
+        CATCH_GRID,
+        "-",
+        "scaling factor of crop parameters",
+        initial=1,
+        time_dependent=False,
+        active=lambda settings: settings.enable_crop_phenology,
+    ),
     "basal_crop_coeff_mid": Variable(
         "basal crop coefficient of mature crop",
         CATCH_GRID + CROPS,

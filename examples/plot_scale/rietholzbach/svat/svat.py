@@ -143,13 +143,6 @@ class SVATSetup(RogerSetup):
     def set_initial_conditions(self, state):
         vs = state.variables
 
-        vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
         vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.46)
         vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.44)
 
