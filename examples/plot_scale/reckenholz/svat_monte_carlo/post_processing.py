@@ -1,5 +1,4 @@
 import shutil
-import glob
 import os
 from pathlib import Path
 import datetime
@@ -55,6 +54,7 @@ for lys_experiment in lys_experiments:
     df_params_eff.loc[:, 'theta_ufc'] = ds_sim["theta_ufc"].isel(y=0).values.flatten()
     df_params_eff.loc[:, 'theta_pwp'] = ds_sim["theta_pwp"].isel(y=0).values.flatten()
     df_params_eff.loc[:, 'ks'] = ds_sim["ks"].isel(y=0).values.flatten()
+    df_params_eff.loc[:, 'crop_scale'] = ds_sim["crop_scale"].isel(y=0).values.flatten()
     # calculate metrics
     vars_sim = ['q_ss', 'theta', 'S_s', 'S']
     vars_obs = ['PERC', 'THETA', 'WEIGHT', 'WEIGHT']
@@ -251,7 +251,7 @@ for lys_experiment in lys_experiments:
 
     # dotty plots
     df_eff = df_params_eff.loc[:, ['KGE_q_ss', 'r_S', 'E_multi']]
-    df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+    df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'crop_scale']]
     nrow = len(df_eff.columns)
     ncol = len(df_params.columns)
     fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(14, 7))

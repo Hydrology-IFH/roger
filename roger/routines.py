@@ -453,9 +453,9 @@ class rogerSync:
             elif runtime_state.proc_rank > 0:
                 def function():
                     pass
-                distributed.barrier()
                 out = function()
                 runtime_settings.mpi_comm.irecv(source=0, tag=10)
+                distributed.barrier()
 
         return out
 

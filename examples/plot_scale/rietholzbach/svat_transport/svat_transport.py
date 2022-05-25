@@ -622,7 +622,7 @@ def _ffill_3d(state, arr):
 
 tm_structures = ['complete-mixing', 'piston',
                  'preferential', 'advection-dispersion',
-                 'complete-mixing advection-dispersion',
+                 'complete-mixing + advection-dispersion',
                  'time-variant preferential',
                  'time-variant advection-dispersion',
                  'time-variant']
