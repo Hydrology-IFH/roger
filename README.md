@@ -48,13 +48,15 @@ regularly by using the `git pull` command.
 GIT:
 
 **First step:**
+Download the repository and install required Python packages in an environment:
 ```bash
 git clone https://github.com/schwemro/roger.git
 cd roger
 conda env create -f conda-environment.yml
 ```
 **Second step:**
-Activate the anaconda environment and launch Spyder
+Activate the anaconda environment and install packages for post-processing
+(optional):
 ```bash
 conda activate roger
 # packages for post-processing (optional)
@@ -72,13 +74,15 @@ regularly by using the `git pull` command.
 GIT:
 
 **First step:**
+Download the repository and install required Python packages in an environment:
 ```bash
 git clone https://github.com/schwemro/roger.git
 cd roger
 conda env create -f conda-environment.yml
 ```
 **Second step:**
-Activate the anaconda environment and launch Spyder
+Activate the anaconda environment and install packages for post-processing
+(optional):
 ```bash
 activate roger
 # packages for post-processing (optional)
