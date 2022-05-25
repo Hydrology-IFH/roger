@@ -54,7 +54,9 @@ git clone https://github.com/schwemro/roger.git
 cd roger
 conda env create -f conda-environment.yml
 ```
-IMPORTANT: Add the folder containing the package to your PYTHONPATH!
+IMPORTANT: Add the folder containing the package to your PYTHONPATH! Modify
+your .bashrc-file.
+
 **Second step:**
 Activate the anaconda environment and install packages for post-processing
 (optional):
@@ -81,7 +83,9 @@ git clone https://github.com/schwemro/roger.git
 cd roger
 conda env create -f conda-environment.yml
 ```
-IMPORTANT: Add the folder containing the package to your PYTHONPATH!
+IMPORTANT: Add the folder containing the package to your PYTHONPATH! Modify
+your environment variables in the system properties.
+
 **Second step:**
 Activate the anaconda environment and install packages for post-processing
 (optional):
