@@ -4,7 +4,6 @@ from roger.core.operators import numpy as npx, update, at, where
 from roger import roger_kernel
 
 
-@roger_kernel(static_args=("size", "fill_value"))
 def _get_row_no(arr1d, i, size=1, fill_value=0):
     arr = npx.full((npx.size(arr1d),), dtype=bool, fill_value=False)
     arr = update(
@@ -18,7 +17,13 @@ def _get_row_no(arr1d, i, size=1, fill_value=0):
         val = 0
     row_no = npx.int64(npx.where(cond, val, 0))
 
-    return row_no
+    arr_row_no = npx.full((1,), dtype=int, fill_value=False)
+    arr_row_no = update(
+        arr_row_no,
+        at[:], row_no,
+    )
+
+    return arr_row_no
 
 
 @roger_kernel(static_args=("local"))

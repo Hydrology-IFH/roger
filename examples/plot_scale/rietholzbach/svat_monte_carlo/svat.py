@@ -3,7 +3,7 @@ import os
 import h5netcdf
 
 from roger import runtime_settings as rs, runtime_state as rst
-rs.backend = "numpy"
+rs.backend = "jax"
 rs.force_overwrite = True
 if rs.mpi_comm:
     rs.num_proc = (rst.proc_num, 1)

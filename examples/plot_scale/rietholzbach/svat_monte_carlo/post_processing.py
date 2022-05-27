@@ -380,6 +380,10 @@ base_path_tm = base_path.parent / "svat_transport_sensitivity"
 states_hm_file1 = base_path_tm / "states_hm.nc"
 shutil.copy(states_hm_file, states_hm_file1)
 
+base_path_tm = base_path.parent / "svat_transport_bromide_benchmark"
+states_hm_file1 = base_path_tm / "states_hm.nc"
+shutil.copy(states_hm_file, states_hm_file1)
+
 base_path_tm = base_path.parent / "svat_transport"
 states_hm_file1 = base_path_tm / "states_hm.nc"
 shutil.copy(states_hm_file, states_hm_file1)

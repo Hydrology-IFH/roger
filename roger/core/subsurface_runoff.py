@@ -525,6 +525,10 @@ def calc_dz_sat(state):
     mask4 = (f_vr >= 1) & (vs.S_lp_ss <= 0)
     vs.dz_sat = update(
         vs.dz_sat,
+        at[2:-2, 2:-2], 0,
+    )
+    vs.dz_sat = update(
+        vs.dz_sat,
         at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], (qv[2:-2, 2:-2] * f_vr[2:-2, 2:-2]) / vs.theta_ac[2:-2, 2:-2], vs.dz_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.dz_sat = update(
@@ -541,7 +545,11 @@ def calc_dz_sat(state):
     )
     vs.z_sat = update(
         vs.z_sat,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask3[2:-2, 2:-2], 0, vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau], npx.where(mask3[2:-2, 2:-2], vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], vs.z_sat[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.z_sat = update(
+        vs.z_sat,
+        at[2:-2, 2:-2, vs.tau], npx.where(vs.S_lp_ss[2:-2, 2:-2] <= 0, 0, vs.z_sat[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(dz_sat=vs.dz_sat, z_sat=vs.z_sat)

@@ -202,7 +202,11 @@ for tm_structure in tm_structures:
         v.attrs.update(long_name="SAS parameters of subsoil percolation",
                        units=" ")
 
-# move hydrologic states to directories of transport model
+# move best SAS parameters to directories of transport model
+base_path_tm = base_path.parent / "svat_transport_bromide_benchmark"
+params_tm_file1 = base_path_tm / "sas_params.nc"
+shutil.copy(states_hm_file, params_tm_file1)
+
 base_path_tm = base_path.parent / "svat_transport_monte_carlo_reverse"
 params_tm_file1 = base_path_tm / "sas_params.nc"
 shutil.copy(states_hm_file, params_tm_file1)

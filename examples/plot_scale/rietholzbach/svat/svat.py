@@ -120,12 +120,12 @@ class SVATSetup(RogerSetup):
         vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
         vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
         vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
-        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
-        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 300)
-        vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.19)
-        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.16)
-        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2],  0.24)
-        vs.ks = update(vs.ks, at[2:-2, 2:-2], 9)
+        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 201)
+        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1314)
+        vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.32)
+        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.1)
+        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2],  0.06)
+        vs.ks = update(vs.ks, at[2:-2, 2:-2], 50)
         vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
     @roger_routine
@@ -175,7 +175,7 @@ class SVATSetup(RogerSetup):
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss",
                                                    "theta_rz", "theta_ss", "theta",
-                                                   "S_snow"]
+                                                   "S_snow", "S_lp_rz", "S_lp_ss"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 
