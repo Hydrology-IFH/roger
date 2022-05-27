@@ -26,7 +26,7 @@ def calc_cpr_rz(state):
         at[2:-2, 2:-2], ((vs.z_root[2:-2, 2:-2, vs.tau] + (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])/2) - vs.z_root[2:-2, 2:-2, vs.tau]/2) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # vertical uplift using the Richards equation
+    # vertical uplift using the Richards
     vs.cpr_rz = update(
         vs.cpr_rz,
         at[2:-2, 2:-2], (-1) * vs.k_rz[2:-2, 2:-2, vs.tau] * (dh[2:-2, 2:-2]/dz[2:-2, 2:-2] + 1) * vs.dt * vs.maskCatch[2:-2, 2:-2],

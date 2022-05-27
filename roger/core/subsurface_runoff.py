@@ -206,6 +206,11 @@ def calc_q_sub_pot(state):
         vs.q_sub_pot,
         at[2:-2, 2:-2], (vs.q_sub_mp_pot[2:-2, 2:-2] + vs.q_sub_mat_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
+    mask = (vs.q_sub_pot > vs.S_lp_rz + vs.S_lp_ss)
+    vs.q_sub_pot = update(
+        vs.q_sub_pot,
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.S_lp_rz[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2], vs.q_sub_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
 
     # contribution of subsurface runoff components
     vs.q_sub_mat_share = update(
@@ -523,6 +528,7 @@ def calc_dz_sat(state):
     mask2 = (f_vr > 0) & (f_vr < 1) & (vs.ks * vs.dt >= z_ns)
     mask3 = (f_vr >= 1) & (vs.S_lp_ss > 0)
     mask4 = (f_vr >= 1) & (vs.S_lp_ss <= 0)
+    mask5 = (vs.S_lp_ss >= vs.S_lp_ss)
     vs.dz_sat = update(
         vs.dz_sat,
         at[2:-2, 2:-2], 0,
@@ -550,6 +556,10 @@ def calc_dz_sat(state):
     vs.z_sat = update(
         vs.z_sat,
         at[2:-2, 2:-2, vs.tau], npx.where(vs.S_lp_ss[2:-2, 2:-2] <= 0, 0, vs.z_sat[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.z_sat = update(
+        vs.z_sat,
+        at[2:-2, 2:-2, vs.tau], npx.where(mask5[2:-2, 2:-2], vs.S_lp_rz[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], vs.z_sat[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(dz_sat=vs.dz_sat, z_sat=vs.z_sat)
@@ -590,6 +600,18 @@ def calc_perc_pot_rz(state):
     vs.q_pot_rz = update(
         vs.q_pot_rz,
         at[2:-2, 2:-2], npx.where(mask4[2:-2, 2:-2], vs.S_lp_rz[2:-2, 2:-2], vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    mask5 = (vs.q_pot_rz > 0) & (vs.q_pot_rz > vs.S_ac_ss - vs.S_lp_ss)
+    vs.q_pot_rz = update(
+        vs.q_pot_rz,
+        at[2:-2, 2:-2], npx.where(mask5[2:-2, 2:-2], vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2], vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    mask6 = (vs.q_pot_rz > 0) & (vs.S_lp_ss >= vs.S_ac_ss)
+    vs.q_pot_rz = update(
+        vs.q_pot_rz,
+        at[2:-2, 2:-2], npx.where(mask6[2:-2, 2:-2], 0, vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(q_pot_rz=vs.q_pot_rz)
@@ -653,11 +675,11 @@ def calc_perc_pot_ss(state):
 
     # where drainage occurs
     if settings.enable_groundwater_boundary | settings.enable_groundwater:
-        mask1 = (perc_pot > 0) & ((vs.S_zsat > 0) | (vs.z_soil < vs.z_gw[:, :, vs.tau])) & (perc_pot <= vs.S_zsat)
-        mask2 = (perc_pot > 0) & ((vs.S_zsat > 0) | (vs.z_soil < vs.z_gw[:, :, vs.tau])) & (perc_pot > vs.S_zsat)
+        mask1 = (perc_pot > 0) & ((vs.S_lp_ss > 0) | (vs.z_soil < vs.z_gw[:, :, vs.tau])) & (perc_pot <= vs.S_lp_ss)
+        mask2 = (perc_pot > 0) & ((vs.S_lp_ss > 0) | (vs.z_soil < vs.z_gw[:, :, vs.tau])) & (perc_pot > vs.S_lp_ss)
     else:
-        mask1 = (perc_pot > 0) & (vs.S_zsat > 0) & (perc_pot <= vs.S_zsat)
-        mask2 = (perc_pot > 0) & (vs.S_zsat > 0) & (perc_pot > vs.S_zsat)
+        mask1 = (perc_pot > 0) & (vs.S_lp_ss > 0) & (perc_pot <= vs.S_lp_ss)
+        mask2 = (perc_pot > 0) & (vs.S_lp_ss > 0) & (perc_pot > vs.S_lp_ss)
 
     # vertical drainage of subsoil
     vs.q_pot_ss = update(
@@ -670,7 +692,7 @@ def calc_perc_pot_ss(state):
     )
     vs.q_pot_ss = update(
         vs.q_pot_ss,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.S_zsat[2:-2, 2:-2], vs.q_pot_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.S_lp_ss[2:-2, 2:-2], vs.q_pot_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(q_pot_ss=vs.q_pot_ss)
