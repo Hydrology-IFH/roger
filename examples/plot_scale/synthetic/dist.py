@@ -644,12 +644,3 @@ for meteo_station in meteo_stations:
                         v[:, :, :] = vals.swapaxes(0, 2)
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                         units=var_obj.attrs["units"])
-
-
-# vs = model.state.variables
-# dS = vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1]
-# S = vs.S[2:-2, 2:-2, vs.tau]
-# S1 = vs.S[2:-2, 2:-2, vs.taum1]
-# fluxes = vs.prec[2:-2, 2:-2] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.q_sub[2:-2, 2:-2]
-# cpr_rz = vs.cpr_rz[2:-2, 2:-2]
-# cpr_rz = vs.cpr_rz[1311, 2:-2]
