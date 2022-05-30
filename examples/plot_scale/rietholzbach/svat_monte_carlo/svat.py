@@ -3,7 +3,7 @@ import os
 import h5netcdf
 
 from roger import runtime_settings as rs, runtime_state as rst
-rs.backend = "jax"
+rs.backend = "numpy"
 rs.force_overwrite = True
 if rs.mpi_comm:
     rs.num_proc = (rst.proc_num, 1)
@@ -16,7 +16,7 @@ import roger.lookuptables as lut
 import numpy as onp
 
 # number of monte-carlo samples
-NSAMPLES = 10000
+NSAMPLES = 1000
 
 
 class SVATSetup(RogerSetup):
@@ -209,7 +209,7 @@ class SVATSetup(RogerSetup):
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss",
                                                    "theta_rz", "theta_ss", "theta",
-                                                   "S_snow"]
+                                                   "S_snow", "S_lp_ss", "z_sat"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 

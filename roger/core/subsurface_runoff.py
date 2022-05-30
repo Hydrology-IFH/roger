@@ -667,8 +667,6 @@ def calc_perc_rz(state):
         at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    vs.update(calc_dz_sat(state))
-
     return KernelOutput(q_rz=vs.q_rz, S_lp_rz=vs.S_lp_rz, S_fp_ss=vs.S_fp_ss, S_lp_ss=vs.S_lp_ss)
 
 
@@ -893,6 +891,7 @@ def calculate_subsurface_runoff(state):
     if settings.enable_lateral_flow:
         vs.update(calc_perc_pot_rz(state))
         vs.update(calc_perc_rz(state))
+        vs.update(calc_dz_sat(state))
         vs.update(calc_S_zsat(state))
         vs.update(calc_z_sat_layer(state))
         vs.update(calc_q_sub_pot(state))
@@ -905,7 +904,9 @@ def calculate_subsurface_runoff(state):
     elif not settings.enable_lateral_flow:
         vs.update(calc_perc_pot_rz(state))
         vs.update(calc_perc_rz(state))
+        vs.update(calc_dz_sat(state))
         vs.update(calc_S_zsat(state))
+        print(vs.S_zsat_ss[2:-2, 2:-2])
         vs.update(calc_perc_pot_ss(state))
         vs.update(calc_perc_ss(state))
 

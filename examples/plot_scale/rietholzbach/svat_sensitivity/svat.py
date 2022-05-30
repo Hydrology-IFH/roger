@@ -4,7 +4,7 @@ import h5netcdf
 from SALib.sample import saltelli
 
 from roger import runtime_settings as rs, runtime_state as rst
-rs.backend = "jax"
+rs.backend = "numpy"
 rs.force_overwrite = True
 if rs.mpi_comm:
     rs.num_proc = (rst.proc_num, 1)

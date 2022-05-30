@@ -2,13 +2,17 @@
 # run monte carlo
 cd "$PWD"/svat_monte_carlo
 OMP_NUM_THREADS=1 mpirun -n 4 python svat.py
+cd ..
 # run sobol' sequence
 cd "$PWD"/svat_sensitivity
 OMP_NUM_THREADS=1 mpirun -n 4 python svat.py
+cd ..
 cd "$PWD"/svat_monte_carlo
 python post_processing.py
+cd ..
 cd "$PWD"/svat_sensitivity
 python post_processing.py
+cd ..
 # # run monte carlo for transport model
 # cd "$PWD"/svat_transport_monte_carlo
 # OMP_NUM_THREADS=1 mpirun -n 4 python svat_transport.py
