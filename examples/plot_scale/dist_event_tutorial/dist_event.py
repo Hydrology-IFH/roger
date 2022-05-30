@@ -11,6 +11,48 @@ import roger.lookuptables as lut
 from roger.tools.setup import write_forcing_event
 import numpy as onp
 
+# --- set the model parameters ------------------------
+# land use ID (see README for description)
+LU_ID = 8
+# degree of sealing (-)
+SEALING = 0
+# surface slope (-)
+SLOPE = 0.05
+# total surface depression storage (mm)
+S_DEP_TOT = 0
+# soil depth (mm)
+Z_SOIL = 1000
+# density of vertical macropores (1/m2)
+DMPV = 50
+# density of horizontal macropores (1/m2)
+DMPH = 300
+# total length of vertical macropores (mm)
+LMPV = 300
+# air capacity (-)
+THETA_AC = 0.08
+# usable field capacity (-)
+THETA_UFC = 0.15
+# permanent wilting point (-)
+THETA_PWP = 0.17
+# saturated hydraulic conductivity (-)
+KS = 9.2
+# hydraulic conductivity of bedrock/saturated zone (-)
+KF = 5
+
+# --- set the initial conditions -----------------------
+# soil water content of root zone/upper soil layer (-)
+THETA_RZ = 0.32
+# soil water content of subsoil/lower soil layer (-)
+THETA_SS = 0.32
+
+# --- set the output variables -----------------------
+# list with simulated fluxes (see variables for description)
+OUTPUT_FLUXES = ["inf_mat", "inf_mp", "inf_sc", "q_ss",
+                 "q_sub", "q_sub_mp", "q_sub_mat",
+                 "q_hof", "q_sof"]
+
+# !!!Do not modify the script below!!!
+
 
 class DISTEVENTSetup(RogerSetup):
     """A 1D model for a single event.
@@ -135,33 +177,33 @@ class DISTEVENTSetup(RogerSetup):
         vs = state.variables
 
         # land use ID (see README for description)
-        vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
+        vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], LU_ID)
         # degree of sealing (-)
         vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
         # surface slope (-)
-        vs.slope = update(vs.slope, at[2:-2, 2:-2], 0.05)
+        vs.slope = update(vs.slope, at[2:-2, 2:-2], SLOPE)
         # convert slope to percentage
         vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
         # total surface depression storage (mm)
         vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
         # soil depth (mm)
-        vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1000)
+        vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], Z_SOIL)
         # density of vertical macropores (1/m2)
-        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
+        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], DMPV)
         # density of horizontal macropores (1/m2)
-        vs.dmph = update(vs.dmph, at[2:-2, 2:-2], 300)
+        vs.dmph = update(vs.dmph, at[2:-2, 2:-2], DMPH)
         # total length of vertical macropores (mm)
-        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 300)
+        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], LMPV)
         # air capacity (-)
-        vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.08)
+        vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], THETA_AC)
         # usable field capacity (-)
-        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.15)
+        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], THETA_UFC)
         # permanent wilting point (-)
-        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.17)
+        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], THETA_PWP)
         # saturated hydraulic conductivity (-)
-        vs.ks = update(vs.ks, at[2:-2, 2:-2], 9.2)
+        vs.ks = update(vs.ks, at[2:-2, 2:-2], KS)
         # hydraulic conductivity of bedrock/saturated zone (-)
-        vs.kf = update(vs.kf, at[2:-2, 2:-2], 5)
+        vs.kf = update(vs.kf, at[2:-2, 2:-2], KF)
 
     @roger_routine
     def set_parameters(self, state):
@@ -189,12 +231,10 @@ class DISTEVENTSetup(RogerSetup):
         vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
         # snow water equivalent of snow cover (mm)
         vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
-        # soil water content of root zone/upper soil layer (mm)
-        vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.32)
-        # soil water content of subsoil/lower soil layer (mm)
-        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.32)
-        # thickness of saturation water table (mm)
-        vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 0)
+        # soil water content of root zone/upper soil layer (-)
+        vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], THETA_RZ)
+        # soil water content of subsoil/lower soil layer (-)
+        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], THETA_SS)
 
     @roger_routine
     def set_forcing_setup(self, state):
@@ -217,7 +257,7 @@ class DISTEVENTSetup(RogerSetup):
         diagnostics = state.diagnostics
 
         # variables written to output files
-        diagnostics["rates"].output_variables = ["inf_mat", "inf_mp", "inf_sc", "q_ss", "q_sub", "q_sub_mp", "q_sub_mat", "q_hof", "q_sof"]
+        diagnostics["rates"].output_variables = OUTPUT_FLUXES
         # required to be equal or greater than time increments of input
         diagnostics["rates"].output_frequency = 10 * 60  # in seconds
         diagnostics["rates"].sampling_frequency = 1
