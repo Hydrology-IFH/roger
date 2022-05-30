@@ -906,7 +906,6 @@ def calculate_subsurface_runoff(state):
         vs.update(calc_perc_rz(state))
         vs.update(calc_dz_sat(state))
         vs.update(calc_S_zsat(state))
-        print(vs.S_zsat_ss[2:-2, 2:-2])
         vs.update(calc_perc_pot_ss(state))
         vs.update(calc_perc_ss(state))
 
