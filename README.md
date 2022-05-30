@@ -63,7 +63,7 @@ Activate the anaconda environment and install packages for post-processing
 ```bash
 conda activate roger
 # packages for post-processing (optional)
-conda install --yes --file requirements_extra.txt
+conda install --yes --file requirements_extra.txt -c conda-forge
 ```
 
 ## Installation and usage on Windows
@@ -90,9 +90,9 @@ your environment variables in the system properties.
 Activate the anaconda environment and install packages for post-processing
 (optional):
 ```bash
-activate roger
+conda activate roger
 # packages for post-processing (optional)
-conda install --yes --file requirements_extra.txt
+conda install --yes --file requirements_extra.txt -c conda-forge
 ```
 
 ## Basic usage
