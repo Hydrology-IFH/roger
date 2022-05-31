@@ -541,14 +541,13 @@
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_num</span><span class="p">):</span>
                     <span class="n">buffer</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
                     <span class="n">runtime_settings</span><span class="o">.</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">isend</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-                <span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
             <span class="c1"># let other processes wait</span>
             <span class="k">elif</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_rank</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">def</span> <span class="nf">function</span><span class="p">():</span>
                     <span class="k">pass</span>
-                <span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
                 <span class="n">out</span> <span class="o">=</span> <span class="n">function</span><span class="p">()</span>
                 <span class="n">runtime_settings</span><span class="o">.</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">irecv</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">out</span>
 

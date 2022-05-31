@@ -1,4 +1,4 @@
 1D event model
 =======================
 
-.. autoclass:: roger.setups.distributed_event.DISTEVENTSetup
+.. autoclass:: roger.setups.oneD_event.ONEDEVENTSetup

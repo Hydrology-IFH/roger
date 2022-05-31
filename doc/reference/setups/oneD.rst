@@ -1,4 +1,4 @@
 1D model
 =======================
 
-.. autoclass:: roger.setups.distributed.DISTSetup
+.. autoclass:: roger.setups.oneD.ONEDSetup

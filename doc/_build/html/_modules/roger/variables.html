@@ -4374,6 +4374,15 @@
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_crop_phenology</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="s2">&quot;crop_scale&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;scaling factor of crop parameters&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span><span class="p">,</span>
+        <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;scaling factor of crop parameters&quot;</span><span class="p">,</span>
+        <span class="n">initial</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_crop_phenology</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;basal_crop_coeff_mid&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;basal crop coefficient of mature crop&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">CROPS</span><span class="p">,</span>

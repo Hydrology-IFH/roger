@@ -120,8 +120,9 @@ examples/*/*/*/results/
 examples/*/*/*/figures/
 EVENTS.txt
 
-# Slides
+# Slides or Word
 *.key
+*.docx
 
 # VS Code environments
 *.code-workspace
