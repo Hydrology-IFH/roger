@@ -285,6 +285,11 @@ class RogerSetup(metaclass=abc.ABCMeta):
         if not self.state.settings.enable_offline_transport:
             self._warmup_done = True
 
+        if self._warmup_done:
+            # write initial values to output
+            diagnostics.diagnose(self.state)
+            diagnostics.output(self.state)
+
         logger.success("Setup done\n")
 
     @roger_routine
@@ -407,6 +412,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
             Make sure to call :meth:`setup` prior to this function.
 
         """
+        from roger import diagnostics
         from roger.core import numerics
 
         if self.state.settings.enable_offline_transport:
@@ -419,6 +425,10 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     self.state.variables.time = 0
 
         self._warmup_done = True
+        if self._warmup_done:
+            # write initial values to output after warmup
+            diagnostics.diagnose(self.state)
+            diagnostics.output(self.state)
 
     def run(self, show_progress_bar=None):
         """Main routine of the simulation.

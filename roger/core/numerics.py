@@ -675,7 +675,6 @@ def calc_parameters_surface_kernel(state):
 
 def validate_parameters_surface(state):
     vs = state.variables
-    settings = state.settings
 
     mask1 = ((vs.slope > 1) | (vs.slope < 0))
     if global_and(npx.any(mask1)):
@@ -1338,6 +1337,9 @@ def calc_storage(state):
 
 @roger_kernel
 def sanity_check(state):
+    """
+    Checks for mass conservation
+    """
     vs = state.variables
     settings = state.settings
 

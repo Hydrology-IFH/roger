@@ -147,7 +147,7 @@ def calc_tt(state, SA, sa, flux, sas_params):
     )
     q_re = update(
         q_re,
-        at[2:-2, 2:-2, :], npx.where((diff_q[2:-2, 2:-2, :] > 0), 0, diff_q[2:-2, 2:-2, :]),
+        at[2:-2, 2:-2, :], npx.where((diff_q[2:-2, 2:-2, :] > 0), diff_q[2:-2, 2:-2, :], 0),
     )
     q_re_sum = update(
         q_re_sum,
@@ -203,6 +203,11 @@ def calc_tt(state, SA, sa, flux, sas_params):
         tt,
         at[2:-2, 2:-2, :], npx.where(npx.any(flux_tt_init[2:-2, 2:-2, :] > sa[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis], flux_tt[2:-2, 2:-2, :]/flux[2:-2, 2:-2, npx.newaxis], tt[2:-2, 2:-2, :]),
     )
+
+    # sanity check of SAS function
+    mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=1e-02)
+    if not npx.any(mask[2:-2, 2:-2]):
+        raise RuntimeError(f"solution of SAS function diverged at iteration {vs.itt}")
 
     return tt
 

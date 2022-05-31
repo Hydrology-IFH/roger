@@ -67,6 +67,7 @@ class SVATSetup(RogerSetup):
         settings.nittevent = self._get_nittevent(self._input_dir, 'forcing.nc')
         settings.nittevent_p1 = settings.nittevent + 1
         settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
+        settings.runlen = 24 * 60 * 60 * 10
 
         # lysimeter surface 3.14 square meter (2m diameter)
         settings.dx = 2
@@ -198,7 +199,6 @@ class SVATSetup(RogerSetup):
     @roger_routine
     def set_diagnostics(self, state):
         diagnostics = state.diagnostics
-        settings = state.settings
 
         diagnostics["rates"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS"]
         diagnostics["rates"].output_frequency = 24 * 60 * 60

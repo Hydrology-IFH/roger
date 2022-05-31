@@ -369,7 +369,7 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
                 vals = onp.array(var_obj)
                 v[:, :] = vals[idx_best, :]
                 v.attrs.update(long_name=var_obj.attrs["long_name"],
-                               units=var_obj.attrs["units"])
+                                units=var_obj.attrs["units"])
 
 # move hydrologic states to directories of transport model
 base_path_tm = base_path.parent / "svat_transport_monte_carlo"
