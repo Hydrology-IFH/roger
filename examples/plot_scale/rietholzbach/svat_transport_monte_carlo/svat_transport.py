@@ -672,7 +672,7 @@ def _ffill_3d(state, arr):
     return arr_fill
 
 
-nsamples = 10  # number of samples
+nsamples = 20  # number of samples
 tm_structures = ['complete-mixing', 'piston',
                  'preferential', 'advection-dispersion',
                  'time-variant preferential',
