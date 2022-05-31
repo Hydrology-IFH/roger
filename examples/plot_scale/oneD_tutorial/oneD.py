@@ -50,7 +50,7 @@ THETA_SS = 0.32
 
 # --- set the output variables -----------------------
 # list with simulated fluxes (see variables for description)
-OUTPUT_FLUXES = ["inf_mat", "inf_mp", "inf_sc", "q_ss",
+OUTPUT_FLUXES = ["aet", "transp", "evap_soil", "inf_mat", "inf_mp", "inf_sc", "q_ss",
                  "q_sub", "q_sub_mp", "q_sub_mat",
                  "q_hof", "q_sof"]
 # list with simulated storages (see variables for description)

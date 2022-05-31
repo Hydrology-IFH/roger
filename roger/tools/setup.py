@@ -596,4 +596,4 @@ def validate(data: pd.DataFrame):
         non_numeric = data.isin([onp.nan, onp.inf, -onp.inf]).any().values
 
         if any(non_numeric):
-            raise ValueError('File contains non-numeric data.')
+            raise ValueError('File contains non-numeric values.')

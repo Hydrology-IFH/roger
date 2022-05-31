@@ -79,7 +79,7 @@ for var_sim in vars_sim:
     fig1 = eval_utils.plot_sim(df_sim, y_lab=labs._Y_LABS_DAILY[var_sim], x_lab='Time [days]')
     fig2 = eval_utils.plot_sim_cum(df_sim, y_lab=labs._Y_LABS_CUM[var_sim], x_lab='Time [days]')
 
-vars_sim = ["theta", "theta_rz", "theta_ss"]
+vars_sim = ["theta"]
 for var_sim in vars_sim:
     sim_vals = ds_sim[var_sim].isel(x=0, y=0).values
     df_sim = pd.DataFrame(index=days_sim, columns=[var_sim])

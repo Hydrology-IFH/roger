@@ -673,6 +673,32 @@ def calc_parameters_surface_kernel(state):
     )
 
 
+def validate_parameters_surface(state):
+    vs = state.variables
+    settings = state.settings
+
+    mask1 = ((vs.slope > 1) | (vs.slope < 0))
+    if global_and(npx.any(mask1)):
+        raise ValueError('slope-parameter is out of range.')
+
+    mask2 = ((vs.sealing > 1) | (vs.sealing < 0))
+    if global_and(npx.any(mask2)):
+        raise ValueError('sealing-parameter is out of range.')
+
+    mask3 = ((vs.lu_id > 1000) | (vs.lu_id < 0))
+    if global_and(npx.any(mask3)):
+        raise ValueError('lu_id-parameter is out of range.')
+
+    if global_and(npx.any(npx.isnan(vs.slope))):
+        raise ValueError('slope-parameter contains non-numeric values.')
+
+    if global_and(npx.any(npx.isnan(vs.sealing))):
+        raise ValueError('sealing-parameter contains non-numeric values.')
+
+    if global_and(npx.any(npx.isnan(vs.lu_id))):
+        raise ValueError('lu_id-parameter contains non-numeric values.')
+
+
 @roger_kernel
 def calc_parameters_soil_kernel(state):
     vs = state.variables
@@ -785,7 +811,7 @@ def calc_parameters_soil_kernel(state):
         at[2:-2, 2:-2], (vs.clay[2:-2, 2:-2] * 700) * vs.maskCatch[2:-2, 2:-2]
     )
 
-    # calculate drainage area aof vertical macropores
+    # calculate drainage area of vertical macropores
     vs.mp_drain_area = update(
         vs.mp_drain_area,
         at[2:-2, 2:-2], 1 - npx.exp((-1) * (vs.dmpv[2:-2, 2:-2]/82)**0.887) * vs.maskCatch[2:-2, 2:-2]
@@ -1171,9 +1197,62 @@ def calc_parameters_transport_kernel(state):
     pass
 
 
+def validate_parameters_transport(state):
+    pass
+
+
 @roger_kernel
 def calc_parameters_groundwater_kernel(state):
     pass
+
+
+def validate_parameters_groundwater(state):
+    pass
+
+
+def validate_parameters_soil(state):
+    vs = state.variables
+    settings = state.settings
+
+    mask1 = (vs.z_soil > 0) & ((vs.theta_pwp + vs.theta_ufc + vs.theta_ac > 0.99) | (vs.theta_pwp + vs.theta_ufc + vs.theta_ac < 0.01))
+    if global_and(npx.any(mask1)):
+        raise ValueError('theta-parameters are out of range.')
+
+    mask2 = (vs.z_soil > 0) & ((vs.ks > 10000) | (vs.ks < 0))
+    if global_and(npx.any(mask2)):
+        raise ValueError('ks-parameter is out of range.')
+
+    mask3 = (vs.z_soil > 0) & ((vs.lmpv > vs.z_soil) | (vs.lmpv < 0))
+    if global_and(npx.any(mask3)):
+        raise ValueError('lmpv-parameter is out of range.')
+
+    if global_and(npx.any(npx.isnan(vs.z_soil))):
+        raise ValueError('z_soil-parameter contains non-numeric values.')
+
+    if global_and(npx.any(npx.isnan(vs.dmpv))):
+        raise ValueError('dmpv-parameter contains non-numeric values.')
+
+    if global_and(npx.any(npx.isnan(vs.lmpv))):
+        raise ValueError('lmpv-parameter contains non-numeric values.')
+
+    if global_and(npx.any(npx.isnan(vs.theta_pwp))):
+        raise ValueError('theta_pwp-parameter contains non-numeric values.')
+
+    if global_and(npx.any(npx.isnan(vs.theta_ufc))):
+        raise ValueError('theta_ufc-parameter contains non-numeric values.')
+
+    if global_and(npx.any(npx.isnan(vs.theta_ac))):
+        raise ValueError('theta_ac-parameter contains non-numeric values.')
+
+    if global_and(npx.any(npx.isnan(vs.ks))):
+        raise ValueError('ks-parameter contains non-numeric values.')
+
+    if global_and(npx.any(npx.isnan(vs.kf))):
+        raise ValueError('kf-parameter contains non-numeric values.')
+
+    if settings.enable_lateral_flow:
+        if global_and(npx.any(npx.isnan(vs.dmph))):
+            raise ValueError('dmph-parameter contains non-numeric values.')
 
 
 @roger_routine
@@ -1182,6 +1261,8 @@ def calc_parameters(state):
     settings = state.settings
 
     if not settings.enable_offline_transport:
+        validate_parameters_surface(state)
+        validate_parameters_soil(state)
         vs.update(calc_parameters_surface_kernel(state))
         vs.update(calc_parameters_soil_kernel(state))
         vs.update(calc_parameters_root_zone_kernel(state))

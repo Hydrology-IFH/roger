@@ -1344,9 +1344,6 @@ def set_event_vars(state):
         at[2:-2, 2:-2], 0,
     )
 
-    # depth of shrinkage cracks
-    vs.update(calc_depth_shrinkage_cracks(state))
-
     return KernelOutput(no_wf=vs.no_wf, z_wf=vs.z_wf,
                         z_wf_t0=vs.z_wf_t0,
                         z_wf_t1=vs.z_wf_t1, z_wf_fc=vs.z_wf_fc,
@@ -1616,6 +1613,7 @@ def calculate_infiltration(state):
         )
         # time step during event (10mins or 1 hour)
         vs.dt_event = npx.min(vs.DT_event)
+        vs.update(calc_depth_shrinkage_cracks(state))
         vs.update(set_event_vars(state))
     if cond2.any():
         vs.event_restart = vs.itt
