@@ -3,21 +3,20 @@
 #SBATCH --partition=single
 #SBATCH --job-name=roger_rietholzbach
 #SBATCH --nodes=1
-#SBATCH --ntasks=80
-#SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=2000
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=40
 #SBATCH --exclusive
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL
-#SBATCH --time=24:00:00
+#SBATCH --time=4:00:00
 
 # load module dependencies
 module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1
 
 # adapt command to your available scheduler / MPI implementation
-mpirun python ${PWD}/svat_monte_carlo/svat.py
-mpirun python ${PWD}/svat_sensitivity/svat.py
+mpirun --bind-to core --map-by core -report-bindings python ${HOME}/roger/examples/plot_scale/rietholzbach/svat_monte_carlo/svat.py
+# mpirun python ${HOME}/roger/examples/plot_scale/rietholzbach/svat_sensitivity/svat.py
 
 # displays what resources are available for immediate use for the whole partition
 # sinfo_t_idle

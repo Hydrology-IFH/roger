@@ -15,6 +15,7 @@ salib
 # h5pcc --showconfig
 # CC="mpicc" HDF5_MPI="ON" HDF5_DIR=/usr/local pip install --no-binary=h5py h5py
 # on bwHPC
+# module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1
 # conda remove --name roger-mpi hdf5 h5py mpi4py mpi4jax
 # echo {$HDF5_VERSION}
 # export HDF5_VERSION=1.12.1
