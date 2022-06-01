@@ -66,6 +66,7 @@ class SVATTRANSPORTSetup(RogerSetup):
         settings.ages = settings.nitt
         settings.nages = settings.nitt + 1
         settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
+        settings.runlen = 24 * 60 * 60 * 10
 
         # lysimeter surface 3.14 square meter (2m diameter)
         settings.dx = 2

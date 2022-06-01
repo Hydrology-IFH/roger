@@ -434,6 +434,7 @@ class rogerSync:
 
     def __call__(self, *args, **kwargs):
         from roger import runtime_settings, runtime_state
+        import numpy as onp
 
         # no MPI support
         if runtime_state.proc_num == 1:
@@ -442,18 +443,18 @@ class rogerSync:
         # with MPI support
         elif runtime_state.proc_num > 1:
             # run function on a single process
-            if runtime_state.proc_rank == 0:
-                out = self.function(*args, **kwargs)
-                for i in range(1, runtime_state.proc_num):
-                    buffer = bytearray(1 << 20)
-                    runtime_settings.mpi_comm.isend(buffer, dest=i, tag=10).wait()
-            # let other processes wait
-            elif runtime_state.proc_rank > 0:
+            if runtime_state.proc_rank != 0:
                 def function():
                     pass
                 out = function()
-                buffer = bytearray(1 << 20)
-                runtime_settings.mpi_comm.irecv(buffer, source=0, tag=10).wait()
+                buffer = onp.ascontiguousarray(onp.empty((1000,), dtype=float))
+                runtime_settings.mpi_comm.Send(buffer, dest=0, tag=10)
+            # let other processes wait
+            elif runtime_state.proc_rank == 0:
+                for proc in range(1, runtime_state.proc_num):
+                    buffer = onp.ascontiguousarray(onp.empty((1000,), dtype=float))
+                    runtime_settings.mpi_comm.Recv(buffer, source=proc, tag=11)
+                out = self.function(*args, **kwargs)
             distributed.barrier()
 
         return out

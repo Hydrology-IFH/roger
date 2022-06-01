@@ -16,7 +16,7 @@ import roger.lookuptables as lut
 import numpy as onp
 
 # number of monte-carlo samples
-NSAMPLES = 10000
+NSAMPLES = 20
 
 
 class SVATSetup(RogerSetup):
