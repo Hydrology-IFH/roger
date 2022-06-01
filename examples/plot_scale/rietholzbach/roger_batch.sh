@@ -13,7 +13,7 @@
 #SBATCH --time=24:00:00
 
 # load module dependencies
-# module load mpi4py h5py
+module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1
 
 # adapt command to your available scheduler / MPI implementation
 mpirun python ${PWD}/svat_monte_carlo/svat.py
