@@ -16,7 +16,7 @@ import roger.lookuptables as lut
 import numpy as onp
 
 # number of monte-carlo samples
-NSAMPLES = 20
+NSAMPLES = 10000
 
 
 class SVATSetup(RogerSetup):
@@ -67,7 +67,6 @@ class SVATSetup(RogerSetup):
         settings.nittevent = self._get_nittevent(self._input_dir, 'forcing.nc')
         settings.nittevent_p1 = settings.nittevent + 1
         settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
-        settings.runlen = 24 * 60 * 60 * 10
 
         # lysimeter surface 3.14 square meter (2m diameter)
         settings.dx = 2
