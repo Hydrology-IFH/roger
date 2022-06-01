@@ -95,7 +95,7 @@ shutil.copy(states_hm_si_file, states_hm_si_file1)
 ds_sim = xr.open_dataset(states_hm_si_file, engine="h5netcdf")
 
 # load observations (measured data)
-path_obs = Path("/Users/robinschwemmle/Desktop/PhD/data/plot/rietholzbach/rietholzbach_lysimeter.nc")
+path_obs = base_path / "observations" / "rietholzbach_lysimeter.nc"
 ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
 
 # assign date

@@ -119,6 +119,8 @@ examples/*/*/figures/
 examples/*/*/*/results/
 examples/*/*/*/figures/
 EVENTS.txt
+!examples/*/*/observations/*
+
 
 # Slides or Word
 *.key
