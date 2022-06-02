@@ -118,6 +118,7 @@ examples/*/*/results/
 examples/*/*/figures/
 examples/*/*/*/results/
 examples/*/*/*/figures/
+examples/*/*/test_*
 EVENTS.txt
 !examples/*/*/observations/*
 
