@@ -313,12 +313,10 @@ def calc_canopy_cover(state):
         at[2:-2, 2:-2, vs.tau, :], npx.where(mask10[2:-2, 2:-2, :], 0, vs.ccc[2:-2, 2:-2, vs.tau, :]),
     )
 
-    print(vs.ccc[2:-2, 2:-2, vs.tau, 2])
-
     mask11 = mask_winter_catch & ((vs.doy > vs.doy_mid) | ((vs.doy < vs.doy_dec) & (vs.doy > arr0)))
     mask12 = mask_winter_catch & (vs.t_grow_cc[:, :, vs.tau, :] <= 0)
     mask13 = mask_winter_catch & (vs.ccc[:, :, vs.tau, :] < vs.ccc_max) & ((vs.doy >= vs.doy_start) | (vs.doy <= vs.doy_dec) & (vs.doy > arr0) & (vs.t_grow_cc[:, :, vs.tau, :] > 0))
-    mask14 = mask_winter_catch & (((vs.doy > vs.doy_dec) & (vs.doy > arr0))| ((vs.doy <= vs.doy_end) & (vs.doy > arr0) & (vs.t_grow_cc[:, :, vs.tau, :] > 0)))
+    mask14 = mask_winter_catch & (((vs.doy > vs.doy_dec) & (vs.doy < vs.doy_start))| ((vs.doy <= vs.doy_end) & (vs.doy > arr0) & (vs.t_grow_cc[:, :, vs.tau, :] > 0)))
     mask15 = mask_winter_catch & (vs.doy > vs.doy_end) & (vs.doy < vs.doy_start)
     # mature crop
     vs.ccc_mid = update(
@@ -348,8 +346,6 @@ def calc_canopy_cover(state):
         vs.ccc,
         at[2:-2, 2:-2, vs.tau, :], npx.where(mask15[2:-2, 2:-2, :], 0, vs.ccc[2:-2, 2:-2, vs.tau, :]),
     )
-
-    print(vs.ccc[2:-2, 2:-2, vs.tau, 2])
 
     mask16 = mask_571 & (vs.doy < vs.doy_start)
     mask17 = mask_571 & (vs.doy >= vs.doy_start) & (vs.ccc[:, :, vs.tau, :] < vs.ccc_max) & (vs.doy <= vs.doy_end)
