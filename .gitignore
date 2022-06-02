@@ -129,3 +129,6 @@ EVENTS.txt
 
 # VS Code environments
 *.code-workspace
+
+# SLURM
+*.out
