@@ -721,7 +721,7 @@ def after_timestep_crops_kernel(state):
     )
 
 
-lys_experiments = ["lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
+lys_experiments = ["lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
 for lys_experiment in lys_experiments:
     model = SVATCROPSetup()
     input_path = model._base_path / "input" / lys_experiment
@@ -779,3 +779,11 @@ for lys_experiment in lys_experiments:
                         v[:, :, :] = vals.swapaxes(0, 2)
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
+
+vs = model.state.variables
+dS = vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1]
+S = vs.S[2:-2, 2:-2, vs.tau]
+S1 = vs.S[2:-2, 2:-2, vs.taum1]
+fluxes = vs.prec[2:-2, 2:-2] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2]
+aet = vs.aet[2:-2, 2:-2]
+transp_coeff = vs.transp_coeff[2:-2, 2:-2]
