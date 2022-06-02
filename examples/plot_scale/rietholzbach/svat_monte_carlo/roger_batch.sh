@@ -3,13 +3,12 @@
 #SBATCH --partition=single
 #SBATCH --job-name=roger_rietholzbach
 #SBATCH --nodes=1
-#SBATCH --ntasks=40
+#SBATCH --ntasks=2
 #SBATCH --exclusive
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL
 #SBATCH --time=4:00:00
-#SBATCH --error="error.log"
 
 # load module dependencies
 module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1

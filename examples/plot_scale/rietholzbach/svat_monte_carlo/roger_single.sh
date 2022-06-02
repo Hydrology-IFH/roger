@@ -8,7 +8,6 @@
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL
 #SBATCH --time=1:00:00
-#SBATCH --error="error.log"
 
 python svat.py
 
