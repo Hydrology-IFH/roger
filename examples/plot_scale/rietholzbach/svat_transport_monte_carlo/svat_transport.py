@@ -718,7 +718,7 @@ for tm_structure in tm_structures:
                     if not f.groups[tm_structure].dimensions:
                         f.groups[tm_structure].dimensions = dict_dim
                         v = f.groups[tm_structure].create_variable('x', ('x',), float)
-                        v.attrs['long_name'] = 'Number of model run'
+                        v.attrs['long_name'] = 'model run'
                         v.attrs['units'] = ''
                         v[:] = npx.arange(dict_dim["x"])
                         v = f.groups[tm_structure].create_variable('y', ('y',), float)

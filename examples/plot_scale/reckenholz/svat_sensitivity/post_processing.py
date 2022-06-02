@@ -52,7 +52,7 @@ for lys_experiment in lys_experiments:
     ds_sim = xr.open_dataset(states_hm_si_file, engine="h5netcdf", group=lys_experiment)
 
     # load observations (measured data)
-    path_obs = Path("/Users/robinschwemmle/Desktop/PhD/data/plot/reckenholz/reckenholz_lysimeter.nc")
+    path_obs = base_path.parent / "observations" / "reckenholz_lysimeter.nc"
     ds_obs = xr.open_dataset(path_obs, engine="h5netcdf", group=lys_experiment)
 
     # assign date

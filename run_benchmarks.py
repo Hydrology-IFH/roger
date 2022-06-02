@@ -34,15 +34,15 @@ BENCHMARK_COMMANDS = {
     + STATIC_SETTINGS,
 }
 SLURM_COMMANDS = {
-    "numpy": "{mpiexec} --ntasks 1 --cpus-per-task {nproc} -- {python} {filename} -b numpy" + STATIC_SETTINGS,
-    "numpy-mpi": "{mpiexec} --ntasks {nproc} --cpus-per-task 1 -- {python} {filename} -b numpy --nproc {decomp}"
+    "numpy": "{mpiexec} --ntasks-per-node 1 --cpus-per-task {nproc} -- {python} {filename} -b numpy --partition single" + STATIC_SETTINGS,
+    "numpy-mpi": "{mpiexec} --ntasks-per-node {nproc} --cpus-per-task 1 -- {python} {filename} -b numpy --nproc {decomp} --partition single"
     + STATIC_SETTINGS,
-    "jax": "{mpiexec} --ntasks 1 --cpus-per-task {nproc} -- {python} {filename} -b jax" + STATIC_SETTINGS,
-    "jax-gpu": "{mpiexec} --ntasks 1 --cpus-per-task {nproc} -- {python} {filename} -b jax --device gpu"
+    "jax": "{mpiexec} --ntasks-per-node 1 --cpus-per-task {nproc} -- {python} {filename} -b jax --partition single" + STATIC_SETTINGS,
+    "jax-gpu": "{mpiexec} --ntasks-per-node 1 --cpus-per-task {nproc} -- {python} {filename} -b jax --device gpu --partition gpu_4"
     + STATIC_SETTINGS,
-    "jax-mpi": "{mpiexec} --ntasks {nproc} --cpus-per-task 1 -- {python} {filename} -b jax --nproc {decomp}"
+    "jax-mpi": "{mpiexec} --ntasks-per-node {nproc} --cpus-per-task 1 -- {python} {filename} -b jax --nproc {decomp} --partition single"
     + STATIC_SETTINGS,
-    "jax-gpu-mpi": "{mpiexec} --ntasks {nproc} --cpus-per-task 1 -- {python} {filename} -b jax --device gpu --nproc {decomp}"
+    "jax-gpu-mpi": "{mpiexec} --ntasks-per-node {nproc} --cpus-per-task 1 -- {python} {filename} -b jax --device gpu --nproc {decomp} --partition gpu_4"
     + STATIC_SETTINGS,
 }
 

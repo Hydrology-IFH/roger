@@ -59,12 +59,12 @@ with h5netcdf.File(states_hm_si_file, 'w', decode_vlen_strings=False) as f:
             if not f.dimensions:
                 f.dimensions = dict_dim
                 v = f.create_variable('x', ('x',), float)
-                v.attrs['long_name'] = 'Zonal coordinate'
-                v.attrs['units'] = 'meters'
+                v.attrs['long_name'] = 'model run'
+                v.attrs['units'] = ''
                 v[:] = onp.arange(dict_dim["x"])
                 v = f.create_variable('y', ('y',), float)
-                v.attrs['long_name'] = 'Meridonial coordinate'
-                v.attrs['units'] = 'meters'
+                v.attrs['long_name'] = ''
+                v.attrs['units'] = ''
                 v[:] = onp.arange(dict_dim["y"])
                 v = f.create_variable('Time', ('Time',), float)
                 var_obj = df.variables.get('Time')

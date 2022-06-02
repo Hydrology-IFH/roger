@@ -222,7 +222,7 @@ class SVATCROPSetup(RogerSetup):
     def set_diagnostics(self, state):
         diagnostics = state.diagnostics
 
-        diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz"]
+        diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "re_rg", "re_rl"]
         diagnostics["rates"].output_frequency = 24 * 60 * 60
         diagnostics["rates"].sampling_frequency = 1
 
@@ -230,10 +230,7 @@ class SVATCROPSetup(RogerSetup):
                                                    "S_pwp_rz", "S_fc_rz",
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss",
-                                                   "re_rg", "re_rl",
-                                                   "z_root", "ground_cover",
-                                                   "lu_id",
-                                                   "crop_type", "z_root_crop", "ccc"]
+                                                   "z_root", "ground_cover"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 

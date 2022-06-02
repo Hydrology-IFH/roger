@@ -665,12 +665,12 @@ for lys_experiment in lys_experiments:
                         dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
                         f.dimensions = dict_dim
                         v = f.groups[lys_experiment].groups[tm_structure].create_variable('x', ('x',), float)
-                        v.attrs['long_name'] = 'Zonal coordinate'
-                        v.attrs['units'] = 'meters'
+                        v.attrs['long_name'] = 'model run'
+                        v.attrs['units'] = ''
                         v[:] = npx.arange(dict_dim["x"])
-                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('y', ('y',), float)
-                        v.attrs['long_name'] = 'Meridonial coordinate'
-                        v.attrs['units'] = 'meters'
+                        v = f.groups[lys_experiment].create_variable('y', ('y',), float)
+                        v.attrs['long_name'] = ''
+                        v.attrs['units'] = ''
                         v[:] = npx.arange(dict_dim["y"])
                         v = f.create_variable('Time', ('Time',), float)
                         var_obj = df.variables.get('Time')

@@ -256,7 +256,7 @@ class SVATCROPSetup(RogerSetup):
     def set_diagnostics(self, state):
         diagnostics = state.diagnostics
 
-        diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz"]
+        diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "re_rg", "re_rl"]
         diagnostics["rates"].output_frequency = 24 * 60 * 60
         diagnostics["rates"].sampling_frequency = 1
 
@@ -264,14 +264,20 @@ class SVATCROPSetup(RogerSetup):
                                                    "S_pwp_rz", "S_fc_rz",
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss",
-                                                   "re_rg", "re_rl",
-                                                   "z_root", "ground_cover"]
+                                                   "z_root", "ground_cover",
+                                                   "k_stress_transp", "basal_transp_coeff",
+                                                   "basal_evap_coeff", "k_stress_transp_crop",
+                                                   "k_stress_root_growth"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 
         diagnostics["averages"].output_variables = ["ta"]
         diagnostics["averages"].output_frequency = 24 * 60 * 60
         diagnostics["averages"].sampling_frequency = 1
+
+        diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'crop_scale']
+        diagnostics["constant"].output_frequency = 0
+        diagnostics["constant"].sampling_frequency = 1
 
     @roger_routine
     def after_timestep(self, state):
@@ -736,7 +742,7 @@ def after_timestep_crops_kernel(state):
     )
 
 
-lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
+lys_experiments = ["lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
 for lys_experiment in lys_experiments:
     model = SVATCROPSetup()
     input_path = model._base_path / "input" / lys_experiment
@@ -760,7 +766,7 @@ for lys_experiment in lys_experiments:
             f.create_group(lys_experiment)
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
-            title=f'RoGeR model results at Reckenholz Lysimeter ({lys_experiment})',
+            title='RoGeR model results of Saltelli simulations at Reckenholz Lysimeter',
             institution='University of Freiburg, Chair of Hydrology',
             references='',
             comment='SVAT model with free drainage and crop phenology/crop rotation'
@@ -772,12 +778,12 @@ for lys_experiment in lys_experiments:
                 if not f.groups[lys_experiment].dimensions:
                     f.groups[lys_experiment].dimensions = dict_dim
                     v = f.groups[lys_experiment].create_variable('x', ('x',), float)
-                    v.attrs['long_name'] = 'Zonal coordinate'
-                    v.attrs['units'] = 'meters'
+                    v.attrs['long_name'] = 'model run'
+                    v.attrs['units'] = ''
                     v[:] = npx.arange(dict_dim["x"])
                     v = f.groups[lys_experiment].create_variable('y', ('y',), float)
-                    v.attrs['long_name'] = 'Meridonial coordinate'
-                    v.attrs['units'] = 'meters'
+                    v.attrs['long_name'] = ''
+                    v.attrs['units'] = ''
                     v[:] = npx.arange(dict_dim["y"])
                     v = f.groups[lys_experiment].create_variable('Time', ('Time',), float)
                     var_obj = df.variables.get('Time')

@@ -32,7 +32,7 @@ for lys_experiment in lys_experiments:
     ds_sim = xr.open_dataset(states_hm_mc_file, engine="h5netcdf", group=lys_experiment)
 
     # load observations (measured data)
-    path_obs = Path("/Users/robinschwemmle/Desktop/PhD/data/plot/reckenholz/reckenholz_lysimeter.nc")
+    path_obs = base_path.parent / "observations" / "reckenholz_lysimeter.nc"
     ds_obs = xr.open_dataset(path_obs, engine="h5netcdf", group=lys_experiment)
 
     # assign date
@@ -290,7 +290,7 @@ for lys_experiment in lys_experiments:
             title='RoGeR best monte carlo run at Reckenholz Lysimeter site',
             institution='University of Freiburg, Chair of Hydrology',
             references='',
-            comment='SVAT model with free drainage'
+            comment='SVAT model with free drainage and crop phenology'
         )
         with h5netcdf.File(states_hm_mc_file, 'r', decode_vlen_strings=False) as df:
             # set dimensions with a dictionary
