@@ -26,7 +26,7 @@ class SVATCROPSetup(RogerSetup):
     # sampled parameters with Saltelli's extension of the Sobol' sequence
     _nsamples = 2**2
     _bounds = {
-        'num_vars': 6,
+        'num_vars': 7,
         'names': ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'crop_scale'],
         'bounds': [[1, 400],
                    [1, 1200],
