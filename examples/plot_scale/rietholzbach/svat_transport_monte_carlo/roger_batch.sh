@@ -3,7 +3,7 @@
 #SBATCH --partition=single
 #SBATCH --job-name=roger_rietholzbach
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=2
+#SBATCH --ntasks-per-node=40
 #SBATCH --exclusive
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
@@ -20,4 +20,5 @@ mpirun --bind-to core --map-by core -report-bindings python svat_transport.py
 # sinfo_t_idle
 
 # execute the script
+# chmod +x roger_batch.sh
 # sbatch ./roger_batch.sh
