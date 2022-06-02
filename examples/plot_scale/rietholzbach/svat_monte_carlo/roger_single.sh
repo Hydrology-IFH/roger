@@ -2,6 +2,7 @@
 #
 #SBATCH --partition=single
 #SBATCH --job-name=roger_rietholzbach
+#SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --exclusive
 #SBATCH --mail-type=ALL
