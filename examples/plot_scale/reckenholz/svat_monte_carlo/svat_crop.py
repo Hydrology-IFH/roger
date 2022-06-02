@@ -18,7 +18,7 @@ import roger.lookuptables as lut
 import numpy as onp
 
 # number of monte-carlo samples
-NSAMPLES = 10
+NSAMPLES = 4
 
 
 class SVATCROPSetup(RogerSetup):
@@ -721,7 +721,7 @@ def after_timestep_crops_kernel(state):
     )
 
 
-lys_experiments = ["lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
+lys_experiments = ["lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
 for lys_experiment in lys_experiments:
     model = SVATCROPSetup()
     input_path = model._base_path / "input" / lys_experiment
