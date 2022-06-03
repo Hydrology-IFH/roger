@@ -489,6 +489,11 @@ def calculate_evaporation_transport_iso_kernel(state):
         at[2:-2, 2:-2, vs.tau, :], npx.where((vs.sa_rz[2:-2, 2:-2, vs.tau, :] > 0), vs.msa_rz[2:-2, 2:-2, vs.tau, :], npx.NaN) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
+    vs.C_rz = update(
+        vs.C_rz,
+        at[2:-2, 2:-2, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
     return KernelOutput(sa_rz=vs.sa_rz, tt_evap_soil=vs.tt_evap_soil, TT_evap_soil=vs.TT_evap_soil, msa_rz=vs.msa_rz, mtt_evap_soil=vs.mtt_evap_soil, C_evap_soil=vs.C_evap_soil)
 
 

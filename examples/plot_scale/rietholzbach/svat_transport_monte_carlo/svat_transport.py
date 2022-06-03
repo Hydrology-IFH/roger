@@ -42,7 +42,7 @@ class SVATTRANSPORTSetup(RogerSetup):
         nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['Time']
-            return len(onp.array(var_obj))
+            return len(onp.array(var_obj)) + 1
 
     def _get_runlen(self, path_dir, file):
         nc_file = path_dir / file
@@ -66,7 +66,6 @@ class SVATTRANSPORTSetup(RogerSetup):
         settings.ages = settings.nitt
         settings.nages = settings.nitt + 1
         settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
-        settings.runlen = 24 * 60 * 60 * 10
 
         # lysimeter surface 3.14 square meter (2m diameter)
         settings.dx = 2
@@ -393,10 +392,12 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc'))
 
         if settings.enable_deuterium:
-            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d2H", self._input_dir, 'forcing_tracer.nc'))
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 0], npx.NaN)
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d2H", self._input_dir, 'forcing_tracer.nc'))
 
         if settings.enable_oxygen18:
-            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 0], npx.NaN)
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
 
         if settings.enable_deuterium or settings.enable_oxygen18:
             vs.update(set_iso_input_kernel(state))
@@ -674,7 +675,7 @@ def _ffill_3d(state, arr):
 
 
 nsamples = 10  # number of samples
-tm_structures = ['piston',
+tm_structures = ['complete-mixing', 'piston',
                  'preferential', 'advection-dispersion',
                  'time-variant preferential',
                  'time-variant advection-dispersion']
@@ -776,10 +777,3 @@ for tm_structure in tm_structures:
                             v[:, :, :, :] = vals
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
-
-vs = model.state.variables
-
-npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1)
-vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2)
-npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.tau] - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.taum1]
-vs.inf_mat_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) + vs.inf_pf_ss[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2]) - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2])

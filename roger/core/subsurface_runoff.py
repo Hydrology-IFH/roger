@@ -990,10 +990,20 @@ def calculate_percolation_rz_transport_iso_kernel(state):
         vs.sa_rz,
         at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_q_rz, vs.q_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
+
+    vs.C_rz = update(
+        vs.C_rz,
+        at[2:-2, 2:-2, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
     # update solute StorAge
     vs.msa_rz = update(
         vs.msa_rz,
         at[2:-2, 2:-2, vs.tau, :], npx.where((vs.sa_rz[2:-2, 2:-2, vs.tau, :] > 0), vs.msa_rz[2:-2, 2:-2, vs.tau, :], npx.NaN) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.C_rz = update(
+        vs.C_rz,
+        at[2:-2, 2:-2, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.msa_ss = update(

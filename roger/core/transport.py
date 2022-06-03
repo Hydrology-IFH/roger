@@ -156,7 +156,7 @@ def calc_tt(state, SA, sa, flux, sas_params):
     # available StorAge for sampling
     sa_free = update(
         sa_free,
-        at[2:-2, 2:-2, :], npx.where((diff_q[2:-2, 2:-2, :] > 0), 0, sa[2:-2, 2:-2, vs.tau, :] - flux_tt[2:-2, 2:-2, :]),
+        at[2:-2, 2:-2, :], npx.where((sa[2:-2, 2:-2, vs.tau, :] - flux_tt[2:-2, 2:-2, :] > 0), sa[2:-2, 2:-2, vs.tau, :] - flux_tt[2:-2, 2:-2, :], 0),
     )
     # normalize StorAge with outflux of age T
     sa_free_norm = update(
@@ -165,7 +165,7 @@ def calc_tt(state, SA, sa, flux, sas_params):
     )
     SA_re = update(
         SA_re,
-        at[2:-2, 2:-2, 1:], npx.where(mask_old[2:-2, 2:-2, :], npx.cumsum(sa_free_norm[2:-2, 2:-2, ::-1], axis=-1)[:, :, ::-1], SA_re[2:-2, 2:-2, 1:]),
+        at[2:-2, 2:-2, :-1], npx.where(mask_old[2:-2, 2:-2, :], npx.cumsum(sa_free_norm[2:-2, 2:-2, ::-1], axis=-1)[:, :, ::-1], SA_re[2:-2, 2:-2, 1:]),
     )
     SA_re = update(
         SA_re,
@@ -204,10 +204,19 @@ def calc_tt(state, SA, sa, flux, sas_params):
         at[2:-2, 2:-2, :], npx.where(npx.any(flux_tt_init[2:-2, 2:-2, :] > sa[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis], flux_tt[2:-2, 2:-2, :]/flux[2:-2, 2:-2, npx.newaxis], tt[2:-2, 2:-2, :]),
     )
 
+    # set to zero if zero flux
+    tt = update(
+        tt,
+        at[2:-2, 2:-2, :], npx.where(flux[2:-2, 2:-2, npx.newaxis] <= 0, 0, tt[2:-2, 2:-2, :]),
+    )
+
     # sanity check of SAS function
     mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=1e-02)
     if not npx.any(mask[2:-2, 2:-2]):
-        raise RuntimeError(f"solution of SAS function diverged at iteration {vs.itt}")
+        raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
+    mask1 = (tt * flux[:, :, npx.newaxis] - sa[:, :, 1, :] > 1e-02)
+    if npx.any(mask1[2:-2, 2:-2, :], axis=-1):
+        raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
 
     return tt
 
@@ -282,7 +291,7 @@ def calc_conc_iso_storage(state, sa, msa):
     conc = allocate(state.dimensions, ("x", "y"))
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.nansum(sa[2:-2, 2:-2, vs.tau, :] * msa[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(sa[2:-2, 2:-2, vs.tau, :] , axis=-1),
+        at[2:-2, 2:-2], npx.nansum(sa[2:-2, 2:-2, vs.tau, :] * msa[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1),
     )
     conc = update(
         conc,

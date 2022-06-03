@@ -51,7 +51,7 @@ class SVATTRANSPORTSetup(RogerSetup):
             date = num2date(days, units=f"days since {ds['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
             ds = ds.assign_coords(Time=("Time", date))
             ds_year = ds.sel(Time=slice(f'{self._year}-01-01', f'{self._year + 1}-12-31'))
-            return len(ds_year['Time'].values)
+            return len(ds_year['Time'].values) + 1
 
     def _get_runlen(self, path_dir, file):
         nc_file = path_dir / file

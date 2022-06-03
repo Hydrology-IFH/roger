@@ -72,7 +72,7 @@ states_hm_file = base_path / "states_hm.nc"
 ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
 # load observations (measured data)
-path_obs = base_path / "observations" / "rietholzbach_lysimeter.nc"
+path_obs = base_path.parent / "observations" / "rietholzbach_lysimeter.nc"
 ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
 
 

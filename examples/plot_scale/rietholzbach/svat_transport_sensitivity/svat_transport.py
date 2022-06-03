@@ -44,7 +44,7 @@ class SVATTRANSPORTSetup(RogerSetup):
     def _get_nitt(self, path_dir, file):
         nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables['Time']
+            var_obj = infile.variables['Time'] + 1
             return len(onp.array(var_obj))
 
     def _get_runlen(self, path_dir, file):
@@ -463,10 +463,12 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc'))
 
         if settings.enable_deuterium:
-            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d2H", self._input_dir, 'forcing_tracer.nc'))
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 0], npx.NaN)
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d2H", self._input_dir, 'forcing_tracer.nc'))
 
         if settings.enable_oxygen18:
-            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 0], npx.NaN)
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
 
         if settings.enable_deuterium or settings.enable_oxygen18:
             vs.update(set_iso_input_kernel(state))
