@@ -794,9 +794,15 @@ for lys_experiment in lys_experiments:
                     v[:] = npx.array(var_obj)
                 for key in list(df.variables.keys()):
                     var_obj = df.variables.get(key)
-                    if key not in list(f.groups[lys_experiment].dimensions.keys()) and var_obj.ndim == 3:
+                    if key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
                         v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time'), float)
                         vals = npx.array(var_obj)
                         v[:, :, :] = vals.swapaxes(0, 2)
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                    elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
+                        v = f.groups[lys_experiment].create_variable(key, ('x', 'y'), float)
+                        vals = onp.array(var_obj)
+                        v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
