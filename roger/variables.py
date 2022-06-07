@@ -107,6 +107,7 @@ DIM_TO_SHAPE_VAR = {
     "cr": "ncr",
     "events_ff": "nevent_ff",
     "n_sas_params": "nsas",
+    "n_crop_types": "nct",
 }
 
 DEFAULT_MASKS = {
