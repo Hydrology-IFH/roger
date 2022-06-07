@@ -193,7 +193,7 @@ class SVATCROPSetup(RogerSetup):
         for i, crop_type in enumerate(self._crop_types):
             row_no = _get_row_no(vs.lut_crops[:, 0], crop_type)
             j = offset + i
-            vs.lut_crop_scale = update(vs.lut_crop_scale, at[2:-2, row_no], self._params[:, j, npx.newaxis])
+            vs.lut_crop_scale = update(vs.lut_crop_scale, at[2:-2, 2:-2, row_no], self._params[:, j, npx.newaxis])
 
     @roger_routine
     def set_topography(self, state):
