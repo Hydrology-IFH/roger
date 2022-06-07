@@ -1,4 +1,3 @@
-<<<<<<< HEAD;;;;;;;;;;;;;;;;;;;;;;;
 ;[day of year];[day of year];[day of year];[day of year];[growing degree day];[growing degree day];[growing degree day];[growing degree day];[day of year];[growing degree day];[degC];[degC];[-];[-];[m];[m];[1/growing degree day];[1/growing degree day];[m/growing degree day];[-];[-];[degC];[-]
 lu_id;DOY_start;DOY_mid;DOY_decay;DOY_end;GDD_start;GDD_mid;GDD_decay;GDD_end;cut_interval_day;GDD_cut_interval;ta_base;ta_ut;ground_cover_min;ground_cover_max;z_root_max;crop_height_max;ground_cover_decay_rate;ground_cover_growth_rate;root_growth_rate;water_stress_frac;basal_crop_coeff_mid;ta_dec;alpha_transp
 501;92;172;230;245;378;1070;2324.65;2447;-9999;-9999;1;30;0.01;0.9;1.1;0.4;0.002;0.007953995;-0.005443501;0.45;1.05;-9999;1
