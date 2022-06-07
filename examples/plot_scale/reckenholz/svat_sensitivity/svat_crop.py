@@ -4,6 +4,7 @@ import h5netcdf
 import glob
 import datetime
 from SALib.sample import saltelli
+import numpy as onp
 
 from roger import runtime_settings as rs, runtime_state as rst
 rs.backend = "numpy"
@@ -16,7 +17,6 @@ from roger.core.operators import numpy as npx, update, update_add, at, for_loop,
 from roger.core.utilities import _get_row_no
 from roger.tools.setup import write_forcing, write_crop_rotation
 import roger.lookuptables as lut
-import numpy as onp
 
 
 class SVATCROPSetup(RogerSetup):
@@ -24,17 +24,22 @@ class SVATCROPSetup(RogerSetup):
     """
     _base_path = Path(__file__).parent
     # sampled parameters with Saltelli's extension of the Sobol' sequence
+    _crop_types = [536, 539, 556, 557, 559, 560, 563, 564, 565, 566, 572, 573, 574]
+    _param_names = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']
+    _param_bounds = [[1, 400],
+                     [1, 1200],
+                     [0.05, 0.33],
+                     [0.05, 0.33],
+                     [0.05, 0.33],
+                     [0.1, 120]]
+    for ct in _crop_types:
+        _param_names.append(f"crop_scale_{ct}")
+        _param_bounds.append([0.5, 1.5])
     _nsamples = 2**2
     _bounds = {
-        'num_vars': 7,
-        'names': ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'crop_scale'],
-        'bounds': [[1, 400],
-                   [1, 1200],
-                   [0.05, 0.33],
-                   [0.05, 0.33],
-                   [0.05, 0.33],
-                   [0.1, 120],
-                   [0.5, 2]]
+        'num_vars': len(_param_names),
+        'names': _param_names,
+        'bounds': _param_bounds
     }
     _params = saltelli.sample(_bounds, _nsamples, calc_second_order=False)
     _nrows = _params.shape[0]
@@ -162,7 +167,18 @@ class SVATCROPSetup(RogerSetup):
         vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
         vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
 
-    @roger_routine
+    @roger_routine(
+        dist_safe=False,
+        local_variables=[
+            "lut_ilu",
+            "lut_gc",
+            "lut_gcm",
+            "lut_is",
+            "lut_rdlu",
+            "lut_crops",
+            "lut_crop_scale",
+        ],
+    )
     def set_look_up_tables(self, state):
         vs = state.variables
 
@@ -172,6 +188,12 @@ class SVATCROPSetup(RogerSetup):
         vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
         vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
         vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
+        # scale basal crop coeffcient with factor
+        offset = len(self._param_names) - len(self._crop_types)
+        for i, crop_type in enumerate(self._crop_types):
+            row_no = _get_row_no(vs.lut_crops[:, 0], crop_type)
+            j = offset + i
+            vs.crop_scale = update(vs.crop_scale, at[2:-2, row_no], self._params[:, j, npx.newaxis])
 
     @roger_routine
     def set_topography(self, state):
@@ -189,7 +211,6 @@ class SVATCROPSetup(RogerSetup):
             "theta_pwp",
             "ks",
             "kf",
-            "crop_scale",
             "CROP_TYPE",
             "crop_type",
         ],
@@ -206,7 +227,6 @@ class SVATCROPSetup(RogerSetup):
         vs.theta_pwp = update(vs.theta_pwp, at[2:-2, :], self._params[:, 4, npx.newaxis])
         vs.ks = update(vs.ks, at[2:-2, :], self._params[:, 5, npx.newaxis])
         vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
-        vs.crop_scale = update(vs.crop_scale, at[2:-2, :], self._params[:, 6, npx.newaxis])
 
         vs.CROP_TYPE = update(vs.CROP_TYPE, at[2:-2, 2:-2, :], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc'))
         vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.CROP_TYPE[2:-2, 2:-2, 1])
@@ -275,7 +295,7 @@ class SVATCROPSetup(RogerSetup):
         diagnostics["averages"].output_frequency = 24 * 60 * 60
         diagnostics["averages"].sampling_frequency = 1
 
-        diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'crop_scale']
+        diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'lut_crop_scale']
         diagnostics["constant"].output_frequency = 0
         diagnostics["constant"].sampling_frequency = 1
 
@@ -804,5 +824,13 @@ for lys_experiment in lys_experiments:
                         v = f.groups[lys_experiment].create_variable(key, ('x', 'y'), float)
                         vals = onp.array(var_obj)
                         v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                    elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'n_crop_types', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
+                        v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'n_crop_types'), float)
+                        vals = npx.array(var_obj)
+                        vals = vals.swapaxes(0, 3)
+                        vals = vals.swapaxes(1, 2)
+                        v[:, :, :] = vals[:, :, :, 0]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])

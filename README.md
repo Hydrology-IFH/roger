@@ -274,6 +274,11 @@ for more publications involving Roger.
 - use coarser spatial and temporal resolution for computation of
 groundwater-related processes
 - implement baseflow in the groundwater routine. requires surface water depth.
+- implement surface runoff generation for gravity-driven infiltration
+- implement gravity-driven infiltration and percolation in transport routine
+- implement time-variant sowing and harvesting of crops
+- use physically-constrained artificial neural network to set time-dependent
+model parameters (e.g. number of active macropores)
 - add equations to docstrings
 - write online documentation (see `doc/`)
 
