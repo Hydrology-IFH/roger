@@ -760,7 +760,7 @@ for lys_experiment in lys_experiments:
     # merge model output into single file
     path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
     diag_files = glob.glob(path)
-    states_hm_file = model._base_path / "states_hm.nc"
+    states_hm_file = model._base_path / "states_hm_sensitivity.nc"
     with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
         if lys_experiment not in list(f.groups.keys()):
             f.create_group(lys_experiment)

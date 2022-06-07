@@ -351,7 +351,13 @@ class RogerSetup(metaclass=abc.ABCMeta):
                 with state.timers["storage"]:
                     numerics.calc_storage(state)
 
+                vs.itt = vs.itt + 1
+                vs.time = vs.time + vs.dt_secs
+
             elif settings.enable_offline_transport:
+                vs.itt = vs.itt + 1
+                vs.time = vs.time + vs.dt_secs
+
                 with state.timers["transport"]:
                     with state.timers["forcing"]:
                         self.set_forcing(state)
@@ -389,9 +395,6 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     if settings.enable_groundwater:
                         pass
 
-        vs.itt = vs.itt + 1
-        vs.time = vs.time + vs.dt_secs
-
         with state.timers["diagnostics"]:
             if not numerics.sanity_check(state):
                 raise RuntimeError(f"solution diverged at iteration {vs.itt}")
@@ -405,12 +408,17 @@ class RogerSetup(metaclass=abc.ABCMeta):
         # NOTE: benchmarks parse this, do not change / remove
         logger.debug(" Time step took {:.2f}s", state.timers["main"].last_time)
 
-    def warmup(self):
+    def warmup(self, repeat=1):
         """Warmup routine of the simulation.
 
-        Note:
-            Make sure to call :meth:`setup` prior to this function.
+        Args
+        -------
+        repeat : int, optional
+            Number of warmup runs. Default is 1.
 
+        Note
+        -------
+        Make sure to call :meth:`setup` prior to this function.
         """
         from roger import diagnostics
         from roger.core import numerics
@@ -418,8 +426,9 @@ class RogerSetup(metaclass=abc.ABCMeta):
         if self.state.settings.enable_offline_transport:
             with self.state.timers["Running warm-up"]:
                 logger.info("\nStarting warmup")
-                self.run()
-                numerics.rescale_SA(self.state)
+                for i in range(repeat):
+                    self.run()
+                    numerics.rescale_SA(self.state)
                 with self.state.variables.unlock():
                     self.state.variables.itt = 0
                     self.state.variables.time = 0
@@ -433,13 +442,15 @@ class RogerSetup(metaclass=abc.ABCMeta):
     def run(self, show_progress_bar=None):
         """Main routine of the simulation.
 
-        Note:
-            Make sure to call :meth:`setup` prior to this function.
+        Args
+        -------
+        show_progress_bar (:obj:`bool`, optional): Whether to show fancy progress bar via tqdm.
+            By default, only show if stdout is a terminal and roger is running on a single process.
 
-        Arguments:
-            show_progress_bar (:obj:`bool`, optional): Whether to show fancy progress bar via tqdm.
-                By default, only show if stdout is a terminal and roger is running on a single process.
-
+        Note
+        -------
+        Make sure to call :meth:`setup` (and :meth:`warmup` if offline transport)
+        prior to this function.
         """
         from roger import restart
 

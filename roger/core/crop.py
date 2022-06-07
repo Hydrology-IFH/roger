@@ -40,6 +40,10 @@ def calc_k_stress_transp_crop(state):
         vs.k_stress_transp_crop,
         at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], 1, (vs.theta_rz[2:-2, 2:-2, vs.tau, npx.newaxis] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis]) / (vs.theta_water_stress_crop[2:-2, 2:-2, :] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis])),
     )
+    vs.k_stress_transp_crop = update(
+        vs.k_stress_transp_crop,
+        at[2:-2, 2:-2, :], npx.where(vs.k_stress_transp_crop[2:-2, 2:-2, :] > 1, 1, vs.k_stress_transp_crop[2:-2, 2:-2, :]),
+    )
 
     return KernelOutput(k_stress_transp_crop=vs.k_stress_transp_crop)
 
@@ -445,7 +449,7 @@ def calc_basal_crop_coeff(state):
 
     vs.basal_crop_coeff = update(
         vs.basal_crop_coeff,
-        at[2:-2, 2:-2, :], settings.basal_crop_coeff_min + vs.crop_dev_coeff[2:-2, 2:-2, :] * (vs.basal_crop_coeff_mid[2:-2, 2:-2, :] - settings.basal_crop_coeff_min),
+        at[2:-2, 2:-2, :], settings.basal_crop_coeff_min + vs.ccc[2:-2, 2:-2, :] * (vs.basal_crop_coeff_mid[2:-2, 2:-2, :] - settings.basal_crop_coeff_min),
     )
 
     # bare
@@ -485,19 +489,20 @@ def calc_k_stress_root_growth(state):
     """
     vs = state.variables
 
-    k_stress_root_growth = allocate(state.dimensions, ("x", "y", "crops", 2))
+    k_stress_root_growth = allocate(state.dimensions, ("x", "y", "crops"))
+    mask = (vs.lu_id[:, :, npx.newaxis] == vs.crop_type)
 
     k_stress_root_growth = update(
         k_stress_root_growth,
-        at[2:-2, 2:-2, :, 0], 1,
-    )
-    k_stress_root_growth = update(
-        k_stress_root_growth,
-        at[2:-2, 2:-2, :, 1], 4 * ((vs.theta_rz[2:-2, 2:-2, vs.tau, npx.newaxis] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis]) / (vs.theta_fc[2:-2, 2:-2, npx.newaxis] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis])),
+        at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], 1, (vs.theta_rz[2:-2, 2:-2, vs.tau, npx.newaxis] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis]) / (vs.theta_water_stress_crop[2:-2, 2:-2, :] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis])),
     )
     vs.k_stress_root_growth = update(
         vs.k_stress_root_growth,
-        at[2:-2, 2:-2, :], npx.nanmin(k_stress_root_growth, axis=-1)
+        at[2:-2, 2:-2, :], npx.nanmax(k_stress_root_growth, axis=-1)
+    )
+    vs.k_stress_root_growth = update(
+        vs.k_stress_root_growth,
+        at[2:-2, 2:-2, :], npx.where(vs.k_stress_root_growth[2:-2, 2:-2, :] > 1, 1, vs.k_stress_root_growth[2:-2, 2:-2, :])
     )
 
     return KernelOutput(k_stress_root_growth=vs.k_stress_root_growth)
@@ -689,6 +694,10 @@ def update_k_stress_transp(state):
     vs.k_stress_transp = update(
         vs.k_stress_transp,
         at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.k_stress_transp[2:-2, 2:-2], npx.nanmax(k_stress_transp_crop[2:-2, 2:-2, :], axis=-1))
+    )
+    vs.k_stress_transp = update(
+        vs.k_stress_transp,
+        at[2:-2, 2:-2], npx.where(vs.k_stress_transp[2:-2, 2:-2] > 1, 1, vs.k_stress_transp[2:-2, 2:-2])
     )
 
     return KernelOutput(k_stress_transp=vs.k_stress_transp)

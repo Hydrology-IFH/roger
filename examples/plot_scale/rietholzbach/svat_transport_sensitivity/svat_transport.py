@@ -45,7 +45,7 @@ class SVATTRANSPORTSetup(RogerSetup):
         nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['Time']
-            return len(onp.array(var_obj))
+            return len(onp.array(var_obj)) + 1
 
     def _get_runlen(self, path_dir, file):
         nc_file = path_dir / file
@@ -71,7 +71,7 @@ class SVATTRANSPORTSetup(RogerSetup):
                            [1, 90],
                            [1, 90]]
             }
-            self._params = saltelli.sample(self._bounds, nsamples)
+            self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
             self._nrows = self._params.shape[0]
 
         elif self._tm_structure == "advection-dispersion":
@@ -82,7 +82,7 @@ class SVATTRANSPORTSetup(RogerSetup):
                            [1, 90],
                            [1, 90]]
             }
-            self._params = saltelli.sample(self._bounds, nsamples)
+            self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
             self._nrows = self._params.shape[0]
 
         elif self._tm_structure == "complete-mixing + advection-dispersion":
@@ -92,7 +92,7 @@ class SVATTRANSPORTSetup(RogerSetup):
                 'bounds': [[1, 90],
                            [1, 90]]
             }
-            self._params = saltelli.sample(self._bounds, nsamples)
+            self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
             self._nrows = self._params.shape[0]
 
         elif self._tm_structure == "time-variant preferential":
@@ -103,7 +103,7 @@ class SVATTRANSPORTSetup(RogerSetup):
                            [1, 90],
                            [1, 90]]
             }
-            self._params = saltelli.sample(self._bounds, nsamples)
+            self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
             self._nrows = self._params.shape[0]
 
         elif self._tm_structure == "time-variant advection-dispersion":
@@ -114,21 +114,18 @@ class SVATTRANSPORTSetup(RogerSetup):
                            [1, 90],
                            [1, 90]]
             }
-            self._params = saltelli.sample(self._bounds, nsamples)
+            self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
             self._nrows = self._params.shape[0]
 
         elif self._tm_structure == "time-variant":
             self._bounds = {
-                'num_vars': 6,
-                'names': ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss'],
+                'num_vars': 3,
+                'names': ['ab_transp', 'ab_q_rz', 'ab_q_ss'],
                 'bounds': [[1, 90],
-                           [1, 90],
-                           [1, 90],
-                           [1, 90],
                            [1, 90],
                            [1, 90]]
             }
-            self._params = saltelli.sample(self._bounds, nsamples)
+            self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
             self._nrows = self._params.shape[0]
 
     @roger_routine
@@ -248,7 +245,11 @@ class SVATTRANSPORTSetup(RogerSetup):
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, :, 2], self._params[:, 0, npx.newaxis])
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, :, 1], 1)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, :, 2], self._params[:, 1, npx.newaxis])
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, :, 1], 1)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, :, 2], self._params[:, 2, npx.newaxis])
         elif settings.tm_structure == "advection-dispersion":
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
@@ -463,10 +464,12 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc'))
 
         if settings.enable_deuterium:
-            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d2H", self._input_dir, 'forcing_tracer.nc'))
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 0], npx.NaN)
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d2H", self._input_dir, 'forcing_tracer.nc'))
 
         if settings.enable_oxygen18:
-            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 0], npx.NaN)
+            vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
 
         if settings.enable_deuterium or settings.enable_oxygen18:
             vs.update(set_iso_input_kernel(state))

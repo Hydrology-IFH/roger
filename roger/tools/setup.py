@@ -427,7 +427,8 @@ def write_forcing_tracer(input_dir, tracer, nrows=1, ncols=1, uniform=True, floa
                 v.attrs['long_name'] = labs._LONG_NAME[tracer]
                 v.attrs['units'] = labs._UNITS[tracer]
             v = f.create_variable('Time', ('Time',), float_type)
-            time_origin = df_tracer.index[0] - timedelta(days=1)
+            time_origin = df_tracer.index[0] - timedelta(hours=24)
+            print(time_origin)
             v.attrs['time_origin'] = f"{time_origin}"
             v.attrs['units'] = 'hours'
             v[:] = date2num(df_tracer.index.tolist(), units=f"hours since {time_origin}", calendar='standard')
