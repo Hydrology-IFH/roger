@@ -1152,7 +1152,7 @@ def calc_parameters_crops_kernel(state):
         )
         vs.basal_crop_coeff_mid = update(
             vs.basal_crop_coeff_mid,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 21], vs.basal_crop_coeff_mid[2:-2, 2:-2, :]),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crops[row_no, 21] * vs.lut_crop_scale[2:-2, 2:-2, row_no], vs.basal_crop_coeff_mid[2:-2, 2:-2, :]),
         )
         vs.z_root_crop_max = update(
             vs.z_root_crop_max,
