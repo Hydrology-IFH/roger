@@ -449,7 +449,7 @@ def calc_basal_crop_coeff(state):
 
     vs.basal_crop_coeff = update(
         vs.basal_crop_coeff,
-        at[2:-2, 2:-2, :], settings.basal_crop_coeff_min + vs.ccc[2:-2, 2:-2, :] * (vs.basal_crop_coeff_mid[2:-2, 2:-2, :] - settings.basal_crop_coeff_min),
+        at[2:-2, 2:-2, :], settings.basal_crop_coeff_min + vs.ccc[2:-2, 2:-2, vs.tau, :] * (vs.basal_crop_coeff_mid[2:-2, 2:-2, :] - settings.basal_crop_coeff_min),
     )
 
     # bare
