@@ -3,6 +3,7 @@ import os
 import h5netcdf
 import datetime
 import glob
+import numpy as onp
 
 from roger import runtime_settings as rs, runtime_state as rst
 rs.backend = "numpy"
@@ -15,7 +16,6 @@ from roger.core.operators import numpy as npx, update, update_add, at, for_loop,
 from roger.core.utilities import _get_row_no
 from roger.tools.setup import write_forcing, write_crop_rotation
 import roger.lookuptables as lut
-import numpy as onp
 
 # number of monte-carlo samples
 NSAMPLES = 10
