@@ -6,6 +6,7 @@ import h5netcdf
 import xarray as xr
 from cftime import num2date
 import pandas as pd
+import numpy as onp
 
 from roger import runtime_settings as rs
 rs.backend = "numpy"
@@ -14,7 +15,6 @@ from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, at, where
 from roger.tools.setup import write_forcing_tracer
-import numpy as onp
 
 
 class SVATTRANSPORTSetup(RogerSetup):
@@ -39,7 +39,7 @@ class SVATTRANSPORTSetup(RogerSetup):
             days = (ds['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
             date = num2date(days, units=f"days since {ds['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
             ds = ds.assign_coords(Time=("Time", date))
-            ds_year = ds.sel(Time=slice(f'{self._year}-01-01', f'{self._year + 1}-12-31'))
+            ds_year = ds.sel(Time=slice(f'{self._year - 1}-12-31', f'{self._year + 1}-12-31'))
             vals = ds_year[var].values
 
         return vals
@@ -272,7 +272,7 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.nc'))
         vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc'))
 
-        vs.M_IN = update(vs.M_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("Br", self._input_dir, 'forcing_tracer.nc'))
+        vs.M_IN = update(vs.M_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("Br", self._input_dir, 'forcing_tracer.nc'))
 
     @roger_routine
     def set_forcing(self, state):
@@ -540,7 +540,7 @@ for tm_structure in tm_structures:
         # merge model output into single file
         path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
         diag_files = glob.glob(path)
-        states_tm_file = model._base_path / f"states_tm_{tms}_{year}.nc"
+        states_tm_file = model._base_path / "states_tm.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             if f"{tm_structure}-{year}" not in list(f.groups.keys()):
                 f.create_group(f"{tm_structure}-{year}")
@@ -581,13 +581,13 @@ for tm_structure in tm_structures:
                     for var_sim in list(df.variables.keys()):
                         var_obj = df.variables.get(var_sim)
                         if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions:
-                            v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time'), float)
+                            v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'Time'), float)
                             vals = npx.array(var_obj)
                             v[:, :, :] = vals.swapaxes(0, 2)
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
-                            v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
+                            v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
                             vals = npx.array(var_obj)
                             vals = vals.swapaxes(0, 3)
                             vals = vals.swapaxes(1, 2)
@@ -595,7 +595,7 @@ for tm_structure in tm_structures:
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
-                            v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
+                            v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
                             vals = npx.array(var_obj)
                             vals = vals.swapaxes(0, 3)
                             vals = vals.swapaxes(1, 2)
@@ -604,7 +604,7 @@ for tm_structure in tm_structures:
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
-                            v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
+                            v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
                             vals = npx.array(var_obj)
                             vals = vals.swapaxes(0, 3)
                             vals = vals.swapaxes(1, 2)

@@ -165,7 +165,7 @@ def calc_tt(state, SA, sa, flux, sas_params):
     )
     SA_re = update(
         SA_re,
-        at[2:-2, 2:-2, :-1], npx.where(mask_old[2:-2, 2:-2, :], npx.cumsum(sa_free_norm[2:-2, 2:-2, ::-1], axis=-1)[:, :, ::-1], SA_re[2:-2, 2:-2, 1:]),
+        at[2:-2, 2:-2, :-1], npx.where(mask_old[2:-2, 2:-2, :], npx.cumsum(sa_free_norm[2:-2, 2:-2, ::-1], axis=-1)[:, :, ::-1], SA_re[2:-2, 2:-2, :-1]),
     )
     SA_re = update(
         SA_re,
@@ -213,9 +213,15 @@ def calc_tt(state, SA, sa, flux, sas_params):
     # sanity check of SAS function
     mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=1e-02)
     if not npx.any(mask[2:-2, 2:-2]):
+        # print(npx.sum(sa_free_norm[2:-2, 2:-2, :], axis=-1))
+        # print(npx.max(npx.cumsum(sa_free_norm[2:-2, 2:-2, :], axis=-1), axis=-1))
+        # print(npx.max(SA_re[2:-2, 2:-2, :], axis=-1))
+        # maskx = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3]) & (sas_params[:, :, 1, npx.newaxis] < sas_params[:, :, 2, npx.newaxis])))
+        # maskx = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3]))
+        # print(maskx[2:-2, 2:-2, :])
         raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
     mask1 = (tt * flux[:, :, npx.newaxis] - sa[:, :, 1, :] > 1e-02)
-    if npx.any(mask1[2:-2, 2:-2, :], axis=-1):
+    if npx.any(mask1[2:-2, 2:-2, :]):
         raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
 
     return tt

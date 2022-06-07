@@ -55,7 +55,7 @@ class SVATTRANSPORTSetup(RogerSetup):
         nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['Time']
-            return len(onp.array(var_obj))
+            return len(onp.array(var_obj)) + 1
 
     def _get_runlen(self, path_dir, file):
         nc_file = path_dir / file

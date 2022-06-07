@@ -178,6 +178,9 @@ _LABS = {'S_int_top': r'$S_{int-top}$ [mm]',
          'b_q_rz': r'$b_{q-rz}$ [-]',
          'a_q_ss': r'$a_{q-ss}$ [-]',
          'b_q_ss': r'$b_{q-ss}$ [-]',
+         'ab_transp': r'$a-b_{transp}$ [-]',
+         'ab_q_rz': r'$a-b_{q-rz}$ [-]',
+         'ab_q_ss': r'$a-b_{q-ss}$ [-]',
          'crop_scale': r'scale_{crop} [-]',
          }
 

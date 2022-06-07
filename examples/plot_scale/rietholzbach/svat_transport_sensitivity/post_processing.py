@@ -17,46 +17,43 @@ bounds = {
     "preferential" : {
         'num_vars': 3,
         'names': ['b_transp', 'b_q_rz', 'b_q_ss'],
-        'bounds[tm_structure]': [[1, 100],
-                   [1, 100],
-                   [1, 100]]
+        'bounds': [[1, 90],
+                   [1, 90],
+                   [1, 90]]
     },
     "advection-dispersion" : {
         'num_vars': 3,
         'names': ['b_transp', 'a_q_rz', 'a_q_ss'],
-        'bounds[tm_structure]': [[1, 100],
-                   [1, 100],
-                   [1, 100]]
+        'bounds': [[1, 90],
+                   [1, 90],
+                   [1, 90]]
     },
     "complete-mixing + advection-dispersion" : {
         'num_vars': 2,
         'names': ['a_q_rz', 'a_q_ss'],
-        'bounds[tm_structure]': [[1, 100],
-                   [1, 100]]
+        'bounds': [[1, 90],
+                   [1, 90]]
     },
     "time-variant preferential" : {
         'num_vars': 3,
         'names': ['b_transp', 'b_q_rz', 'b_q_ss'],
-        'bounds[tm_structure]': [[1, 100],
-                   [1, 100],
-                   [1, 100]]
+        'bounds': [[1, 90],
+                   [1, 90],
+                   [1, 90]]
     },
     "time-variant advection-dispersion" : {
         'num_vars': 3,
         'names': ['b_transp', 'a_q_rz', 'a_q_ss'],
-        'bounds[tm_structure]': [[1, 100],
-                   [1, 100],
-                   [1, 100]]
+        'bounds': [[1, 90],
+                   [1, 90],
+                   [1, 90]]
     },
     "time-variant" : {
-        'num_vars': 6,
-        'names': ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss'],
-        'bounds[tm_structure]': [[1, 100],
-                   [1, 100],
-                   [1, 100],
-                   [1, 100],
-                   [1, 100],
-                   [1, 100]]
+        'num_vars': 3,
+        'names': ['ab_transp', 'ab_q_rz', 'ab_q_ss'],
+        'bounds': [[1, 90],
+                   [1, 90],
+                   [1, 90]]
     }
 }
 
@@ -66,6 +63,10 @@ base_path = Path(__file__).parent
 base_path_results = base_path / "results"
 if not os.path.exists(base_path_results):
     os.mkdir(base_path_results)
+# directory of figures
+base_path_figs = base_path / "figures"
+if not os.path.exists(base_path_figs):
+    os.mkdir(base_path_figs)
 
 # load simulation
 states_hm_file = base_path / "states_hm.nc"
@@ -85,7 +86,7 @@ for tm_structure in tm_structures:
 
     # load simulation
     states_tm_file = base_path / "states_tm_sensitivity.nc"
-    ds_sim_tm = xr.open_dataset(states_tm_file, f"{tm_structure}", engine="h5netcdf")
+    ds_sim_tm = xr.open_dataset(states_tm_file, group=tm_structure, engine="h5netcdf")
 
     # assign date
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
@@ -120,12 +121,12 @@ for tm_structure in tm_structures:
         df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
     elif tm_structure == "time-variant preferential":
         df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
-        df_params_eff.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
-        df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+        df_params_eff.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+        df_params_eff.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
     elif tm_structure == "time-variant":
-        df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
-        df_params_eff.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
-        df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+        df_params_eff.loc[:, 'ab_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+        df_params_eff.loc[:, 'ab_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+        df_params_eff.loc[:, 'ab_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
 
     # compare observations and simulations
     ncol = 0
@@ -136,13 +137,13 @@ for tm_structure in tm_structures:
     idx_cs = df_idx_cs['sol'].dropna().index
     for nrow in range(nx):
         # calculate simulated oxygen-18 composite sample
-        df_perc_18O_obs = pd.DataFrame(index=idx_cs, columns=['perc_obs', 'd18O_perc_obs'])
+        df_perc_18O_obs = pd.DataFrame(index=date_obs, columns=['perc_obs', 'd18O_perc_obs'])
         df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=0, y=0).values
         df_perc_18O_obs.loc[:, 'd18O_perc_obs'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-        sample_no = pd.DataFrame(index=df_perc_18O_obs.dropna().index, columns=['sample_no'])
+        sample_no = pd.DataFrame(index=idx_cs, columns=['sample_no'])
         sample_no = sample_no.loc['1997':'2007']
         sample_no['sample_no'] = range(len(sample_no.index))
-        df_perc_18O_sim = pd.DataFrame(index=idx, columns=['perc_sim', 'd18O_perc_sim'])
+        df_perc_18O_sim = pd.DataFrame(index=date_sim_tm, columns=['perc_sim', 'd18O_perc_sim'])
         df_perc_18O_sim['perc_sim'] = ds_sim_hm['q_ss'].isel(x=0, y=0).values
         df_perc_18O_sim['d18O_perc_sim'] = ds_sim_tm['C_q_ss'].isel(x=nrow, y=ncol).values
         df_perc_18O_sim = df_perc_18O_sim.join(sample_no)
@@ -190,13 +191,16 @@ for tm_structure in tm_structures:
         df_params_eff.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
 
     # write composite sample to output file
+    ds_sim_tm = ds_sim_tm.close()
     states_tm_file = base_path / "states_tm_sensitivity.nc"
-    with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
-        v = f.groups[tm_structure].create_variable('d18O_perc_cs', ('x', 'y', 'Time'), float)
+    with h5netcdf.File(states_tm_file, 'r+', decode_vlen_strings=False) as f:
+        try:
+            v = f.groups[tm_structure].create_variable('d18O_perc_cs', ('x', 'y', 'Time'), float)
+        except ValueError:
+            v = f.groups[tm_structure].get('d18O_perc_cs')
         v[:, :, :] = d18O_perc_cs
         v.attrs.update(long_name="composite sample of d18O in percolation",
                        units="permil")
-
     # write to .txt
     file = base_path_results / f"params_eff_{tm_structure}.txt"
     df_params_eff.to_csv(file, header=True, index=False, sep="\t")
@@ -213,14 +217,10 @@ for tm_structure in tm_structures:
         Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
         dict_si[name] = pd.DataFrame(Si_filter, index=bounds[tm_structure]['names'])
 
-    base_path_figs = base_path / "figures"
-    if not os.path.exists(base_path_figs):
-        os.mkdir(base_path_figs)
-
     # plot sobol indices
     _LABS = {'KGE_C_q_ss': 'KGE',
-             'KGE_beta_C_q_ss': '$\beta$',
-             'KGE_alpha_C_q_ss': '$\alpha$',
+             'KGE_beta_C_q_ss': r'$\beta$',
+             'KGE_alpha_C_q_ss': r'$\alpha$',
              'r_C_q_ss': 'r',
              }
     ncol = len(df_eff.columns)
@@ -247,7 +247,7 @@ for tm_structure in tm_structures:
     # make dotty plots
     nrow = len(df_eff.columns)
     ncol = bounds[tm_structure]['num_vars']
-    fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(14, 7))
+    fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(14, 7))
     for i in range(nrow):
         for j in range(ncol):
             y = df_eff.iloc[:, i]

@@ -34,6 +34,7 @@ SETTINGS = {
     "nages": Setting(1, int, "Number of water ages to calculate cumulated distributions"),
     "ncrops": Setting(1, int, "Number of crops per year"),
     "ncr": Setting(2, int, "Number of crop rotations"),
+    "n_crop_types": Setting(76, int, "Number of crop types"),
     "dt_mom": Setting(1.0, float, "Time step in hours for momentum"),
     "dt_ff": Setting(1/6, float, "Time step in hours for film flow"),
     "dt_gw": Setting(24.0, float, "Time step in hours for groundwater"),

@@ -3,6 +3,7 @@ import glob
 import os
 import datetime
 import h5netcdf
+import numpy as onp
 
 from roger import runtime_settings as rs, runtime_state as rst
 rs.backend = "numpy"
@@ -13,7 +14,6 @@ from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, at
 from roger.tools.setup import write_forcing_tracer
-import numpy as onp
 
 
 class SVATTRANSPORTSetup(RogerSetup):

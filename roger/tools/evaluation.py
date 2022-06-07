@@ -77,8 +77,6 @@ def plot_sim(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
     axs.set_xlim((df.index[0], df.index[-1]))
     if ylim:
         axs.set_ylim(ylim)
-    elif y_lab == r'$\delta^{2}$H [permil]':
-        axs.set_ylim((-160, -20))
     axs.set_ylabel(y_lab)
     axs.set_xlabel(x_lab)
     fig.tight_layout()

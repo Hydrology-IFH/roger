@@ -70,7 +70,7 @@ LUT_GC_GRID = (25, 13)
 LUT_IS_GRID = (101, 2)
 LUT_MLMS_GRID = (10000, 9)
 LUT_RDLU_GRID = (26, 7)
-LUT_CROPS_GRID = (76, 23)
+LUT_CROPS_GRID = ("n_crop_types", 24)
 LUT_GCM_GRID = (25, 2)
 TIMESTEPS = ("timesteps",)
 TIMESTEPS_EVENT = ("timesteps_event",)
@@ -84,6 +84,7 @@ NEVENTS_FF = ("events_ff",)
 CROPS = ("crops",)
 CR = ("cr",)
 N_SAS_PARAMS = ("n_sas_params",)
+N_CROP_TYPES = ("n_crop_types",)
 
 # those are written to netCDF output by default
 BASE_DIMENSIONS = X + Y
@@ -4284,6 +4285,15 @@ VARIABLES = {
     "crop_scale": Variable(
         "scaling factor of crop parameters",
         CATCH_GRID,
+        "-",
+        "scaling factor of crop parameters",
+        initial=1,
+        time_dependent=False,
+        active=lambda settings: settings.enable_crop_phenology,
+    ),
+    "lut_crop_scale": Variable(
+        "scaling factor of crop parameters",
+        CATCH_GRID + N_CROP_TYPES,
         "-",
         "scaling factor of crop parameters",
         initial=1,
