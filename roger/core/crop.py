@@ -485,15 +485,10 @@ def calc_k_stress_root_growth(state):
     """
     vs = state.variables
 
-    k_stress_root_growth = allocate(state.dimensions, ("x", "y", "crops"))
     mask = (vs.lu_id[:, :, npx.newaxis] == vs.crop_type)
-    k_stress_root_growth = update(
-        k_stress_root_growth,
-        at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], 1, (vs.theta_rz[2:-2, 2:-2, vs.tau, npx.newaxis] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis]) / (vs.theta_water_stress_crop[2:-2, 2:-2, :] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis])),
-    )
     vs.k_stress_root_growth = update(
         vs.k_stress_root_growth,
-        at[2:-2, 2:-2, :], npx.nanmin(k_stress_root_growth, axis=-1)
+        at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], 1, (vs.theta_rz[2:-2, 2:-2, vs.tau, npx.newaxis] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis]) / (vs.theta_water_stress_crop[2:-2, 2:-2, :] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis])),
     )
     vs.k_stress_root_growth = update(
         vs.k_stress_root_growth,
