@@ -595,7 +595,7 @@ def after_timestep_kernel(state):
 meteo_stations = ["breitnau", "ihringen"]
 
 for meteo_station in meteo_stations:
-    model = DISTSetup()
+    model = ONEDSetup()
     path_meteo_station = model._base_path / "input" / meteo_station
     model._set_input_dir(path_meteo_station)
     write_meteo_csv_from_dwd(path_meteo_station)
