@@ -256,7 +256,11 @@ def calc_transp(state):
     mask_crops = npx.isin(vs.lu_id, npx.arange(500, 600, 1, dtype=int))
     vs.k_stress_transp = update(
         vs.k_stress_transp,
-        at[2:-2, 2:-2], npx.where((vs.theta_rz[2:-2, 2:-2, vs.tau] > theta_water_stress[2:-2, 2:-2]) & ~mask_crops[2:-2, 2:-2], 1, ((vs.theta_rz[2:-2, 2:-2, vs.tau] - vs.theta_pwp[2:-2, 2:-2]) / (theta_water_stress[2:-2, 2:-2] - vs.theta_pwp[2:-2, 2:-2]))) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask_crops[2:-2, 2:-2], vs.k_stress_transp[2:-2, 2:-2], ((vs.theta_rz[2:-2, 2:-2, vs.tau] - vs.theta_pwp[2:-2, 2:-2]) / (theta_water_stress[2:-2, 2:-2] - vs.theta_pwp[2:-2, 2:-2]))) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.k_stress_transp = update(
+        vs.k_stress_transp,
+        at[2:-2, 2:-2], npx.where(vs.k_stress_transp[2:-2, 2:-2] > 1, 1, vs.k_stress_transp[2:-2, 2:-2])
     )
 
     # calculates coeffcient of transpiration

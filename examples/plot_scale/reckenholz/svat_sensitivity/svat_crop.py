@@ -287,7 +287,7 @@ class SVATCROPSetup(RogerSetup):
                                                    "z_root", "ground_cover",
                                                    "k_stress_transp", "basal_transp_coeff",
                                                    "basal_evap_coeff", "k_stress_transp_crop",
-                                                   "k_stress_root_growth"]
+                                                   "k_stress_root_growth", "basal_crop_coeff"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 
