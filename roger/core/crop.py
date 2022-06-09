@@ -40,10 +40,6 @@ def calc_k_stress_transp_crop(state):
         vs.k_stress_transp_crop,
         at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], 1, (vs.theta_rz[2:-2, 2:-2, vs.tau, npx.newaxis] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis]) / (vs.theta_water_stress_crop[2:-2, 2:-2, :] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis])),
     )
-    vs.k_stress_transp_crop = update(
-        vs.k_stress_transp_crop,
-        at[2:-2, 2:-2, :], npx.where(vs.k_stress_transp_crop[2:-2, 2:-2, :] > 1, 1, vs.k_stress_transp_crop[2:-2, 2:-2, :]),
-    )
 
     return KernelOutput(k_stress_transp_crop=vs.k_stress_transp_crop)
 
@@ -695,10 +691,6 @@ def update_k_stress_transp(state):
         vs.k_stress_transp,
         at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.k_stress_transp[2:-2, 2:-2], npx.nanmax(k_stress_transp_crop[2:-2, 2:-2, :], axis=-1))
     )
-    vs.k_stress_transp = update(
-        vs.k_stress_transp,
-        at[2:-2, 2:-2], npx.where(vs.k_stress_transp[2:-2, 2:-2] > 1, 1, vs.k_stress_transp[2:-2, 2:-2])
-    )
 
     return KernelOutput(k_stress_transp=vs.k_stress_transp)
 
@@ -1057,7 +1049,7 @@ def set_crop_params(state):
 
     vs.theta_water_stress_crop = update(
         vs.theta_water_stress_crop,
-        at[2:-2, 2:-2, :], (1 - vs.water_stress_coeff_crop[2:-2, 2:-2, :]) * (vs.theta_fc[2:-2, 2:-2, npx.newaxis] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis]) + vs.theta_pwp[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], vs.water_stress_coeff_crop[2:-2, 2:-2, :] * (vs.theta_fc[2:-2, 2:-2, npx.newaxis] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis]) + vs.theta_pwp[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(

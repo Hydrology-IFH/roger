@@ -794,7 +794,7 @@ for lys_experiment in lys_experiments:
         for dfs in diag_files:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
-                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'n_crop_types': len(df.variables['n_crop_types'])}
+                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'n_crop_types': len(df.variables['n_crop_types']), 'crops': len(df.variables['crops'])}
                 if not f.groups[lys_experiment].dimensions:
                     f.groups[lys_experiment].dimensions = dict_dim
                     v = f.groups[lys_experiment].create_variable('x', ('x',), float)
@@ -816,12 +816,25 @@ for lys_experiment in lys_experiments:
                     v.attrs['long_name'] = 'number of crop types'
                     v.attrs['units'] = ''
                     v[:] = npx.arange(dict_dim["n_crop_types"])
+                    v = f.groups[lys_experiment].create_variable('crops', ('crops',), int)
+                    v.attrs['long_name'] = 'number of crops per growing cycle'
+                    v.attrs['units'] = ''
+                    v[:] = npx.arange(dict_dim["crops"])
                 for key in list(df.variables.keys()):
                     var_obj = df.variables.get(key)
                     if key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
                         v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time'), float)
                         vals = npx.array(var_obj)
                         v[:, :, :] = vals.swapaxes(0, 2)
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                    elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'crops', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
+                        v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time', 'crops'), float)
+                        vals = npx.array(var_obj)
+                        vals = vals.swapaxes(0, 3)
+                        vals = vals.swapaxes(1, 2)
+                        vals = vals.swapaxes(2, 3)
+                        v[:, :, :, :] = vals
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
                     elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
