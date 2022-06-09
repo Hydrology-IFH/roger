@@ -1176,6 +1176,11 @@ def calculate_crop_phenology(state):
             vs.update(calc_basal_evap_coeff_crop(state))
             vs.update(calc_S_int_tot(state))
             vs.update(calc_root_growth(state))
+            vs.update(update_lu_id(state))
+            vs.update(update_ground_cover(state))
+            vs.update(update_k_stress_transp(state))
+            vs.update(update_basal_transp_coeff(state))
+            vs.update(update_basal_evap_coeff(state))
 
         if (vs.event_id == 0):
             vs.update(update_lu_id(state))
