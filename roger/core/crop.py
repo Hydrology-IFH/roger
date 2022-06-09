@@ -40,9 +40,6 @@ def calc_k_stress_transp_crop(state):
         vs.k_stress_transp_crop,
         at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], 1, (vs.theta_rz[2:-2, 2:-2, vs.tau, npx.newaxis] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis]) / (vs.theta_water_stress_crop[2:-2, 2:-2, :] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis])),
     )
-    print(vs.theta_rz[2:-2, 2:-2, vs.tau])
-    print(vs.theta_water_stress_crop[2:-2, 2:-2, :])
-    print(vs.k_stress_transp_crop[2:-2, 2:-2, :])
 
     return KernelOutput(k_stress_transp_crop=vs.k_stress_transp_crop)
 

@@ -117,6 +117,7 @@ class SVATCROPSetup(RogerSetup):
         settings.y_origin = 0.0
         settings.time_origin = self._get_time_origin(self._input_dir, 'forcing.nc')
 
+        settings.enable_crop_water_stress = True
         settings.enable_crop_phenology = True
         settings.enable_crop_rotation = True
         settings.enable_macropore_lower_boundary_condition = False
