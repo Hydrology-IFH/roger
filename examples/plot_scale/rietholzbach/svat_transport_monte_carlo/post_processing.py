@@ -296,8 +296,8 @@ for i, tm_structure in enumerate(tm_structures):
     ax.flatten()[i].scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=2)
     ax.flatten()[i].scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=2)
 
-ax[0, 0].set_ylabel(r'$d_{18}O_{PERC}$ [-]')
-ax[1, 0].set_ylabel(r'$d_{18}O_{PERC}$ [-]')
+ax[0, 0].set_ylabel(r'$d_{18}O_{PERC}$ [permil]')
+ax[1, 0].set_ylabel(r'$d_{18}O_{PERC}$ [permil]')
 ax[1, 1].set_xlabel('Time')
 
 # duration curve of 18O in percolation

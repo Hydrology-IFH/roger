@@ -358,13 +358,13 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
             v[:] = onp.array(var_obj)
         for var_sim in list(df.variables.keys()):
             var_obj = df.variables.get(var_sim)
-            if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3:
+            if var_sim not in list(f.dimensions.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
                 v = f.create_variable(var_sim, ('x', 'y', 'Time'), float)
                 vals = onp.array(var_obj)
                 v[:, :, :] = vals[idx_best, :, :]
                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                 units=var_obj.attrs["units"])
-            elif var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 2:
+            elif var_sim not in list(f.dimensions.keys()) and ('x', 'y') == var_obj.dimensions:
                 v = f.create_variable(var_sim, ('x', 'y'), float)
                 vals = onp.array(var_obj)
                 v[:, :] = vals[idx_best, :]

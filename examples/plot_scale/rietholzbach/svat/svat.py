@@ -164,9 +164,8 @@ class SVATSetup(RogerSetup):
     @roger_routine
     def set_diagnostics(self, state):
         diagnostics = state.diagnostics
-        settings = state.settings
 
-        diagnostics["rates"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS"]
+        diagnostics["rates"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "rain_top", "snow_top", "snow_melt"]
         diagnostics["rates"].output_frequency = 24 * 60 * 60
         diagnostics["rates"].sampling_frequency = 1
 

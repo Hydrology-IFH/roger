@@ -18,7 +18,7 @@ from roger.tools.setup import write_forcing, write_crop_rotation
 import roger.lookuptables as lut
 
 # number of monte-carlo samples
-NSAMPLES = 10
+NSAMPLES = 10000
 
 
 class SVATCROPSetup(RogerSetup):
@@ -71,8 +71,8 @@ class SVATCROPSetup(RogerSetup):
     def _get_time_origin(self, path_dir, file):
         nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables['Time'].attrs['time_origin']
-            return str(var_obj)
+            date = infile.variables['Time'].attrs['time_origin'].split(" ")[0]
+            return f"{date} 00:00:00"
 
     def _get_ncr(self, path_dir, file):
         nc_file = path_dir / file
@@ -265,10 +265,8 @@ class SVATCROPSetup(RogerSetup):
                                                    "S_pwp_rz", "S_fc_rz",
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss",
-                                                   "z_root", "ground_cover",
-                                                   "k_stress_transp", "basal_transp_coeff",
-                                                   "basal_evap_coeff", "k_stress_transp_crop",
-                                                   "k_stress_root_growth", "basal_crop_coeff"]
+                                                   "theta",
+                                                   "z_root", "ground_cover", "lu_id"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 
@@ -741,7 +739,7 @@ def after_timestep_crops_kernel(state):
     )
 
 
-lys_experiments = ["lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
+lys_experiments = ["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
 for lys_experiment in lys_experiments:
     model = SVATCROPSetup()
     input_path = model._base_path / "input" / lys_experiment

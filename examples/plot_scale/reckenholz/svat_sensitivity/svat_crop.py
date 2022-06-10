@@ -24,7 +24,7 @@ class SVATCROPSetup(RogerSetup):
     """
     _base_path = Path(__file__).parent
     # sampled parameters with Saltelli's extension of the Sobol' sequence
-    _crop_types = [536, 539, 556, 557, 559, 560, 563, 564, 565, 566, 572, 573, 574]
+    _crop_types = None
     _param_names = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']
     _param_bounds = [[1, 400],
                      [1, 1200],
@@ -32,10 +32,11 @@ class SVATCROPSetup(RogerSetup):
                      [0.05, 0.33],
                      [0.05, 0.33],
                      [0.1, 120]]
-    for ct in _crop_types:
-        _param_names.append(f"crop_scale_{ct}")
-        _param_bounds.append([0.5, 1.5])
-    _nsamples = 2**2
+    if _crop_types:
+        for ct in _crop_types:
+            _param_names.append(f"crop_scale_{ct}")
+            _param_bounds.append([0.5, 1.5])
+    _nsamples = 2**10
     _bounds = {
         'num_vars': len(_param_names),
         'names': _param_names,
@@ -89,14 +90,26 @@ class SVATCROPSetup(RogerSetup):
     def _get_time_origin(self, path_dir, file):
         nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables['Time'].attrs['time_origin']
-            return str(var_obj)
+            date = infile.variables['Time'].attrs['time_origin'].split(" ")[0]
+            return f"{date} 00:00:00"
 
     def _get_ncr(self, path_dir, file):
         nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['year_season']
             return len(onp.array(var_obj))
+
+    def _set_crop_types(self, path_dir, file):
+        nc_file = path_dir / file
+        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+            var_obj = infile.variables['crop']
+            crop_types1 = onp.unique(onp.array(var_obj)[0, 0, :]).tolist()
+            crop_types = []
+            for ct in crop_types1:
+                if ct in onp.arange(500, 598, dtype=int).tolist():
+                    crop_types.append(ct)
+
+            self._crop_types = crop_types
 
     @roger_routine
     def set_settings(self, state):
@@ -285,10 +298,8 @@ class SVATCROPSetup(RogerSetup):
                                                    "S_pwp_rz", "S_fc_rz",
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss",
-                                                   "z_root", "ground_cover",
-                                                   "k_stress_transp", "basal_transp_coeff",
-                                                   "basal_evap_coeff", "k_stress_transp_crop",
-                                                   "k_stress_root_growth", "basal_crop_coeff"]
+                                                   "theta",
+                                                   "z_root", "ground_cover", "lu_id"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 
@@ -763,12 +774,13 @@ def after_timestep_crops_kernel(state):
     )
 
 
-lys_experiments = ["lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
+lys_experiments = ["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
 for lys_experiment in lys_experiments:
     model = SVATCROPSetup()
     input_path = model._base_path / "input" / lys_experiment
     model._set_input_dir(input_path)
     model._set_identifier(lys_experiment)
+    model._set_crop_types(model._input_dir, "crop_rotation.nc")
     forcing_path = model._input_dir / "forcing.nc"
     if not os.path.exists(forcing_path):
         write_forcing(input_path, enable_crop_phenology=True)

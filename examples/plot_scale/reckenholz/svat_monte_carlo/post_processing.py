@@ -13,11 +13,40 @@ import numpy as onp
 
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
+import roger.lookuptables as lut
+
+
+def _get_row_no(arr1d, i):
+    arr = onp.full((onp.size(arr1d),), dtype=bool, fill_value=False)
+    arr[:], arr1d == i
+    cond = onp.any(arr)
+    if onp.where(arr)[0].size > 0:
+        val = onp.where(arr)[0][0]
+    else:
+        val = 0
+    row_no = onp.int64(onp.where(cond, val, 0))
+
+    arr_row_no = onp.full((1,), dtype=int, fill_value=False)
+    arr_row_no[:] = row_no
+
+    return arr_row_no
+
 
 base_path = Path(__file__).parent
+# directory of results
+base_path_results = base_path / "results"
+if not os.path.exists(base_path_results):
+    os.mkdir(base_path_results)
+# directory of figures
+base_path_figs = base_path / "figures"
+if not os.path.exists(base_path_figs):
+    os.mkdir(base_path_figs)
 
-lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9"]
+dict_params_eff = {}
+
+lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
 for lys_experiment in lys_experiments:
+    dict_params_eff[lys_experiment] = {}
     # directory of results
     base_path_results = base_path / "results" / lys_experiment
     if not os.path.exists(base_path_results):
@@ -28,7 +57,7 @@ for lys_experiment in lys_experiments:
         os.mkdir(base_path_figs)
 
     # load simulation
-    states_hm_mc_file = base_path / lys_experiment / "states_hm_monte_carlo.nc"
+    states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"
     ds_sim = xr.open_dataset(states_hm_mc_file, engine="h5netcdf", group=lys_experiment)
 
     # load observations (measured data)
@@ -54,10 +83,18 @@ for lys_experiment in lys_experiments:
     df_params_eff.loc[:, 'theta_ufc'] = ds_sim["theta_ufc"].isel(y=0).values.flatten()
     df_params_eff.loc[:, 'theta_pwp'] = ds_sim["theta_pwp"].isel(y=0).values.flatten()
     df_params_eff.loc[:, 'ks'] = ds_sim["ks"].isel(y=0).values.flatten()
-    df_params_eff.loc[:, 'crop_scale'] = ds_sim["crop_scale"].isel(y=0).values.flatten()
+    # crop_types = onp.unique(ds_sim["lu_id"].isel(x=0, y=0).values.flatten()).tolist()
+    crop_types = [536, 539, 556, 557, 559, 560, 563, 564, 565, 566, 572, 573, 574]
+    for i, ct in enumerate(crop_types):
+        row_no = _get_row_no(lut.ARR_CP[:, 0], ct)
+        df_params_eff.loc[:, f'crop_scale_{ct}'] = ds_sim["lut_crop_scale"].isel(y=0, n_crop_types=row_no).values.flatten()
     # calculate metrics
-    vars_sim = ['q_ss', 'theta', 'S_s', 'S']
-    vars_obs = ['PERC', 'THETA', 'WEIGHT', 'WEIGHT']
+    if lys_experiment in ["lys2", "lys3", "lys4", "lys8", "lys9"]:
+        vars_sim = ['q_ss', 'theta', 'S_s', 'S']
+        vars_obs = ['PERC', 'THETA', 'WEIGHT', 'WEIGHT']
+    else:
+        vars_sim = ['q_ss']
+        vars_obs = ['PERC']
     for var_sim, var_obs in zip(vars_sim, vars_obs):
         if var_sim == 'theta':
             obs_vals = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0)
@@ -79,7 +116,7 @@ for lys_experiment in lys_experiments:
                 eff_swc = eval_utils.calc_kge(obs_vals, sim_vals)
                 key_kge = 'KGE_' + var_sim
                 df_params_eff.loc[nrow, key_kge] = (Nz / Ni) * eff_swc
-            elif var_sim in ['dS', 'dS_s']:
+            elif var_sim in ['S', 'S_s']:
                 obs_vals = df_eval.loc[:, 'obs'].values
                 sim_vals = df_eval.loc[:, 'sim'].values
                 key_r = 'r_' + var_sim
@@ -244,17 +281,26 @@ for lys_experiment in lys_experiments:
                     df_params_eff.loc[nrow, key_phi] = de.calc_phi(brel_mean, b_slope)
 
     # Calculate multi-objective metric
-    df_params_eff.loc[:, 'E_multi'] = 1/2 * df_params_eff.loc[:, 'r_S'] + 1/2 * df_params_eff.loc[:, 'KGE_q_ss']
+    if lys_experiment in ["lys2", "lys3", "lys4", "lys8", "lys9"]:
+        df_params_eff.loc[:, 'E_multi'] = 1/2 * df_params_eff.loc[:, 'r_S'] + 1/2 * df_params_eff.loc[:, 'KGE_q_ss']
+    else:
+        df_params_eff.loc[:, 'E_multi'] = df_params_eff.loc[:, 'KGE_q_ss']
+    dict_params_eff[lys_experiment]['total'] = df_params_eff
     # write .txt-file
     file = base_path_results / "params_eff.txt"
     df_params_eff.to_csv(file, header=True, index=False, sep="\t")
 
     # dotty plots
-    df_eff = df_params_eff.loc[:, ['KGE_q_ss', 'r_S', 'E_multi']]
-    df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'crop_scale']]
+    ll_params = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'] + [f'crop_scale_{ct}' for ct in crop_types]
+    if lys_experiment in ["lys2", "lys3", "lys4", "lys8", "lys9"]:
+        df_eff = df_params_eff.loc[:, ['KGE_q_ss', 'r_S', 'E_multi']]
+    else:
+        df_eff = df_params_eff.loc[:, ['KGE_q_ss']]
+    df_params = df_params_eff.loc[:, ll_params]
     nrow = len(df_eff.columns)
     ncol = len(df_params.columns)
-    fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(14, 7))
+    fig, ax1 = plt.subplots(nrow, ncol, sharey=True, figsize=(16, int(nrow*3)))
+    ax = ax1.reshape((nrow, ncol))
     for i in range(nrow):
         for j in range(ncol):
             y = df_eff.iloc[:, i]
@@ -269,11 +315,12 @@ for lys_experiment in lys_experiments:
         ax[-1, j].set_xlabel(xlabel)
 
     ax[0, 0].set_ylabel('$KGE_{PERC}$ [-]')
-    ax[1, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
-    ax[2, 0].set_ylabel('$E_{multi}$\n [-]')
+    if lys_experiment in ["lys2", "lys3", "lys4", "lys8", "lys9"]:
+        ax[1, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
+        ax[2, 0].set_ylabel('$E_{multi}$\n [-]')
 
     fig.subplots_adjust(wspace=0.2, hspace=0.3)
-    file = base_path_figs / "dotty_plots.png"
+    file = base_path_figs / f"dotty_plots_{lys_experiment}.png"
     fig.savefig(file, dpi=250)
 
     # select best model run
@@ -294,8 +341,8 @@ for lys_experiment in lys_experiments:
         )
         with h5netcdf.File(states_hm_mc_file, 'r', decode_vlen_strings=False) as df:
             # set dimensions with a dictionary
-            dict_dim = {'x': 1, 'y': 1, 'Time': len(df.variables['Time'])}
-            if not f.groups[lys_experiment].dimension:
+            dict_dim = {'x': 1, 'y': 1, 'Time': len(df.groups[lys_experiment].variables['Time']), 'crops': len(df.groups[lys_experiment].variables['crops']), 'n_crop_types': len(df.groups[lys_experiment].variables['n_crop_types'])}
+            if not f.groups[lys_experiment].dimensions:
                 f.groups[lys_experiment].dimensions = dict_dim
                 v = f.groups[lys_experiment].create_variable('x', ('x',), float)
                 v.attrs['long_name'] = 'Number of model run'
@@ -306,22 +353,33 @@ for lys_experiment in lys_experiments:
                 v.attrs['units'] = ''
                 v[:] = onp.arange(dict_dim["y"])
                 v = f.groups[lys_experiment].create_variable('Time', ('Time',), float)
-                var_obj = df.variables.get('Time')
+                var_obj = df.groups[lys_experiment].variables.get('Time')
                 v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                units=var_obj.attrs["units"])
                 v[:] = onp.array(var_obj)
-            for var_sim in list(df.variables.keys()):
-                var_obj = df.variables.get(var_sim)
-                if var_sim not in list(f.groups[lys_experiment].dimensions.keys()) and var_obj.ndim == 3:
+            for var_sim in list(df.groups[lys_experiment].variables.keys()):
+                var_obj = df.groups[lys_experiment].variables.get(var_sim)
+                if var_sim not in list(f.groups[lys_experiment].dimensions.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
                     v = f.groups[lys_experiment].create_variable(var_sim, ('x', 'y', 'Time'), float)
                     vals = onp.array(var_obj)
                     v[:, :, :] = vals[idx_best, :, :]
                     v.attrs.update(long_name=var_obj.attrs["long_name"],
                                    units=var_obj.attrs["units"])
-                elif var_sim not in list(f.groups[lys_experiment].dimensions.keys()) and var_obj.ndim == 2:
-                    v = f.groups[lys_experiment].create_variable(var_sim, ('x', 'y'), float)
+                elif var_sim not in list(f.groups[lys_experiment].dimensions.keys()) and ('x', 'y', 'Time', 'crops') == var_obj.dimensions:
+                    v = f.groups[lys_experiment].create_variable(var_sim, ('x', 'y', 'Time', 'crops'), float)
                     vals = onp.array(var_obj)
-                    v[:, :] = vals[idx_best, :]
+                    v[:, :, :, :] = vals[idx_best, :, :, :]
+                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                   units=var_obj.attrs["units"])
+                elif var_sim not in list(f.groups[lys_experiment].dimensions.keys()) and ('x', 'y') == var_obj.dimensions:
+                    v = f.groups[lys_experiment].create_variable(var_sim, ('x', 'y'), float)
+                    vals = onp.array(var_obj)[idx_best, :]
+                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                   units=var_obj.attrs["units"])
+                elif var_sim not in list(f.groups[lys_experiment].dimensions.keys()) and ('x', 'y', 'n_crop_types') == var_obj.dimensions:
+                    v = f.groups[lys_experiment].create_variable(var_sim, ('x', 'y', 'n_crop_types'), float)
+                    vals = onp.array(var_obj)
+                    v[:, :, :] = vals[idx_best, :, :]
                     v.attrs.update(long_name=var_obj.attrs["long_name"],
                                    units=var_obj.attrs["units"])
 
