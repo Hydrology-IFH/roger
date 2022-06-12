@@ -697,7 +697,7 @@ for tm_structure in tm_structures:
     forcing_path = model._input_dir / "forcing_tracer.nc"
     if not os.path.exists(forcing_path):
         write_forcing_tracer(input_path, 'd18O')
-        rs.mpi_comm.barrier()
+        # rs.mpi_comm.barrier()
     model.setup()
     model.warmup()
     model.run()
