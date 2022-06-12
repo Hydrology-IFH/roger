@@ -1,11 +1,10 @@
 #!/bin/bash
 #
 #SBATCH --partition=single
-#SBATCH --job-name=roger_rietholzbach
+#SBATCH --job-name=transport_mc
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=40
+#SBATCH --ntasks=40
 #SBATCH --mem-per-cpu=2000mb
-#SBATCH --exclusive
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL

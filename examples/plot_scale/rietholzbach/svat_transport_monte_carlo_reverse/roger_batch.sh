@@ -1,14 +1,13 @@
 #!/bin/bash
 #
 #SBATCH --partition=single
-#SBATCH --job-name=roger_rietholzbach
+#SBATCH --job-name=transport_mc_rev
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=40
-#SBATCH --exclusive
+#SBATCH --ntasks=40
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL
-#SBATCH --time=4:00:00
+#SBATCH --time=12:00:00
 
 # load module dependencies
 module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1
