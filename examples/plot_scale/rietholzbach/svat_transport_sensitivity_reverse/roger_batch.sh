@@ -3,7 +3,7 @@
 #SBATCH --partition=single
 #SBATCH --job-name=transport_sa_rev
 #SBATCH --nodes=1
-#SBATCH --ntasks=64
+#SBATCH --ntasks=32
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL
