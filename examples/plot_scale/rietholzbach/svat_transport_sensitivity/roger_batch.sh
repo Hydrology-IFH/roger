@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-#SBATCH --partition=single
+#SBATCH --partition=multiple
 #SBATCH --job-name=transport_sa
-#SBATCH --nodes=1
-#SBATCH --ntasks=32
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=32
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL
