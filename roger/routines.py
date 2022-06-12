@@ -443,7 +443,6 @@ class rogerSync:
         # with MPI support
         elif runtime_state.proc_num > 1:
             # run function on a single process
-            distributed.barrier()
             if runtime_state.proc_rank != 0:
                 def function():
                     pass
@@ -452,6 +451,7 @@ class rogerSync:
                 runtime_settings.mpi_comm.Send(buffer, dest=0, tag=10)
             # let other processes wait
             elif runtime_state.proc_rank == 0:
+                distributed.barrier()
                 for proc in range(1, runtime_state.proc_num):
                     buffer = onp.ascontiguousarray(onp.empty((1000,), dtype=float))
                     runtime_settings.mpi_comm.Recv(buffer, source=proc, tag=11)
