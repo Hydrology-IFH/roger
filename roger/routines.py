@@ -448,7 +448,7 @@ class rogerSync:
                     pass
                 out = function()
                 buffer = onp.ascontiguousarray(onp.empty((1000,), dtype=float))
-                runtime_settings.mpi_comm.ISend(buffer, dest=0, tag=10)
+                runtime_settings.mpi_comm.Isend(buffer, dest=0, tag=10)
             # let other processes wait
             elif runtime_state.proc_rank == 0:
                 for proc in range(1, runtime_state.proc_num):
