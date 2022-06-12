@@ -3,7 +3,7 @@
 #SBATCH --partition=single
 #SBATCH --job-name=roger_rietholzbach
 #SBATCH --nodes=1
-#SBATCH --ntasks=40
+#SBATCH --ntasks=64
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL
