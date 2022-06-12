@@ -454,7 +454,6 @@ class rogerSync:
                 for proc in range(1, runtime_state.proc_num):
                     buffer = onp.ascontiguousarray(onp.empty((1000,), dtype=float))
                     runtime_settings.mpi_comm.Recv(buffer, source=proc, tag=11)
-                distributed.barrier()
                 out = self.function(*args, **kwargs)
 
         return out
