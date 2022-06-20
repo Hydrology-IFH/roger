@@ -21,6 +21,7 @@ class SVATTRANSPORTSetup(RogerSetup):
     """
     _base_path = Path(__file__).parent
     _tm_structure = None
+    _identifier = None
     _input_dir = None
     _nsamples = 1
 
@@ -53,13 +54,16 @@ class SVATTRANSPORTSetup(RogerSetup):
     def _set_tm_structure(self, tm_structure):
         self._tm_structure = tm_structure
 
+    def _set_identifier(self, identifier):
+        self._identifier = identifier
+
     def _set_nsamples(self, nsamples):
         self._nsamples = nsamples
 
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
-        settings.identifier = "SVATTRANSPORT"
+        settings.identifier = self._identifier
 
         settings.nx, settings.ny, settings.nz = self._nsamples, 1, 1
         settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
@@ -692,6 +696,8 @@ for tm_structure in tm_structures:
         if rs.mpi_comm:
             model._set_nsamples(rst.proc_num)
     model._set_tm_structure(tm_structure)
+    identifier = f'SVATTRANSPORT_{tms}'
+    model._set_identifier(identifier)
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)
     forcing_path = model._input_dir / "forcing_tracer.nc"
@@ -749,10 +755,16 @@ for tm_structure in tm_structures:
                         v[:] = npx.arange(0, dict_dim["n_sas_params"])
                     for var_sim in list(df.variables.keys()):
                         var_obj = df.variables.get(var_sim)
-                        if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions:
+                        if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
                             v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time'), float)
                             vals = npx.array(var_obj)
                             v[:, :, :] = vals.swapaxes(0, 2)
+                            v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                           units=var_obj.attrs["units"])
+                        elif var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
+                            v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y'), float)
+                            vals = npx.array(var_obj)
+                            v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:

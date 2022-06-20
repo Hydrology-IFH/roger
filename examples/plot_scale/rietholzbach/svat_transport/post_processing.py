@@ -284,7 +284,7 @@ df_prec.loc[:, 'Prec'] = ds_sim_hm['rain_top'].isel(x=0, y=0).values + ds_sim_hm
 df_ttop = pd.DataFrame(index=date_obs, columns=['tTop'])
 df_ttop.loc[:, 'tTop'] = ds_obs['TA'].isel(x=0, y=0).values
 df_hcrita = pd.DataFrame(index=date_obs, columns=['hCritA'])
-df_hcrita.loc[:, 'hCritA'] = 0
+df_hcrita.loc[:, 'hCritA'] = 100000
 df_ampl = pd.DataFrame(index=date_obs, columns=['Ampl'])
 df_ampl.loc[:, 'Ampl'] = 0
 df_tatm = pd.DataFrame(index=date_obs, columns=['tAtm'])
@@ -296,7 +296,7 @@ df = pd.DataFrame(index=date_obs)
 df = df.join([df_tatm, df_prec, df_rsoil, df_rroot, df_hcrita, df_ttop, df_ampl, df_ctop])
 
 file = base_path / "results" / "atmosphere_daily_18O.csv"
-df.to_csv(file, header=True, index=False, sep=",")
+df.to_csv(file, header=True, index=False, sep=";")
 
 onp.nansum(ds_obs['PREC'].isel(x=0, y=0).values)
 onp.sum(ds_sim_hm['prec'].isel(x=0, y=0).values)

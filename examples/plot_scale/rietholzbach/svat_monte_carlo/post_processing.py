@@ -58,7 +58,7 @@ with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
                 v[:] = onp.array(var_obj)
             for var_sim in list(df.variables.keys()):
                 var_obj = df.variables.get(var_sim)
-                if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] > 1:
+                if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] > 2:
                     v = f.create_variable(var_sim, ('x', 'y', 'Time'), float)
                     vals = onp.array(var_obj)
                     v[:, :, :] = vals.swapaxes(0, 2)
