@@ -25,6 +25,7 @@ class SVATTRANSPORTSetup(RogerSetup):
     _params = None
     _nrows = None
     _tm_structure = None
+    _identifier = None
     _input_dir = None
 
     def _set_input_dir(self, path):
@@ -61,6 +62,9 @@ class SVATTRANSPORTSetup(RogerSetup):
 
     def _set_tm_structure(self, tm_structure):
         self._tm_structure = tm_structure
+
+    def _set_identifier(self, identifier):
+        self._identifier = identifier
 
     def _make_params(self, nsamples):
         if self._tm_structure == "preferential":
@@ -131,7 +135,7 @@ class SVATTRANSPORTSetup(RogerSetup):
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
-        settings.identifier = "SVATTRANSPORT"
+        settings.identifier = self._identifier
 
         settings.nx, settings.ny, settings.nz = self._nrows, 1, 1
         settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
@@ -757,6 +761,8 @@ for tm_structure in tm_structures:
     tms = tm_structure.replace(" ", "_")
     model = SVATTRANSPORTSetup()
     model._set_tm_structure(tm_structure)
+    model._set_tm_structure(tm_structure)
+    identifier = f'SVATTRANSPORT_{tms}'
     model._make_params(nsamples)
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)

@@ -19,5 +19,7 @@ mpirun --bind-to core --map-by core -report-bindings python svat_transport.py
 # sinfo_t_idle
 
 # execute the script
-# chmod +x roger_batch.sh
+# conda activate roger-mpi
+# cd ~/roger/examples/plot_scale/rietholzbach/svat_transport_sensitivity
 # sbatch ./roger_batch.sh
+# chmod +x roger_batch.sh
