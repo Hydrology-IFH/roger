@@ -4,7 +4,7 @@
 #SBATCH --job-name=transport_sa
 #SBATCH --nodes=1
 #SBATCH --ntasks=32
-#SBATCH --mem-per-cpu=4000mb 
+#SBATCH --mem=180000mb
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL
