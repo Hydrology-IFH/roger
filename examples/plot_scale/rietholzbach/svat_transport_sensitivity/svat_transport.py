@@ -761,8 +761,8 @@ for tm_structure in tm_structures:
     tms = tm_structure.replace(" ", "_")
     model = SVATTRANSPORTSetup()
     model._set_tm_structure(tm_structure)
-    model._set_tm_structure(tm_structure)
     identifier = f'SVATTRANSPORT_{tms}'
+    model._set_identifier(identifier)
     model._make_params(nsamples)
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)
