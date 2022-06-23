@@ -212,9 +212,26 @@ class ONEDSetup(RogerSetup):
     def set_diagnostics(self, state):
         diagnostics = state.diagnostics
 
-        diagnostics["rates"].output_variables = ["aet", "transp", "evap_soil", "inf_mat", "inf_mp", "inf_sc", "q_ss", "q_sub", "q_sub_mp", "q_sub_mat", "q_hof", "q_sof"]
+        diagnostics["rates"].output_variables = ["aet", "pet", "transp",
+                                                 "evap_soil", "inf_mat",
+                                                 "inf_mp", "inf_sc", "q_ss",
+                                                 "q_sub", "q_sub_mp",
+                                                 "q_sub_mat", "q_hof", "q_sof",
+                                                 "prec", "rain", "snow",
+                                                 "int_prec", "int_rain_top",
+                                                 "int_rain_ground", "int_snow_top",
+                                                 "int_snow_ground", "q_snow",
+                                                 "evap_int"]
         diagnostics["rates"].output_frequency = 24 * 60 * 60
         diagnostics["rates"].sampling_frequency = 1
+
+        diagnostics["collect"].output_variables = ["theta", "S_s"]
+        diagnostics["collect"].output_frequency = 24 * 60 * 60
+        diagnostics["collect"].sampling_frequency = 1
+
+        diagnostics["maximum"].output_variables = ["z_sat", "z0"]
+        diagnostics["maximum"].output_frequency = 24 * 60 * 60
+        diagnostics["maximum"].sampling_frequency = 1
 
     @roger_routine
     def after_timestep(self, state):
@@ -617,10 +634,16 @@ for meteo_station in meteo_stations:
             references='',
             comment='1D model with free drainage'
         )
+        # collect dimensions
         for dfs in diag_files:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
-                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y'])}
+                if not dfs.split('/')[-1].split('.')[1] == 'constant' and 'Time' not in list(dict_dim.keys()):
+                    dict_dim['Time'] = len(df.variables['Time'])
+                    time = onp.array(df.variables.get('Time'))
+        for dfs in diag_files:
+            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 if not f.groups[meteo_station].dimensions:
                     f.groups[meteo_station].dimensions = dict_dim
                     v = f.groups[meteo_station].create_variable('x', ('x',), float)
@@ -634,8 +657,8 @@ for meteo_station in meteo_stations:
                     v = f.groups[meteo_station].create_variable('Time', ('Time',), float)
                     var_obj = df.variables.get('Time')
                     v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                                    units=var_obj.attrs["units"])
-                    v[:] = onp.array(var_obj)
+                                   units=var_obj.attrs["units"])
+                    v[:] = time
                 for key in list(df.variables.keys()):
                     var_obj = df.variables.get(key)
                     if key not in list(dict_dim.keys()) and var_obj.ndim == 3:
@@ -644,3 +667,50 @@ for meteo_station in meteo_stations:
                         v[:, :, :] = vals.swapaxes(0, 2)
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                         units=var_obj.attrs["units"])
+
+with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
+    for meteo_station in meteo_stations:
+        # water for infiltration
+        try:
+            v = f.groups[meteo_station].create_variable('inf_in', ('x', 'y', 'Time'), float)
+        except ValueError:
+            v = f.groups[meteo_station].variables.get('inf_in')
+        vals = onp.array(f.groups[meteo_station].variables.get('prec')) - onp.array(f.groups[meteo_station].variables.get('int_rain_top')) - onp.array(f.groups[meteo_station].variables.get('int_rain_ground')) - onp.array(f.groups[meteo_station].variables.get('int_snow_top')) - onp.array(f.groups[meteo_station].variables.get('int_snow_ground')) + onp.array(f.groups[meteo_station].variables.get('q_snow'))
+        v[:, :, :] = vals
+        v.attrs.update(long_name='infiltration input',
+                       units='mm/day')
+
+        # initial soil water content
+        try:
+            v = f.groups[meteo_station].create_variable('theta_init', ('x', 'y'), float)
+        except ValueError:
+            v = f.groups[meteo_station].variables.get('theta_init')
+        vals = onp.array(f.groups[meteo_station].variables.get('theta'))
+        v[:, :] = vals[:, :, 0]
+        v.attrs.update(long_name='initial soil water content',
+                       units='-')
+        try:
+            v = f.groups[meteo_station].create_variable('S_s_init', ('x', 'y'), float)
+        except ValueError:
+            v = f.groups[meteo_station].variables.get('S_s_init')
+        vals = onp.array(f.groups[meteo_station].variables.get('S_s'))
+        v[:, :] = vals[:, :, 0]
+        v.attrs.update(long_name='initial soil water content',
+                       units='mm')
+        # end soil water content
+        try:
+            v = f.groups[meteo_station].create_variable('theta_end', ('x', 'y'), float)
+        except ValueError:
+            v = f.groups[meteo_station].variables.get('theta_end')
+        vals = onp.array(f.groups[meteo_station].variables.get('theta'))
+        v[:, :] = vals[:, :, -1]
+        v.attrs.update(long_name='end soil water content',
+                       units='-')
+        try:
+            v = f.groups[meteo_station].create_variable('S_s_end', ('x', 'y'), float)
+        except ValueError:
+            v = f.groups[meteo_station].variables.get('S_s_end')
+        vals = onp.array(f.groups[meteo_station].variables.get('S_s'))
+        v[:, :] = vals[:, :, -1]
+        v.attrs.update(long_name='end soil water content',
+                       units='mm')

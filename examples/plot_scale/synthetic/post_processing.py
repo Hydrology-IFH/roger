@@ -19,8 +19,10 @@ if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
 meteo_stations = ["breitnau", "ihringen"]
-vars_sim = ['aet', 'evap_soil', 'transp', 'inf_mat', 'inf_mp', 'inf_sc', 'q_hof',
-            'q_sof', 'q_sub', 'q_sub_mat', 'q_sub_mp', 'q_ss']
+vars_sim = ['prec', 'int_prec', 'q_snow', 'inf_in', 'inf_mat', 'inf_mp', 'inf_sc',
+            'q_hof', 'q_sof', 'q_sub', 'q_sub_mat', 'q_sub_mp', 'q_ss',
+            'pet', 'aet', 'evap_int', 'evap_soil', 'transp']
+idx_percentiles = ['min', 'q25', 'median', 'mean', 'q75', 'max']
 ll_df_sim_sum = []
 ll_df_sim_sum_tot = []
 for i, meteo_station in enumerate(meteo_stations):
@@ -38,6 +40,17 @@ for i, meteo_station in enumerate(meteo_stations):
     df = pd.DataFrame(index=range(nx))
     for var_sim in vars_sim:
         df.loc[:, var_sim] = ds_sim_sum[var_sim].values.flatten()
+
+    df_percentiles = pd.DataFrame(index=idx_percentiles, columns=vars_sim)
+    for var_sim in vars_sim:
+        df_percentiles.loc["min", var_sim] = df.loc[:, var_sim].min()
+        df_percentiles.loc["q25", var_sim] = df.loc[:, var_sim].quantile(0.25)
+        df_percentiles.loc["median", var_sim] = df.loc[:, var_sim].median()
+        df_percentiles.loc["mean", var_sim] = df.loc[:, var_sim].mean()
+        df_percentiles.loc["q75", var_sim] = df.loc[:, var_sim].quantile(0.75)
+        df_percentiles.loc["max", var_sim] = df.loc[:, var_sim].max()
+    file = base_path_results / f"percentiles_{meteo_station}.csv"
+    df_percentiles.to_csv(file, header=True, index=True, sep=";")
 
     file = base_path_results / f"summary_{meteo_station}.txt"
     df.to_csv(file, header=True, index=False, sep="\t")
@@ -87,14 +100,14 @@ file = base_path_figs / "sums_per_grid_box.png"
 ax.savefig(file, dpi=250)
 
 #TODO: compare differences
-for i, meteo_station in enumerate(meteo_stations):
-    fig, ax = plt.subplots(3, 4, sharey=False, figsize=(16, 8))
-    data = df_sim_sum.loc[df_sim_sum['meteo_station'] == meteo_station, :]
-    for j, var_sim in enumerate(vars_sim):
-        data1 = data.loc[data['variable'] == var_sim, :]
-        ax.flatten()[j].bar(data1['idx'], data1['value'], color='black', edgecolor='black', width=1, align="edge")
-        ax.flatten()[j].set_xlabel('')
-        ax.flatten()[j].set_ylabel(labs._Y_LABS_CUM[var_sim])
-    fig.tight_layout()
-    file = base_path_figs / f"sums_per_grid_{meteo_station}.png"
-    fig.savefig(file, dpi=250)
+# for i, meteo_station in enumerate(meteo_stations):
+#     fig, ax = plt.subplots(3, 4, sharey=False, figsize=(16, 8))
+#     data = df_sim_sum.loc[df_sim_sum['meteo_station'] == meteo_station, :]
+#     for j, var_sim in enumerate(vars_sim):
+#         data1 = data.loc[data['variable'] == var_sim, :]
+#         ax.flatten()[j].bar(data1['idx'], data1['value'], color='black', edgecolor='black', width=1, align="edge")
+#         ax.flatten()[j].set_xlabel('')
+#         ax.flatten()[j].set_ylabel(labs._Y_LABS_CUM[var_sim])
+#     fig.tight_layout()
+#     file = base_path_figs / f"sums_per_grid_{meteo_station}.png"
+#     fig.savefig(file, dpi=250)

@@ -182,9 +182,13 @@ class DISTEVENTSetup(RogerSetup):
     def set_diagnostics(self, state):
         diagnostics = state.diagnostics
 
-        diagnostics["rates"].output_variables = ["inf_mat", "inf_mp", "inf_sc", "q_ss", "q_sub", "q_sub_mp", "q_sub_mat", "q_hof", "q_sof"]
+        diagnostics["rates"].output_variables = ["prec", "inf_mat", "inf_mp", "inf_sc", "q_ss", "q_sub", "q_sub_mp", "q_sub_mat", "q_hof", "q_sof", "int_rain_top", "int_rain_ground", "int_prec"]
         diagnostics["rates"].output_frequency = 10 * 60
         diagnostics["rates"].sampling_frequency = 1
+
+        diagnostics["collect"].output_variables = ["theta", "z_sat", "z0", "S_s"]
+        diagnostics["collect"].output_frequency = 10 * 60
+        diagnostics["collect"].sampling_frequency = 1
 
     @roger_routine
     def after_timestep(self, state):
@@ -393,10 +397,16 @@ for rainfall_scenario in rainfall_scenarios:
         )
         if rainfall_scenario not in list(f.groups.keys()):
             f.create_group(rainfall_scenario)
+        # collect dimensions
         for dfs in diag_files:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
-                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y'])}
+                if not dfs.split('/')[-1].split('.')[1] == 'constant' and 'Time' not in list(dict_dim.keys()):
+                    dict_dim['Time'] = len(df.variables['Time'])
+                    time = onp.array(df.variables.get('Time'))
+        for dfs in diag_files:
+            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 if not f.groups[rainfall_scenario].dimensions:
                     f.groups[rainfall_scenario].dimensions = dict_dim
                     v = f.groups[rainfall_scenario].create_variable('x', ('x',), float)
@@ -409,8 +419,9 @@ for rainfall_scenario in rainfall_scenarios:
                     v[:] = onp.arange(dict_dim["y"])
                     v = f.groups[rainfall_scenario].create_variable('Time', ('Time',), float)
                     var_obj = df.variables.get('Time')
-                    v.attrs.update(units="hours")
-                    v[:] = onp.array(var_obj)
+                    v.attrs.update(time_origin=var_obj.attrs["time_origin"],
+                                   units=var_obj.attrs["units"])
+                    v[:] = time
                 for key in list(df.variables.keys()):
                     var_obj = df.variables.get(key)
                     if key not in list(dict_dim.keys()) and var_obj.ndim == 3:
@@ -418,4 +429,50 @@ for rainfall_scenario in rainfall_scenarios:
                         vals = onp.array(var_obj)
                         v[:, :, :] = vals.swapaxes(0, 2)
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                        units=var_obj.attrs["units"])
+                                       units=var_obj.attrs["units"])
+
+with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
+    for rainfall_scenario in rainfall_scenarios:
+        # water for infiltration
+        try:
+            v = f.groups[rainfall_scenario].create_variable('inf_in', ('x', 'y', 'Time'), float)
+        except ValueError:
+            v = f.groups[rainfall_scenario].variables.get('inf_in')
+        vals = onp.array(f.groups[rainfall_scenario].variables.get('prec')) - onp.array(f.groups[rainfall_scenario].variables.get('int_rain_top')) - onp.array(f.groups[rainfall_scenario].variables.get('int_rain_ground'))
+        v[:, :, :] = vals
+        v.attrs.update(long_name='infiltration input',
+                       units='mm/dt')
+        # initial soil water content
+        try:
+            v = f.groups[rainfall_scenario].create_variable('theta_init', ('x', 'y'), float)
+        except ValueError:
+            v = f.groups[rainfall_scenario].variables.get('theta_init')
+        vals = onp.array(f.groups[rainfall_scenario].variables.get('theta'))
+        v[:, :] = vals[:, :, 0]
+        v.attrs.update(long_name='initial soil water content',
+                       units='-')
+        try:
+            v = f.groups[rainfall_scenario].create_variable('S_s_init', ('x', 'y'), float)
+        except ValueError:
+            v = f.groups[rainfall_scenario].variables.get('S_s_init')
+        vals = onp.array(f.groups[rainfall_scenario].variables.get('S_s'))
+        v[:, :] = vals[:, :, 0]
+        v.attrs.update(long_name='initial soil water content',
+                       units='mm')
+        # end soil water content
+        try:
+            v = f.groups[rainfall_scenario].create_variable('theta_end', ('x', 'y'), float)
+        except ValueError:
+            v = f.groups[rainfall_scenario].variables.get('theta_end')
+        vals = onp.array(f.groups[rainfall_scenario].variables.get('theta'))
+        v[:, :] = vals[:, :, -1]
+        v.attrs.update(long_name='end soil water content',
+                       units='-')
+        try:
+            v = f.groups[rainfall_scenario].create_variable('S_s_end', ('x', 'y'), float)
+        except ValueError:
+            v = f.groups[rainfall_scenario].variables.get('S_s_end')
+        vals = onp.array(f.groups[rainfall_scenario].variables.get('S_s'))
+        v[:, :] = vals[:, :, -1]
+        v.attrs.update(long_name='end soil water content',
+                       units='mm')

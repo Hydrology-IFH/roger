@@ -26,10 +26,16 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
         references='',
         comment='SVAT model with free drainage'
     )
+    # collect dimensions
     for dfs in diag_files:
         with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
             # set dimensions with a dictionary
-            dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+            dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y'])}
+            if not dfs.split('/')[-1].split('.')[1] == 'constant' and 'Time' not in list(dict_dim.keys()):
+                dict_dim['Time'] = len(df.variables['Time'])
+                time = onp.array(df.variables.get('Time'))
+    for dfs in diag_files:
+        with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
             if not f.dimensions:
                 f.dimensions = dict_dim
                 v = f.create_variable('x', ('x',), float)
@@ -44,7 +50,7 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
                 var_obj = df.variables.get('Time')
                 v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                 units=var_obj.attrs["units"])
-                v[:] = onp.array(var_obj)
+                v[:] = time
             for var_sim in list(df.variables.keys()):
                 var_obj = df.variables.get(var_sim)
                 if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] > 1:

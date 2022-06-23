@@ -728,10 +728,16 @@ for lys_experiment in lys_experiments:
             references='',
             comment='SVAT model with free drainage and crop phenology/crop rotation'
         )
+        # collect dimensions
         for dfs in diag_files:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
-                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y'])}
+                if not dfs.split('/')[-1].split('.')[1] == 'constant' and 'Time' not in list(dict_dim.keys()):
+                    dict_dim['Time'] = len(df.variables['Time'])
+                    time = onp.array(df.variables.get('Time'))
+        for dfs in diag_files:
+            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 if not f.groups[lys_experiment].dimensions:
                     f.groups[lys_experiment].dimensions = dict_dim
                     v = f.groups[lys_experiment].create_variable('x', ('x',), float)
@@ -744,11 +750,9 @@ for lys_experiment in lys_experiments:
                     v[:] = npx.arange(dict_dim["y"])
                     v = f.groups[lys_experiment].create_variable('Time', ('Time',), float)
                     var_obj = df.variables.get('Time')
-                    with h5netcdf.File(model._input_dir / 'forcing.nc', "r", decode_vlen_strings=False) as infile:
-                        time_origin = infile.variables['Time'].attrs['time_origin']
-                    v.attrs.update(time_origin=time_origin,
+                    v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                    units=var_obj.attrs["units"])
-                    v[:] = npx.array(var_obj)
+                    v[:] = time
                 for key in list(df.variables.keys()):
                     var_obj = df.variables.get(key)
                     if key not in list(f.dimensions.keys()) and var_obj.ndim == 3:

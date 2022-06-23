@@ -433,7 +433,6 @@ VARIABLES = {
         "mm",
         "depth of the surface ponding",
         write_to_restart=True,
-        mask=_get_z0_mask,
     ),
     "dz0": Variable(
         "tendency of depth of the surface ponding",
@@ -2493,6 +2492,27 @@ VARIABLES = {
         "snowfall",
     ),
     # interception variables
+    "int_top": Variable(
+        "precipitation interception",
+        CATCH_GRID,
+        "mm/dt",
+        "rainfall interception",
+        time_dependent=True,
+    ),
+    "int_ground": Variable(
+        "precipitation interception",
+        CATCH_GRID,
+        "mm/dt",
+        "rainfall interception",
+        time_dependent=True,
+    ),
+    "int_prec": Variable(
+        "precipitation interception",
+        CATCH_GRID,
+        "mm/dt",
+        "rainfall interception",
+        time_dependent=True,
+    ),
     "int_rain_top": Variable(
         "rainfall interception",
         CATCH_GRID,

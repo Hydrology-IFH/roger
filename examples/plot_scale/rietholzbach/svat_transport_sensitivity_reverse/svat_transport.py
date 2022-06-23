@@ -637,15 +637,21 @@ for tm_structure in tm_structures:
                 f.create_group(tm_structure)
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
-                title=f'RoGeR {tm_structure} transport model saltelli results (reverse) at Rietholzbach Lysimeter site',
+                title='RoGeR transport model saltelli results (reverse) at Rietholzbach Lysimeter site',
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
-                comment=f'SVAT {tm_structure} transport model with free drainage'
+                comment='SVAT transport model with free drainage'
             )
+            # collect dimensions
             for dfs in diag_files:
                 with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                     # set dimensions with a dictionary
-                    dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages'])}
+                    dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
+                    if not dfs.split('/')[-1].split('.')[1] == 'constant' and 'Time' not in list(dict_dim.keys()):
+                        dict_dim['Time'] = len(df.variables['Time'])
+                        time = onp.array(df.variables.get('Time'))
+            for dfs in diag_files:
+                with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                     if not f.groups[tm_structure].dimensions:
                         f.groups[tm_structure].dimensions = dict_dim
                         v = f.groups[tm_structure].create_variable('x', ('x',), float)
@@ -656,11 +662,6 @@ for tm_structure in tm_structures:
                         v.attrs['long_name'] = ''
                         v.attrs['units'] = ''
                         v[:] = npx.arange(dict_dim["y"])
-                        v = f.groups[tm_structure].create_variable('Time', ('Time',), float)
-                        var_obj = df.variables.get('Time')
-                        v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                                        units=var_obj.attrs["units"])
-                        v[:] = npx.array(var_obj)
                         v = f.groups[tm_structure].create_variable('ages', ('ages',), float)
                         v.attrs['long_name'] = 'Water ages'
                         v.attrs['units'] = 'days'
@@ -669,6 +670,11 @@ for tm_structure in tm_structures:
                         v.attrs['long_name'] = 'Water ages (cumulated)'
                         v.attrs['units'] = 'days'
                         v[:] = npx.arange(0, dict_dim["nages"])
+                        v = f.groups[tm_structure].create_variable('Time', ('Time',), float)
+                        var_obj = df.variables.get('Time')
+                        v.attrs.update(time_origin=var_obj.attrs["time_origin"],
+                                       units=var_obj.attrs["units"])
+                        v[:] = time
                     for var_sim in list(df.variables.keys()):
                         var_obj = df.variables.get(var_sim)
                         if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions:

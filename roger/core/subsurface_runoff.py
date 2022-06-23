@@ -187,10 +187,11 @@ def calc_q_sub_pot(state):
     vs = state.variables
     settings = state.settings
 
-    # potential matrix subsurface runoff (in mm/dt)
+    # calculate potential matrix subsurface runoff with darcy (in mm/dt)
+    # convert mm3 to mm (1e-6)
     vs.q_sub_mat_pot = update(
         vs.q_sub_mat_pot,
-        at[2:-2, 2:-2], ((vs.ks[2:-2, 2:-2] * vs.slope[2:-2, 2:-2] * vs.z_sat[2:-2, 2:-2, vs.tau] * vs.dt) * 1e-3) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], ((vs.ks[2:-2, 2:-2] * vs.slope[2:-2, 2:-2] * vs.z_sat[2:-2, 2:-2, vs.tau] * 1000 * vs.dt) * 1e-6) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # total potential macropore subsurface runoff (in mm/dt)

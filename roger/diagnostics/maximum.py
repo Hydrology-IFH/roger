@@ -53,14 +53,9 @@ class Maximum(RogerDiagnostic):
         for key in self.output_variables:
             var_data = getattr(max_vs, key)
             if self._has_timestep_dim(state, key):
-                setattr(max_vs, key, npx.concatenate((var_data, getattr(vs, key)[..., vs.tau]), axis=-1))
+                setattr(max_vs, key, npx.where(getattr(vs, key)[..., vs.tau] > var_data, getattr(vs, key)[..., vs.tau], var_data))
             else:
-                var_data = getattr(max_vs, key)
-                vs_data = getattr(vs, key)
-                if var_data.ndim == vs_data.ndim:
-                    setattr(max_vs, key, npx.stack((var_data, getattr(vs, key)), axis=-1))
-                elif var_data.ndim > vs_data.ndim:
-                    setattr(max_vs, key, npx.concatenate((var_data, getattr(vs, key)[..., npx.newaxis]), axis=-1))
+                setattr(max_vs, key, npx.where(getattr(vs, key) > var_data, getattr(vs, key), var_data))
 
     def output(self, state):
         """Write maximum to netcdf file and zero array"""
@@ -71,6 +66,6 @@ class Maximum(RogerDiagnostic):
 
         for key in self.output_variables:
             val = getattr(max_vs, key)
-            setattr(max_vs, key, npx.max(val, axis=-1))
+            setattr(max_vs, key, val)
 
         self.write_output(state)
