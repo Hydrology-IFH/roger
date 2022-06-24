@@ -1,7 +1,5 @@
 from pathlib import Path
-import glob
 import os
-import datetime
 import h5netcdf
 from SALib.sample import saltelli
 import numpy as onp
@@ -77,79 +75,228 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
         self._nsamples = nsamples
 
     def _sample_params(self, nsamples):
-        if self._tm_structure == "preferential":
+        if self._tm_structure == "complete-mixing":
             self._bounds = {
-                'num_vars': 3,
-                'names': ['b_transp', 'b_q_rz', 'b_q_ss', 'alpha_transp', 'alpha_q'],
+                'num_vars': 12,
+                'names': ['alpha_transp', 'alpha_q',
+                          'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                          'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                          'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
+                'bounds': [[0.01, 1.5],
+                           [0.01, 1.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0]]
+            }
+            self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
+            self._nrows = self._params.shape[0]
+
+        elif self._tm_structure == "piston":
+            self._bounds = {
+                'num_vars': 12,
+                'names': ['alpha_transp', 'alpha_q',
+                          'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                          'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                          'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
+                'bounds': [[0.01, 1.5],
+                           [0.01, 1.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0]]
+            }
+            self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
+            self._nrows = self._params.shape[0]
+
+        elif self._tm_structure == "preferential":
+            self._bounds = {
+                'num_vars': 15,
+                'names': ['b_transp', 'b_q_rz', 'b_q_ss', 'alpha_transp', 'alpha_q',
+                          'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                          'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                          'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
                 'bounds': [[1, 90],
                            [1, 90],
                            [1, 90],
                            [0.01, 1.5],
-                           [0.01, 1.0]]
+                           [0.01, 1.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0]]
             }
             self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
             self._nrows = self._params.shape[0]
 
         elif self._tm_structure == "advection-dispersion":
             self._bounds = {
-                'num_vars': 3,
-                'names': ['b_transp', 'a_q_rz', 'a_q_ss', 'alpha_transp', 'alpha_q'],
+                'num_vars': 15,
+                'names': ['b_transp', 'a_q_rz', 'a_q_ss', 'alpha_transp', 'alpha_q',
+                          'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                          'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                          'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
                 'bounds': [[1, 90],
                            [1, 90],
                            [1, 90],
                            [0.01, 1.5],
-                           [0.01, 1.0]]
+                           [0.01, 1.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0]]
             }
             self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
             self._nrows = self._params.shape[0]
 
         elif self._tm_structure == "complete-mixing + advection-dispersion":
             self._bounds = {
-                'num_vars': 2,
-                'names': ['a_q_rz', 'a_q_ss', 'alpha_transp', 'alpha_q'],
+                'num_vars': 14,
+                'names': ['a_q_rz', 'a_q_ss', 'alpha_transp', 'alpha_q',
+                          'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                          'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                          'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
                 'bounds': [[1, 90],
                            [1, 90],
                            [0.01, 1.5],
-                           [0.01, 1.0]]
+                           [0.01, 1.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0]]
+            }
+            self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
+            self._nrows = self._params.shape[0]
+
+        elif self._tm_structure == "time-variant complete-mixing + advection-dispersion":
+            self._bounds = {
+                'num_vars': 14,
+                'names': ['a_q_rz', 'a_q_ss', 'alpha_transp', 'alpha_q',
+                          'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                          'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                          'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
+                'bounds': [[1, 90],
+                           [1, 90],
+                           [0.01, 1.5],
+                           [0.01, 1.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0]]
             }
             self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
             self._nrows = self._params.shape[0]
 
         elif self._tm_structure == "time-variant preferential":
             self._bounds = {
-                'num_vars': 3,
-                'names': ['b_transp', 'b_q_rz', 'b_q_ss', 'alpha_transp', 'alpha_q'],
+                'num_vars': 15,
+                'names': ['b_transp', 'b_q_rz', 'b_q_ss', 'alpha_transp', 'alpha_q',
+                          'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                          'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                          'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
                 'bounds': [[1, 90],
                            [1, 90],
                            [1, 90],
                            [0.01, 1.5],
-                           [0.01, 1.0]]
+                           [0.01, 1.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0]]
             }
             self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
             self._nrows = self._params.shape[0]
 
         elif self._tm_structure == "time-variant advection-dispersion":
             self._bounds = {
-                'num_vars': 3,
-                'names': ['b_transp', 'a_q_rz', 'a_q_ss', 'alpha_transp', 'alpha_q'],
+                'num_vars': 15,
+                'names': ['b_transp', 'a_q_rz', 'a_q_ss', 'alpha_transp', 'alpha_q',
+                          'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                          'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                          'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
                 'bounds': [[1, 90],
                            [1, 90],
                            [1, 90],
                            [0.01, 1.5],
-                           [0.01, 1.0]]
+                           [0.01, 1.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0]]
             }
             self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
             self._nrows = self._params.shape[0]
 
         elif self._tm_structure == "time-variant":
             self._bounds = {
-                'num_vars': 3,
-                'names': ['ab_transp', 'ab_q_rz', 'ab_q_ss', 'alpha_transp', 'alpha_q'],
+                'num_vars': 15,
+                'names': ['ab_transp', 'ab_q_rz', 'ab_q_ss', 'alpha_transp', 'alpha_q',
+                          'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                          'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                          'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
                 'bounds': [[1, 90],
                            [1, 90],
                            [1, 90],
                            [0.01, 1.5],
-                           [0.01, 1.0]]
+                           [0.01, 1.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 20.0],
+                           [1.0, 20.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0],
+                           [1.0, 100.0]]
             }
             self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
             self._nrows = self._params.shape[0]
@@ -157,7 +304,7 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
-        settings.identifier = "SVATCROPTRANSPORT"
+        settings.identifier = self._identifier
 
         settings.nx, settings.ny, settings.nz = 1, 1, 1
         settings.nitt = self._get_nitt(self._base_path, 'forcing_tracer.nc')
@@ -268,18 +415,18 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
         vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], vs.S_SAT_RZ[2:-2, 2:-2, 0])
         vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], vs.S_SAT_SS[2:-2, 2:-2, 0])
 
-        vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], random_uniform(0.01, 1.5, tuple((vs.alpha_transp.shape[0], vs.alpha_transp.shape[1])))[2:-2, 2:-2])
-        vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], random_uniform(0.01, 1.0, tuple((vs.alpha_q.shape[0], vs.alpha_q.shape[1])))[2:-2, 2:-2])
-        vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], random_uniform(1.0, 20.0, tuple((vs.km_denit_rz.shape[0], vs.km_denit_rz.shape[1])))[2:-2, 2:-2])
-        vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], random_uniform(1.0, 20.0, tuple((vs.km_denit_ss.shape[0], vs.km_denit_ss.shape[1])))[2:-2, 2:-2])
-        vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], random_uniform(1.0, 100.0, tuple((vs.dmax_denit_rz.shape[0], vs.dmax_denit_rz.shape[1])))[2:-2, 2:-2])
-        vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], random_uniform(1.0, 100.0, tuple((vs.dmax_denit_ss.shape[0], vs.dmax_denit_ss.shape[1])))[2:-2, 2:-2])
-        vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], random_uniform(1.0, 20.0, tuple((vs.km_nit_rz.shape[0], vs.km_nit_rz.shape[1])))[2:-2, 2:-2])
-        vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], random_uniform(1.0, 20.0, tuple((vs.km_nit_ss.shape[0], vs.km_nit_ss.shape[1])))[2:-2, 2:-2])
-        vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], random_uniform(1.0, 100.0, tuple((vs.dmax_nit_rz.shape[0], vs.dmax_nit_rz.shape[1])))[2:-2, 2:-2])
-        vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], random_uniform(1.0, 100.0, tuple((vs.dmax_nit_ss.shape[0], vs.dmax_nit_ss.shape[1])))[2:-2, 2:-2])
-        vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], random_uniform(1.0, 100.0, tuple((vs.kmin_rz.shape[0], vs.kmin_rz.shape[1])))[2:-2, 2:-2])
-        vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], random_uniform(1.0, 100.0, tuple((vs.kmin_ss.shape[0], vs.kmin_ss.shape[1])))[2:-2, 2:-2])
+        vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], self._params[:, -12, npx.newaxis])
+        vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], self._params[:, -11, npx.newaxis])
+        vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._params[:, -10, npx.newaxis])
+        vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], self._params[:, -9, npx.newaxis])
+        vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], self._params[:, -8, npx.newaxis])
+        vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], self._params[:, -7, npx.newaxis])
+        vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], self._params[:, -6, npx.newaxis])
+        vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], self._params[:, -5, npx.newaxis])
+        vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], self._params[:, -4, npx.newaxis])
+        vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], self._params[:, -3, npx.newaxis])
+        vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], self._params[:, -2, npx.newaxis])
+        vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], self._params[:, -1, npx.newaxis])
 
         if settings.tm_structure == "complete-mixing":
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 1)
@@ -302,13 +449,13 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], 30)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], self._params[:, 0, npx.newaxis])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 1)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 3)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], self._params[:, 1, npx.newaxis])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 1)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 2)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], self._params[:, 2, npx.newaxis])
             vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
         elif settings.tm_structure == "advection-dispersion":
@@ -316,12 +463,12 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], 30)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], self._params[:, 0, npx.newaxis])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 2)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._params[:, 1, npx.newaxis])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 3)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._params[:, 2, npx.newaxis])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1)
             vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
@@ -330,11 +477,27 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 2)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._params[:, 0, npx.newaxis])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 3)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._params[:, 1, npx.newaxis])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1)
+            vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
+            vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
+        elif settings.tm_structure == "time-variant complete-mixing + advection-dispersion":
+            vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
+            vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 32)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._params[:, 0, npx.newaxis])
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 32)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._params[:, 1, npx.newaxis])
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
             vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
         elif settings.tm_structure == "time-variant advection-dispersion":
@@ -342,17 +505,17 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 31)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 1)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 30)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], self._params[:, 0, npx.newaxis])
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 32)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 2)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._params[:, 1, npx.newaxis])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 32)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 3)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._params[:, 2, npx.newaxis])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
             vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
@@ -362,17 +525,17 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 31)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 1)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 30)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], self._params[:, 0, npx.newaxis])
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 31)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 3)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._params[:, 1, npx.newaxis])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 31)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 2)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._params[:, 2, npx.newaxis])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
             vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
@@ -382,17 +545,17 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 35)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 1)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 30)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], self._params[:, 0, npx.newaxis])
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 35)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 3)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._params[:, 1, npx.newaxis])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 35)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 2)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._params[:, 2, npx.newaxis])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
             vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
@@ -837,7 +1000,7 @@ for lys_experiment in lys_experiments:
         model = SVATCROPTRANSPORTSetup()
         model._set_nsamples(nsamples)
         model._set_tm_structure(tm_structure)
-        identifier = f'SVATCROPTRANSPORT_{tms}_{lys_experiment}'
+        identifier = f'SVATCROPTRANSPORT_{tms}_{lys_experiment}_nitrate'
         model._set_identifier(identifier)
         model._sample_params(nsamples)
         input_path = model._base_path / "input" / lys_experiment
@@ -848,91 +1011,3 @@ for lys_experiment in lys_experiments:
         model.setup()
         model.warmup()
         model.run()
-
-        # merge model output into single file
-        path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
-        diag_files = glob.glob(path)
-        states_tm_file = model._base_path / "states_tm_monte_carlo_nitrate.nc"
-        states_hm_file = model._base_path / "states_hm.nc"
-        with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
-            if lys_experiment not in list(f.groups.keys()):
-                f.create_group(lys_experiment)
-            if tm_structure not in list(f.groups[lys_experiment].groups.keys()):
-                f.groups[lys_experiment].create_group(tm_structure)
-            f.attrs.update(
-                date_created=datetime.datetime.today().isoformat(),
-                title='RoGeR nitrate transport model results at Reckenholz Lysimeter site',
-                institution='University of Freiburg, Chair of Hydrology',
-                references='',
-                comment='SVAT transport model with free drainage and crop phenology/crop rotation'
-            )
-            # collect dimensions
-            for dfs in diag_files:
-                with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                    # set dimensions with a dictionary
-                    if not dfs.split('/')[-1].split('.')[1] == 'constant':
-                        dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
-                        time = onp.array(df.variables.get('Time'))
-            for dfs in diag_files:
-                with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                    # set dimensions with a dictionary
-                    if not f.groups[lys_experiment].groups[tm_structure].dimensions:
-                        f.groups[lys_experiment].groups[tm_structure].dimensions = dict_dim
-                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('x', ('x',), float)
-                        v.attrs['long_name'] = 'model run'
-                        v.attrs['units'] = ''
-                        v[:] = npx.arange(dict_dim["x"])
-                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('y', ('y',), float)
-                        v.attrs['long_name'] = ''
-                        v.attrs['units'] = ''
-                        v[:] = npx.arange(dict_dim["y"])
-                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('Time', ('Time',), float)
-                        var_obj = df.variables.get('Time')
-                        v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                                       units=var_obj.attrs["units"])
-                        v[:] = time
-                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('ages', ('ages',), float)
-                        v.attrs['long_name'] = 'Water ages'
-                        v.attrs['units'] = 'days'
-                        v[:] = npx.arange(1, dict_dim["ages"]+1)
-                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('nages', ('nages',), float)
-                        v.attrs['long_name'] = 'Water ages (cumulated)'
-                        v.attrs['units'] = 'days'
-                        v[:] = npx.arange(0, dict_dim["nages"])
-                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('n_sas_params', ('n_sas_params',), float)
-                        v.attrs['long_name'] = 'Number of SAS parameters'
-                        v.attrs['units'] = ''
-                    for var_sim in list(df.variables.keys()):
-                        var_obj = df.variables.get(var_sim)
-                        if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
-                            v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time'), float)
-                            vals = npx.array(var_obj)
-                            v[:, :, :] = vals.swapaxes(0, 2)
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
-                        elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
-                            v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
-                            vals = npx.array(var_obj)
-                            vals = vals.swapaxes(0, 3)
-                            vals = vals.swapaxes(1, 2)
-                            v[:, :, :] = vals[:, :, :, 0]
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
-                        elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
-                            v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
-                            vals = npx.array(var_obj)
-                            vals = vals.swapaxes(0, 3)
-                            vals = vals.swapaxes(1, 2)
-                            vals = vals.swapaxes(2, 3)
-                            v[:, :, :, :] = vals
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
-                        elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
-                            v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
-                            vals = npx.array(var_obj)
-                            vals = vals.swapaxes(0, 3)
-                            vals = vals.swapaxes(1, 2)
-                            vals = vals.swapaxes(2, 3)
-                            v[:, :, :, :] = vals
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])

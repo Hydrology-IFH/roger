@@ -55,7 +55,7 @@ for lys_experiment in lys_experiments:
         df_idx_cs = pd.DataFrame(index=date_obs, columns=['sol'])
         df_idx_cs.loc[:, 'sol'] = ds_obs['BR_PERC'].isel(x=0, y=0).values
         idx_cs = df_idx_cs['sol'].dropna().index
-        # calculate simulated Bromide composite sample
+        # calculate simulated bromide composite sample
         sample_no = pd.DataFrame(index=idx_cs, columns=['sample_no'])
         sample_no['sample_no'] = range(len(sample_no.index))
         df_perc_Br_sim = pd.DataFrame(index=idx, columns=['perc', 'Br'])

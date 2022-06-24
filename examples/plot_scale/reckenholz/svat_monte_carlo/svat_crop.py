@@ -1,8 +1,6 @@
 from pathlib import Path
 import os
 import h5netcdf
-import datetime
-import glob
 import numpy as onp
 
 from roger import runtime_settings as rs, runtime_state as rst
@@ -744,7 +742,8 @@ for lys_experiment in lys_experiments:
     model = SVATCROPSetup()
     input_path = model._base_path / "input" / lys_experiment
     model._set_input_dir(input_path)
-    model._set_identifier(lys_experiment)
+    identifier = f'SVATCROP_{lys_experiment}'
+    model._set_identifier(identifier)
     forcing_path = model._input_dir / "forcing.nc"
     if not os.path.exists(forcing_path):
         write_forcing(input_path, enable_crop_phenology=True)
@@ -753,81 +752,3 @@ for lys_experiment in lys_experiments:
         write_crop_rotation(input_path)
     model.setup()
     model.run()
-
-    # merge model output into single file
-    path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
-    diag_files = glob.glob(path)
-    states_hm_file = model._base_path / "states_hm_monte_carlo.nc"
-    with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
-        if lys_experiment not in list(f.groups.keys()):
-            f.create_group(lys_experiment)
-        f.attrs.update(
-            date_created=datetime.datetime.today().isoformat(),
-            title='RoGeR model results of Monte-Carlo simulations at Reckenholz Lysimeter',
-            institution='University of Freiburg, Chair of Hydrology',
-            references='',
-            comment='SVAT model with free drainage and crop phenology/crop rotation'
-        )
-        # collect dimensions
-        for dfs in diag_files:
-            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                # set dimensions with a dictionary
-                if not dfs.split('/')[-1].split('.')[1] == 'constant':
-                    dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'n_crop_types': len(df.variables['n_crop_types']), 'crops': len(df.variables['crops']), 'Time': len(df.variables['Time'])}
-                    time = onp.array(df.variables.get('Time'))
-        for dfs in diag_files:
-            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                if not f.groups[lys_experiment].dimensions:
-                    f.groups[lys_experiment].dimensions = dict_dim
-                    v = f.groups[lys_experiment].create_variable('x', ('x',), float)
-                    v.attrs['long_name'] = 'model run'
-                    v.attrs['units'] = ''
-                    v[:] = npx.arange(dict_dim["x"])
-                    v = f.groups[lys_experiment].create_variable('y', ('y',), float)
-                    v.attrs['long_name'] = ''
-                    v.attrs['units'] = ''
-                    v[:] = npx.arange(dict_dim["y"])
-                    v = f.groups[lys_experiment].create_variable('Time', ('Time',), float)
-                    var_obj = df.variables.get('Time')
-                    v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                                   units=var_obj.attrs["units"])
-                    v[:] = time
-                    v = f.groups[lys_experiment].create_variable('n_crop_types', ('n_crop_types',), int)
-                    v.attrs['long_name'] = 'number of crop types'
-                    v.attrs['units'] = ''
-                    v[:] = npx.arange(dict_dim["n_crop_types"])
-                    v = f.groups[lys_experiment].create_variable('crops', ('crops',), int)
-                    v.attrs['long_name'] = 'number of crops per growing cycle'
-                    v.attrs['units'] = ''
-                    v[:] = npx.arange(dict_dim["crops"])
-                for key in list(df.variables.keys()):
-                    var_obj = df.variables.get(key)
-                    if key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
-                        v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time'), float)
-                        vals = npx.array(var_obj)
-                        v[:, :, :] = vals.swapaxes(0, 2)
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                       units=var_obj.attrs["units"])
-                    elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'crops', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
-                        v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time', 'crops'), float)
-                        vals = npx.array(var_obj)
-                        vals = vals.swapaxes(0, 3)
-                        vals = vals.swapaxes(1, 2)
-                        vals = vals.swapaxes(2, 3)
-                        v[:, :, :, :] = vals
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                       units=var_obj.attrs["units"])
-                    elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
-                        v = f.groups[lys_experiment].create_variable(key, ('x', 'y'), float)
-                        vals = onp.array(var_obj)
-                        v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                       units=var_obj.attrs["units"])
-                    elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'n_crop_types', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
-                        v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'n_crop_types'), float)
-                        vals = npx.array(var_obj)
-                        vals = vals.swapaxes(0, 3)
-                        vals = vals.swapaxes(1, 2)
-                        v[:, :, :] = vals[:, :, :, 0]
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                       units=var_obj.attrs["units"])

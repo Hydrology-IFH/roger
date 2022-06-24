@@ -1,7 +1,5 @@
 from pathlib import Path
-import glob
 import os
-import datetime
 import h5netcdf
 
 from roger import runtime_settings as rs, runtime_state as rst
@@ -20,17 +18,9 @@ class SVATTRANSPORTSetup(RogerSetup):
     """A SVAT transport model.
     """
     _base_path = Path(__file__).parent
-    _bounds = {
-        'num_vars': 6,
-        'names': ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'],
-        'bounds': [[1, 400],
-                   [1, 1500],
-                   [0.05, 0.33],
-                   [0.05, 0.33],
-                   [0.05, 0.33],
-                   [0.1, 120]]
-    }
     _input_dir = None
+    _identifier = None
+    _tm_structure = None
 
     def _set_input_dir(self, path):
         if os.path.exists(path):
@@ -69,10 +59,16 @@ class SVATTRANSPORTSetup(RogerSetup):
             var_obj = infile.variables['x']
             return len(onp.array(var_obj))
 
+    def _set_tm_structure(self, tm_structure):
+        self._tm_structure = tm_structure
+
+    def _set_identifier(self, identifier):
+        self._identifier = identifier
+
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
-        settings.identifier = "SVATTRANSPORT"
+        settings.identifier = self._identifier
 
         settings.nx, settings.ny, settings.nz = self._get_nx(self._base_path, 'states_hm_sensitivity.nc'), 1, 1
         settings.nitt = self._get_nitt(self._base_path, 'states_hm_sensitivity.nc')
@@ -91,7 +87,7 @@ class SVATTRANSPORTSetup(RogerSetup):
 
         settings.enable_offline_transport = True
         settings.enable_oxygen18 = True
-        settings.tm_structure = "complete-mixing"
+        settings.tm_structure = self._tm_structure
 
     @roger_routine(
         dist_safe=False,
@@ -618,6 +614,8 @@ for tm_structure in tm_structures:
     tms = tm_structure.replace(" ", "_")
     model = SVATTRANSPORTSetup()
     model._set_tm_structure(tm_structure)
+    identifier = f'SVATTRANSPORT_{tms}'
+    model._set_identifier(identifier)
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)
     forcing_path = model._input_dir / "forcing_tracer.nc"
@@ -626,85 +624,3 @@ for tm_structure in tm_structures:
     model.setup()
     model.warmup()
     model.run()
-
-    # merge model output into single file
-    if rst.proc_rank == 0 or not rs.mpi_comm:
-        path = str(model._base_path / f"{model.state.settings.identifier}.*.nc")
-        diag_files = glob.glob(path)
-        states_tm_file = model._base_path / "states_tm_sensitivity_reverse.nc"
-        with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
-            if tm_structure not in list(f.groups.keys()):
-                f.create_group(tm_structure)
-            f.attrs.update(
-                date_created=datetime.datetime.today().isoformat(),
-                title='RoGeR transport model saltelli results (reverse) at Rietholzbach Lysimeter site',
-                institution='University of Freiburg, Chair of Hydrology',
-                references='',
-                comment='SVAT transport model with free drainage'
-            )
-            # collect dimensions
-            for dfs in diag_files:
-                with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                    # set dimensions with a dictionary
-                    if not dfs.split('/')[-1].split('.')[1] == 'constant':
-                        dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
-                        time = onp.array(df.variables.get('Time'))
-            for dfs in diag_files:
-                with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                    if not f.groups[tm_structure].dimensions:
-                        f.groups[tm_structure].dimensions = dict_dim
-                        v = f.groups[tm_structure].create_variable('x', ('x',), float)
-                        v.attrs['long_name'] = 'model run'
-                        v.attrs['units'] = ''
-                        v[:] = npx.arange(dict_dim["x"])
-                        v = f.groups[tm_structure].create_variable('y', ('y',), float)
-                        v.attrs['long_name'] = ''
-                        v.attrs['units'] = ''
-                        v[:] = npx.arange(dict_dim["y"])
-                        v = f.groups[tm_structure].create_variable('ages', ('ages',), float)
-                        v.attrs['long_name'] = 'Water ages'
-                        v.attrs['units'] = 'days'
-                        v[:] = npx.arange(1, dict_dim["ages"]+1)
-                        v = f.groups[tm_structure].create_variable('nages', ('nages',), float)
-                        v.attrs['long_name'] = 'Water ages (cumulated)'
-                        v.attrs['units'] = 'days'
-                        v[:] = npx.arange(0, dict_dim["nages"])
-                        v = f.groups[tm_structure].create_variable('Time', ('Time',), float)
-                        var_obj = df.variables.get('Time')
-                        v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                                       units=var_obj.attrs["units"])
-                        v[:] = time
-                    for var_sim in list(df.variables.keys()):
-                        var_obj = df.variables.get(var_sim)
-                        if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions:
-                            v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time'), float)
-                            vals = npx.array(var_obj)
-                            v[:, :, :] = vals.swapaxes(0, 2)
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
-                        elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
-                            v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
-                            vals = npx.array(var_obj)
-                            vals = vals.swapaxes(0, 3)
-                            vals = vals.swapaxes(1, 2)
-                            v[:, :, :] = vals[:, :, :, 0]
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
-                        elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
-                            v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
-                            vals = npx.array(var_obj)
-                            vals = vals.swapaxes(0, 3)
-                            vals = vals.swapaxes(1, 2)
-                            vals = vals.swapaxes(2, 3)
-                            v[:, :, :, :] = vals
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
-                        elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
-                            v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
-                            vals = npx.array(var_obj)
-                            vals = vals.swapaxes(0, 3)
-                            vals = vals.swapaxes(1, 2)
-                            vals = vals.swapaxes(2, 3)
-                            v[:, :, :, :] = vals
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
