@@ -17,6 +17,7 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
     _base_path = Path(__file__).parent
     _tm_structure = None
     _input_dir = None
+    _identifier = None
 
     def _set_input_dir(self, path):
         if os.path.exists(path):
@@ -36,7 +37,7 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
         nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             var_obj = infile.variables['Time']
-            return len(onp.array(var_obj))
+            return len(onp.array(var_obj)) + 1
 
     def _get_runlen(self, path_dir, file):
         nc_file = path_dir / file
@@ -44,8 +45,17 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
             var_obj = infile.variables['Time']
             return len(onp.array(var_obj)) * 60 * 60 * 24
 
+    def _get_time_origin(self, path_dir, file):
+        nc_file = path_dir / file
+        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+            date = infile.variables['Time'].attrs['time_origin'].split(" ")[0]
+            return f"{date} 00:00:00"
+
     def _set_tm_structure(self, tm_structure):
         self._tm_structure = tm_structure
+
+    def _set_identifier(self, identifier):
+        self._identifier = identifier
 
     @roger_routine
     def set_settings(self, state):
@@ -53,10 +63,10 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
         settings.identifier = "SVATCROPTRANSPORT"
 
         settings.nx, settings.ny, settings.nz = 1, 1, 1
-        settings.nitt = self._get_nitt(self._base_path, 'states_hm.nc')
+        settings.nitt = self._get_nitt(self._base_path, 'forcing_tracer.nc')
         settings.ages = settings.nitt
         settings.nages = settings.nitt + 1
-        settings.runlen = self._get_runlen(self._base_path, 'states_hm.nc')
+        settings.runlen = self._get_runlen(self._base_path, 'forcing_tracer.nc')
 
         settings.dx = 1
         settings.dy = 1
@@ -64,6 +74,7 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
+        settings.time_origin = self._get_time_origin(self._input_dir, 'forcing_tracer.nc')
 
         settings.enable_crop_phenology = True
         settings.enable_crop_rotation = True
@@ -366,8 +377,11 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
             at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_s[2:-2, 2:-2, :, :], axis=-1),
         )
 
+        # initial nitrate concentration (in mg/l)
         vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], 30)
         vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 30)
+        # exponential distribution of mineral soil nitrogen
+        # mineral soil nitrogen is decreasing with increasing age
         p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
         p_dec = update(p_dec, at[:, :, :vs.taup1, :], sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))[npx.newaxis, npx.newaxis, npx.newaxis, :])
         vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
@@ -563,6 +577,8 @@ def set_states_kernel(state):
     vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], vs.Q_RZ[2:-2, 2:-2, vs.itt])
     vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], vs.Q_SS[2:-2, 2:-2, vs.itt])
     vs.cpr_rz = update(vs.cpr_ss, at[2:-2, 2:-2], vs.CPR_RZ[2:-2, 2:-2, vs.itt])
+    vs.re_rg = update(vs.re_rg, at[2:-2, 2:-2], vs.RE_RG[2:-2, 2:-2, vs.itt])
+    vs.re_rl = update(vs.re_rl, at[2:-2, 2:-2], vs.RE_RL[2:-2, 2:-2, vs.itt])
 
     vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], vs.S_RZ[2:-2, 2:-2, vs.itt])
     vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], vs.S_SS[2:-2, 2:-2, vs.itt])
@@ -577,6 +593,8 @@ def set_states_kernel(state):
         q_rz=vs.q_rz,
         q_ss=vs.q_ss,
         cpr_rz=vs.cpr_rz,
+        re_rg=vs.re_rg,
+        re_rl=vs.re_rl,
         S_rz=vs.S_rz,
         S_ss=vs.S_ss,
     )
@@ -742,27 +760,31 @@ for lys_experiment in lys_experiments:
                 references='',
                 comment='SVAT transport model with free drainage and crop phenology/crop rotation'
             )
+            # collect dimensions
+            for dfs in diag_files:
+                with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                    # set dimensions with a dictionary
+                    if not dfs.split('/')[-1].split('.')[1] == 'constant':
+                        dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
+                        time = onp.array(df.variables.get('Time'))
             for dfs in diag_files:
                 with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                     # set dimensions with a dictionary
                     if not f.groups[lys_experiment].groups[tm_structure].dimensions:
-                        dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
-                        f.dimensions = dict_dim
+                        f.groups[lys_experiment].groups[tm_structure].dimensions = dict_dim
                         v = f.groups[lys_experiment].groups[tm_structure].create_variable('x', ('x',), float)
                         v.attrs['long_name'] = 'model run'
                         v.attrs['units'] = ''
                         v[:] = npx.arange(dict_dim["x"])
-                        v = f.groups[lys_experiment].create_variable('y', ('y',), float)
+                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('y', ('y',), float)
                         v.attrs['long_name'] = ''
                         v.attrs['units'] = ''
                         v[:] = npx.arange(dict_dim["y"])
-                        v = f.create_variable('Time', ('Time',), float)
+                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('Time', ('Time',), float)
                         var_obj = df.variables.get('Time')
-                        with h5netcdf.File(model._base_path / 'forcing_tracer.nc', "r", decode_vlen_strings=False) as infile:
-                            time_origin = infile.variables['time'].attrs['time_origin']
-                        v.attrs.update(time_origin=time_origin,
+                        v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                        units=var_obj.attrs["units"])
-                        v[:] = npx.array(var_obj)
+                        v[:] = time
                         v = f.groups[lys_experiment].groups[tm_structure].create_variable('ages', ('ages',), float)
                         v.attrs['long_name'] = 'Water ages'
                         v.attrs['units'] = 'days'
@@ -771,26 +793,26 @@ for lys_experiment in lys_experiments:
                         v.attrs['long_name'] = 'Water ages (cumulated)'
                         v.attrs['units'] = 'days'
                         v[:] = npx.arange(0, dict_dim["nages"])
-                        v = f.groups[tm_structure].create_variable('n_sas_params', ('n_sas_params',), float)
+                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('n_sas_params', ('n_sas_params',), float)
                         v.attrs['long_name'] = 'Number of SAS parameters'
                         v.attrs['units'] = ''
                     for var_sim in list(df.variables.keys()):
                         var_obj = df.variables.get(var_sim)
-                        if var_sim not in list(f.groups[lys_experiment].groups[tm_structure].dimensions.keys()) and ('Time', 'y', 'x') == var_obj.dimensions:
+                        if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
                             v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time'), float)
                             vals = npx.array(var_obj)
                             v[:, :, :] = vals.swapaxes(0, 2)
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
-                        elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
-                            v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
+                        elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
+                            v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
                             vals = npx.array(var_obj)
                             vals = vals.swapaxes(0, 3)
                             vals = vals.swapaxes(1, 2)
                             v[:, :, :] = vals[:, :, :, 0]
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
-                        elif var_sim not in list(f.groups[lys_experiment].groups[tm_structure].dimensions.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
+                        elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
                             v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
                             vals = npx.array(var_obj)
                             vals = vals.swapaxes(0, 3)
@@ -799,7 +821,7 @@ for lys_experiment in lys_experiments:
                             v[:, :, :, :] = vals
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
-                        elif var_sim not in list(f.dimensions.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
+                        elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
                             v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
                             vals = npx.array(var_obj)
                             vals = vals.swapaxes(0, 3)

@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #SBATCH --partition=single
-#SBATCH --job-name=transport_sa_rev
+#SBATCH --job-name=transport_sar
 #SBATCH --nodes=1
 #SBATCH --ntasks=32
 #SBATCH --mail-type=ALL

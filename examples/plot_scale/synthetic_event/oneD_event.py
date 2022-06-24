@@ -402,7 +402,7 @@ for rainfall_scenario in rainfall_scenarios:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
                 if not dfs.split('/')[-1].split('.')[1] == 'constant':
-                    dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']}
+                    dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
                     time = onp.array(df.variables.get('Time'))
         for dfs in diag_files:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
