@@ -18,7 +18,7 @@ from roger.tools.setup import write_forcing, write_crop_rotation
 import roger.lookuptables as lut
 
 # number of monte-carlo samples
-NSAMPLES = 10
+NSAMPLES = 10000
 
 
 class SVATCROPSetup(RogerSetup):
