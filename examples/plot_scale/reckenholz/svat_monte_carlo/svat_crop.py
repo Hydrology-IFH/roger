@@ -779,6 +779,7 @@ for lys_experiment in lys_experiments:
         for dfs in diag_files:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 if not f.groups[lys_experiment].dimensions:
+                    print(dict_dim)
                     f.groups[lys_experiment].dimensions = dict_dim
                     v = f.groups[lys_experiment].create_variable('x', ('x',), float)
                     v.attrs['long_name'] = 'model run'
