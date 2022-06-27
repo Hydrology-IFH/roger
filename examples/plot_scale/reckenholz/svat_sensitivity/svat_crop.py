@@ -34,7 +34,7 @@ class SVATCROPSetup(RogerSetup):
         for ct in _crop_types:
             _param_names.append(f"crop_scale_{ct}")
             _param_bounds.append([0.5, 1.5])
-    _nsamples = 2**2
+    _nsamples = 2**10
     _bounds = {
         'num_vars': len(_param_names),
         'names': _param_names,

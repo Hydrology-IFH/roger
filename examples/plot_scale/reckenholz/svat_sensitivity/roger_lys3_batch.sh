@@ -19,5 +19,7 @@ mpirun --bind-to core --map-by core -report-bindings python svat.py lys3
 # sinfo_t_idle
 
 # execute the script
+# conda activate roger-mpi
+# cd ~/roger/examples/plot_scale/reckenholz/svat_sensitivity
 # chmod +x roger_lys3_batch.sh
 # sbatch ./roger_lys3_batch.sh

@@ -19,5 +19,7 @@ mpirun --bind-to core --map-by core -report-bindings python svat.py lys9_bromide
 # sinfo_t_idle
 
 # execute the script
+# conda activate roger-mpi
+# cd ~/roger/examples/plot_scale/reckenholz/svat_sensitivitys
 # chmod +x roger_lys9_bromide_batch.sh
 # sbatch ./roger_lys9_bromide_batch.sh

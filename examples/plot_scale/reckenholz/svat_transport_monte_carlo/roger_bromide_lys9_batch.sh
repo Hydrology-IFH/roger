@@ -21,6 +21,6 @@ mpirun --bind-to core --map-by core -report-bindings python svat_transport_bromi
 
 # execute the script
 # conda activate roger-mpi
-# cd ~/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo
+# cd ~/roger/examples/plot_scale/reckenholz/svat_transport_monte_carlo
 # sbatch ./roger_bromide_lys9_batch.sh
 # chmod +x roger_bromide_lys9_batch.sh

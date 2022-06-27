@@ -21,6 +21,6 @@ mpirun --bind-to core --map-by core -report-bindings python svat_transport_nitra
 
 # execute the script
 # conda activate roger-mpi
-# cd ~/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo
+# cd ~/roger/examples/plot_scale/reckenholz/svat_transport_monte_carlo
 # sbatch ./roger_nitrate_lys8_batch.sh
 # chmod +x roger_nitrate_lys8_batch.sh
