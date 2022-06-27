@@ -2,7 +2,7 @@
 #
 #SBATCH --partition=multiple
 #SBATCH --job-name=transport_mc
-#SBATCH --nodes=2
+#SBATCH --nodes=5
 #SBATCH --ntasks-per-node=40
 #SBATCH --mem=90000mb
 #SBATCH --mail-type=ALL
