@@ -363,7 +363,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
                         self.set_forcing(state)
                     if settings.enable_crop_phenology:
                         with state.timers["redistribution after root growth/harvesting"]:
-                            pass
+                            crop.calculate_redistribution_transport(state)
                     with state.timers["infiltration into root zone"]:
                         infiltration.calculate_infiltration_rz_transport(state)
                     with state.timers["evapotranspiration"]:

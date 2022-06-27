@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 import os
 import h5netcdf
 from SALib.sample import saltelli
@@ -23,6 +24,7 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
     _bounds = None
     _params = None
     _nrows = None
+    _lys = None
     _tm_structure = None
     _identifier = None
     _input_dir = None
@@ -35,11 +37,20 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
             if not os.path.exists(self._input_dir):
                 os.mkdir(self._input_dir)
 
-    def _read_var_from_nc(self, var, path_dir, file):
+    def _read_var_from_nc(self, var, path_dir, file, group=None, subgroup=None):
         nc_file = path_dir / file
-        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables[var]
-            return npx.array(var_obj)
+        if group and not subgroup:
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.groups[group].variables[var]
+                return npx.array(var_obj)
+        elif group and subgroup:
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.groups[group].groups[subgroup].variables[var]
+                return npx.array(var_obj)
+        else:
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables[var]
+                return npx.array(var_obj)
 
     def _get_nitt(self, path_dir, file):
         nc_file = path_dir / file
@@ -64,6 +75,9 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
             date = infile.variables['Time'].attrs['time_origin'].split(" ")[0]
             return f"{date} 00:00:00"
+
+    def _set_lys(self, lys):
+        self._lys = lys
 
     def _set_tm_structure(self, tm_structure):
         self._tm_structure = tm_structure
@@ -173,7 +187,7 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
 
         elif self._tm_structure == "time-variant":
             self._bounds = {
-                'num_vars': 3,
+                'num_vars': 5,
                 'names': ['ab_transp', 'ab_q_rz', 'ab_q_ss', 'alpha_transp', 'alpha_q'],
                 'bounds': [[1, 90],
                            [1, 90],
@@ -189,11 +203,11 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
         settings = state.settings
         settings.identifier = self._identifier
 
-        settings.nx, settings.ny, settings.nz = 1, 1, 1
-        settings.nitt = self._get_nitt(self._base_path, 'forcing_tracer.nc')
+        settings.nx, settings.ny, settings.nz = self._nrows, 1, 1
+        settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
         settings.ages = settings.nitt
         settings.nages = settings.nitt + 1
-        settings.runlen = self._get_runlen(self._base_path, 'forcing_tracer.nc')
+        settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
 
         settings.dx = 1
         settings.dy = 1
@@ -278,10 +292,10 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
         vs = state.variables
         settings = state.settings
 
-        vs.S_PWP_RZ = update(vs.S_PWP_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.nc'))
-        vs.S_PWP_SS = update(vs.S_PWP_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.nc'))
-        vs.S_SAT_RZ = update(vs.S_SAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc'))
-        vs.S_SAT_SS = update(vs.S_SAT_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.nc'))
+        vs.S_PWP_RZ = update(vs.S_PWP_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.S_PWP_SS = update(vs.S_PWP_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.S_SAT_RZ = update(vs.S_SAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.S_SAT_SS = update(vs.S_SAT_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.nc', group=self._lys))
 
         vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], vs.S_PWP_RZ[2:-2, 2:-2, 0])
         vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], vs.S_PWP_SS[2:-2, 2:-2, 0])
@@ -438,8 +452,8 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
     def set_initial_conditions_setup(self, state):
         vs = state.variables
 
-        vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc'))
-        vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc'))
+        vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc', group=self._lys))
 
     @roger_routine
     def set_initial_conditions(self, state):
@@ -532,24 +546,23 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
             "C_IN",
         ],
     )
-    @roger_routine
     def set_forcing_setup(self, state):
         vs = state.variables
 
-        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("ta", self._base_path, 'states_hm.nc'))
-        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._base_path, 'states_hm.nc'))
-        vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", self._base_path, 'states_hm.nc'))
-        vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", self._base_path, 'states_hm.nc') + self._read_var_from_nc("inf_sc_rz", self._base_path, 'states_hm.nc'))
-        vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._base_path, 'states_hm.nc'))
-        vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._base_path, 'states_hm.nc'))
-        vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", self._base_path, 'states_hm.nc'))
-        vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._base_path, 'states_hm.nc'))
-        vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.nc'))
-        vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc'))
-        vs.RE_RG = update(vs.RE_RG, at[2:-2, 2:-2, :], self._read_var_from_nc("re_rg", self._base_path, 'states_hm.nc'))
-        vs.RE_RL = update(vs.RE_RL, at[2:-2, 2:-2, :], self._read_var_from_nc("re_rl", self._base_path, 'states_hm.nc'))
+        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("ta", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", self._base_path, 'states_hm.nc', group=self._lys) + self._read_var_from_nc("inf_sc_rz", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.RE_RG = update(vs.RE_RG, at[2:-2, 2:-2, :], self._read_var_from_nc("re_rg", self._base_path, 'states_hm.nc', group=self._lys))
+        vs.RE_RL = update(vs.RE_RL, at[2:-2, 2:-2, :], self._read_var_from_nc("re_rl", self._base_path, 'states_hm.nc', group=self._lys))
 
-        vs.M_IN = update(vs.M_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("Br", 'tracer_input.nc'))
+        vs.M_IN = update(vs.M_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("Br", self._input_dir, 'forcing_tracer.nc'))
 
         mask_rain = (vs.PREC > 0) & (vs.TA > 0)
         mask_sol = (vs.M_IN > 0)
@@ -609,7 +622,7 @@ def set_bromide_input_kernel(state, nn_rain, nn_sol):
         start_rain = rain_idx[input_itt]
         rain_sum = update(
             rain_sum,
-            at[:, :], npx.max(npx.where(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1) <= 20, npx.max(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1), axis=-1), 0), axis=-1),
+            at[:, :], npx.max(npx.where(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1) <= 20, npx.max(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1), axis=-1)[:, :, npx.newaxis], 0), axis=-1),
         )
         nn_end = npx.max(npx.where(npx.cumsum(vs.PREC[:, :, start_rain:]) <= 20, npx.max(npx.arange(npx.shape(vs.PREC)[2])[npx.newaxis, npx.newaxis, npx.shape(vs.PREC)[2]-start_rain], axis=-1), 0))
         end_rain = update(end_rain, at[:], start_rain + nn_end)
@@ -791,24 +804,24 @@ def after_timestep_kernel(state):
 
 
 nsamples = 2**10  # number of samples
-lys_experiments = ["lys3_bromide", "lys8_bromide", "lys9_bromide"]
+lys_experiment = sys.argv[1]
 tm_structures = ['complete-mixing', 'piston',
                  'preferential', 'complete-mixing + advection-dispersion',
                  'time-variant preferential',
                  'time-variant complete-mixing + advection-dispersion']
-for lys_experiment in lys_experiments:
-    for tm_structure in tm_structures:
-        tms = tm_structure.replace(" ", "_")
-        model = SVATCROPTRANSPORTSetup()
-        model._set_tm_structure(tm_structure)
-        identifier = f'SVATCROPTRANSPORT_{tms}_{lys_experiment}_bromide'
-        model._set_identifier(identifier)
-        model._sample_params(nsamples)
-        input_path = model._base_path / "input" / lys_experiment
-        model._set_input_dir(input_path)
-        forcing_path = model._input_dir / "forcing_tracer.nc"
-        if not os.path.exists(forcing_path):
-            write_forcing_tracer(input_path, 'Br')
-        model.setup()
-        model.warmup()
-        model.run()
+for tm_structure in tm_structures:
+    tms = tm_structure.replace(" ", "_")
+    model = SVATCROPTRANSPORTSetup()
+    model._set_lys(lys_experiment)
+    model._set_tm_structure(tm_structure)
+    identifier = f'SVATCROPTRANSPORT_{tms}_{lys_experiment}_bromide'
+    model._set_identifier(identifier)
+    model._sample_params(nsamples)
+    input_path = model._base_path / "input" / lys_experiment
+    model._set_input_dir(input_path)
+    forcing_path = model._input_dir / "forcing_tracer.nc"
+    if not os.path.exists(forcing_path):
+        write_forcing_tracer(input_path, 'Br')
+    model.setup()
+    model.warmup()
+    model.run()

@@ -34,7 +34,7 @@ class SVATCROPSetup(RogerSetup):
         for ct in _crop_types:
             _param_names.append(f"crop_scale_{ct}")
             _param_bounds.append([0.5, 1.5])
-    _nsamples = 2**10
+    _nsamples = 2**2
     _bounds = {
         'num_vars': len(_param_names),
         'names': _param_names,
@@ -44,6 +44,10 @@ class SVATCROPSetup(RogerSetup):
     _nrows = _params.shape[0]
     _input_dir = None
     _identifier = None
+    _lys = None
+
+    def _set_lys(self, lys):
+        self._lys = lys
 
     def _set_identifier(self, identifier):
         self._identifier = identifier
@@ -112,7 +116,7 @@ class SVATCROPSetup(RogerSetup):
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
-        settings.identifier = "SVATCROP"
+        settings.identifier = self._identifier
 
         settings.nx, settings.ny, settings.nz = self._nrows, 1, 1
         settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
@@ -260,9 +264,9 @@ class SVATCROPSetup(RogerSetup):
     def set_initial_conditions(self, state):
         vs = state.variables
 
-        theta_rz = self._read_var_from_nc("theta_rz", self._base_path, 'initvals.nc', group=self._identifier)
+        theta_rz = self._read_var_from_nc("theta_rz", self._base_path, 'initvals.nc', group=self._lys)
         vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], npx.where(theta_rz > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_sat[2:-2, 2:-2, npx.newaxis], theta_rz))
-        theta_ss = self._read_var_from_nc("theta_ss", self._base_path, 'initvals.nc', group=self._identifier)
+        theta_ss = self._read_var_from_nc("theta_ss", self._base_path, 'initvals.nc', group=self._lys)
         vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], npx.where(theta_ss > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_sat[2:-2, 2:-2, npx.newaxis], theta_ss))
 
         vs.update(set_initial_conditions_crops_kernel(state))
@@ -772,19 +776,20 @@ def after_timestep_crops_kernel(state):
     )
 
 
-lys_experiments = ["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
+lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
 for lys_experiment in lys_experiments:
     model = SVATCROPSetup()
+    model._set_lys(lys_experiment)
     input_path = model._base_path / "input" / lys_experiment
     model._set_input_dir(input_path)
     identifier = f'SVATCROP_{lys_experiment}'
     model._set_identifier(identifier)
-    model._set_crop_types(model._input_dir, "crop_rotation.nc")
     forcing_path = model._input_dir / "forcing.nc"
     if not os.path.exists(forcing_path):
         write_forcing(input_path, enable_crop_phenology=True)
     crop_rotation_path = model._input_dir / "crop_rotation.nc"
     if not os.path.exists(crop_rotation_path):
         write_crop_rotation(input_path)
+    model._set_crop_types(model._input_dir, "crop_rotation.nc")
     model.setup()
     model.run()

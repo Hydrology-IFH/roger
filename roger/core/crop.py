@@ -3,7 +3,7 @@ from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at
 import roger.lookuptables as lut
 from roger.core.utilities import _get_row_no
-
+from roger.core import transport
 
 @roger_kernel
 def calc_gdd(state):
@@ -1192,3 +1192,365 @@ def calculate_crop_phenology(state):
             vs.update(update_z_root(state))
             vs.update(recalc_soil_params(state))
             vs.update(redistribution(state))
+
+
+@roger_kernel
+def calculate_redistribution_root_growth_transport_kernel(state):
+    """
+    Calculates transport of redistribution after root growth
+    """
+    vs = state.variables
+
+    vs.SA_ss = update(
+        vs.SA_rz,
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.re_rg = update(
+        vs.re_rg,
+        at[2:-2, 2:-2], npx.where(vs.re_rg[2:-2, 2:-2] > npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1), npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1), vs.re_rg[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.tt_re_rg = update(
+        vs.tt_re_rg,
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_ss, vs.sa_ss, vs.re_rg, vs.sas_params_re_rg)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.TT_re_rg = update(
+        vs.TT_re_rg,
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_re_rg[2:-2, 2:-2, :], axis=-1),
+    )
+
+    vs.sa_ss = update(
+        vs.sa_ss,
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_re_rg, vs.re_rg)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.sa_rz = update_add(
+        vs.sa_rz,
+        at[2:-2, 2:-2, vs.tau, :], vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rg=vs.tt_re_rg, TT_re_rg=vs.TT_re_rg, re_rg=vs.re_rg)
+
+
+@roger_kernel
+def calculate_redistribution_root_growth_transport_iso_kernel(state):
+    """
+    Calculates isotope transport of redistribution after root growth
+    """
+    vs = state.variables
+
+    vs.SA_ss = update(
+        vs.SA_ss,
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.re_rg = update(
+        vs.re_rg,
+        at[2:-2, 2:-2], npx.where(vs.re_rg[2:-2, 2:-2] > npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1), npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1), vs.re_rg[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.tt_re_rg = update(
+        vs.tt_re_rg,
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_ss, vs.sa_ss, vs.re_rg, vs.sas_params_re_rg)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.TT_re_rg = update(
+        vs.TT_re_rg,
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_re_rg[2:-2, 2:-2, :], axis=-1),
+    )
+
+    # calculate solute travel time distribution
+    alpha = allocate(state.dimensions, ("x", "y"), fill=1)
+    vs.mtt_re_rg = update(
+        vs.mtt_re_rg,
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_ss, vs.tt_re_rg, vs.re_rg, vs.msa_ss, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.C_re_rg = update(
+        vs.C_re_rg,
+        at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_re_rg, vs.tt_re_rg, vs.re_rg)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # update StorAge with flux
+    vs.sa_ss = update(
+        vs.sa_ss,
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_re_rg, vs.re_rg)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    # update isotope StorAge
+    vs.msa_ss = update(
+        vs.msa_ss,
+        at[2:-2, 2:-2, vs.tau, :], npx.where((vs.sa_ss[2:-2, 2:-2, vs.tau, :] > 0), vs.msa_ss[2:-2, 2:-2, vs.tau, :], npx.NaN) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.C_ss = update(
+        vs.C_ss,
+        at[2:-2, 2:-2, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_ss, vs.msa_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.msa_rz = update(
+        vs.msa_rz,
+        at[2:-2, 2:-2, :, :], transport.calc_msa_iso(state, vs.sa_rz, vs.msa_rz, vs.re_rg, vs.tt_re_rg, vs.mtt_re_rg)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.sa_rz = update_add(
+        vs.sa_rz,
+        at[2:-2, 2:-2, vs.tau, :], vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rg=vs.tt_re_rg, TT_re_rg=vs.TT_re_rg, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, mtt_re_rg=vs.mtt_re_rg, C_re_rg=vs.C_re_rg, re_rg=vs.re_rg)
+
+
+@roger_kernel
+def calculate_redistribution_root_growth_transport_anion_kernel(state):
+    """
+    Calculates chloride/bromide/nitrate transport of redistribution after root growth
+    """
+    vs = state.variables
+
+    vs.SA_ss = update(
+        vs.SA_ss,
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.re_rg = update(
+        vs.re_rg,
+        at[2:-2, 2:-2], npx.where(vs.re_rg[2:-2, 2:-2] > npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1), npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1), vs.re_rg[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.tt_re_rg = update(
+        vs.tt_re_rg,
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_ss, vs.sa_ss, vs.re_rg, vs.sas_params_re_rg)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.TT_re_rg = update(
+        vs.TT_re_rg,
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_re_rg[2:-2, 2:-2, :], axis=2),
+    )
+
+    # calculate isotope travel time distribution
+    vs.mtt_re_rg = update(
+        vs.mtt_re_rg,
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_ss, vs.tt_re_rg, vs.re_rg, vs.msa_ss, vs.alpha_q)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.C_re_rg = update(
+        vs.C_re_rg,
+        at[2:-2, 2:-2], npx.where(vs.re_rg > 0, npx.sum(vs.mtt_re_rg, axis=2) / vs.re_rg, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # update StorAge with flux
+    vs.sa_ss = update(
+        vs.sa_ss,
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_re_rg, vs.re_rg)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.sa_rz = update_add(
+        vs.sa_rz,
+        at[2:-2, 2:-2, vs.tau, :], vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    # update solute StorAge of root zone
+    vs.msa_rz = update_add(
+        vs.msa_rz,
+        at[2:-2, 2:-2, vs.tau, :], vs.mtt_re_rg[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+    vs.msa_ss = update_add(
+        vs.msa_ss,
+        at[2:-2, 2:-2, vs.tau, :], -vs.mtt_re_rg[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rg=vs.tt_re_rg, TT_re_rg=vs.TT_re_rg, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, mtt_re_rg=vs.mtt_re_rg, C_re_rg=vs.C_re_rg, re_rg=vs.re_rg)
+
+
+@roger_kernel
+def calculate_redistribution_root_loss_transport_kernel(state):
+    """
+    Calculates transport of redistribution after root loss
+    """
+    vs = state.variables
+
+    vs.SA_rz = update(
+        vs.SA_rz,
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.re_rl = update(
+        vs.re_rl,
+        at[2:-2, 2:-2], npx.where(vs.re_rl[2:-2, 2:-2] > npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1), npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1), vs.re_rl[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.tt_re_rl = update(
+        vs.tt_re_rl,
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.re_rl, vs.sas_params_re_rl)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.TT_re_rl = update(
+        vs.TT_re_rl,
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_re_rl[2:-2, 2:-2, :], axis=2),
+    )
+
+    vs.sa_rz = update(
+        vs.sa_rz,
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_re_rl, vs.re_rl)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.sa_ss = update_add(
+        vs.sa_ss,
+        at[2:-2, 2:-2, vs.tau, :], vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rl=vs.tt_re_rl, TT_re_rl=vs.TT_re_rl, re_rl=vs.re_rl)
+
+
+@roger_kernel
+def calculate_redistribution_root_loss_transport_iso_kernel(state):
+    """
+    Calculates isotope transport of redistribution after root loss
+    """
+    vs = state.variables
+
+    vs.SA_rz = update(
+        vs.SA_rz,
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.re_rl = update(
+        vs.re_rl,
+        at[2:-2, 2:-2], npx.where(vs.re_rl[2:-2, 2:-2] > npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1), npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1), vs.re_rl[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.tt_re_rl = update(
+        vs.tt_re_rl,
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.re_rl, vs.sas_params_re_rl)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.TT_re_rl = update(
+        vs.TT_re_rl,
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_re_rl[2:-2, 2:-2, :], axis=-1),
+    )
+
+    # calculate solute travel time distribution
+    alpha = allocate(state.dimensions, ("x", "y"), fill=1)
+    vs.mtt_re_rl = update(
+        vs.mtt_re_rl,
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_re_rl, vs.re_rl, vs.msa_rz, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.C_re_rl = update(
+        vs.C_re_rl,
+        at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_re_rl, vs.tt_re_rl, vs.re_rl)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # update StorAge with flux
+    vs.sa_rz = update(
+        vs.sa_rz,
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_re_rl, vs.re_rl)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    # update isotope StorAge
+    vs.msa_rz = update(
+        vs.msa_rz,
+        at[2:-2, 2:-2, vs.tau, :], npx.where((vs.sa_rz[2:-2, 2:-2, vs.tau, :] > 0), vs.msa_rz[2:-2, 2:-2, vs.tau, :], npx.NaN) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.C_rz = update(
+        vs.C_rz,
+        at[2:-2, 2:-2, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.msa_ss = update(
+        vs.msa_ss,
+        at[2:-2, 2:-2, :, :], transport.calc_msa_iso(state, vs.sa_ss, vs.msa_ss, vs.re_rl, vs.tt_re_rl, vs.mtt_re_rl)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.sa_ss = update_add(
+        vs.sa_ss,
+        at[2:-2, 2:-2, vs.tau, :], vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rl=vs.tt_re_rl, TT_re_rl=vs.TT_re_rl, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, mtt_re_rl=vs.mtt_re_rl, C_re_rl=vs.C_re_rl, re_rl=vs.re_rl)
+
+
+@roger_kernel
+def calculate_redistribution_root_loss_transport_anion_kernel(state):
+    """
+    Calculates chloride/bromide/nitrate transport of redistribution after root loss
+    """
+    vs = state.variables
+
+    vs.SA_rz = update(
+        vs.SA_rz,
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.re_rl = update(
+        vs.re_rl,
+        at[2:-2, 2:-2], npx.where(vs.re_rl[2:-2, 2:-2] > npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1), npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1), vs.re_rl[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.tt_re_rl = update(
+        vs.tt_re_rl,
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.re_rl, vs.sas_params_re_rl)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.TT_re_rl = update(
+        vs.TT_re_rl,
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_re_rl[2:-2, 2:-2, :], axis=2),
+    )
+
+    # calculate isotope travel time distribution
+    vs.mtt_re_rl = update(
+        vs.mtt_re_rl,
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_re_rl, vs.re_rl, vs.msa_rz, vs.alpha_q)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.C_re_rl = update(
+        vs.C_re_rl,
+        at[2:-2, 2:-2], npx.where(vs.re_rg > 0, npx.sum(vs.mtt_re_rl, axis=2) / vs.re_rg, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # update StorAge with flux
+    vs.sa_rz = update(
+        vs.sa_rz,
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_re_rl, vs.re_rl)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+    vs.sa_ss = update_add(
+        vs.sa_ss,
+        at[2:-2, 2:-2, vs.tau, :], vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    # update solute StorAge of root zone
+    vs.msa_rz = update_add(
+        vs.msa_rz,
+        at[2:-2, 2:-2, vs.tau, :], -vs.mtt_re_rl[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+    vs.msa_ss = update_add(
+        vs.msa_ss,
+        at[2:-2, 2:-2, vs.tau, :], vs.mtt_re_rl[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rl=vs.tt_re_rl, TT_re_rl=vs.TT_re_rl, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, mtt_re_rl=vs.mtt_re_rl, C_re_rl=vs.C_re_rl, re_rl=vs.re_rl)
+
+
+@roger_routine
+def calculate_redistribution_transport(state):
+    """
+    Calculates trasnport of redistribution after root growth/root loss
+    """
+    vs = state.variables
+    settings = state.settings
+
+    if settings.enable_offline_transport and settings.enable_crop_phenology and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
+        vs.update(calculate_redistribution_root_growth_transport_kernel(state))
+        vs.update(calculate_redistribution_root_loss_transport_kernel(state))
+
+    if settings.enable_offline_transport and settings.enable_crop_phenology and (settings.enable_oxygen18 | settings.enable_deuterium):
+        vs.update(calculate_redistribution_root_growth_transport_iso_kernel(state))
+        vs.update(calculate_redistribution_root_loss_transport_iso_kernel(state))
+
+    if settings.enable_offline_transport and settings.enable_crop_phenology and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate):
+        vs.update(calculate_redistribution_root_growth_transport_anion_kernel(state))
+        vs.update(calculate_redistribution_root_loss_transport_anion_kernel(state))

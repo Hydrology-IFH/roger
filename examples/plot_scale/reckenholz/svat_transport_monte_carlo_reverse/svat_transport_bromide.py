@@ -95,10 +95,10 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
         settings.identifier = self._identifier
 
         settings.nx, settings.ny, settings.nz = self._get_nx(self._base_path, 'states_hm_monte_carlo.nc', group=self._lys), 1, 1
-        settings.nitt = self._get_nitt(self._base_path, 'forcing_tracer.nc')
+        settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
         settings.ages = settings.nitt
         settings.nages = settings.nitt + 1
-        settings.runlen = self._get_runlen(self._base_path, 'forcing_tracer.nc')
+        settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
 
         settings.dx = 1
         settings.dy = 1
@@ -377,7 +377,6 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
             "C_IN",
         ],
     )
-    @roger_routine
     def set_forcing_setup(self, state):
         vs = state.variables
 
@@ -394,7 +393,7 @@ class SVATCROPTRANSPORTSetup(RogerSetup):
         vs.RE_RG = update(vs.RE_RG, at[2:-2, 2:-2, :], self._read_var_from_nc("re_rg", self._base_path, 'states_hm_monte_carlo.nc', group=self._lys))
         vs.RE_RL = update(vs.RE_RL, at[2:-2, 2:-2, :], self._read_var_from_nc("re_rl", self._base_path, 'states_hm_monte_carlo.nc', group=self._lys))
 
-        vs.M_IN = update(vs.M_IN, at[2:-2, 2:-2, :], self._read_var_from_nc("Br", 'tracer_input.nc'))
+        vs.M_IN = update(vs.M_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("Br", self._input_dir, 'forcing_tracer.nc'))
 
         mask_rain = (vs.PREC > 0) & (vs.TA > 0)
         mask_sol = (vs.M_IN > 0)
@@ -450,7 +449,7 @@ def set_bromide_input_kernel(state, nn_rain, nn_sol):
         start_rain = rain_idx[input_itt]
         rain_sum = update(
             rain_sum,
-            at[:, :], npx.max(npx.where(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1) <= 20, npx.max(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1), axis=-1), 0), axis=-1),
+            at[:, :], npx.max(npx.where(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1) <= 20, npx.max(npx.cumsum(vs.PREC[:, :, start_rain:], axis=-1), axis=-1)[:, :, npx.newaxis], 0), axis=-1),
         )
         nn_end = npx.max(npx.where(npx.cumsum(vs.PREC[:, :, start_rain:]) <= 20, npx.max(npx.arange(npx.shape(vs.PREC)[2])[npx.newaxis, npx.newaxis, npx.shape(vs.PREC)[2]-start_rain], axis=-1), 0))
         end_rain = update(end_rain, at[:], start_rain + nn_end)
@@ -632,7 +631,7 @@ def after_timestep_kernel(state):
 
 
 nsamples = 10000  # number of samples
-lys_experiments = ["lys3_bromide", "lys8_bromide", "lys9_bromide"]
+lys_experiments = ["lys2_bromide", "lys8_bromide", "lys9_bromide"]
 tm_structures = ['complete-mixing', 'piston',
                  'preferential', 'complete-mixing + advection-dispersion',
                  'time-variant preferential',

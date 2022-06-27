@@ -498,13 +498,13 @@ def calculate_evaporation_transport_iso_kernel(state):
         at[2:-2, 2:-2, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(sa_rz=vs.sa_rz, tt_evap_soil=vs.tt_evap_soil, TT_evap_soil=vs.TT_evap_soil, msa_rz=vs.msa_rz, mtt_evap_soil=vs.mtt_evap_soil, C_evap_soil=vs.C_evap_soil)
+    return KernelOutput(sa_rz=vs.sa_rz, tt_evap_soil=vs.tt_evap_soil, TT_evap_soil=vs.TT_evap_soil, msa_rz=vs.msa_rz, C_rz=vs.C_rz, mtt_evap_soil=vs.mtt_evap_soil, C_evap_soil=vs.C_evap_soil)
 
 
 @roger_kernel
 def calculate_transpiration_transport_kernel(state):
     """
-    Calculates travel time of transpiration
+    Calculates transport of transpiration
     """
     vs = state.variables
 
@@ -570,7 +570,7 @@ def calculate_transpiration_transport_iso_kernel(state):
         vs.sa_rz,
         at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_transp, vs.transp)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
-    # update solute StorAge
+    # update isotope StorAge
     vs.msa_rz = update(
         vs.msa_rz,
         at[2:-2, 2:-2, vs.tau, :], npx.where((vs.sa_rz[2:-2, 2:-2, vs.tau, :] > 0), vs.msa_rz[2:-2, 2:-2, vs.tau, :], npx.NaN) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],

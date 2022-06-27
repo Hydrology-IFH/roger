@@ -31,12 +31,12 @@ def denit_soil(state, msa, km, Dmax, sa, S_sat, S_pwp):
     # no denitrification if storage is lower than 70 % of pore volume
     mr = update(
         mr,
-        at[2:-2, 2:-2, :], npx.where(S[2:-2, 2:-2, npx.newaxis] >= 0.7 * (S_sat[2:-2, 2:-2, npx.newaxis] - S_pwp[2:-2, 2:-2, npx.newaxis]), mr, 0) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.where(S[2:-2, 2:-2, npx.newaxis] >= 0.7 * (S_sat[2:-2, 2:-2, npx.newaxis] - S_pwp[2:-2, 2:-2, npx.newaxis]), mr[2:-2, 2:-2, :], 0) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     # limit denitrification to available solute mass
     mr = update(
         mr,
-        at[2:-2, 2:-2, :], npx.where(mr > msa[2:-2, 2:-2, vs.tau, :], msa[2:-2, 2:-2, vs.tau, :], mr) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.where(mr[2:-2, 2:-2, :] > msa[2:-2, 2:-2, vs.tau, :], msa[2:-2, 2:-2, vs.tau, :], mr[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return mr
@@ -71,7 +71,7 @@ def nit_soil(state, Nmin, knit, Dnit, sa, S_sat, S_pwp):
     # no nitrification if storage is greater than 70 % of pore volume
     ma = update(
         ma,
-        at[2:-2, 2:-2, :], npx.where(S[2:-2, 2:-2, npx.newaxis] < 0.7 * (S_sat[2:-2, 2:-2, npx.newaxis] - S_pwp[2:-2, 2:-2, npx.newaxis]), ma, 0) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.where(S[2:-2, 2:-2, npx.newaxis] < 0.7 * (S_sat[2:-2, 2:-2, npx.newaxis] - S_pwp[2:-2, 2:-2, npx.newaxis]), ma[2:-2, 2:-2, :], 0) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     # limit denitrification to available solute mass
     ma = update(
