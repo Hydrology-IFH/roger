@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-#SBATCH --partition=single
+#SBATCH --partition=multiple
 #SBATCH --job-name=transport_mc
-#SBATCH --nodes=1
-#SBATCH --ntasks=40
-#SBATCH --mem=180000mb
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=40
+#SBATCH --mem=90000mb
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL
