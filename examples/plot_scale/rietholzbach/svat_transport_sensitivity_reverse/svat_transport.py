@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 import os
 import h5netcdf
 
@@ -606,21 +607,17 @@ def _ffill_3d(state, arr):
     return arr_fill
 
 
-tm_structures = ['complete-mixing', 'piston',
-                 'preferential', 'advection-dispersion',
-                 'time-variant preferential',
-                 'time-variant advection-dispersion']
-for tm_structure in tm_structures:
-    tms = tm_structure.replace(" ", "_")
-    model = SVATTRANSPORTSetup()
-    model._set_tm_structure(tm_structure)
-    identifier = f'SVATTRANSPORT_{tms}'
-    model._set_identifier(identifier)
-    input_path = model._base_path / "input"
-    model._set_input_dir(input_path)
-    forcing_path = model._input_dir / "forcing_tracer.nc"
-    if not os.path.exists(forcing_path):
-        write_forcing_tracer(input_path, 'd18O')
-    model.setup()
-    model.warmup()
-    model.run()
+tms = sys.argv[1]
+tm_structure = tms.replace("_", " ")
+model = SVATTRANSPORTSetup()
+model._set_tm_structure(tm_structure)
+identifier = f'SVATTRANSPORT_{tms}'
+model._set_identifier(identifier)
+input_path = model._base_path / "input"
+model._set_input_dir(input_path)
+forcing_path = model._input_dir / "forcing_tracer.nc"
+if not os.path.exists(forcing_path):
+    write_forcing_tracer(input_path, 'd18O')
+model.setup()
+model.warmup()
+model.run()

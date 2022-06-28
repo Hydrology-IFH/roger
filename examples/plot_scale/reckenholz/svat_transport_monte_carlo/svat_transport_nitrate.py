@@ -768,23 +768,19 @@ def after_timestep_nitrate_kernel(state):
 
 nsamples = 10000  # number of samples
 lys_experiment = sys.argv[1]
-tm_structures = ['complete-mixing', 'piston',
-                 'preferential', 'complete-mixing + advection-dispersion',
-                 'time-variant preferential',
-                 'time-variant complete-mixing + advection-dispersion']
-for tm_structure in tm_structures:
-    tms = tm_structure.replace(" ", "_")
-    model = SVATCROPTRANSPORTSetup()
-    model._set_nsamples(nsamples)
-    model._set_lys(lys_experiment)
-    model._set_tm_structure(tm_structure)
-    identifier = f'SVATCROPTRANSPORT_{tms}_{lys_experiment}_nitrate'
-    model._set_identifier(identifier)
-    input_path = model._base_path / "input" / lys_experiment
-    model._set_input_dir(input_path)
-    forcing_path = model._input_dir / "forcing_tracer.nc"
-    if not os.path.exists(forcing_path):
-        write_forcing_tracer(input_path, 'NO3')
-    model.setup()
-    model.warmup()
-    model.run()
+tms = sys.argv[2]
+tm_structure = tms.replace("_", " ")
+model = SVATCROPTRANSPORTSetup()
+model._set_nsamples(nsamples)
+model._set_lys(lys_experiment)
+model._set_tm_structure(tm_structure)
+identifier = f'SVATCROPTRANSPORT_{tms}_{lys_experiment}_nitrate'
+model._set_identifier(identifier)
+input_path = model._base_path / "input" / lys_experiment
+model._set_input_dir(input_path)
+forcing_path = model._input_dir / "forcing_tracer.nc"
+if not os.path.exists(forcing_path):
+    write_forcing_tracer(input_path, 'NO3')
+model.setup()
+model.warmup()
+model.run()

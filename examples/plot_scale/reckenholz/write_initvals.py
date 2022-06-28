@@ -3,6 +3,7 @@ import pandas as pd
 import h5netcdf
 import datetime
 
+# write initial soil storage
 base_path = Path(__file__).parent
 csv_file = base_path / "initvals.csv"
 df_initvals = pd.read_csv(csv_file, sep=";", header=0, index_col=0)
