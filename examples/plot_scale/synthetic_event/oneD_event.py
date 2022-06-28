@@ -17,8 +17,8 @@ from roger.tools.make_toy_setup import make_forcing_event
 import numpy as onp
 
 
-class DISTEVENTSetup(RogerSetup):
-    """A distributed model for a single event.
+class ONEDEVENTSetup(RogerSetup):
+    """A 1D model for a single event.
     """
     _base_path = Path(__file__).parent
     _input_dir = None
@@ -369,7 +369,7 @@ rainfall_scenarios = ["rain", "block-rain", "rain-with-break", "heavyrain",
                       "heavyrain-gamma-reverse", "block-heavyrain"]
 
 for rainfall_scenario in rainfall_scenarios:
-    model = DISTEVENTSetup()
+    model = ONEDEVENTSetup()
     path_input = model._base_path / "input"
     path_scenario = model._base_path / "input" / rainfall_scenario
     model._set_input_dir(path_scenario)

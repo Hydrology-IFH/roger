@@ -22,11 +22,16 @@ class ONEDEVENTSetup(RogerSetup):
             if not os.path.exists(self._input_dir):
                 os.mkdir(self._input_dir)
 
-    def _read_var_from_nc(self, var, path_dir, file):
+    def _read_var_from_nc(self, var, path_dir, file, group=None):
         nc_file = path_dir / file
-        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables[var]
-            return npx.array(var_obj)
+        if group:
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.groups[group].variables[var]
+                return npx.array(var_obj)
+        else:
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables[var]
+                return npx.array(var_obj)
 
     def _get_nitt(self, path_dir, file):
         nc_file = path_dir / file
@@ -142,7 +147,7 @@ class ONEDEVENTSetup(RogerSetup):
         vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
         vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.4)
         vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.47)
-        vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 250)
+        vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 0)
 
     @roger_routine
     def set_forcing_setup(self, state):
@@ -194,14 +199,6 @@ def after_timestep_kernel(state):
     vs.ta = update(
         vs.ta,
         at[2:-2, 2:-2, vs.taum1], vs.ta[2:-2, 2:-2, vs.tau],
-    )
-    vs.z_root = update(
-        vs.z_root,
-        at[2:-2, 2:-2, vs.taum1], vs.z_root[2:-2, 2:-2, vs.tau],
-    )
-    vs.ground_cover = update(
-        vs.ground_cover,
-        at[2:-2, 2:-2, vs.taum1], vs.ground_cover[2:-2, 2:-2, vs.tau],
     )
     vs.S_sur = update(
         vs.S_sur,
@@ -314,8 +311,6 @@ def after_timestep_kernel(state):
 
     return KernelOutput(
         ta=vs.ta,
-        z_root=vs.z_root,
-        ground_cover=vs.ground_cover,
         S_sur=vs.S_sur,
         S_int_top=vs.S_int_top,
         S_int_ground=vs.S_int_ground,

@@ -23,11 +23,16 @@ class ONEDSetup(RogerSetup):
             if not os.path.exists(self._input_dir):
                 os.mkdir(self._input_dir)
 
-    def _read_var_from_nc(self, var, path_dir, file):
+    def _read_var_from_nc(self, var, path_dir, file, group=None):
         nc_file = path_dir / file
-        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables[var]
-            return npx.array(var_obj)
+        if group:
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.groups[group].variables[var]
+                return npx.array(var_obj)
+        else:
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables[var]
+                return npx.array(var_obj)
 
     def _get_nittevent(self, path_dir, file):
         nc_file = path_dir / file
@@ -64,6 +69,7 @@ class ONEDSetup(RogerSetup):
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
+        settings.time_origin = "2010-09-30 00:00:00"
 
         settings.enable_groundwater_boundary = False
         settings.enable_lateral_flow = True
@@ -169,7 +175,7 @@ class ONEDSetup(RogerSetup):
         vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
         vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.4)
         vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.47)
-        vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 250)
+        vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 0)
 
     @roger_routine
     def set_forcing_setup(self, state):
@@ -509,6 +515,23 @@ def after_timestep_kernel(state):
         vs.z0,
         at[2:-2, 2:-2, vs.taum1], vs.z0[2:-2, 2:-2, vs.tau],
     )
+    # set to 0 for numerical errors
+    vs.S_fp_rz = update(
+        vs.S_fp_rz,
+        at[2:-2, 2:-2], npx.where((vs.S_fp_rz > -1e-6) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz)[2:-2, 2:-2],
+    )
+    vs.S_lp_rz = update(
+        vs.S_lp_rz,
+        at[2:-2, 2:-2], npx.where((vs.S_lp_rz > -1e-6) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz)[2:-2, 2:-2],
+    )
+    vs.S_fp_ss = update(
+        vs.S_fp_ss,
+        at[2:-2, 2:-2], npx.where((vs.S_fp_ss > -1e-6) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss)[2:-2, 2:-2],
+    )
+    vs.S_lp_ss = update(
+        vs.S_lp_ss,
+        at[2:-2, 2:-2], npx.where((vs.S_lp_ss > -1e-6) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss)[2:-2, 2:-2],
+    )
 
     return KernelOutput(
         ta=vs.ta,
@@ -542,4 +565,8 @@ def after_timestep_kernel(state):
         k_rz=vs.k_rz,
         k_ss=vs.k_ss,
         k=vs.k,
+        S_fp_rz=vs.S_fp_rz,
+        S_lp_rz=vs.S_lp_rz,
+        S_fp_ss=vs.S_fp_ss,
+        S_lp_ss=vs.S_lp_ss,
     )
