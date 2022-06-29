@@ -1,5 +1,5 @@
 from pathlib import Path
-import os
+import subprocess
 
 base_path = Path(__file__).parent
 transport_models_abrev = {'complete-mixing': 'cm',
@@ -37,11 +37,11 @@ for tm in transport_models:
     lines.append(' \n')
     lines.append('# adapt command to your available scheduler / MPI implementation\n')
     lines.append('conda activate roger-mpi\n')
-    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py {tms}\n')
+    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 40 1 -ns 10000 -tms {tms}\n')
     file_path = base_path / f'{script_name}.sh'
     file = open(file_path, "w")
     file.writelines(lines)
     file.close()
-    os.system(f"chmod +x {script_name}.sh")
+    subprocess.Popen(f"chmod +x {script_name}.sh", shell=True)
 
-os.system("chmod +x submit.sh")
+subprocess.Popen("chmod +x submit.sh", shell=True)

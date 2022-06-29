@@ -182,22 +182,22 @@ VARIABLES = {
         None,
         "",
         "Index of current time step",
-        dtype="int32",
+        dtype="int64",
         initial=1,
         write_to_restart=True,
     ),
     "taup1": Variable(
-        "Index of next time step", None, "", "Index of next time step", dtype="int32", initial=2, write_to_restart=True
+        "Index of next time step", None, "", "Index of next time step", dtype="int64", initial=2, write_to_restart=True
     ),
     "taum1": Variable(
-        "Index of last time step", None, "", "Index of last time step", dtype="int32", initial=0, write_to_restart=True
+        "Index of last time step", None, "", "Index of last time step", dtype="int64", initial=0, write_to_restart=True
     ),
     "tau_event": Variable(
         "Index of current time step within event",
         None,
         "",
         "Index of current time step within event",
-        dtype="int32",
+        dtype="int64",
         initial=0,
         write_to_restart=True,
     ),
@@ -248,11 +248,11 @@ VARIABLES = {
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport,
     ),
-    "itt": Variable("Current iteration", None, "", "Current iteration", dtype="int32", initial=0),
-    "itt_cr": Variable("Current iteration of crop rotation", None, "", "Current iteration of crop rotation", dtype="int32", initial=2),
-    "year": Variable("Year at current iteration", None, "", "Year at Current iteration", dtype="int32", initial=1900),
-    "month": Variable("Month at current iteration", None, "", "Month at Current iteration", dtype="int32", initial=1),
-    "doy": Variable("Day of year at current iteration", None, "", "Day of year at Current iteration", dtype="int32", initial=1),
+    "itt": Variable("Current iteration", None, "", "Current iteration", dtype="int64", initial=0, write_to_restart=True),
+    "itt_cr": Variable("Current iteration of crop rotation", None, "", "Current iteration of crop rotation", dtype="int64", initial=2, write_to_restart=True),
+    "year": Variable("Year at current iteration", None, "", "Year at Current iteration", dtype="int64", initial=1900, write_to_restart=True),
+    "month": Variable("Month at current iteration", None, "", "Month at Current iteration", dtype="int64", initial=1, write_to_restart=True),
+    "doy": Variable("Day of year at current iteration", None, "", "Day of year at Current iteration", dtype="int64", initial=1, write_to_restart=True),
     "dt": Variable(
         "time step",
         None,
@@ -285,7 +285,7 @@ VARIABLES = {
         None,
         "",
         "Event number",
-        dtype="int32",
+        dtype="int64",
         initial=0,
         write_to_restart=True,
     ),
@@ -294,7 +294,7 @@ VARIABLES = {
         None,
         "",
         "iteration when new event starts",
-        dtype="int32",
+        dtype="int64",
         initial=0,
         write_to_restart=True,
     ),
@@ -303,7 +303,7 @@ VARIABLES = {
         None,
         "",
         "iteration when new event restarts after rainfall pause",
-        dtype="int32",
+        dtype="int64",
         initial=0,
         write_to_restart=True,
     ),
@@ -312,7 +312,7 @@ VARIABLES = {
         None,
         "",
         "iteration when new event stops",
-        dtype="int32",
+        dtype="int64",
         initial=0,
         write_to_restart=True,
     ),
@@ -321,7 +321,7 @@ VARIABLES = {
         TIME,
         "",
         "year",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
     ),
     "MONTH": Variable(
@@ -329,7 +329,7 @@ VARIABLES = {
         TIME,
         "",
         "month",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
     ),
     "DOY": Variable(
@@ -337,7 +337,7 @@ VARIABLES = {
         TIME,
         "",
         "day of year",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
     ),
     # base variables
@@ -346,6 +346,7 @@ VARIABLES = {
         CATCH_GRID,
         "",
         "Mask in physical space for catchment",
+        write_to_restart=True,
         time_dependent=False,
         dtype="bool",
     ),
@@ -354,6 +355,7 @@ VARIABLES = {
         RIVER_GRID,
         "",
         "Mask in physical space for river",
+        write_to_restart=True,
         time_dependent=False,
         dtype="bool",
     ),
@@ -363,6 +365,7 @@ VARIABLES = {
         "",
         "Mask in physical space for lake",
         time_dependent=False,
+        write_to_restart=True,
         dtype="bool",
     ),
     "maskUrban": Variable(
@@ -371,6 +374,7 @@ VARIABLES = {
         "",
         "Mask in physical space for urban",
         time_dependent=False,
+        write_to_restart=True,
         dtype="bool",
         active=lambda settings: settings.enable_urban,
     ),
@@ -380,6 +384,7 @@ VARIABLES = {
         "",
         "Mask in physical space for boundaries",
         time_dependent=False,
+        write_to_restart=True,
         dtype="bool",
         active=lambda settings: settings.enable_groundwater,
     ),
@@ -389,6 +394,7 @@ VARIABLES = {
         lambda settings: "degrees_east" if settings.coord_degree else "m",
         "Zonal (x) coordinate of grid center point",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "y": Variable(
         "Meridional coordinate",
@@ -396,6 +402,7 @@ VARIABLES = {
         lambda settings: "degrees_north" if settings.coord_degree else "m",
         "Meridional (y) coordinate of grid center point",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "z": Variable(
         "Vertical coordinate of grid center point",
@@ -403,6 +410,7 @@ VARIABLES = {
         "mm",
         "Vertical coordinate of grid center point",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "t": Variable(
         "Time coordinate",
@@ -410,6 +418,7 @@ VARIABLES = {
         "",
         "Time coordinat",
         time_dependent=False,
+        write_to_restart=True,
     ),
     # surface parameters
     "lu_id": Variable(
@@ -417,8 +426,9 @@ VARIABLES = {
         CATCH_GRID,
         "m",
         "Land use",
-        dtype="int32",
+        dtype="int64",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "sealing": Variable(
         "degree of surface sealing",
@@ -426,6 +436,7 @@ VARIABLES = {
         "%",
         "degree of surface sealing",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "z0": Variable(
         "depth of the surface ponding",
@@ -480,14 +491,16 @@ VARIABLES = {
         "m/m",
         "surface slope",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "slope_per": Variable(
         "surface slope",
         CATCH_GRID,
         "%",
         "surface slope",
-        dtype="int32",
+        dtype="int64",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_dep_tot": Variable(
         "total surface depression storage",
@@ -495,18 +508,21 @@ VARIABLES = {
         "mm",
         "total surface depression storage",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "ground_cover": Variable(
         "fraction of ground cover",
         CATCH_GRID + TIMESTEPS,
         "-",
         "fraction of ground cover",
+        write_to_restart=True,
     ),
     "lai": Variable(
         "leaf area index",
         CATCH_GRID,
         "-",
         "leaf area index",
+        write_to_restart=True,
     ),
     "basal_evap_coeff": Variable(
         "basal soil evaporation coefficient",
@@ -549,18 +565,21 @@ VARIABLES = {
         CATCH_GRID,
         "-",
         "total interception storage of top surface layer",
+        write_to_restart=True,
     ),
     "S_int_ground_tot": Variable(
         "total interception storage of ground surface layer",
         CATCH_GRID,
         "-",
         "total interception storage of ground surface layer",
+        write_to_restart=True,
     ),
     "S": Variable(
         "storage",
         CATCH_GRID + TIMESTEPS,
         "mm",
         "storage",
+        write_to_restart=True,
     ),
     "dS": Variable(
         "storage change",
@@ -574,6 +593,7 @@ VARIABLES = {
         CATCH_GRID + TIMESTEPS,
         "mm",
         "snow storage",
+        write_to_restart=True,
     ),
     "dS_snow": Variable(
         "change in snow storage",
@@ -586,30 +606,35 @@ VARIABLES = {
         CATCH_GRID + TIMESTEPS,
         "mm",
         "snow water equivalent",
+        write_to_restart=True,
     ),
     "swe_top": Variable(
         "snow water equivalent",
         CATCH_GRID + TIMESTEPS,
         "mm",
         "snow water equivalent stored in snow cover of top surface layer",
+        write_to_restart=True,
     ),
     "swe_ground": Variable(
         "snow water equivalent",
         CATCH_GRID + TIMESTEPS,
         "mm",
         "snow water equivalent stored in snow cover of ground surface layer",
+        write_to_restart=True,
     ),
     "S_dep": Variable(
         "surface depression storage",
         CATCH_GRID + TIMESTEPS,
         "mm",
         "surface depression storage",
+        write_to_restart=True,
     ),
     "S_sur": Variable(
         "surface storage",
         CATCH_GRID + TIMESTEPS,
         "mm",
         "surface storage",
+        write_to_restart=True,
     ),
     "dS_sur": Variable(
         "change in surface storage",
@@ -645,6 +670,7 @@ VARIABLES = {
         "mm",
         "Soil depth",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "clay": Variable(
         "fraction of clay content in soil",
@@ -652,6 +678,7 @@ VARIABLES = {
         "-",
         "fraction of clay content in soil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "sand": Variable(
         "fraction of sand content in soil",
@@ -659,6 +686,7 @@ VARIABLES = {
         "-",
         "fraction of sand content in soil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "lmpv": Variable(
         "length of vertical macropores",
@@ -666,6 +694,7 @@ VARIABLES = {
         "mm",
         "length of vertical macropores",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "lmpv_non_sat": Variable(
         "non-saturated length of vertical macropores",
@@ -673,18 +702,21 @@ VARIABLES = {
         "mm",
         "non-saturated length of vertical macropores",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "z_sc": Variable(
         "depth of shrinkage cracks",
         CATCH_GRID,
         "mm",
         "depth of shrinkage cracks",
+        write_to_restart=True,
     ),
     "z_sc_non_sat": Variable(
         "non-saturated depth of shrinkage cracks",
         CATCH_GRID,
         "mm",
         "non-saturated depth of shrinkage cracks",
+        write_to_restart=True,
     ),
     "dmpv": Variable(
         "density of vertical macropores",
@@ -692,6 +724,7 @@ VARIABLES = {
         "1/m^2",
         "density of vertical macropores",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "mp_drain_area": Variable(
         "drainage area of vertical macropores",
@@ -699,6 +732,7 @@ VARIABLES = {
         "%",
         "drainage area of vertical macropore",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "dmph": Variable(
         "density of horizontal macropores",
@@ -706,6 +740,7 @@ VARIABLES = {
         "1/m^2",
         "density of horizontal macropores",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_lateral_flow,
     ),
     "theta_ufc": Variable(
@@ -714,6 +749,7 @@ VARIABLES = {
         "-",
         "usable field capacity of soil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "theta_ac": Variable(
         "air capacity of soil",
@@ -721,6 +757,7 @@ VARIABLES = {
         "-",
         "air capacity of soil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "theta_pwp": Variable(
         "permanent wilting point of soil",
@@ -728,6 +765,7 @@ VARIABLES = {
         "-",
         "permanent wilting point of soil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "theta_sat": Variable(
         "soil water content at saturation",
@@ -735,6 +773,7 @@ VARIABLES = {
         "-",
         "soil water content at saturation",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "theta_fc": Variable(
         "soil water content at field capacity",
@@ -742,6 +781,7 @@ VARIABLES = {
         "-",
         "soil water content at field capacity",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "theta_27": Variable(
         "soil water content at 2700 hPa potential",
@@ -749,6 +789,7 @@ VARIABLES = {
         "-",
         "soil water content at 2700 hPa potential",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "theta_4": Variable(
         "soil water content at 4000 hPa potential",
@@ -756,6 +797,7 @@ VARIABLES = {
         "-",
         "soil water content at 4000 hPa potential",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "theta_6": Variable(
         "soil water content at 6000 hPa potential",
@@ -763,6 +805,7 @@ VARIABLES = {
         "-",
         "soil water content at 6000 hPa potential",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "theta_pc": Variable(
         "soil water content threshold for deep percolation and capillary rise",
@@ -770,6 +813,7 @@ VARIABLES = {
         "-",
         "soil water content threshold for deep percolation and capillary rise",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_ufc_s": Variable(
         "usable field capacity of soil",
@@ -777,6 +821,7 @@ VARIABLES = {
         "mm",
         "usable field capacity of soil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_ac_s": Variable(
         "air capacity of soil",
@@ -784,6 +829,7 @@ VARIABLES = {
         "mm",
         "air capacity of soil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_pwp_s": Variable(
         "permanent wilting point of soil",
@@ -791,6 +837,7 @@ VARIABLES = {
         "mm",
         "permanent wilting point of soil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_sat_s": Variable(
         "soil water content at saturation",
@@ -798,6 +845,7 @@ VARIABLES = {
         "mm",
         "soil water content at saturation",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_fc_s": Variable(
         "soil water content at field capacity",
@@ -805,6 +853,7 @@ VARIABLES = {
         "mm",
         "soil water content at field capacity",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "wfs": Variable(
         "water front suction",
@@ -812,6 +861,7 @@ VARIABLES = {
         "mm",
         "water front suction",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "ks": Variable(
         "Saturated hydraulic conductivity",
@@ -819,6 +869,7 @@ VARIABLES = {
         "mm/h",
         "Saturated hydraulic conductivity",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "ha": Variable(
         "air entry value",
@@ -826,6 +877,7 @@ VARIABLES = {
         "hpa",
         "air entry value",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "lambda_bc": Variable(
         "pore-size distribution index",
@@ -833,6 +885,7 @@ VARIABLES = {
         "-",
         "pore-size distribution index",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "m_bc": Variable(
         "pore-connectivity parameter",
@@ -840,6 +893,7 @@ VARIABLES = {
         "-",
         "pore-connectivity parameter",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "n_salv": Variable(
         "salvucci exponent",
@@ -847,6 +901,7 @@ VARIABLES = {
         "-",
         "salvucci exponent",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "z_sc_max": Variable(
         "maximum depth of shrinkage cracks",
@@ -854,6 +909,7 @@ VARIABLES = {
         "mm",
         "maximum depth of shrinkage cracks",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "v_mp_layer_1": Variable(
         "macropore flow velocity in the first layer",
@@ -924,7 +980,7 @@ VARIABLES = {
         None,
         "",
         "Film flow event number",
-        dtype="int32",
+        dtype="int64",
         initial=0,
         write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
@@ -934,7 +990,7 @@ VARIABLES = {
         None,
         "",
         "Film flow event number",
-        dtype="int32",
+        dtype="int64",
         initial=0,
         write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
@@ -944,7 +1000,7 @@ VARIABLES = {
         NEVENTS_FF,
         "",
         "iteration when new film flow event starts",
-        dtype="int32",
+        dtype="int64",
         initial=0,
         write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
@@ -954,7 +1010,7 @@ VARIABLES = {
         NEVENTS_FF,
         "",
         "iteration when film flow event stops",
-        dtype="int32",
+        dtype="int64",
         initial=0,
         write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
@@ -965,6 +1021,7 @@ VARIABLES = {
         "mm/10min",
         "rainfall intensity of film flow input pulse",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "rain_event": Variable(
@@ -1009,6 +1066,7 @@ VARIABLES = {
         "10min",
         "time of film flow event",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "ti_ff": Variable(
@@ -1017,6 +1075,7 @@ VARIABLES = {
         "10min",
         "time of intersection between wetting front and drainage front",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "tb_ff": Variable(
@@ -1025,6 +1084,7 @@ VARIABLES = {
         "10min",
         "time at beginning of rainfall input pulse",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "ts_ff": Variable(
@@ -1033,6 +1093,7 @@ VARIABLES = {
         "10min",
         "time at end of rainfall input pulse",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "tw_ff": Variable(
@@ -1041,6 +1102,7 @@ VARIABLES = {
         "10min",
         "time at arrival of wetting front at soil depth",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "tp_ff": Variable(
@@ -1049,6 +1111,7 @@ VARIABLES = {
         "10min",
         "time at arrival of percolation front at soil depth",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "qs_ff": Variable(
@@ -1057,6 +1120,7 @@ VARIABLES = {
         "m/s",
         "volume flux density of film flow",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "zi_ff": Variable(
@@ -1065,6 +1129,7 @@ VARIABLES = {
         "mm",
         "depth of intersection between wetting front and drainage front",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "rain_ff": Variable(
@@ -1073,6 +1138,7 @@ VARIABLES = {
         "mm/10min",
         "rainfall pulse of film flow",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "v_wf": Variable(
@@ -1081,6 +1147,7 @@ VARIABLES = {
         "mm/dt",
         "velocity of film flow wetting front",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "v_perc": Variable(
@@ -1089,6 +1156,7 @@ VARIABLES = {
         "mm/dt",
         "velocity of film flow percolation front",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "ff_abs_rz": Variable(
@@ -1121,6 +1189,7 @@ VARIABLES = {
         "-",
         "relative saturation deficit of root zone",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "theta_d_rel_ss_ff": Variable(
@@ -1129,6 +1198,7 @@ VARIABLES = {
         "-",
         "relative saturation deficit of subsoil",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "S_f_rz": Variable(
@@ -1137,6 +1207,7 @@ VARIABLES = {
         "mm",
         "film volume of root zone",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "S_f_ss": Variable(
@@ -1145,6 +1216,7 @@ VARIABLES = {
         "mm",
         "film volume of subsoil",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "S_f": Variable(
@@ -1153,6 +1225,7 @@ VARIABLES = {
         "mm",
         "film volume",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "ff_drain": Variable(
@@ -1169,6 +1242,7 @@ VARIABLES = {
         "-",
         "soil water content including film flow of root zone",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "theta_ss_ff": Variable(
@@ -1177,6 +1251,7 @@ VARIABLES = {
         "-",
         "soil water content including film flow of subsoil",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "theta_ff": Variable(
@@ -1185,6 +1260,7 @@ VARIABLES = {
         "-",
         "soil water content including film flow",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "S_rz_ff": Variable(
@@ -1193,6 +1269,7 @@ VARIABLES = {
         "-",
         "storage of root zone including film flow",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "S_ss_ff": Variable(
@@ -1201,6 +1278,7 @@ VARIABLES = {
         "-",
         "storage of subsoil including film flow",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "S_ff": Variable(
@@ -1209,6 +1287,7 @@ VARIABLES = {
         "-",
         "storage including film flow",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "itt_event_ff": Variable(
@@ -1216,8 +1295,9 @@ VARIABLES = {
         NEVENTS_FF,
         "",
         "iteration within film flow event",
-        dtype="int32",
+        dtype="int64",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "z_wf_ff": Variable(
@@ -1226,6 +1306,7 @@ VARIABLES = {
         "mm",
         "depth of water content wave",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "z_pf_ff": Variable(
@@ -1234,6 +1315,7 @@ VARIABLES = {
         "mm",
         "depth of percolation front",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "z_pf": Variable(
@@ -1242,6 +1324,7 @@ VARIABLES = {
         "mm",
         "depth of percolation front",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "a_ff": Variable(
@@ -1250,6 +1333,7 @@ VARIABLES = {
         "-",
         "film flow parameter",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "c_ff": Variable(
@@ -1258,6 +1342,7 @@ VARIABLES = {
         "-",
         "fudge parameter of film flow abstraction",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_film_flow,
     ),
     "kf": Variable(
@@ -1266,6 +1351,7 @@ VARIABLES = {
         "mm/h",
         "vertical hydraulic conductivity of bedrock",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "theta": Variable(
         "Soil water content",
@@ -1281,6 +1367,7 @@ VARIABLES = {
         "-",
         "Soil water content in fine pores",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "theta_lp": Variable(
         "Soil water content in large pores",
@@ -1288,6 +1375,7 @@ VARIABLES = {
         "-",
         "Soil water content in large pores",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "theta_d": Variable(
         "soil moisture deficit",
@@ -1295,6 +1383,7 @@ VARIABLES = {
         "-",
         "soil moisture deficit",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "theta_d_fp": Variable(
         "soil moisture deficit in fine pores",
@@ -1302,6 +1391,7 @@ VARIABLES = {
         "-",
         "soil moisture deficit in fine pores",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "theta_d_rel": Variable(
         "relative soil moisture deficit",
@@ -1309,6 +1399,7 @@ VARIABLES = {
         "-",
         "relative soil moisture deficit",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "theta_d_rel_t0": Variable(
         "relative soil moisture deficit at beginning of event",
@@ -1316,6 +1407,7 @@ VARIABLES = {
         "-",
         "relative soil moisture deficit at beginning of event",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "theta_d_rel_t1": Variable(
         "relative soil moisture deficit after rainfall pause",
@@ -1323,6 +1415,7 @@ VARIABLES = {
         "-",
         "relative soil moisture deficit after rainfall pause",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "theta_d_t0": Variable(
         "soil moisture deficit at beginning of event",
@@ -1330,6 +1423,7 @@ VARIABLES = {
         "-",
         "soil moisture deficit at beginning of event",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "theta_d_t1": Variable(
         "soil moisture deficit after rainfall pause",
@@ -1337,6 +1431,7 @@ VARIABLES = {
         "-",
         "soil moisture deficit after rainfall pause",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "S_s": Variable(
         "soil water content",
@@ -1359,6 +1454,7 @@ VARIABLES = {
         "mm",
         "soil water content in fine pores",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_lp_s": Variable(
         "soil water content in large pores",
@@ -1366,6 +1462,7 @@ VARIABLES = {
         "mm",
         "soil water content in large pores",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_zsat": Variable(
         "soil water content in large pores below saturation water level",
@@ -1373,6 +1470,7 @@ VARIABLES = {
         "mm",
         "soil water content in large pores below saturation water level",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "k": Variable(
         "hydraulic conductivity of soil",
@@ -1380,6 +1478,7 @@ VARIABLES = {
         "mm/h",
         "hydraulic conductivity of soil",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "h": Variable(
         "soil water potential",
@@ -1387,6 +1486,7 @@ VARIABLES = {
         "hPa",
         "soil water potential",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "y_mp": Variable(
         "radial length of macropore wetting front",
@@ -1529,6 +1629,7 @@ VARIABLES = {
         "mm",
         "water StorAge of soil",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "SA_s": Variable(
@@ -1546,6 +1647,7 @@ VARIABLES = {
         "mg",
         "solute mass StorAge of soil",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "MSA_s": Variable(
@@ -1563,6 +1665,7 @@ VARIABLES = {
         "mg",
         "solute mass of soil",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "C_s": Variable(
@@ -1571,6 +1674,7 @@ VARIABLES = {
         "mg/l or per mil",
         "solute concentration of soil",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "mr_s": Variable(
@@ -1621,6 +1725,7 @@ VARIABLES = {
         "mm",
         "total evaporable water",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "rew": Variable(
         "readily evaporable water",
@@ -1628,6 +1733,7 @@ VARIABLES = {
         "mm",
         "readily evaporable water",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "de": Variable(
         "accumulated soil evaporation deficit",
@@ -1635,6 +1741,7 @@ VARIABLES = {
         "mm",
         "accumulated soil evaporation deficit",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "theta_water_stress": Variable(
         "soil water content below water stress of plants starts",
@@ -1642,6 +1749,7 @@ VARIABLES = {
         "-",
         "soil water content below water stress of plants starts",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "water_stress_fp": Variable(
         "fraction of extractable fine pore storage for plant",
@@ -1649,6 +1757,7 @@ VARIABLES = {
         "-",
         "fraction of extractable fine pore storage for plant",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "k_rz": Variable(
         "hydraulic conductivity of root zone",
@@ -1656,6 +1765,7 @@ VARIABLES = {
         "mm/h",
         "hydraulic conductivity of root zone",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "h_rz": Variable(
         "soil water potential of root zone",
@@ -1663,6 +1773,7 @@ VARIABLES = {
         "hPa",
         "soil water potential of root zone",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "theta_rz": Variable(
         "Soil moisture in root zone",
@@ -1707,6 +1818,7 @@ VARIABLES = {
         "mm",
         "soil water content of fine pores in root zone",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_lp_rz": Variable(
         "soil water content of large pores in root zone",
@@ -1714,6 +1826,7 @@ VARIABLES = {
         "mm",
         "soil water content of large pores in root zone",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_zsat_rz": Variable(
         "soil water content in large pores below saturation water level",
@@ -1728,6 +1841,7 @@ VARIABLES = {
         "mm",
         "soil water content at permanent wilting point in root zone",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_fc_rz": Variable(
         "soil water content at field capacity in root zone",
@@ -1735,6 +1849,7 @@ VARIABLES = {
         "mm",
         "soil water content at field capacity in root zone",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_sat_rz": Variable(
         "soil water content at saturation in root zone",
@@ -1742,6 +1857,7 @@ VARIABLES = {
         "mm",
         "soil water content at saturation in root zone",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_ufc_rz": Variable(
         "usable field capacity of root zone",
@@ -1749,6 +1865,7 @@ VARIABLES = {
         "mm",
         "usable field capacity of root zone",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_ac_rz": Variable(
         "air capacity of root zone",
@@ -1756,6 +1873,7 @@ VARIABLES = {
         "mm",
         "air capacity of root zone",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "sa_rz": Variable(
         "water StorAge of root zone",
@@ -1763,6 +1881,7 @@ VARIABLES = {
         "mm",
         "water StorAge of root zone",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "SA_rz": Variable(
@@ -1780,6 +1899,7 @@ VARIABLES = {
         "mg",
         "solute mass StorAge of root zone",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "MSA_rz": Variable(
@@ -1797,6 +1917,7 @@ VARIABLES = {
         "mg",
         "solute mass of root zone",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "C_rz": Variable(
@@ -1805,6 +1926,7 @@ VARIABLES = {
         "mg/l or per mil",
         "solute concentration of root zone",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "km_denit_rz": Variable(
@@ -1812,7 +1934,7 @@ VARIABLES = {
         CATCH_GRID,
         "kg N ha-1 year-1",
         "Michaelis constant for denitrification",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
@@ -1821,7 +1943,7 @@ VARIABLES = {
         CATCH_GRID,
         "kg N ha-1 year-1",
         "maximum denitrification rate",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
@@ -1830,7 +1952,7 @@ VARIABLES = {
         CATCH_GRID,
         "kg N ha-1 year-1",
         "Michaelis constant for nitrification",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
@@ -1839,7 +1961,7 @@ VARIABLES = {
         CATCH_GRID,
         "kg N ha-1 year-1",
         "maximum nitrification rate",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
@@ -1848,7 +1970,7 @@ VARIABLES = {
         CATCH_GRID,
         "kg N ha-1 year-1",
         "constant mineralization rate",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
@@ -1884,6 +2006,7 @@ VARIABLES = {
         "mm/h",
         "hydraulic conductivity of subsoil",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "h_ss": Variable(
         "soil water potential of subsoil",
@@ -1891,6 +2014,7 @@ VARIABLES = {
         "hPa",
         "soil water potential of subsoil",
         time_dependent=True,
+        write_to_restart=True,
     ),
     "theta_ss": Variable(
         "Soil moisture in subsoil",
@@ -1934,6 +2058,7 @@ VARIABLES = {
         "mm",
         "soil water content of fine pores in subsoil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_lp_ss": Variable(
         "soil water content of large pores in subsoil",
@@ -1941,6 +2066,7 @@ VARIABLES = {
         "mm",
         "soil water content of large pores in subsoil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_zsat_ss": Variable(
         "soil water content in large pores below saturation water level",
@@ -1948,6 +2074,7 @@ VARIABLES = {
         "mm",
         "soil water content in large pores below saturation water level",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_pwp_ss": Variable(
         "soil water content at permanent wilting point in subsoil",
@@ -1955,6 +2082,7 @@ VARIABLES = {
         "mm",
         "soil water content at permanent wilting point in subsoil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_fc_ss": Variable(
         "soil water content at field capacity in subsoil",
@@ -1962,6 +2090,7 @@ VARIABLES = {
         "mm",
         "soil water content at field capacity in subsoil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_sat_ss": Variable(
         "soil water content at saturation in subsoil",
@@ -1969,6 +2098,7 @@ VARIABLES = {
         "mm",
         "soil water content at saturation in subsoil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_ufc_ss": Variable(
         "usable field capacity of subsoil",
@@ -1976,6 +2106,7 @@ VARIABLES = {
         "mm",
         "usable field capacity of subsoil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "S_ac_ss": Variable(
         "air capacity of subsoil",
@@ -1983,6 +2114,7 @@ VARIABLES = {
         "mm",
         "air capacity of subsoil",
         time_dependent=False,
+        write_to_restart=True,
     ),
     "sa_ss": Variable(
         "water StorAge of subsoil",
@@ -1990,6 +2122,7 @@ VARIABLES = {
         "mm",
         "water StorAge of subsoil",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "SA_ss": Variable(
@@ -2007,6 +2140,7 @@ VARIABLES = {
         "mg",
         "solute mass StorAge of subsoil",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "MSA_ss": Variable(
@@ -2024,6 +2158,7 @@ VARIABLES = {
         "mg",
         "solute mass of subsoil",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "C_ss": Variable(
@@ -2032,6 +2167,7 @@ VARIABLES = {
         "mg/l or per mil",
         "solute concentration of subsoil",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "km_denit_ss": Variable(
@@ -2039,7 +2175,7 @@ VARIABLES = {
         CATCH_GRID,
         "kg N ha-1 year-1",
         "Michaelis constant for denitrification",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
@@ -2048,7 +2184,7 @@ VARIABLES = {
         CATCH_GRID,
         "kg N ha-1 year-1",
         "maximum denitrification rate",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
@@ -2057,7 +2193,7 @@ VARIABLES = {
         CATCH_GRID,
         "kg N ha-1 year-1",
         "Michaelis constant for nitrification",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
@@ -2066,7 +2202,7 @@ VARIABLES = {
         CATCH_GRID,
         "kg N ha-1 year-1",
         "maximum nitrification rate",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
@@ -2075,6 +2211,7 @@ VARIABLES = {
         CATCH_GRID,
         "kg N ha-1 year-1",
         "constant mineralization rate",
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
@@ -2110,6 +2247,7 @@ VARIABLES = {
         "mm",
         "total groundwater storage",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_groundwater,
     ),
     "z_gw_tot": Variable(
@@ -2118,6 +2256,7 @@ VARIABLES = {
         "m",
         "total thickness of aquifer layer",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_groundwater,
     ),
     "npor": Variable(
@@ -2126,6 +2265,7 @@ VARIABLES = {
         "-",
         "porosity of aquifer layer",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_groundwater,
     ),
     "nuy": Variable(
@@ -2134,6 +2274,7 @@ VARIABLES = {
         "-",
         "unspecific yield of aquifer layer",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_groundwater,
     ),
     "n0": Variable(
@@ -2142,6 +2283,7 @@ VARIABLES = {
         "-",
         "specific yield at the soil/bedrock interface",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_groundwater,
     ),
     "k_gw": Variable(
@@ -2150,6 +2292,7 @@ VARIABLES = {
         "mm/h",
         "hydraulic conductivity of aquifer layer",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_groundwater,
     ),
     "k_leak": Variable(
@@ -2158,6 +2301,7 @@ VARIABLES = {
         "mm/h",
         "hydraulic conductivity of aquitard",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_groundwater,
     ),
     "bdec": Variable(
@@ -2166,6 +2310,7 @@ VARIABLES = {
         "-",
         "decay coeffcient",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_groundwater,
     ),
     "tt": Variable(
@@ -2174,6 +2319,7 @@ VARIABLES = {
         "m^2/h",
         "transmissivity of aquifer",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_groundwater,
     ),
     # groundwater variables
@@ -2191,7 +2337,6 @@ VARIABLES = {
         CATCH_GRID,
         "m/m",
         "gradient of groundwater table depth",
-        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_groundwater,
     ),
@@ -2210,6 +2355,7 @@ VARIABLES = {
         "mm",
         "Residual groundwater storage",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_groundwater,
     ),
     "dS_gw": Variable(
@@ -2226,6 +2372,7 @@ VARIABLES = {
         "mm",
         "Total vadose zone storage",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_groundwater,
     ),
     "S_vad": Variable(
@@ -2243,6 +2390,7 @@ VARIABLES = {
         "mm",
         "Residual vadose zone storage",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_groundwater,
     ),
     "dS_vad": Variable(
@@ -2259,6 +2407,7 @@ VARIABLES = {
         "mm",
         "water StorAge of vadose zone",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "SA_vad": Variable(
@@ -2276,6 +2425,7 @@ VARIABLES = {
         "mg",
         "solute mass StorAge of vadose zone",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "MSA_vad": Variable(
@@ -2293,6 +2443,7 @@ VARIABLES = {
         "mg",
         "solute mass of vadose zone",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "C_vad": Variable(
@@ -2301,6 +2452,7 @@ VARIABLES = {
         "mg/l or per mil",
         "solute concentration of vadose zone",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "sa_gw": Variable(
@@ -2309,6 +2461,7 @@ VARIABLES = {
         "mm",
         "water StorAge of groundwater",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "SA_gw": Variable(
@@ -2326,6 +2479,7 @@ VARIABLES = {
         "mg",
         "solute mass StorAge of groundwater",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "MSA_gw": Variable(
@@ -2343,6 +2497,7 @@ VARIABLES = {
         "mg",
         "solute mass of groundwater",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "C_gw": Variable(
@@ -2351,6 +2506,7 @@ VARIABLES = {
         "mg/l or per mil",
         "solute concentration of groundwater",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "k_denit_gw": Variable(
@@ -2358,7 +2514,7 @@ VARIABLES = {
         CATCH_GRID,
         "kg N ha-1 year-1",
         "decay rate for denitrification in groundwater",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
@@ -2384,6 +2540,7 @@ VARIABLES = {
         "-",
         "SAS parameters of lateral groundwater runoff",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
     ),
     "TT_q_gw": Variable(
@@ -2681,7 +2838,7 @@ VARIABLES = {
         CATCH_GRID,
         "",
         "number of wetting fronts",
-        dtype="int32",
+        dtype="int64",
         write_to_restart=True,
         time_dependent=True,
     ),
@@ -2690,7 +2847,7 @@ VARIABLES = {
         CATCH_GRID,
         "",
         "iteration at matrix saturation",
-        dtype="int32",
+        dtype="int64",
         write_to_restart=True,
     ),
     "sat_itt_t0": Variable(
@@ -2972,6 +3129,7 @@ VARIABLES = {
         "-",
         "SAS parameters of transpiration",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "TT_transp": Variable(
@@ -3028,6 +3186,7 @@ VARIABLES = {
         "-",
         "SAS parameters of soil evaporation",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "TT_evap_soil": Variable(
@@ -3136,6 +3295,7 @@ VARIABLES = {
         "-",
         "SAS parameters of redistribution after root loss",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport & settings.enable_crop_phenology,
     ),
     "TT_re_rl": Variable(
@@ -3192,6 +3352,7 @@ VARIABLES = {
         "-",
         "SAS parameters of percolation from root zone",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "TT_q_rz": Variable(
@@ -3248,6 +3409,7 @@ VARIABLES = {
         "-",
         "SAS parameters of percolation from subsoil",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "TT_q_ss": Variable(
@@ -3327,6 +3489,7 @@ VARIABLES = {
         "-",
         "SAS parameters of redistribution after root growth",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport & settings.enable_crop_phenology,
     ),
     "TT_re_rg": Variable(
@@ -3383,6 +3546,7 @@ VARIABLES = {
         "-",
         "SAS parameters of capillary rise into root zone",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "TT_cpr_rz": Variable(
@@ -3439,6 +3603,7 @@ VARIABLES = {
         "-",
         "SAS parameters of capillary rise into subsoil",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "TT_cpr_ss": Variable(
@@ -3732,6 +3897,7 @@ VARIABLES = {
         "-",
         "SAS parameters of lateral subsurface runoff in subsoil",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport & settings.enable_lateral_flow,
     ),
     "TT_q_sub_ss": Variable(
@@ -3791,6 +3957,7 @@ VARIABLES = {
         "-",
         "partition coefficient of transpiration",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     "alpha_q": Variable(
@@ -3799,6 +3966,7 @@ VARIABLES = {
         "-",
         "partition coefficient of drainage",
         time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_offline_transport,
     ),
     # event variables
@@ -3858,7 +4026,7 @@ VARIABLES = {
         "number of events",
         write_to_restart=True,
         time_dependent=True,
-        dtype="int32",
+        dtype="int64",
     ),
     "EVENT_ID_FF": Variable(
         "number of events",
@@ -3867,7 +4035,7 @@ VARIABLES = {
         "number of events",
         write_to_restart=True,
         time_dependent=True,
-        dtype="int32",
+        dtype="int64",
         active=lambda settings: settings.enable_film_flow,
     ),
     "PREC": Variable(
@@ -3875,7 +4043,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "precipitation",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
     ),
     "PET": Variable(
@@ -3883,7 +4051,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "potential evapotranspiration",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
     ),
     "TA": Variable(
@@ -3891,7 +4059,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "degC",
         "daily average air temperature",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
     ),
     "TA_MIN": Variable(
@@ -3899,7 +4067,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "degC",
         "daily minimum air temperature",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -3908,7 +4076,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "degC",
         "daily maximum air temperature",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -3917,7 +4085,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mg/l or per mil",
         "solute concentration of input",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport & (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate),
     ),
@@ -3962,7 +4130,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mg",
         "mineral nitrogen fertilizer",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport & settings.enable_nitrate,
     ),
@@ -3980,7 +4148,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mg",
         "organic nitrogen fertilizer",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport & settings.enable_nitrate,
     ),
@@ -3998,7 +4166,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "film flow",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport & settings.enable_film_flow,
     ),
@@ -4007,7 +4175,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "matrix infiltration into root zone",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4016,7 +4184,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "preferential infiltration into root zone",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4025,7 +4193,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "preferential infiltration into subsoil",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4034,7 +4202,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "transpiration",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4043,7 +4211,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "soil evaporation",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4052,7 +4220,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "percolation from root zone",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4061,7 +4229,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "percolation from subsoil",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4070,7 +4238,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "capillary rise from subsoil into root zone",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4079,7 +4247,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "capillary rise from groundwater into subsoil",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater_boundary,
     ),
@@ -4088,7 +4256,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "redistribution after root growth",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport & settings.enable_crop_phenology
     ),
@@ -4097,7 +4265,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "redistribution after root loss",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport & settings.enable_crop_phenology
     ),
@@ -4106,7 +4274,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm",
         "storage of snow cover",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4115,7 +4283,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm",
         "soil water content of soil",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4124,7 +4292,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm",
         "soil water content of root zone",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4133,7 +4301,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm",
         "permanent wilting point of root zone",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4142,7 +4310,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm",
         "soil water content of root zone at saturation",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4151,7 +4319,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm",
         "soil water content of subsoil",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4160,7 +4328,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm",
         "permanent wilting point of subsoil",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4169,7 +4337,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm",
         "soil water content of subsoil at saturation",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport
     ),
@@ -4182,7 +4350,7 @@ VARIABLES = {
         RIVER_GRID,
         "m",
         "total depth of riverr",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_routing,
     ),
@@ -4192,7 +4360,7 @@ VARIABLES = {
         RIVER_GRID + TIMESTEPS,
         "m",
         "depth of riverr",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_routing,
     ),
@@ -4222,7 +4390,9 @@ VARIABLES = {
         CATCH_GRID + CR,
         "",
         "crop type",
-        dtype="int32",
+        dtype="int64",
+        time_dependent=False,
+        write_to_restart=True,
         active=lambda settings: settings.enable_crop_phenology & settings.enable_crop_rotation,
     ),
     "crop_type": Variable(
@@ -4230,8 +4400,9 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "",
         "crop type",
+        write_to_restart=True,
         time_dependent=True,
-        dtype="int32",
+        dtype="int64",
         active=lambda settings: settings.enable_crop_phenology,
     ),
     "crop_height": Variable(
@@ -4248,6 +4419,7 @@ VARIABLES = {
         "mm",
         "maximum height of crops",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
     "lai_crop": Variable(
@@ -4256,6 +4428,7 @@ VARIABLES = {
         "-",
         "leaf area index of crops",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
     "S_int_tot_crop": Variable(
@@ -4264,6 +4437,7 @@ VARIABLES = {
         "mm",
         "total interception storage of crop canopy",
         time_dependent=True,
+        write_to_restart=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
     "doy_start": Variable(
@@ -4271,7 +4445,8 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "",
         "day of year of sowing",
-        dtype="int32",
+        write_to_restart=True,
+        dtype="int64",
         active=lambda settings: settings.enable_crop_phenology,
     ),
     "doy_mid": Variable(
@@ -4279,7 +4454,8 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "",
         "day of year of full canopy",
-        dtype="int32",
+        write_to_restart=True,
+        dtype="int64",
         active=lambda settings: settings.enable_crop_phenology,
     ),
     "doy_dec": Variable(
@@ -4287,7 +4463,8 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "",
         "day of year of crop canopy decay",
-        dtype="int32",
+        write_to_restart=True,
+        dtype="int64",
         active=lambda settings: settings.enable_crop_phenology,
     ),
     "doy_end": Variable(
@@ -4295,7 +4472,8 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "",
         "day of year of harvesting",
-        dtype="int32",
+        write_to_restart=True,
+        dtype="int64",
         active=lambda settings: settings.enable_crop_phenology,
     ),
     "ta_base": Variable(
@@ -4303,6 +4481,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "degC",
         "lower threshold of crop growth",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4311,6 +4490,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "degC",
         "upper threshold of crop growth",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4319,6 +4499,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "GDD",
         "growing degree days",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4327,6 +4508,7 @@ VARIABLES = {
         CATCH_GRID + TIMESTEPS + CROPS,
         "GDD",
         "cumulated growing degree days",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4335,6 +4517,7 @@ VARIABLES = {
         CATCH_GRID + TIMESTEPS + CROPS,
         "GDD",
         "time since crop canopy growth",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4343,6 +4526,7 @@ VARIABLES = {
         CATCH_GRID + TIMESTEPS + CROPS,
         "GDD",
         "time since crop root growth",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4351,6 +4535,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "GDD",
         "time since half full canopy",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4359,6 +4544,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "GDD",
         "time since crop canopy decay",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4367,6 +4553,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "-",
         "growth rate of crop canopy cover",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4375,6 +4562,7 @@ VARIABLES = {
         CATCH_GRID + TIMESTEPS + CROPS,
         "-",
         "crop canopy cover",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4383,6 +4571,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "-",
         "minimum crop canopy cover",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4391,6 +4580,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "-",
         "crop canopy cover at maturity",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4399,6 +4589,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "-",
         "maximum crop canopy cover",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4407,6 +4598,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "-",
         "crop development coefficient",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4415,6 +4607,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "-",
         "basal crop evaporation coefficient",
+        write_to_restart=True,
         time_dependent=False,
     ),
     "k_stress_transp_crop": Variable(
@@ -4422,6 +4615,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "-",
         "water stress coefficient of crop transpiration",
+        write_to_restart=True,
         initial=1,
         time_dependent=False,
     ),
@@ -4430,6 +4624,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "-",
         "basal crop coefficient",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4438,6 +4633,7 @@ VARIABLES = {
         CATCH_GRID,
         "-",
         "scaling factor of crop parameters",
+        write_to_restart=True,
         initial=1,
         time_dependent=False,
         active=lambda settings: settings.enable_crop_phenology,
@@ -4447,6 +4643,7 @@ VARIABLES = {
         CATCH_GRID + N_CROP_TYPES,
         "-",
         "scaling factor of crop parameters",
+        write_to_restart=True,
         initial=1,
         time_dependent=False,
         active=lambda settings: settings.enable_crop_phenology,
@@ -4456,6 +4653,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "-",
         "basal crop coefficient of mature crop",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4464,6 +4662,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "-",
         "soil water content of crop water stress",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4472,6 +4671,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "-",
         "coeffcient of crop water stress",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4480,6 +4680,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "-",
         "growth rate of crop roots",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4488,6 +4689,7 @@ VARIABLES = {
         CATCH_GRID + TIMESTEPS + CROPS,
         "mm",
         "root depth of crop",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4496,6 +4698,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "mm",
         "maximum root depth of crop",
+        write_to_restart=True,
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
@@ -4504,6 +4707,7 @@ VARIABLES = {
         CATCH_GRID + CROPS,
         "-",
         "water stress coeffcient of root growth",
+        write_to_restart=True,
         time_dependent=True,
         initial=1,
         active=lambda settings: settings.enable_crop_phenology,
@@ -4514,7 +4718,7 @@ VARIABLES = {
         LUT_ILU_GRID,
         "mm",
         "Look-up-table of land use dependent interception storage",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
     ),
     "lut_gc": Variable(
@@ -4522,7 +4726,7 @@ VARIABLES = {
         LUT_ILU_GRID,
         "-",
         "Look-up-table of land use dependent ground cover",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
     ),
     "lut_gcm": Variable(
@@ -4530,7 +4734,7 @@ VARIABLES = {
         LUT_GCM_GRID,
         "-",
         "Look-up-table of land use dependent  maximalground cover",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
     ),
     "lut_is": Variable(
@@ -4538,7 +4742,7 @@ VARIABLES = {
         LUT_IS_GRID,
         "mm",
         "Look-up-table of sealing dependent interception storage",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
     ),
     "lut_mlms": Variable(
@@ -4546,7 +4750,7 @@ VARIABLES = {
         LUT_MLMS_GRID,
         "mm/h",
         "Look-up-table of lateral macropore flow velocity",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_lateral_flow,
     ),
@@ -4555,7 +4759,7 @@ VARIABLES = {
         LUT_RDLU_GRID,
         "mm",
         "Look-up-table of land use dependent root depth",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
     ),
     "lut_crops": Variable(
@@ -4563,7 +4767,7 @@ VARIABLES = {
         LUT_CROPS_GRID,
         "",
         "Look-up-table of crop specific parameters",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_crop_phenology,
     ),

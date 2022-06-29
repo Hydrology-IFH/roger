@@ -329,19 +329,19 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     subsurface_runoff.calculate_subsurface_runoff(state)
                 with state.timers["capillary rise"]:
                     capillary_rise.calculate_capillary_rise(state)
-                with state.timers["surface"]:
+                with state.timers["storage"]:
                     surface.calculate_surface(state)
-                with state.timers["root zone"]:
+                with state.timers["storage"]:
                     root_zone.calculate_root_zone(state)
-                with state.timers["subsoil"]:
+                with state.timers["storage"]:
                     subsoil.calculate_subsoil(state)
-                with state.timers["soil"]:
+                with state.timers["storage"]:
                     soil.calculate_soil(state)
 
                 if settings.enable_groundwater:
                     with state.timers["groundwater flow"]:
                         groundwater_flow.calculate_groundwater_flow(state)
-                    with state.timers["groundwater"]:
+                    with state.timers["storage"]:
                         groundwater.calculate_groundwater(state)
 
                 if settings.enable_routing:
@@ -358,7 +358,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
                 vs.itt = vs.itt + 1
                 vs.time = vs.time + vs.dt_secs
 
-                with state.timers["transport"]:
+                with state.timers["main transport"]:
                     with state.timers["forcing"]:
                         self.set_forcing(state)
                     if settings.enable_crop_phenology:
@@ -386,11 +386,11 @@ class RogerSetup(metaclass=abc.ABCMeta):
                             nitrate.calculate_nitrogen_cycle(state)
                     with state.timers["ageing"]:
                         transport.calculate_ageing(state)
-                    with state.timers["root zone"]:
+                    with state.timers["storage"]:
                         root_zone.calculate_root_zone_transport(state)
-                    with state.timers["subsoil"]:
+                    with state.timers["storage"]:
                         subsoil.calculate_subsoil_transport(state)
-                    with state.timers["soil"]:
+                    with state.timers["storage"]:
                         soil.calculate_soil_transport(state)
                     if settings.enable_groundwater:
                         pass
@@ -424,7 +424,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
         from roger.core import numerics
 
         if self.state.settings.enable_offline_transport:
-            with self.state.timers["Running warm-up"]:
+            with self.state.timers["warmup"]:
                 logger.info("\nStarting warmup")
                 for i in range(repeat):
                     self.run()
@@ -497,29 +497,55 @@ class RogerSetup(metaclass=abc.ABCMeta):
     def _timing_summary(self):
         timing_summary = []
 
-        timing_summary.extend(
-            [
-                "",
-                "Timing summary:",
-                "(excluding first iteration)",
-                "---",
-                " setup time               = {:.2f}s".format(self.state.timers["setup"].total_time),
-                " main loop time           = {:.2f}s".format(self.state.timers["main"].total_time),
-                "   forcing                = {:.2f}s".format(self.state.timers["forcing"].total_time),
-                "   parameters             = {:.2f}s".format(self.state.timers["time-variant parameters"].total_time),
-                "   interception           = {:.2f}s".format(self.state.timers["interception"].total_time),
-                "   evapotranspiration     = {:.2f}s".format(self.state.timers["evapotranspiration"].total_time),
-                "   snow                   = {:.2f}s".format(self.state.timers["snow"].total_time),
-                "   infiltration           = {:.2f}s".format(self.state.timers["infiltration"].total_time),
-                "   percolation            = {:.2f}s".format(self.state.timers["percolation"].total_time),
-                "   capillary rise         = {:.2f}s".format(self.state.timers["capillary rise"].total_time),
-                "   subsurface runoff      = {:.2f}s".format(self.state.timers["subsurface runoff"].total_time),
-                "   groundwater flow       = {:.2f}s".format(self.state.timers["groundwater flow"].total_time),
-                "   crops                  = {:.2f}s".format(self.state.timers["crops"].total_time),
-                "   transport              = {:.2f}s".format(self.state.timers["transport"].total_time),
-                "   routing                = {:.2f}s".format(self.state.timers["routing"].total_time),
-            ]
-        )
+        if self.state.timers["main"].total_time > 0:
+            timing_summary.extend(
+                [
+                    "",
+                    "Timing summary:",
+                    "(excluding first iteration)",
+                    "---",
+                    " setup time                 = {:.2f}s".format(self.state.timers["setup"].total_time),
+                    " main loop time             = {:.2f}s".format(self.state.timers["main"].total_time),
+                    "   forcing                  = {:.2f}s".format(self.state.timers["forcing"].total_time),
+                    "   time-variant parameters  = {:.2f}s".format(self.state.timers["time-variant parameters"].total_time),
+                    "   interception             = {:.2f}s".format(self.state.timers["interception"].total_time),
+                    "   evapotranspiration       = {:.2f}s".format(self.state.timers["evapotranspiration"].total_time),
+                    "   snow                     = {:.2f}s".format(self.state.timers["snow"].total_time),
+                    "   infiltration             = {:.2f}s".format(self.state.timers["infiltration"].total_time),
+                    "   capillary rise           = {:.2f}s".format(self.state.timers["capillary rise"].total_time),
+                    "   subsurface flow          = {:.2f}s".format(self.state.timers["subsurface runoff"].total_time),
+                    "   groundwater flow         = {:.2f}s".format(self.state.timers["groundwater flow"].total_time),
+                    "   crops                    = {:.2f}s".format(self.state.timers["crops"].total_time),
+                    "   storage                  = {:.2f}s".format(self.state.timers["storage"].total_time),
+                    "   routing                  = {:.2f}s".format(self.state.timers["routing"].total_time),
+                ]
+            )
+
+        if self.state.timers["main transport"].total_time > 0:
+            timing_summary.extend(
+                [
+                    "",
+                    "Timing summary:",
+                    "(excluding first iteration)",
+                    "---",
+                    " setup time                                      = {:.2f}s".format(self.state.timers["setup"].total_time),
+                    " warmup time                                     = {:.2f}s".format(self.state.timers["warmup"].total_time),
+                    " main loop time                                  = {:.2f}s".format(self.state.timers["main transport"].total_time),
+                    "   forcing                                       = {:.2f}s".format(self.state.timers["forcing"].total_time),
+                    "   redistribution after root growth/harvesting   = {:.2f}s".format(self.state.timers["redistribution after root growth/harvesting"].total_time),
+                    "   infiltration into root zone                   = {:.2f}s".format(self.state.timers["infiltration into root zone"].total_time),
+                    "   evapotranspiration                            = {:.2f}s".format(self.state.timers["evapotranspiration"].total_time),
+                    "   infiltration into subsoil                     = {:.2f}s".format(self.state.timers["infiltration into subsoil"].total_time),
+                    "   subsurface runoff of root zone                = {:.2f}s".format(self.state.timers["subsurface runoff of root zone"].total_time),
+                    "   subsurface runoff of subsoil                  = {:.2f}s".format(self.state.timers["subsurface runoff of subsoil"].total_time),
+                    "   capillary rise into root zone                 = {:.2f}s".format(self.state.timers["capillary rise into root zone"].total_time),
+                    "   capillary rise into subsoil                   = {:.2f}s".format(self.state.timers["capillary rise into subsoil"].total_time),
+                    "   ageing                                        = {:.2f}s".format(self.state.timers["ageing"].total_time),
+                    "   storage                                       = {:.2f}s".format(self.state.timers["storage"].total_time),
+                    "   nitrogen cycle                                = {:.2f}s".format(self.state.timers["nitrogen cycle"].total_time),
+                    "   routing                                       = {:.2f}s".format(self.state.timers["routing"].total_time),
+                ]
+            )
 
         if rs.profile_mode:
             pass
@@ -527,7 +553,6 @@ class RogerSetup(metaclass=abc.ABCMeta):
         timing_summary.extend(
             [
                 " diagnostics and I/O      = {:.2f}s".format(self.state.timers["diagnostics"].total_time),
-                " plugins                  = {:.2f}s".format(self.state.timers["plugins"].total_time),
             ]
         )
 

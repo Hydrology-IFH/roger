@@ -1,5 +1,5 @@
 from pathlib import Path
-import os
+import subprocess
 
 base_path = Path(__file__).parent
 transport_models_abrev = {'complete-mixing': 'cm',
@@ -44,9 +44,9 @@ for lys in lysimeters:
         file = open(file_path, "w")
         file.writelines(lines)
         file.close()
-        os.system(f"chmod +x {script_name}.sh")
+        subprocess.Popen(f"chmod +x {script_name}.sh", shell=True)
 
-os.system(f"chmod +x submit_{tracer}.sh")
+subprocess.Popen("chmod +x submit.sh", shell=True)
 
 tracer = 'nitrate'
 lysimeters = ['lys2', 'lys3', 'lys4', 'lys8', 'lys9']
@@ -83,6 +83,6 @@ for lys in lysimeters:
         file = open(file_path, "w")
         file.writelines(lines)
         file.close()
-        os.system(f"chmod +x {script_name}.sh")
+        subprocess.Popen(f"chmod +x {script_name}.sh", shell=True)
 
-os.system(f"chmod +x submit_{tracer}.sh")
+subprocess.Popen("chmod +x submit.sh", shell=True)

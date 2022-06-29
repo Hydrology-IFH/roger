@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 import os
 
 # write shell-scripts to run simulations from BwUniCluster 2.0
@@ -10,4 +11,4 @@ for d in list_dir:
     if os.path.exists(file):
         path_dir =  base_path / d
         os.chdir(path_dir)
-        os.system("python write_batch.py")
+        subprocess.Popen("python write_batch.py", shell=True)

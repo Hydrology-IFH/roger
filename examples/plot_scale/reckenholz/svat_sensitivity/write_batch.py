@@ -1,9 +1,9 @@
 from pathlib import Path
-import os
+import subprocess
 
 base_path = Path(__file__).parent
-
-lysimeters = ['lys1', 'lys2', 'lys3', 'lys4', 'lys8', 'lys9', 'lys2_bromide', 'lys8_bromide', 'lys9_bromide']
+lysimeters = ['lys1', 'lys2', 'lys3', 'lys4', 'lys8', 'lys9', 'lys2_bromide',
+              'lys8_bromide', 'lys9_bromide']
 for lys in lysimeters:
     script_name = f'{lys}_sa'
     lines = []
@@ -24,11 +24,11 @@ for lys in lysimeters:
     lines.append(' \n')
     lines.append('# adapt command to your available scheduler / MPI implementation\n')
     lines.append('conda activate roger-mpi\n')
-    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_crop.py {lys}\n')
+    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_crop.py -b numpy -d cpu -n 32 1 -lys {lys}\n')
     file_path = base_path / f'{script_name}.sh'
     file = open(file_path, "w")
     file.writelines(lines)
     file.close()
-    os.system(f"chmod +x {script_name}.sh")
+    subprocess.Popen(f"chmod +x {script_name}.sh", shell=True)
 
-os.system("chmod +x submit.sh")
+subprocess.Popen("chmod +x submit.sh", shell=True)

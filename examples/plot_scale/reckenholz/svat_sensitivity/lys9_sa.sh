@@ -15,4 +15,4 @@ module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1
  
 # adapt command to your available scheduler / MPI implementation
 conda activate roger-mpi
-mpirun --bind-to core --map-by core -report-bindings python svat_crop.py lys9
+mpirun --bind-to core --map-by core -report-bindings python svat_crop.py -b numpy -d cpu -n 32 1 -lys lys9

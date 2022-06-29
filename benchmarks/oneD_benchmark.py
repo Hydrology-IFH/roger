@@ -6,12 +6,6 @@ import numpy as onp
 
 @benchmark_cli
 def main(backend, device, size):
-    from roger import runtime_settings as rs, runtime_state as rst
-    rs.backend = backend
-    rs.backend = device
-    rs.force_overwrite = True
-    if rs.mpi_comm:
-        rs.num_proc = (rst.proc_num, 1)
     from roger import roger_routine, roger_kernel, KernelOutput
     from roger.setups.svat import ONEDSetup
     from roger.variables import allocate

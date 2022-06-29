@@ -19,5 +19,5 @@ mpirun --bind-to core --map-by core -report-bindings python svat.py
 # sinfo_t_idle
 
 # execute the script
-# chmod +x roger_batch.sh
-# sbatch ./roger_batch.sh
+# chmod +x sa.sh
+# sbatch ./sa.sh

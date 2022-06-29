@@ -171,22 +171,22 @@ def run(**kwargs):
                         lines.append(' \n')
                         lines.append('# adapt command to your available scheduler / MPI implementation\n')
                         if backend in ['numpy']:
-                            lines.append('conda activate roger\n')
+                            lines.append('conda activate roger-mpi\n')
                             lines.append(f'{cmd_sh}\n')
                         elif backend in ['jax']:
-                            lines.append('conda activate roger-jax\n')
+                            lines.append('conda activate roger-mpi\n')
                             lines.append(f'{cmd_sh}\n')
                         elif backend in ['jax-gpu']:
-                            lines.append('conda activate roger-jax\n')
+                            lines.append('conda activate roger-mpi\n')
                             lines.append(f'{cmd_sh}\n')
                         elif backend in ['numpy-mpi']:
                             lines.append('conda activate roger-mpi\n')
                             lines.append(f'mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
                         elif backend in ['jax-mpi']:
-                            lines.append('conda activate roger-jax-mpi\n')
+                            lines.append('conda activate roger-mpi\n')
                             lines.append(f'mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
                         elif backend in ['jax-gpu-mpi']:
-                            lines.append('conda activate roger-jax-gpu-mpi\n')
+                            lines.append('conda activate roger-mpi\n')
                             lines.append(f'mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
                         file_path = TESTDIR / 'job.sh'
                         file = open(file_path, "w")

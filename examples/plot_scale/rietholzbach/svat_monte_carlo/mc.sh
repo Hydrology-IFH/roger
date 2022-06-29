@@ -13,11 +13,11 @@
 module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1
 
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python svat.py
+mpirun --bind-to core --map-by core -report-bindings python svat.py --backend numpy --device cpu -n 40 1
 
 # displays what resources are available for immediate use for the whole partition
 # sinfo_t_idle
 
 # execute the script
-# chmod +x roger_batch.sh
-# sbatch ./roger_batch.sh
+# chmod +x mc.sh
+# sbatch ./mc.sh
