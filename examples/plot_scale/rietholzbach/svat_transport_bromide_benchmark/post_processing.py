@@ -10,6 +10,7 @@ import xarray as xr
 from cftime import num2date
 import pandas as pd
 import numpy as onp
+import roger
 
 base_path = Path(__file__).parent
 # directory of results
@@ -32,16 +33,18 @@ for tm_structure in tm_structures:
     for year in years:
         path = str(base_path / f'SVATTRANSPORT_{tms}_{year}.*.nc')
         diag_files = glob.glob(path)
-        states_tm_file = base_path / "states_tm.nc"
+        states_tm_file = base_path / "states_tm_bromide_benchmark.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             if f"{tm_structure}-{year}" not in list(f.groups.keys()):
                 f.create_group(f"{tm_structure}-{year}")
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
-                title=f'RoGeR {tm_structure} ({year} - {year + 1}) transport model results for bromide benchmark at Rietholzbach Lysimeter site',
+                title='RoGeR transport model results for bromide benchmark at Rietholzbach Lysimeter site',
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
-                comment='SVAT transport model with free drainage'
+                comment='',
+                model_structure='SVAT transport model with free drainage',
+                roger_version=f'{roger.__version__}'
             )
             # collect dimensions
             for dfs in diag_files:
@@ -126,7 +129,7 @@ for tm_structure in tm_structures:
     fig, axes = plt.subplots(1, 1, figsize=(10, 6))
     for year in years:
         # load simulation
-        states_tm_file = base_path / "states_tm.nc"
+        states_tm_file = base_path / "states_tm_bromide_benchmark.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{tm_structure}-{year}", engine="h5netcdf")
 
         # plot observed and simulated time series

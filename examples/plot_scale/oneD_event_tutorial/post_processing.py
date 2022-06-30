@@ -7,7 +7,7 @@ import xarray as xr
 import pandas as pd
 import numpy as onp
 import seaborn as sns
-import matplotlib.pyplot as plt
+import roger
 import roger.tools.labels as labs
 import roger.tools.evaluation as eval_utils
 
@@ -33,7 +33,9 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
         title='RoGeR model results for a single event (Tutorial)',
         institution='University of Freiburg, Chair of Hydrology',
         references='',
-        comment='1D model with free drainage'
+        comment='',
+        model_structure='1D model with free drainage',
+        roger_version=f'{roger.__version__}'
     )
     # collect dimensions
     for dfs in diag_files:

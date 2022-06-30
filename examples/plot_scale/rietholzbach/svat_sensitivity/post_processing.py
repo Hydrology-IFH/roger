@@ -18,6 +18,8 @@ import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
 onp.random.seed(42)
 
+import roger
+
 # sampled parameter space
 bounds = {
     'num_vars': 6,
@@ -50,7 +52,9 @@ with h5netcdf.File(states_hm_si_file, 'w', decode_vlen_strings=False) as f:
         title='RoGeR saltelli results at Rietholzbach Lysimeter site',
         institution='University of Freiburg, Chair of Hydrology',
         references='',
-        comment='SVAT model with free drainage'
+        comment='',
+        model_structure='SVAT model with free drainage',
+        roger_version=f'{roger.__version__}'
     )
     # collect dimensions
     for dfs in diag_files:

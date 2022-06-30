@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as onp
 
+import roger
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
 
@@ -35,7 +36,9 @@ with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
         title='RoGeR monte carlo results at Rietholzbach Lysimeter site',
         institution='University of Freiburg, Chair of Hydrology',
         references='',
-        comment='SVAT model with free drainage'
+        comment='',
+        model_structure='SVAT model with free drainage',
+        roger_version=f'{roger.__version__}'
     )
     # collect dimensions
     for dfs in diag_files:
@@ -341,7 +344,9 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
         title='RoGeR best monte carlo run at Rietholzbach Lysimeter site',
         institution='University of Freiburg, Chair of Hydrology',
         references='',
-        comment='SVAT model with free drainage'
+        comment='',
+        model_structure='SVAT model with free drainage',
+        roger_version=f'{roger.__version__}'
     )
     with h5netcdf.File(states_hm_mc_file, 'r', decode_vlen_strings=False) as df:
         # set dimensions with a dictionary

@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.colors import Normalize
 import seaborn as sns
+import roger
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
 import numpy as onp
@@ -50,7 +51,9 @@ for tm_structure in tm_structures:
             title='RoGeR transport model Saltelli simulations reverse at Rietholzbach lysimeter site',
             institution='University of Freiburg, Chair of Hydrology',
             references='',
-            comment='SVAT transport model with free drainage'
+            comment='',
+            model_structure='SVAT transport model with free drainage',
+            roger_version=f'{roger.__version__}'
         )
         # collect dimensions
         for dfs in diag_files:

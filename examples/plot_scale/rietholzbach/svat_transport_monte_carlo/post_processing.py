@@ -11,6 +11,7 @@ from cftime import num2date
 import pandas as pd
 import numpy as onp
 
+import roger
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
 
@@ -42,7 +43,9 @@ for tm_structure in tm_structures:
             title='RoGeR transport model Monte Carlo simulations at Rietholzbach lysimeter site',
             institution='University of Freiburg, Chair of Hydrology',
             references='',
-            comment='SVAT transport model with free drainage'
+            comment='',
+            model_structure='SVAT transport model with free drainage',
+            roger_version=f'{roger.__version__}'
         )
         # collect dimensions
         for dfs in diag_files:
@@ -301,10 +304,11 @@ for tm_structure in tm_structures:
             f.create_group(tm_structure)
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
-            title=f'RoGeR SAS parameters of best monte carlo run of {tm_structure} transport model at Rietholzbach Lysimeter site',
+            title='RoGeR SAS parameters of best monte carlo simulation at Rietholzbach Lysimeter site',
             institution='University of Freiburg, Chair of Hydrology',
             references='',
-            comment=f'SVAT {tm_structure} transport model with free drainage'
+            model_structure='SVAT transport model with free drainage',
+            roger_version=f'{roger.__version__}'
         )
         dict_dim = {'x': nx, 'y': 1, 'n_sas_params': 8}
         if not f.groups[tm_structure].dimensions:

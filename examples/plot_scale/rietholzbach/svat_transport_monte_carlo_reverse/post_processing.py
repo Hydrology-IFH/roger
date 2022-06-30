@@ -9,6 +9,7 @@ from cftime import num2date
 import pandas as pd
 import roger.tools.evaluation as eval_utils
 import numpy as onp
+import roger
 
 
 base_path = Path(__file__).parent
@@ -36,10 +37,12 @@ for tm_structure in tm_structures:
             f.create_group(tm_structure)
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
-            title='RoGeR transport model Monte Carlo simulations reverse results at Rietholzbach lysimeter site',
+            title='RoGeR transport model Monte Carlo simulations reverse at Rietholzbach lysimeter site',
             institution='University of Freiburg, Chair of Hydrology',
             references='',
-            comment='SVAT transport model with free drainage'
+            comment='',
+            model_structure='SVAT transport model with free drainage',
+            roger_version=f'{roger.__version__}'
         )
         # collect dimensions
         for dfs in diag_files:
