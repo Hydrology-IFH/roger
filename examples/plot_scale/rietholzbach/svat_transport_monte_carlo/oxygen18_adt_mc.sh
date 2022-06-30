@@ -4,7 +4,7 @@
 #SBATCH --job-name=oxygen18_adt_mc
 #SBATCH --nodes=5
 #SBATCH --ntasks=40
-#SBATCH --mem=180000mb
+#SBATCH --mem=90000mb
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL
