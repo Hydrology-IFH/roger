@@ -30,7 +30,7 @@ for tm in transport_models:
     lines.append('#SBATCH --mail-type=ALL\n')
     lines.append('#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n')
     lines.append('#SBATCH --export=ALL\n')
-    lines.append('#SBATCH --time=24:00:00\n')
+    lines.append('#SBATCH --time=30:00:00\n')
     lines.append(' \n')
     lines.append('# load module dependencies\n')
     lines.append('module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1\n')
