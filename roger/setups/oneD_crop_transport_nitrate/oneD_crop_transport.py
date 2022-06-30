@@ -494,7 +494,7 @@ def set_nitrate_input_kernel(state, nn_rain, nn_sol):
     for i in range(nn_sol):
         rain_sum = allocate(state.dimensions, ("x", "y"))
         nn_end = allocate(state.dimensions, ("x", "y"))
-        input_itt = npx.nanargmin(npx.where(rain_idx - sol_idx[i] < 0, npx.NaN, rain_idx - sol_idx[i]))
+        input_itt = npx.nanargmin(npx.where(rain_idx - sol_idx[i] < 0, onp.NaN, rain_idx - sol_idx[i]))
         start_rain = rain_idx[input_itt]
         rain_sum = update(
             rain_sum,
