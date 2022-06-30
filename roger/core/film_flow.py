@@ -2,6 +2,7 @@ from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at
 from roger.core.utilities import linear_regression
+import numpy as onp
 
 
 @roger_kernel
@@ -494,7 +495,7 @@ def calc_drainage(state):
     )
     vs.ff_drain = update(
         vs.ff_drain,
-        at[2:-2, 2:-2], npx.nansum(npx.where(vs.S_f[2:-2, 2:-2, :] < ff_drain_pot[2:-2, 2:-2, :], vs.S_f[2:-2, 2:-2, :], ff_drain_pot[2:-2, 2:-2, :]), axis=-1),
+        at[2:-2, 2:-2], onp.NaNsum(npx.where(vs.S_f[2:-2, 2:-2, :] < ff_drain_pot[2:-2, 2:-2, :], vs.S_f[2:-2, 2:-2, :], ff_drain_pot[2:-2, 2:-2, :]), axis=-1),
     )
     vs.ff_drain = update(
         vs.ff_drain,

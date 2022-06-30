@@ -2,6 +2,7 @@ from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at
 from roger.core import sas
+import numpy as onp
 
 
 @roger_kernel
@@ -234,11 +235,11 @@ def calc_conc_iso_flux(state, mtt, tt, flux):
     conc = allocate(state.dimensions, ("x", "y"))
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.nansum(tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis] * mtt[2:-2, 2:-2, :], axis=-1) / npx.sum(tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis], axis=-1),
+        at[2:-2, 2:-2], onp.NaNsum(tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis] * mtt[2:-2, 2:-2, :], axis=-1) / npx.sum(tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis], axis=-1),
     )
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], npx.NaN),
+        at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], onp.NaN),
     )
 
     return conc
@@ -282,7 +283,7 @@ def calc_msa_iso(state, sa, msa, flux, tt, mtt):
     )
     msa = update(
         msa,
-        at[2:-2, 2:-2, vs.tau, :], npx.where((msa[2:-2, 2:-2, vs.tau, :] != 0), msa[2:-2, 2:-2, vs.tau, :], npx.NaN),
+        at[2:-2, 2:-2, vs.tau, :], npx.where((msa[2:-2, 2:-2, vs.tau, :] != 0), msa[2:-2, 2:-2, vs.tau, :], onp.NaN),
     )
 
     return msa
@@ -297,11 +298,11 @@ def calc_conc_iso_storage(state, sa, msa):
     conc = allocate(state.dimensions, ("x", "y"))
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.nansum(sa[2:-2, 2:-2, vs.tau, :] * msa[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1),
+        at[2:-2, 2:-2], onp.NaNsum(sa[2:-2, 2:-2, vs.tau, :] * msa[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1),
     )
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], npx.NaN),
+        at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], onp.NaN),
     )
 
     return conc
@@ -320,7 +321,7 @@ def calc_mtt(state, sa, tt, flux, msa, alpha):
         # isotope travel time distribution at current time step
         mtt = update(
             mtt,
-            at[2:-2, 2:-2, :], npx.where(tt[2:-2, 2:-2, :] > 0, msa[2:-2, 2:-2, vs.tau, :], npx.NaN),
+            at[2:-2, 2:-2, :], npx.where(tt[2:-2, 2:-2, :] > 0, msa[2:-2, 2:-2, vs.tau, :], onp.NaN),
         )
 
     else:
@@ -451,7 +452,7 @@ def calc_ageing_iso(state, sa, msa):
     # add youngest isotope input to isotope StorAge
     msa = update(
         msa,
-        at[2:-2, 2:-2, vs.tau, 0], npx.NaN,
+        at[2:-2, 2:-2, vs.tau, 0], onp.NaN,
     )
     # merge oldest isotopes
     sum_old = allocate(state.dimensions, ("x", "y"))

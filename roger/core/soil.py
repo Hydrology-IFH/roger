@@ -2,6 +2,7 @@ from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, at
 from roger.core import transport
+import numpy as onp
 
 
 @roger_kernel
@@ -177,7 +178,7 @@ def calculate_soil_transport_iso_kernel(state):
     )
     vs.msa_s = update(
         vs.msa_s,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.msa_s[2:-2, 2:-2, vs.tau, :] == 0, npx.NaN, vs.msa_s[2:-2, 2:-2, vs.tau, :]),
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.msa_s[2:-2, 2:-2, vs.tau, :] == 0, onp.NaN, vs.msa_s[2:-2, 2:-2, vs.tau, :]),
     )
 
     vs.C_s = update(

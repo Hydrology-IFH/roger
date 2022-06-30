@@ -4,6 +4,8 @@ from roger.core.operators import numpy as npx, update, update_add, at
 import roger.lookuptables as lut
 from roger.core.utilities import _get_row_no
 from roger.core import transport
+import numpy as onp
+
 
 @roger_kernel
 def calc_gdd(state):
@@ -429,7 +431,7 @@ def calc_crop_dev_coeff(state):
     )
     vs.crop_dev_coeff = update(
         vs.crop_dev_coeff,
-        at[2:-2, 2:-2, :], npx.nanmin(crop_dev_coeff[2:-2, 2:-2, :], axis=-1),
+        at[2:-2, 2:-2, :], onp.NaNmin(crop_dev_coeff[2:-2, 2:-2, :], axis=-1),
     )
 
     return KernelOutput(crop_dev_coeff=vs.crop_dev_coeff)
@@ -661,7 +663,7 @@ def update_ground_cover(state):
     )
     vs.ground_cover = update(
         vs.ground_cover,
-        at[2:-2, 2:-2, vs.tau], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.ground_cover[2:-2, 2:-2, vs.tau], npx.nanmax(ccc[2:-2, 2:-2, :], axis=-1))
+        at[2:-2, 2:-2, vs.tau], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.ground_cover[2:-2, 2:-2, vs.tau], onp.NaNmax(ccc[2:-2, 2:-2, :], axis=-1))
     )
 
     return KernelOutput(ground_cover=vs.ground_cover)
@@ -683,7 +685,7 @@ def update_k_stress_transp(state):
     )
     vs.k_stress_transp = update(
         vs.k_stress_transp,
-        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.k_stress_transp[2:-2, 2:-2], npx.nanmin(k_stress_transp_crop[2:-2, 2:-2, :], axis=-1))
+        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.k_stress_transp[2:-2, 2:-2], onp.NaNmin(k_stress_transp_crop[2:-2, 2:-2, :], axis=-1))
     )
 
     return KernelOutput(k_stress_transp=vs.k_stress_transp)
@@ -705,7 +707,7 @@ def update_basal_transp_coeff(state):
     )
     vs.basal_transp_coeff = update(
         vs.basal_transp_coeff,
-        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.basal_transp_coeff[2:-2, 2:-2], npx.nanmax(basal_crop_coeff[2:-2, 2:-2, :], axis=-1))
+        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.basal_transp_coeff[2:-2, 2:-2], onp.NaNmax(basal_crop_coeff[2:-2, 2:-2, :], axis=-1))
     )
 
     return KernelOutput(basal_transp_coeff=vs.basal_transp_coeff)
@@ -727,7 +729,7 @@ def update_basal_evap_coeff(state):
     )
     vs.basal_evap_coeff = update(
         vs.basal_evap_coeff,
-        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.basal_evap_coeff[2:-2, 2:-2], npx.nanmax(basal_evap_coeff_crop[2:-2, 2:-2, :], axis=-1))
+        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.basal_evap_coeff[2:-2, 2:-2], onp.NaNmax(basal_evap_coeff_crop[2:-2, 2:-2, :], axis=-1))
     )
 
     return KernelOutput(basal_evap_coeff=vs.basal_evap_coeff)
@@ -749,7 +751,7 @@ def update_S_int_ground_tot(state):
     )
     vs.S_int_ground_tot = update(
         vs.S_int_ground_tot,
-        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.S_int_ground_tot[2:-2, 2:-2], npx.nanmax(S_int_tot_crop[2:-2, 2:-2, :], axis=-1))
+        at[2:-2, 2:-2], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.S_int_ground_tot[2:-2, 2:-2], onp.NaNmax(S_int_tot_crop[2:-2, 2:-2, :], axis=-1))
     )
 
     return KernelOutput(S_int_ground_tot=vs.S_int_ground_tot)
@@ -771,7 +773,7 @@ def update_z_root(state):
     )
     vs.z_root = update(
         vs.z_root,
-        at[2:-2, 2:-2, vs.tau], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.z_root[2:-2, 2:-2, vs.tau], npx.nanmax(z_root_crop[2:-2, 2:-2, :], axis=-1))
+        at[2:-2, 2:-2, vs.tau], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.z_root[2:-2, 2:-2, vs.tau], onp.NaNmax(z_root_crop[2:-2, 2:-2, :], axis=-1))
     )
 
     return KernelOutput(z_root=vs.z_root)
@@ -1282,7 +1284,7 @@ def calculate_redistribution_root_growth_transport_iso_kernel(state):
     # update isotope StorAge
     vs.msa_ss = update(
         vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, :], npx.where((vs.sa_ss[2:-2, 2:-2, vs.tau, :] > 0), vs.msa_ss[2:-2, 2:-2, vs.tau, :], npx.NaN) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], npx.where((vs.sa_ss[2:-2, 2:-2, vs.tau, :] > 0), vs.msa_ss[2:-2, 2:-2, vs.tau, :], onp.NaN) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.C_ss = update(
@@ -1453,7 +1455,7 @@ def calculate_redistribution_root_loss_transport_iso_kernel(state):
     # update isotope StorAge
     vs.msa_rz = update(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], npx.where((vs.sa_rz[2:-2, 2:-2, vs.tau, :] > 0), vs.msa_rz[2:-2, 2:-2, vs.tau, :], npx.NaN) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], npx.where((vs.sa_rz[2:-2, 2:-2, vs.tau, :] > 0), vs.msa_rz[2:-2, 2:-2, vs.tau, :], onp.NaN) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.C_rz = update(
