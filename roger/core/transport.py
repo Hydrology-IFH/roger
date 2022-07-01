@@ -235,7 +235,7 @@ def calc_conc_iso_flux(state, mtt, tt, flux):
     conc = allocate(state.dimensions, ("x", "y"))
     conc = update(
         conc,
-        at[2:-2, 2:-2], onp.NaNsum(tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis] * mtt[2:-2, 2:-2, :], axis=-1) / npx.sum(tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis], axis=-1),
+        at[2:-2, 2:-2], npx.nansum(tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis] * mtt[2:-2, 2:-2, :], axis=-1) / npx.sum(tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis], axis=-1),
     )
     conc = update(
         conc,
@@ -298,7 +298,7 @@ def calc_conc_iso_storage(state, sa, msa):
     conc = allocate(state.dimensions, ("x", "y"))
     conc = update(
         conc,
-        at[2:-2, 2:-2], onp.NaNsum(sa[2:-2, 2:-2, vs.tau, :] * msa[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1),
+        at[2:-2, 2:-2], npx.nansum(sa[2:-2, 2:-2, vs.tau, :] * msa[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1),
     )
     conc = update(
         conc,
