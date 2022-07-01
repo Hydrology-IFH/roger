@@ -4,7 +4,7 @@
 #SBATCH --job-name=lys2_bromide_mc
 #SBATCH --nodes=1
 #SBATCH --ntasks=40
-#SBATCH --mem=180000mb
+#SBATCH --mem-per-cpu=4000
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL

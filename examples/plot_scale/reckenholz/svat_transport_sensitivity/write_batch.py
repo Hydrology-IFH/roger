@@ -46,7 +46,7 @@ for lys in lysimeters:
         file.close()
         subprocess.Popen(f"chmod +x {script_name}.sh", shell=True)
 
-subprocess.Popen("chmod +x submit.sh", shell=True)
+subprocess.Popen("chmod +x submit_bromide.sh", shell=True)
 
 tracer = 'nitrate'
 lysimeters = ['lys2', 'lys3', 'lys4', 'lys8', 'lys9']
@@ -85,4 +85,4 @@ for lys in lysimeters:
         file.close()
         subprocess.Popen(f"chmod +x {script_name}.sh", shell=True)
 
-subprocess.Popen("chmod +x submit.sh", shell=True)
+subprocess.Popen("chmod +x submit_nitrate.sh", shell=True)

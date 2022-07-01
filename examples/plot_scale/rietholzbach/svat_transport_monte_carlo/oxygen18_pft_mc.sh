@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-#SBATCH --partition=multiple
+#SBATCH --partition=single
 #SBATCH --job-name=oxygen18_pft_mc
-#SBATCH --nodes=5
+#SBATCH --nodes=1
 #SBATCH --ntasks=40
-#SBATCH --mem=90000mb
+#SBATCH --mem-per-cpu=4000
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL
