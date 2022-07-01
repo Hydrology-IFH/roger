@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 #
 #SBATCH --partition=single
 #SBATCH --job-name=svat_mc

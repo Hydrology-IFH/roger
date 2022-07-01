@@ -20,7 +20,7 @@ for tm in transport_models:
     script_name = f'{tracer}_{tm1}_mc'
     tms = tm.replace(" ", "_")
     lines = []
-    lines.append('#!/bin/bash\n')
+    lines.append('#!/bin/bash -l\n')
     lines.append('#\n')
     lines.append('#SBATCH --partition=single\n')
     lines.append(f'#SBATCH --job-name={script_name}\n')
@@ -36,7 +36,6 @@ for tm in transport_models:
     lines.append('module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1\n')
     lines.append(' \n')
     lines.append('# adapt command to your available scheduler / MPI implementation\n')
-    lines.append('conda activate roger-mpi\n')
     lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 200 1 -ns 10000 -tms {tms}\n')
     file_path = base_path / f'{script_name}.sh'
     file = open(file_path, "w")

@@ -164,7 +164,7 @@ def run(**kwargs):
                         cmd_sh = BENCHMARK_COMMANDS[backend].format(**cmd_args)
                         # write shell shell script to submit job
                         lines = []
-                        lines.append('#!/bin/bash\n')
+                        lines.append('#!/bin/bash -l\n')
                         lines.append('#\n')
                         lines.append('# load module dependencies\n')
                         lines.append('module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1\n')

@@ -22,7 +22,7 @@ for lys in lysimeters:
         script_name = f'{tracer}_{lys}_{tm1}_sa'
         tms = tm.replace(" ", "_")
         lines = []
-        lines.append('#!/bin/bash\n')
+        lines.append('#!/bin/bash -l\n')
         lines.append('#\n')
         lines.append('#SBATCH --partition=single\n')
         lines.append(f'#SBATCH --job-name={script_name}\n')
@@ -38,7 +38,6 @@ for lys in lysimeters:
         lines.append('module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1\n')
         lines.append(' \n')
         lines.append('# adapt command to your available scheduler / MPI implementation\n')
-        lines.append('conda activate roger-mpi\n')
         lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport_{tracer}.py {lys} {tms}\n')
         file_path = base_path / f'{script_name}.sh'
         file = open(file_path, "w")
@@ -61,7 +60,7 @@ for lys in lysimeters:
         script_name = f'{tracer}_{lys}_{tm1}_sa'
         tms = tm.replace(" ", "_")
         lines = []
-        lines.append('#!/bin/bash\n')
+        lines.append('#!/bin/bash -l\n')
         lines.append('#\n')
         lines.append('#SBATCH --partition=single\n')
         lines.append(f'#SBATCH --job-name={script_name}\n')
@@ -77,7 +76,6 @@ for lys in lysimeters:
         lines.append('module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1\n')
         lines.append(' \n')
         lines.append('# adapt command to your available scheduler / MPI implementation\n')
-        lines.append('conda activate roger-mpi\n')
         lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport_{tracer}.py {lys} {tms}\n')
         file_path = base_path / f'{script_name}.sh'
         file = open(file_path, "w")

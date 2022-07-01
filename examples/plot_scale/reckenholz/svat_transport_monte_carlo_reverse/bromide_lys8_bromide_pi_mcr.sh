@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 #
 #SBATCH --partition=single
 #SBATCH --job-name=bromide_lys8_bromide_pi_mcr

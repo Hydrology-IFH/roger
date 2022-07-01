@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 #
 #SBATCH --partition=single
 #SBATCH --job-name=nitrate_lys9_pi_mc
@@ -14,5 +14,4 @@
 module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1
  
 # adapt command to your available scheduler / MPI implementation
-conda activate roger-mpi
 mpirun --bind-to core --map-by core -report-bindings python svat_transport_nitrate.py lys9 piston
