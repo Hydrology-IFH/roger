@@ -13,7 +13,7 @@ for lys in lysimeters:
     lines.append(f'#SBATCH --job-name={script_name}\n')
     lines.append('#SBATCH --nodes=1\n')
     lines.append('#SBATCH --ntasks=32\n')
-    lines.append('#SBATCH --mem-per-cpu=4000\n')
+    lines.append('#SBATCH --mem=180000\n')
     lines.append('#SBATCH --mail-type=ALL\n')
     lines.append('#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n')
     lines.append('#SBATCH --export=ALL\n')
