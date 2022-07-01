@@ -1205,10 +1205,12 @@ def calc_parameters_groundwater_kernel(state):
     pass
 
 
+@roger_kernel
 def validate_parameters_groundwater(state):
     pass
 
 
+@roger_kernel
 def validate_parameters_soil(state):
     vs = state.variables
     settings = state.settings
