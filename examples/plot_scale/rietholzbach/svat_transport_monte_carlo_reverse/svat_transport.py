@@ -593,7 +593,7 @@ def main(nsamples, transport_model_structure):
         )
         idx = update(
             idx,
-            at[:, :, :], npx.maximum.accumulate(idx, axis=-1),
+            at[:, :, :], onp.maximum.accumulate(idx, axis=-1),
         )
         arr1 = update(
             arr1,

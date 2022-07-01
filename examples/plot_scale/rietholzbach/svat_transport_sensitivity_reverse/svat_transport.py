@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import h5netcdf
 import click
+import numpy as onp
 from roger.cli.roger_run_base import roger_base_cli
 
 
@@ -578,7 +579,7 @@ def main(nsamples, transport_model_structure):
         )
         idx = update(
             idx,
-            at[:, :, :], npx.maximum.accumulate(idx, axis=-1),
+            at[:, :, :], onp.maximum.accumulate(idx, axis=-1),
         )
         arr1 = update(
             arr1,
