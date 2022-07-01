@@ -212,9 +212,9 @@ def calc_tt(state, SA, sa, flux, sas_params):
     )
 
     # sanity check of SAS function
-    mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=1e-02)
-    if not npx.all(mask[2:-2, 2:-2]):
-        raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
+    # mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=1e-02)
+    # if not npx.all(mask[2:-2, 2:-2]):
+    #     raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
     mask1 = (tt * flux[:, :, npx.newaxis] - sa[:, :, 1, :] > 1e-02)
     if npx.any(mask1[2:-2, 2:-2, :]):
         raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
