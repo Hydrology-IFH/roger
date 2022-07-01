@@ -36,7 +36,7 @@ for tm in transport_models:
     lines.append('module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1\n')
     lines.append(' \n')
     lines.append('# adapt command to your available scheduler / MPI implementation\n')
-    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 200 1 -ns 10000 -tms {tms}\n')
+    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 40 1 -ns 10000 -tms {tms}\n')
     file_path = base_path / f'{script_name}.sh'
     file = open(file_path, "w")
     file.writelines(lines)
