@@ -4,7 +4,7 @@
 #SBATCH --job-name=oxygen18_pi_mc
 #SBATCH --nodes=1
 #SBATCH --ntasks=40
-#SBATCH --mem-per-cpu=3375
+#SBATCH --mem=180000
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL

@@ -4,7 +4,7 @@
 #SBATCH --job-name=oxygen18_adt_sar
 #SBATCH --nodes=1
 #SBATCH --ntasks=32
-#SBATCH --mem-per-cpu=4000
+#SBATCH --mem=180000
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL
