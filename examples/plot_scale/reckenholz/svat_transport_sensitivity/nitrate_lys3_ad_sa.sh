@@ -14,4 +14,4 @@
 module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1
  
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python svat_transport_nitrate.py lys3 complete-mixing_+_advection-dispersion
+mpirun --bind-to core --map-by core -report-bindings python svat_transport_nitrate.py -lys lys3 -tms complete-mixing_+_advection-dispersion

@@ -1200,59 +1200,56 @@ def validate_parameters_transport(state):
     pass
 
 
-@roger_kernel
 def calc_parameters_groundwater_kernel(state):
     pass
 
 
-@roger_kernel
 def validate_parameters_groundwater(state):
     pass
 
 
-@roger_kernel
 def validate_parameters_soil(state):
     vs = state.variables
     settings = state.settings
 
     mask1 = (vs.z_soil > 0) & ((vs.theta_pwp + vs.theta_ufc + vs.theta_ac > 0.99) | (vs.theta_pwp + vs.theta_ufc + vs.theta_ac < 0.01))
-    if global_and(npx.any(mask1)):
+    if global_and(npx.any(mask1[2:-2, 2:-2])):
         raise ValueError('theta-parameters are out of range.')
 
     mask2 = (vs.z_soil > 0) & ((vs.ks > 10000) | (vs.ks < 0))
-    if global_and(npx.any(mask2)):
+    if global_and(npx.any(mask2[2:-2, 2:-2])):
         raise ValueError('ks-parameter is out of range.')
 
     mask3 = (vs.z_soil > 0) & ((vs.lmpv > vs.z_soil) | (vs.lmpv < 0))
-    if global_and(npx.any(mask3)):
+    if global_and(npx.any(mask3[2:-2, 2:-2])):
         raise ValueError('lmpv-parameter is out of range.')
 
-    if global_and(npx.any(npx.isnan(vs.z_soil))):
+    if global_and(npx.any(npx.isnan(vs.z_soil[2:-2, 2:-2]))):
         raise ValueError('z_soil-parameter contains non-numeric values.')
 
-    if global_and(npx.any(npx.isnan(vs.dmpv))):
+    if global_and(npx.any(npx.isnan(vs.dmpv[2:-2, 2:-2]))):
         raise ValueError('dmpv-parameter contains non-numeric values.')
 
-    if global_and(npx.any(npx.isnan(vs.lmpv))):
+    if global_and(npx.any(npx.isnan(vs.lmpv[2:-2, 2:-2]))):
         raise ValueError('lmpv-parameter contains non-numeric values.')
 
-    if global_and(npx.any(npx.isnan(vs.theta_pwp))):
+    if global_and(npx.any(npx.isnan(vs.theta_pwp[2:-2, 2:-2]))):
         raise ValueError('theta_pwp-parameter contains non-numeric values.')
 
-    if global_and(npx.any(npx.isnan(vs.theta_ufc))):
+    if global_and(npx.any(npx.isnan(vs.theta_ufc[2:-2, 2:-2]))):
         raise ValueError('theta_ufc-parameter contains non-numeric values.')
 
-    if global_and(npx.any(npx.isnan(vs.theta_ac))):
+    if global_and(npx.any(npx.isnan(vs.theta_ac[2:-2, 2:-2]))):
         raise ValueError('theta_ac-parameter contains non-numeric values.')
 
-    if global_and(npx.any(npx.isnan(vs.ks))):
+    if global_and(npx.any(npx.isnan(vs.ks[2:-2, 2:-2]))):
         raise ValueError('ks-parameter contains non-numeric values.')
 
-    if global_and(npx.any(npx.isnan(vs.kf))):
+    if global_and(npx.any(npx.isnan(vs.kf[2:-2, 2:-2]))):
         raise ValueError('kf-parameter contains non-numeric values.')
 
     if settings.enable_lateral_flow:
-        if global_and(npx.any(npx.isnan(vs.dmph))):
+        if global_and(npx.any(npx.isnan(vs.dmph[2:-2, 2:-2]))):
             raise ValueError('dmph-parameter contains non-numeric values.')
 
 

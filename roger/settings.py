@@ -76,6 +76,7 @@ SETTINGS = {
     "enable_lateral_flow": Setting(False, bool, "enable lateral flow"),
     "enable_crop_phenology": Setting(False, bool, "enable crop phenology"),
     "enable_crop_rotation": Setting(False, bool, "enable crop rotation"),
+    "enable_crop_partitioning": Setting(False, bool, "enable crop specific solute uptake"),
     "enable_crop_water_stress": Setting(False, bool, "enable crop water stress"),
     "enable_offline_transport": Setting(False, bool, "enable offline transport"),
     "enable_groundwater_boundary": Setting(False, bool, "enable groundwater boundary"),
@@ -88,7 +89,7 @@ SETTINGS = {
     "enable_routing": Setting(False, bool, "enable routing"),
     "enable_runon_infiltration": Setting(False, bool, "enable run-on infiltration"),
     "enable_urban": Setting(False, bool, "enable urban"),
-    "enable_macropore_lower_boundary_condition": Setting(False, bool, "enable_macropore_lower_boundary_condition"),
+    "enable_macropore_lower_boundary_condition": Setting(False, bool, "enable lower boundary condition of macropores"),
     "tm_structure": Setting("UNNAMED", str, "transport model structure"),
     # Restarts
     "restart_input_filename": Setting(

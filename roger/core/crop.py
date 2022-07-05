@@ -1197,6 +1197,24 @@ def calculate_crop_phenology(state):
 
 
 @roger_kernel
+def update_alpha_transp(state):
+    """
+    Updates crop specific partition coefficient of transpiration
+    """
+    vs = state.variables
+
+    for i in range(500, 600):
+        mask = (vs.lu_id == i)
+        row_no = _get_row_no(vs.lut_crops[:, 0], i)
+        vs.alpha_transp = update(
+            vs.alpha_transp,
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2], vs.lut_crop_scale[2:-2, 2:-2, row_no], vs.alpha_transp[2:-2, 2:-2, :]),
+        )
+
+    return KernelOutput(alpha_transp=vs.alpha_transp)
+
+
+@roger_kernel
 def calculate_redistribution_root_growth_transport_kernel(state):
     """
     Calculates transport of redistribution after root growth

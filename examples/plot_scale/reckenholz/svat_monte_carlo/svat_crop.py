@@ -739,12 +739,8 @@ def main(nsamples, lys_experiment):
     model._set_input_dir(input_path)
     identifier = f'SVATCROP_{lys_experiment}'
     model._set_identifier(identifier)
-    forcing_path = model._input_dir / "forcing.nc"
-    if not os.path.exists(forcing_path):
-        write_forcing(input_path, enable_crop_phenology=True)
-    crop_rotation_path = model._input_dir / "crop_rotation.nc"
-    if not os.path.exists(crop_rotation_path):
-        write_crop_rotation(input_path)
+    write_forcing(input_path, enable_crop_phenology=True)
+    write_crop_rotation(input_path)
     model.setup()
     model.run()
     return
