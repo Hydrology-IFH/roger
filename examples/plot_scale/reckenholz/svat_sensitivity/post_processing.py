@@ -8,6 +8,7 @@ from cftime import num2date
 import xarray as xr
 import pandas as pd
 from de import de
+import yaml
 from SALib.analyze import sobol
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -18,20 +19,12 @@ import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
 onp.random.seed(42)
 
-# sampled parameter space
-bounds = {
-    'num_vars': 6,
-    'names': ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'crop_scale'],
-    'bounds': [[1, 400],
-               [1, 1200],
-               [0.05, 0.33],
-               [0.05, 0.33],
-               [0.05, 0.33],
-               [0.1, 120],
-               [0.5, 2]]
-}
-
 base_path = Path(__file__).parent
+# sampled parameter space
+file_path = base_path / "param_bounds.yml"
+with open(file_path, 'r') as file:
+    bounds = yaml.safe_load(file)
+
 # directory of results
 base_path_results = base_path / "results"
 if not os.path.exists(base_path_results):
@@ -422,3 +415,7 @@ for lys_experiment in lys_experiments:
     fig.subplots_adjust(wspace=0.2, hspace=0.3)
     file = base_path_figs / "dotty_plots.png"
     fig.savefig(file, dpi=250)
+
+    file1 = base_path.parent / "param_bounds.yml"
+    file2 = base_path.parent.parent / "svat_transport_sensitivity_reverse" / "param_bounds.yml"
+    shutil.copy(file1, file2)

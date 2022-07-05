@@ -13,26 +13,21 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.colors import Normalize
 import seaborn as sns
+import yaml
 import numpy as onp
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
+import roger
 onp.random.seed(42)
 
-import roger
+base_path = Path(__file__).parent
+base_path_data = Path('smb://fuhys015.public.ads.uni-freiburg.de/Gerics') / base_path.parts[0].join(base_path.parts[-5:])
 
 # sampled parameter space
-bounds = {
-    'num_vars': 6,
-    'names': ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'],
-    'bounds': [[1, 400],
-               [1, 1500],
-               [0.05, 0.33],
-               [0.05, 0.33],
-               [0.05, 0.33],
-               [0.1, 120]]
-}
+file_path = base_path / "param_bounds.yml"
+with open(file_path, 'r') as file:
+    bounds = yaml.safe_load(file)
 
-base_path = Path(__file__).parent
 # directory of results
 base_path_results = base_path / "results"
 if not os.path.exists(base_path_results):
@@ -101,6 +96,7 @@ states_hm_si_file1 = base_path_tm / "states_hm_sensitivity.nc"
 shutil.copy(states_hm_si_file, states_hm_si_file1)
 
 # load simulation
+states_hm_mc_file = base_path_data / "states_hm_sensitivity.nc"
 ds_sim = xr.open_dataset(states_hm_si_file, engine="h5netcdf")
 
 # load observations (measured data)
@@ -387,3 +383,7 @@ ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
 fig.subplots_adjust(wspace=0.2, hspace=0.3)
 file = base_path_figs / "dotty_plots.png"
 fig.savefig(file, dpi=250)
+
+file1 = base_path.parent / "param_bounds.yml"
+file2 = base_path.parent.parent / "svat_transport_sensitivity_reverse" / "param_bounds.yml"
+shutil.copy(file1, file2)

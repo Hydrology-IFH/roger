@@ -1,0 +1,94 @@
+preferential:
+  num_vars: 3
+
+  names:
+  - 'b_transp'
+  - 'b_q_rz'
+  - 'b_q_ss'
+
+  bounds:
+  -
+    - 1
+    - 90
+  -
+    - 1
+    - 90
+  -
+    - 1
+    - 90
+
+time-variant preferential:
+  num_vars: 3
+
+  names:
+  - 'b_transp'
+  - 'b_q_rz'
+  - 'b_q_ss'
+
+  bounds:
+  -
+    - 1
+    - 90
+  -
+    - 1
+    - 90
+  -
+    - 1
+    - 90
+
+advection-dispersion:
+  num_vars: 3
+
+  names:
+  - 'b_transp'
+  - 'a_q_rz'
+  - 'a_q_ss'
+
+  bounds:
+  -
+    - 1
+    - 90
+  -
+    - 1
+    - 90
+  -
+    - 1
+    - 90
+
+time-variant advection-dispersion:
+  num_vars: 3
+
+  names:
+  - 'b_transp'
+  - 'a_q_rz'
+  - 'a_q_ss'
+
+  bounds:
+  -
+    - 1
+    - 90
+  -
+    - 1
+    - 90
+  -
+    - 1
+    - 90
+
+time-variant:
+  num_vars: 3
+
+  names:
+  - 'ab_transp'
+  - 'ab_q_rz'
+  - 'ab_q_ss'
+
+  bounds:
+  -
+    - 1
+    - 90
+  -
+    - 1
+    - 90
+  -
+    - 1
+    - 90

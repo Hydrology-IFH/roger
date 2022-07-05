@@ -11,57 +11,18 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.colors import Normalize
 import seaborn as sns
+import yaml
+import numpy as onp
 import roger
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
-import numpy as onp
-
-bounds = {
-    "preferential" : {
-        'num_vars': 3,
-        'names': ['b_transp', 'b_q_rz', 'b_q_ss'],
-        'bounds': [[1, 90],
-                   [1, 90],
-                   [1, 90]]
-    },
-    "advection-dispersion" : {
-        'num_vars': 3,
-        'names': ['b_transp', 'a_q_rz', 'a_q_ss'],
-        'bounds': [[1, 90],
-                   [1, 90],
-                   [1, 90]]
-    },
-    "complete-mixing + advection-dispersion" : {
-        'num_vars': 2,
-        'names': ['a_q_rz', 'a_q_ss'],
-        'bounds': [[1, 90],
-                   [1, 90]]
-    },
-    "time-variant preferential" : {
-        'num_vars': 3,
-        'names': ['b_transp', 'b_q_rz', 'b_q_ss'],
-        'bounds': [[1, 90],
-                   [1, 90],
-                   [1, 90]]
-    },
-    "time-variant advection-dispersion" : {
-        'num_vars': 3,
-        'names': ['b_transp', 'a_q_rz', 'a_q_ss'],
-        'bounds': [[1, 90],
-                   [1, 90],
-                   [1, 90]]
-    },
-    "time-variant" : {
-        'num_vars': 3,
-        'names': ['ab_transp', 'ab_q_rz', 'ab_q_ss'],
-        'bounds': [[1, 90],
-                   [1, 90],
-                   [1, 90]]
-    }
-}
-
 
 base_path = Path(__file__).parent
+# sampled parameter space
+file_path = base_path / "param_bounds.yml"
+with open(file_path, 'r') as file:
+    bounds = yaml.safe_load(file)
+
 # directory of results
 base_path_results = base_path / "results"
 if not os.path.exists(base_path_results):

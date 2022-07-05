@@ -16,6 +16,7 @@ import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
 
 base_path = Path(__file__).parent
+base_path_data = Path('smb://fuhys015.public.ads.uni-freiburg.de/Gerics') / base_path.parts[0].join(base_path.parts[-5:])
 # directory of results
 base_path_results = base_path / "results"
 if not os.path.exists(base_path_results):

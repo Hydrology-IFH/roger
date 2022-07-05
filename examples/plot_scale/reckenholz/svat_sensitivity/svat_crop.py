@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import h5netcdf
+import yaml
 from SALib.sample import saltelli
 import numpy as onp
 import click
@@ -46,6 +47,20 @@ def main(nsamples, lys_experiment):
         _input_dir = None
         _identifier = None
         _lys = None
+
+        # write sampled boundaries to .yml
+        file_path = _base_path / "param_bounds.yml"
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                _bounds_yml = yaml.safe_load(file)
+            _bounds_yml[lys_experiment] = _bounds
+            with open(file_path, 'w') as file:
+                yaml.dump(_bounds_yml, file)
+        else:
+            _bounds_yml = {}
+            _bounds_yml[lys_experiment] = _bounds
+            with open(file_path, 'w') as file:
+                yaml.dump(_bounds_yml, file)
 
         def _set_lys(self, lys):
             self._lys = lys

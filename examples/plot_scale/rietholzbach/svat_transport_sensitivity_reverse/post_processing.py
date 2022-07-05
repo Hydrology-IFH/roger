@@ -11,24 +11,18 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.colors import Normalize
 import seaborn as sns
+import yaml
+import numpy as onp
 import roger
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
-import numpy as onp
-
-# sampled parameter space
-bounds = {
-    'num_vars': 6,
-    'names': ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'],
-    'bounds': [[1, 400],
-               [1, 1500],
-               [0.05, 0.33],
-               [0.05, 0.33],
-               [0.05, 0.33],
-               [0.1, 120]]
-}
 
 base_path = Path(__file__).parent
+# sampled parameter space
+file_path = base_path / "param_bounds.yml"
+with open(file_path, 'r') as file:
+    bounds = yaml.safe_load(file)
+
 # directory of results
 base_path_results = base_path / "results"
 if not os.path.exists(base_path_results):

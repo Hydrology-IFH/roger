@@ -1,5 +1,5 @@
 from pathlib import Path
-import sys
+import yaml
 import os
 import h5netcdf
 from SALib.sample import saltelli
@@ -364,6 +364,24 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
                     }
                     self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
                     self._nrows = self._params.shape[0]
+
+            # write sampled boundaries to .yml
+            file_path = self._base_path / "param_bounds.yml"
+            if os.path.exists(file_path):
+                with open(file_path, 'r') as file:
+                    _bounds_yml = yaml.safe_load(file)
+                if lys_experiment not in list(_bounds_yml.keys()):
+                    _bounds_yml[lys_experiment] = {}
+                _bounds_yml[lys_experiment][self._tm_structure] = self._bounds
+                with open(file_path, 'w') as file:
+                    yaml.dump(_bounds_yml, file)
+            else:
+                _bounds_yml = {}
+                if lys_experiment not in list(_bounds_yml.keys()):
+                    _bounds_yml[lys_experiment] = {}
+                _bounds_yml[lys_experiment][self._tm_structure] = self._bounds
+                with open(file_path, 'w') as file:
+                    yaml.dump(_bounds_yml, file)
 
         @roger_routine
         def set_settings(self, state):

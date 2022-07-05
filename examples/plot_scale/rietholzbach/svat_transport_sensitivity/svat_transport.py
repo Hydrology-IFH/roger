@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import h5netcdf
+import yaml
 from SALib.sample import saltelli
 import numpy as onp
 import click
@@ -66,70 +67,13 @@ def main(nsamples, transport_model_structure):
             self._identifier = identifier
 
         def _sample_params(self, nsamples):
-            if self._tm_structure == "preferential":
-                self._bounds = {
-                    'num_vars': 3,
-                    'names': ['b_transp', 'b_q_rz', 'b_q_ss'],
-                    'bounds': [[1, 90],
-                               [1, 90],
-                               [1, 90]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
+            file_path = self._base_path / "param_bounds.yml"
+            with open(file_path, 'r') as file:
+                bounds = yaml.safe_load(file)
 
-            elif self._tm_structure == "advection-dispersion":
-                self._bounds = {
-                    'num_vars': 3,
-                    'names': ['b_transp', 'a_q_rz', 'a_q_ss'],
-                    'bounds': [[1, 90],
-                               [1, 90],
-                               [1, 90]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
-
-            elif self._tm_structure == "complete-mixing + advection-dispersion":
-                self._bounds = {
-                    'num_vars': 2,
-                    'names': ['a_q_rz', 'a_q_ss'],
-                    'bounds': [[1, 90],
-                               [1, 90]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
-
-            elif self._tm_structure == "time-variant preferential":
-                self._bounds = {
-                    'num_vars': 3,
-                    'names': ['b_transp', 'b_q_rz', 'b_q_ss'],
-                    'bounds': [[1, 90],
-                               [1, 90],
-                               [1, 90]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
-
-            elif self._tm_structure == "time-variant advection-dispersion":
-                self._bounds = {
-                    'num_vars': 3,
-                    'names': ['b_transp', 'a_q_rz', 'a_q_ss'],
-                    'bounds': [[1, 90],
-                               [1, 90],
-                               [1, 90]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
-
-            elif self._tm_structure == "time-variant":
-                self._bounds = {
-                    'num_vars': 3,
-                    'names': ['ab_transp', 'ab_q_rz', 'ab_q_ss'],
-                    'bounds': [[1, 90],
-                               [1, 90],
-                               [1, 90]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
+            self._bounds = bounds[self._tm_structure]
+            self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
+            self._nrows = self._params.shape[0]
 
         @roger_routine
         def set_settings(self, state):

@@ -1,13 +1,16 @@
 from pathlib import Path
 import os
 import h5netcdf
+import yaml
 from SALib.sample import saltelli
 import numpy as onp
+import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
+@click.option("-ns", "--nsamples", type=int, default=1024)
 @roger_base_cli
-def main():
+def main(nsamples):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
@@ -20,18 +23,10 @@ def main():
         """
         _base_path = Path(__file__).parent
         # sampled parameters with Saltelli's extension of the Sobol' sequence
-        _nsamples = 2**10
-        _bounds = {
-            'num_vars': 6,
-            'names': ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'],
-            'bounds': [[1, 400],
-                       [1, 1500],
-                       [0.05, 0.33],
-                       [0.05, 0.33],
-                       [0.05, 0.33],
-                       [0.1, 120]]
-        }
-        _params = saltelli.sample(_bounds, _nsamples, calc_second_order=False)
+        file_path = _base_path / "param_bounds.yml"
+        with open(file_path, 'r') as file:
+            _bounds = yaml.safe_load(file)
+        _params = saltelli.sample(_bounds, nsamples, calc_second_order=False)
         _nrows = _params.shape[0]
         _input_dir = None
 
