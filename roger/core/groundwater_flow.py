@@ -126,6 +126,14 @@ def update_storage_bc(state):
     pass
 
 
+@roger_kernel
+def calc_groundwater_runoff_routing(state):
+    """
+    Calculates groundwater runoff routing
+    """
+    pass
+
+
 @roger_routine
 def calculate_groundwater_flow(state):
     """

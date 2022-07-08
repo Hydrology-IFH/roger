@@ -85,6 +85,7 @@ CROPS = ("crops",)
 CR = ("cr",)
 N_SAS_PARAMS = ("n_sas_params",)
 N_CROP_TYPES = ("n_crop_types",)
+FLOWDIRS = (8,)
 
 # those are written to netCDF output by default
 BASE_DIMENSIONS = X + Y
@@ -445,45 +446,69 @@ VARIABLES = {
         "depth of the surface ponding",
         write_to_restart=True,
     ),
+    "elev": Variable(
+        "surface elevation",
+        CATCH_GRID,
+        "m a.s.l.",
+        "surface elevation",
+        active=lambda settings: settings.enable_routing,
+        write_to_restart=True,
+    ),
+    "q0_out": Variable(
+        "surface runoff",
+        CATCH_GRID + FLOWDIRS,
+        "mm/s",
+        "surface runoff leaving a grid cell",
+        active=lambda settings: settings.enable_routing,
+        write_to_restart=False,
+    ),
     "dz0": Variable(
         "tendency of depth of the surface ponding",
-        CATCH_GRID + TIMESTEPS,
-        "mm/s^2",
+        CATCH_GRID + FLOWDIRS,
+        "m/m",
         "tendency of depth of the surface ponding",
         active=lambda settings: settings.enable_routing,
-        write_to_restart=True,
+        write_to_restart=False,
     ),
-    "vx": Variable(
-        "flow velocity in zonal direction",
-        CATCH_GRID + TIMESTEPS,
-        "mm/s",
-        "flow velocity in zonal direction",
+    "dz_sub": Variable(
+        "tendency of depth of the saturation water table",
+        CATCH_GRID + FLOWDIRS,
+        "m/m",
+        "tendency of depth of the saturation water table",
         active=lambda settings: settings.enable_routing,
-        write_to_restart=True,
+        write_to_restart=False,
     ),
-    "vy": Variable(
-        "flow velocity in meridional direction",
-        CATCH_GRID + TIMESTEPS,
+    "v0": Variable(
+        "flow velocity of surface runoff",
+        CATCH_GRID + FLOWDIRS,
         "mm/s",
-        "flow velocity in meridonial direction",
+        "flow velocity of surface runoff",
         active=lambda settings: settings.enable_routing,
-        write_to_restart=True,
+        write_to_restart=False,
     ),
-    "dvx": Variable(
-        "tendency of flow velocity in zonal direction",
-        CATCH_GRID + TIMESTEPS,
+    "v_sub": Variable(
+        "flow velocity of subsurface runoff",
+        CATCH_GRID + FLOWDIRS,
         "mm/s",
-        "tendency of flow velocity in zonal direction",
+        "flow velocity of subsurface runoff",
         active=lambda settings: settings.enable_routing,
-        write_to_restart=True,
+        write_to_restart=False,
     ),
-    "dvy": Variable(
-        "tendency of flow velocity in meridional direction",
-        CATCH_GRID + TIMESTEPS,
+    "q_mat_out": Variable(
+        "matrix subsurface runoff",
+        CATCH_GRID + FLOWDIRS,
         "mm/s",
-        "tendency of flow velocity in meridonial direction",
+        "matrix subsurface runoff leaving a grid cell",
         active=lambda settings: settings.enable_routing,
-        write_to_restart=True,
+        write_to_restart=False,
+    ),
+    "q_mp_out": Variable(
+        "macropore subsurface runoff",
+        CATCH_GRID + FLOWDIRS,
+        "mm/s",
+        "macropore subsurface runoff leaving a grid cell",
+        active=lambda settings: settings.enable_routing,
+        write_to_restart=False,
     ),
     "slope": Variable(
         "surface slope",
@@ -2334,11 +2359,11 @@ VARIABLES = {
     ),
     "dz_gw": Variable(
         "gradient of groundwater table depth",
-        CATCH_GRID,
+        CATCH_GRID + FLOWDIRS,
         "m/m",
         "gradient of groundwater table depth",
         time_dependent=True,
-        active=lambda settings: settings.enable_groundwater,
+        active=lambda settings: settings.enable_groundwater & settings.enable_routing,
     ),
     "S_gw": Variable(
         "Groundwater storage",

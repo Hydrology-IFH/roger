@@ -919,6 +919,38 @@ def calculate_subsurface_runoff(state):
 
 
 @roger_kernel
+def calc_subsurface_runoff_routing(state):
+    """
+    Calculates subsurface runoff routing
+    """
+    pass
+    # m, n = dem.shape
+    # fdir = np.zeros((8, m, n), dtype=np.float64)
+    # row_offsets = np.array([-1, -1, 0, 1, 1, 1, 0, -1])
+    # col_offsets = np.array([0, 1, 1, 1, 0, -1, -1, -1])
+    # dd = np.sqrt(dx**2 + dy**2)
+    # distances = np.array([dy, dd, dx, dd, dy, dd, dx, dd])
+    # for i in prange(1, m - 1):
+    #     for j in prange(1, n - 1):
+    #         if nodata_cells[i, j]:
+    #             fdir[:, i, j] = nodata_out
+    #         else:
+    #             elev = dem[i, j]
+    #             den = 0.
+    #             for k in range(8):
+    #                 row_offset = row_offsets[k]
+    #                 col_offset = col_offsets[k]
+    #                 distance = distances[k]
+    #                 num = (elev - dem[i + row_offset, j + col_offset])**p / distance
+    #                 if num > 0:
+    #                     fdir[k, i, j] = num
+    #                     den += num
+    #             if den > 0:
+    #                 fdir[:, i, j] /= den
+    # return fdir
+
+
+@roger_kernel
 def calculate_percolation_rz_transport_kernel(state):
     """
     Calculates travel time of percolation
