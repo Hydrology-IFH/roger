@@ -8,7 +8,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion']), default='complete-mixing')
 @roger_base_cli
-def main(nsamples, transport_model_structure):
+def main(transport_model_structure):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
