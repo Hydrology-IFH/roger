@@ -3,6 +3,8 @@ from contextlib import contextmanager
 
 from roger import runtime_settings, runtime_state, roger_kernel
 
+SEED = 1
+
 
 class Index:
     __slots__ = ()
@@ -94,6 +96,9 @@ def where_numpy(*args, **kwargs):
 
 def random_uniform_numpy(lower, upper, shape):
     import numpy as np
+    global SEED
+    SEED += 1
+    np.random.seed(SEED)
     return np.random.uniform(lower, upper, size=shape[0]*shape[1]).reshape(shape)
 
 
@@ -169,7 +174,9 @@ def update_multiply_jax(arr, at, to):
 
 def random_uniform_jax(lower, upper, shape):
     import jax
-    key = jax.random.PRNGKey(42)
+    global SEED
+    SEED += 1
+    key = jax.random.PRNGKey(SEED)
     return jax.random.uniform(key, shape=shape, minval=lower, maxval=upper)
 
 

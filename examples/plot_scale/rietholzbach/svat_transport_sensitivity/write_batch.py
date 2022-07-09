@@ -20,13 +20,13 @@ for tm in transport_models:
     script_name = f'{tracer}_{tm1}_sa'
     tms = tm.replace(" ", "_")
     lines = []
-    lines.append('#!/bin/bash -l\n')
+    lines.append('#!/bin/bash\n')
     lines.append('#\n')
-    lines.append('#SBATCH --partition=single\n')
+    lines.append('#SBATCH --partition=multiple\n')
     lines.append(f'#SBATCH --job-name={script_name}\n')
     lines.append('#SBATCH --nodes=1\n')
     lines.append('#SBATCH --ntasks-per-node=32\n')
-    lines.append('#SBATCH --mem=180000\n')
+    lines.append('#SBATCH --mem=90000\n')
     lines.append('#SBATCH --mail-type=ALL\n')
     lines.append('#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n')
     lines.append('#SBATCH --export=ALL\n')

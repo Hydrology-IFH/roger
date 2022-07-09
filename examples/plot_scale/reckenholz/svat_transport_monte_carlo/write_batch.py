@@ -22,7 +22,7 @@ for lys in lysimeters:
         script_name = f'{tracer}_{lys}_{tm1}_mc'
         tms = tm.replace(" ", "_")
         lines = []
-        lines.append('#!/bin/bash -l\n')
+        lines.append('#!/bin/bash\n')
         lines.append('#\n')
         lines.append('#SBATCH --partition=single\n')
         lines.append(f'#SBATCH --job-name={script_name}\n')
@@ -47,7 +47,7 @@ for lys in lysimeters:
 
 subprocess.Popen("chmod +x submit_bromide.sh", shell=True)
 
-tracer = 'nitrate'
+tracer = 'nitrate2'
 lysimeters = ['lys2', 'lys3', 'lys4', 'lys8', 'lys9']
 transport_models = ['complete-mixing', 'piston',
                     'preferential', 'complete-mixing + advection-dispersion',
@@ -60,7 +60,7 @@ for lys in lysimeters:
         script_name = f'{tracer}_{lys}_{tm1}_mc'
         tms = tm.replace(" ", "_")
         lines = []
-        lines.append('#!/bin/bash -l\n')
+        lines.append('#!/bin/bash\n')
         lines.append('#\n')
         lines.append('#SBATCH --partition=single\n')
         lines.append(f'#SBATCH --job-name={script_name}\n')
@@ -84,3 +84,39 @@ for lys in lysimeters:
         subprocess.Popen(f"chmod +x {script_name}.sh", shell=True)
 
 subprocess.Popen("chmod +x submit_nitrate.sh", shell=True)
+
+tracer = 'nitrate1'
+lysimeters = ['lys2', 'lys3', 'lys4', 'lys8', 'lys9']
+transport_models = ['complete-mixing', 'piston',
+                    'preferential', 'complete-mixing + advection-dispersion',
+                    'time-variant preferential',
+                    'time-variant complete-mixing + advection-dispersion']
+for lys in lysimeters:
+    for tm in transport_models:
+        tm1 = transport_models_abrev[tm]
+        tms = tm.replace(" ", "_")
+        script_name = f'{tracer}_{lys}_{tm1}_mc'
+        tms = tm.replace(" ", "_")
+        lines = []
+        lines.append('#!/bin/bash\n')
+        lines.append('#\n')
+        lines.append('#SBATCH --partition=single\n')
+        lines.append(f'#SBATCH --job-name={script_name}\n')
+        lines.append('#SBATCH --nodes=1\n')
+        lines.append('#SBATCH --ntasks=40\n')
+        lines.append('#SBATCH --mem=180000mb\n')
+        lines.append('#SBATCH --mail-type=ALL\n')
+        lines.append('#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n')
+        lines.append('#SBATCH --export=ALL\n')
+        lines.append('#SBATCH --time=72:00:00\n')
+        lines.append(' \n')
+        lines.append('# load module dependencies\n')
+        lines.append('module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1\n')
+        lines.append(' \n')
+        lines.append('# adapt command to your available scheduler / MPI implementation\n')
+        lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport_{tracer}.py {lys} {tms}\n')
+        file_path = base_path / f'{script_name}.sh'
+        file = open(file_path, "w")
+        file.writelines(lines)
+        file.close()
+        subprocess.Popen(f"chmod +x {script_name}.sh", shell=True)

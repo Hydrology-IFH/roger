@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/bash
 #
 #SBATCH --partition=single
 #SBATCH --job-name=nitrate_lys4_adt_sar

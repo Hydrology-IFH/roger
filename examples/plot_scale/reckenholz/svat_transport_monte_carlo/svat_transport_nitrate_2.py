@@ -19,7 +19,6 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
     import roger.lookuptables as lut
     from roger.core.crop import update_alpha_transp
 
-
     class SVATCROPTRANSPORTSetup(RogerSetup):
         """A SVAT transport model for nitrate including
         crop phenology/crop rotation.

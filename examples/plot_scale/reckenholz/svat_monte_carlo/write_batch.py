@@ -7,7 +7,7 @@ lysimeters = ['lys1', 'lys2', 'lys3', 'lys4', 'lys8', 'lys9', 'lys2_bromide',
 for lys in lysimeters:
     script_name = f'{lys}_mc'
     lines = []
-    lines.append('#!/bin/bash -l\n')
+    lines.append('#!/bin/bash\n')
     lines.append('#\n')
     lines.append('#SBATCH --partition=single\n')
     lines.append(f'#SBATCH --job-name={script_name}\n')

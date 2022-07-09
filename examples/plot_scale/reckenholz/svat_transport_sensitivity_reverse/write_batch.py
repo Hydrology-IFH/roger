@@ -22,7 +22,7 @@ for lys in lysimeters:
         script_name = f'{tracer}_{lys}_{tm1}_sar'
         tms = tm.replace(" ", "_")
         lines = []
-        lines.append('#!/bin/bash -l\n')
+        lines.append('#!/bin/bash\n')
         lines.append('#\n')
         lines.append('#SBATCH --partition=single\n')
         lines.append(f'#SBATCH --job-name={script_name}\n')
@@ -60,7 +60,7 @@ for lys in lysimeters:
         script_name = f'{tracer}_{lys}_{tm1}_sar'
         tms = tm.replace(" ", "_")
         lines = []
-        lines.append('#!/bin/bash -l\n')
+        lines.append('#!/bin/bash\n')
         lines.append('#\n')
         lines.append('#SBATCH --partition=single\n')
         lines.append(f'#SBATCH --job-name={script_name}\n')

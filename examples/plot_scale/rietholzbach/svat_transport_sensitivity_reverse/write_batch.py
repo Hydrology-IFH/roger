@@ -20,7 +20,7 @@ for tm in transport_models:
     script_name = f'{tracer}_{tm1}_sar'
     tms = tm.replace(" ", "_")
     lines = []
-    lines.append('#!/bin/bash -l\n')
+    lines.append('#!/bin/bash\n')
     lines.append('#\n')
     lines.append('#SBATCH --partition=single\n')
     lines.append(f'#SBATCH --job-name={script_name}\n')
