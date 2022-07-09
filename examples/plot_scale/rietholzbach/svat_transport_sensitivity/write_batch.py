@@ -26,7 +26,7 @@ for tm in transport_models:
     lines.append(f'#SBATCH --job-name={script_name}\n')
     lines.append('#SBATCH --nodes=2\n')
     lines.append('#SBATCH --ntasks-per-node=16\n')
-    lines.append('#SBATCH --mem=45000\n')
+    lines.append('#SBATCH --mem=90000\n')
     lines.append('#SBATCH --mail-type=ALL\n')
     lines.append('#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n')
     lines.append('#SBATCH --export=ALL\n')
