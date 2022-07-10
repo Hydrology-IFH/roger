@@ -397,7 +397,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
         with state.timers["diagnostics"]:
             if not numerics.sanity_check(state):
-                raise RuntimeError(f"solution diverged at iteration {vs.itt}")
+                logger.debug(f"solution diverged at iteration {vs.itt}")
+                # raise RuntimeError(f"solution diverged at iteration {vs.itt}")
 
             if self._warmup_done:
                 diagnostics.diagnose(state)
