@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --partition=multiple
+#SBATCH --partition=multiple_e
 #SBATCH --job-name=oxygen18_pft_sa
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=16

@@ -22,7 +22,7 @@ for tm in transport_models:
     lines = []
     lines.append('#!/bin/bash\n')
     lines.append('#\n')
-    lines.append('#SBATCH --partition=multiple\n')
+    lines.append('#SBATCH --partition=multiple_e\n')
     lines.append(f'#SBATCH --job-name={script_name}\n')
     lines.append('#SBATCH --nodes=2\n')
     lines.append('#SBATCH --ntasks-per-node=16\n')
