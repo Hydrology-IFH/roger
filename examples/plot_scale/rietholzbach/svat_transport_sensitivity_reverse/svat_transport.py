@@ -250,7 +250,7 @@ def main(nsamples, transport_model_structure):
             )
 
             if (settings.enable_oxygen18 | settings.enable_deuterium):
-                vs.C_snow = update(vs.C_snow, at[2:-2, 2:-2, :vs.taup1], onp.NaN)
+                vs.C_snow = update(vs.C_snow, at[2:-2, 2:-2, :vs.taup1], npx.nan)
                 vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], -13)
                 vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], -7)
                 vs.msa_rz = update(
@@ -259,7 +259,7 @@ def main(nsamples, transport_model_structure):
                 )
                 vs.msa_rz = update(
                     vs.msa_rz,
-                    at[2:-2, 2:-2, :vs.taup1, 0], onp.NaN,
+                    at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
                 )
                 vs.msa_ss = update(
                     vs.msa_ss,
@@ -267,7 +267,7 @@ def main(nsamples, transport_model_structure):
                 )
                 vs.msa_ss = update(
                     vs.msa_ss,
-                    at[2:-2, 2:-2, :vs.taup1, 0], onp.NaN,
+                    at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
                 )
                 iso_rz = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
                 iso_ss = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
@@ -326,11 +326,11 @@ def main(nsamples, transport_model_structure):
             vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, 'states_hm_sensitivity.nc'))
 
             if settings.enable_deuterium:
-                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 0], onp.NaN)
+                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 0], npx.nan)
                 vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d2H", self._input_dir, 'forcing_tracer.nc'))
 
             if settings.enable_oxygen18:
-                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 0], onp.NaN)
+                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 0], npx.nan)
                 vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
 
             if settings.enable_deuterium or settings.enable_oxygen18:
@@ -377,17 +377,17 @@ def main(nsamples, transport_model_structure):
         # mixing of isotopes while snow accumulation
         vs.C_snow = update(
             vs.C_snow,
-            at[2:-2, 2:-2, vs.tau], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] > 0, npx.where(npx.isnan(vs.C_snow[2:-2, 2:-2, vs.tau]), vs.C_IN[2:-2, 2:-2, vs.itt], (vs.PREC[2:-2, 2:-2, vs.itt] / (vs.PREC[2:-2, 2:-2, vs.itt] + vs.S_SNOW[2:-2, 2:-2, vs.itt])) * vs.C_IN[2:-2, 2:-2, vs.itt] + (vs.S_SNOW[2:-2, 2:-2, vs.itt] / (vs.PREC[2:-2, 2:-2, vs.itt] + vs.S_SNOW[2:-2, 2:-2, vs.itt])) * vs.C_snow[2:-2, 2:-2, vs.taum1]), onp.NaN) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2, vs.tau], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] > 0, npx.where(npx.isnan(vs.C_snow[2:-2, 2:-2, vs.tau]), vs.C_IN[2:-2, 2:-2, vs.itt], (vs.PREC[2:-2, 2:-2, vs.itt] / (vs.PREC[2:-2, 2:-2, vs.itt] + vs.S_SNOW[2:-2, 2:-2, vs.itt])) * vs.C_IN[2:-2, 2:-2, vs.itt] + (vs.S_SNOW[2:-2, 2:-2, vs.itt] / (vs.PREC[2:-2, 2:-2, vs.itt] + vs.S_SNOW[2:-2, 2:-2, vs.itt])) * vs.C_snow[2:-2, 2:-2, vs.taum1]), npx.nan) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_snow = update(
             vs.C_snow,
-            at[2:-2, 2:-2, vs.tau], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] <= 0, onp.NaN, vs.C_snow[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2, vs.tau], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] <= 0, npx.nan, vs.C_snow[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
         )
 
         # mix isotopes from snow melt and rainfall
         vs.C_in = update(
             vs.C_in,
-            at[2:-2, 2:-2], npx.where(npx.isfinite(vs.C_snow[2:-2, 2:-2, vs.taum1]), vs.C_snow[2:-2, 2:-2, vs.taum1], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], onp.NaN)) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(npx.isfinite(vs.C_snow[2:-2, 2:-2, vs.taum1]), vs.C_snow[2:-2, 2:-2, vs.taum1], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.nan)) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.M_in = update(
             vs.M_in,
@@ -560,7 +560,7 @@ def main(nsamples, transport_model_structure):
         )
         conc = update(
             conc,
-            at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], onp.NaN),
+            at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], npx.nan),
         )
 
         return conc

@@ -235,7 +235,7 @@ def calc_conc_iso_flux(state, mtt, tt, flux):
     )
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], onp.NaN),
+        at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], npx.nan),
     )
 
     return conc
@@ -279,7 +279,7 @@ def calc_msa_iso(state, sa, msa, flux, tt, mtt):
     )
     msa = update(
         msa,
-        at[2:-2, 2:-2, vs.tau, :], npx.where((msa[2:-2, 2:-2, vs.tau, :] != 0), msa[2:-2, 2:-2, vs.tau, :], onp.NaN),
+        at[2:-2, 2:-2, vs.tau, :], npx.where((msa[2:-2, 2:-2, vs.tau, :] != 0), msa[2:-2, 2:-2, vs.tau, :], npx.nan),
     )
 
     return msa
@@ -298,7 +298,7 @@ def calc_conc_iso_storage(state, sa, msa):
     )
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], onp.NaN),
+        at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], npx.nan),
     )
 
     return conc
@@ -317,7 +317,7 @@ def calc_mtt(state, sa, tt, flux, msa, alpha):
         # isotope travel time distribution at current time step
         mtt = update(
             mtt,
-            at[2:-2, 2:-2, :], npx.where(tt[2:-2, 2:-2, :] > 0, msa[2:-2, 2:-2, vs.tau, :], onp.NaN),
+            at[2:-2, 2:-2, :], npx.where(tt[2:-2, 2:-2, :] > 0, msa[2:-2, 2:-2, vs.tau, :], npx.nan),
         )
 
     else:
@@ -448,7 +448,7 @@ def calc_ageing_iso(state, sa, msa):
     # add youngest isotope input to isotope StorAge
     msa = update(
         msa,
-        at[2:-2, 2:-2, vs.tau, 0], onp.NaN,
+        at[2:-2, 2:-2, vs.tau, 0], npx.nan,
     )
     # merge oldest isotopes
     sum_old = allocate(state.dimensions, ("x", "y"))

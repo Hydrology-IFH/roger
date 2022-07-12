@@ -1679,11 +1679,11 @@ def calculate_infiltration_rz_transport_iso_kernel(state):
     # isotope ratio of infiltration
     vs.C_inf_mat_rz = update(
         vs.C_inf_mat_rz,
-        at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], onp.NaN) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.C_inf_pf_rz = update(
         vs.C_inf_pf_rz,
-        at[2:-2, 2:-2], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], onp.NaN) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.sa_rz = update_add(
         vs.sa_rz,
@@ -1691,7 +1691,7 @@ def calculate_infiltration_rz_transport_iso_kernel(state):
     )
     vs.msa_rz = update(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, 0], npx.where(vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], onp.NaN) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau, 0], npx.where(vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(sa_rz=vs.sa_rz, msa_rz=vs.msa_rz, C_inf_mat_rz=vs.C_inf_mat_rz, C_inf_pf_rz=vs.C_inf_pf_rz)
@@ -1759,7 +1759,7 @@ def calculate_infiltration_ss_transport_iso_kernel(state):
     # isotope ratio of infiltration
     vs.C_inf_pf_ss = update(
         vs.C_inf_pf_ss,
-        at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], onp.NaN) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.sa_ss = update_add(

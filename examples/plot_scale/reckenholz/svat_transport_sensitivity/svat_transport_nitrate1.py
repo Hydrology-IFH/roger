@@ -1000,7 +1000,7 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
         for i in range(nn_sol):
             rain_sum = allocate(state.dimensions, ("x", "y"))
             nn_end = allocate(state.dimensions, ("x", "y"))
-            input_itt = npx.nanargmin(npx.where(rain_idx - sol_idx[i] < 0, onp.NaN, rain_idx - sol_idx[i]))
+            input_itt = npx.nanargmin(npx.where(rain_idx - sol_idx[i] < 0, npx.nan, rain_idx - sol_idx[i]))
             start_rain = rain_idx[input_itt]
             rain_sum = update(
                 rain_sum,

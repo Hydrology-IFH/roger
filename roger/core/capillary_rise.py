@@ -276,7 +276,7 @@ def calculate_capillary_rise_rz_transport_iso_kernel(state):
     # update solute StorAge
     vs.msa_ss = update(
         vs.msa_ss,
-        at[2:-2, 2:-2, :, :], npx.where((vs.sa_ss[2:-2, 2:-2, :, :] > 0), vs.msa_ss[2:-2, 2:-2, :, :], onp.NaN) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+        at[2:-2, 2:-2, :, :], npx.where((vs.sa_ss[2:-2, 2:-2, :, :] > 0), vs.msa_ss[2:-2, 2:-2, :, :], npx.nan) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.msa_rz = update(
