@@ -18,7 +18,7 @@ def read_from_h5(dimensions, var_meta, infile, groupname):
             continue
 
         local_shape = get_shape(dimensions, var_meta[key].dims, local=True, include_ghosts=True)
-        gidx, lidx = get_chunk_slices(dimensions["xt"], dimensions["yt"], var_meta[key].dims, include_overlap=True)
+        gidx, lidx = get_chunk_slices(dimensions["x"], dimensions["y"], var_meta[key].dims, include_overlap=True)
 
         # pass dtype as str to prevent endianness from leaking into array
         variables[key] = npx.empty(local_shape, dtype=str(var.dtype))

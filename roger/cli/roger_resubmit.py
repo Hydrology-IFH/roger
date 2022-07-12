@@ -39,7 +39,7 @@ def unparse(args):
     return " ".join(map(pipes.quote, args))
 
 
-def call_roger(cmd, name, n, runlen):
+def call_roger(cmd, name, n):
     identifier = f"{name}.{n:0>4}"
     prev_id = f"{name}.{n-1:0>4}"
     args = [
@@ -49,9 +49,6 @@ def call_roger(cmd, name, n, runlen):
         "-s",
         "restart_output_filename",
         "{identifier}.restart.h5",
-        "-s",
-        "runlen",
-        str(runlen),
     ]
     if n:
         args += ["-s", "restart_input_filename", f"{prev_id}.restart.h5"]
@@ -66,7 +63,7 @@ def call_roger(cmd, name, n, runlen):
         raise RuntimeError(f"Run {n} failed, exiting")
 
 
-def resubmit(identifier, num_runs, length_per_run, roger_cmd, callback):
+def resubmit(identifier, num_runs, roger_cmd, callback):
     """Performs several runs of roger back to back, using the previous run as restart input.
 
     Intended to be used with scheduling systems (e.g. SLURM or PBS).
@@ -78,7 +75,7 @@ def resubmit(identifier, num_runs, length_per_run, roger_cmd, callback):
     if current_n >= num_runs:
         return
 
-    call_roger(roger_cmd, identifier, current_n, length_per_run)
+    call_roger(roger_cmd, identifier, current_n)
 
     next_n = current_n + 1
     write_next_n(next_n, last_n_filename)
@@ -105,8 +102,7 @@ def resubmit(identifier, num_runs, length_per_run, roger_cmd, callback):
 
 @click.command("roger-resubmit", short_help="Re-run a roger setup several times")
 @click.option("-i", "--identifier", required=True, help="Base identifier of the simulation")
-@click.option("-n", "--num-runs", type=click.INT, required=True, help="Total number of runs to execute")
-@click.option("-l", "--length-per-run", type=click.FLOAT, required=True, help="Length (in seconds) of each run")
+@click.option("-n", "--num-runs", type=click.INT, required=True, help="Total number of iterations to execute")
 @click.option(
     "-c", "--roger-cmd", type=ShellCommand(), required=True, help="The command that is used to call roger (quoted)"
 )

@@ -268,18 +268,20 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
             self.set_look_up_tables(self.state)
 
-            self.set_parameters_setup(self.state)
-            numerics.calc_parameters(self.state)
+            if not self.state.settings.restart_input_filename:
+                self.set_parameters_setup(self.state)
+                numerics.calc_parameters(self.state)
 
-            self.set_initial_conditions_setup(self.state)
-            self.set_initial_conditions(self.state)
-            numerics.calc_initial_conditions(self.state)
+                self.set_initial_conditions_setup(self.state)
+                self.set_initial_conditions(self.state)
+                numerics.calc_initial_conditions(self.state)
 
             self.set_diagnostics(self.state)
             diagnostics.initialize(self.state)
-            restart.read_restart(self.state)
 
-            self.set_forcing_setup(self.state)
+            if not self.state.settings.restart_input_filename:
+                self.set_forcing_setup(self.state)
+            restart.read_restart(self.state)
 
         self._setup_done = True
         if not self.state.settings.enable_offline_transport:
@@ -397,8 +399,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
         with state.timers["diagnostics"]:
             if not numerics.sanity_check(state):
-                logger.debug(f"solution diverged at iteration {vs.itt}")
-                # raise RuntimeError(f"solution diverged at iteration {vs.itt}")
+                raise RuntimeError(f"solution diverged at iteration {vs.itt}")
 
             if self._warmup_done:
                 diagnostics.diagnose(state)
@@ -421,7 +422,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
         -------
         Make sure to call :meth:`setup` prior to this function.
         """
-        from roger import diagnostics
+        from roger import diagnostics, restart
         from roger.core import numerics
 
         if self.state.settings.enable_offline_transport:
@@ -436,6 +437,12 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
         self._warmup_done = True
         if self._warmup_done:
+            with self.state.settings.unlock():
+                restart_file = self.state.settings.restart_output_filename
+                self.state.settings.restart_output_filename = f'{self.state.settings.identifier}.warmup_restart.h5'
+            restart.write_restart(self.state, force=True)
+            with self.state.settings.unlock():
+                self.state.settings.restart_output_filename = restart_file
             # write initial values to output after warmup
             diagnostics.diagnose(self.state)
             diagnostics.output(self.state)

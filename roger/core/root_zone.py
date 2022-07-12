@@ -140,12 +140,17 @@ def calculate_root_zone_transport_iso_kernel(state):
         at[2:-2, 2:-2, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
+    vs.M_rz = update(
+        vs.M_rz,
+        at[2:-2, 2:-2, vs.tau], npx.nansum(vs.msa_rz[2:-2, 2:-2, vs.tau, :] * vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     vs.SA_rz = update(
         vs.SA_rz,
         at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
-    return KernelOutput(SA_rz=vs.SA_rz, C_rz=vs.C_rz)
+    return KernelOutput(SA_rz=vs.SA_rz, C_rz=vs.C_rz, M_rz=vs.M_rz)
 
 
 @roger_kernel

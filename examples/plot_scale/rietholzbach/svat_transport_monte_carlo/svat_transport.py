@@ -13,7 +13,7 @@ def main(nsamples, transport_model_structure):
     from roger import runtime_settings as rs, runtime_state as rst
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, at, random_uniform
+    from roger.core.operators import numpy as npx, update, at, random_uniform, for_loop
     from roger.tools.setup import write_forcing_tracer
 
     class SVATTRANSPORTSetup(RogerSetup):
@@ -642,6 +642,20 @@ def main(nsamples, transport_model_structure):
         return conc
 
     @roger_kernel
+    def _ffill(loop_arr):
+        def loop_body(i, loop_arr):
+            loop_arr = update(
+                loop_arr,
+                at[:, :, i], npx.where(loop_arr[:, :, i] == 0, loop_arr[:, :, i - 1], loop_arr[:, :, i]),
+            )
+
+            return loop_arr
+
+        loop_arr = for_loop(1, loop_arr.shape[2], loop_body, loop_arr)
+
+        return loop_arr
+
+    @roger_kernel
     def _ffill_3d(state, arr):
         idx_shape = tuple([slice(None)] + [npx.newaxis] * (3 - 2 - 1))
         idx = allocate(state.dimensions, ("x", "y", "t"), dtype=int)
@@ -651,11 +665,11 @@ def main(nsamples, transport_model_structure):
         arr_fill = allocate(state.dimensions, ("x", "y", "t"))
         idx = update(
             idx,
-            at[:, :, :], npx.where(npx.isfinite(arr), npx.arange(npx.shape(arr)[2])[idx_shape], 0),
+            at[2:-2, 2:-2, :], npx.where(npx.isfinite(arr), npx.arange(npx.shape(arr)[2])[idx_shape], 0)[2:-2, 2:-2, :],
         )
         idx = update(
             idx,
-            at[:, :, :], npx.max(npx.max(idx, axis=0), axis=0)[npx.newaxis, npx.newaxis, :],
+            at[2:-2, 2:-2, :], _ffill(idx)[2:-2, 2:-2, :],
         )
         arr1 = update(
             arr1,
@@ -695,6 +709,28 @@ def main(nsamples, transport_model_structure):
     model.warmup()
     model.run()
     return
+
+    # tms = transport_model_structure.replace("_", " ")
+    # model = SVATTRANSPORTSetup(override=dict(
+    #         restart_input_filename=f'SVATTRANSPORT_{transport_model_structure}.warmup_restart.h5',
+    #         restart_output_filename=None,
+    #         ))
+    # if tms not in ['complete-mixing', 'piston']:
+    #     model._set_nsamples(nsamples)
+    # else:
+    #     if rs.mpi_comm:
+    #         model._set_nsamples(rst.proc_num)
+    # model._set_tm_structure(tms)
+    # identifier = f'SVATTRANSPORT_{transport_model_structure}'
+    # model._set_identifier(identifier)
+    # input_path = model._base_path / "input"
+    # model._set_input_dir(input_path)
+    # forcing_path = model._input_dir / "forcing_tracer.nc"
+    # if not os.path.exists(forcing_path):
+    #     write_forcing_tracer(input_path, 'd18O')
+    # model.setup()
+    # model.run()
+    # return
 
 
 if __name__ == "__main__":

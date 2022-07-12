@@ -9,9 +9,11 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion']), default='complete-mixing')
 @roger_base_cli
 def main(transport_model_structure):
+    from roger import runtime_settings as rs
+    rs.backend = 'numpy'
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, at
+    from roger.core.operators import numpy as npx, update, at, for_loop
     from roger.tools.setup import write_forcing_tracer
 
     class SVATTRANSPORTSetup(RogerSetup):
@@ -191,17 +193,17 @@ def main(transport_model_structure):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 31)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 30)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 67.9)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 31)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 3)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 28.3)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 31)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 2)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 18.6)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
             elif settings.tm_structure == "time-variant":
@@ -379,7 +381,6 @@ def main(transport_model_structure):
             vs = state.variables
 
             vs.update(after_timestep_kernel(state))
-
 
     @roger_kernel
     def set_iso_input_kernel(state):
@@ -587,6 +588,20 @@ def main(transport_model_structure):
         return conc
 
     @roger_kernel
+    def _ffill(loop_arr):
+        def loop_body(i, loop_arr):
+            loop_arr = update(
+                loop_arr,
+                at[:, :, i], npx.where(loop_arr[:, :, i] == 0, loop_arr[:, :, i - 1], loop_arr[:, :, i]),
+            )
+
+            return loop_arr
+
+        loop_arr = for_loop(1, loop_arr.shape[2], loop_body, loop_arr)
+
+        return loop_arr
+
+    @roger_kernel
     def _ffill_3d(state, arr):
         idx_shape = tuple([slice(None)] + [npx.newaxis] * (3 - 2 - 1))
         idx = allocate(state.dimensions, ("x", "y", "t"), dtype=int)
@@ -596,11 +611,11 @@ def main(transport_model_structure):
         arr_fill = allocate(state.dimensions, ("x", "y", "t"))
         idx = update(
             idx,
-            at[:, :, :], npx.where(npx.isfinite(arr), npx.arange(npx.shape(arr)[2])[idx_shape], 0),
+            at[2:-2, 2:-2, :], npx.where(npx.isfinite(arr), npx.arange(npx.shape(arr)[2])[idx_shape], 0)[2:-2, 2:-2, :],
         )
         idx = update(
             idx,
-            at[:, :, :], npx.max(npx.max(idx, axis=0), axis=0)[npx.newaxis, npx.newaxis, :],
+            at[2:-2, 2:-2, :], _ffill(idx)[2:-2, 2:-2, :],
         )
         arr1 = update(
             arr1,

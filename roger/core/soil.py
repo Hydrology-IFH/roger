@@ -186,7 +186,12 @@ def calculate_soil_transport_iso_kernel(state):
         at[2:-2, 2:-2, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_s, vs.msa_s)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(sa_s=vs.sa_s, SA_s=vs.SA_s, msa_s=vs.msa_s, C_s=vs.C_s)
+    vs.M_s = update(
+        vs.M_s,
+        at[2:-2, 2:-2, vs.tau], npx.nansum(vs.msa_s[2:-2, 2:-2, vs.tau, :] * vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    return KernelOutput(sa_s=vs.sa_s, SA_s=vs.SA_s, msa_s=vs.msa_s, C_s=vs.C_s, M_s=vs.M_s)
 
 
 @roger_kernel

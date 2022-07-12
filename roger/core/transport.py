@@ -2,6 +2,7 @@ from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at
 from roger.core import sas
+from roger import runtime_settings as rs
 import numpy as onp
 
 
@@ -211,13 +212,14 @@ def calc_tt(state, SA, sa, flux, sas_params):
         at[2:-2, 2:-2, :], npx.where(flux[2:-2, 2:-2, npx.newaxis] <= 0, 0, tt[2:-2, 2:-2, :]),
     )
 
-    # # sanity check of SAS function (works only for numpy backend)
-    # mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=1e-02)
-    # if not npx.all(mask[2:-2, 2:-2]):
-    #     raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
-    # mask1 = (tt * flux[:, :, npx.newaxis] - sa[:, :, 1, :] > 1e-02)
-    # if npx.any(mask1[2:-2, 2:-2, :]):
-    #     raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
+    if rs.backend == 'numpy':
+        # sanity check of SAS function (works only for numpy backend)
+        mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=1e-02)
+        if not npx.all(mask[2:-2, 2:-2]):
+            raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
+        mask1 = (tt * flux[:, :, npx.newaxis] - sa[:, :, 1, :] > 1e-02)
+        if npx.any(mask1[2:-2, 2:-2, :]):
+            raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
 
     return tt
 

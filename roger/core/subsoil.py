@@ -140,12 +140,17 @@ def calculate_subsoil_transport_iso_kernel(state):
         at[2:-2, 2:-2, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_ss, vs.msa_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
+    vs.M_ss = update(
+        vs.M_ss,
+        at[2:-2, 2:-2, vs.tau], npx.nansum(vs.msa_ss[2:-2, 2:-2, vs.tau, :] * vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     vs.SA_ss = update(
         vs.SA_ss,
         at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
-    return KernelOutput(SA_ss=vs.SA_ss, C_ss=vs.C_ss)
+    return KernelOutput(SA_ss=vs.SA_ss, C_ss=vs.C_ss, M_ss=vs.M_ss)
 
 
 @roger_kernel

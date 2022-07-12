@@ -201,6 +201,7 @@ VARIABLES = {
         dtype="int64",
         initial=0,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "time": Variable(
         "Current time",
@@ -232,6 +233,7 @@ VARIABLES = {
         "time steps of an entire simulation eventusing hour as base",
         write_to_restart=True,
         time_dependent=False,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "ages": Variable(
         "water ages",
@@ -280,6 +282,7 @@ VARIABLES = {
         dtype="float64",
         initial=1,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "event_id": Variable(
         "Event number",
@@ -289,6 +292,7 @@ VARIABLES = {
         dtype="int64",
         initial=0,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "event_start": Variable(
         "iteration when new event starts",
@@ -298,6 +302,7 @@ VARIABLES = {
         dtype="int64",
         initial=0,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "event_restart": Variable(
         "iteration when event restarts after rainfall pause",
@@ -307,6 +312,7 @@ VARIABLES = {
         dtype="int64",
         initial=0,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "event_end": Variable(
         "iteration when new event stops",
@@ -316,6 +322,7 @@ VARIABLES = {
         dtype="int64",
         initial=0,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "YEAR": Variable(
         "year",
@@ -438,6 +445,7 @@ VARIABLES = {
         "degree of surface sealing",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "z0": Variable(
         "depth of the surface ponding",
@@ -445,6 +453,7 @@ VARIABLES = {
         "mm",
         "depth of the surface ponding",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "elev": Variable(
         "surface elevation",
@@ -517,6 +526,7 @@ VARIABLES = {
         "surface slope",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "slope_per": Variable(
         "surface slope",
@@ -526,6 +536,7 @@ VARIABLES = {
         dtype="int64",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_dep_tot": Variable(
         "total surface depression storage",
@@ -534,6 +545,7 @@ VARIABLES = {
         "total surface depression storage",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "ground_cover": Variable(
         "fraction of ground cover",
@@ -541,6 +553,7 @@ VARIABLES = {
         "-",
         "fraction of ground cover",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "lai": Variable(
         "leaf area index",
@@ -548,6 +561,7 @@ VARIABLES = {
         "-",
         "leaf area index",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "basal_evap_coeff": Variable(
         "basal soil evaporation coefficient",
@@ -591,6 +605,7 @@ VARIABLES = {
         "-",
         "total interception storage of top surface layer",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_int_ground_tot": Variable(
         "total interception storage of ground surface layer",
@@ -598,6 +613,7 @@ VARIABLES = {
         "-",
         "total interception storage of ground surface layer",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S": Variable(
         "storage",
@@ -632,6 +648,7 @@ VARIABLES = {
         "mm",
         "snow water equivalent",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "swe_top": Variable(
         "snow water equivalent",
@@ -639,6 +656,7 @@ VARIABLES = {
         "mm",
         "snow water equivalent stored in snow cover of top surface layer",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "swe_ground": Variable(
         "snow water equivalent",
@@ -646,6 +664,7 @@ VARIABLES = {
         "mm",
         "snow water equivalent stored in snow cover of ground surface layer",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_dep": Variable(
         "surface depression storage",
@@ -653,6 +672,7 @@ VARIABLES = {
         "mm",
         "surface depression storage",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_sur": Variable(
         "surface storage",
@@ -660,6 +680,7 @@ VARIABLES = {
         "mm",
         "surface storage",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "dS_sur": Variable(
         "change in surface storage",
@@ -673,6 +694,7 @@ VARIABLES = {
         "mm",
         "interception storage of top surface layer",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_int_ground": Variable(
         "interception storage of ground surface layer",
@@ -680,6 +702,7 @@ VARIABLES = {
         "mm",
         "interception storage of ground surface layer",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "ta": Variable(
         "air temperature",
@@ -696,6 +719,7 @@ VARIABLES = {
         "Soil depth",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "clay": Variable(
         "fraction of clay content in soil",
@@ -704,6 +728,7 @@ VARIABLES = {
         "fraction of clay content in soil",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "sand": Variable(
         "fraction of sand content in soil",
@@ -712,6 +737,7 @@ VARIABLES = {
         "fraction of sand content in soil",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "lmpv": Variable(
         "length of vertical macropores",
@@ -720,6 +746,7 @@ VARIABLES = {
         "length of vertical macropores",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "lmpv_non_sat": Variable(
         "non-saturated length of vertical macropores",
@@ -728,6 +755,7 @@ VARIABLES = {
         "non-saturated length of vertical macropores",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "z_sc": Variable(
         "depth of shrinkage cracks",
@@ -735,6 +763,7 @@ VARIABLES = {
         "mm",
         "depth of shrinkage cracks",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "z_sc_non_sat": Variable(
         "non-saturated depth of shrinkage cracks",
@@ -742,6 +771,7 @@ VARIABLES = {
         "mm",
         "non-saturated depth of shrinkage cracks",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "dmpv": Variable(
         "density of vertical macropores",
@@ -750,6 +780,7 @@ VARIABLES = {
         "density of vertical macropores",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "mp_drain_area": Variable(
         "drainage area of vertical macropores",
@@ -758,6 +789,7 @@ VARIABLES = {
         "drainage area of vertical macropore",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "dmph": Variable(
         "density of horizontal macropores",
@@ -775,6 +807,7 @@ VARIABLES = {
         "usable field capacity of soil",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_ac": Variable(
         "air capacity of soil",
@@ -783,6 +816,7 @@ VARIABLES = {
         "air capacity of soil",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_pwp": Variable(
         "permanent wilting point of soil",
@@ -791,6 +825,7 @@ VARIABLES = {
         "permanent wilting point of soil",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_sat": Variable(
         "soil water content at saturation",
@@ -799,6 +834,7 @@ VARIABLES = {
         "soil water content at saturation",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_fc": Variable(
         "soil water content at field capacity",
@@ -807,6 +843,7 @@ VARIABLES = {
         "soil water content at field capacity",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_27": Variable(
         "soil water content at 2700 hPa potential",
@@ -815,6 +852,7 @@ VARIABLES = {
         "soil water content at 2700 hPa potential",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_4": Variable(
         "soil water content at 4000 hPa potential",
@@ -823,6 +861,7 @@ VARIABLES = {
         "soil water content at 4000 hPa potential",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_6": Variable(
         "soil water content at 6000 hPa potential",
@@ -831,6 +870,7 @@ VARIABLES = {
         "soil water content at 6000 hPa potential",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_pc": Variable(
         "soil water content threshold for deep percolation and capillary rise",
@@ -839,6 +879,7 @@ VARIABLES = {
         "soil water content threshold for deep percolation and capillary rise",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_ufc_s": Variable(
         "usable field capacity of soil",
@@ -887,6 +928,7 @@ VARIABLES = {
         "water front suction",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "ks": Variable(
         "Saturated hydraulic conductivity",
@@ -895,6 +937,7 @@ VARIABLES = {
         "Saturated hydraulic conductivity",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "ha": Variable(
         "air entry value",
@@ -903,6 +946,7 @@ VARIABLES = {
         "air entry value",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "lambda_bc": Variable(
         "pore-size distribution index",
@@ -911,6 +955,7 @@ VARIABLES = {
         "pore-size distribution index",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "m_bc": Variable(
         "pore-connectivity parameter",
@@ -919,6 +964,7 @@ VARIABLES = {
         "pore-connectivity parameter",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "n_salv": Variable(
         "salvucci exponent",
@@ -927,6 +973,7 @@ VARIABLES = {
         "salvucci exponent",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "z_sc_max": Variable(
         "maximum depth of shrinkage cracks",
@@ -935,6 +982,7 @@ VARIABLES = {
         "maximum depth of shrinkage cracks",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "v_mp_layer_1": Variable(
         "macropore flow velocity in the first layer",
@@ -942,7 +990,7 @@ VARIABLES = {
         "mm/h",
         "macropore flow velocity in the first layer",
         time_dependent=False,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "v_mp_layer_2": Variable(
         "macropore flow velocity in the second layer",
@@ -950,7 +998,7 @@ VARIABLES = {
         "mm/h",
         "macropore flow velocity in the second layer",
         time_dependent=False,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "v_mp_layer_3": Variable(
         "macropore flow velocity in the third layer",
@@ -958,7 +1006,7 @@ VARIABLES = {
         "mm/h",
         "macropore flow velocity in the third layer",
         time_dependent=False,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "v_mp_layer_4": Variable(
         "macropore flow velocity in the fourth layer",
@@ -966,7 +1014,7 @@ VARIABLES = {
         "mm/h",
         "macropore flow velocity in the fourth layer",
         time_dependent=False,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "v_mp_layer_5": Variable(
         "macropore flow velocity in the fifth layer",
@@ -974,7 +1022,7 @@ VARIABLES = {
         "mm/h",
         "macropore flow velocity in the fifth layer",
         time_dependent=False,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "v_mp_layer_6": Variable(
         "macropore flow velocity in the sixth layer",
@@ -982,7 +1030,7 @@ VARIABLES = {
         "mm/h",
         "macropore flow velocity in the sixth layer",
         time_dependent=False,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "v_mp_layer_7": Variable(
         "macropore flow velocity in the seventh layer",
@@ -990,7 +1038,7 @@ VARIABLES = {
         "mm/h",
         "macropore flow velocity in the seventh layer",
         time_dependent=False,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "v_mp_layer_8": Variable(
         "macropore flow velocity in the eighth layer",
@@ -998,7 +1046,7 @@ VARIABLES = {
         "mm/h",
         "macropore flow velocity in the eighth layer",
         time_dependent=False,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "event_no_ff": Variable(
         "Film flow event number",
@@ -1008,7 +1056,7 @@ VARIABLES = {
         dtype="int64",
         initial=0,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "event_id_ff": Variable(
         "Film flow event number",
@@ -1018,7 +1066,7 @@ VARIABLES = {
         dtype="int64",
         initial=0,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "event_start_ff": Variable(
         "iteration when new film flow event starts",
@@ -1028,7 +1076,7 @@ VARIABLES = {
         dtype="int64",
         initial=0,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "event_end_ff": Variable(
         "iteration when film flow event stops",
@@ -1038,7 +1086,7 @@ VARIABLES = {
         dtype="int64",
         initial=0,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "rain_int_ff": Variable(
         "rainfall intensity of film flow input pulse",
@@ -1047,7 +1095,7 @@ VARIABLES = {
         "rainfall intensity of film flow input pulse",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "rain_event": Variable(
         "rainfall of a film flow event",
@@ -1056,7 +1104,7 @@ VARIABLES = {
         "rainfall of a film flow event",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "rain_event_ff": Variable(
         "rectangular rainfall pulse of a film flow event",
@@ -1065,7 +1113,7 @@ VARIABLES = {
         "rectangular rainfall pulse of a film flow event",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "rain_event_sum": Variable(
         "rainfall sum of a film flow event",
@@ -1074,7 +1122,7 @@ VARIABLES = {
         "rainfall sum of a film flow event",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "rain_event_csum": Variable(
         "cumulated rainfall sum of a film flow event",
@@ -1083,7 +1131,7 @@ VARIABLES = {
         "cumulated rainfall sum of a film flow event",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "t_end_ff": Variable(
         "time of film flow event",
@@ -1092,7 +1140,7 @@ VARIABLES = {
         "time of film flow event",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "ti_ff": Variable(
         "time of intersection between wetting front and drainage front",
@@ -1101,7 +1149,7 @@ VARIABLES = {
         "time of intersection between wetting front and drainage front",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "tb_ff": Variable(
         "time at beginning of rainfall input pulse",
@@ -1110,7 +1158,7 @@ VARIABLES = {
         "time at beginning of rainfall input pulse",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "ts_ff": Variable(
         "time at end of rainfall input pulse",
@@ -1119,7 +1167,7 @@ VARIABLES = {
         "time at end of rainfall input pulse",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "tw_ff": Variable(
         "time at arrival of wetting front at soil depth",
@@ -1128,7 +1176,7 @@ VARIABLES = {
         "time at arrival of wetting front at soil depth",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "tp_ff": Variable(
         "time at arrival of percolation front at soil depth",
@@ -1137,7 +1185,7 @@ VARIABLES = {
         "time at arrival of percolation front at soil depth",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "qs_ff": Variable(
         "volume flux density of film flow",
@@ -1146,7 +1194,7 @@ VARIABLES = {
         "volume flux density of film flow",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "zi_ff": Variable(
         "depth of intersection between wetting front and drainage front",
@@ -1155,7 +1203,7 @@ VARIABLES = {
         "depth of intersection between wetting front and drainage front",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "rain_ff": Variable(
         "rainfall pulse of film flow",
@@ -1164,7 +1212,7 @@ VARIABLES = {
         "rainfall pulse of film flow",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "v_wf": Variable(
         "velocity of film flow wetting front",
@@ -1173,7 +1221,7 @@ VARIABLES = {
         "velocity of film flow wetting front",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "v_perc": Variable(
         "velocity of film flow percolation front",
@@ -1182,7 +1230,7 @@ VARIABLES = {
         "velocity of film flow percolation front",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "ff_abs_rz": Variable(
         "film flow abstraction into root zone",
@@ -1190,7 +1238,7 @@ VARIABLES = {
         "mm/dt",
         "film flow abstraction into root zone",
         time_dependent=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "ff_abs_ss": Variable(
         "film flow abstraction into subsoil",
@@ -1198,7 +1246,7 @@ VARIABLES = {
         "mm/dt",
         "film flow abstraction into subsoil",
         time_dependent=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "ff_abs": Variable(
         "film flow abstraction into soil",
@@ -1206,7 +1254,7 @@ VARIABLES = {
         "mm/dt",
         "film flow abstraction into soil",
         time_dependent=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "theta_d_rel_rz_ff": Variable(
         "relative saturation deficit of root zone",
@@ -1215,7 +1263,7 @@ VARIABLES = {
         "relative saturation deficit of root zone",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "theta_d_rel_ss_ff": Variable(
         "relative saturation deficit of subsoil",
@@ -1224,7 +1272,7 @@ VARIABLES = {
         "relative saturation deficit of subsoil",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "S_f_rz": Variable(
         "film volume of root zone",
@@ -1268,7 +1316,7 @@ VARIABLES = {
         "soil water content including film flow of root zone",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "theta_ss_ff": Variable(
         "soil water content including film flow of subsoil",
@@ -1277,7 +1325,7 @@ VARIABLES = {
         "soil water content including film flow of subsoil",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "theta_ff": Variable(
         "soil water content including film flow",
@@ -1286,7 +1334,7 @@ VARIABLES = {
         "soil water content including film flow",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "S_rz_ff": Variable(
         "storage of root zone including film flow",
@@ -1323,7 +1371,7 @@ VARIABLES = {
         dtype="int64",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "z_wf_ff": Variable(
         "depth of water content wave",
@@ -1332,7 +1380,7 @@ VARIABLES = {
         "depth of water content wave",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "z_pf_ff": Variable(
         "depth of percolation front",
@@ -1341,7 +1389,7 @@ VARIABLES = {
         "depth of percolation front",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "z_pf": Variable(
         "depth of percolation front",
@@ -1350,7 +1398,7 @@ VARIABLES = {
         "depth of percolation front",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "a_ff": Variable(
         "film flow parameter",
@@ -1359,7 +1407,7 @@ VARIABLES = {
         "film flow parameter",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "c_ff": Variable(
         "fudge parameter of film flow abstraction",
@@ -1368,7 +1416,7 @@ VARIABLES = {
         "fudge parameter of film flow abstraction",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "kf": Variable(
         "vertical hydraulic conductivity of bedrock",
@@ -1377,6 +1425,7 @@ VARIABLES = {
         "vertical hydraulic conductivity of bedrock",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta": Variable(
         "Soil water content",
@@ -1385,6 +1434,7 @@ VARIABLES = {
         "Soil water content",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_fp": Variable(
         "Soil water content in fine pores",
@@ -1393,6 +1443,7 @@ VARIABLES = {
         "Soil water content in fine pores",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_lp": Variable(
         "Soil water content in large pores",
@@ -1401,6 +1452,7 @@ VARIABLES = {
         "Soil water content in large pores",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_d": Variable(
         "soil moisture deficit",
@@ -1409,6 +1461,7 @@ VARIABLES = {
         "soil moisture deficit",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_d_fp": Variable(
         "soil moisture deficit in fine pores",
@@ -1417,6 +1470,7 @@ VARIABLES = {
         "soil moisture deficit in fine pores",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_d_rel": Variable(
         "relative soil moisture deficit",
@@ -1425,6 +1479,7 @@ VARIABLES = {
         "relative soil moisture deficit",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_d_rel_t0": Variable(
         "relative soil moisture deficit at beginning of event",
@@ -1433,6 +1488,7 @@ VARIABLES = {
         "relative soil moisture deficit at beginning of event",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_d_rel_t1": Variable(
         "relative soil moisture deficit after rainfall pause",
@@ -1441,6 +1497,7 @@ VARIABLES = {
         "relative soil moisture deficit after rainfall pause",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_d_t0": Variable(
         "soil moisture deficit at beginning of event",
@@ -1449,6 +1506,7 @@ VARIABLES = {
         "soil moisture deficit at beginning of event",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_d_t1": Variable(
         "soil moisture deficit after rainfall pause",
@@ -1457,6 +1515,7 @@ VARIABLES = {
         "soil moisture deficit after rainfall pause",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_s": Variable(
         "soil water content",
@@ -1480,6 +1539,7 @@ VARIABLES = {
         "soil water content in fine pores",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_lp_s": Variable(
         "soil water content in large pores",
@@ -1488,6 +1548,7 @@ VARIABLES = {
         "soil water content in large pores",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_zsat": Variable(
         "soil water content in large pores below saturation water level",
@@ -1496,6 +1557,7 @@ VARIABLES = {
         "soil water content in large pores below saturation water level",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "k": Variable(
         "hydraulic conductivity of soil",
@@ -1504,6 +1566,7 @@ VARIABLES = {
         "hydraulic conductivity of soil",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "h": Variable(
         "soil water potential",
@@ -1512,6 +1575,7 @@ VARIABLES = {
         "soil water potential",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "y_mp": Variable(
         "radial length of macropore wetting front",
@@ -1520,6 +1584,7 @@ VARIABLES = {
         "radial length of macropore wetting front",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "y_sc": Variable(
         "horizontal length of shrinkage crack wetting front",
@@ -1528,6 +1593,7 @@ VARIABLES = {
         "horizontal length of shrinkage crack wetting front",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "z_wf": Variable(
         "depth of wetting front",
@@ -1536,6 +1602,7 @@ VARIABLES = {
         "depth of wetting front",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "z_wf_t0": Variable(
         "depth of wetting front",
@@ -1544,6 +1611,7 @@ VARIABLES = {
         "depth of wetting front",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "z_wf_t1": Variable(
         "depth of wetting front",
@@ -1552,6 +1620,7 @@ VARIABLES = {
         "depth of wetting front",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "z_wf_fc": Variable(
         "depth of wetting front to fill storage until field capacity",
@@ -1560,6 +1629,7 @@ VARIABLES = {
         "depth of wetting front to fill storage until field capacity",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "z_sat_layer_1": Variable(
         "saturation depth of the first layer",
@@ -1568,7 +1638,7 @@ VARIABLES = {
         "saturation depth of the first layer",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "z_sat_layer_2": Variable(
         "saturation depth of the second layer",
@@ -1577,7 +1647,7 @@ VARIABLES = {
         "saturation depth of the second layer",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "z_sat_layer_3": Variable(
         "saturation depth of the third layer",
@@ -1586,7 +1656,7 @@ VARIABLES = {
         "saturation depth of the third layer",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "z_sat_layer_4": Variable(
         "saturation depth of the fourth layer",
@@ -1595,7 +1665,7 @@ VARIABLES = {
         "saturation depth of the fourth layer",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "z_sat_layer_5": Variable(
         "saturation depth of the fifth layer",
@@ -1604,7 +1674,7 @@ VARIABLES = {
         "saturation depth of the fifth layer",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "z_sat_layer_6": Variable(
         "saturation depth of the sixth layer",
@@ -1613,7 +1683,7 @@ VARIABLES = {
         "saturation depth of the sixth layer",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "z_sat_layer_7": Variable(
         "saturation depth of the seventh layer",
@@ -1622,7 +1692,7 @@ VARIABLES = {
         "saturation depth of the seventh layer",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "z_sat_layer_8": Variable(
         "saturation depth of the eighth layer",
@@ -1631,7 +1701,7 @@ VARIABLES = {
         "saturation depth of the eighth layer",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_lateral_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_lateral_flow,
     ),
     "z_sat": Variable(
         "depth of saturation water level",
@@ -1640,6 +1710,7 @@ VARIABLES = {
         "depth of saturation water level",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "dz_sat": Variable(
         "change in saturation water level",
@@ -1735,6 +1806,7 @@ VARIABLES = {
         "Root depth",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "z_evap": Variable(
         "evaporation depth",
@@ -1743,6 +1815,7 @@ VARIABLES = {
         "evaporation depth",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "tew": Variable(
         "total evaporable water",
@@ -1751,6 +1824,7 @@ VARIABLES = {
         "total evaporable water",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "rew": Variable(
         "readily evaporable water",
@@ -1759,6 +1833,7 @@ VARIABLES = {
         "readily evaporable water",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "de": Variable(
         "accumulated soil evaporation deficit",
@@ -1767,6 +1842,7 @@ VARIABLES = {
         "accumulated soil evaporation deficit",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_water_stress": Variable(
         "soil water content below water stress of plants starts",
@@ -1775,6 +1851,7 @@ VARIABLES = {
         "soil water content below water stress of plants starts",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "water_stress_fp": Variable(
         "fraction of extractable fine pore storage for plant",
@@ -1783,6 +1860,7 @@ VARIABLES = {
         "fraction of extractable fine pore storage for plant",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "k_rz": Variable(
         "hydraulic conductivity of root zone",
@@ -1791,6 +1869,7 @@ VARIABLES = {
         "hydraulic conductivity of root zone",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "h_rz": Variable(
         "soil water potential of root zone",
@@ -1799,6 +1878,7 @@ VARIABLES = {
         "soil water potential of root zone",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_rz": Variable(
         "Soil moisture in root zone",
@@ -1807,6 +1887,7 @@ VARIABLES = {
         "Soil moisture in root zone",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_fp_rz": Variable(
         "Soil water content in fine pores",
@@ -1844,6 +1925,7 @@ VARIABLES = {
         "soil water content of fine pores in root zone",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_lp_rz": Variable(
         "soil water content of large pores in root zone",
@@ -1852,6 +1934,7 @@ VARIABLES = {
         "soil water content of large pores in root zone",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_zsat_rz": Variable(
         "soil water content in large pores below saturation water level",
@@ -1875,6 +1958,7 @@ VARIABLES = {
         "soil water content at field capacity in root zone",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_sat_rz": Variable(
         "soil water content at saturation in root zone",
@@ -1891,6 +1975,7 @@ VARIABLES = {
         "usable field capacity of root zone",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_ac_rz": Variable(
         "air capacity of root zone",
@@ -1899,6 +1984,7 @@ VARIABLES = {
         "air capacity of root zone",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "sa_rz": Variable(
         "water StorAge of root zone",
@@ -2032,6 +2118,7 @@ VARIABLES = {
         "hydraulic conductivity of subsoil",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "h_ss": Variable(
         "soil water potential of subsoil",
@@ -2040,6 +2127,7 @@ VARIABLES = {
         "soil water potential of subsoil",
         time_dependent=True,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_ss": Variable(
         "Soil moisture in subsoil",
@@ -2047,6 +2135,7 @@ VARIABLES = {
         "-",
         "Soil moisture in subsoil",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "theta_fp_ss": Variable(
         "Soil water content in fine pores",
@@ -2084,6 +2173,7 @@ VARIABLES = {
         "soil water content of fine pores in subsoil",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_lp_ss": Variable(
         "soil water content of large pores in subsoil",
@@ -2092,6 +2182,7 @@ VARIABLES = {
         "soil water content of large pores in subsoil",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_zsat_ss": Variable(
         "soil water content in large pores below saturation water level",
@@ -2100,6 +2191,7 @@ VARIABLES = {
         "soil water content in large pores below saturation water level",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_pwp_ss": Variable(
         "soil water content at permanent wilting point in subsoil",
@@ -2116,6 +2208,7 @@ VARIABLES = {
         "soil water content at field capacity in subsoil",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_sat_ss": Variable(
         "soil water content at saturation in subsoil",
@@ -2132,6 +2225,7 @@ VARIABLES = {
         "usable field capacity of subsoil",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_ac_ss": Variable(
         "air capacity of subsoil",
@@ -2140,6 +2234,7 @@ VARIABLES = {
         "air capacity of subsoil",
         time_dependent=False,
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "sa_ss": Variable(
         "water StorAge of subsoil",
@@ -2291,7 +2386,7 @@ VARIABLES = {
         "porosity of aquifer layer",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_groundwater,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_groundwater,
     ),
     "nuy": Variable(
         "unspecific yield of aquifer layer",
@@ -2300,7 +2395,7 @@ VARIABLES = {
         "unspecific yield of aquifer layer",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_groundwater,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_groundwater,
     ),
     "n0": Variable(
         "specific yield at the soil/bedrock interface",
@@ -2309,7 +2404,7 @@ VARIABLES = {
         "specific yield at the soil/bedrock interface",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_groundwater,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_groundwater,
     ),
     "k_gw": Variable(
         "hydraulic conductivity of aquifer layer",
@@ -2318,7 +2413,7 @@ VARIABLES = {
         "hydraulic conductivity of aquifer layer",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_groundwater,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_groundwater,
     ),
     "k_leak": Variable(
         "hydraulic conductivity of aquitard",
@@ -2327,7 +2422,7 @@ VARIABLES = {
         "hydraulic conductivity of aquitard",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_groundwater,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_groundwater,
     ),
     "bdec": Variable(
         "decay coeffcient",
@@ -2336,7 +2431,7 @@ VARIABLES = {
         "decay coeffcient",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_groundwater,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_groundwater,
     ),
     "tt": Variable(
         "transmissivity of aquifer",
@@ -2345,7 +2440,7 @@ VARIABLES = {
         "transmissivity of aquifer",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_groundwater,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_groundwater,
     ),
     # groundwater variables
     "z_gw": Variable(
@@ -2416,7 +2511,7 @@ VARIABLES = {
         "Residual vadose zone storage",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_groundwater,
+        active=lambda settings: settings.enable_groundwater & settings.enable_groundwater,
     ),
     "dS_vad": Variable(
         "change of vadose zone storage",
@@ -2424,7 +2519,7 @@ VARIABLES = {
         "mm/dt",
         "change of vadose zone storage",
         time_dependent=True,
-        active=lambda settings: settings.enable_groundwater,
+        active=lambda settings: settings.enable_groundwater & settings.enable_groundwater,
     ),
     "sa_vad": Variable(
         "water StorAge of vadose zone",
@@ -2433,7 +2528,7 @@ VARIABLES = {
         "water StorAge of vadose zone",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_offline_transport,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
     ),
     "SA_vad": Variable(
         "cumulative water StorAge of vadose zone",
@@ -2442,7 +2537,7 @@ VARIABLES = {
         "cumulative water StorAge of vadose zone",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
     ),
     "msa_vad": Variable(
         "solute mass StorAge of vadose zone",
@@ -2451,7 +2546,7 @@ VARIABLES = {
         "solute mass StorAge of vadose zone",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_offline_transport,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
     ),
     "MSA_vad": Variable(
         "cumulative solute mass StorAge of vadose zone",
@@ -2460,7 +2555,7 @@ VARIABLES = {
         "cumulative solute mass StorAge of vadose zone",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
     ),
     "M_vad": Variable(
         "solute mass of vadose zone",
@@ -2469,7 +2564,7 @@ VARIABLES = {
         "solute mass of vadose zone",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_offline_transport,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
     ),
     "C_vad": Variable(
         "solute concentration of vadose zone",
@@ -2478,7 +2573,7 @@ VARIABLES = {
         "solute concentration of vadose zone",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_offline_transport,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
     ),
     "sa_gw": Variable(
         "water StorAge of groundwater",
@@ -2487,7 +2582,7 @@ VARIABLES = {
         "water StorAge of groundwater",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_offline_transport,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
     ),
     "SA_gw": Variable(
         "cumulative water StorAge of groundwater",
@@ -2496,7 +2591,7 @@ VARIABLES = {
         "cumulative water StorAge of groundwater",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
     ),
     "msa_gw": Variable(
         "solute mass StorAge of groundwater",
@@ -2505,7 +2600,7 @@ VARIABLES = {
         "solute mass StorAge of groundwater",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_offline_transport,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
     ),
     "MSA_gw": Variable(
         "cumulative solute mass StorAge of groundwater",
@@ -2514,7 +2609,7 @@ VARIABLES = {
         "cumulative solute mass StorAge of groundwater",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
     ),
     "M_gw": Variable(
         "solute mass of groundwater",
@@ -2523,7 +2618,7 @@ VARIABLES = {
         "solute mass of groundwater",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_offline_transport,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
     ),
     "C_gw": Variable(
         "solute concentration of groundwater",
@@ -2532,7 +2627,7 @@ VARIABLES = {
         "solute concentration of groundwater",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_offline_transport,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
     ),
     "k_denit_gw": Variable(
         "decay rate for denitrification in groundwater",
@@ -2541,7 +2636,7 @@ VARIABLES = {
         "decay rate for denitrification in groundwater",
         write_to_restart=True,
         time_dependent=False,
-        active=lambda settings: settings.enable_nitrate,
+        active=lambda settings: settings.enable_nitrate & settings.enable_groundwater,
     ),
     "q_re": Variable(
         "groundwater recharge",
@@ -2866,6 +2961,7 @@ VARIABLES = {
         dtype="int64",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "sat_itt": Variable(
         "iteration at matrix saturation",
@@ -2874,6 +2970,7 @@ VARIABLES = {
         "iteration at matrix saturation",
         dtype="int64",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "sat_itt_t0": Variable(
         "iteration at matrix saturation of first wetting front",
@@ -2881,6 +2978,7 @@ VARIABLES = {
         "",
         "iteration at matrix saturation of first wetting front",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "sat_itt_t1": Variable(
         "iteration at matrix saturation of second wetting front",
@@ -2888,6 +2986,7 @@ VARIABLES = {
         "",
         "iteration at matrix saturation of second wetting front",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "pi_gr": Variable(
         "threshold rainfall intensity",
@@ -2895,6 +2994,7 @@ VARIABLES = {
         "mm/dt",
         "threshold rainfall intensity",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "pi_gr_t0": Variable(
         "threshold rainfall intensity of first wetting front",
@@ -2902,6 +3002,7 @@ VARIABLES = {
         "mm/dt",
         "threshold rainfall intensity of first wetting front",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "pi_gr_t1": Variable(
         "threshold rainfall intensity of second wetting front",
@@ -2909,6 +3010,7 @@ VARIABLES = {
         "mm/dt",
         "threshold rainfall intensity of second wetting front",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "pi_m": Variable(
         "rainfall sum at matrix saturation",
@@ -2916,6 +3018,7 @@ VARIABLES = {
         "mm",
         "rainfall sum at matrix saturation",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "pi_m_t0": Variable(
         "rainfall sum at matrix saturation of first wetting front",
@@ -2923,6 +3026,7 @@ VARIABLES = {
         "mm",
         "rainfall sum at matrix saturation of first wetting front",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "pi_m_t1": Variable(
         "rainfall sum at matrix saturation of second wetting front",
@@ -2930,6 +3034,7 @@ VARIABLES = {
         "mm",
         "rainfall sum at matrix saturation of second wetting front",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "t_sat": Variable(
         "time to reach matrix saturation",
@@ -2937,6 +3042,7 @@ VARIABLES = {
         "hours",
         "time to reach matrix saturation",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "t_sat_t0": Variable(
         "time to reach matrix saturation of first wetting front",
@@ -2944,6 +3050,7 @@ VARIABLES = {
         "hours",
         "time to reach matrix saturation of first wetting front",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "t_sat_t1": Variable(
         "time to reach matrix saturation of second wetting front",
@@ -2951,6 +3058,7 @@ VARIABLES = {
         "hours",
         "time to reach matrix saturation of second wetting front",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "Fs": Variable(
         "Infiltration sum to reach saturation",
@@ -2958,6 +3066,7 @@ VARIABLES = {
         "mm",
         "Infiltration sum to reach saturation",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "Fs_t0": Variable(
         "Infiltration sum to reach saturation of first wetting front",
@@ -2965,6 +3074,7 @@ VARIABLES = {
         "mm",
         "Infiltration sum to reach saturation of first wetting front",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "Fs_t1": Variable(
         "Infiltration sum to reach saturation of second wetting front",
@@ -2972,6 +3082,7 @@ VARIABLES = {
         "mm",
         "Infiltration sum to reach saturation of second wetting front",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "inf_mat_pot_event_csum": Variable(
         "cumulated potential matrix infiltration while event",
@@ -2979,6 +3090,7 @@ VARIABLES = {
         "mm",
         "cumulated potential matrix infiltration while event",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "inf_mat_event_csum": Variable(
         "cumulated matrix infiltration while event",
@@ -2986,6 +3098,7 @@ VARIABLES = {
         "mm",
         "cumulated matrix infiltration while event",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "inf_mp_event_csum": Variable(
         "cumulated macropore infiltration while event",
@@ -2993,6 +3106,7 @@ VARIABLES = {
         "mm",
         "cumulated macropore infiltration while event",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "inf_sc_event_csum": Variable(
         "cumulated shrinkage crack infiltration while event",
@@ -3000,6 +3114,7 @@ VARIABLES = {
         "mm",
         "cumulated shrinkage crack infiltration while event",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "C_inf_mat_rz": Variable(
         "solute concentration of matrix infiltration into root zone",
@@ -3296,7 +3411,6 @@ VARIABLES = {
         CATCH_GRID,
         "mm/dt",
         "vertical subsoil drainage of large pores",
-        write_to_restart=True,
         time_dependent=True,
     ),
     "q_ss": Variable(
@@ -4002,6 +4116,7 @@ VARIABLES = {
         "precipitation of an event",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "prec_event_csum": Variable(
         "cumulated precipitation while event",
@@ -4010,6 +4125,7 @@ VARIABLES = {
         "cumulated precipitation while event",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "prec_int_event_csum": Variable(
         "cumulated precipitation intensities while event",
@@ -4018,6 +4134,7 @@ VARIABLES = {
         "cumulated precipitation intensities while event",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "prec_event_sum": Variable(
         "cumulated precipitation while event",
@@ -4026,6 +4143,7 @@ VARIABLES = {
         "cumulated precipitation while event",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "t_event_csum": Variable(
         "cumulated time while event",
@@ -4034,6 +4152,7 @@ VARIABLES = {
         "cumulated time while event",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "t_event_sum": Variable(
         "cumulated time while event",
@@ -4042,6 +4161,7 @@ VARIABLES = {
         "cumulated time while event",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     # forcing
     "EVENT_ID": Variable(
@@ -4052,6 +4172,7 @@ VARIABLES = {
         write_to_restart=True,
         time_dependent=True,
         dtype="int64",
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "EVENT_ID_FF": Variable(
         "number of events",
@@ -4061,7 +4182,7 @@ VARIABLES = {
         write_to_restart=True,
         time_dependent=True,
         dtype="int64",
-        active=lambda settings: settings.enable_film_flow,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
     ),
     "PREC": Variable(
         "precipitation",
@@ -4078,6 +4199,7 @@ VARIABLES = {
         "potential evapotranspiration",
         write_to_restart=True,
         time_dependent=False,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "TA": Variable(
         "daily average air temperature",
@@ -4094,7 +4216,7 @@ VARIABLES = {
         "daily minimum air temperature",
         write_to_restart=True,
         time_dependent=False,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "TA_MAX": Variable(
         "daily maximum air temperature",
@@ -4103,7 +4225,7 @@ VARIABLES = {
         "daily maximum air temperature",
         write_to_restart=True,
         time_dependent=False,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "C_IN": Variable(
         "solute concentration of input",
@@ -4137,7 +4259,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mg",
         "solute mass of input",
-        write_to_restart=False,
+        write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport & (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate),
     ),
@@ -4418,7 +4540,7 @@ VARIABLES = {
         dtype="int64",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: settings.enable_crop_phenology & settings.enable_crop_rotation,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology & settings.enable_crop_rotation,
     ),
     "crop_type": Variable(
         "crop type",
@@ -4428,7 +4550,7 @@ VARIABLES = {
         write_to_restart=True,
         time_dependent=True,
         dtype="int64",
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "crop_height": Variable(
         "height of crops",
@@ -4445,7 +4567,7 @@ VARIABLES = {
         "maximum height of crops",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "lai_crop": Variable(
         "leaf area index of crops",
@@ -4454,7 +4576,7 @@ VARIABLES = {
         "leaf area index of crops",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "S_int_tot_crop": Variable(
         "total interception storage of crop canopy",
@@ -4463,7 +4585,7 @@ VARIABLES = {
         "total interception storage of crop canopy",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "doy_start": Variable(
         "day of year of sowing",
@@ -4472,7 +4594,7 @@ VARIABLES = {
         "day of year of sowing",
         write_to_restart=True,
         dtype="int64",
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "doy_mid": Variable(
         "day of year of full canopy",
@@ -4481,7 +4603,7 @@ VARIABLES = {
         "day of year of full canopy",
         write_to_restart=True,
         dtype="int64",
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "doy_dec": Variable(
         "day of year of crop canopy decay",
@@ -4490,7 +4612,7 @@ VARIABLES = {
         "day of year of crop canopy decay",
         write_to_restart=True,
         dtype="int64",
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "doy_end": Variable(
         "day of year of harvesting",
@@ -4499,7 +4621,7 @@ VARIABLES = {
         "day of year of harvesting",
         write_to_restart=True,
         dtype="int64",
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "ta_base": Variable(
         "lower threshold of crop growth",
@@ -4508,7 +4630,7 @@ VARIABLES = {
         "lower threshold of crop growth",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "ta_ceil": Variable(
         "upper threshold of crop growth",
@@ -4517,7 +4639,7 @@ VARIABLES = {
         "upper threshold of crop growth",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "gdd": Variable(
         "cumulated growing degree days",
@@ -4526,7 +4648,7 @@ VARIABLES = {
         "growing degree days",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "gdd_sum": Variable(
         "cumulated growing degree days",
@@ -4535,7 +4657,7 @@ VARIABLES = {
         "cumulated growing degree days",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "t_grow_cc": Variable(
         "time since crop canopy growth",
@@ -4544,7 +4666,7 @@ VARIABLES = {
         "time since crop canopy growth",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "t_grow_root": Variable(
         "time since crop root growth",
@@ -4553,7 +4675,7 @@ VARIABLES = {
         "time since crop root growth",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "t_half_mid": Variable(
         "time since half full canopy",
@@ -4562,7 +4684,7 @@ VARIABLES = {
         "time since half full canopy",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "t_decay": Variable(
         "time since crop canopy decay",
@@ -4571,7 +4693,7 @@ VARIABLES = {
         "time since crop canopy decay",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "ccc_growth_rate": Variable(
         "growth rate of crop canopy cover",
@@ -4580,7 +4702,7 @@ VARIABLES = {
         "growth rate of crop canopy cover",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "ccc": Variable(
         "crop canopy cover",
@@ -4589,7 +4711,7 @@ VARIABLES = {
         "crop canopy cover",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "ccc_min": Variable(
         "minimum crop canopy cover",
@@ -4598,7 +4720,7 @@ VARIABLES = {
         "minimum crop canopy cover",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "ccc_mid": Variable(
         "crop canopy cover at maturity",
@@ -4607,7 +4729,7 @@ VARIABLES = {
         "crop canopy cover at maturity",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "ccc_max": Variable(
         "maximum crop canopy cover",
@@ -4616,7 +4738,7 @@ VARIABLES = {
         "maximum crop canopy cover",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "crop_dev_coeff": Variable(
         "crop development coefficient",
@@ -4625,7 +4747,7 @@ VARIABLES = {
         "crop development coefficient",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "basal_evap_coeff_crop": Variable(
         "basal crop evaporation coefficient",
@@ -4634,6 +4756,7 @@ VARIABLES = {
         "basal crop evaporation coefficient",
         write_to_restart=True,
         time_dependent=False,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "k_stress_transp_crop": Variable(
         "water stress coefficient of crop transpiration",
@@ -4643,6 +4766,7 @@ VARIABLES = {
         write_to_restart=True,
         initial=1,
         time_dependent=False,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "basal_crop_coeff": Variable(
         "basal crop coefficient",
@@ -4651,7 +4775,7 @@ VARIABLES = {
         "basal crop coefficient",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "crop_scale": Variable(
         "scaling factor of crop parameters",
@@ -4661,7 +4785,7 @@ VARIABLES = {
         write_to_restart=True,
         initial=1,
         time_dependent=False,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "lut_crop_scale": Variable(
         "scaling factor of crop parameters",
@@ -4680,7 +4804,7 @@ VARIABLES = {
         "basal crop coefficient of mature crop",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "theta_water_stress_crop": Variable(
         "soil water content of crop water stress",
@@ -4689,7 +4813,7 @@ VARIABLES = {
         "soil water content of crop water stress",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "water_stress_coeff_crop": Variable(
         "coeffcient of crop water stress",
@@ -4698,7 +4822,7 @@ VARIABLES = {
         "coeffcient of crop water stress",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "root_growth_rate": Variable(
         "growth rate of crop roots",
@@ -4707,7 +4831,7 @@ VARIABLES = {
         "growth rate of crop roots",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "z_root_crop": Variable(
         "root depth of crop",
@@ -4716,7 +4840,7 @@ VARIABLES = {
         "root depth of crop",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "z_root_crop_max": Variable(
         "maximum root depth of crop",
@@ -4725,7 +4849,7 @@ VARIABLES = {
         "maximum root depth of crop",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "k_stress_root_growth": Variable(
         "water stress coeffcient of root growth",
@@ -4735,7 +4859,7 @@ VARIABLES = {
         write_to_restart=True,
         time_dependent=True,
         initial=1,
-        active=lambda settings: settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     # look-up-tables
     "lut_ilu": Variable(
@@ -4743,7 +4867,7 @@ VARIABLES = {
         LUT_ILU_GRID,
         "mm",
         "Look-up-table of land use dependent interception storage",
-        write_to_restart=True,
+        write_to_restart=False,
         time_dependent=False,
     ),
     "lut_gc": Variable(
@@ -4751,7 +4875,7 @@ VARIABLES = {
         LUT_ILU_GRID,
         "-",
         "Look-up-table of land use dependent ground cover",
-        write_to_restart=True,
+        write_to_restart=False,
         time_dependent=False,
     ),
     "lut_gcm": Variable(
@@ -4759,7 +4883,7 @@ VARIABLES = {
         LUT_GCM_GRID,
         "-",
         "Look-up-table of land use dependent  maximalground cover",
-        write_to_restart=True,
+        write_to_restart=False,
         time_dependent=False,
     ),
     "lut_is": Variable(
@@ -4767,7 +4891,7 @@ VARIABLES = {
         LUT_IS_GRID,
         "mm",
         "Look-up-table of sealing dependent interception storage",
-        write_to_restart=True,
+        write_to_restart=False,
         time_dependent=False,
     ),
     "lut_mlms": Variable(
@@ -4775,7 +4899,7 @@ VARIABLES = {
         LUT_MLMS_GRID,
         "mm/h",
         "Look-up-table of lateral macropore flow velocity",
-        write_to_restart=True,
+        write_to_restart=False,
         time_dependent=False,
         active=lambda settings: settings.enable_lateral_flow,
     ),
@@ -4784,7 +4908,7 @@ VARIABLES = {
         LUT_RDLU_GRID,
         "mm",
         "Look-up-table of land use dependent root depth",
-        write_to_restart=True,
+        write_to_restart=False,
         time_dependent=False,
     ),
     "lut_crops": Variable(
@@ -4792,7 +4916,7 @@ VARIABLES = {
         LUT_CROPS_GRID,
         "",
         "Look-up-table of crop specific parameters",
-        write_to_restart=True,
+        write_to_restart=False,
         time_dependent=False,
         active=lambda settings: settings.enable_crop_phenology,
     ),
