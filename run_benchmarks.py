@@ -25,7 +25,7 @@ STATIC_SETTINGS = " --size {nx} {ny} {nz} --timesteps {timesteps} --float-type {
 
 BENCHMARK_COMMANDS = {
     "numpy": "{python} {filename}" + STATIC_SETTINGS,
-    "numpy-mpi": "{python} {filename} --n {decomp}" + STATIC_SETTINGS,
+    "numpy-mpi": "{python} {filename} -n {decomp}" + STATIC_SETTINGS,
     "jax": "{python} {filename}" + STATIC_SETTINGS,
     "jax-gpu": "{python} {filename} --device gpu" + STATIC_SETTINGS,
     "jax-mpi": "{python} {filename} -n {decomp}" + STATIC_SETTINGS,
@@ -36,11 +36,11 @@ SLURM_COMMANDS = {
     "numpy-mpi": "{mpiexec} --nodes 1 --ntasks-per-node {nproc} --mem=90000 --partition single --time=02:00:00 --job-name={backend} {python} {filename} --nproc {decomp}"
     + STATIC_SETTINGS,
     "jax": "{mpiexec} --nodes 1 --ntasks 1 --mem=180000 --partition single --time=02:00:00 --job-name={backend} {python} {filename}" + STATIC_SETTINGS,
-    "jax-gpu": "{mpiexec} --gres=gpu:1 --ntasks-per-node 1 --cpu-per-gpu {nproc} --mem=752000 --partition gpu_8 --time=02:00:00 --job-name={backend} {python} {filename} --device gpu"
+    "jax-gpu": "{mpiexec} --gres=gpu:1 --ntasks 1 --cpu-per-task 1 --mem=752000 --partition gpu_8 --time=02:00:00 --job-name={backend} {python} {filename} --device gpu"
     + STATIC_SETTINGS,
     "jax-mpi": "{mpiexec} --nodes 1 --ntasks-per-node {nproc} --mem=90000 --partition single --time=02:00:00 --job-name={backend} {python} {filename} --nproc {decomp}"
     + STATIC_SETTINGS,
-    "jax-gpu-mpi": "{mpiexec} --gres=gpu:1 -- ntasks {nproc} --ntasks-per-node {nproc} --cpu-per-gpu 1 --mem=752000 --partition gpu_8 --time=02:00:00 --job-name={backend} {python} {filename} --device gpu --nproc {decomp}"
+    "jax-gpu-mpi": "{mpiexec} --gres=gpu:2 --ntasks 2 --ntasks-per-node 1 --cpu-per-task 1 --mem=752000 --partition gpu_8 --time=02:00:00 --job-name={backend} {python} {filename} --device gpu --nproc {decomp}"
     + STATIC_SETTINGS,
 }
 
@@ -164,7 +164,7 @@ def run(**kwargs):
                         cmd_sh = BENCHMARK_COMMANDS[backend].format(**cmd_args)
                         # write shell shell script to submit job
                         lines = []
-                        lines.append('#!/bin/bash -l\n')
+                        lines.append('#!/bin/bash\n')
                         lines.append('#\n')
                         lines.append('# load module dependencies\n')
                         lines.append('module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1\n')
@@ -174,21 +174,27 @@ def run(**kwargs):
                         lines.append(' \n')
                         lines.append('# adapt command to your available scheduler / MPI implementation\n')
                         if backend in ['numpy']:
+                            lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger\n')
                             lines.append(f'{cmd_sh}\n')
                         elif backend in ['jax']:
+                            lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger\n')
                             lines.append(f'{cmd_sh}\n')
                         elif backend in ['jax-gpu']:
+                            lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-gpu\n')
                             lines.append(f'{cmd_sh}\n')
                         elif backend in ['numpy-mpi']:
+                            lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-mpi\n')
                             lines.append(f'mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
                         elif backend in ['jax-mpi']:
+                            lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-mpi\n')
                             lines.append(f'mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
                         elif backend in ['jax-gpu-mpi']:
+                            lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-gpu\n')
                             lines.append(f'MPI4JAX_USE_CUDA_MPI=1 mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
                         file_path = TESTDIR / 'job.sh'
@@ -201,11 +207,11 @@ def run(**kwargs):
                         if backend in ['numpy', 'jax']:
                             cmd = f"sbatch -p single -N 1 -n 1 --mem=180000 --time=02:00:00 --job-name={backend} ./{file_path}"
                         elif backend in ['numpy-mpi', 'jax-mpi']:
-                            cmd = f"sbatch -p single -N 1 -n {nproc} --mem=90000 --time=02:00:00 --job-name={backend} ./{file_path}"
+                            cmd = f"sbatch -p single -N 1 -n {nproc} --mem=180000 --time=02:00:00 --job-name={backend} ./{file_path}"
                         elif backend in ['jax-gpu']:
-                            cmd = f"sbatch -p gpu_8 --gres=gpu:1 --cpu-per-gpu 1 --mem=752000 --time=02:00:00 --job-name={backend} ./{file_path}"
+                            cmd = f"sbatch -p gpu_8 --gres=gpu:1 --ntasks 1 --cpu-per-task 1 --mem=752000 --time=02:00:00 --job-name={backend} ./{file_path}"
                         elif backend in ['jax-gpu-mpi']:
-                            cmd = f"sbatch -p gpu_8 --gres=gpu:1 -n {nproc} --cpu-per-gpu {nproc} --mem=752000 --time=02:00:00 --job-name={backend} ./{file_path}"
+                            cmd = f"sbatch -p gpu_8 --gres=gpu:2 -n 2 --ntasks-per-node 1 --cpu-per-task 1 --mem=752000 --time=02:00:00 --job-name={backend} ./{file_path}"
 
                     if kwargs["debug"]:
                         click.echo(f"  $ {cmd}")

@@ -36,6 +36,7 @@ for tm in transport_models:
     lines.append('# load module dependencies\n')
     lines.append('module load devel/cudnn/9.2\n')
     lines.append('module load devel/cuda/11.4\n')
+    lines.append('module load lib/hdf5/1.12.1-gnu-11.2-openmpi-4.1\n')
     lines.append(' \n')
     lines.append(f'python svat_transport.py -b jax -d gpu -ns 10000 -tms {tms}\n')
     file_path = base_path / f'{script_name}_gpu.sh'
