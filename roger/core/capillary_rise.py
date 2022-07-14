@@ -2,7 +2,6 @@ from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at
 from roger.core import transport
-import numpy as onp
 
 
 @roger_kernel
@@ -40,7 +39,7 @@ def calc_cpr_rz(state):
     if settings.enable_film_flow:
         vs.cpr_rz = update(
             vs.cpr_rz,
-            at[2:-2, 2:-2], npx.where(npx.sum(vs.S_f, axis=-1) > 0, 0, vs.cpr_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(npx.sum(vs.S_f[2:-2, 2:-2, :], axis=-1) > 0, 0, vs.cpr_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
 
     # limit uplift to available fine pore storage in subsoil

@@ -3,7 +3,7 @@ import os
 import h5netcdf
 import pandas as pd
 import numpy as onp
-from roger.cli.roger_base_run import roger_base_cli
+from roger.cli.roger_run_base import roger_base_cli
 
 
 @roger_base_cli

@@ -2,7 +2,6 @@ from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, at
 from roger.core import transport
-import numpy as onp
 
 
 @roger_kernel

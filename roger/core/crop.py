@@ -4,7 +4,6 @@ from roger.core.operators import numpy as npx, update, update_add, at
 import roger.lookuptables as lut
 from roger.core.utilities import _get_row_no
 from roger.core import transport
-import numpy as onp
 
 
 @roger_kernel

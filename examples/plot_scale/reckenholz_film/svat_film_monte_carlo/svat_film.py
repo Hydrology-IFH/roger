@@ -1,7 +1,6 @@
 from pathlib import Path
 import os
 import h5netcdf
-import pandas as pd
 import numpy as onp
 from roger.cli.roger_run_base import roger_base_cli
 
@@ -12,16 +11,14 @@ def main():
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
     from roger.core.utilities import _get_row_no
-    from roger.tools.setup import write_forcing
     import roger.lookuptables as lut
-    from roger.io_tools.csv import write_meteo_csv_from_dwd
+    from roger.tools.setup import write_forcing
 
-    class ONEDSetup(RogerSetup):
-        """A 1D model.
+    class SVATFILMSetup(RogerSetup):
+        """A SVAT model including gravity-driven infiltration and percolation.
         """
         _base_path = Path(__file__).parent
         _input_dir = None
-        _identifier = None
 
         def _set_input_dir(self, path):
             if os.path.exists(path):
@@ -32,24 +29,13 @@ def main():
                     os.mkdir(self._input_dir)
 
         def _read_var_from_nc(self, var, path_dir, file):
-            nc_file = self._input_dir / file
+            nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables[var]
                 return npx.array(var_obj)
 
-        def _read_var_from_csv(self, var, path_dir, file):
-            csv_file = path_dir / file
-            infile = pd.read_csv(csv_file, sep=';', skiprows=1)
-            var_obj = infile.loc[:, var]
-            return npx.array(var_obj)[:, npx.newaxis]
-
-        def _get_nx(self, path_dir, file):
-            csv_file = path_dir / file
-            infile = pd.read_csv(csv_file, sep=';', skiprows=1)
-            return len(infile.index)
-
         def _get_nittevent(self, path_dir, file):
-            nc_file = self._input_dir / file
+            nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables['nitt_event']
                 return onp.int32(onp.array(var_obj)[0])
@@ -66,19 +52,25 @@ def main():
                 var_obj = infile.variables['Time']
                 return onp.array(var_obj)[-1] * 60 * 60
 
-        def _set_identifier(self, identifier):
-            self._identifier = identifier
+        def _get_nevent_ff(self, path_dir, file):
+            nc_file = path_dir / file
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables['nevent_ff']
+                return onp.int32(onp.array(var_obj)[0])
 
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = self._identifier
+            settings.identifier = "SVATFILM"
 
-            settings.nx, settings.ny, settings.nz = self._get_nx(self._base_path, 'parameter_grid.csv'), 1, 1
+            settings.nx, settings.ny, settings.nz = 1, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
             settings.nittevent = self._get_nittevent(self._input_dir, 'forcing.nc')
             settings.nittevent_p1 = settings.nittevent + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
+            settings.nittevent_ff = 5 * 24 * 6
+            settings.nittevent_ff_p1 = settings.nittevent_ff + 1
+            settings.nevent_ff = self._get_nevent_ff(self._input_dir, 'forcing.nc')
 
             settings.dx = 1
             settings.dy = 1
@@ -86,11 +78,11 @@ def main():
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0
-            settings.time_origin = "2010-09-30 00:00:00"
 
-            settings.enable_groundwater_boundary = False
-            settings.enable_lateral_flow = True
-            settings.enable_routing = False
+            settings.enable_film_flow = True
+            settings.enable_macropore_lower_boundary_condition = False
+
+            settings.ff_tc = 0.15
 
         @roger_routine(
             dist_safe=False,
@@ -143,7 +135,6 @@ def main():
             vs.lut_gcm = update(vs.lut_gcm, at[:, :], lut.ARR_GCM)
             vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
             vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
-            vs.lut_mlms = update(vs.lut_mlms, at[:, :], lut.ARR_MLMS)
 
         @roger_routine
         def set_topography(self, state):
@@ -153,20 +144,18 @@ def main():
         def set_parameters_setup(self, state):
             vs = state.variables
 
-            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], self._read_var_from_csv("lu_id", self._base_path,  "parameter_grid.csv"))
-            vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
-            vs.slope = update(vs.slope, at[2:-2, 2:-2], self._read_var_from_csv("slope", self._base_path,  "parameter_grid.csv"))
-            vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
-            vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], self._read_var_from_csv("S_dep_tot", self._base_path,  "parameter_grid.csv"))
-            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path,  "parameter_grid.csv"))
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_csv("dmpv", self._base_path,  "parameter_grid.csv"))
-            vs.dmph = update(vs.dmph, at[2:-2, 2:-2], self._read_var_from_csv("dmph", self._base_path,  "parameter_grid.csv"))
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_csv("lmpv", self._base_path,  "parameter_grid.csv"))
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_csv("theta_ac", self._base_path,  "parameter_grid.csv"))
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_csv("theta_ufc", self._base_path,  "parameter_grid.csv"))
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_csv("theta_pwp", self._base_path,  "parameter_grid.csv"))
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_csv("ks", self._base_path,  "parameter_grid.csv"))
-            vs.kf = update(vs.kf, at[2:-2, 2:-2], self._read_var_from_csv("kf", self._base_path,  "parameter_grid.csv"))
+            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
+            vs.slope = update(vs.slope, at[2:-2, 2:-2], 0)
+            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1350)
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1000)
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.13)
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.24)
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.23)
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], 25)
+            vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
+            vs.a_ff = update(vs.a_ff, at[2:-2, 2:-2], 0.19)
+            vs.c_ff = update(vs.c_ff, at[2:-2, 2:-2], 0.001)
 
         @roger_routine
         def set_parameters(self, state):
@@ -190,9 +179,8 @@ def main():
             vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
             vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
             vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
-            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
-            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
-            vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 0)
+            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.4)
+            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.47)
 
         @roger_routine
         def set_forcing_setup(self, state):
@@ -202,43 +190,75 @@ def main():
             vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
             vs.PET = update(vs.PET, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc'))
             vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc'))
+            vs.EVENT_ID_FF = update(vs.EVENT_ID_FF, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID_FF", self._input_dir, 'forcing.nc'))
 
         @roger_routine
         def set_forcing(self, state):
             vs = state.variables
+            settings = state.settings
+
+            vs.itt_event_ff = update(
+                vs.itt_event_ff,
+                at[:], vs.itt - vs.event_start_ff,
+            )
+            arr_itt = allocate(state.dimensions, ("x", "y"))
+            arr_itt = update(
+                arr_itt,
+                at[2:-2, 2:-2], vs.itt,
+            )
+            cond1 = ((vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt-1] == 0) & (vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt] >= 1) & (arr_itt >= 1))
+            if cond1.any():
+                vs.event_no_ff = vs.event_no_ff + 1
+                # number of event
+                vs.event_id_ff = npx.max(vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt])
+                # iteration at event start
+                vs.event_start_ff = update(vs.event_start_ff, at[vs.event_no_ff - 1], vs.itt)
+                # iteration at event end
+                vs.event_end_ff = update(vs.event_end_ff, at[vs.event_no_ff - 1], vs.itt + settings.nittevent_ff)
+                if (vs.event_end_ff[vs.event_no_ff - 1] >= settings.nitt):
+                    vs.event_end_ff = update(vs.event_end_ff, at[vs.event_no_ff - 1], settings.nitt)
+                vs.rain_event = update(
+                    vs.rain_event,
+                    at[2:-2, 2:-2, :], 0,
+                )
+                vs.rain_event = update(
+                    vs.rain_event,
+                    at[2:-2, 2:-2, 0:vs.event_end_ff[vs.event_no_ff - 1]-vs.event_start_ff[vs.event_no_ff - 1]], npx.where(vs.EVENT_ID_FF == vs.event_id_ff, vs.PREC, 0)[2:-2, 2:-2, vs.event_start_ff[vs.event_no_ff - 1]:vs.event_end_ff[vs.event_no_ff - 1]],
+                )
+                vs.rain_event_sum = update(
+                    vs.rain_event_sum,
+                    at[2:-2, 2:-2], npx.sum(vs.rain_event[2:-2, 2:-2, :], axis=-1),
+                )
+                vs.rain_event_csum = update(
+                    vs.rain_event_csum,
+                    at[2:-2, 2:-2, :], npx.cumsum(vs.rain_event[2:-2, 2:-2, :], axis=-1),
+                )
+                # subtract interception storage
+                vs.rain_event = update(
+                    vs.rain_event,
+                    at[2:-2, 2:-2, 0], vs.rain_event[2:-2, 2:-2, 0] - (vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau]),
+                )
+                vs.rain_event = update(
+                    vs.rain_event,
+                    at[2:-2, 2:-2, 1:], npx.diff(npx.where(npx.cumsum(vs.rain_event[2:-2, 2:-2, :], axis=-1) < 0, 0, npx.cumsum(vs.rain_event[2:-2, 2:-2, :], axis=-1)), axis=-1),
+                )
+                vs.rain_event = update(
+                    vs.rain_event,
+                    at[2:-2, 2:-2, 0], npx.where(vs.rain_event[2:-2, 2:-2, 0] < 0, 0, vs.rain_event[2:-2, 2:-2, 0]),
+                )
 
             vs.update(set_forcing_kernel(state))
 
         @roger_routine
         def set_diagnostics(self, state):
-            diagnostics = state.diagnostics
-
-            diagnostics["rates"].output_variables = ["aet", "pet", "transp",
-                                                     "evap_soil", "inf_mat",
-                                                     "inf_mp", "inf_sc", "q_ss",
-                                                     "q_sub", "q_sub_mp",
-                                                     "q_sub_mat", "q_hof", "q_sof",
-                                                     "prec", "rain", "snow",
-                                                     "int_prec", "int_rain_top",
-                                                     "int_rain_ground", "int_snow_top",
-                                                     "int_snow_ground", "q_snow",
-                                                     "evap_int"]
-            diagnostics["rates"].output_frequency = 24 * 60 * 60
-            diagnostics["rates"].sampling_frequency = 1
-
-            diagnostics["collect"].output_variables = ["theta", "S_s"]
-            diagnostics["collect"].output_frequency = 24 * 60 * 60
-            diagnostics["collect"].sampling_frequency = 1
-
-            diagnostics["maximum"].output_variables = ["z_sat", "z0"]
-            diagnostics["maximum"].output_frequency = 24 * 60 * 60
-            diagnostics["maximum"].sampling_frequency = 1
+            pass
 
         @roger_routine
         def after_timestep(self, state):
             vs = state.variables
 
             vs.update(after_timestep_kernel(state))
+            vs.update(after_timestep_film_flow_kernel(state))
 
     @roger_kernel
     def set_parameters_monthly_kernel(state):
@@ -399,7 +419,13 @@ def main():
     def set_forcing_kernel(state):
         vs = state.variables
 
-        vs.prec = update(vs.prec, at[2:-2, 2:-2], vs.PREC[2:-2, 2:-2, vs.itt])
+        # update precipitation with available interception storage while film flow event
+        mask_noff = (vs.EVENT_ID_FF[:, :, vs.itt] == 0)
+        vs.prec = update(vs.prec, at[2:-2, 2:-2], 0)
+        vs.prec = update_add(vs.prec, at[2:-2, 2:-2],
+                             npx.where((vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt] >= 1) & ((vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau]) > 0),
+                             npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > (vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau]), (vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau]), vs.PREC[2:-2, 2:-2, vs.itt]), 0))
+        vs.prec = update(vs.prec, at[2:-2, 2:-2], npx.where(mask_noff[2:-2, 2:-2], vs.PREC[2:-2, 2:-2, vs.itt], 0))
         vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[2:-2, 2:-2, vs.itt])
         vs.pet = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
         vs.pet_res = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
@@ -409,6 +435,17 @@ def main():
         vs.year = vs.YEAR[vs.itt]
         vs.month = vs.MONTH[vs.itt]
         vs.doy = vs.DOY[vs.itt]
+
+        # reset fluxes at beginning of time step
+        vs.q_sur = update(
+            vs.q_sur,
+            at[2:-2, 2:-2], 0,
+        )
+
+        vs.q_hof = update(
+            vs.q_hof,
+            at[2:-2, 2:-2], 0,
+        )
 
         return KernelOutput(
             prec=vs.prec,
@@ -420,6 +457,8 @@ def main():
             year=vs.year,
             month=vs.month,
             doy=vs.doy,
+            q_sur=vs.q_sur,
+            q_hof=vs.q_hof,
         )
 
     @roger_kernel
@@ -550,23 +589,6 @@ def main():
             vs.z0,
             at[2:-2, 2:-2, vs.taum1], vs.z0[2:-2, 2:-2, vs.tau],
         )
-        # set to 0 for numerical errors
-        vs.S_fp_rz = update(
-            vs.S_fp_rz,
-            at[2:-2, 2:-2], npx.where((vs.S_fp_rz > -1e-6) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz)[2:-2, 2:-2],
-        )
-        vs.S_lp_rz = update(
-            vs.S_lp_rz,
-            at[2:-2, 2:-2], npx.where((vs.S_lp_rz > -1e-6) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz)[2:-2, 2:-2],
-        )
-        vs.S_fp_ss = update(
-            vs.S_fp_ss,
-            at[2:-2, 2:-2], npx.where((vs.S_fp_ss > -1e-6) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss)[2:-2, 2:-2],
-        )
-        vs.S_lp_ss = update(
-            vs.S_lp_ss,
-            at[2:-2, 2:-2], npx.where((vs.S_lp_ss > -1e-6) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss)[2:-2, 2:-2],
-        )
 
         return KernelOutput(
             ta=vs.ta,
@@ -596,27 +618,56 @@ def main():
             h_rz=vs.h_rz,
             h_ss=vs.h_ss,
             h=vs.h,
-            z0=vs.z0,
             k_rz=vs.k_rz,
             k_ss=vs.k_ss,
             k=vs.k,
-            S_fp_rz=vs.S_fp_rz,
-            S_lp_rz=vs.S_lp_rz,
-            S_fp_ss=vs.S_fp_ss,
-            S_lp_ss=vs.S_lp_ss,
+            z0=vs.z0,
         )
 
-    meteo_stations = ["breitnau", "ihringen"]
-    for meteo_station in meteo_stations:
-        model = ONEDSetup()
-        identifier = f'ONED_{meteo_station}'
-        model._set_identifier(identifier)
-        path_meteo_station = model._base_path / "input" / meteo_station
-        model._set_input_dir(path_meteo_station)
-        write_meteo_csv_from_dwd(path_meteo_station)
-        write_forcing(path_meteo_station)
-        model.setup()
-        model.run()
+    @roger_kernel
+    def after_timestep_film_flow_kernel(state):
+        vs = state.variables
+
+        vs.z_wf_ff = update(
+            vs.z_wf_ff,
+            at[2:-2, 2:-2, :, vs.taum1], vs.z_wf_ff[2:-2, 2:-2, :, vs.tau],
+        )
+        vs.z_pf_ff = update(
+            vs.z_pf_ff,
+            at[2:-2, 2:-2, :, vs.taum1], vs.z_pf_ff[2:-2, 2:-2, :, vs.tau],
+        )
+        vs.theta_rz_ff = update(
+            vs.theta_rz_ff,
+            at[2:-2, 2:-2, vs.taum1], vs.theta_rz_ff[2:-2, 2:-2, vs.tau],
+        )
+        vs.theta_ss_ff = update(
+            vs.theta_ss_ff,
+            at[2:-2, 2:-2, vs.taum1], vs.theta_ss_ff[2:-2, 2:-2, vs.tau],
+        )
+        vs.theta_ff = update(
+            vs.theta_ff,
+            at[2:-2, 2:-2, vs.taum1], vs.theta_ff[2:-2, 2:-2, vs.tau],
+        )
+        vs.z_pf = update(
+            vs.z_pf,
+            at[2:-2, 2:-2, vs.taum1], vs.z_pf[2:-2, 2:-2, vs.tau],
+        )
+
+        return KernelOutput(
+            z_wf_ff=vs.z_wf_ff,
+            z_pf_ff=vs.z_pf_ff,
+            theta_rz_ff=vs.theta_rz_ff,
+            theta_ss_ff=vs.theta_ss_ff,
+            theta_ff=vs.theta_ff,
+            z_pf=vs.z_pf,
+        )
+
+    model = SVATFILMSetup()
+    path_input = model._base_path / "input"
+    model._set_input_dir(path_input)
+    write_forcing(path_input, enable_film_flow=True, z_soil=1350, a=0.19)
+    model.setup()
+    model.run()
     return
 
 

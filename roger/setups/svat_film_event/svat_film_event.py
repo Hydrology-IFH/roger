@@ -1,15 +1,16 @@
 from pathlib import Path
 import os
 import h5netcdf
+import numpy as onp
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
-from roger.core.operators import numpy as npx, update, at
+from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
+from roger.core.utilities import _get_row_no
 import roger.lookuptables as lut
-import numpy as onp
 
 
-class SVATEVENTSetup(RogerSetup):
-    """A SVAT model for a single event.
+class SVATFILMEVENTSetup(RogerSetup):
+    """A SVAT model including gravity-driven infiltration and percolation.
     """
     _base_path = Path(__file__).parent
     _input_dir = None
@@ -37,13 +38,14 @@ class SVATEVENTSetup(RogerSetup):
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
-        settings.identifier = "SVATEVENT"
+        settings.identifier = "SVATFILMEVENT"
 
         settings.nx, settings.ny, settings.nz = 1, 1, 1
-        settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
-        settings.nittevent = self._get_nitt(self._input_dir, 'forcing.nc')
+        settings.nitt, settings.nittevent, settings.nittevent_ff = self._get_nitt(self._input_dir, 'forcing.nc')
         settings.nittevent_p1 = settings.nittevent + 1
         settings.runlen = settings.nitt * 10 * 60
+        settings.nittevent_ff_p1 = settings.nittevent_ff + 1
+        settings.nevent_ff = 1
 
         settings.dx = 1
         settings.dy = 1
@@ -52,12 +54,16 @@ class SVATEVENTSetup(RogerSetup):
         settings.x_origin = 0.0
         settings.y_origin = 0.0
 
-        settings.enable_groundwater_boundary = False
+        settings.enable_film_flow = True
         settings.enable_macropore_lower_boundary_condition = False
+
+        settings.ff_tc = 0.15
 
     @roger_routine(
         dist_safe=False,
         local_variables=[
+            "DT_SECS",
+            "DT",
             "dt_secs",
             "dt",
             "t",
@@ -66,7 +72,6 @@ class SVATEVENTSetup(RogerSetup):
             "y",
         ],
     )
-    @roger_routine
     def set_grid(self, state):
         vs = state.variables
         settings = state.settings
@@ -104,16 +109,17 @@ class SVATEVENTSetup(RogerSetup):
         vs = state.variables
 
         vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
-        vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
-        vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
-        vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
-        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 100)
+        vs.slope = update(vs.slope, at[2:-2, 2:-2], 0)
+        vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1350)
+        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
         vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1000)
         vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.13)
         vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.24)
         vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.23)
         vs.ks = update(vs.ks, at[2:-2, 2:-2], 25)
         vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
+        vs.a_ff = update(vs.a_ff, at[2:-2, 2:-2], 0.19)
+        vs.c_ff = update(vs.c_ff, at[2:-2, 2:-2], 0.001)
 
     @roger_routine
     def set_parameters(self, state):
@@ -143,12 +149,64 @@ class SVATEVENTSetup(RogerSetup):
 
         vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
         vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
-        vs.PET = update(vs.PET, at[2:-2, 2:-2, :], 0)
-        vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, 1:], 1)
+        vs.PET = update(vs.PET, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc'))
+        vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, :], 1)
+        vs.EVENT_ID_FF = update(vs.EVENT_ID_FF, at[2:-2, 2:-2, :], 1)
 
     @roger_routine
     def set_forcing(self, state):
         vs = state.variables
+        settings = state.settings
+
+        vs.itt_event_ff = update(
+            vs.itt_event_ff,
+            at[:], vs.itt - vs.event_start_ff,
+        )
+        arr_itt = allocate(state.dimensions, ("x", "y"))
+        arr_itt = update(
+            arr_itt,
+            at[2:-2, 2:-2], vs.itt,
+        )
+        cond1 = ((vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt-1] == 0) & (vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt] >= 1) & (arr_itt >= 1))
+        if cond1.any():
+            vs.event_no_ff = vs.event_no_ff + 1
+            # number of event
+            vs.event_id_ff = npx.max(vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt])
+            # iteration at event start
+            vs.event_start_ff = update(vs.event_start_ff, at[vs.event_no_ff - 1], vs.itt)
+            # iteration at event end
+            vs.event_end_ff = update(vs.event_end_ff, at[vs.event_no_ff - 1], vs.itt + settings.nittevent_ff)
+            if (vs.event_end_ff[vs.event_no_ff - 1] >= settings.nitt):
+                vs.event_end_ff = update(vs.event_end_ff, at[vs.event_no_ff - 1], settings.nitt)
+            vs.rain_event = update(
+                vs.rain_event,
+                at[2:-2, 2:-2, :], 0,
+            )
+            vs.rain_event = update(
+                vs.rain_event,
+                at[2:-2, 2:-2, 0:vs.event_end_ff[vs.event_no_ff - 1]-vs.event_start_ff[vs.event_no_ff - 1]], npx.where(vs.EVENT_ID_FF == vs.event_id_ff, vs.PREC, 0)[2:-2, 2:-2, vs.event_start_ff[vs.event_no_ff - 1]:vs.event_end_ff[vs.event_no_ff - 1]],
+            )
+            vs.rain_event_sum = update(
+                vs.rain_event_sum,
+                at[2:-2, 2:-2], npx.sum(vs.rain_event[2:-2, 2:-2, :], axis=-1),
+            )
+            vs.rain_event_csum = update(
+                vs.rain_event_csum,
+                at[2:-2, 2:-2, :], npx.cumsum(vs.rain_event[2:-2, 2:-2, :], axis=-1),
+            )
+            # subtract interception storage
+            vs.rain_event = update(
+                vs.rain_event,
+                at[2:-2, 2:-2, 0], vs.rain_event[2:-2, 2:-2, 0] - (vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau]),
+            )
+            vs.rain_event = update(
+                vs.rain_event,
+                at[2:-2, 2:-2, 1:], npx.diff(npx.where(npx.cumsum(vs.rain_event[2:-2, 2:-2, :], axis=-1) < 0, 0, npx.cumsum(vs.rain_event[2:-2, 2:-2, :], axis=-1)), axis=-1),
+            )
+            vs.rain_event = update(
+                vs.rain_event,
+                at[2:-2, 2:-2, 0], npx.where(vs.rain_event[2:-2, 2:-2, 0] < 0, 0, vs.rain_event[2:-2, 2:-2, 0]),
+            )
 
         vs.update(set_forcing_kernel(state))
 
@@ -161,14 +219,29 @@ class SVATEVENTSetup(RogerSetup):
         vs = state.variables
 
         vs.update(after_timestep_kernel(state))
+        vs.update(after_timestep_film_flow_kernel(state))
 
 
 @roger_kernel
 def set_forcing_kernel(state):
     vs = state.variables
 
-    vs.prec = update(vs.prec, at[2:-2, 2:-2], vs.PREC[2:-2, 2:-2, vs.itt])
+    # update precipitation with available interception storage while film flow event
+    mask_noff = (vs.EVENT_ID_FF[:, :, vs.itt] == 0)
+    vs.prec = update(vs.prec, at[2:-2, 2:-2], 0)
+    vs.prec = update_add(vs.prec, at[2:-2, 2:-2],
+                         npx.where((vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt] >= 1) & ((vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau]) > 0),
+                         npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > (vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau]), (vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau]), vs.PREC[2:-2, 2:-2, vs.itt]), 0))
+    vs.prec = update(vs.prec, at[2:-2, 2:-2], npx.where(mask_noff[2:-2, 2:-2], vs.PREC[2:-2, 2:-2, vs.itt], 0))
     vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[2:-2, 2:-2, vs.itt])
+    vs.pet = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
+    vs.pet_res = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
+
+    vs.dt_secs = vs.DT_SECS[vs.itt]
+    vs.dt = vs.DT[vs.itt]
+    vs.year = vs.YEAR[vs.itt]
+    vs.month = vs.MONTH[vs.itt]
+    vs.doy = vs.DOY[vs.itt]
 
     # reset fluxes at beginning of time step
     vs.q_sur = update(
@@ -181,14 +254,18 @@ def set_forcing_kernel(state):
         at[2:-2, 2:-2], 0,
     )
 
-    vs.dt_secs = vs.DT_SECS[vs.itt]
-    vs.dt = vs.DT[vs.itt]
-
     return KernelOutput(
         prec=vs.prec,
         ta=vs.ta,
+        pet=vs.pet,
+        pet_res=vs.pet_res,
         dt=vs.dt,
         dt_secs=vs.dt_secs,
+        year=vs.year,
+        month=vs.month,
+        doy=vs.doy,
+        q_sur=vs.q_sur,
+        q_hof=vs.q_hof,
     )
 
 
@@ -353,4 +430,42 @@ def after_timestep_kernel(state):
         k_ss=vs.k_ss,
         k=vs.k,
         z0=vs.z0,
+    )
+
+@roger_kernel
+def after_timestep_film_flow_kernel(state):
+    vs = state.variables
+
+    vs.z_wf_ff = update(
+        vs.z_wf_ff,
+        at[2:-2, 2:-2, :, vs.taum1], vs.z_wf_ff[2:-2, 2:-2, :, vs.tau],
+    )
+    vs.z_pf_ff = update(
+        vs.z_pf_ff,
+        at[2:-2, 2:-2, :, vs.taum1], vs.z_pf_ff[2:-2, 2:-2, :, vs.tau],
+    )
+    vs.theta_rz_ff = update(
+        vs.theta_rz_ff,
+        at[2:-2, 2:-2, vs.taum1], vs.theta_rz_ff[2:-2, 2:-2, vs.tau],
+    )
+    vs.theta_ss_ff = update(
+        vs.theta_ss_ff,
+        at[2:-2, 2:-2, vs.taum1], vs.theta_ss_ff[2:-2, 2:-2, vs.tau],
+    )
+    vs.theta_ff = update(
+        vs.theta_ff,
+        at[2:-2, 2:-2, vs.taum1], vs.theta_ff[2:-2, 2:-2, vs.tau],
+    )
+    vs.z_pf = update(
+        vs.z_pf,
+        at[2:-2, 2:-2, vs.taum1], vs.z_pf[2:-2, 2:-2, vs.tau],
+    )
+
+    return KernelOutput(
+        z_wf_ff=vs.z_wf_ff,
+        z_pf_ff=vs.z_pf_ff,
+        theta_rz_ff=vs.theta_rz_ff,
+        theta_ss_ff=vs.theta_ss_ff,
+        theta_ff=vs.theta_ff,
+        z_pf=vs.z_pf,
     )

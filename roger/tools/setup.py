@@ -219,7 +219,7 @@ def write_forcing(input_dir, nrows=1, ncols=1, hpi=5, end_prec_event=36, sf=3,
         df_meteo = df_PREC.join(df_TA)
         df_meteo = df_meteo.ffill()
         if prec_correction:
-            prec_corr = ecl.precipitation_correction(df_meteo['PREC'].values,
+            prec_corr = precipitation_correction(df_meteo['PREC'].values,
                                                      df_meteo['TA'].values,
                                                      df_meteo.index.month,
                                                      horizontal_shielding=prec_correction)
@@ -529,7 +529,7 @@ def write_forcing_event(input_dir, nrows=1, ncols=1, uniform=True, prec_correcti
         df_meteo = df_PREC.join(df_TA["TA"].to_frame())
         df_meteo = df_meteo.ffill()
         if prec_correction:
-            prec_corr = ecl.precipitation_correction(df_meteo['PREC'].values,
+            prec_corr = precipitation_correction(df_meteo['PREC'].values,
                                                      df_meteo['TA'].values,
                                                      df_meteo.index.month,
                                                      horizontal_shielding=prec_correction)
@@ -574,6 +574,66 @@ def write_forcing_event(input_dir, nrows=1, ncols=1, uniform=True, prec_correcti
             v.attrs['long_name'] = 'Meridonial coordinate'
             v.attrs['units'] = 'meters'
             v[:] = onp.arange(ncols)
+
+
+def precipitation_correction(prec, ta, month, horizontal_shielding="b1"):
+    """Correction of precipitation according to Richter (1995).
+
+    Args
+    ----------
+    prec : onp.ndarray
+        precipitation at time step t (in mm)
+
+    ta : onp.ndarray
+        air temperature at time step t (in celsius)
+
+    month : int
+        month at time step t (in celsius)
+
+    horizontal_shielding : str
+        b1 = open location
+        b2 = slightly protected
+        b3 = moderately protected
+        b4 = strongly protected
+
+    Returns
+    ----------
+    prec_corr : onp.ndarray
+        corrected precipitation at time step t (in mm)
+
+    Reference
+    ----------
+    Richter, D.: Ergebnisse methodischer Untersuchungen zur Korrektur des
+    systematischen Meßfehlers des Hellmann-Niederschlagsmessers, Berichte des
+    Deutschen Wetterdienstes, Selbstverlag des Deutschen Wetterdienstes,
+    Offenbach am Main, 1995.
+    """
+    # precipitation correction
+    LUT_PREC_CORR = pd.DataFrame(index=['summer', 'winter', 'mixed', 'snow'],
+                                 columns=['eps', 'b1', 'b2', 'b3', 'b4'])
+    LUT_PREC_CORR.loc[:, 'eps'] = [0.38, 0.46, 0.55, 0.82]
+    LUT_PREC_CORR.loc[:, 'b1'] = [0.345, 0.34, 0.535, 0.72]
+    LUT_PREC_CORR.loc[:, 'b2'] = [0.31, 0.28, 0.39, 0.51]
+    LUT_PREC_CORR.loc[:, 'b3'] = [0.28, 0.24, 0.305, 0.33]
+    LUT_PREC_CORR.loc[:, 'b4'] = [0.245, 0.19, 0.185, 0.21]
+
+    if (ta <= -0.7):
+        eps = LUT_PREC_CORR.loc['snow', 'eps']
+        b = LUT_PREC_CORR.loc['snow', horizontal_shielding]
+    elif ((ta > -0.7) & (ta < 3.0)):
+        eps = LUT_PREC_CORR.loc['mixed', 'eps']
+        b = LUT_PREC_CORR.loc['mixed', horizontal_shielding]
+    elif ((ta >= 3.0) & (month in [9, 10, 11, 12, 1, 2])):
+        eps = LUT_PREC_CORR.loc['winter', 'eps']
+        b = LUT_PREC_CORR.loc['winter', horizontal_shielding]
+    elif ((ta >= 3.0) & (month in [3, 4, 5, 6, 7, 8])):
+        eps = LUT_PREC_CORR.loc['summer', 'eps']
+        b = LUT_PREC_CORR.loc['summer', horizontal_shielding]
+
+    dprec = b * prec**eps
+    prec_corr = prec + dprec
+
+    return prec_corr
 
 
 def validate(data: pd.DataFrame):

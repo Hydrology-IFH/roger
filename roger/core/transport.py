@@ -3,7 +3,6 @@ from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at
 from roger.core import sas
 from roger import runtime_settings as rs
-import numpy as onp
 
 
 @roger_kernel

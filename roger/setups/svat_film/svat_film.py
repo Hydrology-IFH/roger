@@ -1,12 +1,13 @@
 from pathlib import Path
 import os
 import h5netcdf
+import numpy as onp
+
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
 from roger.core.utilities import _get_row_no
 import roger.lookuptables as lut
-import numpy as onp
 
 
 class SVATFILMSetup(RogerSetup):
@@ -98,7 +99,6 @@ class SVATFILMSetup(RogerSetup):
             "y",
         ],
     )
-    @roger_routine
     def set_grid(self, state):
         vs = state.variables
 
@@ -139,15 +139,11 @@ class SVATFILMSetup(RogerSetup):
     @roger_routine
     def set_parameters_setup(self, state):
         vs = state.variables
-        settings = state.settings
 
         vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
-        vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
         vs.slope = update(vs.slope, at[2:-2, 2:-2], 0)
-        vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope * 100)
-        vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
         vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1350)
-        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 100)
+        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
         vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1000)
         vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.13)
         vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.24)
@@ -171,7 +167,6 @@ class SVATFILMSetup(RogerSetup):
     @roger_routine
     def set_initial_conditions(self, state):
         vs = state.variables
-        settings = state.settings
 
         vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, :vs.taup1], 0)
         vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, :vs.taup1], 0)
@@ -183,15 +178,9 @@ class SVATFILMSetup(RogerSetup):
         vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.4)
         vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.47)
 
-        if settings.enable_crop_phenology:
-            vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :vs.taup1], 0)
-            vs.z_root_crop = update(vs.z_root_crop, at[2:-2, 2:-2, :vs.taup1, 0], 0)
-            vs.update(set_initial_conditions_crops_kernel(state))
-
     @roger_routine
     def set_forcing_setup(self, state):
         vs = state.variables
-        settings = state.settings
 
         vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
         vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
@@ -234,20 +223,20 @@ class SVATFILMSetup(RogerSetup):
             )
             vs.rain_event_sum = update(
                 vs.rain_event_sum,
-                at[2:-2, 2:-2], npx.sum(vs.rain_event, axis=-1),
+                at[2:-2, 2:-2], npx.sum(vs.rain_event[2:-2, 2:-2, :], axis=-1),
             )
             vs.rain_event_csum = update(
                 vs.rain_event_csum,
-                at[2:-2, 2:-2, :], npx.cumsum(vs.rain_event, axis=-1),
+                at[2:-2, 2:-2, :], npx.cumsum(vs.rain_event[2:-2, 2:-2, :], axis=-1),
             )
             # subtract interception storage
             vs.rain_event = update(
                 vs.rain_event,
-                at[2:-2, 2:-2, 0], vs.rain_event[2:-2, 2:-2, 0] - (vs.S_int_top_tot - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot - vs.S_int_ground[2:-2, 2:-2, vs.tau]),
+                at[2:-2, 2:-2, 0], vs.rain_event[2:-2, 2:-2, 0] - (vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau]),
             )
             vs.rain_event = update(
                 vs.rain_event,
-                at[2:-2, 2:-2, 1:], npx.diff(npx.where(npx.cumsum(vs.rain_event, axis=-1) < 0, 0, npx.cumsum(vs.rain_event, axis=-1)), axis=-1),
+                at[2:-2, 2:-2, 1:], npx.diff(npx.where(npx.cumsum(vs.rain_event[2:-2, 2:-2, :], axis=-1) < 0, 0, npx.cumsum(vs.rain_event[2:-2, 2:-2, :], axis=-1)), axis=-1),
             )
             vs.rain_event = update(
                 vs.rain_event,
@@ -432,8 +421,8 @@ def set_forcing_kernel(state):
     mask_noff = (vs.EVENT_ID_FF[:, :, vs.itt] == 0)
     vs.prec = update(vs.prec, at[2:-2, 2:-2], 0)
     vs.prec = update_add(vs.prec, at[2:-2, 2:-2],
-                         npx.where((vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt] >= 1) & ((vs.S_int_top_tot - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot - vs.S_int_ground[2:-2, 2:-2, vs.tau]) > 0),
-                         npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > (vs.S_int_top_tot - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot - vs.S_int_ground[2:-2, 2:-2, vs.tau]), (vs.S_int_top_tot - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot - vs.S_int_ground[2:-2, 2:-2, vs.tau]), vs.PREC[2:-2, 2:-2, vs.itt]), 0))
+                         npx.where((vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt] >= 1) & ((vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau]) > 0),
+                         npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > (vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau]), (vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau]) + (vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau]), vs.PREC[2:-2, 2:-2, vs.itt]), 0))
     vs.prec = update(vs.prec, at[2:-2, 2:-2], npx.where(mask_noff[2:-2, 2:-2], vs.PREC[2:-2, 2:-2, vs.itt], 0))
     vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[2:-2, 2:-2, vs.itt])
     vs.pet = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])

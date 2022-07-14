@@ -1,7 +1,6 @@
 from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, for_loop, at
-import numpy as onp
 
 
 @roger_kernel

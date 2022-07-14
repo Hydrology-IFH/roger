@@ -1,6 +1,5 @@
 from roger import runtime_settings
 from roger.core.operators import numpy as npx, update, at, where
-
 from roger import roger_kernel
 
 

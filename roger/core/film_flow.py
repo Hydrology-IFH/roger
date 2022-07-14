@@ -2,7 +2,6 @@ from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at
 from roger.core.utilities import linear_regression
-import numpy as onp
 
 
 @roger_kernel
@@ -107,19 +106,19 @@ def calc_volume_flux_density(state):
     params_reg = allocate(state.dimensions, ("x", "y", 2))
     idx_reg = update(
         idx_reg,
-        at[2:-2, 2:-2, :], npx.where((itt_event >= idx_rain_25[2:-2, 2:-2, npx.newaxis]) & (itt_event <= idx_rain_75[2:-2, 2:-2, npx.newaxis]), itt_event, 0),
+        at[2:-2, 2:-2, :], npx.where((itt_event[2:-2, 2:-2, :] >= idx_rain_25[2:-2, 2:-2, npx.newaxis]) & (itt_event[2:-2, 2:-2, :] <= idx_rain_75[2:-2, 2:-2, npx.newaxis]), itt_event[2:-2, 2:-2, :], 0),
     )
     rain_init = update(
         rain_init,
-        at[2:-2, 2:-2], npx.max(npx.where(vs.rain_event_csum <= 0.25 * vs.rain_event_sum[2:-2, 2:-2, npx.newaxis], vs.rain_event_csum, 0), axis=-1),
+        at[2:-2, 2:-2], npx.max(npx.where(vs.rain_event_csum[2:-2, 2:-2, :] <= 0.25 * vs.rain_event_sum[2:-2, 2:-2, npx.newaxis], vs.rain_event_csum[2:-2, 2:-2, :], 0), axis=-1),
     )
     rain_reg = update(
         rain_reg,
-        at[2:-2, 2:-2, :], npx.where((itt_event >= idx_rain_25[2:-2, 2:-2, npx.newaxis]) & (itt_event <= idx_rain_75[2:-2, 2:-2, npx.newaxis]), vs.rain_event, 0),
+        at[2:-2, 2:-2, :], npx.where((itt_event[2:-2, 2:-2, :] >= idx_rain_25[2:-2, 2:-2, npx.newaxis]) & (itt_event[2:-2, 2:-2, :] <= idx_rain_75[2:-2, 2:-2, npx.newaxis]), vs.rain_event[2:-2, 2:-2, :], 0),
     )
     rain_csum_reg = update(
         rain_csum_reg,
-        at[2:-2, 2:-2, :], npx.cumsum(rain_reg, axis=-1) + rain_init[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.cumsum(rain_reg[2:-2, 2:-2, :], axis=-1) + rain_init[2:-2, 2:-2, npx.newaxis],
     )
     # linear regression to determine volume flux density
     params_reg = update(
@@ -139,7 +138,7 @@ def calc_volume_flux_density(state):
 
     vs.ts_ff = update(
         vs.ts_ff,
-        at[2:-2, 2:-2, vs.event_no_ff - 1], vs.tb_ff[2:-2, 2:-2, vs.event_no_ff - 1] + (vs.rain_event_sum - params_reg[2:-2, 2:-2, 1])/params_reg[2:-2, 2:-2, 0],
+        at[2:-2, 2:-2, vs.event_no_ff - 1], vs.tb_ff[2:-2, 2:-2, vs.event_no_ff - 1] + (vs.rain_event_sum[2:-2, 2:-2] - params_reg[2:-2, 2:-2, 1])/params_reg[2:-2, 2:-2, 0],
     )
 
     return KernelOutput(
@@ -181,7 +180,7 @@ def calc_rain_pulse(state):
 
     vs.rain_event_ff = update(
         vs.rain_event_ff,
-        at[2:-2, 2:-2, :], npx.where((itt_event >= tb[2:-2, 2:-2, npx.newaxis]) & (itt_event <= ts[2:-2, 2:-2, npx.newaxis]), vs.rain_int_ff[2:-2, 2:-2, vs.event_no_ff - 1, npx.newaxis], 0),
+        at[2:-2, 2:-2, :], npx.where((itt_event[2:-2, 2:-2, :] >= tb[2:-2, 2:-2, npx.newaxis]) & (itt_event[2:-2, 2:-2, :] <= ts[2:-2, 2:-2, npx.newaxis]), vs.rain_int_ff[2:-2, 2:-2, vs.event_no_ff - 1, npx.newaxis], 0),
     )
 
     return KernelOutput(
@@ -430,7 +429,7 @@ def calc_abstraction(state):
     # update subsoil storage after abtraction from film flow
     vs.S_fp_ss = update_add(
         vs.S_fp_ss,
-        at[2:-2, 2:-2], npx.sum(vs.ff_abs_ss, axis=-1) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.sum(vs.ff_abs_ss[2:-2, 2:-2], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # subsoil fine pore excess fills subsoil large pores
@@ -544,7 +543,7 @@ def calculate_film_flow(state):
 
     vs.itt_event_ff = update(
         vs.itt_event_ff,
-        at[:], npx.where(vs.itt - vs.event_start_ff <= settings.nittevent_ff, vs.itt - vs.event_start_ff, settings.nittevent_ff),
+        at[:], npx.where(vs.itt - vs.event_start_ff < settings.nittevent_ff, vs.itt - vs.event_start_ff, settings.nittevent_ff - 1),
     )
 
     arr_itt = allocate(state.dimensions, ("x", "y"))

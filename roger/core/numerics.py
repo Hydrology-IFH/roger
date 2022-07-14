@@ -1355,7 +1355,7 @@ def sanity_check(state):
         check = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] + vs.cpr_ss[2:-2, 2:-2], atol=1e-02)))
 
     elif settings.enable_film_flow and not settings.enable_offline_transport:
-        pass
+        check = True
 
     elif not settings.enable_lateral_flow and not settings.enable_groundwater_boundary and not settings.enable_groundwater and not settings.enable_offline_transport:
         check = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2], atol=1e-02)))

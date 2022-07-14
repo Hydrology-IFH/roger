@@ -49,12 +49,3 @@ WINTER_MULTI_YEAR_CROPS_INIT = onp.array([572], dtype=int)
 WINTER_MULTI_YEAR_CROPS_CONT = onp.array([574], dtype=int)
 SUMMER_MULTI_YEAR_CROPS_INIT = onp.array([571], dtype=int)
 SUMMER_MULTI_YEAR_CROPS_CONT = onp.array([573], dtype=int)
-
-# precipitation correction
-LUT_PREC_CORR = pd.DataFrame(index=['summer', 'winter', 'mixed', 'snow'],
-                             columns=['eps', 'b1', 'b2', 'b3', 'b4'])
-LUT_PREC_CORR.loc[:, 'eps'] = [0.38, 0.46, 0.55, 0.82]
-LUT_PREC_CORR.loc[:, 'b1'] = [0.345, 0.34, 0.535, 0.72]
-LUT_PREC_CORR.loc[:, 'b2'] = [0.31, 0.28, 0.39, 0.51]
-LUT_PREC_CORR.loc[:, 'b3'] = [0.28, 0.24, 0.305, 0.33]
-LUT_PREC_CORR.loc[:, 'b4'] = [0.245, 0.19, 0.185, 0.21]
