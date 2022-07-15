@@ -1,6 +1,5 @@
 jaxlib
 jax
-pyyaml
 matplotlib
 seaborn
 xarray

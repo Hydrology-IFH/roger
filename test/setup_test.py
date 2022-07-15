@@ -22,27 +22,3 @@ def test_setup_svat_float_types(float_type):
                float_type=float_type)
     sim.setup()
     sim.run()
-
-
-def test_setup_svat_transport():
-    pass
-
-
-def test_setup_svat_crop():
-    pass
-
-
-def test_setup_svat_crop_transport():
-    pass
-
-
-def test_setup_svat_film():
-    pass
-
-
-def test_setup_dist():
-    pass
-
-
-def test_setup_dist_event():
-    pass

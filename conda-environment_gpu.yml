@@ -15,5 +15,3 @@ dependencies:
     - loguru
     - tqdm
     - cython
-    - pip:
-        - diag-eff

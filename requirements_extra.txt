@@ -1,8 +1,5 @@
-pyyaml
 matplotlib
 seaborn
-sphinx_rtd_theme
 xarray
 cftime
 salib
-# pip install diag-eff

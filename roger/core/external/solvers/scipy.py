@@ -49,13 +49,13 @@ class SciPySolver(LinearSolver):
         )
 
         if info > 0:
-            logger.warning("Streamfunction solver did not converge after {} iterations", info)
+            logger.warning("Solver did not converge after {} iterations", info)
 
         return npx.asarray(linear_solution, dtype=orig_dtype).reshape(orig_shape)
 
     def solve(self, state, rhs, x0, boundary_val=None):
         """
-        Main solver for streamfunction. Solves a 2D Poisson equation. Uses scipy.sparse.linalg
+        Main solver. Solves a 2D Poisson equation. Uses scipy.sparse.linalg
         linear solvers.
 
         Arguments:

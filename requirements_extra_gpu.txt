@@ -1,4 +1,3 @@
-pyyaml
 matplotlib
 seaborn
 xarray

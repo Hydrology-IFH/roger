@@ -17,5 +17,3 @@ dependencies:
     - cython
     - h5netcdf
     - h5py
-    - pip:
-        - diag-eff

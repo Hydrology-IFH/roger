@@ -18,6 +18,7 @@ def _normalize(*arrays):
 class RestartSetup(SVATSetup):
     pass
 
+
 def test_restart(tmpdir):
     from roger.tools.make_toy_setup import make_setup  # noqa: E402
     os.chdir(tmpdir)
