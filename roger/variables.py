@@ -97,7 +97,7 @@ DIM_TO_SHAPE_VAR = {
     "y": "ny",
     "z": "nz",
     "t": "nitt",
-    "timesteps": 3,
+    "timesteps": 2,
     "timesteps_event": "nittevent",
     "timesteps_event_p1": "nittevent_p1",
     "timesteps_event_ff": "nittevent_ff",
