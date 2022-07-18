@@ -273,7 +273,7 @@ def calc_infiltration(state):
     )
     vs.prec = update_add(
         vs.prec,
-        at[2:-2, 2:-2], vs.rain_ff[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau], vs.rain_ff[2:-2, 2:-2],
     )
     vs.S_f = update_add(
         vs.S_f,

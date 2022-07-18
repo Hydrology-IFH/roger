@@ -286,7 +286,7 @@ VARIABLES = {
     ),
     "event_id": Variable(
         "Event number",
-        None,
+        CATCH_GRID + TIMESTEPS,
         "",
         "Event number",
         dtype="int64",
@@ -2722,7 +2722,7 @@ VARIABLES = {
     # precipitation variables
     "prec": Variable(
         "precipitation",
-        CATCH_GRID,
+        CATCH_GRID + TIMESTEPS,
         "mm/dt",
         "precipitation",
     ),

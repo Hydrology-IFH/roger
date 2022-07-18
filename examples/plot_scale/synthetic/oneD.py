@@ -196,18 +196,22 @@ def main():
 
         @roger_routine
         def set_forcing_setup(self, state):
-            vs = state.variables
-
-            vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
-            vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
-            vs.PET = update(vs.PET, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc'))
-            vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc'))
+            pass
 
         @roger_routine
         def set_forcing(self, state):
             vs = state.variables
 
-            vs.update(set_forcing_kernel(state))
+            vs.prec = update(vs.prec, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.ta = update(vs.ta, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.pet = update(vs.pet, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.event_id = update(vs.event_id, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+
+            vs.dt_secs = vs.DT_SECS[vs.itt]
+            vs.dt = vs.DT[vs.itt]
+            vs.year = vs.YEAR[vs.itt]
+            vs.month = vs.MONTH[vs.itt]
+            vs.doy = vs.DOY[vs.itt]
 
         @roger_routine
         def set_diagnostics(self, state):
@@ -396,33 +400,6 @@ def main():
         )
 
     @roger_kernel
-    def set_forcing_kernel(state):
-        vs = state.variables
-
-        vs.prec = update(vs.prec, at[2:-2, 2:-2], vs.PREC[2:-2, 2:-2, vs.itt])
-        vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[2:-2, 2:-2, vs.itt])
-        vs.pet = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
-        vs.pet_res = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
-
-        vs.dt_secs = vs.DT_SECS[vs.itt]
-        vs.dt = vs.DT[vs.itt]
-        vs.year = vs.YEAR[vs.itt]
-        vs.month = vs.MONTH[vs.itt]
-        vs.doy = vs.DOY[vs.itt]
-
-        return KernelOutput(
-            prec=vs.prec,
-            ta=vs.ta,
-            pet=vs.pet,
-            pet_res=vs.pet_res,
-            dt=vs.dt,
-            dt_secs=vs.dt_secs,
-            year=vs.year,
-            month=vs.month,
-            doy=vs.doy,
-        )
-
-    @roger_kernel
     def after_timestep_kernel(state):
         vs = state.variables
 
@@ -549,6 +526,14 @@ def main():
         vs.z0 = update(
             vs.z0,
             at[2:-2, 2:-2, vs.taum1], vs.z0[2:-2, 2:-2, vs.tau],
+        )
+        vs.prec = update(
+            vs.prec,
+            at[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau],
+        )
+        vs.event_id = update(
+            vs.event_id,
+            at[2:-2, 2:-2, vs.taum1], vs.event_id[2:-2, 2:-2, vs.tau],
         )
         # set to 0 for numerical errors
         vs.S_fp_rz = update(
