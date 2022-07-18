@@ -50,12 +50,6 @@ def main(nsamples, lys_experiment):
                     var_obj = infile.variables[var]
                     return npx.array(var_obj)
 
-        def _get_nittevent(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['nitt_event']
-                return onp.int32(onp.array(var_obj)[0])
-
         def _get_nitt(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
@@ -87,8 +81,6 @@ def main(nsamples, lys_experiment):
 
             settings.nx, settings.ny, settings.nz = nsamples, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
-            settings.nittevent = self._get_nittevent(self._input_dir, 'forcing.nc')
-            settings.nittevent_p1 = settings.nittevent + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
             # lysimeter surface 1 square meter (1m diameter)
@@ -238,20 +230,45 @@ def main(nsamples, lys_experiment):
 
         @roger_routine
         def set_forcing_setup(self, state):
-            vs = state.variables
+            pass
 
-            vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
-            vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
-            vs.PET = update(vs.PET, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc'))
-            vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc'))
-            vs.TA_MIN = update(vs.TA_MIN, at[2:-2, 2:-2, :], self._read_var_from_nc("TA_min", self._input_dir, 'forcing.nc'))
-            vs.TA_MAX = update(vs.TA_MAX, at[2:-2, 2:-2, :], self._read_var_from_nc("TA_max", self._input_dir, 'forcing.nc'))
-
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "DT_SECS",
+                "DT",
+                "dt_secs",
+                "dt",
+                "itt",
+                "prec",
+                "ta",
+                "ta_min",
+                "ta_max",
+                "pet"
+                "event_id",
+                "YEAR",
+                "MONTH",
+                "DOY",
+                "year",
+                "month",
+                "doy",
+            ],
+        )
         def set_forcing(self, state):
             vs = state.variables
 
-            vs.update(set_forcing_kernel(state))
+            vs.prec = update(vs.prec, at[2:-2, 2:-2], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2], self._read_var_from_nc("TA_MIN", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.ta_max = update(vs.ta_max, at[2:-2, 2:-2], self._read_var_from_nc("TA_MAX", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.pet = update(vs.pet, at[2:-2, 2:-2], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.event_id = update(vs.event_id, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc')[vs.itt])
+
+            vs.dt_secs = vs.DT_SECS[vs.itt]
+            vs.dt = vs.DT[vs.itt]
+            vs.year = vs.YEAR[vs.itt]
+            vs.month = vs.MONTH[vs.itt]
+            vs.doy = vs.DOY[vs.itt]
 
         @roger_routine
         def set_diagnostics(self, state):
@@ -484,50 +501,6 @@ def main(nsamples, lys_experiment):
         )
 
     @roger_kernel
-    def set_forcing_kernel(state):
-        vs = state.variables
-
-        vs.prec = update(vs.prec, at[:, :], vs.PREC[:, :, vs.itt])
-        vs.ta = update(vs.ta, at[:, :, vs.tau], vs.TA[:, :, vs.itt])
-        vs.pet = update(vs.pet, at[:, :], vs.PET[:, :, vs.itt])
-        vs.pet_res = update(vs.pet, at[:, :], vs.PET[:, :, vs.itt])
-        vs.ta_min = update(vs.ta_min, at[:, :, vs.tau], vs.TA_MIN[:, :, vs.itt])
-        vs.ta_max = update(vs.ta_max, at[:, :, vs.tau], vs.TA_MAX[:, :, vs.itt])
-
-        vs.dt_secs = vs.DT_SECS[vs.itt]
-        vs.dt = vs.DT[vs.itt]
-        vs.year = vs.YEAR[vs.itt]
-        vs.month = vs.MONTH[vs.itt]
-        vs.doy = vs.DOY[vs.itt]
-
-        # reset fluxes at beginning of time step
-        vs.q_sur = update(
-            vs.q_sur,
-            at[:, :], 0,
-        )
-
-        vs.q_hof = update(
-            vs.q_hof,
-            at[:, :], 0,
-        )
-
-        return KernelOutput(
-            prec=vs.prec,
-            ta=vs.ta,
-            ta_min=vs.ta_min,
-            ta_max=vs.ta_max,
-            pet=vs.pet,
-            pet_res=vs.pet_res,
-            dt=vs.dt,
-            dt_secs=vs.dt_secs,
-            year=vs.year,
-            month=vs.month,
-            doy=vs.doy,
-            q_sur=vs.q_sur,
-            q_hof=vs.q_hof,
-        )
-
-    @roger_kernel
     def after_timestep_kernel(state):
         vs = state.variables
 
@@ -607,14 +580,6 @@ def main(nsamples, lys_experiment):
             vs.y_sc,
             at[2:-2, 2:-2, vs.taum1], vs.y_sc[2:-2, 2:-2, vs.tau],
         )
-        vs.prec_event_sum = update(
-            vs.prec_event_sum,
-            at[2:-2, 2:-2, vs.taum1], vs.prec_event_sum[2:-2, 2:-2, vs.tau],
-        )
-        vs.t_event_sum = update(
-            vs.t_event_sum,
-            at[2:-2, 2:-2, vs.taum1], vs.t_event_sum[2:-2, 2:-2, vs.tau],
-        )
         vs.theta_rz = update(
             vs.theta_rz,
             at[2:-2, 2:-2, vs.taum1], vs.theta_rz[2:-2, 2:-2, vs.tau],
@@ -672,6 +637,14 @@ def main(nsamples, lys_experiment):
             vs.S_lp_ss,
             at[2:-2, 2:-2], npx.where((vs.S_lp_ss[2:-2, 2:-2] > -1e-6) & (vs.S_lp_ss[2:-2, 2:-2] < 0), 0, vs.S_lp_ss[2:-2, 2:-2]),
         )
+        vs.prec = update(
+            vs.prec,
+            at[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau],
+        )
+        vs.event_id = update(
+            vs.event_id,
+            at[2:-2, 2:-2, vs.taum1], vs.event_id[2:-2, 2:-2, vs.tau],
+        )
 
         return KernelOutput(
             ta=vs.ta,
@@ -693,8 +666,6 @@ def main(nsamples, lys_experiment):
             z_wf_t1=vs.z_wf_t1,
             y_mp=vs.y_mp,
             y_sc=vs.y_sc,
-            t_event_sum=vs.t_event_sum,
-            prec_event_sum=vs.prec_event_sum,
             theta_rz=vs.theta_rz,
             theta_ss=vs.theta_ss,
             theta=vs.theta,
@@ -705,6 +676,8 @@ def main(nsamples, lys_experiment):
             k_ss=vs.k_ss,
             k=vs.k,
             z0=vs.z0,
+            prec=vs.prec,
+            event_id=vs.event_id,
             S_fp_rz=vs.S_fp_rz,
             S_lp_rz=vs.S_lp_rz,
             S_fp_ss=vs.S_fp_ss,

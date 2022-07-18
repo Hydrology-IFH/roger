@@ -1183,7 +1183,7 @@ def calculate_crop_phenology(state):
             vs.update(update_basal_transp_coeff(state))
             vs.update(update_basal_evap_coeff(state))
 
-        if (vs.event_id == 0):
+        if npx.all(vs.event_id[2:-2, 2:-2, vs.tau] == 0):
             vs.update(update_lu_id(state))
             vs.update(update_ground_cover(state))
             vs.update(update_k_stress_transp(state))

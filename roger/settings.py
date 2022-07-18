@@ -28,8 +28,6 @@ SETTINGS = {
     "nevent_ff": Setting(1, int, "Number of films"),
     "nittevent_ff": Setting(1, int, "Number of total iterations of a single film flow event"),
     "nittevent_ff_p1": Setting(2, int, "Number of total iterations of a single film flow event for cumulated values"),
-    "nittevent": Setting(1, int, "Number of iterations within event"),
-    "nittevent_p1": Setting(2, int, "Number of iterations within event for cumulated values"),
     "ages": Setting(1, int, "Number of water ages"),
     "nages": Setting(1, int, "Number of water ages to calculate cumulated distributions"),
     "ncrops": Setting(1, int, "Number of crops per year"),

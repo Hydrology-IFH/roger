@@ -14,7 +14,7 @@ def main():
     import roger.lookuptables as lut
     from roger.tools.setup import write_forcing
 
-    class SVATFILMSetup(RogerSetup):
+    class SVATFILMEVENTSetup(RogerSetup):
         """A SVAT model including gravity-driven infiltration and percolation.
         """
         _base_path = Path(__file__).parent
@@ -34,41 +34,22 @@ def main():
                 var_obj = infile.variables[var]
                 return npx.array(var_obj)
 
-        def _get_nittevent(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['nitt_event']
-                return onp.int32(onp.array(var_obj)[0])
-
         def _get_nitt(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables['Time']
                 return len(onp.array(var_obj))
 
-        def _get_runlen(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['Time']
-                return onp.array(var_obj)[-1] * 60 * 60
-
-        def _get_nevent_ff(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['nevent_ff']
-                return onp.int32(onp.array(var_obj)[0])
-
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = "SVATFILM"
+            settings.identifier = "SVATFILMEVENT"
 
             settings.nx, settings.ny, settings.nz = 1, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
-            settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
-            settings.nittevent_ff = 5 * 24 * 6
+            settings.runlen = settings.nitt * 10 * 60
             settings.nittevent_ff_p1 = settings.nittevent_ff + 1
-            settings.nevent_ff = self._get_nevent_ff(self._input_dir, 'forcing.nc')
+            settings.nevent_ff = 1
 
             settings.dx = 1
             settings.dy = 1
@@ -87,14 +68,8 @@ def main():
             local_variables=[
                 "DT_SECS",
                 "DT",
-                "YEAR",
-                "MONTH",
-                "DOY",
                 "dt_secs",
                 "dt",
-                "year",
-                "month",
-                "doy",
                 "t",
                 "itt",
                 "x",
@@ -103,19 +78,14 @@ def main():
         )
         def set_grid(self, state):
             vs = state.variables
+            settings = state.settings
 
             # temporal grid
             vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", self._input_dir, 'forcing.nc'))
             vs.DT = update(vs.DT, at[:], vs.DT_SECS / (60 * 60))
-            vs.YEAR = update(vs.YEAR, at[:], self._read_var_from_nc("year", self._input_dir, 'forcing.nc'))
-            vs.MONTH = update(vs.MONTH, at[:], self._read_var_from_nc("month", self._input_dir, 'forcing.nc'))
-            vs.DOY = update(vs.DOY, at[:], self._read_var_from_nc("doy", self._input_dir, 'forcing.nc'))
             vs.dt_secs = vs.DT_SECS[vs.itt]
             vs.dt = vs.DT[vs.itt]
-            vs.year = vs.YEAR[vs.itt]
-            vs.month = vs.MONTH[vs.itt]
-            vs.doy = vs.DOY[vs.itt]
-            vs.t = update(vs.t, at[:], npx.cumsum(vs.DT))
+            vs.t = update(vs.t, at[:], npx.linspace(0, vs.dt * settings.nitt, num=settings.nitt))
             # spatial grid
             dx = allocate(state.dimensions, ("x"))
             dx = update(dx, at[:], 1)
@@ -157,10 +127,7 @@ def main():
 
         @roger_routine
         def set_parameters(self, state):
-            vs = state.variables
-
-            if (vs.MONTH[vs.itt] != vs.MONTH[vs.itt - 1]) & (vs.itt > 1):
-                vs.update(set_parameters_monthly_kernel(state))
+            pass
 
         @roger_routine
         def set_initial_conditions_setup(self, state):
@@ -187,8 +154,8 @@ def main():
             vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
             vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
             vs.PET = update(vs.PET, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc'))
-            vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc'))
-            vs.EVENT_ID_FF = update(vs.EVENT_ID_FF, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID_FF", self._input_dir, 'forcing.nc'))
+            vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, :], 1)
+            vs.EVENT_ID_FF = update(vs.EVENT_ID_FF, at[2:-2, 2:-2, :], 1)
 
         @roger_routine
         def set_forcing(self, state):
@@ -258,160 +225,6 @@ def main():
             vs.update(after_timestep_kernel(state))
             vs.update(after_timestep_film_flow_kernel(state))
 
-    @roger_kernel
-    def set_parameters_monthly_kernel(state):
-        vs = state.variables
-
-        # land use dependent upper interception storage
-        def loop_body_S_int_top_tot(i, S_int_top_tot):
-            arr_i = allocate(state.dimensions, ("x", "y"))
-            arr_i = update(
-                arr_i,
-                at[:, :], i * (vs.lu_id == i),
-            )
-            mask = (vs.lu_id == i) & npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
-            row_no = _get_row_no(vs.lut_ilu[:, 0], i)
-            S_int_top_tot = update(
-                S_int_top_tot,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_ilu[row_no, vs.month], 0),
-            )
-
-            return S_int_top_tot
-
-        S_int_top_tot = allocate(state.dimensions, ("x", "y"))
-
-        S_int_top_tot = for_loop(10, 17, loop_body_S_int_top_tot, S_int_top_tot)
-        mask = npx.isin(vs.lu_id, npx.array([10, 11, 12, 15, 16]))
-        vs.S_int_top_tot = update(
-            vs.S_int_top_tot,
-            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], S_int_top_tot[2:-2, 2:-2], vs.S_int_top_tot[2:-2, 2:-2]),
-        )
-
-        # land use dependent lower interception storage
-        S_int_ground_tot = allocate(state.dimensions, ("x", "y"))
-
-        def loop_body_S_int_ground_tot(i, S_int_ground_tot):
-            arr_i = allocate(state.dimensions, ("x", "y"))
-            arr_i = update(
-                arr_i,
-                at[:, :], i * vs.maskCatch,
-            )
-            mask = (vs.lu_id == i) & ~npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
-            row_no = _get_row_no(vs.lut_ilu[:, 0], i)
-            S_int_ground_tot = update_add(
-                S_int_ground_tot,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_ilu[row_no, vs.month], 0),
-            )
-
-            return S_int_ground_tot
-
-        def loop_body_S_int_ground_tot_trees(i, S_int_ground_tot):
-            arr_i = allocate(state.dimensions, ("x", "y"))
-            arr_i = update(
-                arr_i,
-                at[:, :], i * vs.maskCatch,
-            )
-            mask = (vs.lu_id == i) & npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
-            S_int_ground_tot = update_add(
-                S_int_ground_tot,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 1, 0),
-            )
-
-            return S_int_ground_tot
-
-        S_int_ground_tot = update(
-            S_int_ground_tot,
-            at[:, :], for_loop(0, 51, loop_body_S_int_ground_tot, S_int_ground_tot),
-        )
-        S_int_ground_tot = update(
-            S_int_ground_tot,
-            at[:, :], for_loop(10, 17, loop_body_S_int_ground_tot_trees, S_int_ground_tot),
-        )
-
-        mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
-        vs.S_int_ground_tot = update(
-            vs.S_int_ground_tot,
-            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], S_int_ground_tot[2:-2, 2:-2], vs.S_int_ground_tot[2:-2, 2:-2]),
-        )
-
-        # land use dependent ground cover (canopy cover)
-        ground_cover = allocate(state.dimensions, ("x", "y"))
-
-        def loop_body_ground_cover(i, ground_cover):
-            mask = (vs.lu_id == i)
-            row_no = _get_row_no(vs.lut_gc[:, 0], i)
-            ground_cover = update_add(
-                ground_cover,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_gc[row_no, vs.month], 0),
-            )
-
-            return ground_cover
-
-        ground_cover = for_loop(0, 51, loop_body_ground_cover, ground_cover)
-
-        mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
-        vs.ground_cover = update(
-            vs.ground_cover,
-            at[2:-2, 2:-2, vs.tau], npx.where(mask[2:-2, 2:-2], ground_cover[2:-2, 2:-2], vs.ground_cover[2:-2, 2:-2, vs.tau]),
-        )
-
-        # land use dependent transpiration coeffcient
-        basal_transp_coeff = allocate(state.dimensions, ("x", "y"))
-
-        def loop_body_basal_transp_coeff(i, basal_transp_coeff):
-            mask = (vs.lu_id == i)
-            row_no = _get_row_no(vs.lut_gc[:, 0], i)
-            basal_transp_coeff = update_add(
-                basal_transp_coeff,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1], 0),
-            )
-
-            return basal_transp_coeff
-
-        basal_transp_coeff = update(
-            basal_transp_coeff,
-            at[:, :], where(vs.maskRiver | vs.maskLake, 0, for_loop(0, 51, loop_body_basal_transp_coeff, basal_transp_coeff)),
-        )
-
-        mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
-        vs.basal_transp_coeff = update(
-            vs.basal_transp_coeff,
-            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], basal_transp_coeff[2:-2, 2:-2], vs.basal_transp_coeff[2:-2, 2:-2]),
-        )
-
-        # land use dependent evaporation coeffcient
-        basal_evap_coeff = allocate(state.dimensions, ("x", "y"))
-
-        def loop_body_basal_evap_coeff(i, basal_evap_coeff):
-            mask = (vs.lu_id == i)
-            row_no = _get_row_no(vs.lut_gc[:, 0], i)
-            basal_evap_coeff = update_add(
-                basal_evap_coeff,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 1 - ((vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1]) * vs.lut_gcm[row_no, 1]), 0),
-            )
-
-            return basal_evap_coeff
-
-        basal_evap_coeff = for_loop(0, 51, loop_body_basal_evap_coeff, basal_evap_coeff)
-
-        basal_evap_coeff = update(
-            basal_evap_coeff,
-            at[:, :], where(vs.maskRiver | vs.maskLake, 1, basal_evap_coeff),
-        )
-
-        mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
-        vs.basal_evap_coeff = update(
-            vs.basal_evap_coeff,
-            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], basal_evap_coeff[2:-2, 2:-2], vs.basal_evap_coeff[2:-2, 2:-2]),
-        )
-
-        return KernelOutput(
-            S_int_top_tot=vs.S_int_top_tot,
-            S_int_ground_tot=vs.S_int_ground_tot,
-            ground_cover=vs.ground_cover,
-            basal_transp_coeff=vs.basal_transp_coeff,
-            basal_evap_coeff=vs.basal_evap_coeff
-        )
 
     @roger_kernel
     def set_forcing_kernel(state):
@@ -458,6 +271,7 @@ def main():
             q_sur=vs.q_sur,
             q_hof=vs.q_hof,
         )
+
 
     @roger_kernel
     def after_timestep_kernel(state):
@@ -622,6 +436,7 @@ def main():
             z0=vs.z0,
         )
 
+
     @roger_kernel
     def after_timestep_film_flow_kernel(state):
         vs = state.variables
@@ -660,7 +475,7 @@ def main():
             z_pf=vs.z_pf,
         )
 
-    model = SVATFILMSetup()
+    model = SVATFILMEVENTSetup()
     path_input = model._base_path / "input"
     model._set_input_dir(path_input)
     write_forcing(path_input, enable_film_flow=True, z_soil=1350, a=0.19)

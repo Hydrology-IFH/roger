@@ -36,23 +36,17 @@ class SVATSetup(RogerSetup):
             var_obj = infile.variables[var]
             return npx.array(var_obj)
 
-    def _get_nittevent(self, path_dir, file):
-        nc_file = path_dir / file
-        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables['nitt_event']
-            return onp.int32(onp.array(var_obj)[0])
-
     def _get_nitt(self, path_dir, file):
         nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables['time']
+            var_obj = infile.variables['Time']
             return len(onp.array(var_obj))
 
     def _get_runlen(self, path_dir, file):
         nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-            var_obj = infile.variables['time']
-            return onp.array(var_obj)[-1] * 60 * 60 + 24 * 60 * 60
+            var_obj = infile.variables['Time']
+            return onp.array(var_obj)[-1] * 60 * 60
 
     @roger_routine
     def set_settings(self, state):
@@ -60,10 +54,8 @@ class SVATSetup(RogerSetup):
         settings.identifier = "SVAT"
 
         settings.nx, settings.ny, settings.nz = 1, 1, 1
-        settings.nitt = self._get_nitt(self._input_dir, "forcing.nc")
-        settings.nittevent = self._get_nittevent(self._input_dir, "forcing.nc")
-        settings.nittevent_p1 = settings.nittevent + 1
-        settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
+        settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
+        settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
         # lysimeter surface 3.14 square meter (2m diameter)
         settings.dx = 2
@@ -76,34 +68,16 @@ class SVATSetup(RogerSetup):
 
         settings.enable_macropore_lower_boundary_condition = False
 
-    @roger_routine(
-        dist_safe=False,
-        local_variables=[
-            "DT_SECS",
-            "DT",
-            "YEAR",
-            "MONTH",
-            "DOY",
-            "dt_secs",
-            "dt",
-            "year",
-            "month",
-            "doy",
-            "t",
-            "itt",
-            "x",
-            "y",
-        ],
-    )
+    @roger_routine
     def set_grid(self, state):
         vs = state.variables
 
         # temporal grid
-        vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", self._input_dir, "forcing.nc"))
+        vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", self._input_dir, 'forcing.nc'))
         vs.DT = update(vs.DT, at[:], vs.DT_SECS / (60 * 60))
-        vs.YEAR = update(vs.YEAR, at[:], self._read_var_from_nc("year", self._input_dir, "forcing.nc"))
-        vs.MONTH = update(vs.MONTH, at[:], self._read_var_from_nc("month", self._input_dir, "forcing.nc"))
-        vs.DOY = update(vs.DOY, at[:], self._read_var_from_nc("doy", self._input_dir, "forcing.nc"))
+        vs.YEAR = update(vs.YEAR, at[:], self._read_var_from_nc("year", self._input_dir, 'forcing.nc'))
+        vs.MONTH = update(vs.MONTH, at[:], self._read_var_from_nc("month", self._input_dir, 'forcing.nc'))
+        vs.DOY = update(vs.DOY, at[:], self._read_var_from_nc("doy", self._input_dir, 'forcing.nc'))
         vs.dt_secs = vs.DT_SECS[vs.itt]
         vs.dt = vs.DT[vs.itt]
         vs.year = vs.YEAR[vs.itt]
@@ -140,12 +114,12 @@ class SVATSetup(RogerSetup):
         vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
         vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
         vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
-        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
-        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1300)
-        vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.16)
-        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.2)
-        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.24)
-        vs.ks = update(vs.ks, at[2:-2, 2:-2], 9)
+        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 201)
+        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1314)
+        vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.32)
+        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.1)
+        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2],  0.06)
+        vs.ks = update(vs.ks, at[2:-2, 2:-2], 50)
         vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
     @roger_routine
@@ -163,37 +137,52 @@ class SVATSetup(RogerSetup):
     def set_initial_conditions(self, state):
         vs = state.variables
 
-        vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
-        vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
         vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.46)
         vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.44)
 
     @roger_routine
     def set_forcing_setup(self, state):
-        vs = state.variables
+        pass
 
-        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, "forcing.nc"))
-        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, "forcing.nc"))
-        vs.PET = update(vs.PET, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self._input_dir, "forcing.nc"))
-        vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID", self._input_dir, "forcing.nc"))
-
-    @roger_routine
+    @roger_routine(
+        dist_safe=False,
+        local_variables=[
+            "DT_SECS",
+            "DT",
+            "dt_secs",
+            "dt",
+            "itt",
+            "prec",
+            "ta",
+            "pet"
+            "event_id",
+            "YEAR",
+            "MONTH",
+            "DOY",
+            "year",
+            "month",
+            "doy",
+        ],
+    )
     def set_forcing(self, state):
         vs = state.variables
 
-        vs.update(set_forcing_kernel(state))
+        vs.prec = update(vs.prec, at[2:-2, 2:-2], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+        vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+        vs.pet = update(vs.pet, at[2:-2, 2:-2], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+        vs.event_id = update(vs.event_id, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc')[vs.itt])
+
+        vs.dt_secs = vs.DT_SECS[vs.itt]
+        vs.dt = vs.DT[vs.itt]
+        vs.year = vs.YEAR[vs.itt]
+        vs.month = vs.MONTH[vs.itt]
+        vs.doy = vs.DOY[vs.itt]
 
     @roger_routine
     def set_diagnostics(self, state):
         diagnostics = state.diagnostics
-        settings = state.settings
 
-        diagnostics["rates"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS"]
+        diagnostics["rates"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "rain_top", "snow_top", "snow_melt"]
         diagnostics["rates"].output_frequency = 24 * 60 * 60
         diagnostics["rates"].sampling_frequency = 1
 
@@ -201,9 +190,8 @@ class SVATSetup(RogerSetup):
                                                    "S_pwp_rz", "S_fc_rz",
                                                    "S_sat_rz", "S_pwp_ss",
                                                    "S_fc_ss", "S_sat_ss",
-                                                   "theta_rz", "theta_ss", "theta"]
-        if settings.enable_crop_phenology:
-            diagnostics["collect"].output_variables += ["re_rg", "re_rl", "z_root", "ground_cover"]
+                                                   "theta_rz", "theta_ss", "theta",
+                                                   "S_snow", "S_lp_rz", "S_lp_ss"]
         diagnostics["collect"].output_frequency = 24 * 60 * 60
         diagnostics["collect"].sampling_frequency = 1
 
@@ -227,13 +215,13 @@ def set_parameters_monthly_kernel(state):
         arr_i = allocate(state.dimensions, ("x", "y"))
         arr_i = update(
             arr_i,
-            at[2:-2, 2:-2], i * (vs.lu_id == i),
+            at[:, :], i * (vs.lu_id == i),
         )
         mask = (vs.lu_id == i) & npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
         row_no = _get_row_no(vs.lut_ilu[:, 0], i)
         S_int_top_tot = update(
             S_int_top_tot,
-            at[2:-2, 2:-2], npx.where(mask, vs.lut_ilu[row_no, vs.month], 0),
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_ilu[row_no, vs.month], 0),
         )
 
         return S_int_top_tot
@@ -244,7 +232,7 @@ def set_parameters_monthly_kernel(state):
     mask = npx.isin(vs.lu_id, npx.array([10, 11, 12, 15, 16]))
     vs.S_int_top_tot = update(
         vs.S_int_top_tot,
-        at[2:-2, 2:-2], npx.where(mask, S_int_top_tot, vs.S_int_top_tot),
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], S_int_top_tot[2:-2, 2:-2], vs.S_int_top_tot[2:-2, 2:-2]),
     )
 
     # land use dependent lower interception storage
@@ -254,13 +242,13 @@ def set_parameters_monthly_kernel(state):
         arr_i = allocate(state.dimensions, ("x", "y"))
         arr_i = update(
             arr_i,
-            at[2:-2, 2:-2], i * vs.maskCatch,
+            at[:, :], i * vs.maskCatch,
         )
         mask = (vs.lu_id == i) & ~npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
         row_no = _get_row_no(vs.lut_ilu[:, 0], i)
         S_int_ground_tot = update_add(
             S_int_ground_tot,
-            at[2:-2, 2:-2], npx.where(mask, vs.lut_ilu[row_no, vs.month], 0),
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_ilu[row_no, vs.month], 0),
         )
 
         return S_int_ground_tot
@@ -269,29 +257,29 @@ def set_parameters_monthly_kernel(state):
         arr_i = allocate(state.dimensions, ("x", "y"))
         arr_i = update(
             arr_i,
-            at[2:-2, 2:-2], i * vs.maskCatch,
+            at[:, :], i * vs.maskCatch,
         )
         mask = (vs.lu_id == i) & npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
         S_int_ground_tot = update_add(
             S_int_ground_tot,
-            at[2:-2, 2:-2], npx.where(mask, 1, 0),
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 1, 0),
         )
 
         return S_int_ground_tot
 
     S_int_ground_tot = update(
         S_int_ground_tot,
-        at[2:-2, 2:-2], for_loop(0, 51, loop_body_S_int_ground_tot, S_int_ground_tot),
+        at[:, :], for_loop(0, 51, loop_body_S_int_ground_tot, S_int_ground_tot),
     )
     S_int_ground_tot = update(
         S_int_ground_tot,
-        at[2:-2, 2:-2], for_loop(10, 17, loop_body_S_int_ground_tot_trees, S_int_ground_tot),
+        at[:, :], for_loop(10, 17, loop_body_S_int_ground_tot_trees, S_int_ground_tot),
     )
 
     mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
     vs.S_int_ground_tot = update(
         vs.S_int_ground_tot,
-        at[2:-2, 2:-2], npx.where(mask, S_int_ground_tot, vs.S_int_ground_tot),
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], S_int_ground_tot[2:-2, 2:-2], vs.S_int_ground_tot[2:-2, 2:-2]),
     )
 
     # land use dependent ground cover (canopy cover)
@@ -302,7 +290,7 @@ def set_parameters_monthly_kernel(state):
         row_no = _get_row_no(vs.lut_gc[:, 0], i)
         ground_cover = update_add(
             ground_cover,
-            at[2:-2, 2:-2], npx.where(mask, vs.lut_gc[row_no, vs.month], 0),
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_gc[row_no, vs.month], 0),
         )
 
         return ground_cover
@@ -312,7 +300,7 @@ def set_parameters_monthly_kernel(state):
     mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
     vs.ground_cover = update(
         vs.ground_cover,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask, ground_cover, vs.ground_cover[2:-2, 2:-2, vs.tau]),
+        at[2:-2, 2:-2, vs.tau], npx.where(mask[2:-2, 2:-2], ground_cover[2:-2, 2:-2], vs.ground_cover[2:-2, 2:-2, vs.tau]),
     )
 
     # land use dependent transpiration coeffcient
@@ -323,20 +311,20 @@ def set_parameters_monthly_kernel(state):
         row_no = _get_row_no(vs.lut_gc[:, 0], i)
         basal_transp_coeff = update_add(
             basal_transp_coeff,
-            at[2:-2, 2:-2], npx.where(mask, vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1], 0),
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1], 0),
         )
 
         return basal_transp_coeff
 
     basal_transp_coeff = update(
         basal_transp_coeff,
-        at[2:-2, 2:-2], where(vs.maskRiver | vs.maskLake, 0, for_loop(0, 51, loop_body_basal_transp_coeff, basal_transp_coeff)),
+        at[:, :], where(vs.maskRiver | vs.maskLake, 0, for_loop(0, 51, loop_body_basal_transp_coeff, basal_transp_coeff)),
     )
 
     mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
     vs.basal_transp_coeff = update(
         vs.basal_transp_coeff,
-        at[2:-2, 2:-2], npx.where(mask, basal_transp_coeff, vs.basal_transp_coeff),
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], basal_transp_coeff[2:-2, 2:-2], vs.basal_transp_coeff[2:-2, 2:-2]),
     )
 
     # land use dependent evaporation coeffcient
@@ -347,7 +335,7 @@ def set_parameters_monthly_kernel(state):
         row_no = _get_row_no(vs.lut_gc[:, 0], i)
         basal_evap_coeff = update_add(
             basal_evap_coeff,
-            at[2:-2, 2:-2], npx.where(mask, 1 - ((vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1]) * vs.lut_gcm[row_no, 1]), 0),
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 1 - ((vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1]) * vs.lut_gcm[row_no, 1]), 0),
         )
 
         return basal_evap_coeff
@@ -356,13 +344,13 @@ def set_parameters_monthly_kernel(state):
 
     basal_evap_coeff = update(
         basal_evap_coeff,
-        at[2:-2, 2:-2], where(vs.maskRiver | vs.maskLake, 1, basal_evap_coeff),
+        at[:, :], where(vs.maskRiver | vs.maskLake, 1, basal_evap_coeff),
     )
 
     mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
     vs.basal_evap_coeff = update(
         vs.basal_evap_coeff,
-        at[2:-2, 2:-2], npx.where(mask, basal_evap_coeff, vs.basal_evap_coeff),
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], basal_evap_coeff[2:-2, 2:-2], vs.basal_evap_coeff[2:-2, 2:-2]),
     )
 
     return KernelOutput(
@@ -371,34 +359,6 @@ def set_parameters_monthly_kernel(state):
         ground_cover=vs.ground_cover,
         basal_transp_coeff=vs.basal_transp_coeff,
         basal_evap_coeff=vs.basal_evap_coeff
-    )
-
-
-@roger_kernel
-def set_forcing_kernel(state):
-    vs = state.variables
-
-    vs.prec = update(vs.prec, at[2:-2, 2:-2], vs.PREC[2:-2, 2:-2, vs.itt])
-    vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[2:-2, 2:-2, vs.itt])
-    vs.pet = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
-    vs.pet_res = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
-
-    vs.dt_secs = vs.DT_SECS[vs.itt]
-    vs.dt = vs.DT[vs.itt]
-    vs.year = vs.YEAR[vs.itt]
-    vs.month = vs.MONTH[vs.itt]
-    vs.doy = vs.DOY[vs.itt]
-
-    return KernelOutput(
-        prec=vs.prec,
-        ta=vs.ta,
-        pet=vs.pet,
-        pet_res=vs.pet_res,
-        dt=vs.dt,
-        dt_secs=vs.dt_secs,
-        year=vs.year,
-        month=vs.month,
-        doy=vs.doy,
     )
 
 
@@ -482,14 +442,6 @@ def after_timestep_kernel(state):
         vs.y_sc,
         at[2:-2, 2:-2, vs.taum1], vs.y_sc[2:-2, 2:-2, vs.tau],
     )
-    vs.prec_event_sum = update(
-        vs.prec_event_sum,
-        at[2:-2, 2:-2, vs.taum1], vs.prec_event_sum[2:-2, 2:-2, vs.tau],
-    )
-    vs.t_event_sum = update(
-        vs.t_event_sum,
-        at[2:-2, 2:-2, vs.taum1], vs.t_event_sum[2:-2, 2:-2, vs.tau],
-    )
     vs.theta_rz = update(
         vs.theta_rz,
         at[2:-2, 2:-2, vs.taum1], vs.theta_rz[2:-2, 2:-2, vs.tau],
@@ -547,6 +499,14 @@ def after_timestep_kernel(state):
         vs.S_lp_ss,
         at[2:-2, 2:-2], npx.where((vs.S_lp_ss > -1e-6) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss)[2:-2, 2:-2],
     )
+    vs.prec = update(
+        vs.prec,
+        at[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau],
+    )
+    vs.event_id = update(
+        vs.event_id,
+        at[2:-2, 2:-2, vs.taum1], vs.event_id[2:-2, 2:-2, vs.tau],
+    )
 
     return KernelOutput(
         ta=vs.ta,
@@ -568,8 +528,6 @@ def after_timestep_kernel(state):
         z_wf_t1=vs.z_wf_t1,
         y_mp=vs.y_mp,
         y_sc=vs.y_sc,
-        t_event_sum=vs.t_event_sum,
-        prec_event_sum=vs.prec_event_sum,
         theta_rz=vs.theta_rz,
         theta_ss=vs.theta_ss,
         theta=vs.theta,
@@ -580,6 +538,8 @@ def after_timestep_kernel(state):
         k_ss=vs.k_ss,
         k=vs.k,
         z0=vs.z0,
+        prec=vs.prec,
+        event_id=vs.event_id,
         S_fp_rz=vs.S_fp_rz,
         S_lp_rz=vs.S_lp_rz,
         S_fp_ss=vs.S_fp_ss,

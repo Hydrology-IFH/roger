@@ -56,12 +56,13 @@ def calc_inf_mat(state):
     l1 = allocate(state.dimensions, ("x", "y"))
     inf_mat_pot = allocate(state.dimensions, ("x", "y"))
 
-    mask1 = (vs.pi_m <= vs.prec_csum)
-    mask2 = (vs.pi_m > vs.prec_csum)
-    mask3 = (vs.t_sat > vs.t_event_sum[:, :, vs.taum1]) & (vs.t_sat < vs.t_event_sum[:, :, vs.tau])
+    mask1 = (vs.pi_m <= vs.prec_event_csum) & (vs.t_event_csum > vs.t_sat) & (vs.t_sat > 0)
+    mask2 = (vs.pi_m > vs.prec_event_csum) & (vs.t_event_csum > vs.t_sat) & (vs.t_sat > 0)
+    mask3 = (vs.t_sat > vs.t_event_csum - vs.dt) & (vs.t_sat < vs.t_event_csum)
+    mask4 = (vs.pi_m > vs.prec_event_csum) & (vs.t_sat <= 0)
     a = update(
         a,
-        at[2:-2, 2:-2], vs.ks[2:-2, 2:-2] * (vs.t_event_sum[2:-2, 2:-2, vs.tau] - vs.t_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], vs.ks[2:-2, 2:-2] * (vs.t_event_csum[2:-2, 2:-2] - vs.t_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     b = update(
         b,
@@ -95,11 +96,16 @@ def calc_inf_mat(state):
     )
     inf_mat_pot_sat = update(
         inf_mat_pot_sat,
-        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2], vs.z0[2:-2, 2:-2, vs.tau] * (vs.t_sat[2:-2, 2:-2] - vs.t_event_sum[2:-2, 2:-2, vs.taum1]), inf_mat_pot_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2], vs.z0[2:-2, 2:-2, vs.tau] * (vs.t_sat[2:-2, 2:-2] - (vs.t_event_csum[2:-2, 2:-2] - vs.dt)), inf_mat_pot_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.inf_mat_pot = update(
         vs.inf_mat_pot,
         at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2], inf_mat_pot_sat[2:-2, 2:-2] + inf_mat_pot_rec[2:-2, 2:-2] * ((100 - vs.sealing[2:-2, 2:-2]) / 100), vs.inf_mat_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.inf_mat_pot = update(
+        vs.inf_mat_pot,
+        at[2:-2, 2:-2], npx.where(mask4[2:-2, 2:-2], vs.pi_gr[2:-2, 2:-2] * ((100 - vs.sealing[2:-2, 2:-2]) / 100), vs.inf_mat_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     inf_mat_pot = update(
@@ -1062,7 +1068,7 @@ def calc_theta_d_fp(state):
 
 
 @roger_kernel
-def calc_pi_gr(state, sat_itt):
+def calc_pi_gr(state):
     """
     Calculates threshold of precipitation intensity
     """
@@ -1072,14 +1078,14 @@ def calc_pi_gr(state, sat_itt):
 
     pi_gr = update(
         pi_gr,
-        at[2:-2, 2:-2], vs.ks[2:-2, 2:-2] * (((vs.theta_d[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2])/(vs.prec_event_csum[2:-2, 2:-2] + 1))),
+        at[2:-2, 2:-2], vs.ks[2:-2, 2:-2] * (((vs.theta_d[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2])/(vs.prec_event_csum[2:-2, 2:-2] + 1)) + 1),
     )
 
     return pi_gr
 
 
 @roger_kernel
-def calc_pi_m(state, sat_itt):
+def calc_pi_m(state):
     """
     Calculates infiltration sum at saturation
     """
@@ -1096,32 +1102,24 @@ def calc_pi_m(state, sat_itt):
 
 
 @roger_kernel
-def calc_sat_time(state, pi_m, pi_gr, sat_itt):
+def calc_sat_time(state, pi_m, pi_gr):
     """
     Calculates time to reach soil matrix saturation during rainfall event.
     """
     vs = state.variables
 
-    tsum = allocate(state.dimensions, ("x", "y"))
-
-    mask1 = (vs.pi_m <= vs.prec_event_csum) & (vs.pi_m > vs.pi_gr)
-    mask2 = ((vs.prec[:, :, vs.tau] * (1 / vs.dt) - vs.ks) * vs.prec_event_csum[:, :] > vs.ks * vs.theta_d * vs.wfs) & (vs.pi_m <= vs.prec_event_csum) & (vs.pi_m <= vs.pi_gr)
-    tsum = update(
-        tsum,
-        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], vs.t_event_csum, tsum[2:-2, 2:-2]),
+    mask1 = (vs.pi_m <= vs.prec_event_csum) & (vs.pi_m > vs.pi_gr) & (vs.t_sat == 0)
+    mask2 = ((vs.prec[:, :, vs.tau] * (1 / vs.dt) - vs.ks) * vs.prec_event_csum > vs.ks * vs.theta_d * vs.wfs) & (vs.pi_m <= vs.prec_event_csum) & (vs.pi_m <= vs.pi_gr) & (vs.t_sat == 0)
+    vs.t_sat = update(
+        vs.t_sat,
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], vs.t_event_csum[2:-2, 2:-2] - vs.dt, vs.t_sat[2:-2, 2:-2]),
     )
-    tsum = update(
-        tsum,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.t_event_csum + ((vs.ks[2:-2, 2:-2] * vs.theta_d[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2]) / (vs.pi_m[2:-2, 2:-2] * (vs.pi_m[2:-2, 2:-2] * - vs.ks[2:-2, 2:-2]))) - (vs.dt / vs.pi_m[2:-2, 2:-2]) * vs.prec_event_csum[2:-2, 2:-2], tsum[2:-2, 2:-2]),
+    vs.t_sat = update(
+        vs.t_sat,
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.t_event_csum[2:-2, 2:-2] + ((vs.ks[2:-2, 2:-2] * vs.theta_d[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2]) / (vs.pi_m[2:-2, 2:-2] * (vs.pi_m[2:-2, 2:-2] * - vs.ks[2:-2, 2:-2]))) - (vs.dt / vs.pi_m[2:-2, 2:-2]) * vs.prec_event_csum[2:-2, 2:-2], vs.t_sat[2:-2, 2:-2]),
     )
 
-    sat_time = allocate(state.dimensions, ("x", "y"))
-    sat_time = update(
-        sat_time,
-        at[2:-2, 2:-2], tsum[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    return sat_time
+    return vs.t_sat
 
 
 @roger_kernel
@@ -1276,16 +1274,12 @@ def set_event_vars(state):
     # accumulated precipitation wihin event (in mm)
     vs.prec_event_csum = update(
         vs.prec_event_csum,
-        at[2:-2, 2:-2, :], 0,
+        at[2:-2, 2:-2], 0,
     )
     # accumulated time during an event (in mm)
-    vs.t_event_sum = update(
-        vs.t_event_sum,
-        at[2:-2, 2:-2, :], 0,
-    )
     vs.t_event_csum = update(
         vs.t_event_csum,
-        at[:], 0,
+        at[2:-2, 2:-2], 0,
     )
 
     # reset accumulated soil evaporation deficit
@@ -1308,7 +1302,6 @@ def set_event_vars(state):
                         theta_d_t0=vs.theta_d_t0,
                         theta_d_fp=vs.theta_d_fp,
                         prec_event_csum=vs.prec_event_csum,
-                        t_event_sum=vs.t_event_sum,
                         t_event_csum=vs.t_event_csum,
                         de=vs.de,
                         z_sc=vs.z_sc
@@ -1366,13 +1359,9 @@ def set_event_vars_end_rainfall_pause(state):
         at[2:-2, 2:-2, :], 0,
     )
     # accumulated time during an event (in mm)
-    vs.t_event_sum = update(
-        vs.t_event_sum,
-        at[2:-2, 2:-2, :], 0,
-    )
     vs.t_event_csum = update(
         vs.t_event_csum,
-        at[:], 0,
+        at[2:-2, 2:-2], 0,
     )
 
     return KernelOutput(no_wf=vs.no_wf,
@@ -1380,7 +1369,6 @@ def set_event_vars_end_rainfall_pause(state):
                         theta_d=vs.theta_d,
                         theta_d_rel=vs.theta_d_rel,
                         prec_event_csum=vs.prec_event_csum,
-                        t_event_sum=vs.t_event_sum,
                         t_event_csum=vs.t_event_csum,
                         de=vs.de
                         )
@@ -1428,10 +1416,6 @@ def reset_event_vars(state):
         vs.theta_d_t0,
         at[2:-2, 2:-2], theta_d[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
-    vs.sat_itt = update(
-        vs.sat_itt,
-        at[2:-2, 2:-2], 0,
-    )
     vs.pi_gr = update(
         vs.pi_gr,
         at[2:-2, 2:-2], 0,
@@ -1460,7 +1444,6 @@ def reset_event_vars(state):
                         y_sc=vs.y_sc,
                         theta_d=vs.theta_d,
                         theta_d_t0=vs.theta_d_t0,
-                        sat_itt=vs.sat_itt,
                         pi_gr=vs.pi_gr,
                         pi_m=vs.pi_m,
                         t_sat=vs.t_sat,
@@ -1474,39 +1457,25 @@ def calculate_infiltration(state):
     Calculates infiltration
     """
     vs = state.variables
-    settings = state.settings
 
     arr_itt = allocate(state.dimensions, ("x", "y"))
     arr_itt = update(
         arr_itt,
         at[2:-2, 2:-2], vs.itt,
     )
-    cond1 = ((vs.event_id[2:-2, 2:-2, vs.taum1] == 0) & (vs.vs.event_id[2:-2, 2:-2, vs.tau] >= 1) & (arr_itt[2:-2, 2:-2] >= 1))
+    cond1 = ((vs.event_id[2:-2, 2:-2, vs.taum1] == 0) & (vs.event_id[2:-2, 2:-2, vs.tau] >= 1) & (arr_itt[2:-2, 2:-2] >= 1))
     cond2 = ((vs.prec[2:-2, 2:-2, vs.tau] == 0) & (vs.prec[2:-2, 2:-2, vs.taum1] != 0) & (vs.event_id[2:-2, 2:-2, vs.taum1] >= 1) & (arr_itt[2:-2, 2:-2] >= 1))
     cond3 = ((vs.prec[2:-2, 2:-2, vs.tau] != 0) & (vs.prec[2:-2, 2:-2, vs.taum1] == 0) & (vs.event_id[2:-2, 2:-2, vs.taum1] == vs.event_id[2:-2, 2:-2, vs.tau]) & (arr_itt[2:-2, 2:-2] >= 1))
     cond4 = ((vs.event_id[2:-2, 2:-2, vs.taum1] >= 1) & (vs.event_id[2:-2, 2:-2, vs.tau] == 0) & (arr_itt[2:-2, 2:-2] >= 1))
     cond5 = (vs.event_id[2:-2, 2:-2, vs.tau] >= 1)
     if cond1.any():
-        # iteration at event start
-        vs.event_start = vs.itt
-        vs.event_restart = vs.itt
-        # iteration at event end
-        vs.event_end = vs.itt + settings.nittevent
-        if (vs.event_end >= settings.nitt):
-            vs.event_end = settings.nitt
         vs.update(calc_depth_shrinkage_cracks(state))
         vs.update(set_event_vars(state))
     if cond2.any():
-        vs.event_restart = vs.itt
         vs.update(set_event_vars_start_rainfall_pause(state))
     if cond3.any():
-        vs.event_restart = vs.itt
         vs.update(set_event_vars_end_rainfall_pause(state))
     if cond5.any():
-        vs.t_event_sum = update_add(
-            vs.t_event_sum,
-            at[2:-2, 2:-2, vs.tau], vs.dt,
-        )
         vs.t_event_csum = update_add(
             vs.t_event_csum,
             at[2:-2, 2:-2], vs.dt,

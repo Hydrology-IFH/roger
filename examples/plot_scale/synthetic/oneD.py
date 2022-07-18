@@ -48,12 +48,6 @@ def main():
             infile = pd.read_csv(csv_file, sep=';', skiprows=1)
             return len(infile.index)
 
-        def _get_nittevent(self, path_dir, file):
-            nc_file = self._input_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['nitt_event']
-                return onp.int32(onp.array(var_obj)[0])
-
         def _get_nitt(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
@@ -76,8 +70,6 @@ def main():
 
             settings.nx, settings.ny, settings.nz = self._get_nx(self._base_path, 'parameter_grid.csv'), 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
-            settings.nittevent = self._get_nittevent(self._input_dir, 'forcing.nc')
-            settings.nittevent_p1 = settings.nittevent + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
             settings.dx = 1
@@ -198,14 +190,33 @@ def main():
         def set_forcing_setup(self, state):
             pass
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "DT_SECS",
+                "DT",
+                "dt_secs",
+                "dt",
+                "itt",
+                "prec",
+                "ta",
+                "pet"
+                "event_id",
+                "YEAR",
+                "MONTH",
+                "DOY",
+                "year",
+                "month",
+                "doy",
+            ],
+        )
         def set_forcing(self, state):
             vs = state.variables
 
-            vs.prec = update(vs.prec, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt])
-            vs.ta = update(vs.ta, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt])
-            vs.pet = update(vs.pet, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt])
-            vs.event_id = update(vs.event_id, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.prec = update(vs.prec, at[2:-2, 2:-2], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.pet = update(vs.pet, at[2:-2, 2:-2], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.event_id = update(vs.event_id, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc')[vs.itt])
 
             vs.dt_secs = vs.DT_SECS[vs.itt]
             vs.dt = vs.DT[vs.itt]
@@ -479,14 +490,6 @@ def main():
             vs.y_sc,
             at[2:-2, 2:-2, vs.taum1], vs.y_sc[2:-2, 2:-2, vs.tau],
         )
-        vs.prec_event_sum = update(
-            vs.prec_event_sum,
-            at[2:-2, 2:-2, vs.taum1], vs.prec_event_sum[2:-2, 2:-2, vs.tau],
-        )
-        vs.t_event_sum = update(
-            vs.t_event_sum,
-            at[2:-2, 2:-2, vs.taum1], vs.t_event_sum[2:-2, 2:-2, vs.tau],
-        )
         vs.theta_rz = update(
             vs.theta_rz,
             at[2:-2, 2:-2, vs.taum1], vs.theta_rz[2:-2, 2:-2, vs.tau],
@@ -573,8 +576,6 @@ def main():
             z_wf_t1=vs.z_wf_t1,
             y_mp=vs.y_mp,
             y_sc=vs.y_sc,
-            t_event_sum=vs.t_event_sum,
-            prec_event_sum=vs.prec_event_sum,
             theta_rz=vs.theta_rz,
             theta_ss=vs.theta_ss,
             theta=vs.theta,
@@ -582,6 +583,8 @@ def main():
             h_ss=vs.h_ss,
             h=vs.h,
             z0=vs.z0,
+            prec=vs.prec,
+            event_id=vs.event_id,
             k_rz=vs.k_rz,
             k_ss=vs.k_ss,
             k=vs.k,

@@ -111,12 +111,12 @@ def calc_rain_int_ground(state):
         at[2:-2, 2:-2, vs.tau], npx.where(vs.S_snow[2:-2, 2:-2, vs.tau] > 0, 0, vs.rain_ground[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    vs.prec_event_sum = update_add(
-        vs.prec_event_sum,
-        at[2:-2, 2:-2, vs.tau], npx.where(vs.S_snow[2:-2, 2:-2, vs.tau] > 0, 0, vs.rain_ground[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    vs.prec_event_csum = update_add(
+        vs.prec_event_csum,
+        at[2:-2, 2:-2], npx.where(vs.S_snow[2:-2, 2:-2, vs.tau] > 0, 0, vs.rain_ground[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(S_int_ground=vs.S_int_ground, rain_ground=vs.rain_ground, int_rain_ground=vs.int_rain_ground, z0=vs.z0, prec_event_sum=vs.prec_event_sum)
+    return KernelOutput(S_int_ground=vs.S_int_ground, rain_ground=vs.rain_ground, int_rain_ground=vs.int_rain_ground, z0=vs.z0, prec_event_csum=vs.prec_event_csum)
 
 
 @roger_kernel
@@ -234,12 +234,12 @@ def calc_snow_int_ground(state):
         at[2:-2, 2:-2], (vs.snow_top[2:-2, 2:-2] - vs.int_snow_top[2:-2, 2:-2] - vs.int_snow_ground[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    vs.prec_event_sum = update_add(
-        vs.prec_event_sum,
-        at[2:-2, 2:-2, vs.tau], vs.snow_ground[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    vs.prec_event_csum = update_add(
+        vs.prec_event_csum,
+        at[2:-2, 2:-2], vs.snow_ground[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(S_int_ground=vs.S_int_ground, swe_ground=vs.swe_ground, snow_ground=vs.snow_ground, int_snow_ground=vs.int_snow_ground, prec_event_sum=vs.prec_event_sum)
+    return KernelOutput(S_int_ground=vs.S_int_ground, swe_ground=vs.swe_ground, snow_ground=vs.snow_ground, int_snow_ground=vs.int_snow_ground, prec_event_csum=vs.prec_event_csum)
 
 
 @roger_kernel

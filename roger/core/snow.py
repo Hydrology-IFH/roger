@@ -336,12 +336,12 @@ def calc_snow_melt(state):
         at[2:-2, 2:-2, vs.tau], vs.q_snow[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    vs.prec_event_sum = update_add(
-        vs.prec_event_sum,
-        at[2:-2, 2:-2, vs.tau], vs.q_snow[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    vs.prec_event_csum = update_add(
+        vs.prec_event_csum,
+        at[2:-2, 2:-2], vs.q_snow[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(snow_melt=vs.snow_melt, q_rain_on_snow=vs.q_rain_on_snow, q_snow=vs.q_snow, z0=vs.z0, S_snow=vs.S_snow, swe=vs.swe, pet_res=vs.pet_res, prec_event_sum=vs.prec_event_sum)
+    return KernelOutput(snow_melt=vs.snow_melt, q_rain_on_snow=vs.q_rain_on_snow, q_snow=vs.q_snow, z0=vs.z0, S_snow=vs.S_snow, swe=vs.swe, pet_res=vs.pet_res, prec_event_csum=vs.prec_event_csum)
 
 
 @roger_routine

@@ -85,12 +85,6 @@ def main():
             var_obj = infile.loc[:, var]
             return npx.array(var_obj)[:, npx.newaxis]
 
-        def _get_nittevent(self, path_dir, file):
-            nc_file = self._input_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['nitt_event']
-                return onp.int32(onp.array(var_obj)[0])
-
         def _get_nitt(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
@@ -112,9 +106,6 @@ def main():
             settings.nx, settings.ny, settings.nz = 1, 1, 1
             # derive total number of time steps from forcing
             settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
-            # derive total number of time steps of event with longest duration from forcing
-            settings.nittevent = self._get_nittevent(self._input_dir, 'forcing.nc')
-            settings.nittevent_p1 = settings.nittevent + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
             # spatial discretization (in meters)
@@ -263,20 +254,41 @@ def main():
 
         @roger_routine
         def set_forcing_setup(self, state):
-            vs = state.variables
+            pass
 
-            vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
-            vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
-            vs.PET = update(vs.PET, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc'))
-            vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, :], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc'))
-
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "DT_SECS",
+                "DT",
+                "dt_secs",
+                "dt",
+                "itt",
+                "prec",
+                "ta",
+                "pet"
+                "event_id",
+                "YEAR",
+                "MONTH",
+                "DOY",
+                "year",
+                "month",
+                "doy",
+            ],
+        )
         def set_forcing(self, state):
             vs = state.variables
 
-            # set precipitation, potential evapotranspiration and air temperature
-            # at beginning of each time step
-            vs.update(set_forcing_kernel(state))
+            vs.prec = update(vs.prec, at[2:-2, 2:-2], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.pet = update(vs.pet, at[2:-2, 2:-2], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.event_id = update(vs.event_id, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc')[vs.itt])
+
+            vs.dt_secs = vs.DT_SECS[vs.itt]
+            vs.dt = vs.DT[vs.itt]
+            vs.year = vs.YEAR[vs.itt]
+            vs.month = vs.MONTH[vs.itt]
+            vs.doy = vs.DOY[vs.itt]
 
         @roger_routine
         def set_diagnostics(self, state):
@@ -562,14 +574,6 @@ def main():
             vs.y_sc,
             at[2:-2, 2:-2, vs.taum1], vs.y_sc[2:-2, 2:-2, vs.tau],
         )
-        vs.prec_event_sum = update(
-            vs.prec_event_sum,
-            at[2:-2, 2:-2, vs.taum1], vs.prec_event_sum[2:-2, 2:-2, vs.tau],
-        )
-        vs.t_event_sum = update(
-            vs.t_event_sum,
-            at[2:-2, 2:-2, vs.taum1], vs.t_event_sum[2:-2, 2:-2, vs.tau],
-        )
         vs.theta_rz = update(
             vs.theta_rz,
             at[2:-2, 2:-2, vs.taum1], vs.theta_rz[2:-2, 2:-2, vs.tau],
@@ -610,6 +614,14 @@ def main():
             vs.z0,
             at[2:-2, 2:-2, vs.taum1], vs.z0[2:-2, 2:-2, vs.tau],
         )
+        vs.prec = update(
+            vs.prec,
+            at[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau],
+        )
+        vs.event_id = update(
+            vs.event_id,
+            at[2:-2, 2:-2, vs.taum1], vs.event_id[2:-2, 2:-2, vs.tau],
+        )
 
         return KernelOutput(
             ta=vs.ta,
@@ -631,8 +643,6 @@ def main():
             z_wf_t1=vs.z_wf_t1,
             y_mp=vs.y_mp,
             y_sc=vs.y_sc,
-            t_event_sum=vs.t_event_sum,
-            prec_event_sum=vs.prec_event_sum,
             theta_rz=vs.theta_rz,
             theta_ss=vs.theta_ss,
             theta=vs.theta,
@@ -640,6 +650,8 @@ def main():
             h_ss=vs.h_ss,
             h=vs.h,
             z0=vs.z0,
+            prec=vs.prec,
+            event_id=vs.event_id,
             k_rz=vs.k_rz,
             k_ss=vs.k_ss,
             k=vs.k,
@@ -657,6 +669,7 @@ def main():
     # iterates over time steps
     model.run()
     return
+
 
 if __name__ == "__main__":
     main()

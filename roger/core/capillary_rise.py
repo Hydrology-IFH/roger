@@ -49,9 +49,9 @@ def calc_cpr_rz(state):
     )
 
     # update root zone storage and subsoil storage
-    mask1 = (vs.cpr_rz > 0) & (vs.S_lp_ss <= 0) & (vs.event_id <= 0)
-    mask2 = (vs.cpr_rz > 0) & (vs.S_lp_ss > 0) & (vs.cpr_rz <= vs.S_lp_ss) & (vs.event_id <= 0)
-    mask3 = (vs.cpr_rz > 0) & (vs.S_lp_ss > 0) & (vs.cpr_rz > vs.S_lp_ss) & (vs.event_id <= 0)
+    mask1 = (vs.cpr_rz > 0) & (vs.S_lp_ss <= 0) & (vs.event_id[:, :, vs.tau] <= 0)
+    mask2 = (vs.cpr_rz > 0) & (vs.S_lp_ss > 0) & (vs.cpr_rz <= vs.S_lp_ss) & (vs.event_id[:, :, vs.tau] <= 0)
+    mask3 = (vs.cpr_rz > 0) & (vs.S_lp_ss > 0) & (vs.cpr_rz > vs.S_lp_ss) & (vs.event_id[:, :, vs.tau] <= 0)
     vs.S_fp_rz = update_add(
         vs.S_fp_rz,
         at[2:-2, 2:-2], mask1[2:-2, 2:-2] * vs.cpr_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
