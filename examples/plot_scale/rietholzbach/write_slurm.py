@@ -7,8 +7,8 @@ base_path = Path(__file__).parent
 list_dir = os.listdir(base_path)
 
 for d in list_dir:
-    file = base_path / d / 'write_batch_gpu.py'
+    file = base_path / d / 'write_slurm.py'
     if os.path.exists(file):
         path_dir = base_path / d
         os.chdir(path_dir)
-        subprocess.Popen("python write_batch_gpu.py", shell=True)
+        subprocess.Popen("python write_slurm.py", shell=True)
