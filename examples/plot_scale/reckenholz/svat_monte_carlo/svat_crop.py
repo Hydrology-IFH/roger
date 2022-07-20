@@ -12,7 +12,7 @@ from roger.cli.roger_run_base import roger_base_cli
 def main(nsamples, lys_experiment):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where, random_uniform
+    from roger.core.operators import numpy as npx, update, update_add, at, for_loop, random_uniform
     from roger.core.utilities import _get_row_no
     from roger.tools.setup import write_forcing, write_crop_rotation
     import roger.lookuptables as lut
@@ -244,7 +244,8 @@ def main(nsamples, lys_experiment):
                 "ta",
                 "ta_min",
                 "ta_max",
-                "pet"
+                "pet",
+                "pet_res",
                 "event_id",
                 "YEAR",
                 "MONTH",
@@ -252,6 +253,7 @@ def main(nsamples, lys_experiment):
                 "year",
                 "month",
                 "doy",
+                "tau"
             ],
         )
         def set_forcing(self, state):
@@ -262,6 +264,7 @@ def main(nsamples, lys_experiment):
             vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2], self._read_var_from_nc("TA_MIN", self._input_dir, 'forcing.nc')[:, :, vs.itt])
             vs.ta_max = update(vs.ta_max, at[2:-2, 2:-2], self._read_var_from_nc("TA_MAX", self._input_dir, 'forcing.nc')[:, :, vs.itt])
             vs.pet = update(vs.pet, at[2:-2, 2:-2], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], vs.pet[2:-2, 2:-2])
             vs.event_id = update(vs.event_id, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc')[vs.itt])
 
             vs.dt_secs = vs.DT_SECS[vs.itt]
@@ -350,131 +353,132 @@ def main(nsamples, lys_experiment):
         vs = state.variables
 
         # land use dependent upper interception storage
+        S_int_top_tot = allocate(state.dimensions, ("x", "y"))
+        trees_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
+        trees_cond = update(
+            trees_cond,
+            at[:, :], npx.isin(vs.lu_id, npx.array([10, 11, 12, 15])),
+        )
+
         def loop_body_S_int_top_tot(i, S_int_top_tot):
-            arr_i = allocate(state.dimensions, ("x", "y"))
-            arr_i = update(
-                arr_i,
-                at[:, :], i * (vs.lu_id == i),
-            )
-            mask = (vs.lu_id == i) & npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
+            mask = (vs.lu_id == i) & trees_cond
             row_no = _get_row_no(vs.lut_ilu[:, 0], i)
             S_int_top_tot = update(
                 S_int_top_tot,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_ilu[row_no, vs.month], 0),
+                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_ilu[row_no, vs.month], S_int_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
             )
 
             return S_int_top_tot
 
-        S_int_top_tot = allocate(state.dimensions, ("x", "y"))
+        S_int_top_tot = for_loop(10, 16, loop_body_S_int_top_tot, S_int_top_tot)
 
-        S_int_top_tot = for_loop(10, 17, loop_body_S_int_top_tot, S_int_top_tot)
-        mask = npx.isin(vs.lu_id, npx.array([10, 11, 12, 15, 16]))
         vs.S_int_top_tot = update(
             vs.S_int_top_tot,
-            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], S_int_top_tot[2:-2, 2:-2], vs.S_int_top_tot[2:-2, 2:-2]),
+            at[2:-2, 2:-2], S_int_top_tot[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
         )
 
         # land use dependent lower interception storage
         S_int_ground_tot = allocate(state.dimensions, ("x", "y"))
 
+        ground_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
+        ground_cond = update(
+            ground_cond,
+            at[:, :], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 13, 98, 31, 32, 33, 40, 41, 50, 98]))
+        )
+
         def loop_body_S_int_ground_tot(i, S_int_ground_tot):
-            arr_i = allocate(state.dimensions, ("x", "y"))
-            arr_i = update(
-                arr_i,
-                at[:, :], i * vs.maskCatch,
-            )
-            mask = (vs.lu_id == i) & ~npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
+            mask = (vs.lu_id == i) & ground_cond
             row_no = _get_row_no(vs.lut_ilu[:, 0], i)
-            S_int_ground_tot = update_add(
+            S_int_ground_tot = update(
                 S_int_ground_tot,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_ilu[row_no, vs.month], 0),
+                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_ilu[row_no, vs.month], S_int_ground_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
             )
 
             return S_int_ground_tot
+
+        trees_ground_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
+        trees_ground_cond = update(
+            trees_ground_cond,
+            at[:, :], npx.isin(vs.lu_id, npx.array([10, 11, 12, 15]))
+        )
 
         def loop_body_S_int_ground_tot_trees(i, S_int_ground_tot):
-            arr_i = allocate(state.dimensions, ("x", "y"))
-            arr_i = update(
-                arr_i,
-                at[:, :], i * vs.maskCatch,
-            )
-            mask = (vs.lu_id == i) & npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
-            S_int_ground_tot = update_add(
+            mask = (vs.lu_id == i) & trees_ground_cond
+            S_int_ground_tot = update(
                 S_int_ground_tot,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 1, 0),
+                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 1, S_int_ground_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
             )
 
             return S_int_ground_tot
 
-        S_int_ground_tot = update(
-            S_int_ground_tot,
-            at[:, :], for_loop(0, 51, loop_body_S_int_ground_tot, S_int_ground_tot),
-        )
-        S_int_ground_tot = update(
-            S_int_ground_tot,
-            at[:, :], for_loop(10, 17, loop_body_S_int_ground_tot_trees, S_int_ground_tot),
-        )
+        S_int_ground_tot = for_loop(0, 51, loop_body_S_int_ground_tot, S_int_ground_tot)
+        S_int_ground_tot = for_loop(10, 16, loop_body_S_int_ground_tot_trees, S_int_ground_tot)
 
-        mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
         vs.S_int_ground_tot = update(
             vs.S_int_ground_tot,
-            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], S_int_ground_tot[2:-2, 2:-2], vs.S_int_ground_tot[2:-2, 2:-2]),
+            at[2:-2, 2:-2], S_int_ground_tot[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
         )
 
         # land use dependent ground cover (canopy cover)
         ground_cover = allocate(state.dimensions, ("x", "y"))
 
+        cc_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)
+        cc_cond = update(
+            cc_cond,
+            at[:, :], npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 98, 31, 32, 33, 40, 41, 50, 98]))
+        )
+
         def loop_body_ground_cover(i, ground_cover):
-            mask = (vs.lu_id == i)
+            mask = (vs.lu_id == i) & cc_cond
             row_no = _get_row_no(vs.lut_gc[:, 0], i)
-            ground_cover = update_add(
+            ground_cover = update(
                 ground_cover,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_gc[row_no, vs.month], 0),
+                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_gc[row_no, vs.month], ground_cover[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
             )
 
             return ground_cover
 
         ground_cover = for_loop(0, 51, loop_body_ground_cover, ground_cover)
 
-        mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
         vs.ground_cover = update(
             vs.ground_cover,
-            at[2:-2, 2:-2, vs.tau], npx.where(mask[2:-2, 2:-2], ground_cover[2:-2, 2:-2], vs.ground_cover[2:-2, 2:-2, vs.tau]),
+            at[2:-2, 2:-2, vs.tau], ground_cover[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
         )
 
         # land use dependent transpiration coeffcient
         basal_transp_coeff = allocate(state.dimensions, ("x", "y"))
 
         def loop_body_basal_transp_coeff(i, basal_transp_coeff):
-            mask = (vs.lu_id == i)
+            mask = (vs.lu_id == i) & cc_cond
             row_no = _get_row_no(vs.lut_gc[:, 0], i)
-            basal_transp_coeff = update_add(
+            basal_transp_coeff = update(
                 basal_transp_coeff,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1], 0),
+                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1], basal_transp_coeff[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
             )
 
             return basal_transp_coeff
 
+        basal_transp_coeff = for_loop(0, 51, loop_body_basal_transp_coeff, basal_transp_coeff)
+
         basal_transp_coeff = update(
             basal_transp_coeff,
-            at[:, :], where(vs.maskRiver | vs.maskLake, 0, for_loop(0, 51, loop_body_basal_transp_coeff, basal_transp_coeff)),
+            at[2:-2, 2:-2], npx.where(vs.maskRiver[2:-2, 2:-2] | vs.maskLake[2:-2, 2:-2], 0, basal_transp_coeff[2:-2, 2:-2]),
         )
 
-        mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
         vs.basal_transp_coeff = update(
             vs.basal_transp_coeff,
-            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], basal_transp_coeff[2:-2, 2:-2], vs.basal_transp_coeff[2:-2, 2:-2]),
+            at[2:-2, 2:-2], basal_transp_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
         )
 
         # land use dependent evaporation coeffcient
         basal_evap_coeff = allocate(state.dimensions, ("x", "y"))
 
         def loop_body_basal_evap_coeff(i, basal_evap_coeff):
-            mask = (vs.lu_id == i)
+            mask = (vs.lu_id == i) & cc_cond
             row_no = _get_row_no(vs.lut_gc[:, 0], i)
-            basal_evap_coeff = update_add(
+            basal_evap_coeff = update(
                 basal_evap_coeff,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 1 - ((vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1]) * vs.lut_gcm[row_no, 1]), 0),
+                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 1 - ((vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1]) * vs.lut_gcm[row_no, 1]), basal_evap_coeff[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
             )
 
             return basal_evap_coeff
@@ -483,13 +487,41 @@ def main(nsamples, lys_experiment):
 
         basal_evap_coeff = update(
             basal_evap_coeff,
-            at[:, :], where(vs.maskRiver | vs.maskLake, 1, basal_evap_coeff),
+            at[2:-2, 2:-2], npx.where(vs.maskRiver[2:-2, 2:-2] | vs.maskLake[2:-2, 2:-2], 1, basal_evap_coeff[2:-2, 2:-2]),
         )
 
-        mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
         vs.basal_evap_coeff = update(
             vs.basal_evap_coeff,
-            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], basal_evap_coeff[2:-2, 2:-2], vs.basal_evap_coeff[2:-2, 2:-2]),
+            at[2:-2, 2:-2], basal_evap_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
+        )
+
+        # maximum snow interception storage
+        vs.swe_top_tot = update(
+            vs.swe_top_tot,
+            at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] >= -3) & (vs.ta[2:-2, 2:-2, vs.tau] <= -1) & (vs.lu_id[2:-2, 2:-2] == 10), 2.5 + 0.5 * vs.ta[2:-2, 2:-2, vs.tau] * 9, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        )
+        vs.swe_top_tot = update(
+            vs.swe_top_tot,
+            at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] >= -3) & (vs.ta[2:-2, 2:-2, vs.tau] <= -1) & (vs.lu_id[2:-2, 2:-2] == 11), 2.5 + 0.5 * vs.ta[2:-2, 2:-2, vs.tau] * 15, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        )
+        vs.swe_top_tot = update(
+            vs.swe_top_tot,
+            at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] >= -3) & (vs.ta[2:-2, 2:-2, vs.tau] <= -1) & (vs.lu_id[2:-2, 2:-2] == 12), 2.5 + 0.5 * vs.ta[2:-2, 2:-2, vs.tau] * 25, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        )
+
+        vs.lai = update(
+            vs.lai,
+            at[2:-2, 2:-2], npx.log(1 / (1 - vs.ground_cover[2:-2, 2:-2, vs.tau])) / npx.log(1 / 0.7) * vs.maskCatch[2:-2, 2:-2]
+        )
+
+        vs.throughfall_coeff_top = update(
+            vs.throughfall_coeff_top,
+            at[2:-2, 2:-2], npx.where(npx.isin(vs.lu_id[2:-2, 2:-2], npx.array([10, 11, 12])), npx.where(vs.lai[2:-2, 2:-2] > 1, 0, 1 - vs.lai[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2]
+        )
+
+        vs.throughfall_coeff_ground = update(
+            vs.throughfall_coeff_ground,
+            at[2:-2, 2:-2], npx.where(npx.isin(vs.lu_id[2:-2, 2:-2], npx.arange(500, 598)), npx.where(vs.lai[2:-2, 2:-2] > 1, 0, 1 - vs.lai[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2]
         )
 
         return KernelOutput(
@@ -497,7 +529,11 @@ def main(nsamples, lys_experiment):
             S_int_ground_tot=vs.S_int_ground_tot,
             ground_cover=vs.ground_cover,
             basal_transp_coeff=vs.basal_transp_coeff,
-            basal_evap_coeff=vs.basal_evap_coeff
+            basal_evap_coeff=vs.basal_evap_coeff,
+            swe_top_tot=vs.swe_top_tot,
+            lai=vs.lai,
+            throughfall_coeff_top=vs.throughfall_coeff_top,
+            throughfall_coeff_ground=vs.throughfall_coeff_ground,
         )
 
     @roger_kernel

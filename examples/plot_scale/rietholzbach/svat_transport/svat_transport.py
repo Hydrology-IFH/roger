@@ -56,6 +56,40 @@ def main(transport_model_structure):
         def _set_tm_structure(self, tm_structure):
             self._tm_structure = tm_structure
 
+        def _ffill_3d(self, state, arr):
+            idx_shape = tuple([slice(None)] + [npx.newaxis] * (3 - 2 - 1))
+            idx = allocate(state.dimensions, ("x", "y", "t"), dtype=int)
+            arr1 = allocate(state.dimensions, ("x", 1, 1), dtype=int)
+            arr2 = allocate(state.dimensions, (1, "y", 1), dtype=int)
+            arr3 = allocate(state.dimensions, ("x", "y", "t"), dtype=int)
+            arr_fill = allocate(state.dimensions, ("x", "y", "t"))
+            idx = update(
+                idx,
+                at[2:-2, 2:-2, :], npx.where(npx.isfinite(arr), npx.arange(npx.shape(arr)[2])[idx_shape], 0)[2:-2, 2:-2, :],
+            )
+            idx = update(
+                idx,
+                at[2:-2, 2:-2, :], _ffill(idx)[2:-2, 2:-2, :],
+            )
+            arr1 = update(
+                arr1,
+                at[:, 0, 0], npx.arange(npx.shape(arr)[0]),
+            )
+            arr2 = update(
+                arr2,
+                at[0, :, 0], npx.arange(npx.shape(arr)[1]),
+            )
+            arr3 = update(
+                arr3,
+                at[:, :, :], idx,
+            )
+            arr_fill = update(
+                arr_fill,
+                at[:, :, :], arr[arr1, arr2, arr3],
+            )
+
+            return arr_fill
+
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
@@ -109,20 +143,29 @@ def main(transport_model_structure):
         def set_topography(self, state):
             pass
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "S_pwp_rz",
+                "S_pwp_ss",
+                "S_sat_rz",
+                "S_sat_ss",
+                "sas_params_evap_soil",
+                "sas_params_cpr_rz",
+                "sas_params_transp",
+                "sas_params_q_rz",
+                "sas_params_q_ss",
+                "itt"
+            ],
+        )
         def set_parameters_setup(self, state):
             vs = state.variables
             settings = state.settings
 
-            vs.S_PWP_RZ = update(vs.S_PWP_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.nc'))
-            vs.S_PWP_SS = update(vs.S_PWP_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.nc'))
-            vs.S_SAT_RZ = update(vs.S_SAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc'))
-            vs.S_SAT_SS = update(vs.S_SAT_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.nc'))
-
-            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], vs.S_PWP_RZ[2:-2, 2:-2, 0])
-            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], vs.S_PWP_SS[2:-2, 2:-2, 0])
-            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], vs.S_SAT_RZ[2:-2, 2:-2, 0])
-            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], vs.S_SAT_SS[2:-2, 2:-2, 0])
+            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt])
 
             if settings.tm_structure == "complete-mixing":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 1)
@@ -229,24 +272,29 @@ def main(transport_model_structure):
         def set_parameters(self, state):
             pass
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "S_pwp_rz",
+                "S_pwp_ss",
+                "S_snow",
+                "S_rz",
+                "S_ss",
+                "S_s",
+                "itt"
+            ],
+        )
         def set_initial_conditions_setup(self, state):
             vs = state.variables
-
-            vs.S_SNOW = update(vs.S_SNOW, at[2:-2, 2:-2, :], self._read_var_from_nc("S_snow", self._base_path, 'states_hm.nc'))
-            vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc'))
-            vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc'))
+            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_snow", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :2], vs.S_rz[2:-2, 2:-2, :2] + vs.S_ss[2:-2, 2:-2, :2])
 
         @roger_routine
         def set_initial_conditions(self, state):
             vs = state.variables
             settings = state.settings
-
-            vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
-            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], vs.S_SNOW[2:-2, 2:-2, 0, npx.newaxis])
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
-            vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_S[2:-2, 2:-2, 0, npx.newaxis] - (vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis] + vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis]))
 
             arr0 = allocate(state.dimensions, ("x", "y"))
             vs.sa_rz = update(
@@ -327,17 +375,6 @@ def main(transport_model_structure):
             vs = state.variables
             settings = state.settings
 
-            vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("ta", self._base_path, 'states_hm.nc'))
-            vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._base_path, 'states_hm.nc'))
-            vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", self._base_path, 'states_hm.nc'))
-            vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", self._base_path, 'states_hm.nc') + self._read_var_from_nc("inf_sc_rz", self._base_path, 'states_hm.nc'))
-            vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._base_path, 'states_hm.nc'))
-            vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._base_path, 'states_hm.nc'))
-            vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", self._base_path, 'states_hm.nc'))
-            vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._base_path, 'states_hm.nc'))
-            vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.nc'))
-            vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc'))
-
             if settings.enable_deuterium:
                 vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 0], npx.nan)
                 vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d2H", self._input_dir, 'forcing_tracer.nc'))
@@ -347,14 +384,76 @@ def main(transport_model_structure):
                 vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
 
             if settings.enable_deuterium or settings.enable_oxygen18:
-                vs.update(set_iso_input_kernel(state))
+                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._ffill_3d(state, vs.C_IN)[2:-2, 2:-2, :])
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "ta",
+                "prec",
+                "inf_mat_rz",
+                "inf_pf_rz",
+                "inf_pf_ss",
+                "transp",
+                "evap_soil",
+                "cpr_rz",
+                "q_rz",
+                "q_ss",
+                "S_pwp_rz",
+                "S_rz",
+                "S_pwp_ss",
+                "S_ss",
+                "S_s",
+                "S_snow",
+                "tau",
+                "taum1",
+                "itt",
+                "C_in",
+                "C_IN",
+                "C_snow",
+                "M_in"
+
+            ],
+        )
         def set_forcing(self, state):
             vs = state.variables
 
-            vs.update(set_states_kernel(state))
-            vs.update(set_forcing_iso_kernel(state))
+            vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("ta", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("prec", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mat_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.inf_pf_rz = update(vs.inf_pf_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mp_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt] + self._read_var_from_nc("inf_sc_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.inf_pf_ss = update(vs.inf_pf_ss, at[2:-2, 2:-2], self._read_var_from_nc("inf_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.transp = update(vs.transp, at[2:-2, 2:-2], self._read_var_from_nc("transp", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.evap_soil = update(vs.evap_soil, at[2:-2, 2:-2], self._read_var_from_nc("evap_soil", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.cpr_rz = update(vs.cpr_rz, at[2:-2, 2:-2], self._read_var_from_nc("cpr_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
+            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_snow", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+
+            vs.C_in = update(vs.C_in, at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt])
+            # mixing of isotopes while snow accumulation
+            vs.C_snow = update(
+                vs.C_snow,
+                at[2:-2, 2:-2, vs.tau], npx.where(vs.S_snow[2:-2, 2:-2, vs.tau] > 0, npx.where(npx.isnan(vs.C_snow[2:-2, 2:-2, vs.tau]), vs.C_in[2:-2, 2:-2], (vs.prec[2:-2, 2:-2, vs.tau] / (vs.prec[2:-2, 2:-2, vs.tau] + vs.S_snow[2:-2, 2:-2, vs.tau])) * vs.C_in[2:-2, 2:-2] + (vs.S_snow[2:-2, 2:-2, vs.tau] / (vs.prec[2:-2, 2:-2, vs.tau] + vs.S_snow[2:-2, 2:-2, vs.tau])) * vs.C_snow[2:-2, 2:-2, vs.taum1]), npx.nan),
+            )
+            vs.C_snow = update(
+                vs.C_snow,
+                at[2:-2, 2:-2, vs.tau], npx.where(vs.S_snow[2:-2, 2:-2, vs.tau] <= 0, npx.nan, vs.C_snow[2:-2, 2:-2, vs.tau]),
+            )
+
+            # mix isotopes from snow melt and rainfall
+            vs.C_in = update(
+                vs.C_in,
+                at[2:-2, 2:-2], npx.where(npx.isfinite(vs.C_snow[2:-2, 2:-2, vs.taum1]), vs.C_snow[2:-2, 2:-2, vs.taum1], npx.where(vs.prec[2:-2, 2:-2, vs.tau] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.nan)),
+            )
+            vs.M_in = update(
+                vs.M_in,
+                at[2:-2, 2:-2], vs.C_in[2:-2, 2:-2] * vs.prec[2:-2, 2:-2, vs.tau],
+            )
 
         @roger_routine
         def set_diagnostics(self, state):
@@ -381,78 +480,6 @@ def main(transport_model_structure):
             vs = state.variables
 
             vs.update(after_timestep_kernel(state))
-
-    @roger_kernel
-    def set_iso_input_kernel(state):
-        vs = state.variables
-
-        vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], _ffill_3d(state, vs.C_IN)[2:-2, 2:-2, :])
-
-        return KernelOutput(
-            C_IN=vs.C_IN,
-        )
-
-    @roger_kernel
-    def set_forcing_iso_kernel(state):
-        vs = state.variables
-
-        # mixing of isotopes while snow accumulation
-        vs.C_snow = update(
-            vs.C_snow,
-            at[2:-2, 2:-2, vs.tau], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] > 0, npx.where(npx.isnan(vs.C_snow[2:-2, 2:-2, vs.tau]), vs.C_IN[2:-2, 2:-2, vs.itt], (vs.PREC[2:-2, 2:-2, vs.itt] / (vs.PREC[2:-2, 2:-2, vs.itt] + vs.S_SNOW[2:-2, 2:-2, vs.itt])) * vs.C_IN[2:-2, 2:-2, vs.itt] + (vs.S_SNOW[2:-2, 2:-2, vs.itt] / (vs.PREC[2:-2, 2:-2, vs.itt] + vs.S_SNOW[2:-2, 2:-2, vs.itt])) * vs.C_snow[2:-2, 2:-2, vs.taum1]), npx.nan) * vs.maskCatch[2:-2, 2:-2],
-        )
-        vs.C_snow = update(
-            vs.C_snow,
-            at[2:-2, 2:-2, vs.tau], npx.where(vs.S_SNOW[2:-2, 2:-2, vs.itt] <= 0, npx.nan, vs.C_snow[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
-        )
-
-        # mix isotopes from snow melt and rainfall
-        vs.C_in = update(
-            vs.C_in,
-            at[2:-2, 2:-2], npx.where(npx.isfinite(vs.C_snow[2:-2, 2:-2, vs.taum1]), vs.C_snow[2:-2, 2:-2, vs.taum1], npx.where(vs.PREC[2:-2, 2:-2, vs.itt] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.nan)) * vs.maskCatch[2:-2, 2:-2],
-        )
-        vs.M_in = update(
-            vs.M_in,
-            at[2:-2, 2:-2], vs.C_in[2:-2, 2:-2] * vs.PREC[2:-2, 2:-2, vs.itt] * vs.maskCatch[2:-2, 2:-2],
-        )
-
-        return KernelOutput(
-            M_in=vs.M_in,
-            C_in=vs.C_in,
-            C_snow=vs.C_snow,
-        )
-
-    @roger_kernel
-    def set_states_kernel(state):
-        vs = state.variables
-
-        vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], vs.INF_MAT_RZ[2:-2, 2:-2, vs.itt])
-        vs.inf_pf_rz = update(vs.inf_pf_rz, at[2:-2, 2:-2], vs.INF_PF_RZ[2:-2, 2:-2, vs.itt])
-        vs.inf_pf_ss = update(vs.inf_pf_ss, at[2:-2, 2:-2], vs.INF_PF_SS[2:-2, 2:-2, vs.itt])
-        vs.transp = update(vs.transp, at[2:-2, 2:-2], vs.TRANSP[2:-2, 2:-2, vs.itt])
-        vs.evap_soil = update(vs.evap_soil, at[2:-2, 2:-2], vs.EVAP_SOIL[2:-2, 2:-2, vs.itt])
-        vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], vs.Q_RZ[2:-2, 2:-2, vs.itt])
-        vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], vs.Q_SS[2:-2, 2:-2, vs.itt])
-        vs.cpr_rz = update(vs.cpr_ss, at[2:-2, 2:-2], vs.CPR_RZ[2:-2, 2:-2, vs.itt])
-
-        vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], vs.S_RZ[2:-2, 2:-2, vs.itt])
-        vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], vs.S_SS[2:-2, 2:-2, vs.itt])
-        vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_S[2:-2, 2:-2, vs.itt])
-        vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, vs.tau], vs.S_SNOW[2:-2, 2:-2, vs.itt])
-
-        return KernelOutput(
-            inf_mat_rz=vs.inf_mat_rz,
-            inf_pf_rz=vs.inf_pf_rz,
-            inf_pf_ss=vs.inf_pf_ss,
-            transp=vs.transp,
-            evap_soil=vs.evap_soil,
-            q_rz=vs.q_rz,
-            q_ss=vs.q_ss,
-            cpr_rz=vs.cpr_rz,
-            S_rz=vs.S_rz,
-            S_ss=vs.S_ss,
-            S_snow=vs.S_snow,
-        )
 
     @roger_kernel
     def after_timestep_kernel(state):
@@ -534,6 +561,10 @@ def main(transport_model_structure):
             vs.C_snow,
             at[2:-2, 2:-2, vs.taum1], vs.C_snow[2:-2, 2:-2, vs.tau],
         )
+        vs.prec = update(
+            vs.prec,
+            at[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau],
+        )
 
         return KernelOutput(
             SA_rz=vs.SA_rz,
@@ -600,41 +631,6 @@ def main(transport_model_structure):
         loop_arr = for_loop(1, loop_arr.shape[2], loop_body, loop_arr)
 
         return loop_arr
-
-    @roger_kernel
-    def _ffill_3d(state, arr):
-        idx_shape = tuple([slice(None)] + [npx.newaxis] * (3 - 2 - 1))
-        idx = allocate(state.dimensions, ("x", "y", "t"), dtype=int)
-        arr1 = allocate(state.dimensions, ("x", 1, 1), dtype=int)
-        arr2 = allocate(state.dimensions, (1, "y", 1), dtype=int)
-        arr3 = allocate(state.dimensions, ("x", "y", "t"), dtype=int)
-        arr_fill = allocate(state.dimensions, ("x", "y", "t"))
-        idx = update(
-            idx,
-            at[2:-2, 2:-2, :], npx.where(npx.isfinite(arr), npx.arange(npx.shape(arr)[2])[idx_shape], 0)[2:-2, 2:-2, :],
-        )
-        idx = update(
-            idx,
-            at[2:-2, 2:-2, :], _ffill(idx)[2:-2, 2:-2, :],
-        )
-        arr1 = update(
-            arr1,
-            at[:, 0, 0], npx.arange(npx.shape(arr)[0]),
-        )
-        arr2 = update(
-            arr2,
-            at[0, :, 0], npx.arange(npx.shape(arr)[1]),
-        )
-        arr3 = update(
-            arr3,
-            at[:, :, :], idx,
-        )
-        arr_fill = update(
-            arr_fill,
-            at[:, :, :], arr[arr1, arr2, arr3],
-        )
-
-        return arr_fill
 
     tms = transport_model_structure.replace("_", " ")
     model = SVATTRANSPORTSetup()

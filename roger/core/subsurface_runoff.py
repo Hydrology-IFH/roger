@@ -191,11 +191,11 @@ def calc_q_sub_pot(state):
     # convert mm3 to mm (1e-6)
     vs.q_sub_mat_pot = update(
         vs.q_sub_mat_pot,
-        at[2:-2, 2:-2], ((vs.ks[2:-2, 2:-2] * vs.slope[2:-2, 2:-2] * vs.z_sat[2:-2, 2:-2, vs.tau] * 1000 * vs.dt) * 1e-6) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], ((vs.ks[2:-2, 2:-2] * vs.slope[2:-2, 2:-2] * vs.z_sat[2:-2, 2:-2, vs.tau] * vs.dt) * 1e-6) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # total potential macropore subsurface runoff (in mm/dt)
-    # convert mm3 to mm (1e-6)
+    # convert mm3 to mm (1e-9)
     vs.q_sub_mp_pot = update(
         vs.q_sub_mp_pot,
         at[2:-2, 2:-2], ((vs.z_sat_layer_1[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_1[2:-2, 2:-2] +

@@ -20,6 +20,7 @@ def main():
         _base_path = Path(__file__).parent
         _input_dir = None
         _identifier = None
+        _initial_conditions = None
 
         def _set_input_dir(self, path):
             if os.path.exists(path):
@@ -54,6 +55,7 @@ def main():
 
         def _set_identifier(self, identifier):
             self._identifier = identifier
+            self._initial_conditions = identifier.split('_')[-1]
 
         @roger_routine
         def set_settings(self, state):
@@ -159,9 +161,19 @@ def main():
             vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
             vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
             vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
-            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
-            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
             vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 0)
+            if self._initial_conditions == "dry":
+                vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + 0.1 * (vs.theta_ufc[2:-2, 2:-2, npx.newaxis] + vs.theta_ac[2:-2, 2:-2, npx.newaxis]))
+                vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + 0.1 * (vs.theta_ufc[2:-2, 2:-2, npx.newaxis] + vs.theta_ac[2:-2, 2:-2, npx.newaxis]))
+            elif self._initial_conditions == "normal":
+                vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + vs.theta_ufc[2:-2, 2:-2, npx.newaxis])
+                vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + vs.theta_ufc[2:-2, 2:-2, npx.newaxis])
+            elif self._initial_conditions == "wet":
+                vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + 0.9 * (vs.theta_ufc[2:-2, 2:-2, npx.newaxis] + vs.theta_ac[2:-2, 2:-2, npx.newaxis]))
+                vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + 0.9 * (vs.theta_ufc[2:-2, 2:-2, npx.newaxis] + vs.theta_ac[2:-2, 2:-2, npx.newaxis]))
+            else:
+                vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
+                vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
 
         @roger_routine
         def set_forcing_setup(self, state):
@@ -351,23 +363,25 @@ def main():
             prec=vs.prec,
         )
 
+    initial_conditions = ["dry", "normal", "wet", "75"]
     rainfall_scenarios = ["rain", "block-rain", "rain-with-break", "heavyrain",
                           "heavyrain-normal", "heavyrain-gamma",
                           "heavyrain-gamma-reverse", "block-heavyrain"]
-    for rainfall_scenario in rainfall_scenarios:
-        model = ONEDEVENTSetup()
-        identifier = f'ONEDEVENT_{rainfall_scenario}'
-        model._set_identifier(identifier)
-        path_input = model._base_path / "input"
-        path_scenario = model._base_path / "input" / rainfall_scenario
-        model._set_input_dir(path_scenario)
-        if not os.path.exists(path_input):
-            os.mkdir(path_input)
-        if not os.path.exists(path_scenario):
-            os.mkdir(path_scenario)
-        make_forcing_event(path_scenario, nhours=5, event_type=rainfall_scenario)
-        model.setup()
-        model.run()
+    for initial_condition in initial_conditions:
+        for rainfall_scenario in rainfall_scenarios:
+            model = ONEDEVENTSetup()
+            identifier = f'ONEDEVENT_{rainfall_scenario}_{initial_condition}'
+            model._set_identifier(identifier)
+            path_input = model._base_path / "input"
+            path_scenario = model._base_path / "input" / rainfall_scenario
+            model._set_input_dir(path_scenario)
+            if not os.path.exists(path_input):
+                os.mkdir(path_input)
+            if not os.path.exists(path_scenario):
+                os.mkdir(path_scenario)
+            make_forcing_event(path_scenario, nhours=5, event_type=rainfall_scenario)
+            model.setup()
+            model.run()
     return
 
 

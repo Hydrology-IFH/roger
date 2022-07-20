@@ -26,7 +26,7 @@ if not os.path.exists(base_path_figs):
 meteo_stations = ["breitnau", "ihringen"]
 # merge model output into single file
 for meteo_station in meteo_stations:
-    path = str(base_path / f"ONED_{meteo_station}.*.nc")
+    path = str(base_path / f"ONED_lbc_{meteo_station}.*.nc")
     diag_files = glob.glob(path)
     states_hm_file = base_path / "states_hm.nc"
     with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
@@ -125,7 +125,7 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
 meteo_stations = ["breitnau", "ihringen"]
 vars_sim = ['prec', 'int_prec', 'q_snow', 'inf_in', 'inf_mat', 'inf_mp', 'inf_sc',
             'q_hof', 'q_sof', 'q_sub', 'q_sub_mat', 'q_sub_mp', 'q_ss',
-            'pet', 'aet', 'evap_sur', 'evap_soil', 'transp']
+            'pet', 'aet', 'evap_sue', 'evap_soil', 'transp']
 idx_percentiles = ['min', 'q25', 'median', 'mean', 'q75', 'max']
 ll_df_sim_sum = []
 ll_df_sim_sum_tot = []
@@ -213,7 +213,7 @@ ax.savefig(file, dpi=250)
 ax = sns.catplot(x="variable", y="value", hue="meteo_station",
                 data=df_sim_sum, kind="box", height=7, aspect=2, palette="RdPu", whis=[0, 100])
 xticklabels = [labs._TICKLABS[var_sim] for var_sim in vars_sim]
-ax.set_xticklabels(xticklabels, rotation=30)
+ax.set_xticklabels(xticklabels)
 ax.set(xlabel='', ylabel='[mm]')
 ax._legend.set_title("Meteo station")
 file = base_path_figs / "sums_per_grid_box.png"
@@ -232,106 +232,3 @@ ax.savefig(file, dpi=250)
 #     file = base_path_figs / f"sums_per_grid_{meteo_station}.png"
 #     fig.savefig(file, dpi=250)
 plt.close('all')
-
-meteo_stations = ["ihringen"]
-base_path_legacy = Path("/Volumes/Gerics/roger/examples/plot_scale/synthetic/results/roger_legacy")
-idx_10mins = pd.date_range(start='1/10/2010', end='30/09/2011 23:50:00', freq='600s')
-idx_daily = pd.date_range(start='1/10/2010', end='30/09/2011', freq='D')
-for meteo_station in meteo_stations:
-    # file = base_path_legacy / meteo_station / "robin_n0.csv"
-    # df_inf_in_10mins = pd.read_csv(file, sep=" ", header=None)
-    # df_inf_in_10mins.index = idx_10mins
-    # df_inf_in = df_inf_in_10mins.resample('D').sum()
-
-    # file = base_path_legacy / meteo_station / "robin_inf_mtrx0.csv"
-    # df_inf_mat_10mins = pd.read_csv(file, sep=" ", header=None)
-    # df_inf_mat_10mins.index = idx_10mins
-    # df_inf_mat = df_inf_mat_10mins.resample('D').sum()
-
-    # file = base_path_legacy / meteo_station / "robin_sws0.csv"
-    # df_zsat_10mins = pd.read_csv(file, sep=" ", header=None)
-    # df_zsat_10mins.index = idx_10mins
-    # df_zsat = pd.DataFrame(index=idx_daily)
-    # df_zsat = df_theta.join(df_zsat_10mins)
-
-    # file = base_path_legacy / meteo_station / "robin_tp0.csv"
-    # df_perc_10mins = pd.read_csv(file, sep=" ", header=None)
-    # df_perc_10mins.index = idx_10mins
-    # df_perc = df_perc_10mins.resample('D').sum()
-    
-    # del df_inf_in_10mins, df_inf_mat_10mins, df_theta_10mins, df_perc_10mins
-    
-    file = base_path_legacy / meteo_station / "robin_d_n0.csv"
-    df_inf_in = pd.read_csv(file, sep=" ", header=None)
-
-    file = base_path_legacy / meteo_station / "robin_d_inf_mtrx0.csv"
-    df_inf_mat = pd.read_csv(file, sep=" ", header=None)
-
-    file = base_path_legacy / meteo_station / "robin_d_sws0.csv"
-    df_zsat = pd.read_csv(file, sep=" ", header=None)
-
-    file = base_path_legacy / meteo_station / "robin_d_tp0.csv"
-    df_perc = pd.read_csv(file, sep=" ", header=None)
-
-    # load simulation
-    states_hm_file = base_path / "states_hm.nc"
-    ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf", group=meteo_station)
-
-    # assign date
-    days_sim = ds_sim.Time.values + 1
-    ds_sim = ds_sim.assign_coords(date=("Time", days_sim))
-
-    # sums per grid
-    ds_sim_sum = ds_sim.sum(dim="Time")
-    nx = ds_sim_sum.dims['x']  # number of rows
-    df = pd.DataFrame(index=range(nx))
-    for var_sim in vars_sim:
-        df.loc[:, 'inf_in'] = ds_sim_sum['inf_in'].values.flatten()
-
-    fig, ax = plt.subplots()
-    ax.plot(df.index, df.values.flatten() - df_inf_in.sum().values, color='black')
-    ax.set_xlabel('# grid')
-    ax.set_ylabel('[mm]')
-    fig.tight_layout()
-    file = base_path_figs / f"difference_inf_in_sum_{meteo_station}.png"
-    fig.savefig(file, dpi=250)
-    plt.close(fig)
-    
-    fig, ax = plt.subplots()
-    ax.plot(df.index, df.values.flatten(), color='red')
-    ax.plot(df.index, df_inf_in.sum().values, color='blue')
-    ax.set_xlabel('# grid')
-    ax.set_ylabel('[mm]')
-    fig.tight_layout()
-    file = base_path_figs / f"inf_in_sum_{meteo_station}.png"
-    fig.savefig(file, dpi=250)
-    plt.close(fig)
-
-    ds_sim_sum = ds_sim.sum(dim="Time")
-    nx = ds_sim_sum.dims['x']  # number of rows
-    df = pd.DataFrame(index=range(nx))
-    for var_sim in vars_sim:
-        df.loc[:, 'inf_mat'] = ds_sim_sum['inf_mat'].values.flatten()
-
-    fig, ax = plt.subplots()
-    ax.plot(df.index, df.values.flatten() - df_inf_mat.sum().values, color='black')
-    ax.set_xlabel('# grid')
-    ax.set_ylabel('[mm]')
-    fig.tight_layout()
-    file = base_path_figs / f"difference_inf_mat_{meteo_station}.png"
-    fig.savefig(file, dpi=250)
-    plt.close(fig)
-
-    nx = ds_sim.dims['x']  # number of rows
-    df = pd.DataFrame(index=range(nx))
-    for var_sim in vars_sim:
-        df.loc[:, 'z_sat'] = onp.max(ds_sim['z_sat'].values[:, 0, -1], axis=-1)
-
-    fig, ax = plt.subplots()
-    ax.plot(df.index, df.values.flatten() - onp.max(df_zsat.values, axis=-1), color='black')
-    ax.set_xlabel('# grid')
-    ax.set_ylabel('[mm]')
-    fig.tight_layout()
-    file = base_path_figs / f"difference_zsat_max_{meteo_station}.png"
-    fig.savefig(file, dpi=250)
-    plt.close(fig)

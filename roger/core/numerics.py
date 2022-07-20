@@ -659,12 +659,45 @@ def calc_parameters_surface_kernel(state):
         at[2:-2, 2:-2], basal_evap_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
     )
 
+    # maximum snow interception storage
+    vs.swe_top_tot = update(
+        vs.swe_top_tot,
+        at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] >= -3) & (vs.ta[2:-2, 2:-2, vs.tau] <= -1) & (vs.lu_id[2:-2, 2:-2] == 10), 2.5 + 0.5 * vs.ta[2:-2, 2:-2, vs.tau] * 9, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.swe_top_tot = update(
+        vs.swe_top_tot,
+        at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] >= -3) & (vs.ta[2:-2, 2:-2, vs.tau] <= -1) & (vs.lu_id[2:-2, 2:-2] == 11), 2.5 + 0.5 * vs.ta[2:-2, 2:-2, vs.tau] * 15, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.swe_top_tot = update(
+        vs.swe_top_tot,
+        at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] >= -3) & (vs.ta[2:-2, 2:-2, vs.tau] <= -1) & (vs.lu_id[2:-2, 2:-2] == 12), 2.5 + 0.5 * vs.ta[2:-2, 2:-2, vs.tau] * 25, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.lai = update(
+        vs.lai,
+        at[2:-2, 2:-2], npx.log(1 / (1 - vs.ground_cover[2:-2, 2:-2, vs.tau])) / npx.log(1 / 0.7) * vs.maskCatch[2:-2, 2:-2]
+    )
+
+    vs.throughfall_coeff_top = update(
+        vs.throughfall_coeff_top,
+        at[2:-2, 2:-2], npx.where(npx.isin(vs.lu_id[2:-2, 2:-2], npx.array([10, 11, 12])), npx.where(vs.lai[2:-2, 2:-2] > 1, 0, 1 - vs.lai[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2]
+    )
+
+    vs.throughfall_coeff_ground = update(
+        vs.throughfall_coeff_ground,
+        at[2:-2, 2:-2], npx.where(npx.isin(vs.lu_id[2:-2, 2:-2], npx.arange(500, 598)), npx.where(vs.lai[2:-2, 2:-2] > 1, 0, 1 - vs.lai[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2]
+    )
+
     return KernelOutput(
         S_int_top_tot=vs.S_int_top_tot,
         S_int_ground_tot=vs.S_int_ground_tot,
         ground_cover=vs.ground_cover,
         basal_transp_coeff=vs.basal_transp_coeff,
-        basal_evap_coeff=vs.basal_evap_coeff
+        basal_evap_coeff=vs.basal_evap_coeff,
+        swe_top_tot=vs.swe_top_tot,
+        lai=vs.lai,
+        throughfall_coeff_top=vs.throughfall_coeff_top,
+        throughfall_coeff_ground=vs.throughfall_coeff_ground,
     )
 
 

@@ -1480,11 +1480,6 @@ def calculate_infiltration(state):
             vs.t_event_csum,
             at[2:-2, 2:-2], vs.dt,
         )
-        # accumulated event precipitation
-        vs.prec_event_csum = update_add(
-            vs.prec_event_csum,
-            at[2:-2, 2:-2], vs.prec[2:-2, 2:-2, vs.tau],
-        )
 
     vs.update(calc_inf_mat_params(state))
     vs.update(calc_inf_mat(state))

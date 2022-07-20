@@ -22,11 +22,11 @@ def calc_rain_int_top(state):
     int_top_free = allocate(state.dimensions, ("x", "y"))
     int_top_free = update(
         int_top_free,
-        at[2:-2, 2:-2], npx.where(vs.S_int_top[2:-2, 2:-2, vs.tau] < vs.S_int_top_tot[2:-2, 2:-2], 0, vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.S_int_top[2:-2, 2:-2, vs.tau] < vs.S_int_top_tot[2:-2, 2:-2], vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    mask1 = (int_top_free >= vs.prec[:, :, vs.tau] * (1. - settings.throughfall_coeff)) & (vs.ta[:, :, vs.tau] > settings.ta_fm) & (int_top_free > 0)
-    mask2 = (int_top_free < vs.prec[:, :, vs.tau] * (1. - settings.throughfall_coeff)) & (vs.ta[:, :, vs.tau] > settings.ta_fm) & (int_top_free > 0)
+    mask1 = (int_top_free >= vs.prec[:, :, vs.tau] * (1. - vs.throughfall_coeff_top)) & (vs.ta[:, :, vs.tau] > settings.ta_fm) & (int_top_free > 0)
+    mask2 = (int_top_free < vs.prec[:, :, vs.tau] * (1. - vs.throughfall_coeff_top)) & (vs.ta[:, :, vs.tau] > settings.ta_fm) & (int_top_free > 0)
 
     vs.int_rain_top = update(
         vs.int_rain_top,
@@ -35,7 +35,7 @@ def calc_rain_int_top(state):
     # rain is intercepted
     vs.int_rain_top = update_add(
         vs.int_rain_top,
-        at[2:-2, 2:-2], vs.prec[2:-2, 2:-2, vs.tau] * (1. - settings.throughfall_coeff) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], vs.prec[2:-2, 2:-2, vs.tau] * (1. - vs.throughfall_coeff_top[2:-2, 2:-2]) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     # interception is constrained by remaining storage
@@ -73,7 +73,7 @@ def calc_rain_int_ground(state):
     int_ground_free = allocate(state.dimensions, ("x", "y"))
     int_ground_free = update(
         int_ground_free,
-        at[2:-2, 2:-2], npx.where((vs.S_int_ground[2:-2, 2:-2, vs.tau] < vs.S_int_ground_tot[2:-2, 2:-2]) & (vs.S_snow[2:-2, 2:-2, vs.tau] > 0), 0, vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where((vs.S_int_ground[2:-2, 2:-2, vs.tau] < vs.S_int_ground_tot[2:-2, 2:-2]) & (vs.S_snow[2:-2, 2:-2, vs.tau] <= 0), vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
     mask1 = (int_ground_free >= rain) & (vs.ta[:, :, vs.tau] > settings.ta_fm) & (int_ground_free > 0)
@@ -134,15 +134,29 @@ def calc_snow_int_top(state):
         at[2:-2, 2:-2], npx.where(mask_snow[2:-2, 2:-2], vs.prec[2:-2, 2:-2, vs.tau], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
+    # maximum snow interception storage
+    vs.swe_top_tot = update(
+        vs.swe_top_tot,
+        at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] >= -3) & (vs.ta[2:-2, 2:-2, vs.tau] <= -1) & (vs.lu_id[2:-2, 2:-2] == 10), 2.5 + 0.5 * vs.ta[2:-2, 2:-2, vs.tau] * 9, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.swe_top_tot = update(
+        vs.swe_top_tot,
+        at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] >= -3) & (vs.ta[2:-2, 2:-2, vs.tau] <= -1) & (vs.lu_id[2:-2, 2:-2] == 11), 2.5 + 0.5 * vs.ta[2:-2, 2:-2, vs.tau] * 15, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.swe_top_tot = update(
+        vs.swe_top_tot,
+        at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] >= -3) & (vs.ta[2:-2, 2:-2, vs.tau] <= -1) & (vs.lu_id[2:-2, 2:-2] == 12), 2.5 + 0.5 * vs.ta[2:-2, 2:-2, vs.tau] * 25, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     # available interception storage
     int_top_free = allocate(state.dimensions, ("x", "y"))
     int_top_free = update(
         int_top_free,
-        at[2:-2, 2:-2], npx.where(vs.S_int_top[2:-2, 2:-2, vs.tau] >= vs.S_int_top_tot[2:-2, 2:-2], 0, vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.swe_top[2:-2, 2:-2, vs.tau] >= vs.swe_top_tot[2:-2, 2:-2], 0, vs.swe_top_tot[2:-2, 2:-2] - vs.swe_top[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    mask1 = (int_top_free >= vs.prec[:, :, vs.tau] * (1. - settings.throughfall_coeff)) & (vs.ta[:, :, vs.tau] <= settings.ta_fm) & (int_top_free > 0)
-    mask2 = (int_top_free < vs.prec[:, :, vs.tau] * (1. - settings.throughfall_coeff)) & (vs.ta[:, :, vs.tau] <= settings.ta_fm) & (int_top_free > 0)
+    mask1 = (int_top_free >= vs.prec[:, :, vs.tau] * (1. - vs.throughfall_coeff_top)) & (vs.ta[:, :, vs.tau] <= settings.ta_fm) & (int_top_free > 0)
+    mask2 = (int_top_free < vs.prec[:, :, vs.tau] * (1. - vs.throughfall_coeff_top)) & (vs.ta[:, :, vs.tau] <= settings.ta_fm) & (int_top_free > 0)
 
     # snow is intercepted
     vs.int_snow_top = update(
@@ -152,7 +166,7 @@ def calc_snow_int_top(state):
 
     vs.int_snow_top = update_add(
         vs.int_snow_top,
-        at[2:-2, 2:-2], vs.prec[2:-2, 2:-2, vs.tau] * (1. - settings.throughfall_coeff) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], vs.prec[2:-2, 2:-2, vs.tau] * (1. - vs.throughfall_coeff_top[2:-2, 2:-2]) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     # interception is constrained by remaining storage

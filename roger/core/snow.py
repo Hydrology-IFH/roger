@@ -45,7 +45,7 @@ def calc_rain_on_snow(state):
 
 
 @roger_kernel
-def calc_snow_melt_top_int(state):
+def calc_snow_melt_int_top(state):
     """
     Calculates snow melt in top interception storage
     """
@@ -59,14 +59,15 @@ def calc_snow_melt_top_int(state):
         at[2:-2, 2:-2], (settings.sf * (vs.ta[2:-2, 2:-2, vs.tau] - settings.ta_fm) * vs.dt) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    mask1 = (snow_melt_pot > 0) & (snow_melt_pot <= vs.swe_top[:, :, vs.tau]) & (vs.swe_top[:, :, vs.tau] == vs.S_int_top[:, :, vs.tau])
-    mask2 = (snow_melt_pot > 0) & (snow_melt_pot > vs.swe_top[:, :, vs.tau]) & (vs.swe_top[:, :, vs.tau] == vs.S_int_top[:, :, vs.tau])
+    mask1 = (snow_melt_pot > 0) & (snow_melt_pot <= vs.swe_top[:, :, vs.tau]) & (vs.S_int_top_tot >= vs.swe_top[:, :, vs.tau]) & (vs.swe_top[:, :, vs.tau] == vs.S_int_top[:, :, vs.tau])
+    mask2 = (snow_melt_pot > 0) & (snow_melt_pot > vs.swe_top[:, :, vs.tau]) & (vs.S_int_top_tot >= vs.swe_top[:, :, vs.tau]) & (vs.swe_top[:, :, vs.tau] == vs.S_int_top[:, :, vs.tau])
+    mask6 = (snow_melt_pot > 0) & (snow_melt_pot <= vs.swe_top[:, :, vs.tau]) & (vs.S_int_top_tot < vs.swe_top[:, :, vs.tau]) & (vs.swe_top[:, :, vs.tau] == vs.S_int_top[:, :, vs.tau])
+    mask7 = (snow_melt_pot > 0) & (snow_melt_pot > vs.swe_top[:, :, vs.tau]) & (vs.S_int_top_tot < vs.swe_top[:, :, vs.tau]) & (vs.swe_top[:, :, vs.tau] == vs.S_int_top[:, :, vs.tau])
 
     vs.snow_melt_top = update(
         vs.snow_melt_top,
         at[2:-2, 2:-2], 0,
     )
-
     vs.snow_melt_top = update(
         vs.snow_melt_top,
         at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], snow_melt_pot[2:-2, 2:-2], vs.snow_melt_top[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
@@ -74,6 +75,24 @@ def calc_snow_melt_top_int(state):
     vs.snow_melt_top = update(
         vs.snow_melt_top,
         at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.swe_top[2:-2, 2:-2, vs.tau], vs.snow_melt_top[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.snow_melt_top = update(
+        vs.snow_melt_top,
+        at[2:-2, 2:-2], npx.where(mask6[2:-2, 2:-2], snow_melt_pot[2:-2, 2:-2], vs.snow_melt_top[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.snow_melt_top = update(
+        vs.snow_melt_top,
+        at[2:-2, 2:-2], npx.where(mask7[2:-2, 2:-2], vs.swe_top[2:-2, 2:-2, vs.tau], vs.snow_melt_top[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # add snow melt dripping to snow melt runoff
+    vs.q_snow = update(
+        vs.q_snow,
+        at[2:-2, 2:-2], 0,
+    )
+    vs.q_snow = update_add(
+        vs.q_snow,
+        at[2:-2, 2:-2], npx.where(mask6[2:-2, 2:-2] | mask7[2:-2, 2:-2], vs.snow_melt_top[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # snow melt when snow cover contains liquid water
@@ -110,7 +129,13 @@ def calc_snow_melt_top_int(state):
         at[2:-2, 2:-2, vs.tau], npx.where(mask5[2:-2, 2:-2], 0, -vs.swe_top[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(snow_melt_top=vs.snow_melt_top, pet_res=vs.pet_res, swe_top=vs.swe_top)
+    mask8 = (vs.S_int_top_tot <= vs.swe_top[:, :, vs.tau])
+    vs.S_int_top = update_add(
+        vs.S_int_top,
+        at[2:-2, 2:-2, vs.tau], npx.where(mask8[2:-2, 2:-2], -vs.snow_melt_top[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    return KernelOutput(snow_melt_top=vs.snow_melt_top, pet_res=vs.pet_res, swe_top=vs.swe_top, S_int_top=vs.S_int_top, q_snow=vs.q_snow)
 
 
 @roger_kernel
@@ -326,7 +351,7 @@ def calc_snow_melt(state):
         at[2:-2, 2:-2, vs.tau], npx.where(mask9[2:-2, 2:-2], 0, vs.S_snow[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    vs.q_snow = update(
+    vs.q_snow = update_add(
         vs.q_snow,
         at[2:-2, 2:-2], (vs.snow_melt[2:-2, 2:-2] + vs.q_rain_on_snow[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
@@ -353,6 +378,6 @@ def calculate_snow(state):
 
     vs.update(calc_snow_accumulation(state))
     vs.update(calc_rain_on_snow(state))
-    vs.update(calc_snow_melt_top_int(state))
+    vs.update(calc_snow_melt_int_top(state))
     vs.update(calc_snow_melt_ground_int(state))
     vs.update(calc_snow_melt(state))

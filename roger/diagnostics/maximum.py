@@ -51,11 +51,10 @@ class Maximum(RogerDiagnostic):
         max_vs = self.variables
 
         for key in self.output_variables:
-            var_data = getattr(max_vs, key)
             if self._has_timestep_dim(state, key):
-                setattr(max_vs, key, npx.where(getattr(vs, key)[..., vs.tau] > var_data, getattr(vs, key)[..., vs.tau], var_data))
+                setattr(max_vs, key, npx.where(getattr(vs, key)[..., vs.tau] > getattr(max_vs, key)[..., vs.tau], getattr(vs, key)[..., vs.tau], getattr(max_vs, key)[..., vs.tau]))
             else:
-                setattr(max_vs, key, npx.where(getattr(vs, key) > var_data, getattr(vs, key), var_data))
+                setattr(max_vs, key, npx.where(getattr(vs, key) > getattr(max_vs, key), getattr(vs, key), getattr(max_vs, key)))
 
     def output(self, state):
         """Write maximum to netcdf file and zero array"""

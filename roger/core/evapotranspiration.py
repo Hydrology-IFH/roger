@@ -89,7 +89,12 @@ def calc_evap_int_ground(state):
         at[2:-2, 2:-2, vs.tau], -vs.evap_int_ground[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(S_int_ground=vs.S_int_ground, pet_res=vs.pet_res, evap_int_ground=vs.evap_int_ground)
+    vs.evap_int = update_add(
+        vs.evap_int,
+        at[2:-2, 2:-2], vs.evap_int_ground[2:-2, 2:-2] + vs.evap_int_top[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    return KernelOutput(S_int_ground=vs.S_int_ground, pet_res=vs.pet_res, evap_int_ground=vs.evap_int_ground, evap_int=vs.evap_int)
 
 
 @roger_kernel
