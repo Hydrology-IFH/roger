@@ -515,10 +515,6 @@ def main(nsamples):
             vs.y_sc,
             at[2:-2, 2:-2, vs.taum1], vs.y_sc[2:-2, 2:-2, vs.tau],
         )
-        vs.t_event_sum = update(
-            vs.t_event_sum,
-            at[2:-2, 2:-2, vs.taum1], vs.t_event_sum[2:-2, 2:-2, vs.tau],
-        )
         vs.theta_rz = update(
             vs.theta_rz,
             at[2:-2, 2:-2, vs.taum1], vs.theta_rz[2:-2, 2:-2, vs.tau],
@@ -605,7 +601,6 @@ def main(nsamples):
             z_wf_t1=vs.z_wf_t1,
             y_mp=vs.y_mp,
             y_sc=vs.y_sc,
-            t_event_sum=vs.t_event_sum,
             theta_rz=vs.theta_rz,
             theta_ss=vs.theta_ss,
             theta=vs.theta,
