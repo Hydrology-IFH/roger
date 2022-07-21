@@ -81,7 +81,8 @@ with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
                                    units=var_obj.attrs["units"])
 
 # load simulation
-states_hm_mc_file = base_path_data / "states_hm_monte_carlo.nc"
+states_hm_mc_file1 = base_path_data / "states_hm_monte_carlo.nc"
+shutil.copy(states_hm_mc_file, states_hm_mc_file1)
 ds_sim = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
 
 # load observations (measured data)

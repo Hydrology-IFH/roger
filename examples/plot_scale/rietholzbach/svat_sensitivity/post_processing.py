@@ -96,8 +96,9 @@ states_hm_si_file1 = base_path_tm / "states_hm_sensitivity.nc"
 shutil.copy(states_hm_si_file, states_hm_si_file1)
 
 # load simulation
-states_hm_mc_file = base_path_data / "states_hm_sensitivity.nc"
-ds_sim = xr.open_dataset(states_hm_si_file, engine="h5netcdf")
+states_hm_si_file2 = base_path_data / "states_hm_sensitivity.nc"
+shutil.copy(states_hm_si_file, states_hm_si_file2)
+ds_sim = xr.open_dataset(states_hm_si_file2, engine="h5netcdf")
 
 # load observations (measured data)
 path_obs = base_path.parent / "observations" / "rietholzbach_lysimeter.nc"
