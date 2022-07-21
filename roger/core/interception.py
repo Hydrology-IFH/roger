@@ -146,6 +146,18 @@ def calc_snow_int_top(state):
     # maximum snow interception storage
     vs.swe_top_tot = update(
         vs.swe_top_tot,
+        at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] > -1) & (vs.lu_id[2:-2, 2:-2] == 10), 9, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.swe_top_tot = update(
+        vs.swe_top_tot,
+        at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] > -1) & (vs.lu_id[2:-2, 2:-2] == 11), 15, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.swe_top_tot = update(
+        vs.swe_top_tot,
+        at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] > -1) & (vs.lu_id[2:-2, 2:-2] == 12), 25, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.swe_top_tot = update(
+        vs.swe_top_tot,
         at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] >= -3) & (vs.ta[2:-2, 2:-2, vs.tau] <= -1) & (vs.lu_id[2:-2, 2:-2] == 10), 2.5 + 0.5 * vs.ta[2:-2, 2:-2, vs.tau] * 9, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.swe_top_tot = update(
@@ -155,6 +167,18 @@ def calc_snow_int_top(state):
     vs.swe_top_tot = update(
         vs.swe_top_tot,
         at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] >= -3) & (vs.ta[2:-2, 2:-2, vs.tau] <= -1) & (vs.lu_id[2:-2, 2:-2] == 12), 2.5 + 0.5 * vs.ta[2:-2, 2:-2, vs.tau] * 25, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.swe_top_tot = update(
+        vs.swe_top_tot,
+        at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] < -3) & (vs.lu_id[2:-2, 2:-2] == 10), 18, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.swe_top_tot = update(
+        vs.swe_top_tot,
+        at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] < -3) & (vs.lu_id[2:-2, 2:-2] == 11), 30, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.swe_top_tot = update(
+        vs.swe_top_tot,
+        at[2:-2, 2:-2], npx.where((vs.ta[2:-2, 2:-2, vs.tau] < -3) & (vs.lu_id[2:-2, 2:-2] == 12), 50, vs.swe_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # available interception storage
@@ -195,7 +219,7 @@ def calc_snow_int_top(state):
         at[2:-2, 2:-2, vs.tau], vs.int_snow_top[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(S_int_top=vs.S_int_top, swe_top=vs.swe_top, snow_top=vs.snow_top, int_snow_top=vs.int_snow_top)
+    return KernelOutput(S_int_top=vs.S_int_top, swe_top=vs.swe_top, snow_top=vs.snow_top, int_snow_top=vs.int_snow_top, swe_top_tot=vs.swe_top_tot)
 
 
 @roger_kernel
