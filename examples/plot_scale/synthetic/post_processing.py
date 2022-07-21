@@ -181,7 +181,7 @@ for i, meteo_station in enumerate(meteo_stations):
         for x in range(nx):
             vals = ds_sim[var_sim].isel(x=x, y=0).values
             ax.plot(days_sim[1:], vals[1:], color='black')
-        ax.set_xlabel('Time [hours]')
+        ax.set_xlabel('Time [days]')
         ax.set_ylabel(labs._LABS[var_sim])
         fig.tight_layout()
         file = base_path_figs / f"trace_{var_sim}_{meteo_station}.png"
@@ -258,9 +258,9 @@ for meteo_station in meteo_stations:
     # df_perc_10mins = pd.read_csv(file, sep=" ", header=None)
     # df_perc_10mins.index = idx_10mins
     # df_perc = df_perc_10mins.resample('D').sum()
-    
+
     # del df_inf_in_10mins, df_inf_mat_10mins, df_theta_10mins, df_perc_10mins
-    
+
     file = base_path_legacy / meteo_station / "robin_d_n0.csv"
     df_inf_in = pd.read_csv(file, sep=" ", header=None)
 
@@ -287,6 +287,7 @@ for meteo_station in meteo_stations:
     df = pd.DataFrame(index=range(nx))
     for var_sim in vars_sim:
         df.loc[:, 'inf_in'] = ds_sim_sum['inf_in'].values.flatten()
+        df.loc[:, 'prec'] = ds_sim_sum['prec'].values.flatten()
 
     fig, ax = plt.subplots()
     ax.plot(df.index, df.values.flatten() - df_inf_in.sum().values, color='black')
@@ -296,9 +297,10 @@ for meteo_station in meteo_stations:
     file = base_path_figs / f"difference_inf_in_sum_{meteo_station}.png"
     fig.savefig(file, dpi=250)
     plt.close(fig)
-    
+
     fig, ax = plt.subplots()
-    ax.plot(df.index, df.values.flatten(), color='red')
+    ax.plot(df.index, df.loc[:, 'prec'].values.flatten(), color='black')
+    ax.plot(df.index, df.loc[:, 'inf_in'].values.flatten(), color='red')
     ax.plot(df.index, df_inf_in.sum().values, color='blue')
     ax.set_xlabel('# grid')
     ax.set_ylabel('[mm]')
@@ -322,16 +324,16 @@ for meteo_station in meteo_stations:
     fig.savefig(file, dpi=250)
     plt.close(fig)
 
-    nx = ds_sim.dims['x']  # number of rows
-    df = pd.DataFrame(index=range(nx))
-    for var_sim in vars_sim:
-        df.loc[:, 'z_sat'] = onp.max(ds_sim['z_sat'].values[:, 0, -1], axis=-1)
-
-    fig, ax = plt.subplots()
-    ax.plot(df.index, df.values.flatten() - onp.max(df_zsat.values, axis=-1), color='black')
-    ax.set_xlabel('# grid')
-    ax.set_ylabel('[mm]')
-    fig.tight_layout()
-    file = base_path_figs / f"difference_zsat_max_{meteo_station}.png"
-    fig.savefig(file, dpi=250)
-    plt.close(fig)
+    # nx = ds_sim.dims['x']  # number of rows
+    # df = pd.DataFrame(index=range(nx))
+    # for var_sim in vars_sim:
+    #     df.loc[:, 'z_sat'] = onp.max(ds_sim['z_sat'].values[:, 0, -1], axis=-1)
+    #
+    # fig, ax = plt.subplots()
+    # ax.plot(df.index, df.values.flatten() - onp.max(df_zsat.values, axis=-1), color='black')
+    # ax.set_xlabel('# grid')
+    # ax.set_ylabel('[mm]')
+    # fig.tight_layout()
+    # file = base_path_figs / f"difference_zsat_max_{meteo_station}.png"
+    # fig.savefig(file, dpi=250)
+    # plt.close(fig)

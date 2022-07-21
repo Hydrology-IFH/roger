@@ -21,7 +21,7 @@ import roger
 onp.random.seed(42)
 
 base_path = Path(__file__).parent
-base_path_data = Path('smb://fuhys015.public.ads.uni-freiburg.de/Gerics') / base_path.parts[0].join(base_path.parts[-5:])
+base_path_data = Path('/Volumes/Gerics/') / base_path.parts[0].join(base_path.parts[-5:])
 
 # sampled parameter space
 file_path = base_path / "param_bounds.yml"
