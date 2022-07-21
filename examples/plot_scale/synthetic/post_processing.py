@@ -290,7 +290,7 @@ for meteo_station in meteo_stations:
         df.loc[:, 'prec'] = ds_sim_sum['prec'].values.flatten()
 
     fig, ax = plt.subplots()
-    ax.plot(df.index, df.values.flatten() - df_inf_in.sum().values, color='black')
+    ax.plot(df.index, df.loc[:, 'inf_in'].values.flatten() - df_inf_in.sum().values, color='black')
     ax.set_xlabel('# grid')
     ax.set_ylabel('[mm]')
     fig.tight_layout()

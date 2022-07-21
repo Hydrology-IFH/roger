@@ -76,8 +76,8 @@ def calc_rain_int_ground(state):
         at[2:-2, 2:-2], npx.where((vs.S_int_ground[2:-2, 2:-2, vs.tau] < vs.S_int_ground_tot[2:-2, 2:-2]) & (vs.S_snow[2:-2, 2:-2, vs.tau] <= 0), vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    mask1 = (int_ground_free >= rain) & (vs.ta[:, :, vs.tau] > settings.ta_fm) & (int_ground_free > 0)
-    mask2 = (int_ground_free < rain) & (vs.ta[:, :, vs.tau] > settings.ta_fm) & (int_ground_free > 0)
+    mask1 = (int_ground_free >= rain * (1. - vs.throughfall_coeff_ground)) & (vs.ta[:, :, vs.tau] > settings.ta_fm) & (int_ground_free > 0)
+    mask2 = (int_ground_free < rain * (1. - vs.throughfall_coeff_ground)) & (vs.ta[:, :, vs.tau] > settings.ta_fm) & (int_ground_free > 0)
 
     vs.int_rain_ground = update(
         vs.int_rain_ground,
@@ -86,7 +86,7 @@ def calc_rain_int_ground(state):
     # rain is intercepted
     vs.int_rain_ground = update_add(
         vs.int_rain_ground,
-        at[2:-2, 2:-2], rain[2:-2, 2:-2] * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], rain[2:-2, 2:-2] * (1. - vs.throughfall_coeff_ground) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     # interception is constrained by remaining storage
@@ -212,8 +212,8 @@ def calc_snow_int_ground(state):
         at[2:-2, 2:-2], npx.where(vs.S_int_ground[2:-2, 2:-2, vs.tau] >= vs.S_int_ground_tot[2:-2, 2:-2], 0, vs.S_int_ground_tot[2:-2, 2:-2] - vs.S_int_ground[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    mask1 = (int_ground_free >= snow) & (vs.ta[:, :, vs.tau] <= settings.ta_fm) & (int_ground_free > 0)
-    mask2 = (int_ground_free < snow) & (vs.ta[:, :, vs.tau] <= settings.ta_fm) & (int_ground_free > 0)
+    mask1 = (int_ground_free >= snow * (1. - vs.throughfall_coeff_ground)) & (vs.ta[:, :, vs.tau] <= settings.ta_fm) & (int_ground_free > 0)
+    mask2 = (int_ground_free < snow * (1. - vs.throughfall_coeff_ground)) & (vs.ta[:, :, vs.tau] <= settings.ta_fm) & (int_ground_free > 0)
 
     # snow is intercepted
     vs.int_snow_ground = update(
@@ -223,7 +223,7 @@ def calc_snow_int_ground(state):
 
     vs.int_snow_ground = update_add(
         vs.int_snow_ground,
-        at[2:-2, 2:-2], snow[2:-2, 2:-2] * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], snow[2:-2, 2:-2] * (1. - vs.throughfall_coeff_ground) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     # interception is constrained by remaining storage
