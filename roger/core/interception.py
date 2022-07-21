@@ -18,11 +18,20 @@ def calc_rain_int_top(state):
         at[2:-2, 2:-2], npx.where(mask_rain[2:-2, 2:-2], vs.prec[2:-2, 2:-2, vs.tau], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
+    # snow layer retention storage
+    wtmx = allocate(state.dimensions, ("x", "y"))
+    wtmx = (10000. / (100 - settings.rmax) / 100.) * vs.swe_top[:, :, vs.tau]
+
     # available interception storage
     int_top_free = allocate(state.dimensions, ("x", "y"))
+    S_int_top_tot = allocate(state.dimensions, ("x", "y"))
+    S_int_top_tot = update(
+        S_int_top_tot,
+        at[2:-2, 2:-2], npx.where(vs.S_int_top_tot[2:-2, 2:-2] < wtmx[2:-2, 2:-2], wtmx[2:-2, 2:-2], vs.S_int_top_tot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
     int_top_free = update(
         int_top_free,
-        at[2:-2, 2:-2], npx.where(vs.S_int_top[2:-2, 2:-2, vs.tau] < vs.S_int_top_tot[2:-2, 2:-2], vs.S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau], 0) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.S_int_top[2:-2, 2:-2, vs.tau] < S_int_top_tot[2:-2, 2:-2], S_int_top_tot[2:-2, 2:-2] - vs.S_int_top[2:-2, 2:-2, vs.tau], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
     mask1 = (int_top_free >= vs.prec[:, :, vs.tau] * (1. - vs.throughfall_coeff_top)) & (vs.ta[:, :, vs.tau] > settings.ta_fm) & (int_top_free > 0)
@@ -86,7 +95,7 @@ def calc_rain_int_ground(state):
     # rain is intercepted
     vs.int_rain_ground = update_add(
         vs.int_rain_ground,
-        at[2:-2, 2:-2], rain[2:-2, 2:-2] * (1. - vs.throughfall_coeff_ground) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], rain[2:-2, 2:-2] * (1. - vs.throughfall_coeff_ground[2:-2, 2:-2]) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     # interception is constrained by remaining storage
@@ -223,7 +232,7 @@ def calc_snow_int_ground(state):
 
     vs.int_snow_ground = update_add(
         vs.int_snow_ground,
-        at[2:-2, 2:-2], snow[2:-2, 2:-2] * (1. - vs.throughfall_coeff_ground) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], snow[2:-2, 2:-2] * (1. - vs.throughfall_coeff_ground[2:-2, 2:-2]) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     # interception is constrained by remaining storage

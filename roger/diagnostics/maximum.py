@@ -52,7 +52,7 @@ class Maximum(RogerDiagnostic):
 
         for key in self.output_variables:
             if self._has_timestep_dim(state, key):
-                setattr(max_vs, key, npx.where(getattr(vs, key)[..., vs.tau] > getattr(max_vs, key)[..., vs.tau], getattr(vs, key)[..., vs.tau], getattr(max_vs, key)[..., vs.tau]))
+                setattr(max_vs, key, npx.where(getattr(vs, key)[..., vs.tau] > getattr(max_vs, key), getattr(vs, key)[..., vs.tau], getattr(max_vs, key)))
             else:
                 setattr(max_vs, key, npx.where(getattr(vs, key) > getattr(max_vs, key), getattr(vs, key), getattr(max_vs, key)))
 

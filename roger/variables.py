@@ -2727,6 +2727,12 @@ VARIABLES = {
         "mm/dt",
         "snowfall",
     ),
+    "snow_melt_drip": Variable(
+        "snow melt drip from canopy",
+        CATCH_GRID,
+        "mm/dt",
+        "snow melt drip from canopy",
+    ),
     "snow_top": Variable(
         "snowfall",
         CATCH_GRID,

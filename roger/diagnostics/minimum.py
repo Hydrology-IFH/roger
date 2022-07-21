@@ -51,11 +51,10 @@ class Minimum(RogerDiagnostic):
         min_vs = self.variables
 
         for key in self.output_variables:
-            var_data = getattr(min_vs, key)
             if self._has_timestep_dim(state, key):
-                setattr(min_vs, key, npx.where(getattr(vs, key)[..., vs.tau] < var_data, getattr(vs, key)[..., vs.tau], var_data))
+                setattr(min_vs, key, npx.where(getattr(vs, key)[..., vs.tau] < getattr(min_vs, key), getattr(vs, key)[..., vs.tau], getattr(min_vs, key)))
             else:
-                setattr(min_vs, key, npx.where(getattr(vs, key) < var_data, getattr(vs, key), var_data))
+                setattr(min_vs, key, npx.where(getattr(vs, key) < getattr(min_vs, key), getattr(vs, key), getattr(min_vs, key)))
 
     def output(self, state):
         """Write minimum to netcdf file and zero array"""

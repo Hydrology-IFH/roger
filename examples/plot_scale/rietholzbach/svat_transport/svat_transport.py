@@ -286,6 +286,7 @@ def main(transport_model_structure):
         )
         def set_initial_conditions_setup(self, state):
             vs = state.variables
+
             vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_snow", self._base_path, 'states_hm.nc')[:, :, vs.itt])
             vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
             vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
@@ -370,7 +371,12 @@ def main(transport_model_structure):
                     at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2],
                 )
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "C_IN",
+            ],
+        )
         def set_forcing_setup(self, state):
             vs = state.variables
             settings = state.settings
