@@ -13,7 +13,7 @@ def calc_S_zsat(state):
 
     vs.S_zsat = update(
         vs.S_zsat,
-        at[2:-2, 2:-2], vs.z_sat[2:-2, 2:-2, vs.tau] * vs.theta_ac[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.z_sat[2:-2, 2:-2, vs.tau] <= vs.z_soil[2:-2, 2:-2], vs.z_sat[2:-2, 2:-2, vs.tau] * vs.theta_ac[2:-2, 2:-2], vs.z_soil[2:-2, 2:-2] * vs.theta_ac[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.S_zsat_ss = update(
@@ -618,13 +618,13 @@ def calc_perc_pot_rz(state):
         at[2:-2, 2:-2], npx.where(mask4[2:-2, 2:-2], vs.S_lp_rz[2:-2, 2:-2], vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    mask5 = (vs.q_pot_rz > 0) & (vs.q_pot_rz > vs.S_ac_ss - vs.S_lp_ss)
+    mask5 = (vs.q_pot_rz > 0) & (vs.q_pot_rz > vs.S_ac_ss - vs.S_lp_ss) & (vs.S_lp_ss < vs.S_ac_ss)
     vs.q_pot_rz = update(
         vs.q_pot_rz,
         at[2:-2, 2:-2], npx.where(mask5[2:-2, 2:-2], vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2], vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    mask6 = (vs.q_pot_rz > 0) & (vs.S_lp_ss >= vs.S_ac_ss)
+    mask6 = (vs.S_lp_ss >= vs.S_ac_ss)
     vs.q_pot_rz = update(
         vs.q_pot_rz,
         at[2:-2, 2:-2], npx.where(mask6[2:-2, 2:-2], 0, vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],

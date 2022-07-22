@@ -81,7 +81,7 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
             v = f.groups[meteo_station].create_variable('inf_in', ('x', 'y', 'Time'), float)
         except ValueError:
             v = f.groups[meteo_station].variables.get('inf_in')
-        vals = onp.array(f.groups[meteo_station].variables.get('prec')) - onp.array(f.groups[meteo_station].variables.get('int_rain_top')) - onp.array(f.groups[meteo_station].variables.get('int_rain_ground')) - onp.array(f.groups[meteo_station].variables.get('int_snow_top')) - onp.array(f.groups[meteo_station].variables.get('int_snow_ground')) + onp.array(f.groups[meteo_station].variables.get('q_snow'))
+        vals = onp.array(f.groups[meteo_station].variables.get('prec')) - onp.array(f.groups[meteo_station].variables.get('int_rain_top')) - onp.array(f.groups[meteo_station].variables.get('int_rain_ground')) - onp.array(f.groups[meteo_station].variables.get('int_snow_top')) - onp.array(f.groups[meteo_station].variables.get('int_snow_ground')) - onp.array(f.groups[meteo_station].variables.get('snow_ground')) + onp.array(f.groups[meteo_station].variables.get('q_snow'))
         v[:, :, :] = vals
         v.attrs.update(long_name='infiltration input',
                        units='mm/day')
@@ -187,6 +187,30 @@ for i, meteo_station in enumerate(meteo_stations):
         file = base_path_figs / f"trace_{var_sim}_{meteo_station}.png"
         fig.savefig(file, dpi=250)
         plt.close(fig)
+
+days_sim = ds_sim.Time.values + 1
+fig, ax = plt.subplots()
+vals = onp.cumsum(ds_sim['inf_in'].isel(x=0, y=0).values)
+ax.plot(range(len(days_sim[1:])), vals[1:], color='blue')
+vals = onp.cumsum(ds_sim['prec'].isel(x=0, y=0).values)
+ax.plot(range(len(days_sim[1:])), vals[1:], color='red')
+vals = onp.cumsum(ds_sim['q_snow'].isel(x=0, y=0).values)
+ax.plot(range(len(days_sim[1:])), vals[1:], color='grey')
+vals = ds_sim['S_snow'].isel(x=0, y=0).values
+ax.plot(range(len(days_sim[1:])), vals[1:], color='black')
+ax.set_xlabel('Time [days]')
+ax.set_ylabel('[mm]')
+fig.tight_layout()
+file = base_path_figs / "grid0_ihringen.png"
+fig.savefig(file, dpi=250)
+grid0 = pd.DataFrame(index=range(len(days_sim[1:])))
+grid0.loc[:, 'S_int_ground'] = ds_sim['S_int_ground'].isel(x=0, y=0).values[1:]
+grid0.loc[:, 'S_int_ground_tot'] = ds_sim['S_int_ground_tot'].isel(x=0, y=0).values[1:]
+grid0.loc[:, 'evap_int'] = ds_sim['evap_sur'].isel(x=0, y=0).values[1:]
+grid0.loc[:, 'inf_in'] = ds_sim['inf_in'].isel(x=0, y=0).values[1:]
+file = base_path_results / "grid0.csv"
+grid0.to_csv(file, header=True, index=True, sep=";")
+
 
 # concatenate dataframes
 df_sim_sum = pd.concat(ll_df_sim_sum, sort=False)

@@ -35,6 +35,10 @@ def calc_cpr_rz(state):
         vs.cpr_rz,
         at[2:-2, 2:-2], npx.where(vs.cpr_rz[2:-2, 2:-2] < 0, 0, vs.cpr_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
+    vs.cpr_rz = update(
+        vs.cpr_rz,
+        at[2:-2, 2:-2], npx.where(vs.S_lp_rz[2:-2, 2:-2] > 0, 0, vs.cpr_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
 
     if settings.enable_film_flow:
         vs.cpr_rz = update(
@@ -42,10 +46,10 @@ def calc_cpr_rz(state):
             at[2:-2, 2:-2], npx.where(npx.sum(vs.S_f[2:-2, 2:-2, :], axis=-1) > 0, 0, vs.cpr_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
 
-    # limit uplift to available fine pore storage in subsoil
+    # limit uplift to available mobile storage in subsoil
     vs.cpr_rz = update(
         vs.cpr_rz,
-        at[2:-2, 2:-2], npx.where(vs.cpr_rz[2:-2, 2:-2] > vs.S_fp_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2], vs.cpr_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where((vs.cpr_rz[2:-2, 2:-2] > (vs.S_fp_ss[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2])), vs.S_fp_ss[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2], vs.cpr_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update root zone storage and subsoil storage
@@ -82,7 +86,7 @@ def calc_cpr_rz(state):
     )
 
     # fine pore excess fills large pores
-    mask4 = (vs.S_fp_rz > vs.S_ufc_rz)
+    mask4 = (vs.S_fp_rz > vs.S_ufc_rz) & (vs.event_id[:, :, vs.tau] <= 0)
     vs.S_lp_rz = update_add(
         vs.S_lp_rz,
         at[2:-2, 2:-2], mask4[2:-2, 2:-2] * (vs.S_fp_rz[2:-2, 2:-2] - vs.S_ufc_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],

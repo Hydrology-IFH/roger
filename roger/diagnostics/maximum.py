@@ -2,8 +2,8 @@ import os
 import copy
 
 from roger.diagnostics.base import RogerDiagnostic
-from roger.variables import TIMESTEPS
-from roger.core.operators import numpy as npx
+from roger.variables import TIMESTEPS, allocate
+from roger.core.operators import numpy as npx, update, at
 
 
 class Maximum(RogerDiagnostic):
@@ -50,11 +50,37 @@ class Maximum(RogerDiagnostic):
         vs = state.variables
         max_vs = self.variables
 
+        var_data = allocate(state.dimensions, ("x", "y", 2))
+
         for key in self.output_variables:
             if self._has_timestep_dim(state, key):
-                setattr(max_vs, key, npx.where(getattr(vs, key)[..., vs.tau] > getattr(max_vs, key), getattr(vs, key)[..., vs.tau], getattr(max_vs, key)))
+                var_data = update(
+                    var_data,
+                    at[:, :, 0], getattr(max_vs, key),
+                )
+                var_data = update(
+                    var_data,
+                    at[:, :, 1], getattr(vs, key)[..., vs.tau],
+                )
+                var_data = update(
+                    var_data,
+                    at[:, :, 0], npx.where((var_data[:, :, 0] == 0) & (var_data[:, :, 1] < 0), npx.nan, var_data[:, :, 0]),
+                )
+                setattr(max_vs, key, npx.nanmax(var_data, axis=-1))
             else:
-                setattr(max_vs, key, npx.where(getattr(vs, key) > getattr(max_vs, key), getattr(vs, key), getattr(max_vs, key)))
+                var_data = update(
+                    var_data,
+                    at[:, :, 0], getattr(max_vs, key),
+                )
+                var_data = update(
+                    var_data,
+                    at[:, :, 1], getattr(vs, key),
+                )
+                var_data = update(
+                    var_data,
+                    at[:, :, 0], npx.where((var_data[:, :, 0] == 0) & (var_data[:, :, 1] < 0), npx.nan, var_data[:, :, 0]),
+                )
+                setattr(max_vs, key, npx.nanmax(var_data, axis=-1))
 
     def output(self, state):
         """Write maximum to netcdf file and zero array"""

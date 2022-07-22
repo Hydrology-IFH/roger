@@ -386,5 +386,5 @@ file = base_path_figs / "dotty_plots.png"
 fig.savefig(file, dpi=250)
 
 file1 = base_path / "param_bounds.yml"
-file2 = base_path.parent.parent / "svat_transport_sensitivity_reverse" / "param_bounds.yml"
+file2 = base_path.parent / "svat_transport_sensitivity_reverse" / "param_bounds.yml"
 shutil.copy(file1, file2)
