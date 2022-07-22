@@ -53,7 +53,7 @@ OUTPUT_STORAGES = ["theta"]
 def main():
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, at, for_loop
+    from roger.core.operators import numpy as npx, update, at
     from roger.core.numerics import calc_parameters_surface_kernel
     from roger.tools.setup import write_forcing
     import roger.lookuptables as lut

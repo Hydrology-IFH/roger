@@ -236,7 +236,6 @@ def main(nsamples, lys_experiment):
                 "theta_pwp",
                 "ks",
                 "kf",
-                "CROP_TYPE",
                 "crop_type",
             ],
         )
@@ -253,10 +252,9 @@ def main(nsamples, lys_experiment):
             vs.ks = update(vs.ks, at[2:-2, :], self._params[:, 5, npx.newaxis])
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
-            vs.CROP_TYPE = update(vs.CROP_TYPE, at[2:-2, 2:-2, :], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc'))
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.CROP_TYPE[2:-2, 2:-2, 1])
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], vs.CROP_TYPE[2:-2, 2:-2, 2])
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], vs.CROP_TYPE[2:-2, 2:-2, 3])
+            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 1])
+            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 2])
+            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 3])
 
         @roger_routine
         def set_parameters(self, state):
@@ -305,11 +303,19 @@ def main(nsamples, lys_experiment):
                 "year",
                 "month",
                 "doy",
-                "tau"
+                "tau",
+                "crop_type",
+                "itt_cr"
             ],
         )
         def set_forcing(self, state):
             vs = state.variables
+
+            if (vs.YEAR[vs.itt] != vs.YEAR[vs.itt - 1]) & (vs.itt > 1):
+                vs.itt_cr = vs.itt_cr + 2
+                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.crop_type[2:-2, 2:-2, 2])
+                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, vs.itt_cr])
+                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, vs.itt_cr + 1])
 
             vs.prec = update(vs.prec, at[2:-2, 2:-2], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt])
             vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt])

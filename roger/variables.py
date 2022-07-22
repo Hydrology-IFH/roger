@@ -4203,16 +4203,6 @@ VARIABLES = {
         time_dependent=True,
         active=lambda settings: settings.enable_crop_phenology,
     ),
-    "CROP_TYPE": Variable(
-        "crop type",
-        CATCH_GRID + CR,
-        "",
-        "crop type",
-        dtype="int64",
-        time_dependent=False,
-        write_to_restart=True,
-        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology & settings.enable_crop_rotation,
-    ),
     "crop_type": Variable(
         "crop type",
         CATCH_GRID + CROPS,

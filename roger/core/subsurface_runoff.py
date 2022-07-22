@@ -918,7 +918,15 @@ def calculate_subsurface_runoff(state):
 
 
 @roger_kernel
-def calc_subsurface_runoff_routing(state):
+def calc_subsurface_runoff_routing_1D(state):
+    """
+    Calculates subsurface runoff routing
+    """
+    pass
+
+
+@roger_kernel
+def calc_subsurface_runoff_routing_2D(state):
     """
     Calculates subsurface runoff routing
     """

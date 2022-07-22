@@ -1077,10 +1077,6 @@ def calculate_crop_phenology(state):
     if not settings.enable_offline_transport:
         if (vs.YEAR[vs.itt] > vs.YEAR[vs.itt-1]) & (vs.itt > 1):
             if settings.enable_crop_rotation:
-                vs.itt_cr = vs.itt_cr + 2
-                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.crop_type[2:-2, 2:-2, 2])
-                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], vs.CROP_TYPE[2:-2, 2:-2, vs.itt_cr])
-                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], vs.CROP_TYPE[2:-2, 2:-2, vs.itt_cr + 1])
                 vs.ccc = update(
                     vs.ccc,
                     at[2:-2, 2:-2, :2, 0], vs.ccc[2:-2, 2:-2, :2, 2],

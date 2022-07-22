@@ -1,49 +1,91 @@
 from pathlib import Path
 import os
 import h5netcdf
+import pandas as pd
 import numpy as onp
-import click
 from roger.cli.roger_run_base import roger_base_cli
 
+# --- set the model parameters ------------------------
+# highest elevation of hillslope (m)
+ELEV_HIGH = 10
+# lowest elevation of hillslope (m)
+ELEV_LOW = 10
+# land use ID (see README for description)
+LU_ID = 8
+# degree of sealing (-)
+SEALING = 0
+# total surface depression storage (mm)
+S_DEP_TOT = 0
+# soil depth (mm)
+Z_SOIL = 1000
+# density of vertical macropores (1/m2)
+DMPV = 50
+# density of horizontal macropores (1/m2)
+DMPH = 100
+# total length of vertical macropores (mm)
+LMPV = 300
+# air capacity (-)
+THETA_AC = 0.08
+# usable field capacity (-)
+THETA_UFC = 0.15
+# permanent wilting point (-)
+THETA_PWP = 0.17
+# saturated hydraulic conductivity (-)
+KS = 9.2
+# hydraulic conductivity of bedrock/saturated zone (-)
+KF = 5
 
-@click.option("-lys", "--lys-experiment", type=click.Choice(["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys1")
+# --- set the initial conditions -----------------------
+# soil water content of root zone/upper soil layer (-)
+THETA_RZ = 0.32
+# soil water content of subsoil/lower soil layer (-)
+THETA_SS = 0.32
+
+# --- set the output variables -----------------------
+# list with simulated fluxes (see variables for description)
+OUTPUT_FLUXES = ["aet", "transp", "evap_soil", "inf_mat", "inf_mp", "inf_sc", "q_ss",
+                 "q_sub", "q_sub_mp", "q_sub_mat",
+                 "q_hof", "q_sof"]
+# list with simulated storages (see variables for description)
+OUTPUT_STORAGES = ["theta"]
+# !!!Do not modify the script below!!!
+
+
 @roger_base_cli
-def main(nsamples, lys_experiment):
+def main():
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
     from roger.core.numerics import calc_parameters_surface_kernel
-    from roger.tools.setup import write_forcing, write_crop_rotation
+    from roger.tools.setup import write_forcing
     import roger.lookuptables as lut
 
-    class SVATCROPSetup(RogerSetup):
-        """A SVAT model including crop phenology/crop rotation.
+    class ONEDSetup(RogerSetup):
+        """A 1D model.
         """
         _base_path = Path(__file__).parent
         _input_dir = None
-        _identifier = None
 
-        def _set_identifier(self, identifier):
-            self._identifier = identifier
-
+        # custom helper functions
         def _set_input_dir(self, path):
             if os.path.exists(path):
                 self._input_dir = path
             else:
-                self._input_dir = path
-                if not os.path.exists(self._input_dir):
+                if not os.path.exists(path):
                     os.mkdir(self._input_dir)
+                    self._input_dir = path
 
-        def _read_var_from_nc(self, var, path_dir, file, group=None):
-            nc_file = path_dir / file
-            if group:
-                with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                    var_obj = infile.groups[group].variables[var]
-                    return npx.array(var_obj)
-            else:
-                with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                    var_obj = infile.variables[var]
-                    return npx.array(var_obj)
+        def _read_var_from_nc(self, var, path_dir, file):
+            nc_file = self._input_dir / file
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables[var]
+                return npx.array(var_obj)
+
+        def _read_var_from_csv(self, var, path_dir, file):
+            csv_file = path_dir / file
+            infile = pd.read_csv(csv_file, sep=';', skiprows=1)
+            var_obj = infile.loc[:, var]
+            return npx.array(var_obj)[:, npx.newaxis]
 
         def _get_nitt(self, path_dir, file):
             nc_file = path_dir / file
@@ -57,42 +99,30 @@ def main(nsamples, lys_experiment):
                 var_obj = infile.variables['Time']
                 return onp.array(var_obj)[-1] * 60 * 60
 
-        def _get_time_origin(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['Time'].attrs['time_origin']
-                return str(var_obj)
-
-        def _get_ncr(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['year_season']
-                return len(onp.array(var_obj))
-
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = "SVATCROP"
+            settings.identifier = "ONED"
 
-            settings.nx, settings.ny, settings.nz = 1, 1, 1
+            # total grid numbers in x-,y- and z-direction
+            settings.nx, settings.ny, settings.nz = 1, 12, 1
+            # derive total number of time steps from forcing
             settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
-            settings.dx = 1
-            settings.dy = 1
+            # spatial discretization (in meters)
+            settings.dx = 10
+            settings.dy = 10
             settings.dz = 1
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0
-            settings.time_origin = self._get_time_origin(self._input_dir, 'forcing.nc')
+            settings.time_origin = "2010-09-30 23:00:00"
 
-            settings.enable_crop_phenology = True
-            settings.enable_crop_rotation = True
-            settings.enable_macropore_lower_boundary_condition = False
-
-            if settings.enable_crop_rotation:
-                settings.ncrops = 3
-                settings.ncr = self._get_ncr(self._input_dir, 'crop_rotation.nc')
+            # enable specific processes
+            settings.enable_groundwater_boundary = False
+            settings.enable_lateral_flow = True
+            settings.enable_routing = True
 
         @roger_routine(
             dist_safe=False,
@@ -140,35 +170,59 @@ def main(nsamples, lys_experiment):
         def set_look_up_tables(self, state):
             vs = state.variables
 
+            # land use-dependent interception storage
             vs.lut_ilu = update(vs.lut_ilu, at[:, :], lut.ARR_ILU)
+            # land use-dependent ground cover
             vs.lut_gc = update(vs.lut_gc, at[:, :], lut.ARR_GC)
+            # land use-dependent maximum ground cover
             vs.lut_gcm = update(vs.lut_gcm, at[:, :], lut.ARR_GCM)
+            # land use-dependent maximum ground cover
             vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
+            # land use-dependent rooting depth
             vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
-            vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
+            # macropore flow velocities
+            vs.lut_mlms = update(vs.lut_mlms, at[:, :], lut.ARR_MLMS)
 
         @roger_routine
         def set_topography(self, state):
-            pass
+            vs = state.variables
+            settings = state.settings
+
+            vs.elev = update(vs.elev, at[2:-2, 2:-1], npx.linspace(ELEV_LOW, ELEV_HIGH, num=settings.ny+1))
 
         @roger_routine
         def set_parameters_setup(self, state):
             vs = state.variables
+            settings = state.settings
 
-            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
-            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1350)
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 100)
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1000)
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.13)
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.24)
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.23)
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], 25)
-            vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
-            vs.crop_scale = update(vs.crop_scale, at[2:-2, 2:-2], 1)
-
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 1])
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 2])
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 3])
+            # land use ID (see README for description)
+            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], LU_ID)
+            # degree of sealing (-)
+            vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
+            # surface slope (-)
+            vs.slope = update(vs.slope, at[2:-2, 2:-2], npx.diff(vs.elev[2:-2, 2:-1], axis=-1)/settings.dy)
+            # convert slope to percentage
+            vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
+            # total surface depression storage (mm)
+            vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
+            # soil depth (mm)
+            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], Z_SOIL)
+            # density of vertical macropores (1/m2)
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], DMPV)
+            # density of horizontal macropores (1/m2)
+            vs.dmph = update(vs.dmph, at[2:-2, 2:-2], DMPH)
+            # total length of vertical macropores (mm)
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], LMPV)
+            # air capacity (-)
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], THETA_AC)
+            # usable field capacity (-)
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], THETA_UFC)
+            # permanent wilting point (-)
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], THETA_PWP)
+            # saturated hydraulic conductivity (-)
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], KS)
+            # hydraulic conductivity of bedrock/saturated zone (-)
+            vs.kf = update(vs.kf, at[2:-2, 2:-2], KF)
 
         @roger_routine
         def set_parameters(self, state):
@@ -185,12 +239,24 @@ def main(nsamples, lys_experiment):
         def set_initial_conditions(self, state):
             vs = state.variables
 
-            theta_rz = self._read_var_from_nc("theta_rz", self._base_path, 'initvals.nc', group=self._identifier)
-            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], npx.where(theta_rz > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_sat[2:-2, 2:-2, npx.newaxis], theta_rz))
-            theta_ss = self._read_var_from_nc("theta_ss", self._base_path, 'initvals.nc', group=self._identifier)
-            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], npx.where(theta_ss > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_sat[2:-2, 2:-2, npx.newaxis], theta_ss))
-
-            vs.update(set_initial_conditions_crops_kernel(state))
+            # interception storage of upper surface layer (mm)
+            vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, :vs.taup1], 0)
+            # snow water equivalent stored in upper surface layer (mm)
+            vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, :vs.taup1], 0)
+            # interception storage of lower surface layer (mm)
+            vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, :vs.taup1], 0)
+            # snow water equivalent stored in lower surface layer (mm)
+            vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, :vs.taup1], 0)
+            # surface depression storage (mm)
+            vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
+            # snow cover storage (mm)
+            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
+            # snow water equivalent of snow cover (mm)
+            vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
+            # soil water content of root zone/upper soil layer (-)
+            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], THETA_RZ)
+            # soil water content of subsoil/lower soil layer (-)
+            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], THETA_SS)
 
         @roger_routine
         def set_forcing_setup(self, state):
@@ -206,8 +272,6 @@ def main(nsamples, lys_experiment):
                 "itt",
                 "prec",
                 "ta",
-                "ta_min",
-                "ta_max",
                 "pet",
                 "pet_res",
                 "event_id",
@@ -217,24 +281,14 @@ def main(nsamples, lys_experiment):
                 "year",
                 "month",
                 "doy",
-                "tau",
-                "crop_type",
-                "itt_cr"
+                "tau"
             ],
         )
         def set_forcing(self, state):
             vs = state.variables
 
-            if (vs.YEAR[vs.itt] != vs.YEAR[vs.itt - 1]) & (vs.itt > 1):
-                vs.itt_cr = vs.itt_cr + 2
-                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.crop_type[2:-2, 2:-2, 2])
-                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, vs.itt_cr])
-                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, vs.itt_cr + 1])
-
             vs.prec = update(vs.prec, at[2:-2, 2:-2], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt])
             vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt])
-            vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2], self._read_var_from_nc("TA_min", self._input_dir, 'forcing.nc')[:, :, vs.itt])
-            vs.ta_max = update(vs.ta_max, at[2:-2, 2:-2], self._read_var_from_nc("TA_max", self._input_dir, 'forcing.nc')[:, :, vs.itt])
             vs.pet = update(vs.pet, at[2:-2, 2:-2], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt])
             vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], vs.pet[2:-2, 2:-2])
             vs.event_id = update(vs.event_id, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc')[vs.itt])
@@ -249,70 +303,49 @@ def main(nsamples, lys_experiment):
         def set_diagnostics(self, state):
             diagnostics = state.diagnostics
 
-            diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "re_rg", "re_rl"]
-            diagnostics["rates"].output_frequency = 24 * 60 * 60
+            # variables written to output files
+            diagnostics["rates"].output_variables = OUTPUT_FLUXES
+            # values are aggregated to daily
+            diagnostics["rates"].output_frequency = 24 * 60 * 60  # in seconds
             diagnostics["rates"].sampling_frequency = 1
 
-            diagnostics["collect"].output_variables = ["S_rz", "S_ss", "S_s", "S",
-                                                       "S_pwp_rz", "S_fc_rz",
-                                                       "S_sat_rz", "S_pwp_ss",
-                                                       "S_fc_ss", "S_sat_ss",
-                                                       "z_root", "ground_cover"]
-            diagnostics["collect"].output_frequency = 24 * 60 * 60
+            diagnostics["collect"].output_variables = OUTPUT_STORAGES
+            # values are aggregated to daily
+            diagnostics["collect"].output_frequency = 24 * 60 * 60  # in seconds
             diagnostics["collect"].sampling_frequency = 1
-
-            diagnostics["averages"].output_variables = ["ta"]
-            diagnostics["averages"].output_frequency = 24 * 60 * 60
-            diagnostics["averages"].sampling_frequency = 1
 
         @roger_routine
         def after_timestep(self, state):
             vs = state.variables
 
+            # shift variables backwards
             vs.update(after_timestep_kernel(state))
-            vs.update(after_timestep_crops_kernel(state))
 
     @roger_kernel
-    def set_initial_conditions_crops_kernel(state):
+    def set_forcing_kernel(state):
         vs = state.variables
 
-        # set initial root depth if start of simulation is within growing period
-        mask1 = npx.isin(vs.crop_type[:, :, 0], npx.array([556, 557, 558, 559, 560, 564, 569, 570, 572]))
-        vs.z_root_crop = update(
-            vs.z_root_crop,
-            at[2:-2, 2:-2, :2, 0], npx.where(mask1[2:-2, 2:-2, npx.newaxis], 300, 0)
-        )
-        mask2 = (vs.z_root_crop[:, :, vs.taum1, 0] > vs.z_soil)
-        vs.z_root_crop = update(
-            vs.z_root_crop,
-            at[2:-2, 2:-2, :2, 0], npx.where(mask2[2:-2, 2:-2, npx.newaxis], vs.z_soil[2:-2, 2:-2, npx.newaxis] * .33, vs.z_root_crop[2:-2, 2:-2, :2, 0])
-        )
-        mask3 = (vs.z_root_crop[:, :, vs.taum1, 0] > 0)
-        vs.z_root = update(
-            vs.z_root,
-            at[2:-2, 2:-2, :2], npx.where(mask3[2:-2, 2:-2, npx.newaxis], vs.z_root_crop[2:-2, 2:-2, :2, 0], vs.z_root[2:-2, 2:-2, :2])
-        )
+        vs.prec = update(vs.prec, at[2:-2, 2:-2], vs.PREC[2:-2, 2:-2, vs.itt])
+        vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[2:-2, 2:-2, vs.itt])
+        vs.pet = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
+        vs.pet_res = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
 
-        # calculate time since growing
-        t_grow = allocate(state.dimensions, ("x", "y", "crops"))
-        t_grow = update(
-            t_grow,
-            at[2:-2, 2:-2, :], npx.where(vs.z_root_crop[2:-2, 2:-2, vs.taum1, :] > 0, (-1 / vs.root_growth_rate[2:-2, 2:-2, :]) * npx.log(1 / ((vs.z_root_crop[2:-2, 2:-2, vs.taum1, :] / 1000 - vs.z_root_crop_max[2:-2, 2:-2, :] / 1000) * (-1 / (vs.z_root_crop_max[2:-2, 2:-2, :] / 1000 - vs.z_evap[2:-2, 2:-2, npx.newaxis] / 1000)))), 0)
-        )
-
-        vs.t_grow_cc = update(
-            vs.t_grow_cc,
-            at[2:-2, 2:-2, :2, :], t_grow[2:-2, 2:-2, npx.newaxis, :]
-        )
-
-        vs.t_grow_root = update(
-            vs.t_grow_root,
-            at[2:-2, 2:-2, :2, :], t_grow[2:-2, 2:-2, npx.newaxis, :]
-        )
+        vs.dt_secs = vs.DT_SECS[vs.itt]
+        vs.dt = vs.DT[vs.itt]
+        vs.year = vs.YEAR[vs.itt]
+        vs.month = vs.MONTH[vs.itt]
+        vs.doy = vs.DOY[vs.itt]
 
         return KernelOutput(
-            t_grow_cc=vs.t_grow_cc,
-            t_grow_root=vs.t_grow_root,
+            prec=vs.prec,
+            ta=vs.ta,
+            pet=vs.pet,
+            pet_res=vs.pet_res,
+            dt=vs.dt,
+            dt_secs=vs.dt_secs,
+            year=vs.year,
+            month=vs.month,
+            doy=vs.doy,
         )
 
     @roger_kernel
@@ -435,23 +468,6 @@ def main(nsamples, lys_experiment):
             vs.z0,
             at[2:-2, 2:-2, vs.taum1], vs.z0[2:-2, 2:-2, vs.tau],
         )
-        # set to 0 for numerical errors
-        vs.S_fp_rz = update(
-            vs.S_fp_rz,
-            at[2:-2, 2:-2], npx.where((vs.S_fp_rz[2:-2, 2:-2] > -1e-6) & (vs.S_fp_rz[2:-2, 2:-2] < 0), 0, vs.S_fp_rz[2:-2, 2:-2]),
-        )
-        vs.S_lp_rz = update(
-            vs.S_lp_rz,
-            at[2:-2, 2:-2], npx.where((vs.S_lp_rz[2:-2, 2:-2] > -1e-6) & (vs.S_lp_rz[2:-2, 2:-2] < 0), 0, vs.S_lp_rz[2:-2, 2:-2]),
-        )
-        vs.S_fp_ss = update(
-            vs.S_fp_ss,
-            at[2:-2, 2:-2], npx.where((vs.S_fp_ss[2:-2, 2:-2] > -1e-6) & (vs.S_fp_ss[2:-2, 2:-2] < 0), 0, vs.S_fp_ss[2:-2, 2:-2]),
-        )
-        vs.S_lp_ss = update(
-            vs.S_lp_ss,
-            at[2:-2, 2:-2], npx.where((vs.S_lp_ss[2:-2, 2:-2] > -1e-6) & (vs.S_lp_ss[2:-2, 2:-2] < 0), 0, vs.S_lp_ss[2:-2, 2:-2]),
-        )
         vs.prec = update(
             vs.prec,
             at[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau],
@@ -487,48 +503,24 @@ def main(nsamples, lys_experiment):
             h_rz=vs.h_rz,
             h_ss=vs.h_ss,
             h=vs.h,
-            k_rz=vs.k_rz,
-            k_ss=vs.k_ss,
-            k=vs.k,
             z0=vs.z0,
             prec=vs.prec,
             event_id=vs.event_id,
-            S_fp_rz=vs.S_fp_rz,
-            S_lp_rz=vs.S_lp_rz,
-            S_fp_ss=vs.S_fp_ss,
-            S_lp_ss=vs.S_lp_ss,
+            k_rz=vs.k_rz,
+            k_ss=vs.k_ss,
+            k=vs.k,
         )
 
-    @roger_kernel
-    def after_timestep_crops_kernel(state):
-        vs = state.variables
-
-        vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2, vs.taum1], vs.ta_min[2:-2, 2:-2, vs.tau])
-        vs.ta_max = update(vs.ta_max, at[2:-2, 2:-2, vs.taum1], vs.ta_max[2:-2, 2:-2, vs.tau])
-        vs.gdd_sum = update(vs.gdd_sum, at[2:-2, 2:-2, vs.taum1, :], vs.gdd_sum[2:-2, 2:-2, vs.tau, :])
-        vs.t_grow_cc = update(vs.t_grow_cc, at[2:-2, 2:-2, vs.taum1, :], vs.t_grow_cc[2:-2, 2:-2, vs.tau, :])
-        vs.t_grow_root = update(vs.t_grow_root, at[2:-2, 2:-2, vs.taum1, :], vs.t_grow_root[2:-2, 2:-2, vs.tau, :])
-        vs.ccc = update(vs.ccc, at[2:-2, 2:-2, vs.taum1, :], vs.ccc[2:-2, 2:-2, vs.tau, :])
-        vs.z_root_crop = update(vs.z_root_crop, at[2:-2, 2:-2, vs.taum1, :], vs.z_root_crop[2:-2, 2:-2, vs.tau, :])
-
-        return KernelOutput(
-            ta_min=vs.ta_min,
-            ta_max=vs.ta_max,
-            gdd_sum=vs.gdd_sum,
-            t_grow_cc=vs.t_grow_cc,
-            t_grow_root=vs.t_grow_root,
-            ccc=vs.ccc,
-            z_root_crop=vs.z_root_crop,
-        )
-
-    model = SVATCROPSetup()
-    model._set_lys(lys_experiment)
-    input_path = model._base_path / "input" / lys_experiment
-    model._set_input_dir(input_path)
-    model._set_identifier(lys_experiment)
-    write_forcing(input_path, enable_crop_phenology=True)
-    write_crop_rotation(input_path)
+    # initialize the model structure
+    model = ONEDSetup()
+    # set path to directory containing the input files
+    path_input = model._base_path / "input"
+    model._set_input_dir(path_input)
+    # runs event classification and writes the forcing
+    write_forcing(path_input)
+    # runs the model setup
     model.setup()
+    # iterates over time steps
     model.run()
     return
 
