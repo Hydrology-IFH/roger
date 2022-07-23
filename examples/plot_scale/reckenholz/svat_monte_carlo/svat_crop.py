@@ -267,7 +267,7 @@ def main(nsamples, lys_experiment):
 
             vs.prec = update(vs.prec, at[2:-2, 2:-2], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt])
             vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt])
-            vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2], self._read_var_from_nc("TA_MIN", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2], self._read_var_from_nc("TA_min", self._input_dir, 'forcing.nc')[:, :, vs.itt])
             vs.ta_max = update(vs.ta_max, at[2:-2, 2:-2], self._read_var_from_nc("TA_MAX", self._input_dir, 'forcing.nc')[:, :, vs.itt])
             vs.pet = update(vs.pet, at[2:-2, 2:-2], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt])
             vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], vs.pet[2:-2, 2:-2])
