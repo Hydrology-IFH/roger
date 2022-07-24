@@ -27,12 +27,12 @@ Future Online-Documentation will be here: [visit our documentation](https://roge
 
 Roger provides
 
--   grid-based **SVAT models** and **distributed models**
+-   grid-based **1D models** and **distributed models**
 -   **offline solute transport** with several **StorAge selection (SAS) functions**
--   support for both **capillary-driven infiltration (Green-Ampt)** and **gravity-driven infiltration (Viscous-Flow)**
--   several **pre-implemented diagnostics** such as hydrologic fluxes,
-    variable time aggregation, travel time distributions and residence time
-    distributions (written to netCDF4 output)
+-   implementations of **capillary-driven infiltration (Green-Ampt)** and **gravity-driven infiltration (Viscous-Flow)**
+-   several **pre-implemented diagnostics** such as averages or collecting values
+    at given time interval, variable time aggregation, travel time distributions
+    and residence time distributions (written to netCDF4 output)
 -   **pre-configured idealized and realistic setups** that are ready to
     run and easy to adapt
 -   **accessibility and extensibility** due to high-level programming language Python
