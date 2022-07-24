@@ -35,6 +35,7 @@ for tm in transport_models:
     lines.append('export OMP_NUM_THREADS=1\n')
     lines.append('eval "$(conda shell.bash hook)"\n')
     lines.append('conda activate roger-mpi\n')
+    lines.append(f'cd {base_path_binac}\n')
     lines.append(' \n')
     lines.append('# adapt command to your available scheduler / MPI implementation\n')
     lines.append(f'mpirun --bind-to core --map-by core -report-bindings python {base_path_binac}/svat_transport.py -b jax -d cpu -n 50 1 -tms {tms}\n')
