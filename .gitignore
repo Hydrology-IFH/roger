@@ -134,4 +134,7 @@ EVENTS.txt
 *.out
 
 # MOAB
-*.o*_feedback
+*.o*
+*.e*
+*.sh.o*
+*.sh.e*
