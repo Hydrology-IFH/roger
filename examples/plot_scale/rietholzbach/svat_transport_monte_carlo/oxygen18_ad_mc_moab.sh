@@ -11,4 +11,4 @@ module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
 export OMP_NUM_THREADS=1
  
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python /Users/robinschwemmle/Desktop/PhD/models/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo/svat_transport.py -b jax -d cpu -n 50 1 -tms advection-dispersion
+mpirun --bind-to core --map-by core -report-bindings python /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo/svat_transport.py -b jax -d cpu -n 50 1 -tms advection-dispersion
