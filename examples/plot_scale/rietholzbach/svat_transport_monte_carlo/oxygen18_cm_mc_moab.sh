@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l nodes=5:ppn=10
-#PBS -l walltime=30:00:00
+#PBS -l walltime=48:00:00
 #PBS -l pmem=12000mb
 #PBS -N oxygen18_cm_mc
 #PBS -m bea
@@ -14,4 +14,4 @@ conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo
  
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo/svat_transport.py -b jax -d cpu -n 50 1 -tms complete-mixing
+mpirun --bind-to core --map-by core -report-bindings python /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo/svat_transport.py -b numpy -d cpu -n 50 1 -tms complete-mixing
