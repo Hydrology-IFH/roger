@@ -132,3 +132,6 @@ EVENTS.txt
 
 # SLURM
 *.out
+
+# MOAB
+*.o*_feedback
