@@ -612,9 +612,7 @@ def main(nsamples, transport_model_structure):
     model._set_identifier(identifier)
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)
-    forcing_path = model._input_dir / "forcing_tracer.nc"
-    if not os.path.exists(forcing_path):
-        write_forcing_tracer(input_path, 'd18O')
+    write_forcing_tracer(input_path, 'd18O')
     model.setup()
     model.warmup()
     model.run()
