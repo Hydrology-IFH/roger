@@ -70,3 +70,51 @@ check1 = npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.p
 rows = npx.where(check1 == False)[0] + 2
 dS = vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1]
 dF = vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.q_sub[2:-2, 2:-2]
+
+
+# add missing initial values
+# write states of best model run
+import h5netcdf
+import numpy as onp
+from pathlib import Path
+base_path = Path("/Users/robinschwemmle/Desktop/PhD/models/roger/examples/plot_scale/rietholzbach/svat_transport")
+states_hm_file = base_path / "states_hm.nc"
+with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
+    var_obj = f.variables.get('S_rz')
+    var_obj1 = f.variables.get('S_sat_rz')
+    vals = onp.array(var_obj)
+    vals1 = onp.array(var_obj1)
+    var_obj[:, :, 0] = onp.where(0.46 * 400 > vals1[:, :, 1], vals1[:, :, 1], 0.46 * 400)
+    var_obj = f.variables.get('S_ss')
+    var_obj1 = f.variables.get('S_sat_ss')
+    vals = onp.array(var_obj)
+    vals1 = onp.array(var_obj1)
+    var_obj[:, :, 0] = onp.where(0.44 * 1600 > vals1[:, :, 1], vals1[:, :, 1], 0.44 * 1600)
+
+base_path = Path("/Volumes/Gerics/roger/examples/plot_scale/rietholzbach/svat_monte_carlo")
+states_hm_file = base_path / "states_hm_monte_carlo.nc"
+with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
+    var_obj = f.variables.get('S_rz')
+    var_obj1 = f.variables.get('S_sat_rz')
+    vals = onp.array(var_obj)
+    vals1 = onp.array(var_obj1)
+    var_obj[:, :, 0] = onp.where(0.46 * 400 > vals1[:, :, 1], vals1[:, :, 1], 0.46 * 400)
+    var_obj = f.variables.get('S_ss')
+    var_obj1 = f.variables.get('S_sat_ss')
+    vals = onp.array(var_obj)
+    vals1 = onp.array(var_obj1)
+    var_obj[:, :, 0] = onp.where(0.44 * 1600 > vals1[:, :, 1], vals1[:, :, 1], 0.44 * 1600)
+
+base_path = Path("/Volumes/Gerics/roger/examples/plot_scale/rietholzbach/svat_sensitivity")
+states_hm_file = base_path / "states_hm_sensitivity.nc"
+with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
+    var_obj = f.variables.get('S_rz')
+    var_obj1 = f.variables.get('S_sat_rz')
+    vals = onp.array(var_obj)
+    vals1 = onp.array(var_obj1)
+    var_obj[:, :, 0] = onp.where(0.46 * 400 > vals1[:, :, 1], vals1[:, :, 1], 0.46 * 400)
+    var_obj = f.variables.get('S_ss')
+    var_obj1 = f.variables.get('S_sat_ss')
+    vals = onp.array(var_obj)
+    vals1 = onp.array(var_obj1)
+    var_obj[:, :, 0] = onp.where(0.44 * 1600 > vals1[:, :, 1], vals1[:, :, 1], 0.44 * 1600)
