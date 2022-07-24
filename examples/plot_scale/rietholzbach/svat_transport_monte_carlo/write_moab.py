@@ -3,6 +3,7 @@ import subprocess
 
 
 base_path = Path(__file__).parent
+base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo'
 transport_models_abrev = {'complete-mixing': 'cm',
                           'piston': 'pi',
                           'preferential': 'pf',
@@ -34,7 +35,7 @@ for tm in transport_models:
     lines.append('export OMP_NUM_THREADS=1\n')
     lines.append(' \n')
     lines.append('# adapt command to your available scheduler / MPI implementation\n')
-    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python {base_path}/svat_transport.py -b jax -d cpu -n 50 1 -tms {tms}\n')
+    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python {base_path_binac}/svat_transport.py -b jax -d cpu -n 50 1 -tms {tms}\n')
     file_path = base_path / f'{script_name}_moab.sh'
     file = open(file_path, "w")
     file.writelines(lines)
