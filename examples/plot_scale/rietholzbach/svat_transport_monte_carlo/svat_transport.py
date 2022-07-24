@@ -299,16 +299,17 @@ def main(nsamples, transport_model_structure):
                 "S_rz",
                 "S_ss",
                 "S_s",
-                "itt"
+                "itt",
+                "taup1"
             ],
         )
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_snow", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
-            vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :2], vs.S_rz[2:-2, 2:-2, :2] + vs.S_ss[2:-2, 2:-2, :2])
+            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_snow", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
 
         @roger_routine
         def set_initial_conditions(self, state):
@@ -668,28 +669,6 @@ def main(nsamples, transport_model_structure):
     model.warmup()
     model.run()
     return
-
-    # tms = transport_model_structure.replace("_", " ")
-    # model = SVATTRANSPORTSetup(override=dict(
-    #         restart_input_filename=f'SVATTRANSPORT_{transport_model_structure}.warmup_restart.h5',
-    #         restart_output_filename=None,
-    #         ))
-    # if tms not in ['complete-mixing', 'piston']:
-    #     model._set_nsamples(nsamples)
-    # else:
-    #     if rs.mpi_comm:
-    #         model._set_nsamples(rst.proc_num)
-    # model._set_tm_structure(tms)
-    # identifier = f'SVATTRANSPORT_{transport_model_structure}'
-    # model._set_identifier(identifier)
-    # input_path = model._base_path / "input"
-    # model._set_input_dir(input_path)
-    # forcing_path = model._input_dir / "forcing_tracer.nc"
-    # if not os.path.exists(forcing_path):
-    #     write_forcing_tracer(input_path, 'd18O')
-    # model.setup()
-    # model.run()
-    # return
 
 
 if __name__ == "__main__":

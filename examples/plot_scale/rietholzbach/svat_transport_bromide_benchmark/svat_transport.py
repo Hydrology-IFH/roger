@@ -256,15 +256,16 @@ def main(transport_model_structure):
                 "S_rz",
                 "S_ss",
                 "S_s",
-                "itt"
+                "itt",
+                "taup1"
             ],
         )
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
-            vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :2], vs.S_rz[2:-2, 2:-2, :2] + vs.S_ss[2:-2, 2:-2, :2])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
 
         @roger_routine
         def set_initial_conditions(self, state):

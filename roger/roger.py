@@ -363,6 +363,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
                 with state.timers["main transport"]:
                     with state.timers["forcing"]:
                         self.set_forcing(state)
+                    with state.timers["time-variant parameters"]:
+                        self.set_parameters(state)
                     if settings.enable_crop_phenology:
                         with state.timers["redistribution after root growth/harvesting"]:
                             crop.calculate_redistribution_transport(state)

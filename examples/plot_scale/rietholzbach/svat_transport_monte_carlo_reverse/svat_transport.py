@@ -228,16 +228,17 @@ def main(nsamples, transport_model_structure):
                 "S_rz",
                 "S_ss",
                 "S_s",
-                "itt"
+                "itt",
+                "taup1"
             ],
         )
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_snow", self._base_path, 'states_hm_monte_carlo.nc')[:, :, vs.itt])
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_rz", self._base_path, 'states_hm_monte_carlo.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_ss", self._base_path, 'states_hm_monte_carlo.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
-            vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :2], vs.S_rz[2:-2, 2:-2, :2] + vs.S_ss[2:-2, 2:-2, :2])
+            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_snow", self._base_path, 'states_hm_monte_carlo.nc')[:, :, vs.itt])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path, 'states_hm_monte_carlo.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path, 'states_hm_monte_carlo.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
 
         @roger_routine
         def set_initial_conditions(self, state):
@@ -382,8 +383,8 @@ def main(nsamples, transport_model_structure):
             vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], self._read_var_from_nc("q_rz", self._base_path, 'states_hm_monte_carlo.nc')[:, :, vs.itt])
             vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], self._read_var_from_nc("q_ss", self._base_path, 'states_hm_monte_carlo.nc')[:, :, vs.itt])
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._base_path, 'states_hm_monte_carlo.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._base_path, 'states_hm_monte_carlo.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._base_path, 'states_hm_monte_carlo.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._base_path, 'states_hm_monte_carlo.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
             vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_snow", self._base_path, 'states_hm_monte_carlo.nc')[:, :, vs.itt])
 

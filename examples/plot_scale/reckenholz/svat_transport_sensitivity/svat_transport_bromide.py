@@ -9,9 +9,9 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-ns", "--nsamples", type=int, default=10000)
-@click.option("-lys", "--lys-experiment", type=click.Choice(["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys1")
+@click.option("-lys", "--lys-experiment", type=click.Choice(["lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys2_bromide")
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion']), default='complete-mixing')
-@click.option("-ecp", "--crop-partitioning", is_flag=False)
+@click.option("-ecp", "--crop-partitioning", is_flag=True)
 @roger_base_cli
 def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -519,7 +519,10 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
                 "sas_params_q_ss",
                 "sas_params_re_rg",
                 "sas_params_re_rl",
-                "itt"
+                "itt",
+                "lu_id",
+                "lut_crops",
+                "lut_crop_scale"
             ],
         )
         def set_parameters_setup(self, state):
@@ -675,6 +678,22 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
             vs = state.variables
             settings = state.settings
 
+            if settings.tm_structure == "time-variant complete-mixing + advection-dispersion":
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
+            elif settings.tm_structure == "time-variant advection-dispersion":
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
+            elif settings.tm_structure == "time-variant preferential":
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
+            elif settings.tm_structure == "time-variant":
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
+
             if settings.enable_crop_partitioning:
                 vs.update(update_alpha_transp(state))
 
@@ -828,8 +847,12 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
             vs.re_rg = update(vs.re_rg, at[2:-2, 2:-2], self._read_var_from_nc("re_rg", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
             vs.re_rl = update(vs.re_rl, at[2:-2, 2:-2], self._read_var_from_nc("re_rl", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
+            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
+            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
+            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
 
             vs.C_in = update(vs.C_in, at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt])

@@ -91,7 +91,7 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
     vals1 = onp.array(var_obj1)
     var_obj[:, :, 0] = onp.where(0.44 * 1600 > vals1[:, :, 1], vals1[:, :, 1], 0.44 * 1600)
 
-base_path = Path("/Volumes/Gerics/roger/examples/plot_scale/rietholzbach/svat_monte_carlo")
+base_path = Path("/Users/robinschwemmle/Desktop/PhD/models/roger/examples/plot_scale/rietholzbach/svat_monte_carlo")
 states_hm_file = base_path / "states_hm_monte_carlo.nc"
 with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
     var_obj = f.variables.get('S_rz')
@@ -105,7 +105,7 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
     vals1 = onp.array(var_obj1)
     var_obj[:, :, 0] = onp.where(0.44 * 1600 > vals1[:, :, 1], vals1[:, :, 1], 0.44 * 1600)
 
-base_path = Path("/Volumes/Gerics/roger/examples/plot_scale/rietholzbach/svat_sensitivity")
+base_path = Path("/Users/robinschwemmle/Desktop/PhD/models/roger/examples/plot_scale/rietholzbach/svat_sensitivity")
 states_hm_file = base_path / "states_hm_sensitivity.nc"
 with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
     var_obj = f.variables.get('S_rz')
@@ -118,3 +118,27 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
     vals = onp.array(var_obj)
     vals1 = onp.array(var_obj1)
     var_obj[:, :, 0] = onp.where(0.44 * 1600 > vals1[:, :, 1], vals1[:, :, 1], 0.44 * 1600)
+
+
+# resubmit
+tms = transport_model_structure.replace("_", " ")
+model = SVATTRANSPORTSetup(override=dict(
+        restart_input_filename=f'SVATTRANSPORT_{transport_model_structure}.warmup_restart.h5',
+        restart_output_filename=None,
+        ))
+if tms not in ['complete-mixing', 'piston']:
+    model._set_nsamples(nsamples)
+else:
+    if rs.mpi_comm:
+        model._set_nsamples(rst.proc_num)
+model._set_tm_structure(tms)
+identifier = f'SVATTRANSPORT_{transport_model_structure}'
+model._set_identifier(identifier)
+input_path = model._base_path / "input"
+model._set_input_dir(input_path)
+forcing_path = model._input_dir / "forcing_tracer.nc"
+if not os.path.exists(forcing_path):
+    write_forcing_tracer(input_path, 'd18O')
+model.setup()
+model.run()
+return
