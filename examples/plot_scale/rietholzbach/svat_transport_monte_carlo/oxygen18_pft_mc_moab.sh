@@ -11,4 +11,4 @@ module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
 export OMP_NUM_THREADS=1
  
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 32 1 -tms time-variant_preferential
+mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 100 1 -tms time-variant_preferential

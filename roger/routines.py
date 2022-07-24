@@ -443,16 +443,15 @@ class rogerSync:
         # with MPI support
         elif runtime_state.proc_num > 1:
             # run function on a single process
+            distributed.barrier()
             if runtime_state.proc_rank != 0:
-                def function():
-                    pass
-                out = function()
-                buffer = onp.ascontiguousarray(onp.empty((1000,), dtype=float))
+                out = None
+                buffer = onp.ascontiguousarray(onp.empty((10,), dtype=float))
                 runtime_settings.mpi_comm.Send(buffer, dest=0, tag=11)
             # let other processes wait
             elif runtime_state.proc_rank == 0:
                 for proc in range(1, runtime_state.proc_num):
-                    buffer = onp.ascontiguousarray(onp.empty((1000,), dtype=float))
+                    buffer = onp.ascontiguousarray(onp.empty((10,), dtype=float))
                     buffer = buffer.copy()
                     runtime_settings.mpi_comm.Recv(buffer, source=proc, tag=11)
                 out = self.function(*args, **kwargs)
