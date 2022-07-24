@@ -22,9 +22,9 @@ for tm in transport_models:
     tms = tm.replace(" ", "_")
     lines = []
     lines.append('#!/bin/bash\n')
-    lines.append('#PBS -l nodes=5:ppn=20\n')
+    lines.append('#PBS -l nodes=5:ppn=10\n')
     lines.append('#PBS -l walltime=30:00:00\n')
-    lines.append('#PBS -l pmem=6000mb\n')
+    lines.append('#PBS -l pmem=12000mb\n')
     lines.append(f'#PBS -N {script_name}\n')
     lines.append('#PBS -m bea\n')
     lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
@@ -34,7 +34,7 @@ for tm in transport_models:
     lines.append('export OMP_NUM_THREADS=1\n')
     lines.append(' \n')
     lines.append('# adapt command to your available scheduler / MPI implementation\n')
-    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 100 1 -tms {tms}\n')
+    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 50 1 -tms {tms}\n')
     file_path = base_path / f'{script_name}_moab.sh'
     file = open(file_path, "w")
     file.writelines(lines)
