@@ -134,7 +134,7 @@ EVENTS.txt
 *.out
 
 # MOAB
-*.o*
-*.e*
-*.sh.o*
-*.sh.e*
+*.o1*
+*.e1*
+*.sh.o1*
+*.sh.e1*
