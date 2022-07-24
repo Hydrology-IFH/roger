@@ -447,12 +447,13 @@ class rogerSync:
                 def function():
                     pass
                 out = function()
-                buffer = onp.empty((1000,), dtype=float)
-                runtime_settings.mpi_comm.Isend(buffer, dest=0, tag=11)
+                buffer = onp.ascontiguousarray(onp.empty((1000,), dtype=float))
+                runtime_settings.mpi_comm.Send(buffer, dest=0, tag=11)
             # let other processes wait
             elif runtime_state.proc_rank == 0:
                 for proc in range(1, runtime_state.proc_num):
-                    buffer = onp.empty((1000,), dtype=float)
+                    buffer = onp.ascontiguousarray(onp.empty((1000,), dtype=float))
+                    buffer = buffer.copy()
                     runtime_settings.mpi_comm.Recv(buffer, source=proc, tag=11)
                 out = self.function(*args, **kwargs)
             distributed.barrier()
