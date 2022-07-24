@@ -14,4 +14,4 @@ conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo
  
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo/svat_transport.py -b numpy -d cpu -n 50 1 -tms preferential
+mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 50 1 -tms preferential

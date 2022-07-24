@@ -38,7 +38,7 @@ for tm in transport_models:
     lines.append(f'cd {base_path_binac}\n')
     lines.append(' \n')
     lines.append('# adapt command to your available scheduler / MPI implementation\n')
-    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python {base_path_binac}/svat_transport.py -b numpy -d cpu -n 50 1 -tms {tms}\n')
+    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 50 1 -tms {tms}\n')
     file_path = base_path / f'{script_name}_moab.sh'
     file = open(file_path, "w")
     file.writelines(lines)
