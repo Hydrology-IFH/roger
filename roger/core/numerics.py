@@ -16,20 +16,20 @@ def rescale_SA_soil_kernel(state):
 
     vs.sa_rz = update_multiply(
         vs.sa_rz,
-        at[2:-2, 2:-2, 0, :], (vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_PWP_RZ[2:-2, 2:-2, 0, npx.newaxis]) / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        at[2:-2, 2:-2, 0, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
     )
     vs.sa_ss = update_multiply(
         vs.sa_ss,
-        at[2:-2, 2:-2, 0, :], (vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_PWP_SS[2:-2, 2:-2, 0, npx.newaxis]) / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        at[2:-2, 2:-2, 0, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
     )
 
     vs.sa_rz = update_multiply(
         vs.sa_rz,
-        at[2:-2, 2:-2, 1, :], (vs.S_RZ[2:-2, 2:-2, 0, npx.newaxis] - vs.S_PWP_RZ[2:-2, 2:-2, 0, npx.newaxis]) / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        at[2:-2, 2:-2, 1, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
     )
     vs.sa_ss = update_multiply(
         vs.sa_ss,
-        at[2:-2, 2:-2, 1, :], (vs.S_SS[2:-2, 2:-2, 0, npx.newaxis] - vs.S_PWP_SS[2:-2, 2:-2, 0, npx.newaxis]) / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        at[2:-2, 2:-2, 1, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
     )
 
     vs.SA_rz = update(

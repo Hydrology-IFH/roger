@@ -56,7 +56,7 @@ class Minimum(RogerDiagnostic):
             if self._has_timestep_dim(state, key):
                 var_data = update(
                     var_data,
-                    at[:, :, 0], getattr(min_vs, key),
+                    at[:, :, 0], getattr(vs, key)[..., vs.taum1],
                 )
                 var_data = update(
                     var_data,

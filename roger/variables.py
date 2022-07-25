@@ -1882,6 +1882,15 @@ VARIABLES = {
         write_to_restart=True,
         time_dependent=True,
     ),
+    "S_rz_init": Variable(
+        "initial soil water content in root zone",
+        CATCH_GRID,
+        "mm",
+        "initial soil water content in root zone",
+        write_to_restart=True,
+        time_dependent=False,
+        active=lambda settings: settings.enable_offline_transport,
+    ),
     "dS_rz": Variable(
         "change of soil water content in root zone",
         CATCH_GRID,
@@ -2129,6 +2138,15 @@ VARIABLES = {
         "soil water content in subsoil",
         write_to_restart=True,
         time_dependent=True,
+    ),
+    "S_ss_init": Variable(
+        "initial soil water content in subsoil",
+        CATCH_GRID,
+        "mm",
+        "initial soil water content in subsoil",
+        write_to_restart=True,
+        time_dependent=False,
+        active=lambda settings: settings.enable_offline_transport,
     ),
     "dS_ss": Variable(
         "change of soil water content in subsoil",

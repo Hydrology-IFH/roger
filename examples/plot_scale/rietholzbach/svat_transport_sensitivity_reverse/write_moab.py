@@ -9,13 +9,15 @@ transport_models_abrev = {'complete-mixing': 'cm',
                           'preferential': 'pf',
                           'advection-dispersion': 'ad',
                           'time-variant preferential': 'pft',
-                          'time-variant advection-dispersion': 'adt'}
+                          'time-variant advection-dispersion': 'adt',
+                          'time-variant': 'tv'}
 
 tracer = 'oxygen18'
 transport_models = ['complete-mixing', 'piston',
                     'preferential', 'advection-dispersion',
                     'time-variant preferential',
-                    'time-variant advection-dispersion']
+                    'time-variant advection-dispersion',
+                    'time-variant']
 for tm in transport_models:
     tm1 = transport_models_abrev[tm]
     tms = tm.replace(" ", "_")
