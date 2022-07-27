@@ -88,17 +88,11 @@ def main(nsamples, lys_experiment):
                     var_obj = infile.variables[var]
                     return npx.array(var_obj)
 
-        def _get_nitt(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['Time']
-                return len(onp.array(var_obj))
-
         def _get_runlen(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['Time']
-                return onp.array(var_obj)[-1] * 60 * 60
+                var_obj = infile.variables['dt']
+                return onp.sum(onp.array(var_obj))
 
         def _get_time_origin(self, path_dir, file):
             nc_file = path_dir / file
@@ -130,7 +124,6 @@ def main(nsamples, lys_experiment):
             settings.identifier = self._identifier
 
             settings.nx, settings.ny, settings.nz = self._nrows, 1, 1
-            settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
             settings.dx = 1
@@ -153,18 +146,6 @@ def main(nsamples, lys_experiment):
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "DT_SECS",
-                "DT",
-                "YEAR",
-                "MONTH",
-                "DOY",
-                "dt_secs",
-                "dt",
-                "year",
-                "month",
-                "doy",
-                "t",
-                "itt",
                 "x",
                 "y",
             ],
@@ -172,19 +153,7 @@ def main(nsamples, lys_experiment):
         def set_grid(self, state):
             vs = state.variables
 
-            # temporal grid
-            vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", self._input_dir, 'forcing.nc'))
-            vs.DT = update(vs.DT, at[:], vs.DT_SECS / (60 * 60))
-            vs.YEAR = update(vs.YEAR, at[:], self._read_var_from_nc("year", self._input_dir, 'forcing.nc'))
-            vs.MONTH = update(vs.MONTH, at[:], self._read_var_from_nc("month", self._input_dir, 'forcing.nc'))
-            vs.DOY = update(vs.DOY, at[:], self._read_var_from_nc("doy", self._input_dir, 'forcing.nc'))
-            vs.dt_secs = vs.DT_SECS[vs.itt]
-            vs.dt = vs.DT[vs.itt]
-            vs.year = vs.YEAR[vs.itt]
-            vs.month = vs.MONTH[vs.itt]
-            vs.doy = vs.DOY[vs.itt]
-            vs.t = update(vs.t, at[:], npx.cumsum(vs.DT))
-            # spatial grid
+            # grid of model runs
             dx = allocate(state.dimensions, ("x"))
             dx = update(dx, at[:], 1)
             dy = allocate(state.dimensions, ("y"))
@@ -260,7 +229,7 @@ def main(nsamples, lys_experiment):
         def set_parameters(self, state):
             vs = state.variables
 
-            if (vs.MONTH[vs.itt] != vs.MONTH[vs.itt - 1]) & (vs.itt > 1):
+            if (vs.month[vs.tau] != vs.month[vs.taum1]) & (vs.itt > 1):
                 vs.update(calc_parameters_surface_kernel(state))
 
         @roger_routine
@@ -285,11 +254,11 @@ def main(nsamples, lys_experiment):
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "DT_SECS",
-                "DT",
                 "dt_secs",
                 "dt",
                 "itt",
+                "itt_forc",
+                "itt_day",
                 "prec",
                 "ta",
                 "ta_min",
@@ -297,38 +266,158 @@ def main(nsamples, lys_experiment):
                 "pet",
                 "pet_res",
                 "event_id",
-                "YEAR",
-                "MONTH",
-                "DOY",
+                "event_id_counter",
                 "year",
                 "month",
                 "doy",
                 "tau",
+                "taum1",
+                "q_snow",
+                "swe",
+                "swe_top",
+                "time",
+                "time_event0",
                 "crop_type",
                 "itt_cr"
             ],
         )
         def set_forcing(self, state):
             vs = state.variables
+            settings = state.settings
 
-            if (vs.YEAR[vs.itt] != vs.YEAR[vs.itt - 1]) & (vs.itt > 1):
+            vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, 'forcing.nc')[vs.itt_forc])
+            vs.month = update(vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, 'forcing.nc')[vs.itt_forc])
+            vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, 'forcing.nc')[vs.itt_forc])
+
+            # adaptive time stepping
+            condt = (vs.time % (24 * 60 * 60) == 0) & (vs.itt > 0)
+            if condt:
+                vs.itt_day = 0
+                vs.itt_forc = vs.itt_forc + 6 * 24
+            prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
+            ta_day = self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
+            ta_min_day = self._read_var_from_nc("TA_min", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
+            ta_max_day = self._read_var_from_nc("TA_max", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
+            pet_day = self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
+            cond0 = (prec_day <= 0).all() & (vs.swe[2:-2, 2:-2, vs.tau] <= 0).all() & (vs.swe_top[2:-2, 2:-2, vs.tau] <= 0).all() & (ta_day > settings.ta_fm).all()
+            cond00 = ((prec_day > 0) & (ta_day <= settings.ta_fm)).any() | ((prec_day <= 0) & (ta_day <= settings.ta_fm)).all()
+            cond1 = (prec_day > settings.hpi).any() & (prec_day > 0).any() & (ta_day > settings.ta_fm).any()
+            cond2 = (prec_day <= settings.hpi).all() & (prec_day > 0).any() & (ta_day > settings.ta_fm).any()
+            cond3 = (prec_day > settings.hpi).any() & (prec_day > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
+            cond4 = (prec_day <= settings.hpi).all() & (prec_day > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
+            cond5 = (prec_day <= 0).all() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
+            # no event or snowfall - daily time steps
+            if cond0 or cond00:
+                prec = npx.sum(prec_day, axis=-1)
+                ta = npx.mean(ta_day, axis=-1)
+                if (vs.time % (24 * 60 * 60) == 0):
+                    vs.dt_secs = 24 * 60 * 60
+                else:
+                    vs.dt_secs = 60 * 60
+            # rainfall/snow melt event - hourly time steps
+            elif (cond2 or cond4 or cond5) and not cond1 and not cond3:
+                prec_hour = prec_day[:, :, vs.itt_day:vs.itt_day+6]
+                ta_hour = ta_day[:, :, vs.itt_day:vs.itt_day+6]
+                prec = npx.sum(prec_hour, axis=-1)
+                ta = npx.mean(ta_hour, axis=-1)
+                vs.dt_secs = 60 * 60
+            # heavy rainfall event - 10 minutes time steps
+            elif (cond1 or cond3) and not cond2 and not cond4 and not cond5:
+                prec = prec_day[:, :, vs.itt_day]
+                ta = ta_day[:, :, vs.itt_day]
+                vs.dt_secs = 10 * 60
+
+            # determine end of event
+            if ((prec > 0).any() | ((vs.swe[2:-2, 2:-2, vs.tau] > 0) | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0)).any() and (ta > settings.ta_fm)).any():
+                vs.time_event0 = 0
+            elif ((prec <= 0) & (ta > settings.ta_fm)).all() or ((prec > 0) & (ta <= settings.ta_fm)).all() or ((vs.swe[2:-2, 2:-2, vs.taum1] > 0).any() & (vs.swe[2:-2, 2:-2, vs.tau] <= 0).all()):
+                vs.time_event0 = vs.time_event0 + vs.dt_secs
+
+            # increase time stepping at end of event if either full hour
+            # or full day, respectively
+            if vs.time_event0 <= settings.end_event and (vs.dt_secs == 10 * 60):
+                ta = ta_day[:, :, vs.itt_day]
+                ta_min = ta_min_day[:, :, vs.itt_day]
+                ta_max = ta_max_day[:, :, vs.itt_day]
+                pet = pet_day[:, :, vs.itt_day]
+                vs.event_id = update(
+                    vs.event_id,
+                    at[vs.tau], vs.event_id_counter,
+                )
+                vs.dt = 1 / 6
+                vs.itt_day = vs.itt_day + 1
+            elif vs.time_event0 <= settings.end_event and (vs.dt_secs == 60 * 60):
+                ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
+                ta_min = npx.mean(ta_min_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
+                ta_max = npx.mean(ta_max_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
+                pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
+                vs.event_id = update(
+                    vs.event_id,
+                    at[vs.tau], vs.event_id_counter,
+                )
+                vs.dt = 1
+                vs.itt_day = vs.itt_day + 6
+            elif vs.time_event0 <= settings.end_event and (vs.dt_secs == 24 * 60 * 60):
+                ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
+                ta_min = npx.mean(ta_min_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
+                ta_max = npx.mean(ta_max_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
+                pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
+                vs.dt = 24
+                vs.itt_day = 0
+            elif vs.time_event0 > settings.end_event and (vs.time % (60 * 60) != 0) and (vs.dt_secs == 10 * 60):
+                vs.dt_secs = 10 * 60
+                vs.dt = 1 / 6
+                vs.itt_day = vs.itt_day + 1
+                ta = ta_day[:, :, vs.itt_day]
+                ta_min = ta_min_day[:, :, vs.itt_day]
+                ta_max = ta_max_day[:, :, vs.itt_day]
+                pet = pet_day[:, :, vs.itt_day]
+                vs.event_id = update(
+                    vs.event_id,
+                    at[vs.tau], 0,
+                )
+            elif vs.time_event0 > settings.end_event and (vs.time % (60 * 60) == 0) and ((vs.dt_secs == 10 * 60) or (vs.dt_secs == 60 * 60)):
+                ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
+                ta_min = npx.mean(ta_min_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
+                ta_max = npx.mean(ta_max_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
+                pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
+                vs.dt_secs = 60 * 60
+                vs.dt = 1
+                vs.itt_day = vs.itt_day + 6
+                vs.event_id = update(
+                    vs.event_id,
+                    at[vs.tau], 0,
+                )
+            elif vs.time_event0 > settings.end_event and (vs.time % (24 * 60 * 60) == 0) and (vs.dt_secs == 24 * 60 * 60):
+                ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
+                ta_min = npx.mean(ta_min_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
+                ta_max = npx.mean(ta_max_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
+                pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
+                vs.dt_secs = 24 * 60 * 60
+                vs.dt = 24
+                vs.itt_day = 0
+                vs.event_id = update(
+                    vs.event_id,
+                    at[vs.tau], 0,
+                )
+
+            # set event id for next event
+            if (vs.event_id[vs.taum1] > 0) & (vs.event_id[vs.tau] == 0):
+                vs.event_id_counter = vs.event_id_counter + 1
+
+            # set forcing for current time step
+            vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], prec)
+            vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], ta)
+            vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2, vs.tau], ta_min)
+            vs.ta_max = update(vs.ta_max, at[2:-2, 2:-2, vs.tau], ta_max)
+            vs.pet = update(vs.pet, at[2:-2, 2:-2], pet)
+            vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], pet)
+
+            if (vs.year[vs.tau] != vs.year[vs.taum1]) & (vs.itt > 1):
                 vs.itt_cr = vs.itt_cr + 2
                 vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.crop_type[2:-2, 2:-2, 2])
                 vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, vs.itt_cr])
                 vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, vs.itt_cr + 1])
-
-            vs.prec = update(vs.prec, at[2:-2, 2:-2], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt])
-            vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt])
-            vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2], self._read_var_from_nc("TA_min", self._input_dir, 'forcing.nc')[:, :, vs.itt])
-            vs.ta_max = update(vs.ta_max, at[2:-2, 2:-2], self._read_var_from_nc("TA_max", self._input_dir, 'forcing.nc')[:, :, vs.itt])
-            vs.pet = update(vs.pet, at[2:-2, 2:-2], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt])
-            vs.event_id = update(vs.event_id, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("EVENT_ID", self._input_dir, 'forcing.nc')[vs.itt])
-
-            vs.dt_secs = vs.DT_SECS[vs.itt]
-            vs.dt = vs.DT[vs.itt]
-            vs.year = vs.YEAR[vs.itt]
-            vs.month = vs.MONTH[vs.itt]
-            vs.doy = vs.DOY[vs.itt]
 
         @roger_routine
         def set_diagnostics(self, state):
@@ -548,7 +637,19 @@ def main(nsamples, lys_experiment):
         )
         vs.event_id = update(
             vs.event_id,
-            at[2:-2, 2:-2, vs.taum1], vs.event_id[2:-2, 2:-2, vs.tau],
+            at[vs.taum1], vs.event_id[vs.tau],
+        )
+        vs.year = update(
+            vs.year,
+            at[vs.taum1], vs.year[vs.tau],
+        )
+        vs.month = update(
+            vs.month,
+            at[vs.taum1], vs.month[vs.tau],
+        )
+        vs.doy = update(
+            vs.doy,
+            at[vs.taum1], vs.doy[vs.tau],
         )
 
         return KernelOutput(
@@ -583,6 +684,9 @@ def main(nsamples, lys_experiment):
             z0=vs.z0,
             prec=vs.prec,
             event_id=vs.event_id,
+            year=vs.year,
+            month=vs.month,
+            doy=vs.doy,
             S_fp_rz=vs.S_fp_rz,
             S_lp_rz=vs.S_lp_rz,
             S_fp_ss=vs.S_fp_ss,

@@ -287,7 +287,7 @@ def calc_q_sub_rz(state):
         at[2:-2, 2:-2], npx.where(vs.q_sub_pot[2:-2, 2:-2] * rz_share[2:-2, 2:-2] < vs.S_zsat_rz[2:-2, 2:-2], vs.q_sub_pot[2:-2, 2:-2] * rz_share[2:-2, 2:-2], vs.S_zsat_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # root zone subsurface runoff
+    # lateral subsurface runoff in root zone
     vs.q_sub_mat_rz = update(
         vs.q_sub_mat_rz,
         at[2:-2, 2:-2], vs.q_sub_rz[2:-2, 2:-2] * vs.q_sub_mat_share[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
@@ -342,7 +342,7 @@ def calc_q_sub_pot_ss(state):
         at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], 0, ss_share[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # subsoil subsurface runoff
+    # lateral subsurface runoff in subsoil
     vs.q_sub_mat_pot_ss = update(
         vs.q_sub_mat_pot_ss,
         at[2:-2, 2:-2], vs.q_sub_mat_pot[2:-2, 2:-2] * ss_share[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
@@ -368,6 +368,31 @@ def calc_q_sub_ss(state):
     """
     vs = state.variables
 
+    vs.q_ss = update(
+        vs.q_ss,
+        at[2:-2, 2:-2], 0,
+    )
+    vs.q_ss = update(
+        vs.q_ss,
+        at[2:-2, 2:-2], npx.where(vs.z_sat[2:-2, 2:-2, vs.tau] <= 0, vs.q_pot_ss[2:-2, 2:-2], vs.q_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # update subsoil storage after vertical subsoil drainage
+    mask1 = (vs.S_lp_ss < vs.q_pot_ss) & (vs.z_sat[:, :, vs.tau] <= 0)
+    mask2 = (vs.S_lp_ss >= vs.q_pot_ss) & (vs.z_sat[:, :, vs.tau] <= 0)
+    vs.S_fp_ss = update_add(
+        vs.S_fp_ss,
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], -(vs.q_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.S_lp_ss = update(
+        vs.S_lp_ss,
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], 0, vs.S_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.S_lp_ss = update_add(
+        vs.S_lp_ss,
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], -vs.q_ss[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     # fraction of lateral and vertical flow
     fv = allocate(state.dimensions, ("x", "y"))
     fl = allocate(state.dimensions, ("x", "y"))
@@ -380,14 +405,15 @@ def calc_q_sub_ss(state):
         at[2:-2, 2:-2], npx.where((vs.q_pot_ss[2:-2, 2:-2] + vs.q_sub_pot_ss[2:-2, 2:-2]) > 0, vs.q_sub_pot_ss[2:-2, 2:-2] / (vs.q_pot_ss[2:-2, 2:-2] + vs.q_sub_pot_ss[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # vertical flow
-    vs.q_ss = update(
-        vs.q_ss,
-        at[2:-2, 2:-2], 0,
+    # vertical flow while saturation water level
+    q_ss_sat = allocate(state.dimensions, ("x", "y"))
+    q_ss_sat = update(
+        q_ss_sat,
+        at[2:-2, 2:-2], npx.where((vs.q_pot_ss[2:-2, 2:-2] + vs.q_sub_pot_ss[2:-2, 2:-2]) <= vs.S_zsat_ss[2:-2, 2:-2], (vs.q_pot_ss[2:-2, 2:-2] + vs.q_sub_pot_ss[2:-2, 2:-2]) * fv[2:-2, 2:-2], vs.S_zsat_ss[2:-2, 2:-2] * fv[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.q_ss = update(
         vs.q_ss,
-        at[2:-2, 2:-2], npx.where((vs.q_pot_ss[2:-2, 2:-2] + vs.q_sub_pot_ss[2:-2, 2:-2]) <= vs.S_zsat_ss[2:-2, 2:-2], (vs.q_pot_ss[2:-2, 2:-2] + vs.q_sub_pot_ss[2:-2, 2:-2]) * fv[2:-2, 2:-2], vs.S_zsat_ss[2:-2, 2:-2] * fv[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.z_sat[2:-2, 2:-2, vs.tau] > 0, q_ss_sat[2:-2, 2:-2], vs.q_ss[2:-2, 2:-2]),
     )
 
     # lateral flow
@@ -408,10 +434,35 @@ def calc_q_sub_ss(state):
         at[2:-2, 2:-2], vs.q_sub_ss[2:-2, 2:-2] * vs.q_sub_mp_share[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
+    # update subsoil storage after lateral subsurface runoff
+    vs.S_lp_ss = update_add(
+        vs.S_lp_ss,
+        at[2:-2, 2:-2], -vs.q_sub_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    # update subsoil storage after vertical subsoil drainage
+    mask1 = (vs.S_lp_ss < vs.q_ss) & (vs.z_sat[:, :, vs.tau] > 0)
+    mask2 = (vs.S_lp_ss >= vs.q_ss) & (vs.z_sat[:, :, vs.tau] > 0)
+    vs.S_fp_ss = update_add(
+        vs.S_fp_ss,
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], -(vs.q_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.S_lp_ss = update(
+        vs.S_lp_ss,
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], 0, vs.S_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.S_lp_ss = update_add(
+        vs.S_lp_ss,
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], -vs.q_ss[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     # update subsoil saturation water level
     vs.z_sat = update_add(
         vs.z_sat,
         at[2:-2, 2:-2, vs.tau], -((vs.q_sub_ss[2:-2, 2:-2] + vs.q_ss[2:-2, 2:-2])/vs.theta_ac[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.z_sat = update(
+        vs.z_sat,
+        at[2:-2, 2:-2, vs.tau], npx.where(vs.z_sat[2:-2, 2:-2, vs.tau] < 0, 0, vs.z_sat[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.S_zsat = update(
@@ -419,13 +470,7 @@ def calc_q_sub_ss(state):
         at[2:-2, 2:-2], vs.z_sat[2:-2, 2:-2, vs.tau] * vs.theta_ac[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # update subsoil storage
-    vs.S_lp_ss = update_add(
-        vs.S_lp_ss,
-        at[2:-2, 2:-2], -(vs.q_sub_ss[2:-2, 2:-2] + vs.q_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    return KernelOutput(q_ss=vs.q_ss, q_sub_ss=vs.q_sub_ss, q_sub_mat_ss=vs.q_sub_mat_ss, q_sub_mp_ss=vs.q_sub_mp_ss, z_sat=vs.z_sat, S_lp_ss=vs.S_lp_ss)
+    return KernelOutput(q_ss=vs.q_ss, q_sub_ss=vs.q_sub_ss, q_sub_mat_ss=vs.q_sub_mat_ss, q_sub_mp_ss=vs.q_sub_mp_ss, z_sat=vs.z_sat, S_lp_ss=vs.S_lp_ss, S_fp_ss=vs.S_fp_ss)
 
 
 @roger_kernel
@@ -590,20 +635,31 @@ def calc_perc_pot_rz(state):
 
     # potential percolation rate
     perc_pot = allocate(state.dimensions, ("x", "y"))
-    mask1 = (vs.z_wf[:, :, vs.tau] < vs.z_root[:, :, vs.tau])
-    mask2 = (vs.z_wf[:, :, vs.tau] >= vs.z_root[:, :, vs.tau])
+    mask1 = (vs.z_wf[:, :, vs.tau] < vs.z_root[:, :, vs.tau]) & (vs.z_sat[:, :, vs.tau] <= 0)
+    mask2 = (vs.z_wf[:, :, vs.tau] >= vs.z_root[:, :, vs.tau]) & (vs.z_sat[:, :, vs.tau] <= 0)
+    mask3 = (vs.z_sat[:, :, vs.tau] > 0) & (vs.z_root[:, :, vs.tau] < vs.z_soil - vs.z_sat[:, :, vs.tau])
     perc_pot = update(
         perc_pot,
-        at[2:-2, 2:-2], npx.fmin(vs.ks[2:-2, 2:-2] * vs.dt, vs.k_rz[2:-2, 2:-2, vs.tau] * vs.dt) * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], (vs.k_rz[2:-2, 2:-2, vs.tau] / vs.ks[2:-2, 2:-2]) * vs.dt, 0) * vs.maskCatch[2:-2, 2:-2],
     )
     perc_pot = update(
         perc_pot,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.ks[2:-2, 2:-2] * vs.dt, perc_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], (vs.k_rz[2:-2, 2:-2, vs.tau] / vs.ks[2:-2, 2:-2]) * vs.dt, perc_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    z = allocate(state.dimensions, ("x", "y"))
+    z = update(
+        z,
+        at[2:-2, 2:-2], (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau]) - vs.z_sat[2:-2, 2:-2, vs.tau],
+    )
+    perc_pot = update(
+        perc_pot,
+        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2], ((npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]) - npx.power(-vs.h_rz[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]))/(1 + npx.power(-vs.h_rz[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]) + (vs.n_salv[2:-2, 2:-2] - 1) * npx.power((z[2:-2, 2:-2]*-1)/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]))),
+                                  perc_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # drainage of root zone
-    mask3 = (perc_pot > 0) & (perc_pot <= vs.S_lp_rz) & (vs.z_root[:, :, vs.taum1] < vs.z_soil - vs.z_sat[:, :, vs.tau])
-    mask4 = (perc_pot > 0) & (perc_pot > vs.S_lp_rz) & (vs.z_root[:, :, vs.taum1] < vs.z_soil - vs.z_sat[:, :, vs.tau])
+    # vertical drainage of root zone
+    mask3 = (perc_pot > 0) & (vs.S_lp_rz + vs.S_fp_rz >= perc_pot) & (vs.z_root[:, :, vs.taum1] < vs.z_soil - vs.z_sat[:, :, vs.tau])
+    mask4 = (perc_pot > 0) & (vs.S_lp_rz + vs.S_fp_rz < perc_pot) & (vs.z_root[:, :, vs.taum1] < vs.z_soil - vs.z_sat[:, :, vs.tau])
 
     vs.q_pot_rz = update(
         vs.q_pot_rz,
@@ -615,19 +671,7 @@ def calc_perc_pot_rz(state):
     )
     vs.q_pot_rz = update(
         vs.q_pot_rz,
-        at[2:-2, 2:-2], npx.where(mask4[2:-2, 2:-2], vs.S_lp_rz[2:-2, 2:-2], vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    mask5 = (vs.q_pot_rz > 0) & (vs.q_pot_rz > vs.S_ac_ss - vs.S_lp_ss) & (vs.S_lp_ss < vs.S_ac_ss)
-    vs.q_pot_rz = update(
-        vs.q_pot_rz,
-        at[2:-2, 2:-2], npx.where(mask5[2:-2, 2:-2], vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2], vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    mask6 = (vs.S_lp_ss >= vs.S_ac_ss)
-    vs.q_pot_rz = update(
-        vs.q_pot_rz,
-        at[2:-2, 2:-2], npx.where(mask6[2:-2, 2:-2], 0, vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask4[2:-2, 2:-2], vs.S_fp_rz[2:-2, 2:-2] + vs.S_lp_rz[2:-2, 2:-2], vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(q_pot_rz=vs.q_pot_rz)
@@ -640,15 +684,26 @@ def calc_perc_rz(state):
     """
     vs = state.variables
 
+    mask1 = (vs.S_lp_rz < vs.q_pot_rz)
+    mask2 = (vs.S_lp_rz >= vs.q_pot_rz)
+
     vs.q_rz = update(
         vs.q_rz,
         at[2:-2, 2:-2], vs.q_pot_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # update root zone storage after root zone drainage
+    # update root zone storage after vertical root zone drainage
+    vs.S_fp_rz = update_add(
+        vs.S_fp_rz,
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], -(vs.q_rz[2:-2, 2:-2] - vs.S_lp_rz[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.S_lp_rz = update(
+        vs.S_lp_rz,
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], 0, vs.S_lp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
     vs.S_lp_rz = update_add(
         vs.S_lp_rz,
-        at[2:-2, 2:-2], -vs.q_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], -vs.q_rz[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update subsoil storage after percolation
@@ -668,7 +723,7 @@ def calc_perc_rz(state):
         at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(q_rz=vs.q_rz, S_lp_rz=vs.S_lp_rz, S_fp_ss=vs.S_fp_ss, S_lp_ss=vs.S_lp_ss)
+    return KernelOutput(q_rz=vs.q_rz, S_fp_rz=vs.S_fp_rz, S_lp_rz=vs.S_lp_rz, S_fp_ss=vs.S_fp_ss, S_lp_ss=vs.S_lp_ss)
 
 
 @roger_kernel
@@ -677,23 +732,23 @@ def calc_perc_pot_ss(state):
     Calculates potenital percolation in subsoil
     """
     vs = state.variables
-    settings = state.settings
 
     # potential drainage rate
     # calculate potential percolation rate
     perc_pot = allocate(state.dimensions, ("x", "y"))
+    z = allocate(state.dimensions, ("x", "y"))
+    z = update(
+        z,
+        at[2:-2, 2:-2], vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 - vs.z_soil[2:-2, 2:-2],
+    )
     perc_pot = update(
         perc_pot,
-        at[2:-2, 2:-2], npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, npx.where(vs.z_sat[2:-2, 2:-2, vs.tau] > 0, vs.ks[2:-2, 2:-2] * vs.dt, npx.fmin(vs.ks[2:-2, 2:-2] * vs.dt, vs.k_ss[2:-2, 2:-2, vs.tau] * vs.dt))) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, npx.where(vs.z_sat[2:-2, 2:-2, vs.tau] > 0, vs.ks[2:-2, 2:-2] * vs.dt, (npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2])/(1 + (vs.n_salv[2:-2, 2:-2] - 1) * npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]))))) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # where drainage occurs
-    if settings.enable_groundwater_boundary | settings.enable_groundwater:
-        mask1 = (perc_pot > 0) & ((vs.S_zsat_ss > 0) | (vs.z_soil < vs.z_gw[:, :, vs.tau])) & (perc_pot <= vs.S_zsat_ss)
-        mask2 = (perc_pot > 0) & ((vs.S_zsat_ss > 0) | (vs.z_soil < vs.z_gw[:, :, vs.tau])) & (perc_pot > vs.S_zsat_ss)
-    else:
-        mask1 = (perc_pot > 0) & (vs.S_zsat_ss > 0) & (perc_pot <= vs.S_zsat_ss)
-        mask2 = (perc_pot > 0) & (vs.S_zsat_ss > 0) & (perc_pot > vs.S_zsat_ss)
+    mask1 = (perc_pot > 0) & (vs.z_soil < vs.z_gw[:, :, vs.tau] * 1000) & (perc_pot <= vs.S_fp_ss + vs.S_lp_ss)
+    mask2 = (perc_pot > 0) & (vs.z_soil < vs.z_gw[:, :, vs.tau] * 1000) & (perc_pot > vs.S_fp_ss + vs.S_lp_ss)
 
     # vertical drainage of subsoil
     vs.q_pot_ss = update(
@@ -706,7 +761,28 @@ def calc_perc_pot_ss(state):
     )
     vs.q_pot_ss = update(
         vs.q_pot_ss,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.S_zsat_ss[2:-2, 2:-2], vs.q_pot_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2], vs.q_pot_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # percolation stops while shallow groundwater table or groundwater table
+    # rises into soil
+    z = allocate(state.dimensions, ("x", "y"))
+    cpr_pot = allocate(state.dimensions, ("x", "y"))
+    z = update(
+        z,
+        at[2:-2, 2:-2], npx.where(vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 < vs.z_soil[2:-2, 2:-2], 0, vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 - vs.z_soil[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    cpr_pot = update(
+        cpr_pot,
+        at[2:-2, 2:-2], ((npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]) - npx.power(-vs.h_ss[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]))/(1 + npx.power(-vs.h_ss[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]) + (vs.n_salv[2:-2, 2:-2] - 1) * npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]))) * vs.maskCatch[2:-2, 2:-2],
+    )
+    cpr_pot = update(
+        cpr_pot,
+        at[2:-2, 2:-2], npx.where(z[2:-2, 2:-2] > 0, 0, cpr_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.q_pot_ss = update(
+        vs.q_pot_ss,
+        at[2:-2, 2:-2], npx.where((cpr_pot[2:-2, 2:-2] > 0) & (z[2:-2, 2:-2] > 0), 0, vs.q_pot_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(q_pot_ss=vs.q_pot_ss)
@@ -719,16 +795,20 @@ def calc_perc_ss(state):
     """
     vs = state.variables
 
-    mask = (vs.q_pot_ss > vs.S_zsat_ss)
     vs.q_ss = update(
         vs.q_ss,
-        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.S_zsat_ss[2:-2, 2:-2], vs.q_pot_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], vs.q_pot_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update saturation water level
     vs.z_sat = update_add(
         vs.z_sat,
-        at[2:-2, 2:-2, vs.tau], -vs.q_ss[2:-2, 2:-2]/vs.theta_ac[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau], npx.where(vs.z_sat[2:-2, 2:-2, vs.tau] > 0, -vs.q_ss[2:-2, 2:-2]/vs.theta_ac[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.z_sat = update(
+        vs.z_sat,
+        at[2:-2, 2:-2, vs.tau], npx.where(vs.z_sat[2:-2, 2:-2, vs.tau] < 0, 0, vs.z_sat[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.S_zsat_ss = update(
@@ -736,146 +816,23 @@ def calc_perc_ss(state):
         at[2:-2, 2:-2], vs.z_sat[2:-2, 2:-2, vs.tau] * vs.theta_ac[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # update subsoil storage after subsoil drainage
-    vs.S_lp_ss = update_add(
-        vs.S_lp_ss,
-        at[2:-2, 2:-2], -vs.q_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    return KernelOutput(q_ss=vs.q_ss, S_lp_ss=vs.S_lp_ss, z_sat=vs.z_sat, S_zsat=vs.S_zsat)
-
-
-@roger_kernel
-def calc_perc_pot_rz_ff(state):
-    """
-    Calculates potential percolation in root zone
-    """
-    vs = state.variables
-
-    # potential percolation rate
-    perc_pot = allocate(state.dimensions, ("x", "y"))
-    perc_pot = update(
-        perc_pot,
-        at[2:-2, 2:-2], npx.fmin(vs.ks[2:-2, 2:-2] * vs.dt, vs.k_rz[2:-2, 2:-2, vs.tau] * vs.dt) * vs.maskCatch[2:-2, 2:-2],
-    )
-    # drainage of root zone
-    mask3 = (perc_pot > 0) & (perc_pot <= vs.S_lp_rz) & (vs.z_root[:, :, vs.taum1] < vs.z_soil - vs.z_sat[:, :, vs.tau])
-    mask4 = (perc_pot > 0) & (perc_pot > vs.S_lp_rz) & (vs.z_root[:, :, vs.taum1] < vs.z_soil - vs.z_sat[:, :, vs.tau])
-
-    vs.q_pot_rz = update(
-        vs.q_pot_rz,
-        at[2:-2, 2:-2], 0,
-    )
-    vs.q_pot_rz = update(
-        vs.q_pot_rz,
-        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2], perc_pot[2:-2, 2:-2], vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.q_pot_rz = update(
-        vs.q_pot_rz,
-        at[2:-2, 2:-2], npx.where(mask4[2:-2, 2:-2], vs.S_lp_rz[2:-2, 2:-2], vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    return KernelOutput(q_pot_rz=vs.q_pot_rz)
-
-
-@roger_kernel
-def calc_perc_rz_ff(state):
-    """
-    Calculates percolation in root zone
-    """
-    vs = state.variables
-
-    vs.q_rz = update(
-        vs.q_rz,
-        at[2:-2, 2:-2], vs.q_pot_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    # update root zone storage after root zone drainage
-    vs.S_lp_rz = update_add(
-        vs.S_lp_rz,
-        at[2:-2, 2:-2], -vs.q_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    # update subsoil storage after percolation
+    # update subsoil storage after vertical subsoil drainage
+    mask1 = (vs.S_lp_ss < vs.q_pot_ss)
+    mask2 = (vs.S_lp_ss >= vs.q_pot_ss)
     vs.S_fp_ss = update_add(
         vs.S_fp_ss,
-        at[2:-2, 2:-2], vs.q_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], -(vs.q_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
     )
-
-    # subsoil fine pore excess fills subsoil large pores
-    mask = (vs.S_fp_ss > vs.S_ufc_ss)
+    vs.S_lp_ss = update(
+        vs.S_lp_ss,
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], 0, vs.S_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
     vs.S_lp_ss = update_add(
         vs.S_lp_ss,
-        at[2:-2, 2:-2], (vs.S_fp_ss[2:-2, 2:-2] - vs.S_ufc_ss[2:-2, 2:-2]) * mask[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.S_fp_ss = update(
-        vs.S_fp_ss,
-        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], -vs.q_ss[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(q_rz=vs.q_rz, S_lp_rz=vs.S_lp_rz, S_fp_ss=vs.S_fp_ss, S_lp_ss=vs.S_lp_ss)
-
-
-@roger_kernel
-def calc_perc_pot_ss_ff(state):
-    """
-    Calculates potenital percolation in subsoil
-    """
-    vs = state.variables
-    settings = state.settings
-
-    # potential drainage rate
-    # calculate potential percolation rate
-    perc_pot = allocate(state.dimensions, ("x", "y"))
-    perc_pot = update(
-        perc_pot,
-        at[2:-2, 2:-2], npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, npx.where(vs.S_lp_ss[2:-2, 2:-2] > 0, vs.ks[2:-2, 2:-2] * vs.dt, npx.fmin(vs.ks[2:-2, 2:-2] * vs.dt, vs.k_ss[2:-2, 2:-2, vs.tau] * vs.dt))) * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    # where drainage occurs
-    if settings.enable_groundwater_boundary | settings.enable_groundwater:
-        mask1 = (perc_pot > 0) & ((vs.S_zsat_ss > 0) | (vs.z_soil < vs.z_gw[:, :, vs.tau])) & (perc_pot <= vs.S_zsat_ss)
-        mask2 = (perc_pot > 0) & ((vs.S_zsat_ss > 0) | (vs.z_soil < vs.z_gw[:, :, vs.tau])) & (perc_pot > vs.S_zsat_ss)
-    else:
-        mask1 = (perc_pot > 0) & (vs.S_zsat_ss > 0) & (perc_pot <= vs.S_zsat_ss)
-        mask2 = (perc_pot > 0) & (vs.S_zsat_ss > 0) & (perc_pot > vs.S_zsat_ss)
-
-    # vertical drainage of subsoil
-    vs.q_pot_ss = update(
-        vs.q_pot_ss,
-        at[2:-2, 2:-2], 0,
-    )
-    vs.q_pot_ss = update(
-        vs.q_pot_ss,
-        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], perc_pot[2:-2, 2:-2], vs.q_pot_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.q_pot_ss = update(
-        vs.q_pot_ss,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.S_zsat_ss[2:-2, 2:-2], vs.q_pot_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    return KernelOutput(q_pot_ss=vs.q_pot_ss)
-
-
-@roger_kernel
-def calc_perc_ss_ff(state):
-    """
-    Calculates percolation in subsoil
-    """
-    vs = state.variables
-
-    vs.q_ss = update(
-        vs.q_ss,
-        at[2:-2, 2:-2], vs.q_pot_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    # update root zone storage after root zone drainage
-    vs.S_lp_ss = update_add(
-        vs.S_lp_ss,
-        at[2:-2, 2:-2], -vs.q_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    return KernelOutput(q_ss=vs.q_ss, S_lp_ss=vs.S_lp_ss)
+    return KernelOutput(q_ss=vs.q_ss, S_fp_ss=vs.S_fp_ss, S_lp_ss=vs.S_lp_ss, z_sat=vs.z_sat, S_zsat=vs.S_zsat)
 
 
 @roger_routine
@@ -911,10 +868,10 @@ def calculate_subsurface_runoff(state):
         vs.update(calc_perc_ss(state))
 
     elif not settings.enable_lateral_flow and settings.enable_film_flow:
-        vs.update(calc_perc_pot_rz_ff(state))
-        vs.update(calc_perc_rz_ff(state))
-        vs.update(calc_perc_pot_ss_ff(state))
-        vs.update(calc_perc_ss_ff(state))
+        vs.update(calc_perc_pot_rz(state))
+        vs.update(calc_perc_rz(state))
+        vs.update(calc_perc_pot_ss(state))
+        vs.update(calc_perc_ss(state))
 
 
 @roger_kernel

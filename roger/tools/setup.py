@@ -150,7 +150,7 @@ def get_uniform_grid_steps(total_length, stepsize):
 
 
 @roger_sync
-def write_forcing(input_dir, nrows=1, ncols=1, hpi=5, end_prec_event=36, sf=3,
+def write_forcing_old(input_dir, nrows=1, ncols=1, hpi=5, end_prec_event=36, sf=3,
                   ta_fm=0, uniform=True, enable_film_flow=False,
                   enable_crop_phenology=False,
                   prec_correction=None, z_soil=None,
@@ -530,9 +530,9 @@ def write_forcing_event(input_dir, nrows=1, ncols=1, uniform=True, prec_correcti
         df_meteo = df_meteo.ffill()
         if prec_correction:
             prec_corr = precipitation_correction(df_meteo['PREC'].values,
-                                                     df_meteo['TA'].values,
-                                                     df_meteo.index.month,
-                                                     horizontal_shielding=prec_correction)
+                                                 df_meteo['TA'].values,
+                                                 df_meteo.index.month,
+                                                 horizontal_shielding=prec_correction)
             df_meteo['PREC'] = prec_corr
 
         nc_file = input_dir / "forcing.nc"
@@ -657,3 +657,111 @@ def validate(data: pd.DataFrame):
 
         if any(non_numeric):
             raise ValueError('File contains non-numeric values.')
+
+
+@roger_sync
+def write_forcing(input_dir, nrows=1, ncols=1, uniform=True,
+                  enable_crop_phenology=False,
+                  prec_correction=None, float_type="float64"):
+    """Runs event classification and writes forcing data
+
+    Args
+    ----------
+    input_dir : Path
+        path to directory with input data
+
+    nrows : int, optional
+        number of rows
+
+    ncols : int, optional
+        number of columns
+
+    uniform : bool, optional
+        True if time series are used as input data
+
+    enable_crop_phenology : bool, optional
+        if True daily minimum and maximum is required
+
+    prec_correction : str, optional
+        if True precipitation is corrected according to Richter (1995)
+    """
+    if uniform:
+        df_PREC, df_PET, df_TA = read_meteo(input_dir)
+        validate(df_PREC)
+        validate(df_PET)
+        validate(df_TA)
+        df_meteo = df_PREC.join([df_TA, df_PET.loc[:, 'PET'].to_frame()])
+        df_meteo = df_meteo.ffill()
+        # downscale daily PET to 10 minutes
+        df_meteo.loc[:, 'PET'] = (df_meteo.loc[:, 'PET'] / 24) / 6
+        if prec_correction:
+            prec_corr = precipitation_correction(df_meteo['PREC'].values,
+                                                 df_meteo['TA'].values,
+                                                 df_meteo.index.month,
+                                                 horizontal_shielding=prec_correction)
+            df_meteo['PREC'] = prec_corr
+
+        nc_file = input_dir / "forcing.nc"
+        with h5netcdf.File(nc_file, 'w', decode_vlen_strings=False) as f:
+            f.attrs.update(
+                date_created=datetime.datetime.today().isoformat(),
+                title='RoGeR model forcing',
+                institution='University of Freiburg, Chair of Hydrology',
+                references='',
+                comment=''
+            )
+            # set dimensions with a dictionary
+            dict_dim = {'x': nrows, 'y': ncols, 'Time': len(df_meteo.index), 'scalar': 1}
+            f.dimensions = dict_dim
+            v = f.create_variable('PREC', ('x', 'y', 'Time'), float_type)
+            arr = df_meteo['PREC'].astype(float_type).values
+            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+            v.attrs['long_name'] = 'Precipitation'
+            v.attrs['units'] = 'mm/10 minutes'
+            v = f.create_variable('TA', ('x', 'y', 'Time'), float_type)
+            arr = df_meteo['TA'].astype(float_type).values
+            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+            v.attrs['long_name'] = 'Air temperature'
+            v.attrs['units'] = 'degC'
+            v = f.create_variable('PET', ('x', 'y', 'Time'), float_type)
+            arr = df_meteo['PET'].astype(float_type).values
+            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+            v.attrs['long_name'] = 'Potential Evapotranspiration'
+            v.attrs['units'] = 'mm/10 minutes'
+            v = f.create_variable('dt', ('Time',), float_type)
+            v[:] = 10 * 60
+            v.attrs['long_name'] = 'time step'
+            v.attrs['units'] = 'seconds'
+            v = f.create_variable('YEAR', ('Time',), int)
+            v[:] = df_meteo.index.year.astype(int).values
+            v.attrs['units'] = 'year'
+            v = f.create_variable('MONTH', ('Time',), int)
+            v[:] = df_meteo.index.month.astype(int).values
+            v.attrs['units'] = 'month'
+            v = f.create_variable('DOY', ('Time',), int)
+            v[:] = df_meteo.index.dayofyear.astype(int).values
+            v.attrs['units'] = 'day of year'
+            v = f.create_variable('Time', ('Time',), float_type)
+            time_origin = df_meteo.index[0] - timedelta(hours=1)
+            v.attrs['time_origin'] = f"{time_origin}"
+            v.attrs['units'] = 'hours'
+            v[:] = date2num(df_meteo.index.tolist(), units=f"hours since {time_origin}", calendar='standard')
+            v = f.create_variable('x', ('x',), int)
+            v.attrs['long_name'] = 'x'
+            v.attrs['units'] = ''
+            v[:] = onp.arange(nrows)
+            v = f.create_variable('y', ('y',), int)
+            v.attrs['long_name'] = 'y'
+            v.attrs['units'] = ''
+            v[:] = onp.arange(ncols)
+            if enable_crop_phenology:
+                v = f.create_variable('TA_min', ('x', 'y', 'Time'), float_type)
+                arr = df_meteo['TA_min'].values
+                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+                v.attrs['long_name'] = 'minimum air temperature'
+                v.attrs['units'] = 'degC'
+                v = f.create_variable('TA_max', ('x', 'y', 'Time'), float_type)
+                arr = df_meteo['TA_max'].values
+                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+                v.attrs['long_name'] = 'maximum air temperature'
+                v.attrs['units'] = 'degC'

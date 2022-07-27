@@ -373,6 +373,71 @@ def plot_obs_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'
     return fig
 
 
+def plot_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
+    """Plot cumulated observed and simulated values for each hydrologic year.
+
+    Args
+    ----------
+    df : pd.DataFrame
+        Dataframe with simulated values
+
+    y_lab : str
+        label of y-axis
+
+    start_month_hyd_year : int, optional
+        starting month of hydrologic year
+
+    x_lab : str, optional
+        label of x-axis
+
+    Returns
+    ----------
+    fig : Figure
+    """
+    df.columns = ['sim']
+    df = assign_hyd_year(df.copy(), start_month_hyd_year=start_month_hyd_year)
+    df_cs = pd.DataFrame(index=df.index, columns=['sim'])
+    years = pd.unique(df.hyd_year)
+    for year in years:
+        df_cs.loc[(df.hyd_year == year), 'sim'] = df.loc[(df.hyd_year == year), 'sim'].cumsum()
+    df_cs.loc[df_cs.isnull().any(axis=1)] = 0
+
+    # DataFrame from wide to long format
+    df_sim = df_cs.iloc[:, 0].to_frame()
+    df_sim.columns = ['sim_obs']
+    df_sim['type'] = 'sim'
+    df_sim_long = pd.melt(df_sim, id_vars=['type'], value_vars=['sim_obs'], ignore_index=False)
+    df_sim_long = assign_hyd_year(df_sim_long.copy(), start_month_hyd_year=start_month_hyd_year)
+    df_sim_long['time'] = df_sim_long.index
+    df_sim_long.loc[df_sim_long.isnull().any(axis=1)] = 0
+    df_sim_long = df_sim_long.drop(columns=['variable'])
+    df_sim_long = df_sim_long.astype(dtype= {"type" : str,
+                                             "value" : onp.float64,
+                                             "hyd_year" : onp.int64,
+                                             "time" : onp.datetime64})
+    df_sim_long.index = range(len(df_sim_long.index))
+    # Plot the lines on facets
+    g = sns.relplot(
+        data=df_sim_long,
+        x="time", y="value",
+        hue="type", col="hyd_year",
+        kind="line", palette=["black"],
+        facet_kws=dict(sharex=False),
+        height=4, aspect=.7, col_wrap=4
+    )
+    g.set_ylabels(y_lab)
+    g.set_xlabels(x_lab)
+    g.set_xticklabels(rotation=90)
+    for axs in g.axes.flatten():
+        axs.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m'))
+    g.set_titles(template='{col_name}')
+    g._legend.remove()
+    g.tight_layout()
+    fig = g.fig
+
+    return fig
+
+
 def time_to_num(idx, time='days'):
     """Convert DatetimeIndex to numeric range. Conversion is based either on
     days or hours.

@@ -546,13 +546,7 @@ def calculate_film_flow(state):
         at[:], npx.where(vs.itt - vs.event_start_ff < settings.nittevent_ff, vs.itt - vs.event_start_ff, settings.nittevent_ff - 1),
     )
 
-    arr_itt = allocate(state.dimensions, ("x", "y"))
-    arr_itt = update(
-        arr_itt,
-        at[2:-2, 2:-2], vs.itt,
-    )
-    cond1 = ((vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt-1] == 0) & (vs.EVENT_ID_FF[2:-2, 2:-2, vs.itt] >= 1) & (arr_itt >= 1))
-
+    cond1 = ((vs.event_id[vs.taum1] == 0) & (vs.event_id[vs.tau] >= 1))
     if cond1.any():
         vs.z_wf_ff = update(
             vs.z_wf_ff,

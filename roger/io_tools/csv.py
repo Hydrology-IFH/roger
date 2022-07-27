@@ -37,14 +37,17 @@ def read_meteo(path_to_dir: Path):
     df_PREC = pd.read_csv(PREC_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
                           index_col=0, na_values=-9999)
     df_PREC.index = pd.to_datetime(df_PREC.index, format='%Y %m %d %H %M')
+    df_PREC.index = df_PREC.index.rename('Index')
 
     df_pet = pd.read_csv(PET_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
                          index_col=0, na_values=-9999)
     df_pet.index = pd.to_datetime(df_pet.index, format='%Y %m %d %H %M')
+    df_pet.index = df_pet.index.rename('Index')
 
     df_ta = pd.read_csv(Ta_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
                         index_col=0, na_values=-9999)
     df_ta.index = pd.to_datetime(df_ta.index, format='%Y %m %d %H %M')
+    df_ta.index = df_ta.index.rename('Index')
 
     # reset index of precipitation time series
     # time series starts on first day at 00:00 and ends on last day at 23:50

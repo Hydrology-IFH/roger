@@ -20,6 +20,7 @@ _Y_LABS_DAILY = {'prec': r'$PREC$ [mm $day^{-1}$]',
                  'theta_ss': r'$\theta_{subsoil}$ [-]',
                  'S_snow': r'$S_{snow}$ [mm]',
                  'S_s': r'$S_s$ [mm]',
+                 'ta': r'$TA$ [degC]',
                  }
 
 _Y_LABS_HOURLY = {'prec': r'$PREC$ [mm $hour^{-1}$]',

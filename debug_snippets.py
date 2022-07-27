@@ -142,3 +142,6 @@ if not os.path.exists(forcing_path):
 model.setup()
 model.run()
 return
+
+
+print(vs.S_fp_rz[2,2], vs.S_lp_rz[2,2], vs.S_fp_ss[2,2], vs.S_lp_ss[2,2])

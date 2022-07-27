@@ -1,4 +1,3 @@
-import roger.lookuptables as lut
 import numpy as onp
 import pandas as pd
 from datetime import datetime, timedelta
@@ -71,8 +70,8 @@ def join_meteo(prec_var_time: pd.DataFrame, df_pet: pd.DataFrame,
     return var_time
 
 
-def event_classification(pta, hpi=5, end_prec_event=36, sf=3, ta_fm=0):
-    """Event classification for spatially uniform distributed precipitation
+def event_classification(pta, hpi=5, end_prec_event=36):
+    """Event classification for spatially uniform distributed rainfall
 
     Args
     ----------
@@ -89,12 +88,6 @@ def event_classification(pta, hpi=5, end_prec_event=36, sf=3, ta_fm=0):
         temporal threshold when event ends (in 10min; default: 36). Time after
         which no precipitation occured.
 
-    sf : float, optional
-        snow melt factor (-)
-
-    ta_fm : float, optional
-        freeze-melt threshold (default = 0; in °C)
-
     Returns
     ----------
     prec_event : pandas.DataFrame
@@ -105,63 +98,23 @@ def event_classification(pta, hpi=5, end_prec_event=36, sf=3, ta_fm=0):
     # array with air temperature values
     ta_arr = pta.iloc[:, 1].values
 
-    df_event = pd.DataFrame(index=pta.index, columns=['rng_idx', 'TA', 'PREC', 'snowfall', 'snow_melt', 'rain_', 'snow_', 'snow_melt_'])
+    df_event = pd.DataFrame(index=pta.index, columns=['rng_idx', 'TA', 'PREC', 'rain_'])
     df_event.loc[:, 'rng_idx'] = range(len(df_event.index))
     df_event.loc[:, 'PREC'] = prec_arr
     df_event.loc[:, 'TA'] = ta_arr
-    df_event.loc[:, 'snowfall'] = 0
-    df_event.loc[:, 'snow_melt'] = 0
     df_event.loc[:, 'rain_'] = onp.NaN
-    df_event.loc[:, 'snow_'] = onp.NaN
-    df_event.loc[:, 'snow_melt_'] = onp.NaN
     df_event.loc[:, 'event_'] = onp.NaN
     mask = (df_event['PREC'] > 0) & (df_event['TA'] > 0)
     df_event.loc[mask, 'rain_'] = True
     df_event.loc[:, 'rain_'] = df_event.loc[:, 'rain_'].fillna(method="ffill", limit=end_prec_event)
-    mask = df_event['rain_'] & (df_event['TA'] <= 0)
-    df_event.loc[mask, 'rain_'] = False
     df_event.loc[:, 'rain_'] = df_event.loc[:, 'rain_'].fillna(False)
-    mask = (df_event['PREC'] > 0) & (df_event['TA'] <= 0)
-    df_event.loc[mask, 'snowfall'] = df_event.loc[mask, 'PREC']
-    df_event.loc[mask, 'snow_'] = True
-    df_event.loc[:, 'snow_'] = df_event.loc[:, 'snow_'].fillna(method="ffill", limit=end_prec_event)
-    df_event.loc[:, 'snow_'] = df_event.loc[:, 'snow_'].fillna(False)
-    mask = (df_event['TA'] > 0)
-    df_event.loc[mask, 'snow_melt'] = df_event.loc[mask, 'TA'] * sf * 1/6
-    mask = (df_event['TA'] > 0) & (df_event['snow_'] == True) & (df_event['snow_'].shift(-1) == False)
-    df_event.loc[mask, 'snow_melt_'] = True
-    df_event.loc[:, 'rain_'] = df_event.loc[:, 'rain_'].fillna(False)
-    df_event.loc[:, 'snow_melt_'] = df_event.loc[:, 'snow_melt_'].fillna(False)
     mask = (df_event['rain_'] == True) & (df_event['rain_'].shift(1) == False)
     df_event.loc[mask, 'start_rain_'] = True
     df_event.loc[:, 'start_rain_'] = df_event.loc[:, 'start_rain_'].fillna(False)
     mask = (df_event['rain_'] == True) & (df_event['rain_'].shift(-1) == False)
     df_event.loc[mask, 'end_rain_'] = True
     df_event.loc[:, 'end_rain_'] = df_event.loc[:, 'end_rain_'].fillna(False)
-    mask = (df_event['snow_'] == True) & (df_event['snow_'].shift(1) == False)
-    df_event.loc[mask, 'start_snow_'] = True
-    df_event.loc[:, 'start_snow_'] = df_event.loc[:, 'start_snow_'].fillna(False)
-    mask = (df_event['snow_'] == True) & (df_event['snow_'].shift(-1) == False)
-    df_event.loc[mask, 'end_snow_'] = True
-    df_event.loc[:, 'end_snow_'] = df_event.loc[:, 'end_snow_'].fillna(False)
-    start_snow_melt = [0] + [i for i in df_event.rng_idx if df_event.snow_melt_[i]]
-    end_snow_melt = []
-    if len(start_snow_melt) > 1:
-        for i in range(1, len(start_snow_melt)):
-            sum_snow = df_event.loc[df_event.index[start_snow_melt[i-1]]:df_event.index[start_snow_melt[i]], 'snowfall'].sum()
-            csum_melt = onp.cumsum(df_event.loc[df_event.index[start_snow_melt[i]]:, 'TA'] * 3 * 1/6)
-            end = onp.where(csum_melt > sum_snow)[0][0]
-            if end:
-                end_snow_melt.append(start_snow_melt[i] + end)
-            else:
-                end_snow_melt.append(start_snow_melt[i] + 1)
-        del start_snow_melt[0]
-        for i in end_snow_melt:
-            df_event.loc[df_event.index[i], 'end_snow_melt_'] = True
-        for s, e in zip(start_snow_melt, end_snow_melt):
-            df_event.loc[df_event.index[s]:df_event.index[e], 'snow_melt_'] = True
-        df_event.loc[:, 'end_snow_melt_'] = df_event.loc[:, 'end_snow_melt_'].fillna(False)
-    mask = (df_event['rain_'] == True) | (df_event['snow_'] == True) | (df_event['snow_melt_'] == True)
+    mask = (df_event['rain_'] == True)
     df_event.loc[mask, 'event_'] = True
     df_event.loc[:, 'event_'] = df_event.loc[:, 'event_'].fillna(False)
     mask = (df_event['event_'] == True) & (df_event['event_'].shift(1) == False)
@@ -193,16 +146,6 @@ def event_classification(pta, hpi=5, end_prec_event=36, sf=3, ta_fm=0):
         if (df_event.loc[mask, 'PREC'] < hpi).all() and df_event.loc[mask, 'rain_'].all():
             df_event.loc[mask, 'event_type'] = 30
             df_event.loc[mask_no_prec, 'event_type'] = 40
-        # snowfall
-        if df_event.loc[mask, 'snow_'].all():
-            df_event.loc[mask, 'event_type'] = 50
-        # rain-on-snow
-        if df_event.loc[mask, 'rain_'].any() and df_event.loc[mask, 'snow_melt_'].any():
-            df_event.loc[mask, 'event_type'] = 30
-            df_event.loc[mask_no_prec, 'event_type'] = 60
-        # snow melt
-        if df_event.loc[mask, 'snow_melt_'].all():
-            df_event.loc[mask, 'event_type'] = 60
 
     df_event = df_event.loc[:, ['PREC', 'event_type', 'event_no']]
 

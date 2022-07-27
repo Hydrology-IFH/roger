@@ -121,14 +121,10 @@ def main(nsamples, transport_model_structure):
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "DT_SECS",
-                "DT",
                 "dt_secs",
                 "dt",
-                "t",
                 "ages",
                 "nages",
-                "itt",
                 "x",
                 "y",
             ],
@@ -140,9 +136,6 @@ def main(nsamples, transport_model_structure):
             # temporal grid
             vs.dt_secs = 60 * 60 * 24
             vs.dt = 60 * 60 * 24 / (60 * 60)
-            vs.DT_SECS = update(vs.DT_SECS, at[:], vs.dt_secs)
-            vs.DT = update(vs.DT, at[:], vs.dt)
-            vs.t = update(vs.t, at[:], npx.cumsum(vs.DT))
             vs.ages = update(vs.ages, at[:], npx.arange(1, settings.nages))
             vs.nages = update(vs.nages, at[:], npx.arange(settings.nages))
             # grid of model runs

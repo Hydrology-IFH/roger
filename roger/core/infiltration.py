@@ -1327,10 +1327,11 @@ def set_event_vars_start_rainfall_pause(state):
     vs = state.variables
 
     z_wf_fc = calc_z_wf_fc(state)
+    mask = (vs.prec[:, :, vs.tau] == 0) & (vs.prec[:, :, vs.taum1] != 0)
 
     vs.z_wf_fc = update(
         vs.z_wf_fc,
-        at[2:-2, 2:-2], z_wf_fc[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], z_wf_fc[2:-2, 2:-2], vs.z_wf_fc[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(z_wf_fc=vs.z_wf_fc)
@@ -1343,36 +1344,38 @@ def set_event_vars_end_rainfall_pause(state):
     """
     vs = state.variables
 
+    mask = (vs.prec[:, :, vs.tau] != 0) & (vs.prec[:, :, vs.taum1] == 0)
+
     vs.no_wf = update(
         vs.no_wf,
-        at[2:-2, 2:-2], 2,
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 2, vs.no_wf[2:-2, 2:-2]),
     )
 
     theta_d = calc_theta_d(state)
     vs.theta_d = update(
         vs.theta_d,
-        at[2:-2, 2:-2], theta_d[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], theta_d[2:-2, 2:-2], vs.theta_d[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d_rel = calc_theta_d_rel(state)
     vs.theta_d_rel = update(
         vs.theta_d_rel,
-        at[2:-2, 2:-2], theta_d_rel[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], theta_d_rel[2:-2, 2:-2], vs.theta_d_rel[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     # second wetting front
     vs.z_wf_t1 = update(
         vs.z_wf_t1,
-        at[2:-2, 2:-2, :], 0,
+        at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, npx.newaxis], 0, vs.z_wf_t1[2:-2, 2:-2, :]),
     )
 
     # accumulated event precipitation
     vs.prec_event_csum = update(
         vs.prec_event_csum,
-        at[2:-2, 2:-2, :], 0,
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 0, vs.prec_event_csum[2:-2, 2:-2]),
     )
     # accumulated time during an event (in mm)
     vs.t_event_csum = update(
         vs.t_event_csum,
-        at[2:-2, 2:-2], 0,
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 0, vs.t_event_csum[2:-2, 2:-2]),
     )
 
     return KernelOutput(no_wf=vs.no_wf,
@@ -1469,16 +1472,11 @@ def calculate_infiltration(state):
     """
     vs = state.variables
 
-    arr_itt = allocate(state.dimensions, ("x", "y"))
-    arr_itt = update(
-        arr_itt,
-        at[2:-2, 2:-2], vs.itt,
-    )
-    cond1 = ((vs.event_id[2:-2, 2:-2, vs.taum1] == 0) & (vs.event_id[2:-2, 2:-2, vs.tau] >= 1) & (arr_itt[2:-2, 2:-2] >= 1))
-    cond2 = ((vs.prec[2:-2, 2:-2, vs.tau] == 0) & (vs.prec[2:-2, 2:-2, vs.taum1] != 0) & (vs.event_id[2:-2, 2:-2, vs.taum1] >= 1) & (arr_itt[2:-2, 2:-2] >= 1))
-    cond3 = ((vs.prec[2:-2, 2:-2, vs.tau] != 0) & (vs.prec[2:-2, 2:-2, vs.taum1] == 0) & (vs.event_id[2:-2, 2:-2, vs.taum1] == vs.event_id[2:-2, 2:-2, vs.tau]) & (arr_itt[2:-2, 2:-2] >= 1))
-    cond4 = ((vs.event_id[2:-2, 2:-2, vs.taum1] >= 1) & (vs.event_id[2:-2, 2:-2, vs.tau] == 0) & (arr_itt[2:-2, 2:-2] >= 1))
-    cond5 = (vs.event_id[2:-2, 2:-2, vs.tau] >= 1)
+    cond1 = ((vs.event_id[vs.taum1] == 0) & (vs.event_id[vs.tau] >= 1))
+    cond2 = ((vs.prec[2:-2, 2:-2, vs.tau] == 0).any() & (vs.prec[2:-2, 2:-2, vs.taum1] != 0).any() & (vs.event_id[vs.taum1] >= 1))
+    cond3 = ((vs.prec[2:-2, 2:-2, vs.tau] != 0).any() & (vs.prec[2:-2, 2:-2, vs.taum1] == 0).any() & (vs.event_id[vs.taum1] == vs.event_id[vs.tau]))
+    cond4 = ((vs.event_id[vs.taum1] >= 1) & (vs.event_id[vs.tau] == 0))
+    cond5 = (vs.event_id[vs.tau] >= 1)
     if cond1.any():
         vs.update(calc_depth_shrinkage_cracks(state))
         vs.update(set_event_vars(state))

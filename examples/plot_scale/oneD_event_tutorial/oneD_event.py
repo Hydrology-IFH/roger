@@ -121,26 +121,18 @@ def main():
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "DT_SECS",
-                "DT",
                 "dt_secs",
                 "dt",
-                "t",
-                "itt",
                 "x",
                 "y",
             ],
         )
         def set_grid(self, state):
             vs = state.variables
-            settings = state.settings
 
             # temporal grid
-            vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", self._input_dir, 'forcing.nc'))
-            vs.DT = update(vs.DT, at[:], vs.DT_SECS / (60 * 60))
-            vs.dt_secs = vs.DT_SECS[vs.itt]
-            vs.dt = vs.DT[vs.itt]
-            vs.t = update(vs.t, at[:], npx.linspace(0, vs.dt * settings.nitt, num=settings.nitt))
+            vs.dt_secs = 10 * 60
+            vs.dt = 1 / 6
             # spatial grid
             dx = allocate(state.dimensions, ("x"))
             dx = update(dx, at[:], 1)
@@ -241,25 +233,19 @@ def main():
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "DT_SECS",
-                "DT",
-                "dt_secs",
-                "dt",
                 "itt",
                 "prec",
                 "ta",
                 "event_id",
+                "tau",
             ],
         )
         def set_forcing(self, state):
             vs = state.variables
 
-            vs.prec = update(vs.prec, at[2:-2, 2:-2], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+            vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt])
             vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt])
-            vs.event_id = update(vs.event_id, at[2:-2, 2:-2, vs.tau], 1)
-
-            vs.dt_secs = vs.DT_SECS[vs.itt]
-            vs.dt = vs.DT[vs.itt]
+            vs.event_id = update(vs.event_id, at[vs.tau], 1)
 
         @roger_routine
         def set_diagnostics(self, state):

@@ -11,8 +11,8 @@ def calc_evap_int_top(state):
     """
     vs = state.variables
 
-    mask1 = (vs.S_int_top[:, :, vs.tau] <= vs.S_int_top_tot) & (vs.pet_res <= vs.S_int_top[:, :, vs.tau]) & (vs.S_int_top_tot > 0) & (vs.S_int_top[:, :, vs.tau] > 0) & (vs.prec[:, :, vs.tau] <= 0)
-    mask2 = (vs.S_int_top[:, :, vs.tau] <= vs.S_int_top_tot) & (vs.pet_res > vs.S_int_top[:, :, vs.tau]) & (vs.S_int_top_tot > 0) & (vs.S_int_top[:, :, vs.tau] > 0) & (vs.prec[:, :, vs.tau] <= 0)
+    mask1 = (vs.S_int_top[:, :, vs.tau] <= vs.S_int_top_tot) & (vs.pet_res <= vs.S_int_top[:, :, vs.tau]) & (vs.S_int_top_tot > 0) & (vs.S_int_top[:, :, vs.tau] > 0)
+    mask2 = (vs.S_int_top[:, :, vs.tau] <= vs.S_int_top_tot) & (vs.pet_res > vs.S_int_top[:, :, vs.tau]) & (vs.S_int_top_tot > 0) & (vs.S_int_top[:, :, vs.tau] > 0)
 
     vs.evap_int_top = update(
         vs.evap_int_top,
@@ -55,8 +55,8 @@ def calc_evap_int_ground(state):
     """
     vs = state.variables
 
-    mask1 = (vs.S_int_ground[:, :, vs.tau] <= vs.S_int_ground_tot) & (vs.pet_res <= vs.S_int_ground[:, :, vs.tau]) & (vs.S_int_ground_tot > 0) & (vs.S_int_ground[:, :, vs.tau] > 0) & (vs.prec[:, :, vs.tau] <= 0)
-    mask2 = (vs.S_int_ground[:, :, vs.tau] <= vs.S_int_ground_tot) & (vs.pet_res > vs.S_int_ground[:, :, vs.tau]) & (vs.S_int_ground_tot > 0) & (vs.S_int_ground[:, :, vs.tau] > 0) & (vs.prec[:, :, vs.tau] <= 0)
+    mask1 = (vs.S_int_ground[:, :, vs.tau] <= vs.S_int_ground_tot) & (vs.pet_res <= vs.S_int_ground[:, :, vs.tau]) & (vs.S_int_ground_tot > 0) & (vs.S_int_ground[:, :, vs.tau] > 0)
+    mask2 = (vs.S_int_ground[:, :, vs.tau] <= vs.S_int_ground_tot) & (vs.pet_res > vs.S_int_ground[:, :, vs.tau]) & (vs.S_int_ground_tot > 0) & (vs.S_int_ground[:, :, vs.tau] > 0)
 
     vs.evap_int_ground = update(
         vs.evap_int_ground,
@@ -291,7 +291,7 @@ def calc_transp(state):
 
     # water transpires from large pores in root zone
     # some water remains
-    mask1 = (vs.S_lp_rz > 0) & (vs.ptransp_res <= vs.S_lp_rz) & (vs.ptransp > 0) & (vs.swe[:, :, vs.tau] <= 0) & (vs.prec[:, :, vs.tau] <= 0)
+    mask1 = (vs.S_lp_rz > 0) & (vs.ptransp_res <= vs.S_lp_rz) & (vs.ptransp > 0) & (vs.prec[:, :, vs.tau] <= 0)
     transp_lp = update_add(
         transp_lp,
         at[2:-2, 2:-2], vs.ptransp_res[2:-2, 2:-2] * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
@@ -303,7 +303,7 @@ def calc_transp(state):
 
     # water transpires from large pores in root zone
     # no water remains
-    mask2 = (vs.S_lp_rz > 0) & (vs.ptransp_res > vs.S_lp_rz) & (vs.ptransp > 0) & (vs.swe[:, :, vs.tau] <= 0) & (vs.prec[:, :, vs.tau] <= 0)
+    mask2 = (vs.S_lp_rz > 0) & (vs.ptransp_res > vs.S_lp_rz) & (vs.ptransp > 0) & (vs.prec[:, :, vs.tau] <= 0)
     transp_lp = update_add(
         transp_lp,
         at[2:-2, 2:-2], vs.S_lp_rz[2:-2, 2:-2] * mask2[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
@@ -315,7 +315,7 @@ def calc_transp(state):
 
     # water transpires from fine pores in root zone
     # some water remains
-    mask3 = (vs.S_fp_rz > 0) & (vs.ptransp_res <= vs.S_fp_rz) & (vs.S_lp_rz <= 0) & (vs.ptransp > 0) & (vs.swe[:, :, vs.tau] <= 0) & (vs.prec[:, :, vs.tau] <= 0)
+    mask3 = (vs.S_fp_rz > 0) & (vs.ptransp_res <= vs.S_fp_rz) & (vs.S_lp_rz <= 0) & (vs.ptransp > 0) & (vs.prec[:, :, vs.tau] <= 0)
     transp_fp = update_add(
         transp_fp,
         at[2:-2, 2:-2], vs.ptransp_res[2:-2, 2:-2] * mask3[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
@@ -327,7 +327,7 @@ def calc_transp(state):
 
     # water transpires from fine pores in root zone
     # no water remains
-    mask4 = (vs.S_fp_rz > 0) & (vs.ptransp_res > vs.S_fp_rz) & (vs.S_lp_rz <= 0) & (vs.ptransp > 0) & (vs.swe[:, :, vs.tau] <= 0) & (vs.prec[:, :, vs.tau] <= 0)
+    mask4 = (vs.S_fp_rz > 0) & (vs.ptransp_res > vs.S_fp_rz) & (vs.S_lp_rz <= 0) & (vs.ptransp > 0) & (vs.prec[:, :, vs.tau] <= 0)
     transp_fp = update_add(
         transp_fp,
         at[2:-2, 2:-2], vs.S_fp_rz[2:-2, 2:-2] * mask4[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],

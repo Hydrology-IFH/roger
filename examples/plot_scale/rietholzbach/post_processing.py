@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set_style('ticks', {'xtick.major.size': 8, 'ytick.major.size': 8})
 sns.set_context("paper", font_scale=1.5)
+import roger.tools.evaluation as eval_utils
+import roger.tools.labels as labs
 
 base_path = Path(__file__).parent
 # directory of figures
@@ -55,15 +57,73 @@ fig.text(0.115, 0.92, "(a)", ha="center", va="center")
 fig.text(0.89, 0.615, r"$\overline{\delta^{18}O}_{prec}$: %s" % (d18O_prec_mean), ha="center", va="center")
 fig.text(0.89, 0.155, r"$\overline{\delta^{18}O}_{perc}$: %s" % (d18O_perc_mean), ha="center", va="center")
 fig.text(0.115, 0.46, "(b)", ha="center", va="center")
-path_png = base_path_figs / 'observed_d18O_prec_perc'
-fig.savefig(path_png, dpi=250)
+file = base_path_figs / 'observed_d18O_prec_perc.pdf'
+fig.savefig(file, dpi=250)
 plt.close(fig=fig)
 
 # load best monte carlo run
-states_hm_file = base_path / "states_hm.nc"
+states_hm_file = base_path / "svat_monte_carlo" / "states_hm.nc"
 ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
-
 # assign date
 days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
 date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
 ds_sim_hm = ds_sim_hm.assign_coords(date=("Time", date_sim_hm))
+
+# compare simulation and observation
+vars_obs = ['AET', 'PERC', 'dWEIGHT']
+vars_sim = ['aet', 'q_ss', 'dS']
+for var_obs, var_sim in zip(vars_obs, vars_sim):
+    obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+    df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+    df_obs.loc[:, 'obs'] = obs_vals
+    sim_vals = ds_sim_hm[var_sim].isel(x=0, y=0).values
+    # join observations on simulations
+    df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
+    # plot observed and simulated time series
+    fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+    file_str = '%s.pdf' % (var_sim)
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=250)
+    # plot cumulated observed and simulated time series
+    fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+    file_str = '%s_cum.pdf' % (var_sim)
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=250)
+    fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+    file_str = '%s_cum_year_facet.pdf' % (var_sim)
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=250)
+    
+vars_obs = ['PREC']
+vars_sim = ['prec']
+for var_obs, var_sim in zip(vars_obs, vars_sim):
+    obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+    df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+    df_obs.loc[:, 'obs'] = obs_vals
+    # plot observed time series
+    fig = eval_utils.plot_sim(df_obs, labs._Y_LABS_DAILY[var_sim])
+    file_str = '%s.pdf' % (var_sim)
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=250)
+    # plot cumulated observed time series
+    fig = eval_utils.plot_sim_cum(df_obs, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+    file_str = '%s_cum.pdf' % (var_sim)
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=250)
+    fig = eval_utils.plot_sim_cum_year_facet(df_obs, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+    file_str = '%s_cum_year_facet.pdf' % (var_sim)
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=250)
+    
+vars_obs = ['TA']
+vars_sim = ['ta']
+for var_obs, var_sim in zip(vars_obs, vars_sim):
+    obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+    df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+    df_obs.loc[:, 'obs'] = obs_vals
+    # plot observed time series
+    fig = eval_utils.plot_sim(df_obs, labs._Y_LABS_DAILY[var_sim])
+    file_str = '%s.pdf' % (var_obs)
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=250)
+

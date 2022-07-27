@@ -12,24 +12,16 @@ def calc_cpr_rz(state):
     vs = state.variables
     settings = state.settings
 
-    dh = allocate(state.dimensions, ("x", "y"))
-    dz = allocate(state.dimensions, ("x", "y"))
-
-    # pressure head gradient
-    dh = update(
-        dh,
-        at[2:-2, 2:-2], (vs.h_rz[2:-2, 2:-2, vs.tau] - vs.h_ss[2:-2, 2:-2, vs.tau]) * 10.2 * vs.maskCatch[2:-2, 2:-2],
-    )
-    # gravitational head gradient
-    dz = update(
-        dz,
+    # distance between center of root zone and center of subsoil
+    z = allocate(state.dimensions, ("x", "y"))
+    z = update(
+        z,
         at[2:-2, 2:-2], ((vs.z_root[2:-2, 2:-2, vs.tau] + (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])/2) - vs.z_root[2:-2, 2:-2, vs.tau]/2) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # vertical uplift using the Richards
     vs.cpr_rz = update(
         vs.cpr_rz,
-        at[2:-2, 2:-2], (-1) * vs.k_rz[2:-2, 2:-2, vs.tau] * (dh[2:-2, 2:-2]/dz[2:-2, 2:-2] + 1) * vs.dt * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], ((npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]) - npx.power(-vs.h_rz[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]))/(1 + npx.power(-vs.h_rz[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]) + (vs.n_salv[2:-2, 2:-2] - 1) * npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]))) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.cpr_rz = update(
         vs.cpr_rz,
@@ -37,7 +29,15 @@ def calc_cpr_rz(state):
     )
     vs.cpr_rz = update(
         vs.cpr_rz,
+        at[2:-2, 2:-2], npx.where(npx.isnan(vs.cpr_rz[2:-2, 2:-2]), 0, vs.cpr_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.cpr_rz = update(
+        vs.cpr_rz,
         at[2:-2, 2:-2], npx.where(vs.S_lp_rz[2:-2, 2:-2] > 0, 0, vs.cpr_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.cpr_rz = update(
+        vs.cpr_rz,
+        at[2:-2, 2:-2], npx.where(vs.h_rz[2:-2, 2:-2, vs.tau] > vs.h_ss[2:-2, 2:-2, vs.tau], 0, vs.cpr_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     if settings.enable_film_flow:
@@ -53,9 +53,9 @@ def calc_cpr_rz(state):
     )
 
     # update root zone storage and subsoil storage
-    mask1 = (vs.cpr_rz > 0) & (vs.S_lp_ss <= 0) & (vs.event_id[:, :, vs.tau] <= 0)
-    mask2 = (vs.cpr_rz > 0) & (vs.S_lp_ss > 0) & (vs.cpr_rz <= vs.S_lp_ss) & (vs.event_id[:, :, vs.tau] <= 0)
-    mask3 = (vs.cpr_rz > 0) & (vs.S_lp_ss > 0) & (vs.cpr_rz > vs.S_lp_ss) & (vs.event_id[:, :, vs.tau] <= 0)
+    mask1 = (vs.cpr_rz > 0) & (vs.S_lp_ss <= 0) & ((vs.z_wf[:, :, vs.tau] < vs.z_root[:, :, vs.tau]) | (vs.z_sat[:, :, vs.tau] < vs.z_soil[:, :] - vs.z_root[:, :, vs.tau]))
+    mask2 = (vs.cpr_rz > 0) & (vs.S_lp_ss > 0) & (vs.cpr_rz <= vs.S_lp_ss) & ((vs.z_wf[:, :, vs.tau] < vs.z_root[:, :, vs.tau]) | (vs.z_sat[:, :, vs.tau] < vs.z_soil[:, :] - vs.z_root[:, :, vs.tau]))
+    mask3 = (vs.cpr_rz > 0) & (vs.S_lp_ss > 0) & (vs.cpr_rz > vs.S_lp_ss) & ((vs.z_wf[:, :, vs.tau] < vs.z_root[:, :, vs.tau]) | (vs.z_sat[:, :, vs.tau] < vs.z_soil[:, :] - vs.z_root[:, :, vs.tau]))
     vs.S_fp_rz = update_add(
         vs.S_fp_rz,
         at[2:-2, 2:-2], mask1[2:-2, 2:-2] * vs.cpr_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
@@ -86,7 +86,7 @@ def calc_cpr_rz(state):
     )
 
     # fine pore excess fills large pores
-    mask4 = (vs.S_fp_rz > vs.S_ufc_rz) & (vs.event_id[:, :, vs.tau] <= 0)
+    mask4 = (vs.S_fp_rz > vs.S_ufc_rz)
     vs.S_lp_rz = update_add(
         vs.S_lp_rz,
         at[2:-2, 2:-2], mask4[2:-2, 2:-2] * (vs.S_fp_rz[2:-2, 2:-2] - vs.S_ufc_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
@@ -119,14 +119,17 @@ def calc_cpr_ss(state):
             z,
             at[2:-2, 2:-2], (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 - vs.z_root[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
         )
-
         vs.cpr_ss = update(
             vs.cpr_ss,
-            at[2:-2, 2:-2], (vs.ks[2:-2, 2:-2] * vs.dt * (npx.power((-z[2:-2, 2:-2])/(vs.ha[2:-2, 2:-2]*10), -vs.n_salv[2:-2, 2:-2]) - npx.power(vs.h_ss[2:-2, 2:-2, vs.tau]/vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]))/(1 + npx.power(vs.h_ss[2:-2, 2:-2, vs.tau]/vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]) + (vs.n_salv[2:-2, 2:-2] - 1) * npx.power((z[2:-2, 2:-2]*-1)/(vs.ha[2:-2, 2:-2]*10), -vs.n_salv[2:-2, 2:-2]))) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], ((npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]) - npx.power(-vs.h_ss[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]))/(1 + npx.power(-vs.h_ss[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]) + (vs.n_salv[2:-2, 2:-2] - 1) * npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]))) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.cpr_ss = update(
             vs.cpr_ss,
-            at[2:-2, 2:-2], npx.where(npx.isnan(vs.cpr_ss[2:-2, 2:-2]), npx.power((-z[2:-2, 2:-2])/(vs.ha[2:-2, 2:-2]*10), -vs.n_salv[2:-2, 2:-2])/(1 + (vs.n_salv[2:-2, 2:-2] - 1) * npx.power((z[2:-2, 2:-2]*-1)/(vs.ha[2:-2, 2:-2]*10), -vs.n_salv[2:-2, 2:-2])), vs.cpr_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.cpr_ss[2:-2, 2:-2] < 0, 0, vs.cpr_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        )
+        vs.cpr_ss = update(
+            vs.cpr_ss,
+            at[2:-2, 2:-2], npx.where(npx.isnan(vs.cpr_ss[2:-2, 2:-2]), 0, vs.cpr_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.cpr_ss = update(
             vs.cpr_ss,
