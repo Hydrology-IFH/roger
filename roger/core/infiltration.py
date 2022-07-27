@@ -552,7 +552,7 @@ def calc_inf_mp(state):
     # limit macropore infiltration to pores which are not filled
     vs.inf_mp = update(
         vs.inf_mp,
-        at[2:-2, 2:-2], npx.where((vs.z_wf[2:-2, 2:-2, vs.tau] > vs.z_root[2:-2, 2:-2, vs.tau]) & (vs.inf_mp[2:-2, 2:-2] > vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2]), vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2], vs.inf_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where((vs.z_wf[2:-2, 2:-2, vs.tau] > vs.z_root[2:-2, 2:-2, vs.tau]) & (vs.inf_mp[2:-2, 2:-2] > vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2]) & (vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2] > 0), vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2], vs.inf_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.inf_mp = update(
@@ -587,7 +587,7 @@ def calc_inf_mp(state):
         # limit macropore infiltration to pores which are not filled
         vs.inf_mp = update(
             vs.inf_mp,
-            at[2:-2, 2:-2], npx.where((vs.z_wf[2:-2, 2:-2, vs.tau] > vs.z_root[2:-2, 2:-2, vs.tau]) & (vs.inf_mp[2:-2, 2:-2] > vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2]), vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2], vs.inf_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where((vs.z_wf[2:-2, 2:-2, vs.tau] > vs.z_root[2:-2, 2:-2, vs.tau]) & (vs.inf_mp[2:-2, 2:-2] > vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2]) & (vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2] > 0), vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2], vs.inf_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.z0 = update_add(
             vs.z0,
