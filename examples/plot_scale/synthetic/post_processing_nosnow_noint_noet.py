@@ -125,7 +125,7 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
 ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf", group="ihringen")
 days_sim = ds_sim.Time.values + 1
 grid0 = pd.DataFrame(index=range(len(days_sim[1:])))
-for var_sim in ['inf_in', 'inf_mat', 'inf_mp', 'inf_sc', 'q_sub_mat', 'q_sub_mp', 'z_sat']:
+for var_sim in ['inf_in', 'inf_mat', 'inf_mp', 'inf_sc', 'q_sub_mat', 'q_sub_mp', 'z_sat', 'theta']:
     grid0.loc[:, var_sim] = ds_sim[var_sim].isel(x=0, y=0).values[1:]
 grid0.loc[:, 'perc'] = ds_sim['q_ss'].isel(x=0, y=0).values[1:]
 file = base_path_results / "grid0_nosnow_noint_noet.csv"

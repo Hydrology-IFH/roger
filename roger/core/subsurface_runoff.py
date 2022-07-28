@@ -532,98 +532,13 @@ def calc_dz_sat(state):
         z_nomp,
         at[2:-2, 2:-2], npx.where(z_nomp[2:-2, 2:-2] < 0, 0, z_nomp[2:-2, 2:-2]),
     )
-    # non-saturated large pore storage [mm]
-    S_nomp = allocate(state.dimensions, ("x", "y"))
-    S_nomp = update(
-        S_nomp,
-        at[2:-2, 2:-2], z_nomp[2:-2, 2:-2] * vs.theta_ac[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-    # non-saturated distance [mm]
-    z_ns = allocate(state.dimensions, ("x", "y"))
-    z_ns = update(
-        z_ns,
-        at[2:-2, 2:-2], z_nomp[2:-2, 2:-2] - z_sat_top[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-    z_ns = update(
-        z_ns,
-        at[2:-2, 2:-2], npx.where(z_ns[2:-2, 2:-2] < 0, 0, z_ns[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    # vertical flow [mm/dt]
-    qv = allocate(state.dimensions, ("x", "y"))
-    qv = update(
-        qv,
-        at[2:-2, 2:-2], ((vs.ks[2:-2, 2:-2] * vs.dt) - z_ns[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    qv = update(
-        qv,
-        at[2:-2, 2:-2], npx.where(qv[2:-2, 2:-2] < 0, vs.ks[2:-2, 2:-2] * vs.dt, qv[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    qv = update(
-        qv,
-        at[2:-2, 2:-2], npx.where(qv[2:-2, 2:-2] > vs.S_lp_ss[2:-2, 2:-2], vs.S_lp_ss[2:-2, 2:-2], qv[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+
+    vs.z_sat = update(
+        vs.z_sat,
+        at[2:-2, 2:-2, vs.tau], npx.where(z_sat_top[2:-2, 2:-2] > z_nomp[2:-2, 2:-2], npx.where((vs.S_fp_ss[2:-2, 2:-2] >= vs.S_ufc_ss[2:-2, 2:-2]) & ((vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2]) < (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])), vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], npx.where((vs.S_fp_rz[2:-2, 2:-2] >= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] >= vs.S_ac_ss[2:-2, 2:-2]), vs.S_lp_rz[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2])), 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # factor for vertical redistribution [-]
-    f_vr = allocate(state.dimensions, ("x", "y"))
-    f_vr = update(
-        f_vr,
-        at[2:-2, 2:-2], npx.where(S_nomp[2:-2, 2:-2] != 0, vs.S_lp_ss[2:-2, 2:-2] / S_nomp[2:-2, 2:-2], 1) * vs.maskCatch[2:-2, 2:-2],
-    )
-    f_vr = update(
-        f_vr,
-        at[2:-2, 2:-2], npx.where(f_vr[2:-2, 2:-2] > 1, 1, f_vr[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    # change in saturation water level
-    mask1 = (f_vr > 0) & (f_vr < 1) & (vs.ks * vs.dt < z_ns)
-    mask2 = (f_vr > 0) & (f_vr < 1) & (vs.ks * vs.dt >= z_ns)
-    mask3 = (f_vr >= 1) & (vs.S_lp_ss > 0)
-    mask4 = (f_vr >= 1) & (vs.S_lp_ss <= 0)
-    mask5 = (vs.S_lp_ss >= vs.S_ac_ss)
-    vs.dz_sat = update(
-        vs.dz_sat,
-        at[2:-2, 2:-2], 0,
-    )
-    vs.dz_sat = update(
-        vs.dz_sat,
-        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], (qv[2:-2, 2:-2] * f_vr[2:-2, 2:-2]) / vs.theta_ac[2:-2, 2:-2], vs.dz_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.dz_sat = update(
-        vs.dz_sat,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], qv[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], vs.dz_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.dz_sat = update(
-        vs.dz_sat,
-        at[2:-2, 2:-2], npx.where(mask4[2:-2, 2:-2], 0, vs.dz_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.z_sat = update_add(
-        vs.z_sat,
-        at[2:-2, 2:-2, vs.tau], vs.dz_sat[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.z_sat = update(
-        vs.z_sat,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask3[2:-2, 2:-2], vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], vs.z_sat[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.z_sat = update(
-        vs.z_sat,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask5[2:-2, 2:-2], vs.S_lp_rz[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], vs.z_sat[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    mask6 = (vs.S_lp_ss < vs.S_ac_ss) & (vs.z_sat[:, :, vs.tau] > vs.S_lp_ss / vs.theta_ac)
-    vs.z_sat = update(
-        vs.z_sat,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask6[2:-2, 2:-2], vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], vs.z_sat[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    mask7 = (vs.S_lp_ss >= vs.S_ac_ss) & (vs.z_sat[:, :, vs.tau] > (vs.S_lp_rz + vs.S_lp_ss) / vs.theta_ac)
-    vs.z_sat = update(
-        vs.z_sat,
-        at[2:-2, 2:-2, vs.tau], npx.where(mask7[2:-2, 2:-2], (vs.S_lp_rz[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2]) / vs.theta_ac[2:-2, 2:-2], vs.z_sat[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.z_sat = update(
-        vs.z_sat,
-        at[2:-2, 2:-2, vs.tau], npx.where(vs.S_lp_ss[2:-2, 2:-2] <= 0, 0, vs.z_sat[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    return KernelOutput(dz_sat=vs.dz_sat, z_sat=vs.z_sat)
+    return KernelOutput(z_sat=vs.z_sat)
 
 
 @roger_kernel

@@ -145,3 +145,13 @@ return
 
 
 print(vs.S_fp_rz[2,2], vs.S_lp_rz[2,2], vs.S_fp_ss[2,2], vs.S_lp_ss[2,2])
+
+
+h = (vs.ha[2,2]/((theta/vs.theta_sat[2,2])**(1/vs.lambda_bc[2,2])))
+k = (vs.ks[2,2]/(1 + (theta/vs.theta_sat[2,2])**(-vs.m_bc[2,2])))
+perc = k/vs.ks[2,2]
+z = vs.z_gw[2,2, vs.tau] * 1000 - vs.z_soil[2,2]
+
+(npx.power((z)/(-vs.ha[2,2]*10.2), -vs.n_salv[2,2])/(1 + (vs.n_salv[2,2] - 1) * npx.power((z)/(-vs.ha[2,2]*10.2), -vs.n_salv[2,2])))
+
+(npx.power((z)/(-vs.ha]*10.2), -vs.n_salv)/(1 + (vs.n_salv - 1) * npx.power((z)/(-vs.ha*10.2), -vs.n_salv)))
