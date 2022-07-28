@@ -168,7 +168,11 @@ def main():
                 vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
 
         @roger_routine
-        def set_forcing_setup(self, state):
+        def set_boundary_conditions_setup(self, state):
+            pass
+
+        @roger_routine
+        def set_boundary_conditions(self, state):
             pass
 
         @roger_routine(

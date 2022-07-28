@@ -2424,7 +2424,7 @@ VARIABLES = {
         "Groundwater table depth",
         write_to_restart=True,
         time_dependent=True,
-        initial=100,
+        initial=1000,
     ),
     "dz_gw": Variable(
         "gradient of groundwater table depth",

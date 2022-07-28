@@ -1,11 +1,13 @@
 from pathlib import Path
 import os
 import h5netcdf
+import pandas as pd
+import numpy as onp
+
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, at
 import roger.lookuptables as lut
-import numpy as onp
 
 
 class ONEDEVENTSetup(RogerSetup):
@@ -14,24 +16,26 @@ class ONEDEVENTSetup(RogerSetup):
     _base_path = Path(__file__).parent
     _input_dir = None
 
+    # custom helper functions
     def _set_input_dir(self, path):
         if os.path.exists(path):
             self._input_dir = path
         else:
-            self._input_dir = path
-            if not os.path.exists(self._input_dir):
+            if not os.path.exists(path):
                 os.mkdir(self._input_dir)
+                self._input_dir = path
 
-    def _read_var_from_nc(self, var, path_dir, file, group=None):
+    def _read_var_from_nc(self, var, path_dir, file):
         nc_file = path_dir / file
-        if group:
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.groups[group].variables[var]
-                return npx.array(var_obj)
-        else:
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables[var]
-                return npx.array(var_obj)
+        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+            var_obj = infile.variables[var]
+            return npx.array(var_obj)
+
+    def _read_var_from_csv(self, var, path_dir, file):
+        csv_file = path_dir / file
+        infile = pd.read_csv(csv_file, sep=';', skiprows=1)
+        var_obj = infile.loc[:, var]
+        return npx.array(var_obj)[:, npx.newaxis]
 
     def _get_nitt(self, path_dir, file):
         nc_file = path_dir / file
@@ -39,17 +43,24 @@ class ONEDEVENTSetup(RogerSetup):
             var_obj = infile.variables['Time']
             return len(onp.array(var_obj))
 
+    def _get_runlen(self, path_dir, file):
+        nc_file = path_dir / file
+        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+            var_obj = infile.variables['dt']
+            return onp.sum(var_obj)
+
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
         settings.identifier = "ONEDEVENT"
 
+        # total grid numbers in x-,y- and z-direction
         settings.nx, settings.ny, settings.nz = 8, 8, 1
+        # derive total number of time steps from forcing
         settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
-        settings.nittevent = self._get_nitt(self._input_dir, 'forcing.nc')
-        settings.nittevent_p1 = settings.nittevent + 1
-        settings.runlen = settings.nitt * 10 * 60
+        settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
+        # spatial discretization (in meters)
         settings.dx = 1
         settings.dy = 1
         settings.dz = 1
@@ -57,6 +68,7 @@ class ONEDEVENTSetup(RogerSetup):
         settings.x_origin = 0.0
         settings.y_origin = 0.0
 
+        # enable specific processes
         settings.enable_groundwater_boundary = False
         settings.enable_lateral_flow = True
         settings.enable_routing = False
@@ -64,26 +76,18 @@ class ONEDEVENTSetup(RogerSetup):
     @roger_routine(
         dist_safe=False,
         local_variables=[
-            "DT_SECS",
-            "DT",
             "dt_secs",
             "dt",
-            "t",
-            "itt",
             "x",
             "y",
         ],
     )
     def set_grid(self, state):
         vs = state.variables
-        settings = state.settings
 
         # temporal grid
-        vs.DT_SECS = update(vs.DT_SECS, at[:], self._read_var_from_nc("dt", self._input_dir, 'forcing.nc'))
-        vs.DT = update(vs.DT, at[:], vs.DT_SECS / (60 * 60))
-        vs.dt_secs = vs.DT_SECS[vs.itt]
-        vs.dt = vs.DT[vs.itt]
-        vs.t = update(vs.t, at[:], npx.linspace(0, vs.dt * settings.nitt, num=settings.nitt))
+        vs.dt_secs = 10 * 60
+        vs.dt = 1 / 6
         # spatial grid
         dx = allocate(state.dimensions, ("x"))
         dx = update(dx, at[:], 1)
@@ -96,11 +100,17 @@ class ONEDEVENTSetup(RogerSetup):
     def set_look_up_tables(self, state):
         vs = state.variables
 
+        # land use-dependent interception storage
         vs.lut_ilu = update(vs.lut_ilu, at[:, :], lut.ARR_ILU)
+        # land use-dependent ground cover
         vs.lut_gc = update(vs.lut_gc, at[:, :], lut.ARR_GC)
+        # land use-dependent maximum ground cover
         vs.lut_gcm = update(vs.lut_gcm, at[:, :], lut.ARR_GCM)
+        # land use-dependent maximum ground cover
         vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
+        # land use-dependent rooting depth
         vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
+        # macropore flow velocities
         vs.lut_mlms = update(vs.lut_mlms, at[:, :], lut.ARR_MLMS)
 
     @roger_routine
@@ -111,20 +121,34 @@ class ONEDEVENTSetup(RogerSetup):
     def set_parameters_setup(self, state):
         vs = state.variables
 
+        # land use ID (see README for description)
         vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
+        # degree of sealing (-)
         vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
+        # surface slope (-)
         vs.slope = update(vs.slope, at[2:-2, 2:-2], 0.05)
-        vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope * 100)
+        # convert slope to percentage
+        vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
+        # total surface depression storage (mm)
         vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
-        vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
-        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 100)
-        vs.dmph = update(vs.dmph, at[2:-2, 2:-2], 100)
-        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1000)
+        # soil depth (mm)
+        vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2000)
+        # density of vertical macropores (1/m2)
+        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
+        # density of horizontal macropores (1/m2)
+        vs.dmph = update(vs.dmph, at[2:-2, 2:-2], 30)
+        # total length of vertical macropores (mm)
+        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 500)
+        # air capacity (-)
         vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.13)
-        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.24)
-        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.23)
-        vs.ks = update(vs.ks, at[2:-2, 2:-2], 25)
-        vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
+        # usable field capacity (-)
+        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.22)
+        # permanent wilting point (-)
+        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.18)
+        # saturated hydraulic conductivity (-)
+        vs.ks = update(vs.ks, at[2:-2, 2:-2], 9)
+        # hydraulic conductivity of bedrock/saturated zone (-)
+        vs.kf = update(vs.kf, at[2:-2, 2:-2], 5)
 
     @roger_routine
     def set_parameters(self, state):
@@ -138,30 +162,53 @@ class ONEDEVENTSetup(RogerSetup):
     def set_initial_conditions(self, state):
         vs = state.variables
 
+        # interception storage of upper surface layer (mm)
         vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, :vs.taup1], 0)
+        # snow water equivalent stored in upper surface layer (mm)
         vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, :vs.taup1], 0)
+        # interception storage of lower surface layer (mm)
         vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, :vs.taup1], 0)
+        # snow water equivalent stored in lower surface layer (mm)
         vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, :vs.taup1], 0)
+        # surface depression storage (mm)
         vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
+        # snow cover storage (mm)
         vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
+        # snow water equivalent of snow cover (mm)
         vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
+        # soil water content of root zone/upper soil layer (-)
         vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.4)
-        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.47)
-        vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 0)
+        # soil water content of subsoil/lower soil layer (-)
+        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.4)
+
+    @roger_routine
+    def set_boundary_conditions_setup(self, state):
+        pass
+
+    @roger_routine
+    def set_boundary_conditions(self, state):
+        pass
 
     @roger_routine
     def set_forcing_setup(self, state):
-        vs = state.variables
+        pass
 
-        vs.PREC = update(vs.PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
-        vs.TA = update(vs.TA, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
-        vs.EVENT_ID = update(vs.EVENT_ID, at[2:-2, 2:-2, 1:], 1)
-
-    @roger_routine
+    @roger_routine(
+        dist_safe=False,
+        local_variables=[
+            "itt",
+            "prec",
+            "ta",
+            "event_id",
+            "tau",
+        ],
+    )
     def set_forcing(self, state):
         vs = state.variables
 
-        vs.update(set_forcing_kernel(state))
+        vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+        vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt])
+        vs.event_id = update(vs.event_id, at[vs.tau], 1)
 
     @roger_routine
     def set_diagnostics(self, state):
@@ -171,26 +218,8 @@ class ONEDEVENTSetup(RogerSetup):
     def after_timestep(self, state):
         vs = state.variables
 
+        # shift variables backwards
         vs.update(after_timestep_kernel(state))
-
-
-@roger_kernel
-def set_forcing_kernel(state):
-    vs = state.variables
-
-    vs.prec = update(vs.prec, at[2:-2, 2:-2], vs.PREC[2:-2, 2:-2, vs.itt])
-    vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[2:-2, 2:-2, vs.itt])
-
-    vs.dt_secs = vs.DT_SECS[vs.itt]
-    vs.dt = vs.DT[vs.itt]
-
-    return KernelOutput(
-        prec=vs.prec,
-        ta=vs.ta,
-        dt=vs.dt,
-        dt_secs=vs.dt_secs,
-    )
-
 
 @roger_kernel
 def after_timestep_kernel(state):
@@ -264,14 +293,6 @@ def after_timestep_kernel(state):
         vs.y_sc,
         at[2:-2, 2:-2, vs.taum1], vs.y_sc[2:-2, 2:-2, vs.tau],
     )
-    vs.prec_event_sum = update(
-        vs.prec_event_sum,
-        at[2:-2, 2:-2, vs.taum1], vs.prec_event_sum[2:-2, 2:-2, vs.tau],
-    )
-    vs.t_event_sum = update(
-        vs.t_event_sum,
-        at[2:-2, 2:-2, vs.taum1], vs.t_event_sum[2:-2, 2:-2, vs.tau],
-    )
     vs.theta_rz = update(
         vs.theta_rz,
         at[2:-2, 2:-2, vs.taum1], vs.theta_rz[2:-2, 2:-2, vs.tau],
@@ -308,6 +329,10 @@ def after_timestep_kernel(state):
         vs.h,
         at[2:-2, 2:-2, vs.taum1], vs.h[2:-2, 2:-2, vs.tau],
     )
+    vs.prec = update(
+        vs.prec,
+        at[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau],
+    )
 
     return KernelOutput(
         ta=vs.ta,
@@ -327,8 +352,6 @@ def after_timestep_kernel(state):
         z_wf_t1=vs.z_wf_t1,
         y_mp=vs.y_mp,
         y_sc=vs.y_sc,
-        t_event_sum=vs.t_event_sum,
-        prec_event_sum=vs.prec_event_sum,
         theta_rz=vs.theta_rz,
         theta_ss=vs.theta_ss,
         theta=vs.theta,
@@ -338,4 +361,5 @@ def after_timestep_kernel(state):
         k_rz=vs.k_rz,
         k_ss=vs.k_ss,
         k=vs.k,
+        prec=vs.prec,
     )

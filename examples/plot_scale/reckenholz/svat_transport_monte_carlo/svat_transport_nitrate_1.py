@@ -443,6 +443,14 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
                 at[2:-2, 2:-2, :], npx.sum(vs.msa_s[2:-2, 2:-2, :, :], axis=-1),
                 )
 
+        @roger_routine
+        def set_boundary_conditions_setup(self, state):
+            pass
+
+        @roger_routine
+        def set_boundary_conditions(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

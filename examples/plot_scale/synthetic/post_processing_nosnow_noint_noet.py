@@ -81,7 +81,7 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
             v = f.groups[meteo_station].create_variable('inf_in', ('x', 'y', 'Time'), float)
         except ValueError:
             v = f.groups[meteo_station].variables.get('inf_in')
-        vals = onp.array(f.groups[meteo_station].variables.get('prec')) - onp.array(f.groups[meteo_station].variables.get('int_rain_top')) - onp.array(f.groups[meteo_station].variables.get('int_rain_ground')) - onp.array(f.groups[meteo_station].variables.get('int_snow_top')) - onp.array(f.groups[meteo_station].variables.get('int_snow_ground')) - onp.array(f.groups[meteo_station].variables.get('snow_ground')) + onp.array(f.groups[meteo_station].variables.get('q_snow'))
+        vals = onp.array(f.groups[meteo_station].variables.get('prec'))
         v[:, :, :] = vals
         v.attrs.update(long_name='infiltration input',
                        units='mm/day')
@@ -128,5 +128,6 @@ grid0 = pd.DataFrame(index=range(len(days_sim[1:])))
 for var_sim in ['inf_in', 'inf_mat', 'inf_mp', 'inf_sc', 'q_sub_mat', 'q_sub_mp', 'z_sat']:
     grid0.loc[:, var_sim] = ds_sim[var_sim].isel(x=0, y=0).values[1:]
 grid0.loc[:, 'perc'] = ds_sim['q_ss'].isel(x=0, y=0).values[1:]
-file = base_path_results / "grid0.csv"
+file = base_path_results / "grid0_nosnow_noint_noet.csv"
 grid0.to_csv(file, header=True, index=True, sep=";")
+ds_sim.close()

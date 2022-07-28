@@ -371,6 +371,14 @@ def main(transport_model_structure):
                     at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2],
                 )
 
+        @roger_routine
+        def set_boundary_conditions_setup(self, state):
+            pass
+
+        @roger_routine
+        def set_boundary_conditions(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

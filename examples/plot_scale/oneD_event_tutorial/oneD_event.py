@@ -227,6 +227,14 @@ def main():
             vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], THETA_SS)
 
         @roger_routine
+        def set_boundary_conditions_setup(self, state):
+            pass
+
+        @roger_routine
+        def set_boundary_conditions(self, state):
+            pass
+
+        @roger_routine
         def set_forcing_setup(self, state):
             pass
 

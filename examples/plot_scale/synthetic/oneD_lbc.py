@@ -3,15 +3,16 @@ import os
 import h5netcdf
 import pandas as pd
 import numpy as onp
+import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
+@click.option("-ms", "--meteo-station", type=click.Choice(['breitnau', 'ihringen']), default='ihringen')
 @roger_base_cli
 def main():
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, at, for_loop
-    from roger.core.utilities import _get_row_no
+    from roger.core.operators import numpy as npx, update, at
     from roger.core.numerics import calc_parameters_surface_kernel
     from roger.tools.setup import write_forcing
     import roger.lookuptables as lut
@@ -155,6 +156,16 @@ def main():
             vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 0)
             vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
             vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
+
+        @roger_routine
+        def set_boundary_conditions_setup(self, state):
+            vs = state.variables
+
+            vs.z_gw = update(vs.z_gw, at[2:-2, 2:-2, :vs.taup1], (vs.z_soil / 1000) + 1)
+
+        @roger_routine
+        def set_boundary_conditions(self, state):
+            pass
 
         @roger_routine
         def set_forcing_setup(self, state):
@@ -532,17 +543,15 @@ def main():
             S_lp_ss=vs.S_lp_ss,
         )
 
-    meteo_stations = ["breitnau", "ihringen"]
-    for meteo_station in meteo_stations:
-        model = ONEDSetup()
-        identifier = f'ONED_lbc_{meteo_station}'
-        model._set_identifier(identifier)
-        path_meteo_station = model._base_path / "input" / meteo_station
-        model._set_input_dir(path_meteo_station)
-        write_meteo_csv_from_dwd(path_meteo_station)
-        write_forcing(path_meteo_station)
-        model.setup()
-        model.run()
+    model = ONEDSetup()
+    identifier = f'ONED_lbc_{meteo_station}'
+    model._set_identifier(identifier)
+    path_meteo_station = model._base_path / "input" / meteo_station
+    model._set_input_dir(path_meteo_station)
+    write_meteo_csv_from_dwd(path_meteo_station)
+    write_forcing(path_meteo_station)
+    model.setup()
+    model.run()
     return
 
 

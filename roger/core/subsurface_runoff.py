@@ -640,11 +640,11 @@ def calc_perc_pot_rz(state):
     mask3 = (vs.z_sat[:, :, vs.tau] > 0) & (vs.z_root[:, :, vs.tau] < vs.z_soil - vs.z_sat[:, :, vs.tau])
     perc_pot = update(
         perc_pot,
-        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], (vs.k_rz[2:-2, 2:-2, vs.tau] / vs.ks[2:-2, 2:-2]) * vs.dt, 0) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], vs.k_rz[2:-2, 2:-2, vs.tau] * vs.dt, 0) * vs.maskCatch[2:-2, 2:-2],
     )
     perc_pot = update(
         perc_pot,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], (vs.k_rz[2:-2, 2:-2, vs.tau] / vs.ks[2:-2, 2:-2]) * vs.dt, perc_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.ks[2:-2, 2:-2] * vs.dt, perc_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     z = allocate(state.dimensions, ("x", "y"))
     z = update(
@@ -653,7 +653,7 @@ def calc_perc_pot_rz(state):
     )
     perc_pot = update(
         perc_pot,
-        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2], ((npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]) - npx.power(-vs.h_rz[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]))/(1 + npx.power(-vs.h_rz[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]) + (vs.n_salv[2:-2, 2:-2] - 1) * npx.power((z[2:-2, 2:-2]*-1)/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]))),
+        at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2], ((npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]) - npx.power(-vs.h_rz[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]))/(1 + npx.power(-vs.h_rz[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]) + (vs.n_salv[2:-2, 2:-2] - 1) * npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]))) * vs.dt,
                                   perc_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
@@ -743,7 +743,7 @@ def calc_perc_pot_ss(state):
     )
     perc_pot = update(
         perc_pot,
-        at[2:-2, 2:-2], npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, npx.where(vs.z_sat[2:-2, 2:-2, vs.tau] > 0, vs.ks[2:-2, 2:-2] * vs.dt, (npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2])/(1 + (vs.n_salv[2:-2, 2:-2] - 1) * npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]))))) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where((vs.z_gw[2:-2, 2:-2, vs.tau] > 10) & (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 > vs.z_soil[2:-2, 2:-2]), npx.where(vs.z_sat[2:-2, 2:-2, vs.tau] > 0, npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, vs.ks[2:-2, 2:-2] * vs.dt), npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, vs.k_ss[2:-2, 2:-2, vs.tau] * vs.dt)), npx.where(vs.z_sat[2:-2, 2:-2, vs.tau] > 0, npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, vs.ks[2:-2, 2:-2] * vs.dt), npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, (npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2])/((1 + (vs.n_salv[2:-2, 2:-2] - 1)) * npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]))) * vs.dt))) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # where drainage occurs

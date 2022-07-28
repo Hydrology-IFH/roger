@@ -128,6 +128,34 @@ class RogerSetup(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def set_boundary_conditions_setup(self, state):
+        """To be implemented by subclass.
+
+        Use this function to set the boundary conditions.
+
+        Example:
+          >>> @roger_method
+          >>> def set_boundary_conditions_setup(self, state):
+          >>>     vs = state.variables
+          >>>     vs.z_gw = update(vs.z_gw, at[:, :, :, :vs.taup1], 5)
+        """
+        pass
+
+    @abc.abstractmethod
+    def set_boundary_conditions(self, state):
+        """To be implemented by subclass.
+
+        May be used to set boundary conditions.
+
+        Example:
+          >>> @roger_method
+          >>> def set_boundary_conditions(self, state):
+          >>>     vs = state.variables
+          >>>     vs.z_gw = update(vs.z_gw, at[:, :, :, :vs.taup1], 5)
+        """
+        pass
+
+    @abc.abstractmethod
     def set_grid(self, state):
         """To be implemented by subclass.
 
@@ -229,6 +257,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
             self.set_topography,
             self.set_initial_conditions_setup,
             self.set_initial_conditions,
+            self.set_boundary_conditions_setup,
+            self.set_boundary_conditions,
             self.set_diagnostics,
             self.set_forcing_setup,
             self.after_timestep,
@@ -279,6 +309,9 @@ class RogerSetup(metaclass=abc.ABCMeta):
             self.set_diagnostics(self.state)
             diagnostics.initialize(self.state)
 
+            self.set_boundary_conditions_setup(self.state)
+            self.set_boundary_conditions(self.state)
+
             if not self.state.settings.restart_input_filename:
                 self.set_forcing_setup(self.state)
             restart.read_restart(self.state)
@@ -309,6 +342,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
         with state.timers["main"]:
             if not settings.enable_offline_transport:
+                with state.timers["boundary conditions"]:
+                    self.set_boundary_conditions(state)
                 with state.timers["forcing"]:
                     self.set_forcing(state)
                 with state.timers["time-variant parameters"]:
@@ -361,6 +396,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
                 vs.time = vs.time + vs.dt_secs
 
                 with state.timers["main transport"]:
+                    with state.timers["boundary conditions"]:
+                        self.set_boundary_conditions(state)
                     with state.timers["forcing"]:
                         self.set_forcing(state)
                     with state.timers["time-variant parameters"]:
@@ -516,6 +553,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     "---",
                     " setup time                 = {:.2f}s".format(self.state.timers["setup"].total_time),
                     " main loop time             = {:.2f}s".format(self.state.timers["main"].total_time),
+                    "   boundary conditions      = {:.2f}s".format(self.state.timers["boundary conditions"].total_time),
                     "   forcing                  = {:.2f}s".format(self.state.timers["forcing"].total_time),
                     "   time-variant parameters  = {:.2f}s".format(self.state.timers["time-variant parameters"].total_time),
                     "   interception             = {:.2f}s".format(self.state.timers["interception"].total_time),
@@ -541,6 +579,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     " setup time                                      = {:.2f}s".format(self.state.timers["setup"].total_time),
                     " warmup time                                     = {:.2f}s".format(self.state.timers["warmup"].total_time),
                     " main loop time                                  = {:.2f}s".format(self.state.timers["main transport"].total_time),
+                    "   boundary conditions                           = {:.2f}s".format(self.state.timers["boundary conditions"].total_time),
                     "   forcing                                       = {:.2f}s".format(self.state.timers["forcing"].total_time),
                     "   redistribution after root growth/harvesting   = {:.2f}s".format(self.state.timers["redistribution after root growth/harvesting"].total_time),
                     "   infiltration into root zone                   = {:.2f}s".format(self.state.timers["infiltration into root zone"].total_time),

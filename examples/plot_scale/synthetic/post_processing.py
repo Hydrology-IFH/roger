@@ -23,7 +23,7 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
-meteo_stations = ["breitnau", "ihringen"]
+meteo_stations = ["ihringen"]
 # merge model output into single file
 for meteo_station in meteo_stations:
     path = str(base_path / f"ONED_{meteo_station}.*.nc")
@@ -122,242 +122,228 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
                        units='mm')
 
 
-meteo_stations = ["breitnau", "ihringen"]
-vars_sim = ['prec', 'int_prec', 'q_snow', 'inf_in', 'inf_mat', 'inf_mp', 'inf_sc',
-            'q_hof', 'q_sof', 'q_sub', 'q_sub_mat', 'q_sub_mp', 'q_ss',
-            'pet', 'aet', 'evap_sur', 'evap_soil', 'transp']
-idx_percentiles = ['min', 'q25', 'median', 'mean', 'q75', 'max']
-ll_df_sim_sum = []
-ll_df_sim_sum_tot = []
-for i, meteo_station in enumerate(meteo_stations):
-    # load simulation
-    states_hm_file = base_path / "states_hm.nc"
-    ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf", group=meteo_station)
-
-    # assign date
-    days_sim = ds_sim.Time.values + 1
-    ds_sim = ds_sim.assign_coords(date=("Time", days_sim))
-
-    # sums per grid
-    ds_sim_sum = ds_sim.sum(dim="Time")
-    nx = ds_sim_sum.dims['x']  # number of rows
-    df = pd.DataFrame(index=range(nx))
-    for var_sim in vars_sim:
-        df.loc[:, var_sim] = ds_sim_sum[var_sim].values.flatten()
-
-    df_percentiles = pd.DataFrame(index=idx_percentiles, columns=vars_sim)
-    for var_sim in vars_sim:
-        df_percentiles.loc["min", var_sim] = df.loc[:, var_sim].min()
-        df_percentiles.loc["q25", var_sim] = df.loc[:, var_sim].quantile(0.25)
-        df_percentiles.loc["median", var_sim] = df.loc[:, var_sim].median()
-        df_percentiles.loc["mean", var_sim] = df.loc[:, var_sim].mean()
-        df_percentiles.loc["q75", var_sim] = df.loc[:, var_sim].quantile(0.75)
-        df_percentiles.loc["max", var_sim] = df.loc[:, var_sim].max()
-    file = base_path_results / f"percentiles_{meteo_station}.csv"
-    df_percentiles.to_csv(file, header=True, index=True, sep=";")
-
-    file = base_path_results / f"summary_{meteo_station}.txt"
-    df.to_csv(file, header=True, index=False, sep="\t")
-    df.loc[:, 'meteo_station'] = meteo_station
-    df.loc[:, 'idx'] = df.index
-
-    ll_df_sim_sum.append(df)
-
-    # total sums
-    ds_sim_sum_tot = ds_sim.sum()
-    df = pd.DataFrame(index=["sum"])
-    for j, var_sim in enumerate(vars_sim):
-        df.loc[:, var_sim] = ds_sim_sum_tot[var_sim].values
-    df.loc[:, 'meteo_station'] = meteo_station
-
-    ll_df_sim_sum_tot.append(df)
-
-    # plot time series
-    vars_sim_trace = ["S_s", "theta"]
-    nx = ds_sim.dims['x']
-    days_sim = ds_sim.Time.values + 1
-    for j, var_sim in enumerate(vars_sim_trace):
-        fig, ax = plt.subplots()
-        for x in range(nx):
-            vals = ds_sim[var_sim].isel(x=x, y=0).values
-            ax.plot(days_sim[1:], vals[1:], color='black')
-        ax.set_xlabel('Time [days]')
-        ax.set_ylabel(labs._LABS[var_sim])
-        fig.tight_layout()
-        file = base_path_figs / f"trace_{var_sim}_{meteo_station}.png"
-        fig.savefig(file, dpi=250)
-        plt.close(fig)
-
-days_sim = ds_sim.Time.values + 1
-fig, ax = plt.subplots()
-vals = onp.cumsum(ds_sim['inf_in'].isel(x=0, y=0).values)
-ax.plot(range(len(days_sim[1:])), vals[1:], color='blue')
-vals = onp.cumsum(ds_sim['prec'].isel(x=0, y=0).values)
-ax.plot(range(len(days_sim[1:])), vals[1:], color='red')
-vals = onp.cumsum(ds_sim['q_snow'].isel(x=0, y=0).values)
-ax.plot(range(len(days_sim[1:])), vals[1:], color='grey')
-vals = ds_sim['S_snow'].isel(x=0, y=0).values
-ax.plot(range(len(days_sim[1:])), vals[1:], color='black')
-ax.set_xlabel('Time [days]')
-ax.set_ylabel('[mm]')
-fig.tight_layout()
-file = base_path_figs / "grid0_ihringen.png"
-fig.savefig(file, dpi=250)
-grid0 = pd.DataFrame(index=range(len(days_sim[1:])))
-grid0.loc[:, 'S_int_ground'] = ds_sim['S_int_ground'].isel(x=0, y=0).values[1:]
-grid0.loc[:, 'S_int_ground_tot'] = ds_sim['S_int_ground_tot'].isel(x=0, y=0).values[1:]
-grid0.loc[:, 'evap_int'] = ds_sim['evap_sur'].isel(x=0, y=0).values[1:]
-grid0.loc[:, 'inf_in'] = ds_sim['inf_in'].isel(x=0, y=0).values[1:]
-file = base_path_results / "grid0.csv"
-grid0.to_csv(file, header=True, index=True, sep=";")
-
-
-# concatenate dataframes
-df_sim_sum = pd.concat(ll_df_sim_sum, sort=False)
-df_sim_sum_tot = pd.concat(ll_df_sim_sum_tot, sort=False)
-
-# convert from wide to long
-df_sim_sum = pd.melt(df_sim_sum, id_vars=['meteo_station', 'idx'])
-df_sim_sum_tot = pd.melt(df_sim_sum_tot, id_vars=['meteo_station'])
-for i, meteo_station in enumerate(meteo_stations):
-    df_sim_sum_tot.loc[df_sim_sum_tot['meteo_station'] == meteo_station, 'idx'] = range(len(vars_sim))
-
-
-# compare total sums
-ax = sns.catplot(x="variable", y="value", hue="meteo_station",
-                data=df_sim_sum_tot, height=7, aspect=2, palette="RdPu", kind="bar")
-xticklabels = [labs._TICKLABS[var_sim] for var_sim in vars_sim]
-ax.set_xticklabels(xticklabels)
-ax.set(xlabel='', ylabel='[mm]')
-ax._legend.set_title("Meteo station")
-file = base_path_figs / "total_sums.png"
-ax.savefig(file, dpi=250)
-
-# compare sums per grid
-ax = sns.catplot(x="variable", y="value", hue="meteo_station",
-                data=df_sim_sum, kind="box", height=7, aspect=2, palette="RdPu", whis=[0, 100])
-xticklabels = [labs._TICKLABS[var_sim] for var_sim in vars_sim]
-ax.set_xticklabels(xticklabels, rotation=30)
-ax.set(xlabel='', ylabel='[mm]')
-ax._legend.set_title("Meteo station")
-file = base_path_figs / "sums_per_grid_box.png"
-ax.savefig(file, dpi=250)
-
-#TODO: compare differences
+# meteo_stations = ["breitnau", "ihringen"]
+# vars_sim = ['prec', 'int_prec', 'q_snow', 'inf_in', 'inf_mat', 'inf_mp', 'inf_sc',
+#             'q_hof', 'q_sof', 'q_sub', 'q_sub_mat', 'q_sub_mp', 'q_ss',
+#             'pet', 'aet', 'evap_sur', 'evap_soil', 'transp']
+# idx_percentiles = ['min', 'q25', 'median', 'mean', 'q75', 'max']
+# ll_df_sim_sum = []
+# ll_df_sim_sum_tot = []
 # for i, meteo_station in enumerate(meteo_stations):
-#     fig, ax = plt.subplots(3, 4, sharey=False, figsize=(16, 8))
-#     data = df_sim_sum.loc[df_sim_sum['meteo_station'] == meteo_station, :]
+#     # load simulation
+#     states_hm_file = base_path / "states_hm.nc"
+#     ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf", group=meteo_station)
+#
+#     # assign date
+#     days_sim = ds_sim.Time.values + 1
+#     ds_sim = ds_sim.assign_coords(date=("Time", days_sim))
+#
+#     # sums per grid
+#     ds_sim_sum = ds_sim.sum(dim="Time")
+#     nx = ds_sim_sum.dims['x']  # number of rows
+#     df = pd.DataFrame(index=range(nx))
+#     for var_sim in vars_sim:
+#         df.loc[:, var_sim] = ds_sim_sum[var_sim].values.flatten()
+#
+#     df_percentiles = pd.DataFrame(index=idx_percentiles, columns=vars_sim)
+#     for var_sim in vars_sim:
+#         df_percentiles.loc["min", var_sim] = df.loc[:, var_sim].min()
+#         df_percentiles.loc["q25", var_sim] = df.loc[:, var_sim].quantile(0.25)
+#         df_percentiles.loc["median", var_sim] = df.loc[:, var_sim].median()
+#         df_percentiles.loc["mean", var_sim] = df.loc[:, var_sim].mean()
+#         df_percentiles.loc["q75", var_sim] = df.loc[:, var_sim].quantile(0.75)
+#         df_percentiles.loc["max", var_sim] = df.loc[:, var_sim].max()
+#     file = base_path_results / f"percentiles_{meteo_station}.csv"
+#     df_percentiles.to_csv(file, header=True, index=True, sep=";")
+#
+#     file = base_path_results / f"summary_{meteo_station}.txt"
+#     df.to_csv(file, header=True, index=False, sep="\t")
+#     df.loc[:, 'meteo_station'] = meteo_station
+#     df.loc[:, 'idx'] = df.index
+#
+#     ll_df_sim_sum.append(df)
+#
+#     # total sums
+#     ds_sim_sum_tot = ds_sim.sum()
+#     df = pd.DataFrame(index=["sum"])
 #     for j, var_sim in enumerate(vars_sim):
-#         data1 = data.loc[data['variable'] == var_sim, :]
-#         ax.flatten()[j].bar(data1['idx'], data1['value'], color='black', edgecolor='black', width=1, align="edge")
-#         ax.flatten()[j].set_xlabel('')
-#         ax.flatten()[j].set_ylabel(labs._Y_LABS_CUM[var_sim])
+#         df.loc[:, var_sim] = ds_sim_sum_tot[var_sim].values
+#     df.loc[:, 'meteo_station'] = meteo_station
+#
+#     ll_df_sim_sum_tot.append(df)
+#
+#     # plot time series
+#     vars_sim_trace = ["S_s", "theta"]
+#     nx = ds_sim.dims['x']
+#     days_sim = ds_sim.Time.values + 1
+#     for j, var_sim in enumerate(vars_sim_trace):
+#         fig, ax = plt.subplots()
+#         for x in range(nx):
+#             vals = ds_sim[var_sim].isel(x=x, y=0).values
+#             ax.plot(days_sim[1:], vals[1:], color='black')
+#         ax.set_xlabel('Time [days]')
+#         ax.set_ylabel(labs._LABS[var_sim])
+#         fig.tight_layout()
+#         file = base_path_figs / f"trace_{var_sim}_{meteo_station}.png"
+#         fig.savefig(file, dpi=250)
+#         plt.close(fig)
+
+ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf", group="ihringen")
+days_sim = ds_sim.Time.values + 1
+grid0 = pd.DataFrame(index=range(len(days_sim[1:])))
+for var_sim in ['inf_in', 'inf_mat', 'inf_mp', 'inf_sc', 'q_sub_mat', 'q_sub_mp', 'z_sat']:
+    grid0.loc[:, var_sim] = ds_sim[var_sim].isel(x=0, y=0).values[1:]
+grid0.loc[:, 'perc'] = ds_sim['q_ss'].isel(x=0, y=0).values[1:]
+file = base_path_results / "grid0_nosnow_noint.csv"
+grid0.to_csv(file, header=True, index=True, sep=";")
+ds_sim.close()
+
+# # concatenate dataframes
+# df_sim_sum = pd.concat(ll_df_sim_sum, sort=False)
+# df_sim_sum_tot = pd.concat(ll_df_sim_sum_tot, sort=False)
+#
+# # convert from wide to long
+# df_sim_sum = pd.melt(df_sim_sum, id_vars=['meteo_station', 'idx'])
+# df_sim_sum_tot = pd.melt(df_sim_sum_tot, id_vars=['meteo_station'])
+# for i, meteo_station in enumerate(meteo_stations):
+#     df_sim_sum_tot.loc[df_sim_sum_tot['meteo_station'] == meteo_station, 'idx'] = range(len(vars_sim))
+#
+#
+# # compare total sums
+# ax = sns.catplot(x="variable", y="value", hue="meteo_station",
+#                 data=df_sim_sum_tot, height=7, aspect=2, palette="RdPu", kind="bar")
+# xticklabels = [labs._TICKLABS[var_sim] for var_sim in vars_sim]
+# ax.set_xticklabels(xticklabels)
+# ax.set(xlabel='', ylabel='[mm]')
+# ax._legend.set_title("Meteo station")
+# file = base_path_figs / "total_sums.png"
+# ax.savefig(file, dpi=250)
+#
+# # compare sums per grid
+# ax = sns.catplot(x="variable", y="value", hue="meteo_station",
+#                 data=df_sim_sum, kind="box", height=7, aspect=2, palette="RdPu", whis=[0, 100])
+# xticklabels = [labs._TICKLABS[var_sim] for var_sim in vars_sim]
+# ax.set_xticklabels(xticklabels, rotation=30)
+# ax.set(xlabel='', ylabel='[mm]')
+# ax._legend.set_title("Meteo station")
+# file = base_path_figs / "sums_per_grid_box.png"
+# ax.savefig(file, dpi=250)
+#
+# #TODO: compare differences
+# # for i, meteo_station in enumerate(meteo_stations):
+# #     fig, ax = plt.subplots(3, 4, sharey=False, figsize=(16, 8))
+# #     data = df_sim_sum.loc[df_sim_sum['meteo_station'] == meteo_station, :]
+# #     for j, var_sim in enumerate(vars_sim):
+# #         data1 = data.loc[data['variable'] == var_sim, :]
+# #         ax.flatten()[j].bar(data1['idx'], data1['value'], color='black', edgecolor='black', width=1, align="edge")
+# #         ax.flatten()[j].set_xlabel('')
+# #         ax.flatten()[j].set_ylabel(labs._Y_LABS_CUM[var_sim])
+# #     fig.tight_layout()
+# #     file = base_path_figs / f"sums_per_grid_{meteo_station}.png"
+# #     fig.savefig(file, dpi=250)
+# plt.close('all')
+#
+# meteo_stations = ["ihringen"]
+# base_path_legacy = Path("/Volumes/Gerics/roger/examples/plot_scale/synthetic/results/roger_legacy")
+# idx_10mins = pd.date_range(start='1/10/2010', end='30/09/2011 23:50:00', freq='600s')
+# idx_daily = pd.date_range(start='1/10/2010', end='30/09/2011', freq='D')
+# for meteo_station in meteo_stations:
+#     # file = base_path_legacy / meteo_station / "robin_n0.csv"
+#     # df_inf_in_10mins = pd.read_csv(file, sep=" ", header=None)
+#     # df_inf_in_10mins.index = idx_10mins
+#     # df_inf_in = df_inf_in_10mins.resample('D').sum()
+#
+#     # file = base_path_legacy / meteo_station / "robin_inf_mtrx0.csv"
+#     # df_inf_mat_10mins = pd.read_csv(file, sep=" ", header=None)
+#     # df_inf_mat_10mins.index = idx_10mins
+#     # df_inf_mat = df_inf_mat_10mins.resample('D').sum()
+#
+#     # file = base_path_legacy / meteo_station / "robin_sws0.csv"
+#     # df_zsat_10mins = pd.read_csv(file, sep=" ", header=None)
+#     # df_zsat_10mins.index = idx_10mins
+#     # df_zsat = pd.DataFrame(index=idx_daily)
+#     # df_zsat = df_theta.join(df_zsat_10mins)
+#
+#     # file = base_path_legacy / meteo_station / "robin_tp0.csv"
+#     # df_perc_10mins = pd.read_csv(file, sep=" ", header=None)
+#     # df_perc_10mins.index = idx_10mins
+#     # df_perc = df_perc_10mins.resample('D').sum()
+#
+#     # del df_inf_in_10mins, df_inf_mat_10mins, df_theta_10mins, df_perc_10mins
+#
+#     file = base_path_legacy / meteo_station / "robin_d_n0.csv"
+#     df_inf_in = pd.read_csv(file, sep=" ", header=None)
+#
+#     file = base_path_legacy / meteo_station / "robin_d_inf_mtrx0.csv"
+#     df_inf_mat = pd.read_csv(file, sep=" ", header=None)
+#
+#     file = base_path_legacy / meteo_station / "robin_d_sws0.csv"
+#     df_zsat = pd.read_csv(file, sep=" ", header=None)
+#
+#     file = base_path_legacy / meteo_station / "robin_d_tp0.csv"
+#     df_perc = pd.read_csv(file, sep=" ", header=None)
+#
+#     # load simulation
+#     states_hm_file = base_path / "states_hm.nc"
+#     ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf", group=meteo_station)
+#
+#     # assign date
+#     days_sim = ds_sim.Time.values + 1
+#     ds_sim = ds_sim.assign_coords(date=("Time", days_sim))
+#
+#     # sums per grid
+#     ds_sim_sum = ds_sim.sum(dim="Time")
+#     nx = ds_sim_sum.dims['x']  # number of rows
+#     df = pd.DataFrame(index=range(nx))
+#     for var_sim in vars_sim:
+#         df.loc[:, 'inf_in'] = ds_sim_sum['inf_in'].values.flatten()
+#         df.loc[:, 'prec'] = ds_sim_sum['prec'].values.flatten()
+#
+#     fig, ax = plt.subplots()
+#     ax.plot(df.index, df.loc[:, 'inf_in'].values.flatten() - df_inf_in.sum().values, color='black')
+#     ax.set_xlabel('# grid')
+#     ax.set_ylabel('[mm]')
 #     fig.tight_layout()
-#     file = base_path_figs / f"sums_per_grid_{meteo_station}.png"
+#     file = base_path_figs / f"difference_inf_in_sum_{meteo_station}.png"
 #     fig.savefig(file, dpi=250)
-plt.close('all')
-
-meteo_stations = ["ihringen"]
-base_path_legacy = Path("/Volumes/Gerics/roger/examples/plot_scale/synthetic/results/roger_legacy")
-idx_10mins = pd.date_range(start='1/10/2010', end='30/09/2011 23:50:00', freq='600s')
-idx_daily = pd.date_range(start='1/10/2010', end='30/09/2011', freq='D')
-for meteo_station in meteo_stations:
-    # file = base_path_legacy / meteo_station / "robin_n0.csv"
-    # df_inf_in_10mins = pd.read_csv(file, sep=" ", header=None)
-    # df_inf_in_10mins.index = idx_10mins
-    # df_inf_in = df_inf_in_10mins.resample('D').sum()
-
-    # file = base_path_legacy / meteo_station / "robin_inf_mtrx0.csv"
-    # df_inf_mat_10mins = pd.read_csv(file, sep=" ", header=None)
-    # df_inf_mat_10mins.index = idx_10mins
-    # df_inf_mat = df_inf_mat_10mins.resample('D').sum()
-
-    # file = base_path_legacy / meteo_station / "robin_sws0.csv"
-    # df_zsat_10mins = pd.read_csv(file, sep=" ", header=None)
-    # df_zsat_10mins.index = idx_10mins
-    # df_zsat = pd.DataFrame(index=idx_daily)
-    # df_zsat = df_theta.join(df_zsat_10mins)
-
-    # file = base_path_legacy / meteo_station / "robin_tp0.csv"
-    # df_perc_10mins = pd.read_csv(file, sep=" ", header=None)
-    # df_perc_10mins.index = idx_10mins
-    # df_perc = df_perc_10mins.resample('D').sum()
-
-    # del df_inf_in_10mins, df_inf_mat_10mins, df_theta_10mins, df_perc_10mins
-
-    file = base_path_legacy / meteo_station / "robin_d_n0.csv"
-    df_inf_in = pd.read_csv(file, sep=" ", header=None)
-
-    file = base_path_legacy / meteo_station / "robin_d_inf_mtrx0.csv"
-    df_inf_mat = pd.read_csv(file, sep=" ", header=None)
-
-    file = base_path_legacy / meteo_station / "robin_d_sws0.csv"
-    df_zsat = pd.read_csv(file, sep=" ", header=None)
-
-    file = base_path_legacy / meteo_station / "robin_d_tp0.csv"
-    df_perc = pd.read_csv(file, sep=" ", header=None)
-
-    # load simulation
-    states_hm_file = base_path / "states_hm.nc"
-    ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf", group=meteo_station)
-
-    # assign date
-    days_sim = ds_sim.Time.values + 1
-    ds_sim = ds_sim.assign_coords(date=("Time", days_sim))
-
-    # sums per grid
-    ds_sim_sum = ds_sim.sum(dim="Time")
-    nx = ds_sim_sum.dims['x']  # number of rows
-    df = pd.DataFrame(index=range(nx))
-    for var_sim in vars_sim:
-        df.loc[:, 'inf_in'] = ds_sim_sum['inf_in'].values.flatten()
-        df.loc[:, 'prec'] = ds_sim_sum['prec'].values.flatten()
-
-    fig, ax = plt.subplots()
-    ax.plot(df.index, df.loc[:, 'inf_in'].values.flatten() - df_inf_in.sum().values, color='black')
-    ax.set_xlabel('# grid')
-    ax.set_ylabel('[mm]')
-    fig.tight_layout()
-    file = base_path_figs / f"difference_inf_in_sum_{meteo_station}.png"
-    fig.savefig(file, dpi=250)
-    plt.close(fig)
-
-    fig, ax = plt.subplots()
-    ax.plot(df.index, df.loc[:, 'prec'].values.flatten(), color='black')
-    ax.plot(df.index, df.loc[:, 'inf_in'].values.flatten(), color='red')
-    ax.plot(df.index, df_inf_in.sum().values, color='blue')
-    ax.set_xlabel('# grid')
-    ax.set_ylabel('[mm]')
-    fig.tight_layout()
-    file = base_path_figs / f"inf_in_sum_{meteo_station}.png"
-    fig.savefig(file, dpi=250)
-    plt.close(fig)
-
-    ds_sim_sum = ds_sim.sum(dim="Time")
-    nx = ds_sim_sum.dims['x']  # number of rows
-    df = pd.DataFrame(index=range(nx))
-    for var_sim in vars_sim:
-        df.loc[:, 'inf_mat'] = ds_sim_sum['inf_mat'].values.flatten()
-
-    fig, ax = plt.subplots()
-    ax.plot(df.index, df.values.flatten() - df_inf_mat.sum().values, color='black')
-    ax.set_xlabel('# grid')
-    ax.set_ylabel('[mm]')
-    fig.tight_layout()
-    file = base_path_figs / f"difference_inf_mat_{meteo_station}.png"
-    fig.savefig(file, dpi=250)
-    plt.close(fig)
-
-    # nx = ds_sim.dims['x']  # number of rows
-    # df = pd.DataFrame(index=range(nx))
-    # for var_sim in vars_sim:
-    #     df.loc[:, 'z_sat'] = onp.max(ds_sim['z_sat'].values[:, 0, -1], axis=-1)
-    #
-    # fig, ax = plt.subplots()
-    # ax.plot(df.index, df.values.flatten() - onp.max(df_zsat.values, axis=-1), color='black')
-    # ax.set_xlabel('# grid')
-    # ax.set_ylabel('[mm]')
-    # fig.tight_layout()
-    # file = base_path_figs / f"difference_zsat_max_{meteo_station}.png"
-    # fig.savefig(file, dpi=250)
-    # plt.close(fig)
+#     plt.close(fig)
+#
+#     fig, ax = plt.subplots()
+#     ax.plot(df.index, df.loc[:, 'prec'].values.flatten(), color='black')
+#     ax.plot(df.index, df.loc[:, 'inf_in'].values.flatten(), color='red')
+#     ax.plot(df.index, df_inf_in.sum().values, color='blue')
+#     ax.set_xlabel('# grid')
+#     ax.set_ylabel('[mm]')
+#     fig.tight_layout()
+#     file = base_path_figs / f"inf_in_sum_{meteo_station}.png"
+#     fig.savefig(file, dpi=250)
+#     plt.close(fig)
+#
+#     ds_sim_sum = ds_sim.sum(dim="Time")
+#     nx = ds_sim_sum.dims['x']  # number of rows
+#     df = pd.DataFrame(index=range(nx))
+#     for var_sim in vars_sim:
+#         df.loc[:, 'inf_mat'] = ds_sim_sum['inf_mat'].values.flatten()
+#
+#     fig, ax = plt.subplots()
+#     ax.plot(df.index, df.values.flatten() - df_inf_mat.sum().values, color='black')
+#     ax.set_xlabel('# grid')
+#     ax.set_ylabel('[mm]')
+#     fig.tight_layout()
+#     file = base_path_figs / f"difference_inf_mat_{meteo_station}.png"
+#     fig.savefig(file, dpi=250)
+#     plt.close(fig)
+#
+#     # nx = ds_sim.dims['x']  # number of rows
+#     # df = pd.DataFrame(index=range(nx))
+#     # for var_sim in vars_sim:
+#     #     df.loc[:, 'z_sat'] = onp.max(ds_sim['z_sat'].values[:, 0, -1], axis=-1)
+#     #
+#     # fig, ax = plt.subplots()
+#     # ax.plot(df.index, df.values.flatten() - onp.max(df_zsat.values, axis=-1), color='black')
+#     # ax.set_xlabel('# grid')
+#     # ax.set_ylabel('[mm]')
+#     # fig.tight_layout()
+#     # file = base_path_figs / f"difference_zsat_max_{meteo_station}.png"
+#     # fig.savefig(file, dpi=250)
+#     # plt.close(fig)

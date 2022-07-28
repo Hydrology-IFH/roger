@@ -21,7 +21,7 @@ def calc_cpr_rz(state):
 
     vs.cpr_rz = update(
         vs.cpr_rz,
-        at[2:-2, 2:-2], ((npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]) - npx.power(-vs.h_rz[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]))/(1 + npx.power(-vs.h_rz[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]) + (vs.n_salv[2:-2, 2:-2] - 1) * npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]))) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], (npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]) - npx.power(-vs.h_rz[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]))/(1 + npx.power(-vs.h_rz[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]) + (vs.n_salv[2:-2, 2:-2] - 1) * npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2])) * vs.dt * vs.maskCatch[2:-2, 2:-2],
     )
     vs.cpr_rz = update(
         vs.cpr_rz,
@@ -121,7 +121,7 @@ def calc_cpr_ss(state):
         )
         vs.cpr_ss = update(
             vs.cpr_ss,
-            at[2:-2, 2:-2], ((npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]) - npx.power(-vs.h_ss[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]))/(1 + npx.power(-vs.h_ss[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]) + (vs.n_salv[2:-2, 2:-2] - 1) * npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]))) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], (npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2]) - npx.power(-vs.h_ss[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]))/(1 + npx.power(-vs.h_ss[2:-2, 2:-2, vs.tau]/-vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2]) + (vs.n_salv[2:-2, 2:-2] - 1) * npx.power((z[2:-2, 2:-2])/(-vs.ha[2:-2, 2:-2]*10.2), -vs.n_salv[2:-2, 2:-2])) * vs.dt * vs.maskCatch[2:-2, 2:-2],
         )
         vs.cpr_ss = update(
             vs.cpr_ss,

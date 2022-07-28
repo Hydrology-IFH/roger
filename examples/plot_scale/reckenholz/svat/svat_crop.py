@@ -162,6 +162,14 @@ def main(nsamples, lys_experiment):
             vs.update(set_initial_conditions_crops_kernel(state))
 
         @roger_routine
+        def set_boundary_conditions_setup(self, state):
+            pass
+
+        @roger_routine
+        def set_boundary_conditions(self, state):
+            pass
+
+        @roger_routine
         def set_forcing_setup(self, state):
             pass
 
