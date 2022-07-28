@@ -644,7 +644,7 @@ def calc_perc_pot_rz(state):
     )
     perc_pot = update(
         perc_pot,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.ks[2:-2, 2:-2] * vs.dt, perc_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.k_rz[2:-2, 2:-2, vs.tau] * vs.dt, perc_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     z = allocate(state.dimensions, ("x", "y"))
     z = update(
