@@ -67,10 +67,22 @@ mfluxes = vs.M_inf_mat_rz[2:-2, 2:-2] + vs.M_inf_pf_rz[2:-2, 2:-2] - vs.M_transp
 
 # oneD model
 check1 = npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.q_sub[2:-2, 2:-2], atol=1e-02)
-rows = npx.where(check1 == False)[0] + 2
+rows = npx.where(check1 == False)[0]
 dS = vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1]
 dF = vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.q_sub[2:-2, 2:-2]
 
+
+rows = npx.where(mask == True)[0]
+row = 362
+vs.S_fp_rz[row,2], vs.S_lp_rz[row,2]
+vs.S_ufc_rz[row,2], vs.S_ac_rz[row,2]
+vs.S_fp_ss[row,2], vs.S_lp_ss[row,2]
+vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2]
+
+vs.S_fp_rz[rows,2], vs.S_lp_rz[rows,2]
+vs.S_ufc_rz[rows,2], vs.S_ac_rz[rows,2]
+vs.S_fp_ss[rows,2], vs.S_lp_ss[rows,2]
+vs.S_ufc_ss[rows,2], vs.S_ac_ss[rows,2]
 
 # add missing initial values
 # write states of best model run

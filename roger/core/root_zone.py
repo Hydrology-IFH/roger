@@ -1,5 +1,6 @@
 from roger import roger_kernel, roger_routine, KernelOutput
 from roger.core.operators import numpy as npx, update, at
+from roger.variables import allocate
 from roger.core import transport
 
 
@@ -72,6 +73,22 @@ def calc_S(state):
     """
     vs = state.variables
 
+    # horizontal redistribution
+    mask = (vs.S_fp_rz < vs.S_ufc_rz) & (vs.S_fp_rz >= 0) & (vs.S_lp_rz < vs.S_ac_rz) & (vs.S_lp_rz > 0)
+    S_fp_rz = allocate(state.dimensions, ("x", "y"))
+    S_fp_rz = update(
+        S_fp_rz,
+        at[2:-2, 2:-2], vs.S_fp_rz[2:-2, 2:-2],
+    )
+    vs.S_fp_rz = update(
+        vs.S_fp_rz,
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], npx.where((vs.S_ufc_rz[2:-2, 2:-2] - vs.S_fp_rz[2:-2, 2:-2] > vs.S_lp_rz[2:-2, 2:-2]), vs.S_fp_rz[2:-2, 2:-2] + vs.S_lp_rz[2:-2, 2:-2], vs.S_ufc_rz[2:-2, 2:-2]), vs.S_fp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.S_lp_rz = update(
+        vs.S_lp_rz,
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], npx.where((vs.S_ufc_rz[2:-2, 2:-2] - S_fp_rz[2:-2, 2:-2] > vs.S_lp_rz[2:-2, 2:-2]), 0, vs.S_lp_rz[2:-2, 2:-2] - (vs.S_ufc_rz[2:-2, 2:-2] - S_fp_rz[2:-2, 2:-2])), vs.S_lp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     vs.S_rz = update(
         vs.S_rz,
         at[2:-2, 2:-2, vs.tau], (vs.S_pwp_rz[2:-2, 2:-2] + vs.S_fp_rz[2:-2, 2:-2] + vs.S_lp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
@@ -103,11 +120,11 @@ def calculate_root_zone(state):
     vs = state.variables
     settings = state.settings
 
+    vs.update(calc_S(state))
+    vs.update(calc_dS(state))
     vs.update(calc_theta(state))
     vs.update(calc_k(state))
     vs.update(calc_h(state))
-    vs.update(calc_S(state))
-    vs.update(calc_dS(state))
 
     if settings.enable_film_flow:
         vs.update(calc_theta_ff(state))
