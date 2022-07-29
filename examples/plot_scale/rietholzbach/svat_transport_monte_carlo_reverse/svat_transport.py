@@ -65,7 +65,7 @@ def main(nsamples, transport_model_structure):
         def _set_identifier(self, identifier):
             self._identifier = identifier
 
-        def _ffill_3d(self, state, arr):
+        def _bfill_3d(self, state, arr):
             idx_shape = tuple([slice(None)] + [npx.newaxis] * (3 - 2 - 1))
             idx = allocate(state.dimensions, ("x", "y", "t"), dtype=int)
             arr1 = allocate(state.dimensions, ("x", 1, 1), dtype=int)
@@ -78,7 +78,7 @@ def main(nsamples, transport_model_structure):
             )
             idx = update(
                 idx,
-                at[2:-2, 2:-2, :], _ffill(idx)[2:-2, 2:-2, :],
+                at[2:-2, 2:-2, :], _bfill(idx)[2:-2, 2:-2, :],
             )
             arr1 = update(
                 arr1,
@@ -343,7 +343,7 @@ def main(nsamples, transport_model_structure):
                 vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
 
             if settings.enable_deuterium or settings.enable_oxygen18:
-                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._ffill_3d(state, vs.C_IN)[2:-2, 2:-2, :])
+                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._bfill_3d(state, vs.C_IN)[2:-2, 2:-2, :])
 
         @roger_routine(
             dist_safe=False,
@@ -562,53 +562,18 @@ def main(nsamples, transport_model_structure):
         return conc
 
     @roger_kernel
-    def _ffill(loop_arr):
+    def _bfill(loop_arr):
         def loop_body(i, loop_arr):
             loop_arr = update(
                 loop_arr,
-                at[:, :, i], npx.where(loop_arr[:, :, i] == 0, loop_arr[:, :, i - 1], loop_arr[:, :, i]),
+                at[:, :, i-1], npx.where(loop_arr[:, :, i-1] == 0, loop_arr[:, :, i], loop_arr[:, :, i-1]),
             )
 
             return loop_arr
 
-        loop_arr = for_loop(1, loop_arr.shape[2], loop_body, loop_arr)
+        loop_arr = for_loop(loop_arr.shape[2], 1, loop_body, loop_arr)
 
         return loop_arr
-
-    @roger_kernel
-    def _ffill_3d(state, arr):
-        idx_shape = tuple([slice(None)] + [npx.newaxis] * (3 - 2 - 1))
-        idx = allocate(state.dimensions, ("x", "y", "t"), dtype=int)
-        arr1 = allocate(state.dimensions, ("x", 1, 1), dtype=int)
-        arr2 = allocate(state.dimensions, (1, "y", 1), dtype=int)
-        arr3 = allocate(state.dimensions, ("x", "y", "t"), dtype=int)
-        arr_fill = allocate(state.dimensions, ("x", "y", "t"))
-        idx = update(
-            idx,
-            at[2:-2, 2:-2, :], npx.where(npx.isfinite(arr), npx.arange(npx.shape(arr)[2])[idx_shape], 0)[2:-2, 2:-2, :],
-        )
-        idx = update(
-            idx,
-            at[2:-2, 2:-2, :], _ffill(idx)[2:-2, 2:-2, :],
-        )
-        arr1 = update(
-            arr1,
-            at[:, 0, 0], npx.arange(npx.shape(arr)[0]),
-        )
-        arr2 = update(
-            arr2,
-            at[0, :, 0], npx.arange(npx.shape(arr)[1]),
-        )
-        arr3 = update(
-            arr3,
-            at[:, :, :], idx,
-        )
-        arr_fill = update(
-            arr_fill,
-            at[:, :, :], arr[arr1, arr2, arr3],
-        )
-
-        return arr_fill
 
     tms = transport_model_structure.replace("_", " ")
     model = SVATTRANSPORTSetup()
