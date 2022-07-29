@@ -73,7 +73,8 @@ dF = vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - v
 
 
 rows = npx.where(mask == True)[0]
-row = 362
+
+row = 133
 vs.S_fp_rz[row,2], vs.S_lp_rz[row,2]
 vs.S_ufc_rz[row,2], vs.S_ac_rz[row,2]
 vs.S_fp_ss[row,2], vs.S_lp_ss[row,2]
@@ -83,6 +84,15 @@ vs.S_fp_rz[rows,2], vs.S_lp_rz[rows,2]
 vs.S_ufc_rz[rows,2], vs.S_ac_rz[rows,2]
 vs.S_fp_ss[rows,2], vs.S_lp_ss[rows,2]
 vs.S_ufc_ss[rows,2], vs.S_ac_ss[rows,2]
+
+check2 = (vs.S_fp_rz[2:-2, 2:-2] > -1e-9) & (vs.S_lp_rz[2:-2, 2:-2] > -1e-9) & (vs.S_fp_ss[2:-2, 2:-2] > -1e-9) & (vs.S_lp_ss[2:-2, 2:-2] > -1e-9)
+rows = npx.where(check2 == False)[0]
+
+check3 = (vs.S_fp_rz[2:-2, 2:-2] <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] <= vs.S_ac_ss[2:-2, 2:-2])
+rows = npx.where(check3 == False)[0] + 2
+
+row = 133
+print(vs.S_fp_rz[row,2], vs.S_lp_rz[row,2], vs.S_ufc_rz[row,2], vs.S_ac_rz[row,2])
 
 # add missing initial values
 # write states of best model run

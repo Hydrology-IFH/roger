@@ -51,6 +51,10 @@ def calc_cpr_rz(state):
         vs.cpr_rz,
         at[2:-2, 2:-2], npx.where((vs.cpr_rz[2:-2, 2:-2] > (vs.S_fp_ss[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2])), vs.S_fp_ss[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2], vs.cpr_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
+    vs.cpr_rz = update(
+        vs.cpr_rz,
+        at[2:-2, 2:-2], npx.where((vs.cpr_rz[2:-2, 2:-2] > vs.S_ufc_rz[2:-2, 2:-2] - vs.S_fp_rz[2:-2, 2:-2]) & (vs.S_ufc_rz[2:-2, 2:-2] - vs.S_fp_rz[2:-2, 2:-2] > 0), vs.S_ufc_rz[2:-2, 2:-2] - vs.S_fp_rz[2:-2, 2:-2], vs.cpr_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
 
     # update root zone storage and subsoil storage
     mask1 = (vs.cpr_rz > 0) & (vs.S_lp_ss <= 0) & ((vs.z_wf[:, :, vs.tau] < vs.z_root[:, :, vs.tau]) | (vs.z_sat[:, :, vs.tau] < vs.z_soil[:, :] - vs.z_root[:, :, vs.tau]))
@@ -68,10 +72,14 @@ def calc_cpr_rz(state):
         vs.S_fp_rz,
         at[2:-2, 2:-2], mask2[2:-2, 2:-2] * vs.cpr_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
+    row = 133
+    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2], 'cpr')
     vs.S_lp_ss = update_add(
         vs.S_lp_ss,
         at[2:-2, 2:-2], mask2[2:-2, 2:-2] * -vs.cpr_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
+    row = 133
+    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2])
     vs.S_fp_rz = update_add(
         vs.S_fp_rz,
         at[2:-2, 2:-2], mask3[2:-2, 2:-2] * vs.cpr_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
@@ -80,10 +88,14 @@ def calc_cpr_rz(state):
         vs.S_fp_ss,
         at[2:-2, 2:-2], mask3[2:-2, 2:-2] * -(vs.cpr_rz[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
+    row = 133
+    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2], 'cpr')
     vs.S_lp_ss = update(
         vs.S_lp_ss,
         at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2], 0, vs.S_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
+    row = 133
+    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2])
 
     # fine pore excess fills large pores
     mask4 = (vs.S_fp_rz > vs.S_ufc_rz)

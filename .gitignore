@@ -1,3 +1,6 @@
+# debugging
+debug_snippets.py
+
 # binary files
 *.nc
 *.h5

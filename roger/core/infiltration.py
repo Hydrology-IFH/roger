@@ -549,15 +549,88 @@ def calc_inf_mp(state):
         at[2:-2, 2:-2], loop_arr[2:-2, 2:-2, 11] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # limit macropore infiltration to pores which are not filled
-    vs.inf_mp = update(
-        vs.inf_mp,
-        at[2:-2, 2:-2], npx.where((vs.z_wf[2:-2, 2:-2, vs.tau] > vs.z_root[2:-2, 2:-2, vs.tau]) & (vs.inf_mp[2:-2, 2:-2] > vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2]) & (vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2] > 0), vs.S_ac_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2], vs.inf_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-
     vs.inf_mp = update(
         vs.inf_mp,
         at[2:-2, 2:-2], npx.where(npx.isnan(vs.inf_mp[2:-2, 2:-2]), 0, vs.inf_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # macropore infiltration into root zone
+    rz_share_mp = allocate(state.dimensions, ("x", "y"))
+    rz_share_mp = update(
+        rz_share_mp,
+        at[2:-2, 2:-2], npx.where(vs.lmpv_non_sat[2:-2, 2:-2] > 0, 1. - (vs.lmpv[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau]) / vs.lmpv_non_sat[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+    rz_share_mp = update(
+        rz_share_mp,
+        at[2:-2, 2:-2], npx.where(vs.lmpv[2:-2, 2:-2] <= vs.z_root[2:-2, 2:-2, vs.tau], 1, rz_share_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    rz_share_mp = update(
+        rz_share_mp,
+        at[2:-2, 2:-2], npx.where(vs.lmpv_non_sat[2:-2, 2:-2] <= vs.lmpv[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau], 0, rz_share_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.inf_mp_rz = update(
+        vs.inf_mp_rz,
+        at[2:-2, 2:-2], vs.inf_mp[2:-2, 2:-2] * rz_share_mp[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.inf_mp_rz = update(
+        vs.inf_mp_rz,
+        at[2:-2, 2:-2], npx.where((vs.inf_mp_rz[2:-2, 2:-2] > (vs.S_ac_rz[2:-2, 2:-2] + vs.S_ufc_rz[2:-2, 2:-2]) - (vs.S_lp_rz[2:-2, 2:-2] + vs.S_fp_rz[2:-2, 2:-2])) & ((vs.S_ac_rz[2:-2, 2:-2] + vs.S_ufc_rz[2:-2, 2:-2]) - (vs.S_lp_rz[2:-2, 2:-2] + vs.S_fp_rz[2:-2, 2:-2]) > 0), (vs.S_ac_rz[2:-2, 2:-2] + vs.S_ufc_rz[2:-2, 2:-2]) - (vs.S_lp_rz[2:-2, 2:-2] + vs.S_fp_rz[2:-2, 2:-2]), vs.inf_mp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # macropore infiltration into subsoil
+    rz_share_mp = allocate(state.dimensions, ("x", "y"))
+    rz_share_mp = update(
+        rz_share_mp,
+        at[2:-2, 2:-2], npx.where(vs.lmpv_non_sat[2:-2, 2:-2] > 0, 1. - (vs.lmpv[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau]) / vs.lmpv_non_sat[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+    rz_share_mp = update(
+        rz_share_mp,
+        at[2:-2, 2:-2], npx.where(vs.lmpv[2:-2, 2:-2] <= vs.z_root[2:-2, 2:-2, vs.tau], 1, rz_share_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    rz_share_mp = update(
+        rz_share_mp,
+        at[2:-2, 2:-2], npx.where(vs.lmpv_non_sat[2:-2, 2:-2] <= vs.lmpv[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau], 0, rz_share_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.inf_mp_ss = update(
+        vs.inf_mp_ss,
+        at[2:-2, 2:-2], vs.inf_mp[2:-2, 2:-2] * (1 - rz_share_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.inf_mp_ss = update(
+        vs.inf_mp_ss,
+        at[2:-2, 2:-2], npx.where((vs.inf_mp_ss[2:-2, 2:-2] > (vs.S_ac_ss[2:-2, 2:-2] + vs.S_ufc_ss[2:-2, 2:-2]) - (vs.S_lp_ss[2:-2, 2:-2] + vs.S_fp_ss[2:-2, 2:-2])) & ((vs.S_ac_ss[2:-2, 2:-2] + vs.S_ufc_ss[2:-2, 2:-2]) - (vs.S_lp_ss[2:-2, 2:-2] + vs.S_fp_ss[2:-2, 2:-2]) > 0), (vs.S_ac_ss[2:-2, 2:-2] + vs.S_ufc_ss[2:-2, 2:-2]) - (vs.S_lp_ss[2:-2, 2:-2] + vs.S_fp_ss[2:-2, 2:-2]), vs.inf_mp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.inf_ss = update(
+        vs.inf_ss,
+        at[2:-2, 2:-2], vs.inf_mp_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    row = 133
+    print(vs.inf_mp[row,2], vs.inf_ss[row,2], vs.z_wf[row,2,1], vs.lmpv[row,2], 'inf')
+    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2], 'inf')
+    # update subsoil storage after macropore infiltration
+    vs.S_fp_ss = update_add(
+        vs.S_fp_ss,
+        at[2:-2, 2:-2], vs.inf_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # subsoil fine pore excess fills subsoil large pores
+    row = 133
+    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2])
+    mask = (vs.S_fp_ss > vs.S_ufc_ss)
+    vs.S_lp_ss = update_add(
+        vs.S_lp_ss,
+        at[2:-2, 2:-2], (vs.S_fp_ss[2:-2, 2:-2] - vs.S_ufc_ss[2:-2, 2:-2]) * mask[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.S_fp_ss = update(
+        vs.S_fp_ss,
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    row = 133
+    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2])
+
+    vs.inf_mp = update(
+        vs.inf_mp,
+        at[2:-2, 2:-2], vs.inf_mp_rz[2:-2, 2:-2] + vs.inf_mp_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.inf_mp_event_csum = update_add(
@@ -598,7 +671,7 @@ def calc_inf_mp(state):
             at[2:-2, 2:-2, vs.tau], npx.where(vs.z0[2:-2, 2:-2, vs.tau] < 0, 0, vs.z0[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
         )
 
-    return KernelOutput(inf_mp=vs.inf_mp, inf_mp_event_csum=vs.inf_mp_event_csum, y_mp=vs.y_mp, z0=vs.z0)
+    return KernelOutput(inf_mp=vs.inf_mp, inf_mp_event_csum=vs.inf_mp_event_csum, y_mp=vs.y_mp, z0=vs.z0, inf_mp_ss=vs.inf_mp_ss, inf_ss=vs.inf_ss, S_fp_ss=vs.S_fp_ss, S_lp_ss=vs.S_lp_ss, inf_mp_rz=vs.inf_mp_rz)
 
 
 @roger_kernel
@@ -804,26 +877,6 @@ def calc_inf_rz(state):
         at[2:-2, 2:-2], vs.inf_mat[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # macropore infiltration into root zone
-    rz_share_mp = allocate(state.dimensions, ("x", "y"))
-    rz_share_mp = update(
-        rz_share_mp,
-        at[2:-2, 2:-2], npx.where(vs.lmpv_non_sat[2:-2, 2:-2] > 0, 1. - (vs.lmpv[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau]) / vs.lmpv_non_sat[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
-    )
-    rz_share_mp = update(
-        rz_share_mp,
-        at[2:-2, 2:-2], npx.where(vs.lmpv[2:-2, 2:-2] <= vs.z_root[2:-2, 2:-2, vs.tau], 1, rz_share_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    rz_share_mp = update(
-        rz_share_mp,
-        at[2:-2, 2:-2], npx.where(vs.lmpv_non_sat[2:-2, 2:-2] <= vs.lmpv[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau], 0, rz_share_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    vs.inf_mp_rz = update(
-        vs.inf_mp_rz,
-        at[2:-2, 2:-2], vs.inf_mp[2:-2, 2:-2] * rz_share_mp[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
     # shrinkage crack infiltration into root zone
     vs.inf_sc_rz = update(
         vs.inf_sc_rz,
@@ -856,56 +909,6 @@ def calc_inf_rz(state):
 
 
 @roger_kernel
-def calc_inf_ss(state):
-    """
-    Calculates infiltration into subsoil
-    """
-    vs = state.variables
-
-    # macropore infiltration into subsoil
-    rz_share_mp = allocate(state.dimensions, ("x", "y"))
-    rz_share_mp = update(
-        rz_share_mp,
-        at[2:-2, 2:-2], npx.where(vs.lmpv_non_sat[2:-2, 2:-2] > 0, 1. - (vs.lmpv[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau]) / vs.lmpv_non_sat[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
-    )
-    rz_share_mp = update(
-        rz_share_mp,
-        at[2:-2, 2:-2], npx.where(vs.lmpv[2:-2, 2:-2] <= vs.z_root[2:-2, 2:-2, vs.tau], 1, rz_share_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    rz_share_mp = update(
-        rz_share_mp,
-        at[2:-2, 2:-2], npx.where(vs.lmpv_non_sat[2:-2, 2:-2] <= vs.lmpv[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau], 0, rz_share_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.inf_mp_ss = update(
-        vs.inf_mp_ss,
-        at[2:-2, 2:-2], vs.inf_mp[2:-2, 2:-2] * (1 - rz_share_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.inf_ss = update(
-        vs.inf_ss,
-        at[2:-2, 2:-2], vs.inf_mp_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    # update subsoil storage after infiltration
-    vs.S_fp_ss = update_add(
-        vs.S_fp_ss,
-        at[2:-2, 2:-2], vs.inf_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    # subsoil fine pore excess fills subsoil large pores
-    mask = (vs.S_fp_ss > vs.S_ufc_ss)
-    vs.S_lp_ss = update_add(
-        vs.S_lp_ss,
-        at[2:-2, 2:-2], (vs.S_fp_ss[2:-2, 2:-2] - vs.S_ufc_ss[2:-2, 2:-2]) * mask[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.S_fp_ss = update(
-        vs.S_fp_ss,
-        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    return KernelOutput(inf_mp_ss=vs.inf_mp_ss, inf_ss=vs.inf_ss, S_fp_ss=vs.S_fp_ss, S_lp_ss=vs.S_lp_ss)
-
-
-@roger_kernel
 def calc_surface_runoff(state):
     """
     Calculates surface runoff
@@ -924,12 +927,17 @@ def calc_surface_runoff(state):
 
     vs.q_sof = update(
         vs.q_sof,
-        at[2:-2, 2:-2], npx.where((vs.z0[2:-2, 2:-2, vs.tau] > 0) & (vs.S_rz[2:-2, 2:-2, vs.tau] >= vs.S_sat_rz[2:-2, 2:-2]), vs.z0[2:-2, 2:-2, vs.tau], 0) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where((vs.S_lp_rz[2:-2, 2:-2] + vs.S_fp_rz[2:-2, 2:-2]) > (vs.S_ac_rz[2:-2, 2:-2] + vs.S_ufc_rz[2:-2, 2:-2]), (vs.S_lp_rz[2:-2, 2:-2] + vs.S_fp_rz[2:-2, 2:-2]) - (vs.S_ac_rz[2:-2, 2:-2] + vs.S_ufc_rz[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    vs.z0 = update_add(
-        vs.z0,
-        at[2:-2, 2:-2, vs.tau], -vs.q_sof[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    mask = (vs.q_sof > 0)
+    vs.S_fp_rz = update(
+        vs.S_fp_rz,
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.S_ufc_rz[2:-2, 2:-2], vs.S_fp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.S_lp_rz = update(
+        vs.S_lp_rz,
+        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.S_ac_rz[2:-2, 2:-2], vs.S_lp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.q_sur = update(
@@ -1495,7 +1503,6 @@ def calculate_infiltration(state):
     vs.update(calc_inf_mp(state))
     vs.update(calc_inf_sc(state))
     vs.update(calc_inf_rz(state))
-    vs.update(calc_inf_ss(state))
     vs.update(calc_inf(state))
     vs.update(calc_surface_runoff(state))
 
