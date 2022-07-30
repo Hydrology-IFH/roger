@@ -604,9 +604,6 @@ def calc_inf_mp(state):
         at[2:-2, 2:-2], vs.inf_mp_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    row = 133
-    print(vs.inf_mp[row,2], vs.inf_ss[row,2], vs.z_wf[row,2,1], vs.lmpv[row,2], 'inf')
-    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2], 'inf')
     # update subsoil storage after macropore infiltration
     vs.S_fp_ss = update_add(
         vs.S_fp_ss,
@@ -614,8 +611,6 @@ def calc_inf_mp(state):
     )
 
     # subsoil fine pore excess fills subsoil large pores
-    row = 133
-    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2])
     mask = (vs.S_fp_ss > vs.S_ufc_ss)
     vs.S_lp_ss = update_add(
         vs.S_lp_ss,
@@ -625,8 +620,6 @@ def calc_inf_mp(state):
         vs.S_fp_ss,
         at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
-    row = 133
-    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2])
 
     vs.inf_mp = update(
         vs.inf_mp,

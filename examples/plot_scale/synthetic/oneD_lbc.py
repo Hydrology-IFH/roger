@@ -487,19 +487,19 @@ def main():
         # set to 0 for numerical errors
         vs.S_fp_rz = update(
             vs.S_fp_rz,
-            at[2:-2, 2:-2], npx.where((vs.S_fp_rz > -1e-6) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz)[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where((vs.S_fp_rz > -1e-9) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz)[2:-2, 2:-2],
         )
         vs.S_lp_rz = update(
             vs.S_lp_rz,
-            at[2:-2, 2:-2], npx.where((vs.S_lp_rz > -1e-6) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz)[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where((vs.S_lp_rz > -1e-9) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz)[2:-2, 2:-2],
         )
         vs.S_fp_ss = update(
             vs.S_fp_ss,
-            at[2:-2, 2:-2], npx.where((vs.S_fp_ss > -1e-6) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss)[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where((vs.S_fp_ss > -1e-9) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss)[2:-2, 2:-2],
         )
         vs.S_lp_ss = update(
             vs.S_lp_ss,
-            at[2:-2, 2:-2], npx.where((vs.S_lp_ss > -1e-6) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss)[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where((vs.S_lp_ss > -1e-9) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss)[2:-2, 2:-2],
         )
 
         return KernelOutput(

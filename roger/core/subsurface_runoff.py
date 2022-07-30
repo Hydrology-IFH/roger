@@ -384,8 +384,6 @@ def calc_q_sub_ss(state):
         vs.S_fp_ss,
         at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], -(vs.q_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
     )
-    row = 133
-    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2], 'perc')
     vs.S_lp_ss = update(
         vs.S_lp_ss,
         at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], 0, vs.S_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
@@ -394,8 +392,6 @@ def calc_q_sub_ss(state):
         vs.S_lp_ss,
         at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], -vs.q_ss[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
-    row = 133
-    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2])
 
     # fraction of lateral and vertical flow
     fv = allocate(state.dimensions, ("x", "y"))
@@ -440,14 +436,10 @@ def calc_q_sub_ss(state):
 
     # update subsoil storage after lateral subsurface runoff
     mask = (vs.z_sat[:, :, vs.tau] > 0)
-    row = 133
-    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2], 'ssq')
     vs.S_lp_ss = update_add(
         vs.S_lp_ss,
         at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], -vs.q_sub_ss[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
-    row = 133
-    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2])
     # update subsoil storage after vertical subsoil drainage
     mask1 = (vs.S_lp_ss < vs.q_ss) & (vs.z_sat[:, :, vs.tau] > 0)
     mask2 = (vs.S_lp_ss >= vs.q_ss) & (vs.z_sat[:, :, vs.tau] > 0)
@@ -455,8 +447,6 @@ def calc_q_sub_ss(state):
         vs.S_fp_ss,
         at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], -(vs.q_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
     )
-    row = 133
-    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2], 'perc_sat')
     vs.S_lp_ss = update(
         vs.S_lp_ss,
         at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], 0, vs.S_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
@@ -465,8 +455,6 @@ def calc_q_sub_ss(state):
         vs.S_lp_ss,
         at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], -vs.q_ss[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
-    row = 133
-    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2])
 
     # update subsoil saturation water level
     vs.z_sat = update_add(
@@ -512,9 +500,9 @@ def calc_q_sub(state):
 
 
 @roger_kernel
-def calc_dz_sat(state):
+def calc_z_sat_rise(state):
     """
-    Calculates change of saturation water level in subsoil
+    Calculates rise of saturation water level
     """
     vs = state.variables
 
@@ -602,15 +590,20 @@ def calc_perc_pot_rz(state):
         at[2:-2, 2:-2], npx.where(mask4[2:-2, 2:-2], vs.S_fp_rz[2:-2, 2:-2] + vs.S_lp_rz[2:-2, 2:-2], vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    mask5 = (vs.q_pot_rz > 0) & ((vs.S_ac_ss + vs.S_ufc_ss) - (vs.S_lp_ss + vs.S_fp_ss) > 0) & (vs.q_pot_rz > (vs.S_ac_ss + vs.S_ufc_ss) - (vs.S_lp_ss + vs.S_fp_ss)) & (vs.z_root[:, :, vs.taum1] < vs.z_soil - vs.z_sat[:, :, vs.tau])
+    mask5 = (vs.q_pot_rz > 0) & ((vs.S_ac_ss + vs.S_ufc_ss) - (vs.S_lp_ss + vs.S_fp_ss) > 1e-6) & (vs.q_pot_rz > (vs.S_ac_ss + vs.S_ufc_ss) - (vs.S_lp_ss + vs.S_fp_ss)) & (vs.z_root[:, :, vs.taum1] < vs.z_soil - vs.z_sat[:, :, vs.tau])
     vs.q_pot_rz = update(
         vs.q_pot_rz,
         at[2:-2, 2:-2], npx.where(mask5[2:-2, 2:-2], (vs.S_ac_ss[2:-2, 2:-2] + vs.S_ufc_ss[2:-2, 2:-2]) - (vs.S_lp_ss[2:-2, 2:-2] + vs.S_fp_ss[2:-2, 2:-2]), vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
-    mask6 = (vs.S_lp_ss >= vs.S_ac_ss) & (vs.S_fp_ss >= vs.S_ufc_ss)
+    mask6 = (vs.S_lp_ss >= vs.S_ac_ss - 1e-6) & (vs.S_fp_ss >= vs.S_ufc_ss - 1e-6)
     vs.q_pot_rz = update(
         vs.q_pot_rz,
         at[2:-2, 2:-2], npx.where(mask6[2:-2, 2:-2], 0, vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    mask7 = (vs.z_root[:, :, vs.taum1] >= vs.z_soil - vs.z_sat[:, :, vs.tau])
+    vs.q_pot_rz = update(
+        vs.q_pot_rz,
+        at[2:-2, 2:-2], npx.where(mask7[2:-2, 2:-2], 0, vs.q_pot_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(q_pot_rz=vs.q_pot_rz)
@@ -652,8 +645,6 @@ def calc_perc_rz(state):
     )
 
     # subsoil fine pore excess fills subsoil large pores
-    row = 133
-    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2], 'perc_rz')
     mask = (vs.S_fp_ss > vs.S_ufc_ss)
     vs.S_lp_ss = update_add(
         vs.S_lp_ss,
@@ -663,8 +654,6 @@ def calc_perc_rz(state):
         vs.S_fp_ss,
         at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
-    row = 133
-    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2])
 
     return KernelOutput(q_rz=vs.q_rz, S_fp_rz=vs.S_fp_rz, S_lp_rz=vs.S_lp_rz, S_fp_ss=vs.S_fp_ss, S_lp_ss=vs.S_lp_ss)
 
@@ -766,8 +755,6 @@ def calc_perc_ss(state):
         vs.S_fp_ss,
         at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], -(vs.q_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
     )
-    row = 133
-    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2], 'perc_ss')
     vs.S_lp_ss = update(
         vs.S_lp_ss,
         at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], 0, vs.S_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
@@ -776,8 +763,6 @@ def calc_perc_ss(state):
         vs.S_lp_ss,
         at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], -vs.q_ss[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
-    row = 133
-    print(vs.S_fp_ss[row,2], vs.S_lp_ss[row,2], vs.S_ufc_ss[row,2], vs.S_ac_ss[row,2])
 
     return KernelOutput(q_ss=vs.q_ss, S_fp_ss=vs.S_fp_ss, S_lp_ss=vs.S_lp_ss, z_sat=vs.z_sat, S_zsat=vs.S_zsat)
 
@@ -794,11 +779,11 @@ def calculate_subsurface_runoff(state):
     settings = state.settings
 
     if settings.enable_lateral_flow:
-        vs.update(calc_perc_pot_rz(state))
-        vs.update(calc_perc_rz(state))
-        vs.update(calc_dz_sat(state))
+        vs.update(calc_z_sat_rise(state))
         vs.update(calc_S_zsat(state))
         vs.update(calc_z_sat_layer(state))
+        vs.update(calc_perc_pot_rz(state))
+        vs.update(calc_perc_rz(state))
         vs.update(calc_q_sub_pot(state))
         vs.update(calc_q_sub_rz(state))
         vs.update(calc_q_sub_pot_ss(state))
@@ -807,10 +792,10 @@ def calculate_subsurface_runoff(state):
         vs.update(calc_q_sub(state))
 
     elif not settings.enable_lateral_flow:
+        vs.update(calc_z_sat_rise(state))
+        vs.update(calc_S_zsat(state))
         vs.update(calc_perc_pot_rz(state))
         vs.update(calc_perc_rz(state))
-        vs.update(calc_dz_sat(state))
-        vs.update(calc_S_zsat(state))
         vs.update(calc_perc_pot_ss(state))
         vs.update(calc_perc_ss(state))
 
