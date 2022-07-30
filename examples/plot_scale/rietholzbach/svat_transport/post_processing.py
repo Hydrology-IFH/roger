@@ -285,7 +285,7 @@ df_rroot = pd.DataFrame(index=date_obs, columns=['rRoot'])
 df_rroot.loc[:, 'rRoot'] = ds_obs['PET'].isel(x=0, y=0).values * df_scf['scf'].values
 df_rroot.iloc[0, 0] = 0.03
 df_prec = pd.DataFrame(index=date_sim_hm, columns=['Prec'])
-df_prec.loc[:, 'Prec'] = ds_sim_hm['rain_top'].isel(x=0, y=0).values + ds_sim_hm['snow_melt'].isel(x=0, y=0).values
+df_prec.loc[:, 'Prec'] = ds_sim_hm['rain_top'].isel(x=0, y=0).values + ds_sim_hm['q_snow'].isel(x=0, y=0).values
 df_ttop = pd.DataFrame(index=date_obs, columns=['tTop'])
 df_ttop.loc[:, 'tTop'] = ds_obs['TA'].isel(x=0, y=0).values
 df_hcrita = pd.DataFrame(index=date_obs, columns=['hCritA'])

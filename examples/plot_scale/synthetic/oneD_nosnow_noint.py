@@ -550,7 +550,7 @@ def main(meteo_station):
         )
 
     model = ONEDSetup()
-    identifier = f'ONED_nosnow_noint_{meteo_station}1'
+    identifier = f'ONED_nosnow_noint_{meteo_station}'
     model._set_identifier(identifier)
     path_meteo_station = model._base_path / "input" / meteo_station
     model._set_input_dir(path_meteo_station)

@@ -481,7 +481,7 @@ def main(transport_model_structure):
             diagnostics["constant"].output_frequency = 0
             diagnostics["constant"].sampling_frequency = 1
 
-            diagnostics["collect"].output_variables = ["TT_q_ss", "SA_s", "SA_rz", "SA_ss"]
+            diagnostics["collect"].output_variables = ["TT_q_ss", "SA_s", "SA_rz", "SA_ss", "C_in"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
 

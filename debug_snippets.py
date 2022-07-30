@@ -74,7 +74,7 @@ dF = vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - v
 
 rows = npx.where(mask == True)[0]
 
-row = 133
+row = 2108
 vs.S_fp_rz[row,2], vs.S_lp_rz[row,2]
 vs.S_ufc_rz[row,2], vs.S_ac_rz[row,2]
 vs.S_fp_ss[row,2], vs.S_lp_ss[row,2]
@@ -91,7 +91,7 @@ rows = npx.where(check2 == False)[0]
 check3 = (vs.S_fp_rz[2:-2, 2:-2] <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] <= vs.S_ac_ss[2:-2, 2:-2])
 rows = npx.where(check3 == False)[0] + 2
 
-row = 133
+row = 2108
 print(vs.S_fp_rz[row,2], vs.S_lp_rz[row,2], vs.S_ufc_rz[row,2], vs.S_ac_rz[row,2])
 
 # add missing initial values
