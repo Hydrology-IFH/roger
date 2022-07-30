@@ -62,7 +62,7 @@ fig.savefig(file, dpi=250)
 plt.close(fig=fig)
 
 # load best monte carlo run
-states_hm_file = base_path / "svat_monte_carlo" / "states_hm.nc"
+states_hm_file = base_path / "svat" / "states_hm.nc"
 ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
 # assign date
 days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
@@ -79,6 +79,7 @@ for var_obs, var_sim in zip(vars_obs, vars_sim):
     sim_vals = ds_sim_hm[var_sim].isel(x=0, y=0).values
     # join observations on simulations
     df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
+    df_eval = df_eval.iloc[3:, :]
     # plot observed and simulated time series
     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
     file_str = '%s.pdf' % (var_sim)
@@ -93,7 +94,7 @@ for var_obs, var_sim in zip(vars_obs, vars_sim):
     file_str = '%s_cum_year_facet.pdf' % (var_sim)
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=250)
-    
+
 vars_obs = ['PREC']
 vars_sim = ['prec']
 for var_obs, var_sim in zip(vars_obs, vars_sim):
@@ -114,7 +115,7 @@ for var_obs, var_sim in zip(vars_obs, vars_sim):
     file_str = '%s_cum_year_facet.pdf' % (var_sim)
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=250)
-    
+
 vars_obs = ['TA']
 vars_sim = ['ta']
 for var_obs, var_sim in zip(vars_obs, vars_sim):
@@ -126,4 +127,3 @@ for var_obs, var_sim in zip(vars_obs, vars_sim):
     file_str = '%s.pdf' % (var_obs)
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=250)
-

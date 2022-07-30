@@ -40,12 +40,6 @@ def main():
                 var_obj = infile.variables['dt']
                 return onp.sum(onp.array(var_obj))
 
-        def _get_nevent_ff(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['nevent_ff']
-                return onp.int32(onp.array(var_obj)[0])
-
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
@@ -55,7 +49,7 @@ def main():
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
             settings.nittevent_ff = 5 * 24 * 6
             settings.nittevent_ff_p1 = settings.nittevent_ff + 1
-            settings.nevent_ff = self._get_nevent_ff(self._input_dir, 'forcing.nc')
+            settings.nevent_ff = 20
 
             settings.dx = 1
             settings.dy = 1
@@ -68,6 +62,7 @@ def main():
             settings.enable_macropore_lower_boundary_condition = False
 
             settings.ff_tc = 0.15
+            settings.end_event = 21600
 
         @roger_routine(
             dist_safe=False,
@@ -169,35 +164,63 @@ def main():
             if condt:
                 vs.itt_event = 0
                 vs.itt_forc = vs.itt_forc + 6 * 24
-            prec_event = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
-            ta_event = self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
-            pet_event = self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
-            cond0 = (prec_event <= 0).all() & (vs.swe[2:-2, 2:-2, vs.tau] <= 0).all() & (vs.swe_top[2:-2, 2:-2, vs.tau] <= 0).all() & (ta_event > settings.ta_fm).all()
-            cond00 = ((prec_event > 0) & (ta_event <= settings.ta_fm)).any() | ((prec_event <= 0) & (ta_event <= settings.ta_fm)).all()
-            cond1 = (prec_event > settings.hpi).any() & (prec_event > 0).any() & (ta_event > settings.ta_fm).any()
-            cond2 = (prec_event <= settings.hpi).all() & (prec_event > 0).any() & (ta_event > settings.ta_fm).any()
-            cond3 = (prec_event > settings.hpi).any() & (prec_event > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_event > settings.ta_fm).any())
-            cond4 = (prec_event <= settings.hpi).all() & (prec_event > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_event > settings.ta_fm).any())
-            cond5 = (prec_event <= 0).all() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_event > settings.ta_fm).any())
+            prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
+            ta_day = self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
+            pet_day = self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
+            event = npx.zeros((prec_day.shape[-1]), dtype=int)
+            break_counter = prec_day.shape[-1]
+            for i in range(0, prec_day.shape[-1]):
+                if (prec_day[:, :, vs.itt_forc+i] > 0) & (ta_day[:, :, vs.itt_forc+i] > 0):
+                    event = update(event, at[i], 1)
+                    break_counter = 0
+                elif ((prec_day[:, :, vs.itt_forc+i] <= 0) & (ta_day[:, :, vs.itt_forc+i] <= 0)).all() & (break_counter < settings.end_event / (60 * 10)):
+                    event = update(event, at[i], 1)
+                    break_counter = break_counter + 1
+                elif ((prec_day[:, :, vs.itt_forc+i] <= 0) & (ta_day[:, :, vs.itt_forc+i] <= 0)).all() & (break_counter < settings.end_event / (60 * 10)):
+                    event = update(event, at[i], 0)
+                    break_counter = break_counter + 1
+
+            if ((prec_day[:, :, vs.itt_forc+6*18:vs.itt_forc+6*24] > 0) & (ta_day[:, :, vs.itt_forc+6*18:vs.itt_forc+6*24] > 0)).any() and vs.itt_forc+6*24*2 <= settings.nitt_forc:
+                prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24*2]
+                ta_day = self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24*2]
+                pet_day = self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24*2]
+                break_counter = prec_day.shape[-1]
+                for i in range(0, prec_day.shape[-1]):
+                    if (prec_day[:, :, vs.itt_forc+i] > 0) & (ta_day[:, :, vs.itt_forc+i] > 0):
+                        event = update(event, at[i], 1)
+                        break_counter = 0
+                    elif ((prec_day[:, :, vs.itt_forc+i] <= 0) & (ta_day[:, :, vs.itt_forc+i] <= 0)).all() & (break_counter < settings.end_event / (60 * 10)):
+                        event = update(event, at[i], 1)
+                        break_counter = break_counter + 1
+                    elif ((prec_day[:, :, vs.itt_forc+i] <= 0) & (ta_day[:, :, vs.itt_forc+i] <= 0)).all() & (break_counter < settings.end_event / (60 * 10)):
+                        event = update(event, at[i], 0)
+                        break_counter = break_counter + 1
+            cond0 = (prec_day <= 0).all() & (vs.swe[2:-2, 2:-2, vs.tau] <= 0).all() & (vs.swe_top[2:-2, 2:-2, vs.tau] <= 0).all() & (ta_day > settings.ta_fm).all()
+            cond00 = ((prec_day > 0) & (ta_day <= settings.ta_fm)).any() | ((prec_day <= 0) & (ta_day <= settings.ta_fm)).all()
+            cond1 = (prec_day > settings.hpi).any() & (prec_day > 0).any() & (ta_day > settings.ta_fm).any()
+            cond2 = (prec_day <= settings.hpi).all() & (prec_day > 0).any() & (ta_day > settings.ta_fm).any()
+            cond3 = (prec_day > settings.hpi).any() & (prec_day > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
+            cond4 = (prec_day <= settings.hpi).all() & (prec_day > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
+            cond5 = (prec_day <= 0).all() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
             # no event or snowfall - daily time steps
             if cond0 or cond00:
-                prec = npx.sum(prec_event, axis=-1)
-                ta = npx.mean(ta_event, axis=-1)
+                prec = npx.sum(prec_day, axis=-1)
+                ta = npx.mean(ta_day, axis=-1)
                 if (vs.time % (24 * 60 * 60) == 0):
                     vs.dt_secs = 24 * 60 * 60
                 else:
                     vs.dt_secs = 60 * 60
             # rainfall/snow melt event - hourly time steps
             elif (cond2 or cond4 or cond5) and not cond1 and not cond3:
-                prec_hour = prec_event[:, :, vs.itt_event:vs.itt_event+6]
-                ta_hour = ta_event[:, :, vs.itt_event:vs.itt_event+6]
+                prec_hour = prec_day[:, :, vs.itt_event:vs.itt_event+6]
+                ta_hour = ta_day[:, :, vs.itt_event:vs.itt_event+6]
                 prec = npx.sum(prec_hour, axis=-1)
                 ta = npx.mean(ta_hour, axis=-1)
                 vs.dt_secs = 60 * 60
             # heavy rainfall event - 10 minutes time steps
             elif (cond1 or cond3) and not cond2 and not cond4 and not cond5:
-                prec = prec_event[:, :, vs.itt_event]
-                ta = ta_event[:, :, vs.itt_event]
+                prec = prec_day[:, :, vs.itt_event]
+                ta = ta_day[:, :, vs.itt_event]
                 vs.dt_secs = 10 * 60
 
             # determine end of event
@@ -209,8 +232,8 @@ def main():
             # increase time stepping at end of event if either full hour
             # or full day, respectively
             if vs.time_event0 <= settings.end_event and (vs.dt_secs == 10 * 60):
-                ta = ta_event[:, :, vs.itt_event]
-                pet = pet_event[:, :, vs.itt_event]
+                ta = ta_day[:, :, vs.itt_event]
+                pet = pet_day[:, :, vs.itt_event]
                 vs.event_id = update(
                     vs.event_id,
                     at[vs.tau], vs.event_id_counter,
@@ -218,8 +241,8 @@ def main():
                 vs.dt = 1 / 6
                 vs.itt_event = vs.itt_event + 1
             elif vs.time_event0 <= settings.end_event and (vs.dt_secs == 60 * 60):
-                ta = npx.mean(ta_event[:, :, vs.itt_event:vs.itt_event+6], axis=-1)
-                pet = npx.sum(pet_event[:, :, vs.itt_event:vs.itt_event+6], axis=-1)
+                ta = npx.mean(ta_day[:, :, vs.itt_event:vs.itt_event+6], axis=-1)
+                pet = npx.sum(pet_day[:, :, vs.itt_event:vs.itt_event+6], axis=-1)
                 vs.event_id = update(
                     vs.event_id,
                     at[vs.tau], vs.event_id_counter,
@@ -227,23 +250,23 @@ def main():
                 vs.dt = 1
                 vs.itt_event = vs.itt_event + 6
             elif vs.time_event0 <= settings.end_event and (vs.dt_secs == 24 * 60 * 60):
-                ta = npx.mean(ta_event[:, :, vs.itt_event:vs.itt_event+24*6], axis=-1)
-                pet = npx.sum(pet_event[:, :, vs.itt_event:vs.itt_event+24*6], axis=-1)
+                ta = npx.mean(ta_day[:, :, vs.itt_event:vs.itt_event+24*6], axis=-1)
+                pet = npx.sum(pet_day[:, :, vs.itt_event:vs.itt_event+24*6], axis=-1)
                 vs.dt = 24
                 vs.itt_event = 0
             elif vs.time_event0 > settings.end_event and (vs.time % (60 * 60) != 0) and (vs.dt_secs == 10 * 60):
                 vs.dt_secs = 10 * 60
                 vs.dt = 1 / 6
                 vs.itt_event = vs.itt_event + 1
-                ta = ta_event[:, :, vs.itt_event]
-                pet = pet_event[:, :, vs.itt_event]
+                ta = ta_day[:, :, vs.itt_event]
+                pet = pet_day[:, :, vs.itt_event]
                 vs.event_id = update(
                     vs.event_id,
                     at[vs.tau], 0,
                 )
             elif vs.time_event0 > settings.end_event and (vs.time % (60 * 60) == 0) and ((vs.dt_secs == 10 * 60) or (vs.dt_secs == 60 * 60)):
-                ta = npx.mean(ta_event[:, :, vs.itt_event:vs.itt_event+6], axis=-1)
-                pet = npx.sum(pet_event[:, :, vs.itt_event:vs.itt_event+6], axis=-1)
+                ta = npx.mean(ta_day[:, :, vs.itt_event:vs.itt_event+6], axis=-1)
+                pet = npx.sum(pet_day[:, :, vs.itt_event:vs.itt_event+6], axis=-1)
                 vs.dt_secs = 60 * 60
                 vs.dt = 1
                 vs.itt_event = vs.itt_event + 6
@@ -252,8 +275,8 @@ def main():
                     at[vs.tau], 0,
                 )
             elif vs.time_event0 > settings.end_event and (vs.time % (24 * 60 * 60) == 0) and (vs.dt_secs == 24 * 60 * 60):
-                ta = npx.mean(ta_event[:, :, vs.itt_event:vs.itt_event+24*6], axis=-1)
-                pet = npx.sum(pet_event[:, :, vs.itt_event:vs.itt_event+24*6], axis=-1)
+                ta = npx.mean(ta_day[:, :, vs.itt_event:vs.itt_event+24*6], axis=-1)
+                pet = npx.sum(pet_day[:, :, vs.itt_event:vs.itt_event+24*6], axis=-1)
                 vs.dt_secs = 24 * 60 * 60
                 vs.dt = 24
                 vs.itt_event = 0
@@ -363,9 +386,9 @@ def main():
             vs.y_sc,
             at[2:-2, 2:-2, vs.taum1], vs.y_sc[2:-2, 2:-2, vs.tau],
         )
-        vs.prec_event_sum = update(
-            vs.prec_event_sum,
-            at[2:-2, 2:-2, vs.taum1], vs.prec_event_sum[2:-2, 2:-2, vs.tau],
+        vs.prec_day_sum = update(
+            vs.prec_day_sum,
+            at[2:-2, 2:-2, vs.taum1], vs.prec_day_sum[2:-2, 2:-2, vs.tau],
         )
         vs.t_event_sum = update(
             vs.t_event_sum,
@@ -453,7 +476,7 @@ def main():
             y_mp=vs.y_mp,
             y_sc=vs.y_sc,
             t_event_sum=vs.t_event_sum,
-            prec_event_sum=vs.prec_event_sum,
+            prec_day_sum=vs.prec_day_sum,
             theta_rz=vs.theta_rz,
             theta_ss=vs.theta_ss,
             theta=vs.theta,
@@ -512,7 +535,7 @@ def main():
     model = SVATFILMSetup()
     path_input = model._base_path / "input"
     model._set_input_dir(path_input)
-    write_forcing(path_input, enable_film_flow=True, z_soil=1350, a=0.19)
+    write_forcing(path_input)
     model.setup()
     model.run()
     return

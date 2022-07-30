@@ -175,6 +175,10 @@ def main():
         def set_boundary_conditions(self, state):
             pass
 
+        @roger_routine
+        def set_forcing_setup(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

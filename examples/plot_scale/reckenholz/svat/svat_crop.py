@@ -6,9 +6,9 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-lys", "--lys-experiment", type=click.Choice(["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys1")
+@click.option("-lys", "--lys-experiment", type=click.Choice(["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys2")
 @roger_base_cli
-def main(nsamples, lys_experiment):
+def main(lys_experiment):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
@@ -22,6 +22,10 @@ def main(nsamples, lys_experiment):
         _base_path = Path(__file__).parent
         _input_dir = None
         _identifier = None
+        _lys = None
+
+        def _set_lys(self, lys):
+            self._lys = lys
 
         def _set_identifier(self, identifier):
             self._identifier = identifier

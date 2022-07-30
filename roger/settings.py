@@ -25,6 +25,7 @@ SETTINGS = {
     "dy": Setting(1, int, "Meridional grid spacing"),
     "dz": Setting(1, int, "Vertical grid spacing"),
     "nitt": Setting(1, int, "Number of total iterations"),
+    "nitt_forc": Setting(1, int, "Number of total iterations of forcing"),
     "nevent_ff": Setting(1, int, "Number of films"),
     "nittevent_ff": Setting(1, int, "Number of total iterations of a single film flow event"),
     "nittevent_ff_p1": Setting(2, int, "Number of total iterations of a single film flow event for cumulated values"),

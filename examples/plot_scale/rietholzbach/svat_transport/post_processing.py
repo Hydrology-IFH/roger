@@ -20,7 +20,7 @@ if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
 # merge model output into single file
-path = str(base_path / "SVATTRANSPORT.*.nc")
+path = str(base_path / "SVATTRANSPORT_*.*.nc")
 diag_files = glob.glob(path)
 states_tm_file = base_path / "states_tm.nc"
 with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
@@ -38,8 +38,6 @@ with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
             if not dfs.split('/')[-1].split('.')[1] == 'constant':
                 dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
                 time = onp.array(df.variables.get('Time'))
-    for dfs in diag_files:
-        with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
             if not f.dimensions:
                 f.dimensions = dict_dim
                 v = f.create_variable('x', ('x',), float)
@@ -285,7 +283,7 @@ df_rroot = pd.DataFrame(index=date_obs, columns=['rRoot'])
 df_rroot.loc[:, 'rRoot'] = ds_obs['PET'].isel(x=0, y=0).values * df_scf['scf'].values
 df_rroot.iloc[0, 0] = 0.03
 df_prec = pd.DataFrame(index=date_sim_hm, columns=['Prec'])
-df_prec.loc[:, 'Prec'] = ds_sim_hm['rain_top'].isel(x=0, y=0).values + ds_sim_hm['q_snow'].isel(x=0, y=0).values
+df_prec.loc[:, 'Prec'] = onp.where(ds_sim_hm['ta'].isel(x=0, y=0).values > 0, ds_sim_hm['prec'].isel(x=0, y=0).values, 0) + ds_sim_hm['q_snow'].isel(x=0, y=0).values
 df_ttop = pd.DataFrame(index=date_obs, columns=['tTop'])
 df_ttop.loc[:, 'tTop'] = ds_obs['TA'].isel(x=0, y=0).values
 df_hcrita = pd.DataFrame(index=date_obs, columns=['hCritA'])
@@ -305,8 +303,8 @@ df.to_csv(file, header=True, index=False, sep=";")
 
 onp.nansum(ds_obs['PREC'].isel(x=0, y=0).values)
 onp.sum(ds_sim_hm['prec'].isel(x=0, y=0).values)
-onp.sum(ds_sim_hm['rain_top'].isel(x=0, y=0).values)
-onp.sum(ds_sim_hm['snow_melt'].isel(x=0, y=0).values)
+onp.sum(onp.where(ds_sim_hm['ta'].isel(x=0, y=0).values > 0, ds_sim_hm['prec'].isel(x=0, y=0).values, 0))
+onp.sum(ds_sim_hm['q_snow'].isel(x=0, y=0).values)
 df_prec.sum()
 
 # compare original and snow-corrected input signal
@@ -318,8 +316,9 @@ df_d18O_in = df_d18O_in.join(df_d18O_prec)
 
 fig, ax = plt.subplots()
 ax.scatter(df_d18O_in.index, df_d18O_in['d18O_prec'], s=2, color='black')
-ax.scatter(df_d18O_in.index, df_d18O_in['cTop'], s=2, color='red')
+ax.scatter(df_d18O_in.index, df_d18O_in['cTop'] - 20, s=2, color='red')
 # ax.set_ylim(0,)
 ax.set_xlim((df_d18O_in.index[0], df_d18O_in.index[-1]))
 ax.set_ylabel(r'$d_{18}O$ [permil]')
 ax.set_xlabel(r'Time [year]')
+plt.show()

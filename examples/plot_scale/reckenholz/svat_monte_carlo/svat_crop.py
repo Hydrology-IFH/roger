@@ -6,7 +6,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-lys", "--lys-experiment", type=click.Choice(["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys1")
+@click.option("-lys", "--lys-experiment", type=click.Choice(["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys2")
 @click.option("-ns", "--nsamples", type=int, default=10000)
 @roger_base_cli
 def main(nsamples, lys_experiment):
@@ -103,18 +103,6 @@ def main(nsamples, lys_experiment):
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "DT_SECS",
-                "DT",
-                "YEAR",
-                "MONTH",
-                "DOY",
-                "dt_secs",
-                "dt",
-                "year",
-                "month",
-                "doy",
-                "t",
-                "itt",
                 "x",
                 "y",
             ],
