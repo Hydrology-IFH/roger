@@ -94,6 +94,12 @@ rows = npx.where(check3 == False)[0] + 2
 row = 2108
 print(vs.S_fp_rz[row,2], vs.S_lp_rz[row,2], vs.S_ufc_rz[row,2], vs.S_ac_rz[row,2])
 
+# SVAT-CROP model
+check4 = (vs.S_fp_rz[2:-2, 2:-2] - 1e-9 <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] - 1e-9 <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] - 1e-9 <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] - 1e-9 <= vs.S_ac_ss[2:-2, 2:-2])
+rows = npx.where(check4 == False)[0]
+dS = vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1]
+dF = vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.q_sub[2:-2, 2:-2]
+
 # add missing initial values
 # write states of best model run
 import h5netcdf

@@ -160,6 +160,8 @@ def main(nsamples, lys_experiment):
                 "ks",
                 "kf",
                 "crop_type",
+                "z_root",
+                "z_root_crop",
             ],
         )
         def set_parameters_setup(self, state):
@@ -178,6 +180,13 @@ def main(nsamples, lys_experiment):
             vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 1])
             vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 2])
             vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 3])
+
+            z_root = self._read_var_from_nc("z_root", self._base_path, 'initvals.nc', group=self._lys)
+            vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :2], z_root)
+            vs.z_root_crop = update(
+                vs.z_root_crop,
+                at[2:-2, 2:-2, :2, 0], z_root
+            )
 
         @roger_routine
         def set_parameters(self, state):
@@ -416,23 +425,6 @@ def main(nsamples, lys_experiment):
     @roger_kernel
     def set_initial_conditions_crops_kernel(state):
         vs = state.variables
-
-        # set initial root depth if start of simulation is within growing period
-        mask1 = npx.isin(vs.crop_type[:, :, 0], [556, 557, 558, 559, 560, 564, 569, 570, 572])
-        vs.z_root_crop = update(
-            vs.z_root_crop,
-            at[2:-2, 2:-2, :2, 0], npx.where(mask1[2:-2, 2:-2, npx.newaxis], 300, 0)
-        )
-        mask2 = (vs.z_root_crop[:, :, vs.taum1, 0] > vs.z_soil)
-        vs.z_root_crop = update(
-            vs.z_root_crop,
-            at[2:-2, 2:-2, :2, 0], npx.where(mask2[2:-2, 2:-2, npx.newaxis], vs.z_soil[2:-2, 2:-2, npx.newaxis] * .33, vs.z_root_crop[2:-2, 2:-2, :2, 0])
-        )
-        mask3 = (vs.z_root_crop[:, :, vs.taum1, 0] > 0)
-        vs.z_root = update(
-            vs.z_root,
-            at[2:-2, 2:-2, :2], npx.where(mask3[2:-2, 2:-2, npx.newaxis], vs.z_root_crop[2:-2, 2:-2, :2, 0], vs.z_root[2:-2, 2:-2, :2])
-        )
 
         # calculate time since growing
         t_grow = allocate(state.dimensions, ("x", "y", "crops"))
