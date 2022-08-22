@@ -14,4 +14,4 @@ conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_monte_carlo
 
 # adapt command to your available scheduler / MPI implementation
-python svat_crop.py -lys lys2
+python svat_crop.py -lys lys8
