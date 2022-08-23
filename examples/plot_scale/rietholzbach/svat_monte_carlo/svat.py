@@ -6,8 +6,9 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-ns", "--nsamples", type=int, default=10000)
+@click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(nsamples):
+def main(nsamples, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, random_uniform
@@ -293,12 +294,14 @@ def main(nsamples):
             vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], pet)
 
         @roger_routine
-        def set_diagnostics(self, state):
+        def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
             diagnostics["rates"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow"]
             diagnostics["rates"].output_frequency = 24 * 60 * 60
             diagnostics["rates"].sampling_frequency = 1
+            if base_path:
+                diagnostics["rates"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = ["S_rz", "S_ss",
                                                        "S_pwp_rz", "S_fc_rz",
@@ -308,14 +311,20 @@ def main(nsamples):
                                                        "S_snow"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
+            if base_path:
+                diagnostics["collect"].base_output_path = base_path
 
             diagnostics["averages"].output_variables = ["ta"]
             diagnostics["averages"].output_frequency = 24 * 60 * 60
             diagnostics["averages"].sampling_frequency = 1
+            if base_path:
+                diagnostics["averages"].base_output_path = base_path
 
             diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']
             diagnostics["constant"].output_frequency = 0
             diagnostics["constant"].sampling_frequency = 1
+            if base_path:
+                diagnostics["constant"].base_output_path = base_path
 
         @roger_routine
         def after_timestep(self, state):

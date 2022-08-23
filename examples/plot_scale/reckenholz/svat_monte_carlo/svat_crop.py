@@ -8,8 +8,9 @@ from roger.cli.roger_run_base import roger_base_cli
 
 @click.option("-lys", "--lys-experiment", type=click.Choice(["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys2")
 @click.option("-ns", "--nsamples", type=int, default=10000)
+@click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(nsamples, lys_experiment):
+def main(nsamples, lys_experiment, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, random_uniform
@@ -391,12 +392,14 @@ def main(nsamples, lys_experiment):
                 vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, vs.itt_cr + 1])
 
         @roger_routine
-        def set_diagnostics(self, state):
+        def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
             diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "re_rg", "re_rl"]
             diagnostics["rates"].output_frequency = 24 * 60 * 60
             diagnostics["rates"].sampling_frequency = 1
+            if base_path:
+                diagnostics["rates"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = ["S_rz", "S_ss", "S_s", "S",
                                                        "S_pwp_rz", "S_fc_rz",

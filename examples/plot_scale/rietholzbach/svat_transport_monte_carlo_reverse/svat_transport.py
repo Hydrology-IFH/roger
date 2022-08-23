@@ -7,6 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion', 'time-variant']), default='complete-mixing')
+@click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(nsamples, transport_model_structure):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -415,12 +416,14 @@ def main(nsamples, transport_model_structure):
             )
 
         @roger_routine
-        def set_diagnostics(self, state):
+        def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
             diagnostics["averages"].output_variables = ["C_q_ss"]
             diagnostics["averages"].output_frequency = 24 * 60 * 60
             diagnostics["averages"].sampling_frequency = 1
+            if base_path:
+                diagnostics["averages"].base_output_path = base_path
 
         @roger_routine
         def after_timestep(self, state):

@@ -219,7 +219,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def set_diagnostics(self, vs):
+    def set_diagnostics(self, vs, base_path=None):
         """To be implemented by subclass.
 
         Called before setting up the :ref:`diagnostics <diagnostics>`. Use this method e.g. to

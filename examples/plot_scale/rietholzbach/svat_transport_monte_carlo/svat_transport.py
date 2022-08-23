@@ -8,6 +8,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 @click.option("-ns", "--nsamples", type=int, default=10000)
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion', 'time-variant']), default='complete-mixing')
+@click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(nsamples, transport_model_structure):
     from roger import runtime_settings as rs, runtime_state as rst
@@ -487,20 +488,26 @@ def main(nsamples, transport_model_structure):
             )
 
         @roger_routine
-        def set_diagnostics(self, state):
+        def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
             diagnostics["rates"].output_variables = ["q_ss"]
             diagnostics["rates"].output_frequency = 24 * 60 * 60
             diagnostics["rates"].sampling_frequency = 1
+            if base_path:
+                diagnostics["rates"].base_output_path = base_path
 
             diagnostics["averages"].output_variables = ["C_q_ss"]
             diagnostics["averages"].output_frequency = 24 * 60 * 60
             diagnostics["averages"].sampling_frequency = 1
+            if base_path:
+                diagnostics["averages"].base_output_path = base_path
 
             diagnostics["constant"].output_variables = ["sas_params_transp", "sas_params_q_rz", "sas_params_q_ss"]
             diagnostics["constant"].output_frequency = 0
             diagnostics["constant"].sampling_frequency = 1
+            if base_path:
+                diagnostics["constant"].base_output_path = base_path
 
         @roger_routine
         def after_timestep(self, state):

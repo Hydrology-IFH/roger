@@ -390,16 +390,20 @@ def main(transport_model_structure):
             )
 
         @roger_routine
-        def set_diagnostics(self, state):
+        def set_diagnostics(self, state, base_path=None):
             diagnostics = state.diagnostics
 
             diagnostics["rates"].output_variables = ["M_q_ss"]
             diagnostics["rates"].output_frequency = 24 * 60 * 60
             diagnostics["rates"].sampling_frequency = 1
+            if base_path:
+                diagnostics["rates"].base_output_path = base_path
 
             diagnostics["averages"].output_variables = ["C_rz", "C_ss", "C_s", "C_q_ss"]
             diagnostics["averages"].output_frequency = 24 * 60 * 60
             diagnostics["averages"].sampling_frequency = 1
+            if base_path:
+                diagnostics["averages"].base_output_path = base_path
 
         @roger_routine
         def after_timestep(self, state):

@@ -274,12 +274,14 @@ def main():
             vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], pet)
 
         @roger_routine
-        def set_diagnostics(self, state):
+        def set_diagnostics(self, state, base_path=None):
             diagnostics = state.diagnostics
 
             diagnostics["rates"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow", "q_hof"]
             diagnostics["rates"].output_frequency = 24 * 60 * 60
             diagnostics["rates"].sampling_frequency = 1
+            if base_path:
+                diagnostics["rates"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = ["S_rz", "S_ss",
                                                        "S_pwp_rz", "S_fc_rz",
@@ -288,14 +290,20 @@ def main():
                                                        "theta_rz", "theta_ss", "theta"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
+            if base_path:
+                diagnostics["collect"].base_output_path = base_path
 
             diagnostics["maximum"].output_variables = ["S_snow", "swe"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1
+            if base_path:
+                diagnostics["maximum"].base_output_path = base_path
 
             diagnostics["averages"].output_variables = ["ta"]
             diagnostics["averages"].output_frequency = 24 * 60 * 60
             diagnostics["averages"].sampling_frequency = 1
+            if base_path:
+                diagnostics["averages"].base_output_path = base_path
 
         @roger_routine
         def after_timestep(self, state):

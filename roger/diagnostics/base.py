@@ -1,6 +1,7 @@
 import abc
 
 import os
+from pathlib import Path
 
 from roger.io_tools import netcdf as nctools
 from roger.signals import do_not_disturb
@@ -19,6 +20,7 @@ class RogerDiagnostic(metaclass=abc.ABCMeta):
     output_frequency = 0.0
 
     output_path = None
+    base_output_path = None
     output_variables = None
 
     var_meta = None  #: Metadata of internal variables
@@ -58,9 +60,17 @@ class RogerDiagnostic(metaclass=abc.ABCMeta):
         self.variables.__locked__ = False
 
     def get_output_file_name(self, state):
-        statedict = dict(state.variables.items())
-        statedict.update(state.settings.items())
-        return self.output_path.format(**statedict)
+        if not self.base_output_path:
+            statedict = dict(state.variables.items())
+            statedict.update(state.settings.items())
+            output_path = self.output_path.format(**statedict)
+        else:
+            statedict = dict(state.variables.items())
+            statedict.update(state.settings.items())
+            file_name = self.output_path.format(**statedict)
+            output_path = Path(self.base_output_path) / file_name
+
+        return output_path
 
     @do_not_disturb
     def initialize_output(self, state):
