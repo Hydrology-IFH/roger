@@ -7,7 +7,7 @@ base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
 lysimeters = ['lys1', 'lys2', 'lys3', 'lys4', 'lys8', 'lys9', 'lys2_bromide',
               'lys8_bromide', 'lys9_bromide']
 for lys in lysimeters:
-    script_name = f'{lys}_mc'
+    script_name = f'{lys}_sa'
     output_path_ws = base_path_ws / 'reckenholz' / 'svat_sensitivity'
     lines = []
     lines.append('#!/bin/bash\n')

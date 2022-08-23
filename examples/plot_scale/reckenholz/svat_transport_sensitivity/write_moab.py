@@ -21,7 +21,7 @@ for lys in lysimeters:
     for tm in transport_models:
         tm1 = transport_models_abrev[tm]
         tms = tm.replace(" ", "_")
-        script_name = f'{tracer}_{lys}_{tm1}_mc'
+        script_name = f'{tracer}_{lys}_{tm1}_sa'
         output_path_ws = base_path_ws / 'reckenholz' / 'svat_transport_sensitivity'
         lines = []
         lines.append('#!/bin/bash\n')
@@ -63,7 +63,7 @@ for lys in lysimeters:
     for tm in transport_models:
         tm1 = transport_models_abrev[tm]
         tms = tm.replace(" ", "_")
-        script_name = f'{tracer}_{lys}_{tm1}_mc'
+        script_name = f'{tracer}_{lys}_{tm1}_sa'
         output_path_ws = base_path_ws / 'reckenholz' / 'svat_transport_sensitivity'
         lines = []
         lines.append('#!/bin/bash\n')
@@ -105,7 +105,7 @@ for lys in lysimeters:
     for tm in transport_models:
         tm1 = transport_models_abrev[tm]
         tms = tm.replace(" ", "_")
-        script_name = f'{tracer}_{lys}_{tm1}_mc'
+        script_name = f'{tracer}_{lys}_{tm1}_sa'
         output_path_ws = base_path_ws / 'reckenholz' / 'svat_transport_sensitivity'
         lines = []
         lines.append('#!/bin/bash\n')
