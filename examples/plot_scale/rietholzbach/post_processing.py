@@ -8,12 +8,12 @@ from cftime import num2date
 import pandas as pd
 import numpy as onp
 import matplotlib.pyplot as plt
+import click
 import seaborn as sns
 sns.set_style('ticks', {'xtick.major.size': 8, 'ytick.major.size': 8})
 sns.set_context("paper", font_scale=1.5)
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
-import click
 
 
 @click.option("-td", "--tmp-dir", type=str, default=None)
@@ -29,7 +29,7 @@ def main(tmp_dir):
         os.mkdir(base_path_figs)
 
     # load observations (measured data)
-    path_obs = base_path / "observations" / "rietholzbach_lysimeter.nc"
+    path_obs = Path(__file__).parent / "observations" / "rietholzbach_lysimeter.nc"
     ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
     # assign date
     days_obs = (ds_obs['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))

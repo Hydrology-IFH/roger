@@ -103,12 +103,10 @@ def main(tmp_dir):
     shutil.copy(states_hm_si_file, states_hm_si_file1)
 
     # load simulation
-    states_hm_si_file2 = base_path / "states_hm_sensitivity.nc"
-    shutil.copy(states_hm_si_file, states_hm_si_file2)
-    ds_sim = xr.open_dataset(states_hm_si_file2, engine="h5netcdf")
+    ds_sim = xr.open_dataset(states_hm_si_file, engine="h5netcdf")
 
     # load observations (measured data)
-    path_obs = base_path.parent / "observations" / "rietholzbach_lysimeter.nc"
+    path_obs = Path(__file__).parent / "observations" / "rietholzbach_lysimeter.nc"
     ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
 
     # assign date

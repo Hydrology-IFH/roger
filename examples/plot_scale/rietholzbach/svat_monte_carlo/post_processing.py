@@ -87,12 +87,10 @@ def main(tmp_dir):
                                        units=var_obj.attrs["units"])
 
     # load simulation
-    states_hm_mc_file1 = base_path / "states_hm_monte_carlo.nc"
-    shutil.copy(states_hm_mc_file, states_hm_mc_file1)
     ds_sim = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
 
     # load observations (measured data)
-    path_obs = base_path.parent / "observations" / "rietholzbach_lysimeter.nc"
+    path_obs = Path(__file__).parent / "observations" / "rietholzbach_lysimeter.nc"
     ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
 
     # assign date
