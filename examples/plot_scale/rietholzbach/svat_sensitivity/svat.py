@@ -10,7 +10,7 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-ns", "--nsamples", type=int, default=1024)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(nsamples):
+def main(nsamples, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at

@@ -10,7 +10,7 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion', 'time-variant']), default='complete-mixing')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(nsamples, transport_model_structure):
+def main(nsamples, transport_model_structure, tmp_dir):
     from roger import runtime_settings as rs, runtime_state as rst
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
