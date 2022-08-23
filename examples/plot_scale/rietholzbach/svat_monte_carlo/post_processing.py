@@ -18,6 +18,7 @@ import roger.tools.labels as labs
 
 
 @click.option("-td", "--tmp-dir", type=str, default=None)
+@click.command("main")
 def main(tmp_dir):
     if tmp_dir:
         base_path = Path(tmp_dir)
