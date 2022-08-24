@@ -172,9 +172,9 @@ def main(nsamples, lys_experiment, tmp_dir):
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1350)
             vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], npx.array(random_uniform(1, 400, vs.dmpv.shape), dtype=int)[2:-2, 2:-2])
             vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], npx.array(random_uniform(1, 1200, vs.lmpv.shape), dtype=int)[2:-2, 2:-2])
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], random_uniform(0.05, 0.33, vs.theta_ac.shape)[2:-2, 2:-2])
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], random_uniform(0.05, 0.33, vs.theta_ufc.shape)[2:-2, 2:-2])
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], random_uniform(0.05, 0.33, vs.theta_pwp.shape)[2:-2, 2:-2])
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], random_uniform(0.05, 0.15, vs.theta_ac.shape)[2:-2, 2:-2])
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], random_uniform(0.05, 0.2, vs.theta_ufc.shape)[2:-2, 2:-2])
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], random_uniform(0.15, 0.25, vs.theta_pwp.shape)[2:-2, 2:-2])
             vs.ks = update(vs.ks, at[2:-2, 2:-2], random_uniform(0.1, 150, vs.ks.shape)[2:-2, 2:-2])
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
