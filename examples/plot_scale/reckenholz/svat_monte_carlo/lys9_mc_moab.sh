@@ -14,7 +14,7 @@ conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_monte_carlo
  
 # adapt command to your available scheduler / MPI implementation
-python svat_crop.py -b numpy -d cpu -td "${TMPDIR}"
+python svat_crop.py -b numpy -d cpu -lys lys9 -td "${TMPDIR}"
 # Write output to temporary SSD of computing node
 echo "Write output to $TMPDIR"
 # Move output from temporary SSD to workspace
