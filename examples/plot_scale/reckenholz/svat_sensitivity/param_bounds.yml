@@ -44,3 +44,95 @@ lys2:
   - ks
   num_vars: 6
   sample_scaled: true
+lys2_bromide:
+  bounds:
+  - - 1
+    - 400
+  - - 1
+    - 1200
+  - - 0.05
+    - 0.33
+  - - 0.05
+    - 0.33
+  - - 0.05
+    - 0.33
+  - - 0.1
+    - 120
+  names:
+  - dmpv
+  - lmpv
+  - theta_ac
+  - theta_ufc
+  - theta_pwp
+  - ks
+  num_vars: 6
+  sample_scaled: true
+lys4:
+  bounds:
+  - - 1
+    - 400
+  - - 1
+    - 1200
+  - - 0.05
+    - 0.33
+  - - 0.05
+    - 0.33
+  - - 0.05
+    - 0.33
+  - - 0.1
+    - 120
+  names:
+  - dmpv
+  - lmpv
+  - theta_ac
+  - theta_ufc
+  - theta_pwp
+  - ks
+  num_vars: 6
+  sample_scaled: true
+lys8_bromide:
+  bounds:
+  - - 1
+    - 400
+  - - 1
+    - 1200
+  - - 0.05
+    - 0.33
+  - - 0.05
+    - 0.33
+  - - 0.05
+    - 0.33
+  - - 0.1
+    - 120
+  names:
+  - dmpv
+  - lmpv
+  - theta_ac
+  - theta_ufc
+  - theta_pwp
+  - ks
+  num_vars: 6
+  sample_scaled: true
+lys9_bromide:
+  bounds:
+  - - 1
+    - 400
+  - - 1
+    - 1200
+  - - 0.05
+    - 0.33
+  - - 0.05
+    - 0.33
+  - - 0.05
+    - 0.33
+  - - 0.1
+    - 120
+  names:
+  - dmpv
+  - lmpv
+  - theta_ac
+  - theta_ufc
+  - theta_pwp
+  - ks
+  num_vars: 6
+  sample_scaled: true
