@@ -90,7 +90,7 @@ def main(tmp_dir):
     ds_sim = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
 
     # load observations (measured data)
-    path_obs = Path(__file__).parent / "observations" / "rietholzbach_lysimeter.nc"
+    path_obs = Path(__file__).parent.parent / "observations" / "rietholzbach_lysimeter.nc"
     ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
 
     # assign date
