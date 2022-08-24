@@ -26,7 +26,7 @@ for lys in lysimeters:
     lines.append(f'cd {base_path_binac}\n')
     lines.append(' \n')
     lines.append('# adapt command to your available scheduler / MPI implementation\n')
-    lines.append('python svat_transport.py -b numpy -d cpu -td "${TMPDIR}"\n')
+    lines.append('python svat_crop.py -b numpy -d cpu -td "${TMPDIR}"\n')
     lines.append('# Write output to temporary SSD of computing node\n')
     lines.append('echo "Write output to $TMPDIR"\n')
     lines.append('# Move output from temporary SSD to workspace\n')
