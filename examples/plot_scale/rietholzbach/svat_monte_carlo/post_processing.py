@@ -387,26 +387,6 @@ def main(tmp_dir):
                     v.attrs.update(long_name=var_obj.attrs["long_name"],
                                     units=var_obj.attrs["units"])
 
-    # move hydrologic states to directories of transport model
-    base_path_tm = base_path.parent / "svat_transport_monte_carlo"
-    states_hm_file1 = base_path_tm / "states_hm.nc"
-    shutil.copy(states_hm_file, states_hm_file1)
-
-    base_path_tm = base_path.parent / "svat_transport_sensitivity"
-    states_hm_file1 = base_path_tm / "states_hm.nc"
-    shutil.copy(states_hm_file, states_hm_file1)
-
-    base_path_tm = base_path.parent / "svat_transport_bromide_benchmark"
-    states_hm_file1 = base_path_tm / "states_hm.nc"
-    shutil.copy(states_hm_file, states_hm_file1)
-
-    base_path_tm = base_path.parent / "svat_transport"
-    states_hm_file1 = base_path_tm / "states_hm.nc"
-    shutil.copy(states_hm_file, states_hm_file1)
-
-    base_path_tm = base_path.parent / "svat_transport_monte_carlo_reverse"
-    states_hm_mc_file1 = base_path_tm / "states_hm_monte_carlo.nc"
-    shutil.copy(states_hm_mc_file, states_hm_mc_file1)
     return
 
 

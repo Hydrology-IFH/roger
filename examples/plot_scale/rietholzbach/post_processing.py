@@ -70,7 +70,7 @@ def main(tmp_dir):
     plt.close(fig=fig)
 
     # load best monte carlo run
-    states_hm_file = base_path / "svat" / "states_hm.nc"
+    states_hm_file = base_path / "svat_monte_carlo" / "states_hm.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
     # assign date
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))

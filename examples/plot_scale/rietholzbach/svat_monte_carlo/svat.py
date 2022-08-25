@@ -115,9 +115,13 @@ def main(nsamples, tmp_dir):
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
             vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], npx.array(random_uniform(1, 400, vs.dmpv.shape), dtype=int)[2:-2, 2:-2])
             vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], npx.array(random_uniform(1, 2000, vs.lmpv.shape), dtype=int)[2:-2, 2:-2])
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], random_uniform(0.04, 0.26, vs.theta_ac.shape)[2:-2, 2:-2])
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], random_uniform(0.09, 0.35, vs.theta_ufc.shape)[2:-2, 2:-2])
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], random_uniform(0.18, 0.25, vs.theta_pwp.shape)[2:-2, 2:-2])
+            # effective porosity
+            eff_por = random_uniform(0.15, 0.35, vs.theta_ac.shape)[2:-2, 2:-2]
+            frac_lp = random_uniform(0.1, 0.9, vs.theta_ac.shape)[2:-2, 2:-2]
+            frac_fp = 1 - frac_lp
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], eff_por * frac_lp)
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], eff_por * frac_fp)
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], random_uniform(0.15, 0.35, vs.theta_pwp.shape)[2:-2, 2:-2])
             vs.ks = update(vs.ks, at[2:-2, 2:-2], random_uniform(1, 150, vs.ks.shape)[2:-2, 2:-2])
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
