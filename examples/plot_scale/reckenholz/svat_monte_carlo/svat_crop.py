@@ -422,7 +422,7 @@ def main(nsamples, lys_experiment, tmp_dir):
             if base_path:
                 diagnostics["averages"].base_output_path = base_path
 
-            diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'lut_crop_scale', 'lut_crops']
+            diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'lut_crop_scale']
             diagnostics["constant"].output_frequency = 0
             diagnostics["constant"].sampling_frequency = 1
             if base_path:
