@@ -7,6 +7,7 @@
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
 
 # load module dependencies
+module purge
 module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
 export OMP_NUM_THREADS=1
 eval "$(conda shell.bash hook)"

@@ -114,13 +114,6 @@ for lys_experiment in lys_experiments:
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
 
-
-# move hydrologic states to directories of transport model
-base_path_tm = base_path.parent / "svat_transport_sensitivity_reverse"
-states_hm_si_file = base_path / "states_hm_sensitivity.nc"
-states_hm_si_file1 = base_path_tm / "states_hm_sensitivity.nc"
-shutil.copy(states_hm_si_file, states_hm_si_file1)
-
 lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9"]
 for lys_experiment in lys_experiments:
     # directory of results
@@ -137,7 +130,7 @@ for lys_experiment in lys_experiments:
     ds_sim = xr.open_dataset(states_hm_si_file, engine="h5netcdf", group=lys_experiment)
 
     # load observations (measured data)
-    path_obs = base_path.parent / "observations" / "reckenholz_lysimeter.nc"
+    path_obs = Path(__file__).parent.parent / "observations" / "reckenholz_lysimeter.nc"
     ds_obs = xr.open_dataset(path_obs, engine="h5netcdf", group=lys_experiment)
 
     # assign date
@@ -415,7 +408,3 @@ for lys_experiment in lys_experiments:
     fig.subplots_adjust(wspace=0.2, hspace=0.3)
     file = base_path_figs / "dotty_plots.png"
     fig.savefig(file, dpi=250)
-
-    file1 = base_path.parent / "param_bounds.yml"
-    file2 = base_path.parent.parent / "svat_transport_sensitivity_reverse" / "param_bounds.yml"
-    shutil.copy(file1, file2)
