@@ -666,9 +666,6 @@ def main(nsamples, transport_model_structure, tmp_dir):
     model = SVATTRANSPORTSetup()
     if tms not in ['complete-mixing', 'piston']:
         model._set_nsamples(nsamples)
-    else:
-        if rs.mpi_comm:
-            model._set_nsamples(rst.proc_num)
     model._set_tm_structure(tms)
     identifier = f'SVATTRANSPORT_{transport_model_structure}'
     model._set_identifier(identifier)

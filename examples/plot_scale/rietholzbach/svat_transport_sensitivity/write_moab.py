@@ -14,8 +14,7 @@ transport_models_abrev = {'complete-mixing': 'cm',
                           'time-variant': 'tv'}
 
 tracer = 'oxygen18'
-transport_models = ['complete-mixing', 'piston',
-                    'preferential', 'advection-dispersion',
+transport_models = ['preferential', 'advection-dispersion',
                     'time-variant preferential',
                     'time-variant advection-dispersion',
                     'time-variant']
