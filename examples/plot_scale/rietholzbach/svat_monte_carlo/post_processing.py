@@ -314,7 +314,7 @@ def main(tmp_dir):
     df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
     nrow = len(df_eff.columns)
     ncol = len(df_params.columns)
-    fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(14, 7))
+    fig, ax = plt.subplots(nrow, ncol, sharey=False, figsize=(14, 7))
     for i in range(nrow):
         for j in range(ncol):
             y = df_eff.iloc[:, i]

@@ -505,6 +505,12 @@ def main(nsamples, transport_model_structure, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
+            diagnostics["rates"].output_variables = ["q_ss"]
+            diagnostics["rates"].output_frequency = 24 * 60 * 60
+            diagnostics["rates"].sampling_frequency = 1
+            if base_path:
+                diagnostics["rates"].base_output_path = base_path
+
             diagnostics["averages"].output_variables = ["C_q_ss"]
             diagnostics["averages"].output_frequency = 24 * 60 * 60
             diagnostics["averages"].sampling_frequency = 1
