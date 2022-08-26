@@ -35,85 +35,86 @@ def main(tmp_dir):
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
-    lys_experiments = ["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
-    for lys_experiment in lys_experiments:
-        # merge model output into single file
-        path = str(base_path / f'SVATCROP_{lys_experiment}.*.nc')
-        diag_files = glob.glob(path)
-        states_hm_file = base_path / "states_hm_monte_carlo.nc"
-        with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
-            if lys_experiment not in list(f.groups.keys()):
-                f.create_group(lys_experiment)
-            f.attrs.update(
-                date_created=datetime.datetime.today().isoformat(),
-                title='RoGeR model Monte Carlo simulations at Reckenholz lysimeter site',
-                institution='University of Freiburg, Chair of Hydrology',
-                references='',
-                comment='SVAT model with free drainage and crop phenology/crop rotation'
-            )
-            # collect dimensions
-            for dfs in diag_files:
-                with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                    # set dimensions with a dictionary
-                    if not dfs.split('/')[-1].split('.')[1] == 'constant':
-                        dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'n_crop_types': len(df.variables['n_crop_types']), 'crops': len(df.variables['crops']), 'Time': len(df.variables['Time'])}
-                        time = onp.array(df.variables.get('Time'))
-            for dfs in diag_files:
-                with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                    if not f.groups[lys_experiment].dimensions:
-                        f.groups[lys_experiment].dimensions = dict_dim
-                        v = f.groups[lys_experiment].create_variable('x', ('x',), float)
-                        v.attrs['long_name'] = 'model run'
-                        v.attrs['units'] = ''
-                        v[:] = onp.arange(dict_dim["x"])
-                        v = f.groups[lys_experiment].create_variable('y', ('y',), float)
-                        v.attrs['long_name'] = ''
-                        v.attrs['units'] = ''
-                        v[:] = onp.arange(dict_dim["y"])
-                        v = f.groups[lys_experiment].create_variable('Time', ('Time',), float)
-                        var_obj = df.variables.get('Time')
-                        v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                                       units=var_obj.attrs["units"])
-                        v[:] = time
-                        v = f.groups[lys_experiment].create_variable('n_crop_types', ('n_crop_types',), int)
-                        v.attrs['long_name'] = 'number of crop types'
-                        v.attrs['units'] = ''
-                        v[:] = onp.arange(dict_dim["n_crop_types"])
-                        v = f.groups[lys_experiment].create_variable('crops', ('crops',), int)
-                        v.attrs['long_name'] = 'number of crops per growing cycle'
-                        v.attrs['units'] = ''
-                        v[:] = onp.arange(dict_dim["crops"])
-                    for key in list(df.variables.keys()):
-                        var_obj = df.variables.get(key)
-                        if key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
-                            v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time'), float)
-                            vals = onp.array(var_obj)
-                            v[:, :, :] = vals.swapaxes(0, 2)
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
+    if not os.path.exists(base_path / "states_hm_monte_carlo.nc"):
+        lys_experiments = ["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
+        for lys_experiment in lys_experiments:
+            # merge model output into single file
+            path = str(base_path / f'SVATCROP_{lys_experiment}.*.nc')
+            diag_files = glob.glob(path)
+            states_hm_file = base_path / "states_hm_monte_carlo.nc"
+            with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
+                if lys_experiment not in list(f.groups.keys()):
+                    f.create_group(lys_experiment)
+                f.attrs.update(
+                    date_created=datetime.datetime.today().isoformat(),
+                    title='RoGeR model Monte Carlo simulations at Reckenholz lysimeter site',
+                    institution='University of Freiburg, Chair of Hydrology',
+                    references='',
+                    comment='SVAT model with free drainage and crop phenology/crop rotation'
+                )
+                # collect dimensions
+                for dfs in diag_files:
+                    with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                        # set dimensions with a dictionary
+                        if not dfs.split('/')[-1].split('.')[1] == 'constant':
+                            dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'n_crop_types': len(df.variables['n_crop_types']), 'crops': len(df.variables['crops']), 'Time': len(df.variables['Time'])}
+                            time = onp.array(df.variables.get('Time'))
+                for dfs in diag_files:
+                    with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                        if not f.groups[lys_experiment].dimensions:
+                            f.groups[lys_experiment].dimensions = dict_dim
+                            v = f.groups[lys_experiment].create_variable('x', ('x',), float)
+                            v.attrs['long_name'] = 'model run'
+                            v.attrs['units'] = ''
+                            v[:] = onp.arange(dict_dim["x"])
+                            v = f.groups[lys_experiment].create_variable('y', ('y',), float)
+                            v.attrs['long_name'] = ''
+                            v.attrs['units'] = ''
+                            v[:] = onp.arange(dict_dim["y"])
+                            v = f.groups[lys_experiment].create_variable('Time', ('Time',), float)
+                            var_obj = df.variables.get('Time')
+                            v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                            units=var_obj.attrs["units"])
-                        elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'crops', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
-                            v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time', 'crops'), float)
-                            vals = onp.array(var_obj)
-                            vals = vals.swapaxes(0, 3)
-                            vals = vals.swapaxes(1, 2)
-                            vals = vals.swapaxes(2, 3)
-                            v[:, :, :, :] = vals
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
-                        elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
-                            v = f.groups[lys_experiment].create_variable(key, ('x', 'y'), float)
-                            vals = onp.array(var_obj)
-                            v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
-                        elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'n_crop_types', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
-                            v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'n_crop_types'), float)
-                            vals = onp.array(var_obj)
-                            vals = vals.swapaxes(0, 3)
-                            vals = vals.swapaxes(1, 2)
-                            v[:, :, :] = vals[:, :, :, 0]
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
+                            v[:] = time
+                            v = f.groups[lys_experiment].create_variable('n_crop_types', ('n_crop_types',), int)
+                            v.attrs['long_name'] = 'number of crop types'
+                            v.attrs['units'] = ''
+                            v[:] = onp.arange(dict_dim["n_crop_types"])
+                            v = f.groups[lys_experiment].create_variable('crops', ('crops',), int)
+                            v.attrs['long_name'] = 'number of crops per growing cycle'
+                            v.attrs['units'] = ''
+                            v[:] = onp.arange(dict_dim["crops"])
+                        for key in list(df.variables.keys()):
+                            var_obj = df.variables.get(key)
+                            if key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
+                                v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time'), float)
+                                vals = onp.array(var_obj)
+                                v[:, :, :] = vals.swapaxes(0, 2)
+                                v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                               units=var_obj.attrs["units"])
+                            elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'crops', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
+                                v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time', 'crops'), float)
+                                vals = onp.array(var_obj)
+                                vals = vals.swapaxes(0, 3)
+                                vals = vals.swapaxes(1, 2)
+                                vals = vals.swapaxes(2, 3)
+                                v[:, :, :, :] = vals
+                                v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                               units=var_obj.attrs["units"])
+                            elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
+                                v = f.groups[lys_experiment].create_variable(key, ('x', 'y'), float)
+                                vals = onp.array(var_obj)
+                                v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
+                                v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                               units=var_obj.attrs["units"])
+                            elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'n_crop_types', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
+                                v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'n_crop_types'), float)
+                                vals = onp.array(var_obj)
+                                vals = vals.swapaxes(0, 3)
+                                vals = vals.swapaxes(1, 2)
+                                v[:, :, :] = vals[:, :, :, 0]
+                                v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                               units=var_obj.attrs["units"])
 
     lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9"]
     for lys_experiment in lys_experiments:
@@ -143,9 +144,9 @@ def main(tmp_dir):
         ds_sim = ds_sim.assign_coords(date=("Time", date_sim))
         ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
         # get list with land use IDs
-        lu = ds_sim["lu_id"].isel(y=0).values.flatten()
-        lu_ids = [0] + onp.unique(ds_sim['lu_id'].values.flatten()).tolist()
-        for lu_id in lu_ids:
+        crop_types_sim1 = onp.unique(ds_sim['lu_id'].values.flatten()).tolist()
+        crop_types_sim = [0] + crop_types_sim1
+        for crop_type_sim in crop_types_sim:
             # DataFrame with sampled model parameters and the corresponding metrics
             nx = ds_sim.dims['x']  # number of rows
             ny = ds_sim.dims['y']  # number of columns
@@ -157,8 +158,8 @@ def main(tmp_dir):
             df_params_eff.loc[:, 'theta_ufc'] = ds_sim["theta_ufc"].isel(y=0).values.flatten()
             df_params_eff.loc[:, 'theta_pwp'] = ds_sim["theta_pwp"].isel(y=0).values.flatten()
             df_params_eff.loc[:, 'ks'] = ds_sim["ks"].isel(y=0).values.flatten()
-            if lu_id > 500:
-                row = onp.where(lut.ARR_CP[:, 0] == lu_id)[0][0]
+            if crop_type_sim > 0:
+                row = onp.where(lut.ARR_CP[:, 0] == crop_type_sim)[0][0]
                 df_params_eff.loc[:, 'crop_scale'] = ds_sim["lut_crop_scale"].isel(y=0, n_crop_types=row).values.flatten()
             else:
                 df_params_eff.loc[:, 'crop_scale'] = onp.nan
@@ -174,11 +175,16 @@ def main(tmp_dir):
                 df_obs.loc[:, 'obs'] = obs_vals
                 for nrow in range(nx * ny):
                     sim_vals = ds_sim[var_sim].isel(x=nrow, y=0).values
+                    if crop_type_sim > 500:
+                        crop_sim = ds_sim['lu_id'].values.flatten()
+                        sim_vals[(crop_sim != crop_type_sim)] = onp.nan
                     # join observations on simulations
                     df_eval = eval_utils.join_obs_on_sim(date_sim, sim_vals, df_obs)
                     # select data for specific crops
-                    if lu_id > 500:
-                        rows = onp.where(lu == lu_id)[0].tolist()
+                    if crop_type_sim > 500:
+                        crop_type_obs = lut.dict_crops[crop_type_sim]
+                        crop_obs = ds_obs["CROP_TYPE"].isel(x=0, y=0).values.flatten()
+                        rows = onp.where((crop_obs == crop_type_obs))[0].tolist()
                         df_eval = df_eval.iloc[rows, :]
                     df_eval = df_eval.dropna()
 
@@ -358,12 +364,12 @@ def main(tmp_dir):
             df_params_eff.loc[:, 'E_multi'] = 1/2 * df_params_eff.loc[:, 'r_S'] + 1/2 * df_params_eff.loc[:, 'KGE_q_ss']
 
             # write .txt-file
-            file = base_path_results / f"params_eff_{lu_id}_{lys_experiment}.txt"
+            file = base_path_results / f"params_eff_{crop_type_sim}_{lys_experiment}.txt"
             df_params_eff.to_csv(file, header=True, index=False, sep="\t")
-            dict_params_eff[f'{lu_id}'] = df_params_eff
+            dict_params_eff[f'{crop_type_sim}'] = df_params_eff
 
             # dotty plots
-            df_eff = df_params_eff.loc[:, ['KGE_q_ss', 'r_dS', 'E_multi']]
+            df_eff = df_params_eff.loc[:, ['KGE_q_ss', 'r_S', 'E_multi']]
             df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'crop_scale']]
             nrow = len(df_eff.columns)
             ncol = len(df_params.columns)
@@ -382,11 +388,11 @@ def main(tmp_dir):
                 ax[-1, j].set_xlabel(xlabel)
 
             ax[0, 0].set_ylabel('$KGE_{PERC}$ [-]')
-            ax[1, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
+            ax[1, 0].set_ylabel(r'$r_{S}$ [-]')
             ax[2, 0].set_ylabel('$E_{multi}$\n [-]')
 
             fig.subplots_adjust(wspace=0.2, hspace=0.3)
-            file = base_path_figs / f"dotty_plots_{lu_id}_{lys_experiment}.png"
+            file = base_path_figs / f"dotty_plots_{crop_type_sim}_{lys_experiment}.png"
             fig.savefig(file, dpi=250)
 
         # select best model run
