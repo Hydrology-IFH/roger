@@ -54,15 +54,15 @@ def main(tmp_dir):
                 df_obs.loc[:, 'd18O_prec'],
                 '.', color='blue')
     axs[0].set_ylabel(r'$\delta^{18}$O [‰]')
-    axs[0].set_ylim([-20,0])
+    axs[0].set_ylim([-20, 0])
     axs[0].set_xlim(df_obs.index[0], df_obs.index[-1])
     axs[1].plot(df_obs.index, df_obs.loc[:, 'd18O_perc'].fillna(method='bfill'),
-             '-', color='grey')
+                '-', color='grey')
     axs[1].plot(df_obs.index, df_obs.loc[:, 'd18O_perc'],
-             '.', color='grey')
+                '.', color='grey')
     axs[1].set_ylabel(r'$\delta^{18}$O [‰]')
     axs[1].set_xlabel('Time [year]')
-    axs[1].set_ylim([-20,0])
+    axs[1].set_ylim([-20, 0])
     axs[1].set_xlim(df_obs.index[0], df_obs.index[-1])
     fig.tight_layout()
     fig.text(0.115, 0.92, "(a)", ha="center", va="center")
@@ -321,7 +321,7 @@ def main(tmp_dir):
     cmap = copy.copy(plt.cm.get_cmap('RdYlBu_r'))
     norm = mpl.colors.Normalize(vmin=-20, vmax=5)
 
-    fig, axes = plt.subplots(2, 1, sharex=False, figsize=(14,7))
+    fig, axes = plt.subplots(2, 1, sharex=False, figsize=(14, 7))
     axes[0].bar(date_hydrus, ds_hydrus['prec'].values, width=-1, color=cmap(norm(ds_hydrus['d18O_prec'].values)), align='edge', edgecolor=cmap(norm(ds_hydrus['d18O_prec'].values)))
     axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
     axes[0].set_xlim(date_hydrus[0], date_hydrus[-1])
@@ -343,7 +343,7 @@ def main(tmp_dir):
     cmap = copy.copy(plt.cm.get_cmap('RdYlBu_r'))
     norm = mpl.colors.Normalize(vmin=-20, vmax=5)
 
-    fig, axes = plt.subplots(3, 1, sharex=False, figsize=(14,7))
+    fig, axes = plt.subplots(3, 1, sharex=False, figsize=(14, 7))
     axes[0].bar(date_hydrus, ds_hydrus['prec'].values, width=-1, edgecolor=cmap(norm(ds_hydrus['d18O_prec'].values)), align='edge')
     axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
     axes[0].set_xlim(date_hydrus[0], date_hydrus[-1])
@@ -367,7 +367,6 @@ def main(tmp_dir):
     file = 'conc_prec_soil_perc.png'
     path = base_path_figs / file
     fig.savefig(path, dpi=250)
-
 
     # states_hydrus_tt_file = base_path / "hydrus_benchmark" / "states_tt_hydrus.nc"
     # ds_hydrus_tt = xr.open_dataset(states_hydrus_tt_file, engine="h5netcdf")

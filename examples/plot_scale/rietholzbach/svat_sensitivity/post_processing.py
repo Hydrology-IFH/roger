@@ -45,62 +45,58 @@ def main(tmp_dir):
         os.mkdir(base_path_figs)
 
     # merge model output into single file
-    path = str(base_path / "SVAT.*.nc")
-    diag_files = glob.glob(path)
-    states_hm_si_file = base_path / "states_hm_sensitivity.nc"
-    with h5netcdf.File(states_hm_si_file, 'w', decode_vlen_strings=False) as f:
-        f.attrs.update(
-            date_created=datetime.datetime.today().isoformat(),
-            title='RoGeR saltelli results at Rietholzbach Lysimeter site',
-            institution='University of Freiburg, Chair of Hydrology',
-            references='',
-            comment='',
-            model_structure='SVAT model with free drainage',
-            roger_version=f'{roger.__version__}'
-        )
-        # collect dimensions
-        for dfs in diag_files:
-            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                # set dimensions with a dictionary
-                if not dfs.split('/')[-1].split('.')[1] == 'constant':
-                    dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
-                    time = onp.array(df.variables.get('Time'))
-        for dfs in diag_files:
-            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                if not f.dimensions:
-                    f.dimensions = dict_dim
-                    v = f.create_variable('x', ('x',), float)
-                    v.attrs['long_name'] = 'model run'
-                    v.attrs['units'] = ''
-                    v[:] = onp.arange(dict_dim["x"])
-                    v = f.create_variable('y', ('y',), float)
-                    v.attrs['long_name'] = ''
-                    v.attrs['units'] = ''
-                    v[:] = onp.arange(dict_dim["y"])
-                    v = f.create_variable('Time', ('Time',), float)
-                    var_obj = df.variables.get('Time')
-                    v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                                   units=var_obj.attrs["units"])
-                    v[:] = time
-                for var_sim in list(df.variables.keys()):
-                    var_obj = df.variables.get(var_sim)
-                    if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] > 1:
-                        v = f.create_variable(var_sim, ('x', 'y', 'Time'), float)
-                        vals = onp.array(var_obj)
-                        v[:, :, :] = vals.swapaxes(0, 2)
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+    if not os.path.exists(base_path / "states_hm_sensitivity.nc"):
+        path = str(base_path / "SVAT.*.nc")
+        diag_files = glob.glob(path)
+        states_hm_si_file = base_path / "states_hm_sensitivity.nc"
+        with h5netcdf.File(states_hm_si_file, 'w', decode_vlen_strings=False) as f:
+            f.attrs.update(
+                date_created=datetime.datetime.today().isoformat(),
+                title='RoGeR saltelli results at Rietholzbach Lysimeter site',
+                institution='University of Freiburg, Chair of Hydrology',
+                references='',
+                comment='',
+                model_structure='SVAT model with free drainage',
+                roger_version=f'{roger.__version__}'
+            )
+            # collect dimensions
+            for dfs in diag_files:
+                with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                    # set dimensions with a dictionary
+                    if not dfs.split('/')[-1].split('.')[1] == 'constant':
+                        dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+                        time = onp.array(df.variables.get('Time'))
+            for dfs in diag_files:
+                with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                    if not f.dimensions:
+                        f.dimensions = dict_dim
+                        v = f.create_variable('x', ('x',), float)
+                        v.attrs['long_name'] = 'model run'
+                        v.attrs['units'] = ''
+                        v[:] = onp.arange(dict_dim["x"])
+                        v = f.create_variable('y', ('y',), float)
+                        v.attrs['long_name'] = ''
+                        v.attrs['units'] = ''
+                        v[:] = onp.arange(dict_dim["y"])
+                        v = f.create_variable('Time', ('Time',), float)
+                        var_obj = df.variables.get('Time')
+                        v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                        units=var_obj.attrs["units"])
-                    elif var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] <= 2:
-                        v = f.create_variable(var_sim, ('x', 'y'), float)
-                        vals = onp.array(var_obj)
-                        v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                       units=var_obj.attrs["units"])
-
-    # move hydrologic states to directories of transport model
-    base_path_tm = base_path.parent / "svat_transport_sensitivity_reverse"
-    states_hm_si_file1 = base_path_tm / "states_hm_sensitivity.nc"
-    shutil.copy(states_hm_si_file, states_hm_si_file1)
+                        v[:] = time
+                    for var_sim in list(df.variables.keys()):
+                        var_obj = df.variables.get(var_sim)
+                        if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] > 1:
+                            v = f.create_variable(var_sim, ('x', 'y', 'Time'), float)
+                            vals = onp.array(var_obj)
+                            v[:, :, :] = vals.swapaxes(0, 2)
+                            v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                           units=var_obj.attrs["units"])
+                        elif var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] <= 2:
+                            v = f.create_variable(var_sim, ('x', 'y'), float)
+                            vals = onp.array(var_obj)
+                            v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
+                            v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                           units=var_obj.attrs["units"])
 
     # load simulation
     ds_sim = xr.open_dataset(states_hm_si_file, engine="h5netcdf")
