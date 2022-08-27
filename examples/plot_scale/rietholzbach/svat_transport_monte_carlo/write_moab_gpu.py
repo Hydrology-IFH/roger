@@ -26,7 +26,7 @@ for tm in transport_models:
     tms = tm.replace(" ", "_")
     lines = []
     lines.append('#!/bin/bash\n')
-    lines.append('#PBS -l nodes=8:ppn=25\n')
+    lines.append('#PBS -l nodes=5:ppn=20:gpus=4:default\n')
     lines.append('#PBS -l walltime=48:00:00\n')
     lines.append('#PBS -l pmem=2000mb\n')
     lines.append(f'#PBS -N {script_name}\n')
@@ -34,26 +34,22 @@ for tm in transport_models:
     lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
     lines.append(' \n')
     lines.append('# load module dependencies\n')
+    lines.append('module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4\n')
     lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
+    lines.append('module load lib/cudnn/8.2-cuda-11.4\n')
     lines.append('export OMP_NUM_THREADS=1\n')
     lines.append('eval "$(conda shell.bash hook)"\n')
-    lines.append('conda activate roger-mpi\n')
+    lines.append('conda activate roger-gpu\n')
     lines.append(f'cd {base_path_binac}\n')
     lines.append(' \n')
     lines.append('# adapt command to your available scheduler / MPI implementation\n')
-    # lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 25 1 -tms %s -td "${TMPDIR}"\n' % (tms))
-    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 200 1 -tms {tms} -td {output_path_ws.as_posix()}\n')
-    # lines.append('# Write output to temporary SSD of computing node\n')
-    # lines.append('echo "Write output to $TMPDIR"\n')
-    # lines.append('# Move output from temporary SSD to workspace\n')
-    # lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
+    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d gpu -n 100 1 -tms {tms} -td {output_path_ws.as_posix()}\n')
     lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-    # lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
-    file_path = base_path / f'{script_name}_moab.sh'
+    file_path = base_path / f'{script_name}_moab_gpu.sh'
     file = open(file_path, "w")
     file.writelines(lines)
     file.close()
-    subprocess.Popen(f"chmod +x {script_name}_moab.sh", shell=True)
+    subprocess.Popen(f"chmod +x {script_name}_moab_gpu.sh", shell=True)
 
 
 transport_models = ['complete-mixing', 'piston']
