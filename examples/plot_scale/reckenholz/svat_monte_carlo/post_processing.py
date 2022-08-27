@@ -147,6 +147,7 @@ def main(tmp_dir):
         crop_types_sim1 = onp.unique(ds_sim['lu_id'].values.flatten()).tolist()
         crop_types_sim = [0] + crop_types_sim1
         for crop_type_sim in crop_types_sim:
+            crop_type_sim = int(crop_type_sim)
             # DataFrame with sampled model parameters and the corresponding metrics
             nx = ds_sim.dims['x']  # number of rows
             ny = ds_sim.dims['y']  # number of columns
@@ -158,7 +159,7 @@ def main(tmp_dir):
             df_params_eff.loc[:, 'theta_ufc'] = ds_sim["theta_ufc"].isel(y=0).values.flatten()
             df_params_eff.loc[:, 'theta_pwp'] = ds_sim["theta_pwp"].isel(y=0).values.flatten()
             df_params_eff.loc[:, 'ks'] = ds_sim["ks"].isel(y=0).values.flatten()
-            if crop_type_sim > 0:
+            if crop_type_sim > 500:
                 print(crop_type_sim)
                 row = onp.where(lut.ARR_CP[:, 0] == crop_type_sim)[0]
                 print(row)
