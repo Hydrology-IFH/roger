@@ -164,6 +164,8 @@ def main():
             if condt:
                 vs.itt_event = 0
                 vs.itt_forc = vs.itt_forc + 6 * 24
+                prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
+                if prec_day[:, :, vs.itt_forc+6*24-settings.end_event:vs.itt_forc+6*24]
             prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
             ta_day = self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
             pet_day = self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
