@@ -140,8 +140,8 @@ def main(nsamples, tmp_dir):
         def set_initial_conditions(self, state):
             vs = state.variables
 
-            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], npx.where(0.46 > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_sat[2:-2, 2:-2, npx.newaxis], 0.46))
-            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], npx.where(0.44 > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_sat[2:-2, 2:-2, npx.newaxis], 0.44))
+            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], npx.where(0.46 > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_ufc[2:-2, 2:-2, npx.newaxis], 0.46))
+            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], npx.where(0.44 > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_ufc[2:-2, 2:-2, npx.newaxis], 0.44))
 
         @roger_routine
         def set_boundary_conditions_setup(self, state):
