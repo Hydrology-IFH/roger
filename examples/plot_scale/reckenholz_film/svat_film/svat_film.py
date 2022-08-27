@@ -158,34 +158,46 @@ def main():
             vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, 'forcing.nc')[vs.itt_forc])
             vs.month = update(vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, 'forcing.nc')[vs.itt_forc])
             vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, 'forcing.nc')[vs.itt_forc])
+            
+            N_prec = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc').shape[-1]
 
             # adaptive time stepping
-            condt = (vs.time % (24 * 60 * 60) == 0) & (vs.itt > 0)
+            condt = (vs.time % (24 * 60 * 60) == 0)
             if condt:
                 vs.itt_event = 0
-                vs.itt_forc = vs.itt_forc + 6 * 24
-                prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
-                if prec_day[:, :, vs.itt_forc+6*24-settings.end_event:vs.itt_forc+6*24]
-            prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
-            ta_day = self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
-            pet_day = self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
+                itt_forc_start = vs.itt_forc
+                itt_forc_end = vs.itt_forc + 6 * 24
+                end_event = int(settings.end_event / 60 / 6)
+                prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, itt_forc_start:itt_forc_end]
+                while (prec_day[:, :, itt_forc_end-end_event:itt_forc_end] > 0).any():
+                    itt_forc_end = itt_forc_end + 6 * 24
+                    prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, itt_forc_start:itt_forc_end]
+                    if itt_forc_end >= N_prec:
+                        break
+
+            prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, itt_forc_start:itt_forc_end]
+            ta_day = self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, itt_forc_start:itt_forc_end]
+            pet_day = self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, itt_forc_start:itt_forc_end]
             event = npx.zeros((prec_day.shape[-1]), dtype=int)
             break_counter = prec_day.shape[-1]
+            event_counter = 1
             for i in range(0, prec_day.shape[-1]):
                 if (prec_day[:, :, vs.itt_forc+i] > 0) & (ta_day[:, :, vs.itt_forc+i] > 0):
-                    event = update(event, at[i], 1)
+                    event = update(event, at[i], event_counter)
                     break_counter = 0
                 elif ((prec_day[:, :, vs.itt_forc+i] <= 0) & (ta_day[:, :, vs.itt_forc+i] <= 0)).all() & (break_counter < settings.end_event / (60 * 10)):
-                    event = update(event, at[i], 1)
+                    event = update(event, at[i], event_counter)
                     break_counter = break_counter + 1
                 elif ((prec_day[:, :, vs.itt_forc+i] <= 0) & (ta_day[:, :, vs.itt_forc+i] <= 0)).all() & (break_counter < settings.end_event / (60 * 10)):
                     event = update(event, at[i], 0)
                     break_counter = break_counter + 1
+                elif (event[i-end_event:i] <= 0).all() & (i >= end_event):
+                    event_counter = event_counter + 1
 
             if ((prec_day[:, :, vs.itt_forc+6*18:vs.itt_forc+6*24] > 0) & (ta_day[:, :, vs.itt_forc+6*18:vs.itt_forc+6*24] > 0)).any() and vs.itt_forc+6*24*2 <= settings.nitt_forc:
-                prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24*2]
-                ta_day = self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24*2]
-                pet_day = self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24*2]
+                prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, itt_forc_start:itt_forc_end*2]
+                ta_day = self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, itt_forc_start:itt_forc_end*2]
+                pet_day = self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, itt_forc_start:itt_forc_end*2]
                 break_counter = prec_day.shape[-1]
                 for i in range(0, prec_day.shape[-1]):
                     if (prec_day[:, :, vs.itt_forc+i] > 0) & (ta_day[:, :, vs.itt_forc+i] > 0):

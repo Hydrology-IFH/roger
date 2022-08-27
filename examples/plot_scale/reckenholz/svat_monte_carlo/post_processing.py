@@ -362,7 +362,8 @@ def main(tmp_dir):
                                 df_params_eff.loc[nrow, key_phi] = de.calc_phi(brel_mean, b_slope)
 
             # Calculate multi-objective metric
-            df_params_eff.loc[:, 'E_multi'] = 1/2 * df_params_eff.loc[:, 'r_S'] + 1/2 * df_params_eff.loc[:, 'KGE_q_ss']
+            if 'r_S' in df_params_eff.columns:
+                df_params_eff.loc[:, 'E_multi'] = 1/2 * df_params_eff.loc[:, 'r_S'] + 1/2 * df_params_eff.loc[:, 'KGE_q_ss']
 
             # write .txt-file
             file = base_path_results / f"params_eff_{crop_type_sim}_{lys_experiment}.txt"
@@ -370,31 +371,32 @@ def main(tmp_dir):
             dict_params_eff[f'{crop_type_sim}'] = df_params_eff
 
             # dotty plots
-            df_eff = df_params_eff.loc[:, ['KGE_q_ss', 'r_S', 'E_multi']]
-            df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'crop_scale']]
-            nrow = len(df_eff.columns)
-            ncol = len(df_params.columns)
-            fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(14, 7))
-            for i in range(nrow):
+            if 'E_multi' in df_params_eff.columns:
+                df_eff = df_params_eff.loc[:, ['KGE_q_ss', 'r_S', 'E_multi']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'crop_scale']]
+                nrow = len(df_eff.columns)
+                ncol = len(df_params.columns)
+                fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(14, 7))
+                for i in range(nrow):
+                    for j in range(ncol):
+                        y = df_eff.iloc[:, i]
+                        x = df_params.iloc[:, j]
+                        sns.regplot(x=x, y=y, ax=ax[i, j], ci=None, color='k',
+                                    scatter_kws={'alpha': 0.2, 's': 4, 'color': 'grey'})
+                        ax[i, j].set_xlabel('')
+                        ax[i, j].set_ylabel('')
+
                 for j in range(ncol):
-                    y = df_eff.iloc[:, i]
-                    x = df_params.iloc[:, j]
-                    sns.regplot(x=x, y=y, ax=ax[i, j], ci=None, color='k',
-                                scatter_kws={'alpha': 0.2, 's': 4, 'color': 'grey'})
-                    ax[i, j].set_xlabel('')
-                    ax[i, j].set_ylabel('')
+                    xlabel = labs._LABS[df_params.columns[j]]
+                    ax[-1, j].set_xlabel(xlabel)
 
-            for j in range(ncol):
-                xlabel = labs._LABS[df_params.columns[j]]
-                ax[-1, j].set_xlabel(xlabel)
+                ax[0, 0].set_ylabel('$KGE_{PERC}$ [-]')
+                ax[1, 0].set_ylabel(r'$r_{S}$ [-]')
+                ax[2, 0].set_ylabel('$E_{multi}$\n [-]')
 
-            ax[0, 0].set_ylabel('$KGE_{PERC}$ [-]')
-            ax[1, 0].set_ylabel(r'$r_{S}$ [-]')
-            ax[2, 0].set_ylabel('$E_{multi}$\n [-]')
-
-            fig.subplots_adjust(wspace=0.2, hspace=0.3)
-            file = base_path_figs / f"dotty_plots_{crop_type_sim}_{lys_experiment}.png"
-            fig.savefig(file, dpi=250)
+                fig.subplots_adjust(wspace=0.2, hspace=0.3)
+                file = base_path_figs / f"dotty_plots_{crop_type_sim}_{lys_experiment}.png"
+                fig.savefig(file, dpi=250)
 
         # select best model run
         df_params_eff = dict_params_eff['0']
