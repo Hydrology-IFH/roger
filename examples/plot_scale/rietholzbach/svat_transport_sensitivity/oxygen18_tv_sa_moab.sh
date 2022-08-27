@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=16
+#PBS -l nodes=2:ppn=16
 #PBS -l walltime=30:00:00
 #PBS -l pmem=8000mb
 #PBS -N oxygen18_tv_sa
@@ -14,7 +14,7 @@ conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_sensitivity
  
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 16 1 -tms time-variant -td "${TMPDIR}"
+mpirun --bind-to core --map-by socket:PE=5 -report-bindings python svat_transport.py -b jax -d cpu -n 32 1 -tms time-variant -td "${TMPDIR}"
 # Write output to temporary SSD of computing node
 echo "Write output to $TMPDIR"
 # Move output from temporary SSD to workspace

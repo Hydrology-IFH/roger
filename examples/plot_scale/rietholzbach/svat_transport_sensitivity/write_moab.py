@@ -26,7 +26,7 @@ for tm in transport_models:
     tms = tm.replace(" ", "_")
     lines = []
     lines.append('#!/bin/bash\n')
-    lines.append('#PBS -l nodes=1:ppn=16\n')
+    lines.append('#PBS -l nodes=2:ppn=16\n')
     lines.append('#PBS -l walltime=30:00:00\n')
     lines.append('#PBS -l pmem=8000mb\n')
     lines.append(f'#PBS -N {script_name}\n')
@@ -41,7 +41,7 @@ for tm in transport_models:
     lines.append(f'cd {base_path_binac}\n')
     lines.append(' \n')
     lines.append('# adapt command to your available scheduler / MPI implementation\n')
-    lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 16 1 -tms %s -td "${TMPDIR}"\n' % (tms))
+    lines.append('mpirun --bind-to core --map-by socket:PE=5 -report-bindings python svat_transport.py -b jax -d cpu -n 32 1 -tms %s -td "${TMPDIR}"\n' % (tms))
     lines.append('# Write output to temporary SSD of computing node\n')
     lines.append('echo "Write output to $TMPDIR"\n')
     lines.append('# Move output from temporary SSD to workspace\n')
