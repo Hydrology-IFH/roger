@@ -207,6 +207,7 @@ _LABS = {'S_int_top': r'$S_{int-top}$ [mm]',
          'crop_scale_572': r'$scale_{winter-grass}$ [-]',
          'crop_scale_573': r'$scale_{summer-grass}$ [-]',
          'crop_scale_574': r'$scale_{winter-grass}$ [-]',
+         'crop_scale': r'$scale_{crop}$ [-]',
          }
 
 # long names of variables used for netcdf
