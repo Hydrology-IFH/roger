@@ -11,7 +11,6 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(nsamples, transport_model_structure, tmp_dir):
-    from roger import runtime_settings as rs, runtime_state as rst
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, random_uniform, for_loop
@@ -670,14 +669,16 @@ def main(nsamples, transport_model_structure, tmp_dir):
 
     tms = transport_model_structure.replace("_", " ")
     model = SVATTRANSPORTSetup()
-    if tms not in ['complete-mixing', 'piston']:
+    if tms in ['preferential', 'advection-dispersion',
+               'time-variant preferential',
+               'time-variant advection-dispersion']:
         model._set_nsamples(nsamples)
     model._set_tm_structure(tms)
     identifier = f'SVATTRANSPORT_{transport_model_structure}'
     model._set_identifier(identifier)
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)
-    write_forcing_tracer(input_path, 'd18O')
+    # write_forcing_tracer(input_path, 'd18O')
     model.setup()
     model.warmup()
     model.run()
