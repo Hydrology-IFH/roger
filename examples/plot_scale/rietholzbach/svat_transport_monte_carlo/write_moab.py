@@ -26,9 +26,9 @@ for tm in transport_models:
     tms = tm.replace(" ", "_")
     lines = []
     lines.append('#!/bin/bash\n')
-    lines.append('#PBS -l nodes=5:ppn=10\n')
+    lines.append('#PBS -l nodes=1:ppn=20\n')
     lines.append('#PBS -l walltime=48:00:00\n')
-    lines.append('#PBS -l pmem=4000mb\n')
+    lines.append('#PBS -l pmem=6000mb\n')
     lines.append(f'#PBS -N {script_name}\n')
     lines.append('#PBS -m bea\n')
     lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')

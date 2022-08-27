@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=20
 #PBS -l walltime=48:00:00
-#PBS -l pmem=4000mb
+#PBS -l pmem=6000mb
 #PBS -N oxygen18_ad_mc
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
@@ -14,7 +14,7 @@ conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo
 
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -ns 4000 -n 20 1 -tms advection-dispersion -td "${TMPDIR}"
+mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -ns 10000 -n 20 1 -tms advection-dispersion -td "${TMPDIR}"
 # Write output to temporary SSD of computing node
 echo "Write output to $TMPDIR"
 # Move output from temporary SSD to workspace
