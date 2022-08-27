@@ -50,9 +50,10 @@ WINTER_MULTI_YEAR_CROPS_CONT = onp.array([574], dtype=int)
 SUMMER_MULTI_YEAR_CROPS_INIT = onp.array([571], dtype=int)
 SUMMER_MULTI_YEAR_CROPS_CONT = onp.array([573], dtype=int)
 
-dict_crops = {557: 'winter wheat',
+dict_crops = {
+              557: 'winter wheat',
               556: 'winter barley',
-              563: 'sugar beets'
+              563: 'sugar beets',
               559: 'winter rape',
               560: 'triticale',
               539: 'silage_corn',
@@ -60,6 +61,6 @@ dict_crops = {557: 'winter wheat',
               536: 'beetroot',
               571: 'grass',
               572: 'grass',
-              573: 'grass'
-              574: 'grass'
+              573: 'grass',
+              574: 'grass',
              }
