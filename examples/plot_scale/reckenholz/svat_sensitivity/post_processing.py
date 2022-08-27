@@ -414,7 +414,7 @@ def main(tmp_dir):
             # make dotty plots
             nrow = len(df_eff.columns)
             ncol = bounds['num_vars']
-            fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(14, 7))
+            fig, ax = plt.subplots(nrow, ncol, sharey=False, figsize=(14, 7))
             for i in range(nrow):
                 for j in range(ncol):
                     y = df_eff.iloc[:, i]
