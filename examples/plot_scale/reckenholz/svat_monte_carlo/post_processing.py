@@ -159,7 +159,7 @@ def main(tmp_dir):
             df_params_eff.loc[:, 'theta_pwp'] = ds_sim["theta_pwp"].isel(y=0).values.flatten()
             df_params_eff.loc[:, 'ks'] = ds_sim["ks"].isel(y=0).values.flatten()
             if crop_type_sim > 0:
-                row = onp.where(lut.ARR_CP[:, 0] == crop_type_sim)[0][0]
+                row = onp.where(lut.ARR_CP[:, 0] == crop_type_sim)[0]
                 df_params_eff.loc[:, f'crop_scale_{crop_type_sim}'] = ds_sim["lut_crop_scale"].isel(y=0, n_crop_types=row).values.flatten()
             else:
                 df_params_eff.loc[:, 'crop_scale'] = onp.nan
