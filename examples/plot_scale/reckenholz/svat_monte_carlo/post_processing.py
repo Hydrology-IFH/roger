@@ -181,7 +181,7 @@ def main(tmp_dir):
                 for nrow in range(nx * ny):
                     sim_vals = ds_sim[var_sim].isel(x=nrow, y=0).values
                     if crop_type_sim > 500:
-                        crop_sim = ds_sim['lu_id'].values.flatten()
+                        crop_sim = ds_sim['lu_id'].isel(x=nrow, y=0).values
                         sim_vals[(crop_sim != crop_type_sim)] = onp.nan
                     # join observations on simulations
                     df_eval = eval_utils.join_obs_on_sim(date_sim, sim_vals, df_obs)
