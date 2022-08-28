@@ -26,7 +26,7 @@ for tm in transport_models:
     tms = tm.replace(" ", "_")
     lines = []
     lines.append('#!/bin/bash\n')
-    lines.append('#PBS -l nodes=1:ppn=1:gpus=1:default\n')
+    lines.append('#PBS -l nodes=4:ppn=1:gpus=1:default\n')
     lines.append('#PBS -l walltime=48:00:00\n')
     lines.append('#PBS -l pmem=4000mb\n')
     lines.append(f'#PBS -N {script_name}\n')
@@ -43,8 +43,8 @@ for tm in transport_models:
     lines.append(f'cd {base_path_binac}\n')
     lines.append(' \n')
     lines.append('# adapt command to your available scheduler / MPI implementation\n')
-    # lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d gpu -ns 1000 -n 100 1 -tms {tms} -td {output_path_ws.as_posix()}\n')
-    lines.append(f'python svat_transport.py -b jax -d gpu -ns 10 -tms {tms} -td {output_path_ws.as_posix()}\n')
+    lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d gpu -ns 40 -n 4 1 -tms {tms} -td {output_path_ws.as_posix()}\n')
+    # lines.append(f'python svat_transport.py -b jax -d gpu -ns 10 -tms {tms} -td {output_path_ws.as_posix()}\n')
     lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
     file_path = base_path / f'{script_name}_moab_gpu.sh'
     file = open(file_path, "w")

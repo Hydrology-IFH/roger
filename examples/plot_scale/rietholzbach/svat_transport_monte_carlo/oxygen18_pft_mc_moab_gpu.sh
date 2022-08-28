@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=1:gpus=1:default
+#PBS -l nodes=4:ppn=1:gpus=1:default
 #PBS -l walltime=48:00:00
 #PBS -l pmem=4000mb
 #PBS -N oxygen18_pft_mc
@@ -16,5 +16,5 @@ conda activate roger-gpu
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo
  
 # adapt command to your available scheduler / MPI implementation
-python svat_transport.py -b jax -d gpu -ns 10 -tms time-variant_preferential -td /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo
+mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d gpu -ns 40 -n 4 1 -tms time-variant_preferential -td /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo
 mkdir -p /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo
