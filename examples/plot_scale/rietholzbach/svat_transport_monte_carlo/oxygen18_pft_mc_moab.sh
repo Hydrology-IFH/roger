@@ -1,24 +1,17 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=25
+#PBS -l nodes=5:ppn=20
 #PBS -l walltime=48:00:00
-#PBS -l pmem=5000mb
+#PBS -l pmem=2000mb
 #PBS -N oxygen18_pft_mc
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  
 # load module dependencies
 module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
-module unload devel/cuda/10.1
 export OMP_NUM_THREADS=1
 eval "$(conda shell.bash hook)"
 conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo
  
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 25 1 -tms time-variant_preferential -td "${TMPDIR}"
-mkdir -p /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo
-# Write output to temporary SSD of computing node
-echo "Write output to $TMPDIR"
-# Move output from temporary SSD to workspace
-echo "Move output to /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo"
-mv "${TMPDIR}"/*.nc /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo
+mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 100 1 -tms time-variant_preferential -td /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo
