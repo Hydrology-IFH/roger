@@ -2,7 +2,7 @@ from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, at
 from roger.core import sas
-from roger import runtime_settings as rs
+from roger import runtime_settings as rs, logger
 
 
 @roger_kernel
@@ -60,9 +60,10 @@ def calc_tt(state, SA, sa, flux, sas_params):
         TT,
         at[2:-2, 2:-2, :], sas.dirac(state, sas_params)[2:-2, 2:-2, :],
     )
+    Omega, sas_params = sas.kumaraswami(state, SA, sas_params)
     TT = update_add(
         TT,
-        at[2:-2, 2:-2, :], sas.kumaraswami(state, SA, sas_params)[2:-2, 2:-2, :],
+        at[2:-2, 2:-2, :], Omega[2:-2, 2:-2, :],
     )
     TT = update_add(
         TT,
@@ -78,8 +79,8 @@ def calc_tt(state, SA, sa, flux, sas_params):
     )
 
     # travel time distribution
-    mask_old = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([1, 22, 32, 34, 52, 62])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis]))
-    mask_young = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([21, 31, 33, 4, 41, 51, 61])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3])) & (sas_params[:, :, 1, npx.newaxis] < sas_params[:, :, 2, npx.newaxis]))
+    mask_old = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([1, 22, 32, 34, 52, 62])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis]))
+    mask_young = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([21, 31, 33, 4, 41, 51, 61])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] < sas_params[:, :, 2, npx.newaxis]))
 
     tt = update(
         tt,
@@ -215,10 +216,19 @@ def calc_tt(state, SA, sa, flux, sas_params):
         # sanity check of SAS function (works only for numpy backend)
         mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=1e-02)
         if not npx.all(mask[2:-2, 2:-2]):
-            raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
+            if rs.profile_mode:
+                logger.debug(f"Solution of SAS function diverged at iteration {vs.itt}")
+            else:
+                raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
         mask1 = (tt * flux[:, :, npx.newaxis] - sa[:, :, 1, :] > 1e-02)
         if npx.any(mask1[2:-2, 2:-2, :]):
-            raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
+            if rs.profile_mode:
+                logger.debug(f"Solution of SAS function diverged at iteration {vs.itt}")
+            else:
+                raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
+        if rs.profile_mode:
+            rows = npx.where(mask == False)[0].tolist()
+            logger.debug(f"Solution of SAS function diverged at {rows}")
 
     return tt
 

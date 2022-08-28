@@ -431,12 +431,12 @@ def main(tmp_dir):
                     v.attrs['units'] = ''
                     v[:] = onp.arange(dict_dim["y"])
                     v = f.groups[lys_experiment].create_variable('Time', ('Time',), float)
-                    var_obj = df.variables.get('Time')
+                    var_obj = df.groups[lys_experiment].variables.get('Time')
                     v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                    units=var_obj.attrs["units"])
                     v[:] = onp.array(var_obj)
                 for var_sim in list(df.variables.keys()):
-                    var_obj = df.variables.get(var_sim)
+                    var_obj = df.groups[lys_experiment].variables.get(var_sim)
                     if var_sim not in list(f.groups[lys_experiment].dimensions.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
                         v = f.groups[lys_experiment].create_variable(var_sim, ('x', 'y', 'Time'), float)
                         vals = onp.array(var_obj)

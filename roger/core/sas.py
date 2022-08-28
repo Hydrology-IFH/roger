@@ -116,7 +116,7 @@ def kumaraswami(state, SA, sas_params):
                                1 - (1 - (SA[2:-2, 2:-2, vs.tau, :]/S[2:-2, 2:-2, :])**sas_params[2:-2, 2:-2, 1, npx.newaxis])**sas_params[2:-2, 2:-2, 2, npx.newaxis], 0.)) * mask3[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    return Omega
+    return Omega, sas_params
 
 
 @roger_kernel

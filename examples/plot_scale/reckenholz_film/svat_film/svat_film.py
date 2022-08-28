@@ -289,8 +289,8 @@ def main():
                 )
 
             cond_event = (event == vs.event_id_counter)
-            t1 = _get_first_row_no(cond_event, vs.event_id[vs.tau])
-            t2 = _get_last_row_no(cond_event, vs.event_id[vs.tau])
+            t1 = _get_first_row_no(cond_event, vs.event_id[vs.tau])[0]
+            t2 = _get_last_row_no(cond_event, vs.event_id[vs.tau])[0]
             prec_event = prec_events[:, :, t1:t2]
             ta_event = ta_events[:, :, t1:t2]
 
