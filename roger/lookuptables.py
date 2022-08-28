@@ -63,4 +63,5 @@ dict_crops = {
               572: 'grass',
               573: 'grass',
               574: 'grass',
+              599: 'bare',
              }
