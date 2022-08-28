@@ -8,6 +8,7 @@
  
 # load module dependencies
 module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
+module unload devel/cuda/10.1
 export OMP_NUM_THREADS=1
 eval "$(conda shell.bash hook)"
 conda activate roger-mpi

@@ -35,6 +35,7 @@ for tm in transport_models:
     lines.append(' \n')
     lines.append('# load module dependencies\n')
     lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
+    lines.append('module unload devel/cuda/10.1\n')
     lines.append('export OMP_NUM_THREADS=1\n')
     lines.append('eval "$(conda shell.bash hook)"\n')
     lines.append('conda activate roger-mpi\n')
