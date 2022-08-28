@@ -17,11 +17,10 @@ def main(nsamples, lys_experiment, tmp_dir):
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
     from roger.core.numerics import calc_parameters_surface_kernel
-    from roger.core.utilities import _get_row_no
-    from roger.tools.setup import write_forcing, write_crop_rotation
+    from roger.tools.setup import write_forcing
     import roger.lookuptables as lut
 
-    class SVATCROPSetup(RogerSetup):
+    class SVATSetup(RogerSetup):
         """A SVAT model including crop phenology/crop rotation.
         """
         _base_path = Path(__file__).parent
@@ -34,10 +33,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                          [0.05, 0.33],
                          [0.05, 0.33],
                          [0.1, 120]]
-        if _crop_types:
-            for ct in _crop_types:
-                _param_names.append(f"crop_scale_{ct}")
-                _param_bounds.append([0.5, 1.5])
         _nsamples = nsamples
         _bounds = {
             'num_vars': len(_param_names),
@@ -51,7 +46,7 @@ def main(nsamples, lys_experiment, tmp_dir):
         _lys = None
 
         # write sampled boundaries to .yml
-        file_path = _base_path / "param_bounds_svat_crop.yml"
+        file_path = _base_path / "param_bounds_svat.yml"
         if os.path.exists(file_path):
             with open(file_path, 'r') as file:
                 _bounds_yml = yaml.safe_load(file)
@@ -101,24 +96,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 date = infile.variables['Time'].attrs['time_origin'].split(" ")[0]
                 return f"{date} 00:00:00"
 
-        def _get_ncr(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['year_season']
-                return len(onp.array(var_obj))
-
-        def _set_crop_types(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['crop']
-                crop_types1 = onp.unique(onp.array(var_obj)[0, 0, :]).tolist()
-                crop_types = []
-                for ct in crop_types1:
-                    if ct in onp.arange(500, 598, dtype=int).tolist():
-                        crop_types.append(ct)
-
-                self._crop_types = crop_types
-
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
@@ -135,14 +112,7 @@ def main(nsamples, lys_experiment, tmp_dir):
             settings.y_origin = 0.0
             settings.time_origin = self._get_time_origin(self._input_dir, 'forcing.nc')
 
-            settings.enable_crop_water_stress = True
-            settings.enable_crop_phenology = True
-            settings.enable_crop_rotation = True
             settings.enable_macropore_lower_boundary_condition = False
-
-            if settings.enable_crop_rotation:
-                settings.ncrops = 3
-                settings.ncr = self._get_ncr(self._input_dir, 'crop_rotation.nc')
 
         @roger_routine(
             dist_safe=False,
@@ -170,8 +140,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 "lut_gcm",
                 "lut_is",
                 "lut_rdlu",
-                "lut_crops",
-                "lut_crop_scale",
             ],
         )
         def set_look_up_tables(self, state):
@@ -182,13 +150,6 @@ def main(nsamples, lys_experiment, tmp_dir):
             vs.lut_gcm = update(vs.lut_gcm, at[:, :], lut.ARR_GCM)
             vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
             vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
-            vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
-            # scale basal crop coeffcient with factor
-            offset = len(self._param_names) - len(self._crop_types)
-            for i, crop_type in enumerate(self._crop_types):
-                row_no = _get_row_no(vs.lut_crops[:, 0], crop_type)
-                j = offset + i
-                vs.lut_crop_scale = update(vs.lut_crop_scale, at[2:-2, 2:-2, row_no], self._params[:, j, npx.newaxis, npx.newaxis])
 
         @roger_routine
         def set_topography(self, state):
@@ -206,15 +167,12 @@ def main(nsamples, lys_experiment, tmp_dir):
                 "theta_pwp",
                 "ks",
                 "kf",
-                "crop_type",
-                "z_root",
-                "z_root_crop",
             ],
         )
         def set_parameters_setup(self, state):
             vs = state.variables
 
-            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
+            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 5)
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1350)
             vs.dmpv = update(vs.dmpv, at[2:-2, :], npx.array(self._params[:, 0, npx.newaxis], dtype=int))
             vs.lmpv = update(vs.lmpv, at[2:-2, :], npx.array(self._params[:, 1, npx.newaxis], dtype=int))
@@ -223,17 +181,6 @@ def main(nsamples, lys_experiment, tmp_dir):
             vs.theta_pwp = update(vs.theta_pwp, at[2:-2, :], self._params[:, 4, npx.newaxis])
             vs.ks = update(vs.ks, at[2:-2, :], self._params[:, 5, npx.newaxis])
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
-
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 1])
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 2])
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 3])
-
-            z_root = self._read_var_from_nc("z_root", self._base_path, 'initvals.nc', group=self._lys)
-            vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :2], z_root)
-            vs.z_root_crop = update(
-                vs.z_root_crop,
-                at[2:-2, 2:-2, :2, 0], z_root
-            )
 
         @roger_routine
         def set_parameters(self, state):
@@ -254,8 +201,6 @@ def main(nsamples, lys_experiment, tmp_dir):
             vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], npx.where(theta_rz > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + vs.theta_ufc[2:-2, 2:-2, npx.newaxis], theta_rz))
             theta_ss = self._read_var_from_nc("theta_ss", self._base_path, 'initvals.nc', group=self._lys)
             vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], npx.where(theta_ss > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + vs.theta_ufc[2:-2, 2:-2, npx.newaxis], theta_ss))
-
-            vs.update(set_initial_conditions_crops_kernel(state))
 
         @roger_routine
         def set_boundary_conditions_setup(self, state):
@@ -295,8 +240,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 "swe_top",
                 "time",
                 "time_event0",
-                "crop_type",
-                "itt_cr"
             ],
         )
         def set_forcing(self, state):
@@ -431,17 +374,11 @@ def main(nsamples, lys_experiment, tmp_dir):
             vs.pet = update(vs.pet, at[2:-2, 2:-2], pet)
             vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], pet)
 
-            if (vs.year[vs.tau] != vs.year[vs.taum1]) & (vs.itt > 1):
-                vs.itt_cr = vs.itt_cr + 2
-                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.crop_type[2:-2, 2:-2, 2])
-                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, vs.itt_cr])
-                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, vs.itt_cr + 1])
-
         @roger_routine
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "re_rg", "re_rl"]
+            diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz"]
             diagnostics["rates"].output_frequency = 24 * 60 * 60
             diagnostics["rates"].sampling_frequency = 1
             if base_path:
@@ -451,8 +388,7 @@ def main(nsamples, lys_experiment, tmp_dir):
                                                        "S_pwp_rz", "S_fc_rz",
                                                        "S_sat_rz", "S_pwp_ss",
                                                        "S_fc_ss", "S_sat_ss",
-                                                       "theta",
-                                                       "z_root", "ground_cover", "lu_id"]
+                                                       "theta"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
@@ -464,7 +400,7 @@ def main(nsamples, lys_experiment, tmp_dir):
             if base_path:
                 diagnostics["averages"].base_output_path = base_path
 
-            diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'lut_crop_scale']
+            diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']
             diagnostics["constant"].output_frequency = 0
             diagnostics["constant"].sampling_frequency = 1
             if base_path:
@@ -475,33 +411,6 @@ def main(nsamples, lys_experiment, tmp_dir):
             vs = state.variables
 
             vs.update(after_timestep_kernel(state))
-            vs.update(after_timestep_crops_kernel(state))
-
-    @roger_kernel
-    def set_initial_conditions_crops_kernel(state):
-        vs = state.variables
-
-        # calculate time since growing
-        t_grow = allocate(state.dimensions, ("x", "y", "crops"))
-        t_grow = update(
-            t_grow,
-            at[2:-2, 2:-2, :], npx.where(vs.z_root_crop[2:-2, 2:-2, vs.taum1, :] > 0, (-1 / vs.root_growth_rate[2:-2, 2:-2, :]) * npx.log(1 / ((vs.z_root_crop[2:-2, 2:-2, vs.taum1, :] / 1000 - vs.z_root_crop_max[2:-2, 2:-2, :] / 1000) * (-1 / (vs.z_root_crop_max[2:-2, 2:-2, :] / 1000 - vs.z_evap[2:-2, 2:-2, npx.newaxis] / 1000)))), 0)
-        )
-
-        vs.t_grow_cc = update(
-            vs.t_grow_cc,
-            at[2:-2, 2:-2, :2, :], t_grow[2:-2, 2:-2, npx.newaxis, :]
-        )
-
-        vs.t_grow_root = update(
-            vs.t_grow_root,
-            at[2:-2, 2:-2, :2, :], t_grow[2:-2, 2:-2, npx.newaxis, :]
-        )
-
-        return KernelOutput(
-            t_grow_cc=vs.t_grow_cc,
-            t_grow_root=vs.t_grow_root,
-        )
 
     @roger_kernel
     def after_timestep_kernel(state):
@@ -702,37 +611,13 @@ def main(nsamples, lys_experiment, tmp_dir):
             S_lp_ss=vs.S_lp_ss,
         )
 
-    @roger_kernel
-    def after_timestep_crops_kernel(state):
-        vs = state.variables
-
-        vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2, vs.taum1], vs.ta_min[2:-2, 2:-2, vs.tau])
-        vs.ta_max = update(vs.ta_max, at[2:-2, 2:-2, vs.taum1], vs.ta_max[2:-2, 2:-2, vs.tau])
-        vs.gdd_sum = update(vs.gdd_sum, at[2:-2, 2:-2, vs.taum1, :], vs.gdd_sum[2:-2, 2:-2, vs.tau, :])
-        vs.t_grow_cc = update(vs.t_grow_cc, at[2:-2, 2:-2, vs.taum1, :], vs.t_grow_cc[2:-2, 2:-2, vs.tau, :])
-        vs.t_grow_root = update(vs.t_grow_root, at[2:-2, 2:-2, vs.taum1, :], vs.t_grow_root[2:-2, 2:-2, vs.tau, :])
-        vs.ccc = update(vs.ccc, at[2:-2, 2:-2, vs.taum1, :], vs.ccc[2:-2, 2:-2, vs.tau, :])
-        vs.z_root_crop = update(vs.z_root_crop, at[2:-2, 2:-2, vs.taum1, :], vs.z_root_crop[2:-2, 2:-2, vs.tau, :])
-
-        return KernelOutput(
-            ta_min=vs.ta_min,
-            ta_max=vs.ta_max,
-            gdd_sum=vs.gdd_sum,
-            t_grow_cc=vs.t_grow_cc,
-            t_grow_root=vs.t_grow_root,
-            ccc=vs.ccc,
-            z_root_crop=vs.z_root_crop,
-        )
-
-    model = SVATCROPSetup()
+    model = SVATSetup()
     model._set_lys(lys_experiment)
     input_path = model._base_path / "input" / lys_experiment
     model._set_input_dir(input_path)
-    identifier = f'SVATCROP_{lys_experiment}'
+    identifier = f'SVAT_{lys_experiment}'
     model._set_identifier(identifier)
-    write_forcing(input_path, enable_crop_phenology=True)
-    write_crop_rotation(input_path)
-    model._set_crop_types(model._input_dir, "crop_rotation.nc")
+    write_forcing(input_path)
     model.setup()
     model.run()
     return

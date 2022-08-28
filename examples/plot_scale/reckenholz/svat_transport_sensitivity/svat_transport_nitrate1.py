@@ -11,9 +11,8 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-ns", "--nsamples", type=int, default=10000)
 @click.option("-lys", "--lys-experiment", type=click.Choice(["lys2", "lys3", "lys4", "lys8", "lys9"]), default="lys2")
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion']), default='complete-mixing')
-@click.option("-ecp", "--crop-partitioning", is_flag=True)
 @roger_base_cli
-def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning):
+def main(nsamples, lys_experiment, transport_model_structure):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, where, scipy_stats as sstx
@@ -22,12 +21,11 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
     import roger.lookuptables as lut
     from roger.core.crop import update_alpha_transp
 
-    class SVATCROPTRANSPORTSetup(RogerSetup):
+    class SVATTRANSPORTSetup(RogerSetup):
         """A SVAT transport model for nitrate including
         crop phenology/crop rotation.
         """
         _base_path = Path(__file__).parent
-        _crop_types = None
         _bounds = None
         _params = None
         _nrows = None
@@ -107,458 +105,216 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
 
                 self._crop_types = crop_types
 
-        def _sample_params(self, nsamples, enable_crop_partitioning=crop_partitioning):
-            if enable_crop_partitioning:
-                if self._tm_structure == "complete-mixing":
-                    _param_names = []
-                    _param_bounds = []
-                    if self._crop_types:
-                        for ct in self._crop_types:
-                            _param_names.append(f"crop_scale_{ct}")
-                            _param_bounds.append([0.5, 1.5])
-                    _param_names.extend(['alpha_q', 'km_denit_rz', 'km_denit_ss',
-                                         'dmax_denit_rz', 'dmax_denit_ss',
-                                         'km_nit_rz', 'km_nit_ss', 'dmax_nit_rz',
-                                         'dmax_nit_ss', 'kmin_rz', 'kmin_ss'])
-                    _param_bounds.extend([0.01, 1.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0])
-                    self._bounds = {
-                        'num_vars': len(_param_names),
-                        'names': _param_names,
-                        'bounds': _param_bounds
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
+        def _sample_params(self, nsamples):
+            if self._tm_structure == "complete-mixing":
+                self._bounds = {
+                    'num_vars': 12,
+                    'names': ['alpha_transp', 'alpha_q',
+                              'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                              'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                              'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
+                    'bounds': [[0.01, 1.5],
+                               [0.01, 1.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0]]
+                }
+                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
+                self._nrows = self._params.shape[0]
 
-                elif self._tm_structure == "piston":
-                    _param_names = []
-                    _param_bounds = []
-                    if self._crop_types:
-                        for ct in self._crop_types:
-                            _param_names.append(f"crop_scale_{ct}")
-                            _param_bounds.append([0.5, 1.5])
-                    _param_names.extend(['alpha_q', 'km_denit_rz', 'km_denit_ss',
-                                         'dmax_denit_rz', 'dmax_denit_ss',
-                                         'km_nit_rz', 'km_nit_ss', 'dmax_nit_rz',
-                                         'dmax_nit_ss', 'kmin_rz', 'kmin_ss'])
-                    _param_bounds.extend([0.01, 1.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0])
-                    self._bounds = {
-                        'num_vars': len(_param_names),
-                        'names': _param_names,
-                        'bounds': _param_bounds
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
+            elif self._tm_structure == "piston":
+                self._bounds = {
+                    'num_vars': 12,
+                    'names': ['alpha_transp', 'alpha_q',
+                              'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                              'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                              'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
+                    'bounds': [[0.01, 1.5],
+                               [0.01, 1.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0]]
+                }
+                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
+                self._nrows = self._params.shape[0]
 
-                elif self._tm_structure == "preferential":
-                    _param_names = []
-                    _param_bounds = []
-                    if self._crop_types:
-                        for ct in self._crop_types:
-                            _param_names.append(f"crop_scale_{ct}")
-                            _param_bounds.append([0.5, 1.5])
-                    _param_names.extend(['alpha_q', 'km_denit_rz', 'km_denit_ss',
-                                         'dmax_denit_rz', 'dmax_denit_ss',
-                                         'km_nit_rz', 'km_nit_ss', 'dmax_nit_rz',
-                                         'dmax_nit_ss', 'kmin_rz', 'kmin_ss'])
-                    _param_bounds.extend([0.01, 1.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0])
-                    self._bounds = {
-                        'num_vars': len(_param_names),
-                        'names': _param_names,
-                        'bounds': _param_bounds
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
+            elif self._tm_structure == "preferential":
+                self._bounds = {
+                    'num_vars': 12,
+                    'names': ['alpha_transp', 'alpha_q',
+                              'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                              'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                              'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
+                    'bounds': [[0.01, 1.5],
+                               [0.01, 1.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0]]
+                }
+                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
+                self._nrows = self._params.shape[0]
 
-                elif self._tm_structure == "time-variant preferential":
-                    _param_names = []
-                    _param_bounds = []
-                    if self._crop_types:
-                        for ct in self._crop_types:
-                            _param_names.append(f"crop_scale_{ct}")
-                            _param_bounds.append([0.5, 1.5])
-                    _param_names.extend(['alpha_q', 'km_denit_rz', 'km_denit_ss',
-                                         'dmax_denit_rz', 'dmax_denit_ss',
-                                         'km_nit_rz', 'km_nit_ss', 'dmax_nit_rz',
-                                         'dmax_nit_ss', 'kmin_rz', 'kmin_ss'])
-                    _param_bounds.extend([0.01, 1.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0])
-                    self._bounds = {
-                        'num_vars': len(_param_names),
-                        'names': _param_names,
-                        'bounds': _param_bounds
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
+            elif self._tm_structure == "advection-dispersion":
+                self._bounds = {
+                    'num_vars': 12,
+                    'names': ['alpha_transp', 'alpha_q',
+                              'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                              'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                              'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
+                    'bounds': [[0.01, 1.5],
+                               [0.01, 1.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0]]
+                }
+                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
+                self._nrows = self._params.shape[0]
 
-                elif self._tm_structure == "advection-dispersion":
-                    _param_names = []
-                    _param_bounds = []
-                    if self._crop_types:
-                        for ct in self._crop_types:
-                            _param_names.append(f"crop_scale_{ct}")
-                            _param_bounds.append([0.5, 1.5])
-                    _param_names.extend(['alpha_q', 'km_denit_rz', 'km_denit_ss',
-                                         'dmax_denit_rz', 'dmax_denit_ss',
-                                         'km_nit_rz', 'km_nit_ss', 'dmax_nit_rz',
-                                         'dmax_nit_ss', 'kmin_rz', 'kmin_ss'])
-                    _param_bounds.extend([0.01, 1.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0])
-                    self._bounds = {
-                        'num_vars': len(_param_names),
-                        'names': _param_names,
-                        'bounds': _param_bounds
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
+            elif self._tm_structure == "complete-mixing + advection-dispersion":
+                self._bounds = {
+                    'num_vars': 12,
+                    'names': ['alpha_transp', 'alpha_q',
+                              'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                              'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                              'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
+                    'bounds': [[0.01, 1.5],
+                               [0.01, 1.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0]]
+                }
+                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
+                self._nrows = self._params.shape[0]
 
-                elif self._tm_structure == "time-variant advection-dispersion":
-                    _param_names = []
-                    _param_bounds = []
-                    if self._crop_types:
-                        for ct in self._crop_types:
-                            _param_names.append(f"crop_scale_{ct}")
-                            _param_bounds.append([0.5, 1.5])
-                    _param_names.extend(['alpha_q', 'km_denit_rz', 'km_denit_ss',
-                                         'dmax_denit_rz', 'dmax_denit_ss',
-                                         'km_nit_rz', 'km_nit_ss', 'dmax_nit_rz',
-                                         'dmax_nit_ss', 'kmin_rz', 'kmin_ss'])
-                    _param_bounds.extend([0.01, 1.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0])
-                    self._bounds = {
-                        'num_vars': len(_param_names),
-                        'names': _param_names,
-                        'bounds': _param_bounds
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
+            elif self._tm_structure == "time-variant complete-mixing + advection-dispersion":
+                self._bounds = {
+                    'num_vars': 12,
+                    'names': ['alpha_transp', 'alpha_q',
+                              'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                              'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                              'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
+                    'bounds': [[0.01, 1.5],
+                               [0.01, 1.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0]]
+                }
+                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
+                self._nrows = self._params.shape[0]
 
-                elif self._tm_structure == "complete-mixing + advection-dispersion":
-                    _param_names = []
-                    _param_bounds = []
-                    if self._crop_types:
-                        for ct in self._crop_types:
-                            _param_names.append(f"crop_scale_{ct}")
-                            _param_bounds.append([0.5, 1.5])
-                    _param_names.extend(['alpha_q', 'km_denit_rz', 'km_denit_ss',
-                                         'dmax_denit_rz', 'dmax_denit_ss',
-                                         'km_nit_rz', 'km_nit_ss', 'dmax_nit_rz',
-                                         'dmax_nit_ss', 'kmin_rz', 'kmin_ss'])
-                    _param_bounds.extend([0.01, 1.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0])
-                    self._bounds = {
-                        'num_vars': len(_param_names),
-                        'names': _param_names,
-                        'bounds': _param_bounds
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
+            elif self._tm_structure == "time-variant preferential":
+                self._bounds = {
+                    'num_vars': 12,
+                    'names': ['alpha_transp', 'alpha_q',
+                              'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                              'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                              'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
+                    'bounds': [[0.01, 1.5],
+                               [0.01, 1.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0]]
+                }
+                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
+                self._nrows = self._params.shape[0]
 
-                elif self._tm_structure == "time-variant complete-mixing + advection-dispersion":
-                    _param_names = []
-                    _param_bounds = []
-                    if self._crop_types:
-                        for ct in self._crop_types:
-                            _param_names.append(f"crop_scale_{ct}")
-                            _param_bounds.append([0.5, 1.5])
-                    _param_names.extend(['alpha_q', 'km_denit_rz', 'km_denit_ss',
-                                         'dmax_denit_rz', 'dmax_denit_ss',
-                                         'km_nit_rz', 'km_nit_ss', 'dmax_nit_rz',
-                                         'dmax_nit_ss', 'kmin_rz', 'kmin_ss'])
-                    _param_bounds.extend([0.01, 1.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 20.0],
-                                         [1.0, 20.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0],
-                                         [1.0, 100.0])
-                    self._bounds = {
-                        'num_vars': len(_param_names),
-                        'names': _param_names,
-                        'bounds': _param_bounds
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
+            elif self._tm_structure == "time-variant advection-dispersion":
+                self._bounds = {
+                    'num_vars': 12,
+                    'names': ['alpha_transp', 'alpha_q',
+                              'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                              'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                              'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
+                    'bounds': [[0.01, 1.5],
+                               [0.01, 1.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0]]
+                }
+                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
+                self._nrows = self._params.shape[0]
 
-            else:
-                if self._tm_structure == "complete-mixing":
-                    self._bounds = {
-                        'num_vars': 12,
-                        'names': ['alpha_transp', 'alpha_q',
-                                  'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
-                                  'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
-                                  'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
-                        'bounds': [[0.01, 1.5],
-                                   [0.01, 1.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0]]
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
-
-                elif self._tm_structure == "piston":
-                    self._bounds = {
-                        'num_vars': 12,
-                        'names': ['alpha_transp', 'alpha_q',
-                                  'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
-                                  'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
-                                  'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
-                        'bounds': [[0.01, 1.5],
-                                   [0.01, 1.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0]]
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
-
-                elif self._tm_structure == "preferential":
-                    self._bounds = {
-                        'num_vars': 12,
-                        'names': ['alpha_transp', 'alpha_q',
-                                  'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
-                                  'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
-                                  'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
-                        'bounds': [[0.01, 1.5],
-                                   [0.01, 1.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0]]
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
-
-                elif self._tm_structure == "advection-dispersion":
-                    self._bounds = {
-                        'num_vars': 12,
-                        'names': ['alpha_transp', 'alpha_q',
-                                  'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
-                                  'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
-                                  'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
-                        'bounds': [[0.01, 1.5],
-                                   [0.01, 1.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0]]
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
-
-                elif self._tm_structure == "complete-mixing + advection-dispersion":
-                    self._bounds = {
-                        'num_vars': 12,
-                        'names': ['alpha_transp', 'alpha_q',
-                                  'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
-                                  'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
-                                  'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
-                        'bounds': [[0.01, 1.5],
-                                   [0.01, 1.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0]]
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
-
-                elif self._tm_structure == "time-variant complete-mixing + advection-dispersion":
-                    self._bounds = {
-                        'num_vars': 12,
-                        'names': ['alpha_transp', 'alpha_q',
-                                  'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
-                                  'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
-                                  'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
-                        'bounds': [[0.01, 1.5],
-                                   [0.01, 1.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0]]
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
-
-                elif self._tm_structure == "time-variant preferential":
-                    self._bounds = {
-                        'num_vars': 12,
-                        'names': ['alpha_transp', 'alpha_q',
-                                  'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
-                                  'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
-                                  'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
-                        'bounds': [[0.01, 1.5],
-                                   [0.01, 1.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0]]
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
-
-                elif self._tm_structure == "time-variant advection-dispersion":
-                    self._bounds = {
-                        'num_vars': 12,
-                        'names': ['alpha_transp', 'alpha_q',
-                                  'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
-                                  'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
-                                  'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
-                        'bounds': [[0.01, 1.5],
-                                   [0.01, 1.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0]]
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
-
-                elif self._tm_structure == "time-variant":
-                    self._bounds = {
-                        'num_vars': 12,
-                        'names': ['alpha_transp', 'alpha_q',
-                                  'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
-                                  'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
-                                  'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
-                        'bounds': [[0.01, 1.5],
-                                   [0.01, 1.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 20.0],
-                                   [1.0, 20.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0],
-                                   [1.0, 100.0]]
-                    }
-                    self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                    self._nrows = self._params.shape[0]
+            elif self._tm_structure == "time-variant":
+                self._bounds = {
+                    'num_vars': 12,
+                    'names': ['alpha_transp', 'alpha_q',
+                              'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz',
+                              'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss',
+                              'dmax_nit_rz', 'dmax_nit_ss', 'kmin_rz', 'kmin_ss'],
+                    'bounds': [[0.01, 1.5],
+                               [0.01, 1.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 20.0],
+                               [1.0, 20.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0],
+                               [1.0, 100.0]]
+                }
+                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
+                self._nrows = self._params.shape[0]
 
             # write sampled boundaries to .yml
-            file_path = self._base_path / "param_bounds.yml"
+            file_path = self._base_path / "param_bounds_svat_crop_nitrate1.yml"
             if os.path.exists(file_path):
                 with open(file_path, 'r') as file:
                     _bounds_yml = yaml.safe_load(file)
@@ -635,12 +391,9 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
             settings.y_origin = 0.0
             settings.time_origin = self._get_time_origin(self._input_dir, 'forcing_tracer.nc')
 
-            settings.enable_crop_phenology = True
-            settings.enable_crop_rotation = True
             settings.enable_offline_transport = True
             settings.enable_nitrate = True
             settings.tm_structure = self._tm_structure
-            settings.enable_crop_partitioning = crop_partitioning
 
         @roger_routine(
             dist_safe=False,
@@ -670,23 +423,9 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
             vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
             vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
 
-        @roger_routine(
-            dist_safe=False,
-            local_variables=[
-                "lut_crops",
-                "lut_crop_scale",
-            ],
-        )
+        @roger_routine
         def set_look_up_tables(self, state):
-            vs = state.variables
-
-            vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
-            # scale basal crop coeffcient with factor
-            offset = len(self._param_names) - len(self._crop_types) - 11
-            for i, crop_type in enumerate(self._crop_types):
-                row_no = _get_row_no(vs.lut_crops[:, 0], crop_type)
-                j = offset + i
-                vs.lut_crop_scale = update(vs.lut_crop_scale, at[2:-2, 2:-2, row_no], self._params[:, j, npx.newaxis, npx.newaxis])
+            pass
 
         @roger_routine
         def set_topography(self, state):
@@ -716,12 +455,8 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
                 "sas_params_transp",
                 "sas_params_q_rz",
                 "sas_params_q_ss",
-                "sas_params_re_rg",
-                "sas_params_re_rl",
                 "itt",
                 "lu_id",
-                "lut_crops",
-                "lut_crop_scale"
             ],
         )
         def set_parameters_setup(self, state):
@@ -733,10 +468,7 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
             vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
             vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
 
-            if settings.enable_crop_partitioning:
-                vs.update(update_alpha_transp(state))
-            else:
-                vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], self._params[:, -12, npx.newaxis])
+            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], self._params[:, -12, npx.newaxis])
             vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], self._params[:, -11, npx.newaxis])
             vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._params[:, -10, npx.newaxis])
             vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], self._params[:, -9, npx.newaxis])
@@ -761,72 +493,54 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 1)
-                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
-                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "piston":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 22)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 22)
-                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
-                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "preferential":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_transp", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
-                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
-                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_transp", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
-                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
-                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "complete-mixing + advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
-                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
-                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "time-variant complete-mixing + advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
-                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
-                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "time-variant advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_transp", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
-                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
-                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "time-variant preferential":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_transp", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
-                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
-                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "time-variant":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_transp", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_rz", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, :], self._read_var_from_nc("sas_params_q_ss", self._base_path, 'tm_bromide_params.nc', group=_lys, subgroup=settings.tm_structure))
-                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
-                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
 
         @roger_routine
         def set_parameters(self, state):
@@ -988,8 +702,6 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
                 "cpr_rz",
                 "q_rz",
                 "q_ss",
-                "re_rg",
-                "re_rl",
                 "S_pwp_rz",
                 "S_rz",
                 "S_pwp_ss",
@@ -1022,8 +734,6 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
             vs.cpr_rz = update(vs.cpr_rz, at[2:-2, 2:-2], self._read_var_from_nc("cpr_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
             vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
             vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.re_rg = update(vs.re_rg, at[2:-2, 2:-2], self._read_var_from_nc("re_rg", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.re_rl = update(vs.re_rl, at[2:-2, 2:-2], self._read_var_from_nc("re_rl", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
 
             vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
             vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
@@ -1195,16 +905,15 @@ def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning)
             )
 
     tms = transport_model_structure.replace("_", " ")
-    model = SVATCROPTRANSPORTSetup()
+    model = SVATTRANSPORTSetup()
     model._set_nsamples(nsamples)
     model._set_lys(lys_experiment)
     model._set_tm_structure(tms)
-    identifier = f'SVATCROPTRANSPORT_{transport_model_structure}_{lys_experiment}_nitrate'
+    identifier = f'SVATTRANSPORT_{transport_model_structure}_{lys_experiment}_nitrate'
     model._set_identifier(identifier)
     model._sample_params(nsamples)
     input_path = model._base_path / "input" / lys_experiment
     model._set_input_dir(input_path)
-    model._set_crop_types(model._input_dir, "crop_rotation.nc")
     write_forcing_tracer(input_path, 'NO3')
     model.setup()
     model.warmup()

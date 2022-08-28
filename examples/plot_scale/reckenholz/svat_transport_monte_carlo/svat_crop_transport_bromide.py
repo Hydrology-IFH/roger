@@ -1,8 +1,6 @@
 from pathlib import Path
-import yaml
 import os
 import h5netcdf
-from SALib.sample import saltelli
 import numpy as onp
 import click
 from roger.cli.roger_run_base import roger_base_cli
@@ -11,26 +9,26 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-ns", "--nsamples", type=int, default=10000)
 @click.option("-lys", "--lys-experiment", type=click.Choice(["lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys2_bromide")
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion']), default='complete-mixing')
+@click.option("-ecp", "--crop-partitioning", is_flag=True)
 @roger_base_cli
-def main(nsamples, lys_experiment, transport_model_structure):
+def main(nsamples, lys_experiment, transport_model_structure, crop_partitioning):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, at, where
+    from roger.core.operators import numpy as npx, update, at, where, random_uniform
     from roger.tools.setup import write_forcing_tracer
+    import roger.lookuptables as lut
     from roger.core.crop import update_alpha_transp
 
-    class SVATTRANSPORTSetup(RogerSetup):
+    class SVATCROPTRANSPORTSetup(RogerSetup):
         """A SVAT transport model for bromide including
         crop phenology/crop rotation.
         """
         _base_path = Path(__file__).parent
-        _bounds = None
-        _params = None
-        _nrows = None
         _lys = None
         _tm_structure = None
-        _identifier = None
         _input_dir = None
+        _identifier = None
+        _nsamples = 1
 
         def _set_input_dir(self, path):
             if os.path.exists(path):
@@ -67,12 +65,6 @@ def main(nsamples, lys_experiment, transport_model_structure):
                 var_obj = infile.variables['Time']
                 return len(onp.array(var_obj)) * 60 * 60 * 24
 
-        def _get_nx(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['x']
-                return len(onp.array(var_obj))
-
         def _get_time_origin(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
@@ -90,134 +82,6 @@ def main(nsamples, lys_experiment, transport_model_structure):
 
         def _set_nsamples(self, nsamples):
             self._nsamples = nsamples
-
-        def _sample_params(self, nsamples):
-            if self._tm_structure == "complete-mixing":
-                self._bounds = {
-                    'num_vars': 2,
-                    'names': ['alpha_transp', 'alpha_q'],
-                    'bounds': [[0.01, 1.5],
-                               [0.01, 1.0]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
-
-            elif self._tm_structure == "piston":
-                self._bounds = {
-                    'num_vars': 2,
-                    'names': ['alpha_transp', 'alpha_q'],
-                    'bounds': [[0.01, 1.5],
-                               [0.01, 1.0]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
-
-            elif self._tm_structure == "preferential":
-                self._bounds = {
-                    'num_vars': 5,
-                    'names': ['b_transp', 'b_q_rz', 'b_q_ss', 'alpha_transp', 'alpha_q'],
-                    'bounds': [[1, 90],
-                               [1, 90],
-                               [1, 90],
-                               [0.01, 1.5],
-                               [0.01, 1.0]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
-
-            elif self._tm_structure == "advection-dispersion":
-                self._bounds = {
-                    'num_vars': 5,
-                    'names': ['b_transp', 'a_q_rz', 'a_q_ss', 'alpha_transp', 'alpha_q'],
-                    'bounds': [[1, 90],
-                               [1, 90],
-                               [1, 90],
-                               [0.01, 1.5],
-                               [0.01, 1.0]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
-
-            elif self._tm_structure == "complete-mixing + advection-dispersion":
-                self._bounds = {
-                    'num_vars': 4,
-                    'names': ['a_q_rz', 'a_q_ss', 'alpha_transp', 'alpha_q'],
-                    'bounds': [[1, 90],
-                               [1, 90],
-                               [0.01, 1.5],
-                               [0.01, 1.0]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
-
-            elif self._tm_structure == "time-variant complete-mixing + advection-dispersion":
-                self._bounds = {
-                    'num_vars': 4,
-                    'names': ['a_q_rz', 'a_q_ss', 'alpha_transp', 'alpha_q'],
-                    'bounds': [[1, 90],
-                               [1, 90],
-                               [0.01, 1.5],
-                               [0.01, 1.0]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
-
-            elif self._tm_structure == "time-variant preferential":
-                self._bounds = {
-                    'num_vars': 5,
-                    'names': ['b_transp', 'b_q_rz', 'b_q_ss', 'alpha_transp', 'alpha_q'],
-                    'bounds': [[1, 90],
-                               [1, 90],
-                               [1, 90],
-                               [0.01, 1.5],
-                               [0.01, 1.0]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
-
-            elif self._tm_structure == "time-variant advection-dispersion":
-                self._bounds = {
-                    'num_vars': 5,
-                    'names': ['b_transp', 'a_q_rz', 'a_q_ss', 'alpha_transp', 'alpha_q'],
-                    'bounds': [[1, 90],
-                               [1, 90],
-                               [1, 90],
-                               [0.01, 1.5],
-                               [0.01, 1.0]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
-
-            elif self._tm_structure == "time-variant":
-                self._bounds = {
-                    'num_vars': 5,
-                    'names': ['ab_transp', 'ab_q_rz', 'ab_q_ss', 'alpha_transp', 'alpha_q'],
-                    'bounds': [[1, 90],
-                               [1, 90],
-                               [1, 90],
-                               [0.01, 1.5],
-                               [0.01, 1.0]]
-                }
-                self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-                self._nrows = self._params.shape[0]
-
-            # write sampled boundaries to .yml
-            file_path = self._base_path / "param_bounds_svat_crop_bromide.yml"
-            if os.path.exists(file_path):
-                with open(file_path, 'r') as file:
-                    _bounds_yml = yaml.safe_load(file)
-                if lys_experiment not in list(_bounds_yml.keys()):
-                    _bounds_yml[lys_experiment] = {}
-                _bounds_yml[lys_experiment][self._tm_structure] = self._bounds
-                with open(file_path, 'w') as file:
-                    yaml.dump(_bounds_yml, file)
-            else:
-                _bounds_yml = {}
-                if lys_experiment not in list(_bounds_yml.keys()):
-                    _bounds_yml[lys_experiment] = {}
-                _bounds_yml[lys_experiment][self._tm_structure] = self._bounds
-                with open(file_path, 'w') as file:
-                    yaml.dump(_bounds_yml, file)
 
         def _set_bromide_input(self, state, nn_rain, nn_sol, prec, ta):
             vs = state.variables
@@ -261,7 +125,7 @@ def main(nsamples, lys_experiment, transport_model_structure):
             settings = state.settings
             settings.identifier = self._identifier
 
-            settings.nx, settings.ny, settings.nz = self._nrows, 1, 1
+            settings.nx, settings.ny, settings.nz = self._nsamples, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
             settings.ages = settings.nitt
             settings.nages = settings.nitt + 1
@@ -275,9 +139,12 @@ def main(nsamples, lys_experiment, transport_model_structure):
             settings.y_origin = 0.0
             settings.time_origin = self._get_time_origin(self._input_dir, 'forcing_tracer.nc')
 
+            settings.enable_crop_phenology = True
+            settings.enable_crop_rotation = True
             settings.enable_offline_transport = True
             settings.enable_bromide = True
             settings.tm_structure = self._tm_structure
+            settings.enable_crop_partitioning = crop_partitioning
 
         @roger_routine(
             dist_safe=False,
@@ -307,9 +174,20 @@ def main(nsamples, lys_experiment, transport_model_structure):
             vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
             vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "lut_crops",
+                "lut_crop_scale",
+            ],
+        )
         def set_look_up_tables(self, state):
-            pass
+            vs = state.variables
+
+            vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
+            # scale partition coefficient of crop solute uptake
+            for i in range(vs.lut_crop_scale.shape[-1]):
+                vs.lut_crop_scale = update(vs.lut_crop_scale, at[2:-2, 2:-2, i], random_uniform(0.5, 1.5, vs.lut_crop_scale.shape[:-1])[2:-2, 2:-2])
 
         @roger_routine
         def set_topography(self, state):
@@ -329,8 +207,13 @@ def main(nsamples, lys_experiment, transport_model_structure):
                 "sas_params_transp",
                 "sas_params_q_rz",
                 "sas_params_q_ss",
+                "sas_params_re_rg",
+                "sas_params_re_rl",
                 "itt",
                 "lu_id",
+                "lut_crops",
+                "lut_crop_scale"
+
             ],
         )
         def set_parameters_setup(self, state):
@@ -342,8 +225,11 @@ def main(nsamples, lys_experiment, transport_model_structure):
             vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
             vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
 
-            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], self._params[:, -2, npx.newaxis])
-            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], self._params[:, -1, npx.newaxis])
+            if settings.enable_crop_partitioning:
+                vs.update(update_alpha_transp(state))
+            else:
+                vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], random_uniform(0.01, 1.5, tuple((vs.alpha_transp.shape[0], vs.alpha_transp.shape[1])))[2:-2, 2:-2])
+            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], random_uniform(0.01, 1.0, tuple((vs.alpha_q.shape[0], vs.alpha_q.shape[1])))[2:-2, 2:-2])
 
             if settings.tm_structure == "complete-mixing":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 1)
@@ -351,114 +237,132 @@ def main(nsamples, lys_experiment, transport_model_structure):
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 1)
+                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
+                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "piston":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 22)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 22)
+                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
+                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "preferential":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], self._params[:, 0, npx.newaxis])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], random_uniform(1, 90, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], self._params[:, 1, npx.newaxis])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], random_uniform(1, 90, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], self._params[:, 2, npx.newaxis])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], random_uniform(1, 90, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
+                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], self._params[:, 0, npx.newaxis])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], random_uniform(1, 90, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._params[:, 1, npx.newaxis])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], random_uniform(1, 90, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._params[:, 2, npx.newaxis])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], random_uniform(1, 90, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1)
+                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
+                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "complete-mixing + advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._params[:, 0, npx.newaxis])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], random_uniform(1, 90, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._params[:, 1, npx.newaxis])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], random_uniform(1, 90, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1)
+                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
+                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "time-variant complete-mixing + advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 32)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._params[:, 0, npx.newaxis])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(1, 90, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 32)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._params[:, 1, npx.newaxis])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(1, 90, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
+                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
+                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "time-variant advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 31)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], self._params[:, 0, npx.newaxis])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], random_uniform(1, 90, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 32)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._params[:, 1, npx.newaxis])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(1, 90, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 32)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._params[:, 2, npx.newaxis])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(1, 90, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
+                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
+                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "time-variant preferential":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 31)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], self._params[:, 0, npx.newaxis])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], random_uniform(1, 90, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 31)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._params[:, 1, npx.newaxis])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(1, 90, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 31)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._params[:, 2, npx.newaxis])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(1, 90, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
+                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
+                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
             elif settings.tm_structure == "time-variant":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 35)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], self._params[:, 0, npx.newaxis])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], random_uniform(1, 90, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 35)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._params[:, 1, npx.newaxis])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(1, 90, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 35)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._params[:, 2, npx.newaxis])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(1, 90, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
+                vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 21)
+                vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 22)
 
         @roger_routine
         def set_parameters(self, state):
@@ -498,8 +402,8 @@ def main(nsamples, lys_experiment, transport_model_structure):
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :2], vs.S_rz[2:-2, 2:-2, :2] + vs.S_ss[2:-2, 2:-2, :2])
 
         @roger_routine
@@ -609,6 +513,8 @@ def main(nsamples, lys_experiment, transport_model_structure):
                 "cpr_rz",
                 "q_rz",
                 "q_ss",
+                "re_rg",
+                "re_rl",
                 "S_pwp_rz",
                 "S_rz",
                 "S_pwp_ss",
@@ -637,6 +543,8 @@ def main(nsamples, lys_experiment, transport_model_structure):
             vs.cpr_rz = update(vs.cpr_rz, at[2:-2, 2:-2], self._read_var_from_nc("cpr_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
             vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
             vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
+            vs.re_rg = update(vs.re_rg, at[2:-2, 2:-2], self._read_var_from_nc("re_rg", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
+            vs.re_rl = update(vs.re_rl, at[2:-2, 2:-2], self._read_var_from_nc("re_rl", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
 
             vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
             vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
@@ -660,11 +568,11 @@ def main(nsamples, lys_experiment, transport_model_structure):
             diagnostics["rates"].output_frequency = 24 * 60 * 60
             diagnostics["rates"].sampling_frequency = 1
 
-            diagnostics["averages"].output_variables = ["C_q_ss", "TT_q_ss", "SA_s"]
+            diagnostics["averages"].output_variables = ["C_q_ss"]
             diagnostics["averages"].output_frequency = 24 * 60 * 60
             diagnostics["averages"].sampling_frequency = 1
 
-            diagnostics["constant"].output_variables = ["sas_params_transp", "sas_params_q_rz", "sas_params_q_ss", "alpha_transp", "alpha_q"]
+            diagnostics["constant"].output_variables = ["sas_params_transp", "sas_params_q_rz", "sas_params_q_ss", "alpha_transp", "alpha_q", "lut_crop_scale"]
             diagnostics["constant"].output_frequency = 0
             diagnostics["constant"].sampling_frequency = 1
 
@@ -773,14 +681,15 @@ def main(nsamples, lys_experiment, transport_model_structure):
             )
 
     tms = transport_model_structure.replace("_", " ")
-    model = SVATTRANSPORTSetup()
+    model = SVATCROPTRANSPORTSetup()
+    model._set_nsamples(nsamples)
     model._set_lys(lys_experiment)
     model._set_tm_structure(tms)
-    identifier = f'SVATTRANSPORT_{transport_model_structure}_{lys_experiment}_bromide'
+    identifier = f'SVATCROPTRANSPORT_{transport_model_structure}_{lys_experiment}_bromide'
     model._set_identifier(identifier)
-    model._sample_params(nsamples)
     input_path = model._base_path / "input" / lys_experiment
     model._set_input_dir(input_path)
+    model._set_crop_types(model._input_dir, "crop_rotation.nc")
     write_forcing_tracer(input_path, 'Br')
     model.setup()
     model.warmup()
