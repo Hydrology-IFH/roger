@@ -25,6 +25,50 @@ def _get_row_no(arr1d, i, size=1, fill_value=0):
     return arr_row_no
 
 
+def _get_first_row_no(arr1d, i, size=1, fill_value=0):
+    arr = npx.full((npx.size(arr1d),), dtype=bool, fill_value=False)
+    arr = update(
+        arr,
+        at[:], arr1d == i,
+    )
+    cond = npx.any(arr)
+    if where(arr, size=size, fill_value=fill_value)[0].size > 0:
+        val = where(arr, size=size, fill_value=fill_value)[0][0]
+    else:
+        val = 0
+    row_no = npx.int64(npx.where(cond, val, 0))
+
+    arr_row_no = npx.full((1,), dtype=int, fill_value=False)
+    arr_row_no = update(
+        arr_row_no,
+        at[:], row_no,
+    )
+
+    return arr_row_no
+
+
+def _get_last_row_no(arr1d, i, size=1, fill_value=0):
+    arr = npx.full((npx.size(arr1d),), dtype=bool, fill_value=False)
+    arr = update(
+        arr,
+        at[:], arr1d == i,
+    )
+    cond = npx.any(arr)
+    if where(arr, size=size, fill_value=fill_value)[0].size > 0:
+        val = where(arr, size=size, fill_value=fill_value)[0][-1]
+    else:
+        val = 0
+    row_no = npx.int64(npx.where(cond, val, 0))
+
+    arr_row_no = npx.full((1,), dtype=int, fill_value=False)
+    arr_row_no = update(
+        arr_row_no,
+        at[:], row_no,
+    )
+
+    return arr_row_no
+
+
 @roger_kernel(static_args=("local"))
 def enforce_boundaries(arr, local=False):
     from roger.distributed import exchange_overlap

@@ -419,7 +419,7 @@ def main(tmp_dir):
             )
             with h5netcdf.File(states_hm_mc_file, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
-                dict_dim = {'x': 1, 'y': 1, 'Time': len(df.variables['Time'])}
+                dict_dim = {'x': 1, 'y': 1, 'Time': len(df.groups[lys_experiment].variables['Time'])}
                 if not f.groups[lys_experiment].dimensions:
                     f.groups[lys_experiment].dimensions = dict_dim
                     v = f.groups[lys_experiment].create_variable('x', ('x',), float)
