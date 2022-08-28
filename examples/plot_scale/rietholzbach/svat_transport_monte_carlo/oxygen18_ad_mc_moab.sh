@@ -1,7 +1,7 @@
 #!/bin/bash
-#PBS -l nodes=4:ppn=25
+#PBS -l nodes=2:ppn=25
 #PBS -l walltime=48:00:00
-#PBS -l pmem=2000mb
+#PBS -l pmem=4000mb
 #PBS -N oxygen18_ad_mc
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
@@ -14,5 +14,4 @@ conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo
  
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 100 1 -tms advection-dispersion -td /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo
-mkdir -p /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo
+mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 50 1 -tms advection-dispersion -td /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo
