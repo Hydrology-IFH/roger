@@ -92,7 +92,7 @@ def calc_volume_flux_density(state):
     idx_rain_75 = allocate(state.dimensions, ("x", "y"))
     idx_rain_25 = update(
         idx_rain_25,
-        at[2:-2, 2:-2], npx.max(npx.where(vs.rain_event_csum[2:-2, 2:-2, :] <= 0.25 * vs.rain_event_sum[2:-2, 2:-2, npx.newaxis], itt_event[2:-2, 2:-2, :], 0), axis=-1),
+        at[2:-2, 2:-2], npx.max(npx.where((vs.rain_event_csum[2:-2, 2:-2, :] <= 0.25 * vs.rain_event_sum[2:-2, 2:-2, npx.newaxis]) & (vs.rain_event_csum[2:-2, 2:-2, :] > 0), itt_event[2:-2, 2:-2, :], 0), axis=-1),
     )
     idx_rain_75 = update(
         idx_rain_75,

@@ -205,8 +205,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 "itt_day",
                 "prec",
                 "ta",
-                "ta_min",
-                "ta_max",
                 "pet",
                 "pet_res",
                 "event_id",
@@ -238,8 +236,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 vs.itt_forc = vs.itt_forc + 6 * 24
             prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
             ta_day = self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
-            ta_min_day = self._read_var_from_nc("TA_min", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
-            ta_max_day = self._read_var_from_nc("TA_max", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
             pet_day = self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
             cond0 = (prec_day <= 0).all() & (vs.swe[2:-2, 2:-2, vs.tau] <= 0).all() & (vs.swe_top[2:-2, 2:-2, vs.tau] <= 0).all() & (ta_day > settings.ta_fm).all()
             cond00 = ((prec_day > 0) & (ta_day <= settings.ta_fm)).any() | ((prec_day <= 0) & (ta_day <= settings.ta_fm)).all()
@@ -279,8 +275,6 @@ def main(nsamples, lys_experiment, tmp_dir):
             # or full day, respectively
             if vs.time_event0 <= settings.end_event and (vs.dt_secs == 10 * 60):
                 ta = ta_day[:, :, vs.itt_day]
-                ta_min = ta_min_day[:, :, vs.itt_day]
-                ta_max = ta_max_day[:, :, vs.itt_day]
                 pet = pet_day[:, :, vs.itt_day]
                 vs.event_id = update(
                     vs.event_id,
@@ -290,8 +284,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 vs.itt_day = vs.itt_day + 1
             elif vs.time_event0 <= settings.end_event and (vs.dt_secs == 60 * 60):
                 ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
-                ta_min = npx.mean(ta_min_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
-                ta_max = npx.mean(ta_max_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
                 pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
                 vs.event_id = update(
                     vs.event_id,
@@ -301,8 +293,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 vs.itt_day = vs.itt_day + 6
             elif vs.time_event0 <= settings.end_event and (vs.dt_secs == 24 * 60 * 60):
                 ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
-                ta_min = npx.mean(ta_min_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
-                ta_max = npx.mean(ta_max_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
                 pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
                 vs.dt = 24
                 vs.itt_day = 0
@@ -311,8 +301,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 vs.dt = 1 / 6
                 vs.itt_day = vs.itt_day + 1
                 ta = ta_day[:, :, vs.itt_day]
-                ta_min = ta_min_day[:, :, vs.itt_day]
-                ta_max = ta_max_day[:, :, vs.itt_day]
                 pet = pet_day[:, :, vs.itt_day]
                 vs.event_id = update(
                     vs.event_id,
@@ -320,8 +308,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 )
             elif vs.time_event0 > settings.end_event and (vs.time % (60 * 60) == 0) and ((vs.dt_secs == 10 * 60) or (vs.dt_secs == 60 * 60)):
                 ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
-                ta_min = npx.mean(ta_min_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
-                ta_max = npx.mean(ta_max_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
                 pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
                 vs.dt_secs = 60 * 60
                 vs.dt = 1
@@ -332,8 +318,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 )
             elif vs.time_event0 > settings.end_event and (vs.time % (24 * 60 * 60) == 0) and (vs.dt_secs == 24 * 60 * 60):
                 ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
-                ta_min = npx.mean(ta_min_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
-                ta_max = npx.mean(ta_max_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
                 pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
                 vs.dt_secs = 24 * 60 * 60
                 vs.dt = 24
@@ -350,8 +334,6 @@ def main(nsamples, lys_experiment, tmp_dir):
             # set forcing for current time step
             vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], prec)
             vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], ta)
-            vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2, vs.tau], ta_min)
-            vs.ta_max = update(vs.ta_max, at[2:-2, 2:-2, vs.tau], ta_max)
             vs.pet = update(vs.pet, at[2:-2, 2:-2], pet)
             vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], pet)
 

@@ -48,7 +48,7 @@ def main():
 
             settings.nx, settings.ny, settings.nz = 1, 1, 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
-            settings.nittevent_ff = 5 * 24 * 6
+            settings.nittevent_ff = 30 * 24 * 6
             settings.nittevent_ff_p1 = settings.nittevent_ff + 1
             settings.nevent_ff = 20
 
@@ -293,6 +293,10 @@ def main():
             t2 = _get_last_row_no(cond_event, vs.event_id[vs.tau])[0]
             prec_event = prec_events[:, :, t1:t2]
             ta_event = ta_events[:, :, t1:t2]
+            
+            vs.rain_event = update(vs.rain_event, at[2:-2, 2:-2, t1:t2], prec_event)
+            vs.rain_event_csum = update(vs.rain_event_csum, at[2:-2, 2:-2, t1:t2], npx.cumsum(prec_event, axis=-1))
+            vs.rain_event_sum = update(vs.rain_event_sum, at[2:-2, 2:-2], npx.sum(prec_event, axis=-1))
 
             # set event id for next event
             if (vs.event_id[vs.taum1] > 0) & (vs.event_id[vs.tau] == 0):
