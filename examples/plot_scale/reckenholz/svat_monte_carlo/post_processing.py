@@ -190,7 +190,7 @@ def main(tmp_dir):
                     df_eval = df_eval.dropna()
                     # number of data points
                     N_obs = len(df_eval.index)
-                    print(N_obs)
+                    df_params_eff.loc[nrow, 'N'] = N_obs
                     if N_obs > 30:
                         if var_sim in ['theta']:
                             Ni = len(df_eval.index)
