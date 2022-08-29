@@ -1461,10 +1461,8 @@ def sanity_check(state):
             rows11 = npx.where(check11 == False)[0].tolist()
             rows12 = npx.where(check12 == False)[0].tolist()
             if rows11:
-                rows11 = npx.where(check11 == False)[0].tolist() - 2
                 logger.debug(f"Water balance diverged at {rows11}")
             if rows12:
-                rows12 = npx.where(check11 == False)[0].tolist() - 2
                 logger.debug(f"Solute balance diverged at {rows12}")
 
     elif settings.enable_offline_transport and (settings.enable_bromide or settings.enable_chloride):

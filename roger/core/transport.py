@@ -229,7 +229,6 @@ def calc_tt(state, SA, sa, flux, sas_params):
         if rs.loglevel == 'debug':
             rows = npx.where(mask == False)[0].tolist()
             if rows:
-                rows = npx.where(mask == False)[0].tolist() - 2
                 logger.debug(f"Solution of SAS function diverged at {rows}")
 
     return tt
