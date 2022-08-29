@@ -163,7 +163,7 @@ def main(tmp_dir):
                 row = onp.where(lut.ARR_CP[:, 0] == crop_type_sim)[0]
                 df_params_eff.loc[:, f'crop_scale_{crop_type_sim}'] = ds_sim["lut_crop_scale"].isel(y=0, n_crop_types=row).values
             else:
-                df_params_eff.loc[:, 'crop_scale'] = onp.nan
+                df_params_eff.loc[:, f'crop_scale_{crop_type_sim}'] = onp.nan
             # calculate metrics
             vars_sim = ['q_ss', 'theta', 'S_s', 'S']
             vars_obs = ['PERC', 'THETA', 'WEIGHT', 'WEIGHT']
@@ -374,7 +374,7 @@ def main(tmp_dir):
             # dotty plots
             if 'E_multi' in df_params_eff.columns:
                 df_eff = df_params_eff.loc[:, ['KGE_q_ss', 'r_S', 'E_multi']]
-                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'crop_scale']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', f'crop_scale_{crop_type_sim}']]
                 nrow = len(df_eff.columns)
                 ncol = len(df_params.columns)
                 fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(14, 7))

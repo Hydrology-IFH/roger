@@ -688,6 +688,12 @@ def main(nsamples, transport_model_structure, tmp_dir):
     identifier = f'SVATTRANSPORT_{transport_model_structure}'
     model._set_identifier(identifier)
     model._sample_params(nsamples)
+    model._params = npx.array([[ 5.30224609, 13.64599609, 70.05322266],
+                     [84.65478516, 13.64599609, 70.05322266],
+                     [ 5.30224609, 60.31884766, 70.05322266],
+                     [ 5.30224609, 13.64599609, 19.12158203],
+                     [84.65478516, 60.31884766, 19.12158203]])
+    model._nrows = model._params.shape[0]
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)
     # write_forcing_tracer(input_path, 'd18O')
