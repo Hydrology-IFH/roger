@@ -490,13 +490,13 @@ def main(nsamples, transport_model_structure, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["rates"].output_variables = ["q_ss"]
+            diagnostics["rates"].output_variables = ["q_ss", "transp"]
             diagnostics["rates"].output_frequency = 24 * 60 * 60
             diagnostics["rates"].sampling_frequency = 1
             if base_path:
                 diagnostics["rates"].base_output_path = base_path
 
-            diagnostics["averages"].output_variables = ["C_q_ss"]
+            diagnostics["averages"].output_variables = ["C_q_ss", "C_transp"]
             diagnostics["averages"].output_frequency = 24 * 60 * 60
             diagnostics["averages"].sampling_frequency = 1
             if base_path:
@@ -508,7 +508,7 @@ def main(nsamples, transport_model_structure, tmp_dir):
             if base_path:
                 diagnostics["constant"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["TT_q_ss", "SA_s", "SA_rz", "SA_ss"]
+            diagnostics["collect"].output_variables = ["TT_q_ss", "TT_transp", "SA_s", "SA_rz", "SA_ss"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:

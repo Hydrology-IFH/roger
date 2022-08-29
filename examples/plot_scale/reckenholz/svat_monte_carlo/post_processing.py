@@ -177,19 +177,20 @@ def main(tmp_dir):
                 for nrow in range(nx * ny):
                     sim_vals = ds_sim[var_sim].isel(x=nrow, y=0).values
                     if crop_type_sim > 500:
-                        crop_sim = ds_sim['lu_id'].isel(x=nrow, y=0).values
-                        sim_vals[(crop_sim != crop_type_sim)] = onp.nan
+                        crop_sim = ds_sim['lu_id'].isel(x=nrow, y=0).values.astype(int)
+                        sim_vals = onp.where((crop_sim == crop_type_sim), sim_vals, onp.nan)
                     # join observations on simulations
                     df_eval = eval_utils.join_obs_on_sim(date_sim, sim_vals, df_obs)
                     # select data for specific crops
-                    if crop_type_sim > 500:
-                        crop_type_obs = lut.dict_crops[crop_type_sim]
-                        crop_obs = ds_obs["CROP_TYPE"].isel(x=0, y=0).values.flatten()
-                        rows = onp.where((crop_obs == crop_type_obs))[0].tolist()
-                        df_eval = df_eval.iloc[rows, :]
+                    # if crop_type_sim > 500:
+                    #     crop_type_obs = int(lut.dict_crops[crop_type_sim])
+                    #     crop_obs = ds_obs["CROP_TYPE"].isel(x=0, y=0).values.astype(int)
+                    #     rows = onp.where((crop_obs == crop_type_obs))[0].tolist()
+                    #     df_eval = df_eval.iloc[rows, :]
                     df_eval = df_eval.dropna()
                     # number of data points
                     N_obs = len(df_eval.index)
+                    print(N_obs)
                     if N_obs > 30:
                         if var_sim in ['theta']:
                             Ni = len(df_eval.index)
