@@ -553,9 +553,6 @@ def calculate_ageing_iso_kernel(state):
 
     sum_iso_ss = npx.nansum(vs.sa_ss[2:-2, 2:-2, vs.tau, :] * vs.msa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)
 
-    if vs.itt >= 341:
-        print('')
-
     sa_ss, msa_ss = calc_ageing_iso(state, vs.sa_ss, vs.msa_ss)
 
     vs.sa_ss = update(
@@ -568,18 +565,18 @@ def calculate_ageing_iso_kernel(state):
         at[2:-2, 2:-2, vs.tau, :], msa_ss[2:-2, 2:-2, vs.tau, :],
     )
 
+    # check for mass conservation after ageing
     sum_iso_rz1 = npx.nansum(vs.sa_rz[2:-2, 2:-2, vs.tau, :] * vs.msa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)
     sum_iso_ss1 = npx.nansum(vs.sa_ss[2:-2, 2:-2, vs.tau, :] * vs.msa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)
-
     check11 = npx.isclose(sum_iso_rz, sum_iso_rz1, atol=1e-02)
     check12 = npx.isclose(sum_iso_ss, sum_iso_ss1, atol=1e-02)
 
     if rs.loglevel == 'debug' and rs.backend == 'numpy':
         if not check11.all():
-            logger.debug(f"Ageing error in root zone at iteration {vs.itt}")
+            logger.debug(f"Solution for ageing in root zone diverged at iteration {vs.itt}")
 
         if not check12.all():
-            logger.debug(f"Ageing error in subsoil at iteration {vs.itt}")
+            logger.debug(f"Solution for ageing in subsoil diverged at iteration {vs.itt}")
 
     return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss)
 
