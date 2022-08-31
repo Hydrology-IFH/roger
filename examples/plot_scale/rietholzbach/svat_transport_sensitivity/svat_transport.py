@@ -690,7 +690,7 @@ def main(nsamples, transport_model_structure, tmp_dir):
     model._sample_params(nsamples)
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)
-    write_forcing_tracer(input_path, 'd18O')
+    # write_forcing_tracer(input_path, 'd18O')
     model.setup()
     model.warmup()
     model.run()
