@@ -11,7 +11,7 @@ def _inject_proc_rank(record):
     return record["extra"].update(proc_rank=runtime_state.proc_rank)
 
 
-def setup_logging(loglevel="info", stream_sink=sys.stdout, log_all_processes=False):
+def setup_logging(loglevel="info", stream_sink=sys.stdout, log_all_processes=False, log_to_file=False):
     from loguru import logger
 
     handler_conf = dict(
@@ -56,5 +56,7 @@ def setup_logging(loglevel="info", stream_sink=sys.stdout, log_all_processes=Fal
 
     logger.configure(handlers=[handler_conf])
     logger.enable("roger")
+    if log_to_file:
+        logger.add("out.log", backtrace=True, diagnose=True, level="DEBUG")
 
     return logger

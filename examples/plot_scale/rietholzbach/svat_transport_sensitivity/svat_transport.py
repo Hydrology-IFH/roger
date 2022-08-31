@@ -9,7 +9,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-ns", "--nsamples", type=int, default=1024)
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion', 'time-variant']), default='advection-dispersion')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion', 'time-variant']), default='preferential')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(nsamples, transport_model_structure, tmp_dir):
@@ -685,21 +685,53 @@ def main(nsamples, transport_model_structure, tmp_dir):
     tms = transport_model_structure.replace("_", " ")
     model = SVATTRANSPORTSetup()
     model._set_tm_structure(tms)
-    identifier = f'SVATTRANSPORT_{transport_model_structure}'
+    identifier = f'SVATTRANSPORT_{transport_model_structure}1'
     model._set_identifier(identifier)
     model._sample_params(nsamples)
-    # model._params = npx.array([[ 5.30224609, 13.64599609, 70.05322266],
-    #                  [84.65478516, 13.64599609, 70.05322266],
-    #                  [ 5.30224609, 60.31884766, 70.05322266],
-    #                  [ 5.30224609, 13.64599609, 19.12158203],
-    #                  [84.65478516, 60.31884766, 19.12158203]])
-    # model._nrows = model._params.shape[0]
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)
-    # write_forcing_tracer(input_path, 'd18O')
+    write_forcing_tracer(input_path, 'd18O')
     model.setup()
     model.warmup()
     model.run()
+
+    # tms = transport_model_structure.replace("_", " ")
+    # model = SVATTRANSPORTSetup()
+    # model._set_tm_structure(tms)
+    # identifier = f'SVATTRANSPORT_{transport_model_structure}1'
+    # model._set_identifier(identifier)
+    # model._sample_params(nsamples)
+    # rows = [12, 13, 14]
+    # params = model._params[rows, :]
+    # model._params = params
+    # model._nrows = len(rows)
+    # input_path = model._base_path / "input"
+    # model._set_input_dir(input_path)
+    # write_forcing_tracer(input_path, 'd18O')
+    # model.setup()
+    # model.warmup()
+    # model.run()
+
+    # tms = transport_model_structure.replace("_", " ")
+    # model = SVATTRANSPORTSetup()
+    # restart_file = "SVATTRANSPORT_preferential.warmup_restart.h5"
+    # model = SVATTRANSPORTSetup(override=dict(
+    #         restart_input_filename=restart_file,
+    #     ))
+    # model._warmup_done = True
+    # model._set_tm_structure(tms)
+    # identifier = f'SVATTRANSPORT_{transport_model_structure}1'
+    # model._set_identifier(identifier)
+    # model._sample_params(nsamples)
+    # rows = [12, 13, 14]
+    # params = model._params[rows, :]
+    # model._params = params
+    # model._nrows = len(rows)
+    # input_path = model._base_path / "input"
+    # model._set_input_dir(input_path)
+    # write_forcing_tracer(input_path, 'd18O')
+    # model.setup()
+    # model.run()
     return
 
 

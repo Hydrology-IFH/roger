@@ -135,6 +135,27 @@ def main(tmp_dir):
     # load observations (measured data)
     path_obs = base_path.parent / "observations" / "rietholzbach_lysimeter.nc"
     ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
+    days_obs = (ds_obs['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    date_obs = num2date(days_obs, units=f"days since {ds_obs['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
+
+    # average observed soil water content of previous 5 days
+    window = 5
+    df_thetap = pd.DataFrame(index=date_obs,
+                             columns=['doy', 'theta', 'sc'])
+    df_thetap.loc[:, 'doy'] = df_thetap.index.day_of_year
+    df_thetap.loc[:, 'theta'] = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0)
+    df_thetap.loc[df_thetap.index[window-1]:, 'theta'] = df_thetap.loc[:, 'theta'].rolling(window=window).mean().iloc[window-1:].values
+    df_thetap.iloc[:window, 1] = onp.nan
+    df_thetap_doy = df_thetap.groupby(by=["doy"], dropna=False).mean()
+    theta_p33 = df_thetap_doy.loc[:, 'theta'].quantile(0.33)
+    theta_p66 = df_thetap_doy.loc[:, 'theta'].quantile(0.66)
+    cond1 = (df_thetap['theta'] < theta_p33)
+    cond2 = (df_thetap['theta'] >= theta_p33) & (df_thetap['theta'] < theta_p66)
+    cond3 = (df_thetap['theta'] >= theta_p66)
+    df_thetap.loc[cond1, 'sc'] = 1  # dry
+    df_thetap.loc[cond2, 'sc'] = 2  # normal
+    df_thetap.loc[cond3, 'sc'] = 3  # wet
 
     dict_params_eff = {}
     tm_structures = ['preferential', 'advection-dispersion',
@@ -150,13 +171,10 @@ def main(tmp_dir):
         # assign date
         days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
         days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-        days_obs = (ds_obs['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
         date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
         date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-        date_obs = num2date(days_obs, units=f"days since {ds_obs['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
         ds_sim_hm = ds_sim_hm.assign_coords(date=("Time", date_sim_hm))
         ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
-        ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
 
         # DataFrame with sampled model parameters and the corresponding metrics
         nx = ds_sim_tm.dims['x']  # number of rows
@@ -190,16 +208,16 @@ def main(tmp_dir):
         # compare observations and simulations
         ncol = 0
         idx = ds_sim_tm.date.values  # time index
-        d18O_perc_cs = onp.zeros((nx, 1, len(idx)))
-        df_idx_cs = pd.DataFrame(index=date_obs, columns=['sol'])
-        df_idx_cs.loc[:, 'sol'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-        idx_cs = df_idx_cs['sol'].dropna().index
+        d18O_perc_bs = onp.zeros((nx, 1, len(idx)))
+        df_idx_bs = pd.DataFrame(index=date_obs, columns=['sol'])
+        df_idx_bs.loc[:, 'sol'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+        idx_bs = df_idx_bs['sol'].dropna().index
         for nrow in range(nx):
-            # calculate simulated oxygen-18 composite sample
+            # calculate simulated oxygen-18 bulk sample
             df_perc_18O_obs = pd.DataFrame(index=date_obs, columns=['perc_obs', 'd18O_perc_obs'])
             df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=0, y=0).values
             df_perc_18O_obs.loc[:, 'd18O_perc_obs'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-            sample_no = pd.DataFrame(index=idx_cs, columns=['sample_no'])
+            sample_no = pd.DataFrame(index=idx_bs, columns=['sample_no'])
             sample_no = sample_no.loc['1997':'2007']
             sample_no['sample_no'] = range(len(sample_no.index))
             df_perc_18O_sim = pd.DataFrame(index=date_sim_tm, columns=['perc_sim', 'd18O_perc_sim'])
@@ -219,9 +237,9 @@ def main(tmp_dir):
             df_perc_18O_sim.loc[:, 'd18O_sample'] = df_perc_18O_sim.loc[:, 'd18O_sample'].fillna(method='bfill', limit=14)
             cond = (df_perc_18O_sim['d18O_sample'] == 0)
             df_perc_18O_sim.loc[cond, 'd18O_sample'] = onp.NaN
-            d18O_perc_cs[nrow, ncol, :] = df_perc_18O_sim.loc[:, 'd18O_sample'].values
-            # calculate observed oxygen-18 composite sample
-            df_perc_18O_obs.loc[:, 'd18O_perc_cs'] = df_perc_18O_obs['d18O_perc_obs'].fillna(method='bfill', limit=14)
+            d18O_perc_bs[nrow, ncol, :] = df_perc_18O_sim.loc[:, 'd18O_sample'].values
+            # calculate observed oxygen-18 bulk sample
+            df_perc_18O_obs.loc[:, 'd18O_perc_bs'] = df_perc_18O_obs['d18O_perc_obs'].fillna(method='bfill', limit=14)
 
             perc_sample_sum_obs = df_perc_18O_sim.join(df_perc_18O_obs).groupby(['sample_no']).sum().loc[:, 'perc_obs']
             sample_no['perc_obs_sum'] = perc_sample_sum_obs.values
@@ -230,67 +248,72 @@ def main(tmp_dir):
 
             # join observations on simulations
             obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-            sim_vals = d18O_perc_cs[nrow, ncol, :]
+            sim_vals = d18O_perc_bs[nrow, ncol, :]
             df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
             df_obs.loc[:, 'obs'] = obs_vals
             df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
             df_eval = df_eval.dropna()
+            for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
+                if sc > 0:
+                    rows = onp.where(df_thetap['sc'].values == sc)[0].tolist()
+                    df_eval = df_eval.iloc[rows, :]
+                df_eval = df_eval.dropna()
 
-            # calculate metrics
-            var_sim = 'C_q_ss'
-            obs_vals = df_eval.loc[:, 'obs'].values
-            sim_vals = df_eval.loc[:, 'sim'].values
-            key_kge = f'KGE_{var_sim}'
-            df_params_eff.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-            key_kge_alpha = f'KGE_alpha_{var_sim}'
-            df_params_eff.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
-            key_kge_beta = f'KGE_beta_{var_sim}'
-            df_params_eff.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
-            key_r = f'r_{var_sim}'
-            df_params_eff.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
-            var_sim = 'TT_q_ss'
-            # mean travel time of percolation
-            key_mtt = f'mean_{var_sim}'
-            ages = onp.arange(1, ds_sim_tm.dims['ages'] + 1)
-            df_params_eff.loc[nrow, key_mtt] = onp.mean(onp.sum(ages[onp.newaxis, :] * onp.diff(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values, axis=1), axis=1))
-            # median travel time of percolation
-            key_mediantt = f'median_{var_sim}'
-            df_params_eff.loc[nrow, key_mediantt] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.5, axis=1))
-            # lower quantile travel time of percolation
-            key_tt25 = f'25_{var_sim}'
-            df_params_eff.loc[nrow, key_tt25] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.25, axis=1))
-            # upper quantile travel time of percolation
-            key_tt75 = f'75_{var_sim}'
-            df_params_eff.loc[nrow, key_tt75] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.75, axis=1))
-            var_sim = 'SA_s'
-            # mean residence time
-            key_mrt = f'mrt_{var_sim}'
-            ages = onp.arange(1, ds_sim_tm.dims['ages'] + 1)
-            df_params_eff.loc[nrow, key_mrt] = onp.mean(onp.sum(ages[onp.newaxis, :] * onp.diff(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values, axis=1), axis=1))
-            # median residence time
-            key_medianrt = f'median_{var_sim}'
-            df_params_eff.loc[nrow, key_medianrt] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.5, axis=1))
-            # lower quantile residence time
-            key_rt25 = f'25_{var_sim}'
-            df_params_eff.loc[nrow, key_rt25] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.25, axis=1))
-            # upper quantile residence time
-            key_rt75 = f'75_{var_sim}'
-            df_params_eff.loc[nrow, key_rt75] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.75, axis=1))
+                # calculate metrics
+                var_sim = 'C_q_ss'
+                obs_vals = df_eval.loc[:, 'obs'].values
+                sim_vals = df_eval.loc[:, 'sim'].values
+                key_kge = f'KGE_{var_sim}'
+                df_params_eff.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
+                key_kge_alpha = f'KGE_alpha_{var_sim}{sc1}'
+                df_params_eff.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
+                key_kge_beta = f'KGE_beta_{var_sim}{sc1}'
+                df_params_eff.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
+                key_r = f'r_{var_sim}{sc1}'
+                df_params_eff.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+                var_sim = 'TT_q_ss'
+                # mean travel time of percolation
+                key_mtt = f'mean_{var_sim}{sc1}'
+                ages = onp.arange(1, ds_sim_tm.dims['ages'] + 1)
+                df_params_eff.loc[nrow, key_mtt] = onp.mean(onp.sum(ages[onp.newaxis, :] * onp.diff(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values, axis=1), axis=1))
+                # median travel time of percolation
+                key_mediantt = f'median_{var_sim}{sc1}'
+                df_params_eff.loc[nrow, key_mediantt] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.5, axis=1))
+                # lower quantile travel time of percolation
+                key_tt25 = f'25_{var_sim}{sc1}'
+                df_params_eff.loc[nrow, key_tt25] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.25, axis=1))
+                # upper quantile travel time of percolation
+                key_tt75 = f'75_{var_sim}{sc1}'
+                df_params_eff.loc[nrow, key_tt75] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.75, axis=1))
+                var_sim = 'SA_s'
+                # mean residence time
+                key_mrt = f'mrt_{var_sim}{sc1}'
+                ages = onp.arange(1, ds_sim_tm.dims['ages'] + 1)
+                df_params_eff.loc[nrow, key_mrt] = onp.mean(onp.sum(ages[onp.newaxis, :] * onp.diff(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values, axis=1), axis=1))
+                # median residence time
+                key_medianrt = f'median_{var_sim}{sc1}'
+                df_params_eff.loc[nrow, key_medianrt] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.5, axis=1))
+                # lower quantile residence time
+                key_rt25 = f'25_{var_sim}{sc1}'
+                df_params_eff.loc[nrow, key_rt25] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.25, axis=1))
+                # upper quantile residence time
+                key_rt75 = f'75_{var_sim}{sc1}'
+                df_params_eff.loc[nrow, key_rt75] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.75, axis=1))
 
-        # write composite sample to output file
+        # write bulk sample to output file
         ds_sim_tm = ds_sim_tm.close()
         states_tm_file = base_path / "states_tm_sensitivity.nc"
         with h5netcdf.File(states_tm_file, 'r+', decode_vlen_strings=False) as f:
             try:
-                v = f.groups[tm_structure].create_variable('d18O_perc_cs', ('x', 'y', 'Time'), float)
+                v = f.groups[tm_structure].create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float)
             except ValueError:
-                v = f.groups[tm_structure].get('d18O_perc_cs')
-            v[:, :, :] = d18O_perc_cs
-            v.attrs.update(long_name="composite sample of d18O in percolation",
+                v = f.groups[tm_structure].get('d18O_perc_bs')
+            v[:, :, :] = d18O_perc_bs
+            v.attrs.update(long_name="bulk sample of d18O in percolation",
                            units="permil")
         # write to .txt
         file = base_path_results / f"params_eff_{tm_structure}.txt"
-        df_params_eff.to_csv(file, header=True, index=False, sep="\t")
+        df_params_eff.to_bsv(file, header=True, index=False, sep="\t")
         dict_params_eff[tm_structure] = df_params_eff
     return
 

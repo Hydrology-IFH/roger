@@ -183,3 +183,7 @@ z = vs.z_gw[2,2, vs.tau] * 1000 - vs.z_soil[2,2]
 (npx.power((z)/(-vs.ha[2,2]*10.2), -vs.n_salv[2,2])/(1 + (vs.n_salv[2,2] - 1) * npx.power((z)/(-vs.ha[2,2]*10.2), -vs.n_salv[2,2])))
 
 (npx.power((z)/(-vs.ha]*10.2), -vs.n_salv)/(1 + (vs.n_salv - 1) * npx.power((z)/(-vs.ha*10.2), -vs.n_salv)))
+
+
+from roger import logger
+logger.add("out.log")

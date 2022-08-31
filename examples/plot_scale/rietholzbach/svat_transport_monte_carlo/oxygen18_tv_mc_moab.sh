@@ -14,4 +14,4 @@ conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo
 
 # adapt command to your available scheduler / MPI implementation
-python svat_transport.py -b numpy -d cpu -n 250 -tms time-variant -td /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo
+python svat_transport.py -b numpy -d cpu -ns 250 -tms time-variant -td /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo

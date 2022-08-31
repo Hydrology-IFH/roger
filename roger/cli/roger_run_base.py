@@ -8,9 +8,10 @@ def roger_base_cli(func):
     @click.option("-n", "--nproc", type=int, nargs=2, default=(1, 1))
     @click.option("--float-type", type=click.Choice(["float64", "float32"]), default="float64")
     @click.option("-v", "--loglevel", type=click.Choice(["debug", "trace"]), default="debug")
+    @click.option("--log_to_file", is_flag=True)
     @click.option("--profile-mode", is_flag=True)
     @click.command("roger-run-base", short_help="Run a roger setup")
-    def inner(backend, device, nproc, float_type, loglevel, profile_mode, **kwargs):
+    def inner(backend, device, nproc, float_type, loglevel, log_to_file, profile_mode, **kwargs):
         from roger import runtime_settings, runtime_state
 
         runtime_settings.update(
@@ -19,6 +20,7 @@ def roger_base_cli(func):
             float_type=float_type,
             num_proc=nproc,
             loglevel=loglevel,
+            log_to_file=log_to_file,
             profile_mode=profile_mode,
         )
 

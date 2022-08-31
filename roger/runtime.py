@@ -65,8 +65,16 @@ def set_loglevel(val):
     from roger import logs
 
     log_args.loglevel = parse_choice(LOGLEVELS)(val)
-    logs.setup_logging(loglevel=log_args.loglevel, log_all_processes=log_args.log_all_processes)
+    logs.setup_logging(loglevel=log_args.loglevel, log_all_processes=log_args.log_all_processes, log_to_file=log_args.log_to_file)
     return log_args.loglevel
+
+
+def set_log_to_file(val):
+    from roger import logs
+
+    log_args.log_to_file = parse_bool(val)
+    logs.setup_logging(loglevel=log_args.loglevel, log_all_processes=log_args.log_to_file, log_to_file=log_args.log_to_file)
+    return log_args.log_to_file
 
 
 def set_log_all_processes(val):
@@ -96,6 +104,7 @@ AVAILABLE_SETTINGS = {
     "monitor_tracer_balance": RuntimeSetting(parse_bool, False),
     "num_proc": RuntimeSetting(parse_two_ints, (1, 1), read_from_env=False),
     "profile_mode": RuntimeSetting(parse_bool, False),
+    "log_to_file": RuntimeSetting(set_log_to_file, False),
     "loglevel": RuntimeSetting(set_loglevel, "info"),
     "mpi_comm": RuntimeSetting(check_mpi_comm, _default_mpi_comm(), read_from_env=False),
     "log_all_processes": RuntimeSetting(set_log_all_processes, False),

@@ -151,12 +151,17 @@ for tm_structure in tm_structures:
         df_perc_br.loc[:, 'Br_conc_mg'] = ds_sim_tm.sel(date=slice(str(year), str(year + 1)))['C_q_ss'].isel(x=0, y=0).values * (1/3.14)
         # in mmol per liter
         df_perc_br.loc[:, 'Br_conc_mmol'] = df_perc_br.loc[:, 'Br_conc_mg'] / 79.904
-        df_perc_br = df_perc_br.iloc[315:, :]
+        # daily samples from day 0 to day 220
+        df_daily = df_perc_br.loc[:df_perc_br.index[315+220], 'Br_conc_mmol'].to_frame()
+        # weekly samples after 220 days
+        df_weekly = df_perc_br.loc[df_perc_br.index[316+220]:, 'Br_conc_mmol'].resample('7D').mean().to_frame()
+        df_daily_weekly = pd.concat([df_daily, df_weekly])
+        df_perc_br = df_perc_br.loc[:, 'perc':'Br_conc_mg'].join(df_daily_weekly)
         idx = range(len(df_perc_br.index))
         fig, axes = plt.subplots(1, 1, figsize=(10, 6))
         axes.plot(idx, df_perc_br['Br_conc_mmol'], color='black', ls='-', colors=cmap(norm(year)))
         axes.set_ylabel('Br [mmol $l^{-1}$]')
-        axes.set_xlabel('Time [hours since injection]')
+        axes.set_xlabel('Time [days since injection]')
         axes.set_ylim(0,)
         axes.set_xlim(0,)
         ax2 = axes.twinx()

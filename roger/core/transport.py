@@ -432,6 +432,8 @@ def calc_ageing_iso(state, sa, msa):
     """
     vs = state.variables
 
+    sum_iso = npx.nansum(sa[2:-2, 2:-2, vs.tau, :] * msa[2:-2, 2:-2, vs.tau, :], axis=-1)
+
     sam1 = allocate(state.dimensions, ("x", "y", "ages"))
     sam1 = update(
         sam1,
@@ -474,7 +476,7 @@ def calc_ageing_iso(state, sa, msa):
     )
     iso_old2 = update(
         iso_old2,
-        at[2:-2, 2:-2], npx.where(npx.isnan(iso_old1[2:-2, 2:-2]), npx.where(npx.isnan(msam1[2:-2, 2:-2, -1]), msa[2:-2, 2:-2, vs.tau, -1], msam1[2:-2, 2:-2, -1]), iso_old1[2:-2, 2:-2]),
+        at[2:-2, 2:-2], npx.where(npx.isnan(iso_old1[2:-2, 2:-2]), npx.where(npx.isnan(msam1[2:-2, 2:-2, -1]), msa[2:-2, 2:-2, vs.tau, -1] * (sa[2:-2, 2:-2, vs.tau, -1]/sum_old[2:-2, 2:-2]), msam1[2:-2, 2:-2, -1] * (sam1[2:-2, 2:-2, -1]/sum_old[2:-2, 2:-2])), iso_old1[2:-2, 2:-2]),
     )
     msa = update(
         msa,
@@ -485,6 +487,8 @@ def calc_ageing_iso(state, sa, msa):
         sa,
         at[2:-2, 2:-2, vs.tau, -1], sam1[2:-2, 2:-2, -1],
     )
+
+    sum_iso1 = npx.nansum(sa[2:-2, 2:-2, vs.tau, :] * msa[2:-2, 2:-2, vs.tau, :], axis=-1)
 
     return sa, msa
 
@@ -533,6 +537,8 @@ def calculate_ageing_iso_kernel(state):
     """
     vs = state.variables
 
+    sum_iso_rz = npx.nansum(vs.sa_rz[2:-2, 2:-2, vs.tau, :] * vs.msa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)
+
     sa_rz, msa_rz = calc_ageing_iso(state, vs.sa_rz, vs.msa_rz)
 
     vs.sa_rz = update(
@@ -545,6 +551,11 @@ def calculate_ageing_iso_kernel(state):
         at[2:-2, 2:-2, vs.tau, :], msa_rz[2:-2, 2:-2, vs.tau, :],
     )
 
+    sum_iso_ss = npx.nansum(vs.sa_ss[2:-2, 2:-2, vs.tau, :] * vs.msa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)
+
+    if vs.itt >= 341:
+        print('')
+
     sa_ss, msa_ss = calc_ageing_iso(state, vs.sa_ss, vs.msa_ss)
 
     vs.sa_ss = update(
@@ -556,6 +567,19 @@ def calculate_ageing_iso_kernel(state):
         vs.msa_ss,
         at[2:-2, 2:-2, vs.tau, :], msa_ss[2:-2, 2:-2, vs.tau, :],
     )
+
+    sum_iso_rz1 = npx.nansum(vs.sa_rz[2:-2, 2:-2, vs.tau, :] * vs.msa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)
+    sum_iso_ss1 = npx.nansum(vs.sa_ss[2:-2, 2:-2, vs.tau, :] * vs.msa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)
+
+    check11 = npx.isclose(sum_iso_rz, sum_iso_rz1, atol=1e-02)
+    check12 = npx.isclose(sum_iso_ss, sum_iso_ss1, atol=1e-02)
+
+    if rs.loglevel == 'debug' and rs.backend == 'numpy':
+        if not check11.all():
+            logger.debug(f"Ageing error in root zone at iteration {vs.itt}")
+
+        if not check12.all():
+            logger.debug(f"Ageing error in subsoil at iteration {vs.itt}")
 
     return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss)
 
