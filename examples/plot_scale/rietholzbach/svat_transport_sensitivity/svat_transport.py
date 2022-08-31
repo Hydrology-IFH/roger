@@ -685,15 +685,16 @@ def main(nsamples, transport_model_structure, tmp_dir):
     tms = transport_model_structure.replace("_", " ")
     model = SVATTRANSPORTSetup()
     model._set_tm_structure(tms)
-    identifier = f'SVATTRANSPORT_{transport_model_structure}1'
+    identifier = f'SVATTRANSPORT_{transport_model_structure}'
     model._set_identifier(identifier)
     model._sample_params(nsamples)
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)
-    # write_forcing_tracer(input_path, 'd18O')
+    write_forcing_tracer(input_path, 'd18O')
     model.setup()
     model.warmup()
     model.run()
+    return
 
     # tms = transport_model_structure.replace("_", " ")
     # model = SVATTRANSPORTSetup()
@@ -711,6 +712,7 @@ def main(nsamples, transport_model_structure, tmp_dir):
     # model.setup()
     # model.warmup()
     # model.run()
+    # return
 
     # tms = transport_model_structure.replace("_", " ")
     # model = SVATTRANSPORTSetup()
@@ -732,7 +734,7 @@ def main(nsamples, transport_model_structure, tmp_dir):
     # write_forcing_tracer(input_path, 'd18O')
     # model.setup()
     # model.run()
-    return
+    # return
 
 
 if __name__ == "__main__":

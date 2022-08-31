@@ -1,7 +1,8 @@
 from roger.core.operators import numpy as npx
 from roger.io_tools.csv import read_meteo
 import roger.tools.labels as labs
-from roger import roger_sync
+from roger import roger_sync, logger
+import time
 import os
 from pathlib import Path
 import numpy as onp
@@ -465,7 +466,16 @@ def write_forcing(input_dir, nrows=1, ncols=1, uniform=True,
         if True precipitation is corrected according to Richter (1995)
     """
     if uniform:
-        df_PREC, df_PET, df_TA = read_meteo(input_dir)
+        _lock = True
+        while _lock:
+            try:
+                df_PREC, df_PET, df_TA = read_meteo(input_dir)
+                _lock = False
+                break
+            except BlockingIOError:
+                logger.debug("Wait for input files. Files might be used by some other process")
+                time.wait(10)
+
         validate(df_PREC)
         validate(df_PET)
         validate(df_TA)
