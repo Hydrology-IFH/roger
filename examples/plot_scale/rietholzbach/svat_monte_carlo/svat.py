@@ -121,9 +121,9 @@ def main(nsamples, tmp_dir):
             # effective porosity
             vs.theta_eff = update(vs.theta_eff, at[2:-2, 2:-2], random_uniform(0.15, 0.35, vs.theta_eff.shape)[2:-2, 2:-2])
             vs.frac_lp = update(vs.frac_lp, at[2:-2, 2:-2], random_uniform(0.1, 0.9, vs.theta_eff.shape)[2:-2, 2:-2])
-            vs.frac_lp = update(vs.frac_lp, at[2:-2, 2:-2], 1 - vs.frac_lp[2:-2, 2:-2])
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], vs.theta_eff[2:-2, 2:-2] * vs.frac_lp)
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], vs.theta_eff[2:-2, 2:-2] * vs.frac_fp)
+            vs.frac_fp = update(vs.frac_fp, at[2:-2, 2:-2], 1 - vs.frac_lp[2:-2, 2:-2])
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], vs.theta_eff[2:-2, 2:-2] * vs.frac_lp[2:-2, 2:-2])
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], vs.theta_eff[2:-2, 2:-2] * vs.frac_fp[2:-2, 2:-2])
             vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], random_uniform(0.15, 0.35, vs.theta_pwp.shape)[2:-2, 2:-2])
             vs.ks = update(vs.ks, at[2:-2, 2:-2], random_uniform(1, 150, vs.ks.shape)[2:-2, 2:-2])
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
