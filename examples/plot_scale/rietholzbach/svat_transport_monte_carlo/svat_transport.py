@@ -669,10 +669,7 @@ def main(nsamples, transport_model_structure, tmp_dir):
 
     tms = transport_model_structure.replace("_", " ")
     model = SVATTRANSPORTSetup()
-    if tms in ['preferential', 'advection-dispersion',
-               'time-variant preferential',
-               'time-variant advection-dispersion']:
-        model._set_nsamples(nsamples)
+    model._set_nsamples(nsamples)
     model._set_tm_structure(tms)
     identifier = f'SVATTRANSPORT_{transport_model_structure}'
     model._set_identifier(identifier)
