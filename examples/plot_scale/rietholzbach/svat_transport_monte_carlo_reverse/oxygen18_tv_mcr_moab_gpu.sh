@@ -1,16 +1,21 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=1
+#PBS -l nodes=1:ppn=1:gpus1:default
 #PBS -l walltime=48:00:00
-#PBS -l pmem=4000mb
+#PBS -l pmem=12000mb
 #PBS -N oxygen18_tv_mcr
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  
+# load module dependencies
+module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4
+module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
+module load lib/cudnn/8.2-cuda-11.4
+export OMP_NUM_THREADS=1
 eval "$(conda shell.bash hook)"
-conda activate roger
+conda activate roger-gpu
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo_reverse
  
-python svat_transport.py -b numpy -d cpu -ns 250 -tms time-variant -td "${TMPDIR}"
+python svat_transport.py -b jax -d gpu -ns 1000 -tms time-variant -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo_reverse"
 mkdir -p /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo_reverse
