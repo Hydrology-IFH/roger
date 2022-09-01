@@ -255,7 +255,7 @@ def calc_transp(state):
     theta_water_stress = allocate(state.dimensions, ("x", "y"))
     theta_water_stress = update(
         theta_water_stress,
-        at[2:-2, 2:-2], (settings.transp_water_stress * (vs.theta_fc[2:-2, 2:-2] - vs.theta_pwp[2:-2, 2:-2]) + vs.theta_pwp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], (settings.transp_water_stress * vs.theta_fc[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     mask_crops = npx.isin(vs.lu_id, npx.arange(500, 600, 1, dtype=int))

@@ -101,6 +101,9 @@ def main(nsamples, tmp_dir):
                 "z_soil",
                 "dmpv",
                 "lmpv",
+                "theta_eff",
+                "frac_lp",
+                "frac_fp",
                 "theta_ac",
                 "theta_ufc",
                 "theta_pwp",
@@ -116,11 +119,11 @@ def main(nsamples, tmp_dir):
             vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], npx.array(random_uniform(1, 400, vs.dmpv.shape), dtype=int)[2:-2, 2:-2])
             vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], npx.array(random_uniform(1, 2000, vs.lmpv.shape), dtype=int)[2:-2, 2:-2])
             # effective porosity
-            eff_por = random_uniform(0.15, 0.35, vs.theta_ac.shape)[2:-2, 2:-2]
-            frac_lp = random_uniform(0.1, 0.9, vs.theta_ac.shape)[2:-2, 2:-2]
-            frac_fp = 1 - frac_lp
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], eff_por * frac_lp)
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], eff_por * frac_fp)
+            vs.theta_eff = update(vs.theta_eff, at[2:-2, 2:-2], random_uniform(0.15, 0.35, vs.theta_eff.shape)[2:-2, 2:-2])
+            vs.frac_lp = update(vs.frac_lp, at[2:-2, 2:-2], random_uniform(0.1, 0.9, vs.theta_eff.shape)[2:-2, 2:-2])
+            vs.frac_lp = update(vs.frac_lp, at[2:-2, 2:-2], 1 - vs.frac_lp[2:-2, 2:-2])
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], vs.theta_eff[2:-2, 2:-2] * vs.frac_lp)
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], vs.theta_eff[2:-2, 2:-2] * vs.frac_fp)
             vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], random_uniform(0.15, 0.35, vs.theta_pwp.shape)[2:-2, 2:-2])
             vs.ks = update(vs.ks, at[2:-2, 2:-2], random_uniform(1, 150, vs.ks.shape)[2:-2, 2:-2])
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
@@ -324,7 +327,7 @@ def main(nsamples, tmp_dir):
             if base_path:
                 diagnostics["averages"].base_output_path = base_path
 
-            diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']
+            diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'theta_eff', 'frac_lp', 'frac_fp']
             diagnostics["constant"].output_frequency = 0
             diagnostics["constant"].sampling_frequency = 1
             if base_path:
