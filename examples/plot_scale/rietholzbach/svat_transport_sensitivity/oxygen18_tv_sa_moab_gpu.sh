@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=1:gpus1:default
+#PBS -l nodes=1:ppn=1:gpus=1:default
 #PBS -l walltime=48:00:00
 #PBS -l pmem=12000mb
 #PBS -N oxygen18_tv_sa

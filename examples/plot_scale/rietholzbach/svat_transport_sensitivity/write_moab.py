@@ -125,7 +125,7 @@ def main(job_type):
             tms = tm.replace(" ", "_")
             lines = []
             lines.append('#!/bin/bash\n')
-            lines.append('#PBS -l nodes=1:ppn=1:gpus1:default\n')
+            lines.append('#PBS -l nodes=1:ppn=1:gpus=1:default\n')
             lines.append('#PBS -l walltime=48:00:00\n')
             lines.append('#PBS -l pmem=12000mb\n')
             lines.append(f'#PBS -N {script_name}\n')
@@ -160,7 +160,7 @@ def main(job_type):
             tms = tm.replace(" ", "_")
             lines = []
             lines.append('#!/bin/bash\n')
-            lines.append('#PBS -l nodes=1:ppn=1:gpus2:default\n')
+            lines.append('#PBS -l nodes=1:ppn=1:gpus=2:default\n')
             lines.append('#PBS -l walltime=48:00:00\n')
             lines.append('#PBS -l pmem=12000mb\n')
             lines.append(f'#PBS -N {script_name}\n')
@@ -195,7 +195,7 @@ def main(job_type):
             tms = tm.replace(" ", "_")
             lines = []
             lines.append('#!/bin/bash\n')
-            lines.append('#PBS -l nodes=2:ppn=1:gpus2:default\n')
+            lines.append('#PBS -l nodes=2:ppn=1:gpus=2:default\n')
             lines.append('#PBS -l walltime=48:00:00\n')
             lines.append('#PBS -l pmem=12000mb\n')
             lines.append(f'#PBS -N {script_name}\n')
