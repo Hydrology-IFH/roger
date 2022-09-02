@@ -339,7 +339,7 @@ def main(tmp_dir):
                         key_phi = 'phi_' + var_sim + f'{sc1}'
                         df_params_eff.loc[nrow, key_phi] = de.calc_phi(brel_mean, b_slope)
 
-    df_params_eff = df_params_eff.copy()
+            df_params_eff = df_params_eff.copy()
     # Calculate multi-objective metric
     for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
         df_params_eff.loc[:, f'E_multi{sc1}'] = 1/3 * df_params_eff.loc[:, f'r_dS{sc1}'] + 1/3 * df_params_eff.loc[:, f'KGE_aet{sc1}'] + 1/3 * df_params_eff.loc[:, f'KGE_q_ss{sc1}']
