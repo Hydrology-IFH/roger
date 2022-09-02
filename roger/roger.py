@@ -326,6 +326,10 @@ class RogerSetup(metaclass=abc.ABCMeta):
             diagnostics.output(self.state)
 
         logger.success("Setup done\n")
+        if rs.deivce == 'gpu':
+            import subprocess
+            nvidia_smi = subprocess.Popen(["nvidia-smi"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            logger.info(nvidia_smi.stdout.decode())
 
     @roger_routine
     def step(self, state):
@@ -451,6 +455,10 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
         # NOTE: benchmarks parse this, do not change / remove
         logger.debug(" Time step of iteration {} took {:.2f}s", vs.itt, state.timers["main"].last_time)
+        if rs.deivce == 'gpu':
+            import subprocess
+            nvidia_smi = subprocess.Popen(["nvidia-smi"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            logger.info(nvidia_smi.stdout.decode())
 
     def warmup(self, repeat=1):
         """Warmup routine of the simulation.

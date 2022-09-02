@@ -35,13 +35,13 @@ def main(tmp_dir):
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
-    if not os.path.exists(base_path / "states_hm_monte_carlo.nc"):
+    states_hm_file = base_path / "states_hm_monte_carlo.nc"
+    if not os.path.exists(states_hm_file):
         lys_experiments = ["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
         for lys_experiment in lys_experiments:
             # merge model output into single file
             path = str(base_path / f'SVATCROP_{lys_experiment}.*.nc')
             diag_files = glob.glob(path)
-            states_hm_file = base_path / "states_hm_monte_carlo.nc"
             with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
                 if lys_experiment not in list(f.groups.keys()):
                     f.create_group(lys_experiment)
@@ -143,6 +143,9 @@ def main(tmp_dir):
         date_obs = num2date(days_obs, units=f"days since {ds_obs['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
         ds_sim = ds_sim.assign_coords(date=("Time", date_sim))
         ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
+        # Dataframe with observed crop types
+        df_crop_types = pd.DataFrame(index=date_obs)
+        df_crop_types.loc[:, 'crop_type'] = ds_obs['CROP_TYPE'].isel(x=0, y=0).values.astype(str)
         # get list with land use IDs
         crop_types_sim1 = onp.unique(ds_sim['lu_id'].values.flatten()).tolist()
         crop_types_sim = [0] + crop_types_sim1
@@ -176,17 +179,13 @@ def main(tmp_dir):
                 df_obs.loc[:, 'obs'] = obs_vals
                 for nrow in range(nx * ny):
                     sim_vals = ds_sim[var_sim].isel(x=nrow, y=0).values
-                    if crop_type_sim > 500:
-                        crop_sim = ds_sim['lu_id'].isel(x=nrow, y=0).values.astype(int)
-                        sim_vals = onp.where((crop_sim == crop_type_sim), sim_vals, onp.nan)
                     # join observations on simulations
                     df_eval = eval_utils.join_obs_on_sim(date_sim, sim_vals, df_obs)
-                    # select data for specific crops
-                    # if crop_type_sim > 500:
-                    #     crop_type_obs = int(lut.dict_crops[crop_type_sim])
-                    #     crop_obs = ds_obs["CROP_TYPE"].isel(x=0, y=0).values.astype(int)
-                    #     rows = onp.where((crop_obs == crop_type_obs))[0].tolist()
-                    #     df_eval = df_eval.iloc[rows, :]
+                    # select data by crop type
+                    if crop_type_sim > 500:
+                        df_rows = pd.DataFrame(index=df_eval.index).join(df_crop_types)
+                        rows = (df_rows['crop_type'].values == lut.dict_crops[crop_type_sim])
+                        df_eval = df_eval.loc[rows, :]
                     df_eval = df_eval.dropna()
                     # number of data points
                     N_obs = len(df_eval.index)

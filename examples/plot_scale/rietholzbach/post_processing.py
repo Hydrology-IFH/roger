@@ -162,6 +162,41 @@ def main(tmp_dir):
         path_fig = base_path_figs / file_str
         fig.savefig(path_fig, dpi=250)
 
+    # HYDRUS-1D benchmark
+    states_hydrus_file = base_path / "hydrus_benchmark" / "states_hydrus.nc"
+    ds_hydrus = xr.open_dataset(states_hydrus_file, engine="h5netcdf")
+    days_hydrus = (ds_hydrus['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    date_hydrus = num2date(days_hydrus, units=f"days since {ds_hydrus['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    ds_hydrus = ds_hydrus.assign_coords(date=("Time", date_hydrus))
+
+    # compare simulation and observation
+    vars_obs = ['AET', 'PERC', 'dWEIGHT']
+    vars_sim = ['aet', 'perc', 'dS']
+    dict_obs_sim_hydrus = {}
+    for var_obs, var_sim in zip(vars_obs, vars_sim):
+        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals
+        sim_vals = ds_hydrus[var_sim].isel(x=0, y=0).values
+        # join observations on simulations
+        df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
+        df_eval = df_eval.iloc[:, :]
+        dict_obs_sim_hydrus[var_sim] = df_eval
+        # plot observed and simulated time series
+        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+        file_str = 'hydrus_%s.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed and simulated time series
+        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = 'hydrus_%s_cum.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = 'hydrus_%s_cum_year_facet.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+
     # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
     fig, axes = plt.subplots(3, 1, sharex=True, figsize=(14, 7))
     axes[0].plot(dict_obs['prec'].index, dict_obs['prec'].cumsum(), lw=1.5, color='blue', ls='-', alpha=1)
@@ -174,18 +209,24 @@ def main(tmp_dir):
               lw=1.5, color='blue', ls='-', alpha=0.5)
     ax2.plot(dict_obs_sim['aet'].index, dict_obs_sim['aet']['sim'].cumsum(),
               lw=1, color='red', ls='-.')
+    ax2.plot(dict_obs_sim_hydrus['aet'].index, dict_obs_sim_hydrus['aet']['sim'].cumsum(),
+              lw=1, color='gray', ls='-.')
     ax2.set_ylim(0,)
     ax2.set_ylabel('Evapotranspiration\n[mm]')
     axes[1].plot(dict_obs_sim['dS'].loc['2001':, :].index, dict_obs_sim['dS'].loc['2001':, 'obs'].cumsum(),
                   lw=1.5, color='blue', ls='-', alpha=0.5)
-    axes[1].plot(dict_obs_sim['dS'].loc['2001':, :].index, dict_obs_sim['dS'].loc['2001':,'sim'].cumsum(),
+    axes[1].plot(dict_obs_sim['dS'].loc['2001':, :].index, dict_obs_sim['dS'].loc['2001':, 'sim'].cumsum(),
                   lw=1, color='red', ls='-.')
+    axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2001':, :].index, dict_obs_sim_hydrus['dS'].loc['2001':, 'sim'].cumsum(),
+                  lw=1, color='gray', ls='-.')
     axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
     axes[1].set_xlim((dict_obs_sim['dS'].index[0], dict_obs_sim['dS'].index[-1]))
     axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['obs'].cumsum(),
                   lw=1.5, color='blue', ls='-', alpha=0.5)
     axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['sim'].cumsum(),
                   lw=1, color='red', ls='-.')
+    axes[2].plot(dict_obs_sim_hydrus['perc'].index, dict_obs_sim_hydrus['perc']['sim'].cumsum(),
+                  lw=1, color='gray', ls='-.')
     axes[2].set_ylim(0,)
     axes[2].invert_yaxis()
     axes[2].set_xlim((dict_obs_sim['q_ss'].index[0], dict_obs_sim['q_ss'].index[-1]))
@@ -226,7 +267,7 @@ def main(tmp_dir):
     #     ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
     #     # join observations on simulations
     #     obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-    #     sim_vals = ds_sim_tm['d18O_perc_cs'].isel(x=0, y=0).values
+    #     sim_vals = ds_sim_tm['d18O_perc_bs'].isel(x=0, y=0).values
     #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
     #     df_obs.loc[:, 'obs'] = obs_vals
     #     df_sim = pd.DataFrame(index=date_sim_tm, columns=['sim'])
@@ -256,7 +297,7 @@ def main(tmp_dir):
     #     ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
     #     # join observations on simulations
     #     obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-    #     sim_vals = ds_sim_tm['d18O_perc_cs'].isel(x=0, y=0).values
+    #     sim_vals = ds_sim_tm['d18O_perc_bs'].isel(x=0, y=0).values
     #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
     #     df_obs.loc[:, 'obs'] = obs_vals
     #     df_sim = pd.DataFrame(index=date_sim_tm, columns=['sim'])
@@ -372,81 +413,6 @@ def main(tmp_dir):
     #     file = base_path_figs / f"dotty_plots_{tms}.png"
     #     fig.savefig(file, dpi=250)
 
-    # HYDRUS-1D benchmark
-    states_hydrus_file = base_path / "hydrus_benchmark" / "states_hydrus.nc"
-    ds_hydrus = xr.open_dataset(states_hydrus_file, engine="h5netcdf")
-    days_hydrus = (ds_hydrus['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    date_hydrus = num2date(days_hydrus, units=f"days since {ds_hydrus['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    ds_hydrus = ds_hydrus.assign_coords(date=("Time", date_hydrus))
-
-    # compare simulation and observation
-    vars_obs = ['AET', 'PERC', 'dWEIGHT']
-    vars_sim = ['aet', 'perc', 'dS']
-    dict_obs_sim_hydrus = {}
-    for var_obs, var_sim in zip(vars_obs, vars_sim):
-        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-        df_obs.loc[:, 'obs'] = obs_vals
-        sim_vals = ds_hydrus[var_sim].isel(x=0, y=0).values
-        # join observations on simulations
-        df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
-        df_eval = df_eval.iloc[:, :]
-        dict_obs_sim_hydrus[var_sim] = df_eval
-        # plot observed and simulated time series
-        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-        file_str = 'hydrus_%s.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        # plot cumulated observed and simulated time series
-        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-        file_str = 'hydrus_%s_cum.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-        file_str = 'hydrus_%s_cum_year_facet.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-
-    # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
-    fig, axes = plt.subplots(3, 1, sharex=True, figsize=(14, 7))
-    axes[0].plot(dict_obs['prec'].index, dict_obs['prec'].cumsum(), lw=1.5, color='blue', ls='-', alpha=1)
-    axes[0].set_ylabel('Precipitation\n[mm]')
-    axes[0].set_xlim((dict_obs['prec'].index[0], dict_obs['prec'].index[-1]))
-    axes[0].set_ylim(0,)
-    axes[0].invert_yaxis()
-    ax2 = axes[0].twinx()
-    ax2.plot(dict_obs_sim_hydrus['aet'].index, dict_obs_sim_hydrus['aet']['obs'].cumsum(),
-              lw=1.5, color='blue', ls='-', alpha=0.5)
-    ax2.plot(dict_obs_sim_hydrus['aet'].index, dict_obs_sim_hydrus['aet']['sim'].cumsum(),
-              lw=1, color='red', ls='-.')
-    ax2.set_ylim(0,)
-    ax2.set_ylabel('Evapotranspiration\n[mm]')
-    axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2000':, :].index, dict_obs_sim_hydrus['dS'].loc['2000':, 'obs'].cumsum(),
-                  lw=1.5, color='blue', ls='-', alpha=0.5)
-    axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2000':, :].index, dict_obs_sim_hydrus['dS'].loc['2000':,'sim'].cumsum(),
-                  lw=1, color='red', ls='-.')
-    axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
-    axes[1].set_xlim((dict_obs_sim_hydrus['dS'].index[0], dict_obs_sim_hydrus['dS'].index[-1]))
-    axes[2].plot(dict_obs_sim_hydrus['perc'].index, dict_obs_sim_hydrus['perc']['obs'].cumsum(),
-                  lw=1.5, color='blue', ls='-', alpha=0.5)
-    axes[2].plot(dict_obs_sim_hydrus['perc'].index, dict_obs_sim_hydrus['perc']['sim'].cumsum(),
-                  lw=1, color='red', ls='-.')
-    axes[2].set_ylim(0,)
-    axes[2].invert_yaxis()
-    axes[2].set_xlim((dict_obs_sim_hydrus['perc'].index[0], dict_obs_sim_hydrus['perc'].index[-1]))
-    axes[2].set_ylabel('Percolation\n[mm]')
-    axes[2].set_xlabel(r'Time [year]')
-    axes[0].text(0.015, 0.9, '(a)', size=15, horizontalalignment='center',
-                 verticalalignment='center', transform=axes[0].transAxes)
-    axes[1].text(0.015, 0.9, '(b)', size=15, horizontalalignment='center',
-                 verticalalignment='center', transform=axes[1].transAxes)
-    axes[2].text(0.015, 0.9, '(c)', size=15, horizontalalignment='center',
-                 verticalalignment='center', transform=axes[2].transAxes)
-    fig.tight_layout()
-    file = 'hydrus_prec_et_dS_perc_obs_sim_cumulated.png'
-    path = base_path_figs / file
-    fig.savefig(path, dpi=250)
-
     # plot isotope ratios of precipitation and soil
     cmap = copy.copy(plt.cm.get_cmap('YlGnBu_r'))
     norm = mpl.colors.Normalize(vmin=-20, vmax=5)
@@ -503,6 +469,10 @@ def main(tmp_dir):
     file = 'hydrus_conc_prec_soil_perc.png'
     path = base_path_figs / file
     fig.savefig(path, dpi=250)
+
+    # dotty plots of monte carlo simulations
+    file = base_path / "hydrus_benchmark" / "mc_results.txt"
+    df_params_eff_hydrus = pd.read_csv(file, header=True, index=False, sep="\t")
 
     # states_hydrus_tt_file = base_path / "hydrus_benchmark" / "states_tt_hydrus.nc"
     # ds_hydrus_tt = xr.open_dataset(states_hydrus_tt_file, engine="h5netcdf")

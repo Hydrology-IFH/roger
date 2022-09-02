@@ -31,8 +31,7 @@ def main(tmp_dir):
 
     # merge results into single file
     if not os.path.exists(base_path / "states_tm_sensitivity.nc"):
-        tm_structures = ['preferential', 'advection-dispersion',
-                         'time-variant preferential',
+        tm_structures = ['advection-dispersion',
                          'time-variant advection-dispersion']
         for tm_structure in tm_structures:
             tms = tm_structure.replace(" ", "_")
@@ -145,21 +144,19 @@ def main(tmp_dir):
                              columns=['doy', 'theta', 'sc'])
     df_thetap.loc[:, 'doy'] = df_thetap.index.day_of_year
     df_thetap.loc[:, 'theta'] = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0)
-    df_thetap.loc[df_thetap.index[window-1]:, 'theta'] = df_thetap.loc[:, 'theta'].rolling(window=window).mean().iloc[window-1:].values
-    df_thetap.iloc[:window, 1] = onp.nan
-    df_thetap_doy = df_thetap.groupby(by=["doy"], dropna=False).mean()
-    theta_p33 = df_thetap_doy.loc[:, 'theta'].quantile(0.33)
-    theta_p66 = df_thetap_doy.loc[:, 'theta'].quantile(0.66)
-    cond1 = (df_thetap['theta'] < theta_p33)
-    cond2 = (df_thetap['theta'] >= theta_p33) & (df_thetap['theta'] < theta_p66)
-    cond3 = (df_thetap['theta'] >= theta_p66)
+    df_thetap.loc[df_thetap.index[window-1]:, f'theta_avg{window}'] = df_thetap.loc[:, 'theta'].rolling(window=window).mean().iloc[window-1:].values
+    df_thetap.iloc[:window, 2] = onp.nan
+    theta_p33 = df_thetap.loc[:, f'theta_avg{window}'].quantile(0.33)
+    theta_p66 = df_thetap.loc[:, f'theta_avg{window}'].quantile(0.66)
+    cond1 = (df_thetap[f'theta_avg{window}'] < theta_p33)
+    cond2 = (df_thetap[f'theta_avg{window}'] >= theta_p33) & (df_thetap[f'theta_avg{window}'] < theta_p66)
+    cond3 = (df_thetap[f'theta_avg{window}'] >= theta_p66)
     df_thetap.loc[cond1, 'sc'] = 1  # dry
     df_thetap.loc[cond2, 'sc'] = 2  # normal
     df_thetap.loc[cond3, 'sc'] = 3  # wet
 
     dict_params_eff = {}
-    tm_structures = ['preferential', 'advection-dispersion',
-                     'time-variant preferential',
+    tm_structures = ['advection-dispersion',
                      'time-variant advection-dispersion']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
@@ -247,23 +244,23 @@ def main(tmp_dir):
             df_perc_18O_sim.loc[:, 'perc_obs_sum'] = df_perc_18O_sim.loc[:, 'perc_obs_sum'].fillna(method='bfill', limit=14)
 
             # join observations on simulations
-            obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-            sim_vals = d18O_perc_bs[nrow, ncol, :]
-            df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-            df_obs.loc[:, 'obs'] = obs_vals
-            df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
-            df_eval = df_eval.dropna()
             for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
+                obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+                sim_vals = d18O_perc_bs[nrow, ncol, :]
+                df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+                df_obs.loc[:, 'obs'] = obs_vals
+                df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
                 if sc > 0:
-                    rows = onp.where(df_thetap['sc'].values == sc)[0].tolist()
-                    df_eval = df_eval.iloc[rows, :]
+                    df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
+                    rows = (df_rows['sc'].values == sc)
+                    df_eval = df_eval.loc[rows, :]
                 df_eval = df_eval.dropna()
 
                 # calculate metrics
                 var_sim = 'C_q_ss'
                 obs_vals = df_eval.loc[:, 'obs'].values
                 sim_vals = df_eval.loc[:, 'sim'].values
-                key_kge = f'KGE_{var_sim}'
+                key_kge = f'KGE_{var_sim}{sc1}'
                 df_params_eff.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
                 key_kge_alpha = f'KGE_alpha_{var_sim}{sc1}'
                 df_params_eff.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
@@ -303,7 +300,7 @@ def main(tmp_dir):
         # write bulk sample to output file
         ds_sim_tm = ds_sim_tm.close()
         states_tm_file = base_path / "states_tm_sensitivity.nc"
-        with h5netcdf.File(states_tm_file, 'r+', decode_vlen_strings=False) as f:
+        with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             try:
                 v = f.groups[tm_structure].create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float)
             except ValueError:

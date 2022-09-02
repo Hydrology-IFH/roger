@@ -208,5 +208,11 @@ class RuntimeState:
 
         return backend.get_backend_module(runtime_settings.backend)
 
+    @property
+    def current_device(self):
+        from roger import backend
+
+        return backend.get_curent_device_name()
+
     def __setattr__(self, attr, val):
         raise TypeError(f"Cannot modify {self.__class__.__name__} objects")
