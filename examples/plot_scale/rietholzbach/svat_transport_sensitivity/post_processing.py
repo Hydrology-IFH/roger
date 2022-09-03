@@ -30,6 +30,110 @@ def main(tmp_dir):
         os.mkdir(base_path_figs)
 
     # merge results into single file
+    tm_structures = ['complete-mixing', 'piston',
+                     'advection-dispersion',
+                     'time-variant advection-dispersion']
+    for tm_structure in tm_structures:
+        tms = tm_structure.replace(" ", "_")
+        path = str(base_path / f"SVATTRANSPORT_{tms}.*.nc")
+        diag_files = glob.glob(path)
+        states_tm_file = base_path / f"states_{tms}_sensitivity.nc"
+        if not os.path.exists(states_tm_file):
+            with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+                f.attrs.update(
+                    date_created=datetime.datetime.today().isoformat(),
+                    title=f'RoGeR {tm_structure} model Saltelli simulations at Rietholzbach lysimeter site',
+                    institution='University of Freiburg, Chair of Hydrology',
+                    references='',
+                    comment='',
+                    model_structure=f'SVAT {tm_structure} model with free drainage',
+                    roger_version=f'{roger.__version__}'
+                )
+                # collect dimensions
+                for dfs in diag_files:
+                    with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                        # set dimensions with a dictionary
+                        if not dfs.split('/')[-1].split('.')[1] == 'constant':
+                            dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
+                            time = onp.array(df.variables.get('Time'))
+                for dfs in diag_files:
+                    with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                        if not f.dimensions:
+                            f.dimensions = dict_dim
+                            v = f.create_variable('x', ('x',), float)
+                            v.attrs['long_name'] = 'model run'
+                            v.attrs['units'] = ''
+                            v[:] = onp.arange(dict_dim["x"])
+                            v = f.create_variable('y', ('y',), float)
+                            v.attrs['long_name'] = ''
+                            v.attrs['units'] = ''
+                            v[:] = onp.arange(dict_dim["y"])
+                            v = f.create_variable('ages', ('ages',), float)
+                            v.attrs['long_name'] = 'Water ages'
+                            v.attrs['units'] = 'days'
+                            v[:] = onp.arange(1, dict_dim["ages"]+1)
+                            v = f.create_variable('nages', ('nages',), float)
+                            v.attrs['long_name'] = 'Water ages (cumulated)'
+                            v.attrs['units'] = 'days'
+                            v[:] = onp.arange(0, dict_dim["nages"])
+                            v = f.create_variable('n_sas_params', ('n_sas_params',), float)
+                            v.attrs['long_name'] = 'Number of SAS parameters'
+                            v.attrs['units'] = ''
+                            v[:] = onp.arange(0, dict_dim["n_sas_params"])
+                            v = f.create_variable('Time', ('Time',), float)
+                            var_obj = df.variables.get('Time')
+                            v.attrs.update(time_origin=var_obj.attrs["time_origin"],
+                                           units=var_obj.attrs["units"])
+                            v[:] = time
+                        for var_sim in list(df.variables.keys()):
+                            var_obj = df.variables.get(var_sim)
+                            if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
+                                v = f.create_variable(var_sim, ('x', 'y', 'Time'), float)
+                                vals = onp.array(var_obj)
+                                v[:, :, :] = vals.swapaxes(0, 2)
+                                v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                               units=var_obj.attrs["units"])
+                                del var_obj, vals
+                            elif var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
+                                v = f.create_variable(var_sim, ('x', 'y'), float)
+                                vals = onp.array(var_obj)
+                                v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
+                                v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                               units=var_obj.attrs["units"])
+                                del var_obj, vals
+                            elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
+                                v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
+                                vals = onp.array(var_obj)
+                                vals = vals.swapaxes(0, 3)
+                                vals = vals.swapaxes(1, 2)
+                                v[:, :, :] = vals[:, :, :, 0]
+                                v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                               units=var_obj.attrs["units"])
+                                del var_obj, vals
+                            elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
+                                v = f.create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
+                                vals = onp.array(var_obj)
+                                vals = vals.swapaxes(0, 3)
+                                vals = vals.swapaxes(1, 2)
+                                vals = vals.swapaxes(2, 3)
+                                v[:, :, :, :] = vals
+                                v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                               units=var_obj.attrs["units"])
+                                del var_obj, vals
+                            elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
+                                v = f.create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
+                                vals = onp.array(var_obj)
+                                vals = vals.swapaxes(0, 3)
+                                vals = vals.swapaxes(1, 2)
+                                vals = vals.swapaxes(2, 3)
+                                v[:, :, :, :] = vals
+                                v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                               units=var_obj.attrs["units"])
+                                del var_obj, vals
+
+
+
+    # merge results into single file
     states_tm_file = base_path / "states_tm_sensitivity.nc"
     if not os.path.exists(base_path / "states_tm_sensitivity.nc"):
         tm_structures = ['advection-dispersion',
