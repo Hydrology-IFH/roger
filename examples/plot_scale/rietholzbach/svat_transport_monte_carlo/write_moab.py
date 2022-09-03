@@ -178,7 +178,7 @@ def main(job_type):
             lines.append('conda activate roger-gpu\n')
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
-            lines.append('python svat_transport.py -b jax -d gpu -ns 2000 -tms %s -td "${TMPDIR}"\n' % (tms))
+            lines.append('python svat_transport.py -b jax -d gpu -ns 200 -tms %s -td "${TMPDIR}"\n' % (tms))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
