@@ -166,7 +166,7 @@ def main(tmp_dir):
 
         # load simulation
         states_tm_file = base_path / f"states_{tms}_sensitivity.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, group=tm_structure, engine="h5netcdf")
+        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
 
         # assign date
         days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))

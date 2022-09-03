@@ -35,19 +35,14 @@ for lys_experiment in lys_experiments:
         tms = tm_structure.replace(" ", "_")
         path = str(base_path / f'SVATCROPTRANSPORT_{tms}_{lys_experiment}_bromide.*.nc')
         diag_files = glob.glob(path)
-        states_tm_file = base_path / "states_tm_monte_carlo_bromide.nc"
-        states_hm_file = base_path / "states_hm.nc"
+        states_tm_file = base_path / f"states_{tms}_{lys_experiment}_monte_carlo_bromide.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
-            if lys_experiment not in list(f.groups.keys()):
-                f.create_group(lys_experiment)
-            if tm_structure not in list(f.groups[lys_experiment].groups.keys()):
-                f.groups[lys_experiment].create_group(tm_structure)
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
                 title='RoGeR bromide transport model Monte Carlo simulations at Reckenholz lysimeter site',
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
-                comment='SVAT transport model with free drainage and crop phenology/crop rotation'
+                comment=f'SVAT {tm_structure} model with free drainage and crop phenology/crop rotation'
             )
             # collect dimensions
             for dfs in diag_files:
@@ -59,44 +54,44 @@ for lys_experiment in lys_experiments:
             for dfs in diag_files:
                 with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                     # set dimensions with a dictionary
-                    if not f.groups[lys_experiment].groups[tm_structure].dimensions:
+                    if not f.dimensions:
                         f.dimensions = dict_dim
-                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('x', ('x',), float)
+                        v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
                         v.attrs['long_name'] = 'model run'
                         v.attrs['units'] = ''
                         v[:] = onp.arange(dict_dim["x"])
-                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('y', ('y',), float)
+                        v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
                         v.attrs['long_name'] = ''
                         v.attrs['units'] = ''
                         v[:] = onp.arange(dict_dim["y"])
-                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('Time', ('Time',), float)
+                        v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
                         var_obj = df.variables.get('Time')
                         with h5netcdf.File(base_path / 'forcing_tracer.nc', "r", decode_vlen_strings=False) as infile:
                             time_origin = infile.variables['time'].attrs['time_origin']
                         v.attrs.update(time_origin=time_origin,
                                        units=var_obj.attrs["units"])
                         v[:] = onp.array(var_obj)
-                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('ages', ('ages',), float)
+                        v = f.create_variable('ages', ('ages',), float, compression="gzip", compression_opts=1)
                         v.attrs['long_name'] = 'Water ages'
                         v.attrs['units'] = 'days'
                         v[:] = onp.arange(1, dict_dim["ages"]+1)
-                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('nages', ('nages',), float)
+                        v = f.create_variable('nages', ('nages',), float, compression="gzip", compression_opts=1)
                         v.attrs['long_name'] = 'Water ages (cumulated)'
                         v.attrs['units'] = 'days'
                         v[:] = onp.arange(0, dict_dim["nages"])
-                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('n_sas_params', ('n_sas_params',), float)
+                        v = f.create_variable('n_sas_params', ('n_sas_params',), float, compression="gzip", compression_opts=1)
                         v.attrs['long_name'] = 'Number of SAS parameters'
                         v.attrs['units'] = ''
                     for var_sim in list(df.variables.keys()):
                         var_obj = df.variables.get(var_sim)
                         if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
-                            v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time'), float)
+                            v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                             vals = onp.array(var_obj)
                             v[:, :, :] = vals.swapaxes(0, 2)
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
-                            v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
+                            v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
                             vals = onp.array(var_obj)
                             vals = vals.swapaxes(0, 3)
                             vals = vals.swapaxes(1, 2)
@@ -104,7 +99,7 @@ for lys_experiment in lys_experiments:
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
-                            v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
+                            v = f.create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
                             vals = onp.array(var_obj)
                             vals = vals.swapaxes(0, 3)
                             vals = vals.swapaxes(1, 2)
@@ -113,7 +108,7 @@ for lys_experiment in lys_experiments:
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
-                            v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
+                            v = f.create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
                             vals = onp.array(var_obj)
                             vals = vals.swapaxes(0, 3)
                             vals = vals.swapaxes(1, 2)
@@ -135,8 +130,8 @@ for lys_experiment in lys_experiments:
         tms = tm_structure.replace(" ", "_")
 
         # load transport simulation
-        states_tm_file = base_path / "states_tm_monte_carlo_bromide.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf", group=f'{lys_experiment}/{tm_structure}')
+        states_tm_file = base_path / f"states_{tms}_{lys}_monte_carlo_bromide.nc"
+        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
 
         # assign date
         days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
@@ -282,10 +277,8 @@ for lys_experiment in lys_experiments:
         dict_params_eff[lys_experiment][tm_structure]['idx_best'] = idx_best
 
         # write transport model parameters of best model run
-        params_tm_file = base_path / "tm_bromide_params.nc"
+        params_tm_file = base_path / f"{tms}_bromide_params.nc"
         with h5netcdf.File(params_tm_file, 'a', decode_vlen_strings=False) as f:
-            if tm_structure not in list(f.groups.keys()):
-                f.create_group(tm_structure)
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
                 title='RoGeR bromide transport model parameters of best monte carlo simulation at Reckenholz Lysimeter site',
@@ -294,17 +287,17 @@ for lys_experiment in lys_experiments:
                 comment='SVAT transport model with free drainage and crop phenology/crop rotation'
             )
             dict_dim = {'x': nx, 'y': 1, 'n_sas_params': 8}
-            if not f.groups[tm_structure].dimensions:
-                f.groups[tm_structure].dimensions = dict_dim
-                v = f.groups[tm_structure].create_variable('x', ('x',), float)
+            if not f.dimensions:
+                f.dimensions = dict_dim
+                v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
                 v.attrs['long_name'] = 'Zonal coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(dict_dim["x"])
-                v = f.groups[tm_structure].create_variable('y', ('y',), float)
+                v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(dict_dim["y"])
-                v = f.groups[tm_structure].create_variable('n_sas_params', ('n_sas_params',), float)
+                v = f.create_variable('n_sas_params', ('n_sas_params',), float, compression="gzip", compression_opts=1)
                 v.attrs['long_name'] = 'Number of SAS parameters'
                 v.attrs['units'] = ' '
                 v[:] = onp.arange(dict_dim["n_sas_params"])
@@ -314,37 +307,37 @@ for lys_experiment in lys_experiments:
                                 'time-variant advection-dispersion',
                                 'time-variant']:
                 try:
-                    v = f.groups[tm_structure].create_variable('sas_params_transp', ('x', 'y', 'n_sas_params'), float)
+                    v = f.create_variable('sas_params_transp', ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
                 except ValueError:
-                    v = f.groups[tm_structure].get('sas_params_transp')
+                    v = f.get('sas_params_transp')
                 v[:, :, :] = ds_sim_tm["sas_params_transp"].isel(x=idx_best)
                 v.attrs.update(long_name="SAS parameters of transpiration",
                                units=" ")
                 try:
-                    v = f.groups[tm_structure].create_variable('sas_params_q_rz', ('x', 'y', 'n_sas_params'), float)
+                    v = f.create_variable('sas_params_q_rz', ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
                 except ValueError:
-                    v = f.groups[tm_structure].get('sas_params_q_rz')
+                    v = f.get('sas_params_q_rz')
                 v[:, :, :] = ds_sim_tm["sas_params_q_rz"].isel(x=idx_best)
                 v.attrs.update(long_name="SAS parameters of root zone percolation",
                                units=" ")
                 try:
-                    v = f.groups[tm_structure].create_variable('sas_params_q_ss', ('x', 'y', 'n_sas_params'), float)
+                    v = f.create_variable('sas_params_q_ss', ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
                 except ValueError:
-                    v = f.groups[tm_structure].get('sas_params_q_ss')
+                    v = f.get('sas_params_q_ss')
                 v[:, :, :] = ds_sim_tm["sas_params_q_ss"].isel(x=idx_best)
                 v.attrs.update(long_name="SAS parameters of subsoil percolation",
                                units=" ")
             try:
-                v = f.groups[tm_structure].create_variable('alpha_transp', ('x', 'y'), float)
+                v = f.create_variable('alpha_transp', ('x', 'y'), float, compression="gzip", compression_opts=1)
             except ValueError:
-                v = f.groups[tm_structure].get('alpha_transp')
+                v = f.get('alpha_transp')
             v[:, :] = ds_sim_tm["alpha_transp"].isel(x=idx_best)
             v.attrs.update(long_name="Partition coefficient of transpiration",
                            units="-")
             try:
-                v = f.groups[tm_structure].create_variable('alpha_q', ('x', 'y'), float)
+                v = f.create_variable('alpha_q', ('x', 'y'), float, compression="gzip", compression_opts=1)
             except ValueError:
-                v = f.groups[tm_structure].get('alpha_q')
+                v = f.get('alpha_q')
             v[:, :] = ds_sim_tm["alpha_q"].isel(x=idx_best)
             v.attrs.update(long_name="Partition coefficient of flow processes",
                            units="-")
@@ -354,16 +347,16 @@ for lys_experiment in lys_experiments:
         states_tm_file = base_path / "states_tm_monte_carlo_bromide.nc"
         with h5netcdf.File(states_tm_file, 'r+', decode_vlen_strings=False) as f:
             try:
-                v = f.groups[tm_structure].create_variable('Br_perc_cs', ('x', 'y', 'Time'), float)
+                v = f.create_variable('Br_perc_cs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
             except ValueError:
-                v = f.groups[tm_structure].get('Br_perc_cs')
+                v = f.get('Br_perc_cs')
             v[:, :, :] = Br_perc_cs
             v.attrs.update(long_name="composite sample of bromide concentration in percolation",
                            units="mg/l")
             try:
-                v = f.groups[tm_structure].create_variable('Br_perc_mass_cs', ('x', 'y', 'Time'), float)
+                v = f.create_variable('Br_perc_mass_cs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
             except ValueError:
-                v = f.groups[tm_structure].get('Br_perc_mass_cs')
+                v = f.get('Br_perc_mass_cs')
             v[:, :, :] = Br_perc_mass_cs
             v.attrs.update(long_name="composite sample of bromide mass in percolation",
                            units="mg")
