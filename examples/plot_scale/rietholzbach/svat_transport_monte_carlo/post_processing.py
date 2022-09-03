@@ -287,7 +287,7 @@ def main(tmp_dir):
         states_tm_file = base_path / f"states_{tms}_monte_carlo.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             try:
-                v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float)
+                v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
             except ValueError:
                 v = f.get('d18O_perc_bs')
             v[:, :, :] = d18O_perc_bs
@@ -360,15 +360,15 @@ def main(tmp_dir):
             dict_dim = {'x': nx, 'y': 1, 'n_sas_params': 8}
             if not f.dimensions:
                 f.dimensions = dict_dim
-                v = f.create_variable('x', ('x',), float)
+                v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
                 v.attrs['long_name'] = 'Zonal coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(dict_dim["x"])
-                v = f.create_variable('y', ('y',), float)
+                v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
                 v.attrs['long_name'] = 'Meridonial coordinate'
                 v.attrs['units'] = 'meters'
                 v[:] = onp.arange(dict_dim["y"])
-                v = f.create_variable('n_sas_params', ('n_sas_params',), float)
+                v = f.create_variable('n_sas_params', ('n_sas_params',), float, compression="gzip", compression_opts=1)
                 v.attrs['long_name'] = 'Number of SAS parameters'
                 v.attrs['units'] = ' '
                 v[:] = onp.arange(dict_dim["n_sas_params"])
@@ -378,21 +378,21 @@ def main(tmp_dir):
                                 'time-variant advection-dispersion',
                                 'time-variant']:
                 try:
-                    v = f.create_variable('sas_params_transp', ('x', 'y', 'n_sas_params'), float)
+                    v = f.create_variable('sas_params_transp', ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
                 except ValueError:
                     v = f.get('sas_params_transp')
                 v[:, :, :] = ds_sim_tm["sas_params_transp"].isel(x=idx_best)
                 v.attrs.update(long_name="SAS parameters of transpiration",
                                units=" ")
             try:
-                v = f.create_variable('sas_params_q_rz', ('x', 'y', 'n_sas_params'), float)
+                v = f.create_variable('sas_params_q_rz', ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
             except ValueError:
                 v = f.get('sas_params_q_rz')
             v[:, :, :] = ds_sim_tm["sas_params_q_rz"].isel(x=idx_best)
             v.attrs.update(long_name="SAS parameters of root zone percolation",
                            units=" ")
             try:
-                v = f.create_variable('sas_params_q_ss', ('x', 'y', 'n_sas_params'), float)
+                v = f.create_variable('sas_params_q_ss', ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
             except ValueError:
                 v = f.get('sas_params_q_ss')
             v[:, :, :] = ds_sim_tm["sas_params_q_ss"].isel(x=idx_best)
@@ -422,27 +422,27 @@ def main(tmp_dir):
                 with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                     if not f.dimensions:
                         f.dimensions = dict_dim
-                        v = f.create_variable('x', ('x',), float)
+                        v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
                         v.attrs['long_name'] = 'model run'
                         v.attrs['units'] = ''
                         v[:] = onp.arange(dict_dim["x"])
-                        v = f.create_variable('y', ('y',), float)
+                        v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
                         v.attrs['long_name'] = ''
                         v.attrs['units'] = ''
                         v[:] = onp.arange(dict_dim["y"])
-                        v = f.create_variable('ages', ('ages',), float)
+                        v = f.create_variable('ages', ('ages',), float, compression="gzip", compression_opts=1)
                         v.attrs['long_name'] = 'Water ages'
                         v.attrs['units'] = 'days'
                         v[:] = onp.arange(1, dict_dim["ages"]+1)
-                        v = f.create_variable('nages', ('nages',), float)
+                        v = f.create_variable('nages', ('nages',), float, compression="gzip", compression_opts=1)
                         v.attrs['long_name'] = 'Water ages (cumulated)'
                         v.attrs['units'] = 'days'
                         v[:] = onp.arange(0, dict_dim["nages"])
-                        v = f.create_variable('n_sas_params', ('n_sas_params',), float)
+                        v = f.create_variable('n_sas_params', ('n_sas_params',), float, compression="gzip", compression_opts=1)
                         v.attrs['long_name'] = 'Number of SAS parameters'
                         v.attrs['units'] = ''
                         v[:] = onp.arange(0, dict_dim["n_sas_params"])
-                        v = f.create_variable('Time', ('Time',), float)
+                        v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
                         var_obj = df.variables.get('Time')
                         v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                        units=var_obj.attrs["units"])
@@ -450,7 +450,7 @@ def main(tmp_dir):
                     for var_sim in list(df.variables.keys()):
                         var_obj = df.variables.get(var_sim)
                         if var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y', 'Time'), float)
+                            v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                             vals = onp.array(var_obj)
                             v[:, :, :] = vals[idx_best, :, :]
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
@@ -462,19 +462,19 @@ def main(tmp_dir):
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'n_sas_params') == var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
+                            v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
                             vals = onp.array(var_obj)
                             v[:, :, :] = vals[idx_best, :, :]
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time', 'ages') == var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
+                            v = f.create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
                             vals = onp.array(var_obj)
                             v[:, :, :, :] = vals[idx_best, :, :, :]
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time', 'nages') == var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
+                            v = f.create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
                             vals = onp.array(var_obj)
                             v[:, :, :, :] = vals[idx_best, :, :, :]
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
