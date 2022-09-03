@@ -415,70 +415,67 @@ def main(tmp_dir):
             # collect dimensions
             with h5netcdf.File(states_tm_mc_file, 'r', decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
-                if not dfs.split('/')[-1].split('.')[1] == 'constant':
-                    dict_dim = {'x': 1, 'y': 1, 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
-                    time = onp.array(df.variables.get('Time'))
-            for dfs in diag_files:
-                with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                    if not f.dimensions:
-                        f.dimensions = dict_dim
-                        v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
-                        v.attrs['long_name'] = 'model run'
-                        v.attrs['units'] = ''
-                        v[:] = onp.arange(dict_dim["x"])
-                        v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
-                        v.attrs['long_name'] = ''
-                        v.attrs['units'] = ''
-                        v[:] = onp.arange(dict_dim["y"])
-                        v = f.create_variable('ages', ('ages',), float, compression="gzip", compression_opts=1)
-                        v.attrs['long_name'] = 'Water ages'
-                        v.attrs['units'] = 'days'
-                        v[:] = onp.arange(1, dict_dim["ages"]+1)
-                        v = f.create_variable('nages', ('nages',), float, compression="gzip", compression_opts=1)
-                        v.attrs['long_name'] = 'Water ages (cumulated)'
-                        v.attrs['units'] = 'days'
-                        v[:] = onp.arange(0, dict_dim["nages"])
-                        v = f.create_variable('n_sas_params', ('n_sas_params',), float, compression="gzip", compression_opts=1)
-                        v.attrs['long_name'] = 'Number of SAS parameters'
-                        v.attrs['units'] = ''
-                        v[:] = onp.arange(0, dict_dim["n_sas_params"])
-                        v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
-                        var_obj = df.variables.get('Time')
-                        v.attrs.update(time_origin=var_obj.attrs["time_origin"],
+                dict_dim = {'x': 1, 'y': 1, 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
+                time = onp.array(df.variables.get('Time'))
+                if not f.dimensions:
+                    f.dimensions = dict_dim
+                    v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = 'model run'
+                    v.attrs['units'] = ''
+                    v[:] = onp.arange(dict_dim["x"])
+                    v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = ''
+                    v.attrs['units'] = ''
+                    v[:] = onp.arange(dict_dim["y"])
+                    v = f.create_variable('ages', ('ages',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = 'Water ages'
+                    v.attrs['units'] = 'days'
+                    v[:] = onp.arange(1, dict_dim["ages"]+1)
+                    v = f.create_variable('nages', ('nages',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = 'Water ages (cumulated)'
+                    v.attrs['units'] = 'days'
+                    v[:] = onp.arange(0, dict_dim["nages"])
+                    v = f.create_variable('n_sas_params', ('n_sas_params',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = 'Number of SAS parameters'
+                    v.attrs['units'] = ''
+                    v[:] = onp.arange(0, dict_dim["n_sas_params"])
+                    v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
+                    var_obj = df.variables.get('Time')
+                    v.attrs.update(time_origin=var_obj.attrs["time_origin"],
+                                   units=var_obj.attrs["units"])
+                    v[:] = time
+                for var_sim in list(df.variables.keys()):
+                    var_obj = df.variables.get(var_sim)
+                    if var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
+                        v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                        vals = onp.array(var_obj)
+                        v[:, :, :] = vals[idx_best, :, :]
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
-                        v[:] = time
-                    for var_sim in list(df.variables.keys()):
-                        var_obj = df.variables.get(var_sim)
-                        if var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                            vals = onp.array(var_obj)
-                            v[:, :, :] = vals[idx_best, :, :]
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
-                        elif var_sim not in list(dict_dim.keys()) and ('x', 'y') == var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y'), float)
-                            vals = onp.array(var_obj)
-                            v[:, :] = vals[idx_best, :]
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
-                        elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'n_sas_params') == var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
-                            vals = onp.array(var_obj)
-                            v[:, :, :] = vals[idx_best, :, :]
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
-                        elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time', 'ages') == var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
-                            vals = onp.array(var_obj)
-                            v[:, :, :, :] = vals[idx_best, :, :, :]
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
-                        elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time', 'nages') == var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
-                            vals = onp.array(var_obj)
-                            v[:, :, :, :] = vals[idx_best, :, :, :]
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
+                    elif var_sim not in list(dict_dim.keys()) and ('x', 'y') == var_obj.dimensions:
+                        v = f.create_variable(var_sim, ('x', 'y'), float)
+                        vals = onp.array(var_obj)
+                        v[:, :] = vals[idx_best, :]
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                    elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'n_sas_params') == var_obj.dimensions:
+                        v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
+                        vals = onp.array(var_obj)
+                        v[:, :, :] = vals[idx_best, :, :]
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                    elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time', 'ages') == var_obj.dimensions:
+                        v = f.create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
+                        vals = onp.array(var_obj)
+                        v[:, :, :, :] = vals[idx_best, :, :, :]
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                    elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time', 'nages') == var_obj.dimensions:
+                        v = f.create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
+                        vals = onp.array(var_obj)
+                        v[:, :, :, :] = vals[idx_best, :, :, :]
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
     return
 
 
