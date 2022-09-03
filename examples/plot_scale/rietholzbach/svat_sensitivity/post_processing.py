@@ -338,7 +338,7 @@ def main(tmp_dir):
                         # (y, x) trigonometric inverse tangent
                         key_phi = 'phi_' + var_sim + f'{sc1}'
                         df_params_eff.loc[nrow, key_phi] = de.calc_phi(brel_mean, b_slope)
-
+            # avoid defragmentation of DataFrame
             df_params_eff = df_params_eff.copy()
     # Calculate multi-objective metric
     for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):

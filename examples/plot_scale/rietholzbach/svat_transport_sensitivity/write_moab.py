@@ -62,8 +62,8 @@ def main(job_type):
             lines = []
             lines.append('#!/bin/bash\n')
             lines.append('#PBS -l nodes=1:ppn=16\n')
-            lines.append('#PBS -l walltime=48:00:00\n')
-            lines.append('#PBS -l pmem=3000mb\n')
+            lines.append('#PBS -l walltime=96:00:00\n')
+            lines.append('#PBS -l pmem=4000mb\n')
             lines.append(f'#PBS -N {script_name}\n')
             lines.append('#PBS -m bea\n')
             lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
@@ -76,7 +76,7 @@ def main(job_type):
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
             lines.append('# adapt command to your available scheduler / MPI implementation\n')
-            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 16 1 -ns 512 -tms %s -td "${TMPDIR}"\n' % (tms))
+            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 16 1 -ns 1024 -tms %s -td "${TMPDIR}"\n' % (tms))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
@@ -96,7 +96,7 @@ def main(job_type):
             lines = []
             lines.append('#!/bin/bash\n')
             lines.append('#PBS -l nodes=2:ppn=16\n')
-            lines.append('#PBS -l walltime=48:00:00\n')
+            lines.append('#PBS -l walltime=72:00:00\n')
             lines.append('#PBS -l pmem=3000mb\n')
             lines.append(f'#PBS -N {script_name}\n')
             lines.append('#PBS -m bea\n')

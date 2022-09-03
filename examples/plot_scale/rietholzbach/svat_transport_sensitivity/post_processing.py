@@ -297,6 +297,9 @@ def main(tmp_dir):
                 key_rt75 = f'75_{var_sim}{sc1}'
                 df_params_eff.loc[nrow, key_rt75] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.75, axis=1))
 
+            # avoid defragmentation of DataFrame
+            df_params_eff = df_params_eff.copy()
+
         # write bulk sample to output file
         ds_sim_tm = ds_sim_tm.close()
         states_tm_file = base_path / "states_tm_sensitivity.nc"

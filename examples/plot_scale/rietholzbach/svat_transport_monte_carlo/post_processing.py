@@ -277,6 +277,9 @@ def main(tmp_dir):
                 key_r = f'r_{var_sim}{sc1}'
                 df_params_eff.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
 
+            # avoid defragmentation of DataFrame
+            df_params_eff = df_params_eff.copy()
+
         # write bulk sample to output file
         ds_sim_tm = ds_sim_tm.close()
         states_tm_file = base_path / "states_tm_monte_carlo.nc"
