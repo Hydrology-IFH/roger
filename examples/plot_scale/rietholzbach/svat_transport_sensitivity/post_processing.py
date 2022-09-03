@@ -30,6 +30,7 @@ def main(tmp_dir):
         os.mkdir(base_path_figs)
 
     # merge results into single file
+    states_tm_file = base_path / "states_tm_sensitivity.nc"
     if not os.path.exists(base_path / "states_tm_sensitivity.nc"):
         tm_structures = ['advection-dispersion',
                          'time-variant advection-dispersion']
@@ -94,12 +95,14 @@ def main(tmp_dir):
                                 v[:, :, :] = vals.swapaxes(0, 2)
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
+                                del var_obj, vals
                             elif var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
                                 v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y'), float)
                                 vals = onp.array(var_obj)
                                 v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
+                                del var_obj, vals
                             elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
                                 v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
                                 vals = onp.array(var_obj)
@@ -108,6 +111,7 @@ def main(tmp_dir):
                                 v[:, :, :] = vals[:, :, :, 0]
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
+                                del var_obj, vals
                             elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
                                 v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
                                 vals = onp.array(var_obj)
@@ -117,6 +121,7 @@ def main(tmp_dir):
                                 v[:, :, :, :] = vals
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
+                                del var_obj, vals
                             elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
                                 v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
                                 vals = onp.array(var_obj)
@@ -126,6 +131,7 @@ def main(tmp_dir):
                                 v[:, :, :, :] = vals
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
+                                del var_obj, vals
 
     # load simulation
     states_hm_file = base_path / "states_hm.nc"
