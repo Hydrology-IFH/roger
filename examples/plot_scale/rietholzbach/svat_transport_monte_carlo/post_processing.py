@@ -347,8 +347,6 @@ def main(tmp_dir):
         # write SAS parameters of best model run
         params_tm_file = Path(__file__).parent / f"sas_params_{tms}.nc"
         with h5netcdf.File(params_tm_file, 'a', decode_vlen_strings=False) as f:
-            if tm_structure not in list(f.groups.keys()):
-                f.create_group(tm_structure)
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
                 title='RoGeR SAS parameters of best monte carlo simulation at Rietholzbach Lysimeter site',

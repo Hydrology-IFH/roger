@@ -63,37 +63,37 @@ def main(tmp_dir):
                     with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                         if not f.groups[lys_experiment].dimensions:
                             f.groups[lys_experiment].dimensions = dict_dim
-                            v = f.groups[lys_experiment].create_variable('x', ('x',), float)
+                            v = f.groups[lys_experiment].create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
                             v.attrs['long_name'] = 'model run'
                             v.attrs['units'] = ''
                             v[:] = onp.arange(dict_dim["x"])
-                            v = f.groups[lys_experiment].create_variable('y', ('y',), float)
+                            v = f.groups[lys_experiment].create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
                             v.attrs['long_name'] = ''
                             v.attrs['units'] = ''
                             v[:] = onp.arange(dict_dim["y"])
-                            v = f.groups[lys_experiment].create_variable('Time', ('Time',), float)
+                            v = f.groups[lys_experiment].create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
                             var_obj = df.variables.get('Time')
                             v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                            units=var_obj.attrs["units"])
                             v[:] = time
-                            v = f.groups[lys_experiment].create_variable('n_crop_types', ('n_crop_types',), int)
+                            v = f.groups[lys_experiment].create_variable('n_crop_types', ('n_crop_types',), int, compression="gzip", compression_opts=1)
                             v.attrs['long_name'] = 'number of crop types'
                             v.attrs['units'] = ''
                             v[:] = onp.arange(dict_dim["n_crop_types"])
-                            v = f.groups[lys_experiment].create_variable('crops', ('crops',), int)
+                            v = f.groups[lys_experiment].create_variable('crops', ('crops',), int, compression="gzip", compression_opts=1)
                             v.attrs['long_name'] = 'number of crops per growing cycle'
                             v.attrs['units'] = ''
                             v[:] = onp.arange(dict_dim["crops"])
                         for key in list(df.variables.keys()):
                             var_obj = df.variables.get(key)
                             if key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
-                                v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time'), float)
+                                v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                                 vals = onp.array(var_obj)
                                 v[:, :, :] = vals.swapaxes(0, 2)
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
                             elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'crops', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
-                                v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time', 'crops'), float)
+                                v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'Time', 'crops'), float, compression="gzip", compression_opts=1)
                                 vals = onp.array(var_obj)
                                 vals = vals.swapaxes(0, 3)
                                 vals = vals.swapaxes(1, 2)
@@ -102,13 +102,13 @@ def main(tmp_dir):
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
                             elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
-                                v = f.groups[lys_experiment].create_variable(key, ('x', 'y'), float)
+                                v = f.groups[lys_experiment].create_variable(key, ('x', 'y'), float, compression="gzip", compression_opts=1)
                                 vals = onp.array(var_obj)
                                 v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
                             elif key not in list(f.groups[lys_experiment].dimensions.keys()) and ('Time', 'n_crop_types', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
-                                v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'n_crop_types'), float)
+                                v = f.groups[lys_experiment].create_variable(key, ('x', 'y', 'n_crop_types'), float, compression="gzip", compression_opts=1)
                                 vals = onp.array(var_obj)
                                 vals = vals.swapaxes(0, 3)
                                 vals = vals.swapaxes(1, 2)
@@ -422,15 +422,15 @@ def main(tmp_dir):
                 dict_dim = {'x': 1, 'y': 1, 'Time': len(df.groups[lys_experiment].variables['Time'])}
                 if not f.groups[lys_experiment].dimensions:
                     f.groups[lys_experiment].dimensions = dict_dim
-                    v = f.groups[lys_experiment].create_variable('x', ('x',), float)
+                    v = f.groups[lys_experiment].create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
                     v.attrs['long_name'] = 'Number of model run'
                     v.attrs['units'] = ''
                     v[:] = onp.arange(dict_dim["x"])
-                    v = f.groups[lys_experiment].create_variable('y', ('y',), float)
+                    v = f.groups[lys_experiment].create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
                     v.attrs['long_name'] = ''
                     v.attrs['units'] = ''
                     v[:] = onp.arange(dict_dim["y"])
-                    v = f.groups[lys_experiment].create_variable('Time', ('Time',), float)
+                    v = f.groups[lys_experiment].create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
                     var_obj = df.groups[lys_experiment].variables.get('Time')
                     v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                    units=var_obj.attrs["units"])
@@ -438,13 +438,13 @@ def main(tmp_dir):
                 for var_sim in list(df.variables.keys()):
                     var_obj = df.groups[lys_experiment].variables.get(var_sim)
                     if var_sim not in list(f.groups[lys_experiment].dimensions.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
-                        v = f.groups[lys_experiment].create_variable(var_sim, ('x', 'y', 'Time'), float)
+                        v = f.groups[lys_experiment].create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                         vals = onp.array(var_obj)
                         v[:, :, :] = vals[idx_best, :, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
                     elif var_sim not in list(f.groups[lys_experiment].dimensions.keys()) and ('x', 'y') == var_obj.dimensions:
-                        v = f.groups[lys_experiment].create_variable(var_sim, ('x', 'y'), float)
+                        v = f.groups[lys_experiment].create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
                         vals = onp.array(var_obj)
                         v[:, :] = vals[idx_best, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],

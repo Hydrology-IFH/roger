@@ -30,8 +30,7 @@ def main(tmp_dir):
         os.mkdir(base_path_figs)
 
     # merge results into single file
-    tm_structures = ['complete-mixing', 'piston',
-                     'advection-dispersion',
+    tm_structures = ['advection-dispersion',
                      'time-variant advection-dispersion']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")

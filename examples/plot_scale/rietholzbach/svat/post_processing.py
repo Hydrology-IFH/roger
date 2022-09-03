@@ -37,15 +37,15 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
         with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
             if not f.dimensions:
                 f.dimensions = dict_dim
-                v = f.create_variable('x', ('x',), float)
+                v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
                 v.attrs['long_name'] = 'model run'
                 v.attrs['units'] = ''
                 v[:] = onp.arange(dict_dim["x"])
-                v = f.create_variable('y', ('y',), float)
+                v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
                 v.attrs['long_name'] = ''
                 v.attrs['units'] = ''
                 v[:] = onp.arange(dict_dim["y"])
-                v = f.create_variable('Time', ('Time',), float)
+                v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
                 var_obj = df.variables.get('Time')
                 v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                 units=var_obj.attrs["units"])
@@ -53,13 +53,13 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
             for var_sim in list(df.variables.keys()):
                 var_obj = df.variables.get(var_sim)
                 if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] > 1:
-                    v = f.create_variable(var_sim, ('x', 'y', 'Time'), float)
+                    v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                     vals = onp.array(var_obj)
                     v[:, :, :] = vals.swapaxes(0, 2)
                     v.attrs.update(long_name=var_obj.attrs["long_name"],
                                    units=var_obj.attrs["units"])
                 elif var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] <= 2:
-                    v = f.create_variable(var_sim, ('x', 'y'), float)
+                    v = f.create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
                     vals = onp.array(var_obj)
                     v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
                     v.attrs.update(long_name=var_obj.attrs["long_name"],
