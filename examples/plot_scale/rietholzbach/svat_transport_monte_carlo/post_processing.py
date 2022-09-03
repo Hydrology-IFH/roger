@@ -41,7 +41,7 @@ def main(tmp_dir):
         diag_files = glob.glob(path)
         states_tm_file = base_path / f"states_{tms}_monte_carlo.nc"
         if not os.path.exists(states_tm_file):
-            with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+            with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
                 f.attrs.update(
                     date_created=datetime.datetime.today().isoformat(),
                     title=f'RoGeR {tm_structure} model Monte Carlo simulations at Rietholzbach lysimeter site',
@@ -347,8 +347,8 @@ def main(tmp_dir):
         # write SAS parameters of best model run
         states_tm_file = base_path / f"states_{tms}_monte_carlo.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-        params_tm_file = Path(__file__).parent / f"sas_params_{tms}.nc"
-        with h5netcdf.File(params_tm_file, 'a', decode_vlen_strings=False) as f:
+        params_tm_file = base_path / f"sas_params_{tms}.nc"
+        with h5netcdf.File(params_tm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
                 title='RoGeR SAS parameters of best monte carlo simulation at Rietholzbach Lysimeter site',
@@ -402,7 +402,7 @@ def main(tmp_dir):
         # write states of best model run
         states_tm_mc_file = base_path / f"states_{tms}_monte_carlo.nc"
         states_tm_file = base_path / f"states_{tms}.nc"
-        with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+        with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
                 title='RoGeR best transport model Monte Carlo simulations at Rietholzbach lysimeter site',
@@ -452,30 +452,35 @@ def main(tmp_dir):
                         v[:, :, :] = vals[idx_best, :, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
+                        del var_obj, vals
                     elif var_sim not in list(dict_dim.keys()) and ('x', 'y') == var_obj.dimensions:
                         v = f.create_variable(var_sim, ('x', 'y'), float)
                         vals = onp.array(var_obj)
                         v[:, :] = vals[idx_best, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
+                        del var_obj, vals
                     elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'n_sas_params') == var_obj.dimensions:
                         v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
                         vals = onp.array(var_obj)
                         v[:, :, :] = vals[idx_best, :, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
+                        del var_obj, vals
                     elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time', 'ages') == var_obj.dimensions:
                         v = f.create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
                         vals = onp.array(var_obj)
                         v[:, :, :, :] = vals[idx_best, :, :, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
+                        del var_obj, vals
                     elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time', 'nages') == var_obj.dimensions:
                         v = f.create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
                         vals = onp.array(var_obj)
                         v[:, :, :, :] = vals[idx_best, :, :, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
+                        del var_obj, vals
     return
 
 

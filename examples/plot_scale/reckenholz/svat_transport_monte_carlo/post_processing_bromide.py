@@ -33,9 +33,9 @@ tm_structures = ['complete-mixing', 'piston',
 for lys_experiment in lys_experiments:
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        path = str(base_path / f'SVATCROPTRANSPORT_{tms}_{lys_experiment}_bromide.*.nc')
+        path = str(base_path / f'SVATCROPTRANSPORT_{lys_experiment}_{tms}_bromide.*.nc')
         diag_files = glob.glob(path)
-        states_tm_file = base_path / f"states_{tms}_{lys_experiment}_monte_carlo_bromide.nc"
+        states_tm_file = base_path / f"states_{lys_experiment}_{tms}_monte_carlo_bromide.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
@@ -130,7 +130,7 @@ for lys_experiment in lys_experiments:
         tms = tm_structure.replace(" ", "_")
 
         # load transport simulation
-        states_tm_file = base_path / f"states_{tms}_{lys}_monte_carlo_bromide.nc"
+        states_tm_file = base_path / f"states_{lys_experiment}_{tms}_monte_carlo_bromide.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
 
         # assign date
@@ -176,14 +176,14 @@ for lys_experiment in lys_experiments:
         # compare observations and simulations
         ncol = 0
         idx = ds_sim_tm.date.values  # time index
-        Br_perc_cs = onp.zeros((1, 1, len(idx)))
-        Br_perc_mass_cs = onp.zeros((1, 1, len(idx)))
-        df_idx_cs = pd.DataFrame(index=date_obs, columns=['sol'])
-        df_idx_cs.loc[:, 'sol'] = ds_obs['BR_PERC'].isel(x=0, y=0).values
-        idx_cs = df_idx_cs['sol'].dropna().index
+        Br_perc_bs = onp.zeros((1, 1, len(idx)))
+        Br_perc_mass_bs = onp.zeros((1, 1, len(idx)))
+        df_idx_bs = pd.DataFrame(index=date_obs, columns=['sol'])
+        df_idx_bs.loc[:, 'sol'] = ds_obs['BR_PERC'].isel(x=0, y=0).values
+        idx_bs = df_idx_bs['sol'].dropna().index
         for nrow in range(nx):
             # calculate simulated bromide composite sample
-            sample_no = pd.DataFrame(index=idx_cs, columns=['sample_no'])
+            sample_no = pd.DataFrame(index=idx_bs, columns=['sample_no'])
             sample_no['sample_no'] = range(len(sample_no.index))
             df_perc_Br_sim = pd.DataFrame(index=idx, columns=['perc', 'Br'])
             df_perc_Br_sim['perc'] = ds_sim_hm['q_ss'].isel(x=0, y=0).values
@@ -199,18 +199,18 @@ for lys_experiment in lys_experiments:
             sample_no['Br_sample'] = Br_sample.values
             df_perc_Br_sim = df_perc_Br_sim.join(sample_no['Br_sample'])
             df_perc_Br_sim.loc[:, 'Br_sample'] = df_perc_Br_sim.loc[:, 'Br_sample']
-            Br_perc_cs[nrow, ncol, :] = df_perc_Br_sim.loc[:, 'Br_sample'].values
+            Br_perc_bs[nrow, ncol, :] = df_perc_Br_sim.loc[:, 'Br_sample'].values
 
             # calculate metrics
-            vars_sim = ['Br_perc_cs', 'Br_perc_mass_cs']
+            vars_sim = ['Br_perc_bs', 'Br_perc_mass_bs']
             vars_obs = ['BR_PERC', 'BR_PERC_MASS']
             for var_sim, var_obs in zip(vars_sim, vars_obs):
                 # join observations on simulations
                 obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-                if var_sim == 'Br_perc_cs':
-                    sim_vals = Br_perc_cs[nrow, ncol, :]
-                elif var_sim == 'Br_perc_mass_cs':
-                    sim_vals = Br_perc_mass_cs[nrow, ncol, :]
+                if var_sim == 'Br_perc_bs':
+                    sim_vals = Br_perc_bs[nrow, ncol, :]
+                elif var_sim == 'Br_perc_mass_bs':
+                    sim_vals = Br_perc_mass_bs[nrow, ncol, :]
                 df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
                 df_obs.loc[:, 'obs'] = obs_vals
                 df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
@@ -227,8 +227,8 @@ for lys_experiment in lys_experiments:
                 df_params_eff.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
 
         # write to .txt
-        file = base_path_results / f"params_eff_{lys_experiment}_{tm_structure}.txt"
-        df_params_eff.to_csv(file, header=True, index=False, sep="\t")
+        file = base_path_results / f"params_eff_{lys_experiment}_{tms}.txt"
+        df_params_eff.to_bsv(file, header=True, index=False, sep="\t")
         dict_params_eff[lys_experiment][tm_structure] = {}
         dict_params_eff[lys_experiment][tm_structure]['params_eff'] = df_params_eff
 
@@ -236,7 +236,7 @@ for lys_experiment in lys_experiments:
         if tm_structure in ['preferential', 'advection-dispersion',
                             'time-variant preferential',
                             'time-variant advection-dispersion']:
-            df_eff = df_params_eff.loc[:, ['KGE_Br_perc_cs']]
+            df_eff = df_params_eff.loc[:, ['KGE_Br_perc_bs']]
             if tm_structure == "preferential":
                 df_params = df_params_eff.loc[:, ['b_transp', 'b_q_rz', 'b_q_ss', 'alpha_transp', 'alpha_q']]
             elif tm_structure == "advection-dispersion":
@@ -277,7 +277,7 @@ for lys_experiment in lys_experiments:
         dict_params_eff[lys_experiment][tm_structure]['idx_best'] = idx_best
 
         # write transport model parameters of best model run
-        params_tm_file = base_path / f"{tms}_bromide_params.nc"
+        params_tm_file = base_path / f"bromide_params_{lys_experiment}_{tms}.nc"
         with h5netcdf.File(params_tm_file, 'a', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
@@ -342,55 +342,46 @@ for lys_experiment in lys_experiments:
             v.attrs.update(long_name="Partition coefficient of flow processes",
                            units="-")
 
-        # write composite sample to output file
+        # write bulk sample to output file
         ds_sim_tm = ds_sim_tm.close()
-        states_tm_file = base_path / "states_tm_monte_carlo_bromide.nc"
+        states_tm_file = base_path / f"states_{lys_experiment}_{tms}_monte_carlo_bromide.nc"
         with h5netcdf.File(states_tm_file, 'r+', decode_vlen_strings=False) as f:
             try:
-                v = f.create_variable('Br_perc_cs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                v = f.create_variable('Br_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
             except ValueError:
-                v = f.get('Br_perc_cs')
-            v[:, :, :] = Br_perc_cs
+                v = f.get('Br_perc_bs')
+            v[:, :, :] = Br_perc_bs
             v.attrs.update(long_name="composite sample of bromide concentration in percolation",
                            units="mg/l")
             try:
-                v = f.create_variable('Br_perc_mass_cs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                v = f.create_variable('Br_perc_mass_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
             except ValueError:
-                v = f.get('Br_perc_mass_cs')
-            v[:, :, :] = Br_perc_mass_cs
+                v = f.get('Br_perc_mass_bs')
+            v[:, :, :] = Br_perc_mass_bs
             v.attrs.update(long_name="composite sample of bromide mass in percolation",
                            units="mg")
 
-# move best SAS parameters to directories of transport model
-base_path_tm = base_path.parent / "svat_transport_monte_carlo_reverse"
-params_tm_file1 = base_path_tm / "tm_bromide_params.nc"
-shutil.copy(states_hm_file, params_tm_file1)
-
-base_path_tm = base_path.parent / "svat_transport_sensitivity_reverse"
-params_tm_file1 = base_path_tm / "tm_bromide_params.nc"
-shutil.copy(states_hm_file, params_tm_file1)
-
-# compare best model runs
-fig, ax = plt.subplots(2, 3, sharey=True, figsize=(14, 7))
-for i, tm_structure in enumerate(tm_structures):
-    # load transport simulation
-    states_tm_file = base_path / "states_tm_monte_carlo_bromide.nc"
-    ds_sim_tm = xr.open_dataset(states_tm_file, group=tm_structure, engine="h5netcdf")
-    # join observations on simulations
-    obs_vals = ds_obs['BR_PERC'].isel(x=0, y=0).values
-    idx_best = dict_params_eff[tm_structure]['idx_best']
-    sim_vals = ds_sim_tm['Br_perc_cs'].isel(x=idx_best, y=0).values
-    df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-    df_obs.loc[:, 'obs'] = obs_vals
-    df_sim = pd.DataFrame(index=date_sim_tm, columns=['sim'])
-    df_sim.loc[:, 'sim'] = ds_sim_tm['C_q_ss'].isel(x=idx_best, y=0).values
-    df_sim = df_sim.iloc[1:, :]
-    df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
-    df_eval = df_eval.dropna()
-    ax.flatten()[i].plot(df_sim.index, df_sim.iloc[:, 0], color='red')
-    ax.flatten()[i].scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=2)
-    ax.flatten()[i].scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=2)
-
-ax[0, 0].set_ylabel(r'$Br_{PERC}$ [mg/l]')
-ax[1, 0].set_ylabel(r'$Br_{PERC}$ [mg/l]')
-ax[1, 1].set_xlabel('Time')
+# # compare best model runs
+# fig, ax = plt.subplots(2, 3, sharey=True, figsize=(14, 7))
+# for i, tm_structure in enumerate(tm_structures):
+#     # load transport simulation
+#     states_tm_file = base_path / "states_tm_monte_carlo_bromide.nc"
+#     ds_sim_tm = xr.open_dataset(states_tm_file, group=tm_structure, engine="h5netcdf")
+#     # join observations on simulations
+#     obs_vals = ds_obs['BR_PERC'].isel(x=0, y=0).values
+#     idx_best = dict_params_eff[tm_structure]['idx_best']
+#     sim_vals = ds_sim_tm['Br_perc_bs'].isel(x=idx_best, y=0).values
+#     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+#     df_obs.loc[:, 'obs'] = obs_vals
+#     df_sim = pd.DataFrame(index=date_sim_tm, columns=['sim'])
+#     df_sim.loc[:, 'sim'] = ds_sim_tm['C_q_ss'].isel(x=idx_best, y=0).values
+#     df_sim = df_sim.iloc[1:, :]
+#     df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
+#     df_eval = df_eval.dropna()
+#     ax.flatten()[i].plot(df_sim.index, df_sim.iloc[:, 0], color='red')
+#     ax.flatten()[i].scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=2)
+#     ax.flatten()[i].scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=2)
+#
+# ax[0, 0].set_ylabel(r'$Br_{PERC}$ [mg/l]')
+# ax[1, 0].set_ylabel(r'$Br_{PERC}$ [mg/l]')
+# ax[1, 1].set_xlabel('Time')

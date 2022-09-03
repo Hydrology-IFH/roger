@@ -308,12 +308,13 @@ def main(tmp_dir):
         states_tm_file = base_path / f"states_{tms}_sensitivity.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             try:
-                v = f.groups[tm_structure].create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
             except ValueError:
-                v = f.groups[tm_structure].get('d18O_perc_bs')
+                v = f.get('d18O_perc_bs')
             v[:, :, :] = d18O_perc_bs
             v.attrs.update(long_name="bulk sample of d18O in percolation",
                            units="permil")
+            del var_obj, vals
         # write to .txt
         file = base_path_results / f"params_eff_{tm_structure}.txt"
         df_params_eff.to_csv(file, header=True, index=False, sep="\t")
