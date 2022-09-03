@@ -130,6 +130,7 @@ def main(tmp_dir):
                                 v[:, :, :, :] = vals
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
+                            del var_obj, vals
 
     # load hydrologic simulation
     states_hm_file = base_path / "states_hm.nc"
