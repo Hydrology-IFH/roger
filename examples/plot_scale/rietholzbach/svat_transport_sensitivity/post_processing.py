@@ -316,7 +316,7 @@ def main(tmp_dir):
                            units="permil")
         # write to .txt
         file = base_path_results / f"params_eff_{tm_structure}.txt"
-        df_params_eff.to_bsv(file, header=True, index=False, sep="\t")
+        df_params_eff.to_csv(file, header=True, index=False, sep="\t")
         dict_params_eff[tm_structure] = df_params_eff
     return
 
