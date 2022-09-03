@@ -345,6 +345,8 @@ def main(tmp_dir):
         dict_params_eff[tm_structure]['idx_best'] = idx_best
 
         # write SAS parameters of best model run
+        states_tm_file = base_path / f"states_{tms}_monte_carlo.nc"
+        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
         params_tm_file = Path(__file__).parent / f"sas_params_{tms}.nc"
         with h5netcdf.File(params_tm_file, 'a', decode_vlen_strings=False) as f:
             f.attrs.update(
