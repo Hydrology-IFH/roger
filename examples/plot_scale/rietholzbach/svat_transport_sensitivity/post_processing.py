@@ -38,7 +38,7 @@ def main(tmp_dir):
         diag_files = glob.glob(path)
         states_tm_file = base_path / f"states_{tms}_sensitivity.nc"
         if not os.path.exists(states_tm_file):
-            with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+            with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
                 f.attrs.update(
                     date_created=datetime.datetime.today().isoformat(),
                     title=f'RoGeR {tm_structure} model Saltelli simulations at Rietholzbach lysimeter site',
