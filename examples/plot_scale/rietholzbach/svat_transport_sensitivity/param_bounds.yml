@@ -9,13 +9,13 @@ preferential:
   bounds:
   -
     - 1
-    - 90
+    - 50
   -
     - 1
-    - 90
+    - 50
   -
     - 1
-    - 90
+    - 50
 
 time-variant preferential:
   num_vars: 3
@@ -28,13 +28,13 @@ time-variant preferential:
   bounds:
   -
     - 1
-    - 90
+    - 50
   -
     - 1
-    - 90
+    - 50
   -
     - 1
-    - 90
+    - 50
 
 advection-dispersion:
   num_vars: 3
@@ -47,13 +47,13 @@ advection-dispersion:
   bounds:
   -
     - 1
-    - 90
+    - 50
   -
     - 1
-    - 90
+    - 50
   -
     - 1
-    - 90
+    - 50
 
 time-variant advection-dispersion:
   num_vars: 3
@@ -66,13 +66,13 @@ time-variant advection-dispersion:
   bounds:
   -
     - 1
-    - 90
+    - 50
   -
     - 1
-    - 90
+    - 50
   -
     - 1
-    - 90
+    - 50
 
 time-variant:
   num_vars: 3
@@ -85,10 +85,10 @@ time-variant:
   bounds:
   -
     - 1
-    - 90
+    - 50
   -
     - 1
-    - 90
+    - 50
   -
     - 1
-    - 90
+    - 50

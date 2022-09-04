@@ -271,6 +271,20 @@ def main(tmp_dir):
                 df_params_eff.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
                 key_r = f'r_{var_sim}{sc1}'
                 df_params_eff.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+                var_sim = 'TT_transp'
+                # mean travel time of percolation
+                key_mtt = f'mean_{var_sim}{sc1}'
+                ages = onp.arange(1, ds_sim_tm.dims['ages'] + 1)
+                df_params_eff.loc[nrow, key_mtt] = onp.mean(onp.sum(ages[onp.newaxis, :] * onp.diff(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values, axis=1), axis=1))
+                # median travel time of percolation
+                key_mediantt = f'median_{var_sim}{sc1}'
+                df_params_eff.loc[nrow, key_mediantt] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.5, axis=1))
+                # lower quantile travel time of percolation
+                key_tt25 = f'25_{var_sim}{sc1}'
+                df_params_eff.loc[nrow, key_tt25] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.25, axis=1))
+                # upper quantile travel time of percolation
+                key_tt75 = f'75_{var_sim}{sc1}'
+                df_params_eff.loc[nrow, key_tt75] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.75, axis=1))
                 var_sim = 'TT_q_ss'
                 # mean travel time of percolation
                 key_mtt = f'mean_{var_sim}{sc1}'

@@ -473,7 +473,7 @@ def main(transport_model_structure):
         def set_diagnostics(self, state, base_path=None):
             diagnostics = state.diagnostics
 
-            diagnostics["averages"].output_variables = ["C_q_ss"]
+            diagnostics["averages"].output_variables = ["C_transp", "C_q_ss"]
             diagnostics["averages"].output_frequency = 24 * 60 * 60
             diagnostics["averages"].sampling_frequency = 1
             if base_path:
@@ -485,7 +485,7 @@ def main(transport_model_structure):
             if base_path:
                 diagnostics["constant"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["TT_q_ss", "SA_s", "SA_rz", "SA_ss", "C_in"]
+            diagnostics["collect"].output_variables = ["TT_transp", "TT_q_ss", "SA_s", "SA_rz", "SA_ss", "C_in"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
