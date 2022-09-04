@@ -329,7 +329,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
         if rs.device == 'gpu':
             import subprocess
             nvidia_smi = subprocess.Popen(["nvidia-smi"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            logger.info(nvidia_smi.stdout.decode())
+            logger.debug(nvidia_smi)
+            logger.deburg(nvidia_smi.stdout)
 
     @roger_routine
     def step(self, state):
@@ -458,7 +459,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
         if rs.device == 'gpu':
             import subprocess
             nvidia_smi = subprocess.Popen(["nvidia-smi"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            logger.info(nvidia_smi.stdout.decode())
+            logger.debug(nvidia_smi)
+            logger.deburg(nvidia_smi.stdout)
 
     def warmup(self, repeat=1):
         """Warmup routine of the simulation.
