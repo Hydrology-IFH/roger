@@ -283,7 +283,8 @@ def main(tmp_dir):
             df_params_eff = df_params_eff.copy()
 
         # write bulk sample to output file
-        ds_sim_tm.close()
+        ds_sim_tm = ds_sim_tm.close()
+        del ds_sim_tm
         states_tm_file = base_path / f"states_{tms}_monte_carlo.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             try:
