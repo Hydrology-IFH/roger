@@ -315,7 +315,6 @@ def main(tmp_dir):
             v[:, :, :] = d18O_perc_bs
             v.attrs.update(long_name="bulk sample of d18O in percolation",
                            units="permil")
-            del var_obj, vals
         # write to .txt
         file = base_path_results / f"params_eff_{tm_structure}.txt"
         df_params_eff.to_csv(file, header=True, index=False, sep="\t")
