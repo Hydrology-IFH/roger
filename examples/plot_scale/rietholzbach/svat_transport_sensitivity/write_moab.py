@@ -76,7 +76,7 @@ def main(job_type):
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
             lines.append('# adapt command to your available scheduler / MPI implementation\n')
-            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 16 1 -ns 1024 -tms %s -td "${TMPDIR}"\n' % (tms))
+            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 16 1 -ns 1024 -tms %s -td "${TMPDIR}"\n' % (tms))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
