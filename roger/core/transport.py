@@ -227,7 +227,7 @@ def calc_tt(state, SA, sa, flux, sas_params):
             else:
                 raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
         if rs.loglevel == 'debug':
-            rows = npx.where(mask == False)[0].tolist()
+            rows = npx.where(mask[2:-2, 2:-2] == False)[0].tolist()
             if rows:
                 logger.debug(f"Solution of SAS function diverged at {rows}")
 
@@ -432,8 +432,6 @@ def calc_ageing_iso(state, sa, msa):
     """
     vs = state.variables
 
-    sum_iso = npx.nansum(sa[2:-2, 2:-2, vs.tau, :] * msa[2:-2, 2:-2, vs.tau, :], axis=-1)
-
     sam1 = allocate(state.dimensions, ("x", "y", "ages"))
     sam1 = update(
         sam1,
@@ -487,8 +485,6 @@ def calc_ageing_iso(state, sa, msa):
         sa,
         at[2:-2, 2:-2, vs.tau, -1], sam1[2:-2, 2:-2, -1],
     )
-
-    sum_iso1 = npx.nansum(sa[2:-2, 2:-2, vs.tau, :] * msa[2:-2, 2:-2, vs.tau, :], axis=-1)
 
     return sa, msa
 
