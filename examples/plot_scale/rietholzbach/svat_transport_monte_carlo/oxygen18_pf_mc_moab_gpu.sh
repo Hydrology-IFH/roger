@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l nodes=10:ppn=1:gpus=1:default
+#PBS -l nodes=1:ppn=1:gpus=1:default
 #PBS -l walltime=1:00:00
 #PBS -l pmem=12000mb
 #PBS -N oxygen18_pf_mc
@@ -16,4 +16,4 @@ eval "$(conda shell.bash hook)"
 conda activate roger-gpu
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo
 
-mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d gpu -n 10 1 -ns 1000 -tms preferential -td /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo
+python svat_transport.py -b jax -d gpu -ns 200 -tms preferential -td /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo

@@ -76,7 +76,7 @@ def main(job_type):
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
             lines.append('# adapt command to your available scheduler / MPI implementation\n')
-            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 20 1 -ns 2000 -tms %s -td "${TMPDIR}"\n' % (tms))
+            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes -b numpy -d cpu -n 20 1 -ns 2000 -tms %s -td "${TMPDIR}"\n' % (tms))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
@@ -110,7 +110,7 @@ def main(job_type):
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
             lines.append('# adapt command to your available scheduler / MPI implementation\n')
-            lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 100 1 -ns 1000 -tms {tms} -td {output_path_ws.as_posix()}\n')
+            lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes -b numpy -d cpu -n 100 1 -ns 1000 -tms {tms} -td {output_path_ws.as_posix()}\n')
             file_path = base_path / f'{script_name}_moab.sh'
             file = open(file_path, "w")
             file.writelines(lines)
@@ -197,7 +197,7 @@ def main(job_type):
             tms = tm.replace(" ", "_")
             lines = []
             lines.append('#!/bin/bash\n')
-            lines.append('#PBS -l nodes=10:ppn=1:gpus=1:default\n')
+            lines.append('#PBS -l nodes=10:ppn=1:gpus=1\n')
             lines.append('#PBS -l walltime=48:00:00\n')
             lines.append('#PBS -l pmem=12000mb\n')
             lines.append(f'#PBS -N {script_name}\n')
