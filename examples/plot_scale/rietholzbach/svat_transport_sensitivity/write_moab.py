@@ -62,7 +62,7 @@ def main(job_type):
             lines = []
             lines.append('#!/bin/bash\n')
             lines.append('#PBS -l nodes=1:ppn=16\n')
-            lines.append('#PBS -l walltime=96:00:00\n')
+            lines.append('#PBS -l walltime=48:00:00\n')
             lines.append('#PBS -l pmem=2000mb\n')
             lines.append(f'#PBS -N {script_name}\n')
             lines.append('#PBS -m bea\n')
