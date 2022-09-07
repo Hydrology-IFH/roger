@@ -1,6 +1,6 @@
 from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
-from roger.core.operators import numpy as npx, update, update_add, for_loop, at
+from roger.core.operators import numpy as npx, update, update_add, scan, at
 
 
 @roger_kernel
@@ -408,7 +408,9 @@ def calc_inf_mp(state):
         at[2:-2, 2:-2, 3], vs.y_mp[2:-2, 2:-2, vs.taum1] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    def loop_body(i, loop_arr):
+    def loop_body(carry, i):
+        vs, settings, loop_arr = carry
+
         # determine computation steps. additional computation steps for hourly
         # time step.
         computation_steps = npx.int64(npx.round(vs.dt / (1 / 5), 0))  # based on hours
@@ -530,9 +532,15 @@ def calc_inf_mp(state):
             at[2:-2, 2:-2, 3], loop_arr[2:-2, 2:-2, 15] * vs.maskCatch[2:-2, 2:-2],
         )
 
-        return loop_arr
+        carry = (vs, settings, loop_arr)
 
-    loop_arr = for_loop(0, computation_steps, loop_body, loop_arr)
+        return carry, None
+
+    steps = npx.arange(0, computation_steps)
+    carry = (vs, settings, loop_arr)
+    res, _ = scan(loop_body, carry, steps)
+
+    loop_arr = res[2]
 
     vs.y_mp = update(
         vs.y_mp,
@@ -765,7 +773,8 @@ def calc_inf_sc(state):
         at[2:-2, 2:-2, 1], vs.y_sc[2:-2, 2:-2, vs.taum1] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    def loop_body(i, loop_arr):
+    def loop_body(carry, i):
+        vs, settings, loop_arr = carry
         # determine computation steps. additional computation steps for hourly
         # time step.
         computation_steps = npx.int64(npx.round(vs.dt / (1 / 5), 0))  # based on hours
@@ -824,9 +833,14 @@ def calc_inf_sc(state):
             at[2:-2, 2:-2, 1], loop_arr[2:-2, 2:-2, 0] * vs.maskCatch[2:-2, 2:-2],
         )
 
-        return loop_arr
+        carry = (vs, settings, loop_arr)
 
-    loop_arr = for_loop(0, computation_steps, loop_body, loop_arr)
+        return carry, None
+
+    steps = npx.arange(0, computation_steps)
+    carry = (vs, settings, loop_arr)
+    res, _ = scan(loop_body, carry, steps)
+    loop_arr = res[2]
 
     vs.y_sc = update(
         vs.y_sc,

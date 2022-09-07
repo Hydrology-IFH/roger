@@ -1,6 +1,6 @@
 from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
-from roger.core.operators import numpy as npx, update, update_add, at
+from roger.core.operators import numpy as npx, update, update_add, at, scan
 from roger.core import sas
 from roger import runtime_settings as rs, logger
 
@@ -45,6 +45,21 @@ def calc_MSA(state, MSA, msa):
 
 @roger_kernel
 def calc_tt(state, SA, sa, flux, sas_params):
+    """Calculates backward travel time distribution.
+    """
+    settings = state.settings
+
+    if settings.sas_solver == "RK4":
+        tt = calc_tt_rk4(state, SA, sa, flux, sas_params)
+
+    else:
+        tt = calc_tt_deterministic(state, SA, sa, flux, sas_params)
+
+    return tt
+
+
+@roger_kernel
+def calc_tt_deterministic(state, SA, sa, flux, sas_params):
     """Calculates backward travel time distribution.
     """
     vs = state.variables
@@ -230,6 +245,320 @@ def calc_tt(state, SA, sa, flux, sas_params):
             rows = npx.where(mask[2:-2, 2:-2] == False)[0].tolist()
             if rows:
                 logger.debug(f"Solution of SAS function diverged at {rows}")
+
+    return tt
+
+
+@roger_kernel
+def calc_tt_rk4(state, SA, sa, flux, sas_params):
+    """Calculates backward travel time distribution with Runge-Kutta method
+    """
+    vs = state.variables
+    settings = state.settings
+
+    if vs.itt >= 231:
+        print('')
+
+    dt_num = 1 / settings.sas_solver_substeps
+
+    SAn = allocate(state.dimensions, ("x", "y", "timesteps", "nages"))
+    san = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
+    SAn = update(
+        SAn,
+        at[2:-2, 2:-2, :, :], SA[2:-2, 2:-2, :, :],
+    )
+    san = update(
+        san,
+        at[2:-2, 2:-2, :, :], sa[2:-2, 2:-2, :, :],
+    )
+
+    TT1 = allocate(state.dimensions, ("x", "y", "nages"))
+    tt1 = allocate(state.dimensions, ("x", "y", "ages"))
+    TT2 = allocate(state.dimensions, ("x", "y", "nages"))
+    tt2 = allocate(state.dimensions, ("x", "y", "ages"))
+    TT3 = allocate(state.dimensions, ("x", "y", "nages"))
+    tt3 = allocate(state.dimensions, ("x", "y", "ages"))
+    TT4 = allocate(state.dimensions, ("x", "y", "nages"))
+    tt4 = allocate(state.dimensions, ("x", "y", "ages"))
+    tt = allocate(state.dimensions, ("x", "y", "ages"))
+    ttn = allocate(state.dimensions, ("x", "y", "ages"))
+
+    def body(carry, x):
+        state, sas_params, SAn, san, TT1, tt1, TT2, tt2, TT3, tt3, TT4, tt4, ttn, tt, dt_num = carry
+        # cumulative backward travel time distribution
+        TT1 = update(
+            TT1,
+            at[2:-2, 2:-2, :], 0,
+        )
+        TT1 = update_add(
+            TT1,
+            at[2:-2, 2:-2, :], sas.uniform(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TT1 = update_add(
+            TT1,
+            at[2:-2, 2:-2, :], sas.dirac(state, sas_params)[2:-2, 2:-2, :],
+        )
+        TT1 = update(
+            TT1,
+            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(flux[2:-2, 2:-2, npx.newaxis] * dt_num/2 <= SAn[2:-2, 2:-2, 1, :], SAn[2:-2, 2:-2, 1, :]/flux[2:-2, 2:-2, npx.newaxis], 0), TT1[2:-2, 2:-2, :]),
+        )
+        TT1 = update(
+            TT1,
+            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(npx.max(TT1[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis] > 1, TT1[2:-2, 2:-2, :] * (1/npx.max(TT1[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis]), TT1[2:-2, 2:-2, :]), TT1[2:-2, 2:-2, :]),
+        )
+        TT1 = update(
+            TT1,
+            at[2:-2, 2:-2, 1:], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(flux[2:-2, 2:-2, npx.newaxis] * dt_num/2 <= npx.cumsum(san[2:-2, 2:-2, 1, ::-1], axis=-1)[:, :, ::-1], npx.cumsum(san[2:-2, 2:-2, 1, ::-1], axis=-1)[:, :, ::-1]/flux[2:-2, 2:-2, npx.newaxis], 0), TT1[2:-2, 2:-2, 1:]),
+        )
+        TT1 = update(
+            TT1,
+            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(npx.max(TT1[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis] > 1, TT1[2:-2, 2:-2, :] * (1/npx.max(TT1[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis]), TT1[2:-2, 2:-2, :]), TT1[2:-2, 2:-2, :]),
+        )
+        Omega, sas_params = sas.kumaraswami(state, SAn, sas_params)
+        TT1 = update_add(
+            TT1,
+            at[2:-2, 2:-2, :], Omega[2:-2, 2:-2, :],
+        )
+        TT1 = update_add(
+            TT1,
+            at[2:-2, 2:-2, :], sas.gamma(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TT1 = update_add(
+            TT1,
+            at[2:-2, 2:-2, :], sas.exponential(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TT1 = update_add(
+            TT1,
+            at[2:-2, 2:-2, :], sas.power(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        tt1 = update(
+            tt1,
+            at[2:-2, 2:-2, :], npx.diff(TT1[2:-2, 2:-2, :], axis=-1),
+        )
+        san = update_add(
+            san,
+            at[2:-2, 2:-2, 1, :], -flux[2:-2, 2:-2, npx.newaxis] * tt1[2:-2, 2:-2, :] * dt_num/2,
+        )
+        SAn = update(
+            SAn,
+            at[2:-2, 2:-2, 1, 1:], npx.cumsum(san[2:-2, 2:-2, 1, :], axis=-1),
+        )
+
+        TT2 = update(
+            TT2,
+            at[2:-2, 2:-2, :], 0,
+        )
+        TT2 = update_add(
+            TT2,
+            at[2:-2, 2:-2, :], sas.uniform(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TT2 = update_add(
+            TT2,
+            at[2:-2, 2:-2, :], sas.dirac(state, sas_params)[2:-2, 2:-2, :],
+        )
+        TT2 = update(
+            TT2,
+            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(flux[2:-2, 2:-2, npx.newaxis] * dt_num/2 <= SAn[2:-2, 2:-2, 1, :], SAn[2:-2, 2:-2, 1, :]/flux[2:-2, 2:-2, npx.newaxis], 0), TT2[2:-2, 2:-2, :]),
+        )
+        TT2 = update(
+            TT2,
+            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(npx.max(TT2[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis] > 1, TT2[2:-2, 2:-2, :] * (1/npx.max(TT2[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis]), TT2[2:-2, 2:-2, :]), TT2[2:-2, 2:-2, :]),
+        )
+        TT2 = update(
+            TT2,
+            at[2:-2, 2:-2, 1:], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(flux[2:-2, 2:-2, npx.newaxis] * dt_num/2 <= npx.cumsum(san[2:-2, 2:-2, 1, ::-1], axis=-1)[:, :, ::-1], npx.cumsum(san[2:-2, 2:-2, 1, ::-1], axis=-1)[:, :, ::-1]/flux[2:-2, 2:-2, npx.newaxis], 0), TT2[2:-2, 2:-2, 1:]),
+        )
+        TT2 = update(
+            TT2,
+            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(npx.max(TT2[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis] > 1, TT2[2:-2, 2:-2, :] * (1/npx.max(TT2[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis]), TT2[2:-2, 2:-2, :]), TT2[2:-2, 2:-2, :]),
+        )
+        Omega, sas_params = sas.kumaraswami(state, SAn, sas_params)
+        TT2 = update_add(
+            TT2,
+            at[2:-2, 2:-2, :], Omega[2:-2, 2:-2, :],
+        )
+        TT2 = update_add(
+            TT2,
+            at[2:-2, 2:-2, :], sas.gamma(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TT2 = update_add(
+            TT2,
+            at[2:-2, 2:-2, :], sas.exponential(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TT2 = update_add(
+            TT2,
+            at[2:-2, 2:-2, :], sas.power(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        tt2 = update(
+            tt2,
+            at[2:-2, 2:-2, :], npx.diff(TT2[2:-2, 2:-2, :], axis=-1),
+        )
+        san = update_add(
+            san,
+            at[2:-2, 2:-2, 1, :], -flux[2:-2, 2:-2, npx.newaxis] * tt2[2:-2, 2:-2, :] * dt_num/2,
+        )
+        SAn = update(
+            SAn,
+            at[2:-2, 2:-2, 1, 1:], npx.cumsum(san[2:-2, 2:-2, 1, :], axis=-1),
+        )
+
+        TT3 = update(
+            TT3,
+            at[2:-2, 2:-2, :], 0,
+        )
+        TT3 = update_add(
+            TT3,
+            at[2:-2, 2:-2, :], sas.uniform(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TT3 = update_add(
+            TT3,
+            at[2:-2, 2:-2, :], sas.dirac(state, sas_params)[2:-2, 2:-2, :],
+        )
+        TT3 = update(
+            TT3,
+            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(flux[2:-2, 2:-2, npx.newaxis] * dt_num/2 <= SAn[2:-2, 2:-2, 1, :], SAn[2:-2, 2:-2, 1, :]/flux[2:-2, 2:-2, npx.newaxis], 0), TT3[2:-2, 2:-2, :]),
+        )
+        TT3 = update(
+            TT3,
+            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(npx.max(TT3[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis] > 1, TT3[2:-2, 2:-2, :] * (1/npx.max(TT3[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis]), TT3[2:-2, 2:-2, :]), TT3[2:-2, 2:-2, :]),
+        )
+        TT3 = update(
+            TT3,
+            at[2:-2, 2:-2, 1:], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(flux[2:-2, 2:-2, npx.newaxis] * dt_num/2 <= npx.cumsum(san[2:-2, 2:-2, 1, ::-1], axis=-1)[:, :, ::-1], npx.cumsum(san[2:-2, 2:-2, 1, ::-1], axis=-1)[:, :, ::-1]/flux[2:-2, 2:-2, npx.newaxis], 0), TT3[2:-2, 2:-2, 1:]),
+        )
+        TT3 = update(
+            TT3,
+            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(npx.max(TT3[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis] > 1, TT3[2:-2, 2:-2, :] * (1/npx.max(TT3[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis]), TT3[2:-2, 2:-2, :]), TT3[2:-2, 2:-2, :]),
+        )
+        Omega, sas_params = sas.kumaraswami(state, SAn, sas_params)
+        TT3 = update_add(
+            TT3,
+            at[2:-2, 2:-2, :], Omega[2:-2, 2:-2, :],
+        )
+        TT3 = update_add(
+            TT3,
+            at[2:-2, 2:-2, :], sas.gamma(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TT3 = update_add(
+            TT3,
+            at[2:-2, 2:-2, :], sas.exponential(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TT3 = update_add(
+            TT3,
+            at[2:-2, 2:-2, :], sas.power(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        tt3 = update(
+            tt3,
+            at[2:-2, 2:-2, :], npx.diff(TT3[2:-2, 2:-2, :], axis=-1),
+        )
+        san = update_add(
+            san,
+            at[2:-2, 2:-2, 1, :], -flux[2:-2, 2:-2, npx.newaxis] * tt1[2:-2, 2:-2, :],
+        )
+        SAn = update(
+            SAn,
+            at[2:-2, 2:-2, 1, 1:], npx.cumsum(san[2:-2, 2:-2, 1, :], axis=-1),
+        )
+
+        TT4 = update(
+            TT4,
+            at[2:-2, 2:-2, :], 0,
+        )
+        TT4 = update_add(
+            TT4,
+            at[2:-2, 2:-2, :], sas.uniform(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TT4 = update_add(
+            TT4,
+            at[2:-2, 2:-2, :], sas.dirac(state, sas_params)[2:-2, 2:-2, :],
+        )
+        TT4 = update(
+            TT4,
+            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(flux[2:-2, 2:-2, npx.newaxis] * dt_num/2 <= SAn[2:-2, 2:-2, 1, :], SAn[2:-2, 2:-2, 1, :]/flux[2:-2, 2:-2, npx.newaxis], 0), TT4[2:-2, 2:-2, :]),
+        )
+        TT4 = update(
+            TT4,
+            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(npx.max(TT4[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis] > 1, TT4[2:-2, 2:-2, :] * (1/npx.max(TT4[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis]), TT4[2:-2, 2:-2, :]), TT4[2:-2, 2:-2, :]),
+        )
+        TT4 = update(
+            TT4,
+            at[2:-2, 2:-2, 1:], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(flux[2:-2, 2:-2, npx.newaxis] * dt_num/2 <= npx.cumsum(san[2:-2, 2:-2, 1, ::-1], axis=-1)[:, :, ::-1], npx.cumsum(san[2:-2, 2:-2, 1, ::-1], axis=-1)[:, :, ::-1]/flux[2:-2, 2:-2, npx.newaxis], 0), TT4[2:-2, 2:-2, 1:]),
+        )
+        TT4 = update(
+            TT4,
+            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(npx.max(TT4[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis] > 1, TT4[2:-2, 2:-2, :] * (1/npx.max(TT4[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis]), TT4[2:-2, 2:-2, :]), TT4[2:-2, 2:-2, :]),
+        )
+        Omega, sas_params = sas.kumaraswami(state, SAn, sas_params)
+        TT4 = update_add(
+            TT4,
+            at[2:-2, 2:-2, :], Omega[2:-2, 2:-2, :],
+        )
+        TT4 = update_add(
+            TT4,
+            at[2:-2, 2:-2, :], sas.gamma(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TT4 = update_add(
+            TT4,
+            at[2:-2, 2:-2, :], sas.exponential(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TT4 = update_add(
+            TT4,
+            at[2:-2, 2:-2, :], sas.power(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        tt4 = update(
+            tt4,
+            at[2:-2, 2:-2, :], npx.diff(TT4[2:-2, 2:-2, :], axis=-1),
+        )
+        ttn = update(
+            ttn,
+            at[2:-2, 2:-2, :], (tt1[2:-2, 2:-2, :] + 2*tt2[2:-2, 2:-2, :] + 2*tt3[2:-2, 2:-2, :] + tt4[2:-2, 2:-2, :]) / 6.,
+        )
+        san = update_add(
+            san,
+            at[2:-2, 2:-2, 1, :], -flux[2:-2, 2:-2, npx.newaxis] * ttn[2:-2, 2:-2, :],
+        )
+        SAn = update(
+            SAn,
+            at[2:-2, 2:-2, 1, 1:], npx.cumsum(san[2:-2, 2:-2, 1, :], axis=-1),
+        )
+        tt = update_add(
+            tt,
+            at[2:-2, 2:-2, :], (tt1[2:-2, 2:-2, :] + 2*tt2[2:-2, 2:-2, :] + 2*tt3[2:-2, 2:-2, :] + tt4[2:-2, 2:-2, :]) / 6. / settings.sas_solver_substeps,
+        )
+
+        carry = (state, sas_params, SAn, san, TT1, tt1, TT2, tt2, TT3, tt3, TT4, tt4, ttn, tt, dt_num)
+
+        return carry, None
+
+    n_substeps = npx.arange(0, settings.sas_solver_substeps)
+    carry = (state, sas_params, SAn, san, TT1, tt1, TT2, tt2, TT3, tt3, TT4, tt4, ttn, tt, dt_num)
+    res, _ = scan(body, carry, n_substeps)
+    tt = res[13]
+
+    diff1 = npx.sum(tt) * npx.sum(flux) - npx.sum(flux)
+    diff2 = npx.sum(npx.where(tt * flux[:, :, npx.newaxis] > sa[:, :, 1, :], tt * flux[:, :, npx.newaxis] - sa[:, :, 1, :], 0))
+
+    if rs.backend == 'numpy':
+        # sanity check of SAS function (works only for numpy backend)
+        mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=1e-02)
+        if not npx.all(mask[2:-2, 2:-2]):
+            if rs.loglevel == 'debug':
+                logger.debug(f"1Solution of SAS function diverged at iteration {vs.itt}")
+                logger.debug(f"Difference: {diff1}")
+            else:
+                raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
+        mask1 = (tt * flux[:, :, npx.newaxis] > sa[:, :, 1, :])
+        if npx.any(mask1[2:-2, 2:-2, :]):
+            if rs.loglevel == 'debug':
+                logger.debug(f"2Solution of SAS function diverged at iteration {vs.itt}")
+                logger.debug(f"Difference: {diff2}")
+            else:
+                raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
+        if rs.loglevel == 'debug':
+            rows = npx.where(mask[2:-2, 2:-2] == False)[0].tolist()
+            if rows:
+                logger.debug(f"Difference: {diff1}")
+                logger.debug(f"3Solution of SAS function diverged at {rows}")
 
     return tt
 

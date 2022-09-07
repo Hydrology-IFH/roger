@@ -19,7 +19,7 @@ def uniform(state, SA, sas_params):
     )
     lam = update(
         lam,
-        at[2:-2, 2:-2, :], (1 / S[2:-2, 2:-2, :]) * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], 1 / S[2:-2, 2:-2, :] * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     Omega = update(
         Omega,

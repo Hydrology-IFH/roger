@@ -89,6 +89,8 @@ SETTINGS = {
     "enable_runon_infiltration": Setting(False, bool, "enable run-on infiltration"),
     "enable_urban": Setting(False, bool, "enable urban"),
     "enable_macropore_lower_boundary_condition": Setting(False, bool, "enable lower boundary condition of macropores"),
+    "sas_solver": Setting(None, optional(str), "numerical solver for StorAge selection"),
+    "sas_solver_substeps": Setting(1, int, "substeps to solver for StorAge selection numerically"),
     "tm_structure": Setting("UNNAMED", str, "transport model structure"),
     # Restarts
     "restart_input_filename": Setting(

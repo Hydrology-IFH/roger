@@ -6,7 +6,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion', 'time-variant']), default='preferential')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion', 'time-variant']), default='complete-mixing')
 @roger_base_cli
 def main(transport_model_structure):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -92,6 +92,8 @@ def main(transport_model_structure):
         def set_settings(self, state):
             settings = state.settings
             settings.identifier = self._identifier
+            settings.sas_solver = "RK4"
+            settings.sas_solver_substeps = 1
 
             settings.nx, settings.ny, settings.nz = 1, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
