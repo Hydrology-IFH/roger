@@ -1449,7 +1449,7 @@ def sanity_check(state):
         check2 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.tau] - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.taum1],
                                                 vs.inf_mat_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) + vs.inf_pf_ss[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2]) -
                                                 npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2]), atol=settings.atol)))
-        check3 = global_and(npx.all((npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2] ) - (vs.S_pwp_rz[2:-2, 2:-2]  + vs.S_pwp_ss[2:-2, 2:-2] )) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)))
+        check3 = global_and(npx.all((npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2]) - (vs.S_pwp_rz[2:-2, 2:-2] + vs.S_pwp_ss[2:-2, 2:-2])) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)))
 
         check = check1 & check2 & check3
 
@@ -1485,7 +1485,7 @@ def sanity_check(state):
         check2 = global_and(npx.all(npx.isclose(npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.msa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
                                                 vs.inf_mat_rz[2:-2, 2:-2] * vs.C_inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] * vs.C_inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] * vs.C_inf_pf_ss[2:-2, 2:-2] -
                                                 npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * vs.C_transp[2:-2, 2:-2] - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * vs.C_q_ss[2:-2, 2:-2], atol=settings.atol)))
-        check3 = global_and(npx.all((npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2] ) - (vs.S_pwp_rz[2:-2, 2:-2]  + vs.S_pwp_ss[2:-2, 2:-2] )) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)))
+        check3 = global_and(npx.all((npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2]) - (vs.S_pwp_rz[2:-2, 2:-2] + vs.S_pwp_ss[2:-2, 2:-2])) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)))
 
         check = check1 & check2 & check3
 
@@ -1496,7 +1496,7 @@ def sanity_check(state):
         check2 = global_and(npx.all(npx.isclose(npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.msa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
                                                 vs.inf_mat_rz[2:-2, 2:-2] * vs.C_inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] * vs.C_inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] * vs.C_inf_pf_ss[2:-2, 2:-2] + npx.sum(vs.ma_s[2:-2, 2:-2, :], axis=2) -
                                                 npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * vs.C_transp[2:-2, 2:-2] - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * vs.C_q_ss[2:-2, 2:-2] - npx.sum(vs.mr_s[2:-2, 2:-2, :], axis=2), atol=settings.atol)))
-        check3 = global_and(npx.all((npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2] ) - (vs.S_pwp_rz[2:-2, 2:-2]  + vs.S_pwp_ss[2:-2, 2:-2] )) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)))
+        check3 = global_and(npx.all((npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2]) - (vs.S_pwp_rz[2:-2, 2:-2] + vs.S_pwp_ss[2:-2, 2:-2])) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)))
         
         check = check1 & check2 & check3
 
