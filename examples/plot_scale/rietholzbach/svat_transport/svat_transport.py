@@ -92,8 +92,8 @@ def main(transport_model_structure):
         def set_settings(self, state):
             settings = state.settings
             settings.identifier = self._identifier
-            settings.sas_solver = "RK4"
-            settings.sas_solver_substeps = 1
+            settings.sas_solver = "Euler"
+            settings.sas_solver_substeps = 3
 
             settings.nx, settings.ny, settings.nz = 1, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
@@ -334,7 +334,7 @@ def main(transport_model_structure):
                 vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], -7)
                 vs.msa_rz = update(
                     vs.msa_rz,
-                    at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis],
+                    at[2:-2, 2:-2, :vs.taup1, :], vs.sa_rz[2:-2, 2:-2, :vs.taup1, :] * vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis],
                 )
                 vs.msa_rz = update(
                     vs.msa_rz,
@@ -342,32 +342,24 @@ def main(transport_model_structure):
                 )
                 vs.msa_ss = update(
                     vs.msa_ss,
-                    at[2:-2, 2:-2, :vs.taup1, :], vs.C_ss[2:-2, 2:-2, :vs.taup1, npx.newaxis],
+                    at[2:-2, 2:-2, :vs.taup1, :], vs.sa_ss[2:-2, 2:-2, :vs.taup1, :] * vs.C_ss[2:-2, 2:-2, :vs.taup1, npx.newaxis],
                 )
                 vs.msa_ss = update(
                     vs.msa_ss,
                     at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
                 )
-                iso_rz = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
-                iso_ss = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
-                iso_rz = update(
-                    iso_rz,
-                    at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_rz), 0, vs.msa_rz)[2:-2, 2:-2, :, :],
-                )
-                iso_ss = update(
-                    iso_ss,
-                    at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_ss), 0, vs.msa_ss)[2:-2, 2:-2, :, :],
+                vs.msa_s = update(
+                    vs.msa_s,
+                    at[2:-2, 2:-2, :, :], (npx.where(npx.isnan(vs.msa_rz), 0, vs.msa_rz)[2:-2, 2:-2, :, :] + npx.where(npx.isnan(vs.msa_ss), 0, vs.msa_ss)[2:-2, 2:-2, :, :]),
                 )
                 vs.msa_s = update(
                     vs.msa_s,
-                    at[2:-2, 2:-2, :, :], (vs.sa_rz[2:-2, 2:-2, :, :] / vs.sa_s[2:-2, 2:-2, :, :]) * iso_rz[2:-2, 2:-2, :, :] + (vs.sa_ss[2:-2, 2:-2, :, :] / vs.sa_s[2:-2, 2:-2, :, :]) * iso_ss[2:-2, 2:-2, :, :],
+                    at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
                 )
-
                 vs.C_s = update(
                     vs.C_s,
-                    at[2:-2, 2:-2, vs.tau], calc_conc_iso_storage(state, vs.sa_s, vs.msa_s)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+                    at[2:-2, 2:-2, vs.tau], npx.nansum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
                 )
-
                 vs.C_s = update(
                     vs.C_s,
                     at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2],
@@ -659,7 +651,6 @@ def main(transport_model_structure):
     model._set_input_dir(input_path)
     write_forcing_tracer(input_path, 'd18O')
     model.setup()
-    model.warmup()
     model.run()
     return
 

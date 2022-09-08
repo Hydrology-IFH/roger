@@ -402,36 +402,18 @@ class RogerSetup(metaclass=abc.ABCMeta):
                         self.set_forcing(state)
                     with state.timers["time-variant parameters"]:
                         self.set_parameters(state)
-                    if settings.enable_crop_phenology:
-                        with state.timers["redistribution after root growth/harvesting"]:
-                            crop.calculate_redistribution_transport(state)
-                    with state.timers["infiltration into root zone"]:
-                        infiltration.calculate_infiltration_rz_transport(state)
-                    with state.timers["evapotranspiration"]:
-                        evapotranspiration.calculate_evapotranspiration_transport(state)
-                    with state.timers["infiltration into subsoil"]:
-                        infiltration.calculate_infiltration_ss_transport(state)
-                    with state.timers["subsurface runoff of root zone"]:
-                        subsurface_runoff.calculate_percolation_rz_transport(state)
-                    with state.timers["subsurface runoff of subsoil"]:
-                        subsurface_runoff.calculate_percolation_ss_transport(state)
-                    with state.timers["capillary rise into root zone"]:
-                        capillary_rise.calculate_capillary_rise_rz_transport(state)
-                    if settings.enable_groundwater_boundary:
-                        with state.timers["capillary rise into subsoil"]:
-                            capillary_rise.calculate_capillary_rise_ss_transport(state)
-                    if settings.enable_groundwater:
-                        pass
+                    with state.timers["StorAge selection"]:
+                        transport.calculate_storage_selection(state)
                     if settings.enable_nitrate:
                         with state.timers["nitrogen cycle"]:
                             nitrate.calculate_nitrogen_cycle(state)
                     with state.timers["ageing"]:
                         transport.calculate_ageing(state)
-                    with state.timers["storage"]:
+                    with state.timers["StorAge"]:
                         root_zone.calculate_root_zone_transport(state)
-                    with state.timers["storage"]:
+                    with state.timers["StorAge"]:
                         subsoil.calculate_subsoil_transport(state)
-                    with state.timers["storage"]:
+                    with state.timers["StorAge"]:
                         soil.calculate_soil_transport(state)
                     if settings.enable_groundwater:
                         pass
@@ -464,7 +446,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
         -------
         Make sure to call :meth:`setup` prior to this function.
         """
-        from roger import diagnostics, restart
+        from roger import diagnostics
         from roger.core import numerics
 
         if self.state.settings.enable_offline_transport:
@@ -479,12 +461,6 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
         self._warmup_done = True
         if self._warmup_done:
-            with self.state.settings.unlock():
-                restart_file = self.state.settings.restart_output_filename
-                self.state.settings.restart_output_filename = f'{self.state.settings.identifier}.warmup_restart.h5'
-            restart.write_restart(self.state, force=True)
-            with self.state.settings.unlock():
-                self.state.settings.restart_output_filename = restart_file
             # write initial values to output after warmup
             diagnostics.diagnose(self.state)
             diagnostics.output(self.state)

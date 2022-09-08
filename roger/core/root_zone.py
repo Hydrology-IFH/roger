@@ -159,7 +159,7 @@ def calculate_root_zone_transport_iso_kernel(state):
 
     vs.M_rz = update(
         vs.M_rz,
-        at[2:-2, 2:-2, vs.tau], npx.nansum(vs.msa_rz[2:-2, 2:-2, vs.tau, :] * vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau], npx.nansum(vs.msa_rz[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.SA_rz = update(

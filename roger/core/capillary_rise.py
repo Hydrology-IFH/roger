@@ -283,20 +283,19 @@ def calculate_capillary_rise_rz_transport_iso_kernel(state):
         vs.sa_ss,
         at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_cpr_rz, vs.cpr_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
-    # update solute StorAge
-    vs.msa_ss = update(
-        vs.msa_ss,
-        at[2:-2, 2:-2, :, :], npx.where((vs.sa_ss[2:-2, 2:-2, :, :] > 0), vs.msa_ss[2:-2, 2:-2, :, :], npx.nan) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
-    )
-
-    vs.msa_rz = update(
-        vs.msa_rz,
-        at[2:-2, 2:-2, :, :], transport.calc_msa_iso(state, vs.sa_rz, vs.msa_rz, vs.cpr_rz, vs.tt_cpr_rz, vs.mtt_cpr_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
-    )
-
     vs.sa_rz = update_add(
         vs.sa_rz,
         at[2:-2, 2:-2, vs.tau, :], vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+    # update solute StorAge
+    vs.msa_ss = update_add(
+        vs.msa_ss,
+        at[2:-2, 2:-2, vs.tau, :], -npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.msa_rz = update_add(
+        vs.msa_rz,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(sa_ss=vs.sa_ss, msa_ss=vs.msa_ss, tt_cpr_rz=vs.tt_cpr_rz, TT_cpr_rz=vs.TT_cpr_rz, mtt_cpr_rz=vs.mtt_cpr_rz, C_cpr_rz=vs.C_cpr_rz, sa_rz=vs.sa_rz, msa_rz=vs.msa_rz)

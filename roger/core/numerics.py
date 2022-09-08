@@ -1402,90 +1402,105 @@ def sanity_check(state):
     settings = state.settings
 
     if settings.enable_lateral_flow and not settings.enable_groundwater_boundary and not settings.enable_groundwater and not settings.enable_offline_transport:
-        check1 = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.q_sub[2:-2, 2:-2], atol=1e-02)))
-        check2 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] > -1e-9) & (vs.S_lp_rz[2:-2, 2:-2] > -1e-9) & (vs.S_fp_ss[2:-2, 2:-2] > -1e-9) & (vs.S_lp_ss[2:-2, 2:-2] > -1e-9)))
-        check3 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] - 1e-9 <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] - 1e-9 <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] - 1e-9 <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] - 1e-9 <= vs.S_ac_ss[2:-2, 2:-2])))
+        check1 = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.q_sub[2:-2, 2:-2], atol=settings.atol)))
+        check2 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] > -settings.atol) & (vs.S_lp_rz[2:-2, 2:-2] > -settings.atol) & (vs.S_fp_ss[2:-2, 2:-2] > -settings.atol) & (vs.S_lp_ss[2:-2, 2:-2] > -settings.atol)))
+        check3 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ac_ss[2:-2, 2:-2])))
         check = check1 & check2 & check3
 
     elif settings.enable_lateral_flow and settings.enable_groundwater_boundary and not settings.enable_offline_transport:
-        check1 = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.q_sub[2:-2, 2:-2] + vs.cpr_ss[2:-2, 2:-2], atol=1e-02)))
-        check2 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] > -1e-9) & (vs.S_lp_rz[2:-2, 2:-2] > -1e-9) & (vs.S_fp_ss[2:-2, 2:-2] > -1e-9) & (vs.S_lp_ss[2:-2, 2:-2] > -1e-9)))
-        check3 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] - 1e-9 <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] - 1e-9 <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] - 1e-9 <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] - 1e-9 <= vs.S_ac_ss[2:-2, 2:-2])))
+        check1 = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.q_sub[2:-2, 2:-2] + vs.cpr_ss[2:-2, 2:-2], atol=settings.atol)))
+        check2 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] > -settings.atol) & (vs.S_lp_rz[2:-2, 2:-2] > -settings.atol) & (vs.S_fp_ss[2:-2, 2:-2] > -settings.atol) & (vs.S_lp_ss[2:-2, 2:-2] > -settings.atol)))
+        check3 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ac_ss[2:-2, 2:-2])))
         check = check1 & check2 & check3
 
     elif settings.enable_lateral_flow and settings.enable_groundwater and not settings.enable_offline_transport:
-        check1 = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_sub[2:-2, 2:-2] - vs.q_gw[2:-2, 2:-2] - vs.q_leak[2:-2, 2:-2], atol=1e-02)))
-        check2 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] > -1e-9) & (vs.S_lp_rz[2:-2, 2:-2] > -1e-9) & (vs.S_fp_ss[2:-2, 2:-2] > -1e-9) & (vs.S_lp_ss[2:-2, 2:-2] > -1e-9)))
-        check3 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] - 1e-9 <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] - 1e-9 <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] - 1e-9 <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] - 1e-9 <= vs.S_ac_ss[2:-2, 2:-2])))
+        check1 = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_sub[2:-2, 2:-2] - vs.q_gw[2:-2, 2:-2] - vs.q_leak[2:-2, 2:-2], atol=settings.atol)))
+        check2 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] > -settings.atol) & (vs.S_lp_rz[2:-2, 2:-2] > -settings.atol) & (vs.S_fp_ss[2:-2, 2:-2] > -settings.atol) & (vs.S_lp_ss[2:-2, 2:-2] > -settings.atol)))
+        check3 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ac_ss[2:-2, 2:-2])))
         check = check1 & check2 & check3
 
     elif settings.enable_groundwater_boundary and not settings.enable_offline_transport:
-        check1 = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] + vs.cpr_ss[2:-2, 2:-2], atol=1e-02)))
-        check2 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] > -1e-9) & (vs.S_lp_rz[2:-2, 2:-2] > -1e-9) & (vs.S_fp_ss[2:-2, 2:-2] > -1e-9) & (vs.S_lp_ss[2:-2, 2:-2] > -1e-9)))
-        check3 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] - 1e-9 <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] - 1e-9 <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] - 1e-9 <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] - 1e-9 <= vs.S_ac_ss[2:-2, 2:-2])))
+        check1 = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] + vs.cpr_ss[2:-2, 2:-2], atol=settings.atol)))
+        check2 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] > -settings.atol) & (vs.S_lp_rz[2:-2, 2:-2] > -settings.atol) & (vs.S_fp_ss[2:-2, 2:-2] > -settings.atol) & (vs.S_lp_ss[2:-2, 2:-2] > -settings.atol)))
+        check3 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ac_ss[2:-2, 2:-2])))
         check = check1 & check2 & check3
 
     elif settings.enable_film_flow and not settings.enable_offline_transport:
-        check1 = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.ff_drain[2:-2, 2:-2], atol=1e-02)))
-        check2 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] > -1e-9) & (vs.S_lp_rz[2:-2, 2:-2] > -1e-9) & (vs.S_fp_ss[2:-2, 2:-2] > -1e-9) & (vs.S_lp_ss[2:-2, 2:-2] > -1e-9)))
-        check3 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] - 1e-9 <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] - 1e-9 <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] - 1e-9 <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] - 1e-9 <= vs.S_ac_ss[2:-2, 2:-2])))
+        check1 = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.ff_drain[2:-2, 2:-2], atol=settings.atol)))
+        check2 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] > -settings.atol) & (vs.S_lp_rz[2:-2, 2:-2] > -settings.atol) & (vs.S_fp_ss[2:-2, 2:-2] > -settings.atol) & (vs.S_lp_ss[2:-2, 2:-2] > -settings.atol)))
+        check3 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ac_ss[2:-2, 2:-2])))
         check = check1 & check2 & check3
 
     elif not settings.enable_lateral_flow and not settings.enable_groundwater_boundary and not settings.enable_groundwater and not settings.enable_offline_transport:
-        check1 = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2], atol=1e-02)))
-        check2 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] > -1e-9) & (vs.S_lp_rz[2:-2, 2:-2] > -1e-9) & (vs.S_fp_ss[2:-2, 2:-2] > -1e-9) & (vs.S_lp_ss[2:-2, 2:-2] > -1e-9)))
-        check3 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] - 1e-9 <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] - 1e-9 <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] - 1e-9 <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] - 1e-9 <= vs.S_ac_ss[2:-2, 2:-2])))
+        check1 = global_and(npx.all(npx.isclose(vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2], atol=settings.atol)))
+        check2 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] > -settings.atol) & (vs.S_lp_rz[2:-2, 2:-2] > -settings.atol) & (vs.S_fp_ss[2:-2, 2:-2] > -settings.atol) & (vs.S_lp_ss[2:-2, 2:-2] > -settings.atol)))
+        check3 = global_and(npx.all((vs.S_fp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ac_rz[2:-2, 2:-2]) & (vs.S_fp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ufc_ss[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ac_ss[2:-2, 2:-2])))
         check = check1 & check2 & check3
 
     elif settings.enable_offline_transport and not (settings.enable_deuterium or settings.enable_oxygen18 or settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate):
         check = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
                                                vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] -
-                                               npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=1e-02)))
+                                               npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=settings.atol)))
 
     elif settings.enable_offline_transport and (settings.enable_deuterium or settings.enable_oxygen18):
         check1 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
                                                 vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] -
-                                                npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=1e-02)))
+                                                npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=settings.atol)))
         check2 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.tau] - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.taum1],
                                                 vs.inf_mat_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) + vs.inf_pf_ss[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2]) -
-                                                npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2]), atol=1e-02)))
-        check = check1 & check2
+                                                npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2]), atol=settings.atol)))
+        check3 = global_and(npx.all((npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2] ) - (vs.S_pwp_rz[2:-2, 2:-2]  + vs.S_pwp_ss[2:-2, 2:-2] )) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)))
+
+        check = check1 & check2 & check3
 
         if rs.loglevel == 'debug' and rs.backend == 'numpy':
             check11 = npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
                                                     vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] -
-                                                    npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=1e-02)
-            check12 = npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.tau] - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.taum1],
-                                                    vs.inf_mat_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) + vs.inf_pf_ss[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2]) -
-                                                    npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2]), atol=1e-02)
+                                                    npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=settings.atol)
+            check22 = npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.tau] - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.taum1],
+                                                    npx.sum(vs.inf_mat_rz[2:-2, 2:-2] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) + vs.inf_pf_ss[2:-2, 2:-2] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2]) -
+                                                    vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2]), axis=2), atol=settings.atol)
+            check33 = (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2] ) - (vs.S_pwp_rz[2:-2, 2:-2]  + vs.S_pwp_ss[2:-2, 2:-2] )) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)
+
             if not check11.all():
-                logger.debug(f"water balance diverged at iteration {vs.itt}")
+                logger.debug(f"Water balance diverged at iteration {vs.itt}")
                 rows11 = npx.where(check11 == False)[0].tolist()
-                logger.debug(f"Water balance diverged at {rows11}")
-            if not check12.all():
-                logger.debug(f"solute balance diverged at iteration {vs.itt}")
-                rows12 = npx.where(check12 == False)[0].tolist()
-                logger.debug(f"Solute balance diverged at {rows12}")
+                if rows11:
+                    logger.debug(f"Water balance diverged at {rows11}")
+            if not check22.all():
+                logger.debug(f"Solute balance diverged at iteration {vs.itt}")
+                rows22 = npx.where(check22 == False)[0].tolist()
+                if rows22:
+                    logger.debug(f"Solute balance diverged at {rows22}")
+            if not check33.all():
+                logger.debug(f"StorAge is out of bounds at iteration {vs.itt}")
+                rows33 = npx.where(check33 == False)[0].tolist()
+                if rows33:
+                    logger.debug(f"Solute balance diverged at {rows33}")
 
     elif settings.enable_offline_transport and (settings.enable_bromide or settings.enable_chloride):
         check1 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
                                                 vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] -
-                                                npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=1e-02)))
+                                                npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=settings.atol)))
         check2 = global_and(npx.all(npx.isclose(npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.msa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
                                                 vs.inf_mat_rz[2:-2, 2:-2] * vs.C_inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] * vs.C_inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] * vs.C_inf_pf_ss[2:-2, 2:-2] -
-                                                npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * vs.C_transp[2:-2, 2:-2] - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * vs.C_q_ss[2:-2, 2:-2], atol=1e-02)))
-        check = check1 & check2
+                                                npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * vs.C_transp[2:-2, 2:-2] - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * vs.C_q_ss[2:-2, 2:-2], atol=settings.atol)))
+        check3 = global_and(npx.all((npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2] ) - (vs.S_pwp_rz[2:-2, 2:-2]  + vs.S_pwp_ss[2:-2, 2:-2] )) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)))
+
+        check = check1 & check2 & check3
 
     elif settings.enable_offline_transport and settings.enable_nitrate:
         check1 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
                                                 vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] -
-                                                npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=1e-02)))
+                                                npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=settings.atol)))
         check2 = global_and(npx.all(npx.isclose(npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.msa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
                                                 vs.inf_mat_rz[2:-2, 2:-2] * vs.C_inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] * vs.C_inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] * vs.C_inf_pf_ss[2:-2, 2:-2] + npx.sum(vs.ma_s[2:-2, 2:-2, :], axis=2) -
-                                                npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * vs.C_transp[2:-2, 2:-2] - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * vs.C_q_ss[2:-2, 2:-2] - npx.sum(vs.mr_s[2:-2, 2:-2, :], axis=2), atol=1e-02)))
-        check = check1 & check2
+                                                npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * vs.C_transp[2:-2, 2:-2] - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * vs.C_q_ss[2:-2, 2:-2] - npx.sum(vs.mr_s[2:-2, 2:-2, :], axis=2), atol=settings.atol)))
+        check3 = global_and(npx.all((npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2] ) - (vs.S_pwp_rz[2:-2, 2:-2]  + vs.S_pwp_ss[2:-2, 2:-2] )) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)))
+        
+        check = check1 & check2 & check3
 
     elif settings.enable_offline_transport and settings.enable_groundwater_boundary:
-        check = global_and(npx.all(npx.isclose(npx.sum(vs.SA_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.SA_s[2:-2, 2:-2, vs.tau, 1, :], axis=-1), vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) + npx.sum(vs.cpr_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_ss[2:-2, 2:-2, :], axis=2), atol=1e-02)))
+        check = global_and(npx.all(npx.isclose(npx.sum(vs.SA_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.SA_s[2:-2, 2:-2, vs.tau, 1, :], axis=-1), vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) + npx.sum(vs.cpr_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_ss[2:-2, 2:-2, :], axis=2), atol=settings.atol)))
 
     return check

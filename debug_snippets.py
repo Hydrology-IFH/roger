@@ -187,3 +187,95 @@ z = vs.z_gw[2,2, vs.tau] * 1000 - vs.z_soil[2,2]
 
 from roger import logger
 logger.add("out.log")
+
+
+
+if rs.loglevel == 'debug' and rs.backend == 'numpy':
+    check11 = npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
+                                            vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] -
+                                            npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=settings.atol)
+    check22 = npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.tau] - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.taum1],
+                                            npx.sum(vs.inf_mat_rz[2:-2, 2:-2] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) + vs.inf_pf_ss[2:-2, 2:-2] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2]) -
+                                            vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2]), axis=2), atol=settings.atol)
+    check33 = (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz + vs.S_sat_ss) - (vs.S_pwp_rz + vs.S_pwp_ss)) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)
+
+    if not check11.all():
+        logger.debug(f"water balance diverged at iteration {vs.itt}")
+        rows11 = npx.where(check11 == False)[0].tolist()
+        logger.debug(f"Water balance diverged at {rows11}")
+        dS = npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1)
+        dS_rz = npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_rz[2:-2, 2:-2, vs.taum1, :], axis=-1)
+        dS_ss = npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_ss[2:-2, 2:-2, vs.taum1, :], axis=-1)
+        fluxes = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2)
+        fluxes_rz = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + npx.sum(vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :], axis=2) - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :], axis=2)
+        fluxes_ss = vs.inf_pf_ss[2:-2, 2:-2] + npx.sum(vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :], axis=2) - npx.sum(vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2)
+        logger.debug(f"dS: {dS[0][0]}; flux: {fluxes[0][0]}")
+        logger.debug(f"dS_rz: {dS_rz[0][0]}; flux_rz: {fluxes_rz[0][0]}")
+        logger.debug(f"dS_ss: {dS_ss[0][0]}; flux_ss: {fluxes_ss[0][0]}")
+    if not check22.all():
+        logger.debug(f"solute balance diverged at iteration {vs.itt}")
+        rows22 = npx.where(check22 == False)[0].tolist()
+        logger.debug(f"Solute balance diverged at {rows22}")
+        dM = npx.sum(npx.where(npx.isnan(vs.msa_s[2:-2, 2:-2, vs.tau, :]), 0, vs.msa_s[2:-2, 2:-2, vs.tau, :]), axis=-1) - npx.sum(npx.where(npx.isnan(vs.msa_s[2:-2, 2:-2, vs.taum1, :]), 0, vs.msa_s[2:-2, 2:-2, vs.taum1, :]), axis=-1)
+        dM_rz = npx.sum(npx.where(npx.isnan(vs.msa_rz[2:-2, 2:-2, vs.tau, :]), 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]), axis=-1) - npx.sum(npx.where(npx.isnan(vs.msa_rz[2:-2, 2:-2, vs.taum1, :]), 0, vs.msa_rz[2:-2, 2:-2, vs.taum1, :]), axis=-1)
+        dM_ss = npx.sum(npx.where(npx.isnan(vs.msa_ss[2:-2, 2:-2, vs.tau, :]), 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :]), axis=-1) - npx.sum(npx.where(npx.isnan(vs.msa_ss[2:-2, 2:-2, vs.taum1, :]), 0, vs.msa_ss[2:-2, 2:-2, vs.taum1, :]), axis=-1)
+        mfluxes = npx.sum(npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_evap_soil[2:-2, 2:-2, :]), 0, vs.mtt_evap_soil[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_transp[2:-2, 2:-2, :]), 0, vs.mtt_transp[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_ss[2:-2, 2:-2, :]), 0, vs.mtt_q_ss[2:-2, 2:-2, :]), axis=-1)
+        mfluxes_rz = npx.sum(npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_evap_soil[2:-2, 2:-2, :]), 0, vs.mtt_evap_soil[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_transp[2:-2, 2:-2, :]), 0, vs.mtt_transp[2:-2, 2:-2, :]) -npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]), axis=-1)
+        mfluxes_ss = npx.sum(npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_ss[2:-2, 2:-2, :]), 0, vs.mtt_q_ss[2:-2, 2:-2, :]), axis=-1)
+        dC = npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.tau] - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.taum1]
+        cfluxes = npx.sum(vs.inf_mat_rz[2:-2, 2:-2] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) + vs.inf_pf_ss[2:-2, 2:-2] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2]) - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2]), axis=2)
+        logger.debug(f"dC: {dC[0][0]}; cflux: {cfluxes[0][0]}")
+        logger.debug(f"dM: {dM[0][0]}; mflux: {mfluxes[0][0]}")
+        logger.debug(f"dM_rz: {dM_rz[0][0]}; mflux_rz: {mfluxes_rz[0][0]}")
+        logger.debug(f"dM_ss: {dM_ss[0][0]}; mflux_ss: {mfluxes_ss[0][0]}")
+    if not check33.all():
+        logger.debug(f"StorAge is out of bounds at iteration {vs.itt}")
+
+
+tms = transport_model_structure.replace("_", " ")
+model = SVATTRANSPORTSetup()
+model._set_tm_structure(tms)
+identifier = f'SVATTRANSPORT_{transport_model_structure}1'
+model._set_identifier(identifier)
+model._sample_params(nsamples)
+rows = [12, 13, 14]
+params = model._params[rows, :]
+model._params = params
+model._nrows = len(rows)
+input_path = model._base_path / "input"
+model._set_input_dir(input_path)
+write_forcing_tracer(input_path, 'd18O')
+model.setup()
+model.warmup()
+model.run()
+return
+
+tms = transport_model_structure.replace("_", " ")
+model = SVATTRANSPORTSetup()
+restart_file = "SVATTRANSPORT_preferential.warmup_restart.h5"
+model = SVATTRANSPORTSetup(override=dict(
+        restart_input_filename=restart_file,
+    ))
+model._warmup_done = True
+model._set_tm_structure(tms)
+identifier = f'SVATTRANSPORT_{transport_model_structure}1'
+model._set_identifier(identifier)
+model._sample_params(nsamples)
+rows = [12, 13, 14]
+params = model._params[rows, :]
+model._params = params
+model._nrows = len(rows)
+input_path = model._base_path / "input"
+model._set_input_dir(input_path)
+write_forcing_tracer(input_path, 'd18O')
+model.setup()
+model.run()
+return
+
+
+with self.state.settings.unlock():
+    restart_file = self.state.settings.restart_output_filename
+    self.state.settings.restart_output_filename = f'{self.state.settings.identifier}.warmup_restart.h5'
+restart.write_restart(self.state, force=True)
+with self.state.settings.unlock():
+    self.state.settings.restart_output_filename = restart_file
