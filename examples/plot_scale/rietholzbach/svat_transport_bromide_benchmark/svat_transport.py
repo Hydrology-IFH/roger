@@ -9,8 +9,9 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion', 'time-variant']), default='complete-mixing')
+@click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler']), default=None)
 @roger_base_cli
-def main(transport_model_structure):
+def main(transport_model_structure, sas_solver):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, where
@@ -24,6 +25,7 @@ def main(transport_model_structure):
         _tm_structure = None
         _input_dir = None
         _identifier = None
+        _sas_solver = None
 
         def _set_input_dir(self, path):
             if os.path.exists(path):
@@ -67,6 +69,9 @@ def main(transport_model_structure):
 
         def _set_tm_structure(self, tm_structure):
             self._tm_structure = tm_structure
+
+        def _set_sas_solver(self, sas_solver):
+            self._sas_solver = sas_solver
 
         def _set_identifier(self, identifier):
             self._identifier = identifier
@@ -112,6 +117,7 @@ def main(transport_model_structure):
         def set_settings(self, state):
             settings = state.settings
             settings.identifier = self._identifier
+            settings.sas_solver = self._sas_solver
 
             settings.nx, settings.ny, settings.nz = 1, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
@@ -514,8 +520,12 @@ def main(transport_model_structure):
     for year in years:
         model = SVATTRANSPORTSetup()
         # set transport model structure
-        model._set_tm_structure(transport_model_structure)
-        identifier = f'SVATTRANSPORT_{tms}_{year}'
+        model._set_sas_solver(sas_solver)
+        model._set_tm_structure(tms)
+        if sas_solver:
+            identifier = f'SVATTRANSPORT_{tms}_{year}_{sas_solver}'
+        else:
+            identifier = f'SVATTRANSPORT_{tms}_{year}'
         model._set_identifier(identifier)
         # set year
         model._set_year(year)

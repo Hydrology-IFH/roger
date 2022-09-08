@@ -8,9 +8,10 @@ from roger.cli.roger_run_base import roger_base_cli
 
 @click.option("-ns", "--nsamples", type=int, default=1000)
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion', 'time-variant']), default='advection-dispersion')
+@click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler']), default=None)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(nsamples, transport_model_structure, tmp_dir):
+def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, random_uniform, for_loop
@@ -23,6 +24,7 @@ def main(nsamples, transport_model_structure, tmp_dir):
         _tm_structure = None
         _input_dir = None
         _identifier = None
+        _sas_solver = None
         _nsamples = 1
 
         def _set_input_dir(self, path):
@@ -53,6 +55,9 @@ def main(nsamples, transport_model_structure, tmp_dir):
 
         def _set_tm_structure(self, tm_structure):
             self._tm_structure = tm_structure
+
+        def _set_sas_solver(self, sas_solver):
+            self._sas_solver = sas_solver
 
         def _set_identifier(self, identifier):
             self._identifier = identifier
@@ -98,6 +103,7 @@ def main(nsamples, transport_model_structure, tmp_dir):
         def set_settings(self, state):
             settings = state.settings
             settings.identifier = self._identifier
+            settings.sas_solver = self._sas_solver
 
             settings.nx, settings.ny, settings.nz = self._nsamples, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
@@ -656,8 +662,12 @@ def main(nsamples, transport_model_structure, tmp_dir):
     tms = transport_model_structure.replace("_", " ")
     model = SVATTRANSPORTSetup()
     model._set_nsamples(nsamples)
+    model._set_sas_solver(sas_solver)
     model._set_tm_structure(tms)
-    identifier = f'SVATTRANSPORT_{transport_model_structure}'
+    if sas_solver:
+        identifier = f'SVATTRANSPORT_{tms}_{sas_solver}'
+    else:
+        identifier = f'SVATTRANSPORT_{tms}'
     model._set_identifier(identifier)
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)

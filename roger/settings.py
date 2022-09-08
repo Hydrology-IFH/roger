@@ -90,7 +90,7 @@ SETTINGS = {
     "enable_urban": Setting(False, bool, "enable urban"),
     "enable_macropore_lower_boundary_condition": Setting(False, bool, "enable lower boundary condition of macropores"),
     "sas_solver": Setting(None, optional(str), "numerical solver for StorAge selection"),
-    "sas_solver_substeps": Setting(1, int, "substeps to solver for StorAge selection numerically"),
+    "sas_solver_substeps": Setting(3, int, "substeps to solver for StorAge selection numerically"),
     "atol": Setting(1e-1, float, "absolute tolerance of solutions"),
     "rtol": Setting(1e-1, float, "relative tolerance of solutions"),
     "tm_structure": Setting("UNNAMED", str, "transport model structure"),
