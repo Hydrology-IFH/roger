@@ -95,54 +95,91 @@ def rescale_conc_soil_kernel(state):
         )
 
     elif (settings.enable_chloride | settings.enable_nitrate):
+        vs.msa_rz = update_multiply(
+            vs.msa_rz,
+            at[2:-2, 2:-2, 0, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.msa_ss = update_multiply(
+            vs.msa_ss,
+            at[2:-2, 2:-2, 0, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.msa_rz = update_multiply(
+            vs.msa_rz,
+            at[2:-2, 2:-2, 1, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.msa_ss = update_multiply(
+            vs.msa_ss,
+            at[2:-2, 2:-2, 1, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
         vs.C_rz = update(
             vs.C_rz,
             at[2:-2, 2:-2, :2], npx.sum(vs.msa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
         )
-
         vs.C_ss = update(
             vs.C_ss,
             at[2:-2, 2:-2, :2], npx.sum(vs.msa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
         )
-
+        vs.msa_s = update(
+            vs.msa_s,
+            at[2:-2, 2:-2, :, :], vs.msa_rz[2:-2, 2:-2, :, :] + vs.msa_ss[2:-2, 2:-2, :, :],
+        )
         vs.C_s = update(
             vs.C_s,
             at[2:-2, 2:-2, :2], npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
         )
 
     elif (settings.enable_oxygen18 | settings.enable_deuterium):
+        vs.msa_rz = update_multiply(
+            vs.msa_rz,
+            at[2:-2, 2:-2, 0, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.msa_ss = update_multiply(
+            vs.msa_ss,
+            at[2:-2, 2:-2, 0, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.msa_rz = update_multiply(
+            vs.msa_rz,
+            at[2:-2, 2:-2, 1, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.msa_ss = update_multiply(
+            vs.msa_ss,
+            at[2:-2, 2:-2, 1, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.msa_rz = update(
+            vs.msa_rz,
+            at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
+        )
+        vs.msa_ss = update(
+            vs.msa_ss,
+            at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
+        )
         vs.C_rz = update(
             vs.C_rz,
             at[2:-2, 2:-2, :2], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2, npx.newaxis],
         )
-
         vs.C_ss = update(
             vs.C_ss,
             at[2:-2, 2:-2, :2], transport.calc_conc_iso_storage(state, vs.sa_ss, vs.msa_ss)[2:-2, 2:-2, npx.newaxis],
         )
-
-        iso_rz = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
-        iso_ss = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
-        iso_rz = update(
-            iso_rz,
-            at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_rz), 0, vs.msa_rz)[2:-2, 2:-2, :, :],
-        )
-        iso_ss = update(
-            iso_ss,
-            at[2:-2, 2:-2, :, :], npx.where(npx.isnan(vs.msa_ss), 0, vs.msa_ss)[2:-2, 2:-2, :, :],
+        vs.msa_s = update(
+            vs.msa_s,
+            at[2:-2, 2:-2, :, :], (npx.where(npx.isnan(vs.msa_rz), 0, vs.msa_rz)[2:-2, 2:-2, :, :] + npx.where(npx.isnan(vs.msa_ss), 0, vs.msa_ss)[2:-2, 2:-2, :, :]),
         )
         vs.msa_s = update(
             vs.msa_s,
-            at[2:-2, 2:-2, :, :], (vs.sa_rz[2:-2, 2:-2, :, :] / vs.sa_s[2:-2, 2:-2, :, :]) * iso_rz[2:-2, 2:-2, :, :] + (vs.sa_ss[2:-2, 2:-2, :, :] / vs.sa_s[2:-2, 2:-2, :, :]) * iso_ss[2:-2, 2:-2, :, :],
+            at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
         )
-
         vs.C_s = update(
             vs.C_s,
-            at[2:-2, 2:-2, :], transport.calc_conc_iso_storage(state, vs.sa_s, vs.msa_s)[2:-2, 2:-2, npx.newaxis],
+            at[2:-2, 2:-2, vs.tau], npx.nansum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
+        )
+        vs.C_s = update(
+            vs.C_s,
+            at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2],
         )
 
     return KernelOutput(
-        C_rz=vs.C_rz, C_ss=vs.C_ss, C_s=vs.C_s, msa_s=vs.msa_s,
+        C_rz=vs.C_rz, C_ss=vs.C_ss, C_s=vs.C_s, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, msa_s=vs.msa_s,
     )
 
 
@@ -1453,30 +1490,30 @@ def sanity_check(state):
 
         check = check1 & check2 & check3
 
-        if rs.loglevel == 'debug' and rs.backend == 'numpy':
+        if rs.loglevel == 'debug' and rs.backend == 'numpy' and not check:
             check11 = npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
                                                     vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] -
                                                     npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=settings.atol)
             check22 = npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.tau] - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.taum1],
-                                                    npx.sum(vs.inf_mat_rz[2:-2, 2:-2] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) + vs.inf_pf_ss[2:-2, 2:-2] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2]) -
-                                                    vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :] * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2]), axis=2), atol=settings.atol)
+                                  vs.inf_mat_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) + vs.inf_pf_ss[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2]) -
+                                  npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2]), atol=settings.atol)
             check33 = (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2] ) - (vs.S_pwp_rz[2:-2, 2:-2]  + vs.S_pwp_ss[2:-2, 2:-2] )) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)
 
             if not check11.all():
-                logger.debug(f"Water balance diverged at iteration {vs.itt}")
+                logger.error(f"Water balance diverged at iteration {vs.itt}")
                 rows11 = npx.where(check11 == False)[0].tolist()
                 if rows11:
-                    logger.debug(f"Water balance diverged at {rows11}")
+                    logger.error(f"Water balance diverged at {rows11}")
             if not check22.all():
-                logger.debug(f"Solute balance diverged at iteration {vs.itt}")
+                logger.error(f"Solute balance diverged at iteration {vs.itt}")
                 rows22 = npx.where(check22 == False)[0].tolist()
                 if rows22:
                     logger.debug(f"Solute balance diverged at {rows22}")
             if not check33.all():
-                logger.debug(f"StorAge is out of bounds at iteration {vs.itt}")
+                logger.error(f"StorAge is out of bounds at iteration {vs.itt}")
                 rows33 = npx.where(check33 == False)[0].tolist()
                 if rows33:
-                    logger.debug(f"Solute balance diverged at {rows33}")
+                    logger.error(f"Solute balance diverged at {rows33}")
 
     elif settings.enable_offline_transport and (settings.enable_bromide or settings.enable_chloride):
         check1 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
@@ -1497,7 +1534,7 @@ def sanity_check(state):
                                                 vs.inf_mat_rz[2:-2, 2:-2] * vs.C_inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] * vs.C_inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] * vs.C_inf_pf_ss[2:-2, 2:-2] + npx.sum(vs.ma_s[2:-2, 2:-2, :], axis=2) -
                                                 npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * vs.C_transp[2:-2, 2:-2] - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * vs.C_q_ss[2:-2, 2:-2] - npx.sum(vs.mr_s[2:-2, 2:-2, :], axis=2), atol=settings.atol)))
         check3 = global_and(npx.all((npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2]) - (vs.S_pwp_rz[2:-2, 2:-2] + vs.S_pwp_ss[2:-2, 2:-2])) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)))
-        
+
         check = check1 & check2 & check3
 
     elif settings.enable_offline_transport and settings.enable_groundwater_boundary:

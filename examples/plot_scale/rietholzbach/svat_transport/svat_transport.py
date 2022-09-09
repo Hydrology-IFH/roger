@@ -650,7 +650,7 @@ def main(transport_model_structure, sas_solver):
     model = SVATTRANSPORTSetup()
     model._set_sas_solver(sas_solver)
     model._set_tm_structure(tms)
-    if sas_solver:
+    if sas_solver in ['RK4', 'Euler']:
         identifier = f'SVATTRANSPORT_{tms}_{sas_solver}'
     else:
         identifier = f'SVATTRANSPORT_{tms}'

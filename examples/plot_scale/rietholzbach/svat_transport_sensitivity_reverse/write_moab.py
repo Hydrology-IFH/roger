@@ -4,10 +4,11 @@ import click
 
 
 @click.option("--job-type", type=click.Choice(['serial', 'single-node', 'multi-node', 'single-node-gpu', 'single-node-multi-gpu', 'multi-node-multi-gpu']), default='serial')
+@click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.command("main")
-def main(job_type):
+def main(job_type, sas_solver):
     base_path = Path(__file__).parent
-    base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_sensitivity'
+    base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_sensitivity_reverse'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
     transport_models_abrev = {'complete-mixing': 'cm',
                               'piston': 'pi',
@@ -27,7 +28,7 @@ def main(job_type):
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
             script_name = f'{tracer}_{tm1}_sar'
-            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
+            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity_reverse'
             tms = tm.replace(" ", "_")
             lines = []
             lines.append('#!/bin/bash\n')
@@ -42,7 +43,7 @@ def main(job_type):
             lines.append('conda activate roger\n')
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
-            lines.append('python svat_transport.py -b numpy -d cpu -ns 32 -tms %s -td "${TMPDIR}"\n' % (tms))
+            lines.append('python svat_transport.py -b numpy -d cpu -ns 32 -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
@@ -57,13 +58,13 @@ def main(job_type):
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
             script_name = f'{tracer}_{tm1}_sar'
-            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
+            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity_reverse'
             tms = tm.replace(" ", "_")
             lines = []
             lines.append('#!/bin/bash\n')
             lines.append('#PBS -l nodes=1:ppn=16\n')
             lines.append('#PBS -l walltime=48:00:00\n')
-            lines.append('#PBS -l pmem=3000mb\n')
+            lines.append('#PBS -l pmem=4000mb\n')
             lines.append(f'#PBS -N {script_name}\n')
             lines.append('#PBS -m bea\n')
             lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
@@ -76,7 +77,7 @@ def main(job_type):
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
             lines.append('# adapt command to your available scheduler / MPI implementation\n')
-            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 16 1 -ns 512 -tms %s -td "${TMPDIR}"\n' % (tms))
+            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes -b numpy -d cpu -n 16 1 -ns 512 -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
@@ -91,13 +92,13 @@ def main(job_type):
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
             script_name = f'{tracer}_{tm1}_sar'
-            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
+            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity_reverse'
             tms = tm.replace(" ", "_")
             lines = []
             lines.append('#!/bin/bash\n')
             lines.append('#PBS -l nodes=2:ppn=16\n')
-            lines.append('#PBS -l walltime=48:00:00\n')
-            lines.append('#PBS -l pmem=3000mb\n')
+            lines.append('#PBS -l walltime=72:00:00\n')
+            lines.append('#PBS -l pmem=2000mb\n')
             lines.append(f'#PBS -N {script_name}\n')
             lines.append('#PBS -m bea\n')
             lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
@@ -110,7 +111,7 @@ def main(job_type):
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
             lines.append('# adapt command to your available scheduler / MPI implementation\n')
-            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 32 1 -ns 1024 -tms %s -td %s\n' % (tms, output_path_ws.as_posix()))
+            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes -b numpy -d cpu -n 32 1 -ns 1024 -tms %s -td %s -ss %s\n' % (tms, output_path_ws.as_posix(), sas_solver))
             file_path = base_path / f'{script_name}_moab.sh'
             file = open(file_path, "w")
             file.writelines(lines)
@@ -137,11 +138,12 @@ def main(job_type):
             lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
             lines.append('module load lib/cudnn/8.2-cuda-11.4\n')
             lines.append('export OMP_NUM_THREADS=1\n')
+            lines.append('export XLA_PYTHON_CLIENT_PREALLOCATE=false\n')
             lines.append('eval "$(conda shell.bash hook)"\n')
             lines.append('conda activate roger-gpu\n')
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
-            lines.append('python svat_transport.py -b jax -d gpu -ns 128 -tms %s -td "${TMPDIR}"\n' % (tms))
+            lines.append('python svat_transport.py -b jax -d gpu -ns 128 -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
@@ -172,11 +174,12 @@ def main(job_type):
             lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
             lines.append('module load lib/cudnn/8.2-cuda-11.4\n')
             lines.append('export OMP_NUM_THREADS=1\n')
+            lines.append('export XLA_PYTHON_CLIENT_PREALLOCATE=false\n')
             lines.append('eval "$(conda shell.bash hook)"\n')
             lines.append('conda activate roger-gpu\n')
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
-            lines.append('python svat_transport.py -b jax -d gpu -ns 256 -tms %s -td "${TMPDIR}"\n' % (tms))
+            lines.append('python svat_transport.py -b jax -d gpu -ns 256 -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
@@ -207,11 +210,12 @@ def main(job_type):
             lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
             lines.append('module load lib/cudnn/8.2-cuda-11.4\n')
             lines.append('export OMP_NUM_THREADS=1\n')
+            lines.append('export XLA_PYTHON_CLIENT_PREALLOCATE=false\n')
             lines.append('eval "$(conda shell.bash hook)"\n')
             lines.append('conda activate roger-gpu\n')
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
-            lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d gpu -n 2 1 -ns 256 -tms {tms} -td {output_path_ws.as_posix()}\n')
+            lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d gpu -n 2 1 -ns 256 -tms {tms} -td {output_path_ws.as_posix()} -ss {sas_solver}\n')
             file_path = base_path / f'{script_name}_moab_gpu.sh'
             file = open(file_path, "w")
             file.writelines(lines)
