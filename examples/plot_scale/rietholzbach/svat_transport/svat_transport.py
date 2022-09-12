@@ -7,7 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion', 'time-variant']), default='complete-mixing')
-@click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
+@click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='Euler')
 @roger_base_cli
 def main(transport_model_structure, sas_solver):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
