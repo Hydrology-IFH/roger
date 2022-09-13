@@ -7,7 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-ns", "--nsamples", type=int, default=1000)
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'power', 'power_time-variant', 'power_time-variant_reverse']), default='advection-dispersion')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'power', 'time-variant_power', 'time-variant_power_reverse']), default='advection-dispersion')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
@@ -426,25 +426,25 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 64)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], random_uniform(0.2, 1, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], random_uniform(0.1, 2, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], random_uniform(0.1, 2.8, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 64)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], random_uniform(0.2, 1, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(0.1, 2, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(0.1, 2.8, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 64)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], random_uniform(0.2, 1, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(0.1, 2, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(0.1, 2.8, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
             elif settings.tm_structure == "time-variant power reverse":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 63)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], random_uniform(0.2, 1, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], random_uniform(0.1, 2, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], random_uniform(0.1, 2.8, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 63)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], random_uniform(0.2, 1, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(0.1, 2, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(0.1, 2.8, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 63)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], random_uniform(0.2, 1, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(0.1, 2, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(0.1, 2.8, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
 
         @roger_routine
         def set_parameters(self, state):

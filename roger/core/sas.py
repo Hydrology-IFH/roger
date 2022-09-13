@@ -223,7 +223,7 @@ def power(state, SA, sas_params):
                               (SA[2:-2, 2:-2, vs.tau, :] / S[2:-2, 2:-2, :])**sas_params[2:-2, 2:-2, 1, npx.newaxis], 1.), 0.) * mask6[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    return Omega
+    return Omega, sas_params
 
 
 @roger_kernel

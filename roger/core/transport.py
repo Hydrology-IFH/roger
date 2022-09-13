@@ -48,6 +48,7 @@ def calc_tt(state, SA, sa, flux, sas_params):
     """Calculates backward travel time distribution.
     """
     vs = state.variables
+    settings = state.settings
 
     TT = allocate(state.dimensions, ("x", "y", "nages"))
     tt = allocate(state.dimensions, ("x", "y", "ages"))
@@ -73,14 +74,21 @@ def calc_tt(state, SA, sa, flux, sas_params):
         TT,
         at[2:-2, 2:-2, :], sas.exponential(state, SA, sas_params)[2:-2, 2:-2, :],
     )
+    Omega, sas_params = sas.power(state, SA, sas_params)
     TT = update_add(
         TT,
-        at[2:-2, 2:-2, :], sas.power(state, SA, sas_params)[2:-2, 2:-2, :],
+        at[2:-2, 2:-2, :], Omega[2:-2, 2:-2, :],
     )
 
     # travel time distribution
-    mask_old = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([1, 22, 32, 34, 52, 62])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis]))
-    mask_young = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([21, 31, 33, 4, 41, 51, 61])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] < sas_params[:, :, 2, npx.newaxis]))
+    mask_old = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([1, 22, 32, 34, 52, 6, 63, 64])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] <= 1))
+    mask_old = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis]), True, mask_old)
+    mask_old = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] >= 1), True, mask_old)
+    mask_young = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([21, 31, 33, 4, 41, 51, 6, 63, 64]))
+    mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] < sas_params[:, :, 2, npx.newaxis]), True, mask_young)
+    mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis]), False, mask_young)
+    mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] < 1), True, mask_young)
+    mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] >= 1), False, mask_young)
 
     tt = update(
         tt,
@@ -214,22 +222,22 @@ def calc_tt(state, SA, sa, flux, sas_params):
 
     if rs.backend == 'numpy':
         # sanity check of SAS function (works only for numpy backend)
-        mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=1e-02)
+        mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=settings.atol)
         if not npx.all(mask[2:-2, 2:-2]):
-            if rs.loglevel == 'debug':
-                logger.debug(f"Solution of SAS function diverged at iteration {vs.itt}")
+            if rs.loglevel == 'error':
+                logger.error(f"Solution of SAS function diverged at iteration {vs.itt}")
             else:
                 raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
-        mask1 = (tt * flux[:, :, npx.newaxis] - sa[:, :, 1, :] > 1e-02)
+        mask1 = (tt * flux[:, :, npx.newaxis] - sa[:, :, 1, :] > settings.atol)
         if npx.any(mask1[2:-2, 2:-2, :]):
-            if rs.loglevel == 'debug':
-                logger.debug(f"Solution of SAS function diverged at iteration {vs.itt}")
+            if rs.loglevel == 'error':
+                logger.error(f"Solution of SAS function diverged at iteration {vs.itt}")
             else:
                 raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
-        if rs.loglevel == 'debug':
+        if rs.loglevel == 'error':
             rows = npx.where(mask[2:-2, 2:-2] == False)[0].tolist()
             if rows:
-                logger.debug(f"Solution of SAS function diverged at {rows}")
+                logger.error(f"Solution of SAS function diverged at {rows}")
 
     return tt
 
@@ -504,9 +512,10 @@ def calc_omega_q(state, SA, sas_params, flux):
         omega_q,
         at[2:-2, 2:-2, :], sas.exponential(state, SA, sas_params)[2:-2, 2:-2, :],
     )
+    Omega, sas_params = sas.power(state, SA, sas_params)
     omega_q = update_add(
         omega_q,
-        at[2:-2, 2:-2, :], sas.power(state, SA, sas_params)[2:-2, 2:-2, :],
+        at[2:-2, 2:-2, :], Omega[2:-2, 2:-2, :],
     )
 
     return omega_q

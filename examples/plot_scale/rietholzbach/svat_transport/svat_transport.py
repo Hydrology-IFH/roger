@@ -6,7 +6,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant preferential_+_advection-dispersion', 'power', 'power_time-variant', 'power_time-variant_reverse']), default='complete-mixing')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant preferential_+_advection-dispersion', 'power', 'time-variant_power', 'time-variant_power_reverse']), default='time-variant_power_reverse')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @roger_base_cli
 def main(transport_model_structure, sas_solver):
@@ -101,7 +101,7 @@ def main(transport_model_structure, sas_solver):
 
             settings.nx, settings.ny, settings.nz = 1, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
-            settings.ages = 365 * 3
+            settings.ages = settings.nitt
             settings.nages = settings.ages + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
 
@@ -371,7 +371,7 @@ def main(transport_model_structure, sas_solver):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], 30)[2:-2, 2:-2])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], 30)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 1)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 3)

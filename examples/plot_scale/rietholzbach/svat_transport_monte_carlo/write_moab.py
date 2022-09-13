@@ -30,8 +30,8 @@ def main(job_type, sas_solver):
                               'preferential + advection-dispersion': 'pfad',
                               'time-variant preferential + advection-dispersion': 'pfadt',
                               'power': 'pow',
-                              'power time-variant': 'powt',
-                              'power time-variant reverse': 'powtr'}
+                              'time-variant power': 'powt',
+                              'time-variant power reverse': 'powtr'}
 
     tracer = 'oxygen18'
     transport_models = ['preferential', 'preferential1', 'preferential2',
@@ -40,7 +40,7 @@ def main(job_type, sas_solver):
                         'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
                         'time-variant', 'time-variant1', 'time-variant2',
                         'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion',
-                        'power', 'power time-variant', 'power time-variant reverse']
+                        'power', 'time-variant power', 'time-variant power reverse']
     for tm in transport_models:
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]
