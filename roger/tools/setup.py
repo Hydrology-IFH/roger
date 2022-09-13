@@ -473,6 +473,7 @@ def write_forcing(input_dir, nrows=1, ncols=1, uniform=True,
                 _lock = False
                 break
             except BlockingIOError:
+                _lock = True
                 logger.debug("Wait for input files. Files might be used by some other process")
                 time.wait(10)
 

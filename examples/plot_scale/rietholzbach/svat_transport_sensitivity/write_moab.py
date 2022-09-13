@@ -13,6 +13,8 @@ def main(job_type, sas_solver):
     transport_models_abrev = {'complete-mixing': 'cm',
                               'piston': 'pi',
                               'preferential': 'pf',
+                              'complete-mixing + advection-dispersion': 'cmad',
+                              'complete-mixing + time-variant advection-dispersion': 'cmadt',
                               'advection-dispersion': 'ad',
                               'time-variant preferential': 'pft',
                               'time-variant advection-dispersion': 'adt',
@@ -20,6 +22,8 @@ def main(job_type, sas_solver):
 
     tracer = 'oxygen18'
     transport_models = ['preferential', 'advection-dispersion',
+                        'complete-mixing + advection-dispersion',
+                        'complete-mixing + time-variant advection-dispersion',
                         'time-variant preferential',
                         'time-variant advection-dispersion',
                         'time-variant']
@@ -97,7 +101,7 @@ def main(job_type, sas_solver):
             lines = []
             lines.append('#!/bin/bash\n')
             lines.append('#PBS -l nodes=2:ppn=16\n')
-            lines.append('#PBS -l walltime=72:00:00\n')
+            lines.append('#PBS -l walltime=96:00:00\n')
             lines.append('#PBS -l pmem=4000mb\n')
             lines.append(f'#PBS -N {script_name}\n')
             lines.append('#PBS -m bea\n')

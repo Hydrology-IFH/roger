@@ -138,7 +138,7 @@ def write_restart(state, force=False):
         return
 
     write_now = force or (
-        settings.restart_frequency and vs.itt > 0 and vs.time % settings.restart_frequency < settings.dt_tracer
+        settings.restart_frequency > 0 and vs.itt > 0 and vs.time % settings.restart_frequency == 0
     )
 
     if not write_now:

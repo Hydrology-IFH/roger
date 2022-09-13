@@ -124,7 +124,12 @@ examples/*/*/*/figures/
 examples/*/*/test_*
 EVENTS.txt
 !examples/*/*/observations/*
-
+examples/*/*/deterministic/
+examples/*/*/*/deterministic/
+examples/*/*/Euler/
+examples/*/*/*/Euler/
+examples/*/*/RK4/
+examples/*/*/*/RK4/
 
 # Slides or Word
 *.key

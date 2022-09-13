@@ -13,6 +13,8 @@ def main(job_type, sas_solver):
     transport_models_abrev = {'complete-mixing': 'cm',
                               'piston': 'pi',
                               'preferential': 'pf',
+                              'complete-mixing + advection-dispersion': 'cmad',
+                              'complete-mixing + time-variant advection-dispersion': 'cmadt',
                               'advection-dispersion': 'ad',
                               'time-variant preferential': 'pft',
                               'time-variant advection-dispersion': 'adt',
@@ -20,6 +22,8 @@ def main(job_type, sas_solver):
 
     tracer = 'oxygen18'
     transport_models = ['preferential', 'advection-dispersion',
+                        'complete-mixing + advection-dispersion',
+                        'complete-mixing + time-variant advection-dispersion',
                         'time-variant preferential',
                         'time-variant advection-dispersion',
                         'time-variant']

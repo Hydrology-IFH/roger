@@ -478,8 +478,6 @@ class RogerSetup(metaclass=abc.ABCMeta):
         Make sure to call :meth:`setup` (and :meth:`warmup` if offline transport)
         prior to this function.
         """
-        from roger import restart
-
         self._ensure_setup_done()
 
         vs = self.state.variables
@@ -516,9 +514,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
                 logger.success("Calculation done\n")
 
         finally:
-            if self._warmup_done:
-                restart.write_restart(self.state, force=True)
-                self._timing_summary()
+            self._timing_summary()
 
     def _timing_summary(self):
         timing_summary = []

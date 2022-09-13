@@ -9,7 +9,7 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_preferential', 'time-variant_advection-dispersion', 'time-variant']), default='complete-mixing')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(nsamples, transport_model_structure):
+def main(nsamples, transport_model_structure, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, for_loop
@@ -107,8 +107,8 @@ def main(nsamples, transport_model_structure):
 
             settings.nx, settings.ny, settings.nz = self._get_nx(self._base_path, 'states_hm_monte_carlo.nc'), 1, 1
             settings.nitt = self._get_nitt(self._base_path, 'states_hm_monte_carlo.nc')
-            settings.ages = settings.nitt
-            settings.nages = settings.nitt + 1
+            settings.ages = 365 * 3
+            settings.nages = settings.ages + 1
             settings.runlen = self._get_runlen(self._base_path, 'states_hm_monte_carlo.nc')
 
             # lysimeter surface 3.14 square meter (2m diameter)
@@ -581,7 +581,7 @@ def main(nsamples, transport_model_structure):
     tms = transport_model_structure.replace("_", " ")
     model = SVATTRANSPORTSetup()
     model._set_tm_structure(tms)
-    identifier = f'SVATTRANSPORT_{transport_model_structure}'
+    identifier = f'SVATTRANSPORT_{tms}'
     model._set_identifier(identifier)
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)

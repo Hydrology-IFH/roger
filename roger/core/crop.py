@@ -1347,9 +1347,10 @@ def calculate_redistribution_root_growth_transport_anion_kernel(state):
     )
 
     # calculate isotope travel time distribution
+    alpha = allocate(state.dimensions, ("x", "y"), fill=1)
     vs.mtt_re_rg = update(
         vs.mtt_re_rg,
-        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_ss, vs.tt_re_rg, vs.re_rg, vs.msa_ss, vs.alpha_q)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_ss, vs.tt_re_rg, vs.re_rg, vs.msa_ss, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.C_re_rg = update(
@@ -1519,9 +1520,10 @@ def calculate_redistribution_root_loss_transport_anion_kernel(state):
     )
 
     # calculate isotope travel time distribution
+    alpha = allocate(state.dimensions, ("x", "y"), fill=1)
     vs.mtt_re_rl = update(
         vs.mtt_re_rl,
-        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_re_rl, vs.re_rl, vs.msa_rz, vs.alpha_q)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_re_rl, vs.re_rl, vs.msa_rz, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.C_re_rl = update(

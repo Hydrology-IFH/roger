@@ -2,7 +2,7 @@
 #PBS -l nodes=1:ppn=16
 #PBS -l walltime=96:00:00
 #PBS -l pmem=8000mb
-#PBS -N oxygen18_ad_sa
+#PBS -N oxygen18_cmad_sa
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  
@@ -14,7 +14,7 @@ conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_sensitivity
  
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes -b numpy -d cpu -n 16 1 -ns 512 -tms advection-dispersion -td "${TMPDIR}" -ss deterministic
+mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes -b numpy -d cpu -n 16 1 -ns 512 -tms complete-mixing_+_advection-dispersion -td "${TMPDIR}" -ss deterministic
 # Move output from local SSD to global workspace
 echo "Move output to /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_sensitivity"
 mkdir -p /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_sensitivity

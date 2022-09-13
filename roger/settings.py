@@ -103,7 +103,7 @@ SETTINGS = {
         optional(str),
         "File name of restart output. May contain Python format syntax that is substituted with roger attributes.",
     ),
-    "restart_frequency": Setting(0, float, "Frequency (in hours) to write restart data"),
+    "restart_frequency": Setting(0, float, "Frequency (in seconds) to write restart data"),
 }
 
 

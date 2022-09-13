@@ -44,11 +44,11 @@ def main(tmp_dir):
             with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
                 f.attrs.update(
                     date_created=datetime.datetime.today().isoformat(),
-                    title=f'RoGeR {tm_structure} model Monte Carlo simulations at Rietholzbach lysimeter site',
+                    title=f'RoGeR {tm_structure} transport model Monte Carlo simulations at Rietholzbach lysimeter site',
                     institution='University of Freiburg, Chair of Hydrology',
                     references='',
                     comment='',
-                    model_structure=f'SVAT {tm_structure} model with free drainage',
+                    model_structure=f'SVAT {tm_structure}  transport model with free drainage',
                     roger_version=f'{roger.__version__}'
                 )
                 # collect dimensions
@@ -134,11 +134,11 @@ def main(tmp_dir):
                                 del var_obj, vals
 
     # load hydrologic simulation
-    states_hm_file = base_path / "states_hm.nc"
+    states_hm_file = base_path.parent.parent / "states_hm.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
     # load observations (measured data)
-    path_obs = base_path.parent / "observations" / "rietholzbach_lysimeter.nc"
+    path_obs = base_path.parent.parent.parent / "observations" / "rietholzbach_lysimeter.nc"
     ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
     days_obs = (ds_obs['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     date_obs = num2date(days_obs, units=f"days since {ds_obs['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -163,14 +163,14 @@ def main(tmp_dir):
 
     dict_params_eff = {}
     tm_structures = ['complete-mixing', 'piston',
-                     'advection-dispersion',
-                     'time-variant advection-dispersion']
+                      'advection-dispersion',
+                      'time-variant advection-dispersion']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
 
         # load transport simulation
         states_tm_file = base_path / f"states_{tms}_monte_carlo.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+        ds_sim_tm = xr.open_dataset(states_tm_file.as_posix(), engine="h5netcdf")
 
         # assign date
         days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
@@ -335,7 +335,7 @@ def main(tmp_dir):
                 xlabel = labs._LABS[df_params.columns[j]]
                 ax[-1, j].set_xlabel(xlabel)
 
-            ax[0, 0].set_ylabel(r'$KGE_{d_{18}O_{PERC}}$ [-]')
+            ax[0, 0].set_ylabel(r'$KGE_{\delta_{18}O_{PERC}}$ [-]')
 
             fig.subplots_adjust(wspace=0.2, hspace=0.3)
             file = base_path_figs / f"dotty_plots_{tm_structure}.png"
@@ -399,6 +399,7 @@ def main(tmp_dir):
             v[:, :, :] = ds_sim_tm["sas_params_q_ss"].isel(x=idx_best)
             v.attrs.update(long_name="SAS parameters of subsoil percolation",
                            units=" ")
+        ds_sim_tm = ds_sim_tm.close()
 
         # write states of best model run
         states_tm_mc_file = base_path / f"states_{tms}_monte_carlo.nc"

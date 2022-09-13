@@ -107,8 +107,8 @@ def main(nsamples, transport_model_structure):
 
             settings.nx, settings.ny, settings.nz = self._get_nx(self._base_path, 'states_hm_sensitivity.nc'), 1, 1
             settings.nitt = self._get_nitt(self._base_path, 'states_hm_sensitivity.nc')
-            settings.ages = settings.nitt
-            settings.nages = settings.nitt + 1
+            settings.ages = 365 * 3
+            settings.nages = settings.ages + 1
             settings.runlen = self._get_runlen(self._base_path, 'states_hm_sensitivity.nc')
 
             # lysimeter surface 3.14 square meter (2m diameter)
