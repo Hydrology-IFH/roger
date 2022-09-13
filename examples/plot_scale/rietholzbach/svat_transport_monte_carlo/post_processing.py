@@ -37,7 +37,8 @@ def main(tmp_dir):
                      'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2',
                      'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
                      'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
-                     'time-variant', 'time-variant1', 'time-variant2']
+                     'time-variant', 'time-variant1', 'time-variant2',
+                     'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
         path = str(base_path / f"SVATTRANSPORT_{tms}.*.nc")
@@ -170,7 +171,8 @@ def main(tmp_dir):
                      'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2',
                      'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
                      'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
-                     'time-variant', 'time-variant1', 'time-variant2']
+                     'time-variant', 'time-variant1', 'time-variant2',
+                     'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
 
@@ -239,6 +241,14 @@ def main(tmp_dir):
         elif tm_structure == "time-variant2":
             df_params_eff.loc[:, 'ab_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
             df_params_eff.loc[:, 'ab_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+        elif tm_structure == "preferential + advection-dispersion":
+            df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
+            df_params_eff.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
+            df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
+        elif tm_structure == "time-variant preferential + advection-dispersion":
+            df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+            df_params_eff.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+            df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
 
         # compare observations and simulations
         ncol = 0
@@ -334,7 +344,8 @@ def main(tmp_dir):
                             'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2',
                             'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
                             'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
-                            'time-variant', 'time-variant1', 'time-variant2']:
+                            'time-variant', 'time-variant1', 'time-variant2',
+                            'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion']:
             df_eff = df_params_eff.loc[:, ['KGE_C_q_ss']]
             if tm_structure == "preferential":
                 df_params = df_params_eff.loc[:, ['b_transp', 'b_q_rz', 'b_q_ss']]
@@ -426,7 +437,8 @@ def main(tmp_dir):
                                 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2',
                                 'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
                                 'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
-                                'time-variant']:
+                                'time-variant', 'time-variant1', 'time-variant2',
+                                'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion']:
                 try:
                     v = f.create_variable('sas_params_transp', ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
                 except ValueError:
