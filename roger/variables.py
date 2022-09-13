@@ -4155,6 +4155,15 @@ VARIABLES = {
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport & (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate),
     ),
+    "M_snow": Variable(
+        "solute mass of snow cover",
+        CATCH_GRID + TIMESTEPS,
+        "mg",
+        "solute mass of snow cover",
+        write_to_restart=False,
+        time_dependent=False,
+        active=lambda settings: settings.enable_offline_transport & (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate),
+    ),
     "M_IN": Variable(
         "solute mass of input",
         CATCH_GRID + TIME,

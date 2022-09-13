@@ -483,7 +483,7 @@ def main(transport_model_structure, sas_solver):
             if base_path:
                 diagnostics["constant"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["TT_transp", "TT_q_ss", "SA_s", "SA_rz", "SA_ss", "C_in"]
+            diagnostics["collect"].output_variables = ["TT_transp", "TT_q_ss", "SA_s", "SA_rz", "SA_ss", "C_snow", "C_in"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
