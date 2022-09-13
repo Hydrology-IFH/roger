@@ -1,7 +1,6 @@
 from pathlib import Path
 import os
 import glob
-import shutil
 import datetime
 import h5netcdf
 import matplotlib.pyplot as plt
@@ -13,6 +12,7 @@ import numpy as onp
 
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
+import roger.lookuptables as lut
 
 base_path = Path(__file__).parent
 # directory of results
@@ -26,10 +26,8 @@ if not os.path.exists(base_path_figs):
 
 # merge bromide model output into single file
 lys_experiments = ["lys3_bromide", "lys8_bromide", "lys9_bromide"]
-tm_structures = ['complete-mixing', 'piston',
-                 'preferential', 'complete-mixing + advection-dispersion',
-                 'time-variant preferential',
-                 'time-variant complete-mixing + advection-dispersion']
+tm_structures = ['complete-mixing', 'power',
+                 'time-variant power']
 for lys_experiment in lys_experiments:
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
@@ -39,10 +37,10 @@ for lys_experiment in lys_experiments:
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
-                title='RoGeR bromide transport model Monte Carlo simulations at Reckenholz lysimeter site',
+                title=f'RoGeR bromide {tm_structure} transport model Monte Carlo simulations at Reckenholz lysimeter site',
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
-                comment=f'SVAT {tm_structure} model with free drainage and crop phenology/crop rotation'
+                comment=f'SVAT bromide {tm_structure} transport model with free drainage and crop phenology/crop rotation'
             )
             # collect dimensions
             for dfs in diag_files:
@@ -149,29 +147,21 @@ for lys_experiment in lys_experiments:
         ny = ds_sim_tm.dims['y']  # number of columns
         df_params_eff = pd.DataFrame(index=range(nx * ny))
         # sampled model parameters
-        if tm_structure == "preferential":
-            df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
-            df_params_eff.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
-            df_params_eff.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
-        elif tm_structure == "advection-dispersion":
-            df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
-            df_params_eff.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
-            df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
-        elif tm_structure == "complete-mixing advection-dispersion":
-            df_params_eff.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
-            df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
-        elif tm_structure == "time-variant advection-dispersion":
-            df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
-            df_params_eff.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
-            df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
-        elif tm_structure == "time-variant preferential":
-            df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
-            df_params_eff.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
-            df_params_eff.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
-        elif tm_structure == "time-variant":
-            df_params_eff.loc[:, 'ab_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
-            df_params_eff.loc[:, 'ab_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
-            df_params_eff.loc[:, 'ab_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+        if tm_structure == "power":
+            df_params_eff.loc[:, 'k_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
+            df_params_eff.loc[:, 'k_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
+            df_params_eff.loc[:, 'k_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
+        elif tm_structure == "time-variant power":
+            df_params_eff.loc[:, 'k1_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten()
+            df_params_eff.loc[:, 'k1_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten()
+            df_params_eff.loc[:, 'k1_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten()
+            df_params_eff.loc[:, 'k2_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+            df_params_eff.loc[:, 'k2_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+            df_params_eff.loc[:, 'k2_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+        crop_types_sim = onp.unique(ds_sim_hm['lu_id'].values.flatten()).tolist()
+        for crop_type_sim in crop_types_sim:
+            row = onp.where(lut.ARR_CP[:, 0] == crop_type_sim)[0]
+            df_params_eff.loc[:, f'crop_scale_{crop_type_sim}'] = ds_sim_tm["lut_crop_scale"].isel(y=0, n_crop_types=row).values
 
         # compare observations and simulations
         ncol = 0
@@ -182,7 +172,7 @@ for lys_experiment in lys_experiments:
         df_idx_bs.loc[:, 'sol'] = ds_obs['BR_PERC'].isel(x=0, y=0).values
         idx_bs = df_idx_bs['sol'].dropna().index
         for nrow in range(nx):
-            # calculate simulated bromide composite sample
+            # calculate simulated bromide bulk sample
             sample_no = pd.DataFrame(index=idx_bs, columns=['sample_no'])
             sample_no['sample_no'] = range(len(sample_no.index))
             df_perc_Br_sim = pd.DataFrame(index=idx, columns=['perc', 'Br'])
@@ -233,22 +223,12 @@ for lys_experiment in lys_experiments:
         dict_params_eff[lys_experiment][tm_structure]['params_eff'] = df_params_eff
 
         # dotty plots
-        if tm_structure in ['preferential', 'advection-dispersion',
-                            'time-variant preferential',
-                            'time-variant advection-dispersion']:
+        if tm_structure in ['power', 'time-variant power']:
             df_eff = df_params_eff.loc[:, ['KGE_Br_perc_bs']]
-            if tm_structure == "preferential":
-                df_params = df_params_eff.loc[:, ['b_transp', 'b_q_rz', 'b_q_ss', 'alpha_transp', 'alpha_q']]
-            elif tm_structure == "advection-dispersion":
-                df_params = df_params_eff.loc[:, ['b_transp', 'a_q_rz', 'a_q_ss', 'alpha_transp', 'alpha_q']]
-            elif tm_structure == "complete-mixing advection-dispersion":
-                df_params = df_params_eff.loc[:, ['a_q_rz', 'a_q_ss', 'alpha_transp', 'alpha_q']]
-            elif tm_structure == "time-variant advection-dispersion":
-                df_params = df_params_eff.loc[:, ['b_transp', 'a_q_rz', 'a_q_ss', 'alpha_transp', 'alpha_q']]
-            elif tm_structure == "time-variant preferential":
-                df_params = df_params_eff.loc[:, ['b_transp', 'b_q_rz', 'b_q_ss', 'alpha_transp', 'alpha_q']]
-            elif tm_structure == "time-variant":
-                df_params = df_params_eff.loc[:, ['ab_transp', 'ab_q_rz', 'ab_q_ss', 'alpha_transp', 'alpha_q']]
+            if tm_structure == "power":
+                df_params = df_params_eff.loc[:, ['k_transp', 'k_q_rz', 'k_q_ss', 'alpha_transp', 'alpha_q']]
+            elif tm_structure == "time-variant power":
+                df_params = df_params_eff.loc[:, ['k1_transp', 'k2_transp', 'k1_q_rz', 'k2_q_rz', 'k1_q_ss', 'k2_q_ss', 'alpha_transp', 'alpha_q']]
             nrow = len(df_eff.columns)
             ncol = len(df_params.columns)
             fig, ax1 = plt.subplots(nrow, ncol, sharey=True, figsize=(14, 7))
@@ -281,10 +261,10 @@ for lys_experiment in lys_experiments:
         with h5netcdf.File(params_tm_file, 'a', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
-                title='RoGeR bromide transport model parameters of best monte carlo simulation at Reckenholz Lysimeter site',
+                title=f'RoGeR bromide {tm_structure} transport model parameters of best monte carlo simulation at Reckenholz Lysimeter site',
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
-                comment='SVAT transport model with free drainage and crop phenology/crop rotation'
+                comment=f'SVAT bromide {tm_structure} transport model with free drainage and crop phenology/crop rotation'
             )
             dict_dim = {'x': nx, 'y': 1, 'n_sas_params': 8}
             if not f.dimensions:
@@ -302,10 +282,8 @@ for lys_experiment in lys_experiments:
                 v.attrs['units'] = ' '
                 v[:] = onp.arange(dict_dim["n_sas_params"])
 
-            if tm_structure in ['preferential', 'advection-dispersion',
-                                'time-variant preferential',
-                                'time-variant advection-dispersion',
-                                'time-variant']:
+            if tm_structure in ['power',
+                                'time-variant power']:
                 try:
                     v = f.create_variable('sas_params_transp', ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
                 except ValueError:
@@ -345,43 +323,18 @@ for lys_experiment in lys_experiments:
         # write bulk sample to output file
         ds_sim_tm = ds_sim_tm.close()
         states_tm_file = base_path / f"states_{lys_experiment}_{tms}_monte_carlo_bromide.nc"
-        with h5netcdf.File(states_tm_file, 'r+', decode_vlen_strings=False) as f:
+        with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             try:
                 v = f.create_variable('Br_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
             except ValueError:
                 v = f.get('Br_perc_bs')
             v[:, :, :] = Br_perc_bs
-            v.attrs.update(long_name="composite sample of bromide concentration in percolation",
+            v.attrs.update(long_name="bulk sample of bromide concentration in percolation",
                            units="mg/l")
             try:
                 v = f.create_variable('Br_perc_mass_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
             except ValueError:
                 v = f.get('Br_perc_mass_bs')
             v[:, :, :] = Br_perc_mass_bs
-            v.attrs.update(long_name="composite sample of bromide mass in percolation",
+            v.attrs.update(long_name="bulk sample of bromide mass in percolation",
                            units="mg")
-
-# # compare best model runs
-# fig, ax = plt.subplots(2, 3, sharey=True, figsize=(14, 7))
-# for i, tm_structure in enumerate(tm_structures):
-#     # load transport simulation
-#     states_tm_file = base_path / "states_tm_monte_carlo_bromide.nc"
-#     ds_sim_tm = xr.open_dataset(states_tm_file, group=tm_structure, engine="h5netcdf")
-#     # join observations on simulations
-#     obs_vals = ds_obs['BR_PERC'].isel(x=0, y=0).values
-#     idx_best = dict_params_eff[tm_structure]['idx_best']
-#     sim_vals = ds_sim_tm['Br_perc_bs'].isel(x=idx_best, y=0).values
-#     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-#     df_obs.loc[:, 'obs'] = obs_vals
-#     df_sim = pd.DataFrame(index=date_sim_tm, columns=['sim'])
-#     df_sim.loc[:, 'sim'] = ds_sim_tm['C_q_ss'].isel(x=idx_best, y=0).values
-#     df_sim = df_sim.iloc[1:, :]
-#     df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
-#     df_eval = df_eval.dropna()
-#     ax.flatten()[i].plot(df_sim.index, df_sim.iloc[:, 0], color='red')
-#     ax.flatten()[i].scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=2)
-#     ax.flatten()[i].scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=2)
-#
-# ax[0, 0].set_ylabel(r'$Br_{PERC}$ [mg/l]')
-# ax[1, 0].set_ylabel(r'$Br_{PERC}$ [mg/l]')
-# ax[1, 1].set_xlabel('Time')

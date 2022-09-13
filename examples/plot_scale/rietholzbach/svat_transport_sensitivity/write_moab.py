@@ -10,23 +10,16 @@ def main(job_type, sas_solver):
     base_path = Path(__file__).parent
     base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_sensitivity'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
-    transport_models_abrev = {'complete-mixing': 'cm',
-                              'piston': 'pi',
-                              'preferential': 'pf',
-                              'complete-mixing + advection-dispersion': 'cmad',
-                              'complete-mixing + time-variant advection-dispersion': 'cmadt',
+    transport_models_abrev = {'preferential': 'pf',
                               'advection-dispersion': 'ad',
                               'time-variant preferential': 'pft',
                               'time-variant advection-dispersion': 'adt',
-                              'time-variant': 'tv'}
+                              'time-variant': 'tv',
+                              'power': 'pow',
+                              'time-variant power': 'powt'}
 
     tracer = 'oxygen18'
-    transport_models = ['preferential', 'advection-dispersion',
-                        'complete-mixing + advection-dispersion',
-                        'complete-mixing + time-variant advection-dispersion',
-                        'time-variant preferential',
-                        'time-variant advection-dispersion',
-                        'time-variant']
+    transport_models = ['power', 'time-variant power']
     for tm in transport_models:
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]

@@ -92,3 +92,53 @@ time-variant:
   -
     - 1
     - 50
+
+power:
+  num_vars: 3
+
+  names:
+  - 'k_transp'
+  - 'k_q_rz'
+  - 'k_q_ss'
+
+  bounds:
+  -
+    - 0.1
+    - 3
+  -
+    - 0.1
+    - 3
+  -
+    - 0.1
+    - 3
+
+time-variant power:
+  num_vars: 6
+
+  names:
+  - 'k1_transp'
+  - 'k2_transp'
+  - 'k1_q_rz'
+  - 'k2_q_rz'
+  - 'k1_q_ss'
+  - 'k2_q_ss'
+
+  bounds:
+  -
+    - 0.1
+    - 2
+  -
+    - 0.1
+    - 3
+  -
+    - 0.1
+    - 2
+  -
+    - 0.1
+    - 3
+  -
+    - 0.1
+    - 2
+  -
+    - 0.1
+    - 3

@@ -22,11 +22,11 @@ import roger.tools.labels as labs
 _LABS_HYDRUS = {
                 'n': r'$n$ [-]',
                 'alpha': r'$alfa$ [-]',
-                'theta_m': r'$\theta_{s}^{m}$ [-]',
-                'theta_im': r'$\theta_{s}^{im}$ [-]',
+                'theta_sat_m': r'$\theta_{s}^{m}$ [-]',
+                'theta_sat_im': r'$\theta_{s}^{im}$ [-]',
                 'ks': r'$k_{s}$ [-]',
-                'alpha_w': r'$\omega$ [-]',
-                'lambda': r'$D_l$ [-]',
+                'omega': r'$\omega$ [-]',
+                'D_l': r'$D_l$ [-]',
                 }
 
 
@@ -71,156 +71,156 @@ def main(tmp_dir):
     df_thetap.loc[cond2, 'sc'] = 2  # normal
     df_thetap.loc[cond3, 'sc'] = 3  # wet
 
-    # # measured oxygen-18 in precipitation and percolation
-    # d18O_prec_mean = onp.round(onp.nanmean(df_obs.loc[:, 'd18O_prec'].values), 2)
-    # d18O_perc_mean = onp.round(onp.nanmean(df_obs.loc[:, 'd18O_perc'].values), 2)
-    # fig, axs = plt.subplots(2, 1, figsize=(10, 6))
-    # axs[0].plot(df_obs.index,
-    #             df_obs.loc[:, 'd18O_prec'].fillna(method='bfill'),
-    #             '-', color='blue')
-    # axs[0].plot(df_obs.index,
-    #             df_obs.loc[:, 'd18O_prec'],
-    #             '.', color='blue')
-    # axs[0].set_ylabel(r'$\delta^{18}$O [‰]')
-    # axs[0].set_ylim([-20, 0])
-    # axs[0].set_xlim(df_obs.index[0], df_obs.index[-1])
-    # axs[1].plot(df_obs.index, df_obs.loc[:, 'd18O_perc'].fillna(method='bfill'),
-    #             '-', color='grey')
-    # axs[1].plot(df_obs.index, df_obs.loc[:, 'd18O_perc'],
-    #             '.', color='grey')
-    # axs[1].set_ylabel(r'$\delta^{18}$O [‰]')
-    # axs[1].set_xlabel('Time [year]')
-    # axs[1].set_ylim([-20, 0])
-    # axs[1].set_xlim(df_obs.index[0], df_obs.index[-1])
-    # fig.tight_layout()
-    # fig.text(0.115, 0.92, "(a)", ha="center", va="center")
-    # fig.text(0.89, 0.615, r"$\overline{\delta^{18}O}_{prec}$: %s" % (d18O_prec_mean), ha="center", va="center")
-    # fig.text(0.89, 0.155, r"$\overline{\delta^{18}O}_{perc}$: %s" % (d18O_perc_mean), ha="center", va="center")
-    # fig.text(0.115, 0.46, "(b)", ha="center", va="center")
-    # file = base_path_figs / 'observed_d18O_prec_perc.pdf'
-    # fig.savefig(file, dpi=250)
-    # plt.close(fig=fig)
-    #
-    # # dotty plots
-    # file = base_path / "svat_monte_carlo" / "results" / "params_eff.txt"
-    # df_params_eff = pd.read_csv(file, sep="\t")
-    # idx_best = df_params_eff['E_multi'].idxmax()
-    # df_eff_best_sc = pd.DataFrame(index=['', 'dry', 'normal', 'wet'], columns=['KGE_aet', 'KGE_q_ss', 'r_dS', 'E_multi'])
-    # for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
-    #     df_eff = df_params_eff.loc[:, [f'KGE_aet{sc1}', f'r_dS{sc1}', f'KGE_q_ss{sc1}', f'E_multi{sc1}']]
-    #     df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
-    #     nrow = len(df_eff.columns)
-    #     ncol = len(df_params.columns)
-    #     fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(14, 7))
-    #     for i in range(nrow):
-    #         for j in range(ncol):
-    #             y = df_eff.iloc[:, i]
-    #             x = df_params.iloc[:, j]
-    #             ax[i, j].scatter(x, y, s=4, c='grey', alpha=0.5)
-    #             ax[i, j].set_xlabel('')
-    #             ax[i, j].set_ylabel('')
-    #             # best parameter set for individual evaluation metric at specific storage conditions
-    #             idx_best_sc = df_params_eff[df_eff.columns[i]].idxmax()
-    #             y_best_sc = df_eff.iloc[idx_best_sc, i]
-    #             x_best_sc = df_params.iloc[idx_best_sc, j]
-    #             ax[i, j].scatter(x_best_sc, y_best_sc, s=12, c='blue', alpha=0.8)
-    #             # best parameter set for multi-objective criteria
-    #             y_best = df_eff.iloc[idx_best, i]
-    #             x_best = df_params.iloc[idx_best, j]
-    #             ax[i, j].scatter(x_best, y_best, s=12, c='red', alpha=0.8)
-    #
-    #         df_eff_best_sc.iloc[sc, i] = df_params_eff.loc[idx_best, df_eff.columns[i]]
-    #
-    #     for j in range(ncol):
-    #         xlabel = labs._LABS[df_params.columns[j]]
-    #         ax[-1, j].set_xlabel(xlabel)
-    #
-    #     ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
-    #     ax[1, 0].set_ylabel('$KGE_{PERC}$\n [-]')
-    #     ax[2, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
-    #     ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
-    #
-    #     fig.subplots_adjust(wspace=0.2, hspace=0.3)
-    #     file = base_path_figs / f"dotty_plots_{sc1}.png"
-    #     fig.savefig(file, dpi=250)
-    #
-    # # write evaluation metrics for different storage condtions to .txt
-    # file = base_path_figs / "eff_best_sc.txt"
-    # df_eff_best_sc.to_csv(file, header=True, index=True, sep="\t")
-    #
-    # # load best monte carlo run
-    # states_hm_file = base_path / "svat_monte_carlo" / "states_hm.nc"
-    # ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
-    # # assign date
-    # days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    # date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    # ds_sim_hm = ds_sim_hm.assign_coords(date=("Time", date_sim_hm))
-    #
-    # # compare simulation and observation
-    # vars_obs = ['AET', 'PERC', 'dWEIGHT']
-    # vars_sim = ['aet', 'q_ss', 'dS']
-    # dict_obs_sim = {}
-    # for var_obs, var_sim in zip(vars_obs, vars_sim):
-    #     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-    #     df_obs.loc[:, 'obs'] = obs_vals
-    #     sim_vals = ds_sim_hm[var_sim].isel(x=0, y=0).values
-    #     # join observations on simulations
-    #     df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
-    #     df_eval = df_eval.iloc[:, :]
-    #     dict_obs_sim[var_sim] = df_eval
-    #     # plot observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = '%s.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     # plot cumulated observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-    #     file_str = '%s_cum.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-    #     file_str = '%s_cum_year_facet.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
-    #
-    # vars_obs = ['PREC']
-    # vars_sim = ['prec']
-    # dict_obs = {}
-    # for var_obs, var_sim in zip(vars_obs, vars_sim):
-    #     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-    #     df_obs.loc[:, 'obs'] = obs_vals
-    #     dict_obs[var_sim] = df_obs
-    #     # plot observed time series
-    #     fig = eval_utils.plot_sim(df_obs, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = '%s.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     # plot cumulated observed time series
-    #     fig = eval_utils.plot_sim_cum(df_obs, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-    #     file_str = '%s_cum.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     fig = eval_utils.plot_sim_cum_year_facet(df_obs, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-    #     file_str = '%s_cum_year_facet.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
-    #
-    # vars_obs = ['TA']
-    # vars_sim = ['ta']
-    # for var_obs, var_sim in zip(vars_obs, vars_sim):
-    #     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-    #     df_obs.loc[:, 'obs'] = obs_vals
-    #     # plot observed time series
-    #     fig = eval_utils.plot_sim(df_obs, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = '%s.pdf' % (var_obs)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
+    # measured oxygen-18 in precipitation and percolation
+    d18O_prec_mean = onp.round(onp.nanmean(df_obs.loc[:, 'd18O_prec'].values), 2)
+    d18O_perc_mean = onp.round(onp.nanmean(df_obs.loc[:, 'd18O_perc'].values), 2)
+    fig, axs = plt.subplots(2, 1, figsize=(10, 6))
+    axs[0].plot(df_obs.index,
+                df_obs.loc[:, 'd18O_prec'].fillna(method='bfill'),
+                '-', color='blue')
+    axs[0].plot(df_obs.index,
+                df_obs.loc[:, 'd18O_prec'],
+                '.', color='blue')
+    axs[0].set_ylabel(r'$\delta^{18}$O [‰]')
+    axs[0].set_ylim([-20, 0])
+    axs[0].set_xlim(df_obs.index[0], df_obs.index[-1])
+    axs[1].plot(df_obs.index, df_obs.loc[:, 'd18O_perc'].fillna(method='bfill'),
+                '-', color='grey')
+    axs[1].plot(df_obs.index, df_obs.loc[:, 'd18O_perc'],
+                '.', color='grey')
+    axs[1].set_ylabel(r'$\delta^{18}$O [‰]')
+    axs[1].set_xlabel('Time [year]')
+    axs[1].set_ylim([-20, 0])
+    axs[1].set_xlim(df_obs.index[0], df_obs.index[-1])
+    fig.tight_layout()
+    fig.text(0.115, 0.92, "(a)", ha="center", va="center")
+    fig.text(0.89, 0.615, r"$\overline{\delta^{18}O}_{prec}$: %s" % (d18O_prec_mean), ha="center", va="center")
+    fig.text(0.89, 0.155, r"$\overline{\delta^{18}O}_{perc}$: %s" % (d18O_perc_mean), ha="center", va="center")
+    fig.text(0.115, 0.46, "(b)", ha="center", va="center")
+    file = base_path_figs / 'observed_d18O_prec_perc.pdf'
+    fig.savefig(file, dpi=250)
+    plt.close(fig=fig)
+
+    # dotty plots
+    file = base_path / "svat_monte_carlo" / "results" / "params_eff.txt"
+    df_params_eff = pd.read_csv(file, sep="\t")
+    idx_best = df_params_eff['E_multi'].idxmax()
+    df_eff_best_sc = pd.DataFrame(index=['', 'dry', 'normal', 'wet'], columns=['KGE_aet', 'KGE_q_ss', 'r_dS', 'E_multi'])
+    for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
+        df_eff = df_params_eff.loc[:, [f'KGE_aet{sc1}', f'r_dS{sc1}', f'KGE_q_ss{sc1}', f'E_multi{sc1}']]
+        df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+        nrow = len(df_eff.columns)
+        ncol = len(df_params.columns)
+        fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(14, 7))
+        for i in range(nrow):
+            for j in range(ncol):
+                y = df_eff.iloc[:, i]
+                x = df_params.iloc[:, j]
+                ax[i, j].scatter(x, y, s=4, c='grey', alpha=0.5)
+                ax[i, j].set_xlabel('')
+                ax[i, j].set_ylabel('')
+                # best parameter set for individual evaluation metric at specific storage conditions
+                idx_best_sc = df_params_eff[df_eff.columns[i]].idxmax()
+                y_best_sc = df_eff.iloc[idx_best_sc, i]
+                x_best_sc = df_params.iloc[idx_best_sc, j]
+                ax[i, j].scatter(x_best_sc, y_best_sc, s=12, c='blue', alpha=0.8)
+                # best parameter set for multi-objective criteria
+                y_best = df_eff.iloc[idx_best, i]
+                x_best = df_params.iloc[idx_best, j]
+                ax[i, j].scatter(x_best, y_best, s=12, c='red', alpha=0.8)
+
+            df_eff_best_sc.iloc[sc, i] = df_params_eff.loc[idx_best, df_eff.columns[i]]
+
+        for j in range(ncol):
+            xlabel = labs._LABS[df_params.columns[j]]
+            ax[-1, j].set_xlabel(xlabel)
+
+        ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
+        ax[1, 0].set_ylabel('$KGE_{PERC}$\n [-]')
+        ax[2, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
+        ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
+
+        fig.subplots_adjust(wspace=0.2, hspace=0.3)
+        file = base_path_figs / f"dotty_plots_{sc1}.png"
+        fig.savefig(file, dpi=250)
+
+    # write evaluation metrics for different storage condtions to .txt
+    file = base_path_figs / "eff_best_sc.txt"
+    df_eff_best_sc.to_csv(file, header=True, index=True, sep="\t")
+
+    # load best monte carlo run
+    states_hm_file = base_path / "svat_monte_carlo" / "states_hm.nc"
+    ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
+    # assign date
+    days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    ds_sim_hm = ds_sim_hm.assign_coords(date=("Time", date_sim_hm))
+
+    # compare simulation and observation
+    vars_obs = ['AET', 'PERC', 'dWEIGHT']
+    vars_sim = ['aet', 'q_ss', 'dS']
+    dict_obs_sim = {}
+    for var_obs, var_sim in zip(vars_obs, vars_sim):
+        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals
+        sim_vals = ds_sim_hm[var_sim].isel(x=0, y=0).values
+        # join observations on simulations
+        df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
+        df_eval = df_eval.iloc[:, :]
+        dict_obs_sim[var_sim] = df_eval
+        # plot observed and simulated time series
+        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+        file_str = '%s.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed and simulated time series
+        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = '%s_cum.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = '%s_cum_year_facet.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
+
+    vars_obs = ['PREC']
+    vars_sim = ['prec']
+    dict_obs = {}
+    for var_obs, var_sim in zip(vars_obs, vars_sim):
+        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals
+        dict_obs[var_sim] = df_obs
+        # plot observed time series
+        fig = eval_utils.plot_sim(df_obs, labs._Y_LABS_DAILY[var_sim])
+        file_str = '%s.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed time series
+        fig = eval_utils.plot_sim_cum(df_obs, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = '%s_cum.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_sim_cum_year_facet(df_obs, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = '%s_cum_year_facet.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
+
+    vars_obs = ['TA']
+    vars_sim = ['ta']
+    for var_obs, var_sim in zip(vars_obs, vars_sim):
+        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals
+        # plot observed time series
+        fig = eval_utils.plot_sim(df_obs, labs._Y_LABS_DAILY[var_sim])
+        file_str = '%s.pdf' % (var_obs)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
 
     # load HYDRUS-1D benchmark
     states_hydrus_file = base_path / "hydrus_benchmark" / "states_hydrus.nc"
@@ -229,80 +229,80 @@ def main(tmp_dir):
     date_hydrus = num2date(days_hydrus, units=f"days since {ds_hydrus['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     ds_hydrus = ds_hydrus.assign_coords(date=("Time", date_hydrus))
 
-    # # compare simulation and observation
-    # vars_obs = ['AET', 'PERC', 'dWEIGHT']
-    # vars_sim = ['aet', 'perc', 'dS']
-    # dict_obs_sim_hydrus = {}
-    # for var_obs, var_sim in zip(vars_obs, vars_sim):
-    #     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-    #     df_obs.loc[:, 'obs'] = obs_vals
-    #     sim_vals = ds_hydrus[var_sim].values
-    #     # join observations on simulations
-    #     df_eval = eval_utils.join_obs_on_sim(date_hydrus, sim_vals, df_obs)
-    #     df_eval = df_eval.iloc[:, :]
-    #     dict_obs_sim_hydrus[var_sim] = df_eval
-    #     # plot observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = 'hydrus_%s.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     # plot cumulated observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-    #     file_str = 'hydrus_%s_cum.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-    #     file_str = 'hydrus_%s_cum_year_facet.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
-    #
-    # # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
-    # fig, axes = plt.subplots(3, 1, sharex=True, figsize=(14, 7))
-    # axes[0].plot(dict_obs['prec'].index, dict_obs['prec'].cumsum(), lw=1.5, color='blue', ls='-', alpha=1)
-    # axes[0].set_ylabel('PREC\n[mm]')
-    # axes[0].set_xlim((dict_obs['prec'].index[0], dict_obs['prec'].index[-1]))
-    # axes[0].set_ylim(0,)
-    # axes[0].invert_yaxis()
-    # ax2 = axes[0].twinx()
-    # ax2.plot(dict_obs_sim['aet'].index, dict_obs_sim['aet']['obs'].cumsum(),
-    #           lw=1.5, color='blue', ls='-', alpha=0.5)
-    # ax2.plot(dict_obs_sim['aet'].index, dict_obs_sim['aet']['sim'].cumsum(),
-    #           lw=1, color='red', ls='-.')
-    # ax2.plot(dict_obs_sim_hydrus['aet'].index, dict_obs_sim_hydrus['aet']['sim'].cumsum(),
-    #           lw=1, color='gray', ls='-.')
-    # ax2.set_ylim(0,)
-    # ax2.set_ylabel('ET\n[mm]')
-    # axes[1].plot(dict_obs_sim['dS'].loc['2001':, :].index, dict_obs_sim['dS'].loc['2001':, 'obs'].cumsum(),
-    #               lw=1.5, color='blue', ls='-', alpha=0.5)
-    # axes[1].plot(dict_obs_sim['dS'].loc['2001':, :].index, dict_obs_sim['dS'].loc['2001':, 'sim'].cumsum(),
-    #               lw=1, color='red', ls='-.')
-    # axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2001':, :].index, dict_obs_sim_hydrus['dS'].loc['2001':, 'sim'].cumsum(),
-    #               lw=1, color='gray', ls='-.')
-    # axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
-    # axes[1].set_xlim((dict_obs_sim['dS'].index[0], dict_obs_sim['dS'].index[-1]))
-    # axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['obs'].cumsum(),
-    #               lw=1.5, color='blue', ls='-', alpha=0.5)
-    # axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['sim'].cumsum(),
-    #               lw=1, color='red', ls='-.')
-    # axes[2].plot(dict_obs_sim_hydrus['perc'].index, dict_obs_sim_hydrus['perc']['sim'].cumsum(),
-    #               lw=1, color='gray', ls='-.')
-    # axes[2].set_ylim(0,)
-    # axes[2].invert_yaxis()
-    # axes[2].set_xlim((dict_obs_sim['q_ss'].index[0], dict_obs_sim['q_ss'].index[-1]))
-    # axes[2].set_ylabel('PERC\n[mm]')
-    # axes[2].set_xlabel(r'Time [year]')
-    # axes[0].text(0.015, 0.9, '(a)', size=15, horizontalalignment='center',
-    #              verticalalignment='center', transform=axes[0].transAxes)
-    # axes[1].text(0.015, 0.9, '(b)', size=15, horizontalalignment='center',
-    #              verticalalignment='center', transform=axes[1].transAxes)
-    # axes[2].text(0.015, 0.9, '(c)', size=15, horizontalalignment='center',
-    #              verticalalignment='center', transform=axes[2].transAxes)
-    # fig.tight_layout()
-    # file = 'prec_et_dS_perc_obs_sim_cumulated.png'
-    # path = base_path_figs / file
-    # fig.savefig(path, dpi=250)
+    # compare simulation and observation
+    vars_obs = ['AET', 'PERC', 'dWEIGHT']
+    vars_sim = ['aet', 'perc', 'dS']
+    dict_obs_sim_hydrus = {}
+    for var_obs, var_sim in zip(vars_obs, vars_sim):
+        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals
+        sim_vals = ds_hydrus[var_sim].values
+        # join observations on simulations
+        df_eval = eval_utils.join_obs_on_sim(date_hydrus, sim_vals, df_obs)
+        df_eval = df_eval.iloc[:, :]
+        dict_obs_sim_hydrus[var_sim] = df_eval
+        # plot observed and simulated time series
+        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+        file_str = 'hydrus_%s.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed and simulated time series
+        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = 'hydrus_%s_cum.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = 'hydrus_%s_cum_year_facet.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
+
+    # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
+    fig, axes = plt.subplots(3, 1, sharex=True, figsize=(14, 7))
+    axes[0].plot(dict_obs['prec'].index, dict_obs['prec'].cumsum(), lw=1.5, color='blue', ls='-', alpha=1)
+    axes[0].set_ylabel('PREC\n[mm]')
+    axes[0].set_xlim((dict_obs['prec'].index[0], dict_obs['prec'].index[-1]))
+    axes[0].set_ylim(0,)
+    axes[0].invert_yaxis()
+    ax2 = axes[0].twinx()
+    ax2.plot(dict_obs_sim['aet'].index, dict_obs_sim['aet']['obs'].cumsum(),
+              lw=1.5, color='blue', ls='-', alpha=0.5)
+    ax2.plot(dict_obs_sim['aet'].index, dict_obs_sim['aet']['sim'].cumsum(),
+              lw=1, color='red', ls='-.')
+    ax2.plot(dict_obs_sim_hydrus['aet'].index, dict_obs_sim_hydrus['aet']['sim'].cumsum(),
+              lw=1, color='gray', ls='-.')
+    ax2.set_ylim(0,)
+    ax2.set_ylabel('ET\n[mm]')
+    axes[1].plot(dict_obs_sim['dS'].loc['2001':, :].index, dict_obs_sim['dS'].loc['2001':, 'obs'].cumsum(),
+                  lw=1.5, color='blue', ls='-', alpha=0.5)
+    axes[1].plot(dict_obs_sim['dS'].loc['2001':, :].index, dict_obs_sim['dS'].loc['2001':, 'sim'].cumsum(),
+                  lw=1, color='red', ls='-.')
+    axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2001':, :].index, dict_obs_sim_hydrus['dS'].loc['2001':, 'sim'].cumsum(),
+                  lw=1, color='gray', ls='-.')
+    axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
+    axes[1].set_xlim((dict_obs_sim['dS'].index[0], dict_obs_sim['dS'].index[-1]))
+    axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['obs'].cumsum(),
+                  lw=1.5, color='blue', ls='-', alpha=0.5)
+    axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['sim'].cumsum(),
+                  lw=1, color='red', ls='-.')
+    axes[2].plot(dict_obs_sim_hydrus['perc'].index, dict_obs_sim_hydrus['perc']['sim'].cumsum(),
+                  lw=1, color='gray', ls='-.')
+    axes[2].set_ylim(0,)
+    axes[2].invert_yaxis()
+    axes[2].set_xlim((dict_obs_sim['q_ss'].index[0], dict_obs_sim['q_ss'].index[-1]))
+    axes[2].set_ylabel('PERC\n[mm]')
+    axes[2].set_xlabel(r'Time [year]')
+    axes[0].text(0.015, 0.9, '(a)', size=15, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0].transAxes)
+    axes[1].text(0.015, 0.9, '(b)', size=15, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1].transAxes)
+    axes[2].text(0.015, 0.9, '(c)', size=15, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2].transAxes)
+    fig.tight_layout()
+    file = 'prec_et_dS_perc_obs_sim_cumulated.png'
+    path = base_path_figs / file
+    fig.savefig(path, dpi=250)
 
     # load metrics of transport simulations
     dict_params_eff_tm_mc = {}
@@ -482,134 +482,134 @@ def main(tmp_dir):
  #        fig.subplots_adjust(wspace=0.2, hspace=0.3)
  #        file = base_path_figs / f"dotty_plots_{tms}.png"
  #        fig.savefig(file, dpi=250)
- #
- #    # dotty plots of HYDRUS-1D monte carlo simulations
- #    file = base_path / "hydrus_benchmark" / "mc_results.txt"
- #    df_params_eff_hydrus = pd.read_csv(file, sep="\t")
- #    df_params_eff_hydrus.loc[:, 'ks'] = df_params_eff_hydrus.loc[:, 'ks'] * (10/24)
- #    df_eff_hydrus = df_params_eff_hydrus.loc[:, ['kge_aet', 'kge_theta', 'kge_perc', 'kge_perc_18O', 'kge_multi']]
- #    df_params_hydrus = df_params_eff_hydrus.loc[:, ['theta_m', 'alpha', 'n', 'ks', 'theta_im', 'alpha_w', 'lambda']]
- #    nrow = len(df_eff_hydrus.columns)
- #    ncol = len(df_params_hydrus.columns)
- #    idx_best = df_eff_hydrus['kge_multi'].idxmax()
- #    fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(14, 7))
- #    for i in range(nrow):
- #        for j in range(ncol):
- #            y = df_eff_hydrus.iloc[:, i]
- #            x = df_params_hydrus.iloc[:, j]
- #            ax[i, j].scatter(x, y, s=4, c='grey', alpha=0.5)
- #            ax[i, j].set_xlabel('')
- #            ax[i, j].set_ylabel('')
- #            ax[i, j].set_ylim(-1, 1)
- #            # best parameter set for multi-objective criteria
- #            y_best = df_eff_hydrus.iloc[idx_best, i]
- #            x_best = df_params_hydrus.iloc[idx_best, j]
- #            ax[i, j].scatter(x_best, y_best, s=12, c='red', alpha=0.8)
- #
- #    for j in range(ncol):
- #        xlabel = _LABS_HYDRUS[df_params_hydrus.columns[j]]
- #        ax[-1, j].set_xlabel(xlabel)
- #
- #    ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
- #    ax[1, 0].set_ylabel('$KGE_{PERC}$\n [-]')
- #    ylab_kge_theta = r'''$KGE_{\theta}$
- # [-]'''
- #    ax[2, 0].set_ylabel(ylab_kge_theta)
- #    ax[3, 0].set_ylabel('$KGE_{\delta^{18}O_{perc}}$\n [-]')
- #    ax[4, 0].set_ylabel('$KGE_{multi}$\n [-]')
- #
- #    fig.subplots_adjust(wspace=0.2, hspace=0.3)
- #    file = base_path_figs / "dotty_plots_hydrus.png"
- #    fig.savefig(file, dpi=250)
- #
- #    # plot isotope ratios of precipitation and soil
- #    cmap = copy.copy(plt.cm.get_cmap('YlGnBu_r'))
- #    norm = mpl.colors.Normalize(vmin=-20, vmax=5)
- #
- #    fig, axes = plt.subplots(2, 1, sharex=False, figsize=(14, 7))
- #    axes[0].bar(date_hydrus, ds_hydrus['prec'].values, width=-1, color=cmap(norm(ds_hydrus['d18O_prec'].values)), align='edge', edgecolor=cmap(norm(ds_hydrus['d18O_prec'].values)))
- #    axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
- #    axes[0].set_xlim(date_hydrus[0], date_hydrus[-1])
- #    sns.heatmap(ds_hydrus['d18O_soil'].values, xticklabels=366, yticklabels=int(50/2), cmap='YlGnBu_r',
- #                vmax=5, vmin=-20, cbar=False, ax=axes[1])
- #    axes[1].set_yticks([0, 25, 50, 75, 100])
- #    axes[1].set_yticklabels([0, 0.5, 1, 1.5, 2])
- #    axes[1].set_xticklabels(list(range(1997, 2008)))
- #    axes[1].set_ylabel('Soil depth\n[m]')
- #    axes[1].set_xlabel('Time [years]')
- #
- #    axl = fig.add_axes([0.92, 0.3, 0.02, 0.3])
- #    cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
- #                                    orientation='vertical',
- #                                    ticks=[0, -5, -10, -15])
- #    cb1.set_label(r'$\delta^{18}$O [‰]')
- #    file = 'hydrus_conc_prec_soil.png'
- #    path = base_path_figs / file
- #    fig.savefig(path, dpi=250)
- #
- #    # plot isotope ratios of precipitation, soil and percolation
- #    cmap = copy.copy(plt.cm.get_cmap('YlGnBu_r'))
- #    norm = mpl.colors.Normalize(vmin=-20, vmax=5)
- #
- #    fig, axes = plt.subplots(3, 1, sharex=False, figsize=(14, 7))
- #    axes[0].bar(date_hydrus, ds_hydrus['prec'].values, width=-1, edgecolor=cmap(norm(ds_hydrus['d18O_prec'].values)), align='edge')
- #    axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
- #    axes[0].set_xlim(date_hydrus[0], date_hydrus[-1])
- #    sns.heatmap(ds_hydrus['d18O_soil'].values, xticklabels=366, yticklabels=int(50/2), cmap='YlGnBu_r',
- #                vmax=5, vmin=-20, cbar=False, ax=axes[1])
- #    axes[1].set_yticks([0, 25, 50, 75, 100])
- #    axes[1].set_yticklabels([0, 0.5, 1, 1.5, 2])
- #    axes[1].set_xticklabels(list(range(1997, 2008)))
- #    axes[1].set_ylabel('Soil depth\n[m]')
- #
- #    axes[2].bar(date_hydrus, ds_hydrus['perc'].values, width=-1, edgecolor=cmap(norm(ds_hydrus['d18O_perc'].values)), align='edge')
- #    axes[2].set_xlim(date_hydrus[0], date_hydrus[-1])
- #    axes[2].set_ylabel('Percolation\n[mm $day^{-1}$]')
- #    axes[2].set_ylim(0, )
- #    axes[2].invert_yaxis()
- #    axes[2].set_xlabel('Time [year]')
- #
- #    axl = fig.add_axes([0.92, 0.33, 0.02, 0.3])
- #    cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
- #                                    orientation='vertical',
- #                                    ticks=[0, -5, -10, -15])
- #    cb1.set_label(r'$\delta^{18}$O [‰]')
- #
- #    file = 'hydrus_d18O_prec_soil_perc.png'
- #    path = base_path_figs / file
- #    fig.savefig(path, dpi=250)
- #
- #    # plot precipitation, soil water content and percolation
- #    cmap = copy.copy(plt.cm.get_cmap('YlGnBu'))
- #    norm = mpl.colors.Normalize(vmin=0.2, vmax=0.5)
- #
- #    fig, axes = plt.subplots(3, 1, sharex=False, figsize=(14, 7))
- #    axes[0].bar(date_hydrus, ds_hydrus['prec'].values, width=-1, edgecolor='blue', align='edge')
- #    axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
- #    axes[0].set_xlim(date_hydrus[0], date_hydrus[-1])
- #    sns.heatmap(ds_hydrus['swc'].values, xticklabels=366, yticklabels=int(50/2), cmap='YlGnBu',
- #                vmax=0.5, vmin=0.2, cbar=False, ax=axes[1])
- #    axes[1].set_yticks([0, 25, 50, 75, 100])
- #    axes[1].set_yticklabels([0, 0.5, 1, 1.5, 2])
- #    axes[1].set_xticklabels(list(range(1997, 2008)))
- #    axes[1].set_ylabel('Soil depth\n[m]')
- #
- #    axes[2].bar(date_hydrus, ds_hydrus['perc'].values, width=-1, edgecolor='grey', align='edge')
- #    axes[2].set_xlim(date_hydrus[0], date_hydrus[-1])
- #    axes[2].set_ylabel('Percolation\n[mm $day^{-1}$]')
- #    axes[2].set_ylim(0, )
- #    axes[2].invert_yaxis()
- #    axes[2].set_xlabel('Time [year]')
- #
- #    axl = fig.add_axes([0.92, 0.33, 0.02, 0.3])
- #    cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
- #                                    orientation='vertical',
- #                                    ticks=[0.2, 0.3, 0.4, 0.5])
- #    cb1.set_label(r'$\theta$ [-]')
- #
- #    file = 'hydrus_prec_theta_perc.png'
- #    path = base_path_figs / file
- #    fig.savefig(path, dpi=250)
+
+    # dotty plots of HYDRUS-1D monte carlo simulations
+    file = base_path / "hydrus_benchmark" / "mc_results.txt"
+    df_params_eff_hydrus = pd.read_csv(file, sep="\t")
+    df_params_eff_hydrus.loc[:, 'ks'] = df_params_eff_hydrus.loc[:, 'ks'] * (10/24)
+    df_eff_hydrus = df_params_eff_hydrus.loc[:, ['kge_aet', 'kge_theta', 'kge_perc', 'kge_perc_18O', 'kge_multi']]
+    df_params_hydrus = df_params_eff_hydrus.loc[:, ['theta_sat_m', 'alpha', 'n', 'ks', 'theta_sat_im', 'omega', 'D_l']]
+    nrow = len(df_eff_hydrus.columns)
+    ncol = len(df_params_hydrus.columns)
+    idx_best = df_eff_hydrus['kge_multi'].idxmax()
+    fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(14, 7))
+    for i in range(nrow):
+        for j in range(ncol):
+            y = df_eff_hydrus.iloc[:, i]
+            x = df_params_hydrus.iloc[:, j]
+            ax[i, j].scatter(x, y, s=4, c='grey', alpha=0.5)
+            ax[i, j].set_xlabel('')
+            ax[i, j].set_ylabel('')
+            ax[i, j].set_ylim(-1, 1)
+            # best parameter set for multi-objective criteria
+            y_best = df_eff_hydrus.iloc[idx_best, i]
+            x_best = df_params_hydrus.iloc[idx_best, j]
+            ax[i, j].scatter(x_best, y_best, s=12, c='red', alpha=0.8)
+
+    for j in range(ncol):
+        xlabel = _LABS_HYDRUS[df_params_hydrus.columns[j]]
+        ax[-1, j].set_xlabel(xlabel)
+
+    ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
+    ax[1, 0].set_ylabel('$KGE_{PERC}$\n [-]')
+    ylab_kge_theta = r'''$KGE_{\theta}$
+    [-]'''
+    ax[2, 0].set_ylabel(ylab_kge_theta)
+    ax[3, 0].set_ylabel('$KGE_{\delta^{18}O_{perc}}$\n [-]')
+    ax[4, 0].set_ylabel('$KGE_{multi}$\n [-]')
+
+    fig.subplots_adjust(wspace=0.2, hspace=0.3)
+    file = base_path_figs / "dotty_plots_hydrus.png"
+    fig.savefig(file, dpi=250)
+
+    # plot isotope ratios of precipitation and soil
+    cmap = copy.copy(plt.cm.get_cmap('YlGnBu_r'))
+    norm = mpl.colors.Normalize(vmin=-20, vmax=5)
+
+    fig, axes = plt.subplots(2, 1, sharex=False, figsize=(14, 7))
+    axes[0].bar(date_hydrus, ds_hydrus['prec'].values, width=-1, color=cmap(norm(ds_hydrus['d18O_prec'].values)), align='edge', edgecolor=cmap(norm(ds_hydrus['d18O_prec'].values)))
+    axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
+    axes[0].set_xlim(date_hydrus[0], date_hydrus[-1])
+    sns.heatmap(ds_hydrus['d18O_soil'].values, xticklabels=366, yticklabels=int(50/2), cmap='YlGnBu_r',
+             vmax=5, vmin=-20, cbar=False, ax=axes[1])
+    axes[1].set_yticks([0, 25, 50, 75, 100])
+    axes[1].set_yticklabels([0, 0.5, 1, 1.5, 2])
+    axes[1].set_xticklabels(list(range(1997, 2008)))
+    axes[1].set_ylabel('Soil depth\n[m]')
+    axes[1].set_xlabel('Time [years]')
+
+    axl = fig.add_axes([0.92, 0.3, 0.02, 0.3])
+    cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
+                                 orientation='vertical',
+                                 ticks=[0, -5, -10, -15])
+    cb1.set_label(r'$\delta^{18}$O [‰]')
+    file = 'hydrus_d18O_prec_soil.png'
+    path = base_path_figs / file
+    fig.savefig(path, dpi=250)
+
+    # plot isotope ratios of precipitation, soil and percolation
+    cmap = copy.copy(plt.cm.get_cmap('YlGnBu_r'))
+    norm = mpl.colors.Normalize(vmin=-20, vmax=5)
+
+    fig, axes = plt.subplots(3, 1, sharex=False, figsize=(14, 7))
+    axes[0].bar(date_hydrus, ds_hydrus['prec'].values, width=-1, edgecolor=cmap(norm(ds_hydrus['d18O_prec'].values)), align='edge')
+    axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
+    axes[0].set_xlim(date_hydrus[0], date_hydrus[-1])
+    sns.heatmap(ds_hydrus['d18O_soil'].values, xticklabels=366, yticklabels=int(50/2), cmap='YlGnBu_r',
+             vmax=5, vmin=-20, cbar=False, ax=axes[1])
+    axes[1].set_yticks([0, 25, 50, 75, 100])
+    axes[1].set_yticklabels([0, 0.5, 1, 1.5, 2])
+    axes[1].set_xticklabels(list(range(1997, 2008)))
+    axes[1].set_ylabel('Soil depth\n[m]')
+
+    axes[2].bar(date_hydrus, ds_hydrus['perc'].values, width=-1, edgecolor=cmap(norm(ds_hydrus['d18O_perc'].values)), align='edge')
+    axes[2].set_xlim(date_hydrus[0], date_hydrus[-1])
+    axes[2].set_ylabel('Percolation\n[mm $day^{-1}$]')
+    axes[2].set_ylim(0, )
+    axes[2].invert_yaxis()
+    axes[2].set_xlabel('Time [year]')
+
+    axl = fig.add_axes([0.92, 0.33, 0.02, 0.3])
+    cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
+                                 orientation='vertical',
+                                 ticks=[0, -5, -10, -15])
+    cb1.set_label(r'$\delta^{18}$O [‰]')
+
+    file = 'hydrus_d18O_prec_soil_perc.png'
+    path = base_path_figs / file
+    fig.savefig(path, dpi=250)
+
+    # plot precipitation, soil water content and percolation
+    cmap = copy.copy(plt.cm.get_cmap('YlGnBu'))
+    norm = mpl.colors.Normalize(vmin=0.1, vmax=0.4)
+
+    fig, axes = plt.subplots(3, 1, sharex=False, figsize=(14, 7))
+    axes[0].bar(date_hydrus, ds_hydrus['prec'].values, width=-1, edgecolor='blue', align='edge')
+    axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
+    axes[0].set_xlim(date_hydrus[0], date_hydrus[-1])
+    sns.heatmap(ds_hydrus['swc'].values, xticklabels=366, yticklabels=int(50/2), cmap='YlGnBu',
+             vmax=0.4, vmin=0.1, cbar=False, ax=axes[1])
+    axes[1].set_yticks([0, 25, 50, 75, 100])
+    axes[1].set_yticklabels([0, 0.5, 1, 1.5, 2])
+    axes[1].set_xticklabels(list(range(1997, 2008)))
+    axes[1].set_ylabel('Soil depth\n[m]')
+
+    axes[2].bar(date_hydrus, ds_hydrus['perc'].values, width=-1, edgecolor='grey', align='edge')
+    axes[2].set_xlim(date_hydrus[0], date_hydrus[-1])
+    axes[2].set_ylabel('Percolation\n[mm $day^{-1}$]')
+    axes[2].set_ylim(0, )
+    axes[2].invert_yaxis()
+    axes[2].set_xlabel('Time [year]')
+
+    axl = fig.add_axes([0.92, 0.33, 0.02, 0.3])
+    cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
+                                 orientation='vertical',
+                                 ticks=[0.1, 0.2, 0.3, 0.4])
+    cb1.set_label(r'$\theta$ [-]')
+
+    file = 'hydrus_prec_theta_perc.png'
+    path = base_path_figs / file
+    fig.savefig(path, dpi=250)
 
     # states_hydrus_tt_file = base_path / "hydrus_benchmark" / "states_tt_hydrus.nc"
     # ds_hydrus_tt = xr.open_dataset(states_hydrus_tt_file, engine="h5netcdf")

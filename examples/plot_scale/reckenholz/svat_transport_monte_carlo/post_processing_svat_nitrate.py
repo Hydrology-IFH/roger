@@ -13,7 +13,6 @@ import numpy as onp
 
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
-import roger.lookuptables as lut
 
 base_path = Path(__file__).parent
 # directory of results
@@ -27,22 +26,25 @@ if not os.path.exists(base_path_figs):
 
 # merge nitrate model output into single file
 lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9"]
-tm_structures = ['complete-mixing', 'power',
-                 'time-variant power']
+tm_structures = ['complete-mixing']
 for lys_experiment in lys_experiments:
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        path = str(base_path / f"SVATCROPTRANSPORT_{lys_experiment}_{tms}_nitrate.*.nc")
+        path = str(base_path / f"SVATTRANSPORT_{tms}_{lys_experiment}_nitrate.*.nc")
         diag_files = glob.glob(path)
-        states_tm_file = base_path / f"states_{lys_experiment}_{tms}_monte_carlo_nitrate.nc"
-        states_hm_file = base_path / "states_svat_crop.nc"
+        states_tm_file = base_path / f"states_svat_{tms}_{lys_experiment}_monte_carlo_nitrate.nc"
+        states_hm_file = base_path / "states_svat.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+            if lys_experiment not in list(f.groups.keys()):
+                f.create_group(lys_experiment)
+            if tm_structure not in list(f.groups[lys_experiment].groups.keys()):
+                f.groups[lys_experiment].create_group(tm_structure)
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
                 title=f'RoGeR nitrate {tm_structure} transport model Monte Carlo simulations at Reckenholz Lysimeter site',
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
-                comment=f'SVAT nitrate {tm_structure} transport model with free drainage and crop phenology/crop rotation'
+                comment=f'SVAT nitrate {tm_structure} transport model with free drainage'
             )
             # collect dimensions
             for dfs in diag_files:
@@ -54,42 +56,42 @@ for lys_experiment in lys_experiments:
             for dfs in diag_files:
                 with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                     # set dimensions with a dictionary
-                    if not f.dimensions:
-                        f.dimensions = dict_dim
-                        v = f.create_variable('x', ('x',), float)
+                    if not f.groups[lys_experiment].groups[tm_structure].dimensions:
+                        f.groups[lys_experiment].groups[tm_structure].dimensions = dict_dim
+                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('x', ('x',), float)
                         v.attrs['long_name'] = 'model run'
                         v.attrs['units'] = ''
                         v[:] = onp.arange(dict_dim["x"])
-                        v = f.create_variable('y', ('y',), float)
+                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('y', ('y',), float)
                         v.attrs['long_name'] = ''
                         v.attrs['units'] = ''
                         v[:] = onp.arange(dict_dim["y"])
-                        v = f.create_variable('Time', ('Time',), float)
+                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('Time', ('Time',), float)
                         var_obj = df.variables.get('Time')
                         v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                        units=var_obj.attrs["units"])
                         v[:] = time
-                        v = f.create_variable('ages', ('ages',), float)
+                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('ages', ('ages',), float)
                         v.attrs['long_name'] = 'Water ages'
                         v.attrs['units'] = 'days'
                         v[:] = onp.arange(1, dict_dim["ages"]+1)
-                        v = f.create_variable('nages', ('nages',), float)
+                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('nages', ('nages',), float)
                         v.attrs['long_name'] = 'Water ages (cumulated)'
                         v.attrs['units'] = 'days'
                         v[:] = onp.arange(0, dict_dim["nages"])
-                        v = f.create_variable('n_sas_params', ('n_sas_params',), float)
+                        v = f.groups[lys_experiment].groups[tm_structure].create_variable('n_sas_params', ('n_sas_params',), float)
                         v.attrs['long_name'] = 'Number of SAS parameters'
                         v.attrs['units'] = ''
                     for var_sim in list(df.variables.keys()):
                         var_obj = df.variables.get(var_sim)
                         if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
-                            v = f.create_variable(var_sim, ('x', 'y', 'Time'), float)
+                            v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time'), float)
                             vals = onp.array(var_obj)
                             v[:, :, :] = vals.swapaxes(0, 2)
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
-                            v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
+                            v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float)
                             vals = onp.array(var_obj)
                             vals = vals.swapaxes(0, 3)
                             vals = vals.swapaxes(1, 2)
@@ -97,7 +99,7 @@ for lys_experiment in lys_experiments:
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
+                            v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float)
                             vals = onp.array(var_obj)
                             vals = vals.swapaxes(0, 3)
                             vals = vals.swapaxes(1, 2)
@@ -106,7 +108,7 @@ for lys_experiment in lys_experiments:
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
+                            v = f.groups[lys_experiment].groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float)
                             vals = onp.array(var_obj)
                             vals = vals.swapaxes(0, 3)
                             vals = vals.swapaxes(1, 2)
@@ -119,7 +121,7 @@ dict_params_eff = {}
 for lys_experiment in lys_experiments:
     dict_params_eff[lys_experiment] = {}
     # load hydrologic simulation
-    states_hm_file = base_path / "states_svat_crop.nc"
+    states_hm_file = base_path / "states_hm.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf", group=lys_experiment)
 
     # load observations (measured data)
@@ -129,8 +131,8 @@ for lys_experiment in lys_experiments:
         tms = tm_structure.replace(" ", "_")
 
         # load transport simulation
-        states_tm_file = base_path / f"states_{tms}_{lys_experiment}_monte_carlo_nitrate.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf", group=f'{lys_experiment}/{tm_structure}')
+        states_tm_file = base_path / f"states_svat_{tms}_{lys_experiment}_monte_carlo_nitrate.nc"
+        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
 
         # assign date
         days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
@@ -147,7 +149,19 @@ for lys_experiment in lys_experiments:
         nx = ds_sim_tm.dims['x']  # number of rows
         ny = ds_sim_tm.dims['y']  # number of columns
         df_params_eff = pd.DataFrame(index=range(nx * ny))
+        if tm_structure == "power":
+            df_params_eff.loc[:, 'k_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
+            df_params_eff.loc[:, 'k_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
+            df_params_eff.loc[:, 'k_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
+        elif tm_structure == "time-variant power":
+            df_params_eff.loc[:, 'k1_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten()
+            df_params_eff.loc[:, 'k1_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten()
+            df_params_eff.loc[:, 'k1_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten()
+            df_params_eff.loc[:, 'k2_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+            df_params_eff.loc[:, 'k2_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+            df_params_eff.loc[:, 'k2_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
         # sampled nitrate parameters
+        df_params_eff.loc[:, 'alpha_transp'] = ds_sim_tm["alpha_transp"].isel(y=0).values
         df_params_eff.loc[:, 'alpha_q'] = ds_sim_tm["alpha_q"].isel(y=0).values
         df_params_eff.loc[:, 'km_denit_rz'] = ds_sim_tm["km_denit_rz"].isel(y=0).values
         df_params_eff.loc[:, 'km_denit_ss'] = ds_sim_tm["km_denit_ss"].isel(y=0).values
@@ -157,10 +171,6 @@ for lys_experiment in lys_experiments:
         df_params_eff.loc[:, 'km_nit_ss'] = ds_sim_tm["km_nit_ss"].isel(y=0).values
         df_params_eff.loc[:, 'kmin_rz'] = ds_sim_tm["kmin_rz"].isel(y=0).values
         df_params_eff.loc[:, 'kmin_ss'] = ds_sim_tm["kmin_ss"].isel(y=0).values
-        crop_types_sim = onp.unique(ds_sim_hm['lu_id'].values.flatten()).tolist()
-        for crop_type_sim in crop_types_sim:
-            row = onp.where(lut.ARR_CP[:, 0] == crop_type_sim)[0]
-            df_params_eff.loc[:, f'crop_scale_{crop_type_sim}'] = ds_sim_tm["lut_crop_scale"].isel(y=0, n_crop_types=row).values
 
         # compare observations and simulations
         ncol = 0
@@ -223,25 +233,21 @@ for lys_experiment in lys_experiments:
         dict_params_eff[lys_experiment][tm_structure]['params_eff'] = df_params_eff
 
         # dotty plots
-        if tm_structure in ['power',
-                            'time-variant power']:
-            df_params_eff = dict_params_eff[lys_experiment][tm_structure]['params_eff']
+        if tm_structure in ['complete-mixing']:
             df_eff = df_params_eff.loc[:, ['KGE_NO3_perc_bs']]
-            df_params = df_params_eff.loc[:, ['km_denit_rz', 'dmax_denit_rz', 'km_nit_rz', 'kmin_rz', 'km_denit_ss', 'dmax_denit_ss', 'km_nit_ss', 'kmin_ss']]
-            nrow = 2
-            ncol = 4
+            df_params = df_params_eff.loc[:, ['alpha_transp', 'alpha_q', 'km_denit_rz', 'km_denit_ss', 'dmax_denit_rz', 'dmax_denit_ss', 'km_nit_rz', 'km_nit_ss', 'kmin_rz', 'kmin_ss']]
+            nrow = len(df_eff.columns)
+            ncol = len(df_params.columns)
             fig, ax1 = plt.subplots(nrow, ncol, sharey=True, figsize=(14, 7))
             ax = ax1.reshape(nrow, ncol)
-            y = df_eff.iloc[:, 0]
-            col_counter = 0
             for i in range(nrow):
                 for j in range(ncol):
-                    x = df_params.iloc[:, j+col_counter]
+                    y = df_eff.iloc[:, i]
+                    x = df_params.iloc[:, j]
                     sns.regplot(x=x, y=y, ax=ax[i, j], ci=None, color='k',
                                 scatter_kws={'alpha': 0.2, 's': 4, 'color': 'grey'})
                     ax[i, j].set_xlabel('')
                     ax[i, j].set_ylabel('')
-                col_counter = 3
 
             for j in range(ncol):
                 xlabel = labs._LABS[df_params.columns[j]]
@@ -250,7 +256,7 @@ for lys_experiment in lys_experiments:
             ax[0, 0].set_ylabel(r'$KGE_{NO_{3}-N_{PERC}}$ [-]')
 
             fig.subplots_adjust(wspace=0.2, hspace=0.3)
-            file = base_path_figs / f"dotty_plots_{lys_experiment}_{tms}.png"
+            file = base_path_figs / "dotty_plots.png"
             fig.savefig(file, dpi=250)
 
         # select best model run
@@ -264,10 +270,10 @@ for lys_experiment in lys_experiments:
                 f.create_group(tm_structure)
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
-                title=f'RoGeR nitrate {tm_structure} transport model parameters of best monte carlo simulation at Reckenholz Lysimeter site',
+                title='RoGeR nitrate transport model parameters of best monte carlo simulation at Reckenholz Lysimeter site',
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
-                comment=f'SVAT nitrate {tm_structure} transport model with free drainage and crop phenology/crop rotation'
+                comment='SVAT transport model with free drainage and crop phenology/crop rotation'
             )
             dict_dim = {'x': nx, 'y': 1, 'n_sas_params': 8}
             if not f.groups[tm_structure].dimensions:
@@ -328,7 +334,7 @@ for lys_experiment in lys_experiments:
         # write bulk sample to output file
         ds_sim_tm = ds_sim_tm.close()
         states_tm_file = base_path / "states_tm_monte_carlo_nitrate.nc"
-        with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+        with h5netcdf.File(states_tm_file, 'r+', decode_vlen_strings=False) as f:
             try:
                 v = f.groups[tm_structure].create_variable('NO3_perc_bs', ('x', 'y', 'Time'), float)
             except ValueError:

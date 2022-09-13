@@ -17,10 +17,8 @@ if not os.path.exists(base_path_figs):
 
 # merge nitrate model output into single file
 lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9"]
-tm_structures = ['complete-mixing', 'piston',
-                 'preferential', 'complete-mixing + advection-dispersion',
-                 'time-variant preferential',
-                 'time-variant complete-mixing + advection-dispersion']
+tm_structures = ['complete-mixing', 'power',
+                 'time-variant power']
 for lys_experiment in lys_experiments:
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")

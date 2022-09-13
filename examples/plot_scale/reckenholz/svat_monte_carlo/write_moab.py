@@ -12,15 +12,12 @@ for lys in lysimeters:
     lines = []
     lines.append('#!/bin/bash\n')
     lines.append('#PBS -l nodes=1:ppn=1\n')
-    lines.append('#PBS -l walltime=40:00:00\n')
+    lines.append('#PBS -l walltime=24:00:00\n')
     lines.append('#PBS -l pmem=8000mb\n')
     lines.append(f'#PBS -N {script_name}\n')
     lines.append('#PBS -m bea\n')
     lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
     lines.append(' \n')
-    lines.append('# load module dependencies\n')
-    lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
-    lines.append('export OMP_NUM_THREADS=1\n')
     lines.append('eval "$(conda shell.bash hook)"\n')
     lines.append('conda activate roger\n')
     lines.append(f'cd {base_path_binac}\n')
@@ -39,21 +36,19 @@ for lys in lysimeters:
     file.close()
     subprocess.Popen(f"chmod +x {script_name}_moab.sh", shell=True)
 
+lysimeters = ['lys1', 'lys2', 'lys3', 'lys4', 'lys8', 'lys9']
 for lys in lysimeters:
     script_name = f'{lys}_svat_mc'
     output_path_ws = base_path_ws / 'reckenholz' / 'svat_monte_carlo'
     lines = []
     lines.append('#!/bin/bash\n')
     lines.append('#PBS -l nodes=1:ppn=1\n')
-    lines.append('#PBS -l walltime=40:00:00\n')
+    lines.append('#PBS -l walltime=24:00:00\n')
     lines.append('#PBS -l pmem=8000mb\n')
     lines.append(f'#PBS -N {script_name}\n')
     lines.append('#PBS -m bea\n')
     lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
     lines.append(' \n')
-    lines.append('# load module dependencies\n')
-    lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
-    lines.append('export OMP_NUM_THREADS=1\n')
     lines.append('eval "$(conda shell.bash hook)"\n')
     lines.append('conda activate roger\n')
     lines.append(f'cd {base_path_binac}\n')

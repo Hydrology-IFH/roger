@@ -35,7 +35,7 @@ def main(tmp_dir):
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
-    states_hm_file = base_path / "states_hm_monte_carlo.nc"
+    states_hm_file = base_path / "states_svat_crop_monte_carlo.nc"
     if not os.path.exists(states_hm_file):
         lys_experiments = ["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
         for lys_experiment in lys_experiments:
@@ -116,7 +116,7 @@ def main(tmp_dir):
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
 
-    lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9"]
+    lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
     for lys_experiment in lys_experiments:
         dict_params_eff = {}
         # directory of results
@@ -129,7 +129,7 @@ def main(tmp_dir):
             os.mkdir(base_path_figs)
 
         # load simulation
-        states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"
+        states_hm_mc_file = base_path / "states_svat_crop_monte_carlo.nc"
         ds_sim = xr.open_dataset(states_hm_mc_file, engine="h5netcdf", group=lys_experiment)
 
         # load observations (measured data)
@@ -402,9 +402,11 @@ def main(tmp_dir):
         df_params_eff = dict_params_eff['0']
         idx_best = df_params_eff['E_multi'].idxmax()
 
+        ds_sim = ds_sim.close()
+        del ds_sim
         # write states of best model run
-        states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"
-        states_hm_file = base_path / "states_hm.nc"
+        states_hm_mc_file = base_path / "states_svat_crop_monte_carlo.nc"
+        states_hm_file = base_path / "states_svat_crop.nc"
         with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
             if lys_experiment not in list(f.groups.keys()):
                 f.create_group(lys_experiment)
