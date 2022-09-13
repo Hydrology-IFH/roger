@@ -33,8 +33,11 @@ def main(tmp_dir):
 
     # merge results into single file
     tm_structures = ['complete-mixing', 'piston',
-                     'advection-dispersion',
-                     'time-variant advection-dispersion']
+                     'preferential', 'preferential1', 'preferential2',
+                     'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2',
+                     'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
+                     'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
+                     'time-variant']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
         path = str(base_path / f"SVATTRANSPORT_{tms}.*.nc")
@@ -163,8 +166,11 @@ def main(tmp_dir):
 
     dict_params_eff = {}
     tm_structures = ['complete-mixing', 'piston',
-                      'advection-dispersion',
-                      'time-variant advection-dispersion']
+                     'preferential', 'preferential1', 'preferential2',
+                     'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2',
+                     'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
+                     'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
+                     'time-variant']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
 
@@ -192,19 +198,36 @@ def main(tmp_dir):
             df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
             df_params_eff.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
             df_params_eff.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
+        elif tm_structure == "preferential1":
+            df_params_eff.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
+        elif tm_structure == "preferential2":
+            df_params_eff.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
+            df_params_eff.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
         elif tm_structure == "advection-dispersion":
             df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
             df_params_eff.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
             df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
-        elif tm_structure == "complete-mixing advection-dispersion":
+        elif tm_structure == "advection-dispersion1":
+            df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
+        elif tm_structure == "advection-dispersion2":
             df_params_eff.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
             df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
         elif tm_structure == "time-variant advection-dispersion":
             df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
             df_params_eff.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
             df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+        elif tm_structure == "time-variant advection-dispersion1":
+            df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+        elif tm_structure == "time-variant advection-dispersion2":
+            df_params_eff.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+            df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
         elif tm_structure == "time-variant preferential":
             df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+            df_params_eff.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+            df_params_eff.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+        elif tm_structure == "time-variant preferential1":
+            df_params_eff.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+        elif tm_structure == "time-variant preferential2":
             df_params_eff.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
             df_params_eff.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
         elif tm_structure == "time-variant":
@@ -302,20 +325,36 @@ def main(tmp_dir):
         dict_params_eff[tm_structure]['params_eff'] = df_params_eff
 
         # dotty plots
-        if tm_structure in ['preferential', 'advection-dispersion',
-                            'time-variant preferential',
-                            'time-variant advection-dispersion']:
+        if tm_structure in ['preferential', 'preferential1', 'preferential2',
+                            'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2',
+                            'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
+                            'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
+                            'time-variant']:
             df_eff = df_params_eff.loc[:, ['KGE_C_q_ss']]
             if tm_structure == "preferential":
                 df_params = df_params_eff.loc[:, ['b_transp', 'b_q_rz', 'b_q_ss']]
+            elif tm_structure == "preferential1":
+                df_params = df_params_eff.loc[:, ['b_q_ss']]
+            elif tm_structure == "preferential2":
+                df_params = df_params_eff.loc[:, ['b_q_rz', 'b_q_ss']]
             elif tm_structure == "advection-dispersion":
                 df_params = df_params_eff.loc[:, ['b_transp', 'a_q_rz', 'a_q_ss']]
-            elif tm_structure == "complete-mixing advection-dispersion":
+            elif tm_structure == "advection-dispersion1":
+                df_params = df_params_eff.loc[:, ['a_q_ss']]
+            elif tm_structure == "advection-dispersion2":
                 df_params = df_params_eff.loc[:, ['a_q_rz', 'a_q_ss']]
             elif tm_structure == "time-variant advection-dispersion":
                 df_params = df_params_eff.loc[:, ['b_transp', 'a_q_rz', 'a_q_ss']]
+            elif tm_structure == "time-variant advection-dispersion1":
+                df_params = df_params_eff.loc[:, ['a_q_ss']]
+            elif tm_structure == "time-variant advection-dispersion2":
+                df_params = df_params_eff.loc[:, ['a_q_rz', 'a_q_ss']]
             elif tm_structure == "time-variant preferential":
                 df_params = df_params_eff.loc[:, ['b_transp', 'b_q_rz', 'b_q_ss']]
+            elif tm_structure == "time-variant preferential1":
+                df_params = df_params_eff.loc[:, ['b_q_ss']]
+            elif tm_structure == "time-variant preferential2":
+                df_params = df_params_eff.loc[:, ['b_q_rz', 'b_q_ss']]
             elif tm_structure == "time-variant":
                 df_params = df_params_eff.loc[:, ['ab_transp', 'ab_q_rz', 'ab_q_ss']]
             nrow = len(df_eff.columns)
@@ -374,9 +413,10 @@ def main(tmp_dir):
                 v.attrs['units'] = ' '
                 v[:] = onp.arange(dict_dim["n_sas_params"])
 
-            if tm_structure in ['preferential', 'advection-dispersion',
-                                'time-variant preferential',
-                                'time-variant advection-dispersion',
+            if tm_structure in ['preferential', 'preferential1', 'preferential2',
+                                'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2',
+                                'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
+                                'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
                                 'time-variant']:
                 try:
                     v = f.create_variable('sas_params_transp', ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)

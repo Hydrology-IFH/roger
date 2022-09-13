@@ -13,19 +13,24 @@ def main(job_type, sas_solver):
     transport_models_abrev = {'complete-mixing': 'cm',
                               'piston': 'pi',
                               'preferential': 'pf',
-                              'complete-mixing + advection-dispersion': 'cmad',
-                              'complete-mixing + time-variant advection-dispersion': 'cmadt',
+                              'preferential1': 'pf1',
+                              'preferential2': 'pf2',
                               'advection-dispersion': 'ad',
+                              'advection-dispersion1': 'ad1',
+                              'advection-dispersion2': 'ad2',
                               'time-variant preferential': 'pft',
+                              'time-variant preferential1': 'pft1',
+                              'time-variant preferential2': 'pft2',
                               'time-variant advection-dispersion': 'adt',
+                              'time-variant advection-dispersion1': 'adt1',
+                              'time-variant advection-dispersion2': 'adt2',
                               'time-variant': 'tv'}
 
     tracer = 'oxygen18'
-    transport_models = ['preferential', 'advection-dispersion',
-                        'complete-mixing + advection-dispersion',
-                        'complete-mixing + time-variant advection-dispersion',
-                        'time-variant preferential',
-                        'time-variant advection-dispersion',
+    transport_models = ['preferential', 'preferential1', 'preferential2',
+                        'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2',
+                        'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
+                        'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
                         'time-variant']
     for tm in transport_models:
         if job_type == 'serial':
