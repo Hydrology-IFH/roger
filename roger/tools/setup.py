@@ -235,6 +235,10 @@ def write_crop_rotation(input_dir, nrows=1, ncols=1, float_type="float64"):
     ncols : int, optional
         number of columns
     """
+    if os.path.exists(input_dir / "crop_rotation.nc"):
+        logger.warning("Use available crop rotation.")
+        return
+
     csv_file = input_dir / 'crop_rotation.csv'
     crops = pd.read_csv(csv_file, sep=';', skiprows=1)
     nc_file = input_dir / 'crop_rotation.nc'
@@ -465,6 +469,10 @@ def write_forcing(input_dir, nrows=1, ncols=1, uniform=True,
     prec_correction : str, optional
         if True precipitation is corrected according to Richter (1995)
     """
+    if os.path.exists(input_dir / "forcing.nc"):
+        logger.warning("Use available forcing.")
+        return
+
     if uniform:
         _lock = True
         while _lock:

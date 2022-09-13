@@ -10,8 +10,9 @@ from roger.cli.roger_run_base import roger_base_cli
 
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'power', 'time-variant_power']), default='complete-mixing')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
+@click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(transport_model_structure, sas_solver):
+def main(transport_model_structure, sas_solver, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, where
@@ -351,7 +352,7 @@ def main(transport_model_structure, sas_solver):
             )
 
         @roger_routine
-        def set_diagnostics(self, state, base_path=None):
+        def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
             diagnostics["rates"].output_variables = ["M_q_ss"]
