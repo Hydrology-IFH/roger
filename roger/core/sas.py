@@ -186,8 +186,8 @@ def power(state, SA, sas_params):
     vs = state.variables
 
     mask6 = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64]))
-    mask63 = (sas_params[:, :, 0, npx.newaxis] == 63)
-    mask64 = (sas_params[:, :, 0, npx.newaxis] == 64)
+    mask63 = (sas_params[:, :, 0] == 63)
+    mask64 = (sas_params[:, :, 0] == 64)
 
     S = allocate(state.dimensions, ("x", "y", 1))
     Omega = allocate(state.dimensions, ("x", "y", "nages"))
