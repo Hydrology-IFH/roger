@@ -45,7 +45,7 @@ def main(job_type, sas_solver):
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{tm1}_mc'
+            script_name = f'{tracer}_{sas_solver}_{tm1}_mc'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_monte_carlo'
             tms = tm.replace(" ", "_")
             lines = []
@@ -75,13 +75,13 @@ def main(job_type, sas_solver):
         elif job_type == 'single-node':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{tm1}_mc'
+            script_name = f'{tracer}_{sas_solver}_{tm1}_mc'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_monte_carlo'
             tms = tm.replace(" ", "_")
             lines = []
             lines.append('#!/bin/bash\n')
             lines.append('#PBS -l nodes=1:ppn=20\n')
-            lines.append('#PBS -l walltime=48:00:00\n')
+            lines.append('#PBS -l walltime=96:00:00\n')
             lines.append('#PBS -l pmem=6000mb\n')
             lines.append(f'#PBS -N {script_name}\n')
             lines.append('#PBS -m bea\n')
@@ -109,7 +109,7 @@ def main(job_type, sas_solver):
         elif job_type == 'multi-node':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{tm1}_mc'
+            script_name = f'{tracer}_{sas_solver}_{tm1}_mc'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_monte_carlo'
             tms = tm.replace(" ", "_")
             lines = []
@@ -139,7 +139,7 @@ def main(job_type, sas_solver):
         elif job_type == 'single-node-gpu':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{tm1}_mc'
+            script_name = f'{tracer}_{sas_solver}_{tm1}_mc'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_monte_carlo'
             tms = tm.replace(" ", "_")
             lines = []
@@ -175,7 +175,7 @@ def main(job_type, sas_solver):
         elif job_type == 'single-node-multi-gpu':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{tm1}_mc'
+            script_name = f'{tracer}_{sas_solver}_{tm1}_mc'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_monte_carlo'
             tms = tm.replace(" ", "_")
             lines = []
@@ -211,7 +211,7 @@ def main(job_type, sas_solver):
         elif job_type == 'multi-node-multi-gpu':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{tm1}_mc'
+            script_name = f'{tracer}_{sas_solver}_{tm1}_mc'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_monte_carlo'
             tms = tm.replace(" ", "_")
             lines = []
@@ -245,14 +245,14 @@ def main(job_type, sas_solver):
     for tm in transport_models:
         tm1 = transport_models_abrev[tm]
         tms = tm.replace(" ", "_")
-        script_name = f'{tracer}_{tm1}_mc'
+        script_name = f'{tracer}_{sas_solver}_{tm1}_mc'
         output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_monte_carlo'
         tms = tm.replace(" ", "_")
         lines = []
         lines.append('#!/bin/bash\n')
         lines.append('#PBS -l nodes=1:ppn=1\n')
-        lines.append('#PBS -l walltime=01:00:00\n')
-        lines.append('#PBS -l pmem=4000mb\n')
+        lines.append('#PBS -l walltime=04:00:00\n')
+        lines.append('#PBS -l pmem=8000mb\n')
         lines.append(f'#PBS -N {script_name}\n')
         lines.append('#PBS -m bea\n')
         lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')

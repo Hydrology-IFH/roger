@@ -37,7 +37,7 @@ def main(tmp_dir):
                      'advection-dispersion']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        path = str(base_path / f"SVATTRANSPORT_{tms}.*.nc")
+        path = str(base_path / f"SVATTRANSPORT_{tms}_*.*.nc")
         diag_files = glob.glob(path)
         states_tm_file = base_path / f"states_{tms}_monte_carlo.nc"
         if not os.path.exists(states_tm_file):

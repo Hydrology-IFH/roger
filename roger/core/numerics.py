@@ -1487,8 +1487,10 @@ def sanity_check(state):
                                                 vs.inf_mat_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) + vs.inf_pf_ss[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2]) -
                                                 npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2]), atol=settings.atol)))
         check3 = global_and(npx.all((npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2]) - (vs.S_pwp_rz[2:-2, 2:-2] + vs.S_pwp_ss[2:-2, 2:-2])) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)))
+        check4 = global_and(npx.all(vs.sa_rz[2:-2, 2:-2, vs.tau, :] >= 0))
+        check5 = global_and(npx.all(vs.sa_ss[2:-2, 2:-2, vs.tau, :] >= 0))
 
-        check = check1 & check2 & check3
+        check = check1 & check2 & check3 & check4 & check5
 
         if rs.loglevel == 'debug' and rs.backend == 'numpy' and not check:
             check11 = npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
@@ -1498,6 +1500,8 @@ def sanity_check(state):
                                   vs.inf_mat_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) + vs.inf_pf_ss[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2]) -
                                   npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2]), atol=settings.atol)
             check33 = (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) <= (vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2] ) - (vs.S_pwp_rz[2:-2, 2:-2]  + vs.S_pwp_ss[2:-2, 2:-2] )) & (npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) >= 0)
+            check44 = (vs.sa_rz[2:-2, 2:-2, vs.tau, :] >= 0)
+            check55 = (vs.sa_ss[2:-2, 2:-2, vs.tau, :] >= 0)
 
             if not check11.all():
                 logger.error(f"Water balance diverged at iteration {vs.itt}")
@@ -1514,6 +1518,16 @@ def sanity_check(state):
                 rows33 = npx.where(check33 == False)[0].tolist()
                 if rows33:
                     logger.error(f"Solute balance diverged at {rows33}")
+            if not check44.all():
+                logger.error(f"Root zone StorAge is out of bounds at iteration {vs.itt}")
+                rows44 = npx.where(npx.any(check44 == False, axis=-1))[0].tolist()
+                if rows44:
+                    logger.error(f"Root zone StorAge is out of bounds at at {rows44}")
+            if not check55.all():
+                logger.error(f"Root zone StorAge is out of bounds at iteration {vs.itt}")
+                rows55 = npx.where(npx.any(check55 == False, axis=-1))[0].tolist()
+                if rows55:
+                    logger.error(f"Root zone StorAge is out of bounds at at {rows55}")
 
     elif settings.enable_offline_transport and (settings.enable_bromide or settings.enable_chloride):
         check1 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),

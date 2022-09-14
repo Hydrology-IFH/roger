@@ -59,7 +59,31 @@ def calc_tt(state, SA, sa, flux, sas_params):
     )
     TT = update_add(
         TT,
-        at[2:-2, 2:-2, :], sas.dirac(state, sas_params)[2:-2, 2:-2, :],
+        at[2:-2, 2:-2, :], sas.dirac(state, SA, sas_params)[2:-2, 2:-2, :],
+    )
+    TT = update(
+        TT,
+        at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where((flux[2:-2, 2:-2, npx.newaxis] <= SA[2:-2, 2:-2, 1, :]), SA[2:-2, 2:-2, 1, :]/flux[2:-2, 2:-2, npx.newaxis], 0), TT[2:-2, 2:-2, :]),
+    )
+    TT = update(
+        TT,
+        at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(TT[2:-2, 2:-2, :] > 1, 1, TT[2:-2, 2:-2, :]), TT[2:-2, 2:-2, :]),
+    )
+    TT = update(
+        TT,
+        at[2:-2, 2:-2, 1:], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where((flux[2:-2, 2:-2, npx.newaxis] <= npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1], axis=-1)), npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1], axis=-1)/flux[2:-2, 2:-2, npx.newaxis], TT[2:-2, 2:-2, 1:])[:, :, ::-1], TT[2:-2, 2:-2, 1:]),
+    )
+    TT = update(
+        TT,
+        at[2:-2, 2:-2, 1:], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(TT[2:-2, 2:-2, 1:] > 1, 1, TT[2:-2, 2:-2, 1:]), TT[2:-2, 2:-2, 1:]),
+    )
+    TT = update(
+        TT,
+        at[2:-2, 2:-2, :-1], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(TT[2:-2, 2:-2, :-1] >= 1, 0, TT[2:-2, 2:-2, :-1]), TT[2:-2, 2:-2, :-1]),
+    )
+    TT = update(
+        TT,
+        at[2:-2, 2:-2, -1], npx.where((sas_params[2:-2, 2:-2, 0] == 22), 1, TT[2:-2, 2:-2, -1]),
     )
     Omega, sas_params = sas.kumaraswami(state, SA, sas_params)
     TT = update_add(
@@ -80,7 +104,7 @@ def calc_tt(state, SA, sa, flux, sas_params):
         at[2:-2, 2:-2, :], Omega[2:-2, 2:-2, :],
     )
 
-    # travel time distribution
+    # preference for redistribution
     mask_old = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([1, 22, 32, 34, 52, 6, 63, 64])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] <= 1))
     mask_old = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis]), True, mask_old)
     mask_old = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] >= 1), True, mask_old)
@@ -90,27 +114,12 @@ def calc_tt(state, SA, sa, flux, sas_params):
     mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] < 1), True, mask_young)
     mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] >= 1), False, mask_young)
 
+    # calculate travel time distribution
     tt = update(
         tt,
-        at[2:-2, 2:-2, :], npx.diff(TT[2:-2, 2:-2, :], axis=-1),
+        at[2:-2, 2:-2, :], npx.where(npx.diff(TT[2:-2, 2:-2, :], axis=-1) >= 0, npx.diff(TT[2:-2, 2:-2, :], axis=-1), 0),
     )
-    # set travel time distribution for dirac function
-    tt = update(
-        tt,
-        at[2:-2, 2:-2, :], npx.where(sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21, 0, tt[2:-2, 2:-2, :]),
-    )
-    tt = update(
-        tt,
-        at[2:-2, 2:-2, 0], npx.where(sas_params[2:-2, 2:-2, 0] == 21, 1, tt[2:-2, 2:-2, 0]),
-    )
-    tt = update(
-        tt,
-        at[2:-2, 2:-2, :], npx.where(sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22, 0, tt[2:-2, 2:-2, :]),
-    )
-    tt = update(
-        tt,
-        at[2:-2, 2:-2, -1], npx.where(sas_params[2:-2, 2:-2, 0] == 22, 1, tt[2:-2, 2:-2, -1]),
-    )
+
     # outflux
     flux_tt = allocate(state.dimensions, ("x", "y", "ages"))
     flux_tt = update(
@@ -214,10 +223,14 @@ def calc_tt(state, SA, sa, flux, sas_params):
         at[2:-2, 2:-2, :], npx.where(npx.any(flux_tt_init[2:-2, 2:-2, :] > sa[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis], flux_tt[2:-2, 2:-2, :]/flux[2:-2, 2:-2, npx.newaxis], tt[2:-2, 2:-2, :]),
     )
 
-    # set to zero if zero flux
+    # impose constraint for nonnegative solution
+    flux_tt = update(
+        flux_tt,
+        at[2:-2, 2:-2, :], npx.where(flux[2:-2, 2:-2, npx.newaxis] * tt[2:-2, 2:-2, :] > sa[2:-2, 2:-2, vs.tau, :], sa[2:-2, 2:-2, vs.tau, :], flux[2:-2, 2:-2, npx.newaxis] * tt[2:-2, 2:-2, :]),
+    )
     tt = update(
         tt,
-        at[2:-2, 2:-2, :], npx.where(flux[2:-2, 2:-2, npx.newaxis] <= 0, 0, tt[2:-2, 2:-2, :]),
+        at[2:-2, 2:-2, :], npx.where(flux[2:-2, 2:-2, npx.newaxis] > 0, flux_tt[2:-2, 2:-2, :]/flux[2:-2, 2:-2, npx.newaxis], 0),
     )
 
     if rs.backend == 'numpy':
@@ -228,16 +241,9 @@ def calc_tt(state, SA, sa, flux, sas_params):
                 logger.error(f"Solution of SAS function diverged at iteration {vs.itt}")
             else:
                 raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
-        mask1 = (tt * flux[:, :, npx.newaxis] - sa[:, :, 1, :] > settings.atol)
-        if npx.any(mask1[2:-2, 2:-2, :]):
-            if rs.loglevel == 'error':
-                logger.error(f"Solution of SAS function diverged at iteration {vs.itt}")
-            else:
-                raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
-        if rs.loglevel == 'error':
-            rows = npx.where(mask[2:-2, 2:-2] == False)[0].tolist()
-            if rows:
-                logger.error(f"Solution of SAS function diverged at {rows}")
+        mask2 = (tt >= 0)
+        if not npx.all(mask2[2:-2, 2:-2, :]):
+            logger.error(f"Negative probabilities at iteration {vs.itt}")
 
     return tt
 
@@ -255,6 +261,12 @@ def calc_conc_iso_flux(state, mtt, tt, flux):
         conc,
         at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], npx.nan),
     )
+    mask = (npx.isnan(conc[2:-2, 2:-2]) & (flux[2:-2, 2:-2] > 1))
+    if mask.any():
+        rows = npx.where(mask)[0].tolist()
+        if rows:
+            logger.error(f"Solution of isotope ratio diverged at {state.variables.itt} with flux {flux[2:-2, 2:-2]}")
+            logger.error(f"Solution of isotope ratio diverged at {rows}")
 
     return conc
 
@@ -481,23 +493,31 @@ def calc_omega_q(state, SA, sas_params, flux):
     )
     omega_q = update_add(
         omega_q,
-        at[2:-2, 2:-2, :], sas.dirac(state, sas_params)[2:-2, 2:-2, :],
+        at[2:-2, 2:-2, :], sas.dirac(state, SA, sas_params)[2:-2, 2:-2, :],
     )
     omega_q = update(
         omega_q,
-        at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(flux[2:-2, 2:-2, npx.newaxis] <= SA[2:-2, 2:-2, 1, :], SA[2:-2, 2:-2, 1, :]/flux[2:-2, 2:-2, npx.newaxis], 0), omega_q[2:-2, 2:-2, :]),
+        at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where((flux[2:-2, 2:-2, npx.newaxis] <= SA[2:-2, 2:-2, 1, :]), SA[2:-2, 2:-2, 1, :]/flux[2:-2, 2:-2, npx.newaxis], 0), omega_q[2:-2, 2:-2, :]),
     )
     omega_q = update(
         omega_q,
-        at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(npx.max(omega_q[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis] > 1, omega_q[2:-2, 2:-2, :] * (1/npx.max(omega_q[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis]), omega_q[2:-2, 2:-2, :]), omega_q[2:-2, 2:-2, :]),
+        at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(omega_q[2:-2, 2:-2, :] > 1, 1, omega_q[2:-2, 2:-2, :]), omega_q[2:-2, 2:-2, :]),
     )
     omega_q = update(
         omega_q,
-        at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(flux[2:-2, 2:-2, npx.newaxis] <= npx.cumsum(SA[2:-2, 2:-2, 1, ::-1], axis=-1)[:, :, ::-1], npx.cumsum(SA[2:-2, 2:-2, 1, ::-1], axis=-1)[:, :, ::-1]/flux[2:-2, 2:-2, npx.newaxis], 0), omega_q[2:-2, 2:-2, :]),
+        at[2:-2, 2:-2, 1:], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where((flux[2:-2, 2:-2, npx.newaxis] <= npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1], axis=-1)), npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1], axis=-1)/flux[2:-2, 2:-2, npx.newaxis], omega_q[2:-2, 2:-2, 1:])[:, :, ::-1], omega_q[2:-2, 2:-2, 1:]),
     )
     omega_q = update(
         omega_q,
-        at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(npx.max(omega_q[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis] > 1, omega_q[2:-2, 2:-2, :] * (1/npx.max(omega_q[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis]), omega_q[2:-2, 2:-2, :]), omega_q[2:-2, 2:-2, :]),
+        at[2:-2, 2:-2, 1:], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(omega_q[2:-2, 2:-2, 1:] > 1, 1, omega_q[2:-2, 2:-2, 1:]), omega_q[2:-2, 2:-2, 1:]),
+    )
+    omega_q = update(
+        omega_q,
+        at[2:-2, 2:-2, :-1], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(omega_q[2:-2, 2:-2, :-1] >= 1, 0, omega_q[2:-2, 2:-2, :-1]), omega_q[2:-2, 2:-2, :-1]),
+    )
+    omega_q = update(
+        omega_q,
+        at[2:-2, 2:-2, -1], npx.where((sas_params[2:-2, 2:-2, 0] == 22), 1, omega_q[2:-2, 2:-2, -1]),
     )
     Omega, sas_params = sas.kumaraswami(state, SA, sas_params)
     omega_q = update_add(
@@ -525,8 +545,6 @@ def calc_omega_q(state, SA, sas_params, flux):
 def svat_transport_model_deterministic(state):
     """Calculates water transport model with deterministic method (i.e. not numerically)
     """
-    settings = state.settings
-
     with state.timers["infiltration into root zone"]:
         infiltration.calculate_infiltration_rz_transport(state)
     with state.timers["evapotranspiration"]:
@@ -545,8 +563,6 @@ def svat_transport_model_deterministic(state):
 def svat_lbc_transport_model_deterministic(state):
     """Calculates water transport model with deterministic method (i.e. not numerically)
     """
-    settings = state.settings
-
     with state.timers["infiltration into root zone"]:
         infiltration.calculate_infiltration_rz_transport(state)
     with state.timers["evapotranspiration"]:
@@ -567,8 +583,6 @@ def svat_lbc_transport_model_deterministic(state):
 def svat_crop_transport_model_deterministic(state):
     """Calculates water transport model with deterministic method (i.e. not numerically)
     """
-    settings = state.settings
-
     with state.timers["redistribution after root growth/harvesting"]:
         crop.calculate_redistribution_transport(state)
     with state.timers["infiltration into root zone"]:
@@ -583,9 +597,6 @@ def svat_crop_transport_model_deterministic(state):
         subsurface_runoff.calculate_percolation_ss_transport(state)
     with state.timers["capillary rise into root zone"]:
         capillary_rise.calculate_capillary_rise_rz_transport(state)
-    if settings.enable_groundwater_boundary:
-        with state.timers["capillary rise into subsoil"]:
-            capillary_rise.calculate_capillary_rise_ss_transport(state)
 
 
 @roger_kernel
@@ -696,7 +707,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         TTrkn_transp = update(
             TTrkn_transp,
@@ -704,7 +715,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         TTrkn_q_rz = update(
             TTrkn_q_rz,
@@ -712,7 +723,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         TTrkn_cpr_rz = update(
             TTrkn_cpr_rz,
@@ -720,7 +731,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         TTrkn_q_ss = update(
             TTrkn_q_ss,
@@ -728,7 +739,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
 
         sarkn_rz = update_add(
@@ -755,7 +766,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         TTrkn_transp = update(
             TTrkn_transp,
@@ -763,7 +774,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         TTrkn_q_rz = update(
             TTrkn_q_rz,
@@ -771,7 +782,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         TTrkn_cpr_rz = update(
             TTrkn_cpr_rz,
@@ -779,7 +790,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         TTrkn_q_ss = update(
             TTrkn_q_ss,
@@ -787,7 +798,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
 
         sarkn_rz = update_add(
@@ -814,7 +825,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         TTrkn_transp = update(
             TTrkn_transp,
@@ -822,7 +833,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         TTrkn_q_rz = update(
             TTrkn_q_rz,
@@ -830,7 +841,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         TTrkn_cpr_rz = update(
             TTrkn_cpr_rz,
@@ -838,7 +849,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         TTrkn_q_ss = update(
             TTrkn_q_ss,
@@ -846,7 +857,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
 
         sarkn_rz = update_add(
@@ -873,7 +884,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         TTrkn_transp = update(
             TTrkn_transp,
@@ -881,7 +892,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         TTrkn_q_rz = update(
             TTrkn_q_rz,
@@ -889,7 +900,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         TTrkn_cpr_rz = update(
             TTrkn_cpr_rz,
@@ -897,7 +908,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         TTrkn_q_ss = update(
             TTrkn_q_ss,
@@ -905,7 +916,7 @@ def svat_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
 
         ttn_evap_soil = update(
@@ -1205,7 +1216,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttrkn_evap_soil = update(
@@ -1218,7 +1229,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         mttrkn_transp = update(
             mttrkn_transp,
@@ -1230,7 +1241,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         mttrkn_q_rz = update(
             mttrkn_q_rz,
@@ -1242,7 +1253,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         mttrkn_cpr_rz = update(
             mttrkn_cpr_rz,
@@ -1254,7 +1265,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         mttrkn_q_ss = update(
             mttrkn_q_ss,
@@ -1293,7 +1304,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttrkn_evap_soil = update(
@@ -1306,7 +1317,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         mttrkn_transp = update(
             mttrkn_transp,
@@ -1318,7 +1329,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         mttrkn_q_rz = update(
             mttrkn_q_rz,
@@ -1330,7 +1341,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         mttrkn_cpr_rz = update(
             mttrkn_cpr_rz,
@@ -1342,7 +1353,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         mttrkn_q_ss = update(
             mttrkn_q_ss,
@@ -1382,7 +1393,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttrkn_evap_soil = update(
@@ -1395,7 +1406,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         mttrkn_transp = update(
             mttrkn_transp,
@@ -1407,7 +1418,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         mttrkn_q_rz = update(
             mttrkn_q_rz,
@@ -1419,7 +1430,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         mttrkn_cpr_rz = update(
             mttrkn_cpr_rz,
@@ -1431,7 +1442,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         mttrkn_q_ss = update(
             mttrkn_q_ss,
@@ -1469,7 +1480,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttrkn_evap_soil = update(
@@ -1482,7 +1493,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         mttrkn_transp = update(
             mttrkn_transp,
@@ -1494,7 +1505,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         mttrkn_q_rz = update(
             mttrkn_q_rz,
@@ -1506,7 +1517,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         mttrkn_cpr_rz = update(
             mttrkn_cpr_rz,
@@ -1518,7 +1529,7 @@ def svat_solute_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         mttrkn_q_ss = update(
             mttrkn_q_ss,
@@ -1642,23 +1653,23 @@ def svat_solute_transport_model_rk4(state):
 
     vs.mtt_evap_soil = update(
         vs.mtt_evap_soil,
-        at[2:-2, 2:-2, :], npx.sum(mttn_evap_soil, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_evap_soil, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_transp = update(
         vs.mtt_transp,
-        at[2:-2, 2:-2, :], npx.sum(mttn_transp, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_transp, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_q_rz = update(
         vs.mtt_q_rz,
-        at[2:-2, 2:-2, :], npx.sum(mttn_q_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_q_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_cpr_rz = update(
         vs.mtt_cpr_rz,
-        at[2:-2, 2:-2, :], npx.sum(mttn_cpr_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_cpr_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_q_ss = update(
         vs.mtt_q_ss,
-        at[2:-2, 2:-2, :], npx.sum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     # cumulative backward travel time distributions
@@ -1765,6 +1776,24 @@ def svat_solute_transport_model_rk4(state):
             vs.C_q_ss,
             at[2:-2, 2:-2], npx.where(vs.q_ss > 0, npx.sum(vs.mtt_q_ss, axis=2) / vs.q_ss, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
+
+    # update StorAge
+    vs.sa_rz = update_add(
+        vs.sa_rz,
+        at[2:-2, 2:-2, 1, :], (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :]),
+    )
+    vs.sa_ss = update_add(
+        vs.sa_ss,
+        at[2:-2, 2:-2, 1, :], vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :],
+    )
+    vs.msa_rz = update_add(
+        vs.msa_rz,
+        at[2:-2, 2:-2, 1, :], npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_evap_soil[2:-2, 2:-2, :]), 0, vs.mtt_evap_soil[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_transp[2:-2, 2:-2, :]), 0, vs.mtt_transp[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]),
+    )
+    vs.msa_ss = update_add(
+        vs.msa_ss,
+        at[2:-2, 2:-2, 1, :], npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_ss[2:-2, 2:-2, :]), 0, vs.mtt_q_ss[2:-2, 2:-2, :]),
+    )
 
     return KernelOutput(tt_evap_soil=vs.tt_evap_soil, tt_transp=vs.tt_transp, tt_q_rz=vs.tt_q_rz, tt_cpr_rz=vs.tt_cpr_rz, tt_q_ss=vs.tt_q_ss,
                         TT_evap_soil=vs.TT_evap_soil, TT_transp=vs.TT_transp, TT_q_rz=vs.TT_q_rz, TT_cpr_rz=vs.TT_cpr_rz, TT_q_ss=vs.TT_q_ss,
@@ -1971,7 +2000,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttrkn_evap_soil = update(
@@ -1984,7 +2013,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         mttrkn_transp = update(
             mttrkn_transp,
@@ -1996,7 +2025,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         mttrkn_q_rz = update(
             mttrkn_q_rz,
@@ -2008,7 +2037,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         mttrkn_cpr_rz = update(
             mttrkn_cpr_rz,
@@ -2020,7 +2049,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         mttrkn_q_ss = update(
             mttrkn_q_ss,
@@ -2059,7 +2088,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttrkn_evap_soil = update(
@@ -2072,7 +2101,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         mttrkn_transp = update(
             mttrkn_transp,
@@ -2084,7 +2113,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         mttrkn_q_rz = update(
             mttrkn_q_rz,
@@ -2096,7 +2125,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         mttrkn_cpr_rz = update(
             mttrkn_cpr_rz,
@@ -2108,7 +2137,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         mttrkn_q_ss = update(
             mttrkn_q_ss,
@@ -2148,7 +2177,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttrkn_evap_soil = update(
@@ -2161,7 +2190,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         mttrkn_transp = update(
             mttrkn_transp,
@@ -2173,7 +2202,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         mttrkn_q_rz = update(
             mttrkn_q_rz,
@@ -2185,7 +2214,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         mttrkn_cpr_rz = update(
             mttrkn_cpr_rz,
@@ -2197,7 +2226,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         mttrkn_q_ss = update(
             mttrkn_q_ss,
@@ -2235,7 +2264,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttrkn_evap_soil = update(
@@ -2248,7 +2277,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         mttrkn_transp = update(
             mttrkn_transp,
@@ -2260,7 +2289,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         mttrkn_q_rz = update(
             mttrkn_q_rz,
@@ -2272,7 +2301,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         mttrkn_cpr_rz = update(
             mttrkn_cpr_rz,
@@ -2284,7 +2313,7 @@ def svat_lbc_solute_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         mttrkn_q_ss = update(
             mttrkn_q_ss,
@@ -2408,23 +2437,23 @@ def svat_lbc_solute_transport_model_rk4(state):
 
     vs.mtt_evap_soil = update(
         vs.mtt_evap_soil,
-        at[2:-2, 2:-2, :], npx.sum(mttn_evap_soil, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_evap_soil, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_transp = update(
         vs.mtt_transp,
-        at[2:-2, 2:-2, :], npx.sum(mttn_transp, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_transp, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_q_rz = update(
         vs.mtt_q_rz,
-        at[2:-2, 2:-2, :], npx.sum(mttn_q_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_q_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_cpr_rz = update(
         vs.mtt_cpr_rz,
-        at[2:-2, 2:-2, :], npx.sum(mttn_cpr_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_cpr_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_q_ss = update(
         vs.mtt_q_ss,
-        at[2:-2, 2:-2, :], npx.sum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     # cumulative backward travel time distributions
@@ -2731,7 +2760,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttrkn_evap_soil = update(
@@ -2744,7 +2773,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         mttrkn_transp = update(
             mttrkn_transp,
@@ -2756,7 +2785,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         mttrkn_q_rz = update(
             mttrkn_q_rz,
@@ -2768,7 +2797,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         mttrkn_cpr_rz = update(
             mttrkn_cpr_rz,
@@ -2780,7 +2809,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         mttrkn_q_ss = update(
             mttrkn_q_ss,
@@ -2792,7 +2821,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_re_rg = update(
             ttrkn_re_rg,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_re_rg[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_re_rg[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_re_rg[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         mttrkn_re_rg = update(
             mttrkn_re_rg,
@@ -2804,7 +2833,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_re_rl = update(
             ttrkn_re_rl,
-            at[2:-2, 2:-2, :, 0], npx.diff(TTrkn_re_rl[2:-2, 2:-2, :, 0], axis=-1),
+            at[2:-2, 2:-2, :, 0], npx.where(npx.diff(TTrkn_re_rl[2:-2, 2:-2, :, 0], axis=-1) >= 0, npx.diff(TTrkn_re_rl[2:-2, 2:-2, :, 0], axis=-1), 0),
         )
         mttrkn_re_rl = update(
             mttrkn_re_rl,
@@ -2843,7 +2872,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttrkn_evap_soil = update(
@@ -2856,7 +2885,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         mttrkn_transp = update(
             mttrkn_transp,
@@ -2868,7 +2897,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         mttrkn_q_rz = update(
             mttrkn_q_rz,
@@ -2880,7 +2909,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         mttrkn_cpr_rz = update(
             mttrkn_cpr_rz,
@@ -2892,7 +2921,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         mttrkn_q_ss = update(
             mttrkn_q_ss,
@@ -2904,7 +2933,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_re_rg = update(
             ttrkn_re_rg,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_re_rg[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_re_rg[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_re_rg[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         mttrkn_re_rg = update(
             mttrkn_re_rg,
@@ -2916,7 +2945,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_re_rl = update(
             ttrkn_re_rl,
-            at[2:-2, 2:-2, :, 1], npx.diff(TTrkn_re_rl[2:-2, 2:-2, :, 1], axis=-1),
+            at[2:-2, 2:-2, :, 1], npx.where(npx.diff(TTrkn_re_rl[2:-2, 2:-2, :, 1], axis=-1) >= 0, npx.diff(TTrkn_re_rl[2:-2, 2:-2, :, 1], axis=-1), 0),
         )
         mttrkn_re_rl = update(
             mttrkn_re_rl,
@@ -2955,7 +2984,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttrkn_evap_soil = update(
@@ -2968,7 +2997,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         mttrkn_transp = update(
             mttrkn_transp,
@@ -2980,7 +3009,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         mttrkn_q_rz = update(
             mttrkn_q_rz,
@@ -2992,7 +3021,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         mttrkn_cpr_rz = update(
             mttrkn_cpr_rz,
@@ -3004,7 +3033,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         mttrkn_q_ss = update(
             mttrkn_q_ss,
@@ -3016,7 +3045,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_re_rg = update(
             ttrkn_re_rg,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_re_rg[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_re_rg[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_re_rg[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         mttrkn_re_rg = update(
             mttrkn_re_rg,
@@ -3028,7 +3057,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_re_rl = update(
             ttrkn_re_rl,
-            at[2:-2, 2:-2, :, 2], npx.diff(TTrkn_re_rl[2:-2, 2:-2, :, 2], axis=-1),
+            at[2:-2, 2:-2, :, 2], npx.where(npx.diff(TTrkn_re_rl[2:-2, 2:-2, :, 2], axis=-1) >= 0, npx.diff(TTrkn_re_rl[2:-2, 2:-2, :, 2], axis=-1), 0),
         )
         mttrkn_re_rl = update(
             mttrkn_re_rl,
@@ -3067,7 +3096,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_evap_soil = update(
             ttrkn_evap_soil,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_evap_soil[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttrkn_evap_soil = update(
@@ -3080,7 +3109,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_transp = update(
             ttrkn_transp,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_transp[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_transp[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_transp[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         mttrkn_transp = update(
             mttrkn_transp,
@@ -3092,7 +3121,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_q_rz = update(
             ttrkn_q_rz,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_q_rz[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         mttrkn_q_rz = update(
             mttrkn_q_rz,
@@ -3104,7 +3133,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_cpr_rz = update(
             ttrkn_cpr_rz,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_cpr_rz[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         mttrkn_cpr_rz = update(
             mttrkn_cpr_rz,
@@ -3116,7 +3145,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_q_ss = update(
             ttrkn_q_ss,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_q_ss[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         mttrkn_q_ss = update(
             mttrkn_q_ss,
@@ -3128,7 +3157,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_re_rg = update(
             ttrkn_re_rg,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_re_rg[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_re_rg[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_re_rg[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         mttrkn_re_rg = update(
             mttrkn_re_rg,
@@ -3140,7 +3169,7 @@ def svat_crop_solute_transport_model_rk4(state):
         )
         ttrkn_re_rl = update(
             ttrkn_re_rl,
-            at[2:-2, 2:-2, :, 3], npx.diff(TTrkn_re_rl[2:-2, 2:-2, :, 3], axis=-1),
+            at[2:-2, 2:-2, :, 3], npx.where(npx.diff(TTrkn_re_rl[2:-2, 2:-2, :, 3], axis=-1) >= 0, npx.diff(TTrkn_re_rl[2:-2, 2:-2, :, 3], axis=-1), 0),
         )
         mttrkn_re_rl = update(
             mttrkn_re_rl,
@@ -3292,31 +3321,31 @@ def svat_crop_solute_transport_model_rk4(state):
 
     vs.mtt_evap_soil = update(
         vs.mtt_evap_soil,
-        at[2:-2, 2:-2, :], npx.sum(mttn_evap_soil, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_evap_soil, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_transp = update(
         vs.mtt_transp,
-        at[2:-2, 2:-2, :], npx.sum(mttn_transp, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_transp, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_q_rz = update(
         vs.mtt_q_rz,
-        at[2:-2, 2:-2, :], npx.sum(mttn_q_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_q_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_cpr_rz = update(
         vs.mtt_cpr_rz,
-        at[2:-2, 2:-2, :], npx.sum(mttn_cpr_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_cpr_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_q_ss = update(
         vs.mtt_q_ss,
-        at[2:-2, 2:-2, :], npx.sum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_re_rg = update(
         vs.mtt_re_rg,
-        at[2:-2, 2:-2, :], npx.sum(mttn_re_rg, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_re_rg, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_re_rl = update(
         vs.mtt_re_rl,
-        at[2:-2, 2:-2, :], npx.sum(mttn_re_rl, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_re_rl, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     # cumulative backward travel time distributions
@@ -3522,7 +3551,7 @@ def svat_transport_model_euler(state):
         )
         ttn_evap_soil = update(
             ttn_evap_soil,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_evap_soil[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_evap_soil[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_evap_soil[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         TTn_transp = update(
             TTn_transp,
@@ -3530,7 +3559,7 @@ def svat_transport_model_euler(state):
         )
         ttn_transp = update(
             ttn_transp,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_transp[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_transp[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_transp[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         TTn_q_rz = update(
             TTn_q_rz,
@@ -3538,7 +3567,7 @@ def svat_transport_model_euler(state):
         )
         ttn_q_rz = update(
             ttn_q_rz,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_q_rz[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_q_rz[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_q_rz[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         TTn_cpr_rz = update(
             TTn_cpr_rz,
@@ -3546,7 +3575,7 @@ def svat_transport_model_euler(state):
         )
         ttn_cpr_rz = update(
             ttn_cpr_rz,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_cpr_rz[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_cpr_rz[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_cpr_rz[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         TTn_q_ss = update(
             TTn_q_ss,
@@ -3554,16 +3583,21 @@ def svat_transport_model_euler(state):
         )
         ttn_q_ss = update(
             ttn_q_ss,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_q_ss[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_q_ss[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_q_ss[2:-2, 2:-2, :, i], axis=-1), 0),
         )
 
+        # constrain numerical solution to nonnegative
+        dsan_rz = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * ttn_evap_soil[2:-2, 2:-2, :, i] - vs.transp[2:-2, 2:-2, npx.newaxis] * ttn_transp[2:-2, 2:-2, :, i] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i]) * h
+        dsan_rz = npx.where(dsan_rz < 0, 0, dsan_rz)
+        dsan_ss = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i] + vs.cpr_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_ss[2:-2, 2:-2, :, i] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * ttn_q_ss[2:-2, 2:-2, :, i]) * h
+        dsan_ss = npx.where(dsan_ss < 0, 0, dsan_ss)
         san_rz = update_add(
             san_rz,
-            at[2:-2, 2:-2, 1, :], (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * ttn_evap_soil[2:-2, 2:-2, :, i] - vs.transp[2:-2, 2:-2, npx.newaxis] * ttn_transp[2:-2, 2:-2, :, i] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i]) * h,
+            at[2:-2, 2:-2, 1, :], dsan_rz,
         )
         san_ss = update_add(
             san_ss,
-            at[2:-2, 2:-2, 1, :], (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * ttn_q_ss[2:-2, 2:-2, :, i]) * h,
+            at[2:-2, 2:-2, 1, :], dsan_ss,
         )
         SAn_rz = update(
             SAn_rz,
@@ -3793,7 +3827,7 @@ def svat_solute_transport_model_euler(state):
         )
         ttn_evap_soil = update(
             ttn_evap_soil,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_evap_soil[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_evap_soil[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_evap_soil[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttn_evap_soil = update(
@@ -3806,7 +3840,7 @@ def svat_solute_transport_model_euler(state):
         )
         ttn_transp = update(
             ttn_transp,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_transp[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_transp[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_transp[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         mttn_transp = update(
             mttn_transp,
@@ -3818,7 +3852,7 @@ def svat_solute_transport_model_euler(state):
         )
         ttn_q_rz = update(
             ttn_q_rz,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_q_rz[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_q_rz[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_q_rz[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         mttn_q_rz = update(
             mttn_q_rz,
@@ -3830,7 +3864,7 @@ def svat_solute_transport_model_euler(state):
         )
         ttn_cpr_rz = update(
             ttn_cpr_rz,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_cpr_rz[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_cpr_rz[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_cpr_rz[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         mttn_cpr_rz = update(
             mttn_cpr_rz,
@@ -3842,29 +3876,49 @@ def svat_solute_transport_model_euler(state):
         )
         ttn_q_ss = update(
             ttn_q_ss,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_q_ss[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_q_ss[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_q_ss[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         mttn_q_ss = update(
             mttn_q_ss,
-            at[2:-2, 2:-2, :, i], calc_mtt(state, san_ss, ttn_cpr_rz[:, :, :, i], vs.q_ss * h, msan_ss, vs.alpha_q)[2:-2, 2:-2, :],
+            at[2:-2, 2:-2, :, i], calc_mtt(state, san_ss, ttn_q_ss[:, :, :, i], vs.q_ss * h, msan_ss, vs.alpha_q)[2:-2, 2:-2, :],
         )
 
+        # constrain numerical solution to nonnegative
+        dsan_rz = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * ttn_evap_soil[2:-2, 2:-2, :, i] - vs.transp[2:-2, 2:-2, npx.newaxis] * ttn_transp[2:-2, 2:-2, :, i] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i]) * h
+        dsan_rz = npx.where(dsan_rz < 0, 0, dsan_rz)
+        dsan_ss = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * ttn_q_ss[2:-2, 2:-2, :, i]) * h
+        dsan_ss = npx.where(dsan_ss < 0, 0, dsan_ss)
         san_rz = update_add(
             san_rz,
-            at[2:-2, 2:-2, 1, :], (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * ttn_evap_soil[2:-2, 2:-2, :, i] - vs.transp[2:-2, 2:-2, npx.newaxis] * ttn_transp[2:-2, 2:-2, :, i] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i]) * h,
+            at[2:-2, 2:-2, 1, :], dsan_rz,
         )
         san_ss = update_add(
             san_ss,
-            at[2:-2, 2:-2, 1, :], (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * ttn_q_ss[2:-2, 2:-2, :, i]) * h,
+            at[2:-2, 2:-2, 1, :], dsan_ss,
         )
-        msan_rz = update_add(
-            msan_rz,
-            at[2:-2, 2:-2, 1, :], (npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_evap_soil[2:-2, 2:-2, :, i]), 0, mttn_evap_soil[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_transp[2:-2, 2:-2, :, i]), 0, mttn_transp[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i])) * h,
-        )
-        msan_ss = update_add(
-            msan_ss,
-            at[2:-2, 2:-2, 1, :], (npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_q_ss[2:-2, 2:-2, :, i]), 0, mttn_q_ss[2:-2, 2:-2, :, i])) * h,
-        )
+        dmsa_rz = (npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_evap_soil[2:-2, 2:-2, :, i]), 0, mttn_evap_soil[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_transp[2:-2, 2:-2, :, i]), 0, mttn_transp[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i])) * h
+        dmsa_ss = (npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_q_ss[2:-2, 2:-2, :, i]), 0, mttn_q_ss[2:-2, 2:-2, :, i])) * h
+        if settings.enable_oxygen18 or settings.enable_deuterium:
+            msan_rz = update_add(
+                msan_rz,
+                at[2:-2, 2:-2, 1, :], dmsa_rz,
+            )
+            msan_ss = update_add(
+                msan_ss,
+                at[2:-2, 2:-2, 1, :], dmsa_ss,
+            )
+        elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+            # constrain numerical solution to nonnegative
+            dmsa_rz = npx.where(dmsa_rz < 0, 0, dmsa_rz)
+            dmsa_ss = npx.where(dmsa_ss < 0, 0, dmsa_ss)
+            msan_rz = update_add(
+                msan_rz,
+                at[2:-2, 2:-2, 1, :], dmsa_rz,
+            )
+            msan_ss = update_add(
+                msan_ss,
+                at[2:-2, 2:-2, 1, :], dmsa_ss,
+            )
         SAn_rz = update(
             SAn_rz,
             at[2:-2, 2:-2, 1, 1:], npx.cumsum(san_rz[2:-2, 2:-2, 1, :], axis=-1),
@@ -3925,23 +3979,23 @@ def svat_solute_transport_model_euler(state):
 
     vs.mtt_evap_soil = update(
         vs.mtt_evap_soil,
-        at[2:-2, 2:-2, :], npx.sum(mttn_evap_soil, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_evap_soil, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_transp = update(
         vs.mtt_transp,
-        at[2:-2, 2:-2, :], npx.sum(mttn_transp, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_transp, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_q_rz = update(
         vs.mtt_q_rz,
-        at[2:-2, 2:-2, :], npx.sum(mttn_q_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_q_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_cpr_rz = update(
         vs.mtt_cpr_rz,
-        at[2:-2, 2:-2, :], npx.sum(mttn_cpr_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_cpr_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_q_ss = update(
         vs.mtt_q_ss,
-        at[2:-2, 2:-2, :], npx.sum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     # cumulative backward travel time distributions
@@ -3967,22 +4021,42 @@ def svat_solute_transport_model_euler(state):
     )
 
     # update StorAge
+    # impose constrain of numerical solution to be nonnegative
+    dsa_rz = vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :]
+    dsa_rz = npx.where(dsa_rz < 0, 0, dsa_rz)
+    dsa_ss = vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :]
+    dsa_ss = npx.where(dsa_ss < 0, 0, dsa_ss)
     vs.sa_rz = update_add(
         vs.sa_rz,
-        at[2:-2, 2:-2, 1, :], vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :],
+        at[2:-2, 2:-2, 1, :], dsa_rz,
     )
     vs.sa_ss = update_add(
         vs.sa_ss,
-        at[2:-2, 2:-2, 1, :], vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :],
+        at[2:-2, 2:-2, 1, :], dsa_ss,
     )
-    vs.msa_rz = update_add(
-        vs.msa_rz,
-        at[2:-2, 2:-2, 1, :], npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_evap_soil[2:-2, 2:-2, :]), 0, vs.mtt_evap_soil[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_transp[2:-2, 2:-2, :]), 0, vs.mtt_transp[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]),
-    )
-    vs.msa_ss = update_add(
-        vs.msa_ss,
-        at[2:-2, 2:-2, 1, :], npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_ss[2:-2, 2:-2, :]), 0, vs.mtt_q_ss[2:-2, 2:-2, :]),
-    )
+    dmsa_rz = npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_evap_soil[2:-2, 2:-2, :]), 0, vs.mtt_evap_soil[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_transp[2:-2, 2:-2, :]), 0, vs.mtt_transp[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :])
+    dmsa_ss = npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_ss[2:-2, 2:-2, :]), 0, vs.mtt_q_ss[2:-2, 2:-2, :])
+    if settings.enable_oxygen18 or settings.enable_deuterium:
+        vs.msa_rz = update_add(
+            vs.msa_rz,
+            at[2:-2, 2:-2, 1, :], dmsa_rz,
+        )
+        vs.msa_ss = update_add(
+            vs.msa_ss,
+            at[2:-2, 2:-2, 1, :], dmsa_ss,
+        )
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+        # constrain numerical solution to nonnegative
+        dmsa_rz = npx.where(dmsa_rz < 0, 0, dmsa_rz)
+        dmsa_ss = npx.where(dmsa_ss < 0, 0, dmsa_ss)
+        vs.msa_rz = update_add(
+            vs.msa_rz,
+            at[2:-2, 2:-2, 1, :], dmsa_rz,
+        )
+        vs.msa_ss = update_add(
+            vs.msa_ss,
+            at[2:-2, 2:-2, 1, :], dmsa_ss,
+        )
 
     # calculate solute concentrations
     if settings.enable_oxygen18 or settings.enable_deuterium:
@@ -4213,7 +4287,7 @@ def svat_lbc_solute_transport_model_euler(state):
         )
         ttn_evap_soil = update(
             ttn_evap_soil,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_evap_soil[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_evap_soil[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_evap_soil[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttn_evap_soil = update(
@@ -4226,7 +4300,7 @@ def svat_lbc_solute_transport_model_euler(state):
         )
         ttn_transp = update(
             ttn_transp,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_transp[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_transp[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_transp[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         mttn_transp = update(
             mttn_transp,
@@ -4238,7 +4312,7 @@ def svat_lbc_solute_transport_model_euler(state):
         )
         ttn_q_rz = update(
             ttn_q_rz,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_q_rz[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_q_rz[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_q_rz[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         mttn_q_rz = update(
             mttn_q_rz,
@@ -4250,7 +4324,7 @@ def svat_lbc_solute_transport_model_euler(state):
         )
         ttn_cpr_rz = update(
             ttn_cpr_rz,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_cpr_rz[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_cpr_rz[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_cpr_rz[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         mttn_cpr_rz = update(
             mttn_cpr_rz,
@@ -4262,29 +4336,48 @@ def svat_lbc_solute_transport_model_euler(state):
         )
         ttn_q_ss = update(
             ttn_q_ss,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_q_ss[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_q_ss[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_q_ss[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         mttn_q_ss = update(
             mttn_q_ss,
-            at[2:-2, 2:-2, :, i], calc_mtt(state, san_ss, ttn_cpr_rz[:, :, :, i], vs.q_ss * h, msan_ss, vs.alpha_q)[2:-2, 2:-2, :],
+            at[2:-2, 2:-2, :, i], calc_mtt(state, san_ss, ttn_q_ss[:, :, :, i], vs.q_ss * h, msan_ss, vs.alpha_q)[2:-2, 2:-2, :],
         )
-
+        # constrain numerical solution to nonnegative
+        dsan_rz = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * ttn_evap_soil[2:-2, 2:-2, :, i] - vs.transp[2:-2, 2:-2, npx.newaxis] * ttn_transp[2:-2, 2:-2, :, i] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i]) * h
+        dsan_rz = npx.where(dsan_rz < 0, 0, dsan_rz)
+        dsan_ss = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i] + vs.cpr_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_ss[2:-2, 2:-2, :, i] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * ttn_q_ss[2:-2, 2:-2, :, i]) * h
+        dsan_ss = npx.where(dsan_ss < 0, 0, dsan_ss)
         san_rz = update_add(
             san_rz,
-            at[2:-2, 2:-2, 1, :], (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * ttn_evap_soil[2:-2, 2:-2, :, i] - vs.transp[2:-2, 2:-2, npx.newaxis] * ttn_transp[2:-2, 2:-2, :, i] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i]) * h,
+            at[2:-2, 2:-2, 1, :], dsan_rz,
         )
         san_ss = update_add(
             san_ss,
-            at[2:-2, 2:-2, 1, :], (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i] + vs.cpr_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_ss[2:-2, 2:-2, :, i] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * ttn_q_ss[2:-2, 2:-2, :, i]) * h,
+            at[2:-2, 2:-2, 1, :], dsan_ss,
         )
-        msan_rz = update_add(
-            msan_rz,
-            at[2:-2, 2:-2, 1, :], (npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_evap_soil[2:-2, 2:-2, :, i]), 0, mttn_evap_soil[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_transp[2:-2, 2:-2, :, i]), 0, mttn_transp[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i])) * h,
-        )
-        msan_ss = update_add(
-            msan_ss,
-            at[2:-2, 2:-2, 1, :], (npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i]) + npx.where(npx.isnan(vs.mtt_cpr_ss[2:-2, 2:-2, :, i]), 0, vs.mtt_cpr_ss[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_q_ss[2:-2, 2:-2, :, i]), 0, mttn_q_ss[2:-2, 2:-2, :, i])) * h,
-        )
+        dmsa_rz = (npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_evap_soil[2:-2, 2:-2, :, i]), 0, mttn_evap_soil[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_transp[2:-2, 2:-2, :, i]), 0, mttn_transp[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i])) * h
+        dmsa_ss = (npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i]) + npx.where(npx.isnan(vs.mtt_cpr_ss[2:-2, 2:-2, :, i]), 0, vs.mtt_cpr_ss[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_q_ss[2:-2, 2:-2, :, i]), 0, mttn_q_ss[2:-2, 2:-2, :, i])) * h
+        if settings.enable_oxygen18 or settings.enable_deuterium:
+            msan_rz = update_add(
+                msan_rz,
+                at[2:-2, 2:-2, 1, :], dmsa_rz,
+            )
+            msan_ss = update_add(
+                msan_ss,
+                at[2:-2, 2:-2, 1, :], dmsa_ss,
+            )
+        elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+            # constrain numerical solution to nonnegative
+            dmsa_rz = npx.where(dmsa_rz < 0, 0, dmsa_rz)
+            dmsa_ss = npx.where(dmsa_ss < 0, 0, dmsa_ss)
+            msan_rz = update_add(
+                msan_rz,
+                at[2:-2, 2:-2, 1, :], dmsa_rz,
+            )
+            msan_ss = update_add(
+                msan_ss,
+                at[2:-2, 2:-2, 1, :], dmsa_ss,
+            )
         SAn_rz = update(
             SAn_rz,
             at[2:-2, 2:-2, 1, 1:], npx.cumsum(san_rz[2:-2, 2:-2, 1, :], axis=-1),
@@ -4345,27 +4438,27 @@ def svat_lbc_solute_transport_model_euler(state):
 
     vs.mtt_evap_soil = update(
         vs.mtt_evap_soil,
-        at[2:-2, 2:-2, :], npx.sum(mttn_evap_soil, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_evap_soil, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_transp = update(
         vs.mtt_transp,
-        at[2:-2, 2:-2, :], npx.sum(mttn_transp, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_transp, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_q_rz = update(
         vs.mtt_q_rz,
-        at[2:-2, 2:-2, :], npx.sum(mttn_q_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_q_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_cpr_rz = update(
         vs.mtt_cpr_rz,
-        at[2:-2, 2:-2, :], npx.sum(mttn_cpr_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_cpr_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_q_ss = update(
         vs.mtt_q_ss,
-        at[2:-2, 2:-2, :], npx.sum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_q_ss = update(
         vs.mtt_q_ss,
-        at[2:-2, 2:-2, :], npx.sum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     # cumulative backward travel time distributions
@@ -4390,23 +4483,42 @@ def svat_lbc_solute_transport_model_euler(state):
         at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    # update StorAge
+    # impose constrain of numerical solution to be nonnegative
+    dsa_rz = vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :]
+    dsa_rz = npx.where(dsa_rz < 0, 0, dsa_rz)
+    dsa_ss = vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] + vs.cpr_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_ss[2:-2, 2:-2, :] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :]
+    dsa_ss = npx.where(dsa_ss < 0, 0, dsa_ss)
     vs.sa_rz = update_add(
         vs.sa_rz,
-        at[2:-2, 2:-2, 1, :], vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :],
+        at[2:-2, 2:-2, 1, :], dsa_rz,
     )
     vs.sa_ss = update_add(
         vs.sa_ss,
-        at[2:-2, 2:-2, 1, :], vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :],
+        at[2:-2, 2:-2, 1, :], dsa_ss,
     )
-    vs.msa_rz = update_add(
-        vs.msa_rz,
-        at[2:-2, 2:-2, 1, :], npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_evap_soil[2:-2, 2:-2, :]), 0, vs.mtt_evap_soil[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_transp[2:-2, 2:-2, :]), 0, vs.mtt_transp[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]),
-    )
-    vs.msa_ss = update_add(
-        vs.msa_ss,
-        at[2:-2, 2:-2, 1, :], npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_ss[2:-2, 2:-2, :]), 0, vs.mtt_q_ss[2:-2, 2:-2, :]),
-    )
+    dmsa_rz = npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_evap_soil[2:-2, 2:-2, :]), 0, vs.mtt_evap_soil[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_transp[2:-2, 2:-2, :]), 0, vs.mtt_transp[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :])
+    dmsa_ss = npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_cpr_ss[2:-2, 2:-2, :]), 0, vs.mtt_cpr_ss[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_ss[2:-2, 2:-2, :]), 0, vs.mtt_q_ss[2:-2, 2:-2, :])
+    if settings.enable_oxygen18 or settings.enable_deuterium:
+        vs.msa_rz = update_add(
+            vs.msa_rz,
+            at[2:-2, 2:-2, 1, :], dmsa_rz,
+        )
+        vs.msa_ss = update_add(
+            vs.msa_ss,
+            at[2:-2, 2:-2, 1, :], dmsa_ss,
+        )
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+        # constrain numerical solution to nonnegative
+        dmsa_rz = npx.where(dmsa_rz < 0, 0, dmsa_rz)
+        dmsa_ss = npx.where(dmsa_ss < 0, 0, dmsa_ss)
+        vs.msa_rz = update_add(
+            vs.msa_rz,
+            at[2:-2, 2:-2, 1, :], dmsa_rz,
+        )
+        vs.msa_ss = update_add(
+            vs.msa_ss,
+            at[2:-2, 2:-2, 1, :], dmsa_ss,
+        )
 
     # calculate solute concentrations
     if settings.enable_oxygen18 or settings.enable_deuterium:
@@ -4627,7 +4739,7 @@ def svat_crop_solute_transport_model_euler(state):
         )
         ttn_evap_soil = update(
             ttn_evap_soil,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_evap_soil[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_evap_soil[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_evap_soil[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         if settings.enable_oxygen18 or settings.enable_deuterium:
             mttn_evap_soil = update(
@@ -4640,7 +4752,7 @@ def svat_crop_solute_transport_model_euler(state):
         )
         ttn_transp = update(
             ttn_transp,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_transp[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_transp[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_transp[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         mttn_transp = update(
             mttn_transp,
@@ -4652,7 +4764,7 @@ def svat_crop_solute_transport_model_euler(state):
         )
         ttn_q_rz = update(
             ttn_q_rz,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_q_rz[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_q_rz[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_q_rz[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         mttn_q_rz = update(
             mttn_q_rz,
@@ -4664,7 +4776,7 @@ def svat_crop_solute_transport_model_euler(state):
         )
         ttn_cpr_rz = update(
             ttn_cpr_rz,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_cpr_rz[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_cpr_rz[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_cpr_rz[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         mttn_cpr_rz = update(
             mttn_cpr_rz,
@@ -4676,11 +4788,11 @@ def svat_crop_solute_transport_model_euler(state):
         )
         ttn_q_ss = update(
             ttn_q_ss,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_q_ss[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_q_ss[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_q_ss[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         mttn_q_ss = update(
             mttn_q_ss,
-            at[2:-2, 2:-2, :, i], calc_mtt(state, san_ss, ttn_cpr_rz[:, :, :, i], vs.q_ss * h, msan_ss, vs.alpha_q)[2:-2, 2:-2, :],
+            at[2:-2, 2:-2, :, i], calc_mtt(state, san_ss, ttn_q_ss[:, :, :, i], vs.q_ss * h, msan_ss, vs.alpha_q)[2:-2, 2:-2, :],
         )
         alpha_re = allocate(state.dimensions, ("x", "y"), fill=1)
         TTn_re_rg = update(
@@ -4689,7 +4801,7 @@ def svat_crop_solute_transport_model_euler(state):
         )
         ttn_re_rg = update(
             ttn_re_rg,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_re_rg[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_re_rg[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_re_rg[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         mttn_re_rg = update(
             mttn_re_rg,
@@ -4702,29 +4814,49 @@ def svat_crop_solute_transport_model_euler(state):
         )
         ttn_re_rl = update(
             ttn_re_rl,
-            at[2:-2, 2:-2, :, i], npx.diff(TTn_re_rl[2:-2, 2:-2, :, i], axis=-1),
+            at[2:-2, 2:-2, :, i], npx.where(npx.diff(TTn_re_rl[2:-2, 2:-2, :, i], axis=-1) >= 0, npx.diff(TTn_re_rl[2:-2, 2:-2, :, i], axis=-1), 0),
         )
         mttn_re_rl = update(
             mttn_re_rl,
             at[2:-2, 2:-2, :, i], calc_mtt(state, san_rz, ttn_re_rl[:, :, :, i], vs.re_rl * h, msan_ss, alpha_re)[2:-2, 2:-2, :],
         )
 
+        # constrain numerical solution to nonnegative
+        dsan_rz = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] + vs.re_rg[2:-2, 2:-2, npx.newaxis] * ttn_re_rg[2:-2, 2:-2, :, i] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * ttn_evap_soil[2:-2, 2:-2, :, i] - vs.transp[2:-2, 2:-2, npx.newaxis] * ttn_transp[2:-2, 2:-2, :, i] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i] - vs.re_rl[2:-2, 2:-2, npx.newaxis] * ttn_re_rl[2:-2, 2:-2, :, i]) * h
+        dsan_rz = npx.where(dsan_rz < 0, 0, dsan_rz)
+        dsan_ss = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i] + vs.re_rl[2:-2, 2:-2, npx.newaxis] * ttn_re_rl[2:-2, 2:-2, :, i] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * ttn_q_ss[2:-2, 2:-2, :, i] - vs.re_rg[2:-2, 2:-2, npx.newaxis] * ttn_re_rg[2:-2, 2:-2, :, i]) * h
+        dsan_ss = npx.where(dsan_ss < 0, 0, dsan_ss)
         san_rz = update_add(
             san_rz,
-            at[2:-2, 2:-2, 1, :], (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] + vs.re_rg[2:-2, 2:-2, npx.newaxis] * ttn_re_rg[2:-2, 2:-2, :, i] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * ttn_evap_soil[2:-2, 2:-2, :, i] - vs.transp[2:-2, 2:-2, npx.newaxis] * ttn_transp[2:-2, 2:-2, :, i] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i] - vs.re_rl[2:-2, 2:-2, npx.newaxis] * ttn_re_rl[2:-2, 2:-2, :, i]) * h,
+            at[2:-2, 2:-2, 1, :], dsan_rz,
         )
         san_ss = update_add(
             san_ss,
-            at[2:-2, 2:-2, 1, :], (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i] + vs.re_rl[2:-2, 2:-2, npx.newaxis] * ttn_re_rl[2:-2, 2:-2, :, i] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * ttn_q_ss[2:-2, 2:-2, :, i] - vs.re_rg[2:-2, 2:-2, npx.newaxis] * ttn_re_rg[2:-2, 2:-2, :, i]) * h,
+            at[2:-2, 2:-2, 1, :], dsan_ss,
         )
-        msan_rz = update_add(
-            msan_rz,
-            at[2:-2, 2:-2, 1, :], (npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) + npx.where(npx.isnan(mttn_re_rg[2:-2, 2:-2, :, i]), 0, mttn_re_rg[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_evap_soil[2:-2, 2:-2, :, i]), 0, mttn_evap_soil[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_transp[2:-2, 2:-2, :, i]), 0, mttn_transp[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_re_rl[2:-2, 2:-2, :, i]), 0, mttn_re_rl[2:-2, 2:-2, :, i])) * h,
-        )
-        msan_ss = update_add(
-            msan_ss,
-            at[2:-2, 2:-2, 1, :], (npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i]) + npx.where(npx.isnan(mttn_re_rl[2:-2, 2:-2, :, i]), 0, mttn_re_rl[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_q_ss[2:-2, 2:-2, :, i]), 0, mttn_q_ss[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_re_rg[2:-2, 2:-2, :, i]), 0, mttn_re_rg[2:-2, 2:-2, :, i])) * h,
-        )
+        dmsa_rz = (npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) + npx.where(npx.isnan(mttn_re_rg[2:-2, 2:-2, :, i]), 0, mttn_re_rg[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_evap_soil[2:-2, 2:-2, :, i]), 0, mttn_evap_soil[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_transp[2:-2, 2:-2, :, i]), 0, mttn_transp[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_re_rl[2:-2, 2:-2, :, i]), 0, mttn_re_rl[2:-2, 2:-2, :, i])) * h
+        dmsa_ss = (npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i]) + npx.where(npx.isnan(mttn_re_rl[2:-2, 2:-2, :, i]), 0, mttn_re_rl[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_q_ss[2:-2, 2:-2, :, i]), 0, mttn_q_ss[2:-2, 2:-2, :, i]) - npx.where(npx.isnan(mttn_re_rg[2:-2, 2:-2, :, i]), 0, mttn_re_rg[2:-2, 2:-2, :, i])) * h
+        if settings.enable_oxygen18 or settings.enable_deuterium:
+            msan_rz = update_add(
+                msan_rz,
+                at[2:-2, 2:-2, 1, :], dmsa_rz,
+            )
+            msan_ss = update_add(
+                msan_ss,
+                at[2:-2, 2:-2, 1, :], dmsa_ss,
+            )
+        elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+            # constrain numerical solution to nonnegative
+            dmsa_rz = npx.where(dmsa_rz < 0, 0, dmsa_rz)
+            dmsa_ss = npx.where(dmsa_ss < 0, 0, dmsa_ss)
+            msan_rz = update_add(
+                msan_rz,
+                at[2:-2, 2:-2, 1, :], dmsa_rz,
+            )
+            msan_ss = update_add(
+                msan_ss,
+                at[2:-2, 2:-2, 1, :], dmsa_ss,
+            )
         SAn_rz = update(
             SAn_rz,
             at[2:-2, 2:-2, 1, 1:], npx.cumsum(san_rz[2:-2, 2:-2, 1, :], axis=-1),
@@ -4797,31 +4929,31 @@ def svat_crop_solute_transport_model_euler(state):
 
     vs.mtt_evap_soil = update(
         vs.mtt_evap_soil,
-        at[2:-2, 2:-2, :], npx.sum(mttn_evap_soil, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_evap_soil, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_transp = update(
         vs.mtt_transp,
-        at[2:-2, 2:-2, :], npx.sum(mttn_transp, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_transp, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_q_rz = update(
         vs.mtt_q_rz,
-        at[2:-2, 2:-2, :], npx.sum(mttn_q_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_q_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_cpr_rz = update(
         vs.mtt_cpr_rz,
-        at[2:-2, 2:-2, :], npx.sum(mttn_cpr_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_cpr_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_q_ss = update(
         vs.mtt_q_ss,
-        at[2:-2, 2:-2, :], npx.sum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_re_rg = update(
         vs.mtt_re_rg,
-        at[2:-2, 2:-2, :], npx.sum(mttn_re_rg, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_re_rg, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_re_rl = update(
         vs.mtt_re_rl,
-        at[2:-2, 2:-2, :], npx.sum(mttn_re_rl, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.nansum(mttn_re_rl, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     # cumulative backward travel time distributions
@@ -4854,23 +4986,42 @@ def svat_crop_solute_transport_model_euler(state):
         at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_re_rl, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    # update StorAge
+    # impose constrain of numerical solution to be nonnegative
+    dsa_rz = vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] + vs.re_rg[2:-2, 2:-2, npx.newaxis] * vs.tt_re_rg[2:-2, 2:-2, :] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] - vs.re_rl[2:-2, 2:-2, npx.newaxis] * vs.tt_re_rl[2:-2, 2:-2, :]
+    dsa_rz = npx.where(dsa_rz < 0, 0, dsa_rz)
+    dsa_ss = vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] + vs.re_rl[2:-2, 2:-2, npx.newaxis] * vs.tt_re_rl[2:-2, 2:-2, :] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :] - vs.re_rg[2:-2, 2:-2, npx.newaxis] * vs.tt_re_rg[2:-2, 2:-2, :]
+    dsa_ss = npx.where(dsa_ss < 0, 0, dsa_ss)
     vs.sa_rz = update_add(
         vs.sa_rz,
-        at[2:-2, 2:-2, 1, :], vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :],
+        at[2:-2, 2:-2, 1, :], dsa_rz,
     )
     vs.sa_ss = update_add(
         vs.sa_ss,
-        at[2:-2, 2:-2, 1, :], vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :],
+        at[2:-2, 2:-2, 1, :], dsa_ss,
     )
-    vs.msa_rz = update_add(
-        vs.msa_rz,
-        at[2:-2, 2:-2, 1, :], npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_evap_soil[2:-2, 2:-2, :]), 0, vs.mtt_evap_soil[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_transp[2:-2, 2:-2, :]), 0, vs.mtt_transp[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]),
-    )
-    vs.msa_ss = update_add(
-        vs.msa_ss,
-        at[2:-2, 2:-2, 1, :], npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_ss[2:-2, 2:-2, :]), 0, vs.mtt_q_ss[2:-2, 2:-2, :]),
-    )
+    dmsa_rz = npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_re_rg[2:-2, 2:-2, :]), 0, vs.mtt_re_rg[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_evap_soil[2:-2, 2:-2, :]), 0, vs.mtt_evap_soil[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_transp[2:-2, 2:-2, :]), 0, vs.mtt_transp[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_re_rl[2:-2, 2:-2, :]), 0, vs.mtt_re_rl[2:-2, 2:-2, :])
+    dmsa_ss = npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_re_rl[2:-2, 2:-2, :]), 0, vs.mtt_re_rl[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_q_ss[2:-2, 2:-2, :]), 0, vs.mtt_q_ss[2:-2, 2:-2, :]) - npx.where(npx.isnan(vs.mtt_re_rg[2:-2, 2:-2, :]), 0, vs.mtt_re_rg[2:-2, 2:-2, :])
+    if settings.enable_oxygen18 or settings.enable_deuterium:
+        vs.msa_rz = update_add(
+            vs.msa_rz,
+            at[2:-2, 2:-2, 1, :], dmsa_rz,
+        )
+        vs.msa_ss = update_add(
+            vs.msa_ss,
+            at[2:-2, 2:-2, 1, :], dmsa_ss,
+        )
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+        # constrain numerical solution to nonnegative
+        dmsa_rz = npx.where(dmsa_rz < 0, 0, dmsa_rz)
+        dmsa_ss = npx.where(dmsa_ss < 0, 0, dmsa_ss)
+        vs.msa_rz = update_add(
+            vs.msa_rz,
+            at[2:-2, 2:-2, 1, :], dmsa_rz,
+        )
+        vs.msa_ss = update_add(
+            vs.msa_ss,
+            at[2:-2, 2:-2, 1, :], dmsa_ss,
+        )
 
     # calculate solute concentrations
     if settings.enable_oxygen18 or settings.enable_deuterium:

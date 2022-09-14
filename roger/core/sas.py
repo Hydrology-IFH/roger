@@ -27,7 +27,11 @@ def uniform(state, SA, sas_params):
     )
     Omega = update(
         Omega,
-        at[2:-2, 2:-2, -1], 1 * mask[2:-2, 2:-2, 0] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, -1], npx.where(mask[2:-2, 2:-2, 0], 1, Omega[2:-2, 2:-2, -1]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    Omega = update(
+        Omega,
+        at[2:-2, 2:-2, :], npx.where(S[2:-2, 2:-2, :] <= 0, 0, Omega[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return Omega
@@ -115,6 +119,10 @@ def kumaraswami(state, SA, sas_params):
                                npx.where(SA[2:-2, 2:-2, vs.tau, :] > 0,
                                1 - (1 - (SA[2:-2, 2:-2, vs.tau, :]/S[2:-2, 2:-2, :])**sas_params[2:-2, 2:-2, 1, npx.newaxis])**sas_params[2:-2, 2:-2, 2, npx.newaxis], 0.)) * mask3[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
+    Omega = update(
+        Omega,
+        at[2:-2, 2:-2, :], npx.where(S[2:-2, 2:-2, :] <= 0, 0, Omega[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
 
     return Omega, sas_params
 
@@ -148,6 +156,10 @@ def gamma(state, SA, sas_params):
         at[2:-2, 2:-2, :], npx.where(SA[2:-2, 2:-2, vs.tau, :] > 0, npx.where(SA[2:-2, 2:-2, vs.tau, :] < S[2:-2, 2:-2, :],
                                      spsx.gammainc(sas_params[2:-2, 2:-2, 2, npx.newaxis], lam[2:-2, 2:-2, :] * SA[2:-2, 2:-2, vs.tau, :]) * rescale[2:-2, 2:-2, :], 1.), 0.) * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
+    Omega = update(
+        Omega,
+        at[2:-2, 2:-2, :], npx.where(S[2:-2, 2:-2, :] <= 0, 0, Omega[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
 
     return Omega
 
@@ -175,6 +187,10 @@ def exponential(state, SA, sas_params):
         Omega,
         at[2:-2, 2:-2, :], npx.where(mask52[2:-2, 2:-2, :], npx.where(SA[2:-2, 2:-2, vs.tau, :] > 0, npx.where(SA[2:-2, 2:-2, vs.tau, :] < S[2:-2, 2:-2, :],
                                1 - npx.exp(sas_params[2:-2, 2:-2, 1, npx.newaxis] * (-1) * (SA[2:-2, 2:-2, vs.tau, :] / S[2:-2, 2:-2, :])), 1.), 0.)[..., ::-1], Omega[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+    Omega = update(
+        Omega,
+        at[2:-2, 2:-2, :], npx.where(S[2:-2, 2:-2, :] <= 0, 0, Omega[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return Omega
@@ -222,26 +238,39 @@ def power(state, SA, sas_params):
         at[2:-2, 2:-2, :], npx.where(SA[2:-2, 2:-2, vs.tau, :] > 0, npx.where(SA[2:-2, 2:-2, vs.tau, :] <= S[2:-2, 2:-2, :],
                               (SA[2:-2, 2:-2, vs.tau, :] / S[2:-2, 2:-2, :])**sas_params[2:-2, 2:-2, 1, npx.newaxis], 1.), 0.) * mask6[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
+    Omega = update(
+        Omega,
+        at[2:-2, 2:-2, :], npx.where(S[2:-2, 2:-2, :] <= 0, 0, Omega[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
 
     return Omega, sas_params
 
 
 @roger_kernel
-def dirac(state, sas_params):
+def dirac(state, SA, sas_params):
     """Dirac SAS function"""
     vs = state.variables
 
     mask21 = (sas_params[:, :, 0] == 21)
     mask22 = (sas_params[:, :, 0] == 22)
 
+    S = allocate(state.dimensions, ("x", "y", 1))
     Omega = allocate(state.dimensions, ("x", "y", "nages"))
+    S = update(
+        S,
+        at[2:-2, 2:-2, :], npx.max(SA[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
     Omega = update(
         Omega,
-        at[2:-2, 2:-2, 1], npx.where(mask21[2:-2, 2:-2], 1, 0) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, 1:], npx.where(mask21[2:-2, 2:-2, npx.newaxis], 1, 0) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     Omega = update(
         Omega,
         at[2:-2, 2:-2, -1], npx.where(mask22[2:-2, 2:-2], 1, 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+    Omega = update(
+        Omega,
+        at[2:-2, 2:-2, :], npx.where(S[2:-2, 2:-2, :] <= 0, 0, Omega[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return Omega

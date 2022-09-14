@@ -24,7 +24,7 @@ def main(job_type, sas_solver):
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{tm1}_sa'
+            script_name = f'{tracer}_{sas_solver}_{tm1}_sa'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
             tms = tm.replace(" ", "_")
             lines = []
@@ -54,7 +54,7 @@ def main(job_type, sas_solver):
         elif job_type == 'single-node':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{tm1}_sa'
+            script_name = f'{tracer}_{sas_solver}_{tm1}_sa'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
             tms = tm.replace(" ", "_")
             lines = []
@@ -88,7 +88,7 @@ def main(job_type, sas_solver):
         elif job_type == 'multi-node':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{tm1}_sa'
+            script_name = f'{tracer}_{sas_solver}_{tm1}_sa'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
             tms = tm.replace(" ", "_")
             lines = []
@@ -118,7 +118,7 @@ def main(job_type, sas_solver):
         elif job_type == 'single-node-gpu':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{tm1}_sa'
+            script_name = f'{tracer}_{sas_solver}_{tm1}_sa'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
             tms = tm.replace(" ", "_")
             lines = []
@@ -154,7 +154,7 @@ def main(job_type, sas_solver):
         elif job_type == 'single-node-multi-gpu':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{tm1}_sa'
+            script_name = f'{tracer}_{sas_solver}_{tm1}_sa'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
             tms = tm.replace(" ", "_")
             lines = []
@@ -190,7 +190,7 @@ def main(job_type, sas_solver):
         elif job_type == 'multi-node-multi-gpu':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{tm1}_sa'
+            script_name = f'{tracer}_{sas_solver}_{tm1}_sa'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
             tms = tm.replace(" ", "_")
             lines = []
