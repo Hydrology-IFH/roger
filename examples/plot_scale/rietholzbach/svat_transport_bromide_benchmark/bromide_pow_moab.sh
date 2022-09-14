@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1
-#PBS -l walltime=10:00:00
+#PBS -l walltime=24:00:00
 #PBS -l pmem=4000mb
 #PBS -N bromide_pow
 #PBS -m bea
