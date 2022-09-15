@@ -2,7 +2,7 @@
 #PBS -l nodes=2:ppn=16
 #PBS -l walltime=96:00:00
 #PBS -l pmem=4000mb
-#PBS -N oxygen18_deterministic_pow_sa
+#PBS -N oxygen18_deterministic_ad_sa
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  
@@ -14,4 +14,4 @@ conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_sensitivity
  
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes -b numpy -d cpu -n 32 1 -ns 1024 -tms power -td /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_sensitivity -ss deterministic
+mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes -b numpy -d cpu -n 32 1 -ns 1024 -tms advection-dispersion -td /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_sensitivity -ss deterministic

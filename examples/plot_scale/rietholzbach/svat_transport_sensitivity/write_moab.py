@@ -19,7 +19,7 @@ def main(job_type, sas_solver):
                               'time-variant power': 'powt'}
 
     tracer = 'oxygen18'
-    transport_models = ['power', 'time-variant power']
+    transport_models = ['advection-dispersion', 'time-variant advection-dispersion', 'power', 'time-variant power']
     for tm in transport_models:
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]
