@@ -14,7 +14,7 @@ conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo_reverse
  
 # adapt command to your available scheduler / MPI implementation
-python svat_transport.py -b numpy -d cpu -ns 1 -tms piston -td "${TMPDIR}" -ss Euler
+python svat_transport.py -b numpy -d cpu -ns 1 -tms piston -td "${TMPDIR}" -ss RK4
 # Write output to temporary SSD of computing node
 echo "Write output to $TMPDIR"
 # Move output from temporary SSD to workspace

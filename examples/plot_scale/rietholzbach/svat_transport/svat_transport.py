@@ -7,7 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant preferential_+_advection-dispersion', 'power', 'time-variant_power', 'time-variant_power_reverse']), default='power')
-@click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
+@click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='RK4')
 @roger_base_cli
 def main(transport_model_structure, sas_solver):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -98,12 +98,14 @@ def main(transport_model_structure, sas_solver):
             settings = state.settings
             settings.identifier = self._identifier
             settings.sas_solver = self._sas_solver
+            settings.sas_solver_substeps = 6
 
             settings.nx, settings.ny, settings.nz = 1, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
-            settings.ages = settings.nitt
+            settings.ages = 365
             settings.nages = settings.ages + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
+            settings.runlen = 365 * 24 * 60 * 60
 
             # lysimeter surface 3.14 square meter (2m diameter)
             settings.dx = 2
@@ -503,7 +505,7 @@ def main(transport_model_structure, sas_solver):
                 )
                 vs.msa_rz = update(
                     vs.msa_rz,
-                    at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
+                    at[2:-2, 2:-2, :vs.taup1, 0], 0,
                 )
                 vs.msa_ss = update(
                     vs.msa_ss,
@@ -511,7 +513,7 @@ def main(transport_model_structure, sas_solver):
                 )
                 vs.msa_ss = update(
                     vs.msa_ss,
-                    at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
+                    at[2:-2, 2:-2, :vs.taup1, 0], 0,
                 )
                 vs.msa_s = update(
                     vs.msa_s,
@@ -519,11 +521,11 @@ def main(transport_model_structure, sas_solver):
                 )
                 vs.msa_s = update(
                     vs.msa_s,
-                    at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
+                    at[2:-2, 2:-2, :vs.taup1, 0], 0,
                 )
                 vs.C_s = update(
                     vs.C_s,
-                    at[2:-2, 2:-2, vs.tau], npx.nansum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
+                    at[2:-2, 2:-2, vs.tau], npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
                 )
                 vs.C_s = update(
                     vs.C_s,
@@ -632,11 +634,17 @@ def main(transport_model_structure, sas_solver):
         def set_diagnostics(self, state, base_path=None):
             diagnostics = state.diagnostics
 
+            diagnostics["rates"].output_variables = ["q_ss"]
+            diagnostics["rates"].output_frequency = 24 * 60 * 60
+            diagnostics["rates"].sampling_frequency = 1
+            if base_path:
+                diagnostics["rates"].base_output_path = base_path
+
             diagnostics["averages"].output_variables = ["C_transp", "C_q_ss"]
             diagnostics["averages"].output_frequency = 24 * 60 * 60
             diagnostics["averages"].sampling_frequency = 1
             if base_path:
-                diagnostics["rates"].base_output_path = base_path
+                diagnostics["averages"].base_output_path = base_path
 
             diagnostics["constant"].output_variables = ["sas_params_transp", "sas_params_q_rz", "sas_params_q_ss"]
             diagnostics["constant"].output_frequency = 0
@@ -762,36 +770,6 @@ def main(transport_model_structure, sas_solver):
             C_s=vs.C_s,
             C_snow=vs.C_snow,
             )
-
-    @roger_kernel
-    def calc_conc_iso_storage(state, sa, msa):
-        """Calculates isotope signal of storage.
-        """
-        vs = state.variables
-
-        mask = npx.isfinite(msa[:, :, vs.tau, :])
-        vals = allocate(state.dimensions, ("x", "y", "ages"))
-        weights = allocate(state.dimensions, ("x", "y", "ages"))
-        vals = update(
-            vals,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], msa[2:-2, 2:-2, vs.tau, :], 0),
-        )
-        weights = update(
-            weights,
-            at[2:-2, 2:-2, :], npx.where(sa[2:-2, 2:-2, vs.tau, :] * mask[2:-2, 2:-2, :] > 0, sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :] * mask[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis], 0),
-        )
-        conc = allocate(state.dimensions, ("x", "y"))
-        # calculate weighted average
-        conc = update(
-            conc,
-            at[2:-2, 2:-2], npx.sum(vals[2:-2, 2:-2, :] * weights[2:-2, 2:-2, :], axis=-1),
-        )
-        conc = update(
-            conc,
-            at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], npx.nan),
-        )
-
-        return conc
 
     @roger_kernel
     def _bfill(loop_arr):

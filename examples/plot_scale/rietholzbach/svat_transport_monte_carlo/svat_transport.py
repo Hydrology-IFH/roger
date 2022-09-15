@@ -532,7 +532,7 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 )
                 vs.msa_rz = update(
                     vs.msa_rz,
-                    at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
+                    at[2:-2, 2:-2, :vs.taup1, 0], 0,
                 )
                 vs.msa_ss = update(
                     vs.msa_ss,
@@ -540,7 +540,7 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 )
                 vs.msa_ss = update(
                     vs.msa_ss,
-                    at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
+                    at[2:-2, 2:-2, :vs.taup1, 0], 0,
                 )
                 vs.msa_s = update(
                     vs.msa_s,
@@ -548,11 +548,11 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 )
                 vs.msa_s = update(
                     vs.msa_s,
-                    at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
+                    at[2:-2, 2:-2, :vs.taup1, 0], 0,
                 )
                 vs.C_s = update(
                     vs.C_s,
-                    at[2:-2, 2:-2, vs.tau], npx.nansum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
+                    at[2:-2, 2:-2, vs.tau], npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
                 )
                 vs.C_s = update(
                     vs.C_s,
@@ -787,36 +787,6 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             C_s=vs.C_s,
             C_snow=vs.C_snow,
             )
-
-    @roger_kernel
-    def calc_conc_iso_storage(state, sa, msa):
-        """Calculates isotope signal of storage.
-        """
-        vs = state.variables
-
-        mask = npx.isfinite(msa[:, :, vs.tau, :])
-        vals = allocate(state.dimensions, ("x", "y", "ages"))
-        weights = allocate(state.dimensions, ("x", "y", "ages"))
-        vals = update(
-            vals,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], msa[2:-2, 2:-2, vs.tau, :], 0),
-        )
-        weights = update(
-            weights,
-            at[2:-2, 2:-2, :], npx.where(sa[2:-2, 2:-2, vs.tau, :] * mask[2:-2, 2:-2, :] > 0, sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :] * mask[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis], 0),
-        )
-        conc = allocate(state.dimensions, ("x", "y"))
-        # calculate weighted average
-        conc = update(
-            conc,
-            at[2:-2, 2:-2], npx.sum(vals[2:-2, 2:-2, :] * weights[2:-2, 2:-2, :], axis=-1),
-        )
-        conc = update(
-            conc,
-            at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], npx.nan),
-        )
-
-        return conc
 
     @roger_kernel
     def _bfill(loop_arr):

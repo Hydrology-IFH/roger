@@ -222,12 +222,12 @@ def calculate_soil_transport_anion_kernel(state):
 
     vs.M_s = update(
         vs.M_s,
-        at[2:-2, 2:-2, vs.tau], npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau], npx.nansum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.C_s = update(
         vs.C_s,
-        at[2:-2, 2:-2, vs.tau], vs.M_s[2:-2, 2:-2, vs.tau] / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1),
+        at[2:-2, 2:-2, vs.tau], npx.where(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) > 0, vs.M_s[2:-2, 2:-2, vs.tau] / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1), 0),
     )
 
     return KernelOutput(sa_s=vs.sa_s, SA_s=vs.SA_s, msa_s=vs.msa_s, MSA_s=vs.MSA_s, C_s=vs.C_s, M_s=vs.M_s)

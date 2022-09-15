@@ -1569,7 +1569,7 @@ def calculate_infiltration_rz_transport_iso_kernel(state):
     )
     vs.mtt_inf_mat_rz = update(
         vs.mtt_inf_mat_rz,
-        at[2:-2, 2:-2, :], npx.where(vs.mtt_inf_mat_rz == 0, npx.nan, vs.mtt_inf_mat_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.where(npx.isnan(vs.mtt_inf_mat_rz), 0, vs.mtt_inf_mat_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.mtt_inf_pf_rz = update(
         vs.mtt_inf_pf_rz,
@@ -1577,7 +1577,7 @@ def calculate_infiltration_rz_transport_iso_kernel(state):
     )
     vs.mtt_inf_pf_rz = update(
         vs.mtt_inf_pf_rz,
-        at[2:-2, 2:-2, :], npx.where(vs.mtt_inf_pf_rz == 0, npx.nan, vs.mtt_inf_pf_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.where(npx.isnan(vs.mtt_inf_pf_rz), 0, vs.mtt_inf_pf_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     # update StorAge
     vs.sa_rz = update_add(
@@ -1690,7 +1690,7 @@ def calculate_infiltration_ss_transport_iso_kernel(state):
     )
     vs.mtt_inf_pf_ss = update(
         vs.mtt_inf_pf_ss,
-        at[2:-2, 2:-2, :], npx.where(vs.mtt_inf_pf_ss == 0, npx.nan, vs.mtt_inf_pf_ss)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.where(npx.isnan(vs.mtt_inf_pf_ss), 0, vs.mtt_inf_pf_ss)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     # update StorAge
     vs.sa_ss = update_add(

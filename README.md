@@ -99,21 +99,15 @@ conda install --yes --file requirements_extra.txt -c conda-forge
 
 To run Roger, you need to set up a model --- i.e., specify which settings
 and model domain you want to use. This is done by subclassing the
-`RogerSetup` base class in a *setup script* that is written in Python. You
-should use the `roger copy-setup` command to copy one into your current
-folder. A good place to start is the
-[SVAT model](https://github.com/schwemro/roger/blob/master/roger/setups/svat/svat.py):
+`RogerSetup` base class in a *setup script* that is written in Python. A good
+place to start is the
+[OneD Tutorial](https://github.com/schwemro/roger/blob/master/roger/examples/plot_scale/oneD_tutorial):
 
+
+After setting up your model, all you need to do is call the model setup:
 ```bash
-$ roger copy-setup svat
-```
-
-After setting up your model, all you need to do is call the `setup` and
-`run` methods on your setup class. The pre-implemented setups can all be
-executed via `roger run`:
-
-```bash
-$ roger run svat.py
+# move into the folder containing the model script
+python oneD.py
 ```
 
 For more information on using Roger, have a look at [our

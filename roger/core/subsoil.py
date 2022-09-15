@@ -189,12 +189,12 @@ def calculate_subsoil_transport_anion_kernel(state):
 
     vs.M_ss = update(
         vs.M_ss,
-        at[2:-2, 2:-2, vs.tau], npx.sum(vs.msa_ss[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau], npx.nansum(vs.msa_ss[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.C_ss = update(
         vs.C_ss,
-        at[2:-2, 2:-2, vs.tau], vs.M_ss[2:-2, 2:-2, vs.tau] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1),
+        at[2:-2, 2:-2, vs.tau], npx.where(npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1) > 0, vs.M_ss[2:-2, 2:-2, vs.tau] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1), 0),
     )
 
     return KernelOutput(SA_ss=vs.SA_ss, MSA_ss=vs.MSA_ss, C_ss=vs.C_ss, M_ss=vs.M_ss)

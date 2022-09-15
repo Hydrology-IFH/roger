@@ -147,11 +147,11 @@ def rescale_conc_soil_kernel(state):
         )
         vs.msa_rz = update(
             vs.msa_rz,
-            at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
+            at[2:-2, 2:-2, :vs.taup1, 0], 0,
         )
         vs.msa_ss = update(
             vs.msa_ss,
-            at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
+            at[2:-2, 2:-2, :vs.taup1, 0], 0,
         )
         vs.C_rz = update(
             vs.C_rz,
@@ -167,7 +167,7 @@ def rescale_conc_soil_kernel(state):
         )
         vs.msa_s = update(
             vs.msa_s,
-            at[2:-2, 2:-2, :vs.taup1, 0], npx.nan,
+            at[2:-2, 2:-2, :vs.taup1, 0], 0,
         )
         vs.C_s = update(
             vs.C_s,
