@@ -1,5 +1,6 @@
 from pathlib import Path
 import pandas as pd
+import h5netcdf
 import xarray as xr
 from cftime import num2date
 import os
@@ -8,7 +9,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'power', 'time-variant_power']), default='complete-mixing')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'advection-dispersion', 'time-variant_advection-dispersion', 'power', 'time-variant_power']), default='complete-mixing')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
@@ -36,34 +37,23 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 if not os.path.exists(self._input_dir):
                     os.mkdir(self._input_dir)
 
-        def _read_var_from_nc(self, var, path_dir, file, group=None):
+        def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
-            with xr.open_dataset(nc_file, engine="h5netcdf", group=group) as ds:
-                days = (ds['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-                date = num2date(days, units=f"days since {ds['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-                ds = ds.assign_coords(Time=("Time", date))
-                ds_year = ds.sel(Time=slice(f'{self._year - 1}-12-31', f'{self._year + 1}-12-31'))
-                vals = ds_year[var].values
-
-            return vals
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables[var]
+                return npx.array(var_obj)
 
         def _get_nitt(self, path_dir, file):
             nc_file = path_dir / file
-            with xr.open_dataset(nc_file, engine="h5netcdf") as ds:
-                days = (ds['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-                date = num2date(days, units=f"days since {ds['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-                ds = ds.assign_coords(Time=("Time", date))
-                ds_year = ds.sel(Time=slice(f'{self._year}-01-01', f'{self._year + 1}-12-31'))
-                return len(ds_year['Time'].values) + 1
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables['Time']
+                return len(onp.array(var_obj)) + 1
 
         def _get_runlen(self, path_dir, file):
             nc_file = path_dir / file
-            with xr.open_dataset(nc_file, engine="h5netcdf") as ds:
-                days = (ds['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-                date = num2date(days, units=f"days since {ds['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-                ds = ds.assign_coords(Time=("Time", date))
-                ds_year = ds.sel(Time=slice(f'{self._year}-01-01', f'{self._year + 1}-12-31'))
-                return len(ds_year['Time'].values) * 60 * 60 * 24
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables['Time']
+                return len(onp.array(var_obj)) * 60 * 60 * 24
 
         def _set_year(self, year):
             self._year = year
@@ -186,10 +176,10 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             vs = state.variables
             settings = state.settings
 
-            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
 
             vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], 0.5)
             vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], 0.3)
@@ -228,8 +218,8 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
             vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
             vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
@@ -286,8 +276,8 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         def set_forcing_setup(self, state):
             vs = state.variables
 
-            TA = self._read_var_from_nc("ta", self._base_path, 'states_hm.nc')
-            PREC = self._read_var_from_nc("prec", self._base_path, 'states_hm.nc')
+            TA = self._read_var_from_nc("ta", self._input_dir, 'states_hm.nc')
+            PREC = self._read_var_from_nc("prec", self._input_dir, 'states_hm.nc')
 
             vs.M_IN = update(vs.M_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("Br", self._input_dir, 'forcing_tracer.nc'))
 
@@ -330,19 +320,19 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         def set_forcing(self, state):
             vs = state.variables
 
-            vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("ta", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("prec", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mat_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.inf_pf_rz = update(vs.inf_pf_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mp_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt] + self._read_var_from_nc("inf_sc_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.inf_pf_ss = update(vs.inf_pf_ss, at[2:-2, 2:-2], self._read_var_from_nc("inf_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.transp = update(vs.transp, at[2:-2, 2:-2], self._read_var_from_nc("transp", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.evap_soil = update(vs.evap_soil, at[2:-2, 2:-2], self._read_var_from_nc("evap_soil", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.cpr_rz = update(vs.cpr_rz, at[2:-2, 2:-2], self._read_var_from_nc("cpr_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("ta", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("prec", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mat_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.inf_pf_rz = update(vs.inf_pf_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mp_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt] + self._read_var_from_nc("inf_sc_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.inf_pf_ss = update(vs.inf_pf_ss, at[2:-2, 2:-2], self._read_var_from_nc("inf_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.transp = update(vs.transp, at[2:-2, 2:-2], self._read_var_from_nc("transp", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.evap_soil = update(vs.evap_soil, at[2:-2, 2:-2], self._read_var_from_nc("evap_soil", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.cpr_rz = update(vs.cpr_rz, at[2:-2, 2:-2], self._read_var_from_nc("cpr_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], self._read_var_from_nc("q_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], self._read_var_from_nc("q_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
 
             vs.C_in = update(vs.C_in, at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt])
@@ -505,6 +495,16 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         path_txt = input_path / "Br.txt"
         df_Br.to_csv(path_txt, header=True, index=False, sep="\t")
         write_forcing_tracer(input_path, 'Br')
+        nc_file = model._base_path / "states_hm.nc"
+        with xr.open_dataset(nc_file, engine="h5netcdf") as ds:
+            days = (ds['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+            date = num2date(days, units=f"days since {ds['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+            ds = ds.assign_coords(Time=("Time", date))
+            ds_year = ds.sel(Time=slice(f'{year - 1}-12-31', f'{year + 1}-12-31'))
+            nc_file_year = model._base_path / "input" / str(year) / "states_hm.nc"
+            ds_year.to_netcdf(nc_file_year, engine="h5netcdf")
+            ds_year = ds_year.close()
+            del ds_year
         model.setup()
         model.warmup()
         model.run()

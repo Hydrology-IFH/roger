@@ -7,7 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-lys", "--lys-experiment", type=click.Choice(["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys9")
-@click.option("-ns", "--nsamples", type=int, default=10)
+@click.option("-ns", "--nsamples", type=int, default=10000)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(nsamples, lys_experiment, tmp_dir):

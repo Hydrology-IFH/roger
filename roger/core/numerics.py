@@ -71,7 +71,7 @@ def rescale_SA_soil_kernel(state):
 
 
 @roger_kernel
-def rescale_conc_soil_kernel(state):
+def rescale_SA_MSA_soil_kernel(state):
     """
     Rescale solute concentration.
     """
@@ -110,6 +110,50 @@ def rescale_conc_soil_kernel(state):
         vs.msa_ss = update_multiply(
             vs.msa_ss,
             at[2:-2, 2:-2, 1, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.sa_rz = update_multiply(
+            vs.sa_rz,
+            at[2:-2, 2:-2, 0, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.sa_ss = update_multiply(
+            vs.sa_ss,
+            at[2:-2, 2:-2, 0, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.sa_rz = update_multiply(
+            vs.sa_rz,
+            at[2:-2, 2:-2, 1, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.sa_ss = update_multiply(
+            vs.sa_ss,
+            at[2:-2, 2:-2, 1, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.SA_rz = update(
+            vs.SA_rz,
+            at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_rz[2:-2, 2:-2, :2, :], axis=-1),
+        )
+        vs.SA_rz = update(
+            vs.SA_rz,
+            at[2:-2, 2:-2, :2, 0], 0,
+        )
+        vs.SA_ss = update(
+            vs.SA_ss,
+            at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_ss[2:-2, 2:-2, :2, :], axis=-1),
+        )
+        vs.SA_ss = update(
+            vs.SA_ss,
+            at[2:-2, 2:-2, :2, 0], 0,
+        )
+        vs.sa_s = update(
+            vs.sa_s,
+            at[2:-2, 2:-2, :2, :], vs.sa_rz[2:-2, 2:-2, :2, :] + vs.sa_ss[2:-2, 2:-2, :2, :],
+        )
+        vs.SA_s = update(
+            vs.SA_s,
+            at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_s[2:-2, 2:-2, :2, :], axis=-1),
+        )
+        vs.SA_s = update(
+            vs.SA_s,
+            at[2:-2, 2:-2, :2, 0], 0,
         )
         vs.C_rz = update(
             vs.C_rz,
@@ -153,6 +197,50 @@ def rescale_conc_soil_kernel(state):
             vs.msa_ss,
             at[2:-2, 2:-2, :vs.taup1, 0], 0,
         )
+        vs.sa_rz = update_multiply(
+            vs.sa_rz,
+            at[2:-2, 2:-2, 0, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.sa_ss = update_multiply(
+            vs.sa_ss,
+            at[2:-2, 2:-2, 0, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.sa_rz = update_multiply(
+            vs.sa_rz,
+            at[2:-2, 2:-2, 1, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.sa_ss = update_multiply(
+            vs.sa_ss,
+            at[2:-2, 2:-2, 1, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.SA_rz = update(
+            vs.SA_rz,
+            at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_rz[2:-2, 2:-2, :2, :], axis=-1),
+        )
+        vs.SA_rz = update(
+            vs.SA_rz,
+            at[2:-2, 2:-2, :2, 0], 0,
+        )
+        vs.SA_ss = update(
+            vs.SA_ss,
+            at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_ss[2:-2, 2:-2, :2, :], axis=-1),
+        )
+        vs.SA_ss = update(
+            vs.SA_ss,
+            at[2:-2, 2:-2, :2, 0], 0,
+        )
+        vs.sa_s = update(
+            vs.sa_s,
+            at[2:-2, 2:-2, :2, :], vs.sa_rz[2:-2, 2:-2, :2, :] + vs.sa_ss[2:-2, 2:-2, :2, :],
+        )
+        vs.SA_s = update(
+            vs.SA_s,
+            at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_s[2:-2, 2:-2, :2, :], axis=-1),
+        )
+        vs.SA_s = update(
+            vs.SA_s,
+            at[2:-2, 2:-2, :2, 0], 0,
+        )
         vs.C_rz = update(
             vs.C_rz,
             at[2:-2, 2:-2, :2], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2, npx.newaxis],
@@ -180,6 +268,7 @@ def rescale_conc_soil_kernel(state):
 
     return KernelOutput(
         C_rz=vs.C_rz, C_ss=vs.C_ss, C_s=vs.C_s, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, msa_s=vs.msa_s,
+        sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, sa_s=vs.sa_s, SA_rz=vs.SA_rz, SA_ss=vs.SA_ss, SA_s=vs.SA_s,
     )
 
 
@@ -201,9 +290,10 @@ def rescale_SA(state):
     vs = state.variables
     settings = state.settings
 
-    vs.update(rescale_SA_soil_kernel(state))
-    if settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_bromide | settings.enable_chloride | settings.enable_nitrate):
-        vs.update(rescale_conc_soil_kernel(state))
+    if settings.enable_offline_transport and (settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_bromide | settings.enable_chloride | settings.enable_nitrate):
+        vs.update(rescale_SA_MSA_soil_kernel(state))
+    elif settings.enable_offline_transport and not (settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_bromide | settings.enable_chloride | settings.enable_nitrate):
+        vs.update(rescale_SA_soil_kernel(state))
 
     if settings.enable_bromide:
         vs.msa_rz = update(

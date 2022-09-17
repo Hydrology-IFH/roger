@@ -283,7 +283,7 @@ def calc_conc_iso_storage(state, sa, msa):
     if settings.enable_oxygen18 or settings.enable_deuterium:
         conc = update(
             conc,
-            at[2:-2, 2:-2], npx.sum(npx.where(sa[2:-2, 2:-2, vs.tau, :] > 0, (msa[2:-2, 2:-2, vs.tau, :] / sa[2:-2, 2:-2, vs.tau, :]) * (sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1)), 0), axis=-1),
+            at[2:-2, 2:-2], npx.sum(npx.where(sa[2:-2, 2:-2, vs.tau, :] > 0, (msa[2:-2, 2:-2, vs.tau, :] / sa[2:-2, 2:-2, vs.tau, :]) * (sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]), 0), axis=-1),
         )
         conc = update(
             conc,

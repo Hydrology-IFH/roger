@@ -102,10 +102,10 @@ def main(transport_model_structure, sas_solver):
 
             settings.nx, settings.ny, settings.nz = 1, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
-            settings.ages = 365 * 3
+            settings.ages = settings.nitt
             settings.nages = settings.ages + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
-            settings.runlen = 365 * 24 * 60 * 60 * 3
+            settings.runlen = 365 * 24 * 60 * 60
 
             # lysimeter surface 3.14 square meter (2m diameter)
             settings.dx = 2
