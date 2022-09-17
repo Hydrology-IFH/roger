@@ -175,10 +175,6 @@ def calculate_soil_transport_iso_kernel(state):
         vs.msa_s,
         at[2:-2, 2:-2, vs.tau, :], iso_rz[2:-2, 2:-2, :] + iso_ss[2:-2, 2:-2, :],
     )
-    vs.msa_s = update(
-        vs.msa_s,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.msa_s[2:-2, 2:-2, vs.tau, :] == 0, npx.nan, vs.msa_s[2:-2, 2:-2, vs.tau, :]),
-    )
 
     vs.C_s = update(
         vs.C_s,

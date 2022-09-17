@@ -255,7 +255,7 @@ def calc_conc_iso_flux(state, mtt, tt, flux):
     conc = allocate(state.dimensions, ("x", "y"))
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.nansum(mtt[2:-2, 2:-2, :], axis=-1) / npx.sum(tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis], axis=-1),
+        at[2:-2, 2:-2], npx.nansum(npx.where(tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis] > 0, (mtt[2:-2, 2:-2, :] / (tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis])) * tt[2:-2, 2:-2, :], 0), axis=-1),
     )
     conc = update(
         conc,
@@ -283,7 +283,7 @@ def calc_conc_iso_storage(state, sa, msa):
     if settings.enable_oxygen18 or settings.enable_deuterium:
         conc = update(
             conc,
-            at[2:-2, 2:-2], npx.nansum(msa[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1),
+            at[2:-2, 2:-2], npx.sum(npx.where(sa[2:-2, 2:-2, vs.tau, :] > 0, (msa[2:-2, 2:-2, vs.tau, :] / sa[2:-2, 2:-2, vs.tau, :]) * (sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1)), 0), axis=-1),
         )
         conc = update(
             conc,
@@ -293,7 +293,7 @@ def calc_conc_iso_storage(state, sa, msa):
     elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
         conc = update(
             conc,
-            at[2:-2, 2:-2], npx.nansum(msa[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1),
+            at[2:-2, 2:-2], npx.sum(npx.where(sa[2:-2, 2:-2, vs.tau, :] > 0, (msa[2:-2, 2:-2, vs.tau, :] / sa[2:-2, 2:-2, vs.tau, :]) * (sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1)), 0), axis=-1),
         )
         conc = update(
             conc,
@@ -314,7 +314,11 @@ def calc_mtt(state, sa, tt, flux, msa, alpha):
     # solute travel time distribution at current time step
     mtt = update(
         mtt,
-        at[2:-2, 2:-2, :], (msa[2:-2, 2:-2, vs.tau, :] / sa[2:-2, 2:-2, vs.tau, :]) * alpha[2:-2, 2:-2, npx.newaxis] * tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], npx.where(sa[2:-2, 2:-2, vs.tau, :] > 0, (msa[2:-2, 2:-2, vs.tau, :] / sa[2:-2, 2:-2, vs.tau, :]), 0) * alpha[2:-2, 2:-2, npx.newaxis] * tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis],
+    )
+    mtt = update(
+        mtt,
+        at[2:-2, 2:-2, :], npx.where(mtt[2:-2, 2:-2, :] == -0, 0, mtt[2:-2, 2:-2, :]),
     )
 
     return mtt
@@ -1478,7 +1482,6 @@ def svat_transport_model_rk4(state):
             vs.C_q_ss,
             at[2:-2, 2:-2], calc_conc_iso_flux(state, vs.mtt_q_ss, vs.tt_q_ss, vs.q_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
-        print(vs.C_q_ss[2:-2, 2:-2])
 
     elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
         vs.C_inf_mat_rz = update(
