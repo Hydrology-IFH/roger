@@ -7,7 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant preferential_+_advection-dispersion', 'power', 'time-variant_power', 'time-variant_power_reverse']), default='piston')
-@click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
+@click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='Euler')
 @roger_base_cli
 def main(transport_model_structure, sas_solver):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -103,10 +103,8 @@ def main(transport_model_structure, sas_solver):
             settings.nx, settings.ny, settings.nz = 1, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
             settings.ages = settings.nitt
-            settings.ages = 365 * 3
             settings.nages = settings.ages + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
-            settings.runlen = 365 * 24 * 60 * 60 * 1
 
             # lysimeter surface 3.14 square meter (2m diameter)
             settings.dx = 2
@@ -651,7 +649,7 @@ def main(transport_model_structure, sas_solver):
             if base_path:
                 diagnostics["averages"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["TT_q_ss", "SA_s", "SA_rz", "SA_ss", "C_snow", "C_in", "mtt_q_ss", "tt_q_ss", "sa_ss", "msa_ss"]
+            diagnostics["collect"].output_variables = ["C_snow", "C_in"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:

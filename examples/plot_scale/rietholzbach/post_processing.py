@@ -304,98 +304,98 @@ def main(tmp_dir):
     path = base_path_figs / file
     fig.savefig(path, dpi=250)
 
-    # load metrics of transport simulations
-    dict_params_eff_tm_mc = {}
-    tm_structures = ['complete-mixing', 'piston',
-                     'advection-dispersion',
-                     'time-variant advection-dispersion']
-    for tm_structure in tm_structures:
-        tms = tm_structure.replace(" ", "_")
-        file = base_path / "svat_transport_monte_carlo" / "deterministic" / "age_max_11" / "results" / f"params_eff_{tms}.txt"
-        df_params_eff = pd.read_csv(file, sep="\t")
-        dict_params_eff_tm_mc[tm_structure] = {}
-        dict_params_eff_tm_mc[tm_structure]['params_eff'] = df_params_eff
+    # # load metrics of transport simulations
+    # dict_params_eff_tm_mc = {}
+    # tm_structures = ['complete-mixing', 'piston',
+    #                  'advection-dispersion',
+    #                  'time-variant advection-dispersion']
+    # for tm_structure in tm_structures:
+    #     tms = tm_structure.replace(" ", "_")
+    #     file = base_path / "svat_transport_monte_carlo" / "deterministic" / "age_max_11" / "results" / f"params_eff_{tms}.txt"
+    #     df_params_eff = pd.read_csv(file, sep="\t")
+    #     dict_params_eff_tm_mc[tm_structure] = {}
+    #     dict_params_eff_tm_mc[tm_structure]['params_eff'] = df_params_eff
 
-    # compare best model runs
-    fig, ax = plt.subplots(2, 2, sharey=True, figsize=(14, 7))
-    for i, tm_structure in enumerate(tm_structures):
-        tms = tm_structure.replace(" ", "_")
-        # load transport simulation
-        states_tm_file = base_path / "svat_transport_monte_carlo" / "deterministic" / "age_max_11" / f"states_{tms}.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-        days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-        date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-        ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
-        # join observations on simulations
-        obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-        sim_vals = ds_sim_tm['d18O_perc_bs'].isel(x=0, y=0).values
-        sim_vals_hydrus = ds_hydrus['d18O_perc_bs'].values
-        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-        df_obs.loc[:, 'obs'] = obs_vals
-        df_sim = pd.DataFrame(index=date_sim_tm, columns=['sim'])
-        df_sim.loc[:, 'sim'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values
-        df_sim = df_sim.iloc[1:, :]
-        df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
-        df_eval = df_eval.dropna()
-        df_eval_hydrus = eval_utils.join_obs_on_sim(date_hydrus, sim_vals_hydrus, df_obs)
-        df_eval_hydrus = df_eval_hydrus.dropna()
-        ax.flatten()[i].plot(df_sim.index, df_sim.iloc[:, 0], color='red')
-        ax.flatten()[i].plot(date_hydrus, ds_hydrus['d18O_perc'].values, color='grey')
-        ax.flatten()[i].scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=2)
-        ax.flatten()[i].scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=2)
-        ax.flatten()[i].scatter(df_eval_hydrus.index, df_eval_hydrus.iloc[:, 0], color='grey', s=2)
+    # # compare best model runs
+    # fig, ax = plt.subplots(2, 2, sharey=True, figsize=(14, 7))
+    # for i, tm_structure in enumerate(tm_structures):
+    #     tms = tm_structure.replace(" ", "_")
+    #     # load transport simulation
+    #     states_tm_file = base_path / "svat_transport_monte_carlo" / "deterministic" / "age_max_11" / f"states_{tms}.nc"
+    #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    #     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    #     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    #     ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
+    #     # join observations on simulations
+    #     obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+    #     sim_vals = ds_sim_tm['d18O_perc_bs'].isel(x=0, y=0).values
+    #     sim_vals_hydrus = ds_hydrus['d18O_perc_bs'].values
+    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+    #     df_obs.loc[:, 'obs'] = obs_vals
+    #     df_sim = pd.DataFrame(index=date_sim_tm, columns=['sim'])
+    #     df_sim.loc[:, 'sim'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values
+    #     df_sim = df_sim.iloc[1:, :]
+    #     df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
+    #     df_eval = df_eval.dropna()
+    #     df_eval_hydrus = eval_utils.join_obs_on_sim(date_hydrus, sim_vals_hydrus, df_obs)
+    #     df_eval_hydrus = df_eval_hydrus.dropna()
+    #     ax.flatten()[i].plot(df_sim.index, df_sim.iloc[:, 0], color='red')
+    #     ax.flatten()[i].plot(date_hydrus, ds_hydrus['d18O_perc'].values, color='grey')
+    #     ax.flatten()[i].scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=2)
+    #     ax.flatten()[i].scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=2)
+    #     ax.flatten()[i].scatter(df_eval_hydrus.index, df_eval_hydrus.iloc[:, 0], color='grey', s=2)
 
-    ax[0, 0].set_ylabel(r'$\delta^{18}$O [‰]')
-    ax[1, 0].set_ylabel(r'$\delta^{18}$O [‰]')
-    ax[1, 0].set_xlabel('Time [year]')
-    ax[1, 1].set_xlabel('Time [year]')
-    fig.tight_layout()
-    file = base_path_figs / "d18O_perc_sim_obs_tm_structures.png"
-    fig.savefig(file, dpi=250)
+    # ax[0, 0].set_ylabel(r'$\delta^{18}$O [‰]')
+    # ax[1, 0].set_ylabel(r'$\delta^{18}$O [‰]')
+    # ax[1, 0].set_xlabel('Time [year]')
+    # ax[1, 1].set_xlabel('Time [year]')
+    # fig.tight_layout()
+    # file = base_path_figs / "d18O_perc_sim_obs_tm_structures.png"
+    # fig.savefig(file, dpi=250)
 
-    # compare duration curve of 18O in percolation
-    fig, ax = plt.subplots(2, 2, sharey=True, figsize=(14, 7))
-    for i, tm_structure in enumerate(tm_structures):
-        tms = tm_structure.replace(" ", "_")
-        # load transport simulation
-        states_tm_file = base_path / "svat_transport_monte_carlo" / "deterministic" / "age_max_11" / f"states_{tms}.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-        days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-        date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-        ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
-        # join observations on simulations
-        obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-        sim_vals = ds_sim_tm['d18O_perc_bs'].isel(x=0, y=0).values
-        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-        df_obs.loc[:, 'obs'] = obs_vals
-        df_sim = pd.DataFrame(index=date_sim_tm, columns=['sim'])
-        df_sim.loc[:, 'sim'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values
-        df_sim = df_sim.iloc[1:, :]
-        df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
-        df_eval = df_eval.dropna()
-        obs = df_eval.sort_values(by=["obs"], ascending=True)
-        sim = df_eval.sort_values(by=["sim"], ascending=True)
+    # # compare duration curve of 18O in percolation
+    # fig, ax = plt.subplots(2, 2, sharey=True, figsize=(14, 7))
+    # for i, tm_structure in enumerate(tm_structures):
+    #     tms = tm_structure.replace(" ", "_")
+    #     # load transport simulation
+    #     states_tm_file = base_path / "svat_transport_monte_carlo" / "deterministic" / "age_max_11" / f"states_{tms}.nc"
+    #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    #     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    #     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    #     ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
+    #     # join observations on simulations
+    #     obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+    #     sim_vals = ds_sim_tm['d18O_perc_bs'].isel(x=0, y=0).values
+    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+    #     df_obs.loc[:, 'obs'] = obs_vals
+    #     df_sim = pd.DataFrame(index=date_sim_tm, columns=['sim'])
+    #     df_sim.loc[:, 'sim'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values
+    #     df_sim = df_sim.iloc[1:, :]
+    #     df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
+    #     df_eval = df_eval.dropna()
+    #     obs = df_eval.sort_values(by=["obs"], ascending=True)
+    #     sim = df_eval.sort_values(by=["sim"], ascending=True)
 
-        # calculate exceedence probability
-        ranks_obs = sp.stats.rankdata(obs["obs"], method="ordinal")
-        ranks_obs = ranks_obs[::-1]
-        prob_obs = [(ranks_obs[i] / (len(obs["obs"]) + 1)) for i in range(len(obs["obs"]))]
+    #     # calculate exceedence probability
+    #     ranks_obs = sp.stats.rankdata(obs["obs"], method="ordinal")
+    #     ranks_obs = ranks_obs[::-1]
+    #     prob_obs = [(ranks_obs[i] / (len(obs["obs"]) + 1)) for i in range(len(obs["obs"]))]
 
-        ranks_sim = sp.stats.rankdata(sim["sim"], method="ordinal")
-        ranks_sim = ranks_sim[::-1]
-        prob_sim = [(ranks_sim[i] / (len(sim["sim"]) + 1)) for i in range(len(sim["sim"]))]
+    #     ranks_sim = sp.stats.rankdata(sim["sim"], method="ordinal")
+    #     ranks_sim = ranks_sim[::-1]
+    #     prob_sim = [(ranks_sim[i] / (len(sim["sim"]) + 1)) for i in range(len(sim["sim"]))]
 
-        ax.flatten()[i].plot(prob_obs, obs["obs"], color="blue", lw=1.5)
-        ax.flatten()[i].plot(prob_sim, sim["sim"], color="red", lw=1, ls="-.", alpha=0.8)
-        ax.flatten()[i].set_xlim(0, 1)
+    #     ax.flatten()[i].plot(prob_obs, obs["obs"], color="blue", lw=1.5)
+    #     ax.flatten()[i].plot(prob_sim, sim["sim"], color="red", lw=1, ls="-.", alpha=0.8)
+    #     ax.flatten()[i].set_xlim(0, 1)
 
-    ax[0, 0].set_ylabel(r'$\delta^{18}$O [‰]')
-    ax[1, 0].set_ylabel(r'$\delta^{18}$O [‰]')
-    ax[1, 0].set_xlabel('Exceedence probabilty [-]')
-    ax[1, 1].set_xlabel('Exceedence probabilty [-]')
-    fig.tight_layout()
-    file = base_path_figs / "fdc_d18O_perc_sim_obs_tm_structures.png"
-    fig.savefig(file, dpi=250)
+    # ax[0, 0].set_ylabel(r'$\delta^{18}$O [‰]')
+    # ax[1, 0].set_ylabel(r'$\delta^{18}$O [‰]')
+    # ax[1, 0].set_xlabel('Exceedence probabilty [-]')
+    # ax[1, 1].set_xlabel('Exceedence probabilty [-]')
+    # fig.tight_layout()
+    # file = base_path_figs / "fdc_d18O_perc_sim_obs_tm_structures.png"
+    # fig.savefig(file, dpi=250)
 
  #    # perform sensitivity analysis
  #    dict_params_eff_tm_sa = {}
@@ -511,10 +511,10 @@ def main(tmp_dir):
         ax[-1, j].set_xlabel(xlabel)
 
     ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
-    ax[1, 0].set_ylabel('$KGE_{PERC}$\n [-]')
     ylab_kge_theta = r'''$KGE_{\theta}$
     [-]'''
-    ax[2, 0].set_ylabel(ylab_kge_theta)
+    ax[1, 0].set_ylabel(ylab_kge_theta)
+    ax[2, 0].set_ylabel('$KGE_{PERC}$\n [-]')
     ax[3, 0].set_ylabel('$KGE_{\delta^{18}O_{perc}}$\n [-]')
     ax[4, 0].set_ylabel('$KGE_{multi}$\n [-]')
 
