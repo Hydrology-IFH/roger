@@ -173,30 +173,6 @@ def rescale_SA_MSA_soil_kernel(state):
         )
 
     elif (settings.enable_oxygen18 | settings.enable_deuterium):
-        vs.msa_rz = update_multiply(
-            vs.msa_rz,
-            at[2:-2, 2:-2, 0, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
-        )
-        vs.msa_ss = update_multiply(
-            vs.msa_ss,
-            at[2:-2, 2:-2, 0, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
-        )
-        vs.msa_rz = update_multiply(
-            vs.msa_rz,
-            at[2:-2, 2:-2, 1, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
-        )
-        vs.msa_ss = update_multiply(
-            vs.msa_ss,
-            at[2:-2, 2:-2, 1, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
-        )
-        vs.msa_rz = update(
-            vs.msa_rz,
-            at[2:-2, 2:-2, :vs.taup1, 0], 0,
-        )
-        vs.msa_ss = update(
-            vs.msa_ss,
-            at[2:-2, 2:-2, :vs.taup1, 0], 0,
-        )
         vs.sa_rz = update_multiply(
             vs.sa_rz,
             at[2:-2, 2:-2, 0, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
@@ -251,7 +227,11 @@ def rescale_SA_MSA_soil_kernel(state):
         )
         vs.msa_s = update(
             vs.msa_s,
-            at[2:-2, 2:-2, :, :], (npx.where(npx.isnan(vs.msa_rz), 0, vs.msa_rz)[2:-2, 2:-2, :, :] + npx.where(npx.isnan(vs.msa_ss), 0, vs.msa_ss)[2:-2, 2:-2, :, :]),
+            at[2:-2, 2:-2, :, :], npx.where(vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :] > 0, vs.msa_rz[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])) + vs.msa_ss[2:-2, 2:-2, :, :] * (vs.sa_ss[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])), 0),
+        )
+        vs.msa_s = update(
+            vs.msa_s,
+            at[2:-2, 2:-2, :vs.taup1, :], npx.where(npx.isnan(vs.msa_s[2:-2, 2:-2, :vs.taup1, :]), 0, vs.msa_s[2:-2, 2:-2, :vs.taup1, :]),
         )
         vs.msa_s = update(
             vs.msa_s,
@@ -259,11 +239,7 @@ def rescale_SA_MSA_soil_kernel(state):
         )
         vs.C_s = update(
             vs.C_s,
-            at[2:-2, 2:-2, vs.tau], npx.nansum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
-        )
-        vs.C_s = update(
-            vs.C_s,
-            at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2, :2], transport.calc_conc_iso_storage(state, vs.sa_s, vs.msa_s)[2:-2, 2:-2, npx.newaxis],
         )
 
     return KernelOutput(

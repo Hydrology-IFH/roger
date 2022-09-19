@@ -7,7 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant preferential_+_advection-dispersion', 'power', 'time-variant_power', 'time-variant_power_reverse']), default='power')
-@click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='Euler')
+@click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @roger_base_cli
 def main(transport_model_structure, sas_solver):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -103,9 +103,10 @@ def main(transport_model_structure, sas_solver):
             settings.nx, settings.ny, settings.nz = 1, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
             settings.ages = settings.nitt
+            settings.ages = 365 * 3
             settings.nages = settings.ages + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
-            settings.runlen = 365 * 24 * 60 * 60
+            settings.runlen = 365 * 24 * 60 * 60 * 1
 
             # lysimeter surface 3.14 square meter (2m diameter)
             settings.dx = 2
@@ -501,7 +502,7 @@ def main(transport_model_structure, sas_solver):
                 vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], -7)
                 vs.msa_rz = update(
                     vs.msa_rz,
-                    at[2:-2, 2:-2, :vs.taup1, :], vs.sa_rz[2:-2, 2:-2, :vs.taup1, :] * vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis],
+                    at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis],
                 )
                 vs.msa_rz = update(
                     vs.msa_rz,
@@ -509,7 +510,7 @@ def main(transport_model_structure, sas_solver):
                 )
                 vs.msa_ss = update(
                     vs.msa_ss,
-                    at[2:-2, 2:-2, :vs.taup1, :], vs.sa_ss[2:-2, 2:-2, :vs.taup1, :] * vs.C_ss[2:-2, 2:-2, :vs.taup1, npx.newaxis],
+                    at[2:-2, 2:-2, :vs.taup1, :], vs.C_ss[2:-2, 2:-2, :vs.taup1, npx.newaxis],
                 )
                 vs.msa_ss = update(
                     vs.msa_ss,
@@ -517,7 +518,11 @@ def main(transport_model_structure, sas_solver):
                 )
                 vs.msa_s = update(
                     vs.msa_s,
-                    at[2:-2, 2:-2, :, :], (npx.where(npx.isnan(vs.msa_rz), 0, vs.msa_rz)[2:-2, 2:-2, :, :] + npx.where(npx.isnan(vs.msa_ss), 0, vs.msa_ss)[2:-2, 2:-2, :, :]),
+                    at[2:-2, 2:-2, :, :], npx.where(vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :] > 0, vs.msa_rz[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])) + vs.msa_ss[2:-2, 2:-2, :, :] * (vs.sa_ss[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])), 0),
+                )
+                vs.msa_s = update(
+                    vs.msa_s,
+                    at[2:-2, 2:-2, :vs.taup1, :], npx.where(npx.isnan(vs.msa_s[2:-2, 2:-2, :vs.taup1, :]), 0, vs.msa_s[2:-2, 2:-2, :vs.taup1, :]),
                 )
                 vs.msa_s = update(
                     vs.msa_s,
@@ -525,7 +530,7 @@ def main(transport_model_structure, sas_solver):
                 )
                 vs.C_s = update(
                     vs.C_s,
-                    at[2:-2, 2:-2, vs.tau], npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
+                    at[2:-2, 2:-2, vs.tau], npx.sum(npx.where(vs.sa_s[2:-2, 2:-2, vs.tau, :] > 0, vs.msa_s[2:-2, 2:-2, vs.tau, :] * (vs.sa_s[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]), 0), axis=-1),
                 )
                 vs.C_s = update(
                     vs.C_s,
@@ -661,6 +666,7 @@ def main(transport_model_structure, sas_solver):
     @roger_kernel
     def after_timestep_kernel(state):
         vs = state.variables
+        print(vs.C_q_ss[2:-2, 2:-2])
 
         vs.SA_rz = update(
             vs.SA_rz,

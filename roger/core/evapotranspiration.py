@@ -492,10 +492,10 @@ def calculate_evaporation_transport_iso_kernel(state):
         vs.sa_rz,
         at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
-    # update solute StorAge
-    vs.msa_rz = update_add(
+    # update isotope StorAge
+    vs.msa_rz = update(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], - npx.where(npx.isnan(vs.mtt_evap_soil[2:-2, 2:-2, :]), 0, vs.mtt_evap_soil[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.C_rz = update(
@@ -576,9 +576,9 @@ def calculate_transpiration_transport_iso_kernel(state):
         at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_transp, vs.transp)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
     # update isotope StorAge
-    vs.msa_rz = update_add(
+    vs.msa_rz = update(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], - npx.where(npx.isnan(vs.mtt_transp[2:-2, 2:-2, :]), 0, vs.mtt_transp[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(sa_rz=vs.sa_rz, tt_transp=vs.tt_transp, TT_transp=vs.TT_transp, msa_rz=vs.msa_rz, mtt_transp=vs.mtt_transp, C_transp=vs.C_transp)
@@ -623,9 +623,9 @@ def calculate_transpiration_transport_anion_kernel(state):
         at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_transp, vs.transp)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
     # update solute StorAge of root zone
-    vs.msa_rz = update(
+    vs.msa_rz = update_add(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], vs.msa_rz[2:-2, 2:-2, vs.tau, :] - vs.mtt_transp[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], - vs.mtt_transp[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(sa_rz=vs.sa_rz, tt_transp=vs.tt_transp, TT_transp=vs.TT_transp, msa_rz=vs.msa_rz, mtt_transp=vs.mtt_transp, C_transp=vs.C_transp)

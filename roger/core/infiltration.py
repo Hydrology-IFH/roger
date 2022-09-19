@@ -1565,32 +1565,27 @@ def calculate_infiltration_rz_transport_iso_kernel(state):
     # isotope travel time distribution
     vs.mtt_inf_mat_rz = update(
         vs.mtt_inf_mat_rz,
-        at[2:-2, 2:-2, 0], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.inf_mat_rz[2:-2, 2:-2] * vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.mtt_inf_mat_rz = update(
-        vs.mtt_inf_mat_rz,
-        at[2:-2, 2:-2, :], npx.where(npx.isnan(vs.mtt_inf_mat_rz), 0, vs.mtt_inf_mat_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, 0], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.mtt_inf_pf_rz = update(
         vs.mtt_inf_pf_rz,
-        at[2:-2, 2:-2, 0], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.inf_pf_rz[2:-2, 2:-2] * vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, 0], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
-    vs.mtt_inf_pf_rz = update(
-        vs.mtt_inf_pf_rz,
-        at[2:-2, 2:-2, :], npx.where(npx.isnan(vs.mtt_inf_pf_rz), 0, vs.mtt_inf_pf_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+
+    # update isotope StorAge
+    vs.msa_rz = update(
+        vs.msa_rz,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_inf_mat_rz[2:-2, 2:-2, :] * vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_inf_mat_rz[2:-2, 2:-2, :] * ((vs.tt_inf_mat_rz[2:-2, 2:-2, :] * vs.inf_mat_rz[2:-2, 2:-2]) / (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
+    vs.msa_rz = update(
+        vs.msa_rz,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_inf_pf_rz[2:-2, 2:-2, :] * vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_inf_pf_rz[2:-2, 2:-2, :] * ((vs.tt_inf_pf_rz[2:-2, 2:-2, :] * vs.inf_pf_rz[2:-2, 2:-2]) / (vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
     # update StorAge
     vs.sa_rz = update_add(
         vs.sa_rz,
         at[2:-2, 2:-2, vs.tau, 0], vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.msa_rz = update_add(
-        vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-    )
-    vs.msa_rz = update_add(
-        vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(sa_rz=vs.sa_rz, msa_rz=vs.msa_rz, C_inf_mat_rz=vs.C_inf_mat_rz, C_inf_pf_rz=vs.C_inf_pf_rz, tt_inf_mat_rz=vs.tt_inf_mat_rz, mtt_inf_mat_rz=vs.mtt_inf_mat_rz, tt_inf_pf_rz=vs.tt_inf_pf_rz, mtt_inf_pf_rz=vs.mtt_inf_pf_rz)
@@ -1686,20 +1681,17 @@ def calculate_infiltration_ss_transport_iso_kernel(state):
     # isotope travel time distribution
     vs.mtt_inf_pf_ss = update(
         vs.mtt_inf_pf_ss,
-        at[2:-2, 2:-2, 0], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.inf_pf_ss[2:-2, 2:-2] * vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, 0], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
-    vs.mtt_inf_pf_ss = update(
-        vs.mtt_inf_pf_ss,
-        at[2:-2, 2:-2, :], npx.where(npx.isnan(vs.mtt_inf_pf_ss), 0, vs.mtt_inf_pf_ss)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    # update isotope StorAge
+    vs.msa_ss = update(
+        vs.msa_ss,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] > 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / (vs.tt_inf_pf_ss[2:-2, 2:-2, :] * vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] + vs.sa_ss[2:-2, 2:-2, vs.tau, :])) + vs.mtt_inf_pf_ss[2:-2, 2:-2, :] * ((vs.tt_inf_pf_ss[2:-2, 2:-2, :] * vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis]) / (vs.inf_pf_ss[2:-2, 2:-2] + vs.sa_ss[2:-2, 2:-2, vs.tau, :])), vs.msa_ss[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     # update StorAge
     vs.sa_ss = update_add(
         vs.sa_ss,
         at[2:-2, 2:-2, vs.tau, 0], vs.inf_pf_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.msa_ss = update_add(
-        vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(sa_ss=vs.sa_ss, msa_ss=vs.msa_ss, C_inf_pf_ss=vs.C_inf_pf_ss, tt_inf_pf_ss=vs.tt_inf_pf_ss, mtt_inf_pf_ss=vs.mtt_inf_pf_ss)

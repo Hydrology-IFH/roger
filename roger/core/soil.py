@@ -161,19 +161,13 @@ def calculate_soil_transport_iso_kernel(state):
         at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_s, vs.sa_s)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
-    iso_rz = allocate(state.dimensions, ("x", "y", "ages"))
-    iso_ss = allocate(state.dimensions, ("x", "y", "ages"))
-    iso_rz = update(
-        iso_rz,
-        at[2:-2, 2:-2, :], npx.where(npx.isnan(vs.msa_rz[2:-2, 2:-2, vs.tau, :]), 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]),
-    )
-    iso_ss = update(
-        iso_ss,
-        at[2:-2, 2:-2, :], npx.where(npx.isnan(vs.msa_ss[2:-2, 2:-2, vs.tau, :]), 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :]),
+    vs.msa_s = update(
+        vs.msa_s,
+        at[2:-2, 2:-2, :, :], npx.where(vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :] > 0, vs.msa_rz[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])) + vs.msa_ss[2:-2, 2:-2, :, :] * (vs.sa_ss[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])), 0),
     )
     vs.msa_s = update(
         vs.msa_s,
-        at[2:-2, 2:-2, vs.tau, :], iso_rz[2:-2, 2:-2, :] + iso_ss[2:-2, 2:-2, :],
+        at[2:-2, 2:-2, :vs.taup1, :], npx.where(npx.isnan(vs.msa_s[2:-2, 2:-2, :vs.taup1, :]), 0, vs.msa_s[2:-2, 2:-2, :vs.taup1, :]),
     )
 
     vs.C_s = update(

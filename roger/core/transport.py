@@ -71,15 +71,11 @@ def calc_tt(state, SA, sa, flux, sas_params):
     )
     TT = update(
         TT,
-        at[2:-2, 2:-2, 1:], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where((flux[2:-2, 2:-2, npx.newaxis] <= npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1], axis=-1)), npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1], axis=-1)/flux[2:-2, 2:-2, npx.newaxis], TT[2:-2, 2:-2, 1:])[:, :, ::-1], TT[2:-2, 2:-2, 1:]),
+        at[2:-2, 2:-2, 1:], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where((flux[2:-2, 2:-2, npx.newaxis] <= npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1], axis=-1)), npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1], axis=-1)/flux[2:-2, 2:-2, npx.newaxis], TT[2:-2, 2:-2, 1:]), TT[2:-2, 2:-2, 1:]),
     )
     TT = update(
         TT,
         at[2:-2, 2:-2, 1:], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(TT[2:-2, 2:-2, 1:] > 1, 1, TT[2:-2, 2:-2, 1:]), TT[2:-2, 2:-2, 1:]),
-    )
-    TT = update(
-        TT,
-        at[2:-2, 2:-2, :-1], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(TT[2:-2, 2:-2, :-1] >= 1, 0, TT[2:-2, 2:-2, :-1]), TT[2:-2, 2:-2, :-1]),
     )
     TT = update(
         TT,
@@ -255,7 +251,7 @@ def calc_conc_iso_flux(state, mtt, tt, flux):
     conc = allocate(state.dimensions, ("x", "y"))
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.nansum(npx.where(tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis] > 0, (mtt[2:-2, 2:-2, :] / (tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis])) * tt[2:-2, 2:-2, :], 0), axis=-1),
+        at[2:-2, 2:-2], npx.nansum(npx.where(tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis] > 0, mtt[2:-2, 2:-2, :] * ((tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis]) / flux[2:-2, 2:-2, npx.newaxis]), 0), axis=-1),
     )
     conc = update(
         conc,
@@ -283,7 +279,7 @@ def calc_conc_iso_storage(state, sa, msa):
     if settings.enable_oxygen18 or settings.enable_deuterium:
         conc = update(
             conc,
-            at[2:-2, 2:-2], npx.sum(npx.where(sa[2:-2, 2:-2, vs.tau, :] > 0, (msa[2:-2, 2:-2, vs.tau, :] / sa[2:-2, 2:-2, vs.tau, :]) * (sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]), 0), axis=-1),
+            at[2:-2, 2:-2], npx.sum(npx.where(sa[2:-2, 2:-2, vs.tau, :] > 0, msa[2:-2, 2:-2, vs.tau, :] * (sa[2:-2, 2:-2, vs.tau, :] / npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]), 0), axis=-1),
         )
         conc = update(
             conc,
@@ -308,18 +304,27 @@ def calc_mtt(state, sa, tt, flux, msa, alpha):
     """Calculate solute travel time distribution at time step t.
     """
     vs = state.variables
+    settings = state.settings
 
     mtt = allocate(state.dimensions, ("x", "y", "ages"))
 
+    if settings.enable_oxygen18 or settings.enable_deuterium:
+        # solute travel time distribution at current time step
+        mtt = update(
+            mtt,
+            at[2:-2, 2:-2, :], npx.where(tt[2:-2, 2:-2, :] > 0, msa[2:-2, 2:-2, vs.tau, :], 0),
+        )
+
     # solute travel time distribution at current time step
-    mtt = update(
-        mtt,
-        at[2:-2, 2:-2, :], npx.where(sa[2:-2, 2:-2, vs.tau, :] > 0, (msa[2:-2, 2:-2, vs.tau, :] / sa[2:-2, 2:-2, vs.tau, :]), 0) * alpha[2:-2, 2:-2, npx.newaxis] * tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis],
-    )
-    mtt = update(
-        mtt,
-        at[2:-2, 2:-2, :], npx.where(mtt[2:-2, 2:-2, :] == -0, 0, mtt[2:-2, 2:-2, :]),
-    )
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+        mtt = update(
+            mtt,
+            at[2:-2, 2:-2, :], npx.where(sa[2:-2, 2:-2, vs.tau, :] > 0, (msa[2:-2, 2:-2, vs.tau, :] / sa[2:-2, 2:-2, vs.tau, :]), 0) * alpha[2:-2, 2:-2, npx.newaxis] * tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis],
+        )
+        mtt = update(
+            mtt,
+            at[2:-2, 2:-2, :], npx.where(mtt[2:-2, 2:-2, :] == -0, 0, mtt[2:-2, 2:-2, :]),
+        )
 
     return mtt
 
@@ -404,6 +409,58 @@ def calc_ageing_msa(state, msa):
 
 
 @roger_kernel
+def calc_ageing_msa_iso(state, msa, sa):
+    """Calculates ageing of isotope StorAge
+    """
+    vs = state.variables
+
+    sam1 = allocate(state.dimensions, ("x", "y", "ages"))
+    sam1 = update(
+        sam1,
+        at[2:-2, 2:-2, :], sa[2:-2, 2:-2, vs.tau, :],
+    )
+    sa = update(
+        sa,
+        at[2:-2, 2:-2, vs.tau, 1:], sam1[2:-2, 2:-2, :-1],
+    )
+
+    msam1 = allocate(state.dimensions, ("x", "y", "ages"))
+    msam1 = update(
+        msam1,
+        at[2:-2, 2:-2, :], msa[2:-2, 2:-2, vs.tau, :],
+    )
+    msa = update(
+        msa,
+        at[2:-2, 2:-2, vs.tau, 1:], msam1[2:-2, 2:-2, :-1],
+    )
+    msa = update(
+        msa,
+        at[2:-2, 2:-2, vs.tau, 0], 0,
+    )
+    # merge oldest water
+    msa = update(
+        msa,
+        at[2:-2, 2:-2, vs.tau, -1], npx.where(sa[2:-2, 2:-2, vs.tau, -1] + sam1[2:-2, 2:-2, -1] > 0, msam1[2:-2, 2:-2, -1] * (sam1[2:-2, 2:-2, -1] / (sa[2:-2, 2:-2, vs.tau, -1] + sam1[2:-2, 2:-2, -1])) + msa[2:-2, 2:-2, vs.tau, -1] * (sa[2:-2, 2:-2, vs.tau, -1] / (sa[2:-2, 2:-2, vs.tau, -1] + sam1[2:-2, 2:-2, -1])), 0),
+    )
+    msa = update(
+        msa,
+        at[2:-2, 2:-2, vs.tau, -1], npx.where(npx.isnan(msa[2:-2, 2:-2, vs.tau, -1]), 0, msa[2:-2, 2:-2, vs.tau, -1]),
+    )
+
+    sa = update(
+        sa,
+        at[2:-2, 2:-2, vs.tau, 0], 0,
+    )
+    # merge oldest water
+    sa = update_add(
+        sa,
+        at[2:-2, 2:-2, vs.tau, -1], sam1[2:-2, 2:-2, -1],
+    )
+
+    return msa, sa
+
+
+@roger_kernel
 def calculate_ageing_sa_kernel(state):
     """Calculates ageing of solute StorAge
     """
@@ -438,6 +495,33 @@ def calculate_ageing_msa_kernel(state):
         at[2:-2, 2:-2, :, :], calc_ageing_msa(state, vs.msa_ss)[2:-2, 2:-2, :, :],
     )
 
+    return KernelOutput(msa_rz=vs.msa_rz, msa_ss=vs.msa_ss)
+
+
+@roger_kernel
+def calculate_ageing_sa_msa_iso_kernel(state):
+    """Calculates ageing of solute StorAge
+    """
+    vs = state.variables
+
+    msa_rz, sa_rz = calc_ageing_msa_iso(state, vs.msa_rz, vs.sa_rz)
+    msa_ss, sa_ss = calc_ageing_msa_iso(state, vs.msa_ss, vs.sa_ss)
+    vs.sa_rz = update(
+        vs.sa_rz,
+        at[2:-2, 2:-2, :, :], sa_rz[2:-2, 2:-2, :, :],
+    )
+    vs.msa_rz = update(
+        vs.msa_rz,
+        at[2:-2, 2:-2, :, :], msa_rz[2:-2, 2:-2, :, :],
+    )
+    vs.sa_ss = update(
+        vs.sa_ss,
+        at[2:-2, 2:-2, :, :], sa_ss[2:-2, 2:-2, :, :],
+    )
+    vs.msa_ss = update(
+        vs.msa_ss,
+        at[2:-2, 2:-2, :, :], msa_ss[2:-2, 2:-2, :, :],
+    )
     return KernelOutput(msa_rz=vs.msa_rz, msa_ss=vs.msa_ss)
 
 
@@ -479,8 +563,7 @@ def calculate_ageing(state):
             pass
 
     elif settings.enable_offline_transport and (settings.enable_oxygen18 | settings.enable_deuterium):
-        vs.update(calculate_ageing_sa_kernel(state))
-        vs.update(calculate_ageing_msa_kernel(state))
+        vs.update(calculate_ageing_sa_msa_iso_kernel(state))
         if settings.enable_groundwater:
             pass
 
@@ -522,7 +605,7 @@ def calc_omega_q(state, SA, sas_params, flux):
     )
     omega_q = update(
         omega_q,
-        at[2:-2, 2:-2, 1:], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where((flux[2:-2, 2:-2, npx.newaxis] <= npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1], axis=-1)), npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1], axis=-1)/flux[2:-2, 2:-2, npx.newaxis], omega_q[2:-2, 2:-2, 1:])[:, :, ::-1], omega_q[2:-2, 2:-2, 1:]),
+        at[2:-2, 2:-2, 1:], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where((flux[2:-2, 2:-2, npx.newaxis] <= npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1], axis=-1)), npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1], axis=-1)/flux[2:-2, 2:-2, npx.newaxis], omega_q[2:-2, 2:-2, 1:]), omega_q[2:-2, 2:-2, 1:]),
     )
     omega_q = update(
         omega_q,
@@ -3452,40 +3535,28 @@ def svat_transport_model_euler(state):
     if settings.enable_deuterium or settings.enable_oxygen18:
         vs.mtt_inf_mat_rz = update(
             vs.mtt_inf_mat_rz,
-            at[2:-2, 2:-2, 0], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.inf_mat_rz[2:-2, 2:-2] * vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
-        )
-        vs.mtt_inf_mat_rz = update(
-            vs.mtt_inf_mat_rz,
-            at[2:-2, 2:-2, :], npx.where(npx.isnan(vs.mtt_inf_mat_rz), 0, vs.mtt_inf_mat_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+            at[2:-2, 2:-2, 0], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.mtt_inf_pf_rz = update(
             vs.mtt_inf_pf_rz,
-            at[2:-2, 2:-2, 0], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.inf_pf_rz[2:-2, 2:-2] * vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
-        )
-        vs.mtt_inf_pf_rz = update(
-            vs.mtt_inf_pf_rz,
-            at[2:-2, 2:-2, :], npx.where(npx.isnan(vs.mtt_inf_pf_rz), 0, vs.mtt_inf_pf_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+            at[2:-2, 2:-2, 0], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.mtt_inf_pf_ss = update(
             vs.mtt_inf_pf_ss,
-            at[2:-2, 2:-2, 0], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.inf_pf_ss[2:-2, 2:-2] * vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
-        )
-        vs.mtt_inf_pf_ss = update(
-            vs.mtt_inf_pf_ss,
-            at[2:-2, 2:-2, :], npx.where(npx.isnan(vs.mtt_inf_pf_ss), 0, vs.mtt_inf_pf_ss)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+            at[2:-2, 2:-2, 0], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
         )
     else:
         vs.mtt_inf_pf_ss = update(
             vs.mtt_inf_pf_ss,
-            at[2:-2, 2:-2, 0], vs.inf_pf_ss[2:-2, 2:-2] * vs.C_in[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2, 0], vs.C_in[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.mtt_inf_mat_rz = update(
             vs.mtt_inf_mat_rz,
-            at[2:-2, 2:-2, 0], vs.inf_mat_rz[2:-2, 2:-2] * vs.C_in[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2, 0], vs.C_in[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.mtt_inf_pf_rz = update(
             vs.mtt_inf_pf_rz,
-            at[2:-2, 2:-2, 0], vs.inf_pf_rz[2:-2, 2:-2] * vs.C_in[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2, 0], vs.C_in[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
     TTn_evap_soil = allocate(state.dimensions, ("x", "y", "nages", settings.sas_solver_substeps))
@@ -3584,41 +3655,56 @@ def svat_transport_model_euler(state):
             at[2:-2, 2:-2, :, i], calc_mtt(state, san_ss, ttn_q_ss[:, :, :, i], vs.q_ss * h, msan_ss, vs.alpha_q)[2:-2, 2:-2, :],
         )
 
-        # constrain numerical solution to nonnegative
-        dsan_rz = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * ttn_evap_soil[2:-2, 2:-2, :, i] - vs.transp[2:-2, 2:-2, npx.newaxis] * ttn_transp[2:-2, 2:-2, :, i] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i]) * h
-        dsan_rz = npx.where(san_rz[2:-2, 2:-2, 1, :] + dsan_rz < 0, -san_rz[2:-2, 2:-2, 1, :], dsan_rz)
-        dsan_ss = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * ttn_q_ss[2:-2, 2:-2, :, i]) * h
-        dsan_ss = npx.where(san_ss[2:-2, 2:-2, 1, :] + dsan_ss < 0, -san_ss[2:-2, 2:-2, 1, :], dsan_ss)
-        san_rz = update_add(
-            san_rz,
-            at[2:-2, 2:-2, 1, :], dsan_rz,
-        )
-        san_ss = update_add(
-            san_ss,
-            at[2:-2, 2:-2, 1, :], dsan_ss,
-        )
         if settings.enable_oxygen18 or settings.enable_deuterium:
-            # impose nonnegative solution
-            dmsan_rz1 = (npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) * h + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) * h + npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]))
-            dmsan_rz2 = (npx.where(npx.isnan(mttn_evap_soil[2:-2, 2:-2, :, i]), 0, mttn_evap_soil[2:-2, 2:-2, :, i]) + npx.where(npx.isnan(mttn_transp[2:-2, 2:-2, :, i]), 0, mttn_transp[2:-2, 2:-2, :, i]) + npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i]))
-            dmsan_ss1 = (npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) * h + npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i]))
-            dmsan_ss2 = (npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) + npx.where(npx.isnan(mttn_q_ss[2:-2, 2:-2, :, i]), 0, mttn_q_ss[2:-2, 2:-2, :, i]))
-            dmsan_rz = npx.where((dmsan_rz1 < 0) & (dmsan_rz2 >= 0), dmsan_rz1 + dmsan_rz2, dmsan_rz1 - dmsan_rz2)
-            dmsan_ss = npx.where((dmsan_ss1 < 0) & (dmsan_ss2 >= 0), dmsan_ss1 + dmsan_ss2, dmsan_ss1 - dmsan_ss2)
-            dmsan_rz = npx.where((dmsan_rz > 0), npx.where(msan_rz[2:-2, 2:-2, 1, :] + dmsan_rz > 0, -msan_rz[2:-2, 2:-2, 1, :], dmsan_rz), dmsan_rz)
-            dmsan_ss = npx.where((dmsan_ss > 0), npx.where(msan_ss[2:-2, 2:-2, 1, :] + dmsan_ss > 0, -msan_ss[2:-2, 2:-2, 1, :], dmsan_ss), dmsan_ss)
-            msan_rz = update_add(
+            # constrain numerical solution to nonnegative
+            dsan_rz = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * ttn_evap_soil[2:-2, 2:-2, :, i] - vs.transp[2:-2, 2:-2, npx.newaxis] * ttn_transp[2:-2, 2:-2, :, i] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i]) * h
+            dsan_rz = npx.where(san_rz[2:-2, 2:-2, 1, :] + dsan_rz < 0, -san_rz[2:-2, 2:-2, 1, :], dsan_rz)
+            dsan_ss = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * ttn_q_ss[2:-2, 2:-2, :, i]) * h
+            dsan_ss = npx.where(san_ss[2:-2, 2:-2, 1, :] + dsan_ss < 0, -san_ss[2:-2, 2:-2, 1, :], dsan_ss)
+            dsan_rz1 = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i]) * h
+            dmsan_rz1 = npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) * npx.where(dsan_rz1 > 0, ((vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] * h) / dsan_rz1), 0) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) * npx.where(dsan_rz1 > 0, ((vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] * h) / dsan_rz1), 0) + npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) * npx.where(dsan_rz1 > 0, ((vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] * h) / dsan_rz1), 0)
+            dsan_ss1 = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i]) * h
+            dmsan_ss1 = npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) * npx.where(dsan_ss1 > 0, ((vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] * h) / dsan_ss1), 0) + npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i]) * npx.where(dsan_ss1 > 0, ((vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] * h) / dsan_ss1), 0)
+            msan_rz = update(
                 msan_rz,
-                at[2:-2, 2:-2, 1, :], dmsan_rz,
+                at[2:-2, 2:-2, 1, :], npx.where(dsan_rz1 + san_rz[2:-2, 2:-2, 1, :] > 0, msan_rz[2:-2, 2:-2, 1, :] * (san_rz[2:-2, 2:-2, 1, :] / (dsan_rz1 + san_rz[2:-2, 2:-2, 1, :])), 0) + npx.where(dsan_rz1 + san_rz[2:-2, 2:-2, 1, :] > 0, dmsan_rz1 * (dsan_rz1 / (dsan_rz1 + san_rz[2:-2, 2:-2, 1, :])), 0),
             )
-            msan_ss = update_add(
+            msan_ss = update(
                 msan_ss,
-                at[2:-2, 2:-2, 1, :], dmsan_ss,
+                at[2:-2, 2:-2, 1, :], npx.where(dsan_ss1 + san_ss[2:-2, 2:-2, 1, :] > 0, msan_ss[2:-2, 2:-2, 1, :] * (san_ss[2:-2, 2:-2, 1, :] / (dsan_ss1 + san_ss[2:-2, 2:-2, 1, :])), 0) + npx.where(dsan_ss1 + san_ss[2:-2, 2:-2, 1, :] > 0, dmsan_ss1 * (dsan_ss1 / (dsan_ss1 + san_ss[2:-2, 2:-2, 1, :])), 0),
+            )
+            san_rz = update_add(
+                san_rz,
+                at[2:-2, 2:-2, 1, :], dsan_rz,
+            )
+            san_ss = update_add(
+                san_ss,
+                at[2:-2, 2:-2, 1, :], dsan_ss,
+            )
+            msan_rz = update(
+                msan_rz,
+                at[2:-2, 2:-2, 1, :], npx.where(san_rz[2:-2, 2:-2, 1, :] <= 0, 0, msan_rz[2:-2, 2:-2, 1, :]),
+            )
+            msan_ss = update(
+                msan_ss,
+                at[2:-2, 2:-2, 1, :], npx.where(san_ss[2:-2, 2:-2, 1, :] <= 0, 0, msan_ss[2:-2, 2:-2, 1, :]),
             )
         elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+            # constrain numerical solution to nonnegative
+            dsan_rz = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * ttn_evap_soil[2:-2, 2:-2, :, i] - vs.transp[2:-2, 2:-2, npx.newaxis] * ttn_transp[2:-2, 2:-2, :, i] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i]) * h
+            dsan_rz = npx.where(san_rz[2:-2, 2:-2, 1, :] + dsan_rz < 0, -san_rz[2:-2, 2:-2, 1, :], dsan_rz)
+            dsan_ss = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttn_q_rz[2:-2, 2:-2, :, i] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttn_cpr_rz[2:-2, 2:-2, :, i] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * ttn_q_ss[2:-2, 2:-2, :, i]) * h
+            dsan_ss = npx.where(san_ss[2:-2, 2:-2, 1, :] + dsan_ss < 0, -san_ss[2:-2, 2:-2, 1, :], dsan_ss)
+            san_rz = update_add(
+                san_rz,
+                at[2:-2, 2:-2, 1, :], dsan_rz,
+            )
+            san_ss = update_add(
+                san_ss,
+                at[2:-2, 2:-2, 1, :], dsan_ss,
+            )
             dmsan_rz = ((npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) * h + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) * h + npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i])) - (npx.where(npx.isnan(mttn_evap_soil[2:-2, 2:-2, :, i]), 0, mttn_evap_soil[2:-2, 2:-2, :, i]) + npx.where(npx.isnan(mttn_transp[2:-2, 2:-2, :, i]), 0, mttn_transp[2:-2, 2:-2, :, i]) + npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i])))
             dmsan_ss = ((npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) * h + npx.where(npx.isnan(mttn_q_rz[2:-2, 2:-2, :, i]), 0, mttn_q_rz[2:-2, 2:-2, :, i])) - (npx.where(npx.isnan(mttn_cpr_rz[2:-2, 2:-2, :, i]), 0, mttn_cpr_rz[2:-2, 2:-2, :, i]) + npx.where(npx.isnan(mttn_q_ss[2:-2, 2:-2, :, i]), 0, mttn_q_ss[2:-2, 2:-2, :, i])))
-            # constrain numerical solution to nonnegative
             dmsan_rz = npx.where(msan_rz[2:-2, 2:-2, 1, :] + dmsan_rz < 0, 0, dmsan_rz)
             dmsan_ss = npx.where(msan_ss[2:-2, 2:-2, 1, :] + dmsan_ss < 0, 0, dmsan_ss)
             msan_rz = update_add(
@@ -3687,26 +3773,49 @@ def svat_transport_model_euler(state):
         at[2:-2, 2:-2, :], npx.sum(ttn_q_ss / settings.sas_solver_substeps, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    vs.mtt_evap_soil = update(
-        vs.mtt_evap_soil,
-        at[2:-2, 2:-2, :], npx.nansum(mttn_evap_soil, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-    )
-    vs.mtt_transp = update(
-        vs.mtt_transp,
-        at[2:-2, 2:-2, :], npx.nansum(mttn_transp, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-    )
-    vs.mtt_q_rz = update(
-        vs.mtt_q_rz,
-        at[2:-2, 2:-2, :], npx.nansum(mttn_q_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-    )
-    vs.mtt_cpr_rz = update(
-        vs.mtt_cpr_rz,
-        at[2:-2, 2:-2, :], npx.nansum(mttn_cpr_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-    )
-    vs.mtt_q_ss = update(
-        vs.mtt_q_ss,
-        at[2:-2, 2:-2, :], npx.nansum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-    )
+    if settings.enable_oxygen18 or settings.enable_deuterium:
+        alpha = allocate(state.dimensions, ("x", "y"), fill=1)
+        vs.mtt_evap_soil = update(
+            vs.mtt_evap_soil,
+            at[2:-2, 2:-2, :], calc_mtt(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil, vs.msa_rz, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        )
+        vs.mtt_transp = update(
+            vs.mtt_transp,
+            at[2:-2, 2:-2, :], calc_mtt(state, vs.sa_rz, vs.tt_transp, vs.transp, vs.msa_rz, vs.alpha_transp)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        )
+        vs.mtt_q_rz = update(
+            vs.mtt_q_rz,
+            at[2:-2, 2:-2, :], calc_mtt(state, vs.sa_rz, vs.tt_q_rz, vs.q_rz, vs.msa_rz, vs.alpha_q)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        )
+        vs.mtt_cpr_rz = update(
+            vs.mtt_cpr_rz,
+            at[2:-2, 2:-2, :], calc_mtt(state, vs.sa_ss, vs.tt_cpr_rz, vs.cpr_rz, vs.msa_ss, vs.alpha_q)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        )
+        vs.mtt_q_ss = update(
+            vs.mtt_q_ss,
+            at[2:-2, 2:-2, :], calc_mtt(state, vs.sa_ss, vs.tt_q_ss, vs.q_ss, vs.msa_ss, vs.alpha_q)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        )
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+        vs.mtt_evap_soil = update(
+            vs.mtt_evap_soil,
+            at[2:-2, 2:-2, :], npx.nansum(mttn_evap_soil, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        )
+        vs.mtt_transp = update(
+            vs.mtt_transp,
+            at[2:-2, 2:-2, :], npx.nansum(mttn_transp, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        )
+        vs.mtt_q_rz = update(
+            vs.mtt_q_rz,
+            at[2:-2, 2:-2, :], npx.nansum(mttn_q_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        )
+        vs.mtt_cpr_rz = update(
+            vs.mtt_cpr_rz,
+            at[2:-2, 2:-2, :], npx.nansum(mttn_cpr_rz, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        )
+        vs.mtt_q_ss = update(
+            vs.mtt_q_ss,
+            at[2:-2, 2:-2, :], npx.nansum(mttn_q_ss, axis=-1)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        )
 
     # cumulative backward travel time distributions
     vs.TT_evap_soil = update(
@@ -3731,42 +3840,56 @@ def svat_transport_model_euler(state):
     )
 
     # update StorAge
-    # impose constrain of numerical solution to be nonnegative
-    dsa_rz = vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :]
-    dsa_rz = npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] + dsa_rz < 0, -vs.sa_rz[2:-2, 2:-2, vs.tau, :], dsa_rz)
-    dsa_ss = vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :]
-    dsa_ss = npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] + dsa_ss < 0, -vs.sa_ss[2:-2, 2:-2, vs.tau, :], dsa_ss)
-    vs.sa_rz = update_add(
-        vs.sa_rz,
-        at[2:-2, 2:-2, 1, :], dsa_rz,
-    )
-    vs.sa_ss = update_add(
-        vs.sa_ss,
-        at[2:-2, 2:-2, 1, :], dsa_ss,
-    )
-
     if settings.enable_oxygen18 or settings.enable_deuterium:
-        dmsa_rz1 = npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :])
-        dmsa_rz2 = npx.where(npx.isnan(vs.mtt_evap_soil[2:-2, 2:-2, :]), 0, vs.mtt_evap_soil[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_transp[2:-2, 2:-2, :]), 0, vs.mtt_transp[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :])
-        dmsa_ss1 = npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :])
-        dmsa_ss2 = npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_q_ss[2:-2, 2:-2, :]), 0, vs.mtt_q_ss[2:-2, 2:-2, :])
-        dmsa_rz = npx.where((dmsa_rz1 < 0) & (dmsa_rz2 >= 0), dmsa_rz1 + dmsa_rz2, dmsa_rz1 - dmsa_rz2)
-        dmsa_ss = npx.where((dmsa_ss1 < 0) & (dmsa_ss2 >= 0), dmsa_ss1 + dmsa_ss2, dmsa_ss1 - dmsa_ss2)
-        # constrain numerical solution to nonnegative
-        dmsa_rz = npx.where(vs.msa_rz[2:-2, 2:-2, vs.tau, :] + dmsa_rz > 0, -vs.msa_rz[2:-2, 2:-2, vs.tau, :], dmsa_rz)
-        dmsa_ss = npx.where(vs.msa_ss[2:-2, 2:-2, vs.tau, :] + dmsa_ss > 0, -vs.msa_ss[2:-2, 2:-2, vs.tau, :], dmsa_ss)
-        vs.msa_rz = update_add(
+        # impose constrain of numerical solution to be nonnegative
+        dsa_rz = vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :]
+        dsa_rz = npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] + dsa_rz < 0, -vs.sa_rz[2:-2, 2:-2, vs.tau, :], dsa_rz)
+        dsa_ss = vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :]
+        dsa_ss = npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] + dsa_ss < 0, -vs.sa_ss[2:-2, 2:-2, vs.tau, :], dsa_ss)
+        dsa_rz1 = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :])
+        dmsa_rz1 = npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) * npx.where(dsa_rz1 > 0, ((vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :]) / dsa_rz1), 0) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) * npx.where(dsa_rz1 > 0, ((vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :]) / dsa_rz1), 0) + npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) * npx.where(dsa_rz1 > 0, ((vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :]) / dsa_rz1), 0)
+        dsa_ss1 = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :])
+        dmsa_ss1 = npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :]) / dsa_ss1), 0) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :]) / dsa_ss1), 0)
+        vs.msa_rz = update(
             vs.msa_rz,
-            at[2:-2, 2:-2, 1, :], dmsa_rz,
+            at[2:-2, 2:-2, 1, :], npx.where(dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :] > 0, vs.msa_rz[2:-2, 2:-2, 1, :] * (vs.sa_rz[2:-2, 2:-2, 1, :] / (dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :])), 0) + npx.where(dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :] > 0, dmsa_rz1 * (dsa_rz1 / (dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :])), 0),
         )
-        vs.msa_ss = update_add(
+        vs.msa_ss = update(
             vs.msa_ss,
-            at[2:-2, 2:-2, 1, :], dmsa_ss,
+            at[2:-2, 2:-2, 1, :], npx.where(dsa_ss1 + vs.sa_ss[2:-2, 2:-2, 1, :] > 0, vs.msa_ss[2:-2, 2:-2, 1, :] * (vs.sa_ss[2:-2, 2:-2, 1, :]/ (dsa_ss1 + vs.sa_ss[2:-2, 2:-2, 1, :])), 0) + npx.where(dsa_ss1 + vs.sa_ss[2:-2, 2:-2, 1, :] > 0, dmsa_ss1 * (dsa_ss1 / (dsa_ss1 + vs.sa_ss[2:-2, 2:-2, 1, :])), 0),
+        )
+        vs.sa_rz = update_add(
+            vs.sa_rz,
+            at[2:-2, 2:-2, 1, :], dsa_rz,
+        )
+        vs.sa_ss = update_add(
+            vs.sa_ss,
+            at[2:-2, 2:-2, 1, :], dsa_ss,
+        )
+        vs.msa_rz = update(
+            vs.msa_rz,
+            at[2:-2, 2:-2, 1, :], npx.where(vs.sa_rz[2:-2, 2:-2, 1, :] <= 0, 0, vs.msa_rz[2:-2, 2:-2, 1, :]),
+        )
+        vs.msa_ss = update(
+            vs.msa_ss,
+            at[2:-2, 2:-2, 1, :], npx.where(vs.sa_ss[2:-2, 2:-2, 1, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, 1, :]),
         )
     elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+        # impose constrain of numerical solution to be nonnegative
+        dsa_rz = vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :]
+        dsa_rz = npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] + dsa_rz < 0, -vs.sa_rz[2:-2, 2:-2, vs.tau, :], dsa_rz)
+        dsa_ss = vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] - vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :]
+        dsa_ss = npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] + dsa_ss < 0, -vs.sa_ss[2:-2, 2:-2, vs.tau, :], dsa_ss)
+        vs.sa_rz = update_add(
+            vs.sa_rz,
+            at[2:-2, 2:-2, 1, :], dsa_rz,
+        )
+        vs.sa_ss = update_add(
+            vs.sa_ss,
+            at[2:-2, 2:-2, 1, :], dsa_ss,
+        )
         dmsa_rz = (npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :])) - (npx.where(npx.isnan(vs.mtt_evap_soil[2:-2, 2:-2, :]), 0, vs.mtt_evap_soil[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_transp[2:-2, 2:-2, :]), 0, vs.mtt_transp[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]))
         dmsa_ss = (npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :])) - (npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) + npx.where(npx.isnan(vs.mtt_q_ss[2:-2, 2:-2, :]), 0, vs.mtt_q_ss[2:-2, 2:-2, :]))
-        # constrain numerical solution to nonnegative
         dmsa_rz = npx.where(vs.msa_rz[2:-2, 2:-2, vs.tau, :] + dmsa_rz < 0, 0, dmsa_rz)
         dmsa_ss = npx.where(vs.msa_ss[2:-2, 2:-2, vs.tau, :] + dmsa_ss < 0, 0, dmsa_ss)
         vs.msa_rz = update_add(

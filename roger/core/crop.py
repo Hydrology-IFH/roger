@@ -1288,32 +1288,26 @@ def calculate_redistribution_root_growth_transport_iso_kernel(state):
         at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_re_rg, vs.tt_re_rg, vs.re_rg)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
+    # update isotope StorAge
+    vs.msa_rz = update_add(
+        vs.msa_rz,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_re_rg[2:-2, 2:-2, :] * ((vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis]) / ((vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis]) + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
     # update StorAge with flux
     vs.sa_ss = update(
         vs.sa_ss,
         at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_re_rg, vs.re_rg)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
-
-    # update isotope StorAge
-    vs.C_ss = update(
-        vs.C_ss,
-        at[2:-2, 2:-2, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_ss, vs.msa_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
     vs.sa_rz = update_add(
         vs.sa_rz,
         at[2:-2, 2:-2, vs.tau, :], vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    # update isotope StorAge of root zone
-    vs.msa_rz = update_add(
-        vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(npx.isnan(vs.mtt_re_rg[2:-2, 2:-2, :]), 0, vs.mtt_re_rg[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-    )
-    # update isotope StorAge of subsoil
-    vs.msa_ss = update_add(
+    # update isotope StorAge
+    vs.msa_ss = update(
         vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, :], -npx.where(npx.isnan(vs.mtt_re_rg[2:-2, 2:-2, :]), 0, vs.mtt_re_rg[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rg=vs.tt_re_rg, TT_re_rg=vs.TT_re_rg, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, mtt_re_rg=vs.mtt_re_rg, C_re_rg=vs.C_re_rg, re_rg=vs.re_rg)
@@ -1462,31 +1456,26 @@ def calculate_redistribution_root_loss_transport_iso_kernel(state):
         at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_re_rl, vs.tt_re_rl, vs.re_rl)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
+    # update isotope StorAge
+    vs.msa_ss = update_add(
+        vs.msa_ss,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis] > 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / (vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis] + vs.sa_ss[2:-2, 2:-2, vs.tau, :])) + vs.mtt_re_rl[2:-2, 2:-2, :] * ((vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis]) / ((vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis]) + vs.sa_ss[2:-2, 2:-2, vs.tau, :])), vs.msa_ss[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
     # update StorAge with flux
     vs.sa_rz = update(
         vs.sa_rz,
         at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_re_rl, vs.re_rl)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
-
-    vs.C_rz = update(
-        vs.C_rz,
-        at[2:-2, 2:-2, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
     vs.sa_ss = update_add(
         vs.sa_ss,
         at[2:-2, 2:-2, vs.tau, :], vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    # update  StorAge of root zone
-    vs.msa_rz = update_add(
-        vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], -npx.where(npx.isnan(vs.mtt_re_rl[2:-2, 2:-2, :]), 0, vs.mtt_re_rl[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-    )
-    # update isotope StorAge of subsoil
-    vs.msa_ss = update_add(
+    # update isotope StorAge
+    vs.msa_rz = update(
         vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(npx.isnan(vs.mtt_re_rl[2:-2, 2:-2, :]), 0, vs.mtt_re_rl[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rl=vs.tt_re_rl, TT_re_rl=vs.TT_re_rl, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, mtt_re_rl=vs.mtt_re_rl, C_re_rl=vs.C_re_rl, re_rl=vs.re_rl)

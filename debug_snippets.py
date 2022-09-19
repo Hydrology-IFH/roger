@@ -289,7 +289,16 @@ ca_rz1 = vs.msa_rz[2:-2, 2:-2, 1, :] / vs.sa_rz[2:-2, 2:-2, 1, :]
 ca_ss1 = vs.msa_ss[2:-2, 2:-2, 1, :] / vs.sa_ss[2:-2, 2:-2, 1, :]
 cfluxa = mtt[2:-2, 2:-2, :] / (tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis])
 
+sa_rz2 = vs.sa_rz[2:-2, 2:-2, 1, :]
+sa_ss2 = vs.sa_ss[2:-2, 2:-2, 1, :]
+msa_rz2 = vs.msa_rz[2:-2, 2:-2, 1, :]
+msa_ss2 = vs.msa_ss[2:-2, 2:-2, 1, :]
+
 cond1 = (sa_rz1 <= 0) & (msa_rz1 =! 0)
 cond2 = (sa_rz1 > 0) & (msa_rz1 == 0)
 cond3 = (sa_ss1 <= 0) & (msa_ss1 =! 0)
 cond4 = (sa_ss1 > 0) & (msa_ss1 == 0)
+
+
+msa_rz1 = msan_rz[2:-2, 2:-2, 1, :]
+msa_ss1 = msan_ss[2:-2, 2:-2, 1, :]
