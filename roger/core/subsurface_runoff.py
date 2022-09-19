@@ -917,7 +917,7 @@ def calculate_percolation_rz_transport_iso_kernel(state):
     # update isotope StorAge
     vs.msa_ss = update(
         vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.tt_q_rz[2:-2, 2:-2, :] * vs.q_rz[2:-2, 2:-2, npx.newaxis] > 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / (vs.tt_q_rz[2:-2, 2:-2, :] * vs.q_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_ss[2:-2, 2:-2, vs.tau, :])) + vs.mtt_q_rz[2:-2, 2:-2, :] * ((vs.tt_q_rz[2:-2, 2:-2, :] * vs.q_rz[2:-2, 2:-2, npx.newaxis]) / ((vs.tt_q_rz[2:-2, 2:-2, :] * vs.q_rz[2:-2, 2:-2, npx.newaxis]) + vs.sa_ss[2:-2, 2:-2, vs.tau, :])), vs.msa_ss[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.tt_q_rz[2:-2, 2:-2, :] * vs.q_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_ss[2:-2, 2:-2, vs.tau, :] > 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / (vs.tt_q_rz[2:-2, 2:-2, :] * vs.q_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_ss[2:-2, 2:-2, vs.tau, :])) + vs.mtt_q_rz[2:-2, 2:-2, :] * ((vs.tt_q_rz[2:-2, 2:-2, :] * vs.q_rz[2:-2, 2:-2, npx.newaxis]) / ((vs.tt_q_rz[2:-2, 2:-2, :] * vs.q_rz[2:-2, 2:-2, npx.newaxis]) + vs.sa_ss[2:-2, 2:-2, vs.tau, :])), vs.msa_ss[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     # update StorAge with flux

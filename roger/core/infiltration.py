@@ -1575,11 +1575,11 @@ def calculate_infiltration_rz_transport_iso_kernel(state):
     # update isotope StorAge
     vs.msa_rz = update(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_inf_mat_rz[2:-2, 2:-2, :] * vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_inf_mat_rz[2:-2, 2:-2, :] * ((vs.tt_inf_mat_rz[2:-2, 2:-2, :] * vs.inf_mat_rz[2:-2, 2:-2]) / (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.sa_rz[2:-2, 2:-2, vs.tau, :] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_inf_mat_rz[2:-2, 2:-2, :] * vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_inf_mat_rz[2:-2, 2:-2, :] * ((vs.tt_inf_mat_rz[2:-2, 2:-2, :] * vs.inf_mat_rz[2:-2, 2:-2]) / (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     vs.msa_rz = update(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_inf_pf_rz[2:-2, 2:-2, :] * vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_inf_pf_rz[2:-2, 2:-2, :] * ((vs.tt_inf_pf_rz[2:-2, 2:-2, :] * vs.inf_pf_rz[2:-2, 2:-2]) / (vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.sa_rz[2:-2, 2:-2, vs.tau, :] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_inf_pf_rz[2:-2, 2:-2, :] * vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_inf_pf_rz[2:-2, 2:-2, :] * ((vs.tt_inf_pf_rz[2:-2, 2:-2, :] * vs.inf_pf_rz[2:-2, 2:-2]) / (vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     # update StorAge
@@ -1686,7 +1686,7 @@ def calculate_infiltration_ss_transport_iso_kernel(state):
     # update isotope StorAge
     vs.msa_ss = update(
         vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] > 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / (vs.tt_inf_pf_ss[2:-2, 2:-2, :] * vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] + vs.sa_ss[2:-2, 2:-2, vs.tau, :])) + vs.mtt_inf_pf_ss[2:-2, 2:-2, :] * ((vs.tt_inf_pf_ss[2:-2, 2:-2, :] * vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis]) / (vs.inf_pf_ss[2:-2, 2:-2] + vs.sa_ss[2:-2, 2:-2, vs.tau, :])), vs.msa_ss[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.sa_ss[2:-2, 2:-2, vs.tau, :] > 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / (vs.tt_inf_pf_ss[2:-2, 2:-2, :] * vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] + vs.sa_ss[2:-2, 2:-2, vs.tau, :])) + vs.mtt_inf_pf_ss[2:-2, 2:-2, :] * ((vs.tt_inf_pf_ss[2:-2, 2:-2, :] * vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis]) / (vs.inf_pf_ss[2:-2, 2:-2] + vs.sa_ss[2:-2, 2:-2, vs.tau, :])), vs.msa_ss[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     # update StorAge
     vs.sa_ss = update_add(

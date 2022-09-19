@@ -1291,7 +1291,7 @@ def calculate_redistribution_root_growth_transport_iso_kernel(state):
     # update isotope StorAge
     vs.msa_rz = update_add(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_re_rg[2:-2, 2:-2, :] * ((vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis]) / ((vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis]) + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_re_rg[2:-2, 2:-2, :] * ((vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis]) / ((vs.tt_re_rg[2:-2, 2:-2, :] * vs.re_rg[2:-2, 2:-2, npx.newaxis]) + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     # update StorAge with flux
@@ -1459,7 +1459,7 @@ def calculate_redistribution_root_loss_transport_iso_kernel(state):
     # update isotope StorAge
     vs.msa_ss = update_add(
         vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis] > 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / (vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis] + vs.sa_ss[2:-2, 2:-2, vs.tau, :])) + vs.mtt_re_rl[2:-2, 2:-2, :] * ((vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis]) / ((vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis]) + vs.sa_ss[2:-2, 2:-2, vs.tau, :])), vs.msa_ss[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis] + vs.sa_ss[2:-2, 2:-2, vs.tau, :] > 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / (vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis] + vs.sa_ss[2:-2, 2:-2, vs.tau, :])) + vs.mtt_re_rl[2:-2, 2:-2, :] * ((vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis]) / ((vs.tt_re_rl[2:-2, 2:-2, :] * vs.re_rl[2:-2, 2:-2, npx.newaxis]) + vs.sa_ss[2:-2, 2:-2, vs.tau, :])), vs.msa_ss[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     # update StorAge with flux

@@ -281,7 +281,7 @@ def calculate_capillary_rise_rz_transport_iso_kernel(state):
     # update isotope StorAge
     vs.msa_rz = update(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_cpr_rz[2:-2, 2:-2, :] * ((vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis]) / ((vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis]) + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_cpr_rz[2:-2, 2:-2, :] * ((vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis]) / ((vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis]) + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     # update StorAge with flux

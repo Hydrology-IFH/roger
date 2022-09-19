@@ -666,14 +666,19 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
     @roger_kernel
     def _bfill(loop_arr):
         def loop_body(i, loop_arr):
+            j = loop_arr.shape[2] - i
             loop_arr = update(
                 loop_arr,
-                at[:, :, i-1], npx.where(loop_arr[:, :, i-1] == 0, loop_arr[:, :, i], loop_arr[:, :, i-1]),
+                at[:, :, j-1], npx.where(loop_arr[:, :, j-1] == 0, loop_arr[:, :, j], loop_arr[:, :, j-1]),
             )
 
             return loop_arr
 
-        loop_arr = for_loop(loop_arr.shape[2], 1, loop_body, loop_arr)
+        loop_arr = for_loop(1, loop_arr.shape[2], loop_body, loop_arr)
+        loop_arr = update(
+            loop_arr,
+            at[:, :, -1], npx.where(loop_arr[:, :, -1] == 0, loop_arr[:, :, -2], loop_arr[:, :, -1]),
+        )
 
         return loop_arr
 

@@ -6,7 +6,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant preferential_+_advection-dispersion', 'power', 'time-variant_power', 'time-variant_power_reverse']), default='power')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant preferential_+_advection-dispersion', 'power', 'time-variant_power', 'time-variant_power_reverse']), default='piston')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @roger_base_cli
 def main(transport_model_structure, sas_solver):
@@ -774,14 +774,19 @@ def main(transport_model_structure, sas_solver):
     @roger_kernel
     def _bfill(loop_arr):
         def loop_body(i, loop_arr):
+            j = loop_arr.shape[2] - i
             loop_arr = update(
                 loop_arr,
-                at[:, :, i-1], npx.where(loop_arr[:, :, i-1] == 0, loop_arr[:, :, i], loop_arr[:, :, i-1]),
+                at[:, :, j-1], npx.where(loop_arr[:, :, j-1] == 0, loop_arr[:, :, j], loop_arr[:, :, j-1]),
             )
 
             return loop_arr
 
-        loop_arr = for_loop(loop_arr.shape[2], 1, loop_body, loop_arr)
+        loop_arr = for_loop(1, loop_arr.shape[2], loop_body, loop_arr)
+        loop_arr = update(
+            loop_arr,
+            at[:, :, -1], npx.where(loop_arr[:, :, -1] == 0, loop_arr[:, :, -2], loop_arr[:, :, -1]),
+        )
 
         return loop_arr
 
