@@ -50,7 +50,7 @@ GIT:
 **First step:**
 Download the repository and install required Python packages in an environment:
 ```bash
-git clone https://github.com/schwemro/roger.git
+git clone https://github.com/Hydrology-IFH/roger.git
 cd roger
 conda env create -f conda-environment.yml
 ```
@@ -79,7 +79,7 @@ GIT:
 **First step:**
 Download the repository and install required Python packages in an environment:
 ```bash
-git clone https://github.com/schwemro/roger.git
+git clone https://github.com/Hydrology-IFH/roger.git
 cd roger
 conda env create -f conda-environment.yml
 ```
@@ -101,7 +101,7 @@ To run Roger, you need to set up a model --- i.e., specify which settings
 and model domain you want to use. This is done by subclassing the
 `RogerSetup` base class in a *setup script* that is written in Python. A good
 place to start is the
-[OneD Tutorial](https://github.com/schwemro/roger/blob/master/roger/examples/plot_scale/oneD_tutorial):
+[OneD Tutorial](https://github.com/Hydrology-IFH/roger/blob/master/roger/examples/plot_scale/oneD_tutorial):
 
 
 After setting up your model, all you need to do is call the model setup:
@@ -121,13 +121,13 @@ new setup, fixed a bug, or even extended Roger\' core mechanics. There
 are 2 ways to contribute:
 
 1.  If you want to report a bug or request a missing feature, please
-    [open an issue](https://github.com/schwemro/roger/issues). If you
+    [open an issue](https://github.com/Hydrology-IFH/roger/issues). If you
     are reporting a bug, make sure to include all relevant information
     for reproducing it (ideally through a *minimal* code sample).
 2.  If you want to fix the issue yourself, or wrote an extension for
     Roger - great! You are welcome to submit your code for review by
     committing it to a repository and opening a [pull
-    request](https://github.com/schwemro/toger/pulls). However,
+    request](https://github.com/Hydrology-IFH/roger/pulls). However,
     before you do so, please check [the contribution
     guide](http://roger.readthedocs.io/quickstart/get-started.html#enhancing-Roger)
     for some tips on testing and benchmarking, and to make sure that
