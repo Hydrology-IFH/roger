@@ -170,6 +170,11 @@ def write_forcing_tracer(input_dir, tracer, nrows=1, ncols=1, uniform=True, floa
     uniform : bool, optional
         True if time series are used as input data
     """
+    input_path = input_dir / "forcing_tracer.nc"
+    if os.path.exists(input_path):
+        logger.warning("Use available tracer forcing.")
+        return
+
     if uniform:
         if tracer in ['Nmin', 'Norg', 'NO3']:
             df_tracer = read_tracer_input(input_dir, 'Nmin')
@@ -181,7 +186,7 @@ def write_forcing_tracer(input_dir, tracer, nrows=1, ncols=1, uniform=True, floa
         with h5netcdf.File(nc_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
-                title='model tracer forcing',
+                title=f'{tracer} forcing',
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
                 comment=''
@@ -235,7 +240,8 @@ def write_crop_rotation(input_dir, nrows=1, ncols=1, float_type="float64"):
     ncols : int, optional
         number of columns
     """
-    if os.path.exists(input_dir / "crop_rotation.nc"):
+    input_path = input_dir / "crop_rotation.nc"
+    if os.path.exists(input_path):
         logger.warning("Use available crop rotation.")
         return
 
@@ -298,6 +304,11 @@ def write_forcing_event(input_dir, nrows=1, ncols=1, uniform=True, prec_correcti
     prec_correction : str, optional
         if True precipitation is corrected according to Richter (1995)
     """
+    input_path = input_dir / "forcing.nc"
+    if os.path.exists(input_path):
+        logger.warning("Use available forcing.")
+        return
+
     if uniform:
         if not os.path.isdir(input_dir):
             raise ValueError(input_dir, 'does not exist')
@@ -323,7 +334,7 @@ def write_forcing_event(input_dir, nrows=1, ncols=1, uniform=True, prec_correcti
         with h5netcdf.File(nc_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
-                title='model forcing',
+                title='Meteorological forcing',
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
                 comment=''
@@ -469,7 +480,8 @@ def write_forcing(input_dir, nrows=1, ncols=1, uniform=True,
     prec_correction : str, optional
         if True precipitation is corrected according to Richter (1995)
     """
-    if os.path.exists(input_dir / "forcing.nc"):
+    input_path = input_dir / "forcing.nc"
+    if os.path.exists(input_path):
         logger.warning("Use available forcing.")
         return
 
@@ -503,7 +515,7 @@ def write_forcing(input_dir, nrows=1, ncols=1, uniform=True,
         with h5netcdf.File(nc_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
-                title='RoGeR model forcing',
+                title='Meteorological forcing',
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
                 comment=''
