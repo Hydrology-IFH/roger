@@ -1,6 +1,7 @@
 from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, update_add, scan, at
+from roger.core import transport
 
 
 @roger_kernel
@@ -1544,14 +1545,22 @@ def calculate_infiltration_rz_transport_iso_kernel(state):
     """
     vs = state.variables
 
-    # isotope ratio of infiltration
+    # isotope concentration of infiltration
     vs.C_inf_mat_rz = update(
         vs.C_inf_mat_rz,
-        at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.C_inf_pf_rz = update(
         vs.C_inf_pf_rz,
-        at[2:-2, 2:-2], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.C_iso_inf_mat_rz = update(
+        vs.C_iso_inf_mat_rz,
+        at[2:-2, 2:-2], transport.conc_to_delta(state, vs.C_inf_mat_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.C_iso_inf_pf_rz = update(
+        vs.C_iso_inf_pf_rz,
+        at[2:-2, 2:-2], transport.conc_to_delta(state, vs.C_inf_pf_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     # travel time distribution
     vs.tt_inf_mat_rz = update(
@@ -1571,24 +1580,28 @@ def calculate_infiltration_rz_transport_iso_kernel(state):
         vs.mtt_inf_pf_rz,
         at[2:-2, 2:-2, 0], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
-
     # update isotope StorAge
     vs.msa_rz = update(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.sa_rz[2:-2, 2:-2, vs.tau, :] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_inf_mat_rz[2:-2, 2:-2, :] * vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_inf_mat_rz[2:-2, 2:-2, :] * ((vs.tt_inf_mat_rz[2:-2, 2:-2, :] * vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis]) / (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.sa_rz[2:-2, 2:-2, vs.tau, :] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_inf_mat_rz[2:-2, 2:-2, :] * vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_inf_mat_rz[2:-2, 2:-2, :] * ((vs.tt_inf_mat_rz[2:-2, 2:-2, :] * vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis]) / (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
+    # update StorAge
+    vs.sa_rz = update_add(
+        vs.sa_rz,
+        at[2:-2, 2:-2, vs.tau, 0], vs.inf_mat_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    # update isotope StorAge
     vs.msa_rz = update(
         vs.msa_rz,
         at[2:-2, 2:-2, vs.tau, :], npx.where(vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.sa_rz[2:-2, 2:-2, vs.tau, :] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_inf_pf_rz[2:-2, 2:-2, :] * vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_inf_pf_rz[2:-2, 2:-2, :] * ((vs.tt_inf_pf_rz[2:-2, 2:-2, :] * vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis]) / (vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
-
     # update StorAge
     vs.sa_rz = update_add(
         vs.sa_rz,
-        at[2:-2, 2:-2, vs.tau, 0], vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau, 0], vs.inf_pf_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(sa_rz=vs.sa_rz, msa_rz=vs.msa_rz, C_inf_mat_rz=vs.C_inf_mat_rz, C_inf_pf_rz=vs.C_inf_pf_rz, tt_inf_mat_rz=vs.tt_inf_mat_rz, mtt_inf_mat_rz=vs.mtt_inf_mat_rz, tt_inf_pf_rz=vs.tt_inf_pf_rz, mtt_inf_pf_rz=vs.mtt_inf_pf_rz)
+    return KernelOutput(sa_rz=vs.sa_rz, msa_rz=vs.msa_rz, C_inf_mat_rz=vs.C_inf_mat_rz, C_inf_pf_rz=vs.C_inf_pf_rz, C_iso_inf_mat_rz=vs.C_iso_inf_mat_rz, C_iso_inf_pf_rz=vs.C_iso_inf_pf_rz, tt_inf_mat_rz=vs.tt_inf_mat_rz, mtt_inf_mat_rz=vs.mtt_inf_mat_rz, tt_inf_pf_rz=vs.tt_inf_pf_rz, mtt_inf_pf_rz=vs.mtt_inf_pf_rz)
 
 
 @roger_kernel
@@ -1671,7 +1684,11 @@ def calculate_infiltration_ss_transport_iso_kernel(state):
     # isotope ratio of infiltration
     vs.C_inf_pf_ss = update(
         vs.C_inf_pf_ss,
-        at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], npx.nan) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.C_iso_inf_pf_ss = update(
+        vs.C_iso_inf_pf_ss,
+        at[2:-2, 2:-2], transport.conc_to_delta(state, vs.C_inf_pf_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     # travel time distribution
     vs.tt_inf_pf_ss = update(
@@ -1694,7 +1711,7 @@ def calculate_infiltration_ss_transport_iso_kernel(state):
         at[2:-2, 2:-2, vs.tau, 0], vs.inf_pf_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(sa_ss=vs.sa_ss, msa_ss=vs.msa_ss, C_inf_pf_ss=vs.C_inf_pf_ss, tt_inf_pf_ss=vs.tt_inf_pf_ss, mtt_inf_pf_ss=vs.mtt_inf_pf_ss)
+    return KernelOutput(sa_ss=vs.sa_ss, msa_ss=vs.msa_ss, C_inf_pf_ss=vs.C_inf_pf_ss, C_iso_inf_pf_ss=vs.C_iso_inf_pf_ss, tt_inf_pf_ss=vs.tt_inf_pf_ss, mtt_inf_pf_ss=vs.mtt_inf_pf_ss)
 
 
 @roger_kernel
@@ -1714,7 +1731,7 @@ def calculate_infiltration_ss_transport_anion_kernel(state):
         vs.tt_inf_pf_ss,
         at[2:-2, 2:-2, 0], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, 1, 0) * vs.maskCatch[2:-2, 2:-2],
     )
-    # isotope travel time distribution
+    # solute travel time distribution
     vs.mtt_inf_pf_ss = update(
         vs.mtt_inf_pf_ss,
         at[2:-2, 2:-2, 0], vs.inf_pf_ss[2:-2, 2:-2] * vs.C_in[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],

@@ -1,7 +1,7 @@
 # SVAT 18O
 vs = model.state.variables
 dS = npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1)
-fluxes = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2)
+fluxes = (vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2)) * settings.h
 
 dS_rz = npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_rz[2:-2, 2:-2, vs.taum1, :], axis=-1)
 fluxes_rz = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :], axis=2) + npx.sum(vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :], axis=2)
@@ -11,6 +11,7 @@ fluxes_ss = vs.inf_pf_ss[2:-2, 2:-2] + npx.sum(vs.q_rz[2:-2, 2:-2, npx.newaxis] 
 
 dC = npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.tau] - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.taum1]
 cfluxes = vs.inf_mat_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) + vs.inf_pf_ss[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2]) - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2])
+
 
 dC_rz = npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.C_rz[2:-2, 2:-2, vs.tau] - npx.sum(vs.sa_rz[2:-2, 2:-2, vs.taum1, :], axis=-1) * vs.C_rz[2:-2, 2:-2, vs.taum1]
 cfluxes_rz = vs.inf_mat_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2]) + vs.inf_pf_rz[2:-2, 2:-2] * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2]) - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_evap_soil[2:-2, 2:-2]), 0, vs.C_evap_soil[2:-2, 2:-2]) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2]) - npx.sum(vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_q_rz[2:-2, 2:-2]), 0, vs.C_q_rz[2:-2, 2:-2]) + npx.sum(vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :], axis=2) * npx.where(npx.isnan(vs.C_cpr_rz[2:-2, 2:-2]), 0, vs.C_cpr_rz[2:-2, 2:-2])
@@ -283,11 +284,17 @@ with self.state.settings.unlock():
 vs = state.variables
 sa_rz1 = vs.sa_rz[2:-2, 2:-2, 1, :]
 sa_ss1 = vs.sa_ss[2:-2, 2:-2, 1, :]
+sa_s1 = vs.sa_s[2:-2, 2:-2, 1, :]
 msa_rz1 = vs.msa_rz[2:-2, 2:-2, 1, :]
 msa_ss1 = vs.msa_ss[2:-2, 2:-2, 1, :]
+csa_rz1 = vs.csa_rz[2:-2, 2:-2, 1, :]
+csa_ss1 = vs.csa_ss[2:-2, 2:-2, 1, :]
+msa_s1 = vs.msa_s[2:-2, 2:-2, 1, :]
 ca_rz1 = vs.msa_rz[2:-2, 2:-2, 1, :] / vs.sa_rz[2:-2, 2:-2, 1, :]
 ca_ss1 = vs.msa_ss[2:-2, 2:-2, 1, :] / vs.sa_ss[2:-2, 2:-2, 1, :]
 cfluxa = mtt[2:-2, 2:-2, :] / (tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis])
+SA_rz1 = vs.SA_rz[2:-2, 2:-2, 1, :]
+SA_ss1 = vs.SA_ss[2:-2, 2:-2, 1, :]
 
 sa_rz2 = vs.sa_rz[2:-2, 2:-2, 1, :]
 sa_ss2 = vs.sa_ss[2:-2, 2:-2, 1, :]
@@ -300,5 +307,5 @@ cond3 = (sa_ss1 <= 0) & (msa_ss1 =! 0)
 cond4 = (sa_ss1 > 0) & (msa_ss1 == 0)
 
 
-msa_rz1 = msan_rz[2:-2, 2:-2, 1, :]
-msa_ss1 = msan_ss[2:-2, 2:-2, 1, :]
+msa_rz0 = msan_rz[2:-2, 2:-2, 0, :]
+msa_ss0 = msan_ss[2:-2, 2:-2, 0, :]

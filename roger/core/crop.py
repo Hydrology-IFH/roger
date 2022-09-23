@@ -1287,6 +1287,10 @@ def calculate_redistribution_root_growth_transport_iso_kernel(state):
         vs.C_re_rg,
         at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_re_rg, vs.tt_re_rg, vs.re_rg)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
+    vs.C_iso_re_rg = update(
+        vs.C_iso_re_rg,
+        at[2:-2, 2:-2], transport.conc_to_delta(state, vs.C_re_rg)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
 
     # update isotope StorAge
     vs.msa_rz = update_add(
@@ -1310,7 +1314,7 @@ def calculate_redistribution_root_growth_transport_iso_kernel(state):
         at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rg=vs.tt_re_rg, TT_re_rg=vs.TT_re_rg, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, mtt_re_rg=vs.mtt_re_rg, C_re_rg=vs.C_re_rg, re_rg=vs.re_rg)
+    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rg=vs.tt_re_rg, TT_re_rg=vs.TT_re_rg, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, mtt_re_rg=vs.mtt_re_rg, C_re_rg=vs.C_re_rg, C_iso_re_rg=vs.C_iso_re_rg, re_rg=vs.re_rg)
 
 
 @roger_kernel
@@ -1455,6 +1459,10 @@ def calculate_redistribution_root_loss_transport_iso_kernel(state):
         vs.C_re_rl,
         at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_re_rl, vs.tt_re_rl, vs.re_rl)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
+    vs.C_iso_re_rl = update(
+        vs.C_iso_re_rl,
+        at[2:-2, 2:-2], transport.conc_to_delta(state, vs.C_re_rl)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
 
     # update isotope StorAge
     vs.msa_ss = update_add(
@@ -1478,7 +1486,7 @@ def calculate_redistribution_root_loss_transport_iso_kernel(state):
         at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rl=vs.tt_re_rl, TT_re_rl=vs.TT_re_rl, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, mtt_re_rl=vs.mtt_re_rl, C_re_rl=vs.C_re_rl, re_rl=vs.re_rl)
+    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rl=vs.tt_re_rl, TT_re_rl=vs.TT_re_rl, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, mtt_re_rl=vs.mtt_re_rl, C_re_rl=vs.C_re_rl, C_iso_re_rl=vs.C_iso_re_rl, re_rl=vs.re_rl)
 
 
 @roger_kernel
@@ -1535,6 +1543,7 @@ def calculate_redistribution_root_loss_transport_anion_kernel(state):
         vs.msa_rz,
         at[2:-2, 2:-2, vs.tau, :], -vs.mtt_re_rl[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
+    # update solute StorAge of subsoil
     vs.msa_ss = update_add(
         vs.msa_ss,
         at[2:-2, 2:-2, vs.tau, :], vs.mtt_re_rl[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],

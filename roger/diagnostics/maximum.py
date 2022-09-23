@@ -24,7 +24,7 @@ class Maximum(RogerDiagnostic):
         self.output_variables = []
 
     def initialize(self, state):
-        """Register all variables to be maximumd"""
+        """Register all variables to be maximum"""
 
         for var in self.output_variables:
             var_meta = copy.copy(state.var_meta[var])
@@ -94,3 +94,12 @@ class Maximum(RogerDiagnostic):
             setattr(max_vs, key, val)
 
         self.write_output(state)
+        
+        # set to zero after output
+        for var in self.output_variables:
+            if self._has_timestep_dim(state, var):
+                var_data = allocate(state.dimensions, ("x", "y", 2))
+                setattr(max_vs, var, var_data)
+            else:
+                var_data = allocate(state.dimensions, ("x", "y"))
+                setattr(max_vs, var, var_data)

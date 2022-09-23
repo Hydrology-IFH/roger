@@ -41,7 +41,6 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
         self._plugin_interfaces = tuple(load_plugin(p) for p in self.__roger_plugins__)
         self._setup_done = False
-        self._warmup_done = False
 
         self.state = get_default_state(use_plugins=self.__roger_plugins__)
 
@@ -244,7 +243,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
             raise RuntimeError("setup() method has to be called before running the model")
 
     def _ensure_warmup_done(self):
-        if not self._warmup_done:
+        if not settings.warmup_done:
             raise RuntimeError("warmup() method has to be called before running the model")
 
     def setup(self):
@@ -318,9 +317,10 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
         self._setup_done = True
         if not self.state.settings.enable_offline_transport:
-            self._warmup_done = True
+            with self.state.settings.unlock():
+                self.state.settings.warmup_done = True
 
-        if self._warmup_done:
+        if self.state.settings.warmup_done:
             # write initial values to output
             diagnostics.diagnose(self.state)
             diagnostics.output(self.state)
@@ -330,7 +330,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
     @roger_routine
     def step(self, state):
         from roger import diagnostics, restart
-        from roger.core import surface, soil, root_zone, subsoil, groundwater, interception, snow, evapotranspiration, infiltration, film_flow, subsurface_runoff, capillary_rise, crop, groundwater_flow, numerics, transport, nitrate
+        from roger.core import surface, soil, root_zone, subsoil, groundwater, interception, snow, evapotranspiration, infiltration, film_flow, subsurface_runoff, capillary_rise, crop, groundwater_flow, numerics, transport
 
         self._ensure_setup_done()
 
@@ -390,10 +390,24 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
                 vs.itt = vs.itt + 1
                 vs.time = vs.time + vs.dt_secs
+                # write output at end of time step
+                with state.timers["diagnostics"]:
+                    if not numerics.sanity_check(state):
+                        if rs.loglevel == 'error' or rs.loglevel == 'debug' and rs.backend == 'numpy':
+                            logger.error(f"solution diverged at iteration {vs.itt}")
+                        else:
+                            raise RuntimeError(f"solution diverged at iteration {vs.itt}")
+                    numerics.calculate_num_error(state)
+
+                    if settings.warmup_done:
+                        diagnostics.diagnose(state)
+                        diagnostics.output(state)
 
             elif settings.enable_offline_transport:
+                # skip first iteration which contains initial values
                 vs.itt = vs.itt + 1
-                vs.time = vs.time + vs.dt_secs
+                if settings.sas_solver == 'deterministic':
+                    vs.time = vs.time + vs.dt_secs
 
                 with state.timers["main transport"]:
                     with state.timers["boundary conditions"]:
@@ -404,30 +418,6 @@ class RogerSetup(metaclass=abc.ABCMeta):
                         self.set_parameters(state)
                     with state.timers["StorAge selection"]:
                         transport.calculate_storage_selection(state)
-                    if settings.enable_nitrate:
-                        with state.timers["nitrogen cycle"]:
-                            nitrate.calculate_nitrogen_cycle(state)
-                    with state.timers["ageing"]:
-                        transport.calculate_ageing(state)
-                    with state.timers["StorAge"]:
-                        root_zone.calculate_root_zone_transport(state)
-                    with state.timers["StorAge"]:
-                        subsoil.calculate_subsoil_transport(state)
-                    with state.timers["StorAge"]:
-                        soil.calculate_soil_transport(state)
-                    if settings.enable_groundwater:
-                        pass
-
-        with state.timers["diagnostics"]:
-            if not numerics.sanity_check(state):
-                if rs.loglevel == 'error' or rs.loglevel == 'debug' and rs.backend == 'numpy':
-                    logger.debug(f"solution diverged at iteration {vs.itt}")
-                else:
-                    raise RuntimeError(f"solution diverged at iteration {vs.itt}")
-
-            if self._warmup_done:
-                diagnostics.diagnose(state)
-                diagnostics.output(state)
 
         self.after_timestep(state)
 
@@ -459,8 +449,9 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     self.state.variables.itt = 0
                     self.state.variables.time = 0
 
-        self._warmup_done = True
-        if self._warmup_done:
+        with self.state.settings.unlock():
+            self.state.settings.warmup_done = True
+        if self.state.settings.warmup_done:
             # write initial values to output after warmup
             diagnostics.diagnose(self.state)
             diagnostics.output(self.state)
@@ -508,7 +499,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
             raise
 
         else:
-            if not self._warmup_done:
+            if not settings.warmup_done:
                 logger.success("Warmup done\n")
             else:
                 logger.success("Calculation done\n")

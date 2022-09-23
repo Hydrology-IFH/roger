@@ -36,6 +36,9 @@ class Averages(RogerDiagnostic):
             if self._has_timestep_dim(state, var):
                 var_meta.dims = var_meta.dims[:-1]
 
+            if self._has_fourth_dim(state, var):
+                var_meta.dims = tuple((var_meta.dims[0], var_meta.dims[1], var_meta.dims[-1]))
+
             self.var_meta[var] = var_meta
 
         self.initialize_variables(state)
@@ -48,6 +51,13 @@ class Averages(RogerDiagnostic):
 
         return state.var_meta[var].dims[-1] == TIMESTEPS[0]
 
+    @staticmethod
+    def _has_fourth_dim(state, var):
+        if state.var_meta[var].dims is None:
+            return False
+
+        return state.var_meta[var].dims[-2] == TIMESTEPS[0]
+
     def diagnose(self, state):
         vs = state.variables
         avg_vs = self.variables
@@ -58,6 +68,8 @@ class Averages(RogerDiagnostic):
             var_data = npx.where(npx.isnan(getattr(avg_vs, key)), 0, getattr(avg_vs, key))
             if self._has_timestep_dim(state, key):
                 setattr(avg_vs, key, var_data + getattr(vs, key)[..., vs.tau])
+            elif self._has_fourth_dim(state, key):
+                setattr(avg_vs, key, var_data + getattr(vs, key)[:, :, vs.tau, :])
             else:
                 setattr(avg_vs, key, var_data + getattr(vs, key))
 

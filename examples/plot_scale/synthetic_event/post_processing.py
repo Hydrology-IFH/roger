@@ -61,15 +61,15 @@ for scenario in scenarios:
             with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
                 if not f.groups[scenario].dimensions:
                     f.groups[scenario].dimensions = dict_dim
-                    v = f.groups[scenario].create_variable('x', ('x',), float)
+                    v = f.groups[scenario].create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
                     v.attrs['long_name'] = 'Model run'
                     v.attrs['units'] = ''
                     v[:] = onp.arange(dict_dim["x"])
-                    v = f.groups[scenario].create_variable('y', ('y',), float)
+                    v = f.groups[scenario].create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
                     v.attrs['long_name'] = ''
                     v.attrs['units'] = ''
                     v[:] = onp.arange(dict_dim["y"])
-                    v = f.groups[scenario].create_variable('Time', ('Time',), float)
+                    v = f.groups[scenario].create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
                     var_obj = df.variables.get('Time')
                     v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                    units=var_obj.attrs["units"])
@@ -77,7 +77,7 @@ for scenario in scenarios:
                 for key in list(df.variables.keys()):
                     var_obj = df.variables.get(key)
                     if key not in list(dict_dim.keys()) and var_obj.ndim == 3:
-                        v = f.groups[scenario].create_variable(key, ('x', 'y', 'Time'), float)
+                        v = f.groups[scenario].create_variable(key, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                         vals = onp.array(var_obj)
                         v[:, :, :] = vals.swapaxes(0, 2)
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
@@ -87,7 +87,7 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
     for scenario in scenarios:
         # water for infiltration
         try:
-            v = f.groups[scenario].create_variable('inf_in', ('x', 'y', 'Time'), float)
+            v = f.groups[scenario].create_variable('inf_in', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
         except ValueError:
             v = f.groups[scenario].variables.get('inf_in')
         vals = onp.array(f.groups[scenario].variables.get('prec')) - onp.array(f.groups[scenario].variables.get('int_rain_top')) - onp.array(f.groups[scenario].variables.get('int_rain_ground'))
@@ -96,7 +96,7 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
                        units='mm/dt')
         # initial soil water content
         try:
-            v = f.groups[scenario].create_variable('theta_init', ('x', 'y'), float)
+            v = f.groups[scenario].create_variable('theta_init', ('x', 'y'), float, compression="gzip", compression_opts=1)
         except ValueError:
             v = f.groups[scenario].variables.get('theta_init')
         vals = onp.array(f.groups[scenario].variables.get('theta'))
@@ -104,7 +104,7 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
         v.attrs.update(long_name='initial soil water content',
                        units='-')
         try:
-            v = f.groups[scenario].create_variable('S_s_init', ('x', 'y'), float)
+            v = f.groups[scenario].create_variable('S_s_init', ('x', 'y'), float, compression="gzip", compression_opts=1)
         except ValueError:
             v = f.groups[scenario].variables.get('S_s_init')
         vals = onp.array(f.groups[scenario].variables.get('S_s'))
@@ -113,7 +113,7 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
                        units='mm')
         # end soil water content
         try:
-            v = f.groups[scenario].create_variable('theta_end', ('x', 'y'), float)
+            v = f.groups[scenario].create_variable('theta_end', ('x', 'y'), float, compression="gzip", compression_opts=1)
         except ValueError:
             v = f.groups[scenario].variables.get('theta_end')
         vals = onp.array(f.groups[scenario].variables.get('theta'))
@@ -121,7 +121,7 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
         v.attrs.update(long_name='end soil water content',
                        units='-')
         try:
-            v = f.groups[scenario].create_variable('S_s_end', ('x', 'y'), float)
+            v = f.groups[scenario].create_variable('S_s_end', ('x', 'y'), float, compression="gzip", compression_opts=1)
         except ValueError:
             v = f.groups[scenario].variables.get('S_s_end')
         vals = onp.array(f.groups[scenario].variables.get('S_s'))

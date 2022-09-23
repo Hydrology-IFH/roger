@@ -160,27 +160,28 @@ def calculate_soil_transport_iso_kernel(state):
         vs.SA_s,
         at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_s, vs.sa_s)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
-
     vs.msa_s = update(
         vs.msa_s,
-        at[2:-2, 2:-2, :, :], npx.where(vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :] > 0, vs.msa_rz[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])) + vs.msa_ss[2:-2, 2:-2, :, :] * (vs.sa_ss[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])), 0),
+        at[2:-2, 2:-2, :, :], npx.where(vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :] > 0, vs.msa_rz[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] / (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])) + vs.msa_ss[2:-2, 2:-2, :, :] * (vs.sa_ss[2:-2, 2:-2, :, :] / (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])), 0),
     )
     vs.msa_s = update(
         vs.msa_s,
         at[2:-2, 2:-2, :vs.taup1, :], npx.where(npx.isnan(vs.msa_s[2:-2, 2:-2, :vs.taup1, :]), 0, vs.msa_s[2:-2, 2:-2, :vs.taup1, :]),
     )
-
+    vs.csa_s = update(
+        vs.csa_s,
+        at[2:-2, 2:-2, vs.tau, :], transport.conc_to_delta(state, vs.msa_s[2:-2, 2:-2, vs.tau, :]),
+    )
     vs.C_s = update(
         vs.C_s,
         at[2:-2, 2:-2, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_s, vs.msa_s)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
-
-    vs.M_s = update(
-        vs.M_s,
-        at[2:-2, 2:-2, vs.tau], npx.nansum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
+    vs.C_iso_s = update(
+        vs.C_iso_s,
+        at[2:-2, 2:-2, vs.tau], transport.conc_to_delta(state, vs.C_s[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(sa_s=vs.sa_s, SA_s=vs.SA_s, msa_s=vs.msa_s, C_s=vs.C_s, M_s=vs.M_s)
+    return KernelOutput(sa_s=vs.sa_s, SA_s=vs.SA_s, msa_s=vs.msa_s, csa_s=vs.csa_s, C_s=vs.C_s, C_iso_s=vs.C_iso_s, M_s=vs.M_s)
 
 
 @roger_kernel

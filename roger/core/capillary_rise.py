@@ -263,7 +263,7 @@ def calculate_capillary_rise_rz_transport_iso_kernel(state):
 
     vs.TT_cpr_rz = update(
         vs.TT_cpr_rz,
-        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_cpr_rz[2:-2, 2:-2, :], axis=-1),
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_cpr_rz[2:-2, 2:-2, :], axis=2),
     )
 
     # calculate solute travel time distribution
@@ -272,18 +272,19 @@ def calculate_capillary_rise_rz_transport_iso_kernel(state):
         vs.mtt_cpr_rz,
         at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_ss, vs.tt_cpr_rz, vs.cpr_rz, vs.msa_ss, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
-
     vs.C_cpr_rz = update(
         vs.C_cpr_rz,
         at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_cpr_rz, vs.tt_cpr_rz, vs.cpr_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
-
+    vs.C_iso_cpr_rz = update(
+        vs.C_iso_cpr_rz,
+        at[2:-2, 2:-2], transport.conc_to_delta(state, vs.C_cpr_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
     # update isotope StorAge
     vs.msa_rz = update(
         vs.msa_rz,
         at[2:-2, 2:-2, vs.tau, :], npx.where(vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :] > 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / (vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis] + vs.sa_rz[2:-2, 2:-2, vs.tau, :])) + vs.mtt_cpr_rz[2:-2, 2:-2, :] * ((vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis]) / ((vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis]) + vs.sa_rz[2:-2, 2:-2, vs.tau, :])), vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
-
     # update StorAge with flux
     vs.sa_ss = update(
         vs.sa_ss,
@@ -293,14 +294,12 @@ def calculate_capillary_rise_rz_transport_iso_kernel(state):
         vs.sa_rz,
         at[2:-2, 2:-2, vs.tau, :], vs.tt_cpr_rz[2:-2, 2:-2, :] * vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
-
     # update isotope StorAge
     vs.msa_ss = update(
         vs.msa_ss,
         at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
-
-    return KernelOutput(sa_ss=vs.sa_ss, msa_ss=vs.msa_ss, tt_cpr_rz=vs.tt_cpr_rz, TT_cpr_rz=vs.TT_cpr_rz, mtt_cpr_rz=vs.mtt_cpr_rz, C_cpr_rz=vs.C_cpr_rz, sa_rz=vs.sa_rz, msa_rz=vs.msa_rz)
+    return KernelOutput(sa_ss=vs.sa_ss, msa_ss=vs.msa_ss, tt_cpr_rz=vs.tt_cpr_rz, TT_cpr_rz=vs.TT_cpr_rz, mtt_cpr_rz=vs.mtt_cpr_rz, C_cpr_rz=vs.C_cpr_rz, C_iso_cpr_rz=vs.C_iso_cpr_rz, sa_rz=vs.sa_rz, msa_rz=vs.msa_rz)
 
 
 @roger_kernel

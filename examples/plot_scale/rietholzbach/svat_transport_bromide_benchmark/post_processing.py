@@ -132,7 +132,7 @@ for tm_structure in tm_structures:
         states_tm_file = base_path / "states_tm_bromide_benchmark.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{tm_structure}-{year}", engine="h5netcdf")
 
-        # plot observed and simulated time series
+        # plot simulated time series
         base_path_figs = base_path / "figures"
 
         # assign date

@@ -434,17 +434,14 @@ def calculate_evaporation_transport_kernel(state):
         vs.SA_rz,
         at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
-
     vs.tt_evap_soil = update(
         vs.tt_evap_soil,
         at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.evap_soil, vs.sas_params_evap_soil)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
-
     vs.TT_evap_soil = update(
         vs.TT_evap_soil,
         at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_evap_soil[2:-2, 2:-2, :], axis=-1),
     )
-
     vs.sa_rz = update(
         vs.sa_rz,
         at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
@@ -464,6 +461,52 @@ def calculate_evaporation_transport_iso_kernel(state):
         vs.SA_rz,
         at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
+    vs.tt_evap_soil = update(
+        vs.tt_evap_soil,
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.evap_soil, vs.sas_params_evap_soil)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+    vs.TT_evap_soil = update(
+        vs.TT_evap_soil,
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_evap_soil[2:-2, 2:-2, :], axis=-1),
+    )
+    # calculate solute travel time distribution
+    alpha = allocate(state.dimensions, ("x", "y"), fill=1)
+    vs.mtt_evap_soil = update(
+        vs.mtt_evap_soil,
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil, vs.msa_rz, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+    vs.C_evap_soil = update(
+        vs.C_evap_soil,
+        at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_evap_soil, vs.tt_evap_soil, vs.evap_soil)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.C_iso_evap_soil = update(
+        vs.C_iso_evap_soil,
+        at[2:-2, 2:-2], transport.conc_to_delta(state, vs.C_evap_soil)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    # update StorAge with flux
+    vs.sa_rz = update(
+        vs.sa_rz,
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+    # update isotope StorAge
+    vs.msa_rz = update(
+        vs.msa_rz,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+    return KernelOutput(sa_rz=vs.sa_rz, tt_evap_soil=vs.tt_evap_soil, TT_evap_soil=vs.TT_evap_soil, msa_rz=vs.msa_rz, mtt_evap_soil=vs.mtt_evap_soil, C_evap_soil=vs.C_evap_soil, C_iso_evap_soil=vs.C_iso_evap_soil)
+
+
+@roger_kernel
+def calculate_evaporation_transport_anion_kernel(state):
+    """
+    Calculates transport of soil evaporation
+    """
+    vs = state.variables
+
+    vs.SA_rz = update(
+        vs.SA_rz,
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
 
     vs.tt_evap_soil = update(
         vs.tt_evap_soil,
@@ -475,35 +518,12 @@ def calculate_evaporation_transport_iso_kernel(state):
         at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_evap_soil[2:-2, 2:-2, :], axis=-1),
     )
 
-    # calculate solute travel time distribution
-    alpha = allocate(state.dimensions, ("x", "y"), fill=1)
-    vs.mtt_evap_soil = update(
-        vs.mtt_evap_soil,
-        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil, vs.msa_rz, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-    )
-
-    vs.C_evap_soil = update(
-        vs.C_evap_soil,
-        at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_evap_soil, vs.tt_evap_soil, vs.evap_soil)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    # update StorAge with flux
     vs.sa_rz = update(
         vs.sa_rz,
         at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
-    # update isotope StorAge
-    vs.msa_rz = update(
-        vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-    )
 
-    vs.C_rz = update(
-        vs.C_rz,
-        at[2:-2, 2:-2, vs.tau], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    return KernelOutput(sa_rz=vs.sa_rz, tt_evap_soil=vs.tt_evap_soil, TT_evap_soil=vs.TT_evap_soil, msa_rz=vs.msa_rz, C_rz=vs.C_rz, mtt_evap_soil=vs.mtt_evap_soil, C_evap_soil=vs.C_evap_soil)
+    return KernelOutput(sa_rz=vs.sa_rz, tt_evap_soil=vs.tt_evap_soil, TT_evap_soil=vs.TT_evap_soil)
 
 
 @roger_kernel
@@ -555,7 +575,7 @@ def calculate_transpiration_transport_iso_kernel(state):
 
     vs.TT_transp = update(
         vs.TT_transp,
-        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_transp[2:-2, 2:-2, :], axis=-1),
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_transp[2:-2, 2:-2, :], axis=2),
     )
 
     # calculate solute travel time distribution
@@ -569,7 +589,10 @@ def calculate_transpiration_transport_iso_kernel(state):
         vs.C_transp,
         at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_transp, vs.tt_transp, vs.transp)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
-
+    vs.C_iso_transp = update(
+        vs.C_iso_transp,
+        at[2:-2, 2:-2], transport.conc_to_delta(state, vs.C_transp)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
     # update StorAge with flux
     vs.sa_rz = update(
         vs.sa_rz,
@@ -581,7 +604,7 @@ def calculate_transpiration_transport_iso_kernel(state):
         at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    return KernelOutput(sa_rz=vs.sa_rz, tt_transp=vs.tt_transp, TT_transp=vs.TT_transp, msa_rz=vs.msa_rz, mtt_transp=vs.mtt_transp, C_transp=vs.C_transp)
+    return KernelOutput(sa_rz=vs.sa_rz, tt_transp=vs.tt_transp, TT_transp=vs.TT_transp, msa_rz=vs.msa_rz, mtt_transp=vs.mtt_transp, C_transp=vs.C_transp, C_iso_transp=vs.C_iso_transp)
 
 
 @roger_kernel

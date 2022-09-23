@@ -16,6 +16,7 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, random_uniform, for_loop
     from roger.tools.setup import write_forcing_tracer
+    from roger.core.transport import delta_to_conc, conc_to_delta
 
     class SVATTRANSPORTSetup(RogerSetup):
         """A SVAT transport model.
@@ -104,6 +105,9 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             settings = state.settings
             settings.identifier = self._identifier
             settings.sas_solver = self._sas_solver
+            if settings.sas_solver in ['RK4', 'Euler']:
+                settings.sas_solver_substeps = 6
+                settings.h = 1 / settings.sas_solver_substeps
 
             settings.nx, settings.ny, settings.nz = self._nsamples, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
@@ -522,10 +526,14 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 at[2:-2, 2:-2, :, 1:], npx.cumsum(vs.sa_s[2:-2, 2:-2, :, :], axis=-1),
             )
 
-            if (settings.enable_oxygen18 | settings.enable_deuterium):
-                vs.C_snow = update(vs.C_snow, at[2:-2, 2:-2, :vs.taup1], npx.nan)
-                vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], -13)
-                vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], -7)
+            if settings.enable_oxygen18:
+                vs.C_iso_snow = update(vs.C_iso_snow, at[2:-2, 2:-2, :vs.taup1], npx.nan)
+                vs.C_iso_rz = update(vs.C_iso_rz, at[2:-2, 2:-2, :vs.taup1], -13)
+                vs.C_iso_ss = update(vs.C_iso_ss, at[2:-2, 2:-2, :vs.taup1], -7)
+                vs.C_rz = update(
+                    vs.C_rz,
+                    at[2:-2, 2:-2, :vs.taup1], delta_to_conc(state, vs.C_iso_rz[2:-2, 2:-2, vs.tau, npx.newaxis]),
+                )
                 vs.msa_rz = update(
                     vs.msa_rz,
                     at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis],
@@ -533,6 +541,10 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 vs.msa_rz = update(
                     vs.msa_rz,
                     at[2:-2, 2:-2, :vs.taup1, 0], 0,
+                )
+                vs.C_ss = update(
+                    vs.C_ss,
+                    at[2:-2, 2:-2, :vs.taup1], delta_to_conc(state, vs.C_iso_ss[2:-2, 2:-2, vs.tau, npx.newaxis]),
                 )
                 vs.msa_ss = update(
                     vs.msa_ss,
@@ -544,11 +556,7 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 )
                 vs.msa_s = update(
                     vs.msa_s,
-                    at[2:-2, 2:-2, :, :], npx.where(vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :] > 0, vs.msa_rz[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])) + vs.msa_ss[2:-2, 2:-2, :, :] * (vs.sa_ss[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])), 0),
-                )
-                vs.msa_s = update(
-                    vs.msa_s,
-                    at[2:-2, 2:-2, :vs.taup1, :], npx.where(npx.isnan(vs.msa_s[2:-2, 2:-2, :vs.taup1, :]), 0, vs.msa_s[2:-2, 2:-2, :vs.taup1, :]),
+                    at[2:-2, 2:-2, :, :], npx.where(vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :] > 0, vs.msa_rz[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] / (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])) + vs.msa_ss[2:-2, 2:-2, :, :] * (vs.sa_ss[2:-2, 2:-2, :, :] / (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])), 0),
                 )
                 vs.msa_s = update(
                     vs.msa_s,
@@ -562,6 +570,26 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                     vs.C_s,
                     at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2],
                 )
+                vs.C_iso_s = update(
+                    vs.C_iso_s,
+                    at[2:-2, 2:-2, vs.taum1], conc_to_delta(state, vs.C_s[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+                )
+                vs.C_iso_s = update(
+                    vs.C_iso_s,
+                    at[2:-2, 2:-2, vs.tau], conc_to_delta(state, vs.C_s[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+                )
+                vs.csa_rz = update(
+                    vs.csa_rz,
+                    at[2:-2, 2:-2, vs.tau, :], conc_to_delta(state, vs.msa_rz[2:-2, 2:-2, vs.tau, :]),
+                )
+                vs.csa_ss = update(
+                    vs.csa_ss,
+                    at[2:-2, 2:-2, vs.tau, :], conc_to_delta(state, vs.msa_ss[2:-2, 2:-2, vs.tau, :]),
+                )
+                vs.csa_s = update(
+                    vs.csa_s,
+                    at[2:-2, 2:-2, vs.tau, :], conc_to_delta(state, vs.msa_s[2:-2, 2:-2, vs.tau, :]),
+                )
 
         @roger_routine
         def set_boundary_conditions_setup(self, state):
@@ -574,6 +602,7 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
         @roger_routine(
             dist_safe=False,
             local_variables=[
+                "C_ISO_IN",
                 "C_IN",
             ],
         )
@@ -581,16 +610,11 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             vs = state.variables
             settings = state.settings
 
-            if settings.enable_deuterium:
-                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 0], npx.nan)
-                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d2H", self._input_dir, 'forcing_tracer.nc'))
-
             if settings.enable_oxygen18:
-                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 0], npx.nan)
-                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
-
-            if settings.enable_deuterium or settings.enable_oxygen18:
-                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], self._bfill_3d(state, vs.C_IN)[2:-2, 2:-2, :])
+                vs.C_ISO_IN = update(vs.C_ISO_IN, at[2:-2, 2:-2, 0], npx.nan)
+                vs.C_ISO_IN = update(vs.C_ISO_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
+                vs.C_ISO_IN = update(vs.C_ISO_IN, at[2:-2, 2:-2, :], self._bfill_3d(state, vs.C_ISO_IN)[2:-2, 2:-2, :])
+                vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], delta_to_conc(state, vs.C_ISO_IN)[2:-2, 2:-2, :])
 
         @roger_routine(
             dist_safe=False,
@@ -615,10 +639,10 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 "taum1",
                 "itt",
                 "C_in",
+                "C_iso_in",
                 "C_IN",
                 "C_snow",
-                "M_in"
-
+                "C_iso_snow",
             ],
         )
         def set_forcing(self, state):
@@ -650,16 +674,17 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 vs.C_snow,
                 at[2:-2, 2:-2, vs.tau], npx.where(vs.S_snow[2:-2, 2:-2, vs.tau] <= 0, npx.nan, vs.C_snow[2:-2, 2:-2, vs.tau]),
             )
+            vs.C_iso_snow = update(
+                vs.C_iso_snow,
+                at[2:-2, 2:-2, vs.tau], conc_to_delta(state, vs.C_snow[2:-2, 2:-2, vs.tau]),
+            )
 
             # mix isotopes from snow melt and rainfall
             vs.C_in = update(
                 vs.C_in,
-                at[2:-2, 2:-2], npx.where(npx.isfinite(vs.C_snow[2:-2, 2:-2, vs.taum1]), vs.C_snow[2:-2, 2:-2, vs.taum1], npx.where(vs.prec[2:-2, 2:-2, vs.tau] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], npx.nan)),
+                at[2:-2, 2:-2], npx.where(npx.isfinite(vs.C_snow[2:-2, 2:-2, vs.taum1]), vs.C_snow[2:-2, 2:-2, vs.taum1], npx.where(vs.prec[2:-2, 2:-2, vs.tau] > 0, vs.C_IN[2:-2, 2:-2, vs.itt], 0)),
             )
-            vs.M_in = update(
-                vs.M_in,
-                at[2:-2, 2:-2], vs.C_in[2:-2, 2:-2] * vs.prec[2:-2, 2:-2, vs.tau],
-            )
+            vs.C_iso_in = update(vs.C_iso_in, at[2:-2, 2:-2], conc_to_delta(state, vs.C_in[2:-2, 2:-2]))
 
         @roger_routine
         def set_diagnostics(self, state, base_path=tmp_dir):
@@ -693,103 +718,23 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
     def after_timestep_kernel(state):
         vs = state.variables
 
-        vs.SA_rz = update(
-            vs.SA_rz,
-            at[2:-2, 2:-2, vs.taum1, :], vs.SA_rz[2:-2, 2:-2, vs.tau, :],
-        )
-        vs.sa_rz = update(
-            vs.sa_rz,
-            at[2:-2, 2:-2, vs.taum1, :], vs.sa_rz[2:-2, 2:-2, vs.tau, :],
-        )
-        vs.MSA_rz = update(
-            vs.MSA_rz,
-            at[2:-2, 2:-2, vs.taum1, :], vs.MSA_rz[2:-2, 2:-2, vs.tau, :],
-        )
-        vs.msa_rz = update(
-            vs.msa_rz,
-            at[2:-2, 2:-2, vs.taum1, :], vs.msa_rz[2:-2, 2:-2, vs.tau, :],
-        )
-        vs.M_rz = update(
-            vs.M_rz,
-            at[2:-2, 2:-2, vs.taum1], vs.M_rz[2:-2, 2:-2, vs.tau],
-        )
-        vs.C_rz = update(
-            vs.C_rz,
-            at[2:-2, 2:-2, vs.taum1], vs.C_rz[2:-2, 2:-2, vs.tau],
-        )
-        vs.SA_ss = update(
-            vs.SA_ss,
-            at[2:-2, 2:-2, vs.taum1, :], vs.SA_ss[2:-2, 2:-2, vs.tau, :],
-        )
-        vs.sa_ss = update(
-            vs.sa_ss,
-            at[2:-2, 2:-2, vs.taum1, :], vs.sa_ss[2:-2, 2:-2, vs.tau, :],
-        )
-        vs.MSA_ss = update(
-            vs.MSA_ss,
-            at[2:-2, 2:-2, vs.taum1, :], vs.MSA_ss[2:-2, 2:-2, vs.tau, :],
-        )
-        vs.msa_ss = update(
-            vs.msa_ss,
-            at[2:-2, 2:-2, vs.taum1, :], vs.msa_ss[2:-2, 2:-2, vs.tau, :],
-        )
-        vs.M_ss = update(
-            vs.M_ss,
-            at[2:-2, 2:-2, vs.taum1], vs.M_ss[2:-2, 2:-2, vs.tau],
-        )
-        vs.C_ss = update(
-            vs.C_ss,
-            at[2:-2, 2:-2, vs.taum1], vs.C_ss[2:-2, 2:-2, vs.tau],
-        )
-        vs.SA_s = update(
-            vs.SA_s,
-            at[2:-2, 2:-2, vs.taum1, :], vs.SA_s[2:-2, 2:-2, vs.tau, :],
-        )
-        vs.sa_s = update(
-            vs.sa_s,
-            at[2:-2, 2:-2, vs.taum1, :], vs.sa_s[2:-2, 2:-2, vs.tau, :],
-        )
-        vs.MSA_s = update(
-            vs.MSA_s,
-            at[2:-2, 2:-2, vs.taum1, :], vs.MSA_s[2:-2, 2:-2, vs.tau, :],
-        )
-        vs.msa_s = update(
-            vs.msa_s,
-            at[2:-2, 2:-2, vs.taum1, :], vs.msa_s[2:-2, 2:-2, vs.tau, :],
-        )
-        vs.M_s = update(
-            vs.M_s,
-            at[2:-2, 2:-2, vs.taum1], vs.M_s[2:-2, 2:-2, vs.tau],
-        )
-        vs.C_s = update(
-            vs.C_s,
-            at[2:-2, 2:-2, vs.taum1], vs.C_s[2:-2, 2:-2, vs.tau],
+        vs.S_snow = update(
+            vs.S_snow,
+            at[2:-2, 2:-2, vs.taum1], vs.S_snow[2:-2, 2:-2, vs.tau],
         )
         vs.C_snow = update(
             vs.C_snow,
             at[2:-2, 2:-2, vs.taum1], vs.C_snow[2:-2, 2:-2, vs.tau],
         )
+        vs.prec = update(
+            vs.prec,
+            at[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau],
+        )
 
         return KernelOutput(
-            SA_rz=vs.SA_rz,
-            sa_rz=vs.sa_rz,
-            MSA_rz=vs.MSA_rz,
-            msa_rz=vs.msa_rz,
-            M_rz=vs.M_rz,
-            C_rz=vs.C_rz,
-            SA_ss=vs.SA_ss,
-            sa_ss=vs.sa_ss,
-            MSA_ss=vs.MSA_ss,
-            msa_ss=vs.msa_ss,
-            M_ss=vs.M_ss,
-            C_ss=vs.C_ss,
-            SA_s=vs.SA_s,
-            sa_s=vs.sa_s,
-            MSA_s=vs.MSA_s,
-            msa_s=vs.msa_s,
-            M_s=vs.M_s,
-            C_s=vs.C_s,
+            prec=vs.prec,
             C_snow=vs.C_snow,
+            S_snow=vs.S_snow,
             )
 
     @roger_kernel

@@ -536,7 +536,7 @@ def calc_z_sat_rise(state):
 
     vs.z_sat = update(
         vs.z_sat,
-        at[2:-2, 2:-2, vs.tau], npx.where(z_sat_top[2:-2, 2:-2] > z_nomp[2:-2, 2:-2], npx.where((vs.S_fp_ss[2:-2, 2:-2] >= vs.S_ufc_ss[2:-2, 2:-2]) & ((vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2]) < (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])), vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], npx.where((vs.S_fp_rz[2:-2, 2:-2] >= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] >= vs.S_ac_ss[2:-2, 2:-2]), vs.S_lp_rz[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2])), vs.z_sat[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau], npx.where(z_sat_top[2:-2, 2:-2] > z_nomp[2:-2, 2:-2], npx.where((vs.S_fp_ss[2:-2, 2:-2] >= vs.S_ufc_ss[2:-2, 2:-2]) & ((vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2]) < (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])), vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], npx.where((vs.S_fp_rz[2:-2, 2:-2] >= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] >= vs.S_ac_ss[2:-2, 2:-2]), vs.S_lp_rz[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2])), 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(z_sat=vs.z_sat)
@@ -900,20 +900,21 @@ def calculate_percolation_rz_transport_iso_kernel(state):
 
     vs.TT_q_rz = update(
         vs.TT_q_rz,
-        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_q_rz[2:-2, 2:-2, :], axis=-1),
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_q_rz[2:-2, 2:-2, :], axis=2),
     )
-
-    # calculate solute travel time distribution
+    # calculate isotope travel time distribution
     vs.mtt_q_rz = update(
         vs.mtt_q_rz,
         at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_q_rz, vs.q_rz, vs.msa_rz, vs.alpha_q)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
-
     vs.C_q_rz = update(
         vs.C_q_rz,
         at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_q_rz, vs.tt_q_rz, vs.q_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
-
+    vs.C_iso_q_rz = update(
+        vs.C_iso_q_rz,
+        at[2:-2, 2:-2], transport.conc_to_delta(state, vs.C_q_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
     # update isotope StorAge
     vs.msa_ss = update(
         vs.msa_ss,
@@ -936,7 +937,7 @@ def calculate_percolation_rz_transport_iso_kernel(state):
         at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    return KernelOutput(sa_rz=vs.sa_rz, tt_q_rz=vs.tt_q_rz, TT_q_rz=vs.TT_q_rz, msa_rz=vs.msa_rz, mtt_q_rz=vs.mtt_q_rz, C_q_rz=vs.C_q_rz, sa_ss=vs.sa_ss, msa_ss=vs.msa_ss)
+    return KernelOutput(sa_rz=vs.sa_rz, tt_q_rz=vs.tt_q_rz, TT_q_rz=vs.TT_q_rz, msa_rz=vs.msa_rz, mtt_q_rz=vs.mtt_q_rz, C_q_rz=vs.C_q_rz, C_iso_q_rz=vs.C_iso_q_rz, sa_ss=vs.sa_ss, msa_ss=vs.msa_ss)
 
 
 @roger_kernel
@@ -1037,7 +1038,6 @@ def calculate_percolation_ss_transport_iso_kernel(state):
         vs.SA_ss,
         at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
-
     vs.tt_q_ss = update(
         vs.tt_q_ss,
         at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_ss, vs.sa_ss, vs.q_ss, vs.sas_params_q_ss)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
@@ -1047,32 +1047,32 @@ def calculate_percolation_ss_transport_iso_kernel(state):
         vs.TT_q_ss,
         at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_q_ss[2:-2, 2:-2, :], axis=2),
     )
-
     # calculate solute travel time distribution
     alpha = allocate(state.dimensions, ("x", "y"), fill=1)
     vs.mtt_q_ss = update(
         vs.mtt_q_ss,
         at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_ss, vs.tt_q_ss, vs.q_ss, vs.msa_ss, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
-
     vs.C_q_ss = update(
         vs.C_q_ss,
         at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_q_ss, vs.tt_q_ss, vs.q_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
-
+    vs.C_iso_q_ss = update(
+        vs.C_iso_q_ss,
+        at[2:-2, 2:-2], transport.conc_to_delta(state, vs.C_q_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
     # update StorAge with flux
     vs.sa_ss = update(
         vs.sa_ss,
         at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_q_ss, vs.q_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
-
     # update isotope StorAge
     vs.msa_ss = update(
         vs.msa_ss,
         at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    return KernelOutput(sa_ss=vs.sa_ss, tt_q_ss=vs.tt_q_ss, TT_q_ss=vs.TT_q_ss, msa_ss=vs.msa_ss, mtt_q_ss=vs.mtt_q_ss, C_q_ss=vs.C_q_ss)
+    return KernelOutput(sa_ss=vs.sa_ss, tt_q_ss=vs.tt_q_ss, TT_q_ss=vs.TT_q_ss, msa_ss=vs.msa_ss, mtt_q_ss=vs.mtt_q_ss, C_q_ss=vs.C_q_ss, C_iso_q_ss=vs.C_iso_q_ss)
 
 
 @roger_kernel
@@ -1113,7 +1113,7 @@ def calculate_percolation_ss_transport_anion_kernel(state):
         vs.sa_ss,
         at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_q_ss, vs.q_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
-    # update solute StorAge of root zone
+    # update solute StorAge of subsoil
     vs.msa_ss = update_add(
         vs.msa_ss,
         at[2:-2, 2:-2, vs.tau, :], -vs.mtt_q_ss[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],

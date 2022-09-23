@@ -19,89 +19,90 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
-# merge model output into single file
-path = str(base_path / "SVATTRANSPORT_*.*.nc")
-diag_files = glob.glob(path)
-states_tm_file = base_path / "states_tm.nc"
-with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
-    f.attrs.update(
-        date_created=datetime.datetime.today().isoformat(),
-        title='RoGeR transport model results at Rietholzbach Lysimeter site',
-        institution='University of Freiburg, Chair of Hydrology',
-        references='',
-        comment='SVAT transport model with free drainage'
-    )
-    # collect dimensions
-    for dfs in diag_files:
-        with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-            # set dimensions with a dictionary
-            if not dfs.split('/')[-1].split('.')[1] == 'constant':
-                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
-                time = onp.array(df.variables.get('Time'))
-            if not f.dimensions:
-                f.dimensions = dict_dim
-                v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
-                v.attrs['long_name'] = 'Number of model run'
-                v.attrs['units'] = ''
-                v[:] = onp.arange(dict_dim["x"])
-                v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
-                v.attrs['long_name'] = ''
-                v.attrs['units'] = ''
-                v[:] = onp.arange(dict_dim["y"])
-                v = f.create_variable('ages', ('ages',), float, compression="gzip", compression_opts=1)
-                v.attrs['long_name'] = 'Water ages'
-                v.attrs['units'] = 'days'
-                v[:] = onp.arange(1, dict_dim["ages"]+1)
-                v = f.create_variable('nages', ('nages',), float, compression="gzip", compression_opts=1)
-                v.attrs['long_name'] = 'Water ages (cumulated)'
-                v.attrs['units'] = 'days'
-                v[:] = onp.arange(0, dict_dim["nages"])
-                v = f.create_variable('n_sas_params', ('n_sas_params',), float, compression="gzip", compression_opts=1)
-                v.attrs['long_name'] = 'Number of SAS parameters'
-                v.attrs['units'] = ''
-                v[:] = onp.arange(0, dict_dim["n_sas_params"])
-                v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
-                var_obj = df.variables.get('Time')
-                v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                               units=var_obj.attrs["units"])
-                v[:] = time
-            for var_sim in list(df.variables.keys()):
-                var_obj = df.variables.get(var_sim)
-                if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions:
-                    v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                    vals = onp.array(var_obj)
-                    v[:, :, :] = vals.swapaxes(0, 2)
-                    v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                   units=var_obj.attrs["units"])
-                elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
-                    v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
-                    vals = onp.array(var_obj)
-                    vals = vals.swapaxes(0, 3)
-                    vals = vals.swapaxes(1, 2)
-                    v[:, :, :] = vals[:, :, :, 0]
-                    v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                   units=var_obj.attrs["units"])
-                elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
-                    v = f.create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
-                    vals = onp.array(var_obj)
-                    vals = vals.swapaxes(0, 3)
-                    vals = vals.swapaxes(1, 2)
-                    vals = vals.swapaxes(2, 3)
-                    v[:, :, :, :] = vals
-                    v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                   units=var_obj.attrs["units"])
-                elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
-                    v = f.create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
-                    vals = onp.array(var_obj)
-                    vals = vals.swapaxes(0, 3)
-                    vals = vals.swapaxes(1, 2)
-                    vals = vals.swapaxes(2, 3)
-                    v[:, :, :, :] = vals
-                    v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                   units=var_obj.attrs["units"])
+# # merge model output into single file
+# path = str(base_path / "SVATTRANSPORT_*.*.nc")
+# diag_files = glob.glob(path)
+# states_tm_file = base_path / "states_tm.nc"
+# with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
+#     f.attrs.update(
+#         date_created=datetime.datetime.today().isoformat(),
+#         title='RoGeR transport model results at Rietholzbach Lysimeter site',
+#         institution='University of Freiburg, Chair of Hydrology',
+#         references='',
+#         comment='SVAT transport model with free drainage'
+#     )
+#     # collect dimensions
+#     for dfs in diag_files:
+#         with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+#             # set dimensions with a dictionary
+#             if not dfs.split('/')[-1].split('.')[1] == 'constant':
+#                 dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
+#                 time = onp.array(df.variables.get('Time'))
+#             if not f.dimensions:
+#                 f.dimensions = dict_dim
+#                 v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
+#                 v.attrs['long_name'] = 'Number of model run'
+#                 v.attrs['units'] = ''
+#                 v[:] = onp.arange(dict_dim["x"])
+#                 v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
+#                 v.attrs['long_name'] = ''
+#                 v.attrs['units'] = ''
+#                 v[:] = onp.arange(dict_dim["y"])
+#                 v = f.create_variable('ages', ('ages',), float, compression="gzip", compression_opts=1)
+#                 v.attrs['long_name'] = 'Water ages'
+#                 v.attrs['units'] = 'days'
+#                 v[:] = onp.arange(1, dict_dim["ages"]+1)
+#                 v = f.create_variable('nages', ('nages',), float, compression="gzip", compression_opts=1)
+#                 v.attrs['long_name'] = 'Water ages (cumulated)'
+#                 v.attrs['units'] = 'days'
+#                 v[:] = onp.arange(0, dict_dim["nages"])
+#                 v = f.create_variable('n_sas_params', ('n_sas_params',), float, compression="gzip", compression_opts=1)
+#                 v.attrs['long_name'] = 'Number of SAS parameters'
+#                 v.attrs['units'] = ''
+#                 v[:] = onp.arange(0, dict_dim["n_sas_params"])
+#                 v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
+#                 var_obj = df.variables.get('Time')
+#                 v.attrs.update(time_origin=var_obj.attrs["time_origin"],
+#                                units=var_obj.attrs["units"])
+#                 v[:] = time
+#             for var_sim in list(df.variables.keys()):
+#                 var_obj = df.variables.get(var_sim)
+#                 if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions:
+#                     v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+#                     vals = onp.array(var_obj)
+#                     v[:, :, :] = vals.swapaxes(0, 2)
+#                     v.attrs.update(long_name=var_obj.attrs["long_name"],
+#                                    units=var_obj.attrs["units"])
+#                 elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
+#                     v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
+#                     vals = onp.array(var_obj)
+#                     vals = vals.swapaxes(0, 3)
+#                     vals = vals.swapaxes(1, 2)
+#                     v[:, :, :] = vals[:, :, :, 0]
+#                     v.attrs.update(long_name=var_obj.attrs["long_name"],
+#                                    units=var_obj.attrs["units"])
+#                 elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
+#                     v = f.create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
+#                     vals = onp.array(var_obj)
+#                     vals = vals.swapaxes(0, 3)
+#                     vals = vals.swapaxes(1, 2)
+#                     vals = vals.swapaxes(2, 3)
+#                     v[:, :, :, :] = vals
+#                     v.attrs.update(long_name=var_obj.attrs["long_name"],
+#                                    units=var_obj.attrs["units"])
+#                 elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
+#                     v = f.create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
+#                     vals = onp.array(var_obj)
+#                     vals = vals.swapaxes(0, 3)
+#                     vals = vals.swapaxes(1, 2)
+#                     vals = vals.swapaxes(2, 3)
+#                     v[:, :, :, :] = vals
+#                     v.attrs.update(long_name=var_obj.attrs["long_name"],
+#                                    units=var_obj.attrs["units"])
 
 
 # load simulation
+states_tm_file = base_path / "states_tm.nc"
 ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
 states_hm_file = base_path / "states_hm.nc"
 ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
@@ -120,9 +121,9 @@ days_obs = (ds_obs['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
 date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
 date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
 date_obs = num2date(days_obs, units=f"days since {ds_obs['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-ds_sim_hm = ds_sim_hm.assign_coords(date=("Time", date_sim_hm))
-ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
-ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
+ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
+ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+ds_obs = ds_obs.assign_coords(Time=("Time", date_obs))
 
 # # compare observations and simulations
 # nrow = 0
@@ -322,3 +323,57 @@ ax.set_xlim((df_d18O_in.index[0], df_d18O_in.index[-1]))
 ax.set_ylabel(r'$d_{18}O$ [permil]')
 ax.set_xlabel(r'Time [year]')
 plt.show()
+
+
+# write HYDRUS-1D input for virtual bromide experiments
+years = onp.arange(1997, 2007).tolist()
+for year in years:
+    ds_obs_year = ds_obs.sel(Time=slice(f'{year}-01-01', f'{year + 1}-12-31'))
+    date_obs_year = ds_obs_year['Time'].values
+    ds_sim_hm_year = ds_sim_hm.sel(Time=slice(f'{year}-01-01', f'{year + 1}-12-31'))
+    date_sim_hm_year = ds_sim_hm_year['Time'].values
+
+    # monthly variable soil cover fraction of grass
+    df_scf_year = pd.DataFrame(index=date_obs_year, columns=['scf'])
+    df_scf_year.loc[df_scf_year.index.month==1] = 1. - onp.exp(-0.463*1)
+    df_scf_year.loc[df_scf_year.index.month==2] = 1. - onp.exp(-0.463*1)
+    df_scf_year.loc[df_scf_year.index.month==3] = 1. - onp.exp(-0.463*1.33)
+    df_scf_year.loc[df_scf_year.index.month==4] = 1. - onp.exp(-0.463*1.66)
+    df_scf_year.loc[df_scf_year.index.month==5] = 1. - onp.exp(-0.463*2)
+    df_scf_year.loc[df_scf_year.index.month==6] = 1. - onp.exp(-0.463*2)
+    df_scf_year.loc[df_scf_year.index.month==7] = 1. - onp.exp(-0.463*2)
+    df_scf_year.loc[df_scf_year.index.month==8] = 1. - onp.exp(-0.463*2)
+    df_scf_year.loc[df_scf_year.index.month==9] = 1. - onp.exp(-0.463*2)
+    df_scf_year.loc[df_scf_year.index.month==10] = 1. - onp.exp(-0.463*1.33)
+    df_scf_year.loc[df_scf_year.index.month==11] = 1. - onp.exp(-0.463*1.16)
+    df_scf_year.loc[df_scf_year.index.month==12] = 1. - onp.exp(-0.463*1)
+
+    df_rsoil = pd.DataFrame(index=date_obs_year, columns=['rSoil'])
+    df_rsoil.loc[:, 'rSoil'] = ds_obs_year['PET'].isel(x=0, y=0).values * (1 - df_scf_year['scf'].values)
+    df_rsoil.iloc[0, 0] = 0.05
+    df_rroot = pd.DataFrame(index=date_obs_year, columns=['rRoot'])
+    df_rroot.loc[:, 'rRoot'] = ds_obs_year['PET'].isel(x=0, y=0).values * df_scf_year['scf'].values
+    df_rroot.iloc[0, 0] = 0.03
+    df_prec = pd.DataFrame(index=date_sim_hm_year, columns=['Prec'])
+    df_prec.loc[:, 'Prec'] = onp.where(ds_sim_hm_year['ta'].isel(x=0, y=0).values > 0, ds_sim_hm_year['prec'].isel(x=0, y=0).values, 0) + ds_sim_hm_year['q_snow'].isel(x=0, y=0).values
+    df_ttop = pd.DataFrame(index=date_obs_year, columns=['tTop'])
+    df_ttop.loc[:, 'tTop'] = ds_obs_year['TA'].isel(x=0, y=0).values
+    df_hcrita = pd.DataFrame(index=date_obs_year, columns=['hCritA'])
+    df_hcrita.loc[:, 'hCritA'] = 100000
+    df_ampl = pd.DataFrame(index=date_obs_year, columns=['Ampl'])
+    df_ampl.loc[:, 'Ampl'] = 0
+    df_tatm = pd.DataFrame(index=date_obs_year, columns=['tAtm'])
+    df_tatm.loc[:, 'tAtm'] = range(1, len(df_tatm.index)+1)
+    df_ctop = pd.DataFrame(index=df_scf_year.index, columns=['cTop'])
+    injection_date = f'{year}-11-12'
+    # set new injection dates within 20 mm of cumulated rainfall
+    cond = (df_prec.loc[injection_date:, 'Prec'].values.cumsum() <= 20)
+    injection_dates_new = df_prec.loc[injection_date:, ].index[cond]
+    df_ctop.loc[injection_dates_new, 'cTop'] = 79.9/df_prec.loc[injection_dates_new, 'Prec']  # bromide mass in mg/l
+    df_ctop.replace([onp.inf, -onp.inf, onp.nan], 0, inplace=True)
+
+    df_year = pd.DataFrame(index=date_obs_year)
+    df_year = df_year.join([df_tatm, df_prec, df_rsoil, df_rroot, df_hcrita, df_ttop, df_ampl, df_ctop])
+
+    file = base_path / "results" / f"atmosphere_daily_bromide_{year}.csv"
+    df_year.to_csv(file, header=True, index=False, sep=";")
