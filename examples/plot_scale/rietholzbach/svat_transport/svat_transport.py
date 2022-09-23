@@ -8,8 +8,9 @@ from roger.cli.roger_run_base import roger_base_cli
 
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant preferential_+_advection-dispersion', 'power', 'time-variant_power', 'time-variant_power_reverse']), default='power')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='Euler')
+@click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(transport_model_structure, sas_solver):
+def main(transport_model_structure, sas_solver, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, for_loop
@@ -658,7 +659,7 @@ def main(transport_model_structure, sas_solver):
             vs.C_iso_in = update(vs.C_iso_in, at[2:-2, 2:-2], conc_to_delta(state, vs.C_in[2:-2, 2:-2]))
 
         @roger_routine
-        def set_diagnostics(self, state, base_path=None):
+        def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
             diagnostics["rates"].output_variables = ["q_ss"]
