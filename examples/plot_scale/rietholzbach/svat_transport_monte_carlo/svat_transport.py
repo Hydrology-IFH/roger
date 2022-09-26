@@ -111,7 +111,7 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
 
             settings.nx, settings.ny, settings.nz = self._nsamples, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
-            settings.ages = 365 * 3
+            settings.ages = settings.nitt
             settings.nages = settings.ages + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
 
