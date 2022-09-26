@@ -561,7 +561,7 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             if base_path:
                 diagnostics["rates"].base_output_path = base_path
 
-            diagnostics["averages"].output_variables = ["C_transp", "C_q_ss", "TT_transp", "TT_q_ss"]
+            diagnostics["averages"].output_variables = ["C_iso_transp", "C_iso_q_ss", "TT_transp", "TT_q_ss"]
             diagnostics["averages"].output_frequency = 24 * 60 * 60
             diagnostics["averages"].sampling_frequency = 1
             if base_path:

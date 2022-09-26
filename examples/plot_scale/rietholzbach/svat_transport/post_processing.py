@@ -8,6 +8,7 @@ import xarray as xr
 from cftime import num2date
 import pandas as pd
 import numpy as onp
+import roger.tools.evaluation as eval_utils
 
 base_path = Path(__file__).parent
 # directory of results
@@ -21,11 +22,12 @@ if not os.path.exists(base_path_figs):
 
 # merge model output into a single file
 transport_models = ['complete-mixing', 'advection-dispersion', 'time-variant advection-dispersion', 'power', 'time-variant power', 'time-variant power reverse', 'preferential', 'time-variant']
+# transport_models = ['power']
 for tm in transport_models:
-    path = str(base_path / "SVATTRANSPORT_tm*.*.nc")
+    path = str(base_path / "deterministic" / "age_max_11" / f"SVATTRANSPORT_{tm}.*.nc")
     diag_files = glob.glob(path)
     tm1 = tm.replace(" ", "_")
-    states_tm_file = base_path / f"states_{tm1}.nc"
+    states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tm1}.nc"
     with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
@@ -119,33 +121,34 @@ ds_obs = ds_obs.assign_coords(Time=("Time", date_obs))
 
 # load transport simulation
 transport_models = ['complete-mixing', 'advection-dispersion', 'time-variant advection-dispersion', 'power', 'time-variant power', 'time-variant power reverse', 'preferential', 'time-variant']
-transport_models = ['power']
+# transport_models = ['power']
 for tm in transport_models:
     tm1 = tm.replace(" ", "_")
-    states_tm_file = base_path / f"states_{tm1}.nc"
+    states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tm1}.nc"
     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+    ages = ds_sim_tm['ages'].values / onp.timedelta64(24 * 60 * 60, "s")
 
     # compare observations and simulations
     nrow = 0
     ncol = 0
-    idx = ds_sim_tm.date.values  # time index
-    d18O_perc_cs = onp.zeros((1, 1, len(idx)))
-    # calculate simulated oxygen-18 composite sample
-    df_idx_cs = pd.DataFrame(index=date_obs, columns=['sol'])
-    df_idx_cs.loc[:, 'sol'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-    idx_cs = df_idx_cs['sol'].dropna().index
-    df_perc_18O_obs = pd.DataFrame(index=idx_cs, columns=['perc_obs', 'd18O_perc_obs'])
-    df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=nrow, y=ncol).values
-    df_perc_18O_obs.loc[:, 'd18O_perc_obs'] = ds_obs['d18O_PERC'].isel(x=nrow, y=ncol).values
-    sample_no = pd.DataFrame(index=df_perc_18O_obs.dropna().index, columns=['sample_no'])
+    idx = ds_sim_tm.Time.values  # time index
+    d18O_perc_bs = onp.zeros((1, 1, len(idx)))
+    df_idx_bs = pd.DataFrame(index=date_obs, columns=['sol'])
+    df_idx_bs.loc[:, 'sol'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+    idx_bs = df_idx_bs['sol'].dropna().index
+    # calculate simulated oxygen-18 bulk sample
+    df_perc_18O_obs = pd.DataFrame(index=date_obs, columns=['perc_obs', 'd18O_perc_obs'])
+    df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=0, y=0).values
+    df_perc_18O_obs.loc[:, 'd18O_perc_obs'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+    sample_no = pd.DataFrame(index=idx_bs, columns=['sample_no'])
     sample_no = sample_no.loc['1997':'2007']
     sample_no['sample_no'] = range(len(sample_no.index))
-    df_perc_18O_sim = pd.DataFrame(index=idx, columns=['perc_sim', 'd18O_perc_sim'])
-    df_perc_18O_sim['perc_sim'] = ds_sim_hm['q_ss'].isel(x=nrow, y=ncol).values
-    df_perc_18O_sim['d18O_perc_sim'] = ds_sim_tm['C_q_ss'].isel(x=nrow, y=ncol).values
+    df_perc_18O_sim = pd.DataFrame(index=date_sim_tm, columns=['perc_sim', 'd18O_perc_sim'])
+    df_perc_18O_sim['perc_sim'] = ds_sim_hm['q_ss'].isel(x=0, y=0).values
+    df_perc_18O_sim['d18O_perc_sim'] = ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=ncol).values
     df_perc_18O_sim = df_perc_18O_sim.join(sample_no)
     df_perc_18O_sim.loc[:, 'sample_no'] = df_perc_18O_sim.loc[:, 'sample_no'].fillna(method='bfill', limit=14)
     perc_sum = df_perc_18O_sim.groupby(['sample_no']).sum().loc[:, 'perc_sim']
@@ -160,19 +163,18 @@ for tm in transport_models:
     df_perc_18O_sim.loc[:, 'd18O_sample'] = df_perc_18O_sim.loc[:, 'd18O_sample'].fillna(method='bfill', limit=14)
     cond = (df_perc_18O_sim['d18O_sample'] == 0)
     df_perc_18O_sim.loc[cond, 'd18O_sample'] = onp.NaN
-    d18O_perc_cs[nrow, ncol, :] = df_perc_18O_sim.loc[:, 'd18O_sample'].values
-    # calculate observed oxygen-18 composite sample
-    df_perc_18O_obs.loc[:, 'd18O_perc_cs'] = df_perc_18O_obs['d18O_perc_obs'].fillna(method='bfill', limit=14)
+    d18O_perc_bs[nrow, ncol, :] = df_perc_18O_sim.loc[:, 'd18O_sample'].values
+    # calculate observed oxygen-18 bulk sample
+    df_perc_18O_obs.loc[:, 'd18O_perc_bs'] = df_perc_18O_obs['d18O_perc_obs'].fillna(method='bfill', limit=14)
 
     perc_sample_sum_obs = df_perc_18O_sim.join(df_perc_18O_obs).groupby(['sample_no']).sum().loc[:, 'perc_obs']
     sample_no['perc_obs_sum'] = perc_sample_sum_obs.values
     df_perc_18O_sim = df_perc_18O_sim.join(sample_no['perc_obs_sum'])
     df_perc_18O_sim.loc[:, 'perc_obs_sum'] = df_perc_18O_sim.loc[:, 'perc_obs_sum'].fillna(method='bfill', limit=14)
 
-    vars_tt_sim = ['tt_q_ss']
     vars_TT_sim = ['TT_q_ss']
     vars_sim = ['q_ss']
-    for var_tt_sim, var_TT_sim, var_sim in zip(vars_tt_sim, vars_TT_sim, vars_sim):
+    for var_TT_sim, var_sim in zip(vars_TT_sim, vars_sim):
         # plot cumulative travel time distributions
         TT = ds_sim_tm[var_TT_sim].isel(x=nrow, y=ncol).values
         fig, axs = plt.subplots()
@@ -180,19 +182,20 @@ for tm in transport_models:
             axs.plot(TT[i, :], lw=1, color='grey')
         axs.set_xlim((0, 1200))
         axs.set_ylim((0, 1))
-        axs.set_ylabel('$P_Q(T)$')
+        axs.set_ylabel('$P(T,t)$')
         axs.set_xlabel('T [days]')
         fig.tight_layout()
-        file_str = '%s.pdf' % (var_sim)
+        file_str = 'TTD_%s_%s.pdf' % (var_sim, tm1)
         path_fig = base_path_figs / file_str
         fig.savefig(path_fig, dpi=250)
 
-        tt = ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values
+        # calculate travel time from cumulative travel time
+        tt = onp.diff(TT, axis=-1)
         # calculate mean travel time for each time step
-        mtt = onp.sum(tt * ds_sim_tm['ages'].values[onp.newaxis, :], axis=1)
+        mtt = onp.sum(tt * ages[onp.newaxis, :], axis=1)
         mtt[mtt == 0] = onp.NaN
         # calculate median travel time for each time step
-        mediantt = onp.zeros((len(ds_sim_tm['ages'].values)))
+        mediantt = onp.zeros((len(ages)))
         for i in range(len(ds_sim_tm['Time'].values)):
             mediant = onp.where(TT[i, :] >= 0.5)[0]
             if len(mediant) == 0:
@@ -217,11 +220,11 @@ for tm in transport_models:
                 tt75[i] = t75[0]
         # calculate upper interquartile travel time for each time step
         df_tt = pd.DataFrame(index=idx[1:], columns=['MTT', 'MEDIANTT', 'TT25', 'TT75'])
-        df_tt.loc[:, 'MTT'] = mtt
-        df_tt.loc[:, 'MEDIANTT'] = mediantt
-        df_tt.loc[:, 'TT25'] = tt25
-        df_tt.loc[:, 'TT75'] = tt75
-        df_tt.loc[:, var_sim] = ds_sim_hm[var_sim].isel(x=nrow, y=ncol).values
+        df_tt.loc[:, 'MTT'] = mtt[1:]
+        df_tt.loc[:, 'MEDIANTT'] = mediantt[1:]
+        df_tt.loc[:, 'TT25'] = tt25[1:]
+        df_tt.loc[:, 'TT75'] = tt75[1:]
+        df_tt.loc[:, var_sim] = ds_sim_hm[var_sim].isel(x=nrow, y=ncol).values[1:]
 
         # mean and median travel time over entire simulation period
         df_tt_mean_median = pd.DataFrame(index=['mean', 'median'], columns=['MTT', 'MEDIANTT'])
@@ -230,8 +233,8 @@ for tm in transport_models:
         df_tt_mean_median.loc['median', 'MTT'] = onp.nanmedian(df_tt['MTT'].values)
         df_tt_mean_median.loc['median', 'MEDIANTT'] = onp.nanmedian(df_tt['MEDIANTT'].values)
         file_str = 'tt_mean_median_%s.pdf' % (var_sim)
-        path_csv = base_path_figs / file_str
-        df_tt_mean_median.to_csv(path_csv, header=True, index=True, sep="\t")
+        path_bsv = base_path_figs / file_str
+        df_tt_mean_median.to_csv(path_bsv, header=True, index=True, sep="\t")
 
         # plot mean and median travel time
         fig, axes = plt.subplots(2, 1, sharex=True, figsize=(14, 7))
@@ -242,23 +245,66 @@ for tm in transport_models:
         tt_50 = str(int(df_tt_mean_median.loc['mean', 'MEDIANTT']))
         tt_mean = str(int(df_tt_mean_median.loc['mean', 'MTT']))
         axes[0].text(0.75, 0.93, r'$\overline{TT}_{50}$: %s days' % (tt_50), size=12, horizontalalignment='left',
-                     verticalalignment='center', transform=axes[1].transAxes)
+                     verticalalignment='center', transform=axes[0].transAxes)
         axes[0].text(0.75, 0.83, r'$\overline{TT}$: %s days' % (tt_mean), size=12, horizontalalignment='left',
-                     verticalalignment='center', transform=axes[1].transAxes)
+                     verticalalignment='center', transform=axes[0].transAxes)
         axes[0].set_ylabel('age\n[days]')
         axes[0].set_ylim((0, 500))
         axes[0].set_xlim((df_tt.index[0], df_tt.index[-1]))
-        axes[0].text(0.985, 0.05, '(b)', size=15, horizontalalignment='center',
-                     verticalalignment='center', transform=axes[1].transAxes)
-        axes[1].bar(df_tt.index, df_tt['PERC'], width=-1, align='edge', edgecolor='grey')
+        axes[1].bar(df_tt.index, df_tt[var_sim], width=-1, align='edge', edgecolor='grey')
         axes[1].set_ylim(0,)
         axes[1].invert_yaxis()
         axes[1].set_xlim((df_tt.index[0], df_tt.index[-1]))
         axes[1].set_ylabel('Percolation\n[mm $day^{-1}$]')
         axes[1].set_xlabel(r'Time [year]')
-        axes[1].text(0.985, 0.05, '(c)', size=15, horizontalalignment='center',
-                     verticalalignment='center', transform=axes[2].transAxes)
         fig.tight_layout()
-        file_str = 'mean_median_tt_%s.pdf' % (var_sim)
+        file_str = 'mean_median_tt_%s_%s.pdf' % (var_sim, tm1)
         path_fig = base_path_figs / file_str
         fig.savefig(path_fig, dpi=250)
+
+        # plot numerical errors
+        sd_dS_num_error = '{:.2e}'.format(onp.std(ds_sim_tm['dS_num_error'].isel(x=nrow, y=ncol).values))
+        max_dS_num_error = '{:.2e}'.format(onp.max(ds_sim_tm['dS_num_error'].isel(x=nrow, y=ncol).values))
+        sd_dC_num_error = '{:.2e}'.format(onp.std(ds_sim_tm['dC_num_error'].isel(x=nrow, y=ncol).values))
+        max_dC_num_error = '{:.2e}'.format(onp.max(ds_sim_tm['dC_num_error'].isel(x=nrow, y=ncol).values))
+        fig, axes = plt.subplots(2, 1, sharex=True, sharey=False, figsize=(14, 7))
+        axes[0].plot(ds_sim_tm.Time.values, ds_sim_tm['dS_num_error'].isel(x=nrow, y=ncol).values, ls='-', lw=1, color='black')
+        axes[0].set_ylabel('Bias\n[mm]')
+        axes[0].set_ylim(0,)
+        axes[0].set_xlim((ds_sim_tm.Time.values[0], ds_sim_tm.Time.values[-1]))
+        axes[0].text(0.75, 0.93, r'Error SD: %s' % (sd_dS_num_error), size=12, horizontalalignment='left',
+                     verticalalignment='center', transform=axes[0].transAxes)
+        axes[0].text(0.75, 0.83, r'Error Max: %s' % (max_dS_num_error), size=12, horizontalalignment='left',
+                     verticalalignment='center', transform=axes[0].transAxes)
+        axes[1].plot(ds_sim_tm.Time.values, ds_sim_tm['dC_num_error'].isel(x=nrow, y=ncol).values, ls='-', lw=1, color='black')
+        axes[1].set_ylabel('Bias\n[mg/l]')
+        axes[1].set_ylim(0,)
+        axes[1].set_xlim((ds_sim_tm.Time.values[0], ds_sim_tm.Time.values[-1]))
+        axes[1].text(0.75, 0.93, r'Error SD: %s' % (sd_dC_num_error), size=12, horizontalalignment='left',
+                     verticalalignment='center', transform=axes[1].transAxes)
+        axes[1].text(0.75, 0.83, r'Error Max: %s' % (max_dC_num_error), size=12, horizontalalignment='left',
+                     verticalalignment='center', transform=axes[1].transAxes)
+        axes[1].set_xlabel(r'Time [year]')
+        fig.tight_layout()
+        file_str = 'num_errors_%s.pdf' % (tm1)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+
+        # join observations on simulations
+        obs_vals_bs = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+        sim_vals_bs = d18O_perc_bs[nrow, ncol, :]
+        sim_vals = ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=ncol).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals_bs
+        df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals_bs, df_obs)
+        df_eval = df_eval.dropna()
+        fig, ax = plt.subplots(figsize=(14, 3.5))
+        ax.plot(ds_sim_tm.Time.values, sim_vals, color='red')
+        ax.scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=2)
+        ax.scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=2)
+        ax.set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.set_xlabel('Time [year]')
+        fig.tight_layout()
+        file = base_path_figs / f"d18O_perc_sim_obs_{tm1}.png"
+        fig.savefig(file, dpi=250)
+        plt.close('all')

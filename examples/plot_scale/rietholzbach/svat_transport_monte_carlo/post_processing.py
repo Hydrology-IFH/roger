@@ -15,6 +15,15 @@ import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
 
 
+def conc_to_delta(conc):
+    """Calculate oxygen-18 ratio from oxygen-18 concentration
+    """
+    delta_iso = 1000.*(conc/(2005.2e-6*(1.-conc))-1.)
+    delta_iso = onp.where(delta_iso < -999, onp.nan, delta_iso)
+
+    return delta_iso
+
+
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir):
@@ -40,11 +49,12 @@ def main(tmp_dir):
                      'time-variant', 'time-variant1', 'time-variant2',
                      'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion',
                      'power', 'power time-variant', 'power time-variant reverse']
+    tm_structures = ['power']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        path = str(base_path / f"SVATTRANSPORT_{tms}.*.nc")
+        path = str(base_path / "deterministic" / "age_max_11" / f"SVATTRANSPORT_{tms}.*.nc")
         diag_files = glob.glob(path)
-        states_tm_file = base_path / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}_monte_carlo.nc"
         if not os.path.exists(states_tm_file):
             with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
                 f.attrs.update(
@@ -138,12 +148,31 @@ def main(tmp_dir):
                                                units=var_obj.attrs["units"])
                                 del var_obj, vals
 
+                            var_obj = df.variables.get(var_sim)
+                            if 'C_iso_q_ss' not in list(df.variables.keys()) and var_sim == "C_q_ss":
+                                v = f.create_variable('C_iso_q_ss', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                                vals = conc_to_delta(onp.array(var_obj).swapaxes(0, 2))
+                                v[:, :, :] = vals
+                                v.attrs.update(long_name="oxygen-18 ratio of percolation",
+                                               units="per mil")
+                                del var_obj
+                            if 'C_iso_transp' not in list(df.variables.keys()) and var_sim == "C_transp":
+                                v = f.create_variable('C_iso_transp', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                                vals = conc_to_delta(onp.array(var_obj).swapaxes(0, 2))
+                                v[:, :, :] = vals
+                                v.attrs.update(long_name="oxygen-18 ratio of transpiration",
+                                               units="per mil")
+                                del var_obj
+
     # load hydrologic simulation
-    states_hm_file = base_path.parent.parent / "states_hm.nc"
+    states_hm_file = base_path / "states_hm.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
+    days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
 
     # load observations (measured data)
-    path_obs = base_path.parent.parent.parent / "observations" / "rietholzbach_lysimeter.nc"
+    path_obs = base_path.parent / "observations" / "rietholzbach_lysimeter.nc"
     ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
     days_obs = (ds_obs['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     date_obs = num2date(days_obs, units=f"days since {ds_obs['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -167,31 +196,23 @@ def main(tmp_dir):
     df_thetap.loc[cond3, 'sc'] = 3  # wet
 
     dict_params_eff = {}
-    tm_structures = ['complete-mixing', 'piston',
-                     'preferential', 'preferential1', 'preferential2',
-                     'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2',
+    tm_structures = ['complete-mixing',
+                     'preferential'
+                     'advection-dispersion',
                      'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
-                     'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
-                     'time-variant', 'time-variant1', 'time-variant2',
-                     'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion'
-                     'power', 'power time-variant', 'power time-variant reverse']
+                     'time-variant advection-dispersion',
+                     'time-variant',
+                     'power', 'power time-variant']
+    tm_structures = ['power']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
 
         # load transport simulation
-        states_tm_file = base_path / f"states_{tms}_monte_carlo.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file.as_posix(), engine="h5netcdf")
-
-        # assign date
-        days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+        states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}_monte_carlo.nc"
+        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
         days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-        days_obs = (ds_obs['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-        date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
         date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-        date_obs = num2date(days_obs, units=f"days since {ds_obs['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-        ds_sim_hm = ds_sim_hm.assign_coords(date=("Time", date_sim_hm))
-        ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
-        ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
+        ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
 
         # DataFrame with sampled model parameters and the corresponding metrics
         nx = ds_sim_tm.dims['x']  # number of rows
@@ -272,7 +293,7 @@ def main(tmp_dir):
 
         # compare observations and simulations
         ncol = 0
-        idx = ds_sim_tm.date.values  # time index
+        idx = ds_sim_tm.Time.values  # time index
         d18O_perc_bs = onp.zeros((nx, 1, len(idx)))
         df_idx_bs = pd.DataFrame(index=date_obs, columns=['sol'])
         df_idx_bs.loc[:, 'sol'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
@@ -287,7 +308,7 @@ def main(tmp_dir):
             sample_no['sample_no'] = range(len(sample_no.index))
             df_perc_18O_sim = pd.DataFrame(index=date_sim_tm, columns=['perc_sim', 'd18O_perc_sim'])
             df_perc_18O_sim['perc_sim'] = ds_sim_hm['q_ss'].isel(x=0, y=0).values
-            df_perc_18O_sim['d18O_perc_sim'] = ds_sim_tm['C_q_ss'].isel(x=nrow, y=ncol).values
+            df_perc_18O_sim['d18O_perc_sim'] = ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=ncol).values
             df_perc_18O_sim = df_perc_18O_sim.join(sample_no)
             df_perc_18O_sim.loc[:, 'sample_no'] = df_perc_18O_sim.loc[:, 'sample_no'].fillna(method='bfill', limit=14)
             perc_sum = df_perc_18O_sim.groupby(['sample_no']).sum().loc[:, 'perc_sim']
@@ -325,7 +346,7 @@ def main(tmp_dir):
                     df_eval = df_eval.loc[rows, :]
                 df_eval = df_eval.dropna()
                 # calculate metrics
-                var_sim = 'C_q_ss'
+                var_sim = 'C_iso_q_ss'
                 obs_vals = df_eval.loc[:, 'obs'].values
                 sim_vals = df_eval.loc[:, 'sim'].values
                 key_kge = f'KGE_{var_sim}{sc1}'
@@ -343,15 +364,15 @@ def main(tmp_dir):
         # write bulk sample to output file
         ds_sim_tm = ds_sim_tm.close()
         del ds_sim_tm
-        states_tm_file = base_path / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}_monte_carlo.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             try:
                 v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
             except ValueError:
                 v = f.get('d18O_perc_bs')
             v[:, :, :] = d18O_perc_bs
-            v.attrs.update(long_name="bulk sample of d18O in percolation",
-                           units="permil")
+            v.attrs.update(long_name="bulk sample of oxygen-18 in percolation",
+                           units="per mil")
 
         # write to .txt
         file = base_path_results / f"params_eff_{tm_structure}.txt"
@@ -367,7 +388,7 @@ def main(tmp_dir):
                             'time-variant', 'time-variant1', 'time-variant2',
                             'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion',
                             'power', 'power time-variant', 'power time-variant reverse']:
-            df_eff = df_params_eff.loc[:, ['KGE_C_q_ss']]
+            df_eff = df_params_eff.loc[:, ['KGE_C_iso_q_ss']]
             if tm_structure == "preferential":
                 df_params = df_params_eff.loc[:, ['b_transp', 'b_q_rz', 'b_q_ss']]
             elif tm_structure == "preferential1":
@@ -430,15 +451,16 @@ def main(tmp_dir):
             fig.subplots_adjust(wspace=0.2, hspace=0.3)
             file = base_path_figs / f"dotty_plots_{tm_structure}.png"
             fig.savefig(file, dpi=250)
+            plt.close('all')
 
         # select best model run
-        idx_best = df_params_eff['KGE_C_q_ss'].idxmax()
+        idx_best = df_params_eff['KGE_C_iso_q_ss'].idxmax()
         dict_params_eff[tm_structure]['idx_best'] = idx_best
 
         # write SAS parameters of best model run
-        states_tm_file = base_path / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}_monte_carlo.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-        params_tm_file = base_path / f"sas_params_{tms}.nc"
+        params_tm_file = base_path / "deterministic" / "age_max_11" / f"sas_params_{tms}.nc"
         with h5netcdf.File(params_tm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
@@ -495,8 +517,8 @@ def main(tmp_dir):
         ds_sim_tm = ds_sim_tm.close()
 
         # write states of best model run
-        states_tm_mc_file = base_path / f"states_{tms}_monte_carlo.nc"
-        states_tm_file = base_path / f"states_{tms}.nc"
+        states_tm_mc_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}.nc"
         with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),

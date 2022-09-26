@@ -12,6 +12,15 @@ import roger
 import roger.tools.evaluation as eval_utils
 
 
+def conc_to_delta(conc):
+    """Calculate oxygen-18 ratio from oxygen-18 concentration
+    """
+    delta_iso = 1000.*(conc/(2005.2e-6*(1.-conc))-1.)
+    delta_iso = onp.where(delta_iso < -999, onp.nan, delta_iso)
+
+    return delta_iso
+
+
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir):
@@ -129,6 +138,22 @@ def main(tmp_dir):
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
                                 del var_obj, vals
+
+                            var_obj = df.variables.get(var_sim)
+                            if 'C_iso_q_ss' not in list(df.variables.keys()) and var_sim == "C_q_ss":
+                                v = f.create_variable('C_iso_q_ss', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                                vals = conc_to_delta(onp.array(var_obj).swapaxes(0, 2))
+                                v[:, :, :] = vals
+                                v.attrs.update(long_name="oxygen-18 ratio of percolation",
+                                               units="per mil")
+                                del var_obj
+                            if 'C_iso_transp' not in list(df.variables.keys()) and var_sim == "C_transp":
+                                v = f.create_variable('C_iso_transp', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                                vals = conc_to_delta(onp.array(var_obj).swapaxes(0, 2))
+                                v[:, :, :] = vals
+                                v.attrs.update(long_name="oxygen-18 ratio of transpiration",
+                                               units="per mil")
+                                del var_obj
 
     # load simulation
     states_hm_file = base_path / "states_hm.nc"

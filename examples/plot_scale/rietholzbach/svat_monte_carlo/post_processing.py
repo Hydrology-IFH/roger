@@ -364,6 +364,7 @@ def main(tmp_dir):
         fig.subplots_adjust(wspace=0.2, hspace=0.3)
         file = base_path_figs / f"dotty_plots_{sc1}.png"
         fig.savefig(file, dpi=250)
+        plt.close('all')
 
     # select best model run
     idx_best = df_params_eff['E_multi'].idxmax()
