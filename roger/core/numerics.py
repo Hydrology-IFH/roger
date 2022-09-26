@@ -1627,7 +1627,7 @@ def sanity_check(state):
 
         check = check1 & check2 & check3 & check4 & check5
 
-        if rs.loglevel == 'error' and rs.backend == 'numpy' and not check:
+        if rs.loglevel == 'warning' and rs.backend == 'numpy' and not check:
             check11 = npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
                                                     vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2] -
                                                     npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2) - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2) - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2), atol=settings.atol, rtol=settings.rtol)
@@ -1639,40 +1639,40 @@ def sanity_check(state):
             check55 = (vs.sa_ss[2:-2, 2:-2, vs.tau, :] >= 0)
 
             if not check11.all():
-                logger.error(f"Water balance diverged at iteration {vs.itt}")
+                logger.warning(f"Water balance diverged at iteration {vs.itt}")
                 rows11 = npx.where(check11 == False)[0].tolist()
                 cols11 = npx.where(check11 == False)[1].tolist()
                 rowscols11 = tuple(zip(rows11, cols11))
                 if rowscols11:
-                    logger.error(f"Water balance diverged at {rowscols11}")
+                    logger.warning(f"Water balance diverged at {rowscols11}")
             if not check22.all():
-                logger.error(f"Solute balance diverged at iteration {vs.itt}")
+                logger.warning(f"Solute balance diverged at iteration {vs.itt}")
                 rows22 = npx.where(check22 == False)[0].tolist()
                 cols22 = npx.where(check22 == False)[1].tolist()
                 rowscols22 = tuple(zip(rows22, cols22))
                 if rowscols22:
                     logger.debug(f"Solute balance diverged at {rowscols22}")
             if not check33.all():
-                logger.error(f"StorAge is out of bounds at iteration {vs.itt}")
+                logger.warning(f"StorAge is out of bounds at iteration {vs.itt}")
                 rows33 = npx.where(check33 == False)[0].tolist()
                 cols33 = npx.where(check33 == False)[1].tolist()
                 rowscols33 = tuple(zip(rows33, cols33))
                 if rowscols33:
-                    logger.error(f"Solute balance diverged at {rowscols33}")
+                    logger.warning(f"Solute balance diverged at {rowscols33}")
             if not check44.all():
-                logger.error(f"Root zone StorAge is out of bounds at iteration {vs.itt}")
+                logger.warning(f"Root zone StorAge is out of bounds at iteration {vs.itt}")
                 rows44 = npx.where(npx.any(check44 == False, axis=-1))[0].tolist()
                 cols44 = npx.where(npx.any(check44 == False, axis=-1))[1].tolist()
                 rowscols44 = tuple(zip(rows44, cols44))
                 if rowscols44:
-                    logger.error(f"Root zone StorAge is out of bounds at at {rowscols44}")
+                    logger.warning(f"Root zone StorAge is out of bounds at at {rowscols44}")
             if not check55.all():
-                logger.error(f"Root zone StorAge is out of bounds at iteration {vs.itt}")
+                logger.warning(f"Root zone StorAge is out of bounds at iteration {vs.itt}")
                 rows55 = npx.where(npx.any(check55 == False, axis=-1))[0].tolist()
                 cols55 = npx.where(npx.any(check55 == False, axis=-1))[1].tolist()
                 rowscols55 = tuple(zip(rows55, cols55))
                 if rowscols55:
-                    logger.error(f"Root zone StorAge is out of bounds at at {rowscols55}")
+                    logger.warning(f"Root zone StorAge is out of bounds at at {rowscols55}")
 
     elif settings.enable_offline_transport and (settings.enable_bromide or settings.enable_chloride):
         check1 = global_and(npx.all(npx.isclose(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),

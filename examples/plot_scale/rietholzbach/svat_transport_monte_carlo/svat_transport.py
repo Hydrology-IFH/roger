@@ -708,6 +708,7 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             if base_path:
                 diagnostics["constant"].base_output_path = base_path
 
+            # maximum bias of deterministic/numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error", "dC_num_error"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1

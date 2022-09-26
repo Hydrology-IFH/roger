@@ -204,9 +204,14 @@ def main():
             diagnostics["rates"].output_frequency = 10 * 60
             diagnostics["rates"].sampling_frequency = 1
 
-            diagnostics["collect"].output_variables = ["theta", "z_sat", "z0", "S_s"]
+            diagnostics["collect"].output_variables = ["theta", "z0", "S_s"]
             diagnostics["collect"].output_frequency = 10 * 60
             diagnostics["collect"].sampling_frequency = 1
+
+            # maximum bias of deterministic/numerical solution at time step t
+            diagnostics["maximum"].output_variables = ["dS_num_error", "z_sat"]
+            diagnostics["maximum"].output_frequency = 24 * 60 * 60
+            diagnostics["maximum"].sampling_frequency = 1
 
         @roger_routine
         def after_timestep(self, state):

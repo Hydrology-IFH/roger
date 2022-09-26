@@ -326,6 +326,10 @@ class RogerSetup(metaclass=abc.ABCMeta):
             diagnostics.output(self.state)
 
         logger.success("Setup done\n")
+        if (self.state.settings.enable_chloride | self.state.settings.enable_bromide | self.state.settings.enable_oxygen18 | self.state.settings.enable_deuterium | self.state.settings.enable_nitrate):
+            logger.warning("IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require an post-evaluation of the accuracy of\n deterministic/numerical solution (e.g. calculate\n standard deviation of dS_num_error or dC_num_error).\n")
+        else:
+            logger.warning("IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require an post-evaluation of the accuracy of\n deterministic/numerical solution (e.g. calculate\n standard deviation of dS_num_error and dC_num_error).\n")
 
     @roger_routine
     def step(self, state):
@@ -393,10 +397,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
                 # write output at end of time step
                 with state.timers["diagnostics"]:
                     if not numerics.sanity_check(state):
-                        if rs.loglevel == 'error' or rs.loglevel == 'debug' and rs.backend == 'numpy':
-                            logger.error(f"solution diverged at iteration {vs.itt}")
-                        else:
-                            raise RuntimeError(f"solution diverged at iteration {vs.itt}")
+                        logger.warning(f"Solution diverged at iteration {vs.itt}.\n Please evaluate bias of deterministic/numerical solution.\n The bias is written to the model output.")
                     numerics.calculate_num_error(state)
 
                     if settings.warmup_done:

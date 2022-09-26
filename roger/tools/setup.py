@@ -172,7 +172,7 @@ def write_forcing_tracer(input_dir, tracer, nrows=1, ncols=1, uniform=True, floa
     """
     input_path = input_dir / "forcing_tracer.nc"
     if os.path.exists(input_path):
-        logger.warning("Use available tracer forcing.")
+        logger.warning("Use available tracer forcing.\n")
         return
 
     if uniform:
@@ -242,7 +242,7 @@ def write_crop_rotation(input_dir, nrows=1, ncols=1, float_type="float64"):
     """
     input_path = input_dir / "crop_rotation.nc"
     if os.path.exists(input_path):
-        logger.warning("Use available crop rotation.")
+        logger.warning("Use available crop rotation.\n")
         return
 
     csv_file = input_dir / 'crop_rotation.csv'
@@ -306,7 +306,7 @@ def write_forcing_event(input_dir, nrows=1, ncols=1, uniform=True, prec_correcti
     """
     input_path = input_dir / "forcing.nc"
     if os.path.exists(input_path):
-        logger.warning("Use available forcing.")
+        logger.warning("Use available forcing.\n")
         return
 
     if uniform:
@@ -482,7 +482,7 @@ def write_forcing(input_dir, nrows=1, ncols=1, uniform=True,
     """
     input_path = input_dir / "forcing.nc"
     if os.path.exists(input_path):
-        logger.warning("Use available forcing.")
+        logger.warning("Use available forcing.\n")
         return
 
     if uniform:

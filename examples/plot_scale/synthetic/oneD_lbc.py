@@ -334,7 +334,8 @@ def main():
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
 
-            diagnostics["maximum"].output_variables = ["z_sat", "theta", "S_s"]
+            # maximum bias of deterministic/numerical solution at time step t
+            diagnostics["maximum"].output_variables = ["dS_num_error", "z_sat"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1
 

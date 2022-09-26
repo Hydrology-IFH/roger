@@ -27,9 +27,9 @@ def setup_logging(loglevel="info", stream_sink=sys.stdout, log_all_processes=Fal
     logger.level("DEBUG", color="<dim><cyan>")
     logger.level("INFO", color="")
     logger.level("SUCCESS", color="<dim><green>")
-    logger.level("WARNING", color="<yellow>")
+    logger.level("WARNING", color="<magenta>")
     logger.level("ERROR", color="<bold><red>")
-    logger.level("DIAGNOSTIC", color="<bold><yellow>")
+    logger.level("DIAGNOSTIC", color="<bold><magenta>")
     logger.level("CRITICAL", color="<bold><red><WHITE>")
 
     logger = logger.patch(_inject_proc_rank)
@@ -57,6 +57,6 @@ def setup_logging(loglevel="info", stream_sink=sys.stdout, log_all_processes=Fal
     logger.configure(handlers=[handler_conf])
     logger.enable("roger")
     if log_to_file:
-        logger.add("out.log", backtrace=True, diagnose=True, level="DEBUG")
+        logger.add("out.log", backtrace=True, diagnose=True, level=loglevel)
 
     return logger

@@ -341,7 +341,12 @@ def main(meteo_station):
             diagnostics["rates"].output_frequency = 24 * 60 * 60
             diagnostics["rates"].sampling_frequency = 1
 
-            diagnostics["maximum"].output_variables = ["z_wf", "z_sat", "theta", "S_s", "S_int_top", "S_int_ground", "S_int_top_tot", "S_int_ground_tot", "S_snow", "swe", "swe_top", "swe_ground", "swe_top_tot"]
+            diagnostics["collect"].output_variables = ["theta", "S_s", "S_int_top", "S_int_ground", "S_int_top_tot", "S_int_ground_tot", "S_snow", "swe", "swe_top", "swe_ground", "swe_top_tot"]
+            diagnostics["collect"].output_frequency = 24 * 60 * 60
+            diagnostics["collect"].sampling_frequency = 1
+
+            # maximum bias of deterministic/numerical solution at time step t
+            diagnostics["maximum"].output_variables = ["dS_num_error", "z_sat", "z_wf"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1
 

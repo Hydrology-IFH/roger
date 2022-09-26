@@ -101,7 +101,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             settings.identifier = self._identifier
             settings.sas_solver = self._sas_solver
             if settings.sas_solver in ['RK4', 'Euler']:
-                settings.sas_solver_substeps = 12
+                settings.sas_solver_substeps = 6
                 settings.h = 1 / settings.sas_solver_substeps
 
             settings.nx, settings.ny, settings.nz = 1, 1, 1
@@ -674,17 +674,18 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             if base_path:
                 diagnostics["averages"].base_output_path = base_path
 
-            diagnostics["maximum"].output_variables = ["dS_num_error", "dC_num_error"]
-            diagnostics["maximum"].output_frequency = 24 * 60 * 60
-            diagnostics["maximum"].sampling_frequency = 1
-            if base_path:
-                diagnostics["maximum"].base_output_path = base_path
-
             diagnostics["collect"].output_variables = ["C_iso_snow", "C_iso_in"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
                 diagnostics["collect"].base_output_path = base_path
+
+            # maximum bias of deterministic/numerical solution at time step t
+            diagnostics["maximum"].output_variables = ["dS_num_error", "dC_num_error"]
+            diagnostics["maximum"].output_frequency = 24 * 60 * 60
+            diagnostics["maximum"].sampling_frequency = 1
+            if base_path:
+                diagnostics["maximum"].base_output_path = base_path
 
         @roger_routine
         def after_timestep(self, state):
