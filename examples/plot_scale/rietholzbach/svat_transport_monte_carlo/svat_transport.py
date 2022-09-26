@@ -106,7 +106,7 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             settings.identifier = self._identifier
             settings.sas_solver = self._sas_solver
             if settings.sas_solver in ['RK4', 'Euler']:
-                settings.sas_solver_substeps = 6
+                settings.sas_solver_substeps = 12
                 settings.h = 1 / settings.sas_solver_substeps
 
             settings.nx, settings.ny, settings.nz = self._nsamples, 1, 1
