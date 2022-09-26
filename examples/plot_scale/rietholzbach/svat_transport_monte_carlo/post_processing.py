@@ -53,7 +53,7 @@ def main(tmp_dir):
                     institution='University of Freiburg, Chair of Hydrology',
                     references='',
                     comment='',
-                    model_structure=f'SVAT {tm_structure}  transport model with free drainage',
+                    model_structure=f'SVAT {tm_structure} transport model with free drainage',
                     roger_version=f'{roger.__version__}'
                 )
                 # collect dimensions
