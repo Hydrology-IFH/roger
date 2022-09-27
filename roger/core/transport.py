@@ -1,6 +1,6 @@
 from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
-from roger.core.operators import numpy as npx, update, update_add, at
+from roger.core.operators import numpy as npx, update, update_add, at, scan
 from roger.core import sas, infiltration, evapotranspiration, subsurface_runoff, capillary_rise, crop, root_zone, subsoil, soil, numerics, nitrate
 from roger import runtime_settings as rs, logger
 from roger import diagnostics
@@ -60,178 +60,135 @@ def calc_tt(state, SA, sa, flux, sas_params):
     vs = state.variables
     settings = state.settings
 
+    TTn = allocate(state.dimensions, ("x", "y", "nages"))
+    ttn = allocate(state.dimensions, ("x", "y", "ages"))
+    SAn = allocate(state.dimensions, ("x", "y", "timesteps", "nages"))
+    san = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
+
+    SAn = update(
+        SAn,
+        at[2:-2, 2:-2, :, :], SA[2:-2, 2:-2, :, :],
+    )
+    san = update(
+        san,
+        at[2:-2, 2:-2, :, :], sa[2:-2, 2:-2, :, :],
+    )
+
+    # loop over substeps
+    def loop_body(carry, i):
+        state, TTn, ttn, SAn, san, flux, sas_params = carry
+        vs = state.variables
+        settings = state.settings
+        h = 1/settings.sas_solver_substeps
+        TTi = allocate(state.dimensions, ("x", "y", "nages"))
+        tti = allocate(state.dimensions, ("x", "y", "ages"))
+        ttqi = allocate(state.dimensions, ("x", "y", "ages"))
+        # derive cumulative backward travel time distribution with SAS functions
+        # at substep i
+        TTi = update_add(
+            TTi,
+            at[2:-2, 2:-2, :], sas.uniform(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TTi = update_add(
+            TTi,
+            at[2:-2, 2:-2, :], sas.dirac(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TTi = update(
+            TTi,
+            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] * h > 0), npx.where((flux[2:-2, 2:-2, npx.newaxis] >= SAn[2:-2, 2:-2, 1, :]) & (SAn[2:-2, 2:-2, 1, :]/(flux[2:-2, 2:-2, npx.newaxis] * h) <= 1), SAn[2:-2, 2:-2, 1, :]/(flux[2:-2, 2:-2, npx.newaxis] * h), 1), TTi[2:-2, 2:-2, :]),
+        )
+        TTi = update(
+            TTi,
+            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] * h > 0), npx.where(TTi[2:-2, 2:-2, :] > 1, 1, TTi[2:-2, 2:-2, :]), TTi[2:-2, 2:-2, :]),
+        )
+        dirac_old = npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] * h > 0), npx.cumsum(npx.diff(npx.where((npx.cumsum(npx.diff(SAn[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1]/(flux[2:-2, 2:-2, npx.newaxis] * h) , axis=-1) <= 1), npx.cumsum(npx.diff(SAn[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1]/(flux[2:-2, 2:-2, npx.newaxis] * h) , axis=-1), 1)[..., ::-1], axis=-1), axis=-1), 0)
+        TTi = update(
+            TTi,
+            at[2:-2, 2:-2, 1:-1], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] * h > 0), dirac_old, TTi[2:-2, 2:-2, 1:-1]),
+        )
+        TTi = update(
+            TTi,
+            at[2:-2, 2:-2, 0], npx.where((sas_params[2:-2, 2:-2, 0] == 22), 0, TTi[2:-2, 2:-2, 0]),
+        )
+        TTi = update(
+            TTi,
+            at[2:-2, 2:-2, -1], npx.where((sas_params[2:-2, 2:-2, 0] == 22), 1, TTi[2:-2, 2:-2, -1]),
+        )
+        TTi_kum, sas_params = sas.kumaraswami(state, SAn, sas_params)
+        TTi = update_add(
+            TTi,
+            at[2:-2, 2:-2, :], TTi_kum[2:-2, 2:-2, :],
+        )
+        TTi = update_add(
+            TTi,
+            at[2:-2, 2:-2, :], sas.gamma(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TTi = update_add(
+            TTi,
+            at[2:-2, 2:-2, :], sas.exponential(state, SAn, sas_params)[2:-2, 2:-2, :],
+        )
+        TTi_pow, sas_params = sas.power(state, SAn, sas_params)
+        TTi = update_add(
+            TTi,
+            at[2:-2, 2:-2, :], TTi_pow[2:-2, 2:-2, :],
+        )
+        # calculate travel time distribution
+        tti = update(
+            tti,
+            at[2:-2, 2:-2, :], npx.where(npx.diff(TTi[2:-2, 2:-2, :], axis=-1) >= 0, npx.diff(TTi[2:-2, 2:-2, :], axis=-1), 0),
+        )
+        # impose nonnegative constraint to solution
+        ttqi = update(
+            ttqi,
+            at[2:-2, 2:-2, :], npx.where(flux[2:-2, 2:-2, npx.newaxis] * tti[2:-2, 2:-2, :] * h > san[2:-2, 2:-2, vs.tau, :], san[2:-2, 2:-2, vs.tau, :], flux[2:-2, 2:-2, npx.newaxis] * tti[2:-2, 2:-2, :] * h),
+        )
+        tti = update(
+            tti,
+            at[2:-2, 2:-2, :], npx.where(flux[2:-2, 2:-2, npx.newaxis] * h > 0, ttqi[2:-2, 2:-2, :]/(flux[2:-2, 2:-2, npx.newaxis] * h) , 0),
+        )
+        # update StorAge
+        san = update_add(
+            san,
+            at[2:-2, 2:-2, 1, :], -tti[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis] * h,
+        )
+        SAn = update(
+            SAn,
+            at[2:-2, 2:-2, 1, 1:], npx.cumsum(san[2:-2, 2:-2, 1, :], axis=-1),
+        )
+        # add distribution for aggration after substeps
+        ttn = update_add(
+            ttn,
+            at[2:-2, 2:-2, :], tti[2:-2, 2:-2, :],
+        )
+        TTn = update_add(
+            TTn,
+            at[2:-2, 2:-2, 1:], npx.cumsum(tti[2:-2, 2:-2, :], axis=-1),
+        )
+        carry = (state, TTn, ttn, SAn, san, flux, sas_params)
+
+        return carry, None
+
+    substeps = npx.arange(0, settings.sas_solver_substeps)
+    carry = (state, TTn, ttn, SAn, san, flux, sas_params)
+    res, _ = scan(loop_body, carry, substeps)
+    TTn = res[1]
+
     TT = allocate(state.dimensions, ("x", "y", "nages"))
     tt = allocate(state.dimensions, ("x", "y", "ages"))
-    # cumulative backward travel time distribution
-    TT = update_add(
-        TT,
-        at[2:-2, 2:-2, :], sas.uniform(state, SA, sas_params)[2:-2, 2:-2, :],
-    )
-    TT = update_add(
-        TT,
-        at[2:-2, 2:-2, :], sas.dirac(state, SA, sas_params)[2:-2, 2:-2, :],
-    )
-    TT = update(
-        TT,
-        at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where((flux[2:-2, 2:-2, npx.newaxis] >= SA[2:-2, 2:-2, 1, :]) & (SA[2:-2, 2:-2, 1, :]/flux[2:-2, 2:-2, npx.newaxis] <= 1), SA[2:-2, 2:-2, 1, :]/flux[2:-2, 2:-2, npx.newaxis], 1), TT[2:-2, 2:-2, :]),
-    )
-    TT = update(
-        TT,
-        at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(TT[2:-2, 2:-2, :] > 1, 1, TT[2:-2, 2:-2, :]), TT[2:-2, 2:-2, :]),
-    )
-    dirac_old = npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.cumsum(npx.diff(npx.where((npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1]/flux[2:-2, 2:-2, npx.newaxis], axis=-1) <= 1), npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1]/flux[2:-2, 2:-2, npx.newaxis], axis=-1), 1)[...,::-1], axis=-1), axis=-1), 0)
-    TT = update(
-        TT,
-        at[2:-2, 2:-2, 1:-1], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), dirac_old, TT[2:-2, 2:-2, 1:-1]),
-    )
-    TT = update(
-        TT,
-        at[2:-2, 2:-2, 0], npx.where((sas_params[2:-2, 2:-2, 0] == 22), 0, TT[2:-2, 2:-2, 0]),
-    )
-    TT = update(
-        TT,
-        at[2:-2, 2:-2, -1], npx.where((sas_params[2:-2, 2:-2, 0] == 22), 1, TT[2:-2, 2:-2, -1]),
-    )
-    TT_kum, sas_params = sas.kumaraswami(state, SA, sas_params)
-    TT = update_add(
-        TT,
-        at[2:-2, 2:-2, :], TT_kum[2:-2, 2:-2, :],
-    )
-    TT = update_add(
-        TT,
-        at[2:-2, 2:-2, :], sas.gamma(state, SA, sas_params)[2:-2, 2:-2, :],
-    )
-    TT = update_add(
-        TT,
-        at[2:-2, 2:-2, :], sas.exponential(state, SA, sas_params)[2:-2, 2:-2, :],
-    )
-    TT_pow, sas_params = sas.power(state, SA, sas_params)
-    TT = update_add(
-        TT,
-        at[2:-2, 2:-2, :], TT_pow[2:-2, 2:-2, :],
-    )
+    ttq = allocate(state.dimensions, ("x", "y", "ages"))
 
-    # calculate travel time distribution
+    # aggregate cumulative travel time distribution after substeps
+    TT = update(
+        TT,
+        at[2:-2, 2:-2, :], TTn[2:-2, 2:-2, :]/settings.sas_solver_substeps,
+    )
+    # calculate travel time distribution from cumulative travel time distribution
     tt = update(
         tt,
-        at[2:-2, 2:-2, :], npx.where(npx.diff(TT[2:-2, 2:-2, :], axis=-1) >= 0, npx.diff(TT[2:-2, 2:-2, :], axis=-1), 0),
+        at[2:-2, 2:-2, :], npx.diff(TT[2:-2, 2:-2, :], axis=-1),
     )
 
-    # age-distributed outflux
-    ttq = allocate(state.dimensions, ("x", "y", "ages"))
-    ttq = update(
-        ttq,
-        at[2:-2, 2:-2, :], flux[2:-2, 2:-2, npx.newaxis] * tt[2:-2, 2:-2, :],
-    )
-
-    if settings.enable_sas_redistribution:
-        # preference for redistribution
-        mask_old = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([1, 22, 32, 34, 52, 6, 63, 64])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] <= 1))
-        mask_old = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis]), True, mask_old)
-        mask_old = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] >= 1), True, mask_old)
-        mask_young = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([21, 31, 33, 4, 41, 51, 6, 63, 64]))
-        mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] < sas_params[:, :, 2, npx.newaxis]), True, mask_young)
-        mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis]), False, mask_young)
-        mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] < 1), True, mask_young)
-        mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] >= 1), False, mask_young)
-
-        # set travel time distribution to zero if no outflux
-        tt = update(
-            tt,
-            at[2:-2, 2:-2, :], npx.where(ttq[2:-2, 2:-2, :] > 0, tt[2:-2, 2:-2, :], 0),
-        )
-
-        TT = update(
-            TT,
-            at[2:-2, 2:-2, 1:], npx.cumsum(tt[2:-2, 2:-2, :], axis=-1),
-        )
-        TT = update(
-            TT,
-            at[2:-2, 2:-2, 0], 0,
-        )
-
-        # outflux is greater than StorAge
-        # redistribution of probabilities to guarantee mass conservation
-        ttq_init = allocate(state.dimensions, ("x", "y", "ages"))
-        diff_q = allocate(state.dimensions, ("x", "y", "ages"))
-        q_re = allocate(state.dimensions, ("x", "y", "ages"))
-        q_re_sum = allocate(state.dimensions, ("x", "y"))
-        sa_free = allocate(state.dimensions, ("x", "y", "ages"))
-        sa_free_norm = allocate(state.dimensions, ("x", "y", "ages"))
-        SA_re = allocate(state.dimensions, ("x", "y", "nages"))
-        omega_re = allocate(state.dimensions, ("x", "y", "ages"))
-        Omega_re = allocate(state.dimensions, ("x", "y", "nages"))
-        ttq_re = allocate(state.dimensions, ("x", "y", "ages"))
-        # outflux is greater than StorAge
-        # difference between outflux and StorAge
-        ttq_init = update(
-            ttq_init,
-            at[2:-2, 2:-2, :], ttq[2:-2, 2:-2, :],
-        )
-        diff_q = update(
-            diff_q,
-            at[2:-2, 2:-2, :], ttq[2:-2, 2:-2, :] - sa[2:-2, 2:-2, vs.tau, :],
-        )
-        q_re = update(
-            q_re,
-            at[2:-2, 2:-2, :], npx.where((diff_q[2:-2, 2:-2, :] > 0), diff_q[2:-2, 2:-2, :], 0),
-        )
-        q_re_sum = update(
-            q_re_sum,
-            at[2:-2, 2:-2], npx.sum(q_re[2:-2, 2:-2, :], axis=-1),
-        )
-        # available StorAge for sampling
-        sa_free = update(
-            sa_free,
-            at[2:-2, 2:-2, :], npx.where((sa[2:-2, 2:-2, vs.tau, :] - ttq[2:-2, 2:-2, :] > 0), sa[2:-2, 2:-2, vs.tau, :] - ttq[2:-2, 2:-2, :], 0),
-        )
-        # normalize StorAge with outflux of age T
-        sa_free_norm = update(
-            sa_free_norm,
-            at[2:-2, 2:-2, :], npx.where((q_re_sum[2:-2, 2:-2, npx.newaxis] > 0), sa_free[2:-2, 2:-2, :] / q_re_sum[2:-2, 2:-2, npx.newaxis], 0),
-        )
-        SA_re = update(
-            SA_re,
-            at[2:-2, 2:-2, :-1], npx.where(mask_old[2:-2, 2:-2, :], npx.cumsum(sa_free_norm[2:-2, 2:-2, ::-1], axis=-1)[:, :, ::-1], SA_re[2:-2, 2:-2, :-1]),
-        )
-        SA_re = update(
-            SA_re,
-            at[2:-2, 2:-2, 1:], npx.where(mask_young[2:-2, 2:-2, :], npx.cumsum(sa_free_norm[2:-2, 2:-2, :], axis=-1), SA_re[2:-2, 2:-2, 1:]),
-        )
-        # cumulative probability to redistribute outflux
-        Omega_re = update(
-            Omega_re,
-            at[2:-2, 2:-2, :], npx.where(SA_re[2:-2, 2:-2, :] < 1, SA_re[2:-2, 2:-2, :], 1),
-        )
-        # probability to redistribute outflux
-        omega_re = update(
-            omega_re,
-            at[2:-2, 2:-2, :], npx.where(mask_old[2:-2, 2:-2, :], npx.diff(Omega_re[2:-2, 2:-2, ::-1], axis=-1)[:, :, ::-1], omega_re[2:-2, 2:-2, :]),
-        )
-        omega_re = update(
-            omega_re,
-            at[2:-2, 2:-2, :], npx.where(mask_young[2:-2, 2:-2, :], npx.diff(Omega_re[2:-2, 2:-2, :], axis=-1), omega_re[2:-2, 2:-2, :]),
-        )
-        # redistribute outflux
-        ttq_re = update(
-            ttq_re,
-            at[2:-2, 2:-2, :], q_re_sum[2:-2, 2:-2, npx.newaxis] * omega_re[2:-2, 2:-2, :],
-        )
-        ttq = update(
-            ttq,
-            at[2:-2, 2:-2, :], npx.where((ttq_re[2:-2, 2:-2, :] > 0), ttq_re[2:-2, 2:-2, :] + ttq[2:-2, 2:-2, :], ttq[2:-2, 2:-2, :]),
-        )
-        ttq = update(
-            ttq,
-            at[2:-2, 2:-2, :], npx.where((diff_q[2:-2, 2:-2, :] > 0), ttq[2:-2, 2:-2, :] - diff_q[2:-2, 2:-2, :], ttq[2:-2, 2:-2, :]),
-        )
-        # recalculate travel time distribution
-        tt = update(
-            tt,
-            at[2:-2, 2:-2, :], npx.where(npx.any(ttq_init[2:-2, 2:-2, :] > sa[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis], ttq[2:-2, 2:-2, :]/flux[2:-2, 2:-2, npx.newaxis], tt[2:-2, 2:-2, :]),
-        )
-
-    # impose nonnegative constraint of solution
+    # impose nonnegative constraint to solution
     ttq = update(
         ttq,
         at[2:-2, 2:-2, :], npx.where(flux[2:-2, 2:-2, npx.newaxis] * tt[2:-2, 2:-2, :] > sa[2:-2, 2:-2, vs.tau, :], sa[2:-2, 2:-2, vs.tau, :], flux[2:-2, 2:-2, npx.newaxis] * tt[2:-2, 2:-2, :]),
@@ -243,15 +200,12 @@ def calc_tt(state, SA, sa, flux, sas_params):
 
     if rs.backend == 'numpy':
         # sanity check of SAS function (works only for numpy backend)
-        mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=settings.atol)
+        mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=settings.atol, rtol=settings.rtol)
         if not npx.all(mask[2:-2, 2:-2]):
-            if rs.loglevel == 'error':
-                logger.warning(f"Solution of SAS function diverged at iteration {vs.itt}")
-            else:
-                raise RuntimeError(f"Solution of SAS function diverged at iteration {vs.itt}")
+            logger.warning(f"Solution of SAS function diverged at iteration {vs.itt}.\nProbabilities of travel time distribution will not cumulate to 1.\n")
         mask2 = (tt >= 0)
         if not npx.all(mask2[2:-2, 2:-2, :]):
-            logger.warning(f"Negative probabilities at iteration {vs.itt}")
+            logger.warning(f"Negative probabilities at iteration {vs.itt}.\n")
 
     return tt
 

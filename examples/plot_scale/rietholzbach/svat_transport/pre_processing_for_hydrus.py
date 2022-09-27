@@ -11,6 +11,9 @@ base_path = Path(__file__).parent
 base_path_results = base_path / "results"
 if not os.path.exists(base_path_results):
     os.mkdir(base_path_results)
+base_path_results = base_path / "results" / "hydrus_input"
+if not os.path.exists(base_path_results):
+    os.mkdir(base_path_results)
 # directory of figures
 base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):

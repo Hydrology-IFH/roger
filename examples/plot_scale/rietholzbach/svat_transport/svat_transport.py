@@ -7,7 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant preferential_+_advection-dispersion', 'power', 'time-variant_power', 'time-variant_power_reverse']), default='power')
-@click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='Euler')
+@click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(transport_model_structure, sas_solver, tmp_dir):
@@ -100,8 +100,8 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             settings = state.settings
             settings.identifier = self._identifier
             settings.sas_solver = self._sas_solver
+            settings.sas_solver_substeps = 12
             if settings.sas_solver in ['RK4', 'Euler']:
-                settings.sas_solver_substeps = 6
                 settings.h = 1 / settings.sas_solver_substeps
 
             settings.nx, settings.ny, settings.nz = 1, 1, 1
@@ -692,7 +692,6 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             vs = state.variables
 
             vs.update(after_timestep_kernel(state))
-            print(vs.C_iso_q_ss[2:-2, 2:-2])
 
     @roger_kernel
     def after_timestep_kernel(state):

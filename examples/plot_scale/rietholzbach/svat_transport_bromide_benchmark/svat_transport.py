@@ -109,8 +109,8 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             settings = state.settings
             settings.identifier = self._identifier
             settings.sas_solver = self._sas_solver
+            settings.sas_solver_substeps = 6
             if settings.sas_solver in ['RK4', 'Euler']:
-                settings.sas_solver_substeps = 12
                 settings.h = 1 / settings.sas_solver_substeps
 
             settings.nx, settings.ny, settings.nz = 1, 1, 1
