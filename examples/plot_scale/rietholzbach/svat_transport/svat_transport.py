@@ -692,6 +692,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             vs = state.variables
 
             vs.update(after_timestep_kernel(state))
+            print(vs.C_iso_q_ss[2:-2, 2:-2])
 
     @roger_kernel
     def after_timestep_kernel(state):

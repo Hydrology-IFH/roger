@@ -111,133 +111,134 @@ def calc_tt(state, SA, sa, flux, sas_params):
         at[2:-2, 2:-2, :], TT_pow[2:-2, 2:-2, :],
     )
 
-    # preference for redistribution
-    mask_old = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([1, 22, 32, 34, 52, 6, 63, 64])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] <= 1))
-    mask_old = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis]), True, mask_old)
-    mask_old = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] >= 1), True, mask_old)
-    mask_young = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([21, 31, 33, 4, 41, 51, 6, 63, 64]))
-    mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] < sas_params[:, :, 2, npx.newaxis]), True, mask_young)
-    mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis]), False, mask_young)
-    mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] < 1), True, mask_young)
-    mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] >= 1), False, mask_young)
-
     # calculate travel time distribution
     tt = update(
         tt,
         at[2:-2, 2:-2, :], npx.where(npx.diff(TT[2:-2, 2:-2, :], axis=-1) >= 0, npx.diff(TT[2:-2, 2:-2, :], axis=-1), 0),
     )
 
-    # outflux
-    flux_tt = allocate(state.dimensions, ("x", "y", "ages"))
-    flux_tt = update(
-        flux_tt,
+    # age-distributed outflux
+    ttq = allocate(state.dimensions, ("x", "y", "ages"))
+    ttq = update(
+        ttq,
         at[2:-2, 2:-2, :], flux[2:-2, 2:-2, npx.newaxis] * tt[2:-2, 2:-2, :],
     )
 
-    # set travel time distribution to zero if no outflux
-    tt = update(
-        tt,
-        at[2:-2, 2:-2, :], npx.where(flux_tt[2:-2, 2:-2, :] > 0, tt[2:-2, 2:-2, :], 0),
-    )
+    if settings.enable_sas_redistribution:
+        # preference for redistribution
+        mask_old = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([1, 22, 32, 34, 52, 6, 63, 64])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis])) | (npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] <= 1))
+        mask_old = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis]), True, mask_old)
+        mask_old = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] >= 1), True, mask_old)
+        mask_young = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([21, 31, 33, 4, 41, 51, 6, 63, 64]))
+        mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] < sas_params[:, :, 2, npx.newaxis]), True, mask_young)
+        mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 35])) & (sas_params[:, :, 1, npx.newaxis] >= sas_params[:, :, 2, npx.newaxis]), False, mask_young)
+        mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] < 1), True, mask_young)
+        mask_young = npx.where(npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64])) & (sas_params[:, :, 1, npx.newaxis] >= 1), False, mask_young)
 
-    TT = update(
-        TT,
-        at[2:-2, 2:-2, 1:], npx.cumsum(tt[2:-2, 2:-2, :], axis=-1),
-    )
-    TT = update(
-        TT,
-        at[2:-2, 2:-2, 0], 0,
-    )
+        # set travel time distribution to zero if no outflux
+        tt = update(
+            tt,
+            at[2:-2, 2:-2, :], npx.where(ttq[2:-2, 2:-2, :] > 0, tt[2:-2, 2:-2, :], 0),
+        )
 
-    # outflux is greater than StorAge
-    # redistribution of probabilities to guarantee mass conservation
-    flux_tt_init = allocate(state.dimensions, ("x", "y", "ages"))
-    diff_q = allocate(state.dimensions, ("x", "y", "ages"))
-    q_re = allocate(state.dimensions, ("x", "y", "ages"))
-    q_re_sum = allocate(state.dimensions, ("x", "y"))
-    sa_free = allocate(state.dimensions, ("x", "y", "ages"))
-    sa_free_norm = allocate(state.dimensions, ("x", "y", "ages"))
-    SA_re = allocate(state.dimensions, ("x", "y", "nages"))
-    omega_re = allocate(state.dimensions, ("x", "y", "ages"))
-    Omega_re = allocate(state.dimensions, ("x", "y", "nages"))
-    flux_tt_re = allocate(state.dimensions, ("x", "y", "ages"))
-    # outflux is greater than StorAge
-    # difference between outflux and StorAge
-    flux_tt_init = update(
-        flux_tt_init,
-        at[2:-2, 2:-2, :], flux_tt[2:-2, 2:-2, :],
-    )
-    diff_q = update(
-        diff_q,
-        at[2:-2, 2:-2, :], flux_tt[2:-2, 2:-2, :] - sa[2:-2, 2:-2, vs.tau, :],
-    )
-    q_re = update(
-        q_re,
-        at[2:-2, 2:-2, :], npx.where((diff_q[2:-2, 2:-2, :] > 0), diff_q[2:-2, 2:-2, :], 0),
-    )
-    q_re_sum = update(
-        q_re_sum,
-        at[2:-2, 2:-2], npx.sum(q_re[2:-2, 2:-2, :], axis=-1),
-    )
-    # available StorAge for sampling
-    sa_free = update(
-        sa_free,
-        at[2:-2, 2:-2, :], npx.where((sa[2:-2, 2:-2, vs.tau, :] - flux_tt[2:-2, 2:-2, :] > 0), sa[2:-2, 2:-2, vs.tau, :] - flux_tt[2:-2, 2:-2, :], 0),
-    )
-    # normalize StorAge with outflux of age T
-    sa_free_norm = update(
-        sa_free_norm,
-        at[2:-2, 2:-2, :], npx.where((q_re_sum[2:-2, 2:-2, npx.newaxis] > 0), sa_free[2:-2, 2:-2, :] / q_re_sum[2:-2, 2:-2, npx.newaxis], 0),
-    )
-    SA_re = update(
-        SA_re,
-        at[2:-2, 2:-2, :-1], npx.where(mask_old[2:-2, 2:-2, :], npx.cumsum(sa_free_norm[2:-2, 2:-2, ::-1], axis=-1)[:, :, ::-1], SA_re[2:-2, 2:-2, :-1]),
-    )
-    SA_re = update(
-        SA_re,
-        at[2:-2, 2:-2, 1:], npx.where(mask_young[2:-2, 2:-2, :], npx.cumsum(sa_free_norm[2:-2, 2:-2, :], axis=-1), SA_re[2:-2, 2:-2, 1:]),
-    )
-    # cumulative probability to redistribute outflux
-    Omega_re = update(
-        Omega_re,
-        at[2:-2, 2:-2, :], npx.where(SA_re[2:-2, 2:-2, :] < 1, SA_re[2:-2, 2:-2, :], 1),
-    )
-    # probability to redistribute outflux
-    omega_re = update(
-        omega_re,
-        at[2:-2, 2:-2, :], npx.where(mask_old[2:-2, 2:-2, :], npx.diff(Omega_re[2:-2, 2:-2, ::-1], axis=-1)[:, :, ::-1], omega_re[2:-2, 2:-2, :]),
-    )
-    omega_re = update(
-        omega_re,
-        at[2:-2, 2:-2, :], npx.where(mask_young[2:-2, 2:-2, :], npx.diff(Omega_re[2:-2, 2:-2, :], axis=-1), omega_re[2:-2, 2:-2, :]),
-    )
-    # redistribute outflux
-    flux_tt_re = update(
-        flux_tt_re,
-        at[2:-2, 2:-2, :], q_re_sum[2:-2, 2:-2, npx.newaxis] * omega_re[2:-2, 2:-2, :],
-    )
-    flux_tt = update(
-        flux_tt,
-        at[2:-2, 2:-2, :], npx.where((flux_tt_re[2:-2, 2:-2, :] > 0), flux_tt_re[2:-2, 2:-2, :] + flux_tt[2:-2, 2:-2, :], flux_tt[2:-2, 2:-2, :]),
-    )
-    flux_tt = update(
-        flux_tt,
-        at[2:-2, 2:-2, :], npx.where((diff_q[2:-2, 2:-2, :] > 0), flux_tt[2:-2, 2:-2, :] - diff_q[2:-2, 2:-2, :], flux_tt[2:-2, 2:-2, :]),
-    )
-    # recalculate travel time distribution
-    tt = update(
-        tt,
-        at[2:-2, 2:-2, :], npx.where(npx.any(flux_tt_init[2:-2, 2:-2, :] > sa[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis], flux_tt[2:-2, 2:-2, :]/flux[2:-2, 2:-2, npx.newaxis], tt[2:-2, 2:-2, :]),
-    )
+        TT = update(
+            TT,
+            at[2:-2, 2:-2, 1:], npx.cumsum(tt[2:-2, 2:-2, :], axis=-1),
+        )
+        TT = update(
+            TT,
+            at[2:-2, 2:-2, 0], 0,
+        )
 
-    # impose constraint for nonnegative solution
-    flux_tt = update(
-        flux_tt,
+        # outflux is greater than StorAge
+        # redistribution of probabilities to guarantee mass conservation
+        ttq_init = allocate(state.dimensions, ("x", "y", "ages"))
+        diff_q = allocate(state.dimensions, ("x", "y", "ages"))
+        q_re = allocate(state.dimensions, ("x", "y", "ages"))
+        q_re_sum = allocate(state.dimensions, ("x", "y"))
+        sa_free = allocate(state.dimensions, ("x", "y", "ages"))
+        sa_free_norm = allocate(state.dimensions, ("x", "y", "ages"))
+        SA_re = allocate(state.dimensions, ("x", "y", "nages"))
+        omega_re = allocate(state.dimensions, ("x", "y", "ages"))
+        Omega_re = allocate(state.dimensions, ("x", "y", "nages"))
+        ttq_re = allocate(state.dimensions, ("x", "y", "ages"))
+        # outflux is greater than StorAge
+        # difference between outflux and StorAge
+        ttq_init = update(
+            ttq_init,
+            at[2:-2, 2:-2, :], ttq[2:-2, 2:-2, :],
+        )
+        diff_q = update(
+            diff_q,
+            at[2:-2, 2:-2, :], ttq[2:-2, 2:-2, :] - sa[2:-2, 2:-2, vs.tau, :],
+        )
+        q_re = update(
+            q_re,
+            at[2:-2, 2:-2, :], npx.where((diff_q[2:-2, 2:-2, :] > 0), diff_q[2:-2, 2:-2, :], 0),
+        )
+        q_re_sum = update(
+            q_re_sum,
+            at[2:-2, 2:-2], npx.sum(q_re[2:-2, 2:-2, :], axis=-1),
+        )
+        # available StorAge for sampling
+        sa_free = update(
+            sa_free,
+            at[2:-2, 2:-2, :], npx.where((sa[2:-2, 2:-2, vs.tau, :] - ttq[2:-2, 2:-2, :] > 0), sa[2:-2, 2:-2, vs.tau, :] - ttq[2:-2, 2:-2, :], 0),
+        )
+        # normalize StorAge with outflux of age T
+        sa_free_norm = update(
+            sa_free_norm,
+            at[2:-2, 2:-2, :], npx.where((q_re_sum[2:-2, 2:-2, npx.newaxis] > 0), sa_free[2:-2, 2:-2, :] / q_re_sum[2:-2, 2:-2, npx.newaxis], 0),
+        )
+        SA_re = update(
+            SA_re,
+            at[2:-2, 2:-2, :-1], npx.where(mask_old[2:-2, 2:-2, :], npx.cumsum(sa_free_norm[2:-2, 2:-2, ::-1], axis=-1)[:, :, ::-1], SA_re[2:-2, 2:-2, :-1]),
+        )
+        SA_re = update(
+            SA_re,
+            at[2:-2, 2:-2, 1:], npx.where(mask_young[2:-2, 2:-2, :], npx.cumsum(sa_free_norm[2:-2, 2:-2, :], axis=-1), SA_re[2:-2, 2:-2, 1:]),
+        )
+        # cumulative probability to redistribute outflux
+        Omega_re = update(
+            Omega_re,
+            at[2:-2, 2:-2, :], npx.where(SA_re[2:-2, 2:-2, :] < 1, SA_re[2:-2, 2:-2, :], 1),
+        )
+        # probability to redistribute outflux
+        omega_re = update(
+            omega_re,
+            at[2:-2, 2:-2, :], npx.where(mask_old[2:-2, 2:-2, :], npx.diff(Omega_re[2:-2, 2:-2, ::-1], axis=-1)[:, :, ::-1], omega_re[2:-2, 2:-2, :]),
+        )
+        omega_re = update(
+            omega_re,
+            at[2:-2, 2:-2, :], npx.where(mask_young[2:-2, 2:-2, :], npx.diff(Omega_re[2:-2, 2:-2, :], axis=-1), omega_re[2:-2, 2:-2, :]),
+        )
+        # redistribute outflux
+        ttq_re = update(
+            ttq_re,
+            at[2:-2, 2:-2, :], q_re_sum[2:-2, 2:-2, npx.newaxis] * omega_re[2:-2, 2:-2, :],
+        )
+        ttq = update(
+            ttq,
+            at[2:-2, 2:-2, :], npx.where((ttq_re[2:-2, 2:-2, :] > 0), ttq_re[2:-2, 2:-2, :] + ttq[2:-2, 2:-2, :], ttq[2:-2, 2:-2, :]),
+        )
+        ttq = update(
+            ttq,
+            at[2:-2, 2:-2, :], npx.where((diff_q[2:-2, 2:-2, :] > 0), ttq[2:-2, 2:-2, :] - diff_q[2:-2, 2:-2, :], ttq[2:-2, 2:-2, :]),
+        )
+        # recalculate travel time distribution
+        tt = update(
+            tt,
+            at[2:-2, 2:-2, :], npx.where(npx.any(ttq_init[2:-2, 2:-2, :] > sa[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis], ttq[2:-2, 2:-2, :]/flux[2:-2, 2:-2, npx.newaxis], tt[2:-2, 2:-2, :]),
+        )
+
+    # impose nonnegative constraint of solution
+    ttq = update(
+        ttq,
         at[2:-2, 2:-2, :], npx.where(flux[2:-2, 2:-2, npx.newaxis] * tt[2:-2, 2:-2, :] > sa[2:-2, 2:-2, vs.tau, :], sa[2:-2, 2:-2, vs.tau, :], flux[2:-2, 2:-2, npx.newaxis] * tt[2:-2, 2:-2, :]),
     )
     tt = update(
         tt,
-        at[2:-2, 2:-2, :], npx.where(flux[2:-2, 2:-2, npx.newaxis] > 0, flux_tt[2:-2, 2:-2, :]/flux[2:-2, 2:-2, npx.newaxis], 0),
+        at[2:-2, 2:-2, :], npx.where(flux[2:-2, 2:-2, npx.newaxis] > 0, ttq[2:-2, 2:-2, :]/flux[2:-2, 2:-2, npx.newaxis], 0),
     )
 
     if rs.backend == 'numpy':
@@ -867,7 +868,7 @@ def svat_transport_model_rk4(state):
         dsa_rz1 = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :]) * settings.h
         dmsa_rz1 = npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) * npx.where(dsa_rz1 > 0, ((vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] * settings.h) / dsa_rz1), 0) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) * npx.where(dsa_rz1 > 0, ((vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] * settings.h) / dsa_rz1), 0)
         dsa_ss1 = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :]) * settings.h
-        dmsa_ss1 = npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] * settings.h) / dsa_ss1), 0) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] * settings.h) / dsa_ss1), 0)
+        dmsa_ss1 = npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] * settings.h) / dsa_ss1), 0)
         vs.msa_rz = update(
             vs.msa_rz,
             at[2:-2, 2:-2, 1, :], npx.where((dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :] > 0) & (vs.msa_rz[2:-2, 2:-2, 1, :] > 0), vs.msa_rz[2:-2, 2:-2, 1, :] * (vs.sa_rz[2:-2, 2:-2, 1, :] / (dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :])), 0) + npx.where(dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :] > 0, dmsa_rz1 * (dsa_rz1 / (dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :])), 0),
@@ -1582,7 +1583,7 @@ def svat_transport_model_rk4(state):
         dsa_ss = npx.where(vs.sa_ss[2:-2, 2:-2, 1, :] + dsa_ss < 0, -vs.sa_ss[2:-2, 2:-2, 1, :], dsa_ss)
         dsa_rz1 = (vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :]) * settings.h
         dmsa_rz1 = npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) * npx.where(dsa_rz1 > 0, ((vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] * settings.h) / dsa_rz1), 0)
-        dsa_ss1 = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :]) * settings.h
+        dsa_ss1 = (vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :]) * settings.h
         dmsa_ss1 = npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] * settings.h) / dsa_ss1), 0)
         vs.msa_rz = update(
             vs.msa_rz,
@@ -1792,7 +1793,7 @@ def svat_transport_model_euler(state):
         dsa_rz1 = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :]) * settings.h
         dmsa_rz1 = npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) * npx.where(dsa_rz1 > 0, ((vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] * settings.h) / dsa_rz1), 0) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) * npx.where(dsa_rz1 > 0, ((vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] * settings.h) / dsa_rz1), 0)
         dsa_ss1 = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :]) * settings.h
-        dmsa_ss1 = npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] * settings.h) / dsa_ss1), 0) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] * settings.h) / dsa_ss1), 0)
+        dmsa_ss1 = npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] * settings.h) / dsa_ss1), 0)
         vs.msa_rz = update(
             vs.msa_rz,
             at[2:-2, 2:-2, 1, :], npx.where((dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :] > 0) & (vs.msa_rz[2:-2, 2:-2, 1, :] > 0), vs.msa_rz[2:-2, 2:-2, 1, :] * (vs.sa_rz[2:-2, 2:-2, 1, :] / (dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :])), 0) + npx.where(dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :] > 0, dmsa_rz1 * (dsa_rz1 / (dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :])), 0),
@@ -1949,7 +1950,7 @@ def svat_transport_model_euler(state):
         dsa_ss = npx.where(vs.sa_ss[2:-2, 2:-2, 1, :] + dsa_ss < 0, -vs.sa_ss[2:-2, 2:-2, 1, :], dsa_ss)
         dsa_rz1 = (vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :]) * settings.h
         dmsa_rz1 = npx.where(npx.isnan(vs.mtt_cpr_rz[2:-2, 2:-2, :]), 0, vs.mtt_cpr_rz[2:-2, 2:-2, :]) * npx.where(dsa_rz1 > 0, ((vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] * settings.h) / dsa_rz1), 0)
-        dsa_ss1 = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] + vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :]) * settings.h
+        dsa_ss1 = (vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :]) * settings.h
         dmsa_ss1 = npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] * settings.h) / dsa_ss1), 0)
         vs.msa_rz = update(
             vs.msa_rz,
@@ -2158,7 +2159,7 @@ def svat_lbc_transport_model_euler(state):
         dsa_rz1 = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :]) * settings.h
         dmsa_rz1 = npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) * npx.where(dsa_rz1 > 0, ((vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] * settings.h) / dsa_rz1), 0) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) * npx.where(dsa_rz1 > 0, ((vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] * settings.h) / dsa_rz1), 0)
         dsa_ss1 = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :]) * settings.h
-        dmsa_ss1 = npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] * settings.h) / dsa_ss1), 0) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] * settings.h) / dsa_ss1), 0)
+        dmsa_ss1 = npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] * settings.h) / dsa_ss1), 0)
         vs.msa_rz = update(
             vs.msa_rz,
             at[2:-2, 2:-2, 1, :], npx.where((dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :] > 0) & (vs.msa_rz[2:-2, 2:-2, 1, :] > 0), vs.msa_rz[2:-2, 2:-2, 1, :] * (vs.sa_rz[2:-2, 2:-2, 1, :] / (dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :])), 0) + npx.where(dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :] > 0, dmsa_rz1 * (dsa_rz1 / (dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :])), 0),
@@ -2490,7 +2491,7 @@ def svat_crop_transport_model_euler(state):
         dsa_rz1 = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :]) * settings.h
         dmsa_rz1 = npx.where(npx.isnan(vs.mtt_inf_mat_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_mat_rz[2:-2, 2:-2, :]) * npx.where(dsa_rz1 > 0, ((vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] * settings.h) / dsa_rz1), 0) + npx.where(npx.isnan(vs.mtt_inf_pf_rz[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_rz[2:-2, 2:-2, :]) * npx.where(dsa_rz1 > 0, ((vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :] * settings.h) / dsa_rz1), 0)
         dsa_ss1 = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :]) * settings.h
-        dmsa_ss1 = npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] * settings.h) / dsa_ss1), 0) + npx.where(npx.isnan(vs.mtt_q_rz[2:-2, 2:-2, :]), 0, vs.mtt_q_rz[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] * settings.h) / dsa_ss1), 0)
+        dmsa_ss1 = npx.where(npx.isnan(vs.mtt_inf_pf_ss[2:-2, 2:-2, :]), 0, vs.mtt_inf_pf_ss[2:-2, 2:-2, :]) * npx.where(dsa_ss1 > 0, ((vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :] * settings.h) / dsa_ss1), 0)
         vs.msa_rz = update(
             vs.msa_rz,
             at[2:-2, 2:-2, 1, :], npx.where((dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :] > 0) & (vs.msa_rz[2:-2, 2:-2, 1, :] > 0), vs.msa_rz[2:-2, 2:-2, 1, :] * (vs.sa_rz[2:-2, 2:-2, 1, :] / (dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :])), 0) + npx.where(dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :] > 0, dmsa_rz1 * (dsa_rz1 / (dsa_rz1 + vs.sa_rz[2:-2, 2:-2, 1, :])), 0),

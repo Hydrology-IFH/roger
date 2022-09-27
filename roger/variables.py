@@ -4175,10 +4175,10 @@ VARIABLES = {
         active=lambda settings: settings.enable_offline_transport & settings.enable_lateral_flow,
     ),
     "M_q_sub_rz": Variable(
-        "solute mass of lateral subsurface runoff in root zone"",
+        "solute mass of lateral subsurface runoff in root zone",
         CATCH_GRID,
         "mg",
-        "solute mass of lateral subsurface runoff in root zone"",
+        "solute mass of lateral subsurface runoff in root zone",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport & settings.enable_lateral_flow,
     ),

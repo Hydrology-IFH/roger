@@ -32,23 +32,21 @@ def main(tmp_dir):
     else:
         base_path = Path(__file__).parent
     # directory of results
-    base_path_results = base_path / "results"
+    base_path_results = base_path / "results" / "deterministic" / "age_max_11"
     if not os.path.exists(base_path_results):
         os.mkdir(base_path_results)
     # directory of figures
-    base_path_figs = base_path / "figures"
+    base_path_figs = base_path / "figures" / "deterministic" / "age_max_11"
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
     # merge results into single file
-    tm_structures = ['complete-mixing', 'piston',
-                     'preferential', 'preferential1', 'preferential2',
-                     'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2',
-                     'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
-                     'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
-                     'time-variant', 'time-variant1', 'time-variant2',
-                     'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion',
-                     'power', 'power time-variant', 'power time-variant reverse']
+    tm_structures = ['complete-mixing',
+                     'preferential'
+                     'advection-dispersion',
+                     'time-variant advection-dispersion',
+                     'time-variant',
+                     'power', 'power time-variant']
     tm_structures = ['power']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
@@ -199,11 +197,9 @@ def main(tmp_dir):
     tm_structures = ['complete-mixing',
                      'preferential'
                      'advection-dispersion',
-                     'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
                      'time-variant advection-dispersion',
                      'time-variant',
                      'power', 'power time-variant']
-    tm_structures = ['power']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
 

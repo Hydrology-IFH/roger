@@ -92,6 +92,7 @@ SETTINGS = {
     "enable_urban": Setting(False, bool, "enable urban"),
     "enable_macropore_lower_boundary_condition": Setting(False, bool, "enable lower boundary condition of macropores"),
     "tm_structure": Setting("UNNAMED", str, "transport model structure"),
+    "enable_sas_redistribution": Setting(False, bool, "enable run-on infiltration"),
     "warmup_done": Setting(False, bool, "True if after model warmup"),
     # numerical solver for SAS
     "sas_solver": Setting(None, optional(str), "numerical solver scheme for StorAge selection"),
