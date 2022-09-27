@@ -209,27 +209,15 @@ for tm in transport_models:
         # calculate median travel time for each time step
         mediantt = onp.zeros((len(ages)))
         for i in range(len(ds_sim_tm['Time'].values)):
-            mediant = onp.where(TT[i, :] >= 0.5)[0]
-            if len(mediant) == 0:
-                mediantt[i] = onp.NaN
-            else:
-                mediantt[i] = mediant[0]
+            mediantt[i] = onp.interp(0.5, TT[i, 1:], ages)
         # calculate lower interquartile travel time for each time step
         tt25 = onp.zeros((len(ds_sim_tm['Time'].values)))
         for i in range(len(ds_sim_tm['Time'].values)):
-            t25 = onp.where(TT[i, :] >= 0.25)[0]
-            if len(t25) == 0:
-                tt25[i] = onp.NaN
-            else:
-                tt25[i] = t25[0]
+            tt25[i] = onp.interp(0.25, TT[i, 1:], ages)
         # calculate lower interquartile travel time for each time step
         tt75 = onp.zeros((len(ds_sim_tm['Time'].values)))
         for i in range(len(ds_sim_tm['Time'].values)):
-            t75 = onp.where(TT[i, :] >= 0.75)[0]
-            if len(t75) == 0:
-                tt75[i] = onp.NaN
-            else:
-                tt75[i] = t75[0]
+            tt75[i] = onp.interp(0.75, TT[i, 1:], ages)
         # calculate upper interquartile travel time for each time step
         df_tt = pd.DataFrame(index=idx[1:], columns=['MTT', 'MEDIANTT', 'TT25', 'TT75'])
         df_tt.loc[:, 'MTT'] = mtt[1:]

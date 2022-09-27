@@ -100,7 +100,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             settings = state.settings
             settings.identifier = self._identifier
             settings.sas_solver = self._sas_solver
-            settings.sas_solver_substeps = 12
+            settings.sas_solver_substeps = 6
             if settings.sas_solver in ['RK4', 'Euler']:
                 settings.h = 1 / settings.sas_solver_substeps
 
@@ -122,6 +122,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             settings.enable_offline_transport = True
             settings.enable_oxygen18 = True
             settings.tm_structure = self._tm_structure
+            settings.enable_age_statistics = True
 
         @roger_routine
         def set_grid(self, state):
@@ -407,9 +408,9 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 6)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 0.2)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 2)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 0.9)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 2)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 0.9)
             elif settings.tm_structure == "time-variant power":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
@@ -662,13 +663,12 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["rates"].output_variables = ["q_ss"]
-            diagnostics["rates"].output_frequency = 24 * 60 * 60
-            diagnostics["rates"].sampling_frequency = 1
-            if base_path:
-                diagnostics["rates"].base_output_path = base_path
-
-            diagnostics["averages"].output_variables = ["C_iso_q_ss", "C_iso_s", "C_iso_rz", "C_iso_ss", "TT_q_ss", "tt_q_ss"]
+            diagnostics["averages"].output_variables = ["C_iso_q_ss", "C_iso_s", "C_iso_rz", "C_iso_ss", "TT_q_ss",
+                                                        "tt25_transp", "tt50_transp", "tt75_transp",  "ttavg_transp",
+                                                        "tt25_q_ss", "tt50_q_ss", "tt75_q_ss",  "ttavg_q_ss",
+                                                        "rt25_rz", "rt50_rz", "rt75_rz",  "rtavg_rz",
+                                                        "rt25_ss", "rt50_ss", "rt75_ss",  "rtavg_ss",
+                                                        "rt25_s", "rt50_s", "rt75_s",  "rtavg_s"]
             diagnostics["averages"].output_frequency = 24 * 60 * 60
             diagnostics["averages"].sampling_frequency = 1
             if base_path:

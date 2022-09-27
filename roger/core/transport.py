@@ -7,6 +7,222 @@ from roger import diagnostics
 
 
 @roger_kernel
+def calc_age_percentile(state, age_dist, perc):
+    """Calculates age for defined percentile from cumulative age distribution
+    """
+    age_perc = allocate(state.dimensions, ("x", "y"))
+    x = allocate(state.dimensions, ("x",))
+    y = allocate(state.dimensions, ("y",))
+    # ages in days
+    ages = allocate(state.dimensions, ("ages",))
+    x = update(
+        x,
+        at[:], npx.arange(x.size),
+    )
+    y = update(
+        y,
+        at[:], npx.arange(y.size),
+    )
+    ages = update(
+        ages,
+        at[:], npx.arange(1, ages.size+1),
+    )
+
+    # loop over grid cells
+    def loop_body(carry, i):
+        state, grid, ages, age_perc = carry
+        xi = grid[i, 0]
+        yi = grid[i, 1]
+        age_perc = update(
+            age_perc,
+            at[xi, yi], npx.interp(perc, age_dist[xi, yi, :], ages),
+        )
+        carry = (state, grid, ages, age_perc)
+
+        return carry, None
+
+    # generate array with sequential grid cell ids
+    grids = npx.array(npx.meshgrid(x[2:-2], y[2:-2]), dtype=int).T.reshape(-1, 2)
+    steps = npx.arange(0, grids.shape[0])
+    carry = (state, grids, ages, age_perc)
+    res, _ = scan(loop_body, carry, steps)
+    age_perc = update(
+        age_perc,
+        at[2:-2, 2:-2], res[-1][2:-2, 2:-2],
+    )
+    age_perc = update(
+        age_perc,
+        at[2:-2, 2:-2], npx.where(npx.max(age_dist[2:-2, 2:-2, :], axis=-1) <= 0, npx.nan, age_perc[2:-2, 2:-2]),
+    )
+
+    return age_perc
+
+
+@roger_kernel
+def calculate_age_statistics(state):
+    """Calculates age statistics
+    """
+    vs = state.variables
+
+    # ages in days
+    ages = allocate(state.dimensions, ("x", "y", "ages"))
+    ages = update(
+        ages,
+        at[:, :, :], npx.arange(1, ages.shape[-1]+1)[npx.newaxis, npx.newaxis, :],
+    )
+
+    # age statistics of transpiration
+    vs.tt25_transp = update(
+        vs.tt25_transp,
+        at[2:-2, 2:-2], calc_age_percentile(state, vs.TT_transp[:, :, 1:], 0.25)[2:-2, 2:-2],
+    )
+
+    vs.tt50_transp = update(
+        vs.tt50_transp,
+        at[2:-2, 2:-2], calc_age_percentile(state, vs.TT_transp[:, :, 1:], 0.5)[2:-2, 2:-2],
+    )
+
+    vs.tt75_transp = update(
+        vs.tt75_transp,
+        at[2:-2, 2:-2], calc_age_percentile(state, vs.TT_transp[:, :, 1:], 0.75)[2:-2, 2:-2],
+    )
+
+    vs.ttavg_transp = update(
+        vs.ttavg_transp,
+        at[2:-2, 2:-2], npx.where(npx.sum(vs.tt_transp, axis=-1) > 0, npx.sum(ages * vs.tt_transp, axis=-1), npx.nan)[2:-2, 2:-2],
+    )
+
+    # age statistics of subsoil percolation
+    vs.tt25_q_ss = update(
+        vs.tt25_q_ss,
+        at[2:-2, 2:-2], calc_age_percentile(state, vs.TT_q_ss[:, :, 1:], 0.25)[2:-2, 2:-2],
+    )
+
+    vs.tt50_q_ss = update(
+        vs.tt50_q_ss,
+        at[2:-2, 2:-2], calc_age_percentile(state, vs.TT_q_ss[:, :, 1:], 0.5)[2:-2, 2:-2],
+    )
+
+    vs.tt75_q_ss = update(
+        vs.tt75_q_ss,
+        at[2:-2, 2:-2], calc_age_percentile(state, vs.TT_q_ss[:, :, 1:], 0.75)[2:-2, 2:-2],
+    )
+
+    vs.ttavg_q_ss = update(
+        vs.ttavg_q_ss,
+        at[2:-2, 2:-2], npx.where(npx.sum(vs.tt_q_ss, axis=-1) > 0, npx.sum(ages * vs.tt_q_ss, axis=-1), npx.nan)[2:-2, 2:-2],
+    )
+
+    # age statistics of root zone
+    # cumulative residence time distribution of root zone
+    RT_rz = allocate(state.dimensions, ("x", "y", "nages"))
+    RT_rz = update(
+        RT_rz,
+        at[2:-2, 2:-2, :], npx.where(npx.max(vs.SA_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] > 0, vs.SA_rz[2:-2, 2:-2, vs.tau, :]/npx.max(vs.SA_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis], 0),
+    )
+    # residence time distribution of soil
+    rt_rz = allocate(state.dimensions, ("x", "y", "ages"))
+    rt_rz = update(
+        rt_rz,
+        at[2:-2, 2:-2, :], npx.diff(RT_rz[2:-2, 2:-2, :], axis=-1),
+    )
+
+    vs.rt25_rz = update(
+        vs.rt25_rz,
+        at[2:-2, 2:-2], calc_age_percentile(state, RT_rz[:, :, 1:], 0.25)[2:-2, 2:-2],
+    )
+
+    vs.rt50_rz = update(
+        vs.rt50_rz,
+        at[2:-2, 2:-2], calc_age_percentile(state, RT_rz[:, :, 1:], 0.5)[2:-2, 2:-2],
+    )
+
+    vs.rt75_rz = update(
+        vs.rt75_rz,
+        at[2:-2, 2:-2], calc_age_percentile(state, RT_rz[:, :, 1:], 0.75)[2:-2, 2:-2],
+    )
+
+    vs.rtavg_rz = update(
+        vs.rtavg_rz,
+        at[2:-2, 2:-2], npx.where(npx.sum(rt_rz, axis=-1) > 0, npx.sum(ages * rt_rz, axis=-1), npx.nan)[2:-2, 2:-2],
+    )
+
+    # age statistics of subsoil
+    # cumulative residence time distribution of subsoil
+    RT_ss = allocate(state.dimensions, ("x", "y", "nages"))
+    RT_ss = update(
+        RT_ss,
+        at[2:-2, 2:-2, :], npx.where(npx.max(vs.SA_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] > 0, vs.SA_ss[2:-2, 2:-2, vs.tau, :]/npx.max(vs.SA_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis], 0),
+    )
+    # residence time distribution of subsoil
+    rt_ss = allocate(state.dimensions, ("x", "y", "ages"))
+    rt_ss = update(
+        rt_ss,
+        at[2:-2, 2:-2, :], npx.diff(RT_ss[2:-2, 2:-2, :], axis=-1),
+    )
+
+    vs.rt25_ss = update(
+        vs.rt25_ss,
+        at[2:-2, 2:-2], calc_age_percentile(state, RT_ss[:, :, 1:], 0.25)[2:-2, 2:-2],
+    )
+
+    vs.rt50_ss = update(
+        vs.rt50_ss,
+        at[2:-2, 2:-2], calc_age_percentile(state, RT_ss[:, :, 1:], 0.5)[2:-2, 2:-2],
+    )
+
+    vs.rt75_ss = update(
+        vs.rt75_ss,
+        at[2:-2, 2:-2], calc_age_percentile(state, RT_ss[:, :, 1:], 0.75)[2:-2, 2:-2],
+    )
+
+    vs.rtavg_ss = update(
+        vs.rtavg_ss,
+        at[2:-2, 2:-2], npx.where(npx.sum(rt_ss, axis=-1) > 0, npx.sum(ages * rt_ss, axis=-1), npx.nan)[2:-2, 2:-2],
+    )
+
+    # age statistics of soil
+    # cumulative residence time distribution of soil
+    RT_s = allocate(state.dimensions, ("x", "y", "nages"))
+    RT_s = update(
+        RT_s,
+        at[2:-2, 2:-2, :], npx.where(npx.max(vs.SA_s[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] > 0, vs.SA_s[2:-2, 2:-2, vs.tau, :]/npx.max(vs.SA_s[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis], 0),
+    )
+    # residence time distribution of soil
+    rt_s = allocate(state.dimensions, ("x", "y", "ages"))
+    rt_s = update(
+        rt_s,
+        at[2:-2, 2:-2, :], npx.diff(RT_s[2:-2, 2:-2, :], axis=-1),
+    )
+
+    vs.rt25_s = update(
+        vs.rt25_s,
+        at[2:-2, 2:-2], calc_age_percentile(state, RT_s[:, :, 1:], 0.25)[2:-2, 2:-2],
+    )
+
+    vs.rt50_s = update(
+        vs.rt50_s,
+        at[2:-2, 2:-2], calc_age_percentile(state, RT_s[:, :, 1:], 0.5)[2:-2, 2:-2],
+    )
+
+    vs.rt75_s = update(
+        vs.rt75_s,
+        at[2:-2, 2:-2], calc_age_percentile(state, RT_s[:, :, 1:], 0.75)[2:-2, 2:-2],
+    )
+
+    vs.rtavg_s = update(
+        vs.rtavg_s,
+        at[2:-2, 2:-2], npx.where(npx.sum(rt_ss, axis=-1) > 0, npx.sum(ages * rt_s, axis=-1), npx.nan)[2:-2, 2:-2],
+    )
+
+    return KernelOutput(tt25_transp=vs.tt25_transp, tt50_transp=vs.tt50_transp, tt75_transp=vs.tt75_transp, ttavg_transp=vs.ttavg_transp,
+                        tt25_q_ss=vs.tt25_q_ss, tt50_q_ss=vs.tt50_q_ss, tt75_q_ss=vs.tt75_q_ss, ttavg_q_ss=vs.ttavg_q_ss,
+                        rt25_rz=vs.rt25_rz, rt50_rz=vs.rt50_rz, rt75_rz=vs.rt75_rz, rtavg_rz=vs.rtavg_rz,
+                        rt25_ss=vs.rt25_ss, rt50_ss=vs.rt50_ss, rt75_ss=vs.rt75_ss, rtavg_ss=vs.rtavg_ss,
+                        rt25_s=vs.rt25_s, rt50_s=vs.rt50_s, rt75_s=vs.rt75_s, rtavg_s=vs.rtavg_s)
+
+
+@roger_kernel
 def delta_to_conc(state, delta_iso):
     """Calculate isotope concentration from isotope ratio
     """
@@ -682,6 +898,9 @@ def svat_transport_model_deterministic(state):
         root_zone.calculate_root_zone_transport(state)
         subsoil.calculate_subsoil_transport(state)
         soil.calculate_soil_transport(state)
+    if settings.enable_age_statistics:
+        with state.timers["age-statistics"]:
+            vs.update(calculate_age_statistics(state))
     with state.timers["diagnostics"]:
         write_output(state)
     with state.timers["ageing"]:
@@ -720,6 +939,9 @@ def svat_lbc_transport_model_deterministic(state):
         root_zone.calculate_root_zone_transport(state)
         subsoil.calculate_subsoil_transport(state)
         soil.calculate_soil_transport(state)
+    if settings.enable_age_statistics:
+        with state.timers["age-statistics"]:
+            vs.update(calculate_age_statistics(state))
     with state.timers["diagnostics"]:
         write_output(state)
     with state.timers["ageing"]:
@@ -758,6 +980,9 @@ def svat_crop_transport_model_deterministic(state):
         root_zone.calculate_root_zone_transport(state)
         subsoil.calculate_subsoil_transport(state)
         soil.calculate_soil_transport(state)
+    if settings.enable_age_statistics:
+        with state.timers["age-statistics"]:
+            vs.update(calculate_age_statistics(state))
     with state.timers["diagnostics"]:
         write_output(state)
     with state.timers["ageing"]:
@@ -2781,6 +3006,9 @@ def calculate_storage_selection(state):
                 subsoil.calculate_subsoil_transport(state)
                 soil.calculate_soil_transport(state)
                 vs.time = vs.time + int(vs.dt_secs / settings.sas_solver_substeps)
+                if settings.enable_age_statistics:
+                    with state.timers["age-statistics"]:
+                        vs.update(calculate_age_statistics(state))
                 # collect data for output at end of substep
                 with state.timers["diagnostics"]:
                     write_output(state)
@@ -2800,6 +3028,9 @@ def calculate_storage_selection(state):
                 subsoil.calculate_subsoil_transport(state)
                 soil.calculate_soil_transport(state)
                 vs.time = vs.time + int(vs.dt_secs / settings.sas_solver_substeps)
+                if settings.enable_age_statistics:
+                    with state.timers["age-statistics"]:
+                        vs.update(calculate_age_statistics(state))
                 # collect data for output at end of substep
                 with state.timers["diagnostics"]:
                     write_output(state)
@@ -2826,6 +3057,9 @@ def calculate_storage_selection(state):
                 subsoil.calculate_subsoil_transport(state)
                 soil.calculate_soil_transport(state)
                 vs.time = vs.time + int(vs.dt_secs / settings.sas_solver_substeps)
+                if settings.enable_age_statistics:
+                    with state.timers["age-statistics"]:
+                        vs.update(calculate_age_statistics(state))
                 # collect data for output at end of substep
                 with state.timers["diagnostics"]:
                     write_output(state)
@@ -2854,6 +3088,9 @@ def calculate_storage_selection(state):
                 subsoil.calculate_subsoil_transport(state)
                 soil.calculate_soil_transport(state)
                 vs.time = vs.time + int(vs.dt_secs / settings.sas_solver_substeps)
+                if settings.enable_age_statistics:
+                    with state.timers["age-statistics"]:
+                        vs.update(calculate_age_statistics(state))
                 # collect data for output at end of substep
                 with state.timers["diagnostics"]:
                     write_output(state)
@@ -2886,6 +3123,9 @@ def calculate_storage_selection(state):
                 subsoil.calculate_subsoil_transport(state)
                 soil.calculate_soil_transport(state)
                 vs.time = vs.time + int(vs.dt_secs / settings.sas_solver_substeps)
+                if settings.enable_age_statistics:
+                    with state.timers["age-statistics"]:
+                        vs.update(calculate_age_statistics(state))
                 # collect data for output at end of substep
                 with state.timers["diagnostics"]:
                     write_output(state)
@@ -2921,6 +3161,9 @@ def calculate_storage_selection(state):
                 subsoil.calculate_subsoil_transport(state)
                 soil.calculate_soil_transport(state)
                 vs.time = vs.time + int(vs.dt_secs / settings.sas_solver_substeps)
+                if settings.enable_age_statistics:
+                    with state.timers["age-statistics"]:
+                        vs.update(calculate_age_statistics(state))
                 # collect data for output at end of substep
                 with state.timers["diagnostics"]:
                     write_output(state)
