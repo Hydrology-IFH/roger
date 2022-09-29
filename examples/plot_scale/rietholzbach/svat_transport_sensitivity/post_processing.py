@@ -53,7 +53,7 @@ def main(tmp_dir):
                     title=f'RoGeR {tm_structure} model Saltelli simulations at Rietholzbach lysimeter site',
                     institution='University of Freiburg, Chair of Hydrology',
                     references='',
-                    comment='',
+                    comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
                     model_structure=f'SVAT {tm_structure} model with free drainage',
                     roger_version=f'{roger.__version__}'
                 )

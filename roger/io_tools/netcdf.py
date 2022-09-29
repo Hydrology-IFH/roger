@@ -31,6 +31,7 @@ def initialize_file(state, ncfile, extra_dimensions=None, create_time_dimension=
     ncfile.attrs.update(
         date_created=datetime.datetime.today().isoformat(),
         roger_version=roger_version,
+        comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
         setup_identifier=state.settings.identifier,
     )
 

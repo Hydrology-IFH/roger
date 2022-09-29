@@ -11,6 +11,7 @@ from cftime import num2date
 import pandas as pd
 import numpy as onp
 import roger
+import roger.tools.evaluation as eval_utils
 
 base_path = Path(__file__).parent
 # directory of results
@@ -39,10 +40,10 @@ for tm_structure in tm_structures:
                 f.create_group(f"{tm_structure}-{year}")
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
-                title='RoGeR transport model results for bromide benchmark at Rietholzbach Lysimeter site',
+                title='RoGeR transport model results for virtual bromide experiments at Rietholzbach Lysimeter site',
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
-                comment='',
+                comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
                 model_structure='SVAT transport model with free drainage',
                 roger_version=f'{roger.__version__}'
             )
@@ -127,7 +128,11 @@ norm = Normalize(vmin=onp.min(years), vmax=onp.max(years))
 for tm_structure in tm_structures:
     tms = tm_structure.replace(" ", "_")
     fig, axes = plt.subplots(1, 1, figsize=(10, 6))
+    df_eff_year = pd.DataFrame(index=years)
     for year in years:
+        # load observations
+        br_obs_file = base_path.parent / "observations" / "bromide_breaktrhough.csv"
+        df_br_obs = pd.read_csv(br_obs_file, sep=';', skiprows=1, index_col=0)
         # load simulation
         states_tm_file = base_path / "states_tm_bromide_benchmark.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{tm_structure}-{year}", engine="h5netcdf")
@@ -144,44 +149,48 @@ for tm_structure in tm_structures:
         ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
 
         # plot percolation rate (in l/h) and bromide concentration (mmol/l)
-        df_perc_br = pd.DataFrame(index=date_sim_hm, columns=['perc', 'Br_conc_mg', 'Br_conc_mmol'])
+        df_perc_br_sim = pd.DataFrame(index=date_sim_hm, columns=['perc', 'Br_conc_mg', 'Br_conc_mmol'])
         # in liter per hour
-        df_perc_br.loc[:, 'perc'] = ds_sim_hm.sel(date=slice(str(year), str(year + 1)))['q_ss'].isel(x=0, y=0).values * (3.14/24)
+        df_perc_br_sim.loc[:, 'perc'] = ds_sim_hm.sel(date=slice(str(year), str(year + 1)))['q_ss'].isel(x=0, y=0).values * (3.14/24)
         # in mg per liter
-        df_perc_br.loc[:, 'Br_conc_mg'] = ds_sim_tm.sel(date=slice(str(year), str(year + 1)))['C_q_ss'].isel(x=0, y=0).values * (1/3.14)
+        df_perc_br_sim.loc[:, 'Br_conc_mg'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values * 3.14
         # in mmol per liter
-        df_perc_br.loc[:, 'Br_conc_mmol'] = df_perc_br.loc[:, 'Br_conc_mg'] / 79.904
+        df_perc_br_sim.loc[:, 'Br_conc_mmol'] = df_perc_br_sim.loc[:, 'Br_conc_mg'] / 79.904
         # daily samples from day 0 to day 220
-        df_daily = df_perc_br.loc[:df_perc_br.index[315+220], 'Br_conc_mmol'].to_frame()
+        df_daily = df_perc_br_sim.loc[:df_perc_br_sim.index[315+220], 'Br_conc_mmol'].to_frame()
         # weekly samples after 220 days
-        df_weekly = df_perc_br.loc[df_perc_br.index[316+220]:, 'Br_conc_mmol'].resample('7D').mean().to_frame()
+        df_weekly = df_perc_br_sim.loc[df_perc_br_sim.index[316+220]:, 'Br_conc_mmol'].resample('7D').mean().to_frame()
         df_daily_weekly = pd.concat([df_daily, df_weekly])
-        df_perc_br = df_perc_br.loc[:, 'perc':'Br_conc_mg'].join(df_daily_weekly)
-        idx = range(len(df_perc_br.index))
+        df_perc_br_sim = df_perc_br_sim.loc[:, 'perc':'Br_conc_mg'].join(df_daily_weekly)
+        df_perc_br_sim = df_perc_br_sim.iloc[315:716, :]
+        df_perc_br_sim.index = range(len(df_perc_br_sim.index))
         fig, axes = plt.subplots(1, 1, figsize=(10, 6))
-        axes.plot(idx, df_perc_br['Br_conc_mmol'], color='black', ls='-', colors=cmap(norm(year)))
+        axes.plot(df_perc_br_sim.index, df_perc_br_sim['Br_conc_mmol'], color='black', ls='-', colors=cmap(norm(year)))
         axes.set_ylabel('Br [mmol $l^{-1}$]')
         axes.set_xlabel('Time [days since injection]')
         axes.set_ylim(0,)
         axes.set_xlim(0,)
         ax2 = axes.twinx()
-        ax2.plot(idx, df_perc_br['perc'], lw=1.5, color='black', ls=':')
+        ax2.plot(df_perc_br_sim.index, df_perc_br_sim['perc'], lw=1.5, color='black', ls=':')
         ax2.set_ylabel('Percolation [l $hour^{-1}$]')
         ax2.set_ylim(0,)
         file = f'perc_br_{tms}.png'
         path = base_path_figs / file
         fig.savefig(path, dpi=250)
 
-        fig_year, axes_year = plt.subplots(1, 1, figsize=(10, 6))
-        axes_year.plot(idx, df_perc_br['Br_conc_mmol'], color='black', ls='-')
-        axes_year.set_ylabel('Br [mmol $l^{-1}$]')
-        axes_year.set_xlabel('Time [hours since injection]')
-        axes_year.set_ylim(0,)
-        axes_year.set_xlim(0,)
-        ax2_year = axes.twinx()
-        ax2_year.plot(idx, df_perc_br['perc'], lw=1.5, color='black', ls=':')
-        ax2_year.set_ylabel('Percolation [l $hour^{-1}$]')
-        ax2_year.set_ylim(0,)
-        file = f'perc_br_{tms}_{year}.png'
-        path = base_path_figs / file
-        fig_year.savefig(path, dpi=250)
+        # join observations on simulations
+        obs_vals = df_br_obs.iloc[:, 0].values
+        sim_vals = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
+        df_obs = pd.DataFrame(index=df_br_obs.index, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals
+        df_eval = eval_utils.join_obs_on_sim(df_perc_br_sim.index, sim_vals, df_obs)
+        df_eval = df_eval.dropna()
+        # calculate metrics
+        obs_vals = df_eval.loc[:, 'obs'].values
+        sim_vals = df_eval.loc[:, 'sim'].values
+        # temporal correlation
+        df_eff_year.loc[year, 'r'] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+        # tracer recovery (in %)
+        df_eff_year.loc[year, 'Br_mass_recovery'] = onp.sum(ds_sim_tm['M_q_ss'].isel(x=0, y=0).values[315:716] * 3.14) / 79900
+        # average travel time of percolation (in days)
+        df_eff_year.loc[year, 'ttavg'] = onp.nanmean(ds_sim_tm['ttavg_q_ss'].isel(x=0, y=0).values[315:716])

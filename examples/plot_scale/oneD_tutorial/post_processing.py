@@ -33,7 +33,7 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
         title='RoGeR model results for a single event (Tutorial)',
         institution='University of Freiburg, Chair of Hydrology',
         references='',
-        comment='',
+        comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
         model_structure='1D model with free drainage',
         roger_version=f'{roger.__version__}'
     )

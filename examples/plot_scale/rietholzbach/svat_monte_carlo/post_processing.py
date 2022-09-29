@@ -43,7 +43,7 @@ def main(tmp_dir):
                 title='RoGeR monte carlo results at Rietholzbach Lysimeter site',
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
-                comment='',
+                comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
                 model_structure='SVAT model with free drainage',
                 roger_version=f'{roger.__version__}'
             )
@@ -378,7 +378,7 @@ def main(tmp_dir):
             title='RoGeR best monte carlo run at Rietholzbach Lysimeter site',
             institution='University of Freiburg, Chair of Hydrology',
             references='',
-            comment='',
+            comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
             model_structure='SVAT model with free drainage',
             roger_version=f'{roger.__version__}'
         )

@@ -131,6 +131,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             settings.enable_offline_transport = True
             settings.enable_bromide = True
             settings.tm_structure = self._tm_structure
+            settings.enable_age_statistics = True
 
         @roger_routine
         def set_grid(self, state):
@@ -184,8 +185,8 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
             vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
 
-            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], 0.5)
-            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], 0.3)
+            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], 0.8)
+            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], 0.8)
 
             if settings.tm_structure == "complete-mixing":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 1)
@@ -354,17 +355,17 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             if base_path:
                 diagnostics["rates"].base_output_path = base_path
 
-            diagnostics["averages"].output_variables = ["M_s", "C_s", "C_q_ss"]
+            diagnostics["averages"].output_variables = ["C_s", "C_q_ss", "ttavg_q_ss"]
             diagnostics["averages"].output_frequency = 24 * 60 * 60
             diagnostics["averages"].sampling_frequency = 1
             if base_path:
                 diagnostics["averages"].base_output_path = base_path
 
-            diagnostics["maximum"].output_variables = ["dS_num_error", "dC_num_error"]
-            diagnostics["maximum"].output_frequency = 24 * 60 * 60
-            diagnostics["maximum"].sampling_frequency = 1
+            diagnostics["collect"].output_variables = ["M_s"]
+            diagnostics["collect"].output_frequency = 24 * 60 * 60
+            diagnostics["collect"].sampling_frequency = 1
             if base_path:
-                diagnostics["maximum"].base_output_path = base_path
+                diagnostics["collect"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error", "dC_num_error"]
@@ -413,7 +414,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         df_Br['hh'] = df_Br.index.hour.values
         df_Br['mm'] = 0
         injection_date = '%s-11-12' % (year)
-        df_Br.loc[injection_date, 'Br'] = 79900  # bromide mass in mg
+        df_Br.loc[injection_date, 'Br'] = 79900/3.14  # bromide mass in mg per m2
         path_txt = input_path / "Br.txt"
         df_Br.to_csv(path_txt, header=True, index=False, sep="\t")
         write_forcing_tracer(input_path, 'Br')

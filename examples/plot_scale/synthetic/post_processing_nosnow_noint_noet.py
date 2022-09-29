@@ -4,12 +4,10 @@ import xarray as xr
 import pandas as pd
 import numpy as onp
 import seaborn as sns
-import matplotlib.pyplot as plt
 import datetime
 import glob
 import h5netcdf
 import roger
-import roger.tools.labels as labs
 
 sns.set_context("talk", font_scale=1)
 
@@ -130,4 +128,4 @@ for var_sim in ['inf_in', 'inf_mat', 'inf_mp', 'inf_sc', 'q_sub_mat', 'q_sub_mp'
 grid0.loc[:, 'perc'] = ds_sim['q_ss'].isel(x=0, y=0).values[1:]
 file = base_path_results / "grid0_nosnow_noint_noet.csv"
 grid0.to_csv(file, header=True, index=True, sep=";")
-ds_sim.close()
+ds_sim = ds_sim.close()

@@ -36,7 +36,7 @@ ds_obs = ds_obs.assign_coords(Time=("Time", date_obs))
 # load transport simulation which contains modified isotope input signal
 # (could be any transport model) since each transport model uses the same
 # approach for mixing isotopes while snowfall/snow melt
-states_tm_file = base_path / "states_complete_mixing.nc"
+states_tm_file = base_path / "states_for_hydrus.nc"
 ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
 days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
 date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -75,7 +75,7 @@ df_ampl.loc[:, 'Ampl'] = 0
 df_tatm = pd.DataFrame(index=date_obs, columns=['tAtm'])
 df_tatm.loc[:, 'tAtm'] = range(1, len(df_tatm.index)+1)
 df_ctop = pd.DataFrame(index=date_sim_tm, columns=['cTop'])
-df_ctop.loc[:, 'cTop'] = ds_sim_tm['C_in'].isel(x=0, y=0).values + 20
+df_ctop.loc[:, 'cTop'] = ds_sim_tm['C_iso_in'].isel(x=0, y=0).values
 
 df = pd.DataFrame(index=date_obs)
 df = df.join([df_tatm, df_prec, df_rsoil, df_rroot, df_hcrita, df_ttop, df_ampl, df_ctop])
@@ -98,13 +98,13 @@ df_d18O_in = df_d18O_in.join(df_d18O_prec)
 
 fig, ax = plt.subplots()
 ax.scatter(df_d18O_in.index, df_d18O_in['d18O_prec'], s=2, color='black')
-ax.scatter(df_d18O_in.index, df_d18O_in['cTop'] - 20, s=2, color='red')
+ax.scatter(df_d18O_in.index, df_d18O_in['cTop'], s=2, color='red')
 # ax.set_ylim(0,)
 ax.set_xlim((df_d18O_in.index[0], df_d18O_in.index[-1]))
 ax.set_ylabel(r'$d_{18}O$ [permil]')
 ax.set_xlabel(r'Time [year]')
+fig.tight_layout()
 plt.show()
-
 
 # write HYDRUS-1D input for virtual bromide experiments
 years = onp.arange(1997, 2007).tolist()
@@ -150,7 +150,7 @@ for year in years:
     # set new injection dates within 20 mm of cumulated rainfall
     cond = (df_prec.loc[injection_date:, 'Prec'].values.cumsum() <= 20)
     injection_dates_new = df_prec.loc[injection_date:, ].index[cond]
-    df_ctop.loc[injection_dates_new, 'cTop'] = 79.9/df_prec.loc[injection_dates_new, 'Prec']  # bromide mass in mg/l
+    df_ctop.loc[injection_dates_new, 'cTop'] = (79.9/3.14)/df_prec.loc[injection_dates_new, 'Prec']  # bromide mass in g per m2
     df_ctop.replace([onp.inf, -onp.inf, onp.nan], 0, inplace=True)
 
     df_year = pd.DataFrame(index=date_obs_year)

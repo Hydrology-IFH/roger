@@ -6,7 +6,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant preferential_+_advection-dispersion', 'power', 'time-variant_power', 'time-variant_power_reverse']), default='power')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant preferential_+_advection-dispersion', 'power', 'time-variant_power', 'time-variant_power_reverse']), default='complete-mixing')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
@@ -106,7 +106,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
 
             settings.nx, settings.ny, settings.nz = 1, 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
-            settings.ages = settings.nitt
+            settings.ages = 365 * 3
             settings.nages = settings.ages + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
 
@@ -408,9 +408,9 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 6)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 0.2)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 0.9)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 2)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 0.9)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 2)
             elif settings.tm_structure == "time-variant power":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
