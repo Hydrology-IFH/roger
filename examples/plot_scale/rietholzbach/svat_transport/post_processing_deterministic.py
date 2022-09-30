@@ -172,7 +172,6 @@ for tm in transport_models:
     d18O_sample = df_perc_18O_sim.groupby(['sample_no']).sum().loc[:, 'd18O_weight']
     sample_no['d18O_sample'] = d18O_sample.values
     df_perc_18O_sim = df_perc_18O_sim.join(sample_no['d18O_sample'])
-    df_perc_18O_sim.loc[:, 'd18O_sample'] = df_perc_18O_sim.loc[:, 'd18O_sample'].fillna(method='bfill', limit=14)
     cond = (df_perc_18O_sim['d18O_sample'] == 0)
     df_perc_18O_sim.loc[cond, 'd18O_sample'] = onp.NaN
     d18O_perc_bs[nrow, ncol, :] = df_perc_18O_sim.loc[:, 'd18O_sample'].values
