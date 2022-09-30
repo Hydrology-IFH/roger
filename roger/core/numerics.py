@@ -9,7 +9,7 @@ from roger import runtime_settings as rs, logger
 
 
 @roger_kernel
-def rescale_SA_soil_kernel(state):
+def rescale_sa_soil_kernel(state):
     """
     Rescale StorAge.
     """
@@ -71,7 +71,114 @@ def rescale_SA_soil_kernel(state):
 
 
 @roger_kernel
-def rescale_SA_MSA_soil_kernel(state):
+def rescale_sa_msa_iso_soil_kernel(state):
+    """
+    Rescale solute concentration.
+    """
+    vs = state.variables
+
+    vs.sa_rz = update_multiply(
+        vs.sa_rz,
+        at[2:-2, 2:-2, 0, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+    )
+    vs.sa_ss = update_multiply(
+        vs.sa_ss,
+        at[2:-2, 2:-2, 0, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+    )
+    vs.sa_rz = update_multiply(
+        vs.sa_rz,
+        at[2:-2, 2:-2, 1, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+    )
+    vs.sa_ss = update_multiply(
+        vs.sa_ss,
+        at[2:-2, 2:-2, 1, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+    )
+    vs.SA_rz = update(
+        vs.SA_rz,
+        at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_rz[2:-2, 2:-2, :2, :], axis=-1),
+    )
+    vs.SA_rz = update(
+        vs.SA_rz,
+        at[2:-2, 2:-2, :2, 0], 0,
+    )
+    vs.SA_ss = update(
+        vs.SA_ss,
+        at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_ss[2:-2, 2:-2, :2, :], axis=-1),
+    )
+    vs.SA_ss = update(
+        vs.SA_ss,
+        at[2:-2, 2:-2, :2, 0], 0,
+    )
+    vs.sa_s = update(
+        vs.sa_s,
+        at[2:-2, 2:-2, :, :], vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :],
+    )
+    vs.SA_s = update(
+        vs.SA_s,
+        at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_s[2:-2, 2:-2, :2, :], axis=-1),
+    )
+    vs.SA_s = update(
+        vs.SA_s,
+        at[2:-2, 2:-2, :2, 0], 0,
+    )
+    vs.C_rz = update(
+        vs.C_rz,
+        at[2:-2, 2:-2, :2], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2, npx.newaxis],
+    )
+    vs.C_iso_rz = update(
+        vs.C_iso_rz,
+        at[2:-2, 2:-2, vs.taum1], transport.conc_to_delta(state, vs.C_rz[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.C_iso_rz = update(
+        vs.C_iso_rz,
+        at[2:-2, 2:-2, vs.tau], transport.conc_to_delta(state, vs.C_rz[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.C_ss = update(
+        vs.C_ss,
+        at[2:-2, 2:-2, :2], transport.calc_conc_iso_storage(state, vs.sa_ss, vs.msa_ss)[2:-2, 2:-2, npx.newaxis],
+    )
+    vs.C_iso_ss = update(
+        vs.C_iso_ss,
+        at[2:-2, 2:-2, vs.taum1], transport.conc_to_delta(state, vs.C_ss[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.C_iso_ss = update(
+        vs.C_iso_ss,
+        at[2:-2, 2:-2, vs.tau], transport.conc_to_delta(state, vs.C_ss[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.msa_s = update(
+        vs.msa_s,
+        at[2:-2, 2:-2, :, :], npx.where(vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :] > 0, vs.msa_rz[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] / (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])) + vs.msa_ss[2:-2, 2:-2, :, :] * (vs.sa_ss[2:-2, 2:-2, :, :] / (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])), 0),
+    )
+    vs.msa_s = update(
+        vs.msa_s,
+        at[2:-2, 2:-2, :vs.taup1, :], npx.where(npx.isnan(vs.msa_s[2:-2, 2:-2, :vs.taup1, :]), 0, vs.msa_s[2:-2, 2:-2, :vs.taup1, :]),
+    )
+    vs.msa_s = update(
+        vs.msa_s,
+        at[2:-2, 2:-2, :vs.taup1, 0], 0,
+    )
+    vs.C_s = update(
+        vs.C_s,
+        at[2:-2, 2:-2, :2], transport.calc_conc_iso_storage(state, vs.sa_s, vs.msa_s)[2:-2, 2:-2, npx.newaxis],
+    )
+    vs.C_iso_s = update(
+        vs.C_iso_s,
+        at[2:-2, 2:-2, vs.taum1], transport.conc_to_delta(state, vs.C_s[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.C_iso_s = update(
+        vs.C_iso_s,
+        at[2:-2, 2:-2, vs.tau], transport.conc_to_delta(state, vs.C_s[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    return KernelOutput(
+        C_rz=vs.C_rz, C_ss=vs.C_ss, C_s=vs.C_s, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, msa_s=vs.msa_s,
+        sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, sa_s=vs.sa_s, SA_rz=vs.SA_rz, SA_ss=vs.SA_ss, SA_s=vs.SA_s,
+        C_iso_rz=vs.C_iso_rz, C_iso_ss=vs.C_iso_ss, C_iso_s=vs.C_iso_s,
+    )
+
+
+@roger_kernel
+def rescale_sa_msa_anion_soil_kernel(state):
     """
     Rescale solute concentration.
     """
@@ -92,6 +199,51 @@ def rescale_SA_MSA_soil_kernel(state):
         vs.C_s = update(
             vs.C_s,
             at[2:-2, 2:-2, :], 0,
+        )
+
+        vs.sa_rz = update_multiply(
+            vs.sa_rz,
+            at[2:-2, 2:-2, 0, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.sa_ss = update_multiply(
+            vs.sa_ss,
+            at[2:-2, 2:-2, 0, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.sa_rz = update_multiply(
+            vs.sa_rz,
+            at[2:-2, 2:-2, 1, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.sa_ss = update_multiply(
+            vs.sa_ss,
+            at[2:-2, 2:-2, 1, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.SA_rz = update(
+            vs.SA_rz,
+            at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_rz[2:-2, 2:-2, :2, :], axis=-1),
+        )
+        vs.SA_rz = update(
+            vs.SA_rz,
+            at[2:-2, 2:-2, :2, 0], 0,
+        )
+        vs.SA_ss = update(
+            vs.SA_ss,
+            at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_ss[2:-2, 2:-2, :2, :], axis=-1),
+        )
+        vs.SA_ss = update(
+            vs.SA_ss,
+            at[2:-2, 2:-2, :2, 0], 0,
+        )
+        vs.sa_s = update(
+            vs.sa_s,
+            at[2:-2, 2:-2, :2, :], vs.sa_rz[2:-2, 2:-2, :2, :] + vs.sa_ss[2:-2, 2:-2, :2, :],
+        )
+        vs.SA_s = update(
+            vs.SA_s,
+            at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_s[2:-2, 2:-2, :2, :], axis=-1),
+        )
+        vs.SA_s = update(
+            vs.SA_s,
+            at[2:-2, 2:-2, :2, 0], 0,
         )
 
     elif (settings.enable_chloride | settings.enable_nitrate):
@@ -171,105 +323,23 @@ def rescale_SA_MSA_soil_kernel(state):
             vs.C_s,
             at[2:-2, 2:-2, :2], npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
         )
-
-    elif (settings.enable_oxygen18 | settings.enable_deuterium):
-        vs.sa_rz = update_multiply(
-            vs.sa_rz,
-            at[2:-2, 2:-2, 0, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        vs.csa_rz = update(
+            vs.csa_rz,
+            at[2:-2, 2:-2, :, :], npx.where(vs.sa_rz[2:-2, 2:-2, :, :] > 0, vs.msa_rz[2:-2, 2:-2, :, :] / vs.sa_rz[2:-2, 2:-2, :, :], 0) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
         )
-        vs.sa_ss = update_multiply(
-            vs.sa_ss,
-            at[2:-2, 2:-2, 0, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        vs.csa_ss = update(
+            vs.csa_ss,
+            at[2:-2, 2:-2, :, :], npx.where(vs.sa_ss[2:-2, 2:-2, :, :] > 0, vs.msa_ss[2:-2, 2:-2, :, :] / vs.sa_ss[2:-2, 2:-2, :, :], 0) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
         )
-        vs.sa_rz = update_multiply(
-            vs.sa_rz,
-            at[2:-2, 2:-2, 1, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
-        )
-        vs.sa_ss = update_multiply(
-            vs.sa_ss,
-            at[2:-2, 2:-2, 1, :], vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
-        )
-        vs.SA_rz = update(
-            vs.SA_rz,
-            at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_rz[2:-2, 2:-2, :2, :], axis=-1),
-        )
-        vs.SA_rz = update(
-            vs.SA_rz,
-            at[2:-2, 2:-2, :2, 0], 0,
-        )
-        vs.SA_ss = update(
-            vs.SA_ss,
-            at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_ss[2:-2, 2:-2, :2, :], axis=-1),
-        )
-        vs.SA_ss = update(
-            vs.SA_ss,
-            at[2:-2, 2:-2, :2, 0], 0,
-        )
-        vs.sa_s = update(
-            vs.sa_s,
-            at[2:-2, 2:-2, :, :], vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :],
-        )
-        vs.SA_s = update(
-            vs.SA_s,
-            at[2:-2, 2:-2, :2, 1:], npx.cumsum(vs.sa_s[2:-2, 2:-2, :2, :], axis=-1),
-        )
-        vs.SA_s = update(
-            vs.SA_s,
-            at[2:-2, 2:-2, :2, 0], 0,
-        )
-        vs.C_rz = update(
-            vs.C_rz,
-            at[2:-2, 2:-2, :2], transport.calc_conc_iso_storage(state, vs.sa_rz, vs.msa_rz)[2:-2, 2:-2, npx.newaxis],
-        )
-        vs.C_iso_rz = update(
-            vs.C_iso_rz,
-            at[2:-2, 2:-2, vs.taum1], transport.conc_to_delta(state, vs.C_rz[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
-        )
-        vs.C_iso_rz = update(
-            vs.C_iso_rz,
-            at[2:-2, 2:-2, vs.tau], transport.conc_to_delta(state, vs.C_rz[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
-        )
-        vs.C_ss = update(
-            vs.C_ss,
-            at[2:-2, 2:-2, :2], transport.calc_conc_iso_storage(state, vs.sa_ss, vs.msa_ss)[2:-2, 2:-2, npx.newaxis],
-        )
-        vs.C_iso_ss = update(
-            vs.C_iso_ss,
-            at[2:-2, 2:-2, vs.taum1], transport.conc_to_delta(state, vs.C_ss[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
-        )
-        vs.C_iso_ss = update(
-            vs.C_iso_ss,
-            at[2:-2, 2:-2, vs.tau], transport.conc_to_delta(state, vs.C_ss[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
-        )
-        vs.msa_s = update(
-            vs.msa_s,
-            at[2:-2, 2:-2, :, :], npx.where(vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :] > 0, vs.msa_rz[2:-2, 2:-2, :, :] * (vs.sa_rz[2:-2, 2:-2, :, :] / (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])) + vs.msa_ss[2:-2, 2:-2, :, :] * (vs.sa_ss[2:-2, 2:-2, :, :] / (vs.sa_rz[2:-2, 2:-2, :, :] + vs.sa_ss[2:-2, 2:-2, :, :])), 0),
-        )
-        vs.msa_s = update(
-            vs.msa_s,
-            at[2:-2, 2:-2, :vs.taup1, :], npx.where(npx.isnan(vs.msa_s[2:-2, 2:-2, :vs.taup1, :]), 0, vs.msa_s[2:-2, 2:-2, :vs.taup1, :]),
-        )
-        vs.msa_s = update(
-            vs.msa_s,
-            at[2:-2, 2:-2, :vs.taup1, 0], 0,
-        )
-        vs.C_s = update(
-            vs.C_s,
-            at[2:-2, 2:-2, :2], transport.calc_conc_iso_storage(state, vs.sa_s, vs.msa_s)[2:-2, 2:-2, npx.newaxis],
-        )
-        vs.C_iso_s = update(
-            vs.C_iso_s,
-            at[2:-2, 2:-2, vs.taum1], transport.conc_to_delta(state, vs.C_s[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
-        )
-        vs.C_iso_s = update(
-            vs.C_iso_s,
-            at[2:-2, 2:-2, vs.tau], transport.conc_to_delta(state, vs.C_s[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+        vs.csa_s = update(
+            vs.csa_s,
+            at[2:-2, 2:-2, :, :], npx.where(vs.sa_s[2:-2, 2:-2, :, :] > 0, vs.msa_s[2:-2, 2:-2, :, :] / vs.sa_s[2:-2, 2:-2, :, :], 0) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
         )
 
     return KernelOutput(
         C_rz=vs.C_rz, C_ss=vs.C_ss, C_s=vs.C_s, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, msa_s=vs.msa_s,
         sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, sa_s=vs.sa_s, SA_rz=vs.SA_rz, SA_ss=vs.SA_ss, SA_s=vs.SA_s,
-        C_iso_rz=vs.C_iso_rz, C_iso_ss=vs.C_iso_ss, C_iso_s=vs.C_iso_s,
+        csa_rz=vs.csa_rz, csa_ss=vs.csa_ss, csa_s=vs.csa_s
     )
 
 
@@ -291,10 +361,12 @@ def rescale_SA(state):
     vs = state.variables
     settings = state.settings
 
-    if settings.enable_offline_transport and (settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_bromide | settings.enable_chloride | settings.enable_nitrate):
-        vs.update(rescale_SA_MSA_soil_kernel(state))
+    if settings.enable_offline_transport and (settings.enable_oxygen18 | settings.enable_deuterium):
+        vs.update(rescale_sa_msa_iso_soil_kernel(state))
+    elif settings.enable_offline_transport and (settings.enable_bromide | settings.enable_chloride | settings.enable_nitrate):
+        vs.update(rescale_sa_msa_anion_soil_kernel(state))
     elif settings.enable_offline_transport and not (settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_bromide | settings.enable_chloride | settings.enable_nitrate):
-        vs.update(rescale_SA_soil_kernel(state))
+        vs.update(rescale_sa_soil_kernel(state))
 
     if settings.enable_bromide:
         vs.msa_rz = update(
@@ -309,11 +381,6 @@ def rescale_SA(state):
             vs.msa_s,
             at[2:-2, 2:-2, :2, :], 0,
         )
-
-    if settings.enable_offline_transport & settings.enable_groundwater:
-        vs.update(rescale_SA_gw_kernel(state))
-        if (settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_bromide | settings.enable_chloride | settings.enable_nitrate):
-            vs.update(rescale_conc_gw_kernel(state))
 
 
 @roger_routine

@@ -1737,7 +1737,7 @@ VARIABLES = {
         "isotope StorAge of soil",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport,
     ),
     "M_s": Variable(
         "solute mass of soil",
@@ -2054,7 +2054,7 @@ VARIABLES = {
         "isotope StorAge of root zone",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport,
     ),
     "M_rz": Variable(
         "solute mass of root zone",
@@ -2354,7 +2354,7 @@ VARIABLES = {
         "isotope StorAge of subsoil",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport,
     ),
     "M_ss": Variable(
         "solute mass of subsoil",

@@ -128,7 +128,7 @@ norm = Normalize(vmin=onp.min(years), vmax=onp.max(years))
 for tm_structure in tm_structures:
     tms = tm_structure.replace(" ", "_")
     fig, axes = plt.subplots(1, 1, figsize=(10, 6))
-    df_eff_year = pd.DataFrame(index=years)
+    df_metrics_year = pd.DataFrame(index=years)
     for year in years:
         # load observations
         br_obs_file = base_path.parent / "observations" / "bromide_breaktrhough.csv"
@@ -189,8 +189,12 @@ for tm_structure in tm_structures:
         obs_vals = df_eval.loc[:, 'obs'].values
         sim_vals = df_eval.loc[:, 'sim'].values
         # temporal correlation
-        df_eff_year.loc[year, 'r'] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+        df_metrics_year.loc[year, 'r'] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
         # tracer recovery (in %)
-        df_eff_year.loc[year, 'Br_mass_recovery'] = onp.sum(ds_sim_tm['M_q_ss'].isel(x=0, y=0).values[315:716] * 3.14) / 79900
+        df_metrics_year.loc[year, 'Br_mass_recovery'] = onp.sum(ds_sim_tm['M_q_ss'].isel(x=0, y=0).values[315:716] * 3.14) / 79900
         # average travel time of percolation (in days)
-        df_eff_year.loc[year, 'ttavg'] = onp.nanmean(ds_sim_tm['ttavg_q_ss'].isel(x=0, y=0).values[315:716])
+        df_metrics_year.loc[year, 'ttavg'] = onp.nanmean(ds_sim_tm['ttavg_q_ss'].isel(x=0, y=0).values[315:716])
+
+    # write evaluation metrics to .csv
+    path_csv = base_path / "results" / f"bromide_metrics_{tms}.csv"
+    df_metrics_year.to_csv(path_csv, header=True, index=True, sep=";")

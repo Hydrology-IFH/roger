@@ -206,9 +206,9 @@ def calculate_soil_transport_anion_kernel(state):
         at[2:-2, 2:-2, :, :], vs.msa_rz[2:-2, 2:-2, :, :] + vs.msa_ss[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
-    vs.MSA_s = update(
-        vs.MSA_s,
-        at[2:-2, 2:-2, :, :], transport.calc_MSA(state, vs.MSA_s, vs.msa_s)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    vs.csa_s = update(
+        vs.csa_s,
+        at[2:-2, 2:-2, :, :], npx.where(vs.sa_s[2:-2, 2:-2, :, :] > 0, vs.msa_s[2:-2, 2:-2, :, :] / vs.sa_s[2:-2, 2:-2, :, :], 0) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
     vs.M_s = update(
@@ -221,7 +221,7 @@ def calculate_soil_transport_anion_kernel(state):
         at[2:-2, 2:-2, vs.tau], npx.where(npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) > 0, vs.M_s[2:-2, 2:-2, vs.tau] / npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1), 0),
     )
 
-    return KernelOutput(sa_s=vs.sa_s, SA_s=vs.SA_s, msa_s=vs.msa_s, MSA_s=vs.MSA_s, C_s=vs.C_s, M_s=vs.M_s)
+    return KernelOutput(sa_s=vs.sa_s, SA_s=vs.SA_s, msa_s=vs.msa_s, csa_s=vs.csa_s, C_s=vs.C_s, M_s=vs.M_s)
 
 
 @roger_routine

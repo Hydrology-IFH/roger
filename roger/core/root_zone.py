@@ -184,6 +184,11 @@ def calculate_root_zone_transport_anion_kernel(state):
         at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
+    vs.csa_rz = update(
+        vs.csa_rz,
+        at[2:-2, 2:-2, :, :], npx.where(vs.sa_rz[2:-2, 2:-2, :, :] > 0, vs.msa_rz[2:-2, 2:-2, :, :] / vs.sa_rz[2:-2, 2:-2, :, :], 0) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
     vs.M_rz = update(
         vs.M_rz,
         at[2:-2, 2:-2, vs.tau], npx.nansum(vs.msa_rz[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
@@ -194,7 +199,7 @@ def calculate_root_zone_transport_anion_kernel(state):
         at[2:-2, 2:-2, vs.tau], npx.where(npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1) > 0, vs.M_rz[2:-2, 2:-2, vs.tau] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1), 0),
     )
 
-    return KernelOutput(SA_rz=vs.SA_rz, C_rz=vs.C_rz, M_rz=vs.M_rz)
+    return KernelOutput(SA_rz=vs.SA_rz, C_rz=vs.C_rz, M_rz=vs.M_rz, csa_rz=vs.csa_rz)
 
 
 @roger_routine

@@ -11,6 +11,7 @@ import numpy as onp
 import roger.tools.evaluation as eval_utils
 
 base_path = Path(__file__).parent
+age_max = "age_max_3"
 # directory of results
 base_path_results = base_path / "results"
 if not os.path.exists(base_path_results):
@@ -18,7 +19,7 @@ if not os.path.exists(base_path_results):
 base_path_results = base_path / "results" / "Euler"
 if not os.path.exists(base_path_results):
     os.mkdir(base_path_results)
-base_path_results = base_path / "results" / "Euler" / "age_max_11"
+base_path_results = base_path / "results" / "Euler" / age_max
 if not os.path.exists(base_path_results):
     os.mkdir(base_path_results)
 # directory of figures
@@ -28,7 +29,7 @@ if not os.path.exists(base_path_figs):
 base_path_figs = base_path / "figures" / "Euler"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
-base_path_figs = base_path / "figures" / "Euler" / "age_max_11"
+base_path_figs = base_path / "figures" / "Euler" / age_max
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
@@ -36,10 +37,10 @@ if not os.path.exists(base_path_figs):
 transport_models = ['complete-mixing', 'advection-dispersion', 'time-variant advection-dispersion', 'power', 'time-variant power', 'time-variant power reverse', 'preferential', 'time-variant']
 # transport_models = ['power']
 for tm in transport_models:
-    path = str(base_path / "Euler" / "age_max_11" / f"SVATTRANSPORT_{tm}_Euler.*.nc")
+    path = str(base_path / "Euler" / age_max / f"SVATTRANSPORT_{tm}_Euler.*.nc")
     diag_files = glob.glob(path)
     tm1 = tm.replace(" ", "_")
-    states_tm_file = base_path / "Euler" / "age_max_11" / f"states_{tm1}_Euler.nc"
+    states_tm_file = base_path / "Euler" / age_max / f"states_{tm1}_Euler.nc"
     with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
@@ -136,7 +137,7 @@ transport_models = ['complete-mixing', 'advection-dispersion', 'time-variant adv
 # transport_models = ['power']
 for tm in transport_models:
     tm1 = tm.replace(" ", "_")
-    states_tm_file = base_path / "Euler" / "age_max_11" / f"states_{tm1}_Euler.nc"
+    states_tm_file = base_path / "Euler" / age_max / f"states_{tm1}_Euler.nc"
     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -189,7 +190,7 @@ for tm in transport_models:
         # plot cumulative travel time distributions
         TT = ds_sim_tm[var_TT_sim].isel(x=nrow, y=ncol).values
         fig, axs = plt.subplots()
-        for i in range(len(ds_sim_tm[var_sim].Time)):
+        for i in range(len(ds_sim_tm["Time"].values)):
             axs.plot(TT[i, :], lw=1, color='grey')
         axs.set_xlim((0, 1200))
         axs.set_ylim((0, 1))
@@ -206,7 +207,7 @@ for tm in transport_models:
         mtt = onp.sum(tt * ages[onp.newaxis, :], axis=1)
         mtt[mtt == 0] = onp.NaN
         # calculate median travel time for each time step
-        mediantt = onp.zeros((len(ages)))
+        mediantt = onp.zeros((len(ds_sim_tm["Time"].values)))
         for i in range(len(ds_sim_tm['Time'].values)):
             mediant = onp.where(TT[i, :] >= 0.5)[0]
             if len(mediant) == 0:
@@ -243,9 +244,9 @@ for tm in transport_models:
         df_tt_mean_median.loc['mean', 'MEDIANTT'] = onp.nanmean(df_tt['MEDIANTT'].values)
         df_tt_mean_median.loc['median', 'MTT'] = onp.nanmedian(df_tt['MTT'].values)
         df_tt_mean_median.loc['median', 'MEDIANTT'] = onp.nanmedian(df_tt['MEDIANTT'].values)
-        file_str = 'tt_mean_median_%s.pdf' % (var_sim)
-        path_bsv = base_path_figs / file_str
-        df_tt_mean_median.to_csv(path_bsv, header=True, index=True, sep="\t")
+        file_str = 'tt_mean_median_%s_%s.csv' % (var_sim, tm1)
+        path_csv = base_path_figs / file_str
+        df_tt_mean_median.to_csv(path_csv, header=True, index=True, sep="\t")
 
         # plot mean and median travel time
         fig, axes = plt.subplots(2, 1, sharex=True, figsize=(14, 7))
@@ -310,11 +311,12 @@ for tm in transport_models:
         df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals_bs, df_obs)
         df_eval = df_eval.dropna()
         fig, ax = plt.subplots(figsize=(14, 3.5))
+        ax.scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=4)
+        ax.scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=4)
         ax.plot(ds_sim_tm.Time.values, sim_vals, color='red')
-        ax.scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=2)
-        ax.scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=2)
         ax.set_ylabel(r'$\delta^{18}$O [‰]')
         ax.set_xlabel('Time [year]')
+        ax.set_xlim((ds_sim_tm.Time.values[0], ds_sim_tm.Time.values[-1]))
         fig.tight_layout()
         file = base_path_figs / f"d18O_perc_sim_obs_{tm1}.png"
         fig.savefig(file, dpi=250)
