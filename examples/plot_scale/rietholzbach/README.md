@@ -12,28 +12,40 @@ Contains data from HYDRUS-1D simulations.
 
 ---
 
-The following folders contain model setups. Each folder contains a subfolder
+The following folders contain the model setups. Each folder contains a subfolder
 `input` from which the model reads the input data, a Python-script with the
-implementation of the model setup and corresponding job-script(s) for computation
+implementation of the model setup and the corresponding job-script(s) for computation
 on a cluster, and Python-scripts for post-processing.
 
-## svat
+## Hydrologic simulations
+### svat
 Single run of hydrologic model
 
-## svat_monte_carlo
-Monte Carlo simulations with hydrologic model
+### svat_monte_carlo
+Monte Carlo simulations with hydrologic model used for parameter estimation
+- `mc.sh`: job script to run Monte Carlo simulations
 
-## svat_sensitivity
-Saltelli simulations with hydrologic model
+### svat_sensitivity
+Saltelli simulations with hydrologic model used for sensitvity analysis
+- `sa.sh`: job script to run Saltelli simulations
 
-## svat_transport
+## Transport simulations
+In order to solve the transport with StorAge selection (SAS) functions, three schemes (sas_solver) are available:
+- `deterministic`: Loop over deterministic sequence of hydrologic processes and solve SAS by internal loops for each process.
+- `Euler`: Solve SAS with an explicit Euler scheme
+- `RK4`: Solve SAS with an explicit Runge-Kutta fourth-order scheme
+
+### svat_transport
 Single run of transport model. Requires hydrologic simulations.
 
-## svat_transport_monte_carlo
-Monte Carlo simulations with oxygen-18 transport models. Requires hydrologic simulations.
+### svat_transport_monte_carlo
+Monte Carlo simulations with oxygen-18 transport models used for parameter estimation. Requires hydrologic simulations.
+- `oxygen18_*_*_moab.sh`: job script to run Monte Carlo simulations with the provided sas solver and provided transport model structure (e.g. ad=advection-dispersion)
 
-## svat_transport_sensitivity
-Saltelli simulations with oxygen-18 transport model. Requires hydrologic simulations.
+### svat_transport_sensitivity
+Saltelli simulations with oxygen-18 transport model used for sensitvity analysis. Requires hydrologic simulations.
+- `oxygen18_*_*_moab.sh`: job script to run Saltelli simulations with the provided sas solver and provided transport model structure (e.g. ad=advection-dispersion)
+- `param_bounds.yml`: contains parameter boundaries for Saltelli sampling
 
-## svat_bromide_benchmark
+### svat_bromide_benchmark
 Virtual bromide experiments with bromide transport model. Requires hydrologic simulations.
