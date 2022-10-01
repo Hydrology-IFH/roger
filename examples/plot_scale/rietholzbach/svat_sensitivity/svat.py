@@ -263,9 +263,9 @@ def main(nsamples, tmp_dir):
             elif vs.time_event0 > settings.end_event and (vs.time % (60 * 60) != 0) and (vs.dt_secs == 10 * 60):
                 vs.dt_secs = 10 * 60
                 vs.dt = 1 / 6
-                vs.itt_day = vs.itt_day + 1
                 ta = ta_day[:, :, vs.itt_day]
                 pet = pet_day[:, :, vs.itt_day]
+                vs.itt_day = vs.itt_day + 1
                 vs.event_id = update(
                     vs.event_id,
                     at[vs.tau], 0,

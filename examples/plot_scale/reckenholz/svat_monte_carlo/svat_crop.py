@@ -7,7 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-lys", "--lys-experiment", type=click.Choice(["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys8")
-@click.option("-ns", "--nsamples", type=int, default=10)
+@click.option("-ns", "--nsamples", type=int, default=10000)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(nsamples, lys_experiment, tmp_dir):
@@ -282,7 +282,7 @@ def main(nsamples, lys_experiment, tmp_dir):
             cond3 = (prec_day > settings.hpi).any() & (prec_day > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
             cond4 = (prec_day <= settings.hpi).all() & (prec_day > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
             cond5 = (prec_day <= 0).all() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
-            # no event or snowfall - daily time steps
+            # no event or snowfall - daily time step
             if cond0 or cond00:
                 prec = npx.sum(prec_day, axis=-1)
                 ta = npx.mean(ta_day, axis=-1)
@@ -290,14 +290,14 @@ def main(nsamples, lys_experiment, tmp_dir):
                     vs.dt_secs = 24 * 60 * 60
                 else:
                     vs.dt_secs = 60 * 60
-            # rainfall/snow melt event - hourly time steps
+            # rainfall/snow melt event - hourly time step
             elif (cond2 or cond4 or cond5) and not cond1 and not cond3:
                 prec_hour = prec_day[:, :, vs.itt_day:vs.itt_day+6]
                 ta_hour = ta_day[:, :, vs.itt_day:vs.itt_day+6]
                 prec = npx.sum(prec_hour, axis=-1)
                 ta = npx.mean(ta_hour, axis=-1)
                 vs.dt_secs = 60 * 60
-            # heavy rainfall event - 10 minutes time steps
+            # heavy rainfall event - 10 minute time step
             elif (cond1 or cond3) and not cond2 and not cond4 and not cond5:
                 prec = prec_day[:, :, vs.itt_day]
                 ta = ta_day[:, :, vs.itt_day]
@@ -343,11 +343,11 @@ def main(nsamples, lys_experiment, tmp_dir):
             elif vs.time_event0 > settings.end_event and (vs.time % (60 * 60) != 0) and (vs.dt_secs == 10 * 60):
                 vs.dt_secs = 10 * 60
                 vs.dt = 1 / 6
-                vs.itt_day = vs.itt_day + 1
                 ta = ta_day[:, :, vs.itt_day]
                 ta_min = ta_min_day[:, :, vs.itt_day]
                 ta_max = ta_max_day[:, :, vs.itt_day]
                 pet = pet_day[:, :, vs.itt_day]
+                vs.itt_day = vs.itt_day + 1
                 vs.event_id = update(
                     vs.event_id,
                     at[vs.tau], 0,

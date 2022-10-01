@@ -300,10 +300,10 @@ def main(lys_experiment):
             elif vs.time_event0 > settings.end_event and (vs.time % (60 * 60) != 0) and (vs.dt_secs == 10 * 60):
                 vs.dt_secs = 10 * 60
                 vs.dt = 1 / 6
-                vs.itt_day = vs.itt_day + 1
                 ta = ta_day[:, :, vs.itt_day]
                 ta_min = ta_min_day[:, :, vs.itt_day]
                 ta_max = ta_max_day[:, :, vs.itt_day]
+                vs.itt_day = vs.itt_day + 1
                 pet = pet_day[:, :, vs.itt_day]
                 vs.event_id = update(
                     vs.event_id,

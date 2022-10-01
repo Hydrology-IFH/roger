@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l nodes=2:ppn=16
 #PBS -l walltime=144:00:00
-#PBS -l pmem=4000mb
+#PBS -l pmem=8000mb
 #PBS -N oxygen18_deterministic_powt_sa
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
