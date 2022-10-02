@@ -12,7 +12,7 @@ def main():
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
     import roger.lookuptables as lut
-    from roger.tools.make_toy_setup import make_forcing_event
+    from roger.tools.make_toy_data import make_toy_forcing_event
 
     class ONEDEVENTSetup(RogerSetup):
         """A 1D model for a single event.
@@ -62,13 +62,12 @@ def main():
             settings = state.settings
             settings.identifier = self._identifier
 
-            settings.nx, settings.ny, settings.nz = self._get_nx(self._base_path, 'parameter_grid.csv'), 1, 1
+            settings.nx, settings.ny = self._get_nx(self._base_path, 'parameter_grid.csv'), 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
             settings.runlen = settings.nitt * 10 * 60
 
             settings.dx = 1
             settings.dy = 1
-            settings.dz = 1
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0
@@ -379,7 +378,7 @@ def main():
                 os.mkdir(path_input)
             if not os.path.exists(path_scenario):
                 os.mkdir(path_scenario)
-            make_forcing_event(path_scenario, nhours=5, event_type=rainfall_scenario)
+            make_toy_forcing_event(path_scenario, nhours=5, event_type=rainfall_scenario)
             model.setup()
             model.run()
     return

@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 import h5netcdf
 
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -14,15 +13,7 @@ class SVATSetup(RogerSetup):
     """A SVAT model.
     """
     _base_path = Path(__file__).parent
-    _input_dir = None
-
-    def _set_input_dir(self, path):
-        if os.path.exists(path):
-            self._input_dir = path
-        else:
-            self._input_dir = path
-            if not os.path.exists(self._input_dir):
-                os.mkdir(self._input_dir)
+    _input_dir = _base_path / "input"
 
     def _read_var_from_nc(self, var, path_dir, file):
         nc_file = path_dir / file
@@ -36,6 +27,12 @@ class SVATSetup(RogerSetup):
             var_obj = infile.variables['dt']
             return onp.sum(onp.array(var_obj))
 
+    def _get_time_origin(self, path_dir, file):
+        nc_file = path_dir / file
+        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+            var_obj = infile.variables['Time'].attrs['time_origin']
+            return str(var_obj)
+
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
@@ -44,14 +41,13 @@ class SVATSetup(RogerSetup):
         settings.nx, settings.ny, settings.nz = 1, 1, 1
         settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
-        # lysimeter surface 3.14 square meter (2m diameter)
-        settings.dx = 2
-        settings.dy = 2
-        settings.dz = 1
+        # spatial discretization (in meters)
+        settings.dx = 1
+        settings.dy = 1
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
-        settings.time_origin = "1996-12-31 00:00:00"
+        settings.time_origin = self._get_time_origin(self._input_dir, 'forcing.nc')
 
         settings.enable_macropore_lower_boundary_condition = False
 
@@ -88,13 +84,13 @@ class SVATSetup(RogerSetup):
         vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
         vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
         vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
-        vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
-        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 189)
-        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 431)
-        vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.145)
-        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.175)
-        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2],  0.21)
-        vs.ks = update(vs.ks, at[2:-2, 2:-2], 119.8)
+        vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2000)
+        vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
+        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 50)
+        vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.1)
+        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.1)
+        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2],  0.2)
+        vs.ks = update(vs.ks, at[2:-2, 2:-2], 5)
         vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
     @roger_routine
@@ -112,8 +108,8 @@ class SVATSetup(RogerSetup):
     def set_initial_conditions(self, state):
         vs = state.variables
 
-        vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.46)
-        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.44)
+        vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.3)
+        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.3)
 
     @roger_routine
     def set_boundary_conditions_setup(self, state):
@@ -231,9 +227,9 @@ class SVATSetup(RogerSetup):
         elif vs.time_event0 > settings.end_event and (vs.time % (60 * 60) != 0) and (vs.dt_secs == 10 * 60):
             vs.dt_secs = 10 * 60
             vs.dt = 1 / 6
-            vs.itt_day = vs.itt_day + 1
             ta = ta_day[:, :, vs.itt_day]
             pet = pet_day[:, :, vs.itt_day]
+            vs.itt_day = vs.itt_day + 1
             vs.event_id = update(
                 vs.event_id,
                 at[vs.tau], 0,
@@ -278,6 +274,7 @@ class SVATSetup(RogerSetup):
         vs = state.variables
 
         vs.update(after_timestep_kernel(state))
+
 
 @roger_kernel
 def after_timestep_kernel(state):

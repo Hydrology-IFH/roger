@@ -134,7 +134,7 @@ def main(nsamples, lys_experiment, transport_model_structure, sas_solver, crop_p
             settings = state.settings
             settings.identifier = self._identifier
 
-            settings.nx, settings.ny, settings.nz = self._nsamples, 1, 1
+            settings.nx, settings.ny = self._nsamples, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
             settings.ages = settings.nitt
             settings.nages = settings.nitt + 1
@@ -142,7 +142,6 @@ def main(nsamples, lys_experiment, transport_model_structure, sas_solver, crop_p
 
             settings.dx = 1
             settings.dy = 1
-            settings.dz = 1
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0

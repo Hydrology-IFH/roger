@@ -64,12 +64,11 @@ def main():
             settings = state.settings
             settings.identifier = self._identifier
 
-            settings.nx, settings.ny, settings.nz = self._get_nx(self._base_path, 'parameter_grid.csv'), 1, 1
+            settings.nx, settings.ny = self._get_nx(self._base_path, 'parameter_grid.csv'), 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
             settings.dx = 1
             settings.dy = 1
-            settings.dz = 1
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0

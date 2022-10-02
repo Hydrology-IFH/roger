@@ -122,7 +122,7 @@ def main(lys_experiment, transport_model_structure, crop_partitioning):
             settings = state.settings
             settings.identifier = "SVATCROPTRANSPORT"
 
-            settings.nx, settings.ny, settings.nz = 1, 1, 1
+            settings.nx, settings.ny = 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
             settings.ages = settings.nitt
             settings.nages = settings.nitt + 1
@@ -130,7 +130,6 @@ def main(lys_experiment, transport_model_structure, crop_partitioning):
 
             settings.dx = 1
             settings.dy = 1
-            settings.dz = 1
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0

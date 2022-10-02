@@ -10,6 +10,7 @@ import roger.cli
 
 SETUPS = (
     "svat",
+    "oneD",
 )
 
 

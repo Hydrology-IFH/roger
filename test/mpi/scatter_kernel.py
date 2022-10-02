@@ -53,4 +53,4 @@ else:
     idx = proc_slices[rst.proc_rank]
     np.testing.assert_array_equal(b, global_arr[idx])
 
-    # rs.mpi_comm.Get_parent().Send(np.array(b), 0)
+    rs.mpi_comm.Get_parent().Send(np.array(b), 0)

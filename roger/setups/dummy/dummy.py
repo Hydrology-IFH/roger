@@ -10,15 +10,12 @@ class DUMMYSetup(RogerSetup):
         settings = state.settings
         settings.identifier = "DUMMY"
 
-        settings.nx, settings.ny, settings.nz = 1, 1, 1
+        settings.nx, settings.ny = 1, 1
         settings.nitt = 24
-        settings.nittevent = 1
-        settings.nittevent_p1 = settings.nittevent + 1
         settings.runlen = 24 * 60 * 60
 
         settings.dx = 1
         settings.dy = 1
-        settings.dz = 1
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0

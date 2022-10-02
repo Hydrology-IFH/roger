@@ -50,13 +50,12 @@ def main(nsamples, tmp_dir):
             settings = state.settings
             settings.identifier = "SVAT"
 
-            settings.nx, settings.ny, settings.nz = self._nrows, 1, 1
+            settings.nx, settings.ny = self._nrows, 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
             # lysimeter surface 3.14 square meter (2m diameter)
-            settings.dx = 2
-            settings.dy = 2
-            settings.dz = 1
+            settings.dx = 1.77
+            settings.dy = 1.77
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0

@@ -20,7 +20,7 @@ class RestartSetup(SVATSetup):
 
 
 def test_restart(tmpdir):
-    from roger.tools.make_toy_setup import make_setup  # noqa: E402
+    from roger.tools.make_toy_data import make_toy_forcing  # noqa: E402
     os.chdir(tmpdir)
 
     timesteps_1 = 10 * 24 * 60 * 60
@@ -36,7 +36,7 @@ def test_restart(tmpdir):
             runlen=timesteps_1,
         )
     )
-    make_setup(svat_no_restart._base_path, event_type='rain', ndays=10)
+    make_toy_forcing(svat_no_restart._base_path, event_type='rain', ndays=10)
     svat_no_restart.setup()
     svat_no_restart.run()
 

@@ -1,61 +1,31 @@
 from pathlib import Path
 import os
+import shutil
+import datetime
+import glob
 import h5netcdf
-import numpy as onp
-import click
-from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-lys", "--lys-experiment", type=click.Choice(["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys8")
-@click.option("-ns", "--nsamples", type=int, default=10000)
-@click.option("-td", "--tmp-dir", type=str, default=None)
-@roger_base_cli
-def main(nsamples, lys_experiment, tmp_dir):
+def make_data(float_type):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, at, random_uniform
+    from roger.core.operators import numpy as npx, update, at
     from roger.core.numerics import calc_parameters_surface_kernel
-    from roger.tools.setup import write_forcing, write_crop_rotation
+    from roger.tools.make_toy_data import make_toy_forcing
     import roger.lookuptables as lut
+    import numpy as onp
 
-    class SVATCROPSetup(RogerSetup):
-        """A SVAT model including crop phenology/crop rotation.
+    class SVATSetup(RogerSetup):
+        """A SVAT model.
         """
         _base_path = Path(__file__).parent
-        _input_dir = None
-        _identifier = None
-        _lys = None
+        _input_dir = _base_path / "input"
 
-        def _set_lys(self, lys):
-            self._lys = lys
-
-        def _set_identifier(self, identifier):
-            self._identifier = identifier
-
-        def _set_input_dir(self, path):
-            if os.path.exists(path):
-                self._input_dir = path
-            else:
-                self._input_dir = path
-                if not os.path.exists(self._input_dir):
-                    os.mkdir(self._input_dir)
-
-        def _read_var_from_nc(self, var, path_dir, file, group=None):
-            nc_file = path_dir / file
-            if group:
-                with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                    var_obj = infile.groups[group].variables[var]
-                    return npx.array(var_obj)
-            else:
-                with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                    var_obj = infile.variables[var]
-                    return npx.array(var_obj)
-
-        def _get_nitt(self, path_dir, file):
+        def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['Time']
-                return len(onp.array(var_obj))
+                var_obj = infile.variables[var]
+                return npx.array(var_obj)
 
         def _get_runlen(self, path_dir, file):
             nc_file = path_dir / file
@@ -66,24 +36,18 @@ def main(nsamples, lys_experiment, tmp_dir):
         def _get_time_origin(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                date = infile.variables['Time'].attrs['time_origin'].split(" ")[0]
-                return f"{date} 00:00:00"
-
-        def _get_ncr(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['year_season']
-                return len(onp.array(var_obj))
+                var_obj = infile.variables['Time'].attrs['time_origin']
+                return str(var_obj)
 
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = self._identifier
+            settings.identifier = "SVAT"
 
-            settings.nx, settings.ny = nsamples, 1
+            settings.nx, settings.ny, settings.nz = 1, 1, 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
-            # lysimeter surface 1 square meter (1m diameter)
+            # spatial discretization (in meters)
             settings.dx = 1
             settings.dy = 1
 
@@ -91,22 +55,9 @@ def main(nsamples, lys_experiment, tmp_dir):
             settings.y_origin = 0.0
             settings.time_origin = self._get_time_origin(self._input_dir, 'forcing.nc')
 
-            settings.enable_crop_water_stress = True
-            settings.enable_crop_phenology = True
-            settings.enable_crop_rotation = True
             settings.enable_macropore_lower_boundary_condition = False
 
-            if settings.enable_crop_rotation:
-                settings.ncrops = 3
-                settings.ncr = self._get_ncr(self._input_dir, 'crop_rotation.nc')
-
-        @roger_routine(
-            dist_safe=False,
-            local_variables=[
-                "x",
-                "y",
-            ],
-        )
+        @roger_routine
         def set_grid(self, state):
             vs = state.variables
 
@@ -118,18 +69,7 @@ def main(nsamples, lys_experiment, tmp_dir):
             vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
             vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
 
-        @roger_routine(
-            dist_safe=False,
-            local_variables=[
-                "lut_ilu",
-                "lut_gc",
-                "lut_gcm",
-                "lut_is",
-                "lut_rdlu",
-                "lut_crops",
-                "lut_crop_scale",
-            ],
-        )
+        @roger_routine
         def set_look_up_tables(self, state):
             vs = state.variables
 
@@ -138,59 +78,26 @@ def main(nsamples, lys_experiment, tmp_dir):
             vs.lut_gcm = update(vs.lut_gcm, at[:, :], lut.ARR_GCM)
             vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
             vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
-            vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
-            # scale basal crop coeffcient with factor
-            for i in range(vs.lut_crop_scale.shape[-1]):
-                vs.lut_crop_scale = update(vs.lut_crop_scale, at[2:-2, 2:-2, i], random_uniform(0.5, 1.5, vs.lut_crop_scale.shape[:-1])[2:-2, 2:-2])
 
         @roger_routine
         def set_topography(self, state):
             pass
 
-        @roger_routine(
-            dist_safe=False,
-            local_variables=[
-                "lu_id",
-                "z_soil",
-                "dmpv",
-                "lmpv",
-                "theta_ac",
-                "theta_ufc",
-                "theta_pwp",
-                "ks",
-                "kf",
-                "crop_type",
-                "z_root",
-                "z_root_crop",
-            ],
-        )
+        @roger_routine
         def set_parameters_setup(self, state):
             vs = state.variables
 
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
-            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1350)
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], npx.array(random_uniform(1, 400, vs.dmpv.shape), dtype=int)[2:-2, 2:-2])
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], npx.array(random_uniform(1, 1200, vs.lmpv.shape), dtype=int)[2:-2, 2:-2])
-            # effective porosity
-            eff_por = random_uniform(0.1, 0.35, vs.theta_ac.shape)[2:-2, 2:-2]
-            frac_lp = random_uniform(0.1, 0.9, vs.theta_ac.shape)[2:-2, 2:-2]
-            frac_fp = 1 - frac_lp
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], eff_por * frac_lp)
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], eff_por * frac_fp)
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], random_uniform(0.1, 0.25, vs.theta_pwp.shape)[2:-2, 2:-2])
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], random_uniform(0.1, 120, vs.ks.shape)[2:-2, 2:-2])
+            vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
+            vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
+            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2000)
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 50)
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.1)
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.1)
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2],  0.2)
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], 5)
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
-
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 1])
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 2])
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 3])
-
-            z_root = self._read_var_from_nc("z_root", self._base_path, 'initvals.nc', group=self._lys)
-            vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :2], z_root)
-            vs.z_root_crop = update(
-                vs.z_root_crop,
-                at[2:-2, 2:-2, :2, 0], z_root
-            )
 
         @roger_routine
         def set_parameters(self, state):
@@ -207,12 +114,8 @@ def main(nsamples, lys_experiment, tmp_dir):
         def set_initial_conditions(self, state):
             vs = state.variables
 
-            theta_rz = self._read_var_from_nc("theta_rz", self._base_path, 'initvals.nc', group=self._lys)
-            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], npx.where(theta_rz > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + vs.theta_ufc[2:-2, 2:-2, npx.newaxis], theta_rz))
-            theta_ss = self._read_var_from_nc("theta_ss", self._base_path, 'initvals.nc', group=self._lys)
-            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], npx.where(theta_ss > vs.theta_sat[2:-2, 2:-2, npx.newaxis], vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + vs.theta_ufc[2:-2, 2:-2, npx.newaxis], theta_ss))
-
-            vs.update(set_initial_conditions_crops_kernel(state))
+            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.3)
+            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.3)
 
         @roger_routine
         def set_boundary_conditions_setup(self, state):
@@ -236,8 +139,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 "itt_day",
                 "prec",
                 "ta",
-                "ta_min",
-                "ta_max",
                 "pet",
                 "pet_res",
                 "event_id",
@@ -251,9 +152,7 @@ def main(nsamples, lys_experiment, tmp_dir):
                 "swe",
                 "swe_top",
                 "time",
-                "time_event0",
-                "crop_type",
-                "itt_cr"
+                "time_event0"
             ],
         )
         def set_forcing(self, state):
@@ -271,8 +170,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 vs.itt_forc = vs.itt_forc + 6 * 24
             prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
             ta_day = self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
-            ta_min_day = self._read_var_from_nc("TA_min", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
-            ta_max_day = self._read_var_from_nc("TA_max", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
             pet_day = self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
             cond0 = (prec_day <= 0).all() & (vs.swe[2:-2, 2:-2, vs.tau] <= 0).all() & (vs.swe_top[2:-2, 2:-2, vs.tau] <= 0).all() & (ta_day > settings.ta_fm).all()
             cond00 = ((prec_day > 0) & (ta_day <= settings.ta_fm)).any() | ((prec_day <= 0) & (ta_day <= settings.ta_fm)).all()
@@ -281,7 +178,7 @@ def main(nsamples, lys_experiment, tmp_dir):
             cond3 = (prec_day > settings.hpi).any() & (prec_day > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
             cond4 = (prec_day <= settings.hpi).all() & (prec_day > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
             cond5 = (prec_day <= 0).all() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
-            # no event or snowfall - daily time step
+            # no event or snowfall - daily time steps
             if cond0 or cond00:
                 prec = npx.sum(prec_day, axis=-1)
                 ta = npx.mean(ta_day, axis=-1)
@@ -289,14 +186,14 @@ def main(nsamples, lys_experiment, tmp_dir):
                     vs.dt_secs = 24 * 60 * 60
                 else:
                     vs.dt_secs = 60 * 60
-            # rainfall/snow melt event - hourly time step
+            # rainfall/snow melt event - hourly time steps
             elif (cond2 or cond4 or cond5) and not cond1 and not cond3:
                 prec_hour = prec_day[:, :, vs.itt_day:vs.itt_day+6]
                 ta_hour = ta_day[:, :, vs.itt_day:vs.itt_day+6]
                 prec = npx.sum(prec_hour, axis=-1)
                 ta = npx.mean(ta_hour, axis=-1)
                 vs.dt_secs = 60 * 60
-            # heavy rainfall event - 10 minute time step
+            # heavy rainfall event - 10 minutes time steps
             elif (cond1 or cond3) and not cond2 and not cond4 and not cond5:
                 prec = prec_day[:, :, vs.itt_day]
                 ta = ta_day[:, :, vs.itt_day]
@@ -312,8 +209,6 @@ def main(nsamples, lys_experiment, tmp_dir):
             # or full day, respectively
             if vs.time_event0 <= settings.end_event and (vs.dt_secs == 10 * 60):
                 ta = ta_day[:, :, vs.itt_day]
-                ta_min = ta_min_day[:, :, vs.itt_day]
-                ta_max = ta_max_day[:, :, vs.itt_day]
                 pet = pet_day[:, :, vs.itt_day]
                 vs.event_id = update(
                     vs.event_id,
@@ -323,8 +218,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 vs.itt_day = vs.itt_day + 1
             elif vs.time_event0 <= settings.end_event and (vs.dt_secs == 60 * 60):
                 ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
-                ta_min = npx.mean(ta_min_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
-                ta_max = npx.mean(ta_max_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
                 pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
                 vs.event_id = update(
                     vs.event_id,
@@ -334,8 +227,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 vs.itt_day = vs.itt_day + 6
             elif vs.time_event0 <= settings.end_event and (vs.dt_secs == 24 * 60 * 60):
                 ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
-                ta_min = npx.mean(ta_min_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
-                ta_max = npx.mean(ta_max_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
                 pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
                 vs.dt = 24
                 vs.itt_day = 0
@@ -343,8 +234,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 vs.dt_secs = 10 * 60
                 vs.dt = 1 / 6
                 ta = ta_day[:, :, vs.itt_day]
-                ta_min = ta_min_day[:, :, vs.itt_day]
-                ta_max = ta_max_day[:, :, vs.itt_day]
                 pet = pet_day[:, :, vs.itt_day]
                 vs.itt_day = vs.itt_day + 1
                 vs.event_id = update(
@@ -353,8 +242,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 )
             elif vs.time_event0 > settings.end_event and (vs.time % (60 * 60) == 0) and ((vs.dt_secs == 10 * 60) or (vs.dt_secs == 60 * 60)):
                 ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
-                ta_min = npx.mean(ta_min_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
-                ta_max = npx.mean(ta_max_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
                 pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
                 vs.dt_secs = 60 * 60
                 vs.dt = 1
@@ -365,8 +252,6 @@ def main(nsamples, lys_experiment, tmp_dir):
                 )
             elif vs.time_event0 > settings.end_event and (vs.time % (24 * 60 * 60) == 0) and (vs.dt_secs == 24 * 60 * 60):
                 ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
-                ta_min = npx.mean(ta_min_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
-                ta_max = npx.mean(ta_max_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
                 pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
                 vs.dt_secs = 24 * 60 * 60
                 vs.dt = 24
@@ -383,89 +268,35 @@ def main(nsamples, lys_experiment, tmp_dir):
             # set forcing for current time step
             vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], prec)
             vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], ta)
-            vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2, vs.tau], ta_min)
-            vs.ta_max = update(vs.ta_max, at[2:-2, 2:-2, vs.tau], ta_max)
             vs.pet = update(vs.pet, at[2:-2, 2:-2], pet)
             vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], pet)
 
-            if (vs.year[vs.tau] != vs.year[vs.taum1]) & (vs.itt > 1):
-                vs.itt_cr = vs.itt_cr + 2
-                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.crop_type[2:-2, 2:-2, 2])
-                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, vs.itt_cr])
-                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, vs.itt_cr + 1])
-
         @roger_routine
-        def set_diagnostics(self, state, base_path=tmp_dir):
+        def set_diagnostics(self, state):
             diagnostics = state.diagnostics
 
-            diagnostics["rates"].output_variables = ["prec", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "re_rg", "re_rl"]
+            diagnostics["rates"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow"]
             diagnostics["rates"].output_frequency = 24 * 60 * 60
             diagnostics["rates"].sampling_frequency = 1
-            if base_path:
-                diagnostics["rates"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["S_rz", "S_ss", "S_s", "S",
+            diagnostics["collect"].output_variables = ["S_rz", "S_ss",
                                                        "S_pwp_rz", "S_fc_rz",
                                                        "S_sat_rz", "S_pwp_ss",
                                                        "S_fc_ss", "S_sat_ss",
-                                                       "theta",
-                                                       "z_root", "ground_cover", "lu_id"]
+                                                       "theta_rz", "theta_ss", "theta",
+                                                       "S_snow"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
-            if base_path:
-                diagnostics["collect"].base_output_path = base_path
 
             diagnostics["averages"].output_variables = ["ta"]
             diagnostics["averages"].output_frequency = 24 * 60 * 60
             diagnostics["averages"].sampling_frequency = 1
-            if base_path:
-                diagnostics["averages"].base_output_path = base_path
-
-            diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'lut_crop_scale']
-            diagnostics["constant"].output_frequency = 0
-            diagnostics["constant"].sampling_frequency = 1
-            if base_path:
-                diagnostics["constant"].base_output_path = base_path
-
-            # maximum bias of deterministic/numerical solution at time step t
-            diagnostics["maximum"].output_variables = ["dS_num_error"]
-            diagnostics["maximum"].output_frequency = 24 * 60 * 60
-            diagnostics["maximum"].sampling_frequency = 1
-            if base_path:
-                diagnostics["maximum"].base_output_path = base_path
 
         @roger_routine
         def after_timestep(self, state):
             vs = state.variables
 
             vs.update(after_timestep_kernel(state))
-            vs.update(after_timestep_crops_kernel(state))
-
-    @roger_kernel
-    def set_initial_conditions_crops_kernel(state):
-        vs = state.variables
-
-        # calculate time since growing
-        t_grow = allocate(state.dimensions, ("x", "y", "crops"))
-        t_grow = update(
-            t_grow,
-            at[2:-2, 2:-2, :], npx.where(vs.z_root_crop[2:-2, 2:-2, vs.taum1, :] > 0, (-1 / vs.root_growth_rate[2:-2, 2:-2, :]) * npx.log(1 / ((vs.z_root_crop[2:-2, 2:-2, vs.taum1, :] / 1000 - vs.z_root_crop_max[2:-2, 2:-2, :] / 1000) * (-1 / (vs.z_root_crop_max[2:-2, 2:-2, :] / 1000 - vs.z_evap[2:-2, 2:-2, npx.newaxis] / 1000)))), 0)
-        )
-
-        vs.t_grow_cc = update(
-            vs.t_grow_cc,
-            at[2:-2, 2:-2, :2, :], t_grow[2:-2, 2:-2, npx.newaxis, :]
-        )
-
-        vs.t_grow_root = update(
-            vs.t_grow_root,
-            at[2:-2, 2:-2, :2, :], t_grow[2:-2, 2:-2, npx.newaxis, :]
-        )
-
-        return KernelOutput(
-            t_grow_cc=vs.t_grow_cc,
-            t_grow_root=vs.t_grow_root,
-        )
 
     @roger_kernel
     def after_timestep_kernel(state):
@@ -590,19 +421,19 @@ def main(nsamples, lys_experiment, tmp_dir):
         # set to 0 for numerical errors
         vs.S_fp_rz = update(
             vs.S_fp_rz,
-            at[2:-2, 2:-2], npx.where((vs.S_fp_rz[2:-2, 2:-2] > -1e-6) & (vs.S_fp_rz[2:-2, 2:-2] < 0), 0, vs.S_fp_rz[2:-2, 2:-2]),
+            at[2:-2, 2:-2], npx.where((vs.S_fp_rz > -1e-6) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz)[2:-2, 2:-2],
         )
         vs.S_lp_rz = update(
             vs.S_lp_rz,
-            at[2:-2, 2:-2], npx.where((vs.S_lp_rz[2:-2, 2:-2] > -1e-6) & (vs.S_lp_rz[2:-2, 2:-2] < 0), 0, vs.S_lp_rz[2:-2, 2:-2]),
+            at[2:-2, 2:-2], npx.where((vs.S_lp_rz > -1e-6) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz)[2:-2, 2:-2],
         )
         vs.S_fp_ss = update(
             vs.S_fp_ss,
-            at[2:-2, 2:-2], npx.where((vs.S_fp_ss[2:-2, 2:-2] > -1e-6) & (vs.S_fp_ss[2:-2, 2:-2] < 0), 0, vs.S_fp_ss[2:-2, 2:-2]),
+            at[2:-2, 2:-2], npx.where((vs.S_fp_ss > -1e-6) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss)[2:-2, 2:-2],
         )
         vs.S_lp_ss = update(
             vs.S_lp_ss,
-            at[2:-2, 2:-2], npx.where((vs.S_lp_ss[2:-2, 2:-2] > -1e-6) & (vs.S_lp_ss[2:-2, 2:-2] < 0), 0, vs.S_lp_ss[2:-2, 2:-2]),
+            at[2:-2, 2:-2], npx.where((vs.S_lp_ss > -1e-6) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss)[2:-2, 2:-2],
         )
         vs.prec = update(
             vs.prec,
@@ -666,40 +497,64 @@ def main(nsamples, lys_experiment, tmp_dir):
             S_lp_ss=vs.S_lp_ss,
         )
 
-    @roger_kernel
-    def after_timestep_crops_kernel(state):
-        vs = state.variables
-
-        vs.ta_min = update(vs.ta_min, at[2:-2, 2:-2, vs.taum1], vs.ta_min[2:-2, 2:-2, vs.tau])
-        vs.ta_max = update(vs.ta_max, at[2:-2, 2:-2, vs.taum1], vs.ta_max[2:-2, 2:-2, vs.tau])
-        vs.gdd_sum = update(vs.gdd_sum, at[2:-2, 2:-2, vs.taum1, :], vs.gdd_sum[2:-2, 2:-2, vs.tau, :])
-        vs.t_grow_cc = update(vs.t_grow_cc, at[2:-2, 2:-2, vs.taum1, :], vs.t_grow_cc[2:-2, 2:-2, vs.tau, :])
-        vs.t_grow_root = update(vs.t_grow_root, at[2:-2, 2:-2, vs.taum1, :], vs.t_grow_root[2:-2, 2:-2, vs.tau, :])
-        vs.ccc = update(vs.ccc, at[2:-2, 2:-2, vs.taum1, :], vs.ccc[2:-2, 2:-2, vs.tau, :])
-        vs.z_root_crop = update(vs.z_root_crop, at[2:-2, 2:-2, vs.taum1, :], vs.z_root_crop[2:-2, 2:-2, vs.tau, :])
-
-        return KernelOutput(
-            ta_min=vs.ta_min,
-            ta_max=vs.ta_max,
-            gdd_sum=vs.gdd_sum,
-            t_grow_cc=vs.t_grow_cc,
-            t_grow_root=vs.t_grow_root,
-            ccc=vs.ccc,
-            z_root_crop=vs.z_root_crop,
+    sim = SVATSetup()
+    make_toy_forcing(sim._base_path, event_type='rain', ndays=10,
+                     float_type=float_type)
+    sim.setup()
+    sim.run()
+    # delete toy forcing
+    files = sim._base_path / "input"
+    shutil.rmtree(files, ignore_errors=True)
+    # merge model output into single file
+    path = str(sim._base_path / "SVAT.*.nc")
+    diag_files = glob.glob(path)
+    states_hm_file = sim._base_path / "states_hm.nc"
+    with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
+        f.attrs.update(
+            date_created=datetime.datetime.today().isoformat(),
+            title='Test data for SVAT transport models',
+            institution='University of Freiburg, Chair of Hydrology',
+            references='',
+            comment='SVAT model with free drainage'
         )
+        # collect dimensions
+        for dfs in diag_files:
+            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                # set dimensions with a dictionary
+                if not dfs.split('/')[-1].split('.')[1] == 'constant':
+                    dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
+                    time = onp.array(df.variables.get('Time'))
+        for dfs in diag_files:
+            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                if not f.dimensions:
+                    f.dimensions = dict_dim
+                    v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = 'model run'
+                    v.attrs['units'] = ''
+                    v[:] = onp.arange(dict_dim["x"])
+                    v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = ''
+                    v.attrs['units'] = ''
+                    v[:] = onp.arange(dict_dim["y"])
+                    v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
+                    var_obj = df.variables.get('Time')
+                    v.attrs.update(time_origin=var_obj.attrs["time_origin"],
+                                    units=var_obj.attrs["units"])
+                    v[:] = time
+                for var_sim in list(df.variables.keys()):
+                    var_obj = df.variables.get(var_sim)
+                    if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] > 1:
+                        v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                        vals = onp.array(var_obj)
+                        v[:, :, :] = vals.swapaxes(0, 2)
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                    elif var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] <= 2:
+                        v = f.create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
+                        vals = onp.array(var_obj)
+                        v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
 
-    model = SVATCROPSetup()
-    model._set_lys(lys_experiment)
-    input_path = model._base_path / "input" / lys_experiment
-    model._set_input_dir(input_path)
-    identifier = f'SVATCROP_{lys_experiment}'
-    model._set_identifier(identifier)
-    write_forcing(input_path, enable_crop_phenology=True)
-    write_crop_rotation(input_path)
-    model.setup()
-    model.run()
-    return
-
-
-if __name__ == "__main__":
-    main()
+        for dfs in diag_files:
+            os.remove(dfs)

@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 import h5netcdf
 import pandas as pd
 import numpy as onp
@@ -14,16 +13,7 @@ class ONEDEVENTSetup(RogerSetup):
     """A 1D model for a single event.
     """
     _base_path = Path(__file__).parent
-    _input_dir = None
-
-    # custom helper functions
-    def _set_input_dir(self, path):
-        if os.path.exists(path):
-            self._input_dir = path
-        else:
-            if not os.path.exists(path):
-                os.mkdir(self._input_dir)
-                self._input_dir = path
+    _input_dir = _base_path / "input"
 
     def _read_var_from_nc(self, var, path_dir, file):
         nc_file = path_dir / file
@@ -54,8 +44,8 @@ class ONEDEVENTSetup(RogerSetup):
         settings = state.settings
         settings.identifier = "ONEDEVENT"
 
-        # total grid numbers in x-,y- and z-direction
-        settings.nx, settings.ny, settings.nz = 8, 8, 1
+        # total grid numbers in x-- and y-direction
+        settings.nx, settings.ny = 1, 1
         # derive total number of time steps from forcing
         settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
         settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
@@ -63,7 +53,6 @@ class ONEDEVENTSetup(RogerSetup):
         # spatial discretization (in meters)
         settings.dx = 1
         settings.dy = 1
-        settings.dz = 1
 
         settings.x_origin = 0.0
         settings.y_origin = 0.0
@@ -136,19 +125,19 @@ class ONEDEVENTSetup(RogerSetup):
         # density of vertical macropores (1/m2)
         vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
         # density of horizontal macropores (1/m2)
-        vs.dmph = update(vs.dmph, at[2:-2, 2:-2], 30)
+        vs.dmph = update(vs.dmph, at[2:-2, 2:-2], 50)
         # total length of vertical macropores (mm)
-        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 500)
+        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1000)
         # air capacity (-)
-        vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.13)
+        vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.1)
         # usable field capacity (-)
-        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.22)
+        vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.1)
         # permanent wilting point (-)
-        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.18)
-        # saturated hydraulic conductivity (-)
-        vs.ks = update(vs.ks, at[2:-2, 2:-2], 9)
-        # hydraulic conductivity of bedrock/saturated zone (-)
-        vs.kf = update(vs.kf, at[2:-2, 2:-2], 5)
+        vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.2)
+        # saturated hydraulic conductivity (mm/h)
+        vs.ks = update(vs.ks, at[2:-2, 2:-2], 5)
+        # hydraulic conductivity of bedrock/saturated zone (mm/h)
+        vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
     @roger_routine
     def set_parameters(self, state):
@@ -177,9 +166,9 @@ class ONEDEVENTSetup(RogerSetup):
         # snow water equivalent of snow cover (mm)
         vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
         # soil water content of root zone/upper soil layer (-)
-        vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.4)
+        vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.3)
         # soil water content of subsoil/lower soil layer (-)
-        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.4)
+        vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.3)
 
     @roger_routine
     def set_boundary_conditions_setup(self, state):
@@ -220,6 +209,7 @@ class ONEDEVENTSetup(RogerSetup):
 
         # shift variables backwards
         vs.update(after_timestep_kernel(state))
+
 
 @roger_kernel
 def after_timestep_kernel(state):

@@ -28,9 +28,9 @@ THETA_AC = 0.08
 THETA_UFC = 0.15
 # permanent wilting point (-)
 THETA_PWP = 0.17
-# saturated hydraulic conductivity (-)
+# saturated hydraulic conductivity (mm/h)
 KS = 9.2
-# hydraulic conductivity of bedrock/saturated zone (-)
+# hydraulic conductivity of bedrock/saturated zone (mm/h)
 KF = 5
 
 # --- set the initial conditions -----------------------
@@ -99,8 +99,8 @@ def main():
             settings = state.settings
             settings.identifier = "ONEDEVENT"
 
-            # total grid numbers in x-,y- and z-direction
-            settings.nx, settings.ny, settings.nz = 1, 1, 1
+            # total grid numbers in x- and y-direction
+            settings.nx, settings.ny = 1, 1
             # derive total number of time steps from forcing
             settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
@@ -108,7 +108,6 @@ def main():
             # spatial discretization (in meters)
             settings.dx = 1
             settings.dy = 1
-            settings.dz = 1
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0
@@ -190,9 +189,9 @@ def main():
             vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], THETA_UFC)
             # permanent wilting point (-)
             vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], THETA_PWP)
-            # saturated hydraulic conductivity (-)
+            # saturated hydraulic conductivity (mm/h)
             vs.ks = update(vs.ks, at[2:-2, 2:-2], KS)
-            # hydraulic conductivity of bedrock/saturated zone (-)
+            # hydraulic conductivity of bedrock/saturated zone (mm/h)
             vs.kf = update(vs.kf, at[2:-2, 2:-2], KF)
 
         @roger_routine

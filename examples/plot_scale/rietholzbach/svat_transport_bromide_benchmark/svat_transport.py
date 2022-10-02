@@ -14,13 +14,13 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(transport_model_structure, sas_solver, tmp_dir):
-    from roger import RogerSetup, roger_routine, roger_kernel
+    from roger import RogerSetup, roger_routine
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, where
     from roger.tools.setup import write_forcing_tracer
 
     class SVATTRANSPORTSetup(RogerSetup):
-        """A SVAT transport model.
+        """A SVAT bromide transport model.
         """
         _base_path = Path(__file__).parent
         _year = None
@@ -113,16 +113,15 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             if settings.sas_solver in ['RK4', 'Euler']:
                 settings.h = 1 / settings.sas_solver_substeps
 
-            settings.nx, settings.ny, settings.nz = 1, 1, 1
+            settings.nx, settings.ny = 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
             settings.ages = settings.nitt
             settings.nages = settings.nitt + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
 
             # lysimeter surface 3.14 square meter (2m diameter)
-            settings.dx = 2
-            settings.dy = 2
-            settings.dz = 1
+            settings.dx = 1.77
+            settings.dy = 1.77
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0
@@ -376,13 +375,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
 
         @roger_routine
         def after_timestep(self, state):
-            vs = state.variables
-
-            vs.update(after_timestep_kernel(state))
-
-    @roger_kernel
-    def after_timestep_kernel(state):
-        pass
+            pass
 
     years = onp.arange(1997, 2007).tolist()
     tms = transport_model_structure.replace("_", " ")

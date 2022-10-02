@@ -109,16 +109,15 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             if settings.sas_solver in ['RK4', 'Euler']:
                 settings.h = 1 / settings.sas_solver_substeps
 
-            settings.nx, settings.ny, settings.nz = self._nsamples, 1, 1
+            settings.nx, settings.ny = self._nsamples, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
             settings.ages = settings.nitt
             settings.nages = settings.ages + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
 
             # lysimeter surface 3.14 square meter (2m diameter)
-            settings.dx = 2
-            settings.dy = 2
-            settings.dz = 1
+            settings.dx = 1.77
+            settings.dy = 1.77
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0

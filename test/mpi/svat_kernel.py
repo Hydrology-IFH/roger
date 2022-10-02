@@ -17,7 +17,7 @@ if rst.proc_num > 1:
 
 
 from roger.setups.svat import SVATSetup  # noqa: E402
-from roger.tools.make_toy_setup import make_setup  # noqa: E402
+from roger.tools.make_toy_data import make_toy_forcing  # noqa: E402
 
 dict_settings = dict(
     nx=8,
@@ -33,7 +33,7 @@ if not os.path.exists(sim._base_path):
     os.mkdir(sim._base_path)
 
 # run toy setup on single process and let the other processes wait
-make_setup(sim._base_path, ndays=10, nrows=dict_settings["nx"], ncols=dict_settings["ny"])
+make_toy_forcing(sim._base_path, ndays=10, nrows=dict_settings["nx"], ncols=dict_settings["ny"])
 
 if rst.proc_num == 1:
     comm = MPI.COMM_SELF.Spawn(sys.executable, args=["-m", "mpi4py", sys.argv[-1]], maxprocs=4)
@@ -56,8 +56,8 @@ else:
 
     theta_global = gather(sim.state.variables.theta, sim.state.dimensions, ("x", "y"))
 
-    # if rst.proc_rank == 0:
-    #     rs.mpi_comm.Get_parent().Send(np.array(theta_global), 0)
+    if rst.proc_rank == 0:
+        rs.mpi_comm.Get_parent().Send(np.array(theta_global), 0)
 
 # delete temporary directory
 shutil.rmtree(sim._base_path, ignore_errors=True)

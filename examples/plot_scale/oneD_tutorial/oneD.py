@@ -28,9 +28,9 @@ THETA_AC = 0.08
 THETA_UFC = 0.15
 # permanent wilting point (-)
 THETA_PWP = 0.17
-# saturated hydraulic conductivity (-)
+# saturated hydraulic conductivity (mm/h)
 KS = 9.2
-# hydraulic conductivity of bedrock/saturated zone (-)
+# hydraulic conductivity of bedrock/saturated zone (mm/h)
 KF = 5
 
 # --- set the initial conditions -----------------------
@@ -96,8 +96,8 @@ def main():
             settings = state.settings
             settings.identifier = "ONED"
 
-            # total grid numbers in x-,y- and z-direction
-            settings.nx, settings.ny, settings.nz = 1, 1, 1
+            # total grid numbers in x- and y-direction
+            settings.nx, settings.ny = 1, 1
             # derive total number of time steps from forcing
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
@@ -215,9 +215,9 @@ def main():
             vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
             # snow water equivalent of snow cover (mm)
             vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
-            # soil water content of root zone/upper soil layer (-)
+            # soil water content of root zone/upper soil layer (mm/h)
             vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], THETA_RZ)
-            # soil water content of subsoil/lower soil layer (-)
+            # soil water content of subsoil/lower soil layer (mm/h)
             vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], THETA_SS)
 
         @roger_routine

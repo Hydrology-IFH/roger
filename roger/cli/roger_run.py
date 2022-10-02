@@ -83,6 +83,8 @@ def run(setup_file, *args, **kwargs):
 
     sim = SetupClass(*args, **kwargs)
     sim.setup()
+    if sim.settings.enable_offline_transport:
+        sim.warmup()
     sim.run()
 
 

@@ -29,24 +29,24 @@ def dummy_variables():
 
 
 def test_lock_settings(dummy_settings):
-    orig_val = dummy_settings.dt_tracer
+    orig_val = dummy_settings.throughfall_coeff
 
     with pytest.raises(RuntimeError):
-        dummy_settings.dt_tracer = 0
+        dummy_settings.throughfall_coeff = 0
 
-    assert dummy_settings.dt_tracer == orig_val
+    assert dummy_settings.throughfall_coeff == orig_val
 
     with dummy_settings.unlock():
-        dummy_settings.dt_tracer = 1
+        dummy_settings.throughfall_coeff = 1
 
-    assert dummy_settings.dt_tracer == 1
+    assert dummy_settings.throughfall_coeff == 1
 
 
 def test_settings_repr(dummy_settings):
     with dummy_settings.unlock():
-        dummy_settings.dt_tracer = 1
+        dummy_settings.throughfall_coeff = 1
 
-    assert "dt_tracer = 1.0," in repr(dummy_settings)
+    assert "throughfall_coeff = 1.0," in repr(dummy_settings)
 
 
 def test_variables_repr(dummy_variables):

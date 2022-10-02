@@ -12,18 +12,18 @@ class Dummy:
 
 @pytest.mark.xfail(platform.system() == "Darwin", reason="Flaky on OSX")
 def test_progress_format(capsys):
-    from veros.logs import setup_logging
+    from roger.logs import setup_logging
 
     setup_logging(stream_sink=sys.stdout)
 
-    from veros.progress import get_progress_bar
+    from roger.progress import get_progress_bar
 
     dummy_state = Dummy()
     dummy_state.settings = Dummy()
     dummy_state.variables = Dummy()
     dummy_state.settings.runlen = 8000
-    dummy_state.variables.time = 2000
-    dummy_state.variables.itt = 2
+    dummy_state.variables.time = 0
+    dummy_state.variables.itt = 0
 
     with get_progress_bar(dummy_state, use_tqdm=False) as pbar:
         for _ in range(8):
