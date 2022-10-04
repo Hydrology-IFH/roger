@@ -364,16 +364,16 @@ def calc_inf_mp(state):
         at[2:-2, 2:-2], npx.where(vs.lmpv_non_sat[2:-2, 2:-2] < 0, 0, vs.lmpv_non_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # determine computation steps. additional computation steps for hourly
+    # determine substeps. additional substeps for hourly
     # time step.
-    computation_steps = npx.int64(npx.round(vs.dt / (1 / 5), 0))  # based on hours
+    substeps = npx.int64(npx.round(vs.dt / (1 / 5), 0))  # based on hours
 
     vs.lmpv_non_sat = update(
         vs.lmpv_non_sat,
-        at[2:-2, 2:-2], npx.where(computation_steps == 1, vs.lmpv_non_sat[2:-2, 2:-2] + dz_wf[2:-2, 2:-2] / 1.39, vs.lmpv_non_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(substeps == 1, vs.lmpv_non_sat[2:-2, 2:-2] + dz_wf[2:-2, 2:-2] / 1.39, vs.lmpv_non_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # variables to calculate y(t)
+    # variables to calculate radial wetting front y(t)
     # 0 = y1
     # 1 = y2
     # 2 = y3
@@ -390,162 +390,183 @@ def calc_inf_mp(state):
     # 13 = inf_mp_event_csum
     # 14 = t
     # 15 = y
-    loop_arr = allocate(state.dimensions, ("x", "y", 16))
+    y1 = allocate(state.dimensions, ("x", "y"))
+    y2 = allocate(state.dimensions, ("x", "y"))
+    y3 = allocate(state.dimensions, ("x", "y"))
+    ym1 = allocate(state.dimensions, ("x", "y"))
+    a = allocate(state.dimensions, ("x", "y"))
+    b1 = allocate(state.dimensions, ("x", "y"))
+    b2 = allocate(state.dimensions, ("x", "y"))
+    c = allocate(state.dimensions, ("x", "y"))
+    inf_mp_pot_di = allocate(state.dimensions, ("x", "y"))
+    inf_mp_di = allocate(state.dimensions, ("x", "y"))
+    z0_di = allocate(state.dimensions, ("x", "y"))
+    inf_mp = allocate(state.dimensions, ("x", "y"))
+    inf_mp_pot = allocate(state.dimensions, ("x", "y"))
+    inf_mp_event_csum = allocate(state.dimensions, ("x", "y"))
+    t = allocate(state.dimensions, ("x", "y"))
+    y = allocate(state.dimensions, ("x", "y"))
 
-    loop_arr = update(
-        loop_arr,
-        at[2:-2, 2:-2, 2], (settings.r_mp / 2) * vs.maskCatch[2:-2, 2:-2],
+    y2 = update(
+        y2,
+        at[2:-2, 2:-2], (settings.r_mp / 2) * vs.maskCatch[2:-2, 2:-2],
     )
-    loop_arr = update(
-        loop_arr,
-        at[2:-2, 2:-2, 4], vs.theta_d[2:-2, 2:-2] * settings.r_mp ** 2 * vs.maskCatch[2:-2, 2:-2],
+    a = update(
+        a,
+        at[2:-2, 2:-2], vs.theta_d[2:-2, 2:-2] * settings.r_mp ** 2 * vs.maskCatch[2:-2, 2:-2],
     )
-    loop_arr = update(
-        loop_arr,
-        at[2:-2, 2:-2, 13], vs.inf_mp_event_csum[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    y = update(
+        y,
+        at[2:-2, 2:-2], vs.y_mp[2:-2, 2:-2, vs.taum1] * vs.maskCatch[2:-2, 2:-2],
     )
-    loop_arr = update(
-        loop_arr,
-        at[2:-2, 2:-2, 3], vs.y_mp[2:-2, 2:-2, vs.taum1] * vs.maskCatch[2:-2, 2:-2],
+    ym1 = update(
+        ym1,
+        at[2:-2, 2:-2], vs.y_mp[2:-2, 2:-2, vs.taum1] * vs.maskCatch[2:-2, 2:-2],
+    )
+    inf_mp_event_csum = update(
+        ym1,
+        at[2:-2, 2:-2], vs.inf_mp_event_csum[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     def loop_body(carry, i):
-        vs, settings, loop_arr = carry
+        vs, settings, loop_vars = carry
+        y1, y2, y3, ym1, a, b1, b2, c, inf_mp_pot_di, inf_mp_di, z0_di, inf_mp, inf_mp_pot, inf_mp_event_csum, t, y = loop_vars
 
-        # determine computation steps. additional computation steps for hourly
+        # determine substeps. additional substeps for hourly time steps
         # time step.
-        computation_steps = npx.int64(npx.round(vs.dt / (1 / 5), 0))  # based on hours
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 10], vs.z0[2:-2, 2:-2, vs.tau] * (vs.mp_drain_area[2:-2, 2:-2] / computation_steps) * vs.maskCatch[2:-2, 2:-2],
+        substeps = npx.int64(npx.round(vs.dt / (1 / 5), 0))  # based on hours
+        z0_di = update(
+            z0_di,
+            at[2:-2, 2:-2], vs.z0[2:-2, 2:-2, vs.tau] * (vs.mp_drain_area[2:-2, 2:-2] / substeps) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update_add(
-            loop_arr,
-            at[2:-2, 2:-2, 14], (vs.dt / computation_steps) * vs.maskCatch[2:-2, 2:-2],
+        t = update_add(
+            t,
+            at[2:-2, 2:-2], (vs.dt / substeps) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 7], vs.ks[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2] * loop_arr[2:-2, 2:-2, 14] * vs.maskCatch[2:-2, 2:-2],
+        c = update(
+            c,
+            at[2:-2, 2:-2], vs.ks[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2] * t[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 7], npx.where(npx.isnan(loop_arr[2:-2, 2:-2, 7]), 0, loop_arr[2:-2, 2:-2, 7]) * vs.maskCatch[2:-2, 2:-2],
+        c = update(
+            c,
+            at[2:-2, 2:-2], npx.where(npx.isnan(c[2:-2, 2:-2]), 0, c[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 5], (6**0.5 * 2 * (loop_arr[2:-2, 2:-2, 7]*(6*loop_arr[2:-2, 2:-2, 7] - loop_arr[2:-2, 2:-2, 4]))**0.5) * vs.maskCatch[2:-2, 2:-2],
+        b1 = update(
+            b1,
+            at[2:-2, 2:-2], (6**0.5 * 2 * (c[2:-2, 2:-2]*(6*c[2:-2, 2:-2] - a[2:-2, 2:-2]))**0.5) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 5], npx.where(npx.isnan(loop_arr[2:-2, 2:-2, 5]), 0, loop_arr[2:-2, 2:-2, 5]) * vs.maskCatch[2:-2, 2:-2],
+        b1 = update(
+            b1,
+            at[2:-2, 2:-2], npx.where(npx.isnan(b1[2:-2, 2:-2]), 0, b1[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 6], (settings.r_mp*vs.theta_d[2:-2, 2:-2]**2) * (12*loop_arr[2:-2, 2:-2, 7] - loop_arr[2:-2, 2:-2, 4] + loop_arr[2:-2, 2:-2, 5]) * vs.maskCatch[2:-2, 2:-2],
+        b2 = update(
+            b2,
+            at[2:-2, 2:-2], (settings.r_mp*vs.theta_d[2:-2, 2:-2]**2) * (12*c[2:-2, 2:-2] - a[2:-2, 2:-2] + b1[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 6], npx.where(npx.isnan(loop_arr[2:-2, 2:-2, 6]), 0, loop_arr[2:-2, 2:-2, 6]) * vs.maskCatch[2:-2, 2:-2],
+        b2 = update(
+            b2,
+            at[2:-2, 2:-2], npx.where(npx.isnan(b2[2:-2, 2:-2]), 0, b2[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 6], npx.where(loop_arr[2:-2, 2:-2, 6] <= 0, 0, loop_arr[2:-2, 2:-2, 6]) * vs.maskCatch[2:-2, 2:-2],
+        b2 = update(
+            b2,
+            at[2:-2, 2:-2], npx.where(b2[2:-2, 2:-2] <= 0, 0, b2[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 0], ((loop_arr[2:-2, 2:-2, 6]**(1/3)) / vs.theta_d[2:-2, 2:-2]) * 0.5 * vs.maskCatch[2:-2, 2:-2],
+        y1 = update(
+            y1,
+            at[2:-2, 2:-2], ((b2[2:-2, 2:-2]**(1/3)) / vs.theta_d[2:-2, 2:-2]) * 0.5 * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 1], (loop_arr[2:-2, 2:-2, 4] / (loop_arr[2:-2, 2:-2, 6]**(1/3))) * 0.5 * vs.maskCatch[2:-2, 2:-2],
+
+        y2 = update(
+            y2,
+            at[2:-2, 2:-2], (a[2:-2, 2:-2] / (b2[2:-2, 2:-2]**(1/3))) * 0.5 * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 15], (loop_arr[2:-2, 2:-2, 0] + loop_arr[2:-2, 2:-2, 1] + loop_arr[2:-2, 2:-2, 2]) * vs.maskCatch[2:-2, 2:-2],
+        y = update(
+            y,
+            at[2:-2, 2:-2], (y1[2:-2, 2:-2] + y2[2:-2, 2:-2] + ym1[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
         # potential radial length of macropore wetting front
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 15], npx.where(loop_arr[2:-2, 2:-2, 15] < settings.r_mp, settings.r_mp, loop_arr[2:-2, 2:-2, 15]) * vs.maskCatch[2:-2, 2:-2],
+        y = update(
+            y,
+            at[2:-2, 2:-2], npx.where(y[2:-2, 2:-2] < settings.r_mp, settings.r_mp, y[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
         # constrain the potential radial length of macropore wetting front
         # to the radial length at beginning of computation step
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 15], npx.where(loop_arr[2:-2, 2:-2, 15] < loop_arr[2:-2, 2:-2, 3], loop_arr[2:-2, 2:-2, 3], loop_arr[2:-2, 2:-2, 15]) * vs.maskCatch[2:-2, 2:-2],
+        y = update(
+            y,
+            at[2:-2, 2:-2], npx.where(y[2:-2, 2:-2] < ym1[2:-2, 2:-2], ym1[2:-2, 2:-2], y[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
         # potential macropore infiltration (in mm/dt)
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 8], (settings.pi * (loop_arr[2:-2, 2:-2, 15]**2 - loop_arr[2:-2, 2:-2, 3]**2) * vs.lmpv_non_sat[2:-2, 2:-2] * vs.theta_d[2:-2, 2:-2] * vs.dmpv[2:-2, 2:-2] * 1e-06) * vs.maskCatch[2:-2, 2:-2],
+        inf_mp_pot_di = update(
+            inf_mp_pot_di,
+            at[2:-2, 2:-2], (settings.pi * (y[2:-2, 2:-2]**2 - ym1[2:-2, 2:-2]**2) * vs.lmpv_non_sat[2:-2, 2:-2] * vs.theta_d[2:-2, 2:-2] * vs.dmpv[2:-2, 2:-2] * 1e-06) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update_add(
-            loop_arr,
-            at[2:-2, 2:-2, 12], loop_arr[2:-2, 2:-2, 8] * vs.maskCatch[2:-2, 2:-2],
+        inf_mp_pot = update_add(
+            inf_mp_pot,
+            at[2:-2, 2:-2], inf_mp_pot_di[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         # constrain macropore infiltration with matrix infiltration excess
-        mask1 = (loop_arr[:, :, 8] > loop_arr[:, :, 10])
+        mask1 = (inf_mp_pot_di > z0_di)
         # actual macropore infiltration
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 9], loop_arr[2:-2, 2:-2, 8] * vs.maskCatch[2:-2, 2:-2],
+        inf_mp_di = update(
+            inf_mp_di,
+            at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], z0_di[2:-2, 2:-2], inf_mp_pot_di[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 9], npx.where(mask1[2:-2, 2:-2], loop_arr[2:-2, 2:-2, 10], loop_arr[2:-2, 2:-2, 9]) * vs.maskCatch[2:-2, 2:-2],
+        inf_mp_di = update(
+            inf_mp_di,
+            at[2:-2, 2:-2], npx.where(vs.lmpv_non_sat[2:-2, 2:-2] == 0, 0, inf_mp_di[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 9], npx.where(vs.lmpv_non_sat[2:-2, 2:-2] == 0, 0, loop_arr[2:-2, 2:-2, 9]) * vs.maskCatch[2:-2, 2:-2],
-        )
-        loop_arr = update_add(
-            loop_arr,
-            at[2:-2, 2:-2, 11], loop_arr[2:-2, 2:-2, 9] * vs.maskCatch[2:-2, 2:-2],
+        inf_mp = update_add(
+            inf_mp,
+            at[2:-2, 2:-2], inf_mp_di[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
         # calculate radial length of macropore wetting front
-        loop_arr = update_add(
-            loop_arr,
-            at[2:-2, 2:-2, 13], loop_arr[2:-2, 2:-2, 9] * vs.maskCatch[2:-2, 2:-2],
+        inf_mp_event_csum = update_add(
+            inf_mp_event_csum,
+            at[2:-2, 2:-2], inf_mp_di[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 15], settings.r_mp + ((loop_arr[2:-2, 2:-2, 13] / (vs.dmpv[2:-2, 2:-2] * vs.theta_d[2:-2, 2:-2])) / settings.pi)**.5 * vs.maskCatch[2:-2, 2:-2],
+        y = update(
+            y,
+            at[2:-2, 2:-2], settings.r_mp + ((inf_mp_event_csum[2:-2, 2:-2] / (vs.dmpv[2:-2, 2:-2] * vs.theta_d[2:-2, 2:-2])) / settings.pi)**.5 * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 15], npx.where(loop_arr[2:-2, 2:-2, 15] < settings.r_mp, settings.r_mp, loop_arr[2:-2, 2:-2, 15]) * vs.maskCatch[2:-2, 2:-2],
+        y = update(
+            y,
+            at[2:-2, 2:-2], npx.where(y[2:-2, 2:-2] < settings.r_mp, settings.r_mp, y[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
 
         # duration of macropore infiltration
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 14], vs.theta_d[2:-2, 2:-2] / (vs.ks[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2] * settings.r_mp) * (loop_arr[2:-2, 2:-2, 15]**3 / 3. - loop_arr[2:-2, 2:-2, 15]**2 * settings.r_mp / 2. + settings.r_mp**3 / 6.) * vs.maskCatch[2:-2, 2:-2],
+        t = update(
+            t,
+            at[2:-2, 2:-2], vs.theta_d[2:-2, 2:-2] / (vs.ks[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2] * settings.r_mp) * (y[2:-2, 2:-2]**3 / 3. - y[2:-2, 2:-2]**2 * settings.r_mp / 2. + settings.r_mp**3 / 6.) * vs.maskCatch[2:-2, 2:-2],
         )
 
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 11], npx.where(loop_arr[2:-2, 2:-2, 11] < 0, 0, loop_arr[2:-2, 2:-2, 11]) * vs.maskCatch[2:-2, 2:-2],
+        inf_mp = update(
+            inf_mp,
+            at[2:-2, 2:-2], npx.where(inf_mp[2:-2, 2:-2] < 0, 0, inf_mp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
 
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 3], loop_arr[2:-2, 2:-2, 15] * vs.maskCatch[2:-2, 2:-2],
+        ym1 = update(
+            ym1,
+            at[2:-2, 2:-2], y[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
-        carry = (vs, settings, loop_arr)
+        loop_vars = (y1, y2, y3, ym1, a, b1, b2, c, inf_mp_pot_di, inf_mp_di, z0_di, inf_mp, inf_mp_pot, inf_mp_event_csum, t, y)
+        carry = (vs, settings, loop_vars)
 
         return carry, None
 
-    steps = npx.arange(0, computation_steps)
-    carry = (vs, settings, loop_arr)
+    steps = npx.arange(0, substeps)
+    loop_vars = (y1, y2, y3, ym1, a, b1, b2, c, inf_mp_pot_di, inf_mp_di, z0_di, inf_mp, inf_mp_pot, inf_mp_event_csum, t, y)
+    carry = (vs, settings, loop_vars)
     res, _ = scan(loop_body, carry, steps)
 
-    loop_arr = res[2]
+    loop_vars = res[2]
+    inf_mp = loop_vars[-5]
+    y = loop_vars[-1]
 
     vs.y_mp = update(
         vs.y_mp,
-        at[2:-2, 2:-2, vs.tau], loop_arr[2:-2, 2:-2, 15] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau], y[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.y_mp = update(
@@ -555,7 +576,7 @@ def calc_inf_mp(state):
 
     vs.inf_mp = update(
         vs.inf_mp,
-        at[2:-2, 2:-2], loop_arr[2:-2, 2:-2, 11] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], inf_mp[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.inf_mp = update(
@@ -745,112 +766,120 @@ def calc_inf_sc(state):
         at[2:-2, 2:-2], npx.where(vs.z_sc_non_sat[2:-2, 2:-2] < 0, 0, vs.z_sc_non_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # determine computation steps. additional computation steps for hourly
+    # determine substeps. additional substeps for hourly
     # time step.
-    computation_steps = npx.int64(npx.round(vs.dt / (1 / 5), 0))  # based on hours
+    substeps = npx.int64(npx.round(vs.dt / (1 / 5), 0))  # based on hours
 
     vs.z_sc_non_sat = update(
         vs.z_sc_non_sat,
-        at[2:-2, 2:-2], npx.where(computation_steps == 1, vs.z_sc_non_sat[2:-2, 2:-2] + dz_wf[2:-2, 2:-2] / 1.39, vs.z_sc_non_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(substeps == 1, vs.z_sc_non_sat[2:-2, 2:-2] + dz_wf[2:-2, 2:-2] / 1.39, vs.z_sc_non_sat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # variables to calculate y(t)
-    # 0 = y
-    # 1 = ym1
-    # 2 = inf_sc_pot_di
-    # 3 = inf_sc_di
-    # 4 = z0_di
-    # 5 = inf_sc_event_csum
-    # 6 = t
-    # 7 = inf_sc
-    loop_arr = allocate(state.dimensions, ("x", "y", 8))
+    # variables to calculate horizontal length of wetting front y(t)
+    y = allocate(state.dimensions, ("x", "y"))
+    ym1 = allocate(state.dimensions, ("x", "y"))
+    inf_sc_pot_di = allocate(state.dimensions, ("x", "y"))
+    inf_sc_di = allocate(state.dimensions, ("x", "y"))
+    z0_di = allocate(state.dimensions, ("x", "y"))
+    inf_sc_event_csum = allocate(state.dimensions, ("x", "y"))
+    t = allocate(state.dimensions, ("x", "y"))
+    inf_sc = allocate(state.dimensions, ("x", "y"))
 
-    loop_arr = update(
-        loop_arr,
-        at[2:-2, 2:-2, 5], vs.inf_sc_event_csum[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    y = update(
+        y,
+        at[2:-2, 2:-2], vs.y_sc[2:-2, 2:-2, vs.taum1] * vs.maskCatch[2:-2, 2:-2],
     )
-    loop_arr = update(
-        loop_arr,
-        at[2:-2, 2:-2, 1], vs.y_sc[2:-2, 2:-2, vs.taum1] * vs.maskCatch[2:-2, 2:-2],
+    ym1 = update(
+        ym1,
+        at[2:-2, 2:-2], vs.y_sc[2:-2, 2:-2, vs.taum1] * vs.maskCatch[2:-2, 2:-2],
+    )
+    inf_sc_event_csum = update(
+        inf_sc_event_csum,
+        at[2:-2, 2:-2, 1], vs.inf_sc_event_csum[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     def loop_body(carry, i):
-        vs, settings, loop_arr = carry
-        # determine computation steps. additional computation steps for hourly
+        vs, settings, loop_vars = carry
+        y, ym1, inf_sc_pot_di, inf_sc_di, z0_di, inf_sc_event_csum, t, inf_sc = loop_vars
+        # determine substeps. additional substeps for hourly
         # time step.
-        computation_steps = npx.int64(npx.round(vs.dt / (1 / 5), 0))  # based on hours
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 4], (vs.z0[2:-2, 2:-2, vs.tau] / computation_steps) * vs.maskCatch[2:-2, 2:-2],
+        substeps = npx.int64(npx.round(vs.dt / (1 / 5), 0))  # based on hours
+        z0_di = update(
+            z0_di,
+            at[2:-2, 2:-2], (vs.z0[2:-2, 2:-2, vs.tau] / substeps) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update_add(
-            loop_arr,
-            at[2:-2, 2:-2, 6], (vs.dt / computation_steps) * vs.maskCatch[2:-2, 2:-2],
+        t = update_add(
+            t,
+            at[2:-2, 2:-2], (vs.dt / substeps) * vs.maskCatch[2:-2, 2:-2],
             )
         # potential horizontal length of shrinkage crack wetting front
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 0], (((vs.ks[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2] * loop_arr[2:-2, 2:-2, 6] * 2) / vs.theta_d[2:-2, 2:-2])**0.5) * vs.maskCatch[2:-2, 2:-2],
+        y = update(
+            y,
+            at[2:-2, 2:-2], (((vs.ks[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2] * t[2:-2, 2:-2] * 2) / vs.theta_d[2:-2, 2:-2])**0.5) * vs.maskCatch[2:-2, 2:-2],
         )
         # potential horizontal shrinkage crack infiltration
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 2], ((vs.z_sc_non_sat[2:-2, 2:-2] * vs.theta_d[2:-2, 2:-2] * settings.l_sc) * (loop_arr[2:-2, 2:-2, 0] - loop_arr[2:-2, 2:-2, 1]) * 1e-06) * vs.maskCatch[2:-2, 2:-2],
+        inf_sc_pot_di = update(
+            inf_sc_pot_di,
+            at[2:-2, 2:-2], ((vs.z_sc_non_sat[2:-2, 2:-2] * vs.theta_d[2:-2, 2:-2] * settings.l_sc) * (y[2:-2, 2:-2] - ym1[2:-2, 2:-2]) * 1e-06) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 2], npx.where(loop_arr[2:-2, 2:-2, 2] <= 0, 0, loop_arr[2:-2, 2:-2, 2]) * vs.maskCatch[2:-2, 2:-2],
+        inf_sc_pot_di = update(
+            inf_sc_pot_di,
+            at[2:-2, 2:-2], npx.where(inf_sc_pot_di[2:-2, 2:-2] <= 0, 0, inf_sc_pot_di[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
         # actual horizontal shrinkage crack infiltration
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 3], npx.where(loop_arr[2:-2, 2:-2, 2] > loop_arr[2:-2, 2:-2, 4], loop_arr[2:-2, 2:-2, 4], loop_arr[2:-2, 2:-2, 2]) * vs.maskCatch[2:-2, 2:-2],
+        inf_sc_di = update(
+            inf_sc_di,
+            at[2:-2, 2:-2], npx.where(inf_sc_pot_di[2:-2, 2:-2] > z0_di[2:-2, 2:-2], z0_di[2:-2, 2:-2], inf_sc_pot_di[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 3], npx.where(vs.z_sc_non_sat[2:-2, 2:-2] <= 0, 0, loop_arr[2:-2, 2:-2, 3]) * vs.maskCatch[2:-2, 2:-2],
+        inf_sc_di = update(
+            inf_sc_di,
+            at[2:-2, 2:-2], npx.where(vs.z_sc_non_sat[2:-2, 2:-2] <= 0, 0, inf_sc_di[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update_add(
-            loop_arr,
-            at[2:-2, 2:-2, 7], loop_arr[2:-2, 2:-2, 3] * vs.maskCatch[2:-2, 2:-2],
+        inf_sc_di = update_add(
+            inf_sc_di,
+            at[2:-2, 2:-2], inf_sc_di[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
-        loop_arr = update_add(
-            loop_arr,
-            at[2:-2, 2:-2, 5], loop_arr[2:-2, 2:-2, 3] * vs.maskCatch[2:-2, 2:-2],
+        inf_sc_event_csum = update_add(
+            inf_sc_event_csum,
+            at[2:-2, 2:-2], inf_sc_di[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         # actual horizontal length of shrinkage crack wetting front
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 0], (loop_arr[2:-2, 2:-2, 5] / settings.l_sc / 2) * vs.maskCatch[2:-2, 2:-2],
+        y = update(
+            y,
+            at[2:-2, 2:-2], (inf_sc_event_csum[2:-2, 2:-2] / settings.l_sc / 2) * vs.maskCatch[2:-2, 2:-2],
         )
         # duration of shrinkage crack infiltration
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 6], ((loop_arr[2:-2, 2:-2, 1]**2 * vs.theta_d[2:-2, 2:-2]) / (vs.ks[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2] * 2)) * vs.maskCatch[2:-2, 2:-2],
+        t = update(
+            t,
+            at[2:-2, 2:-2], ((ym1[2:-2, 2:-2]**2 * vs.theta_d[2:-2, 2:-2]) / (vs.ks[2:-2, 2:-2] * vs.wfs[2:-2, 2:-2] * 2)) * vs.maskCatch[2:-2, 2:-2],
         )
 
-        loop_arr = update(
-            loop_arr,
-            at[2:-2, 2:-2, 1], loop_arr[2:-2, 2:-2, 0] * vs.maskCatch[2:-2, 2:-2],
+        ym1 = update(
+            ym1,
+            at[2:-2, 2:-2], y[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
-        carry = (vs, settings, loop_arr)
+        loop_vars = (y, ym1, inf_sc_pot_di, inf_sc_di, z0_di, inf_sc_event_csum, t, inf_sc)
+        carry = (vs, settings, loop_vars)
 
         return carry, None
 
-    steps = npx.arange(0, computation_steps)
-    carry = (vs, settings, loop_arr)
+    steps = npx.arange(0, substeps)
+    loop_vars = (y, ym1, inf_sc_pot_di, inf_sc_di, z0_di, inf_sc_event_csum, t, inf_sc)
+    carry = (vs, settings, loop_vars)
     res, _ = scan(loop_body, carry, steps)
-    loop_arr = res[2]
+    loop_vars = res[2]
+    y = loop_vars[0]
+    inf_sc = loop_vars[-1]
 
     vs.y_sc = update(
         vs.y_sc,
-        at[2:-2, 2:-2, vs.tau], loop_arr[2:-2, 2:-2, 0] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau], y[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.inf_sc = update(
         vs.inf_sc,
-        at[2:-2, 2:-2], loop_arr[2:-2, 2:-2, 7] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], inf_sc[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.inf_sc_event_csum = update_add(

@@ -30,10 +30,9 @@ SETTINGS = {
     "nittevent_ff": Setting(1, int, "Number of total iterations of a single film flow event"),
     "nittevent_ff_p1": Setting(2, int, "Number of total iterations of a single film flow event for cumulated values"),
     "ages": Setting(1, int, "Number of water ages"),
-    "nages": Setting(1, int, "Number of water ages to calculate cumulated distributions"),
+    "nages": Setting(2, int, "Number of water ages to calculate cumulated distributions"),
     "ncrops": Setting(1, int, "Number of crops per year"),
     "ncr": Setting(2, int, "Number of crop rotations"),
-    "nct": Setting(76, int, "Number of crop types"),
     "dt_mom": Setting(1.0, float, "Time step in hours for momentum"),
     "dt_ff": Setting(1/6, float, "Time step in hours for film flow"),
     "dt_gw": Setting(24.0, float, "Time step in hours for groundwater"),
@@ -94,6 +93,7 @@ SETTINGS = {
     "tm_structure": Setting("UNNAMED", str, "transport model structure"),
     "enable_age_statistics": Setting(False, bool, "enable calculation of age statistics"),
     "warmup_done": Setting(False, bool, "True if after model warmup"),
+    "write_restart": Setting(False, bool, "Write HDF5 file for restart"),
     # numerical solver for SAS
     "sas_solver": Setting(None, optional(str), "numerical solver scheme for StorAge selection"),
     "sas_solver_substeps": Setting(1, int, "substeps to solver for StorAge selection numerically"),
@@ -116,7 +116,7 @@ SETTINGS = {
 def check_setting_conflicts(settings):
     if settings.enable_groundwater and settings.enable_groundwater_boundary:
         raise RuntimeError(
-            "use either the groundwater module or groundwater boundary condition (e.g. groundwater head)"
+            "use either the groundwater module or groundwater boundary condition (e.g. fixed groundwater head, time-variant groundwater head)"
         )
 
     if settings.enable_bromide and (settings.enable_chloride | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):

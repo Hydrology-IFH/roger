@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.routines &mdash; RoGeR 0+unknown documentation</title>
+  <title>roger.routines &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -27,7 +27,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0+unknown
+                0.0.1+15.gf84e55c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -49,6 +49,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../equations/equations.html">Model equations</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/setup-gallery.html">Setup gallery</a></li>
@@ -63,7 +67,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../more/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../more/howtocite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../more/publications.html">Publications involving Roger</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
 </ul>
 
         </div>
@@ -96,7 +100,7 @@
 <span class="kn">import</span> <span class="nn">threading</span>
 <span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">ExitStack</span><span class="p">,</span> <span class="n">contextmanager</span>
 
-<span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">logger</span><span class="p">,</span> <span class="n">distributed</span>
+<span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">logger</span>
 
 <span class="kn">from</span> <span class="nn">roger.state</span> <span class="kn">import</span> <span class="n">RogerState</span>
 
@@ -527,7 +531,7 @@
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">runtime_settings</span><span class="p">,</span> <span class="n">runtime_state</span>
-        <span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span>
+        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">onp</span>
 
         <span class="c1"># no MPI support</span>
         <span class="k">if</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_num</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -536,18 +540,19 @@
         <span class="c1"># with MPI support</span>
         <span class="k">elif</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_num</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># run function on a single process</span>
-            <span class="k">if</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_num</span><span class="p">):</span>
-                    <span class="n">buffer</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-                    <span class="n">runtime_settings</span><span class="o">.</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">isend</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="n">runtime_settings</span><span class="o">.</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_rank</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">buffer</span> <span class="o">=</span> <span class="n">onp</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">onp</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">10</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+                <span class="n">runtime_settings</span><span class="o">.</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">Send</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
             <span class="c1"># let other processes wait</span>
-            <span class="k">elif</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_rank</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">def</span> <span class="nf">function</span><span class="p">():</span>
-                    <span class="k">pass</span>
-                <span class="n">out</span> <span class="o">=</span> <span class="n">function</span><span class="p">()</span>
-                <span class="n">runtime_settings</span><span class="o">.</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">irecv</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-            <span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">proc</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">runtime_state</span><span class="o">.</span><span class="n">proc_num</span><span class="p">):</span>
+                    <span class="n">buffer</span> <span class="o">=</span> <span class="n">onp</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">onp</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">10</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+                    <span class="n">buffer</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                    <span class="n">runtime_settings</span><span class="o">.</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">Recv</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">runtime_settings</span><span class="o">.</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">out</span>
 

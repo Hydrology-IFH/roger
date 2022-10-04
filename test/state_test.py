@@ -1,28 +1,22 @@
 import pytest
 
 from roger.state import RogerSettings, RogerVariables, RogerState
+from roger.variables import VARIABLES, DIM_TO_SHAPE_VAR
+from roger.settings import SETTINGS
 
 
 @pytest.fixture
 def dummy_state():
-    from roger.variables import VARIABLES, DIM_TO_SHAPE_VAR
-    from roger.settings import SETTINGS
-
     return RogerState(VARIABLES, SETTINGS, DIM_TO_SHAPE_VAR)
 
 
 @pytest.fixture
 def dummy_settings():
-    from roger.settings import SETTINGS
-
     return RogerSettings(SETTINGS)
 
 
 @pytest.fixture
 def dummy_variables():
-    from roger.variables import VARIABLES, DIM_TO_SHAPE_VAR
-    from roger.settings import SETTINGS
-
     dummy_state = RogerState(VARIABLES, SETTINGS, DIM_TO_SHAPE_VAR)
     dummy_state.initialize_variables()
     return dummy_state.variables
@@ -53,7 +47,7 @@ def test_variables_repr(dummy_variables):
     from roger.core.operators import numpy as npx
 
     array_type = type(npx.array([]))
-    assert f"tau = {array_type} with shape (), dtype int32," in repr(dummy_variables)
+    assert f"tau = {array_type} with shape (), dtype int64," in repr(dummy_variables)
 
 
 def test_to_xarray(dummy_state):

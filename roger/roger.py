@@ -248,7 +248,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
     def setup(self):
         from roger import diagnostics, restart
-        from roger.core import numerics
+        from roger.core import surface, soil
 
         setup_funcs = (
             self.set_parameters_setup,
@@ -293,17 +293,18 @@ class RogerSetup(metaclass=abc.ABCMeta):
             self.set_grid(self.state)
 
             self.set_topography(self.state)
-            numerics.calc_topo(self.state)
 
             self.set_look_up_tables(self.state)
 
             if not self.state.settings.restart_input_filename:
                 self.set_parameters_setup(self.state)
-                numerics.calc_parameters(self.state)
+                surface.calculate_parameters(self.state)
+                soil.calculate_parameters(self.state)
 
                 self.set_initial_conditions_setup(self.state)
                 self.set_initial_conditions(self.state)
-                numerics.calc_initial_conditions(self.state)
+                surface.calculate_initial_conditions(self.state)
+                soil.calculate_initial_conditions(self.state)
 
             self.set_diagnostics(self.state)
             diagnostics.initialize(self.state)
@@ -327,9 +328,9 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
         logger.success("Setup done\n")
         if (self.state.settings.enable_chloride | self.state.settings.enable_bromide | self.state.settings.enable_oxygen18 | self.state.settings.enable_deuterium | self.state.settings.enable_nitrate):
-            logger.warning("IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require an post-evaluation of the accuracy of\n deterministic/numerical solution (e.g. calculate\n standard deviation of dS_num_error or dC_num_error).\n")
+            logger.warning("IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require an post-evaluation of the accuracy of\n numerical solution (e.g. calculate\n standard deviation of dS_num_error or dC_num_error).\n")
         else:
-            logger.warning("IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require an post-evaluation of the accuracy of\n deterministic/numerical solution (e.g. calculate\n standard deviation of dS_num_error and dC_num_error).\n")
+            logger.warning("IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require an post-evaluation of the accuracy of\n numerical solution (e.g. calculate\n standard deviation of dS_num_error and dC_num_error).\n")
 
     @roger_routine
     def step(self, state):
@@ -438,14 +439,14 @@ class RogerSetup(metaclass=abc.ABCMeta):
         Make sure to call :meth:`setup` prior to this function.
         """
         from roger import diagnostics
-        from roger.core import numerics
+        from roger.core import soil
 
         if self.state.settings.enable_offline_transport:
             with self.state.timers["warmup"]:
                 logger.info("\nStarting warmup")
                 for i in range(repeat):
                     self.run()
-                    numerics.rescale_SA(self.state)
+                    soil.rescale_SA(self.state)
                 with self.state.variables.unlock():
                     self.state.variables.itt = 0
                     self.state.variables.time = 0
@@ -470,6 +471,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
         Make sure to call :meth:`setup` (and :meth:`warmup` if offline transport)
         prior to this function.
         """
+        from roger import restart
         self._ensure_setup_done()
 
         vs = self.state.variables
@@ -506,6 +508,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
                 logger.success("Calculation done\n")
 
         finally:
+            if settings.write_restart:
+                restart.write_restart(self.state, force=True)
             self._timing_summary()
 
     def _timing_summary(self):

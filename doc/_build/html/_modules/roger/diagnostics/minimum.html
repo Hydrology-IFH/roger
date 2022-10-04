@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.diagnostics.minimum &mdash; RoGeR 0+unknown documentation</title>
+  <title>roger.diagnostics.minimum &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -27,7 +27,7 @@
             <a href="../../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0+unknown
+                0.0.1+15.gf84e55c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -49,6 +49,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../equations/equations.html">Model equations</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/setup-gallery.html">Setup gallery</a></li>
@@ -63,7 +67,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../more/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../more/howtocite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../more/publications.html">Publications involving Roger</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
 </ul>
 
         </div>
@@ -95,8 +99,8 @@
 <span class="kn">import</span> <span class="nn">copy</span>
 
 <span class="kn">from</span> <span class="nn">roger.diagnostics.base</span> <span class="kn">import</span> <span class="n">RogerDiagnostic</span>
-<span class="kn">from</span> <span class="nn">roger.variables</span> <span class="kn">import</span> <span class="n">TIMESTEPS</span>
-<span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span>
+<span class="kn">from</span> <span class="nn">roger.variables</span> <span class="kn">import</span> <span class="n">TIMESTEPS</span><span class="p">,</span> <span class="n">allocate</span>
+<span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span><span class="p">,</span> <span class="n">update</span><span class="p">,</span> <span class="n">at</span>
 
 
 <div class="viewcode-block" id="Minimum"><a class="viewcode-back" href="../../../reference/diagnostics.html#roger.diagnostics.minimum.Minimum">[docs]</a><span class="k">class</span> <span class="nc">Minimum</span><span class="p">(</span><span class="n">RogerDiagnostic</span><span class="p">):</span>
@@ -143,17 +147,37 @@
         <span class="n">vs</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">variables</span>
         <span class="n">min_vs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span>
 
+        <span class="n">var_data</span> <span class="o">=</span> <span class="n">allocate</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_variables</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_timestep_dim</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-                <span class="n">var_data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">min_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="n">min_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">npx</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">var_data</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">key</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">var_data</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span>
+                    <span class="n">var_data</span><span class="p">,</span>
+                    <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">key</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="n">vs</span><span class="o">.</span><span class="n">taum1</span><span class="p">],</span>
+                <span class="p">)</span>
+                <span class="n">var_data</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span>
+                    <span class="n">var_data</span><span class="p">,</span>
+                    <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">],</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">key</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="n">vs</span><span class="o">.</span><span class="n">tau</span><span class="p">],</span>
+                <span class="p">)</span>
+                <span class="n">var_data</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span>
+                    <span class="n">var_data</span><span class="p">,</span>
+                    <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">npx</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">var_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">var_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span> <span class="n">npx</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">var_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]),</span>
+                <span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">min_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">npx</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">var_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">var_data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">min_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-                <span class="n">vs_data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">var_data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="n">vs_data</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
-                    <span class="nb">setattr</span><span class="p">(</span><span class="n">min_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">npx</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">var_data</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">key</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
-                <span class="k">elif</span> <span class="n">var_data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="n">vs_data</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
-                    <span class="nb">setattr</span><span class="p">(</span><span class="n">min_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">npx</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">var_data</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">key</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="n">npx</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">var_data</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span>
+                    <span class="n">var_data</span><span class="p">,</span>
+                    <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">min_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="n">var_data</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span>
+                    <span class="n">var_data</span><span class="p">,</span>
+                    <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">],</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="n">var_data</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span>
+                    <span class="n">var_data</span><span class="p">,</span>
+                    <span class="n">at</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">npx</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">var_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">var_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span> <span class="n">npx</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">var_data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]),</span>
+                <span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">min_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">npx</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">var_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Write minimum to netcdf file and zero array&quot;&quot;&quot;</span>
@@ -164,9 +188,18 @@
 
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_variables</span><span class="p">:</span>
             <span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">min_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="n">min_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">npx</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">min_vs</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">write_output</span><span class="p">(</span><span class="n">state</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_output</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+        <span class="c1"># set to zero after output</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_variables</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_timestep_dim</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+                <span class="n">var_data</span> <span class="o">=</span> <span class="n">allocate</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">min_vs</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">var_data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">var_data</span> <span class="o">=</span> <span class="n">allocate</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">))</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">min_vs</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">var_data</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

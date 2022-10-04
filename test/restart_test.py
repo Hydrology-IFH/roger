@@ -23,7 +23,7 @@ def test_restart(tmpdir):
     from roger.tools.make_toy_data import make_toy_forcing  # noqa: E402
     os.chdir(tmpdir)
 
-    timesteps_1 = 10 * 24 * 60 * 60
+    timesteps_1 = 5 * 24 * 60 * 60
     timesteps_2 = 10 * 24 * 60 * 60
 
     restart_file = "restart.h5"
@@ -33,6 +33,7 @@ def test_restart(tmpdir):
             identifier="svat_no_restart",
             restart_input_filename=None,
             restart_output_filename=restart_file,
+            write_restart=True,
             runlen=timesteps_1,
         )
     )
@@ -45,6 +46,7 @@ def test_restart(tmpdir):
             identifier="svat_restart",
             restart_input_filename=restart_file,
             restart_output_filename=None,
+            write_restart=False,
             runlen=timesteps_2,
         )
     )

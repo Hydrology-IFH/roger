@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.runtime &mdash; RoGeR 0+unknown documentation</title>
+  <title>roger.runtime &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -27,7 +27,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0+unknown
+                0.0.1+15.gf84e55c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -49,6 +49,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../equations/equations.html">Model equations</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/setup-gallery.html">Setup gallery</a></li>
@@ -63,7 +67,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../more/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../more/howtocite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../more/publications.html">Publications involving Roger</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
 </ul>
 
         </div>
@@ -158,8 +162,16 @@
     <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">logs</span>
 
     <span class="n">log_args</span><span class="o">.</span><span class="n">loglevel</span> <span class="o">=</span> <span class="n">parse_choice</span><span class="p">(</span><span class="n">LOGLEVELS</span><span class="p">)(</span><span class="n">val</span><span class="p">)</span>
-    <span class="n">logs</span><span class="o">.</span><span class="n">setup_logging</span><span class="p">(</span><span class="n">loglevel</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">loglevel</span><span class="p">,</span> <span class="n">log_all_processes</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">log_all_processes</span><span class="p">)</span>
+    <span class="n">logs</span><span class="o">.</span><span class="n">setup_logging</span><span class="p">(</span><span class="n">loglevel</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">loglevel</span><span class="p">,</span> <span class="n">log_all_processes</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">log_all_processes</span><span class="p">,</span> <span class="n">log_to_file</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">log_to_file</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">log_args</span><span class="o">.</span><span class="n">loglevel</span>
+
+
+<span class="k">def</span> <span class="nf">set_log_to_file</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">logs</span>
+
+    <span class="n">log_args</span><span class="o">.</span><span class="n">log_to_file</span> <span class="o">=</span> <span class="n">parse_bool</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="n">logs</span><span class="o">.</span><span class="n">setup_logging</span><span class="p">(</span><span class="n">loglevel</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">loglevel</span><span class="p">,</span> <span class="n">log_all_processes</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">log_to_file</span><span class="p">,</span> <span class="n">log_to_file</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">log_to_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">log_args</span><span class="o">.</span><span class="n">log_to_file</span>
 
 
 <span class="k">def</span> <span class="nf">set_log_all_processes</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
@@ -189,6 +201,7 @@
     <span class="s2">&quot;monitor_tracer_balance&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">parse_bool</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
     <span class="s2">&quot;num_proc&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">parse_two_ints</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">read_from_env</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
     <span class="s2">&quot;profile_mode&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">parse_bool</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="s2">&quot;log_to_file&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">set_log_to_file</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
     <span class="s2">&quot;loglevel&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">set_loglevel</span><span class="p">,</span> <span class="s2">&quot;info&quot;</span><span class="p">),</span>
     <span class="s2">&quot;mpi_comm&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">check_mpi_comm</span><span class="p">,</span> <span class="n">_default_mpi_comm</span><span class="p">(),</span> <span class="n">read_from_env</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
     <span class="s2">&quot;log_all_processes&quot;</span><span class="p">:</span> <span class="n">RuntimeSetting</span><span class="p">(</span><span class="n">set_log_all_processes</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
@@ -291,6 +304,12 @@
         <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">backend</span><span class="p">,</span> <span class="n">runtime_settings</span>
 
         <span class="k">return</span> <span class="n">backend</span><span class="o">.</span><span class="n">get_backend_module</span><span class="p">(</span><span class="n">runtime_settings</span><span class="o">.</span><span class="n">backend</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">current_device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">backend</span>
+
+        <span class="k">return</span> <span class="n">backend</span><span class="o">.</span><span class="n">get_curent_device_name</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot modify </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> objects&quot;</span><span class="p">)</span></div>

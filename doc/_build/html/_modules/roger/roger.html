@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.roger &mdash; RoGeR 0+unknown documentation</title>
+  <title>roger.roger &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -27,7 +27,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0+unknown
+                0.0.1+15.gf84e55c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -49,6 +49,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../equations/equations.html">Model equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../equations/hydrologic_cycle.html">Hydrologic cycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../equations/solute_transport.html">Solute transport</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/setup-gallery.html">Setup gallery</a></li>
@@ -63,7 +69,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../more/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../more/howtocite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../more/publications.html">Publications involving Roger</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
 </ul>
 
         </div>
@@ -134,7 +140,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_plugin_interfaces</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">load_plugin</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__roger_plugins__</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_done</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_warmup_done</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">get_default_state</span><span class="p">(</span><span class="n">use_plugins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__roger_plugins__</span><span class="p">)</span>
 
@@ -220,6 +225,34 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
+<div class="viewcode-block" id="RogerSetup.set_boundary_conditions_setup"><a class="viewcode-back" href="../../reference/api/roger-setup.html#roger.RogerSetup.set_boundary_conditions_setup">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">set_boundary_conditions_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;To be implemented by subclass.</span>
+
+<span class="sd">        Use this function to set the boundary conditions.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">          &gt;&gt;&gt; @roger_method</span>
+<span class="sd">          &gt;&gt;&gt; def set_boundary_conditions_setup(self, state):</span>
+<span class="sd">          &gt;&gt;&gt;     vs = state.variables</span>
+<span class="sd">          &gt;&gt;&gt;     vs.z_gw = update(vs.z_gw, at[:, :, :, :vs.taup1], 5)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="RogerSetup.set_boundary_conditions"><a class="viewcode-back" href="../../reference/api/roger-setup.html#roger.RogerSetup.set_boundary_conditions">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">set_boundary_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;To be implemented by subclass.</span>
+
+<span class="sd">        May be used to set boundary conditions.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">          &gt;&gt;&gt; @roger_method</span>
+<span class="sd">          &gt;&gt;&gt; def set_boundary_conditions(self, state):</span>
+<span class="sd">          &gt;&gt;&gt;     vs = state.variables</span>
+<span class="sd">          &gt;&gt;&gt;     vs.z_gw = update(vs.z_gw, at[:, :, :, :vs.taup1], 5)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
 <div class="viewcode-block" id="RogerSetup.set_grid"><a class="viewcode-back" href="../../reference/api/roger-setup.html#roger.RogerSetup.set_grid">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">set_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;To be implemented by subclass.</span>
@@ -284,7 +317,7 @@
         <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="RogerSetup.set_diagnostics"><a class="viewcode-back" href="../../reference/api/roger-setup.html#roger.RogerSetup.set_diagnostics">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">set_diagnostics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_diagnostics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vs</span><span class="p">,</span> <span class="n">base_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;To be implemented by subclass.</span>
 
 <span class="sd">        Called before setting up the :ref:`diagnostics &lt;diagnostics&gt;`. Use this method e.g. to</span>
@@ -309,12 +342,12 @@
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;setup() method has to be called before running the model&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_ensure_warmup_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_warmup_done</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">warmup_done</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;warmup() method has to be called before running the model&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">diagnostics</span><span class="p">,</span> <span class="n">restart</span>
-        <span class="kn">from</span> <span class="nn">roger.core</span> <span class="kn">import</span> <span class="n">numerics</span>
+        <span class="kn">from</span> <span class="nn">roger.core</span> <span class="kn">import</span> <span class="n">surface</span><span class="p">,</span> <span class="n">soil</span>
 
         <span class="n">setup_funcs</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters_setup</span><span class="p">,</span>
@@ -322,6 +355,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">set_topography</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_initial_conditions_setup</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_initial_conditions</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_boundary_conditions_setup</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_boundary_conditions</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_diagnostics</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_forcing_setup</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">after_timestep</span><span class="p">,</span>
@@ -357,33 +392,49 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">set_grid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">set_topography</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
-            <span class="n">numerics</span><span class="o">.</span><span class="n">calc_topo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">set_look_up_tables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters_setup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
-            <span class="n">numerics</span><span class="o">.</span><span class="n">calc_parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">restart_input_filename</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters_setup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+                <span class="n">surface</span><span class="o">.</span><span class="n">calculate_parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+                <span class="n">soil</span><span class="o">.</span><span class="n">calculate_parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_initial_conditions_setup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_initial_conditions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
-            <span class="n">numerics</span><span class="o">.</span><span class="n">calc_initial_conditions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_initial_conditions_setup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_initial_conditions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+                <span class="n">surface</span><span class="o">.</span><span class="n">calculate_initial_conditions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+                <span class="n">soil</span><span class="o">.</span><span class="n">calculate_initial_conditions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">set_diagnostics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
             <span class="n">diagnostics</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
-            <span class="n">restart</span><span class="o">.</span><span class="n">read_restart</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_forcing_setup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_boundary_conditions_setup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_boundary_conditions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">restart_input_filename</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_forcing_setup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+            <span class="n">restart</span><span class="o">.</span><span class="n">read_restart</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_done</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_warmup_done</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">unlock</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">warmup_done</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">warmup_done</span><span class="p">:</span>
+            <span class="c1"># write initial values to output</span>
+            <span class="n">diagnostics</span><span class="o">.</span><span class="n">diagnose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+            <span class="n">diagnostics</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="s2">&quot;Setup done</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_chloride</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_bromide</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_oxygen18</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_deuterium</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_nitrate</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;IMPORTANT: Always check your logger output for warnings</span><span class="se">\n</span><span class="s2"> on diverging solutions. The occurence of warnings may</span><span class="se">\n</span><span class="s2"> require an post-evaluation of the accuracy of</span><span class="se">\n</span><span class="s2"> numerical solution (e.g. calculate</span><span class="se">\n</span><span class="s2"> standard deviation of dS_num_error or dC_num_error).</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;IMPORTANT: Always check your logger output for warnings</span><span class="se">\n</span><span class="s2"> on diverging solutions. The occurence of warnings may</span><span class="se">\n</span><span class="s2"> require an post-evaluation of the accuracy of</span><span class="se">\n</span><span class="s2"> numerical solution (e.g. calculate</span><span class="se">\n</span><span class="s2"> standard deviation of dS_num_error and dC_num_error).</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="nd">@roger_routine</span>
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">diagnostics</span><span class="p">,</span> <span class="n">restart</span>
-        <span class="kn">from</span> <span class="nn">roger.core</span> <span class="kn">import</span> <span class="n">surface</span><span class="p">,</span> <span class="n">soil</span><span class="p">,</span> <span class="n">root_zone</span><span class="p">,</span> <span class="n">subsoil</span><span class="p">,</span> <span class="n">groundwater</span><span class="p">,</span> <span class="n">interception</span><span class="p">,</span> <span class="n">snow</span><span class="p">,</span> <span class="n">evapotranspiration</span><span class="p">,</span> <span class="n">infiltration</span><span class="p">,</span> <span class="n">film_flow</span><span class="p">,</span> <span class="n">subsurface_runoff</span><span class="p">,</span> <span class="n">capillary_rise</span><span class="p">,</span> <span class="n">crop</span><span class="p">,</span> <span class="n">groundwater_flow</span><span class="p">,</span> <span class="n">numerics</span><span class="p">,</span> <span class="n">transport</span><span class="p">,</span> <span class="n">nitrate</span>
+        <span class="kn">from</span> <span class="nn">roger.core</span> <span class="kn">import</span> <span class="n">surface</span><span class="p">,</span> <span class="n">soil</span><span class="p">,</span> <span class="n">root_zone</span><span class="p">,</span> <span class="n">subsoil</span><span class="p">,</span> <span class="n">groundwater</span><span class="p">,</span> <span class="n">interception</span><span class="p">,</span> <span class="n">snow</span><span class="p">,</span> <span class="n">evapotranspiration</span><span class="p">,</span> <span class="n">infiltration</span><span class="p">,</span> <span class="n">film_flow</span><span class="p">,</span> <span class="n">subsurface_runoff</span><span class="p">,</span> <span class="n">capillary_rise</span><span class="p">,</span> <span class="n">crop</span><span class="p">,</span> <span class="n">groundwater_flow</span><span class="p">,</span> <span class="n">numerics</span><span class="p">,</span> <span class="n">transport</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_setup_done</span><span class="p">()</span>
 
@@ -395,6 +446,8 @@
 
         <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;boundary conditions&quot;</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">set_boundary_conditions</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;forcing&quot;</span><span class="p">]:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">set_forcing</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;time-variant parameters&quot;</span><span class="p">]:</span>
@@ -417,19 +470,19 @@
                     <span class="n">subsurface_runoff</span><span class="o">.</span><span class="n">calculate_subsurface_runoff</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;capillary rise&quot;</span><span class="p">]:</span>
                     <span class="n">capillary_rise</span><span class="o">.</span><span class="n">calculate_capillary_rise</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;surface&quot;</span><span class="p">]:</span>
+                <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;storage&quot;</span><span class="p">]:</span>
                     <span class="n">surface</span><span class="o">.</span><span class="n">calculate_surface</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;root zone&quot;</span><span class="p">]:</span>
+                <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;storage&quot;</span><span class="p">]:</span>
                     <span class="n">root_zone</span><span class="o">.</span><span class="n">calculate_root_zone</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;subsoil&quot;</span><span class="p">]:</span>
+                <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;storage&quot;</span><span class="p">]:</span>
                     <span class="n">subsoil</span><span class="o">.</span><span class="n">calculate_subsoil</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;soil&quot;</span><span class="p">]:</span>
+                <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;storage&quot;</span><span class="p">]:</span>
                     <span class="n">soil</span><span class="o">.</span><span class="n">calculate_soil</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_groundwater</span><span class="p">:</span>
                     <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;groundwater flow&quot;</span><span class="p">]:</span>
                         <span class="n">groundwater_flow</span><span class="o">.</span><span class="n">calculate_groundwater_flow</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;groundwater&quot;</span><span class="p">]:</span>
+                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;storage&quot;</span><span class="p">]:</span>
                         <span class="n">groundwater</span><span class="o">.</span><span class="n">calculate_groundwater</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_routing</span><span class="p">:</span>
@@ -439,93 +492,85 @@
                 <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;storage&quot;</span><span class="p">]:</span>
                     <span class="n">numerics</span><span class="o">.</span><span class="n">calc_storage</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 
+                <span class="n">vs</span><span class="o">.</span><span class="n">itt</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">itt</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">vs</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">time</span> <span class="o">+</span> <span class="n">vs</span><span class="o">.</span><span class="n">dt_secs</span>
+                <span class="c1"># write output at end of time step</span>
+                <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;diagnostics&quot;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">numerics</span><span class="o">.</span><span class="n">sanity_check</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Solution diverged at iteration </span><span class="si">{</span><span class="n">vs</span><span class="o">.</span><span class="n">itt</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2"> Please evaluate bias of deterministic/numerical solution.</span><span class="se">\n</span><span class="s2"> The bias is written to the model output.&quot;</span><span class="p">)</span>
+                    <span class="n">numerics</span><span class="o">.</span><span class="n">calculate_num_error</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">warmup_done</span><span class="p">:</span>
+                        <span class="n">diagnostics</span><span class="o">.</span><span class="n">diagnose</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+                        <span class="n">diagnostics</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
             <span class="k">elif</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">:</span>
-                <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;transport&quot;</span><span class="p">]:</span>
+                <span class="c1"># skip first iteration which contains initial values</span>
+                <span class="n">vs</span><span class="o">.</span><span class="n">itt</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">itt</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">sas_solver</span> <span class="o">==</span> <span class="s1">&#39;deterministic&#39;</span><span class="p">:</span>
+                    <span class="n">vs</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">time</span> <span class="o">+</span> <span class="n">vs</span><span class="o">.</span><span class="n">dt_secs</span>
+
+                <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;main transport&quot;</span><span class="p">]:</span>
+                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;boundary conditions&quot;</span><span class="p">]:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">set_boundary_conditions</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
                     <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;forcing&quot;</span><span class="p">]:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">set_forcing</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_crop_phenology</span><span class="p">:</span>
-                        <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;redistribution after root growth/harvesting&quot;</span><span class="p">]:</span>
-                            <span class="k">pass</span>
-                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;infiltration into root zone&quot;</span><span class="p">]:</span>
-                        <span class="n">infiltration</span><span class="o">.</span><span class="n">calculate_infiltration_rz_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;evapotranspiration&quot;</span><span class="p">]:</span>
-                        <span class="n">evapotranspiration</span><span class="o">.</span><span class="n">calculate_evapotranspiration_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;infiltration into subsoil&quot;</span><span class="p">]:</span>
-                        <span class="n">infiltration</span><span class="o">.</span><span class="n">calculate_infiltration_ss_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;subsurface runoff of root zone&quot;</span><span class="p">]:</span>
-                        <span class="n">subsurface_runoff</span><span class="o">.</span><span class="n">calculate_percolation_rz_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;subsurface runoff of subsoil&quot;</span><span class="p">]:</span>
-                        <span class="n">subsurface_runoff</span><span class="o">.</span><span class="n">calculate_percolation_ss_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;capillary rise into root zone&quot;</span><span class="p">]:</span>
-                        <span class="n">capillary_rise</span><span class="o">.</span><span class="n">calculate_capillary_rise_rz_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_groundwater_boundary</span><span class="p">:</span>
-                        <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;capillary rise into subsoil&quot;</span><span class="p">]:</span>
-                            <span class="n">capillary_rise</span><span class="o">.</span><span class="n">calculate_capillary_rise_ss_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_groundwater</span><span class="p">:</span>
-                        <span class="k">pass</span>
-                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_nitrate</span><span class="p">:</span>
-                        <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;nitrogen cycle&quot;</span><span class="p">]:</span>
-                            <span class="n">nitrate</span><span class="o">.</span><span class="n">calculate_nitrogen_cycle</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;ageing&quot;</span><span class="p">]:</span>
-                        <span class="n">transport</span><span class="o">.</span><span class="n">calculate_ageing</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;root zone&quot;</span><span class="p">]:</span>
-                        <span class="n">root_zone</span><span class="o">.</span><span class="n">calculate_root_zone_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;subsoil&quot;</span><span class="p">]:</span>
-                        <span class="n">subsoil</span><span class="o">.</span><span class="n">calculate_subsoil_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;soil&quot;</span><span class="p">]:</span>
-                        <span class="n">soil</span><span class="o">.</span><span class="n">calculate_soil_transport</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_groundwater</span><span class="p">:</span>
-                        <span class="k">pass</span>
-
-        <span class="n">vs</span><span class="o">.</span><span class="n">itt</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">itt</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="n">vs</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">time</span> <span class="o">+</span> <span class="n">vs</span><span class="o">.</span><span class="n">dt_secs</span>
-
-        <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;diagnostics&quot;</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">numerics</span><span class="o">.</span><span class="n">sanity_check</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;solution diverged at iteration </span><span class="si">{</span><span class="n">vs</span><span class="o">.</span><span class="n">itt</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_warmup_done</span><span class="p">:</span>
-                <span class="n">diagnostics</span><span class="o">.</span><span class="n">diagnose</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-                <span class="n">diagnostics</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;time-variant parameters&quot;</span><span class="p">]:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;StorAge selection&quot;</span><span class="p">]:</span>
+                        <span class="n">transport</span><span class="o">.</span><span class="n">calculate_storage_selection</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">after_timestep</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 
         <span class="c1"># NOTE: benchmarks parse this, do not change / remove</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot; Time step took </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">last_time</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot; Time step of iteration </span><span class="si">{}</span><span class="s2"> took </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="p">,</span> <span class="n">vs</span><span class="o">.</span><span class="n">itt</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">last_time</span><span class="p">)</span>
 
-<div class="viewcode-block" id="RogerSetup.warmup"><a class="viewcode-back" href="../../reference/api/roger-setup.html#roger.RogerSetup.warmup">[docs]</a>    <span class="k">def</span> <span class="nf">warmup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="RogerSetup.warmup"><a class="viewcode-back" href="../../reference/api/roger-setup.html#roger.RogerSetup.warmup">[docs]</a>    <span class="k">def</span> <span class="nf">warmup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Warmup routine of the simulation.</span>
 
-<span class="sd">        Note:</span>
-<span class="sd">            Make sure to call :meth:`setup` prior to this function.</span>
+<span class="sd">        Args</span>
+<span class="sd">        -------</span>
+<span class="sd">        repeat : int, optional</span>
+<span class="sd">            Number of warmup runs. Default is 1.</span>
 
+<span class="sd">        Note</span>
+<span class="sd">        -------</span>
+<span class="sd">        Make sure to call :meth:`setup` prior to this function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">roger.core</span> <span class="kn">import</span> <span class="n">numerics</span>
+        <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">diagnostics</span>
+        <span class="kn">from</span> <span class="nn">roger.core</span> <span class="kn">import</span> <span class="n">soil</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">:</span>
-            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;Running warm-up&quot;</span><span class="p">]:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;warmup&quot;</span><span class="p">]:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Starting warmup&quot;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-                <span class="n">numerics</span><span class="o">.</span><span class="n">rescale_SA</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeat</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+                    <span class="n">soil</span><span class="o">.</span><span class="n">rescale_SA</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
                 <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">unlock</span><span class="p">():</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">itt</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_warmup_done</span> <span class="o">=</span> <span class="kc">True</span></div>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">unlock</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">warmup_done</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">warmup_done</span><span class="p">:</span>
+            <span class="c1"># write initial values to output after warmup</span>
+            <span class="n">diagnostics</span><span class="o">.</span><span class="n">diagnose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+            <span class="n">diagnostics</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="RogerSetup.run"><a class="viewcode-back" href="../../reference/api/roger-setup.html#roger.RogerSetup.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Main routine of the simulation.</span>
 
-<span class="sd">        Note:</span>
-<span class="sd">            Make sure to call :meth:`setup` prior to this function.</span>
+<span class="sd">        Args</span>
+<span class="sd">        -------</span>
+<span class="sd">        show_progress_bar (:obj:`bool`, optional): Whether to show fancy progress bar via tqdm.</span>
+<span class="sd">            By default, only show if stdout is a terminal and roger is running on a single process.</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">            show_progress_bar (:obj:`bool`, optional): Whether to show fancy progress bar via tqdm.</span>
-<span class="sd">                By default, only show if stdout is a terminal and roger is running on a single process.</span>
-
+<span class="sd">        Note</span>
+<span class="sd">        -------</span>
+<span class="sd">        Make sure to call :meth:`setup` (and :meth:`warmup` if offline transport)</span>
+<span class="sd">        prior to this function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">restart</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_setup_done</span><span class="p">()</span>
 
         <span class="n">vs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">variables</span>
@@ -556,42 +601,70 @@
             <span class="k">raise</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_warmup_done</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">warmup_done</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="s2">&quot;Warmup done</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="s2">&quot;Calculation done</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">finally</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_warmup_done</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">write_restart</span><span class="p">:</span>
                 <span class="n">restart</span><span class="o">.</span><span class="n">write_restart</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_timing_summary</span><span class="p">()</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timing_summary</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">_timing_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">timing_summary</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="n">timing_summary</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;Timing summary:&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;(excluding first iteration)&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;---&quot;</span><span class="p">,</span>
-                <span class="s2">&quot; setup time               = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;setup&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot; main loop time           = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot;   forcing                = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;forcing&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot;   parameters             = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;time-variant parameters&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot;   interception           = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;interception&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot;   evapotranspiration     = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;evapotranspiration&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot;   snow                   = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;snow&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot;   infiltration           = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;infiltration&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot;   percolation            = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;percolation&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot;   capillary rise         = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;capillary rise&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot;   subsurface runoff      = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;subsurface runoff&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot;   groundwater flow       = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;groundwater flow&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot;   crops                  = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;crops&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot;   transport              = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;transport&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot;   routing                = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;routing&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">timing_summary</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Timing summary:&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(excluding first iteration)&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;---&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot; setup time                 = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;setup&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot; main loop time             = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   boundary conditions      = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;boundary conditions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   forcing                  = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;forcing&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   time-variant parameters  = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;time-variant parameters&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   interception             = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;interception&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   evapotranspiration       = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;evapotranspiration&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   snow                     = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;snow&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   infiltration             = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;infiltration&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   capillary rise           = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;capillary rise&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   subsurface flow          = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;subsurface runoff&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   groundwater flow         = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;groundwater flow&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   crops                    = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;crops&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   storage                  = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;storage&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   routing                  = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;routing&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;main transport&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">timing_summary</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Timing summary:&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;(excluding first iteration)&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;---&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot; setup time                                      = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;setup&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot; warmup time                                     = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;warmup&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot; main loop time                                  = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;main transport&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   boundary conditions                           = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;boundary conditions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   forcing                                       = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;forcing&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   redistribution after root growth/harvesting   = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;redistribution after root growth/harvesting&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   infiltration into root zone                   = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;infiltration into root zone&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   evapotranspiration                            = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;evapotranspiration&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   infiltration into subsoil                     = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;infiltration into subsoil&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   subsurface runoff of root zone                = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;subsurface runoff of root zone&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   subsurface runoff of subsoil                  = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;subsurface runoff of subsoil&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   capillary rise into root zone                 = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;capillary rise into root zone&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   capillary rise into subsoil                   = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;capillary rise into subsoil&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   ageing                                        = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;ageing&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   storage                                       = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;storage&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   nitrogen cycle                                = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;nitrogen cycle&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                    <span class="s2">&quot;   routing                                       = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;routing&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">rs</span><span class="o">.</span><span class="n">profile_mode</span><span class="p">:</span>
             <span class="k">pass</span>
@@ -599,7 +672,6 @@
         <span class="n">timing_summary</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="s2">&quot; diagnostics and I/O      = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;diagnostics&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
-                <span class="s2">&quot; plugins                  = </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;plugins&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">total_time</span><span class="p">),</span>
             <span class="p">]</span>
         <span class="p">)</span>
 

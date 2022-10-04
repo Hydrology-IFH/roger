@@ -6,12 +6,12 @@
 <i>Runoff Generation Research in Pure Python</i>
 </p>
 
-Roger, *Runoff Generation Research*, is a process-based hydrologic model that can be applied between plot and catchment scale. Roger is written in pure Python, which facilitates model setup and model workflows. We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.
+Roger, *Runoff Generation Research*, is a process-based hydrologic model that can be applied from plot to catchment scale. Roger is written in pure Python, which facilitates model setup and model workflows. We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.
 
 Roger supports a NumPy backend for small-scale problems, and a
 high-performance [JAX](https://github.com/google/jax) backend
-with CPU and GPU support. It is fully parallelized via MPI and supports
-distributed execution on any number of nodes, including multi-GPU architectures (see also ...).
+with CPU and GPU support. Parallel computation is available via MPI and supports
+distributed execution on any number of nodes/CPU cores, including multi-GPU architectures.
 
 Inspired by [Veros](https://veros.readthedocs.io/en/latest/).
 

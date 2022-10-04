@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Runoff Generation Research in Pure Python &mdash; RoGeR 0+unknown documentation</title>
+  <title>Runoff Generation Research in Pure Python &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -28,7 +29,7 @@
             <a href="#" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0+unknown
+                0.0.1+15.gf84e55c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -50,6 +51,12 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="equations/equations.html">Model equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="equations/hydrologic_cycle.html">Hydrologic cycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="equations/solute_transport.html">Solute transport</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="reference/setup-gallery.html">Setup gallery</a></li>
@@ -64,7 +71,7 @@
 <li class="toctree-l1"><a class="reference internal" href="more/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more/howtocite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more/publications.html">Publications involving Roger</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
 </ul>
 
         </div>
@@ -95,8 +102,14 @@
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
-<div class="section" id="runoff-generation-research-in-pure-python">
+<section id="runoff-generation-research-in-pure-python">
 <h1>Runoff Generation Research in Pure Python<a class="headerlink" href="#runoff-generation-research-in-pure-python" title="Permalink to this headline">¶</a></h1>
+<p>Roger, <em>Runoff Generation Research</em>, is a process-based hydrologic model that can be applied from plot to catchment scale. Roger is written in pure Python, which facilitates model setup and model workflows. We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.</p>
+<p>Roger supports a NumPy backend for small-scale problems, and a
+high-performance <a class="reference external" href="https://github.com/google/jax">JAX</a> backend
+with CPU and GPU support. Parallel computation is available via MPI and supports
+distributed execution on any number of nodes/CPU cores, including multi-GPU architectures.</p>
+<p>Inspired by <a class="reference external" href="https://veros.readthedocs.io/en/latest/">Veros</a>.</p>
 <p>Roger, <em>Runoff Generation Research</em>, is a process-based hydrologic model that supports anything between plot and catchment scale. Roger is written in pure Python, which facilitates model setup workflows.</p>
 <p><em>We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.</em></p>
 <p>Roger supports a NumPy backend for small-scale problems, and a
@@ -136,14 +149,59 @@ distributed execution on any number of nodes, including multi-GPU architectures 
 </ul>
 </div>
 <div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="equations/equations.html">Model equations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="equations/equations.html#time-stepping">Time-stepping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="equations/hydrologic_cycle.html">Hydrologic cycle</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="equations/hydrologic_cycle/hydrologic_processes.html">Hydrologic processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equations/hydrologic_cycle/storages.html">Storages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equations/hydrologic_cycle/model_structures.html">Model structures</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="equations/solute_transport.html">Solute transport</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="equations/solute_transport/SAS_functions.html">StorAge selection (SAS) functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equations/solute_transport/model_structures.html">Model structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equations/solute_transport/biogeochemical_processes.html">Biogeochemical processes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="reference/setup-gallery.html">Setup gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/settings.html">Model settings</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/variables.html">Model variables</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/diagnostics.html">Diagnostics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/cli.html">Command line tools</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference/public-api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/variables.html">Model variables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference/variables.html#variable-class">Variable class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/variables.html#available-variables">Available variables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference/diagnostics.html">Diagnostics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference/diagnostics.html#base-class">Base class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/diagnostics.html#available-diagnostics">Available diagnostics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference/cli.html">Command line tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference/cli.html#roger">roger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/cli.html#roger-create-mask">roger-create-mask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/cli.html#roger-copy-setup">roger-copy-setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/cli.html#roger-resubmit">roger-resubmit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/cli.html#roger-run">roger-run</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference/public-api.html">Python API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference/api/roger-setup.html">Roger setup class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/api/roger-state.html">Roger state class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/api/routines.html">roger_routine and roger_kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/api/runtime.html">Runtime settings &amp; state</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/api/tools.html">Tools &amp; utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/api/operators.html">Numerical operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/api/distributed.html">Distributed communication primitives</a></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
@@ -157,10 +215,10 @@ distributed execution on any number of nodes, including multi-GPU architectures 
 <li class="toctree-l2"><a class="reference internal" href="more/publications.html#theses">Theses</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
 </ul>
 </div>
-</div>
+</section>
 
 
            </div>

@@ -1,6 +1,5 @@
 from pathlib import Path
 import pytest
-import os
 import shutil
 
 BASE_PATH = Path(__file__).parent
@@ -91,6 +90,7 @@ def test_setup_oneD_event_float_types(float_type):
 def test_setup_svat_transport_bromide(float_type):
     from roger import runtime_settings
 
+    object.__setattr__(runtime_settings, "diskless_mode", False)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
     from roger.setups.svat_transport_bromide import SVATTRANSPORTSetup
@@ -114,6 +114,7 @@ def test_setup_svat_transport_bromide(float_type):
 def test_setup_svat_transport_oxygen18(float_type):
     from roger import runtime_settings
 
+    object.__setattr__(runtime_settings, "diskless_mode", False)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
     from roger.setups.svat_transport_oxygen18 import SVATTRANSPORTSetup

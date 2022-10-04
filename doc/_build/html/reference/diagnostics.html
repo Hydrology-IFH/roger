@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Diagnostics &mdash; RoGeR 0+unknown documentation</title>
+  <title>Diagnostics &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -29,7 +30,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0+unknown
+                0.0.1+15.gf84e55c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -50,6 +51,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/analysis.html">Analysis of Roger output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/dev.html">Making changes in Roger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../equations/equations.html">Model equations</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
@@ -80,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../more/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../more/howtocite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../more/publications.html">Publications involving Roger</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
 </ul>
 
         </div>
@@ -107,7 +112,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="diagnostics">
+  <section id="diagnostics">
 <span id="id1"></span><h1>Diagnostics<a class="headerlink" href="#diagnostics" title="Permalink to this headline">¶</a></h1>
 <p>Diagnostics are separate objects (instances of subclasses of <code class="xref py py-class docutils literal notranslate"><span class="pre">RogerDiagnostic</span></code>)
 responsible for handling I/O, restart mechanics, and monitoring of the numerical
@@ -123,7 +128,7 @@ Options for diagnostics may be set during the <code class="xref py py-meth docut
         <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sampling_frequency</span> <span class="o">=</span>  <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span>
 </pre></div>
 </div>
-<div class="section" id="base-class">
+<section id="base-class">
 <h2>Base class<a class="headerlink" href="#base-class" title="Permalink to this headline">¶</a></h2>
 <p>This class implements some common logic for all diagnostics. This makes it easy
 to write your own diagnostics: Just derive from this class, and implement the
@@ -160,12 +165,12 @@ virtual functions.</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="available-diagnostics">
+</section>
+<section id="available-diagnostics">
 <h2>Available diagnostics<a class="headerlink" href="#available-diagnostics" title="Permalink to this headline">¶</a></h2>
 <p>Currently, the following diagnostics are implemented and added to
 <code class="xref py py-obj docutils literal notranslate"><span class="pre">RogerState.diagnostics</span></code>:</p>
-<div class="section" id="snapshot">
+<section id="snapshot">
 <h3>Snapshot<a class="headerlink" href="#snapshot" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roger.diagnostics.snapshot.Snapshot">
@@ -192,8 +197,8 @@ restart data required for restarting a Roger simulation.</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="averages">
+</section>
+<section id="averages">
 <h3>Averages<a class="headerlink" href="#averages" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roger.diagnostics.averages.Averages">
@@ -233,8 +238,8 @@ and averaged and output upon calling <code class="xref py py-meth docutils liter
 
 </dd></dl>
 
-</div>
-<div class="section" id="minimum">
+</section>
+<section id="minimum">
 <h3>Minimum<a class="headerlink" href="#minimum" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roger.diagnostics.minimum.Minimum">
@@ -274,8 +279,8 @@ and returns minimum and output upon calling <code class="xref py py-meth docutil
 
 </dd></dl>
 
-</div>
-<div class="section" id="maximum">
+</section>
+<section id="maximum">
 <h3>Maximum<a class="headerlink" href="#maximum" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roger.diagnostics.maximum.Maximum">
@@ -315,8 +320,8 @@ and returns maximum and output upon calling <code class="xref py py-meth docutil
 
 </dd></dl>
 
-</div>
-<div class="section" id="rates">
+</section>
+<section id="rates">
 <h3>Rates<a class="headerlink" href="#rates" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roger.diagnostics.rates.Rates">
@@ -356,8 +361,8 @@ and output upon calling <code class="xref py py-meth docutils literal notranslat
 
 </dd></dl>
 
-</div>
-<div class="section" id="collect">
+</section>
+<section id="collect">
 <h3>Collect<a class="headerlink" href="#collect" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roger.diagnostics.collect.Collect">
@@ -397,8 +402,8 @@ and collected upon calling <code class="xref py py-meth docutils literal notrans
 
 </dd></dl>
 
-</div>
-<div class="section" id="constant">
+</section>
+<section id="constant">
 <h3>Constant<a class="headerlink" href="#constant" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roger.diagnostics.constant.Constant">
@@ -439,8 +444,8 @@ simulation.</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="water-monitor">
+</section>
+<section id="water-monitor">
 <h3>Water monitor<a class="headerlink" href="#water-monitor" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roger.diagnostics.water_monitor.WaterMonitor">
@@ -455,8 +460,8 @@ simulation.</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="tracer-monitor">
+</section>
+<section id="tracer-monitor">
 <h3>Tracer monitor<a class="headerlink" href="#tracer-monitor" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roger.diagnostics.tracer_monitor.TracerMonitor">
@@ -471,9 +476,9 @@ simulation.</p>
 
 </dd></dl>
 
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>

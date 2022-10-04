@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Command line tools &mdash; RoGeR 0+unknown documentation</title>
+  <title>Command line tools &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -29,7 +30,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0+unknown
+                0.0.1+15.gf84e55c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -50,6 +51,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/analysis.html">Analysis of Roger output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/dev.html">Making changes in Roger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../equations/equations.html">Model equations</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
@@ -72,7 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../more/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../more/howtocite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../more/publications.html">Publications involving Roger</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
 </ul>
 
         </div>
@@ -99,10 +104,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="command-line-tools">
+  <section id="command-line-tools">
 <h1>Command line tools<a class="headerlink" href="#command-line-tools" title="Permalink to this headline">¶</a></h1>
 <p>After installing Roger, you can call these scripts from the command line from any location on your system.</p>
-<div class="section" id="roger">
+<section id="roger">
 <h2>roger<a class="headerlink" href="#roger" title="Permalink to this headline">¶</a></h2>
 <p>This is a wrapper script that provides easy access to all Roger command line tools.</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Usage: roger [OPTIONS] COMMAND [ARGS]...
@@ -120,23 +125,21 @@ Commands:
   run          Runs a roger setup from given file
 </pre></div>
 </div>
-</div>
-<div class="section" id="roger-create-mask">
+</section>
+<section id="roger-create-mask">
 <h2>roger-create-mask<a class="headerlink" href="#roger-create-mask" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Usage: roger create-mask [OPTIONS] INFILE
 
   Creates a mask image from a given netCDF file
 
 Options:
-  -v, --variable TEXT     Variable holding topography data (default: z)
-  -o, --outfile TEXT      Output filename (default: topography.png)
-  -s, --scale INTEGER...  Standard deviation in grid cells for Gaussian smoother
-                          (default: disable smoother)
-  --help                  Show this message and exit.
+  -v, --variable TEXT  Variable holding topography data (default: catchment)
+  -o, --outfile TEXT   Output filename (default: topography.png)
+  --help               Show this message and exit.
 </pre></div>
 </div>
-</div>
-<div class="section" id="roger-copy-setup">
+</section>
+<section id="roger-copy-setup">
 <h2>roger-copy-setup<a class="headerlink" href="#roger-copy-setup" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Usage: roger copy-setup [OPTIONS] SETUP
 
@@ -159,8 +162,8 @@ Options:
   --help     Show this message and exit.
 </pre></div>
 </div>
-</div>
-<div class="section" id="roger-resubmit">
+</section>
+<section id="roger-resubmit">
 <h2>roger-resubmit<a class="headerlink" href="#roger-resubmit" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Usage: roger resubmit [OPTIONS]
 
@@ -170,18 +173,17 @@ Options:
   Intended to be used with scheduling systems (e.g. SLURM or PBS).
 
 Options:
-  -i, --identifier TEXT       Base identifier of the simulation  [required]
-  -n, --num-runs INTEGER      Total number of runs to execute  [required]
-  -l, --length-per-run FLOAT  Length (in seconds) of each run  [required]
-  -c, --roger-cmd COMMAND     The command that is used to call roger (quoted)
-                              [required]
-  --callback CMD              Command to call after each run has finished
-                              (quoted, default: call self)
-  --help                      Show this message and exit.
+  -i, --identifier TEXT    Base identifier of the simulation  [required]
+  -n, --num-runs INTEGER   Total number of iterations to execute  [required]
+  -c, --roger-cmd COMMAND  The command that is used to call roger (quoted)
+                           [required]
+  --callback CMD           Command to call after each run has finished (quoted,
+                           default: call self)
+  --help                   Show this message and exit.
 </pre></div>
 </div>
-</div>
-<div class="section" id="roger-run">
+</section>
+<section id="roger-run">
 <h2>roger-run<a class="headerlink" href="#roger-run" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Usage: roger run [OPTIONS] SETUP_FILE
 
@@ -205,8 +207,8 @@ Options:
   --help                          Show this message and exit.
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

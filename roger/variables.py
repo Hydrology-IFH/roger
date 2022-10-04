@@ -65,13 +65,13 @@ RIVER_GRID = ("x", "y")
 LAKE_GRID = ("x", "y")
 URBAN_GRID = ("x", "y")
 BOUNDGW_GRID = ("x", "y")
-LUT_ILU_GRID = (25, 13)
-LUT_GC_GRID = (25, 13)
-LUT_IS_GRID = (101, 2)
-LUT_MLMS_GRID = (10000, 9)
-LUT_RDLU_GRID = (26, 7)
-LUT_CROPS_GRID = ("n_crop_types", 23)
-LUT_GCM_GRID = (25, 2)
+LUT_ILU_GRID = ("n_lu", "n_params13")
+LUT_GC_GRID = ("n_lu", "n_params13")
+LUT_IS_GRID = ("n_sealing", "n_params2")
+LUT_MLMS_GRID = ("n_slope", "n_params9")
+LUT_RDLU_GRID = ("n_lu", "n_params7")
+LUT_CROPS_GRID = ("n_crop_types", "n_crop_params")
+LUT_GCM_GRID = ("n_lu", "n_params2")
 TIMESTEPS = ("timesteps",)
 TIMESTEPS_EVENT_FF = ("timesteps_event_ff",)
 TIMESTEPS_EVENT_FF_P1 = ("timesteps_event_ff_p1",)
@@ -83,7 +83,7 @@ CROPS = ("crops",)
 CR = ("cr",)
 N_SAS_PARAMS = ("n_sas_params",)
 N_CROP_TYPES = ("n_crop_types",)
-FLOWDIRS = (8,)
+FLOWDIRS = ("n_flowdir",)
 
 # those are written to netCDF output by default
 BASE_DIMENSIONS = X + Y
@@ -104,7 +104,16 @@ DIM_TO_SHAPE_VAR = {
     "cr": "ncr",
     "events_ff": "nevent_ff",
     "n_sas_params": "nsas",
-    "n_crop_types": "nct",
+    "n_crop_types": 76,
+    "n_crop_params": 23,
+    "n_lu": 25,
+    "n_sealing": 101,
+    "n_slope": 10000,
+    "n_params2": 2,
+    "n_params7": 7,
+    "n_params9": 9,
+    "n_params13": 13,
+    "n_flowdir": 8,
 }
 
 DEFAULT_MASKS = {
@@ -315,7 +324,6 @@ VARIABLES = {
         time_dependent=False,
         write_to_restart=True,
         dtype="bool",
-        active=lambda settings: settings.enable_urban,
     ),
     "maskBoundGw": Variable(
         "Mask for boundaries",

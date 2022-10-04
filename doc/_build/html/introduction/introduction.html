@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A short introduction to Roger &mdash; RoGeR 0+unknown documentation</title>
+  <title>A short introduction to Roger &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -29,7 +30,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0+unknown
+                0.0.1+15.gf84e55c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -62,6 +63,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../equations/equations.html">Model equations</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../reference/setup-gallery.html">Setup gallery</a></li>
@@ -76,7 +81,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../more/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../more/howtocite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../more/publications.html">Publications involving Roger</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
 </ul>
 
         </div>
@@ -103,9 +108,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="a-short-introduction-to-roger">
+  <section id="a-short-introduction-to-roger">
 <h1>A short introduction to Roger<a class="headerlink" href="#a-short-introduction-to-roger" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="the-model-architecture">
+<section id="the-model-architecture">
 <h2>The model architecture<a class="headerlink" href="#the-model-architecture" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li><p><strong>Easy to access</strong>: Python modules are simple to install, and projects like <a class="reference external" href="https://www.continuum.io/anaconda-overview">Anaconda</a> are doing a great job in creating platform-independent environments.</p></li>
@@ -113,7 +118,7 @@
 <li><p><strong>Easy to modify</strong>: Due to Python’s popularity, available abstractions, and dynamic nature, Roger can be extended and modified with relatively little effort.</p></li>
 </ol>
 <p>However, choosing Python over a compiled language like Fortran or C usually comes at a high computational cost. We overcome this gap by using <a class="reference external" href="https://github.com/google/jax">JAX</a>, a framework that can act as a high-performance replacement for NumPy. JAX takes care of all performance optimizations in the background, and runs on CPUs and GPUs.</p>
-<div class="section" id="available-processes">
+<section id="available-processes">
 <h3>Available processes<a class="headerlink" href="#available-processes" title="Permalink to this headline">¶</a></h3>
 <p><strong>Interception</strong>:
 - rainfall and snowfall interception by vegetation</p>
@@ -143,8 +148,8 @@
 - StorAge selection (SAS) functions (<a class="reference internal" href="#rinaldo2015" id="id9"><span>[Rinaldo2015]</span></a>) are used to
 calculate travel time distributions and solute concentration/mass of outgoing
 fluxes (e.g. groundwater recharge)</p>
-</div>
-<div class="section" id="available-model-structures">
+</section>
+<section id="available-model-structures">
 <h3>Available model structures<a class="headerlink" href="#available-model-structures" title="Permalink to this headline">¶</a></h3>
 <p>Soil hydrologic parameters are approximated by Brooks-Corey scheme.</p>
 <p><strong>SVAT</strong>:
@@ -164,24 +169,24 @@ explicitly represented</p>
 <p><strong>TRANSPORT</strong>:
 - calculates offline coupled solute transport based on the hydrologic states from
 one of the model structures above</p>
-</div>
-<div class="section" id="diagnostics">
+</section>
+<section id="diagnostics">
 <h3>Diagnostics<a class="headerlink" href="#diagnostics" title="Permalink to this headline">¶</a></h3>
 <p>Diagnostics are responsible for handling all model output, runtime checks of the solution, and restart file handling. They are implemented in a modular fashion, so additional diagnostics can be implemented easily. Already implemented diagnostics handle snapshot output, aggregation of variables, and monitoring of mass balance.</p>
 <p>For more information, see <a class="reference internal" href="../reference/diagnostics.html"><span class="doc">Diagnostics</span></a>.</p>
-</div>
-<div class="section" id="pre-configured-model-setups">
+</section>
+<section id="pre-configured-model-setups">
 <h3>Pre-configured model setups<a class="headerlink" href="#pre-configured-model-setups" title="Permalink to this headline">¶</a></h3>
 <p>Roger supports a wide range of model configurations. Several setups are already implemented that highlight some of the capabilities of Roger, and that serve as a basis for users to set up their own configuration: <a class="reference internal" href="../reference/setup-gallery.html"><span class="doc">Setup gallery</span></a>.</p>
-</div>
-<div class="section" id="current-limitations">
+</section>
+<section id="current-limitations">
 <h3>Current limitations<a class="headerlink" href="#current-limitations" title="Permalink to this headline">¶</a></h3>
 <p>Roger is still in development. There are many open issues that we would like to fix later on:</p>
 <ul class="simple">
 <li><p>…</p></li>
 </ul>
-</div>
-<div class="section" id="references">
+</section>
+<section id="references">
 <h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
 <dl class="citation">
 <dt class="label" id="salvucci1993"><span class="brackets">Salvucci1993</span></dt>
@@ -209,9 +214,9 @@ one of the model structures above</p>
 <dd><p>Germann, P. F. and Prasuhn, V.: Viscous Flow Approach to Rapid Infiltration and Drainage in a Weighing Lysimeter, Vadose Zone Journal, 17, 170020, 2018.</p>
 </dd>
 </dl>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>

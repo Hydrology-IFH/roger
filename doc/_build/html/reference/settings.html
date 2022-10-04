@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Model settings &mdash; RoGeR 0+unknown documentation</title>
+  <title>Model settings &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,7 +19,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Model variables" href="variables.html" />
-    <link rel="prev" title="SVAT transport model" href="setups/svat_transport.html" /> 
+    <link rel="prev" title="1D event model" href="setups/oneD_event.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -29,7 +30,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0+unknown
+                0.0.1+15.gf84e55c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -51,6 +52,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../equations/equations.html">Model equations</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="setup-gallery.html">Setup gallery</a></li>
@@ -65,7 +70,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../more/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../more/howtocite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../more/publications.html">Publications involving Roger</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
 </ul>
 
         </div>
@@ -92,7 +97,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="model-settings">
+  <section id="model-settings">
 <h1>Model settings<a class="headerlink" href="#model-settings" title="Permalink to this headline">¶</a></h1>
 <p>The following list of available settings is automatically created from the file <code class="file docutils literal notranslate"><span class="pre">settings.py</span></code> in the Roger main folder.
 They are available as attributes of the <a class="reference internal" href="api/roger-state.html#roger.state.RogerSettings" title="roger.state.RogerSettings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Roger</span> <span class="pre">settings</span> <span class="pre">object</span></code></a>, e.g.:</p>
@@ -146,37 +151,31 @@ They are available as attributes of the <a class="reference internal" href="api/
 <span class="target" id="setting-nitt"></span><dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">RogerSettings.nitt</span> <span class="pre">=</span> <span class="pre">1</span></span></dt>
-<dd><p>Number of iterations</p>
+<dd><p>Number of total iterations</p>
+</dd></dl>
+
+<span class="target" id="setting-nitt-forc"></span><dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RogerSettings.nitt_forc</span> <span class="pre">=</span> <span class="pre">1</span></span></dt>
+<dd><p>Number of total iterations of forcing</p>
 </dd></dl>
 
 <span class="target" id="setting-nevent-ff"></span><dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">RogerSettings.nevent_ff</span> <span class="pre">=</span> <span class="pre">1</span></span></dt>
-<dd><p>Number of film flow events</p>
+<dd><p>Number of films</p>
 </dd></dl>
 
 <span class="target" id="setting-nittevent-ff"></span><dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">RogerSettings.nittevent_ff</span> <span class="pre">=</span> <span class="pre">1</span></span></dt>
-<dd><p>Number of iterations of a single film flow event</p>
+<dd><p>Number of total iterations of a single film flow event</p>
 </dd></dl>
 
 <span class="target" id="setting-nittevent-ff-p1"></span><dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">RogerSettings.nittevent_ff_p1</span> <span class="pre">=</span> <span class="pre">2</span></span></dt>
-<dd><p>Number of iterations of a single film flow event for cumulated values</p>
-</dd></dl>
-
-<span class="target" id="setting-nittevent"></span><dl class="py attribute">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">RogerSettings.nittevent</span> <span class="pre">=</span> <span class="pre">1</span></span></dt>
-<dd><p>Number of iterations within event</p>
-</dd></dl>
-
-<span class="target" id="setting-nittevent-p1"></span><dl class="py attribute">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">RogerSettings.nittevent_p1</span> <span class="pre">=</span> <span class="pre">2</span></span></dt>
-<dd><p>Number of iterations within event for cumulated values</p>
+<dd><p>Number of total iterations of a single film flow event for cumulated values</p>
 </dd></dl>
 
 <span class="target" id="setting-ages"></span><dl class="py attribute">
@@ -187,7 +186,7 @@ They are available as attributes of the <a class="reference internal" href="api/
 
 <span class="target" id="setting-nages"></span><dl class="py attribute">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">RogerSettings.nages</span> <span class="pre">=</span> <span class="pre">1</span></span></dt>
+<span class="sig-name descname"><span class="pre">RogerSettings.nages</span> <span class="pre">=</span> <span class="pre">2</span></span></dt>
 <dd><p>Number of water ages to calculate cumulated distributions</p>
 </dd></dl>
 
@@ -284,7 +283,7 @@ They are available as attributes of the <a class="reference internal" href="api/
 <span class="target" id="setting-sf"></span><dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">RogerSettings.sf</span> <span class="pre">=</span> <span class="pre">3</span></span></dt>
-<dd><p>snow melt factor in -</p>
+<dd><p>Degree-day factor in -</p>
 </dd></dl>
 
 <span class="target" id="setting-ta-fm"></span><dl class="py attribute">
@@ -296,7 +295,7 @@ They are available as attributes of the <a class="reference internal" href="api/
 <span class="target" id="setting-rmax"></span><dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">RogerSettings.rmax</span> <span class="pre">=</span> <span class="pre">30</span></span></dt>
-<dd><p>in %</p>
+<dd><p>Retention capacity of liquid water in snow cover in %</p>
 </dd></dl>
 
 <span class="target" id="setting-throughfall-coeff"></span><dl class="py attribute">
@@ -305,16 +304,16 @@ They are available as attributes of the <a class="reference internal" href="api/
 <dd><p>throughfall coeffcient in -</p>
 </dd></dl>
 
-<span class="target" id="setting-end-prec-event"></span><dl class="py attribute">
+<span class="target" id="setting-end-event"></span><dl class="py attribute">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">RogerSettings.end_prec_event</span> <span class="pre">=</span> <span class="pre">36</span></span></dt>
-<dd><p>Time after which no precipitation occurs in 10min</p>
+<span class="sig-name descname"><span class="pre">RogerSettings.end_event</span> <span class="pre">=</span> <span class="pre">21600</span></span></dt>
+<dd><p>Time after which no rainfall/snow melt occurs in seconds</p>
 </dd></dl>
 
 <span class="target" id="setting-hpi"></span><dl class="py attribute">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">RogerSettings.hpi</span> <span class="pre">=</span> <span class="pre">36</span></span></dt>
-<dd><p>threshold for classification of heavy precipitation event in mm/10min</p>
+<span class="sig-name descname"><span class="pre">RogerSettings.hpi</span> <span class="pre">=</span> <span class="pre">5</span></span></dt>
+<dd><p>threshold for classification of heavy rainfall event in mm/10min</p>
 </dd></dl>
 
 <span class="target" id="setting-a-bc"></span><dl class="py attribute">
@@ -401,6 +400,18 @@ They are available as attributes of the <a class="reference internal" href="api/
 <dd><p>film flow termination criterium in -</p>
 </dd></dl>
 
+<span class="target" id="setting-vsmow-conc18o"></span><dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RogerSettings.VSMOW_conc18O</span> <span class="pre">=</span> <span class="pre">0.0020052</span></span></dt>
+<dd><p>oxygen-18 abundancy ratios according to VSMOW in -</p>
+</dd></dl>
+
+<span class="target" id="setting-vsmow-conc2h"></span><dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RogerSettings.VSMOW_conc2H</span> <span class="pre">=</span> <span class="pre">0.00015576</span></span></dt>
+<dd><p>deuterium abundancy ratios according to VSMOW in -</p>
+</dd></dl>
+
 <span class="target" id="setting-coord-degree"></span><dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">RogerSettings.coord_degree</span> <span class="pre">=</span> <span class="pre">False</span></span></dt>
@@ -435,6 +446,12 @@ They are available as attributes of the <a class="reference internal" href="api/
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">RogerSettings.enable_crop_rotation</span> <span class="pre">=</span> <span class="pre">False</span></span></dt>
 <dd><p>enable crop rotation</p>
+</dd></dl>
+
+<span class="target" id="setting-enable-crop-partitioning"></span><dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RogerSettings.enable_crop_partitioning</span> <span class="pre">=</span> <span class="pre">False</span></span></dt>
+<dd><p>enable crop specific solute uptake</p>
 </dd></dl>
 
 <span class="target" id="setting-enable-crop-water-stress"></span><dl class="py attribute">
@@ -512,13 +529,61 @@ They are available as attributes of the <a class="reference internal" href="api/
 <span class="target" id="setting-enable-macropore-lower-boundary-condition"></span><dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">RogerSettings.enable_macropore_lower_boundary_condition</span> <span class="pre">=</span> <span class="pre">False</span></span></dt>
-<dd><p>enable_macropore_lower_boundary_condition</p>
+<dd><p>enable lower boundary condition of macropores</p>
 </dd></dl>
 
 <span class="target" id="setting-tm-structure"></span><dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">RogerSettings.tm_structure</span> <span class="pre">=</span> <span class="pre">UNNAMED</span></span></dt>
 <dd><p>transport model structure</p>
+</dd></dl>
+
+<span class="target" id="setting-enable-age-statistics"></span><dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RogerSettings.enable_age_statistics</span> <span class="pre">=</span> <span class="pre">False</span></span></dt>
+<dd><p>enable calculation of age statistics</p>
+</dd></dl>
+
+<span class="target" id="setting-warmup-done"></span><dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RogerSettings.warmup_done</span> <span class="pre">=</span> <span class="pre">False</span></span></dt>
+<dd><p>True if after model warmup</p>
+</dd></dl>
+
+<span class="target" id="setting-write-restart"></span><dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RogerSettings.write_restart</span> <span class="pre">=</span> <span class="pre">False</span></span></dt>
+<dd><p>Write HDF5 file for restart</p>
+</dd></dl>
+
+<span class="target" id="setting-sas-solver"></span><dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RogerSettings.sas_solver</span> <span class="pre">=</span> <span class="pre">None</span></span></dt>
+<dd><p>numerical solver scheme for StorAge selection</p>
+</dd></dl>
+
+<span class="target" id="setting-sas-solver-substeps"></span><dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RogerSettings.sas_solver_substeps</span> <span class="pre">=</span> <span class="pre">1</span></span></dt>
+<dd><p>substeps to solver for StorAge selection numerically</p>
+</dd></dl>
+
+<span class="target" id="setting-h"></span><dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RogerSettings.h</span> <span class="pre">=</span> <span class="pre">1</span></span></dt>
+<dd><p>temporal increment of numerical solver (fraction of time step)</p>
+</dd></dl>
+
+<span class="target" id="setting-atol"></span><dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RogerSettings.atol</span> <span class="pre">=</span> <span class="pre">0.01</span></span></dt>
+<dd><p>absolute tolerance of solutions</p>
+</dd></dl>
+
+<span class="target" id="setting-rtol"></span><dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RogerSettings.rtol</span> <span class="pre">=</span> <span class="pre">0.01</span></span></dt>
+<dd><p>relative tolerance of solutions</p>
 </dd></dl>
 
 <span class="target" id="setting-restart-input-filename"></span><dl class="py attribute">
@@ -536,16 +601,16 @@ They are available as attributes of the <a class="reference internal" href="api/
 <span class="target" id="setting-restart-frequency"></span><dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">RogerSettings.restart_frequency</span> <span class="pre">=</span> <span class="pre">0</span></span></dt>
-<dd><p>Frequency (in hours) to write restart data</p>
+<dd><p>Frequency (in seconds) to write restart data</p>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="setups/svat_transport.html" class="btn btn-neutral float-left" title="SVAT transport model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="setups/oneD_event.html" class="btn btn-neutral float-left" title="1D event model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="variables.html" class="btn btn-neutral float-right" title="Model variables" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

@@ -12,7 +12,7 @@ def main(nsamples, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, random_uniform
-    from roger.core.numerics import calc_parameters_surface_kernel
+    from roger.core.surface import calc_parameters_surface_kernel
     from roger.tools.setup import write_forcing
     import roger.lookuptables as lut
     import numpy as onp

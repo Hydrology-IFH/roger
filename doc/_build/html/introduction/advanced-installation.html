@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Advanced installation &mdash; RoGeR 0+unknown documentation</title>
+  <title>Advanced installation &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -29,7 +30,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0+unknown
+                0.0.1+15.gf84e55c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -56,6 +57,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../equations/equations.html">Model equations</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../reference/setup-gallery.html">Setup gallery</a></li>
@@ -70,7 +75,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../more/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../more/howtocite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../more/publications.html">Publications involving Roger</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/schwemro/roger">Visit us on GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
 </ul>
 
         </div>
@@ -97,7 +102,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="advanced-installation">
+  <section id="advanced-installation">
 <h1>Advanced installation<a class="headerlink" href="#advanced-installation" title="Permalink to this headline">¶</a></h1>
 <p>Because Roger should be usable by both beginners and experts, it has a number of <em>optional</em> dependencies that are not strictly required to run Roger, but highly recommended in high-performance contexts.</p>
 <div class="admonition note">
@@ -143,7 +148,7 @@
 <p class="admonition-title">Note</p>
 <p>On this page, we give all installation instructions via <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code>. If you used conda to install Roger, consider replacing them with <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span></code>.</p>
 </div>
-<div class="section" id="using-jax">
+<section id="using-jax">
 <h2>Using JAX<a class="headerlink" href="#using-jax" title="Permalink to this headline">¶</a></h2>
 <p>Using the JAX backend, Roger is typically about 4x faster than with NumPy, so this should be the first thing to try if you want to get more performance.</p>
 <p>JAX is available on all major platforms and can be installed via:</p>
@@ -161,8 +166,8 @@ $ python setup.py build_ext --inplace
 </pre></div>
 </div>
 <p>in the Roger repository root.</p>
-</div>
-<div class="section" id="using-mpi">
+</section>
+<section id="using-mpi">
 <h2>Using MPI<a class="headerlink" href="#using-mpi" title="Permalink to this headline">¶</a></h2>
 <p>To run Roger on more than one process you need to use MPI. This requires that you install an MPI implementation (such as OpenMPI) on your system. Additionally, you have to install <code class="docutils literal notranslate"><span class="pre">mpi4py</span></code> to interface with it:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install mpi4py
@@ -174,15 +179,15 @@ $ python setup.py build_ext --inplace
 </pre></div>
 </div>
 <p>Note that the versions of PETSc and <code class="docutils literal notranslate"><span class="pre">petsc4py</span></code> have to match.</p>
-</div>
-<div class="section" id="using-jax-mpi">
+</section>
+<section id="using-jax-mpi">
 <h2>Using JAX + MPI<a class="headerlink" href="#using-jax-mpi" title="Permalink to this headline">¶</a></h2>
 <p>To use JAX together with MPI, you need to install <code class="docutils literal notranslate"><span class="pre">mpi4jax</span></code> after installing <code class="docutils literal notranslate"><span class="pre">mpi4py</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install mpi4jax
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

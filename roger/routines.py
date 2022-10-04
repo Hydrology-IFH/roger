@@ -3,7 +3,7 @@ import inspect
 import threading
 from contextlib import ExitStack, contextmanager
 
-from roger import logger, distributed
+from roger import logger
 
 from roger.state import RogerState
 
@@ -443,7 +443,7 @@ class rogerSync:
         # with MPI support
         elif runtime_state.proc_num > 1:
             # run function on a single process
-            distributed.barrier()
+            runtime_settings.mpi_comm.barrier()
             if runtime_state.proc_rank != 0:
                 out = None
                 buffer = onp.ascontiguousarray(onp.empty((10,), dtype=float))
@@ -455,7 +455,7 @@ class rogerSync:
                     buffer = buffer.copy()
                     runtime_settings.mpi_comm.Recv(buffer, source=proc, tag=11)
                 out = self.function(*args, **kwargs)
-            distributed.barrier()
+            runtime_settings.mpi_comm.barrier()
 
         return out
 
