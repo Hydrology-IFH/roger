@@ -795,7 +795,7 @@ def calc_inf_sc(state):
     )
     inf_sc_event_csum = update(
         inf_sc_event_csum,
-        at[2:-2, 2:-2, 1], vs.inf_sc_event_csum[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], vs.inf_sc_event_csum[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     def loop_body(carry, i):
