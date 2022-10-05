@@ -12,15 +12,6 @@ import roger
 import roger.tools.evaluation as eval_utils
 
 
-def conc_to_delta(conc):
-    """Calculate oxygen-18 ratio from oxygen-18 concentration
-    """
-    delta_iso = 1000.*(conc/(2005.2e-6*(1.-conc))-1.)
-    delta_iso = onp.where(delta_iso < -999, onp.nan, delta_iso)
-
-    return delta_iso
-
-
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir):
@@ -138,22 +129,6 @@ def main(tmp_dir):
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
                                 del var_obj, vals
-
-                            var_obj = df.variables.get(var_sim)
-                            if 'C_iso_q_ss' not in list(df.variables.keys()) and var_sim == "C_q_ss":
-                                v = f.create_variable('C_iso_q_ss', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                                vals = conc_to_delta(onp.array(var_obj).swapaxes(0, 2))
-                                v[:, :, :] = vals
-                                v.attrs.update(long_name="oxygen-18 ratio of percolation",
-                                               units="per mil")
-                                del var_obj
-                            if 'C_iso_transp' not in list(df.variables.keys()) and var_sim == "C_transp":
-                                v = f.create_variable('C_iso_transp', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                                vals = conc_to_delta(onp.array(var_obj).swapaxes(0, 2))
-                                v[:, :, :] = vals
-                                v.attrs.update(long_name="oxygen-18 ratio of transpiration",
-                                               units="per mil")
-                                del var_obj
 
     # load simulation
     states_hm_file = base_path / "states_hm.nc"
@@ -295,48 +270,19 @@ def main(tmp_dir):
                 df_params_eff.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
                 key_r = f'r_{var_sim}{sc1}'
                 df_params_eff.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
-                var_sim = 'TT_transp'
-                # mean travel time of percolation
-                key_mtt = f'mean_{var_sim}{sc1}'
-                ages = onp.arange(1, ds_sim_tm.dims['ages'] + 1)
-                df_params_eff.loc[nrow, key_mtt] = onp.mean(onp.sum(ages[onp.newaxis, :] * onp.diff(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values, axis=1), axis=1))
-                # median travel time of percolation
-                key_mediantt = f'median_{var_sim}{sc1}'
-                df_params_eff.loc[nrow, key_mediantt] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.5, axis=1))
-                # lower quantile travel time of percolation
-                key_tt25 = f'25_{var_sim}{sc1}'
-                df_params_eff.loc[nrow, key_tt25] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.25, axis=1))
-                # upper quantile travel time of percolation
-                key_tt75 = f'75_{var_sim}{sc1}'
-                df_params_eff.loc[nrow, key_tt75] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.75, axis=1))
-                var_sim = 'TT_q_ss'
-                # mean travel time of percolation
-                key_mtt = f'mean_{var_sim}{sc1}'
-                ages = onp.arange(1, ds_sim_tm.dims['ages'] + 1)
-                df_params_eff.loc[nrow, key_mtt] = onp.mean(onp.sum(ages[onp.newaxis, :] * onp.diff(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values, axis=1), axis=1))
-                # median travel time of percolation
-                key_mediantt = f'median_{var_sim}{sc1}'
-                df_params_eff.loc[nrow, key_mediantt] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.5, axis=1))
-                # lower quantile travel time of percolation
-                key_tt25 = f'25_{var_sim}{sc1}'
-                df_params_eff.loc[nrow, key_tt25] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.25, axis=1))
-                # upper quantile travel time of percolation
-                key_tt75 = f'75_{var_sim}{sc1}'
-                df_params_eff.loc[nrow, key_tt75] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.75, axis=1))
-                var_sim = 'SA_s'
-                # mean residence time
-                key_mrt = f'mrt_{var_sim}{sc1}'
-                ages = onp.arange(1, ds_sim_tm.dims['ages'] + 1)
-                df_params_eff.loc[nrow, key_mrt] = onp.mean(onp.sum(ages[onp.newaxis, :] * onp.diff(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values, axis=1), axis=1))
-                # median residence time
-                key_medianrt = f'median_{var_sim}{sc1}'
-                df_params_eff.loc[nrow, key_medianrt] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.5, axis=1))
-                # lower quantile residence time
-                key_rt25 = f'25_{var_sim}{sc1}'
-                df_params_eff.loc[nrow, key_rt25] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.25, axis=1))
-                # upper quantile residence time
-                key_rt75 = f'75_{var_sim}{sc1}'
-                df_params_eff.loc[nrow, key_rt75] = onp.median(onp.sum(ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values <= 0.75, axis=1))
+                # average age metrics
+                vars_sim = ['tt25_transp', 'tt50_transp', 'tt75_transp', 'ttavg_transp',
+                            'tt25_q_ss', 'tt50_q_ss', 'tt75_q_ss', 'ttavg_q_ss',
+                            'rt25_s', 'rt50_s', 'rt75_s',  'rtavg_s']
+                for var_sim in vars_sim:
+                    df_eval = pd.DataFrame(index=idx)
+                    df_eval.loc[:, 'sim'] = ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values
+                    if sc > 0:
+                        df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
+                        rows = (df_rows['sc'].values == sc)
+                        df_eval = df_eval.loc[rows, :]
+                    df_eval = df_eval.dropna()
+                    df_params_eff.loc[nrow, var_sim] = onp.mean(df_eval.loc[:, 'sim'].values)
 
             # avoid defragmentation of DataFrame
             df_params_eff = df_params_eff.copy()

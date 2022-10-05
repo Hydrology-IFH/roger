@@ -2300,7 +2300,6 @@ VARIABLES = {
         "soil water content at field capacity in subsoil",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_sat_ss": Variable(
         "soil water content at saturation in subsoil",

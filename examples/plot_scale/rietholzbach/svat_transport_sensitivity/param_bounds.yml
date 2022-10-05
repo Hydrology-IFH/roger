@@ -103,7 +103,7 @@ power:
 
   bounds:
   -
-    - 0.1
+    - 0.01
     - 3
   -
     - 0.1
@@ -125,7 +125,7 @@ time-variant power:
 
   bounds:
   -
-    - 0.1
+    - 0.01
     - 2
   -
     - 0.1

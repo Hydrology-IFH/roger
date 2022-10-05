@@ -4,7 +4,6 @@ import glob
 import datetime
 import h5netcdf
 import matplotlib.pyplot as plt
-import seaborn as sns
 import xarray as xr
 from cftime import num2date
 import pandas as pd
@@ -15,15 +14,6 @@ import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
 
 
-def conc_to_delta(conc):
-    """Calculate oxygen-18 ratio from oxygen-18 concentration
-    """
-    delta_iso = 1000.*(conc/(2005.2e-6*(1.-conc))-1.)
-    delta_iso = onp.where(delta_iso < -999, onp.nan, delta_iso)
-
-    return delta_iso
-
-
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir):
@@ -32,25 +22,31 @@ def main(tmp_dir):
     else:
         base_path = Path(__file__).parent
     # directory of results
+    base_path_results = base_path / "results" / "deterministic"
+    if not os.path.exists(base_path_results):
+        os.mkdir(base_path_results)
     base_path_results = base_path / "results" / "deterministic" / "age_max_11"
     if not os.path.exists(base_path_results):
         os.mkdir(base_path_results)
     # directory of figures
+    base_path_figs = base_path / "figures" / "deterministic"
+    if not os.path.exists(base_path_figs):
+        os.mkdir(base_path_figs)
     base_path_figs = base_path / "figures" / "deterministic" / "age_max_11"
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
     # merge results into single file
-    tm_structures = ['complete-mixing',
-                     'preferential'
-                     'advection-dispersion',
+    tm_structures = ['preferential', 'preferential1', 'preferential2',
+                     'advection-dispersion1', 'advection-dispersion2',
+                     'time-variant preferential',
                      'time-variant advection-dispersion',
                      'time-variant',
-                     'power', 'power time-variant']
-    tm_structures = ['power']
+                     'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion',
+                     'power', 'time-variant power']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        path = str(base_path / "deterministic" / "age_max_11" / f"SVATTRANSPORT_{tms}.*.nc")
+        path = str(base_path / "deterministic" / "age_max_11" / f"SVATTRANSPORT_{tm_structure}.*.nc")
         diag_files = glob.glob(path)
         states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}_monte_carlo.nc"
         if not os.path.exists(states_tm_file):
@@ -146,22 +142,6 @@ def main(tmp_dir):
                                                units=var_obj.attrs["units"])
                                 del var_obj, vals
 
-                            var_obj = df.variables.get(var_sim)
-                            if 'C_iso_q_ss' not in list(df.variables.keys()) and var_sim == "C_q_ss":
-                                v = f.create_variable('C_iso_q_ss', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                                vals = conc_to_delta(onp.array(var_obj).swapaxes(0, 2))
-                                v[:, :, :] = vals
-                                v.attrs.update(long_name="oxygen-18 ratio of percolation",
-                                               units="per mil")
-                                del var_obj
-                            if 'C_iso_transp' not in list(df.variables.keys()) and var_sim == "C_transp":
-                                v = f.create_variable('C_iso_transp', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                                vals = conc_to_delta(onp.array(var_obj).swapaxes(0, 2))
-                                v[:, :, :] = vals
-                                v.attrs.update(long_name="oxygen-18 ratio of transpiration",
-                                               units="per mil")
-                                del var_obj
-
     # load hydrologic simulation
     states_hm_file = base_path / "states_hm.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
@@ -194,12 +174,13 @@ def main(tmp_dir):
     df_thetap.loc[cond3, 'sc'] = 3  # wet
 
     dict_params_eff = {}
-    tm_structures = ['complete-mixing',
-                     'preferential'
-                     'advection-dispersion',
+    tm_structures = ['preferential', 'preferential1', 'preferential2',
+                     'advection-dispersion1', 'advection-dispersion2',
+                     'time-variant preferential',
                      'time-variant advection-dispersion',
                      'time-variant',
-                     'power', 'power time-variant']
+                     'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion',
+                     'power', 'time-variant power']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
 
@@ -377,12 +358,12 @@ def main(tmp_dir):
 
         # dotty plots
         if tm_structure in ['preferential', 'preferential1', 'preferential2',
-                            'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2',
-                            'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
-                            'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
-                            'time-variant', 'time-variant1', 'time-variant2',
+                            'advection-dispersion1', 'advection-dispersion2',
+                            'time-variant preferential',
+                            'time-variant advection-dispersion',
+                            'time-variant',
                             'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion',
-                            'power', 'power time-variant', 'power time-variant reverse']:
+                            'power', 'time-variant power']:
             df_eff = df_params_eff.loc[:, ['KGE_C_iso_q_ss']]
             if tm_structure == "preferential":
                 df_params = df_params_eff.loc[:, ['b_transp', 'b_q_rz', 'b_q_ss']]
@@ -424,33 +405,56 @@ def main(tmp_dir):
                 df_params = df_params_eff.loc[:, ['k1_transp', 'k1_q_rz', 'k1_q_ss', 'k2_transp', 'k2_q_rz', 'k2_q_ss']]
             elif tm_structure == "time-variant power reverse":
                 df_params = df_params_eff.loc[:, ['k1_transp', 'k1_q_rz', 'k1_q_ss', 'k2_transp', 'k2_q_rz', 'k2_q_ss']]
+            # select best model run
+            idx_best = df_params_eff['KGE_C_iso_q_ss'].idxmax()
+            dict_params_eff[tm_structure]['idx_best'] = idx_best
             nrow = len(df_eff.columns)
             ncol = len(df_params.columns)
-            fig, ax1 = plt.subplots(nrow, ncol, sharey=True, figsize=(14, 7))
-            ax = ax1.reshape(nrow, ncol)
-            for i in range(nrow):
+            fig, ax1 = plt.subplots(nrow, ncol, sharey=True, figsize=(ncol*3.5, 3.5))
+            if ncol > 1:
+                ax = ax1.reshape(nrow, ncol)
+                for i in range(nrow):
+                    for j in range(ncol):
+                        y = df_eff.iloc[:, i]
+                        x = df_params.iloc[:, j]
+                        ax[i, j].scatter(x, y, s=4, c='grey', alpha=0.5)
+                        ax[i, j].set_xlabel('')
+                        ax[i, j].set_ylabel('')
+                        ax[i, j].set_ylim(-1, 1)
+                        # best model run
+                        y_best = df_eff.iloc[idx_best, i]
+                        x_best = df_params.iloc[idx_best, j]
+                        ax[i, j].scatter(x_best, y_best, s=12, c='red', alpha=0.8)
+                        
                 for j in range(ncol):
-                    y = df_eff.iloc[:, i]
-                    x = df_params.iloc[:, j]
-                    sns.regplot(x=x, y=y, ax=ax[i, j], ci=None, color='k',
-                                scatter_kws={'alpha': 0.2, 's': 4, 'color': 'grey'})
-                    ax[i, j].set_xlabel('')
-                    ax[i, j].set_ylabel('')
-
-            for j in range(ncol):
-                xlabel = labs._LABS[df_params.columns[j]]
-                ax[-1, j].set_xlabel(xlabel)
-
-            ax[0, 0].set_ylabel(r'$KGE_{\delta_{18}O_{PERC}}$ [-]')
-
-            fig.subplots_adjust(wspace=0.2, hspace=0.3)
-            file = base_path_figs / f"dotty_plots_{tm_structure}.png"
-            fig.savefig(file, dpi=250)
-            plt.close('all')
-
-        # select best model run
-        idx_best = df_params_eff['KGE_C_iso_q_ss'].idxmax()
-        dict_params_eff[tm_structure]['idx_best'] = idx_best
+                    xlabel = labs._LABS[df_params.columns[j]]
+                    ax[-1, j].set_xlabel(xlabel)
+    
+                ax[0, 0].set_ylabel(r'$KGE_{\delta^{18}O_{PERC}}$ [-]')
+    
+                fig.tight_layout()
+                file = base_path_figs / f"dotty_plots_{tm_structure}.png"
+                fig.savefig(file, dpi=250)
+                plt.close('all')
+            else:
+                ax = ax1
+                y = df_eff.iloc[:, 0]
+                x = df_params.iloc[:, 0]
+                ax.scatter(x, y, s=4, c='grey', alpha=0.5)
+                ax.set_xlabel('')
+                ax.set_ylabel('')
+                ax.set_ylim(-1, 1)
+                # best model run
+                y_best = df_eff.iloc[idx_best, 0]
+                x_best = df_params.iloc[idx_best, 0]
+                ax.scatter(x_best, y_best, s=12, c='red', alpha=0.8)
+                xlabel = labs._LABS[df_params.columns[0]]
+                ax.set_xlabel(xlabel)
+                ax.set_ylabel(r'$KGE_{\delta^{18}O_{PERC}}$ [-]')
+                fig.tight_layout()
+                file = base_path_figs / f"dotty_plots_{tm_structure}.png"
+                fig.savefig(file, dpi=250)
+                plt.close('all')
 
         # write SAS parameters of best model run
         states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}_monte_carlo.nc"
@@ -482,12 +486,12 @@ def main(tmp_dir):
                 v[:] = onp.arange(dict_dim["n_sas_params"])
 
             if tm_structure in ['preferential', 'preferential1', 'preferential2',
-                                'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2',
-                                'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
-                                'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
-                                'time-variant', 'time-variant1', 'time-variant2',
+                                'advection-dispersion1', 'advection-dispersion2',
+                                'time-variant preferential',
+                                'time-variant advection-dispersion',
+                                'time-variant',
                                 'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion',
-                                'power', 'power time-variant', 'power time-variant reverse']:
+                                'power', 'time-variant power']:
                 try:
                     v = f.create_variable('sas_params_transp', ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
                 except ValueError:
