@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Surface &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Soil" href="soil.html" />
+    <link rel="prev" title="Storages" href="../storages.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> RoGeR
+          </a>
+              <div class="version">
+                0.0.1+15.gf84e55c.dirty
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/introduction.html">A short introduction to Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/get-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/advanced-installation.html">Advanced installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/cluster.html">Running Roger on a cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/dev.html">Making changes in Roger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../equations.html">Model equations</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../hydrologic_cycle.html">Hydrologic cycle</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../hydrologic_processes.html">Hydrologic processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../storages.html">Storages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../model_structures.html">Model structures</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#svat">SVAT</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Surface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="soil.html">Soil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hydrologic_processes/snow.html">Snow accumulation and snow melt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hydrologic_processes/interception.html">Interception</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hydrologic_processes/infiltration.html">Infiltration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hydrologic_processes/percolation.html">Percolation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hydrologic_processes/evapotranspiration.html">Evapotranspiration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hydrologic_processes/capillary_rise.html">Capillary rise</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../solute_transport.html">Solute transport</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/settings.html">Model settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/variables.html">Model variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/cli.html">Command line tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/public-api.html">Python API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../more/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../more/howtocite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../more/publications.html">Publications involving Roger</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">RoGeR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../hydrologic_cycle.html">Hydrologic cycle</a> &raquo;</li>
+          <li><a href="../storages.html">Storages</a> &raquo;</li>
+      <li>Surface</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/equations/hydrologic_cycle/storages/surface.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="surface">
+<h1>Surface<a class="headerlink" href="#surface" title="Permalink to this headline">¶</a></h1>
+<p>Leaf area index <span class="math notranslate nohighlight">\(LAI\)</span> (-):</p>
+<div class="math notranslate nohighlight">
+\[LAI=\frac{S_{int-tot}}{0.2}\]</div>
+<p>Fraction of ground cover <span class="math notranslate nohighlight">\(f_{ground-cover}\)</span> (-):</p>
+<div class="math notranslate nohighlight">
+\[f_{ground-cover} = 1 - 0.7^{LAI}\]</div>
+<section id="properties-of-upper-interception-storage">
+<h2>Properties of upper interception storage<a class="headerlink" href="#properties-of-upper-interception-storage" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="properties-of-lower-interception-storage">
+<h2>Properties of lower interception storage<a class="headerlink" href="#properties-of-lower-interception-storage" title="Permalink to this headline">¶</a></h2>
+<p>Storage capacitiy (i.e. available storage volume) of lower interception storage
+<span class="math notranslate nohighlight">\(S_{int-lower-tot}\)</span> (mm) is land use dependent and varies seasonally. For example,
+parameters used for grassland (lu_id=8):</p>
+<table class="docutils align-default" id="tbl-grid">
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Jan</p></th>
+<th class="head"><p>Feb</p></th>
+<th class="head"><p>Mar</p></th>
+<th class="head"><p>Apr</p></th>
+<th class="head"><p>May</p></th>
+<th class="head"><p>Jun</p></th>
+<th class="head"><p>Jul</p></th>
+<th class="head"><p>Aug</p></th>
+<th class="head"><p>Sep</p></th>
+<th class="head"><p>Oct</p></th>
+<th class="head"><p>Nov</p></th>
+<th class="head"><p>Dec</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ground_cover [-]</p></td>
+<td><p>0.51</p></td>
+<td><p>0.51</p></td>
+<td><p>0.66</p></td>
+<td><p>0.76</p></td>
+<td><p>0.83</p></td>
+<td><p>0.83</p></td>
+<td><p>0.83</p></td>
+<td><p>0.83</p></td>
+<td><p>0.83</p></td>
+<td><p>0.66</p></td>
+<td><p>0.59</p></td>
+<td><p>0.51</p></td>
+</tr>
+<tr class="row-odd"><td><p>z_root [mm]</p></td>
+<td><p>400</p></td>
+<td><p>400</p></td>
+<td><p>400</p></td>
+<td><p>400</p></td>
+<td><p>400</p></td>
+<td><p>400</p></td>
+<td><p>400</p></td>
+<td><p>400</p></td>
+<td><p>400</p></td>
+<td><p>400</p></td>
+<td><p>400</p></td>
+<td><p>400</p></td>
+</tr>
+<tr class="row-even"><td><p>lai [-]</p></td>
+<td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>3</p></td>
+<td><p>4</p></td>
+<td><p>5</p></td>
+<td><p>5</p></td>
+<td><p>5</p></td>
+<td><p>5</p></td>
+<td><p>5</p></td>
+<td><p>3</p></td>
+<td><p>2.5</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-odd"><td><p>S_int_lower_tot [mm]</p></td>
+<td><p>0.4</p></td>
+<td><p>0.4</p></td>
+<td><p>0.6</p></td>
+<td><p>0.8</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>0.6</p></td>
+<td><p>0.5</p></td>
+<td><p>0.4</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="short-description-of-land-use-lu-id">
+<h2>Short description of land use (lu_id)<a class="headerlink" href="#short-description-of-land-use-lu-id" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><cite>0</cite>: sealed surface</p></li>
+<li><p><cite>5</cite>: arable land</p></li>
+<li><p><cite>501</cite>: bean</p></li>
+<li><p><cite>502</cite>: amaranth</p></li>
+<li><p><cite>503</cite>: other commercial crops</p></li>
+<li><p><cite>504</cite>: artichoke</p></li>
+<li><p><cite>505</cite>: berry</p></li>
+<li><p><cite>506</cite>: ornamental plant</p></li>
+<li><p><cite>507</cite>: nettle</p></li>
+<li><p><cite>508</cite>: buckwheat</p></li>
+<li><p><cite>509</cite>: pea</p></li>
+<li><p><cite>510</cite>: strawberry</p></li>
+<li><p><cite>511</cite>: esparcet</p></li>
+<li><p><cite>512</cite>: sunflower</p></li>
+<li><p><cite>513</cite>: vegetables</p></li>
+<li><p><cite>514</cite>: flax</p></li>
+<li><p><cite>515</cite>: early potatoes</p></li>
+<li><p><cite>516</cite>: fodder root crops</p></li>
+<li><p><cite>517</cite>: fodder legumes</p></li>
+<li><p><cite>518</cite>: hemp</p></li>
+<li><p><cite>519</cite>: home garden</p></li>
+<li><p><cite>520</cite>: hop</p></li>
+<li><p><cite>521</cite>: legumes</p></li>
+<li><p><cite>522</cite>: intensive fruit-growing</p></li>
+<li><p><cite>523</cite>: potato</p></li>
+<li><p><cite>524</cite>: clover</p></li>
+<li><p><cite>525</cite>: grain corn</p></li>
+<li><p><cite>526</cite>: herbs</p></li>
+<li><p><cite>527</cite>: false flax</p></li>
+<li><p><cite>528</cite>: lentil</p></li>
+<li><p><cite>529</cite>: lupine</p></li>
+<li><p><cite>530</cite>: lucerne</p></li>
+<li><p><cite>531</cite>: summer phacelia</p></li>
+<li><p><cite>532</cite>: flat pea</p></li>
+<li><p><cite>533</cite>: grape</p></li>
+<li><p><cite>534</cite>: grape school</p></li>
+<li><p><cite>535</cite>: rhubarb</p></li>
+<li><p><cite>536</cite>: beetroot</p></li>
+<li><p><cite>537</cite>: nuts</p></li>
+<li><p><cite>538</cite>: summer mustard</p></li>
+<li><p><cite>539</cite>: silage corn</p></li>
+<li><p><cite>540</cite>: silphium</p></li>
+<li><p><cite>541</cite>: soybean</p></li>
+<li><p><cite>542</cite>: summer barley</p></li>
+<li><p><cite>543</cite>: summer wheat</p></li>
+<li><p><cite>544</cite>: summer oat</p></li>
+<li><p><cite>545</cite>: summer rape</p></li>
+<li><p><cite>546</cite>: summer triticale</p></li>
+<li><p><cite>547</cite>: sunflower</p></li>
+<li><p><cite>548</cite>: other fruit-growing</p></li>
+<li><p><cite>549</cite>: sorghum</p></li>
+<li><p><cite>550</cite>: asparagus</p></li>
+<li><p><cite>551</cite>: orchards</p></li>
+<li><p><cite>552</cite>: sweet potato</p></li>
+<li><p><cite>553</cite>: tobacco</p></li>
+<li><p><cite>554</cite>: helianthus</p></li>
+<li><p><cite>555</cite>: vetch</p></li>
+<li><p><cite>556</cite>: winter barley</p></li>
+<li><p><cite>557</cite>: winter wheat</p></li>
+<li><p><cite>558</cite>: winter oat</p></li>
+<li><p><cite>559</cite>: winter rape</p></li>
+<li><p><cite>560</cite>: winter triticale</p></li>
+<li><p><cite>561</cite>: chicory</p></li>
+<li><p><cite>562</cite>: sweet corn</p></li>
+<li><p><cite>563</cite>: sugar beet</p></li>
+<li><p><cite>564</cite>: winter green manure (Oct)</p></li>
+<li><p><cite>565</cite>: summer grass</p></li>
+<li><p><cite>566</cite>: winter grass</p></li>
+<li><p><cite>567</cite>: clover</p></li>
+<li><p><cite>568</cite>: winter phacelia</p></li>
+<li><p><cite>569</cite>: winter green manure (Aug)</p></li>
+<li><p><cite>570</cite>: winter green manure (Sep)</p></li>
+<li><p><cite>571</cite>: summer grass (growing only)</p></li>
+<li><p><cite>572</cite>: winter grass (growing only)</p></li>
+<li><p><cite>573</cite>: summer grass (continued)</p></li>
+<li><p><cite>574</cite>: winter grass (continued)</p></li>
+<li><p><cite>598</cite>: no crop</p></li>
+<li><p><cite>599</cite>: bare</p></li>
+<li><p><cite>6</cite>: vineyard</p></li>
+<li><p><cite>7</cite>: fruits</p></li>
+<li><p><cite>8</cite>: grass</p></li>
+<li><p><cite>9</cite>: complex parcel</p></li>
+<li><p><cite>10</cite>: deciduous forest</p></li>
+<li><p><cite>11</cite>: mixed forest</p></li>
+<li><p><cite>12</cite>: coniferous forest</p></li>
+<li><p><cite>13</cite>: wetland</p></li>
+<li><p><cite>14</cite>: lake</p></li>
+<li><p><cite>15</cite>: forest (unknown tree species)</p></li>
+<li><p><cite>16</cite>: urban tree</p></li>
+<li><p><cite>20</cite>: river</p></li>
+<li><p><cite>31</cite>: gravel rooftop</p></li>
+<li><p><cite>32</cite>: grass rooftop extensive</p></li>
+<li><p><cite>33</cite>: grass rooftop intensive</p></li>
+<li><p><cite>41</cite>: gravel</p></li>
+<li><p><cite>50</cite>: percolation plant</p></li>
+<li><p><cite>98</cite>: grass intensive</p></li>
+<li><p><cite>100</cite>: urban</p></li>
+<li><p><cite>999</cite>: no value</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../storages.html" class="btn btn-neutral float-left" title="Storages" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="soil.html" class="btn btn-neutral float-right" title="Soil" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, The RoGeR Team, University of Freiburg.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

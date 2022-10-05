@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soil &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Groundwater" href="groundwater.html" />
+    <link rel="prev" title="Surface" href="surface.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> RoGeR
+          </a>
+              <div class="version">
+                0.0.1+15.gf84e55c.dirty
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/introduction.html">A short introduction to Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/get-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/advanced-installation.html">Advanced installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/cluster.html">Running Roger on a cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/dev.html">Making changes in Roger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../equations.html">Model equations</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../hydrologic_cycle.html">Hydrologic cycle</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../hydrologic_processes.html">Hydrologic processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../storages.html">Storages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../model_structures.html">Model structures</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#svat">SVAT</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="surface.html">Surface</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Soil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hydrologic_processes/snow.html">Snow accumulation and snow melt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hydrologic_processes/interception.html">Interception</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hydrologic_processes/infiltration.html">Infiltration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hydrologic_processes/percolation.html">Percolation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hydrologic_processes/evapotranspiration.html">Evapotranspiration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hydrologic_processes/capillary_rise.html">Capillary rise</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../solute_transport.html">Solute transport</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/settings.html">Model settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/variables.html">Model variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/cli.html">Command line tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/public-api.html">Python API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../more/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../more/howtocite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../more/publications.html">Publications involving Roger</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">RoGeR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../hydrologic_cycle.html">Hydrologic cycle</a> &raquo;</li>
+          <li><a href="../storages.html">Storages</a> &raquo;</li>
+      <li>Soil</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/equations/hydrologic_cycle/storages/soil.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="soil">
+<h1>Soil<a class="headerlink" href="#soil" title="Permalink to this headline">¶</a></h1>
+<p>Soil storage divides into a root zone layer <span class="math notranslate nohighlight">\(rz\)</span> (i.e. upper soil) and a subsoil
+layer <span class="math notranslate nohighlight">\(ss\)</span> (i.e. lower soil). The two soil layers share the same soil hydraulic
+parameters. However, absolute storage values are different due to different thickness of the layers.
+Root depth (<span class="math notranslate nohighlight">\(z_{root}\)</span>; mm) depends on land-use:</p>
+<section id="soil-hydraulic-properties">
+<h2>Soil hydraulic properties<a class="headerlink" href="#soil-hydraulic-properties" title="Permalink to this headline">¶</a></h2>
+<p>Soil hydraulic parameters are calculated with the Brooks-Corey scheme (Brooks and Corey, 1966):
+Pore size distribution parameter <span class="math notranslate nohighlight">\(\lambda\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\lambda=\frac{1}{\frac{\log \left(\frac{h_{fc}}{h_{pwp}}\right)}{\log \left(\frac{\omega_{fc}}{\omega_{pwp}}\right)}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(h_{fc}\)</span> is soil water potential at field capacity (hPa;:math:<cite>h_{fc}`=63) and :math:`h_{pwp}</cite> is the soil water potential at permanent wilting point (hPa;:math:<a href="#id1"><span class="problematic" id="id2">`</span></a>h_{pwp}`=15850)</p>
+<p>Pore size disconnectedness index <span class="math notranslate nohighlight">\(m\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[m=b+\frac{a}{\lambda}\]</div>
+<p>where <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span> are parameters with a fixed value of 2.</p>
+<p>Salvucci exponent <span class="math notranslate nohighlight">\(n\)</span> (Salvucci, 1993):</p>
+<div class="math notranslate nohighlight">
+\[n=\lambda \cdot a+b\]</div>
+<p>Effective soil water content at field capacity <span class="math notranslate nohighlight">\(\omega_{fc}\)</span> (-):</p>
+<div class="math notranslate nohighlight">
+\[\omega_{fc}=\frac{\theta_{fc}}{\theta_{sat}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\theta_{fc}\)</span> is soil water content at field capacity (-) and <span class="math notranslate nohighlight">\(\theta_{sat}\)</span> is soil water content at saturation (-).</p>
+<p>Effective soil water content at permanent wilting point <span class="math notranslate nohighlight">\(\omega_{pwp}\)</span> (-):</p>
+<div class="math notranslate nohighlight">
+\[\omega_{pwp}=\frac{\theta_{pwp}}{\theta_{sat}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\theta_{pwp}\)</span> is soil water content at permanent wilting point (-).</p>
+<p>Effective soil water content <span class="math notranslate nohighlight">\(\omega\)</span> (-):</p>
+<div class="math notranslate nohighlight">
+\[\omega=\frac{\theta}{\theta_{sat}}\]</div>
+<p>Air entry value <span class="math notranslate nohighlight">\(h_a\)</span> (i.e. bubbling pressure, hPa):</p>
+<div class="math notranslate nohighlight">
+\[h_a=\omega_{pwp}^{\frac{1}{\lambda}} \cdot(-1) \cdot h_{pwp}\]</div>
+<p>Soil water potential <span class="math notranslate nohighlight">\(h\)</span> (hPa):</p>
+<div class="math notranslate nohighlight">
+\[h=\frac{h_a}{\omega^{\frac{1}{\lambda}}}\]</div>
+<p>Wetting front suction <span class="math notranslate nohighlight">\(\psi_f\)</span> (mm):</p>
+<div class="math notranslate nohighlight">
+\[\psi_f=\frac{2+3 \lambda}{(1+3 \lambda) \cdot \frac{h_a}{2} \cdot(-10)}\]</div>
+<p>Hydraulic conductivity <span class="math notranslate nohighlight">\(k\)</span> (mm h-1):</p>
+<div class="math notranslate nohighlight">
+\[k=\frac{k_s}{1+\omega^m}\]</div>
+<p>Soil water content at <span class="math notranslate nohighlight">\(10^{2.7}\)</span> hPa <span class="math notranslate nohighlight">\(\theta_{27}\)</span> (-):</p>
+<div class="math notranslate nohighlight">
+\[theta_{27}=\frac{h_a}{-10^{2.7}}^{\lambda_{bc} \cdot \theta_{sat}}\]</div>
+<p>Soil water content at <span class="math notranslate nohighlight">\(10^4\)</span> hPa <span class="math notranslate nohighlight">\(\theta_6\)</span> (-):</p>
+<div class="math notranslate nohighlight">
+\[theta_4=\frac{h_a}{-10^4}^{\lambda_{bc} \cdot \theta_{sat}}\]</div>
+<p>Soil water content at <span class="math notranslate nohighlight">\(10^6\)</span> hPa <span class="math notranslate nohighlight">\(\theta_6\)</span> (-):</p>
+<div class="math notranslate nohighlight">
+\[theta_6=\frac{h_a}{-10^6}^{\lambda_{bc} \cdot \theta_{sat}}\]</div>
+<p>Soil moisture deficit <span class="math notranslate nohighlight">\(\Delta \theta\)</span> (-):</p>
+<div class="math notranslate nohighlight">
+\[\Delta \theta=\theta_{sat} - \theta_{rz}\]</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="surface.html" class="btn btn-neutral float-left" title="Surface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="groundwater.html" class="btn btn-neutral float-right" title="Groundwater" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, The RoGeR Team, University of Freiburg.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
