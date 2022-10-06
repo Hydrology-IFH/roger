@@ -337,7 +337,7 @@ def main(tmp_dir):
     file = base_path_results / "params_eff.txt"
     df_params_eff.to_csv(file, header=True, index=False, sep="\t")
 
-    dotty plots
+    # dotty plots
     for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
         df_eff = df_params_eff.loc[:, [f'KGE_aet{sc1}', f'KGE_q_ss{sc1}', f'r_dS{sc1}', f'E_multi{sc1}']]
         df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
