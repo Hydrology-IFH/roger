@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Diagnostics &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
+  <title>Diagnostics &mdash; RoGeR 0.0.1+24.gc6b8781.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+15.gf84e55c.dirty
+                0.0.1+24.gc6b8781.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -55,6 +55,8 @@
 <p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../equations/equations.html">Model equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../equations/hydrologic_cycle.html">Hydrologic cycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../equations/solute_transport.html">Solute transport</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
@@ -119,15 +121,38 @@ responsible for handling I/O, restart mechanics, and monitoring of the numerical
 solution. All available diagnostics are instantiated and added to a dictionary
 attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">RogerState.diagnostics</span></code> (with a key determined by their <cite>name</cite> attribute).
 Options for diagnostics may be set during the <code class="xref py py-meth docutils literal notranslate"><span class="pre">RogerSetup.set_diagnostics()</span></code> method:</p>
+<p>Output aggregated to daily:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyModelSetup</span><span class="p">(</span><span class="n">RogerSetup</span><span class="p">):</span>
     <span class="o">...</span>
     <span class="k">def</span> <span class="nf">set_diagnostics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="n">diagnostics</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">diagnostics</span>
-        <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output_variables</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;transp&#39;</span><span class="p">,</span><span class="s1">&#39;q_ss&#39;</span><span class="p">]</span>
+        <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output_variables</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;transp&#39;</span><span class="p">,</span> <span class="s1">&#39;q_ss&#39;</span><span class="p">]</span>
         <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sampling_frequency</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sampling_frequency</span> <span class="o">=</span>  <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span>
+        <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output_frequency</span> <span class="o">=</span>  <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span>
 </pre></div>
 </div>
+<p>Output aggregated to hourly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyModelSetup</span><span class="p">(</span><span class="n">RogerSetup</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="k">def</span> <span class="nf">set_diagnostics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">diagnostics</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">diagnostics</span>
+        <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output_variables</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;transp&#39;</span><span class="p">,</span> <span class="s1">&#39;q_ss&#39;</span><span class="p">]</span>
+        <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sampling_frequency</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output_frequency</span> <span class="o">=</span>  <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span>
+</pre></div>
+</div>
+<p>Output aggregated to 10 minutes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyModelSetup</span><span class="p">(</span><span class="n">RogerSetup</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="k">def</span> <span class="nf">set_diagnostics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">diagnostics</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">diagnostics</span>
+        <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output_variables</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;transp&#39;</span><span class="p">,</span> <span class="s1">&#39;q_ss&#39;</span><span class="p">]</span>
+        <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sampling_frequency</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">diagnostics</span><span class="p">[</span><span class="s1">&#39;rates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output_frequency</span> <span class="o">=</span>  <span class="mi">10</span> <span class="o">*</span> <span class="mi">60</span>
+</pre></div>
+</div>
+<p>Please not, that within the adaptive-time stepping greater time steps
+than provided <cite>output_frequency</cite> will not be downscaled (e.g. from daily to hourly).</p>
 <section id="base-class">
 <h2>Base class<a class="headerlink" href="#base-class" title="Permalink to this headline">¶</a></h2>
 <p>This class implements some common logic for all diagnostics. This makes it easy

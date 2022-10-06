@@ -135,26 +135,16 @@ def gamma(state, SA, sas_params):
     mask = (sas_params[:, :, 0, npx.newaxis] == 4)
 
     S = allocate(state.dimensions, ("x", "y", 1))
-    lam = allocate(state.dimensions, ("x", "y", 1))
-    rescale = allocate(state.dimensions, ("x", "y", 1))
     Omega = allocate(state.dimensions, ("x", "y", "nages"))
     S = update(
         S,
         at[2:-2, 2:-2, :], npx.max(SA[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
-    lam = update(
-        lam,
-        at[2:-2, 2:-2, :], (1 / sas_params[2:-2, 2:-2, 1, npx.newaxis]) * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-    )
-    rescale = update(
-        rescale,
-        at[2:-2, 2:-2, :], npx.where(npx.isfinite(S[2:-2, 2:-2, :]), 1/(spsx.gammainc(sas_params[2:-2, 2:-2, 2, npx.newaxis], lam[2:-2, 2:-2, :] * S[2:-2, 2:-2, :])), 1.) * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-    )
 
     Omega = update(
         Omega,
         at[2:-2, 2:-2, :], npx.where(SA[2:-2, 2:-2, vs.tau, :] > 0, npx.where(SA[2:-2, 2:-2, vs.tau, :] < S[2:-2, 2:-2, :],
-                                     spsx.gammainc(sas_params[2:-2, 2:-2, 2, npx.newaxis], lam[2:-2, 2:-2, :] * SA[2:-2, 2:-2, vs.tau, :]) * rescale[2:-2, 2:-2, :], 1.), 0.) * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+                                     spsx.gammainc(sas_params[2:-2, 2:-2, 1, npx.newaxis], sas_params[2:-2, 2:-2, 2, npx.newaxis] * SA[2:-2, 2:-2, vs.tau, :]/S[2:-2, 2:-2, :]) / spsx.gamma(sas_params[2:-2, 2:-2, 1, npx.newaxis])[:, :, npx.newaxis], 0.), 0) * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     Omega = update(
         Omega,

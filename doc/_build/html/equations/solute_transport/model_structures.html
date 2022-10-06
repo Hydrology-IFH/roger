@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Model structures &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
+  <title>Model structures &mdash; RoGeR 0.0.1+24.gc6b8781.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,7 +17,9 @@
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Biogeochemical processes" href="biogeochemical_processes.html" />
+    <link rel="prev" title="StorAge selection (SAS) functions" href="SAS_functions.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -28,7 +30,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+15.gf84e55c.dirty
+                0.0.1+24.gc6b8781.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -51,10 +53,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../equations.html">Model equations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../hydrologic_cycle.html">Hydrologic cycle</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../solute_transport.html">Solute transport</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../solute_transport.html">Solute transport</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="SAS_functions.html">StorAge selection (SAS) functions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Model structures</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#complete-mixing">Complete-mixing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#piston">Piston</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#advection-dispersion">Advection-Dispersion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#preferential">Preferential</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="biogeochemical_processes.html">Biogeochemical processes</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
@@ -87,6 +100,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../solute_transport.html">Solute transport</a> &raquo;</li>
       <li>Model structures</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/equations/solute_transport/model_structures.rst.txt" rel="nofollow"> View page source</a>
@@ -99,12 +113,35 @@
              
   <section id="model-structures">
 <h1>Model structures<a class="headerlink" href="#model-structures" title="Permalink to this headline">¶</a></h1>
+<section id="complete-mixing">
+<h2>Complete-mixing<a class="headerlink" href="#complete-mixing" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="../../_images/complete-mixing.png"><img alt="../../_images/complete-mixing.png" class="align-center" src="../../_images/complete-mixing.png" style="width: 250px;" /></a>
+<p>Transport is represented by complete mixing.</p>
+</section>
+<section id="piston">
+<h2>Piston<a class="headerlink" href="#piston" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="../../_images/piston.png"><img alt="../../_images/piston.png" class="align-center" src="../../_images/piston.png" style="width: 250px;" /></a>
+<p>Transport is represented by piston flow (i.e. purely advective).</p>
+</section>
+<section id="advection-dispersion">
+<h2>Advection-Dispersion<a class="headerlink" href="#advection-dispersion" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="../../_images/advection-dispersion.png"><img alt="../../_images/advection-dispersion.png" class="align-center" src="../../_images/advection-dispersion.png" style="width: 250px;" /></a>
+<p>Transport is represented by advection and dispersion.</p>
+</section>
+<section id="preferential">
+<h2>Preferential<a class="headerlink" href="#preferential" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="../../_images/preferential.png"><img alt="../../_images/preferential.png" class="align-center" src="../../_images/preferential.png" style="width: 250px;" /></a>
+<p>Transport is represented by preferential flow.</p>
+</section>
 </section>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="SAS_functions.html" class="btn btn-neutral float-left" title="StorAge selection (SAS) functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="biogeochemical_processes.html" class="btn btn-neutral float-right" title="Biogeochemical processes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Model structures &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
+  <title>Model structures &mdash; RoGeR 0.0.1+24.gc6b8781.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+15.gf84e55c.dirty
+                0.0.1+24.gc6b8781.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -65,7 +65,40 @@
 <li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/snow.html">Snow accumulation and snow melt</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/interception.html">Interception</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/infiltration.html">Infiltration</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html">Percolation / capillary rise</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html">Percolation / Capillary rise</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html">Evapotranspiration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#svat-crop">SVAT-CROP</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="storages/surface.html">Surface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="storages/soil.html">Soil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/crop_phenology.html">Crop phenology</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/snow.html">Snow accumulation and snow melt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/interception.html">Interception</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/infiltration.html">Infiltration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html">Percolation / Capillary rise</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html">Evapotranspiration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#oned">ONED</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="storages/surface.html">Surface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="storages/soil.html">Soil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/snow.html">Snow accumulation and snow melt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/interception.html">Interception</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/infiltration.html">Infiltration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html">Percolation / Capillary rise</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/lateral_flow_soil.html">Subsurface runoff</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html">Evapotranspiration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#oned-event">ONED-EVENT</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="storages/surface.html">Surface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="storages/soil.html">Soil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/snow.html">Snow accumulation and snow melt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/interception.html">Interception</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/infiltration.html">Infiltration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html">Percolation / Capillary rise</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/lateral_flow_soil.html">Subsurface runoff</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html">Evapotranspiration</a></li>
 </ul>
 </li>
@@ -121,6 +154,7 @@
 <h1>Model structures<a class="headerlink" href="#model-structures" title="Permalink to this headline">¶</a></h1>
 <section id="svat">
 <h2>SVAT<a class="headerlink" href="#svat" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="../../_images/SVAT.png"><img alt="../../_images/SVAT.png" class="align-center" src="../../_images/SVAT.png" style="width: 400px;" /></a>
 <p>Long-term hydrologic modelling of vertical processes.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -146,11 +180,138 @@
 <li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/infiltration.html#shrinkage-crack-infiltration">Shrinkage crack infiltration</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html">Percolation / capillary rise</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html">Percolation / Capillary rise</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html#percolation">Percolation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html#capillary-rise">Capillary rise</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html">Evapotranspiration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html#evaporation-from-interception-storage">Evaporation from interception storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html#soil-evaporation">Soil evaporation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html#transpiration">Transpiration</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="svat-crop">
+<h2>SVAT-CROP<a class="headerlink" href="#svat-crop" title="Permalink to this headline">¶</a></h2>
+<p>Long-term hydrologic modelling of vertical processes including crop phenology/crop rotation.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="storages/surface.html">Surface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="storages/surface.html#properties-of-upper-interception-storage">Properties of upper interception storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="storages/surface.html#properties-of-lower-interception-storage">Properties of lower interception storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="storages/surface.html#short-description-of-land-use-lu-id">Short description of land use (lu_id)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="storages/soil.html">Soil</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="storages/soil.html#soil-hydraulic-properties">Soil hydraulic properties</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/crop_phenology.html">Crop phenology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/snow.html">Snow accumulation and snow melt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/interception.html">Interception</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/interception.html#interception-from-upper-interception-storage">Interception from upper interception storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/interception.html#interception-from-lower-interception-storage">Interception from lower interception storage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/infiltration.html">Infiltration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/infiltration.html#matrix-infiltration">Matrix infiltration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/infiltration.html#macropore-infiltration">Macropore infiltration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/infiltration.html#shrinkage-crack-infiltration">Shrinkage crack infiltration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html">Percolation / Capillary rise</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html#percolation">Percolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html#capillary-rise">Capillary rise</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html">Evapotranspiration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html#evaporation-from-interception-storage">Evaporation from interception storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html#soil-evaporation">Soil evaporation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html#transpiration">Transpiration</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="oned">
+<h2>ONED<a class="headerlink" href="#oned" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="../../_images/ONED.png"><img alt="../../_images/ONED.png" class="align-center" src="../../_images/ONED.png" style="width: 400px;" /></a>
+<p>Long-term hydrologic modelling of vertical processes and lateral processes.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="storages/surface.html">Surface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="storages/surface.html#properties-of-upper-interception-storage">Properties of upper interception storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="storages/surface.html#properties-of-lower-interception-storage">Properties of lower interception storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="storages/surface.html#short-description-of-land-use-lu-id">Short description of land use (lu_id)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="storages/soil.html">Soil</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="storages/soil.html#soil-hydraulic-properties">Soil hydraulic properties</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/snow.html">Snow accumulation and snow melt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/interception.html">Interception</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/interception.html#interception-from-upper-interception-storage">Interception from upper interception storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/interception.html#interception-from-lower-interception-storage">Interception from lower interception storage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/infiltration.html">Infiltration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/infiltration.html#matrix-infiltration">Matrix infiltration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/infiltration.html#macropore-infiltration">Macropore infiltration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/infiltration.html#shrinkage-crack-infiltration">Shrinkage crack infiltration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html">Percolation / Capillary rise</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html#percolation">Percolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html#capillary-rise">Capillary rise</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/lateral_flow_soil.html">Subsurface runoff</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html">Evapotranspiration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html#evaporation-from-interception-storage">Evaporation from interception storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html#soil-evaporation">Soil evaporation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html#transpiration">Transpiration</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="oned-event">
+<h2>ONED-EVENT<a class="headerlink" href="#oned-event" title="Permalink to this headline">¶</a></h2>
+<p>Short-term hydrologic modelling of vertical processes and lateral processes.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="storages/surface.html">Surface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="storages/surface.html#properties-of-upper-interception-storage">Properties of upper interception storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="storages/surface.html#properties-of-lower-interception-storage">Properties of lower interception storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="storages/surface.html#short-description-of-land-use-lu-id">Short description of land use (lu_id)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="storages/soil.html">Soil</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="storages/soil.html#soil-hydraulic-properties">Soil hydraulic properties</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/snow.html">Snow accumulation and snow melt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/interception.html">Interception</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/interception.html#interception-from-upper-interception-storage">Interception from upper interception storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/interception.html#interception-from-lower-interception-storage">Interception from lower interception storage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/infiltration.html">Infiltration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/infiltration.html#matrix-infiltration">Matrix infiltration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/infiltration.html#macropore-infiltration">Macropore infiltration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/infiltration.html#shrinkage-crack-infiltration">Shrinkage crack infiltration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html">Percolation / Capillary rise</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html#percolation">Percolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html#capillary-rise">Capillary rise</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/lateral_flow_soil.html">Subsurface runoff</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html">Evapotranspiration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html#evaporation-from-interception-storage">Evaporation from interception storage</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html#soil-evaporation">Soil evaporation</a></li>

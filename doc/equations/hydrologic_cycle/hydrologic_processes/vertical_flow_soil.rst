@@ -1,7 +1,7 @@
-Percolation / capillary rise
+Percolation / Capillary rise
 ============================
 
-Vertical flux :math:`q_{v}` (mm :math:`\Delta t^{-1}`):
+Vertical soil water flux :math:`q_{v}` (mm :math:`\Delta t^{-1}`):
 
 .. math::
   q_{v}=\left\{\begin{array}{lr}

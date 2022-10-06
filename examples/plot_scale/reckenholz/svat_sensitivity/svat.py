@@ -175,8 +175,11 @@ def main(nsamples, lys_experiment, tmp_dir):
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1350)
             vs.dmpv = update(vs.dmpv, at[2:-2, :], npx.array(self._params[:, 0, npx.newaxis], dtype=int))
             vs.lmpv = update(vs.lmpv, at[2:-2, :], npx.array(self._params[:, 1, npx.newaxis], dtype=int))
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, :], self._params[:, 2, npx.newaxis])
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, :], self._params[:, 3, npx.newaxis])
+            vs.theta_eff = update(vs.theta_eff, at[2:-2, :], self._params[:, 2, npx.newaxis])
+            vs.frac_lp = update(vs.frac_lp, at[2:-2, :], self._params[:, 3, npx.newaxis])
+            vs.frac_fp = update(vs.frac_fp, at[2:-2, :], 1 - vs.frac_lp[2:-2, :])
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, :], vs.theta_eff[2:-2, :] * vs.frac_lp[2:-2, :])
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, :], vs.theta_eff[2:-2, :] * vs.frac_fp[2:-2, :])
             vs.theta_pwp = update(vs.theta_pwp, at[2:-2, :], self._params[:, 4, npx.newaxis])
             vs.ks = update(vs.ks, at[2:-2, :], self._params[:, 5, npx.newaxis])
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
@@ -381,7 +384,7 @@ def main(nsamples, lys_experiment, tmp_dir):
             if base_path:
                 diagnostics["averages"].base_output_path = base_path
 
-            diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']
+            diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'theta_eff', 'frac_lp', 'frac_fp']
             diagnostics["constant"].output_frequency = 0
             diagnostics["constant"].sampling_frequency = 1
             if base_path:

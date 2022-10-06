@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.setups.svat_crop.svat_crop &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
+  <title>roger.setups.svat_crop.svat_crop &mdash; RoGeR 0.0.1+24.gc6b8781.dirty documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -27,7 +27,7 @@
             <a href="../../../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+15.gf84e55c.dirty
+                0.0.1+24.gc6b8781.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -98,12 +98,11 @@
              
   <h1>Source code for roger.setups.svat_crop.svat_crop</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">h5netcdf</span>
 <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">RogerSetup</span><span class="p">,</span> <span class="n">roger_routine</span><span class="p">,</span> <span class="n">roger_kernel</span><span class="p">,</span> <span class="n">KernelOutput</span>
 <span class="kn">from</span> <span class="nn">roger.variables</span> <span class="kn">import</span> <span class="n">allocate</span>
 <span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span><span class="p">,</span> <span class="n">update</span><span class="p">,</span> <span class="n">at</span>
-<span class="kn">from</span> <span class="nn">roger.core.numerics</span> <span class="kn">import</span> <span class="n">calc_parameters_surface_kernel</span>
+<span class="kn">from</span> <span class="nn">roger.core.surface</span> <span class="kn">import</span> <span class="n">calc_parameters_surface_kernel</span>
 <span class="kn">import</span> <span class="nn">roger.lookuptables</span> <span class="k">as</span> <span class="nn">lut</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">onp</span>
 

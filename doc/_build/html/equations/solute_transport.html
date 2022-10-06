@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Solute transport &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
+  <title>Solute transport &mdash; RoGeR 0.0.1+24.gc6b8781.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -15,6 +15,7 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -30,7 +31,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+15.gf84e55c.dirty
+                0.0.1+24.gc6b8781.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -106,18 +107,29 @@
              
   <section id="solute-transport">
 <h1>Solute transport<a class="headerlink" href="#solute-transport" title="Permalink to this headline">¶</a></h1>
+<p>Solute transport is implemented with StorAge selection (SAS) functions:</p>
+<div class="math notranslate nohighlight">
+\[C_Q=\int_{T=0}^{\infty} C_S(T,t) \cdot \alpha_p \cdot \overleftarrow{p}_{Q}(T,t) dT\]</div>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="solute_transport/SAS_functions.html">StorAge selection (SAS) functions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="solute_transport/SAS_functions.html#uniform">Uniform</a></li>
 <li class="toctree-l2"><a class="reference internal" href="solute_transport/SAS_functions.html#dirac">Dirac</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solute_transport/SAS_functions.html#kumaraswamy">Kumaraswamy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="solute_transport/SAS_functions.html#gamma">Gamma</a></li>
 <li class="toctree-l2"><a class="reference internal" href="solute_transport/SAS_functions.html#exponential">Exponential</a></li>
 <li class="toctree-l2"><a class="reference internal" href="solute_transport/SAS_functions.html#power">Power</a></li>
-<li class="toctree-l2"><a class="reference internal" href="solute_transport/SAS_functions.html#kumaraswamy">Kumaraswamy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solute_transport/SAS_functions.html#time-variant-sas-function-parameters">Time-variant SAS function parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solute_transport/SAS_functions.html#short-description-of-sas-parameterization">Short description of SAS parameterization</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="solute_transport/model_structures.html">Model structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solute_transport/model_structures.html">Model structures</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="solute_transport/model_structures.html#complete-mixing">Complete-mixing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solute_transport/model_structures.html#piston">Piston</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solute_transport/model_structures.html#advection-dispersion">Advection-Dispersion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solute_transport/model_structures.html#preferential">Preferential</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="solute_transport/biogeochemical_processes.html">Biogeochemical processes</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="solute_transport/biogeochemical_processes.html#denitrification">Denitrification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="solute_transport/biogeochemical_processes.html#nitrification">Nitrification</a></li>

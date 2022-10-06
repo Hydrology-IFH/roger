@@ -9,15 +9,45 @@ solution. All available diagnostics are instantiated and added to a dictionary
 attribute :attr:`RogerState.diagnostics` (with a key determined by their `name` attribute).
 Options for diagnostics may be set during the :meth:`RogerSetup.set_diagnostics` method:
 
+Output aggregated to daily:
+
 ::
 
    class MyModelSetup(RogerSetup):
        ...
        def set_diagnostics(self, state):
            diagnostics = state.diagnostics
-           diagnostics['rates'].output_variables = ['transp','q_ss']
+           diagnostics['rates'].output_variables = ['transp', 'q_ss']
            diagnostics['rates'].sampling_frequency = 1
-           diagnostics['rates'].sampling_frequency =  24 * 60 * 60
+           diagnostics['rates'].output_frequency =  24 * 60 * 60
+
+Output aggregated to hourly:
+
+::
+
+  class MyModelSetup(RogerSetup):
+      ...
+      def set_diagnostics(self, state):
+          diagnostics = state.diagnostics
+          diagnostics['rates'].output_variables = ['transp', 'q_ss']
+          diagnostics['rates'].sampling_frequency = 1
+          diagnostics['rates'].output_frequency =  60 * 60
+
+
+Output aggregated to 10 minutes:
+
+::
+
+  class MyModelSetup(RogerSetup):
+      ...
+      def set_diagnostics(self, state):
+          diagnostics = state.diagnostics
+          diagnostics['rates'].output_variables = ['transp', 'q_ss']
+          diagnostics['rates'].sampling_frequency = 1
+          diagnostics['rates'].output_frequency =  10 * 60
+
+Please not, that within the adaptive-time stepping greater time steps
+than provided `output_frequency` will not be downscaled (e.g. from daily to hourly).
 
 Base class
 ----------
