@@ -143,7 +143,7 @@ def main(tmp_dir):
                                 del var_obj, vals
 
     # load hydrologic simulation
-    states_hm_file = base_path / "states_hm.nc"
+    states_hm_file = base_path / "states_hm1_bootstrap.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -195,6 +195,12 @@ def main(tmp_dir):
         nx = ds_sim_tm.dims['x']  # number of rows
         ny = ds_sim_tm.dims['y']  # number of columns
         df_params_eff = pd.DataFrame(index=range(nx * ny))
+        df_params_eff.loc[:, 'dmpv'] = ds_sim_hm["dmpv"].values.flatten()
+        df_params_eff.loc[:, 'lmpv'] = ds_sim_hm["lmpv"].values.flatten()
+        df_params_eff.loc[:, 'theta_ac'] = ds_sim_hm["theta_ac"].values.flatten()
+        df_params_eff.loc[:, 'theta_ufc'] = ds_sim_hm["theta_ufc"].values.flatten()
+        df_params_eff.loc[:, 'theta_pwp'] = ds_sim_hm["theta_pwp"].values.flatten()
+        df_params_eff.loc[:, 'ks'] = ds_sim_hm["ks"].values.flatten()
         # sampled model parameters
         if tm_structure == "preferential":
             df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
@@ -284,7 +290,7 @@ def main(tmp_dir):
             sample_no = sample_no.loc['1997':'2007']
             sample_no['sample_no'] = range(len(sample_no.index))
             df_perc_18O_sim = pd.DataFrame(index=date_sim_tm, columns=['perc_sim', 'd18O_perc_sim'])
-            df_perc_18O_sim['perc_sim'] = ds_sim_hm['q_ss'].isel(x=0, y=0).values
+            df_perc_18O_sim['perc_sim'] = ds_sim_hm['q_ss'].isel(x=nrow, y=0).values
             df_perc_18O_sim['d18O_perc_sim'] = ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=ncol).values
             df_perc_18O_sim = df_perc_18O_sim.join(sample_no)
             df_perc_18O_sim.loc[:, 'sample_no'] = df_perc_18O_sim.loc[:, 'sample_no'].fillna(method='bfill', limit=14)
@@ -366,45 +372,45 @@ def main(tmp_dir):
                             'power', 'time-variant power']:
             df_eff = df_params_eff.loc[:, ['KGE_C_iso_q_ss']]
             if tm_structure == "preferential":
-                df_params = df_params_eff.loc[:, ['b_transp', 'b_q_rz', 'b_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'b_q_rz', 'b_q_ss']]
             elif tm_structure == "preferential1":
-                df_params = df_params_eff.loc[:, ['b_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_q_ss']]
             elif tm_structure == "preferential2":
-                df_params = df_params_eff.loc[:, ['b_q_rz', 'b_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_q_rz', 'b_q_ss']]
             elif tm_structure == "advection-dispersion":
-                df_params = df_params_eff.loc[:, ['b_transp', 'a_q_rz', 'a_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'a_q_rz', 'a_q_ss']]
             elif tm_structure == "advection-dispersion1":
-                df_params = df_params_eff.loc[:, ['a_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'a_q_ss']]
             elif tm_structure == "advection-dispersion2":
-                df_params = df_params_eff.loc[:, ['a_q_rz', 'a_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'a_q_rz', 'a_q_ss']]
             elif tm_structure == "time-variant advection-dispersion":
-                df_params = df_params_eff.loc[:, ['b_transp', 'a_q_rz', 'a_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'a_q_rz', 'a_q_ss']]
             elif tm_structure == "time-variant advection-dispersion1":
-                df_params = df_params_eff.loc[:, ['a_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'a_q_ss']]
             elif tm_structure == "time-variant advection-dispersion2":
-                df_params = df_params_eff.loc[:, ['a_q_rz', 'a_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'a_q_rz', 'a_q_ss']]
             elif tm_structure == "time-variant preferential":
-                df_params = df_params_eff.loc[:, ['b_transp', 'b_q_rz', 'b_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'b_q_rz', 'b_q_ss']]
             elif tm_structure == "time-variant preferential1":
-                df_params = df_params_eff.loc[:, ['b_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_q_ss']]
             elif tm_structure == "time-variant preferential2":
-                df_params = df_params_eff.loc[:, ['b_q_rz', 'b_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_q_rz', 'b_q_ss']]
             elif tm_structure == "time-variant":
-                df_params = df_params_eff.loc[:, ['ab_transp', 'ab_q_rz', 'ab_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'ab_transp', 'ab_q_rz', 'ab_q_ss']]
             elif tm_structure == "time-variant1":
-                df_params = df_params_eff.loc[:, ['ab_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'ab_q_ss']]
             elif tm_structure == "time-variant2":
-                df_params = df_params_eff.loc[:, ['ab_q_rz', 'ab_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'ab_q_rz', 'ab_q_ss']]
             elif tm_structure == "preferential + advection-dispersion":
-                df_params = df_params_eff.loc[:, ['b_transp', 'b_q_rz', 'a_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'b_q_rz', 'a_q_ss']]
             elif tm_structure == "time-variant preferential + advection-dispersion":
-                df_params = df_params_eff.loc[:, ['b_transp', 'b_q_rz', 'a_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'b_q_rz', 'a_q_ss']]
             elif tm_structure == "power":
-                df_params = df_params_eff.loc[:, ['k_transp', 'k_q_rz', 'k_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'k_transp', 'k_q_rz', 'k_q_ss']]
             elif tm_structure == "time-variant power":
-                df_params = df_params_eff.loc[:, ['k1_transp', 'k1_q_rz', 'k1_q_ss', 'k2_transp', 'k2_q_rz', 'k2_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'k1_transp', 'k1_q_rz', 'k1_q_ss', 'k2_transp', 'k2_q_rz', 'k2_q_ss']]
             elif tm_structure == "time-variant power reverse":
-                df_params = df_params_eff.loc[:, ['k1_transp', 'k1_q_rz', 'k1_q_ss', 'k2_transp', 'k2_q_rz', 'k2_q_ss']]
+                df_params = df_params_eff.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'k1_transp', 'k1_q_rz', 'k1_q_ss', 'k2_transp', 'k2_q_rz', 'k2_q_ss']]
             # select best model run
             idx_best = df_params_eff['KGE_C_iso_q_ss'].idxmax()
             dict_params_eff[tm_structure]['idx_best'] = idx_best
@@ -425,13 +431,13 @@ def main(tmp_dir):
                         y_best = df_eff.iloc[idx_best, i]
                         x_best = df_params.iloc[idx_best, j]
                         ax[i, j].scatter(x_best, y_best, s=12, c='red', alpha=0.8)
-                        
+
                 for j in range(ncol):
                     xlabel = labs._LABS[df_params.columns[j]]
                     ax[-1, j].set_xlabel(xlabel)
-    
+
                 ax[0, 0].set_ylabel(r'$KGE_{\delta^{18}O_{PERC}}$ [-]')
-    
+
                 fig.tight_layout()
                 file = base_path_figs / f"dotty_plots_{tm_structure}.png"
                 fig.savefig(file, dpi=250)

@@ -2000,7 +2000,6 @@ VARIABLES = {
         "soil water content at field capacity in root zone",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_sat_rz": Variable(
         "soil water content at saturation in root zone",

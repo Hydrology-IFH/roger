@@ -7,6 +7,7 @@ import click
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.command("main")
 def main(job_type, sas_solver):
+    subprocess.Popen("python bootstrap.py --resample-size 100", shell=True)
     base_path = Path(__file__).parent
     base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')

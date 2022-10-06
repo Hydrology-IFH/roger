@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=2:00:00
-#PBS -l pmem=8000mb
+#PBS -l pmem=16000mb
 #PBS -N pp_sa
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de

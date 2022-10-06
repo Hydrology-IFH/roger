@@ -31,7 +31,11 @@ def join_obs_on_sim(idx, sim_vals, df_obs, rm_na=False):
         DataFrame containing simulated and observed values.
     """
     # dataframe with simulated values
-    df_sim = pd.DataFrame(data=sim_vals, index=idx, columns=['sim'])
+    if sim_vals.ndim <= 1:
+        df_sim = pd.DataFrame(data=sim_vals, index=idx, columns=['sim'])
+    else:
+        sim_header = [f'sim{i}' for i in range(sim_vals.shape[-1])]
+        df_sim = pd.DataFrame(data=sim_vals, index=idx, columns=sim_header)
 
     # dataframe with observed values
     df = pd.DataFrame(index=idx)
@@ -153,10 +157,11 @@ def plot_obs_sim(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
     """
     # plot observed and simulated values
     fig, axs = plt.subplots(figsize=(9, 4))
+    for i in range(len(df.columns)-1):
+        axs.plot(df.index, df.iloc[:, i], lw=1, ls='-.', color='red')
     if (ls_obs == 'line'):
-        axs.plot(df.index, df.iloc[:, 1], lw=1.5, color='blue', alpha=0.5)
-    axs.scatter(df.index, df.iloc[:, 1], color='blue', s=1, alpha=0.5)
-    axs.plot(df.index, df.iloc[:, 0], lw=1, ls='-.', color='red')
+        axs.plot(df.index, df.iloc[:, -1], lw=1.5, color='blue', alpha=0.5)
+    axs.scatter(df.index, df.iloc[:, -1], color='blue', s=1, alpha=0.5)
     axs.set_xlim((df.index[0], df.index[-1]))
     if ylim:
         axs.set_ylim(ylim)
@@ -202,11 +207,12 @@ def plot_obs_sim_year(df, y_lab, start_month_hyd_year=10, ls_obs='line', x_lab='
         df_year = df.loc[df.hyd_year == year].copy()
         df_year.loc[df_year.isnull().any(axis=1)] = 0
         # plot observed and simulated values
-        fig, axs = plt.subplots(figsize=(9,4))
+        fig, axs = plt.subplots(figsize=(9, 4))
+        for i in range(len(df.columns)-1):
+            axs.plot(df_year.index, df_year.iloc[:, i], lw=1, ls='-.', color='red')
         if (ls_obs == 'line'):
-            axs.plot(df_year.index, df_year.iloc[:, 1], lw=1.5, color='blue', alpha=0.5)
-        axs.scatter(df_year.index, df_year.iloc[:, 1], color='blue', s=1, alpha=0.5)
-        axs.plot(df_year.index, df_year.iloc[:, 0], lw=1, ls='-.', color='red')
+            axs.plot(df_year.index, df_year.iloc[:, -1], lw=1.5, color='blue', alpha=0.5)
+        axs.scatter(df_year.index, df_year.iloc[:, -1], color='blue', s=1, alpha=0.5)
         axs.set_xlim((df_year.index[0], df_year.index[-1]))
         if ylim:
             axs.set_ylim(ylim)
@@ -245,8 +251,9 @@ def plot_obs_sim_cum(df, y_lab, x_lab='Time'):
 
     # plot observed and simulated values
     fig, axs = plt.subplots(figsize=(9, 4))
-    axs.plot(df.index, df.iloc[:, 1].cumsum(), lw=1.5, color='blue', alpha=0.5)
-    axs.plot(df.index, df.iloc[:, 0].cumsum(), lw=1, ls='-.', color='red')
+    for i in range(len(df.columns)-1):
+        axs.plot(df.index, df.iloc[:, i].cumsum(), lw=1, ls='-.', color='red')
+    axs.plot(df.index, df.iloc[:, -1].cumsum(), lw=1.5, color='blue', alpha=0.5)
     if ('PET' in df.columns.to_list()):
         axs.plot(df.index, df.loc[:, 'PET'].cumsum(), lw=1.5, ls=':', color='silver')
     axs.set_xlim((df.index[0], df.index[-1]))
@@ -286,9 +293,10 @@ def plot_obs_sim_cum_year(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
         df_year = df.loc[df.hyd_year == year].copy()
         df_year.loc[df_year.isnull().any(axis=1)] = 0
         # plot observed and simulated values
-        fig, axs = plt.subplots(figsize=(6,4))
-        axs.plot(df_year.index, df_year.iloc[:, 1].cumsum(), lw=1, color='blue')
-        axs.plot(df_year.index, df_year.iloc[:, 0].cumsum(), lw=1, ls='-.', color='red')
+        fig, axs = plt.subplots(figsize=(6, 4))
+        for i in range(len(df.columns)-1):
+            axs.plot(df_year.index, df_year.iloc[:, i].cumsum(), lw=1, ls='-.', color='red')
+        axs.plot(df_year.index, df_year.iloc[:, -1].cumsum(), lw=1, color='blue')
         if ('PET' in df_year.columns.to_list()):
             axs.plot(df_year.index, df_year.loc[:, 'PET'].cumsum(), lw=1.5, ls=':', color='silver')
         axs.set_xlim((df_year.index[0], df_year.index[-1]))
@@ -325,31 +333,35 @@ def plot_obs_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'
     ----------
     fig : Figure
     """
+    header = df.columns
+    df_cs = pd.DataFrame(index=df.index, columns=header)
     df = assign_hyd_year(df.copy(), start_month_hyd_year=start_month_hyd_year)
-    df_cs = pd.DataFrame(index=df.index, columns=['sim', 'obs'])
     years = pd.unique(df.hyd_year)
     for year in years:
-        df_cs.loc[(df.hyd_year == year), 'sim'] = df.loc[(df.hyd_year == year), 'sim'].cumsum()
-        df_cs.loc[(df.hyd_year == year), 'obs'] = df.loc[(df.hyd_year == year), 'obs'].cumsum()
+        df_cs.loc[(df.hyd_year == year), :] = onp.cumsum(df.loc[(df.hyd_year == year), :'obs'].values, axis=0)
     df_cs.loc[df_cs.isnull().any(axis=1)] = 0
 
     # DataFrame from wide to long format
-    df_sim = df_cs.iloc[:, 0].to_frame()
-    df_sim.columns = ['sim_obs']
-    df_sim['type'] = 'sim'
-    df_obs = df_cs.iloc[:, 1].to_frame()
+    ll_dfs = []
+    for i in range(len(header)-1):
+        df_sim = df_cs.iloc[:, i].to_frame()
+        df_sim.columns = ['sim_obs']
+        df_sim['type'] = 'sim'
+        ll_dfs.append(df_sim)
+    df_obs = df_cs.iloc[:, -1].to_frame()
     df_obs.columns = ['sim_obs']
     df_obs['type'] = 'obs'
-    df_sim_obs = pd.concat([df_sim, df_obs])
+    ll_dfs.append(df_obs)
+    df_sim_obs = pd.concat(ll_dfs)
     df_sim_obs_long = pd.melt(df_sim_obs, id_vars=['type'], value_vars=['sim_obs'], ignore_index=False)
     df_sim_obs_long = assign_hyd_year(df_sim_obs_long.copy(), start_month_hyd_year=start_month_hyd_year)
     df_sim_obs_long['time'] = df_sim_obs_long.index
     df_sim_obs_long.loc[df_sim_obs_long.isnull().any(axis=1)] = 0
     df_sim_obs_long = df_sim_obs_long.drop(columns=['variable'])
-    df_sim_obs_long = df_sim_obs_long.astype(dtype= {"type" : str,
-                                                     "value" : onp.float64,
-                                                     "hyd_year" : onp.int64,
-                                                     "time" : onp.datetime64})
+    df_sim_obs_long = df_sim_obs_long.astype(dtype={"type" : str,
+                                                    "value" : onp.float64,
+                                                    "hyd_year" : onp.int64,
+                                                    "time" : onp.datetime64})
     df_sim_obs_long.index = range(len(df_sim_obs_long.index))
     # Plot the lines on facets
     g = sns.relplot(
@@ -411,10 +423,10 @@ def plot_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
     df_sim_long['time'] = df_sim_long.index
     df_sim_long.loc[df_sim_long.isnull().any(axis=1)] = 0
     df_sim_long = df_sim_long.drop(columns=['variable'])
-    df_sim_long = df_sim_long.astype(dtype= {"type" : str,
-                                             "value" : onp.float64,
-                                             "hyd_year" : onp.int64,
-                                             "time" : onp.datetime64})
+    df_sim_long = df_sim_long.astype(dtype={"type" : str,
+                                            "value" : onp.float64,
+                                            "hyd_year" : onp.int64,
+                                            "time" : onp.datetime64})
     df_sim_long.index = range(len(df_sim_long.index))
     # Plot the lines on facets
     g = sns.relplot(
@@ -599,7 +611,6 @@ def calc_rmse(obs, sim):
     return eff
 
 
-
 def calc_mae(obs, sim):
     """
     Mean absolute error (MAE)
@@ -644,6 +655,7 @@ def calc_mre(obs, sim):
     eff = onp.mean(rel_err)
 
     return eff
+
 
 def calc_mare(obs, sim):
     """
@@ -1045,6 +1057,7 @@ def calc_kge(obs, sim, r="pearson", var="std"):
         )
 
     return eff
+
 
 def calc_nse(obs, sim):
     r"""

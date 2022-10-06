@@ -6,22 +6,22 @@ import click
 import roger
 
 
-@click.option("-s", "--sample-size", type=int, default=2000)
+@click.option("-rs", "--resample-size", type=int, default=10000)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
-def main(tmp_dir, sample_size):
+def main(tmp_dir, resample_size):
     if tmp_dir:
         base_path = Path(tmp_dir)
     else:
         base_path = Path(__file__).parent
     # bootstrap best 1% simulations
     onp.random.seed(42)
-    idx_boot = onp.arange(sample_size)
+    idx_boot = onp.arange(resample_size)
     onp.random.shuffle(idx_boot)
     idx_boot = idx_boot.tolist()
     states_hm1_file = base_path.parent / "svat_monte_carlo" / "states_hm1.nc"
     with h5netcdf.File(states_hm1_file, 'r', decode_vlen_strings=False) as df:
-        n_repeat = int(sample_size / df.dims["x"].size)
+        n_repeat = int(resample_size / df.dims["x"].size)
     if n_repeat <= 1:
         n_repeat = 1
     # write states of best model run
@@ -38,7 +38,7 @@ def main(tmp_dir, sample_size):
         )
         with h5netcdf.File(states_hm1_file, 'r', decode_vlen_strings=False) as df:
             # set dimensions with a dictionary
-            dict_dim = {'x': sample_size, 'y': 1, 'Time': len(df.variables['Time'])}
+            dict_dim = {'x': resample_size, 'y': 1, 'Time': len(df.variables['Time'])}
             if not f.dimensions:
                 f.dimensions = dict_dim
                 v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
@@ -59,14 +59,14 @@ def main(tmp_dir, sample_size):
                 if var_sim not in list(f.dimensions.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
                     v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                     vals = onp.array(var_obj)
-                    vals_rep = onp.repeat(vals, n_repeat, axis=0)[:sample_size, :, :]
+                    vals_rep = onp.repeat(vals, n_repeat, axis=0)[:resample_size, :, :]
                     v[:, :, :] = vals_rep[idx_boot, :, :]
                     v.attrs.update(long_name=var_obj.attrs["long_name"],
                                    units=var_obj.attrs["units"])
                 elif var_sim not in list(f.dimensions.keys()) and ('x', 'y') == var_obj.dimensions:
                     v = f.create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
                     vals = onp.array(var_obj)
-                    vals_rep = onp.repeat(vals, n_repeat, axis=0)[:sample_size, :]
+                    vals_rep = onp.repeat(vals, n_repeat, axis=0)[:resample_size, :]
                     v[:, :] = vals_rep[idx_boot, :]
                     v.attrs.update(long_name=var_obj.attrs["long_name"],
                                    units=var_obj.attrs["units"])

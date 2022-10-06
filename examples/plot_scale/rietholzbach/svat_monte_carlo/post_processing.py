@@ -40,7 +40,7 @@ def main(tmp_dir):
         with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
-                title='RoGeR monte carlo results at Rietholzbach Lysimeter site',
+                title='RoGeR Monte Carlo simulations at Rietholzbach Lysimeter site',
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
                 comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
@@ -375,7 +375,7 @@ def main(tmp_dir):
     with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
-            title='RoGeR best monte carlo simulation at Rietholzbach Lysimeter site',
+            title='RoGeR best Monte Carlo simulation at Rietholzbach Lysimeter site',
             institution='University of Freiburg, Chair of Hydrology',
             references='',
             comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
@@ -426,7 +426,7 @@ def main(tmp_dir):
     with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
-            title='RoGeR best 1% monte carlo simulations at Rietholzbach lysimeter site',
+            title='RoGeR best 1% Monte Carlo simulations at Rietholzbach lysimeter site',
             institution='University of Freiburg, Chair of Hydrology',
             references='',
             comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',

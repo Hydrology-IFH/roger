@@ -27,10 +27,10 @@ def main(nsamples, lys_experiment, tmp_dir):
         _base_path = Path(__file__).parent
         # sampled parameters with Saltelli's extension of the Sobol' sequence
         _crop_types = None
-        _param_names = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']
+        _param_names = ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'theta_pwp', 'ks']
         _param_bounds = [[1, 400],
-                         [1, 1200],
-                         [0.05, 0.33],
+                         [0.1, 0.4],
+                         [0.01, 0.99],
                          [0.05, 0.33],
                          [0.05, 0.33],
                          [0.1, 120]]

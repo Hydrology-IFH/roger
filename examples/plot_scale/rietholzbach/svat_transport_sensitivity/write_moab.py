@@ -3,7 +3,7 @@ import subprocess
 import click
 
 
-@click.option("--job-type", type=click.Choice(['serial', 'single-node', 'multi-node', 'single-node-gpu', 'single-node-multi-gpu', 'multi-node-multi-gpu']), default='serial')
+@click.option("--job-type", type=click.Choice(['serial', 'single-node', 'multi-node']), default='serial')
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.command("main")
 def main(job_type, sas_solver):
@@ -115,109 +115,6 @@ def main(job_type, sas_solver):
             file.close()
             subprocess.Popen(f"chmod +x {script_name}_moab.sh", shell=True)
 
-        elif job_type == 'single-node-gpu':
-            tm1 = transport_models_abrev[tm]
-            tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{sas_solver}_{tm1}_sa'
-            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
-            tms = tm.replace(" ", "_")
-            lines = []
-            lines.append('#!/bin/bash\n')
-            lines.append('#PBS -l nodes=1:ppn=1:gpus=1:default\n')
-            lines.append('#PBS -l walltime=48:00:00\n')
-            lines.append('#PBS -l pmem=12000mb\n')
-            lines.append(f'#PBS -N {script_name}\n')
-            lines.append('#PBS -m bea\n')
-            lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
-            lines.append(' \n')
-            lines.append('# load module dependencies\n')
-            lines.append('module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4\n')
-            lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
-            lines.append('module load lib/cudnn/8.2-cuda-11.4\n')
-            lines.append('export OMP_NUM_THREADS=1\n')
-            lines.append('export XLA_PYTHON_CLIENT_PREALLOCATE=false\n')
-            lines.append('eval "$(conda shell.bash hook)"\n')
-            lines.append('conda activate roger-gpu\n')
-            lines.append(f'cd {base_path_binac}\n')
-            lines.append(' \n')
-            lines.append('python svat_transport.py -b jax -d gpu -ns 128 -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
-            lines.append('# Move output from local SSD to global workspace\n')
-            lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
-            lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-            lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
-            file_path = base_path / f'{script_name}_moab_gpu.sh'
-            file = open(file_path, "w")
-            file.writelines(lines)
-            file.close()
-            subprocess.Popen(f"chmod +x {script_name}_moab_gpu.sh", shell=True)
-
-        elif job_type == 'single-node-multi-gpu':
-            tm1 = transport_models_abrev[tm]
-            tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{sas_solver}_{tm1}_sa'
-            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
-            tms = tm.replace(" ", "_")
-            lines = []
-            lines.append('#!/bin/bash\n')
-            lines.append('#PBS -l nodes=1:ppn=1:gpus=2:default\n')
-            lines.append('#PBS -l walltime=48:00:00\n')
-            lines.append('#PBS -l pmem=12000mb\n')
-            lines.append(f'#PBS -N {script_name}\n')
-            lines.append('#PBS -m bea\n')
-            lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
-            lines.append(' \n')
-            lines.append('# load module dependencies\n')
-            lines.append('module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4\n')
-            lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
-            lines.append('module load lib/cudnn/8.2-cuda-11.4\n')
-            lines.append('export OMP_NUM_THREADS=1\n')
-            lines.append('export XLA_PYTHON_CLIENT_PREALLOCATE=false\n')
-            lines.append('eval "$(conda shell.bash hook)"\n')
-            lines.append('conda activate roger-gpu\n')
-            lines.append(f'cd {base_path_binac}\n')
-            lines.append(' \n')
-            lines.append('python svat_transport.py -b jax -d gpu -ns 256 -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
-            lines.append('# Move output from local SSD to global workspace\n')
-            lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
-            lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-            lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
-            file_path = base_path / f'{script_name}_moab_gpu.sh'
-            file = open(file_path, "w")
-            file.writelines(lines)
-            file.close()
-            subprocess.Popen(f"chmod +x {script_name}_moab_gpu.sh", shell=True)
-
-        elif job_type == 'multi-node-multi-gpu':
-            tm1 = transport_models_abrev[tm]
-            tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{sas_solver}_{tm1}_sa'
-            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
-            tms = tm.replace(" ", "_")
-            lines = []
-            lines.append('#!/bin/bash\n')
-            lines.append('#PBS -l nodes=2:ppn=1:gpus=2:default\n')
-            lines.append('#PBS -l walltime=48:00:00\n')
-            lines.append('#PBS -l pmem=12000mb\n')
-            lines.append(f'#PBS -N {script_name}\n')
-            lines.append('#PBS -m bea\n')
-            lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
-            lines.append(' \n')
-            lines.append('# load module dependencies\n')
-            lines.append('module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4\n')
-            lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
-            lines.append('module load lib/cudnn/8.2-cuda-11.4\n')
-            lines.append('export OMP_NUM_THREADS=1\n')
-            lines.append('export XLA_PYTHON_CLIENT_PREALLOCATE=false\n')
-            lines.append('eval "$(conda shell.bash hook)"\n')
-            lines.append('conda activate roger-gpu\n')
-            lines.append(f'cd {base_path_binac}\n')
-            lines.append(' \n')
-            lines.append(f'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d gpu -n 2 1 -ns 256 -tms {tms} -td {output_path_ws.as_posix()} -ss {sas_solver}\n')
-            file_path = base_path / f'{script_name}_moab_gpu.sh'
-            file = open(file_path, "w")
-            file.writelines(lines)
-            file.close()
-            subprocess.Popen(f"chmod +x {script_name}_moab_gpu.sh", shell=True)
     return
 
 
