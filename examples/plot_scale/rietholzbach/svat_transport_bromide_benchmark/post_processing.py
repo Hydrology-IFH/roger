@@ -10,7 +10,6 @@ import xarray as xr
 from cftime import num2date
 import pandas as pd
 import numpy as onp
-import roger
 import roger.tools.evaluation as eval_utils
 
 base_path = Path(__file__).parent
@@ -45,11 +44,13 @@ for tm_structure in tm_structures:
                 references='',
                 comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
                 model_structure='SVAT transport model with free drainage',
-                roger_version=f'{roger.__version__}'
             )
             # collect dimensions
             for dfs in diag_files:
                 with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                    f.attrs.update(
+                        roger_version=df.attrs['roger_version']
+                    )
                     # set dimensions with a dictionary
                     if not dfs.split('/')[-1].split('.')[1] == 'constant':
                         dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}

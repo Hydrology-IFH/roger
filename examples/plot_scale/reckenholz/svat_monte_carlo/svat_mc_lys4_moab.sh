@@ -2,7 +2,7 @@
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=24:00:00
 #PBS -l pmem=8000mb
-#PBS -N lys4_svat_mc
+#PBS -N svat_mc_lys4
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  

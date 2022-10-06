@@ -521,7 +521,7 @@ def main(tmp_dir):
                            units=" ")
         ds_sim_tm = ds_sim_tm.close()
 
-        # write states of best model run
+        # write states of best transport simulation
         states_tm_mc_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}_monte_carlo.nc"
         states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}.nc"
         with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
@@ -532,7 +532,7 @@ def main(tmp_dir):
                 references='',
                 comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
                 model_structure=f'SVAT {tm_structure} model with free drainage',
-                roger_version=f'{roger.__version__}'
+                roger_version=ds_sim_tm.attrs['roger_version']
             )
             # collect dimensions
             with h5netcdf.File(states_tm_mc_file, 'r', decode_vlen_strings=False) as df:
@@ -603,6 +603,92 @@ def main(tmp_dir):
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
                         del var_obj, vals
+
+        # write hydrologic states corresponding to best transport simulation
+        states_hmb_file = base_path / "states_hm1_bootstrap.nc"
+        states_hm_file = base_path / "states_hm.nc"
+        with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
+            if tm_structure not in list(f.groups.keys()):
+                f.create_group(tm_structure)
+            f.attrs.update(
+                date_created=datetime.datetime.today().isoformat(),
+                title='RoGeR hydrologic Monte Carlo simulations corresponding to best transport simulation at Rietholzbach lysimeter site',
+                institution='University of Freiburg, Chair of Hydrology',
+                references='',
+                comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
+                model_structure='SVAT model with free drainage',
+                roger_version=ds_sim_tm.attrs['roger_version']
+            )
+            # collect dimensions
+            with h5netcdf.File(states_hmb_file, 'r', decode_vlen_strings=False) as df:
+                # set dimensions with a dictionary
+                dict_dim = {'x': 1, 'y': 1, 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
+                time = onp.array(df.variables.get('Time'))
+                if not f.groups[tm_structure].dimensions:
+                    f.groups[tm_structure].dimensions = dict_dim
+                    v = f.groups[tm_structure].create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = 'model run'
+                    v.attrs['units'] = ''
+                    v[:] = onp.arange(dict_dim["x"])
+                    v = f.groups[tm_structure].create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = ''
+                    v.attrs['units'] = ''
+                    v[:] = onp.arange(dict_dim["y"])
+                    v = f.groups[tm_structure].create_variable('ages', ('ages',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = 'Water ages'
+                    v.attrs['units'] = 'days'
+                    v[:] = onp.arange(1, dict_dim["ages"]+1)
+                    v = f.groups[tm_structure].create_variable('nages', ('nages',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = 'Water ages (cumulated)'
+                    v.attrs['units'] = 'days'
+                    v[:] = onp.arange(0, dict_dim["nages"])
+                    v = f.groups[tm_structure].create_variable('n_sas_params', ('n_sas_params',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = 'Number of SAS parameters'
+                    v.attrs['units'] = ''
+                    v[:] = onp.arange(0, dict_dim["n_sas_params"])
+                    v = f.groups[tm_structure].create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
+                    var_obj = df.variables.get('Time')
+                    v.attrs.update(time_origin=var_obj.attrs["time_origin"],
+                                   units=var_obj.attrs["units"])
+                    v[:] = time
+                for var_sim in list(df.variables.keys()):
+                    var_obj = df.variables.get(var_sim)
+                    if var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
+                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                        vals = onp.array(var_obj)
+                        v[:, :, :] = vals[idx_best, :, :]
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                        del var_obj, vals
+                    elif var_sim not in list(dict_dim.keys()) and ('x', 'y') == var_obj.dimensions:
+                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y'), float)
+                        vals = onp.array(var_obj)
+                        v[:, :] = vals[idx_best, :]
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                        del var_obj, vals
+                    elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'n_sas_params') == var_obj.dimensions:
+                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
+                        vals = onp.array(var_obj)
+                        v[:, :, :] = vals[idx_best, :, :]
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                        del var_obj, vals
+                    elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time', 'ages') == var_obj.dimensions:
+                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
+                        vals = onp.array(var_obj)
+                        v[:, :, :, :] = vals[idx_best, :, :, :]
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                        del var_obj, vals
+                    elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time', 'nages') == var_obj.dimensions:
+                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
+                        vals = onp.array(var_obj)
+                        v[:, :, :, :] = vals[idx_best, :, :, :]
+                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                       units=var_obj.attrs["units"])
+                        del var_obj, vals
+
     return
 
 

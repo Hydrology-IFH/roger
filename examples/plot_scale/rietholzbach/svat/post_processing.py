@@ -35,6 +35,9 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
                 time = onp.array(df.variables.get('Time'))
     for dfs in diag_files:
         with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+            f.attrs.update(
+                roger_version=df.attrs['roger_version']
+            )
             if not f.dimensions:
                 f.dimensions = dict_dim
                 v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)

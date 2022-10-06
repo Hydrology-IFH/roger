@@ -16,7 +16,6 @@ import yaml
 import numpy as onp
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
-import roger
 import click
 onp.random.seed(42)
 
@@ -56,11 +55,13 @@ def main(tmp_dir):
                 references='',
                 comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
                 model_structure='SVAT model with free drainage',
-                roger_version=f'{roger.__version__}'
             )
             # collect dimensions
             for dfs in diag_files:
                 with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                    f.attrs.update(
+                        roger_version=df.attrs['roger_version']
+                    )
                     # set dimensions with a dictionary
                     if not dfs.split('/')[-1].split('.')[1] == 'constant':
                         dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time'])}
