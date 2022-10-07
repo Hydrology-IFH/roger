@@ -5,16 +5,6 @@ If you use RoGeR in scientific work, please consider citing `the following publi
 
 ::
 
-	@article{schwemmle_roger_2022,
-		title = {Roger v0.1 – Runoff Generation Research in pure {Python}},
-		volume = {...},
-		issn = {...},
-		url = {...},
-		doi = {...},
-		number = {...},
-		journal = {...},
-		author = {Schwemmle, Robin, and Leistert, Hannes, and Steinbrich, Andreas and Weiler, Markus},
-		month = ...,
-		year = {...},
-		pages = {...},
-	}
+		Robin Schwemmle, Hannes Leister, Andres Steinbrich & Markus Weiler (2022). roger 0.1:
+		Runoff Generation Research in Pure Python.
+		(Version v0.1). Zenodo. https://doi.org/10.5281/zenodo.xxx
