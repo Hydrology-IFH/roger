@@ -29,10 +29,10 @@ def main(nsamples, lys_experiment, tmp_dir):
         _crop_types = None
         _param_names = ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'theta_pwp', 'ks']
         _param_bounds = [[1, 400],
+                         [1, 1200],
                          [0.1, 0.4],
                          [0.01, 0.99],
-                         [0.05, 0.33],
-                         [0.05, 0.33],
+                         [0.1, 0.3],
                          [0.1, 120]]
         if _crop_types:
             for ct in _crop_types:
