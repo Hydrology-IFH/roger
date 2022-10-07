@@ -11,7 +11,7 @@ following are the equations applied for dual-wetting front approach.
 Total infiltration :math:`INF` at time step :math:`t` (mm :math:`\Delta t^{-1}`):
 
 .. math::
-INF=INF_{mat }+INF_{mp}+INF_{sc}
+  INF=INF_{mat }+INF_{mp}+INF_{sc}
 
 
 Matrix infiltration

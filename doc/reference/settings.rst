@@ -1,5 +1,5 @@
-Model settings
-==============
+Constant model parameters
+=========================
 
 The following list of available settings is automatically created from the file :file:`settings.py` in the Roger main folder.
 They are available as attributes of the :class:`Roger settings object <roger.state.RogerSettings>`, e.g.: ::

@@ -7,7 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-ns", "--nsamples", type=int, default=2000)
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'power', 'time-variant_power', 'time-variant_power_reverse']), default='power')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'preferential1', 'preferential2', 'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2', 'time-variant_preferential', 'time-variant_preferential1', 'time-variant_preferential2', 'time-variant_advection-dispersion', 'time-variant_advection-dispersion1', 'time-variant_advection-dispersion2', 'time-variant', 'time-variant1', 'time-variant2', 'preferential_+_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'power', 'time-variant_power', 'time-variant_power_reverse']), default='advection-dispersion')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
@@ -265,18 +265,24 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 31)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], random_uniform(1, 30, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
+                c = random_uniform(1, 40, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 32)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(1, 10, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
+                c = random_uniform(1, 20, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 32)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(1, 10, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
+                c = random_uniform(1, 20, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
             elif settings.tm_structure == "time-variant advection-dispersion1":
@@ -285,8 +291,10 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 32)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(1, 10, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
+                c = random_uniform(1, 20, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
             elif settings.tm_structure == "time-variant advection-dispersion2":
@@ -294,31 +302,41 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 32)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(1, 10, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
+                c = random_uniform(1, 20, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 32)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(1, 10, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
+                c = random_uniform(1, 20, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0, 1, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
             elif settings.tm_structure == "time-variant preferential":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 31)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], random_uniform(1, 30, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
+                c = random_uniform(1, 40, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 31)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(1, 10, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
+                c = random_uniform(1, 20, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 31)
+                c = random_uniform(1, 20, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(1, 10, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
             elif settings.tm_structure == "time-variant preferential1":
@@ -327,8 +345,10 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 31)
+                c = random_uniform(1, 20, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(1, 10, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
             elif settings.tm_structure == "time-variant preferential2":
@@ -336,13 +356,17 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 31)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(1, 10, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
+                c = random_uniform(1, 20, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 31)
+                c = random_uniform(1, 20, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(1, 10, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
             elif settings.tm_structure == "time-variant":
@@ -429,37 +453,49 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             elif settings.tm_structure == "time-variant power":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 64)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], random_uniform(0.01, 1, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], random_uniform(0.1, 2.8, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 62)
+                c = random_uniform(0.01, 1, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 64)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], random_uniform(0.2, 1, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(0.1, 2.8, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 61)
+                c = random_uniform(1, 5, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 64)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], random_uniform(0.2, 1, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(0.1, 2.8, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 61)
+                c = random_uniform(1, 5, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
             elif settings.tm_structure == "time-variant power reverse":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 21)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 21)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 63)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], random_uniform(0.2, 1, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], random_uniform(0.1, 2.8, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 62)
+                c = random_uniform(0.01, 1, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 63)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], random_uniform(0.2, 1, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(0.1, 2.8, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 62)
+                c = random_uniform(1, 5, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 63)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], random_uniform(0.2, 1, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(0.1, 2.8, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 62)
+                c = random_uniform(1, 5, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
+                frac = random_uniform(0.01, 0.99, tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], c * frac)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], c * (1 - frac))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
 

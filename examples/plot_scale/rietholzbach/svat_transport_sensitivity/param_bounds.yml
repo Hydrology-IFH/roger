@@ -18,23 +18,36 @@ preferential:
     - 50
 
 time-variant preferential:
-  num_vars: 3
+  num_vars: 6
 
   names:
-  - 'b_transp'
-  - 'b_q_rz'
-  - 'b_q_ss'
+  - 'c_transp'
+  - 'frac_transp'
+  - 'c_q_rz'
+  - 'frac_q_rz'
+  - 'c_q_ss'
+  - 'frac_q_ss'
 
   bounds:
   -
     - 1
     - 50
   -
-    - 1
-    - 50
+    - 0.01
+    - 0.99
   -
     - 1
-    - 50
+    - 30
+  -
+    - 0.01
+    - 0.99
+  -
+    - 1
+    - 30
+  -
+    - 0.01
+    - 0.99
+
 
 advection-dispersion:
   num_vars: 3
@@ -56,23 +69,36 @@ advection-dispersion:
     - 50
 
 time-variant advection-dispersion:
-  num_vars: 3
+  num_vars: 6
 
   names:
-  - 'b_transp'
-  - 'a_q_rz'
-  - 'a_q_ss'
+  - 'c_transp'
+  - 'frac_transp'
+  - 'c_q_rz'
+  - 'frac_q_rz'
+  - 'c_q_ss'
+  - 'frac_q_ss'
 
   bounds:
   -
     - 1
     - 50
   -
-    - 1
-    - 50
+    - 0.01
+    - 0.99
   -
     - 1
-    - 50
+    - 30
+  -
+    - 0.01
+    - 0.99
+  -
+    - 1
+    - 30
+  -
+    - 0.01
+    - 0.99
+
 
 time-variant:
   num_vars: 3
@@ -104,41 +130,41 @@ power:
   bounds:
   -
     - 0.01
-    - 3
+    - 5
   -
     - 0.1
-    - 3
+    - 5
   -
     - 0.1
-    - 3
+    - 5
 
 time-variant power:
   num_vars: 6
 
   names:
-  - 'k1_transp'
-  - 'k2_transp'
-  - 'k1_q_rz'
-  - 'k2_q_rz'
-  - 'k1_q_ss'
-  - 'k2_q_ss'
+  - 'c_transp'
+  - 'frac_transp'
+  - 'c_q_rz'
+  - 'frac_q_rz'
+  - 'c_q_ss'
+  - 'frac_q_ss'
 
   bounds:
   -
     - 0.01
-    - 2
+    - 5
   -
-    - 0.1
-    - 3
+    - 0.01
+    - 0.99
   -
-    - 0.1
-    - 2
+    - 0.01
+    - 5
   -
-    - 0.1
-    - 3
+    - 0.01
+    - 0.99
   -
-    - 0.1
-    - 2
+    - 0.01
+    - 5
   -
-    - 0.1
-    - 3
+    - 0.01
+    - 0.99

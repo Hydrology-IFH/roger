@@ -144,7 +144,7 @@ def gamma(state, SA, sas_params):
     Omega = update(
         Omega,
         at[2:-2, 2:-2, :], npx.where(SA[2:-2, 2:-2, vs.tau, :] > 0, npx.where(SA[2:-2, 2:-2, vs.tau, :] < S[2:-2, 2:-2, :],
-                                     spsx.gammainc(sas_params[2:-2, 2:-2, 1, npx.newaxis], sas_params[2:-2, 2:-2, 2, npx.newaxis] * SA[2:-2, 2:-2, vs.tau, :]/S[2:-2, 2:-2, :]) / spsx.gamma(sas_params[2:-2, 2:-2, 1, npx.newaxis])[:, :, npx.newaxis], 0.), 0) * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+                                     spsx.gammainc(sas_params[2:-2, 2:-2, 1, npx.newaxis], sas_params[2:-2, 2:-2, 2, npx.newaxis] * SA[2:-2, 2:-2, vs.tau, :]/S[2:-2, 2:-2, :]) / spsx.gamma(sas_params[2:-2, 2:-2, 1, npx.newaxis]), 0.), 0) * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     Omega = update(
         Omega,
@@ -191,9 +191,9 @@ def power(state, SA, sas_params):
     """Power SAS function"""
     vs = state.variables
 
-    mask6 = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 63, 64]))
-    mask63 = (sas_params[:, :, 0] == 63)
-    mask64 = (sas_params[:, :, 0] == 64)
+    mask6 = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([6, 61, 62]))
+    mask61 = (sas_params[:, :, 0] == 61)
+    mask62 = (sas_params[:, :, 0] == 62)
 
     S = allocate(state.dimensions, ("x", "y", 1))
     Omega = allocate(state.dimensions, ("x", "y", "nages"))
@@ -217,11 +217,11 @@ def power(state, SA, sas_params):
     )
     sas_params = update(
         sas_params,
-        at[2:-2, 2:-2, 1], npx.where(mask63[2:-2, 2:-2], sas_params[2:-2, 2:-2, 3] + (S_rel[2:-2, 2:-2] * sas_params[2:-2, 2:-2, 4]), sas_params[2:-2, 2:-2, 1]),
+        at[2:-2, 2:-2, 1], npx.where(mask61[2:-2, 2:-2], sas_params[2:-2, 2:-2, 3] + ((1 - S_rel[2:-2, 2:-2]) * sas_params[2:-2, 2:-2, 4]), sas_params[2:-2, 2:-2, 1]),
     )
     sas_params = update(
         sas_params,
-        at[2:-2, 2:-2, 1], npx.where(mask64[2:-2, 2:-2], sas_params[2:-2, 2:-2, 3] + ((1 - S_rel[2:-2, 2:-2]) * sas_params[2:-2, 2:-2, 4]), sas_params[2:-2, 2:-2, 1]),
+        at[2:-2, 2:-2, 1], npx.where(mask62[2:-2, 2:-2], sas_params[2:-2, 2:-2, 3] + (S_rel[2:-2, 2:-2] * sas_params[2:-2, 2:-2, 4]), sas_params[2:-2, 2:-2, 1]),
     )
     Omega = update(
         Omega,

@@ -32,7 +32,7 @@ def create_mask(infile, outfile, variable="catchment", scale=None):
 @click.command("roger-create-mask")
 @click.argument("infile", type=click.Path(exists=True, dir_okay=False))
 @click.option("-v", "--variable", default="z", help="Variable holding topography data (default: catchment)")
-@click.option("-o", "--outfile", default="topography.png", help="Output filename (default: topography.png)")
+@click.option("-o", "--outfile", default="catchment.png", help="Output filename (default: catchment.png)")
 @functools.wraps(create_mask)
 def cli(*args, **kwargs):
     create_mask(**kwargs)

@@ -158,7 +158,7 @@ def main(tmp_dir):
     df_thetap.loc[cond2, 'sc'] = 2  # normal
     df_thetap.loc[cond3, 'sc'] = 3  # wet
 
-    dict_params_eff = {}
+    dict_params_metrics = {}
     tm_structures = ['advection-dispersion',
                      'time-variant advection-dispersion']
     for tm_structure in tm_structures:
@@ -179,31 +179,31 @@ def main(tmp_dir):
         # DataFrame with sampled model parameters and the corresponding metrics
         nx = ds_sim_tm.dims['x']  # number of rows
         ny = ds_sim_tm.dims['y']  # number of columns
-        df_params_eff = pd.DataFrame(index=range(nx * ny))
+        df_params_metrics = pd.DataFrame(index=range(nx * ny))
         # sampled model parameters
         if tm_structure == "preferential":
-            df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
-            df_params_eff.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
-            df_params_eff.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
+            df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
+            df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
+            df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
         elif tm_structure == "advection-dispersion":
-            df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
-            df_params_eff.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
-            df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
+            df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
+            df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
+            df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
         elif tm_structure == "complete-mixing advection-dispersion":
-            df_params_eff.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
-            df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
+            df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
+            df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
         elif tm_structure == "time-variant advection-dispersion":
-            df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
-            df_params_eff.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
-            df_params_eff.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
         elif tm_structure == "time-variant preferential":
-            df_params_eff.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
-            df_params_eff.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
-            df_params_eff.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
         elif tm_structure == "time-variant":
-            df_params_eff.loc[:, 'ab_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
-            df_params_eff.loc[:, 'ab_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
-            df_params_eff.loc[:, 'ab_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'ab_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'ab_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'ab_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
 
         # compare observations and simulations
         ncol = 0
@@ -263,13 +263,13 @@ def main(tmp_dir):
                 obs_vals = df_eval.loc[:, 'obs'].values
                 sim_vals = df_eval.loc[:, 'sim'].values
                 key_kge = f'KGE_{var_sim}{sc1}'
-                df_params_eff.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
+                df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
                 key_kge_alpha = f'KGE_alpha_{var_sim}{sc1}'
-                df_params_eff.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
+                df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
                 key_kge_beta = f'KGE_beta_{var_sim}{sc1}'
-                df_params_eff.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
+                df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
                 key_r = f'r_{var_sim}{sc1}'
-                df_params_eff.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+                df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
                 # average age metrics
                 vars_sim = ['tt25_transp', 'tt50_transp', 'tt75_transp', 'ttavg_transp',
                             'tt25_q_ss', 'tt50_q_ss', 'tt75_q_ss', 'ttavg_q_ss',
@@ -282,10 +282,10 @@ def main(tmp_dir):
                         rows = (df_rows['sc'].values == sc)
                         df_eval = df_eval.loc[rows, :]
                     df_eval = df_eval.dropna()
-                    df_params_eff.loc[nrow, var_sim] = onp.mean(df_eval.loc[:, 'sim'].values)
+                    df_params_metrics.loc[nrow, var_sim] = onp.mean(df_eval.loc[:, 'sim'].values)
 
             # avoid defragmentation of DataFrame
-            df_params_eff = df_params_eff.copy()
+            df_params_metrics = df_params_metrics.copy()
 
         # write bulk sample to output file
         ds_sim_tm = ds_sim_tm.close()
@@ -300,9 +300,9 @@ def main(tmp_dir):
             v.attrs.update(long_name="bulk sample of d18O in percolation",
                            units="permil")
         # write to .txt
-        file = base_path_results / f"params_eff_{tm_structure}.txt"
-        df_params_eff.to_csv(file, header=True, index=False, sep="\t")
-        dict_params_eff[tm_structure] = df_params_eff
+        file = base_path_results / f"params_metrics_{tm_structure}.txt"
+        df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
+        dict_params_metrics[tm_structure] = df_params_metrics
     return
 
 

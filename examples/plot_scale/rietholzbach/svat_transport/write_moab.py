@@ -7,7 +7,6 @@ import click
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.command("main")
 def main(job_type, sas_solver):
-    subprocess.Popen("python bootstrap.py --resample-size 100", shell=True)
     base_path = Path(__file__).parent
     base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
@@ -19,11 +18,10 @@ def main(job_type, sas_solver):
                               'time-variant advection-dispersion': 'adt',
                               'time-variant': 'tv',
                               'power': 'pow',
-                              'time-variant power': 'powt',
-                              'time-variant power reverse': 'powr'}
+                              'time-variant power': 'powt'}
 
     tracer = 'oxygen18'
-    transport_models = ['piston', 'complete-mixing', 'advection-dispersion', 'time-variant advection-dispersion', 'power', 'time-variant power', 'time-variant power reverse', 'preferential', 'time-variant']
+    transport_models = ['piston', 'complete-mixing', 'advection-dispersion', 'time-variant advection-dispersion', 'power', 'time-variant power', 'preferential',  'time-variant preferential', 'time-variant']
     for tm in transport_models:
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]
@@ -34,8 +32,8 @@ def main(job_type, sas_solver):
             lines = []
             lines.append('#!/bin/bash\n')
             lines.append('#PBS -l nodes=1:ppn=1\n')
-            lines.append('#PBS -l walltime=8:00:00\n')
-            lines.append('#PBS -l pmem=1000mb\n')
+            lines.append('#PBS -l walltime=48:00:00\n')
+            lines.append('#PBS -l pmem=8000mb\n')
             lines.append(f'#PBS -N {script_name}\n')
             lines.append('#PBS -m bea\n')
             lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
