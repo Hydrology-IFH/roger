@@ -44,7 +44,7 @@ def main(job_type):
         subprocess.Popen(f"chmod +x {script_name}_moab.sh", shell=True)
 
     for lys in lysimeters:
-        script_name = f'{lys}_svat_sa'
+        script_name = f'svat_sa_{lys}'
         output_path_ws = base_path_ws / 'reckenholz' / 'svat_sensitivity'
         lines = []
         lines.append('#!/bin/bash\n')
