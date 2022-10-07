@@ -25,44 +25,52 @@ def main(nsamples, lys_experiment, tmp_dir):
         """A SVAT model including crop phenology/crop rotation.
         """
         _base_path = Path(__file__).parent
-        # sampled parameters with Saltelli's extension of the Sobol' sequence
         _crop_types = None
-        _param_names = ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'theta_pwp', 'ks']
-        _param_bounds = [[1, 400],
-                         [1, 1200],
-                         [0.1, 0.4],
-                         [0.01, 0.99],
-                         [0.1, 0.3],
-                         [0.1, 120]]
-        if _crop_types:
-            for ct in _crop_types:
-                _param_names.append(f"crop_scale_{ct}")
-                _param_bounds.append([0.5, 1.5])
-        _nsamples = nsamples
-        _bounds = {
-            'num_vars': len(_param_names),
-            'names': _param_names,
-            'bounds': _param_bounds
-        }
-        _params = saltelli.sample(_bounds, _nsamples, calc_second_order=False)
-        _nrows = _params.shape[0]
+        _param_names = None
+        _param_bounds = None
+        _nsamples = None
+        _bounds = None
+        _params = None
+        _nrows = None
         _input_dir = None
         _identifier = None
         _lys = None
 
-        # write sampled boundaries to .yml
-        file_path = _base_path / "param_bounds_svat_crop.yml"
-        if os.path.exists(file_path):
-            with open(file_path, 'r') as file:
-                _bounds_yml = yaml.safe_load(file)
-            _bounds_yml[lys_experiment] = _bounds
-            with open(file_path, 'w') as file:
-                yaml.dump(_bounds_yml, file)
-        else:
-            _bounds_yml = {}
-            _bounds_yml[lys_experiment] = _bounds
-            with open(file_path, 'w') as file:
-                yaml.dump(_bounds_yml, file)
+        # sampled parameters with Saltelli's extension of the Sobol' sequence
+        def _set_params(self, nsamples):
+            self._param_names = ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'theta_pwp', 'ks']
+            self._param_bounds = [[1, 400],
+                                  [1, 1200],
+                                  [0.1, 0.4],
+                                  [0.01, 0.99],
+                                  [0.1, 0.3],
+                                  [0.1, 120]]
+            if self._crop_types:
+                for ct in self._crop_types:
+                    self._param_names.append(f"crop_scale_{ct}")
+                    self._param_bounds.append([0.5, 1.5])
+            self._nsamples = nsamples
+            self._bounds = {
+                'num_vars': len(self._param_names),
+                'names': self._param_names,
+                'bounds': self._param_bounds
+            }
+            self._params = saltelli.sample(self._bounds, self._nsamples, calc_second_order=False)
+            self._nrows = self._params.shape[0]
+
+            # write sampled boundaries to .yml
+            file_path = self._base_path / "param_bounds_svat_crop.yml"
+            if os.path.exists(file_path):
+                with open(file_path, 'r') as file:
+                    _bounds_yml = yaml.safe_load(file)
+                _bounds_yml[lys_experiment] = self._bounds
+                with open(file_path, 'w') as file:
+                    yaml.dump(_bounds_yml, file)
+            else:
+                _bounds_yml = {}
+                _bounds_yml[lys_experiment] = self._bounds
+                with open(file_path, 'w') as file:
+                    yaml.dump(_bounds_yml, file)
 
         def _set_lys(self, lys):
             self._lys = lys
@@ -745,6 +753,7 @@ def main(nsamples, lys_experiment, tmp_dir):
     write_forcing(input_path, enable_crop_phenology=True)
     write_crop_rotation(input_path)
     model._set_crop_types(model._input_dir, "crop_rotation.nc")
+    model._set_params(nsamples)
     model.setup()
     model.run()
     return
