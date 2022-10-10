@@ -704,7 +704,6 @@ def main(transport_model_structure, sas_solver, tmp_dir):
     def after_timestep_kernel(state):
         vs = state.variables
 
-
         vs.ta = update(
             vs.ta,
             at[2:-2, 2:-2, vs.taum1], vs.ta[2:-2, 2:-2, vs.tau],

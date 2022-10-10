@@ -14,25 +14,26 @@ import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
 
 
+@click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
-def main(tmp_dir):
+def main(tmp_dir, sas_solver):
     if tmp_dir:
         base_path = Path(tmp_dir)
     else:
         base_path = Path(__file__).parent
     # directory of results
-    base_path_results = base_path / "results" / "deterministic"
+    base_path_results = base_path / "results" / sas_solver
     if not os.path.exists(base_path_results):
         os.mkdir(base_path_results)
-    base_path_results = base_path / "results" / "deterministic" / "age_max_11"
+    base_path_results = base_path / "results" / sas_solver / "age_max_11"
     if not os.path.exists(base_path_results):
         os.mkdir(base_path_results)
     # directory of figures
-    base_path_figs = base_path / "figures" / "deterministic"
+    base_path_figs = base_path / "figures" / sas_solver
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
-    base_path_figs = base_path / "figures" / "deterministic" / "age_max_11"
+    base_path_figs = base_path / "figures" / sas_solver / "age_max_11"
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
@@ -46,9 +47,9 @@ def main(tmp_dir):
                      'power', 'time-variant power']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        path = str(base_path / "deterministic" / "age_max_11" / f"SVATTRANSPORT_{tm_structure}.*.nc")
+        path = str(base_path / sas_solver / "age_max_11" / f"SVATTRANSPORT_{tm_structure}.*.nc")
         diag_files = glob.glob(path)
-        states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / sas_solver / "age_max_11" / f"states_{tms}_monte_carlo.nc"
         if not os.path.exists(states_tm_file):
             with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
                 f.attrs.update(
@@ -185,7 +186,7 @@ def main(tmp_dir):
         tms = tm_structure.replace(" ", "_")
 
         # load transport simulation
-        states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / sas_solver / "age_max_11" / f"states_{tms}_monte_carlo.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
         days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
         date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -346,7 +347,7 @@ def main(tmp_dir):
         # write bulk sample to output file
         ds_sim_tm = ds_sim_tm.close()
         del ds_sim_tm
-        states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / sas_solver / "age_max_11" / f"states_{tms}_monte_carlo.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             try:
                 v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
@@ -463,9 +464,9 @@ def main(tmp_dir):
                 plt.close('all')
 
         # write SAS parameters of best model run
-        states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / sas_solver / "age_max_11" / f"states_{tms}_monte_carlo.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-        params_tm_file = base_path / "deterministic" / "age_max_11" / f"sas_params_{tms}.nc"
+        params_tm_file = base_path / sas_solver / "age_max_11" / f"sas_params_{tms}.nc"
         with h5netcdf.File(params_tm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
@@ -522,8 +523,8 @@ def main(tmp_dir):
         ds_sim_tm = ds_sim_tm.close()
 
         # write states of best transport simulation
-        states_tm_mc_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}_monte_carlo.nc"
-        states_tm_file = base_path / "deterministic" / "age_max_11" / f"states_{tms}.nc"
+        states_tm_mc_file = base_path / sas_solver / "age_max_11" / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / sas_solver / "age_max_11" / f"states_{tms}.nc"
         with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
