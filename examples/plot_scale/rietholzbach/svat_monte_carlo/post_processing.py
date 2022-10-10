@@ -338,7 +338,7 @@ def main(tmp_dir):
 
     # dotty plots
     for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
-        df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'KGE_q_ss{sc1}', f'r_dS{sc1}', f'E_multi{sc1}']]
+        df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'r_dS{sc1}', f'KGE_q_ss{sc1}', f'E_multi{sc1}']]
         df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
         nrow = len(df_metrics.columns)
         ncol = len(df_params.columns)
@@ -356,8 +356,8 @@ def main(tmp_dir):
             ax[-1, j].set_xlabel(xlabel)
 
         ax[0, 0].set_ylabel('$KGE_{ET}$ [-]')
-        ax[1, 0].set_ylabel('$KGE_{PERC}$ [-]')
-        ax[2, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
+        ax[1, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
+        ax[2, 0].set_ylabel('$KGE_{PERC}$ [-]')
         ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
 
         fig.subplots_adjust(wspace=0.2, hspace=0.3)

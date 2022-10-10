@@ -135,7 +135,7 @@ def main(tmp_dir):
     idx_best1 = df_params_metrics1.loc[:df_params_metrics1.index[99], 'id'].values.tolist()
     dict_metrics_best = {}
     for sc in ['', 'dry', 'normal', 'wet']:
-        dict_metrics_best[sc] = pd.DataFrame(index=range(len(df_params_metrics1.index)), columns=['KGE_aet', 'KGE_q_ss', 'r_dS', 'E_multi'])
+        dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best1)), columns=['KGE_aet', 'KGE_q_ss', 'r_dS', 'E_multi'])
     for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
         df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'r_dS{sc1}', f'KGE_q_ss{sc1}', f'E_multi{sc1}']]
         df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
@@ -178,10 +178,13 @@ def main(tmp_dir):
         file = base_path_figs / f"dotty_plots_{sc1}.png"
         fig.savefig(file, dpi=250)
 
-    # # write evaluation metrics for different storage condtions to .txt
-    # for sc in ['', 'dry', 'normal', 'wet']:
-    #     file = base_path_figs / f"eff_best_{sc}.txt"
-    #     dict_metrics_best[sc].to_csv(file, header=True, index=True, sep="\t")
+    # write evaluation metrics for different storage condtions to .txt
+    for sc in ['', 'dry', 'normal', 'wet']:
+        df_avg_std = pd.DataFrame(index=['avg', 'std'], columns=dict_metrics_best[sc].columns)
+        df_avg_std.loc['avg', :] = onp.mean(dict_metrics_best[sc].values, axis=0)
+        df_avg_std.loc['std', :] = onp.std(dict_metrics_best[sc].values, axis=0)
+        file = base_path_figs / f"metrics_best_{sc}.txt"
+        df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
     # # # compare best simulation with observations
     # vars_obs = ['AET', 'PERC', 'dWEIGHT']

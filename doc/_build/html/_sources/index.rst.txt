@@ -74,4 +74,5 @@ If you want to learn more about the background and capabilities of Roger, you sh
    more/benchmarks
    more/howtocite
    more/publications
+   changelog
    Visit us on GitHub <https://github.com/Hydrology-IFH/roger>

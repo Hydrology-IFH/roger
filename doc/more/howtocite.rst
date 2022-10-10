@@ -1,7 +1,7 @@
 How to cite
 ===========
 
-If you use RoGeR in scientific work, please consider citing `the following publication ...:
+If you use RoGeR in scientific work, please consider citation as:
 
 ::
 

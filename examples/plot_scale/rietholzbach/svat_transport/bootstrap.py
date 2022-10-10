@@ -6,7 +6,7 @@ import click
 import roger
 
 
-@click.option("-s", "--resample-size", type=int, default=100)
+@click.option("-s", "--resample-size", type=int, default=1)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir, resample_size):
@@ -24,7 +24,7 @@ def main(tmp_dir, resample_size):
         n_repeat = int(resample_size / df.dims["x"].size)
     if n_repeat <= 1:
         n_repeat = 1
-        idx_boot = [22]
+        idx_boot = [0]
     # write states of best model run
     states_hmb_file = base_path / "states_hm1_bootstrap.nc"
     with h5netcdf.File(states_hmb_file, 'w', decode_vlen_strings=False) as f:

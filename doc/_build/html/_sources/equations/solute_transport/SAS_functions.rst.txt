@@ -33,13 +33,14 @@ The uniform distribution function has no age preference.
 
 Dirac
 -----
-For top fluxes we use a modified Dirac delta function with preference for youngest water.
 
 .. math::
-  \Omega_Q(T,t)= \begin{cases}\frac{P_S(T, t) \cdot S(t)}{Q(t)}, & \frac{P_S(T, t) \cdot S(t)}{Q(t)} \leq 1 \\
-  1, & \frac{P_S(T,t) \cdot S(t)}{Q(t)}>1\end{cases}
+  \Omega_Q(T,t)= \begin{cases}0, & T \leq T_{dirac} \\
+  1, & T > T_{dirac} \end{cases}
 
-For bottom fluxes, :math:`P_S (T,t)` cumulates from oldest to youngest.
+where :math:`T_{dirac}` is the water age of the pulse.
+Please note, that a closed form of :math:`P_Q` using the Dirac distribution
+is not available.
 
 
 Kumaraswamy
@@ -92,8 +93,7 @@ SAS parameters are defined in `sas_params_q` where `_q` corresponds
 to the flux e.g. transp.
 
 - `1`: Uniform SAS function
-- `21`: Dirac SAS function with preference for youngest water
-- `21`: Dirac SAS function with preference for oldest water
+- `2`: Dirac SAS function
 - `3`: Kumaraswamy SAS function
 - `31`: Kumaraswamy SAS function with time-variant preference for younger water
 - `32`: Kumaraswamy SAS function with time-variant preference for older water

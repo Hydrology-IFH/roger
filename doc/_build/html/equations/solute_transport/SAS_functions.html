@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StorAge selection (SAS) functions &mdash; RoGeR 0.0.1+25.gf3e1746.dirty documentation</title>
+  <title>StorAge selection (SAS) functions &mdash; RoGeR 0.0.1+35.g81ba391.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -31,7 +31,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+25.gf3e1746.dirty
+                0.0.1+35.g81ba391.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -88,6 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../more/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../more/howtocite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../more/publications.html">Publications involving Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
 </ul>
 
@@ -140,11 +141,12 @@ distribution of the hydrologic flux (where <span class="math notranslate nohighl
 </section>
 <section id="dirac">
 <h2>Dirac<a class="headerlink" href="#dirac" title="Permalink to this headline">¶</a></h2>
-<p>For top fluxes we use a modified Dirac delta function with preference for youngest water.</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}\Omega_Q(T,t)= \begin{cases}\frac{P_S(T, t) \cdot S(t)}{Q(t)}, &amp; \frac{P_S(T, t) \cdot S(t)}{Q(t)} \leq 1 \\
-1, &amp; \frac{P_S(T,t) \cdot S(t)}{Q(t)}&gt;1\end{cases}\end{split}\]</div>
-<p>For bottom fluxes, <span class="math notranslate nohighlight">\(P_S (T,t)\)</span> cumulates from oldest to youngest.</p>
+\[\begin{split}\Omega_Q(T,t)= \begin{cases}0, &amp; T \leq T_{dirac} \\
+1, &amp; T &gt; T_{dirac} \end{cases}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(T_{dirac}\)</span> is the water age of the pulse.
+Please note, that a closed form of <span class="math notranslate nohighlight">\(P_Q\)</span> using the Dirac distribution
+is not available.</p>
 </section>
 <section id="kumaraswamy">
 <h2>Kumaraswamy<a class="headerlink" href="#kumaraswamy" title="Permalink to this headline">¶</a></h2>
@@ -188,8 +190,7 @@ described by a linear relationship of the storage volume:</p>
 to the flux e.g. transp.</p>
 <ul class="simple">
 <li><p><cite>1</cite>: Uniform SAS function</p></li>
-<li><p><cite>21</cite>: Dirac SAS function with preference for youngest water</p></li>
-<li><p><cite>21</cite>: Dirac SAS function with preference for oldest water</p></li>
+<li><p><cite>2</cite>: Dirac SAS function</p></li>
 <li><p><cite>3</cite>: Kumaraswamy SAS function</p></li>
 <li><p><cite>31</cite>: Kumaraswamy SAS function with time-variant preference for younger water</p></li>
 <li><p><cite>32</cite>: Kumaraswamy SAS function with time-variant preference for older water</p></li>

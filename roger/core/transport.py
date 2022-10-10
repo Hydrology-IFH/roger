@@ -309,27 +309,6 @@ def calc_tt(state, SA, sa, flux, sas_params):
             TTi,
             at[2:-2, 2:-2, :], sas.dirac(state, SAn, sas_params)[2:-2, 2:-2, :],
         )
-        TTi = update(
-            TTi,
-            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] * h > 0), npx.where((flux[2:-2, 2:-2, npx.newaxis] >= SAn[2:-2, 2:-2, 1, :]) & (SAn[2:-2, 2:-2, 1, :]/(flux[2:-2, 2:-2, npx.newaxis] * h) <= 1), SAn[2:-2, 2:-2, 1, :]/(flux[2:-2, 2:-2, npx.newaxis] * h), 1), TTi[2:-2, 2:-2, :]),
-        )
-        TTi = update(
-            TTi,
-            at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] * h > 0), npx.where(TTi[2:-2, 2:-2, :] > 1, 1, TTi[2:-2, 2:-2, :]), TTi[2:-2, 2:-2, :]),
-        )
-        dirac_old = npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] * h > 0), npx.cumsum(npx.diff(npx.where((npx.cumsum(npx.diff(SAn[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1]/(flux[2:-2, 2:-2, npx.newaxis] * h) , axis=-1) <= 1), npx.cumsum(npx.diff(SAn[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1]/(flux[2:-2, 2:-2, npx.newaxis] * h) , axis=-1), 1)[..., ::-1], axis=-1), axis=-1), 0)
-        TTi = update(
-            TTi,
-            at[2:-2, 2:-2, 1:-1], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] * h > 0), dirac_old, TTi[2:-2, 2:-2, 1:-1]),
-        )
-        TTi = update(
-            TTi,
-            at[2:-2, 2:-2, 0], npx.where((sas_params[2:-2, 2:-2, 0] == 22), 0, TTi[2:-2, 2:-2, 0]),
-        )
-        TTi = update(
-            TTi,
-            at[2:-2, 2:-2, -1], npx.where((sas_params[2:-2, 2:-2, 0] == 22), 1, TTi[2:-2, 2:-2, -1]),
-        )
         TTi_kum, sas_params = sas.kumaraswami(state, SAn, sas_params)
         TTi = update_add(
             TTi,
@@ -433,7 +412,7 @@ def calc_conc_iso_flux(state, mtt, tt, flux):
     conc = allocate(state.dimensions, ("x", "y"))
     conc = update(
         conc,
-        at[2:-2, 2:-2], npx.sum(mtt[2:-2, 2:-2, :] * tt[2:-2, 2:-2, :], axis=-1),
+        at[2:-2, 2:-2], npx.where(npx.sum(tt[2:-2, 2:-2, :], axis=-1) > 0, npx.sum(mtt[2:-2, 2:-2, :] * tt[2:-2, 2:-2, :], axis=-1) / npx.sum(tt[2:-2, 2:-2, :], axis=-1), npx.nan),
     )
     conc = update(
         conc,
@@ -776,27 +755,6 @@ def calc_TT_num(state, SA, sas_params, flux):
     TTq = update_add(
         TTq,
         at[2:-2, 2:-2, :], sas.dirac(state, SA, sas_params)[2:-2, 2:-2, :],
-    )
-    TTq = update(
-        TTq,
-        at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where((flux[2:-2, 2:-2, npx.newaxis] >= SA[2:-2, 2:-2, 1, :]) & (SA[2:-2, 2:-2, 1, :]/flux[2:-2, 2:-2, npx.newaxis] <= 1), SA[2:-2, 2:-2, 1, :]/flux[2:-2, 2:-2, npx.newaxis], 1), TTq[2:-2, 2:-2, :]),
-    )
-    TTq = update(
-        TTq,
-        at[2:-2, 2:-2, :], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 21) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.where(TTq[2:-2, 2:-2, :] > 1, 1, TTq[2:-2, 2:-2, :]), TTq[2:-2, 2:-2, :]),
-    )
-    dirac_old = npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), npx.cumsum(npx.diff(npx.where((npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1]/flux[2:-2, 2:-2, npx.newaxis], axis=-1) <= 1), npx.cumsum(npx.diff(SA[2:-2, 2:-2, 1, :], axis=-1)[:, :, ::-1]/flux[2:-2, 2:-2, npx.newaxis], axis=-1), 1)[..., ::-1], axis=-1), axis=-1), 0)
-    TTq = update(
-        TTq,
-        at[2:-2, 2:-2, 1:-1], npx.where((sas_params[2:-2, 2:-2, 0, npx.newaxis] == 22) & (flux[2:-2, 2:-2, npx.newaxis] > 0), dirac_old, TTq[2:-2, 2:-2, 1:-1]),
-    )
-    TTq = update(
-        TTq,
-        at[2:-2, 2:-2, 0], npx.where((sas_params[2:-2, 2:-2, 0] == 22), 0, TTq[2:-2, 2:-2, 0]),
-    )
-    TTq = update(
-        TTq,
-        at[2:-2, 2:-2, -1], npx.where((sas_params[2:-2, 2:-2, 0] == 22), 1, TTq[2:-2, 2:-2, -1]),
     )
     TTq_kum, sas_params = sas.kumaraswami(state, SA, sas_params)
     TTq = update_add(
