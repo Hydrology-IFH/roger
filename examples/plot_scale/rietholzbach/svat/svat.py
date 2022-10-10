@@ -115,8 +115,8 @@ def main():
         def set_initial_conditions(self, state):
             vs = state.variables
 
-            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.46)
-            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.44)
+            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + vs.theta_ufc[2:-2, 2:-2, npx.newaxis])
+            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + vs.theta_ufc[2:-2, 2:-2, npx.newaxis])
 
         @roger_routine
         def set_boundary_conditions_setup(self, state):

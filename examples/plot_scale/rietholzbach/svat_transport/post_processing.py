@@ -237,6 +237,7 @@ def main(tmp_dir, sas_solver):
         ax.set_ylabel(r'$\delta^{18}$O [‰]')
         ax.set_xlabel('Time [year]')
         ax.set_xlim((ds_sim_tm.Time.values[0], ds_sim_tm.Time.values[-1]))
+        ax.set_ylim((-20, -5))
         fig.tight_layout()
         file = base_path_figs / f"d18O_perc_sim_obs_{tm1}.png"
         fig.savefig(file, dpi=250)

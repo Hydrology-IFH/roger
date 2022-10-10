@@ -24,6 +24,7 @@ def main(tmp_dir, resample_size):
         n_repeat = int(resample_size / df.dims["x"].size)
     if n_repeat <= 1:
         n_repeat = 1
+        idx_boot = [22]
     # write states of best model run
     states_hmb_file = base_path / "states_hm1_bootstrap.nc"
     with h5netcdf.File(states_hmb_file, 'w', decode_vlen_strings=False) as f:
