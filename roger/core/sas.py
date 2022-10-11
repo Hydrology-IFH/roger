@@ -251,7 +251,7 @@ def dirac(state, SA, sas_params):
     )
     Omega = update(
         Omega,
-        at[2:-2, 2:-2, :], npx.where(mask2[2:-2, 2:-2, :] & (vs.nages[npx.newaxis, npx.newaxis, :] <= sas_params[2:-2, 2:-2, 1, npx.newaxis]), 0, 1) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, :], npx.where(mask2[2:-2, 2:-2, :] & (vs.nages[npx.newaxis, npx.newaxis, :] <= sas_params[2:-2, 2:-2, 1, npx.newaxis]), 0, 1) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     Omega = update(
         Omega,
