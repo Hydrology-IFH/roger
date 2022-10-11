@@ -828,9 +828,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
     model._set_input_dir(input_path)
     write_forcing_tracer(input_path, 'd18O')
     model.setup()
-    with model.state.settings.unlock():
-        model.state.settings.warmup_done = True
-    # model.warmup()
+    model.warmup()
     model.run()
     return
 
