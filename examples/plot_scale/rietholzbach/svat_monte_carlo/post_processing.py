@@ -30,7 +30,7 @@ def main(tmp_dir):
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
-    # # merge model output into single file
+    # merge model output into single file
     states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"
     if not os.path.exists(states_hm_mc_file):
         path = str(base_path / "SVAT.*.nc")
@@ -125,6 +125,9 @@ def main(tmp_dir):
     # sampled model parameters
     df_params_metrics.loc[:, 'dmpv'] = ds_sim["dmpv"].isel(y=0).values.flatten()
     df_params_metrics.loc[:, 'lmpv'] = ds_sim["lmpv"].isel(y=0).values.flatten()
+    df_params_metrics.loc[:, 'theta_eff'] = ds_sim["theta_eff"].isel(y=0).values.flatten()
+    df_params_metrics.loc[:, 'frac_lp'] = ds_sim["frac_lp"].isel(y=0).values.flatten()
+    df_params_metrics.loc[:, 'frac_fp'] = ds_sim["frac_fp"].isel(y=0).values.flatten()
     df_params_metrics.loc[:, 'theta_ac'] = ds_sim["theta_ac"].isel(y=0).values.flatten()
     df_params_metrics.loc[:, 'theta_ufc'] = ds_sim["theta_ufc"].isel(y=0).values.flatten()
     df_params_metrics.loc[:, 'theta_pwp'] = ds_sim["theta_pwp"].isel(y=0).values.flatten()
@@ -202,7 +205,7 @@ def main(tmp_dir):
                         sim0_vals = df_obs0_sim.loc[:, 'sim'].values
                         key_mae0 = 'MAE0_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_mae0] = eval_utils.calc_mae(obs0_vals,
-                                                                                sim0_vals)
+                                                                                    sim0_vals)
                         # peak difference from observations with zero values
                         key_pdiff0 = 'PDIFF0_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_pdiff0] = onp.max(sim0_vals)
@@ -335,6 +338,9 @@ def main(tmp_dir):
     # write .txt-file
     file = base_path_results / "params_metrics.txt"
     df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
+
+    file = base_path_results / "params_metrics.txt"
+    df_params_metrics = pd.read_csv(file, header=0, index_col=False, sep="\t")
 
     # dotty plots
     for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):

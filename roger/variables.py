@@ -666,6 +666,42 @@ VARIABLES = {
         "air temperature",
         time_dependent=True,
     ),
+    # soil temperature
+    "ta_year": Variable(
+        "annual air temperature",
+        CATCH_GRID,
+        "degC",
+        "annual air temperature",
+        time_dependent=True,
+        write_to_restart=True,
+        active=lambda settings: settings.enable_nitrate,
+    ),
+    "ta_soil": Variable(
+        "soil temperature",
+        CATCH_GRID + TIMESTEPS,
+        "degC",
+        "soil temperature",
+        time_dependent=True,
+        active=lambda settings: settings.enable_nitrate,
+    ),
+    "damp_soil": Variable(
+        "dampening depth ",
+        CATCH_GRID,
+        "mm",
+        "dampening depth",
+        time_dependent=True,
+        initial=2290,
+        active=lambda settings: settings.enable_nitrate,
+    ),
+    "phi_soil": Variable(
+        "phase constant",
+        CATCH_GRID,
+        "days",
+        "phase constant",
+        time_dependent=True,
+        initial=-60,
+        active=lambda settings: settings.enable_nitrate,
+    ),
     # soil parameters and variables
     "z_soil": Variable(
         "Soil depth",

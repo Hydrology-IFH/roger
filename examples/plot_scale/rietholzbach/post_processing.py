@@ -96,35 +96,35 @@ def main(tmp_dir):
     df_thetap.loc[cond2, 'sc'] = 2  # normal
     df_thetap.loc[cond3, 'sc'] = 3  # wet
 
-    # # measured oxygen-18 in precipitation and percolation
-    # d18O_prec_mean = onp.round(onp.nanmean(df_obs.loc[:, 'd18O_prec'].values), 2)
-    # d18O_perc_mean = onp.round(onp.nanmean(df_obs.loc[:, 'd18O_perc'].values), 2)
-    # fig, axs = plt.subplots(2, 1, figsize=(10, 6))
-    # axs[0].plot(df_obs.index,
-    #             df_obs.loc[:, 'd18O_prec'].fillna(method='bfill'),
-    #             '-', color='blue')
-    # axs[0].plot(df_obs.index,
-    #             df_obs.loc[:, 'd18O_prec'],
-    #             '.', color='blue')
-    # axs[0].set_ylabel(r'$\delta^{18}$O [‰]')
-    # axs[0].set_ylim([-20, 0])
-    # axs[0].set_xlim(df_obs.index[0], df_obs.index[-1])
-    # axs[1].plot(df_obs.index, df_obs.loc[:, 'd18O_perc'].fillna(method='bfill'),
-    #             '-', color='grey')
-    # axs[1].plot(df_obs.index, df_obs.loc[:, 'd18O_perc'],
-    #             '.', color='grey')
-    # axs[1].set_ylabel(r'$\delta^{18}$O [‰]')
-    # axs[1].set_xlabel('Time [year]')
-    # axs[1].set_ylim([-20, 0])
-    # axs[1].set_xlim(df_obs.index[0], df_obs.index[-1])
-    # fig.tight_layout()
-    # fig.text(0.115, 0.92, "(a)", ha="center", va="center")
-    # fig.text(0.89, 0.615, r"$\overline{\delta^{18}O}_{prec}$: %s" % (d18O_prec_mean), ha="center", va="center")
-    # fig.text(0.89, 0.155, r"$\overline{\delta^{18}O}_{perc}$: %s" % (d18O_perc_mean), ha="center", va="center")
-    # fig.text(0.115, 0.46, "(b)", ha="center", va="center")
-    # file = base_path_figs / 'observed_d18O_prec_perc.pdf'
-    # fig.savefig(file, dpi=250)
-    # plt.close(fig=fig)
+    # measured oxygen-18 in precipitation and percolation
+    d18O_prec_mean = onp.round(onp.nanmean(df_obs.loc[:, 'd18O_prec'].values), 2)
+    d18O_perc_mean = onp.round(onp.nanmean(df_obs.loc[:, 'd18O_perc'].values), 2)
+    fig, axs = plt.subplots(2, 1, figsize=(10, 6))
+    axs[0].plot(df_obs.index,
+                df_obs.loc[:, 'd18O_prec'].fillna(method='bfill'),
+                '-', color='blue')
+    axs[0].plot(df_obs.index,
+                df_obs.loc[:, 'd18O_prec'],
+                '.', color='blue')
+    axs[0].set_ylabel(r'$\delta^{18}$O [‰]')
+    axs[0].set_ylim([-20, 0])
+    axs[0].set_xlim(df_obs.index[0], df_obs.index[-1])
+    axs[1].plot(df_obs.index, df_obs.loc[:, 'd18O_perc'].fillna(method='bfill'),
+                '-', color='grey')
+    axs[1].plot(df_obs.index, df_obs.loc[:, 'd18O_perc'],
+                '.', color='grey')
+    axs[1].set_ylabel(r'$\delta^{18}$O [‰]')
+    axs[1].set_xlabel('Time [year]')
+    axs[1].set_ylim([-20, 0])
+    axs[1].set_xlim(df_obs.index[0], df_obs.index[-1])
+    fig.tight_layout()
+    fig.text(0.115, 0.92, "(a)", ha="center", va="center")
+    fig.text(0.89, 0.615, r"$\overline{\delta^{18}O}_{prec}$: %s" % (d18O_prec_mean), ha="center", va="center")
+    fig.text(0.89, 0.155, r"$\overline{\delta^{18}O}_{perc}$: %s" % (d18O_perc_mean), ha="center", va="center")
+    fig.text(0.115, 0.46, "(b)", ha="center", va="center")
+    file = base_path_figs / 'observed_d18O_prec_perc.pdf'
+    fig.savefig(file, dpi=250)
+    plt.close(fig=fig)
 
     # dotty plots
     file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
@@ -135,7 +135,7 @@ def main(tmp_dir):
     idx_best1 = df_params_metrics1.loc[:df_params_metrics1.index[99], 'id'].values.tolist()
     dict_metrics_best = {}
     for sc in ['', 'dry', 'normal', 'wet']:
-        dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best1)), columns=['KGE_aet', 'KGE_q_ss', 'r_dS', 'E_multi'])
+        dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best1)))
     for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
         df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'r_dS{sc1}', f'KGE_q_ss{sc1}', f'E_multi{sc1}']]
         df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
@@ -162,7 +162,7 @@ def main(tmp_dir):
                 for ii, idx_best in enumerate(idx_best1):
                     y_best = df_metrics.iloc[idx_best, i]
                     x_best = df_params.iloc[idx_best, j]
-                    ax[i, j].scatter(x_best, y_best, s=12, c='red', alpha=0.8)
+                    ax[i, j].scatter(x_best, y_best, s=12, c='red', alpha=1)
                     dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
 
         for j in range(ncol):
@@ -170,8 +170,8 @@ def main(tmp_dir):
             ax[-1, j].set_xlabel(xlabel)
 
         ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
-        ax[1, 0].set_ylabel('$KGE_{PERC}$\n [-]')
-        ax[2, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
+        ax[1, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
+        ax[2, 0].set_ylabel('$KGE_{PERC}$\n [-]')
         ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
 
         fig.subplots_adjust(wspace=0.2, hspace=0.3)
@@ -179,231 +179,239 @@ def main(tmp_dir):
         fig.savefig(file, dpi=250)
 
     # write evaluation metrics for different storage condtions to .txt
+    df_avg_std = pd.DataFrame(columns=['KGE_aet', 'r_dS', 'KGE_q_ss', 'E_multi'])
     for sc in ['', 'dry', 'normal', 'wet']:
-        df_avg_std = pd.DataFrame(index=['avg', 'std'], columns=dict_metrics_best[sc].columns)
-        df_avg_std.loc['avg', :] = onp.mean(dict_metrics_best[sc].values, axis=0)
-        df_avg_std.loc['std', :] = onp.std(dict_metrics_best[sc].values, axis=0)
-        file = base_path_figs / f"metrics_best_{sc}.txt"
-        df_avg_std.to_csv(file, header=True, index=True, sep="\t")
+        df_avg_std.loc[f'avg{sc}', :] = onp.mean(dict_metrics_best[sc].values, axis=0)
+        df_avg_std.loc[f'std{sc}', :] = onp.std(dict_metrics_best[sc].values, axis=0)
+    file = base_path_figs / "metrics_best_1perc_avg_std.txt"
+    df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
-    # # # compare best simulation with observations
-    # vars_obs = ['AET', 'PERC', 'dWEIGHT']
-    # vars_sim = ['aet', 'q_ss', 'dS']
-    # dict_obs_sim = {}
-    # for var_obs, var_sim in zip(vars_obs, vars_sim):
-    #     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-    #     df_obs.loc[:, 'obs'] = obs_vals
-    #     sim_vals = ds_sim_hm[var_sim].isel(x=0, y=0).values
-    #     # join observations on simulations
-    #     df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
-    #     df_eval = df_eval.iloc[:, :]
-    #     dict_obs_sim[var_sim] = df_eval
-    #     # plot observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = '%s.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     # plot cumulated observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-    #     file_str = '%s_cum.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-    #     file_str = '%s_cum_year_facet.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
 
-    # # compare best 1% simulations with observations
-    # vars_obs = ['AET', 'PERC', 'dWEIGHT']
-    # vars_sim = ['aet', 'q_ss', 'dS']
-    # dict_obs_sim1 = {}
-    # for var_obs, var_sim in zip(vars_obs, vars_sim):
-    #     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-    #     df_obs.loc[:, 'obs'] = obs_vals
-    #     sim_vals = ds_sim_hm1[var_sim].isel(y=0).values.T
-    #     # join observations on simulations
-    #     df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
-    #     dict_obs_sim1[var_sim] = df_eval
-    #     # plot observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = '%s_best_1perc.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     # plot cumulated observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-    #     file_str = '%s_cum_best_1perc.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-    #     file_str = '%s_cum_year_facet_best_1perc.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
+    # write average and standard deviation of best parameters to .txt
+    df_avg_std = pd.DataFrame(index=['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
+    df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics1.loc[:df_params_metrics1.index[99], ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
+    df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics1.loc[:df_params_metrics1.index[99], ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
+    file = base_path_figs / "params_best_1perc_avg_std.txt"
+    df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
-    # vars_obs = ['PREC']
-    # vars_sim = ['prec']
-    # dict_obs = {}
-    # for var_obs, var_sim in zip(vars_obs, vars_sim):
-    #     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-    #     df_obs.loc[:, 'obs'] = obs_vals
-    #     dict_obs[var_sim] = df_obs
-    #     # plot observed time series
-    #     fig = eval_utils.plot_sim(df_obs, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = '%s.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     # plot cumulated observed time series
-    #     fig = eval_utils.plot_sim_cum(df_obs, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-    #     file_str = '%s_cum.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     fig = eval_utils.plot_sim_cum_year_facet(df_obs, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-    #     file_str = '%s_cum_year_facet.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
+    # # compare best simulation with observations
+    vars_obs = ['AET', 'PERC', 'dWEIGHT']
+    vars_sim = ['aet', 'q_ss', 'dS']
+    dict_obs_sim = {}
+    for var_obs, var_sim in zip(vars_obs, vars_sim):
+        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals
+        sim_vals = ds_sim_hm[var_sim].isel(x=0, y=0).values
+        # join observations on simulations
+        df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
+        df_eval = df_eval.iloc[:, :]
+        dict_obs_sim[var_sim] = df_eval
+        # plot observed and simulated time series
+        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+        file_str = '%s.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed and simulated time series
+        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = '%s_cum.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = '%s_cum_year_facet.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
 
-    # vars_obs = ['TA']
-    # vars_sim = ['ta']
-    # for var_obs, var_sim in zip(vars_obs, vars_sim):
-    #     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-    #     df_obs.loc[:, 'obs'] = obs_vals
-    #     # plot observed time series
-    #     fig = eval_utils.plot_sim(df_obs, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = '%s.pdf' % (var_obs)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
+    # compare best 1% simulations with observations
+    vars_obs = ['AET', 'PERC', 'dWEIGHT']
+    vars_sim = ['aet', 'q_ss', 'dS']
+    dict_obs_sim1 = {}
+    for var_obs, var_sim in zip(vars_obs, vars_sim):
+        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals
+        sim_vals = ds_sim_hm1[var_sim].isel(y=0).values.T
+        # join observations on simulations
+        df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
+        dict_obs_sim1[var_sim] = df_eval
+        # plot observed and simulated time series
+        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+        file_str = '%s_best_1perc.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed and simulated time series
+        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = '%s_cum_best_1perc.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = '%s_cum_year_facet_best_1perc.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
 
-    # # compare HYDRUS-1D simulations with observations
-    # vars_obs = ['AET', 'PERC', 'dWEIGHT']
-    # vars_sim = ['aet', 'perc', 'dS']
-    # dict_obs_sim_hydrus = {}
-    # for var_obs, var_sim in zip(vars_obs, vars_sim):
-    #     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-    #     df_obs.loc[:, 'obs'] = obs_vals
-    #     sim_vals = ds_hydrus[var_sim].values
-    #     # join observations on simulations
-    #     df_eval = eval_utils.join_obs_on_sim(date_hydrus, sim_vals, df_obs)
-    #     df_eval = df_eval.iloc[:, :]
-    #     dict_obs_sim_hydrus[var_sim] = df_eval
-    #     # plot observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = 'hydrus_%s.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     # plot cumulated observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-    #     file_str = 'hydrus_%s_cum.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-    #     file_str = 'hydrus_%s_cum_year_facet.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
+    vars_obs = ['PREC']
+    vars_sim = ['prec']
+    dict_obs = {}
+    for var_obs, var_sim in zip(vars_obs, vars_sim):
+        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals
+        dict_obs[var_sim] = df_obs
+        # plot observed time series
+        fig = eval_utils.plot_sim(df_obs, labs._Y_LABS_DAILY[var_sim])
+        file_str = '%s.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed time series
+        fig = eval_utils.plot_sim_cum(df_obs, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = '%s_cum.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_sim_cum_year_facet(df_obs, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = '%s_cum_year_facet.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
 
-    # # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
-    # fig, axes = plt.subplots(3, 1, sharex=True, figsize=(14, 7))
-    # axes[0].plot(dict_obs['prec'].index, dict_obs['prec'].cumsum(), lw=1.5, color='blue', ls='-', alpha=1)
-    # axes[0].set_ylabel('PREC\n[mm]')
-    # axes[0].set_xlim((dict_obs['prec'].index[0], dict_obs['prec'].index[-1]))
-    # axes[0].set_ylim(0,)
-    # axes[0].invert_yaxis()
-    # ax2 = axes[0].twinx()
-    # ax2.plot(dict_obs_sim['aet'].index, dict_obs_sim['aet']['obs'].cumsum(),
-    #           lw=1.5, color='blue', ls='-', alpha=0.5)
-    # ax2.plot(dict_obs_sim['aet'].index, dict_obs_sim['aet']['sim'].cumsum(),
-    #           lw=1, color='red', ls='-.')
-    # ax2.plot(dict_obs_sim_hydrus['aet'].index, dict_obs_sim_hydrus['aet']['sim'].cumsum(),
-    #           lw=1, color='gray', ls='-.')
-    # ax2.set_ylim(0,)
-    # ax2.set_ylabel('ET\n[mm]')
-    # axes[1].plot(dict_obs_sim['dS'].loc['2000':, :].index, dict_obs_sim['dS'].loc['2000':, 'obs'].cumsum(),
-    #               lw=1.5, color='blue', ls='-', alpha=0.5)
-    # axes[1].plot(dict_obs_sim['dS'].loc['2000':, :].index, dict_obs_sim['dS'].loc['2000':, 'sim'].cumsum(),
-    #               lw=1, color='red', ls='-.')
-    # axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2000':, :].index, dict_obs_sim_hydrus['dS'].loc['2000':, 'sim'].cumsum(),
-    #               lw=1, color='gray', ls='-.')
-    # axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
-    # axes[1].set_xlim((dict_obs_sim['dS'].index[0], dict_obs_sim['dS'].index[-1]))
-    # axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['obs'].cumsum(),
-    #               lw=1.5, color='blue', ls='-', alpha=0.5)
-    # axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['sim'].cumsum(),
-    #               lw=1, color='red', ls='-.')
-    # axes[2].plot(dict_obs_sim_hydrus['perc'].index, dict_obs_sim_hydrus['perc']['sim'].cumsum(),
-    #               lw=1, color='gray', ls='-.')
-    # axes[2].set_ylim(0,)
-    # axes[2].invert_yaxis()
-    # axes[2].set_xlim((dict_obs_sim['q_ss'].index[0], dict_obs_sim['q_ss'].index[-1]))
-    # axes[2].set_ylabel('PERC\n[mm]')
-    # axes[2].set_xlabel(r'Time [year]')
-    # axes[0].text(0.015, 0.9, '(a)', size=15, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[0].transAxes)
-    # axes[1].text(0.015, 0.9, '(b)', size=15, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[1].transAxes)
-    # axes[2].text(0.015, 0.9, '(c)', size=15, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[2].transAxes)
-    # fig.tight_layout()
-    # file = 'prec_et_dS_perc_obs_sim_cumulated.png'
-    # path = base_path_figs / file
-    # fig.savefig(path, dpi=250)
+    vars_obs = ['TA']
+    vars_sim = ['ta']
+    for var_obs, var_sim in zip(vars_obs, vars_sim):
+        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals
+        # plot observed time series
+        fig = eval_utils.plot_sim(df_obs, labs._Y_LABS_DAILY[var_sim])
+        file_str = '%s.pdf' % (var_obs)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
 
-    # # compare best 1% simulations with observations
-    # nx = ds_sim_hm1.dims['x']
-    # fig, axes = plt.subplots(3, 1, sharex=True, figsize=(14, 7))
-    # axes[0].plot(dict_obs['prec'].index, dict_obs['prec'].cumsum(), lw=1.5, color='blue', ls='-', alpha=1)
-    # axes[0].set_ylabel('PREC\n[mm]')
-    # axes[0].set_xlim((dict_obs['prec'].index[0], dict_obs['prec'].index[-1]))
-    # axes[0].set_ylim(0,)
-    # axes[0].invert_yaxis()
-    # ax2 = axes[0].twinx()
-    # for nrow in range(nx):
-    #     ax2.plot(dict_obs_sim1['aet'].index, dict_obs_sim1['aet'].iloc[:, nrow].cumsum(),
-    #              lw=1, color='red', ls='-', alpha=.8)
-    # ax2.plot(dict_obs_sim1['aet'].index, dict_obs_sim1['aet']['obs'].cumsum(),
-    #           lw=2, color='blue', ls='-', alpha=1)
-    # ax2.plot(dict_obs_sim_hydrus['aet'].index, dict_obs_sim_hydrus['aet']['sim'].cumsum(),
-    #           lw=2, color='gray', ls='-.')
-    # ax2.set_ylim(0,)
-    # ax2.set_ylabel('ET\n[mm]')
-    # for nrow in range(nx):
-    #     axes[1].plot(dict_obs_sim1['dS'].loc['2000':, :].index, dict_obs_sim1['dS'].loc['2000':, f'sim{nrow}'].cumsum(),
-    #              lw=1, color='red', ls='-')
-    # axes[1].plot(dict_obs_sim1['dS'].loc['2000':, :].index, dict_obs_sim1['dS'].loc['2000':, 'obs'].cumsum(),
-    #               lw=2, color='blue', ls='-', alpha=1)
-    # axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2000':, :].index, dict_obs_sim_hydrus['dS'].loc['2000':, 'sim'].cumsum(),
-    #               lw=2, color='gray', ls='-.', alpha=.8)
-    # axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
-    # axes[1].set_xlim((dict_obs_sim['dS'].index[0], dict_obs_sim['dS'].index[-1]))
-    # for nrow in range(nx):
-    #     axes[2].plot(dict_obs_sim1['q_ss'].index, dict_obs_sim1['q_ss'].iloc[:, nrow].cumsum(),
-    #              lw=1, color='red', ls='-', alpha=.8)
-    # axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['obs'].cumsum(),
-    #               lw=2, color='blue', ls='-', alpha=1)
-    # axes[2].plot(dict_obs_sim_hydrus['perc'].index, dict_obs_sim_hydrus['perc']['sim'].cumsum(),
-    #               lw=2, color='gray', ls='-.')
-    # axes[2].set_ylim(0,)
-    # axes[2].invert_yaxis()
-    # axes[2].set_xlim((dict_obs_sim1['q_ss'].index[0], dict_obs_sim1['q_ss'].index[-1]))
-    # axes[2].set_ylabel('PERC\n[mm]')
-    # axes[2].set_xlabel(r'Time [year]')
-    # axes[0].text(0.015, 0.9, '(a)', size=15, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[0].transAxes)
-    # axes[1].text(0.015, 0.9, '(b)', size=15, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[1].transAxes)
-    # axes[2].text(0.015, 0.9, '(c)', size=15, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[2].transAxes)
-    # fig.tight_layout()
-    # file = 'prec_et_dS_perc_obs_sim_cumulated_best_1perc.png'
-    # path = base_path_figs / file
-    # fig.savefig(path, dpi=250)
+    # compare HYDRUS-1D simulations with observations
+    vars_obs = ['AET', 'PERC', 'dWEIGHT']
+    vars_sim = ['aet', 'perc', 'dS']
+    dict_obs_sim_hydrus = {}
+    for var_obs, var_sim in zip(vars_obs, vars_sim):
+        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals
+        sim_vals = ds_hydrus[var_sim].values
+        # join observations on simulations
+        df_eval = eval_utils.join_obs_on_sim(date_hydrus, sim_vals, df_obs)
+        df_eval = df_eval.iloc[:, :]
+        dict_obs_sim_hydrus[var_sim] = df_eval
+        # plot observed and simulated time series
+        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+        file_str = 'hydrus_%s.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed and simulated time series
+        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = 'hydrus_%s_cum.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = 'hydrus_%s_cum_year_facet.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
+
+    # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
+    fig, axes = plt.subplots(3, 1, sharex=True, figsize=(14, 7))
+    axes[0].plot(dict_obs['prec'].index, dict_obs['prec'].cumsum(), lw=1.5, color='blue', ls='-', alpha=1)
+    axes[0].set_ylabel('PREC\n[mm]')
+    axes[0].set_xlim((dict_obs['prec'].index[0], dict_obs['prec'].index[-1]))
+    axes[0].set_ylim(0,)
+    axes[0].invert_yaxis()
+    ax2 = axes[0].twinx()
+    ax2.plot(dict_obs_sim['aet'].index, dict_obs_sim['aet']['obs'].cumsum(),
+              lw=1.5, color='blue', ls='-', alpha=0.5)
+    ax2.plot(dict_obs_sim['aet'].index, dict_obs_sim['aet']['sim'].cumsum(),
+              lw=1, color='red', ls='-.')
+    ax2.plot(dict_obs_sim_hydrus['aet'].index, dict_obs_sim_hydrus['aet']['sim'].cumsum(),
+              lw=1, color='gray', ls='-.')
+    ax2.set_ylim(0,)
+    ax2.set_ylabel('ET\n[mm]')
+    axes[1].plot(dict_obs_sim['dS'].loc['2000':, :].index, dict_obs_sim['dS'].loc['2000':, 'obs'].cumsum(),
+                  lw=1.5, color='blue', ls='-', alpha=0.5)
+    axes[1].plot(dict_obs_sim['dS'].loc['2000':, :].index, dict_obs_sim['dS'].loc['2000':, 'sim'].cumsum(),
+                  lw=1, color='red', ls='-.')
+    axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2000':, :].index, dict_obs_sim_hydrus['dS'].loc['2000':, 'sim'].cumsum(),
+                  lw=1, color='gray', ls='-.')
+    axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
+    axes[1].set_xlim((dict_obs_sim['dS'].index[0], dict_obs_sim['dS'].index[-1]))
+    axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['obs'].cumsum(),
+                  lw=1.5, color='blue', ls='-', alpha=0.5)
+    axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['sim'].cumsum(),
+                  lw=1, color='red', ls='-.')
+    axes[2].plot(dict_obs_sim_hydrus['perc'].index, dict_obs_sim_hydrus['perc']['sim'].cumsum(),
+                  lw=1, color='gray', ls='-.')
+    axes[2].set_ylim(0,)
+    axes[2].invert_yaxis()
+    axes[2].set_xlim((dict_obs_sim['q_ss'].index[0], dict_obs_sim['q_ss'].index[-1]))
+    axes[2].set_ylabel('PERC\n[mm]')
+    axes[2].set_xlabel(r'Time [year]')
+    axes[0].text(0.015, 0.9, '(a)', size=15, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0].transAxes)
+    axes[1].text(0.015, 0.9, '(b)', size=15, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1].transAxes)
+    axes[2].text(0.015, 0.9, '(c)', size=15, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2].transAxes)
+    fig.tight_layout()
+    file = 'prec_et_dS_perc_obs_sim_cumulated.png'
+    path = base_path_figs / file
+    fig.savefig(path, dpi=250)
+
+    # compare best 1% simulations with observations
+    nx = ds_sim_hm1.dims['x']
+    fig, axes = plt.subplots(3, 1, sharex=True, figsize=(14, 7))
+    axes[0].plot(dict_obs['prec'].index, dict_obs['prec'].cumsum(), lw=1.5, color='blue', ls='-', alpha=1)
+    axes[0].set_ylabel('PREC\n[mm]')
+    axes[0].set_xlim((dict_obs['prec'].index[0], dict_obs['prec'].index[-1]))
+    axes[0].set_ylim(0,)
+    axes[0].invert_yaxis()
+    ax2 = axes[0].twinx()
+    for nrow in range(nx):
+        ax2.plot(dict_obs_sim1['aet'].index, dict_obs_sim1['aet'].iloc[:, nrow].cumsum(),
+                  lw=1, color='red', ls='-', alpha=.8)
+    ax2.plot(dict_obs_sim1['aet'].index, dict_obs_sim1['aet']['obs'].cumsum(),
+              lw=2, color='blue', ls='-', alpha=1)
+    ax2.plot(dict_obs_sim_hydrus['aet'].index, dict_obs_sim_hydrus['aet']['sim'].cumsum(),
+              lw=2, color='gray', ls='-.')
+    ax2.set_ylim(0,)
+    ax2.set_ylabel('ET\n[mm]')
+    for nrow in range(nx):
+        axes[1].plot(dict_obs_sim1['dS'].loc['2000':, :].index, dict_obs_sim1['dS'].loc['2000':, f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-')
+    axes[1].plot(dict_obs_sim1['dS'].loc['2000':, :].index, dict_obs_sim1['dS'].loc['2000':, 'obs'].cumsum(),
+                  lw=2, color='blue', ls='-', alpha=1)
+    axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2000':, :].index, dict_obs_sim_hydrus['dS'].loc['2000':, 'sim'].cumsum(),
+                  lw=2, color='gray', ls='-.', alpha=.8)
+    axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
+    axes[1].set_xlim((dict_obs_sim['dS'].index[0], dict_obs_sim['dS'].index[-1]))
+    for nrow in range(nx):
+        axes[2].plot(dict_obs_sim1['q_ss'].index, dict_obs_sim1['q_ss'].iloc[:, nrow].cumsum(),
+                  lw=1, color='red', ls='-', alpha=.8)
+    axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['obs'].cumsum(),
+                  lw=2, color='blue', ls='-', alpha=1)
+    axes[2].plot(dict_obs_sim_hydrus['perc'].index, dict_obs_sim_hydrus['perc']['sim'].cumsum(),
+                  lw=2, color='gray', ls='-.')
+    axes[2].set_ylim(0,)
+    axes[2].invert_yaxis()
+    axes[2].set_xlim((dict_obs_sim1['q_ss'].index[0], dict_obs_sim1['q_ss'].index[-1]))
+    axes[2].set_ylabel('PERC\n[mm]')
+    axes[2].set_xlabel(r'Time [year]')
+    axes[0].text(0.015, 0.9, '(a)', size=15, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0].transAxes)
+    axes[1].text(0.015, 0.9, '(b)', size=15, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1].transAxes)
+    axes[2].text(0.015, 0.9, '(c)', size=15, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2].transAxes)
+    fig.tight_layout()
+    file = 'prec_et_dS_perc_obs_sim_cumulated_best_1perc.png'
+    path = base_path_figs / file
+    fig.savefig(path, dpi=250)
 
     # # load metrics of transport simulations
     # dict_params_metrics_tm_mc = {}

@@ -2958,7 +2958,7 @@ def calculate_storage_selection(state):
     if settings.enable_offline_transport and not (settings.enable_groundwater_boundary & settings.enable_crop_phenology) and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
         if settings.sas_solver == "Euler":
             # loop over substeps
-            while vs.itt_substep < settings.sas_solver_substeps:
+            for i in range(settings.sas_solver_substeps):
                 vs.update(svat_transport_model_euler(state))
                 root_zone.calculate_root_zone_transport(state)
                 subsoil.calculate_subsoil_transport(state)
@@ -2975,12 +2975,11 @@ def calculate_storage_selection(state):
                     vs.update(after_substep_anion(state))
                 else:
                     vs.update(after_substep_anion(state))
-                vs.itt_substep = vs.itt_substep + 1
-            vs.itt_substep = 0
+                vs.itt_substep = i
 
         elif settings.sas_solver == "RK4":
             # loop over substeps
-            while vs.itt_substep < settings.sas_solver_substeps:
+            for i in range(settings.sas_solver_substeps):
                 vs.update(svat_transport_model_rk4(state))
                 root_zone.calculate_root_zone_transport(state)
                 subsoil.calculate_subsoil_transport(state)
@@ -2997,8 +2996,7 @@ def calculate_storage_selection(state):
                     vs.update(after_substep_anion(state))
                 else:
                     vs.update(after_substep_anion(state))
-                vs.itt_substep = vs.itt_substep + 1
-            vs.itt_substep = 0
+                vs.itt_substep = i
 
         else:
             vs.update(svat_transport_model_deterministic(state))
@@ -3006,7 +3004,7 @@ def calculate_storage_selection(state):
     elif settings.enable_offline_transport and not (settings.enable_groundwater_boundary & settings.enable_crop_phenology) and (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
         if settings.sas_solver == "Euler":
             # loop over substeps
-            while vs.itt_substep < settings.sas_solver_substeps:
+            for i in range(settings.sas_solver_substeps):
                 vs.update(svat_transport_model_euler(state))
                 if (settings.enable_oxygen18 | settings.enable_deuterium):
                     # convert isotope concentrations to delta valus
@@ -3032,12 +3030,11 @@ def calculate_storage_selection(state):
                         vs.update(after_substep_iso(state))
                     else:
                         vs.update(after_substep_anion(state))
-                vs.itt_substep = vs.itt_substep + 1
-            vs.itt_substep = 0
+                vs.itt_substep = i
 
         elif settings.sas_solver == "RK4":
             # loop over substeps
-            while vs.itt_substep < settings.sas_solver_substeps:
+            for i in range(settings.sas_solver_substeps):
                 vs.update(svat_transport_model_rk4(state))
                 if (settings.enable_oxygen18 | settings.enable_deuterium):
                     # convert isotope concentrations to delta valus
@@ -3063,8 +3060,7 @@ def calculate_storage_selection(state):
                         vs.update(after_substep_iso(state))
                     else:
                         vs.update(after_substep_anion(state))
-                vs.itt_substep = vs.itt_substep + 1
-            vs.itt_substep = 0
+                vs.itt_substep = i
 
         else:
             vs.update(svat_transport_model_deterministic(state))
@@ -3072,7 +3068,7 @@ def calculate_storage_selection(state):
     elif settings.enable_offline_transport and settings.enable_groundwater_boundary and not settings.enable_crop_phenology and (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
         if settings.sas_solver == "Euler":
             # loop over substeps
-            while vs.itt_substep < settings.sas_solver_substeps:
+            for i in range(settings.sas_solver_substeps):
                 vs.update(svat_lbc_transport_model_euler(state))
                 if (settings.enable_oxygen18 | settings.enable_deuterium):
                     # convert isotope concentrations to delta valus
@@ -3098,8 +3094,7 @@ def calculate_storage_selection(state):
                         vs.update(after_substep_iso(state))
                     else:
                         vs.update(after_substep_anion(state))
-                vs.itt_substep = vs.itt_substep + 1
-            vs.itt_substep = 0
+                vs.itt_substep = i
 
         elif settings.sas_solver == "RK4":
             pass
@@ -3110,7 +3105,7 @@ def calculate_storage_selection(state):
     elif settings.enable_offline_transport and not settings.enable_groundwater_boundary and settings.enable_crop_phenology and (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
         if settings.sas_solver == "Euler":
             # loop over substeps
-            while vs.itt_substep < settings.sas_solver_substeps:
+            for i in range(settings.sas_solver_substeps):
                 vs.update(svat_crop_transport_model_euler(state))
                 if (settings.enable_oxygen18 | settings.enable_deuterium):
                     # convert isotope concentrations to delta valus
@@ -3136,8 +3131,7 @@ def calculate_storage_selection(state):
                         vs.update(after_substep_iso(state))
                     else:
                         vs.update(after_substep_anion(state))
-                vs.itt_substep = vs.itt_substep + 1
-            vs.itt_substep = 0
+                vs.itt_substep = i
 
         elif settings.sas_solver == "RK4":
             pass

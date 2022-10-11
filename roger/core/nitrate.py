@@ -4,7 +4,20 @@ from roger.core.operators import numpy as npx, update, update_add, at
 
 
 @roger_kernel
-def denit_soil(state, msa, km, Dmax, sa, S_sat, S_pwp):
+def calc_soil_temperature(state):
+    """Calculates soil temperature.
+    """
+    vs = state.variables
+    settings = state.settings
+
+    vs.ta_soil = update(
+        vs.ta_soil,
+        at[2:-2, 2:-2, vs.tau], vs.ta_year[2:-2, 2:-2] + (vs.ta[2:-2, 2:-2, vs.tau] - vs.ta_year[2:-2, 2:-2]) * npx.sin(((2 * settings.pi)/365) * vs.doy + ((2 * settings.pi)/365) * vs.phi_soil[2:-2, 2:-2] - (0.5 * vs.z_soil[2:-2, 2:-2] / vs.damp_soil[2:-2, 2:-2])) / npx.exp(-0.5 * vs.z_soil[2:-2, 2:-2] / vs.damp_soil[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+
+@roger_kernel
+def calc_denit_soil(state, msa, km, Dmax, sa, S_sat, S_pwp):
     """Calculates soil dentirification rate.
     """
     vs = state.variables
@@ -20,7 +33,7 @@ def denit_soil(state, msa, km, Dmax, sa, S_sat, S_pwp):
     ta_coeff = allocate(state.dimensions, ("x", "y"))
     ta_coeff = update(
         ta_coeff,
-        at[2:-2, 2:-2], npx.where(((vs.ta[2:-2, 2:-2, vs.tau] >= 5) & (vs.ta[2:-2, 2:-2, vs.tau] <= 50)), vs.ta[2:-2, 2:-2, vs.tau] / (50 - 5), 0) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(((vs.ta_soil[2:-2, 2:-2, vs.tau] >= 5) & (vs.ta_soil[2:-2, 2:-2, vs.tau] <= 50)), vs.ta_soil[2:-2, 2:-2, vs.tau] / (50 - 5), 0) * vs.maskCatch[2:-2, 2:-2],
     )
     # calculate denitrification rate
     mr = allocate(state.dimensions, ("x", "y", "ages"))
@@ -43,7 +56,7 @@ def denit_soil(state, msa, km, Dmax, sa, S_sat, S_pwp):
 
 
 @roger_kernel
-def nit_soil(state, Nmin, knit, Dnit, sa, S_sat, S_pwp):
+def calc_nit_soil(state, Nmin, knit, Dnit, sa, S_sat, S_pwp):
     """Calculates soil nitrification rate.
     """
     vs = state.variables
@@ -59,7 +72,7 @@ def nit_soil(state, Nmin, knit, Dnit, sa, S_sat, S_pwp):
     ta_coeff = allocate(state.dimensions, ("x", "y"))
     ta_coeff = update(
         ta_coeff,
-        at[2:-2, 2:-2], npx.where(((vs.ta[2:-2, 2:-2, vs.tau] >= 1) & (vs.ta[2:-2, 2:-2, vs.tau] <= 30)), vs.ta[2:-2, 2:-2, vs.tau] / (30 - 1), 0) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(((vs.ta_soil[2:-2, 2:-2, vs.tau] >= 1) & (vs.ta_soil[2:-2, 2:-2, vs.tau] <= 30)), vs.ta_soil[2:-2, 2:-2, vs.tau] / (30 - 1), 0) * vs.maskCatch[2:-2, 2:-2],
     )
     # calculate nitrification rate
     ma = allocate(state.dimensions, ("x", "y", "ages"))
@@ -83,7 +96,7 @@ def nit_soil(state, Nmin, knit, Dnit, sa, S_sat, S_pwp):
 
 
 @roger_kernel
-def min_soil(state, kmin):
+def calc_min_soil(state, kmin):
     """Calculates soil nitrogen mineralization rate.
     """
     vs = state.variables
@@ -93,7 +106,7 @@ def min_soil(state, kmin):
     ta_coeff = allocate(state.dimensions, ("x", "y"))
     ta_coeff = update(
         ta_coeff,
-        at[2:-2, 2:-2], npx.where(((vs.ta[2:-2, 2:-2, vs.tau] >= 0) & (vs.ta[2:-2, 2:-2, vs.tau] <= 50)), vs.ta[2:-2, 2:-2, vs.tau] / (50 - 0), 0) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(((vs.ta_soil[2:-2, 2:-2, vs.tau] >= 0) & (vs.ta_soil[2:-2, 2:-2, vs.tau] <= 50)), vs.ta_soil[2:-2, 2:-2, vs.tau] / (50 - 0), 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
     ma = allocate(state.dimensions, ("x", "y"))
@@ -106,7 +119,7 @@ def min_soil(state, kmin):
 
 
 @roger_kernel
-def denit_gw(state, msa, k):
+def calc_denit_gw(state, msa, k):
     """Calculates groundwater dentrification rate.
     """
     vs = state.variables
@@ -137,17 +150,17 @@ def calculate_nitrogen_cycle_kernel(state):
 
     vs.Nmin_rz = update_add(
         vs.Nmin_rz,
-        at[2:-2, 2:-2, vs.tau, 0], min_soil(state, vs.kmin_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau, 0], calc_min_soil(state, vs.kmin_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.Nmin_ss = update_add(
         vs.Nmin_ss,
-        at[2:-2, 2:-2, vs.tau, 0], min_soil(state, vs.kmin_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau, 0], calc_min_soil(state, vs.kmin_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.ma_rz = update(
         vs.ma_rz,
-        at[2:-2, 2:-2, :], nit_soil(state, vs.Nmin_rz, vs.km_nit_rz, vs.dmax_nit_rz, vs.sa_rz, vs.S_sat_rz, vs.S_pwp_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], calc_nit_soil(state, vs.Nmin_rz, vs.km_nit_rz, vs.dmax_nit_rz, vs.sa_rz, vs.S_sat_rz, vs.S_pwp_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.Nmin_rz = update_add(
@@ -162,7 +175,7 @@ def calculate_nitrogen_cycle_kernel(state):
 
     vs.ma_ss = update(
         vs.ma_ss,
-        at[2:-2, 2:-2, :], nit_soil(state, vs.Nmin_ss, vs.km_nit_ss, vs.dmax_nit_ss, vs.sa_ss, vs.S_sat_ss, vs.S_pwp_ss)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], calc_nit_soil(state, vs.Nmin_ss, vs.km_nit_ss, vs.dmax_nit_ss, vs.sa_ss, vs.S_sat_ss, vs.S_pwp_ss)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.Nmin_ss = update_add(
@@ -177,7 +190,7 @@ def calculate_nitrogen_cycle_kernel(state):
 
     vs.mr_rz = update(
         vs.mr_rz,
-        at[2:-2, 2:-2, :], denit_soil(state, vs.msa_rz, vs.km_denit_rz, vs.dmax_denit_rz, vs.sa_rz, vs.S_sat_rz, vs.S_pwp_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], calc_denit_soil(state, vs.msa_rz, vs.km_denit_rz, vs.dmax_denit_rz, vs.sa_rz, vs.S_sat_rz, vs.S_pwp_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.msa_rz = update_add(
@@ -187,7 +200,7 @@ def calculate_nitrogen_cycle_kernel(state):
 
     vs.mr_ss = update(
         vs.mr_ss,
-        at[2:-2, 2:-2, :], denit_soil(state, vs.msa_ss, vs.km_denit_ss, vs.dmax_denit_ss, vs.sa_ss, vs.S_sat_ss, vs.S_pwp_ss)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], calc_denit_soil(state, vs.msa_ss, vs.km_denit_ss, vs.dmax_denit_ss, vs.sa_ss, vs.S_sat_ss, vs.S_pwp_ss)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.msa_ss = update_add(
@@ -219,7 +232,7 @@ def calculate_nitrogen_cycle_gw_kernel(state):
 
     vs.mr_gw = update(
         vs.mr_gw,
-        at[2:-2, 2:-2, :], denit_gw(state, vs.msa_gw, vs.k_denit_gw)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        at[2:-2, 2:-2, :], calc_denit_gw(state, vs.msa_gw, vs.k_calc_denit_gw)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     vs.msa_gw = update_add(

@@ -343,15 +343,18 @@ def plot_obs_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'
 
     # DataFrame from wide to long format
     ll_dfs = []
+    palette = []
     for i in range(len(header)-1):
         df_sim = df_cs.iloc[:, i].to_frame()
         df_sim.columns = ['sim_obs']
-        df_sim['type'] = 'sim'
+        df_sim['type'] = f'sim{i}'
         ll_dfs.append(df_sim)
+        palette.append('r')
     df_obs = df_cs.iloc[:, -1].to_frame()
     df_obs.columns = ['sim_obs']
     df_obs['type'] = 'obs'
     ll_dfs.append(df_obs)
+    palette.append('b')
     df_sim_obs = pd.concat(ll_dfs)
     df_sim_obs_long = pd.melt(df_sim_obs, id_vars=['type'], value_vars=['sim_obs'], ignore_index=False)
     df_sim_obs_long = assign_hyd_year(df_sim_obs_long.copy(), start_month_hyd_year=start_month_hyd_year)
@@ -368,7 +371,7 @@ def plot_obs_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'
         data=df_sim_obs_long,
         x="time", y="value",
         hue="type", col="hyd_year",
-        kind="line", palette=["r", "b"],
+        kind="line", palette=palette,
         facet_kws=dict(sharex=False),
         height=4, aspect=.7, col_wrap=4
     )
