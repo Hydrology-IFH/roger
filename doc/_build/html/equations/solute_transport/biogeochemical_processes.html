@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Biogeochemical processes &mdash; RoGeR 0.0.1+35.g81ba391.dirty documentation</title>
+  <title>Biogeochemical processes &mdash; RoGeR 0.0.1+40.gd2c6e02.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -15,6 +15,7 @@
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -30,7 +31,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+35.g81ba391.dirty
+                0.0.1+40.gd2c6e02.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -60,10 +61,11 @@
 <li class="toctree-l2"><a class="reference internal" href="SAS_functions.html">StorAge selection (SAS) functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="model_structures.html">Model structures</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Biogeochemical processes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#soil-temperature">Soil temperature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nitrogen-cycle">Nitrogen cycle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#denitrification">Denitrification</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#nitrification">Nitrification</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#nitrogen-mineralization">Nitrogen mineralization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#nitrogen-fixation">Nitrogen fixation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#nitrogen-uptake-by-crops">Nitrogen uptake by crops</a></li>
 </ul>
 </li>
@@ -115,20 +117,88 @@
              
   <section id="biogeochemical-processes">
 <h1>Biogeochemical processes<a class="headerlink" href="#biogeochemical-processes" title="Permalink to this headline">¶</a></h1>
+<section id="soil-temperature">
+<h2>Soil temperature<a class="headerlink" href="#soil-temperature" title="Permalink to this headline">¶</a></h2>
+<p>Soil temperature <span class="math notranslate nohighlight">\(TA_{soil}\)</span> (°C) at time step t:</p>
+<div class="math notranslate nohighlight">
+\[TA_{soil}=TA_{year} + (TA - TA_{year}) \cdot \frac{sin(\omega t + \omega \Phi -\frac{0.5 \cdot z_{soil}}{D})}{e^(\frac{-0.5 \cdot z_{soil}}{D}}\]</div>
+<p>with</p>
+<div class="math notranslate nohighlight">
+\[\omega = \frac{2\pi}{365}\]</div>
+<p>where <span class="math notranslate nohighlight">\(TA_{year}\)</span> is the annual average air temperature (°C),
+<span class="math notranslate nohighlight">\(TA\)</span> is the daily air temperature (°C) at time step t, <span class="math notranslate nohighlight">\(D\)</span>
+is the dampening depth (mm), t is the day of year and <span class="math notranslate nohighlight">\(\Phi\)</span> is a constant
+offset (days).</p>
+</section>
+<section id="nitrogen-cycle">
+<h2>Nitrogen cycle<a class="headerlink" href="#nitrogen-cycle" title="Permalink to this headline">¶</a></h2>
+<div class="math notranslate nohighlight">
+\[\frac{\partial NO_{3-soil}(T,t)}{\partial t} + \frac{\partial NO_{3-soil}(T,t)}{\partial T} = 0.3 * N_{fert}(t) + Nit_{soil}(t) - Denit_{soil}(t) - N_{up}(t)\]</div>
+<div class="math notranslate nohighlight">
+\[\frac{\partial Nmin(T,t)}{\partial t} + \frac{\partial Nmin(T,t)}{\partial T} = 0.7 * N_{fert}(t) + Min_{soil}(t) - Nit_{soil}(t)\]</div>
+</section>
 <section id="denitrification">
 <h2>Denitrification<a class="headerlink" href="#denitrification" title="Permalink to this headline">¶</a></h2>
+<p>Denitrification rate of the soil <span class="math notranslate nohighlight">\(Denit_{soil}\)</span> (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>) at time step t:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}Denit_{soil}=\begin{cases}
+(Denit_{soil-max} \cdot \frac{NO_{3-soil}(T,t)}{k_{denit-soil} + NO_{3-soil}(T,t)}) \cdot c_{denit} &amp; S_{t} \geq 0.7 \cdot S_{sat}\\
+0 &amp; S_{t} &lt; 0.7 \cdot S_{sat}
+\end{cases}\end{split}\]</div>
+<p>with</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}c_{denit}=\begin{cases}
+\frac{TA_{soil}}{50 - 5} &amp; 5 \leq TA_{soil} \leq 50 \\
+0 &amp; 5 &gt; TA_{soil} \lor TA_{soil} &gt; 50
+\end{cases}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(Denit_{soil-max}\)</span> is the maximum dentrification rate (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>),
+<span class="math notranslate nohighlight">\(k_{denit-soil}\)</span> is the Michaelis constant (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>),
+<span class="math notranslate nohighlight">\(NO_{3-soil}\)</span> is the age-ranked nitrate storage of the soil (<span class="math notranslate nohighlight">\(kg NO_{3}-N\)</span>),
+<span class="math notranslate nohighlight">\(S\)</span> is the storage volume (mm) at time step t and
+<span class="math notranslate nohighlight">\(S_{sat}\)</span> is the storage volume at saturation (mm).</p>
+<p>Denitrification rate of the groundwater <span class="math notranslate nohighlight">\(Denit_{gw}\)</span> (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>) at time step t:</p>
+<div class="math notranslate nohighlight">
+\[Denit_{gw}=Denit_{gw-max} \cdot \frac{NO_{3-gw}(T,t)}{k_{denit-gw} + NO_{3-gw}(T,t)}\]</div>
+<p>where <span class="math notranslate nohighlight">\(Denit_{gw-max}\)</span> is the maximum dentrification rate (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>),
+<span class="math notranslate nohighlight">\(k_{denit-gw}\)</span> is the Michaelis constant (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>),
+<span class="math notranslate nohighlight">\(NO_{3-gw}\)</span> is the age-ranked nitrate storage of the groundwater (<span class="math notranslate nohighlight">\(kg NO_{3}-N\)</span>),</p>
 </section>
 <section id="nitrification">
 <h2>Nitrification<a class="headerlink" href="#nitrification" title="Permalink to this headline">¶</a></h2>
+<p>Nitrification rate of the soil <span class="math notranslate nohighlight">\(Denit_{soil}\)</span> (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>) at time step t:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}Nit_{soil}=\begin{cases}
+Nit_{soil}=(Nit_{soil-max} \cdot \frac{Nmin(T,t)}{k_{nit} + Nmin(T,t)}) \cdot c_{nit} &amp; S_{t} &lt; 0.7 \cdot S_{sat}\\
+0 &amp; S_{t} &gt; 0.7 \cdot S_{sat}
+\end{cases}\end{split}\]</div>
+<p>with</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}c_{nit}=\begin{cases}
+\frac{TA_{soil}}{50 - 5} &amp; 5 \leq TA_{soil} \leq 50 \\
+0 &amp; 5 &gt; TA_{soil} \lor TA_{soil} &gt; 50
+\end{cases}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(Nit_{soil-max}\)</span> is the maximum nitrification rate (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>),
+<span class="math notranslate nohighlight">\(k_{nit-soil}\)</span> is the Michaelis constant (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>) and
+<span class="math notranslate nohighlight">\(Nmin\)</span> is the age-ranked mineral nitrogen storage of the soil (<span class="math notranslate nohighlight">\(kg N\)</span>).</p>
 </section>
 <section id="nitrogen-mineralization">
 <h2>Nitrogen mineralization<a class="headerlink" href="#nitrogen-mineralization" title="Permalink to this headline">¶</a></h2>
-</section>
-<section id="nitrogen-fixation">
-<h2>Nitrogen fixation<a class="headerlink" href="#nitrogen-fixation" title="Permalink to this headline">¶</a></h2>
+<p>Nitrogen mineralization rate of the soil <span class="math notranslate nohighlight">\(Min_{soil}\)</span> (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>) at time step t:</p>
+<div class="math notranslate nohighlight">
+\[Min_{soil}=k_{min} \cdot c_{min}\]</div>
+<p>with</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}c_{min}=\begin{cases}
+\frac{TA_{soil}}{50 - 5} &amp; 5 \leq TA_{soil} \leq 50 \\
+0 &amp; 5 &gt; TA_{soil} \lor TA_{soil} &gt; 50
+\end{cases}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(k_{min}\)</span> is the maximum nitrogen mineralization rate of the soil (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>),</p>
 </section>
 <section id="nitrogen-uptake-by-crops">
 <h2>Nitrogen uptake by crops<a class="headerlink" href="#nitrogen-uptake-by-crops" title="Permalink to this headline">¶</a></h2>
+<p>Nitrogen uptake by crops <span class="math notranslate nohighlight">\(N_{up}\)</span> (<span class="math notranslate nohighlight">\(mg \Delta t^{-1}\)</span>) at time step t:</p>
+<div class="math notranslate nohighlight">
+\[N_{up}= transp \cdot \int_{T=0}^{\infty} C_S(T,t) \cdot \alpha_p \cdot \overleftarrow{p}_{transp}(T,t) dT\]</div>
 </section>
 </section>
 

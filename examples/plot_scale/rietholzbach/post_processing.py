@@ -186,7 +186,6 @@ def main(tmp_dir):
     file = base_path_figs / "metrics_best_1perc_avg_std.txt"
     df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
-
     # write average and standard deviation of best parameters to .txt
     df_avg_std = pd.DataFrame(index=['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
     df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics1.loc[:df_params_metrics1.index[99], ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.variables &mdash; RoGeR 0.0.1+24.gc6b8781.dirty documentation</title>
+  <title>roger.variables &mdash; RoGeR 0.0.1+40.gd2c6e02.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -27,7 +27,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+24.gc6b8781.dirty
+                0.0.1+40.gd2c6e02.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -58,7 +58,7 @@
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/setup-gallery.html">Setup gallery</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../reference/settings.html">Model settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/settings.html">Constant model parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/variables.html">Model variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/diagnostics.html">Diagnostics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/cli.html">Command line tools</a></li>
@@ -69,6 +69,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../more/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../more/howtocite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../more/publications.html">Publications involving Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
 </ul>
 
@@ -764,6 +765,42 @@
         <span class="s2">&quot;degC&quot;</span><span class="p">,</span>
         <span class="s2">&quot;air temperature&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="c1"># soil temperature</span>
+    <span class="s2">&quot;ta_year&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;annual air temperature&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span><span class="p">,</span>
+        <span class="s2">&quot;degC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;annual air temperature&quot;</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_nitrate</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;ta_soil&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;soil temperature&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIMESTEPS</span><span class="p">,</span>
+        <span class="s2">&quot;degC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;soil temperature&quot;</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_nitrate</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;damp_soil&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;dampening depth &quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span><span class="p">,</span>
+        <span class="s2">&quot;mm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dampening depth&quot;</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">initial</span><span class="o">=</span><span class="mi">2290</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_nitrate</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;phi_soil&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;phase constant&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span><span class="p">,</span>
+        <span class="s2">&quot;days&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;phase constant&quot;</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">initial</span><span class="o">=-</span><span class="mi">60</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_nitrate</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="c1"># soil parameters and variables</span>
     <span class="s2">&quot;z_soil&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
