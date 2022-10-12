@@ -10,7 +10,7 @@ eval "$(conda shell.bash hook)"
 conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport
  
-python svat_transport.py -b numpy -d cpu -tms time-variant_preferential -td "${TMPDIR}" -ss deterministic
+python svat_transport.py -b jax -d cpu -tms time-variant_preferential -td "${TMPDIR}" -ss deterministic
 # Move output from local SSD to global workspace
 echo "Move output to /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport"
 mkdir -p /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport
