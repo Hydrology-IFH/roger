@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-from roger.setups.svat import SVATSetup
+from roger.models.svat import SVATSetup
 
 
 def _normalize(*arrays):

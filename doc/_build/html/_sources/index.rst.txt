@@ -60,7 +60,7 @@ If you want to learn more about the background and capabilities of Roger, you sh
    :maxdepth: 2
    :caption: Reference
 
-   reference/setup-gallery
+   reference/model-gallery
    reference/settings
    reference/variables
    reference/diagnostics

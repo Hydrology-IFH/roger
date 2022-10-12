@@ -153,7 +153,7 @@ setup(
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRAS_REQUIRE,
     ext_modules=extensions,
-    entry_points={"console_scripts": CONSOLE_SCRIPTS, "roger.setup_dirs": ["base = roger.setups"]},
+    entry_points={"console_scripts": CONSOLE_SCRIPTS, "roger.model_dirs": ["base = roger.models"]},
     package_data={"roger": PACKAGE_DATA},
     classifiers=[c for c in CLASSIFIERS.split("\n") if c],
     zip_safe=False,

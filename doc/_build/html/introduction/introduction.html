@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A short introduction to Roger &mdash; RoGeR 0.0.1+40.gd2c6e02.dirty documentation</title>
+  <title>A short introduction to Roger &mdash; RoGeR 0.0.1+41.gdf5e102.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+40.gd2c6e02.dirty
+                0.0.1+41.gdf5e102.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -71,7 +71,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/model-gallery.html">Model gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/settings.html">Constant model parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/variables.html">Model variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/diagnostics.html">Diagnostics</a></li>
@@ -123,64 +123,79 @@
 <p>However, choosing Python over a compiled language like Fortran or C usually comes at a high computational cost. We overcome this gap by using <a class="reference external" href="https://github.com/google/jax">JAX</a>, a framework that can act as a high-performance replacement for NumPy. JAX takes care of all performance optimizations in the background, and runs on CPUs and GPUs.</p>
 <section id="available-processes">
 <h3>Available processes<a class="headerlink" href="#available-processes" title="Permalink to this headline">¶</a></h3>
-<p><strong>Interception</strong>:
-- rainfall and snowfall interception by vegetation</p>
-<p><strong>Snow</strong>:
-- snow accumulation
-- snow melt based on day-degree approach
-- rain-on-snow</p>
-<p><strong>Infiltration</strong>:
-- matrix-driven infiltration based on Green-Ampt approach (<a class="reference internal" href="#weiler2005" id="id1"><span>[Weiler2005]</span></a>)
-- gravity-driven infiltration based on viscous flow approach (<a class="reference internal" href="#germann2018" id="id2"><span>[Germann2018]</span></a>)</p>
-<p><strong>Evaporation</strong>:
-- evaporation from interception and surface storage
-- soil evaporation based on Stage I (i.e. energy limiting stage) and Stage II (i.e. falling rate stage) (<a class="reference internal" href="#torres2010" id="id3"><span>[Torres2010]</span></a>).</p>
-<p><strong>Transpiration</strong>:
-- combination of residual potential evapotranspiration and vegetation-specific coeffcient</p>
-<p><strong>Subsurface Runoff</strong>:
-- capillary-driven vertical soil drainage based on Buckingham-Darcy
-- gravity-driven infiltration based on viscous flow approach (<a class="reference internal" href="#germann2018" id="id4"><span>[Germann2018]</span></a>)
-- lateral subsurface runoff in the soil as described in <a class="reference internal" href="#steinbrich2016" id="id5"><span>[Steinbrich2016]</span></a></p>
-<p><strong>Capillary rise</strong>:
-- capillary-driven vertical uplift (<a class="reference internal" href="#salvucci1993" id="id6"><span>[Salvucci1993]</span></a>)</p>
-<p><strong>Groundwater flow</strong>:
-- spatial explicit representation of shallow groundwater following <a class="reference internal" href="#stoll2010" id="id7"><span>[Stoll2010]</span></a></p>
-<p><strong>Crop phenology and crop rotation</strong>:
-- time-varying crop canopy cover and crop root depth is implemented as in <a class="reference internal" href="#steduto2009" id="id8"><span>[Steduto2009]</span></a></p>
-<p><strong>Offline transport</strong>:
-- StorAge selection (SAS) functions (<a class="reference internal" href="#rinaldo2015" id="id9"><span>[Rinaldo2015]</span></a>) are used to
-calculate travel time distributions and solute concentration/mass of outgoing
-fluxes (e.g. groundwater recharge)</p>
+<p>Soil hydraulic parameters are approximated by the Brooks-Corey scheme.</p>
+<p><strong>Interception</strong>:</p>
+<ul class="simple">
+<li><p>rainfall and snowfall interception by vegetation</p></li>
+</ul>
+<p><strong>Snow</strong>:</p>
+<ul class="simple">
+<li><p>snow accumulation</p></li>
+<li><p>snow melt based on day-degree approach</p></li>
+<li><p>rain-on-snow</p></li>
+</ul>
+<p><strong>Infiltration</strong>:</p>
+<ul class="simple">
+<li><p>matrix-driven infiltration based on Green-Ampt approach (<a class="reference internal" href="#weiler2005" id="id1"><span>[Weiler2005]</span></a>)</p></li>
+<li><p>gravity-driven infiltration based on viscous flow approach (<a class="reference internal" href="#germann2018" id="id2"><span>[Germann2018]</span></a>)</p></li>
+</ul>
+<p><strong>Evaporation</strong>:</p>
+<ul class="simple">
+<li><p>evaporation from interception and surface storage</p></li>
+<li><p>soil evaporation based on Stage I (i.e. energy limiting stage) and Stage II (i.e. falling rate stage) (<a class="reference internal" href="#torres2010" id="id3"><span>[Torres2010]</span></a>).</p></li>
+</ul>
+<p><strong>Transpiration</strong>:</p>
+<ul class="simple">
+<li><p>combination of residual potential evapotranspiration and vegetation-specific coeffcient</p></li>
+</ul>
+<p><strong>Subsurface Runoff</strong>:</p>
+<ul class="simple">
+<li><p>capillary-driven vertical soil drainage based on Buckingham-Darcy</p></li>
+<li><p>gravity-driven infiltration based on viscous flow approach (<a class="reference internal" href="#germann2018" id="id4"><span>[Germann2018]</span></a>)</p></li>
+<li><p>lateral subsurface runoff in the soil as described in <a class="reference internal" href="#steinbrich2016" id="id5"><span>[Steinbrich2016]</span></a></p></li>
+</ul>
+<p><strong>Capillary rise</strong>:</p>
+<ul class="simple">
+<li><p>capillary-driven vertical uplift (<a class="reference internal" href="#salvucci1993" id="id6"><span>[Salvucci1993]</span></a>)</p></li>
+</ul>
+<p><strong>Groundwater flow</strong>:</p>
+<ul class="simple">
+<li><p>spatial explicit representation of shallow groundwater following <a class="reference internal" href="#stoll2010" id="id7"><span>[Stoll2010]</span></a></p></li>
+</ul>
+<p><strong>Crop phenology and crop rotation</strong>:</p>
+<ul class="simple">
+<li><p>time-varying crop canopy cover and crop root depth is implemented as in <a class="reference internal" href="#steduto2009" id="id8"><span>[Steduto2009]</span></a></p></li>
+</ul>
+<p><strong>Offline transport</strong>:</p>
+<ul class="simple">
+<li><p>StorAge selection (SAS) functions (<a class="reference internal" href="#rinaldo2015" id="id9"><span>[Rinaldo2015]</span></a>) are used to calculate travel time distributions, residence time distribution and solute concentrations</p></li>
+</ul>
 </section>
 <section id="available-model-structures">
 <h3>Available model structures<a class="headerlink" href="#available-model-structures" title="Permalink to this headline">¶</a></h3>
-<p>Soil hydrologic parameters are approximated by Brooks-Corey scheme.</p>
 <p><strong>SVAT</strong>:
 - only vertical processes are considered
 - no lateral processes (i.e. no lateral exchange between grid cells)</p>
-<p><strong>SVATCROP</strong>:
-- same as SVAT, but crop development (i.e. varying rooting depth and varying canopy cover) is
+<p><strong>SVAT-CROP</strong>:
+- same as SVAT, but crop phenology (i.e. varying rooting depth and varying canopy cover) is
 explicitly represented</p>
-<p><strong>SVATFILM</strong>:
-- same as SVAT, but with gravity-driven infiltration and gravity-driven drainage</p>
-<p><strong>DIST</strong>:
-- a distributed model</p>
-<p><strong>DISTCROP</strong>:
-- a distributed model including crop phenology/crop rotation</p>
-<p><strong>DISTGROUNDWATER</strong>:
-- a distributed model including shallow groundwater</p>
-<p><strong>TRANSPORT</strong>:
-- calculates offline coupled solute transport based on the hydrologic states from
-one of the model structures above</p>
+<p><strong>ONED</strong>:
+- vertical and lateral processes are considered</p>
+<p><strong>ONED-EVENT</strong>:
+- vertical and lateral processes are considered
+- simulation of a single event</p>
+<p><strong>SVAT_TRANSPORT</strong>:
+- calculates offline coupled solute transport based on the hydrologic simulations from
+the SVAT model</p>
 </section>
 <section id="diagnostics">
 <h3>Diagnostics<a class="headerlink" href="#diagnostics" title="Permalink to this headline">¶</a></h3>
-<p>Diagnostics are responsible for handling all model output, runtime checks of the solution, and restart file handling. They are implemented in a modular fashion, so additional diagnostics can be implemented easily. Already implemented diagnostics handle snapshot output, aggregation of variables, and monitoring of mass balance.</p>
+<p>Diagnostics are responsible for handling all model output, sanity checks of the solution, and restart file handling. They are implemented in a modular fashion, so additional diagnostics can be implemented easily. Already implemented diagnostics handle snapshot output, aggregation of variables, and monitoring of mass balance.</p>
 <p>For more information, see <a class="reference internal" href="../reference/diagnostics.html"><span class="doc">Diagnostics</span></a>.</p>
 </section>
 <section id="pre-configured-model-setups">
 <h3>Pre-configured model setups<a class="headerlink" href="#pre-configured-model-setups" title="Permalink to this headline">¶</a></h3>
-<p>Roger supports a wide range of model configurations. Several setups are already implemented that highlight some of the capabilities of Roger, and that serve as a basis for users to set up their own configuration: <a class="reference internal" href="../reference/setup-gallery.html"><span class="doc">Setup gallery</span></a>.</p>
+<p>Roger supports a wide range of pre-configured models. Several setups are already implemented that highlight some of the capabilities of Roger, and that serve as a basis for users to set up their own configuration: <a class="reference internal" href="../reference/model-gallery.html"><span class="doc">Model gallery</span></a>.</p>
 </section>
 <section id="current-limitations">
 <h3>Current limitations<a class="headerlink" href="#current-limitations" title="Permalink to this headline">¶</a></h3>

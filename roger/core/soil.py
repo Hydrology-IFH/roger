@@ -845,7 +845,7 @@ def calculate_soil_transport_iso_kernel(state):
     )
     vs.msa_s = update(
         vs.msa_s,
-        at[2:-2, 2:-2, :vs.taup1, :], npx.where(npx.isnan(vs.msa_s[2:-2, 2:-2, :vs.taup1, :]), 0, vs.msa_s[2:-2, 2:-2, :vs.taup1, :]),
+        at[2:-2, 2:-2, :2, :], npx.where(npx.isnan(vs.msa_s[2:-2, 2:-2, :2, :]), 0, vs.msa_s[2:-2, 2:-2, :2, :]),
     )
     vs.csa_s = update(
         vs.csa_s,
@@ -1064,11 +1064,11 @@ def rescale_sa_msa_iso_soil_kernel(state):
     )
     vs.msa_s = update(
         vs.msa_s,
-        at[2:-2, 2:-2, :vs.taup1, :], npx.where(npx.isnan(vs.msa_s[2:-2, 2:-2, :vs.taup1, :]), 0, vs.msa_s[2:-2, 2:-2, :vs.taup1, :]),
+        at[2:-2, 2:-2, :2, :], npx.where(npx.isnan(vs.msa_s[2:-2, 2:-2, :2, :]), 0, vs.msa_s[2:-2, 2:-2, :2, :]),
     )
     vs.msa_s = update(
         vs.msa_s,
-        at[2:-2, 2:-2, :vs.taup1, 0], 0,
+        at[2:-2, 2:-2, :2, 0], 0,
     )
     vs.C_s = update(
         vs.C_s,

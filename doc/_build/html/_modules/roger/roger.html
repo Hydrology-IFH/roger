@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.roger &mdash; RoGeR 0.0.1+35.g81ba391.dirty documentation</title>
+  <title>roger.roger &mdash; RoGeR 0.0.1+41.gdf5e102.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -27,7 +27,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+35.g81ba391.dirty
+                0.0.1+41.gdf5e102.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -57,7 +57,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/model-gallery.html">Model gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/settings.html">Constant model parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/variables.html">Model variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/diagnostics.html">Diagnostics</a></li>
@@ -126,7 +126,7 @@
 <span class="sd">        &gt;&gt;&gt;</span>
 <span class="sd">        &gt;&gt;&gt; model = MyModel()</span>
 <span class="sd">        &gt;&gt;&gt; model.run()</span>
-<span class="sd">        &gt;&gt;&gt; plt.imshow(simulation.state.variables.psi[..., 0])</span>
+<span class="sd">        &gt;&gt;&gt; plt.imshow(model.state.variables.theta[..., 1])</span>
 <span class="sd">        &gt;&gt;&gt; plt.show()</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -524,7 +524,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">after_timestep</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 
         <span class="c1"># NOTE: benchmarks parse this, do not change / remove</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot; Time step of iteration </span><span class="si">{}</span><span class="s2"> took </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="p">,</span> <span class="n">vs</span><span class="o">.</span><span class="n">itt</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">last_time</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rs</span><span class="o">.</span><span class="n">profile_mode</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; Time step took </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">last_time</span><span class="p">)</span>
 
 <div class="viewcode-block" id="RogerSetup.warmup"><a class="viewcode-back" href="../../reference/api/roger-setup.html#roger.RogerSetup.warmup">[docs]</a>    <span class="k">def</span> <span class="nf">warmup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Warmup routine of the simulation.</span>

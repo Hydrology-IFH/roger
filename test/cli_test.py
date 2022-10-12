@@ -8,7 +8,7 @@ import pytest
 
 import roger.cli
 
-SETUPS = (
+MODELS = (
     "svat",
     "oneD",
 )
@@ -19,14 +19,14 @@ def runner():
     return CliRunner()
 
 
-@pytest.mark.parametrize("setup", SETUPS)
+@pytest.mark.parametrize("setup", MODELS)
 def test_roger_copy_setup(setup, runner, tmpdir):
     result = runner.invoke(roger.cli.roger_copy_setup.cli, [setup, "--to", os.path.join(tmpdir, setup)])
     assert result.exit_code == 0, setup
     assert not result.output
 
     outpath = os.path.join(tmpdir, setup)
-    srcpath = pkg_resources.resource_filename("roger", f"setups/{setup}")
+    srcpath = pkg_resources.resource_filename("roger", f"models/{setup}")
     ignore = [
         f
         for f in os.listdir(srcpath)

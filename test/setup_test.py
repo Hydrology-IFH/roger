@@ -12,7 +12,7 @@ def test_setup_svat_float_types(float_type):
     object.__setattr__(runtime_settings, "diskless_mode", True)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
-    from roger.setups.svat import SVATSetup
+    from roger.models.svat import SVATSetup
     from roger.tools.make_toy_data import make_toy_forcing
 
     sim = SVATSetup()
@@ -32,7 +32,7 @@ def test_setup_svat_crop_float_types(float_type):
     object.__setattr__(runtime_settings, "diskless_mode", True)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
-    from roger.setups.svat_crop import SVATCROPSetup
+    from roger.models.svat_crop import SVATCROPSetup
     from roger.tools.make_toy_data import make_toy_forcing
 
     sim = SVATCROPSetup()
@@ -53,7 +53,7 @@ def test_setup_oneD_float_types(float_type):
     object.__setattr__(runtime_settings, "diskless_mode", True)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
-    from roger.setups.oneD import ONEDSetup
+    from roger.models.oneD import ONEDSetup
     from roger.tools.make_toy_data import make_toy_forcing
 
     sim = ONEDSetup()
@@ -73,7 +73,7 @@ def test_setup_oneD_event_float_types(float_type):
     object.__setattr__(runtime_settings, "diskless_mode", True)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
-    from roger.setups.oneD_event import ONEDEVENTSetup
+    from roger.models.oneD_event import ONEDEVENTSetup
     from roger.tools.make_toy_data import make_toy_forcing_event
 
     sim = ONEDEVENTSetup()
@@ -93,7 +93,7 @@ def test_setup_svat_transport_bromide(float_type):
     object.__setattr__(runtime_settings, "diskless_mode", False)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
-    from roger.setups.svat_transport_bromide import SVATTRANSPORTSetup
+    from roger.models.svat_transport_bromide import SVATTRANSPORTSetup
     from roger.tools.make_toy_data import make_toy_forcing_tracer
     from make_data_for_svat_transport import make_data
 
@@ -117,7 +117,7 @@ def test_setup_svat_transport_oxygen18(float_type):
     object.__setattr__(runtime_settings, "diskless_mode", False)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
-    from roger.setups.svat_transport_oxygen18 import SVATTRANSPORTSetup
+    from roger.models.svat_transport_oxygen18 import SVATTRANSPORTSetup
     from roger.tools.make_toy_data import make_toy_forcing_tracer
     from make_data_for_svat_transport import make_data
 

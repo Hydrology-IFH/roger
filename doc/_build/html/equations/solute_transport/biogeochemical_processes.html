@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Biogeochemical processes &mdash; RoGeR 0.0.1+40.gd2c6e02.dirty documentation</title>
+  <title>Biogeochemical processes &mdash; RoGeR 0.0.1+41.gdf5e102.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -19,7 +19,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Setup gallery" href="../../reference/setup-gallery.html" />
+    <link rel="next" title="Model gallery" href="../../reference/model-gallery.html" />
     <link rel="prev" title="Model structures" href="model_structures.html" /> 
 </head>
 
@@ -31,7 +31,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+40.gd2c6e02.dirty
+                0.0.1+41.gdf5e102.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -74,7 +74,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/model-gallery.html">Model gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/settings.html">Constant model parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/variables.html">Model variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/diagnostics.html">Diagnostics</a></li>
@@ -121,7 +121,7 @@
 <h2>Soil temperature<a class="headerlink" href="#soil-temperature" title="Permalink to this headline">¶</a></h2>
 <p>Soil temperature <span class="math notranslate nohighlight">\(TA_{soil}\)</span> (°C) at time step t:</p>
 <div class="math notranslate nohighlight">
-\[TA_{soil}=TA_{year} + (TA - TA_{year}) \cdot \frac{sin(\omega t + \omega \Phi -\frac{0.5 \cdot z_{soil}}{D})}{e^(\frac{-0.5 \cdot z_{soil}}{D}}\]</div>
+\[TA_{soil}=TA_{year} + (TA - TA_{year}) \cdot \frac{sin(\omega t + \omega \Phi -\frac{0.5 \cdot z_{soil}}{D})}{e^\frac{-0.5 \cdot z_{soil}}{D}}\]</div>
 <p>with</p>
 <div class="math notranslate nohighlight">
 \[\omega = \frac{2\pi}{365}\]</div>
@@ -133,9 +133,9 @@ offset (days).</p>
 <section id="nitrogen-cycle">
 <h2>Nitrogen cycle<a class="headerlink" href="#nitrogen-cycle" title="Permalink to this headline">¶</a></h2>
 <div class="math notranslate nohighlight">
-\[\frac{\partial NO_{3-soil}(T,t)}{\partial t} + \frac{\partial NO_{3-soil}(T,t)}{\partial T} = 0.3 * N_{fert}(t) + Nit_{soil}(t) - Denit_{soil}(t) - N_{up}(t)\]</div>
+\[\frac{\partial NO_{3-soil}(T,t)}{\partial t} + \frac{\partial NO_{3-soil}(T,t)}{\partial T} = 0.3 \cdot N_{fert}(t) + Nit_{soil}(t) - Denit_{soil}(t) - N_{up}(t)\]</div>
 <div class="math notranslate nohighlight">
-\[\frac{\partial Nmin(T,t)}{\partial t} + \frac{\partial Nmin(T,t)}{\partial T} = 0.7 * N_{fert}(t) + Min_{soil}(t) - Nit_{soil}(t)\]</div>
+\[\frac{\partial Nmin(T,t)}{\partial t} + \frac{\partial Nmin(T,t)}{\partial T} = 0.7 \cdot N_{fert}(t) + Min_{soil}(t) - Nit_{soil}(t)\]</div>
 </section>
 <section id="denitrification">
 <h2>Denitrification<a class="headerlink" href="#denitrification" title="Permalink to this headline">¶</a></h2>
@@ -153,7 +153,7 @@ offset (days).</p>
 \end{cases}\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(Denit_{soil-max}\)</span> is the maximum dentrification rate (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>),
 <span class="math notranslate nohighlight">\(k_{denit-soil}\)</span> is the Michaelis constant (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>),
-<span class="math notranslate nohighlight">\(NO_{3-soil}\)</span> is the age-ranked nitrate storage of the soil (<span class="math notranslate nohighlight">\(kg NO_{3}-N\)</span>),
+<span class="math notranslate nohighlight">\(NO_{3-soil}\)</span> is the age-ranked nitrate nitrogen storage of the soil (<span class="math notranslate nohighlight">\(kg NO_{3}-N\)</span>),
 <span class="math notranslate nohighlight">\(S\)</span> is the storage volume (mm) at time step t and
 <span class="math notranslate nohighlight">\(S_{sat}\)</span> is the storage volume at saturation (mm).</p>
 <p>Denitrification rate of the groundwater <span class="math notranslate nohighlight">\(Denit_{gw}\)</span> (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>) at time step t:</p>
@@ -161,7 +161,7 @@ offset (days).</p>
 \[Denit_{gw}=Denit_{gw-max} \cdot \frac{NO_{3-gw}(T,t)}{k_{denit-gw} + NO_{3-gw}(T,t)}\]</div>
 <p>where <span class="math notranslate nohighlight">\(Denit_{gw-max}\)</span> is the maximum dentrification rate (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>),
 <span class="math notranslate nohighlight">\(k_{denit-gw}\)</span> is the Michaelis constant (<span class="math notranslate nohighlight">\(kg N ha^{-1} year^{-1}\)</span>),
-<span class="math notranslate nohighlight">\(NO_{3-gw}\)</span> is the age-ranked nitrate storage of the groundwater (<span class="math notranslate nohighlight">\(kg NO_{3}-N\)</span>),</p>
+<span class="math notranslate nohighlight">\(NO_{3-gw}\)</span> is the age-ranked nitrate nitrogen storage of the groundwater (<span class="math notranslate nohighlight">\(kg NO_{3}-N\)</span>),</p>
 </section>
 <section id="nitrification">
 <h2>Nitrification<a class="headerlink" href="#nitrification" title="Permalink to this headline">¶</a></h2>
@@ -196,7 +196,7 @@ Nit_{soil}=(Nit_{soil-max} \cdot \frac{Nmin(T,t)}{k_{nit} + Nmin(T,t)}) \cdot c_
 </section>
 <section id="nitrogen-uptake-by-crops">
 <h2>Nitrogen uptake by crops<a class="headerlink" href="#nitrogen-uptake-by-crops" title="Permalink to this headline">¶</a></h2>
-<p>Nitrogen uptake by crops <span class="math notranslate nohighlight">\(N_{up}\)</span> (<span class="math notranslate nohighlight">\(mg \Delta t^{-1}\)</span>) at time step t:</p>
+<p>Nitrogen uptake by crops <span class="math notranslate nohighlight">\(N_{up}\)</span> (mg <span class="math notranslate nohighlight">\(\Delta t^{-1}\)</span>) at time step t:</p>
 <div class="math notranslate nohighlight">
 \[N_{up}= transp \cdot \int_{T=0}^{\infty} C_S(T,t) \cdot \alpha_p \cdot \overleftarrow{p}_{transp}(T,t) dT\]</div>
 </section>
@@ -207,7 +207,7 @@ Nit_{soil}=(Nit_{soil-max} \cdot \frac{Nmin(T,t)}{k_{nit} + Nmin(T,t)}) \cdot c_
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="model_structures.html" class="btn btn-neutral float-left" title="Model structures" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../../reference/setup-gallery.html" class="btn btn-neutral float-right" title="Setup gallery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../../reference/model-gallery.html" class="btn btn-neutral float-right" title="Model gallery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

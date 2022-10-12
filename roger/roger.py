@@ -26,7 +26,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
         >>>
         >>> model = MyModel()
         >>> model.run()
-        >>> plt.imshow(simulation.state.variables.psi[..., 0])
+        >>> plt.imshow(model.state.variables.theta[..., 1])
         >>> plt.show()
 
     """
@@ -424,7 +424,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
         self.after_timestep(state)
 
         # NOTE: benchmarks parse this, do not change / remove
-        logger.debug(" Time step of iteration {} took {:.2f}s", vs.itt, state.timers["main"].last_time)
+        if rs.profile_mode:
+            logger.info(" Time step took {:.2f}s", state.timers["main"].last_time)
 
     def warmup(self, repeat=1):
         """Warmup routine of the simulation.

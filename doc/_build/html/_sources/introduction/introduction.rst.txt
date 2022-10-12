@@ -13,77 +13,82 @@ However, choosing Python over a compiled language like Fortran or C usually come
 Available processes
 +++++++++++++++++++
 
+Soil hydraulic parameters are approximated by the Brooks-Corey scheme.
+
 **Interception**:
+
 - rainfall and snowfall interception by vegetation
 
 **Snow**:
+
 - snow accumulation
 - snow melt based on day-degree approach
 - rain-on-snow
 
 **Infiltration**:
+
 - matrix-driven infiltration based on Green-Ampt approach ([Weiler2005]_)
 - gravity-driven infiltration based on viscous flow approach ([Germann2018]_)
 
 **Evaporation**:
+
 - evaporation from interception and surface storage
 - soil evaporation based on Stage I (i.e. energy limiting stage) and Stage II (i.e. falling rate stage) ([Torres2010]_).
 
 **Transpiration**:
+
 - combination of residual potential evapotranspiration and vegetation-specific coeffcient
 
 **Subsurface Runoff**:
+
 - capillary-driven vertical soil drainage based on Buckingham-Darcy
 - gravity-driven infiltration based on viscous flow approach ([Germann2018]_)
 - lateral subsurface runoff in the soil as described in [Steinbrich2016]_
 
 **Capillary rise**:
+
 - capillary-driven vertical uplift ([Salvucci1993]_)
 
 **Groundwater flow**:
+
 - spatial explicit representation of shallow groundwater following [Stoll2010]_
 
 **Crop phenology and crop rotation**:
+
 - time-varying crop canopy cover and crop root depth is implemented as in [Steduto2009]_
 
 **Offline transport**:
-- StorAge selection (SAS) functions ([Rinaldo2015]_) are used to
-calculate travel time distributions and solute concentration/mass of outgoing
-fluxes (e.g. groundwater recharge)
+
+- StorAge selection (SAS) functions ([Rinaldo2015]_) are used to calculate travel time distributions, residence time distribution and solute concentrations
+
 
 Available model structures
 +++++++++++++++++++++++++++
-Soil hydrologic parameters are approximated by Brooks-Corey scheme.
 
 **SVAT**:
 - only vertical processes are considered
 - no lateral processes (i.e. no lateral exchange between grid cells)
 
-**SVATCROP**:
-- same as SVAT, but crop development (i.e. varying rooting depth and varying canopy cover) is
+**SVAT-CROP**:
+- same as SVAT, but crop phenology (i.e. varying rooting depth and varying canopy cover) is
 explicitly represented
 
-**SVATFILM**:
-- same as SVAT, but with gravity-driven infiltration and gravity-driven drainage
+**ONED**:
+- vertical and lateral processes are considered
 
-**DIST**:
-- a distributed model
+**ONED-EVENT**:
+- vertical and lateral processes are considered
+- simulation of a single event
 
-**DISTCROP**:
-- a distributed model including crop phenology/crop rotation
-
-**DISTGROUNDWATER**:
-- a distributed model including shallow groundwater
-
-**TRANSPORT**:
-- calculates offline coupled solute transport based on the hydrologic states from
-one of the model structures above
+**SVAT_TRANSPORT**:
+- calculates offline coupled solute transport based on the hydrologic simulations from
+the SVAT model
 
 
 Diagnostics
 +++++++++++
 
-Diagnostics are responsible for handling all model output, runtime checks of the solution, and restart file handling. They are implemented in a modular fashion, so additional diagnostics can be implemented easily. Already implemented diagnostics handle snapshot output, aggregation of variables, and monitoring of mass balance.
+Diagnostics are responsible for handling all model output, sanity checks of the solution, and restart file handling. They are implemented in a modular fashion, so additional diagnostics can be implemented easily. Already implemented diagnostics handle snapshot output, aggregation of variables, and monitoring of mass balance.
 
 For more information, see :doc:`/reference/diagnostics`.
 
@@ -91,7 +96,7 @@ For more information, see :doc:`/reference/diagnostics`.
 Pre-configured model setups
 +++++++++++++++++++++++++++
 
-Roger supports a wide range of model configurations. Several setups are already implemented that highlight some of the capabilities of Roger, and that serve as a basis for users to set up their own configuration: :doc:`/reference/setup-gallery`.
+Roger supports a wide range of pre-configured models. Several setups are already implemented that highlight some of the capabilities of Roger, and that serve as a basis for users to set up their own configuration: :doc:`/reference/model-gallery`.
 
 
 Current limitations

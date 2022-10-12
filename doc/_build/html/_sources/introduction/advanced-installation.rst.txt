@@ -18,20 +18,13 @@ Because Roger should be usable by both beginners and experts, it has a number of
       - When to use
     * - JAX
       - Linux, OSX, Windows
-      - To run 4x faster on CPU, and for GPU support
-    * - Roger Cython extensions
-      - Linux, OSX
-      - 20% speedup when using JAX
+      - To run 2x faster on CPU, and for GPU support
     * - MPI + mpi4py
       - Linux, OSX
       - To run in parallel
     * - mpi4jax
       - Linux, OSX
       - To run in parallel with JAX
-    * - PETSc + petsc4py
-      - Linux, OSX
-      - | Faster linear solver when using
-        | more than 10 processes (or GPUs)
 
 .. note::
 
@@ -52,12 +45,6 @@ To use JAX on GPU, you have to install a CUDA-enabled version of jaxlib, e.g.::
 
 (see also `the JAX installation guide <https://github.com/google/jax#installation>`__).
 
-Roger also supplies Cython extensions that optimize certain bottlenecks in JAX. You can make sure they are installed by running::
-
-   $ pip install cython
-   $ python setup.py build_ext --inplace
-
-in the Roger repository root.
 
 Using MPI
 ---------
@@ -67,12 +54,6 @@ To run Roger on more than one process you need to use MPI. This requires that yo
    $ pip install mpi4py
 
 Then, you can :ref:`run Roger in parallel via MPI <mpi-exec>`.
-
-For optimal performance on many processes, Roger supports using PETSc as a linear solver. To use it, you will have to install the PETSc library and ``petsc4py`` Python package::
-
-   $ PETSC_DIR=/path/to/petsc3.12 pip install petsc4py==3.12
-
-Note that the versions of PETSc and ``petsc4py`` have to match.
 
 
 Using JAX + MPI

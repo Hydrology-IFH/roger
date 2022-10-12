@@ -35,9 +35,9 @@ Using Conda (multi-platform)
       if "+" in roger_version:
           roger_version, _ = roger_version.split("+")
       print(".. code-block::\n")
-      print(f"   $ git clone https://github.com/schwemro/roger.git -b v{roger_version}")
+      print(f"   $ git clone https://github.com/Hydrology-IFH/roger.git -b v{roger_version}")
 
-   (or `any other version of Roger <https://github.com/schwemro/roger/releases>`__).
+   (or `any other version of Roger <https://github.com/Hydrology-IFH/roger/releases>`__).
 
    If you do not have git installed, you can do so via ``conda install git``.
 
@@ -65,9 +65,9 @@ Using pip (Linux / OSX)
       if "+" in roger_version:
           roger_version, _ = roger_version.split("+")
       print(".. code-block::\n")
-      print(f"   $ git clone https://github.com/schwemro/roger.git -b v{roger_version}")
+      print(f"   $ git clone https://github.com/Hydrology-IFH/roger.git -b v{roger_version}")
 
-   (or `any other version of Roger <https://github.com/schwemro/roger/releases>`__), or use ::
+   (or `any other version of Roger <https://github.com/Hydrology-IFH/roger/releases>`__), or use ::
 
       $ pip download roger
 
@@ -142,11 +142,11 @@ For post-processing in Python, we recommend that you use `xarray <http://xarray.
 
    import xarray as xr
 
-   ds = xr.open_dataset("acc.snapshot.nc", engine="h5netcdf")
+   ds = xr.open_dataset("ONED.rates.nc", engine="h5netcdf")
 
    # plot surface velocity at the last time step included in the file
-   u_surface = ds.u.isel(Time=-1, zt=-1)
-   u_surface.plot.contourf()
+   inf_mp = ds.inf_mp.isel(x=0, y=0)
+   inf_mp.plot()
 
 
 Re-starting from a previous run
@@ -190,7 +190,7 @@ We believe that the best way to learn how Roger works is to read its source code
 
 In case you want to add additional output capabilities or compute additional quantities without changing the main solution of the simulation, you should consider :doc:`adding a custom diagnostic </reference/diagnostics>`.
 
-A convenient way to implement your modifications is to create your own fork of Roger on GitHub, and submit a `pull request <https://github.com/schwemro/roger/pulls>`_ if you think your modifications could be useful for the Roger community.
+A convenient way to implement your modifications is to create your own fork of Roger on GitHub, and submit a `pull request <https://github.com/Hydrology-IFH/roger/pulls>`_ if you think your modifications could be useful for the Roger community.
 
 .. seealso::
 

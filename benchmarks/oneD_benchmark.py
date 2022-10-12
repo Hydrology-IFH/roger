@@ -1,260 +1,325 @@
 from benchmark_base import benchmark_cli
 from pathlib import Path
 import h5netcdf
-import numpy as onp
 
 
 @benchmark_cli
-def main(backend, device, size):
+def main(size, timesteps):
     from roger import roger_routine, roger_kernel, KernelOutput
-    from roger.setups.svat import ONEDSetup
+    from roger.models.oneD import ONEDSetup
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, update_add, at, for_loop, where
-    from roger.core.utilities import _get_row_no
+    from roger.core.operators import numpy as npx, update, at
+    from roger.core.surface import calc_parameters_surface_kernel
+    import roger.lookuptables as lut
 
     class ONED2Benchmark(ONEDSetup):
         _base_path = Path(__file__).parent
         _input_dir = _base_path / 'input' / 'oneD_benchmark'
 
-        def _get_runlen(self, path_dir, file, timesteps):
+        def _read_var_from_nc(self, var, path_dir, file):
+            nc_file = self._input_dir / file
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables[var]
+                return npx.array(var_obj)
+
+        def _get_time_origin(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['Time']
-                return onp.array(var_obj)[timesteps] * 60 * 60
+                var_obj = infile.variables['Time'].attrs['time_origin']
+                return str(var_obj)
 
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
             settings.identifier = "ONED2Benchmark"
 
-            settings.nx, settings.ny, settings.nz = size
-            settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
-            settings.nittevent = self._get_nittevent(self._input_dir, 'forcing.nc')
-            settings.nittevent_p1 = settings.nittevent + 1
-            settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc', 1000)
+            # total grid numbers in x- and y-direction
+            settings.nx, settings.ny = size
+            # derive total number of time steps from forcing
+            settings.runlen = 24 * 60 * 60 * timesteps
+
+            # spatial discretization (in meters)
+            settings.dx = 1
+            settings.dy = 1
+
+            settings.x_origin = 0.0
+            settings.y_origin = 0.0
+            settings.time_origin = self._get_time_origin(self._input_dir, 'forcing.nc')
+
+            # enable specific processes
+            settings.enable_groundwater_boundary = False
+            settings.enable_lateral_flow = True
+            settings.enable_routing = False
+
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "x",
+                "y",
+            ],
+        )
+        def set_grid(self, state):
+            vs = state.variables
+            # spatial grid
+            dx = allocate(state.dimensions, ("x"))
+            dx = update(dx, at[:], 1)
+            dy = allocate(state.dimensions, ("y"))
+            dy = update(dy, at[:], 1)
+            vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
+            vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
+
+        @roger_routine
+        def set_look_up_tables(self, state):
+            vs = state.variables
+
+            # land use-dependent interception storage
+            vs.lut_ilu = update(vs.lut_ilu, at[:, :], lut.ARR_ILU)
+            # land use-dependent ground cover
+            vs.lut_gc = update(vs.lut_gc, at[:, :], lut.ARR_GC)
+            # land use-dependent maximum ground cover
+            vs.lut_gcm = update(vs.lut_gcm, at[:, :], lut.ARR_GCM)
+            # land use-dependent maximum ground cover
+            vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
+            # land use-dependent rooting depth
+            vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
+            # macropore flow velocities
+            vs.lut_mlms = update(vs.lut_mlms, at[:, :], lut.ARR_MLMS)
+
+        @roger_routine
+        def set_topography(self, state):
+            pass
 
         @roger_routine
         def set_parameters_setup(self, state):
             vs = state.variables
 
+            # land use ID (see README for description)
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
+            # degree of sealing (-)
             vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
+            # surface slope (-)
             vs.slope = update(vs.slope, at[2:-2, 2:-2], 0.05)
-            vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope * 100)
+            # convert slope to percentage
+            vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
+            # total surface depression storage (mm)
             vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
-            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 100)
-            vs.dmph = update(vs.dmph, at[2:-2, 2:-2], 100)
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 1000)
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.13)
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.24)
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.23)
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], 25)
+            # soil depth (mm)
+            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1000)
+            # density of vertical macropores (1/m2)
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
+            # density of horizontal macropores (1/m2)
+            vs.dmph = update(vs.dmph, at[2:-2, 2:-2], 50)
+            # total length of vertical macropores (mm)
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 600)
+            # air capacity (-)
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.1)
+            # usable field capacity (-)
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.1)
+            # permanent wilting point (-)
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.2)
+            # saturated hydraulic conductivity (mm/h)
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], 5)
+            # hydraulic conductivity of bedrock/saturated zone (mm/h)
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
         @roger_routine
         def set_parameters(self, state):
             vs = state.variables
 
-            if (vs.MONTH[vs.itt] != vs.MONTH[vs.itt - 1]) & (vs.itt > 1):
-                vs.update(set_parameters_monthly_kernel(state))
+            if (vs.month[vs.tau] != vs.month[vs.taum1]) & (vs.itt > 1):
+                vs.update(calc_parameters_surface_kernel(state))
+
+        @roger_routine
+        def set_initial_conditions_setup(self, state):
+            pass
 
         @roger_routine
         def set_initial_conditions(self, state):
             vs = state.variables
 
+            # interception storage of upper surface layer (mm)
             vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, :vs.taup1], 0)
+            # snow water equivalent stored in upper surface layer (mm)
             vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, :vs.taup1], 0)
+            # interception storage of lower surface layer (mm)
             vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, :vs.taup1], 0)
+            # snow water equivalent stored in lower surface layer (mm)
             vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, :vs.taup1], 0)
+            # surface depression storage (mm)
             vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
+            # snow cover storage (mm)
             vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
+            # snow water equivalent of snow cover (mm)
             vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
-            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.4)
-            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.47)
-            vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 0)
+            # soil water content of root zone/upper soil layer (-)
+            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.3)
+            # soil water content of subsoil/lower soil layer (-)
+            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.3)
 
-    @roger_kernel
-    def set_parameters_monthly_kernel(state):
-        vs = state.variables
+        @roger_routine
+        def set_boundary_conditions_setup(self, state):
+            pass
 
-        # land use dependent upper interception storage
-        def loop_body_S_int_top_tot(i, S_int_top_tot):
-            arr_i = allocate(state.dimensions, ("x", "y"))
-            arr_i = update(
-                arr_i,
-                at[:, :], i * (vs.lu_id == i),
-            )
-            mask = (vs.lu_id == i) & npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
-            row_no = _get_row_no(vs.lut_ilu[:, 0], i)
-            S_int_top_tot = update(
-                S_int_top_tot,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_ilu[row_no, vs.month], 0),
-            )
+        @roger_routine
+        def set_boundary_conditions(self, state):
+            pass
 
-            return S_int_top_tot
+        @roger_routine
+        def set_forcing_setup(self, state):
+            pass
 
-        S_int_top_tot = allocate(state.dimensions, ("x", "y"))
-
-        S_int_top_tot = for_loop(10, 17, loop_body_S_int_top_tot, S_int_top_tot)
-        mask = npx.isin(vs.lu_id, npx.array([10, 11, 12, 15, 16]))
-        vs.S_int_top_tot = update(
-            vs.S_int_top_tot,
-            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], S_int_top_tot[2:-2, 2:-2], vs.S_int_top_tot[2:-2, 2:-2]),
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "dt_secs",
+                "dt",
+                "itt",
+                "itt_forc",
+                "itt_day",
+                "prec",
+                "ta",
+                "pet",
+                "pet_res",
+                "event_id",
+                "event_id_counter",
+                "year",
+                "month",
+                "doy",
+                "tau",
+                "taum1",
+                "q_snow",
+                "swe",
+                "swe_top",
+                "time",
+                "time_event0"
+            ],
         )
+        def set_forcing(self, state):
+            vs = state.variables
+            settings = state.settings
 
-        # land use dependent lower interception storage
-        S_int_ground_tot = allocate(state.dimensions, ("x", "y"))
+            vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, 'forcing.nc')[vs.itt_forc])
+            vs.month = update(vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, 'forcing.nc')[vs.itt_forc])
+            vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, 'forcing.nc')[vs.itt_forc])
 
-        def loop_body_S_int_ground_tot(i, S_int_ground_tot):
-            arr_i = allocate(state.dimensions, ("x", "y"))
-            arr_i = update(
-                arr_i,
-                at[:, :], i * vs.maskCatch,
-            )
-            mask = (vs.lu_id == i) & ~npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
-            row_no = _get_row_no(vs.lut_ilu[:, 0], i)
-            S_int_ground_tot = update_add(
-                S_int_ground_tot,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_ilu[row_no, vs.month], 0),
-            )
+            # adaptive time stepping
+            condt = (vs.time % (24 * 60 * 60) == 0) & (vs.itt > 0)
+            if condt:
+                vs.itt_day = 0
+                vs.itt_forc = vs.itt_forc + 6 * 24
+            prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
+            ta_day = self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
+            pet_day = self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
+            cond0 = (prec_day <= 0).all() & (vs.swe[2:-2, 2:-2, vs.tau] <= 0).all() & (vs.swe_top[2:-2, 2:-2, vs.tau] <= 0).all() & (ta_day > settings.ta_fm).all()
+            cond00 = ((prec_day > 0) & (ta_day <= settings.ta_fm)).any() | ((prec_day <= 0) & (ta_day <= settings.ta_fm)).all()
+            cond1 = (prec_day > settings.hpi).any() & (prec_day > 0).any() & (ta_day > settings.ta_fm).any()
+            cond2 = (prec_day <= settings.hpi).all() & (prec_day > 0).any() & (ta_day > settings.ta_fm).any()
+            cond3 = (prec_day > settings.hpi).any() & (prec_day > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
+            cond4 = (prec_day <= settings.hpi).all() & (prec_day > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
+            cond5 = (prec_day <= 0).all() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
+            # no event or snowfall - daily time steps
+            if cond0 or cond00:
+                prec = npx.sum(prec_day, axis=-1)
+                ta = npx.mean(ta_day, axis=-1)
+                if (vs.time % (24 * 60 * 60) == 0):
+                    vs.dt_secs = 24 * 60 * 60
+                else:
+                    vs.dt_secs = 60 * 60
+            # rainfall/snow melt event - hourly time steps
+            elif (cond2 or cond4 or cond5) and not cond1 and not cond3:
+                prec_hour = prec_day[:, :, vs.itt_day:vs.itt_day+6]
+                ta_hour = ta_day[:, :, vs.itt_day:vs.itt_day+6]
+                prec = npx.sum(prec_hour, axis=-1)
+                ta = npx.mean(ta_hour, axis=-1)
+                vs.dt_secs = 60 * 60
+            # heavy rainfall event - 10 minutes time steps
+            elif (cond1 or cond3) and not cond2 and not cond4 and not cond5:
+                prec = prec_day[:, :, vs.itt_day]
+                ta = ta_day[:, :, vs.itt_day]
+                vs.dt_secs = 10 * 60
 
-            return S_int_ground_tot
+            # determine end of event
+            if ((prec > 0).any() | ((vs.swe[2:-2, 2:-2, vs.tau] > 0) | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0)).any() and (ta > settings.ta_fm)).any():
+                vs.time_event0 = 0
+            elif ((prec <= 0) & (ta > settings.ta_fm)).all() or ((prec > 0) & (ta <= settings.ta_fm)).all() or ((vs.swe[2:-2, 2:-2, vs.taum1] > 0).any() & (vs.swe[2:-2, 2:-2, vs.tau] <= 0).all()):
+                vs.time_event0 = vs.time_event0 + vs.dt_secs
 
-        def loop_body_S_int_ground_tot_trees(i, S_int_ground_tot):
-            arr_i = allocate(state.dimensions, ("x", "y"))
-            arr_i = update(
-                arr_i,
-                at[:, :], i * vs.maskCatch,
-            )
-            mask = (vs.lu_id == i) & npx.isin(arr_i, npx.array([10, 11, 12, 15, 16]))
-            S_int_ground_tot = update_add(
-                S_int_ground_tot,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 1, 0),
-            )
+            # increase time stepping at end of event if either full hour
+            # or full day, respectively
+            if vs.time_event0 <= settings.end_event and (vs.dt_secs == 10 * 60):
+                ta = ta_day[:, :, vs.itt_day]
+                pet = pet_day[:, :, vs.itt_day]
+                vs.event_id = update(
+                    vs.event_id,
+                    at[vs.tau], vs.event_id_counter,
+                )
+                vs.dt = 1 / 6
+                vs.itt_day = vs.itt_day + 1
+            elif vs.time_event0 <= settings.end_event and (vs.dt_secs == 60 * 60):
+                ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
+                pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
+                vs.event_id = update(
+                    vs.event_id,
+                    at[vs.tau], vs.event_id_counter,
+                )
+                vs.dt = 1
+                vs.itt_day = vs.itt_day + 6
+            elif vs.time_event0 <= settings.end_event and (vs.dt_secs == 24 * 60 * 60):
+                ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
+                pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
+                vs.dt = 24
+                vs.itt_day = 0
+            elif vs.time_event0 > settings.end_event and (vs.time % (60 * 60) != 0) and (vs.dt_secs == 10 * 60):
+                vs.dt_secs = 10 * 60
+                vs.dt = 1 / 6
+                ta = ta_day[:, :, vs.itt_day]
+                pet = pet_day[:, :, vs.itt_day]
+                vs.itt_day = vs.itt_day + 1
+                vs.event_id = update(
+                    vs.event_id,
+                    at[vs.tau], 0,
+                )
+            elif vs.time_event0 > settings.end_event and (vs.time % (60 * 60) == 0) and ((vs.dt_secs == 10 * 60) or (vs.dt_secs == 60 * 60)):
+                ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
+                pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
+                vs.dt_secs = 60 * 60
+                vs.dt = 1
+                vs.itt_day = vs.itt_day + 6
+                vs.event_id = update(
+                    vs.event_id,
+                    at[vs.tau], 0,
+                )
+            elif vs.time_event0 > settings.end_event and (vs.time % (24 * 60 * 60) == 0) and (vs.dt_secs == 24 * 60 * 60):
+                ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
+                pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
+                vs.dt_secs = 24 * 60 * 60
+                vs.dt = 24
+                vs.itt_day = 0
+                vs.event_id = update(
+                    vs.event_id,
+                    at[vs.tau], 0,
+                )
 
-            return S_int_ground_tot
+            # set event id for next event
+            if (vs.event_id[vs.taum1] > 0) & (vs.event_id[vs.tau] == 0):
+                vs.event_id_counter = vs.event_id_counter + 1
 
-        S_int_ground_tot = update(
-            S_int_ground_tot,
-            at[:, :], for_loop(0, 51, loop_body_S_int_ground_tot, S_int_ground_tot),
-        )
-        S_int_ground_tot = update(
-            S_int_ground_tot,
-            at[:, :], for_loop(10, 17, loop_body_S_int_ground_tot_trees, S_int_ground_tot),
-        )
+            # set forcing for current time step
+            vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], prec)
+            vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], ta)
+            vs.pet = update(vs.pet, at[2:-2, 2:-2], pet)
+            vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], pet)
 
-        mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
-        vs.S_int_ground_tot = update(
-            vs.S_int_ground_tot,
-            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], S_int_ground_tot[2:-2, 2:-2], vs.S_int_ground_tot[2:-2, 2:-2]),
-        )
+        @roger_routine
+        def set_diagnostics(self, state):
+            pass
 
-        # land use dependent ground cover (canopy cover)
-        ground_cover = allocate(state.dimensions, ("x", "y"))
+        @roger_routine
+        def after_timestep(self, state):
+            vs = state.variables
 
-        def loop_body_ground_cover(i, ground_cover):
-            mask = (vs.lu_id == i)
-            row_no = _get_row_no(vs.lut_gc[:, 0], i)
-            ground_cover = update_add(
-                ground_cover,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_gc[row_no, vs.month], 0),
-            )
-
-            return ground_cover
-
-        ground_cover = for_loop(0, 51, loop_body_ground_cover, ground_cover)
-
-        mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
-        vs.ground_cover = update(
-            vs.ground_cover,
-            at[2:-2, 2:-2, vs.tau], npx.where(mask[2:-2, 2:-2], ground_cover[2:-2, 2:-2], vs.ground_cover[2:-2, 2:-2, vs.tau]),
-        )
-
-        # land use dependent transpiration coeffcient
-        basal_transp_coeff = allocate(state.dimensions, ("x", "y"))
-
-        def loop_body_basal_transp_coeff(i, basal_transp_coeff):
-            mask = (vs.lu_id == i)
-            row_no = _get_row_no(vs.lut_gc[:, 0], i)
-            basal_transp_coeff = update_add(
-                basal_transp_coeff,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1], 0),
-            )
-
-            return basal_transp_coeff
-
-        basal_transp_coeff = update(
-            basal_transp_coeff,
-            at[:, :], where(vs.maskRiver | vs.maskLake, 0, for_loop(0, 51, loop_body_basal_transp_coeff, basal_transp_coeff)),
-        )
-
-        mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
-        vs.basal_transp_coeff = update(
-            vs.basal_transp_coeff,
-            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], basal_transp_coeff[2:-2, 2:-2], vs.basal_transp_coeff[2:-2, 2:-2]),
-        )
-
-        # land use dependent evaporation coeffcient
-        basal_evap_coeff = allocate(state.dimensions, ("x", "y"))
-
-        def loop_body_basal_evap_coeff(i, basal_evap_coeff):
-            mask = (vs.lu_id == i)
-            row_no = _get_row_no(vs.lut_gc[:, 0], i)
-            basal_evap_coeff = update_add(
-                basal_evap_coeff,
-                at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 1 - ((vs.lut_gc[row_no, vs.month] / vs.lut_gcm[row_no, 1]) * vs.lut_gcm[row_no, 1]), 0),
-            )
-
-            return basal_evap_coeff
-
-        basal_evap_coeff = for_loop(0, 51, loop_body_basal_evap_coeff, basal_evap_coeff)
-
-        basal_evap_coeff = update(
-            basal_evap_coeff,
-            at[:, :], where(vs.maskRiver | vs.maskLake, 1, basal_evap_coeff),
-        )
-
-        mask = npx.isin(vs.lu_id, npx.arange(0, 51, 1, dtype=int))
-        vs.basal_evap_coeff = update(
-            vs.basal_evap_coeff,
-            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], basal_evap_coeff[2:-2, 2:-2], vs.basal_evap_coeff[2:-2, 2:-2]),
-        )
-
-        return KernelOutput(
-            S_int_top_tot=vs.S_int_top_tot,
-            S_int_ground_tot=vs.S_int_ground_tot,
-            ground_cover=vs.ground_cover,
-            basal_transp_coeff=vs.basal_transp_coeff,
-            basal_evap_coeff=vs.basal_evap_coeff
-        )
-
-    @roger_kernel
-    def set_forcing_kernel(state):
-        vs = state.variables
-
-        vs.prec = update(vs.prec, at[2:-2, 2:-2], vs.PREC[2:-2, 2:-2, vs.itt])
-        vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[2:-2, 2:-2, vs.itt])
-        vs.pet = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
-        vs.pet_res = update(vs.pet, at[2:-2, 2:-2], vs.PET[2:-2, 2:-2, vs.itt])
-
-        vs.dt_secs = vs.DT_SECS[vs.itt]
-        vs.dt = vs.DT[vs.itt]
-        vs.year = vs.YEAR[vs.itt]
-        vs.month = vs.MONTH[vs.itt]
-        vs.doy = vs.DOY[vs.itt]
-
-        return KernelOutput(
-            prec=vs.prec,
-            ta=vs.ta,
-            pet=vs.pet,
-            pet_res=vs.pet_res,
-            dt=vs.dt,
-            dt_secs=vs.dt_secs,
-            year=vs.year,
-            month=vs.month,
-            doy=vs.doy,
-        )
+            # shift variables backwards
+            vs.update(after_timestep_kernel(state))
 
     @roger_kernel
     def after_timestep_kernel(state):
@@ -336,14 +401,6 @@ def main(backend, device, size):
             vs.y_sc,
             at[2:-2, 2:-2, vs.taum1], vs.y_sc[2:-2, 2:-2, vs.tau],
         )
-        vs.prec_event_sum = update(
-            vs.prec_event_sum,
-            at[2:-2, 2:-2, vs.taum1], vs.prec_event_sum[2:-2, 2:-2, vs.tau],
-        )
-        vs.t_event_sum = update(
-            vs.t_event_sum,
-            at[2:-2, 2:-2, vs.taum1], vs.t_event_sum[2:-2, 2:-2, vs.tau],
-        )
         vs.theta_rz = update(
             vs.theta_rz,
             at[2:-2, 2:-2, vs.taum1], vs.theta_rz[2:-2, 2:-2, vs.tau],
@@ -384,22 +441,25 @@ def main(backend, device, size):
             vs.z0,
             at[2:-2, 2:-2, vs.taum1], vs.z0[2:-2, 2:-2, vs.tau],
         )
-        # set to 0 for numerical errors
-        vs.S_fp_rz = update(
-            vs.S_fp_rz,
-            at[2:-2, 2:-2], npx.where((vs.S_fp_rz > -1e-6) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz)[2:-2, 2:-2],
+        vs.prec = update(
+            vs.prec,
+            at[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau],
         )
-        vs.S_lp_rz = update(
-            vs.S_lp_rz,
-            at[2:-2, 2:-2], npx.where((vs.S_lp_rz > -1e-6) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz)[2:-2, 2:-2],
+        vs.event_id = update(
+            vs.event_id,
+            at[vs.taum1], vs.event_id[vs.tau],
         )
-        vs.S_fp_ss = update(
-            vs.S_fp_ss,
-            at[2:-2, 2:-2], npx.where((vs.S_fp_ss > -1e-6) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss)[2:-2, 2:-2],
+        vs.year = update(
+            vs.year,
+            at[vs.taum1], vs.year[vs.tau],
         )
-        vs.S_lp_ss = update(
-            vs.S_lp_ss,
-            at[2:-2, 2:-2], npx.where((vs.S_lp_ss > -1e-6) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss)[2:-2, 2:-2],
+        vs.month = update(
+            vs.month,
+            at[vs.taum1], vs.month[vs.tau],
+        )
+        vs.doy = update(
+            vs.doy,
+            at[vs.taum1], vs.doy[vs.tau],
         )
 
         return KernelOutput(
@@ -422,8 +482,6 @@ def main(backend, device, size):
             z_wf_t1=vs.z_wf_t1,
             y_mp=vs.y_mp,
             y_sc=vs.y_sc,
-            t_event_sum=vs.t_event_sum,
-            prec_event_sum=vs.prec_event_sum,
             theta_rz=vs.theta_rz,
             theta_ss=vs.theta_ss,
             theta=vs.theta,
@@ -431,13 +489,14 @@ def main(backend, device, size):
             h_ss=vs.h_ss,
             h=vs.h,
             z0=vs.z0,
+            prec=vs.prec,
+            event_id=vs.event_id,
+            year=vs.year,
+            month=vs.month,
+            doy=vs.doy,
             k_rz=vs.k_rz,
             k_ss=vs.k_ss,
             k=vs.k,
-            S_fp_rz=vs.S_fp_rz,
-            S_lp_rz=vs.S_lp_rz,
-            S_fp_ss=vs.S_fp_ss,
-            S_lp_ss=vs.S_lp_ss,
         )
 
     model = ONED2Benchmark()

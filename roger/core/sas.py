@@ -144,7 +144,7 @@ def gamma(state, SA, sas_params):
     Omega = update(
         Omega,
         at[2:-2, 2:-2, :], npx.where(SA[2:-2, 2:-2, vs.tau, :] > 0, npx.where(SA[2:-2, 2:-2, vs.tau, :] < S[2:-2, 2:-2, :],
-                                     spsx.gammainc(sas_params[2:-2, 2:-2, 1, npx.newaxis], sas_params[2:-2, 2:-2, 2, npx.newaxis] * SA[2:-2, 2:-2, vs.tau, :]/S[2:-2, 2:-2, :]) / spsx.gamma(sas_params[2:-2, 2:-2, 1, npx.newaxis]), 0.), 0) * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+                                     spsx.gammainc(sas_params[2:-2, 2:-2, 1, npx.newaxis], sas_params[2:-2, 2:-2, 2, npx.newaxis] * SA[2:-2, 2:-2, vs.tau, :]/S[2:-2, 2:-2, :]) / npx.exp(spsx.gammaln(sas_params[2:-2, 2:-2, 1, npx.newaxis])), 0.), 0) * mask[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
     Omega = update(
         Omega,

@@ -42,7 +42,7 @@ def main(job_type, sas_solver):
             lines.append('conda activate roger\n')
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
-            lines.append('python svat_transport.py -b numpy -d cpu -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
+            lines.append('python svat_transport.py -b jax -d cpu -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))

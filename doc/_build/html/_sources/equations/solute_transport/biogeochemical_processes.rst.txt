@@ -7,7 +7,7 @@ Soil temperature
 Soil temperature :math:`TA_{soil}` (°C) at time step t:
 
 .. math::
-  TA_{soil}=TA_{year} + (TA - TA_{year}) \cdot \frac{sin(\omega t + \omega \Phi -\frac{0.5 \cdot z_{soil}}{D})}{e^(\frac{-0.5 \cdot z_{soil}}{D}}
+  TA_{soil}=TA_{year} + (TA - TA_{year}) \cdot \frac{sin(\omega t + \omega \Phi -\frac{0.5 \cdot z_{soil}}{D})}{e^\frac{-0.5 \cdot z_{soil}}{D}}
 
 with
 
@@ -23,10 +23,10 @@ Nitrogen cycle
 --------------
 
 .. math::
-  \frac{\partial NO_{3-soil}(T,t)}{\partial t} + \frac{\partial NO_{3-soil}(T,t)}{\partial T} = 0.3 * N_{fert}(t) + Nit_{soil}(t) - Denit_{soil}(t) - N_{up}(t)
+  \frac{\partial NO_{3-soil}(T,t)}{\partial t} + \frac{\partial NO_{3-soil}(T,t)}{\partial T} = 0.3 \cdot N_{fert}(t) + Nit_{soil}(t) - Denit_{soil}(t) - N_{up}(t)
 
 .. math::
-  \frac{\partial Nmin(T,t)}{\partial t} + \frac{\partial Nmin(T,t)}{\partial T} = 0.7 * N_{fert}(t) + Min_{soil}(t) - Nit_{soil}(t)
+  \frac{\partial Nmin(T,t)}{\partial t} + \frac{\partial Nmin(T,t)}{\partial T} = 0.7 \cdot N_{fert}(t) + Min_{soil}(t) - Nit_{soil}(t)
 
 Denitrification
 ---------------
@@ -49,7 +49,7 @@ with
 
 where :math:`Denit_{soil-max}` is the maximum dentrification rate (:math:`kg N ha^{-1} year^{-1}`),
 :math:`k_{denit-soil}` is the Michaelis constant (:math:`kg N ha^{-1} year^{-1}`),
-:math:`NO_{3-soil}` is the age-ranked nitrate storage of the soil (:math:`kg NO_{3}-N`),
+:math:`NO_{3-soil}` is the age-ranked nitrate nitrogen storage of the soil (:math:`kg NO_{3}-N`),
 :math:`S` is the storage volume (mm) at time step t and
 :math:`S_{sat}` is the storage volume at saturation (mm).
 
@@ -60,7 +60,7 @@ Denitrification rate of the groundwater :math:`Denit_{gw}` (:math:`kg N ha^{-1} 
 
 where :math:`Denit_{gw-max}` is the maximum dentrification rate (:math:`kg N ha^{-1} year^{-1}`),
 :math:`k_{denit-gw}` is the Michaelis constant (:math:`kg N ha^{-1} year^{-1}`),
-:math:`NO_{3-gw}` is the age-ranked nitrate storage of the groundwater (:math:`kg NO_{3}-N`),
+:math:`NO_{3-gw}` is the age-ranked nitrate nitrogen storage of the groundwater (:math:`kg NO_{3}-N`),
 
 Nitrification
 -------------
@@ -107,7 +107,7 @@ where :math:`k_{min}` is the maximum nitrogen mineralization rate of the soil (:
 Nitrogen uptake by crops
 ------------------------
 
-Nitrogen uptake by crops :math:`N_{up}` (:math:`mg \Delta t^{-1}`) at time step t:
+Nitrogen uptake by crops :math:`N_{up}` (mg :math:`\Delta t^{-1}`) at time step t:
 
 .. math::
   N_{up}= transp \cdot \int_{T=0}^{\infty} C_S(T,t) \cdot \alpha_p \cdot \overleftarrow{p}_{transp}(T,t) dT

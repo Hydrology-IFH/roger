@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.runtime &mdash; RoGeR 0.0.1+15.gf84e55c.dirty documentation</title>
+  <title>roger.runtime &mdash; RoGeR 0.0.1+41.gdf5e102.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -27,7 +27,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+15.gf84e55c.dirty
+                0.0.1+41.gdf5e102.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -52,11 +52,13 @@
 <p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../equations/equations.html">Model equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../equations/hydrologic_cycle.html">Hydrologic cycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../equations/solute_transport.html">Solute transport</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../reference/setup-gallery.html">Setup gallery</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../reference/settings.html">Model settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/model-gallery.html">Model gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/settings.html">Constant model parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/variables.html">Model variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/diagnostics.html">Diagnostics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/cli.html">Command line tools</a></li>
@@ -67,6 +69,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../more/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../more/howtocite.html">How to cite</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../more/publications.html">Publications involving Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
 </ul>
 
@@ -107,6 +110,7 @@
 <span class="n">log_args</span> <span class="o">=</span> <span class="n">local</span><span class="p">()</span>
 <span class="n">log_args</span><span class="o">.</span><span class="n">log_all_processes</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="n">log_args</span><span class="o">.</span><span class="n">loglevel</span> <span class="o">=</span> <span class="s2">&quot;info&quot;</span>
+<span class="n">log_args</span><span class="o">.</span><span class="n">log_to_file</span> <span class="o">=</span> <span class="kc">True</span>
 
 
 <span class="c1"># MPI helpers</span>
@@ -170,7 +174,7 @@
     <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">logs</span>
 
     <span class="n">log_args</span><span class="o">.</span><span class="n">log_to_file</span> <span class="o">=</span> <span class="n">parse_bool</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-    <span class="n">logs</span><span class="o">.</span><span class="n">setup_logging</span><span class="p">(</span><span class="n">loglevel</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">loglevel</span><span class="p">,</span> <span class="n">log_all_processes</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">log_to_file</span><span class="p">,</span> <span class="n">log_to_file</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">log_to_file</span><span class="p">)</span>
+    <span class="n">logs</span><span class="o">.</span><span class="n">setup_logging</span><span class="p">(</span><span class="n">loglevel</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">loglevel</span><span class="p">,</span> <span class="n">log_all_processes</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">log_all_processes</span><span class="p">,</span> <span class="n">log_to_file</span><span class="o">=</span><span class="n">log_args</span><span class="o">.</span><span class="n">log_to_file</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">log_args</span><span class="o">.</span><span class="n">log_to_file</span>
 
 
@@ -184,7 +188,6 @@
 
 <span class="n">DEVICES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="s2">&quot;gpu&quot;</span><span class="p">,</span> <span class="s2">&quot;tpu&quot;</span><span class="p">)</span>
 <span class="n">FLOAT_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">,</span> <span class="s2">&quot;float32&quot;</span><span class="p">)</span>
-<span class="n">LINEAR_SOLVERS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;scipy&quot;</span><span class="p">,</span> <span class="s2">&quot;scipy_jax&quot;</span><span class="p">,</span> <span class="s2">&quot;petsc&quot;</span><span class="p">,</span> <span class="s2">&quot;best&quot;</span><span class="p">)</span>
 
 
 <span class="c1"># settings</span>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Getting started &mdash; RoGeR 0.0.1+40.gd2c6e02.dirty documentation</title>
+  <title>Getting started &mdash; RoGeR 0.0.1+41.gdf5e102.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+40.gd2c6e02.dirty
+                0.0.1+41.gdf5e102.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -76,7 +76,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/model-gallery.html">Model gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/settings.html">Constant model parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/variables.html">Model variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/diagnostics.html">Diagnostics</a></li>
@@ -141,10 +141,10 @@
 <ol class="arabic">
 <li><p><a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Download and install Miniconda</a>. If you are using Windows, you may use the Anaconda prompt to execute the following steps.</p></li>
 <li><p>Clone the Roger repository</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/schwemro/roger.git -b v0.0.1
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/Hydrology-IFH/roger.git -b v0.0.1
 </pre></div>
 </div>
-<p>(or <a class="reference external" href="https://github.com/schwemro/roger/releases">any other version of Roger</a>).</p>
+<p>(or <a class="reference external" href="https://github.com/Hydrology-IFH/roger/releases">any other version of Roger</a>).</p>
 <p>If you do not have git installed, you can do so via <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">git</span></code>.</p>
 </li>
 <li><p>Create a new conda environment for Roger, and install all relevant dependencies by running</p>
@@ -165,10 +165,10 @@
 <ol class="arabic">
 <li><p>Ensure you have a working Python 3.x installation.</p></li>
 <li><p>Clone our repository:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/schwemro/roger.git -b v0.0.1
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/Hydrology-IFH/roger.git -b v0.0.1
 </pre></div>
 </div>
-<p>(or <a class="reference external" href="https://github.com/schwemro/roger/releases">any other version of Roger</a>), or use</p>
+<p>(or <a class="reference external" href="https://github.com/Hydrology-IFH/roger/releases">any other version of Roger</a>), or use</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip download roger
 </pre></div>
 </div>
@@ -237,11 +237,11 @@
 <p>For post-processing in Python, we recommend that you use <a class="reference external" href="http://xarray.pydata.org/en/stable/">xarray</a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 
-<span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;acc.snapshot.nc&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;h5netcdf&quot;</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;ONED.rates.nc&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;h5netcdf&quot;</span><span class="p">)</span>
 
 <span class="c1"># plot surface velocity at the last time step included in the file</span>
-<span class="n">u_surface</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">Time</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">zt</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">u_surface</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">contourf</span><span class="p">()</span>
+<span class="n">inf_mp</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">inf_mp</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">inf_mp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
@@ -279,7 +279,7 @@
 <p>Roger was written with extensibility in mind. If you already know some Python and have worked with NumPy, you are pretty much ready to write your own extension. The model code is located in the <code class="file docutils literal notranslate"><span class="pre">roger</span></code> subfolder, while all of the numerical routines are located in <code class="file docutils literal notranslate"><span class="pre">roger/core</span></code>.</p>
 <p>We believe that the best way to learn how Roger works is to read its source code. Starting from the <a class="reference internal" href="../reference/api/roger-setup.html#roger.RogerSetup" title="roger.RogerSetup"><code class="xref py py-class docutils literal notranslate"><span class="pre">Roger</span> <span class="pre">base</span> <span class="pre">class</span></code></a>, you should be able to work your way through the flow of the program, and figure out where to add your modifications. If you installed Roger through <strong class="command">pip -e</strong> or <strong class="command">setup.py develop</strong>, all changes you make will immediately be reflected when running the code.</p>
 <p>In case you want to add additional output capabilities or compute additional quantities without changing the main solution of the simulation, you should consider <a class="reference internal" href="../reference/diagnostics.html"><span class="doc">adding a custom diagnostic</span></a>.</p>
-<p>A convenient way to implement your modifications is to create your own fork of Roger on GitHub, and submit a <a class="reference external" href="https://github.com/schwemro/roger/pulls">pull request</a> if you think your modifications could be useful for the Roger community.</p>
+<p>A convenient way to implement your modifications is to create your own fork of Roger on GitHub, and submit a <a class="reference external" href="https://github.com/Hydrology-IFH/roger/pulls">pull request</a> if you think your modifications could be useful for the Roger community.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>More information is available in <a class="reference internal" href="../tutorial/dev.html"><span class="doc">our developer guide</span></a>.</p>

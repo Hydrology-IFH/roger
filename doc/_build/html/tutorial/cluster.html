@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Running Roger on a cluster &mdash; RoGeR 0.0.1+40.gd2c6e02.dirty documentation</title>
+  <title>Running Roger on a cluster &mdash; RoGeR 0.0.1+41.gdf5e102.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+40.gd2c6e02.dirty
+                0.0.1+41.gdf5e102.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -49,7 +49,10 @@
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis of Roger output</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Running Roger on a cluster</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Running Roger on a cluster</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="dev.html">Making changes in Roger</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
@@ -60,7 +63,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/model-gallery.html">Model gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/settings.html">Constant model parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/variables.html">Model variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/diagnostics.html">Diagnostics</a></li>
@@ -102,6 +105,22 @@
              
   <section id="running-roger-on-a-cluster">
 <h1>Running Roger on a cluster<a class="headerlink" href="#running-roger-on-a-cluster" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial walks you through some of the most common challenges that are specific to large, shared architectures like clusters and supercomputers.</p>
+<p>In case you having trouble setting up or running Roger on a cluster, you should first contact your cluster administrator. Otherwise, feel free to <a class="reference external" href="https://github.com/Hydrology-IFH/roger/issues">open an issue</a>.</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Probably the easiest way to try out Roger on a cluster is to, once again, <a class="reference internal" href="../introduction/get-started.html"><span class="doc">use Anaconda</span></a>. Since Anaconda is platform independent and does not require elevated permissions, it is the perfect way to try out Roger without too much hassle.</p>
+<p>However, <strong>in high-performance contexts, we advise against using Anaconda</strong>. Getting optimal performance requires a software stacked that is linked to the correct system libraries, in particular MPI (see also <a class="reference internal" href="../introduction/advanced-installation.html"><span class="doc">Advanced installation</span></a>). This requires that Python packages that depend on C libraries (such as <code class="docutils literal notranslate"><span class="pre">mpi4py</span></code>, <code class="docutils literal notranslate"><span class="pre">mpi4jax</span></code>) are built from source. For example, installation on <a class="reference external" href="https://www.binac.uni-tuebingen.de/">bwForCluster BinAC</a>:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
+module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
+<span class="nb">echo</span> <span class="o">{</span><span class="nv">$HDF5_VERSION</span><span class="o">}</span>
+<span class="nb">export</span> <span class="nv">HDF5_VERSION</span><span class="o">=</span><span class="m">1</span>.12.0
+<span class="nv">CC</span><span class="o">=</span><span class="s2">&quot;mpicc&quot;</span> <span class="nv">HDF5_MPI</span><span class="o">=</span><span class="s2">&quot;ON&quot;</span> <span class="nv">HDF5_DIR</span><span class="o">=</span>/cluster/bwhpc/common/lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2 pip install --no-binary<span class="o">=</span>h5py <span class="nv">h5py</span><span class="o">==</span><span class="m">3</span>.6.0
+pip install h5netcdf --no-build-isolation
+pip install mpi4jax --no-build-isolation
+</pre></div>
+</div>
+</section>
 </section>
 
 

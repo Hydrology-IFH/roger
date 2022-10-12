@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Advanced installation &mdash; RoGeR 0.0.1+40.gd2c6e02.dirty documentation</title>
+  <title>Advanced installation &mdash; RoGeR 0.0.1+41.gdf5e102.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+40.gd2c6e02.dirty
+                0.0.1+41.gdf5e102.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -65,7 +65,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/model-gallery.html">Model gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/settings.html">Constant model parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/variables.html">Model variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/diagnostics.html">Diagnostics</a></li>
@@ -123,27 +123,15 @@
 <tbody>
 <tr class="row-even"><td><p>JAX</p></td>
 <td><p>Linux, OSX, Windows</p></td>
-<td><p>To run 4x faster on CPU, and for GPU support</p></td>
+<td><p>To run 2x faster on CPU, and for GPU support</p></td>
 </tr>
-<tr class="row-odd"><td><p>Roger Cython extensions</p></td>
-<td><p>Linux, OSX</p></td>
-<td><p>20% speedup when using JAX</p></td>
-</tr>
-<tr class="row-even"><td><p>MPI + mpi4py</p></td>
+<tr class="row-odd"><td><p>MPI + mpi4py</p></td>
 <td><p>Linux, OSX</p></td>
 <td><p>To run in parallel</p></td>
 </tr>
-<tr class="row-odd"><td><p>mpi4jax</p></td>
+<tr class="row-even"><td><p>mpi4jax</p></td>
 <td><p>Linux, OSX</p></td>
 <td><p>To run in parallel with JAX</p></td>
-</tr>
-<tr class="row-even"><td><p>PETSc + petsc4py</p></td>
-<td><p>Linux, OSX</p></td>
-<td><div class="line-block">
-<div class="line">Faster linear solver when using</div>
-<div class="line">more than 10 processes (or GPUs)</div>
-</div>
-</td>
 </tr>
 </tbody>
 </table>
@@ -163,12 +151,6 @@
 </pre></div>
 </div>
 <p>(see also <a class="reference external" href="https://github.com/google/jax#installation">the JAX installation guide</a>).</p>
-<p>Roger also supplies Cython extensions that optimize certain bottlenecks in JAX. You can make sure they are installed by running:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install cython
-$ python setup.py build_ext --inplace
-</pre></div>
-</div>
-<p>in the Roger repository root.</p>
 </section>
 <section id="using-mpi">
 <h2>Using MPI<a class="headerlink" href="#using-mpi" title="Permalink to this headline">¶</a></h2>
@@ -176,12 +158,7 @@ $ python setup.py build_ext --inplace
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install mpi4py
 </pre></div>
 </div>
-<p>Then, you can <a class="reference internal" href="get-started.html#mpi-exec"><span class="std std-ref">run Roger in parallel via MPI</span></a>.</p>
-<p>For optimal performance on many processes, Roger supports using PETSc as a linear solver. To use it, you will have to install the PETSc library and <code class="docutils literal notranslate"><span class="pre">petsc4py</span></code> Python package:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ PETSC_DIR=/path/to/petsc3.12 pip install petsc4py==3.12
-</pre></div>
-</div>
-<p>Note that the versions of PETSc and <code class="docutils literal notranslate"><span class="pre">petsc4py</span></code> have to match.</p>
+<p>Then, you can <span class="xref std std-ref">run Roger in parallel via MPI</span>.</p>
 </section>
 <section id="using-jax-mpi">
 <h2>Using JAX + MPI<a class="headerlink" href="#using-jax-mpi" title="Permalink to this headline">¶</a></h2>

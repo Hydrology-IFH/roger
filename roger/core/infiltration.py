@@ -1,6 +1,6 @@
 from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
-from roger.core.operators import numpy as npx, update, update_add, scan, at
+from roger.core.operators import numpy as npx, update, update_add, for_loop, at
 from roger.core import transport
 
 
@@ -428,9 +428,8 @@ def calc_inf_mp(state):
         at[2:-2, 2:-2], vs.inf_mp_event_csum[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    def loop_body(carry, i):
-        vs, settings, loop_vars = carry
-        y1, y2, y3, ym1, a, b1, b2, c, inf_mp_pot_di, inf_mp_di, z0_di, inf_mp, inf_mp_pot, inf_mp_event_csum, t, y = loop_vars
+    def loop_body(i, carry):
+        y1, y2, y3, ym1, a, b1, b2, c, inf_mp_pot_di, inf_mp_di, z0_di, inf_mp, inf_mp_pot, inf_mp_event_csum, t, y = carry
 
         # determine substeps. additional substeps for hourly time steps
         # time step.
@@ -550,19 +549,15 @@ def calc_inf_mp(state):
             at[2:-2, 2:-2], y[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
-        loop_vars = (y1, y2, y3, ym1, a, b1, b2, c, inf_mp_pot_di, inf_mp_di, z0_di, inf_mp, inf_mp_pot, inf_mp_event_csum, t, y)
-        carry = (vs, settings, loop_vars)
+        carry = (y1, y2, y3, ym1, a, b1, b2, c, inf_mp_pot_di, inf_mp_di, z0_di, inf_mp, inf_mp_pot, inf_mp_event_csum, t, y)
 
-        return carry, None
+        return carry
 
-    steps = npx.arange(0, substeps)
-    loop_vars = (y1, y2, y3, ym1, a, b1, b2, c, inf_mp_pot_di, inf_mp_di, z0_di, inf_mp, inf_mp_pot, inf_mp_event_csum, t, y)
-    carry = (vs, settings, loop_vars)
-    res, _ = scan(loop_body, carry, steps)
+    carry = (y1, y2, y3, ym1, a, b1, b2, c, inf_mp_pot_di, inf_mp_di, z0_di, inf_mp, inf_mp_pot, inf_mp_event_csum, t, y)
+    res = for_loop(0, substeps, loop_body, carry)
 
-    loop_vars = res[2]
-    inf_mp = loop_vars[-5]
-    y = loop_vars[-1]
+    inf_mp = res[-5]
+    y = res[-1]
 
     vs.y_mp = update(
         vs.y_mp,
@@ -798,9 +793,8 @@ def calc_inf_sc(state):
         at[2:-2, 2:-2], vs.inf_sc_event_csum[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    def loop_body(carry, i):
-        vs, settings, loop_vars = carry
-        y, ym1, inf_sc_pot_di, inf_sc_di, z0_di, inf_sc_event_csum, t, inf_sc = loop_vars
+    def loop_body(i, carry):
+        y, ym1, inf_sc_pot_di, inf_sc_di, z0_di, inf_sc_event_csum, t, inf_sc = carry
         # determine substeps. additional substeps for hourly
         # time step.
         substeps = npx.int64(npx.round(vs.dt / (1 / 5), 0))  # based on hours
@@ -859,18 +853,14 @@ def calc_inf_sc(state):
             at[2:-2, 2:-2], y[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
-        loop_vars = (y, ym1, inf_sc_pot_di, inf_sc_di, z0_di, inf_sc_event_csum, t, inf_sc)
-        carry = (vs, settings, loop_vars)
+        carry = (y, ym1, inf_sc_pot_di, inf_sc_di, z0_di, inf_sc_event_csum, t, inf_sc)
 
-        return carry, None
+        return carry
 
-    steps = npx.arange(0, substeps)
-    loop_vars = (y, ym1, inf_sc_pot_di, inf_sc_di, z0_di, inf_sc_event_csum, t, inf_sc)
-    carry = (vs, settings, loop_vars)
-    res, _ = scan(loop_body, carry, steps)
-    loop_vars = res[2]
-    y = loop_vars[0]
-    inf_sc = loop_vars[-1]
+    carry = (y, ym1, inf_sc_pot_di, inf_sc_di, z0_di, inf_sc_event_csum, t, inf_sc)
+    res = for_loop(0, substeps, loop_body, carry)
+    y = res[0]
+    inf_sc = res[-1]
 
     vs.y_sc = update(
         vs.y_sc,

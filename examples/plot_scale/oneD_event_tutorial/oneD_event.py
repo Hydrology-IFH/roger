@@ -21,13 +21,13 @@ DMPV = 50
 # density of horizontal macropores (1/m2)
 DMPH = 300
 # total length of vertical macropores (mm)
-LMPV = 300
+LMPV = 500
 # air capacity (-)
-THETA_AC = 0.08
+THETA_AC = 0.1
 # usable field capacity (-)
-THETA_UFC = 0.15
+THETA_UFC = 0.1
 # permanent wilting point (-)
-THETA_PWP = 0.17
+THETA_PWP = 0.2
 # saturated hydraulic conductivity (mm/h)
 KS = 9.2
 # hydraulic conductivity of bedrock/saturated zone (mm/h)
@@ -35,9 +35,9 @@ KF = 5
 
 # --- set the initial conditions -----------------------
 # soil water content of root zone/upper soil layer (-)
-THETA_RZ = 0.39
+THETA_RZ = 0.3
 # soil water content of subsoil/lower soil layer (-)
-THETA_SS = 0.38
+THETA_SS = 0.3
 
 # --- set the output variables -----------------------
 # list with simulated fluxes (see variables for description)

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Model structures &mdash; RoGeR 0.0.1+40.gd2c6e02.dirty documentation</title>
+  <title>Model structures &mdash; RoGeR 0.0.1+41.gdf5e102.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -19,7 +19,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Solute transport" href="../solute_transport.html" />
-    <link rel="prev" title="Groundwater" href="storages/groundwater.html" /> 
+    <link rel="prev" title="Crop phenology" href="crop_phenology.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -30,7 +30,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+40.gd2c6e02.dirty
+                0.0.1+41.gdf5e102.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -58,6 +58,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../hydrologic_cycle.html">Hydrologic cycle</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="hydrologic_processes.html">Hydrologic processes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="storages.html">Storages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crop_phenology.html">Crop phenology</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Model structures</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#svat">SVAT</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="storages/surface.html">Surface</a></li>
@@ -70,9 +71,9 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#svat-crop">SVAT-CROP</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="crop_phenology.html">Crop phenology</a></li>
 <li class="toctree-l4"><a class="reference internal" href="storages/surface.html">Surface</a></li>
 <li class="toctree-l4"><a class="reference internal" href="storages/soil.html">Soil</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/crop_phenology.html">Crop phenology</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/snow.html">Snow accumulation and snow melt</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/interception.html">Interception</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/infiltration.html">Infiltration</a></li>
@@ -110,7 +111,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/model-gallery.html">Model gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/settings.html">Constant model parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/variables.html">Model variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/diagnostics.html">Diagnostics</a></li>
@@ -197,9 +198,11 @@
 </section>
 <section id="svat-crop">
 <h2>SVAT-CROP<a class="headerlink" href="#svat-crop" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="../../_images/SVAT_CROP.png"><img alt="../../_images/SVAT_CROP.png" class="align-center" src="../../_images/SVAT_CROP.png" style="width: 600px;" /></a>
 <p>Long-term hydrologic modelling of vertical processes including crop phenology/crop rotation.</p>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="crop_phenology.html">Crop phenology</a></li>
 <li class="toctree-l1"><a class="reference internal" href="storages/surface.html">Surface</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="storages/surface.html#properties-of-upper-interception-storage">Properties of upper interception storage</a></li>
 <li class="toctree-l2"><a class="reference internal" href="storages/surface.html#properties-of-lower-interception-storage">Properties of lower interception storage</a></li>
@@ -210,7 +213,6 @@
 <li class="toctree-l2"><a class="reference internal" href="storages/soil.html#soil-hydraulic-properties">Soil hydraulic properties</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/crop_phenology.html">Crop phenology</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/snow.html">Snow accumulation and snow melt</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/interception.html">Interception</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/interception.html#interception-from-upper-interception-storage">Interception from upper interception storage</a></li>
@@ -240,7 +242,7 @@
 <section id="oned">
 <h2>ONED<a class="headerlink" href="#oned" title="Permalink to this headline">¶</a></h2>
 <a class="reference internal image-reference" href="../../_images/ONED.png"><img alt="../../_images/ONED.png" class="align-center" src="../../_images/ONED.png" style="width: 400px;" /></a>
-<p>Long-term hydrologic modelling of vertical processes and lateral processes.</p>
+<p>Long-term hydrologic modelling of vertical and lateral processes.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="storages/surface.html">Surface</a><ul>
@@ -282,7 +284,7 @@
 </section>
 <section id="oned-event">
 <h2>ONED-EVENT<a class="headerlink" href="#oned-event" title="Permalink to this headline">¶</a></h2>
-<p>Short-term hydrologic modelling of vertical processes and lateral processes.</p>
+<p>Short-term hydrologic modelling of vertical and lateral processes.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="storages/surface.html">Surface</a><ul>
@@ -328,7 +330,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="storages/groundwater.html" class="btn btn-neutral float-left" title="Groundwater" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="crop_phenology.html" class="btn btn-neutral float-left" title="Crop phenology" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../solute_transport.html" class="btn btn-neutral float-right" title="Solute transport" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

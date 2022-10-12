@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Analysis of Roger output &mdash; RoGeR 0.0.1+40.gd2c6e02.dirty documentation</title>
+  <title>Analysis of Roger output &mdash; RoGeR 0.0.1+41.gdf5e102.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+40.gd2c6e02.dirty
+                0.0.1+41.gdf5e102.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -48,7 +48,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Analysis of Roger output</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Analysis of Roger output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#load-and-aggregate-rates">Load and aggregate rates</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev.html">Making changes in Roger</a></li>
 </ul>
@@ -60,7 +63,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/model-gallery.html">Model gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/settings.html">Constant model parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/variables.html">Model variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/diagnostics.html">Diagnostics</a></li>
@@ -102,6 +105,106 @@
              
   <section id="analysis-of-roger-output">
 <h1>Analysis of Roger output<a class="headerlink" href="#analysis-of-roger-output" title="Permalink to this headline">¶</a></h1>
+<p>In this tutorial, we will use <a class="reference external" href="http://xarray.pydata.org/en/stable/">xarray</a> and <a class="reference external" href="https://matplotlib.org">matplotlib</a> to load, analyze, and plot the model output. You can run these commands in <a class="reference external" href="https://ipython.readthedocs.io/en/stable/">IPython</a> or a <a class="reference external" href="https://jupyter.org">Jupyter Notebook</a>. Just make sure to install the dependencies first:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install xarray matplotlib netcdf4 cftime
+</pre></div>
+</div>
+<p>The analysis below is conducted for a single year simulation of the <a class="reference internal" href="../reference/models/oneD.html"><span class="doc">1D</span></a> setup from the <a class="reference internal" href="../reference/model-gallery.html"><span class="doc">model gallery</span></a>.</p>
+<p>Let’s start by importing some packages:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+<span class="gp">In [2]: </span><span class="kn">from</span> <span class="nn">cftime</span> <span class="kn">import</span> <span class="n">num2date</span>
+
+<span class="gp">In [3]: </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="gp">In [4]: </span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+</pre></div>
+</div>
+<p>Set the paths to the example data:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [5]: </span><span class="n">OUTPUT_FILES</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">   ...: </span>    <span class="s2">&quot;rates&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;_data&quot;</span> <span class="o">/</span> <span class="s2">&quot;ONED.rates.nc&quot;</span><span class="p">,</span>
+<span class="gp">   ...: </span>    <span class="s2">&quot;collect&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;_data&quot;</span> <span class="o">/</span> <span class="s2">&quot;ONED.collect.nc&quot;</span><span class="p">,</span>
+<span class="gp">   ...: </span>    <span class="s2">&quot;maximum&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;_data&quot;</span> <span class="o">/</span> <span class="s2">&quot;ONED.maximum.nc&quot;</span><span class="p">,</span>
+<span class="gp">   ...: </span><span class="p">}</span>
+<span class="gp">   ...: </span>
+</pre></div>
+</div>
+<p>Most of the heavy lifting will be done by <code class="docutils literal notranslate"><span class="pre">xarray</span></code>, which provides a data structure and API for working with labeled N-dimensional arrays. <code class="docutils literal notranslate"><span class="pre">xarray</span></code> datasets automatically keep track how the values of the underlying arrays map to locations in space and time, which makes them immensely useful for analyzing model output.</p>
+<section id="load-and-aggregate-rates">
+<h2>Load and aggregate rates<a class="headerlink" href="#load-and-aggregate-rates" title="Permalink to this headline">¶</a></h2>
+<p>In order to load our first output file and display its content execute the following two commands:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [6]: </span><span class="n">ds_rates</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">OUTPUT_FILES</span><span class="p">[</span><span class="s2">&quot;rates&quot;</span><span class="p">])</span>
+
+<span class="gp">In [7]: </span><span class="n">ds_rates</span>
+<span class="gh">Out[7]: </span><span class="go"></span>
+<span class="go">&lt;xarray.Dataset&gt;</span>
+<span class="go">Dimensions:                (Time: 366, y: 1, x: 1, cr: 2, crops: 1,</span>
+<span class="go">                            events_ff: 1, n_crop_params: 23, n_crop_types: 76,</span>
+<span class="go">                            n_flowdir: 8, n_lu: 25, n_params13: 13,</span>
+<span class="go">                            n_params2: 2, n_params7: 7, n_params9: 9,</span>
+<span class="go">                            n_sas_params: 8, n_sealing: 101, n_slope: 10000,</span>
+<span class="go">                            t: 1, timesteps_event_ff: 1,</span>
+<span class="go">                            timesteps_event_ff_p1: 2, z: 1)</span>
+<span class="go">Coordinates: (12/21)</span>
+<span class="go">  * Time                   (Time) timedelta64[ns] 0 days 1 days ... 365 days</span>
+<span class="go">  * cr                     (cr) float64 0.0 1.0</span>
+<span class="go">  * crops                  (crops) float64 0.0</span>
+<span class="go">  * events_ff              (events_ff) float64 0.0</span>
+<span class="go">  * n_crop_params          (n_crop_params) float64 0.0 1.0 2.0 ... 21.0 22.0</span>
+<span class="go">  * n_crop_types           (n_crop_types) float64 0.0 1.0 2.0 ... 73.0 74.0 75.0</span>
+<span class="go">    ...                     ...</span>
+<span class="go">  * t                      (t) float64 0.0</span>
+<span class="go">  * timesteps_event_ff     (timesteps_event_ff) float64 0.0</span>
+<span class="go">  * timesteps_event_ff_p1  (timesteps_event_ff_p1) float64 0.0 1.0</span>
+<span class="go">  * x                      (x) float64 0.0</span>
+<span class="go">  * y                      (y) float64 0.0</span>
+<span class="go">  * z                      (z) float64 0.0</span>
+<span class="go">Data variables:</span>
+<span class="go">    aet                    (Time, y, x) float64 ...</span>
+<span class="go">    evap_soil              (Time, y, x) float64 ...</span>
+<span class="go">    inf_mat                (Time, y, x) float64 ...</span>
+<span class="go">    inf_mp                 (Time, y, x) float64 ...</span>
+<span class="go">    inf_sc                 (Time, y, x) float64 ...</span>
+<span class="go">    q_hof                  (Time, y, x) float64 ...</span>
+<span class="go">    q_sof                  (Time, y, x) float64 ...</span>
+<span class="go">    q_ss                   (Time, y, x) float64 ...</span>
+<span class="go">    q_sub                  (Time, y, x) float64 ...</span>
+<span class="go">    q_sub_mat              (Time, y, x) float64 ...</span>
+<span class="go">    q_sub_mp               (Time, y, x) float64 ...</span>
+<span class="go">    transp                 (Time, y, x) float64 ...</span>
+<span class="go">Attributes:</span>
+<span class="go">    comment:           First timestep (t=0) contains initial values. Simulati...</span>
+<span class="go">    date_created:      2022-10-07T16:17:22.554316</span>
+<span class="go">    roger_version:     0.0.1+26.gdc95c39.dirty</span>
+<span class="go">    setup_identifier:  ONED</span>
+
+<span class="go"># convert to datetime</span>
+<span class="gp">In [8]: </span><span class="n">days</span> <span class="o">=</span> <span class="p">(</span><span class="n">ds_rates</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">))</span>
+
+<span class="gp">In [9]: </span><span class="n">date</span> <span class="o">=</span> <span class="n">num2date</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;days since </span><span class="si">{</span><span class="n">ds_rates</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;time_origin&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="n">only_use_cftime_datetimes</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="gp">In [10]: </span><span class="n">ds_rates</span> <span class="o">=</span> <span class="n">ds_rates</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">Time</span><span class="o">=</span><span class="n">date</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, we select the time series of <code class="docutils literal notranslate"><span class="pre">inf_mat</span></code> and plot the daily data:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [11]: </span><span class="n">ds_rates</span><span class="p">[</span><span class="s2">&quot;inf_mat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="gh">Out[11]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x135cd9fa0&gt;]</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/inf_mat_daily.png"><img alt="../_images/inf_mat_daily.png" src="../_images/inf_mat_daily.png" style="width: 5in;" /></a>
+<p>To compute the monthly sums and plot the monthly data:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [12]: </span><span class="p">(</span>
+<span class="gp">   ....: </span>    <span class="n">ds_rates</span><span class="p">[</span><span class="s2">&quot;inf_mat&quot;</span><span class="p">]</span>
+<span class="gp">   ....: </span>    <span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">Time</span><span class="o">=</span><span class="s1">&#39;1M&#39;</span><span class="p">)</span>
+<span class="gp">   ....: </span>    <span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="gp">   ....: </span>    <span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="gp">   ....: </span><span class="p">)</span>
+<span class="gp">   ....: </span>
+<span class="gh">Out[12]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x135d0d6d0&gt;]</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/inf_mat_monthly.png"><img alt="../_images/inf_mat_monthly.png" src="../_images/inf_mat_monthly.png" style="width: 5in;" /></a>
+</section>
 </section>
 
 

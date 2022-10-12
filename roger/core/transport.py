@@ -1,13 +1,13 @@
 from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
-from roger.core.operators import numpy as npx, update, update_add, at, scan
+from roger.core.operators import numpy as npx, update, update_add, at, for_loop
 from roger.core import sas, infiltration, evapotranspiration, subsurface_runoff, capillary_rise, crop, root_zone, subsoil, soil, numerics, nitrate
 from roger import runtime_settings as rs, logger
 from roger import diagnostics
 
 
 @roger_kernel
-def calc_age_percentile(state, age_dist, perc):
+def calc_age_percentile(state, age_dist, percentile):
     """Calculates age for defined percentile from cumulative age distribution
     """
     age_perc = allocate(state.dimensions, ("x", "y"))
@@ -29,23 +29,22 @@ def calc_age_percentile(state, age_dist, perc):
     )
 
     # loop over grid cells
-    def loop_body(carry, i):
-        state, grid, ages, age_perc = carry
+    def loop_body(i, carry):
+        grid, ages, age_perc = carry
         xi = grid[i, 0]
         yi = grid[i, 1]
         age_perc = update(
             age_perc,
-            at[xi, yi], npx.interp(perc, age_dist[xi, yi, :], ages),
+            at[xi, yi], npx.interp(percentile, age_dist[xi, yi, :], ages),
         )
-        carry = (state, grid, ages, age_perc)
+        carry = (grid, ages, age_perc)
 
-        return carry, None
+        return carry
 
     # generate array with sequential grid cell ids
     grids = npx.array(npx.meshgrid(x[2:-2], y[2:-2]), dtype=int).T.reshape(-1, 2)
-    steps = npx.arange(0, grids.shape[0])
-    carry = (state, grids, ages, age_perc)
-    res, _ = scan(loop_body, carry, steps)
+    carry = (grids, ages, age_perc)
+    res = for_loop(0, grids.shape[0], loop_body, carry)
     age_perc = update(
         age_perc,
         at[2:-2, 2:-2], res[-1][2:-2, 2:-2],
@@ -290,12 +289,11 @@ def calc_tt(state, SA, sa, flux, sas_params):
         at[2:-2, 2:-2, :, :], sa[2:-2, 2:-2, :, :],
     )
 
+    h = 1/settings.sas_solver_substeps
+
     # loop over substeps
-    def loop_body(carry, i):
+    def loop_body(i, carry):
         state, TTn, ttn, SAn, san, flux, sas_params = carry
-        vs = state.variables
-        settings = state.settings
-        h = 1/settings.sas_solver_substeps
         TTi = allocate(state.dimensions, ("x", "y", "nages"))
         tti = allocate(state.dimensions, ("x", "y", "ages"))
         ttqi = allocate(state.dimensions, ("x", "y", "ages"))
@@ -361,11 +359,10 @@ def calc_tt(state, SA, sa, flux, sas_params):
         )
         carry = (state, TTn, ttn, SAn, san, flux, sas_params)
 
-        return carry, None
+        return carry
 
-    substeps = npx.arange(0, settings.sas_solver_substeps)
     carry = (state, TTn, ttn, SAn, san, flux, sas_params)
-    res, _ = scan(loop_body, carry, substeps)
+    res = for_loop(0, settings.sas_solver_substeps, loop_body, carry)
     TTn = res[1]
 
     TT = allocate(state.dimensions, ("x", "y", "nages"))

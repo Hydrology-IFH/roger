@@ -25,14 +25,20 @@ Long-term hydrologic modelling of vertical processes.
 
 SVAT-CROP
 ---------
+
+.. image:: /_images/SVAT_CROP.png
+   :width: 600
+   :align: center
+
+
 Long-term hydrologic modelling of vertical processes including crop phenology/crop rotation.
 
 .. toctree::
   :maxdepth: 3
 
+  crop_phenology
   storages/surface
   storages/soil
-  hydrologic_processes/crop_phenology
   hydrologic_processes/snow
   hydrologic_processes/interception
   hydrologic_processes/infiltration
@@ -47,7 +53,7 @@ ONED
    :width: 400
    :align: center
 
-Long-term hydrologic modelling of vertical processes and lateral processes.
+Long-term hydrologic modelling of vertical and lateral processes.
 
 .. toctree::
    :maxdepth: 3
@@ -64,7 +70,8 @@ Long-term hydrologic modelling of vertical processes and lateral processes.
 
 ONED-EVENT
 ----------
-Short-term hydrologic modelling of vertical processes and lateral processes.
+
+Short-term hydrologic modelling of vertical and lateral processes.
 
 .. toctree::
   :maxdepth: 3

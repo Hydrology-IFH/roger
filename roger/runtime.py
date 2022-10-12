@@ -10,6 +10,7 @@ from roger.logs import LOGLEVELS
 log_args = local()
 log_args.log_all_processes = False
 log_args.loglevel = "info"
+log_args.log_to_file = True
 
 
 # MPI helpers
@@ -73,7 +74,7 @@ def set_log_to_file(val):
     from roger import logs
 
     log_args.log_to_file = parse_bool(val)
-    logs.setup_logging(loglevel=log_args.loglevel, log_all_processes=log_args.log_to_file, log_to_file=log_args.log_to_file)
+    logs.setup_logging(loglevel=log_args.loglevel, log_all_processes=log_args.log_all_processes, log_to_file=log_args.log_to_file)
     return log_args.log_to_file
 
 
@@ -87,7 +88,6 @@ def set_log_all_processes(val):
 
 DEVICES = ("cpu", "gpu", "tpu")
 FLOAT_TYPES = ("float64", "float32")
-LINEAR_SOLVERS = ("scipy", "scipy_jax", "petsc", "best")
 
 
 # settings
