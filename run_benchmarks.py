@@ -66,7 +66,7 @@ def _round_to_multiple(num, divisor):
 
 @click.command("roger-benchmarks", help="Run Roger benchmarks")
 @click.option(
-    "-s", "--sizes", default=[16.], multiple=True, type=float, required=True, help="Problem sizes to test (total number of elements)"
+    "-s", "--sizes", multiple=True, type=float, required=True, help="Problem sizes to test (total number of elements)"
 )
 @click.option(
     "--backends",
@@ -108,10 +108,10 @@ def _round_to_multiple(num, divisor):
     metavar="BENCHMARK",
 )
 @click.option("--mpiexec", default="mpirun", help="Executable used for calling MPI (e.g. mpirun, mpiexec)")
-@click.option("--debug", is_flag=True, help="Additionally print each command that is executed")
+@click.option("--debug", is_flag=True, help="Prints each command that is executed")
 @click.option("--local", is_flag=True, help="Run benchmark on local computer")
 @click.option("--float-type", default="float64", help="Data type for floating point arrays in Roger components")
-@click.option("--burnin", default=3, type=int, help="Number of iterations to exclude in timings")
+@click.option("--burnin", default=3, type=int, help="Number of iterations to exclude in performance statistic")
 def run(**kwargs):
     proc_decom = _decompose_num(kwargs["nproc"], 2)
     nproc = kwargs["nproc"]
@@ -138,8 +138,9 @@ def run(**kwargs):
                 cmd_args = settings.copy()
                 cmd_args.update(
                     {
-                        "python": sys.executable,
-                        "filename": os.path.realpath(os.path.join(TESTDIR.as_posix(), f)),
+                        "python": "python",
+                        "filename": f,
+                        "dir": TESTDIR.as_posix(),
                         "nx": nx,
                         "ny": ny,
                     }
@@ -158,26 +159,32 @@ def run(**kwargs):
                         if backend in ['numpy']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger\n')
+                            lines.append(f'cd {cmd_args["dir"]}\n')
                             lines.append(f'{cmd_sh}\n')
                         elif backend in ['jax']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger\n')
+                            lines.append(f'cd {cmd_args["dir"]}\n')
                             lines.append(f'{cmd_sh}\n')
                         elif backend in ['jax-gpu']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-gpu\n')
+                            lines.append(f'cd {cmd_args["dir"]}\n')
                             lines.append(f'{cmd_sh}\n')
                         elif backend in ['numpy-mpi']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-mpi\n')
+                            lines.append(f'cd {cmd_args["dir"]}\n')
                             lines.append(f'mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
                         elif backend in ['jax-mpi']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-mpi\n')
+                            lines.append(f'cd {cmd_args["dir"]}\n')
                             lines.append(f'mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
                         elif backend in ['jax-gpu-mpi']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-gpu\n')
+                            lines.append(f'cd {cmd_args["dir"]}\n')
                             lines.append(f'MPI4JAX_USE_CUDA_MPI=1 mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
                     else:
                         # write shell script to submit job to cluster
@@ -191,26 +198,32 @@ def run(**kwargs):
                         if backend in ['numpy']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger\n')
+                            lines.append(f'cd {cmd_args["dir"]}\n')
                             lines.append(f'{cmd_sh}\n')
                         elif backend in ['jax']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger\n')
+                            lines.append(f'cd {cmd_args["dir"]}\n')
                             lines.append(f'{cmd_sh}\n')
                         elif backend in ['jax-gpu']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-gpu\n')
+                            lines.append(f'cd {cmd_args["dir"]}\n')
                             lines.append(f'{cmd_sh}\n')
                         elif backend in ['numpy-mpi']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-mpi\n')
+                            lines.append(f'cd {cmd_args["dir"]}\n')
                             lines.append(f'mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
                         elif backend in ['jax-mpi']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-mpi\n')
+                            lines.append(f'cd {cmd_args["dir"]}\n')
                             lines.append(f'mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
                         elif backend in ['jax-gpu-mpi']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-gpu\n')
+                            lines.append(f'cd {cmd_args["dir"]}\n')
                             lines.append(f'MPI4JAX_USE_CUDA_MPI=1 mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
                     file_path = TESTDIR / 'job.sh'
                     file = open(file_path, "w")
