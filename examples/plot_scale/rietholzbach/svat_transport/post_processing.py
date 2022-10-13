@@ -156,7 +156,7 @@ def main(tmp_dir, sas_solver):
         ages = ds_sim_tm['ages'].values / onp.timedelta64(24 * 60 * 60, "s")
 
         # compare observations and simulations
-        nrows = ds_sim_tm.dims['x'].size
+        nrows = ds_sim_tm.dims['x']
         idx = ds_sim_tm.Time.values  # time index
         # figure to compare simulations with observations
         fig, ax = plt.subplots(figsize=(14, 3.5))
