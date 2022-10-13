@@ -308,7 +308,7 @@ def run(**kwargs):
             with open(kwargs["outfile"], "w") as f:
                 json.dump({"benchmarks": out_data, "settings": settings}, f, indent=4, sort_keys=True)
         else:
-            file = TESTDIR / "timing_files.json"
+            file = TESTDIR / "timing_files_{}.json".format(time.time())
             with open(file, "w") as f:
                 json.dump({"benchmarks": out_data, "settings": settings}, f, indent=4, sort_keys=True)
 
