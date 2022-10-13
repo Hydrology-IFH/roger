@@ -1,7 +1,4 @@
-jaxlib
+jaxlib==0.3.7
 jax
-matplotlib
-seaborn
 xarray
-cftime
 salib

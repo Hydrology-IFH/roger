@@ -7,11 +7,15 @@ import h5netcdf
 import xarray as xr
 import pandas as pd
 from de import de
-import matplotlib.pyplot as plt
 import numpy as onp
 import click
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
+import matplotlib as mpl
+import seaborn as sns
+mpl.use("agg")
+import matplotlib.pyplot as plt  # noqa: E402
+sns.set_style("ticks")
 
 
 @click.option("-td", "--tmp-dir", type=str, default=None)

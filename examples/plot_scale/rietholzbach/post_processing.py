@@ -7,17 +7,17 @@ import xarray as xr
 from cftime import num2date
 import pandas as pd
 import numpy as onp
-import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import matplotlib as mpl
 import yaml
 import click
-import seaborn as sns
 import copy
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
-sns.set_style('ticks', {'xtick.major.size': 8, 'ytick.major.size': 8})
-sns.set_context("paper", font_scale=1.5)
+import matplotlib as mpl
+import seaborn as sns
+mpl.use("agg")
+import matplotlib.pyplot as plt  # noqa: E402
+sns.set_style("ticks")
 
 _LABS_HYDRUS = {
                 'n': r'$n$ [-]',

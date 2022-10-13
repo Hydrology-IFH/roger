@@ -11,8 +11,6 @@ import h5netcdf
 import roger
 import roger.tools.labels as labs
 
-sns.set_context("talk", font_scale=1)
-
 base_path = Path(__file__).parent
 # directory of results
 base_path_results = base_path / "results"

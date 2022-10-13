@@ -237,7 +237,10 @@ def run(**kwargs):
                     else:
                         # submit job to queue
                         if backend in ['numpy', 'jax']:
-                            cmd = f"qsub -q short -N benchmark_{backend}_{real_size} -l nodes=1:ppn=1,walltime=1:00:00,pmem=128000mb job.sh"
+                            pmem = int(4000 * (size / 10000))
+                            if pmem > 128000:
+                                pmem = 128000
+                            cmd = f"qsub -q short -N benchmark_{backend}_{real_size} -l nodes=1:ppn=1,walltime=1:00:00,pmem={pmem}mb job.sh"
                         elif backend in ['numpy-mpi', 'jax-mpi']:
                             nnodes = int(nproc/25)
                             cmd = f"qsub -q short -N benchmark_{backend}_{real_size} -l nodes={nnodes}:ppn=25,walltime=1:00:00,pmem={pmem}mb job.sh"

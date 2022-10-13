@@ -3,7 +3,6 @@ import os
 import glob
 import datetime
 import h5netcdf
-import matplotlib.pyplot as plt
 import xarray as xr
 from cftime import num2date
 import pandas as pd
@@ -12,6 +11,11 @@ import click
 import roger
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
+import matplotlib as mpl
+import seaborn as sns
+mpl.use("agg")
+import matplotlib.pyplot as plt  # noqa: E402
+sns.set_style("ticks")
 
 
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')

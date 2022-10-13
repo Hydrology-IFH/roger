@@ -3,7 +3,6 @@ import os
 import glob
 import h5netcdf
 import datetime
-import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.colors import Normalize
 import xarray as xr
@@ -11,6 +10,11 @@ from cftime import num2date
 import pandas as pd
 import numpy as onp
 import roger.tools.evaluation as eval_utils
+import matplotlib as mpl
+import seaborn as sns
+mpl.use("agg")
+import matplotlib.pyplot as plt  # noqa: E402
+sns.set_style("ticks")
 
 base_path = Path(__file__).parent
 # directory of results

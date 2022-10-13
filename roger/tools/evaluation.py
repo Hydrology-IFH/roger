@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as onp
 import scipy as sp
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib as mpl
 import seaborn as sns
-sns.set_style('ticks', {'xtick.major.size': 8, 'ytick.major.size': 8})
-sns.set_context('paper', font_scale=1.5)
+mpl.use("agg")
+import matplotlib.pyplot as plt  # noqa: E402
+sns.set_style("ticks")
 
 
 def join_obs_on_sim(idx, sim_vals, df_obs, rm_na=False):

@@ -1,5 +1,2 @@
-matplotlib
-seaborn
 xarray
-cftime
 salib

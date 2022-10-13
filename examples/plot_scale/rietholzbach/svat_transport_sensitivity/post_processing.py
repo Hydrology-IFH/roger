@@ -10,6 +10,10 @@ import numpy as onp
 import click
 import roger
 import roger.tools.evaluation as eval_utils
+import matplotlib as mpl
+import seaborn as sns
+mpl.use("agg")
+sns.set_style("ticks")
 
 
 @click.option("-td", "--tmp-dir", type=str, default=None)

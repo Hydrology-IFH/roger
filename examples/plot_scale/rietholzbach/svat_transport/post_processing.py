@@ -3,7 +3,6 @@ import os
 import glob
 import datetime
 import h5netcdf
-import matplotlib.pyplot as plt
 import xarray as xr
 from cftime import num2date
 import pandas as pd
@@ -11,6 +10,11 @@ import numpy as onp
 import click
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
+import matplotlib as mpl
+import seaborn as sns
+mpl.use("agg")
+import matplotlib.pyplot as plt  # noqa: E402
+sns.set_style("ticks")
 
 
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
@@ -50,6 +54,7 @@ def main(tmp_dir, sas_solver):
         diag_files = glob.glob(path)
         tm1 = tm.replace(" ", "_")
         states_tm_file = base_path / sas_solver / age_max / f"states_{tm1}.nc"
+        click.echo(f'Merge output files of {tm} into {states_tm_file.as_posix()}')
         with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
@@ -147,6 +152,7 @@ def main(tmp_dir, sas_solver):
     # load transport simulation
     transport_models = ['complete-mixing', 'advection-dispersion', 'time-variant advection-dispersion', 'preferential', 'time_variant preferential', 'time-variant']
     for tm in transport_models:
+        click.echo(f'Plot results of {tm}')
         tm1 = tm.replace(" ", "_")
         states_tm_file = base_path / sas_solver / age_max / f"states_{tm1}.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
@@ -227,9 +233,9 @@ def main(tmp_dir, sas_solver):
             key_r = f'r_{var_sim}'
             df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
             # plot observed and simulated d18O in percolation
+            ax.plot(ds_sim_tm.Time.values, ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=0).values, color='red')
             ax.scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=4)
             ax.scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=4)
-            ax.plot(ds_sim_tm.Time.values, ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=0).values, color='red')
 
         # write figure to .png
         ax.set_ylabel(r'$\delta^{18}$O [‰]')
@@ -342,7 +348,7 @@ def main(tmp_dir, sas_solver):
             axes[0].text(0.75, 0.83, r'$\overline{TT}$: %s days' % (tt_mean), size=12, horizontalalignment='left',
                          verticalalignment='center', transform=axes[0].transAxes)
             axes[0].set_ylabel('age\n[days]')
-            axes[0].set_ylim((0, 500))
+            axes[0].set_ylim((0,))
             axes[0].set_xlim((df_tt.index[0], df_tt.index[-1]))
             axes[1].bar(df_tt.index, df_tt[var_sim], width=-1, align='edge', edgecolor='grey')
             axes[1].set_ylim(0,)

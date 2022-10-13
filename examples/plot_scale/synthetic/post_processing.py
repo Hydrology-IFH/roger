@@ -3,15 +3,10 @@ from pathlib import Path
 import xarray as xr
 import pandas as pd
 import numpy as onp
-import seaborn as sns
-import matplotlib.pyplot as plt
 import datetime
 import glob
 import h5netcdf
 import roger
-import roger.tools.labels as labs
-
-sns.set_context("talk", font_scale=1)
 
 base_path = Path(__file__).parent
 # directory of results

@@ -15,3 +15,6 @@ dependencies:
     - loguru
     - tqdm
     - cython
+    - matplotlib
+    - seaborn
+    - cftime

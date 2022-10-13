@@ -17,3 +17,6 @@ dependencies:
     - cython
     - h5netcdf
     - h5py
+    - matplotlib
+    - seaborn
+    - cftime

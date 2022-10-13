@@ -8,3 +8,6 @@ loguru==0.6.0
 tqdm==4.64.0
 pandas==1.4.3
 pyyaml==6.0
+matplotlib==3.5.2
+seaborn==0.11.2
+cftime==1.6.1

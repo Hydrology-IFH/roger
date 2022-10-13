@@ -6,12 +6,9 @@ from pathlib import Path
 import xarray as xr
 import pandas as pd
 import numpy as onp
-import seaborn as sns
 import roger
 import roger.tools.labels as labs
 import roger.tools.evaluation as eval_utils
-
-sns.set_context("talk", font_scale=1.2)
 
 base_path = Path(__file__).parent
 # directory of results
