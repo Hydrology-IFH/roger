@@ -14,6 +14,7 @@ class SVATCROPSetup(RogerSetup):
     _base_path = Path(__file__).parent
     _input_dir = _base_path / "input"
 
+    # custom helper functions
     def _read_var_from_nc(self, var, path_dir, file, group=None):
         nc_file = path_dir / file
         if group:
@@ -61,10 +62,14 @@ class SVATCROPSetup(RogerSetup):
         settings.dx = 1
         settings.dy = 1
 
+        # origin of spatial grid
         settings.x_origin = 0.0
         settings.y_origin = 0.0
+        # origin of time steps (e.g. 01-01-2023)
         settings.time_origin = self._get_time_origin(self._input_dir, 'forcing.nc')
 
+        # enable specific processes
+        settings.enable_groundwater_boundary = False
         settings.enable_crop_water_stress = True
         settings.enable_crop_phenology = True
         settings.enable_crop_rotation = True
@@ -83,14 +88,16 @@ class SVATCROPSetup(RogerSetup):
     )
     def set_grid(self, state):
         vs = state.variables
+        settings = state.settingss
 
-        # grid of model runs
+        # spatial grid
         dx = allocate(state.dimensions, ("x"))
-        dx = update(dx, at[:], 1)
+        dx = update(dx, at[:], settings.dx)
         dy = allocate(state.dimensions, ("y"))
-        dy = update(dy, at[:], 1)
-        vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
-        vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
+        dy = update(dy, at[:], settings.dy)
+        # distance from origin
+        vs.x = update(vs.x, at[3:-2], settings.x_origin + npx.cumsum(dx[3:-2]))
+        vs.y = update(vs.y, at[3:-2], settings.y_origin + npx.cumsum(dy[3:-2]))
 
     @roger_routine(
         dist_safe=False,

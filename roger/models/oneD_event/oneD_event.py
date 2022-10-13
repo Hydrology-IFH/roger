@@ -15,6 +15,7 @@ class ONEDEVENTSetup(RogerSetup):
     _base_path = Path(__file__).parent
     _input_dir = _base_path / "input"
 
+    # custom helper functions
     def _read_var_from_nc(self, var, path_dir, file):
         nc_file = path_dir / file
         with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
@@ -54,13 +55,13 @@ class ONEDEVENTSetup(RogerSetup):
         settings.dx = 1
         settings.dy = 1
 
+        # origin of spatial grid
         settings.x_origin = 0.0
         settings.y_origin = 0.0
 
         # enable specific processes
         settings.enable_groundwater_boundary = False
         settings.enable_lateral_flow = True
-        settings.enable_routing = False
 
     @roger_routine(
         dist_safe=False,
@@ -73,17 +74,19 @@ class ONEDEVENTSetup(RogerSetup):
     )
     def set_grid(self, state):
         vs = state.variables
+        settings = state.settings
 
         # temporal grid
         vs.dt_secs = 10 * 60
         vs.dt = 1 / 6
         # spatial grid
         dx = allocate(state.dimensions, ("x"))
-        dx = update(dx, at[:], 1)
+        dx = update(dx, at[:], settings.dx)
         dy = allocate(state.dimensions, ("y"))
-        dy = update(dy, at[:], 1)
-        vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
-        vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
+        dy = update(dy, at[:], settings.dy)
+        # distance from origin
+        vs.x = update(vs.x, at[3:-2], settings.x_origin + npx.cumsum(dx[3:-2]))
+        vs.y = update(vs.y, at[3:-2], settings.y_origin + npx.cumsum(dy[3:-2]))
 
     @roger_routine
     def set_look_up_tables(self, state):

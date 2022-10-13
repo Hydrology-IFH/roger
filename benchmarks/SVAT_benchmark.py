@@ -6,15 +6,15 @@ import h5netcdf
 @benchmark_cli
 def main(size, timesteps):
     from roger import roger_routine, roger_kernel, KernelOutput
-    from roger.models.oneD import ONEDSetup
+    from roger.models.oneD import SVATSetup
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
     from roger.core.surface import calc_parameters_surface_kernel
     import roger.lookuptables as lut
 
-    class ONED2Benchmark(ONEDSetup):
+    class SVAT2Benchmark(SVATSetup):
         _base_path = Path(__file__).parent
-        _input_dir = _base_path / 'input' / 'oneD_benchmark'
+        _input_dir = _base_path / 'input' / 'SVAT_benchmark'
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = self._input_dir / file
@@ -31,7 +31,7 @@ def main(size, timesteps):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = "ONED2Benchmark"
+            settings.identifier = "SVAT2Benchmark"
 
             # total grid numbers in x- and y-direction
             settings.nx, settings.ny = size
@@ -46,7 +46,7 @@ def main(size, timesteps):
             settings.time_origin = self._get_time_origin(self._input_dir, 'forcing.nc')
 
             # enable specific processes
-            settings.enable_lateral_flow = True
+            settings.enable_groundwater_boundary = False
 
         @roger_routine(
             dist_safe=False,
@@ -69,18 +69,11 @@ def main(size, timesteps):
         def set_look_up_tables(self, state):
             vs = state.variables
 
-            # land use-dependent interception storage
             vs.lut_ilu = update(vs.lut_ilu, at[:, :], lut.ARR_ILU)
-            # land use-dependent ground cover
             vs.lut_gc = update(vs.lut_gc, at[:, :], lut.ARR_GC)
-            # land use-dependent maximum ground cover
             vs.lut_gcm = update(vs.lut_gcm, at[:, :], lut.ARR_GCM)
-            # land use-dependent maximum ground cover
             vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
-            # land use-dependent rooting depth
             vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
-            # macropore flow velocities
-            vs.lut_mlms = update(vs.lut_mlms, at[:, :], lut.ARR_MLMS)
 
         @roger_routine
         def set_topography(self, state):
@@ -90,33 +83,16 @@ def main(size, timesteps):
         def set_parameters_setup(self, state):
             vs = state.variables
 
-            # land use ID (see README for description)
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
-            # degree of sealing (-)
             vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
-            # surface slope (-)
-            vs.slope = update(vs.slope, at[2:-2, 2:-2], 0.05)
-            # convert slope to percentage
-            vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
-            # total surface depression storage (mm)
             vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
-            # soil depth (mm)
-            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1000)
-            # density of vertical macropores (1/m2)
+            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2000)
             vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
-            # density of horizontal macropores (1/m2)
-            vs.dmph = update(vs.dmph, at[2:-2, 2:-2], 50)
-            # total length of vertical macropores (mm)
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 600)
-            # air capacity (-)
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 50)
             vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.1)
-            # usable field capacity (-)
             vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.1)
-            # permanent wilting point (-)
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.2)
-            # saturated hydraulic conductivity (mm/h)
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2],  0.2)
             vs.ks = update(vs.ks, at[2:-2, 2:-2], 5)
-            # hydraulic conductivity of bedrock/saturated zone (mm/h)
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
         @roger_routine
@@ -134,23 +110,7 @@ def main(size, timesteps):
         def set_initial_conditions(self, state):
             vs = state.variables
 
-            # interception storage of upper surface layer (mm)
-            vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, :vs.taup1], 0)
-            # snow water equivalent stored in upper surface layer (mm)
-            vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, :vs.taup1], 0)
-            # interception storage of lower surface layer (mm)
-            vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, :vs.taup1], 0)
-            # snow water equivalent stored in lower surface layer (mm)
-            vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, :vs.taup1], 0)
-            # surface depression storage (mm)
-            vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
-            # snow cover storage (mm)
-            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
-            # snow water equivalent of snow cover (mm)
-            vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
-            # soil water content of root zone/upper soil layer (-)
             vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.3)
-            # soil water content of subsoil/lower soil layer (-)
             vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.3)
 
         @roger_routine
@@ -315,7 +275,6 @@ def main(size, timesteps):
         def after_timestep(self, state):
             vs = state.variables
 
-            # shift variables backwards
             vs.update(after_timestep_kernel(state))
 
     @roger_kernel
@@ -438,6 +397,23 @@ def main(size, timesteps):
             vs.z0,
             at[2:-2, 2:-2, vs.taum1], vs.z0[2:-2, 2:-2, vs.tau],
         )
+        # set to 0 for numerical errors
+        vs.S_fp_rz = update(
+            vs.S_fp_rz,
+            at[2:-2, 2:-2], npx.where((vs.S_fp_rz > -1e-6) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz)[2:-2, 2:-2],
+        )
+        vs.S_lp_rz = update(
+            vs.S_lp_rz,
+            at[2:-2, 2:-2], npx.where((vs.S_lp_rz > -1e-6) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz)[2:-2, 2:-2],
+        )
+        vs.S_fp_ss = update(
+            vs.S_fp_ss,
+            at[2:-2, 2:-2], npx.where((vs.S_fp_ss > -1e-6) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss)[2:-2, 2:-2],
+        )
+        vs.S_lp_ss = update(
+            vs.S_lp_ss,
+            at[2:-2, 2:-2], npx.where((vs.S_lp_ss > -1e-6) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss)[2:-2, 2:-2],
+        )
         vs.prec = update(
             vs.prec,
             at[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau],
@@ -485,18 +461,22 @@ def main(size, timesteps):
             h_rz=vs.h_rz,
             h_ss=vs.h_ss,
             h=vs.h,
+            k_rz=vs.k_rz,
+            k_ss=vs.k_ss,
+            k=vs.k,
             z0=vs.z0,
             prec=vs.prec,
             event_id=vs.event_id,
             year=vs.year,
             month=vs.month,
             doy=vs.doy,
-            k_rz=vs.k_rz,
-            k_ss=vs.k_ss,
-            k=vs.k,
+            S_fp_rz=vs.S_fp_rz,
+            S_lp_rz=vs.S_lp_rz,
+            S_fp_ss=vs.S_fp_ss,
+            S_lp_ss=vs.S_lp_ss,
         )
 
-    model = ONED2Benchmark()
+    model = SVAT2Benchmark()
     model.setup()
     model.run()
     return
