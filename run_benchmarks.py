@@ -265,6 +265,7 @@ def run(**kwargs):
                     else:
                         try:
                             # read output stream
+                            _ = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
                             path = str(TESTDIR / f"benchmark_{backend}_{real_size}.e*")
                             job_id = glob.glob(path)[0].split('.e')[-1]
                             file = open(f'benchmark_{backend}_{real_size}.o{job_id}', 'r')
