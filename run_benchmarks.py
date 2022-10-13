@@ -253,31 +253,14 @@ def run(**kwargs):
                     sys.stdout.write(f"  {backend:<15} ... ")
                     sys.stdout.flush()
 
-                    if kwargs["local"]:
-                        try:
-                            output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-                            output = output.decode("utf-8")
-                        except subprocess.CalledProcessError as e:
-                            click.echo("failed")
-                            click.echo(e.output.decode("utf-8"))
-                            all_passed = False
-                            continue
-                    else:
-                        try:
-                            # read output stream
-                            job = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT)
-                            job.wait()
-                            path = str(TESTDIR / f"benchmark_{backend}_{real_size}.e*")
-                            job_id = glob.glob(path)[0].split('.e')[-1]
-                            file = open(f'benchmark_{backend}_{real_size}.o{job_id}', 'r')
-                            lines = file.read().splitlines()
-                            file.close()
-                            output = "\n".join(lines)
-                        except subprocess.CalledProcessError as e:
-                            click.echo("failed")
-                            click.echo(e.output.decode("utf-8"))
-                            all_passed = False
-                            continue
+                    try:
+                        # read output stream
+                        output = subprocess.run(cmd, check=True, capture_output=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
+                    except subprocess.CalledProcessError as e:
+                        click.echo("failed")
+                        click.echo(e.output.decode("utf-8"))
+                        all_passed = False
+                        continue
 
                     iteration_times = list(map(float, re.findall(TIME_PATTERN, output)))[kwargs["burnin"] :]
                     if not iteration_times:
