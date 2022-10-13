@@ -2,7 +2,6 @@
 
 import sys
 import os
-import glob
 import subprocess
 import re
 import time
@@ -253,39 +252,65 @@ def run(**kwargs):
                     sys.stdout.write(f"  {backend:<15} ... ")
                     sys.stdout.flush()
 
-                    try:
-                        # read output stream
-                        output = subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True).stdout
-                        click.echo(f"{output}")
-                    except subprocess.CalledProcessError as e:
-                        click.echo("failed")
-                        click.echo(e.output.decode("utf-8"))
-                        all_passed = False
-                        continue
+                    if kwargs["local"]:
+                        try:
+                            # read output stream
+                            output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+                        except subprocess.CalledProcessError as e:
+                            click.echo("failed")
+                            click.echo(e.output.decode("utf-8"))
+                            all_passed = False
+                            continue
 
-                    iteration_times = list(map(float, re.findall(TIME_PATTERN, output)))[kwargs["burnin"] :]
-                    if not iteration_times:
-                        raise RuntimeError("could not extract iteration times from output")
+                        output = output.decode("utf-8")
+                        iteration_times = list(map(float, re.findall(TIME_PATTERN, output)))[kwargs["burnin"] :]
+                        if not iteration_times:
+                            raise RuntimeError("could not extract iteration times from output")
 
-                    total_elapsed = sum(iteration_times)
-                    click.echo(f"{total_elapsed:>6.2f}s")
+                        total_elapsed = sum(iteration_times)
+                        click.echo(f"{total_elapsed:>6.2f}s")
 
-                    out_data[f].append(
-                        {
-                            "backend": backend,
-                            "size": real_size,
-                            "wall_time": total_elapsed,
-                            "per_iteration": {
-                                "best": float(np.min(iteration_times)),
-                                "worst": float(np.max(iteration_times)),
-                                "mean": float(np.mean(iteration_times)),
-                                "stdev": float(np.std(iteration_times)),
-                            },
-                        }
-                    )
+                        out_data[f].append(
+                            {
+                                "backend": backend,
+                                "size": real_size,
+                                "wall_time": total_elapsed,
+                                "per_iteration": {
+                                    "best": float(np.min(iteration_times)),
+                                    "worst": float(np.max(iteration_times)),
+                                    "mean": float(np.mean(iteration_times)),
+                                    "stdev": float(np.std(iteration_times)),
+                                },
+                            }
+                        )
+                    else:
+                        try:
+                            # submit job
+                            job_id = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+                            job_id = job_id.decode("utf-8")
+                        except subprocess.CalledProcessError as e:
+                            click.echo("failed")
+                            click.echo(e.output.decode("utf-8"))
+                            all_passed = False
+                            continue
+
+                        click.echo(f"submitted benchmark_{backend}_{real_size}")
+                        out_data[f].append(
+                            {
+                                "backend": backend,
+                                "size": real_size,
+                                "timing_file": f"benchmark_{backend}_{real_size}.o{job_id}",
+                            }
+                        )
+
     finally:
-        with open(kwargs["outfile"], "w") as f:
-            json.dump({"benchmarks": out_data, "settings": settings}, f, indent=4, sort_keys=True)
+        if kwargs["local"]:
+            with open(kwargs["outfile"], "w") as f:
+                json.dump({"benchmarks": out_data, "settings": settings}, f, indent=4, sort_keys=True)
+        else:
+            file = TESTDIR / "timing_files.json"
+            with open(file, "w") as f:
+                json.dump({"benchmarks": out_data, "settings": settings}, f, indent=4, sort_keys=True)
 
     raise SystemExit(int(not all_passed))
 
