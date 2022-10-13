@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A short introduction to Roger &mdash; RoGeR 0.0.1+41.gdf5e102.dirty documentation</title>
+  <title>A short introduction to Roger &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+41.gdf5e102.dirty
+                0.0.1+62.g04ad513.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -150,43 +150,55 @@
 </ul>
 <p><strong>Subsurface Runoff</strong>:</p>
 <ul class="simple">
-<li><p>capillary-driven vertical soil drainage based on Buckingham-Darcy</p></li>
 <li><p>gravity-driven infiltration based on viscous flow approach (<a class="reference internal" href="#germann2018" id="id4"><span>[Germann2018]</span></a>)</p></li>
 <li><p>lateral subsurface runoff in the soil as described in <a class="reference internal" href="#steinbrich2016" id="id5"><span>[Steinbrich2016]</span></a></p></li>
 </ul>
+<p><strong>Percolation</strong>:</p>
+<ul class="simple">
+<li><p>capillary-driven vertical drainage (<a class="reference internal" href="#salvucci1993" id="id6"><span>[Salvucci1993]</span></a>)</p></li>
+<li><p>gravity-driven vertical drainage based on viscous flow approach (<a class="reference internal" href="#germann2018" id="id7"><span>[Germann2018]</span></a>)</p></li>
+</ul>
 <p><strong>Capillary rise</strong>:</p>
 <ul class="simple">
-<li><p>capillary-driven vertical uplift (<a class="reference internal" href="#salvucci1993" id="id6"><span>[Salvucci1993]</span></a>)</p></li>
+<li><p>capillary-driven vertical uplift (<a class="reference internal" href="#salvucci1993" id="id8"><span>[Salvucci1993]</span></a>)</p></li>
 </ul>
 <p><strong>Groundwater flow</strong>:</p>
 <ul class="simple">
-<li><p>spatial explicit representation of shallow groundwater following <a class="reference internal" href="#stoll2010" id="id7"><span>[Stoll2010]</span></a></p></li>
+<li><p>spatial explicit representation of shallow groundwater following <a class="reference internal" href="#stoll2010" id="id9"><span>[Stoll2010]</span></a></p></li>
 </ul>
 <p><strong>Crop phenology and crop rotation</strong>:</p>
 <ul class="simple">
-<li><p>time-varying crop canopy cover and crop root depth is implemented as in <a class="reference internal" href="#steduto2009" id="id8"><span>[Steduto2009]</span></a></p></li>
+<li><p>time-varying crop canopy cover and crop root depth is implemented as in <a class="reference internal" href="#steduto2009" id="id10"><span>[Steduto2009]</span></a></p></li>
 </ul>
 <p><strong>Offline transport</strong>:</p>
 <ul class="simple">
-<li><p>StorAge selection (SAS) functions (<a class="reference internal" href="#rinaldo2015" id="id9"><span>[Rinaldo2015]</span></a>) are used to calculate travel time distributions, residence time distribution and solute concentrations</p></li>
+<li><p>StorAge selection (SAS) functions (<a class="reference internal" href="#rinaldo2015" id="id11"><span>[Rinaldo2015]</span></a>) are used to calculate travel time distributions, residence time distribution and solute concentrations</p></li>
 </ul>
 </section>
 <section id="available-model-structures">
 <h3>Available model structures<a class="headerlink" href="#available-model-structures" title="Permalink to this headline">¶</a></h3>
-<p><strong>SVAT</strong>:
-- only vertical processes are considered
-- no lateral processes (i.e. no lateral exchange between grid cells)</p>
-<p><strong>SVAT-CROP</strong>:
-- same as SVAT, but crop phenology (i.e. varying rooting depth and varying canopy cover) is
-explicitly represented</p>
-<p><strong>ONED</strong>:
-- vertical and lateral processes are considered</p>
-<p><strong>ONED-EVENT</strong>:
-- vertical and lateral processes are considered
-- simulation of a single event</p>
-<p><strong>SVAT_TRANSPORT</strong>:
-- calculates offline coupled solute transport based on the hydrologic simulations from
-the SVAT model</p>
+<p><strong>SVAT</strong>:</p>
+<ul class="simple">
+<li><p>only vertical processes are considered</p></li>
+<li><p>no lateral processes (i.e. no lateral exchange between grid cells)</p></li>
+</ul>
+<p><strong>SVAT-CROP</strong>:</p>
+<ul class="simple">
+<li><p>same as SVAT, but crop phenology (i.e. varying rooting depth and varying canopy cover) is explicitly represented</p></li>
+</ul>
+<p><strong>ONED</strong>:</p>
+<ul class="simple">
+<li><p>vertical and lateral processes are considered</p></li>
+</ul>
+<p><strong>ONED-EVENT</strong>:</p>
+<ul class="simple">
+<li><p>vertical and lateral processes are considered</p></li>
+<li><p>simulation of a single event</p></li>
+</ul>
+<p><strong>SVAT_TRANSPORT</strong>:</p>
+<ul class="simple">
+<li><p>calculates offline coupled solute transport based on the hydrologic simulations from the SVAT model</p></li>
+</ul>
 </section>
 <section id="diagnostics">
 <h3>Diagnostics<a class="headerlink" href="#diagnostics" title="Permalink to this headline">¶</a></h3>

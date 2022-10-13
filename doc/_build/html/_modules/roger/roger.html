@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.roger &mdash; RoGeR 0.0.1+41.gdf5e102.dirty documentation</title>
+  <title>roger.roger &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -27,7 +27,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+41.gdf5e102.dirty
+                0.0.1+62.g04ad513.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -430,7 +430,7 @@
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_chloride</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_bromide</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_oxygen18</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_deuterium</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_nitrate</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;IMPORTANT: Always check your logger output for warnings</span><span class="se">\n</span><span class="s2"> on diverging solutions. The occurence of warnings may</span><span class="se">\n</span><span class="s2"> require an post-evaluation of the accuracy of</span><span class="se">\n</span><span class="s2"> the numerical solution (e.g. calculate</span><span class="se">\n</span><span class="s2"> standard deviation of dS_num_error or dC_num_error).</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;IMPORTANT: Always check your logger output for warnings</span><span class="se">\n</span><span class="s2"> on diverging solutions. The occurence of warnings may</span><span class="se">\n</span><span class="s2"> require an post-evaluation of the accuracy of</span><span class="se">\n</span><span class="s2"> the numerical solution (e.g. calculate</span><span class="se">\n</span><span class="s2"> standard deviation of dS_num_error and dC_num_error).</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;IMPORTANT: Always check your logger output for warnings</span><span class="se">\n</span><span class="s2"> on diverging solutions. The occurence of warnings may</span><span class="se">\n</span><span class="s2"> require an post-evaluation of the accuracy of</span><span class="se">\n</span><span class="s2"> the numerical solution (e.g. calculate</span><span class="se">\n</span><span class="s2"> standard deviation of dS_num_error).</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="nd">@roger_routine</span>
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>

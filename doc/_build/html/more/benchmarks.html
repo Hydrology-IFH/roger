@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Benchmarks &mdash; RoGeR 0.0.1+41.gdf5e102.dirty documentation</title>
+  <title>Benchmarks &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -30,7 +30,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+41.gdf5e102.dirty
+                0.0.1+62.g04ad513.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -108,25 +108,25 @@
 <h1>Benchmarks<a class="headerlink" href="#benchmarks" title="Permalink to this headline">¶</a></h1>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>The following benchmarks are for general orientation only. Benchmark results are highly platform dependent; your mileage may vary.</p>
+<p>The following benchmarks are for general orientation only. Benchmark results are highly platform dependent (e.g. processor frequency); your mileage may vary.</p>
 </div>
 <section id="varying-problem-size">
 <h2>Varying problem size<a class="headerlink" href="#varying-problem-size" title="Permalink to this headline">¶</a></h2>
-<p>This benchmark varies the size of the computational domain and records the runtime per iteration. It is executed on a single machine with 25 CPU cores and an Nvidia Tesla K80 GPU.</p>
+<p>This benchmark varies the size of the computational domain and records the runtime per iteration. The computations are executed on a single computing node with 25 CPU cores and an Nvidia Tesla K80 GPU.</p>
 <p>We run the same model code with all Roger backends (<code class="docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="docutils literal notranslate"><span class="pre">numpy-mpi</span></code>, <code class="docutils literal notranslate"><span class="pre">jax</span></code>, <code class="docutils literal notranslate"><span class="pre">jax-mpi</span></code>, <code class="docutils literal notranslate"><span class="pre">jax-gpu</span></code>).</p>
 <figure class="align-center">
 <a class="reference internal image-reference" href="../_images/oneD_scaling_size.png"><img alt="../_images/oneD_scaling_size.png" src="../_images/oneD_scaling_size.png" style="width: 500px;" /></a>
 </figure>
 <figure class="align-center">
-<a class="reference internal image-reference" href="../_images/oneD_scaling_size_speedup.png"><img alt="../_images/oneD_scaling_size_speedup.png" src="../_images/oneD_scaling_size_speedup.png" style="width: 500px;" /></a>
+<a class="reference internal image-reference" href="../_images/oneD_speedup_numpy.png"><img alt="../_images/oneD_speedup_numpy.png" src="../_images/oneD_speedup_numpy.png" style="width: 500px;" /></a>
 </figure>
 <p>As a rule of thumb, we find that JAX is faster than NumPy for a greater grid cell count. GPUs are a competitive alternative to CPUs, <strong>as long as the problem fits into GPU memory</strong>.</p>
 </section>
 <section id="varying-number-of-mpi-processes">
 <h2>Varying number of MPI processes<a class="headerlink" href="#varying-number-of-mpi-processes" title="Permalink to this headline">¶</a></h2>
-<p>In this benchmark, Roger is run for a fixed problem size, but varying number of processes. This allows us to check how model scales with increased CPU count. The problem size corresponds to 1 billion cells.</p>
-<p>It is executed on the <a class="reference external" href="https://www.binac.uni-tuebingen.de/">bwForCluster BinAC</a> cluster. Each cluster node contains 28 CPUs.</p>
-<p>The results show that Roger scales well with increasing number of processes, even for this moderate problem size.</p>
+<p>Roger is run for a fixed problem size, but varying number of processes. This allows us the evaluation of the scaling with increased CPU count. The problem size corresponds to 1 billion cells.</p>
+<p>The computational benchmark experiment is executed on the <a class="reference external" href="https://www.binac.uni-tuebingen.de/">bwForCluster BinAC</a> cluster. Each computing node contains 28 CPUs.</p>
+<p>The results show that Roger scales well with increasing number of processes.</p>
 </section>
 </section>
 

@@ -28,8 +28,7 @@ if not os.path.exists(base_path_figs):
 
 # merge model output into single file
 tm_structures = ['complete-mixing', 'piston',
-                 'preferential', 'advection-dispersion',
-                 'time-variant preferential',
+                 'advection-dispersion',
                  'time-variant advection-dispersion']
 years = onp.arange(1997, 2007).tolist()
 for tm_structure in tm_structures:
@@ -158,7 +157,7 @@ for tm_structure in tm_structures:
         # in liter per hour
         df_perc_br_sim.loc[:, 'perc'] = ds_sim_hm.sel(date=slice(str(year), str(year + 1)))['q_ss'].isel(x=0, y=0).values * (3.14/24)
         # in mg per liter
-        df_perc_br_sim.loc[:, 'Br_conc_mg'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values * 3.14
+        df_perc_br_sim.loc[:, 'Br_conc_mg'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values
         # in mmol per liter
         df_perc_br_sim.loc[:, 'Br_conc_mmol'] = df_perc_br_sim.loc[:, 'Br_conc_mg'] / 79.904
         # daily samples from day 0 to day 220

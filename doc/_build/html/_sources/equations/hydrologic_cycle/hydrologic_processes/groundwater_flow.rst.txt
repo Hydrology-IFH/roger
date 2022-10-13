@@ -18,9 +18,9 @@ Lateral groundwater flow :math:`q_{gw}` (m :math:`\Delta t^{-1}`) at time step t
 
 .. math::
 
-    q_{gw} =  T_{gw} \cdot \beta \cdot w
+    q_{gw} =  T_{gw} \cdot \i_{gw} \cdot w
 
-where :math:`\beta` is the slope of the groundwater table at time step t (-) and
+where :math:`i_{gw}` is the slope of the groundwater table at time step t (-) and
 :math:`w` is the width of the flow (m)
 
 

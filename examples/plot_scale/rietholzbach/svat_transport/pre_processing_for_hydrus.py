@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import xarray as xr
 from cftime import num2date
 import pandas as pd
+from datetime import timedelta
 import numpy as onp
 
 base_path = Path(__file__).parent
@@ -79,6 +80,8 @@ df_ctop.loc[:, 'cTop'] = ds_sim_tm['C_iso_in'].isel(x=0, y=0).values
 
 df = pd.DataFrame(index=date_obs)
 df = df.join([df_tatm, df_prec, df_rsoil, df_rroot, df_hcrita, df_ttop, df_ampl, df_ctop])
+df.columns = [['', '[mm/day]', '[-]', '[-]', '[cm]', '[degC]', '[K]', '[per mil]'],
+              ['tAtm', 'Prec', 'rSoil', 'rRoot', 'hCritA', 'tTop', 'Ampl', 'cTop']]
 
 file = base_path / "results" / "atmosphere_daily_18O.csv"
 df.to_csv(file, header=True, index=False, sep=";")
@@ -150,11 +153,17 @@ for year in years:
     # set new injection dates within 20 mm of cumulated rainfall
     cond = (df_prec.loc[injection_date:, 'Prec'].values.cumsum() <= 20)
     injection_dates_new = df_prec.loc[injection_date:, ].index[cond]
-    df_ctop.loc[injection_dates_new, 'cTop'] = (79.9/3.14)/df_prec.loc[injection_dates_new, 'Prec']  # bromide mass in g per m2
+    if df_prec.loc[injection_dates_new, 'Prec'].sum() > 0:
+        df_ctop.loc[injection_dates_new, 'cTop'] = (79.9/3.14)/df_prec.loc[injection_dates_new, 'Prec']  # bromide mass in g per m2
+    else:
+        injection_dates_new = injection_dates_new[-1] + timedelta(days=1)
+        df_ctop.loc[injection_dates_new, 'cTop'] = (79.9/3.14)/df_prec.loc[injection_dates_new, 'Prec']
     df_ctop.replace([onp.inf, -onp.inf, onp.nan], 0, inplace=True)
 
     df_year = pd.DataFrame(index=date_obs_year)
     df_year = df_year.join([df_tatm, df_prec, df_rsoil, df_rroot, df_hcrita, df_ttop, df_ampl, df_ctop])
+    df_year.columns = [['', '[mm/day]', '[-]', '[-]', '[cm]', '[degC]', '[K]', '[g/l]'],
+                       ['tAtm', 'Prec', 'rSoil', 'rRoot', 'hCritA', 'tTop', 'Ampl', 'cTop']]
 
     file = base_path / "results" / f"atmosphere_daily_bromide_{year}.csv"
     df_year.to_csv(file, header=True, index=False, sep=";")

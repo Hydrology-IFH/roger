@@ -16,11 +16,11 @@ Long-term hydrologic modelling of vertical processes.
 
    storages/surface
    storages/soil
+   hydrologic_processes/evapotranspiration
    hydrologic_processes/snow
    hydrologic_processes/interception
    hydrologic_processes/infiltration
    hydrologic_processes/vertical_flow_soil
-   hydrologic_processes/evapotranspiration
 
 
 SVAT-CROP
@@ -39,11 +39,11 @@ Long-term hydrologic modelling of vertical processes including crop phenology/cr
   crop_phenology
   storages/surface
   storages/soil
+  hydrologic_processes/evapotranspiration
   hydrologic_processes/snow
   hydrologic_processes/interception
   hydrologic_processes/infiltration
   hydrologic_processes/vertical_flow_soil
-  hydrologic_processes/evapotranspiration
 
 
 ONED
@@ -60,12 +60,13 @@ Long-term hydrologic modelling of vertical and lateral processes.
 
    storages/surface
    storages/soil
+   hydrologic_processes/evapotranspiration
    hydrologic_processes/snow
    hydrologic_processes/interception
    hydrologic_processes/infiltration
+   hydrologic_processes/surface_runoff
    hydrologic_processes/vertical_flow_soil
    hydrologic_processes/lateral_flow_soil
-   hydrologic_processes/evapotranspiration
 
 
 ONED-EVENT
@@ -81,6 +82,6 @@ Short-term hydrologic modelling of vertical and lateral processes.
   hydrologic_processes/snow
   hydrologic_processes/interception
   hydrologic_processes/infiltration
+  hydrologic_processes/surface_runoff
   hydrologic_processes/vertical_flow_soil
   hydrologic_processes/lateral_flow_soil
-  hydrologic_processes/evapotranspiration

@@ -41,9 +41,13 @@ Soil hydraulic parameters are approximated by the Brooks-Corey scheme.
 
 **Subsurface Runoff**:
 
-- capillary-driven vertical soil drainage based on Buckingham-Darcy
 - gravity-driven infiltration based on viscous flow approach ([Germann2018]_)
 - lateral subsurface runoff in the soil as described in [Steinbrich2016]_
+
+**Percolation**:
+
+- capillary-driven vertical drainage ([Salvucci1993]_)
+- gravity-driven vertical drainage based on viscous flow approach ([Germann2018]_)
 
 **Capillary rise**:
 
@@ -66,23 +70,26 @@ Available model structures
 +++++++++++++++++++++++++++
 
 **SVAT**:
+
 - only vertical processes are considered
 - no lateral processes (i.e. no lateral exchange between grid cells)
 
 **SVAT-CROP**:
-- same as SVAT, but crop phenology (i.e. varying rooting depth and varying canopy cover) is
-explicitly represented
+
+- same as SVAT, but crop phenology (i.e. varying rooting depth and varying canopy cover) is explicitly represented
 
 **ONED**:
+
 - vertical and lateral processes are considered
 
 **ONED-EVENT**:
+
 - vertical and lateral processes are considered
 - simulation of a single event
 
 **SVAT_TRANSPORT**:
-- calculates offline coupled solute transport based on the hydrologic simulations from
-the SVAT model
+
+- calculates offline coupled solute transport based on the hydrologic simulations from the SVAT model
 
 
 Diagnostics

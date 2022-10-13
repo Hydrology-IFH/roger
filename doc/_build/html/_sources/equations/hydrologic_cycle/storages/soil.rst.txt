@@ -72,6 +72,8 @@ Hydraulic conductivity :math:`k` (mm h-1):
 .. math::
   k=\frac{k_s}{1+\omega^m}
 
+with :math:`k_s` saturated hydraulic conductivity (:math:`m h^{-1}`).
+
 
 Soil water content at :math:`10^{2.7}` hPa :math:`\theta_{27}` (-):
 
