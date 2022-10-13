@@ -2,6 +2,7 @@
 
 import sys
 import os
+import glob
 import subprocess
 import re
 import time
@@ -252,18 +253,31 @@ def run(**kwargs):
                     sys.stdout.write(f"  {backend:<15} ... ")
                     sys.stdout.flush()
 
-                    try:
-                        output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-                    except subprocess.CalledProcessError as e:
-                        click.echo("failed")
-                        click.echo(e.output.decode("utf-8"))
-                        all_passed = False
-                        continue
+                    if kwargs["local"]:
+                        try:
+                            output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+                            output = output.decode("utf-8")
+                        except subprocess.CalledProcessError as e:
+                            click.echo("failed")
+                            click.echo(e.output.decode("utf-8"))
+                            all_passed = False
+                            continue
+                    else:
+                        try:
+                            # read output stream
+                            path = str(TESTDIR / f"benchmark_{backend}_{real_size}.e*")
+                            job_id = glob.glob(path)[0].split('.e')[-1]
+                            file = open(f'benchmark_{backend}_{real_size}.o{job_id}', 'r')
+                            lines = file.read().splitlines()
+                            file.close()
+                            output = "\n".join(lines)
+                        except subprocess.CalledProcessError as e:
+                            click.echo("failed")
+                            click.echo(e.output.decode("utf-8"))
+                            all_passed = False
+                            continue
 
-                    output = output.decode("utf-8")
-                    click.echo(f"{output}")
                     iteration_times = list(map(float, re.findall(TIME_PATTERN, output)))[kwargs["burnin"] :]
-                    click.echo(f"{iteration_times}")
                     if not iteration_times:
                         raise RuntimeError("could not extract iteration times from output")
 
