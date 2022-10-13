@@ -286,8 +286,9 @@ def run(**kwargs):
                     else:
                         try:
                             # submit job
-                            job_id = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-                            job_id = job_id.decode("utf-8")
+                            job_id1 = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+                            job_id1 = job_id1.decode("utf-8")
+                            job_id = re.sub(r'[\n]', '', job_id1)
                         except subprocess.CalledProcessError as e:
                             click.echo("failed")
                             click.echo(e.output.decode("utf-8"))
@@ -308,8 +309,8 @@ def run(**kwargs):
             with open(kwargs["outfile"], "w") as f:
                 json.dump({"benchmarks": out_data, "settings": settings}, f, indent=4, sort_keys=True)
         else:
-            file = TESTDIR / "timing_files_{}.json".format(time.time())
-            with open(file, "w") as f:
+            kwargs["outfile"] = "timing_files_{}.json".format(time.time())
+            with open(kwargs["outfile"], "w") as f:
                 json.dump({"benchmarks": out_data, "settings": settings}, f, indent=4, sort_keys=True)
 
     raise SystemExit(int(not all_passed))
