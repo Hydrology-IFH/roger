@@ -10,6 +10,7 @@ debug_snippets.py
 
 # benchmark output
 benchmark_*.json
+benchmarks/*.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
