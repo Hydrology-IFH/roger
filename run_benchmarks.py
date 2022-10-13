@@ -261,7 +261,9 @@ def run(**kwargs):
                         continue
 
                     output = output.decode("utf-8")
+                    click.echo(f"{output}")
                     iteration_times = list(map(float, re.findall(TIME_PATTERN, output)))[kwargs["burnin"] :]
+                    click.echo(f"{iteration_times}")
                     if not iteration_times:
                         raise RuntimeError("could not extract iteration times from output")
 

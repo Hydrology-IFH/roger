@@ -61,6 +61,7 @@ def main():
     class ONEDSetup(RogerSetup):
         """A 1D model.
         """
+        # custom attributes required by helper functions
         _base_path = Path(__file__).parent
         _input_dir = None
 
@@ -91,6 +92,12 @@ def main():
                 var_obj = infile.variables['dt']
                 return onp.sum(onp.array(var_obj))
 
+        def _get_time_origin(self, path_dir, file):
+            nc_file = path_dir / file
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables['Time'].attrs['time_origin']
+                return str(var_obj)
+
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
@@ -104,11 +111,12 @@ def main():
             # spatial discretization (in meters)
             settings.dx = 1
             settings.dy = 1
-            settings.dz = 1
 
+            # origin of spatial grid
             settings.x_origin = 0.0
             settings.y_origin = 0.0
-            settings.time_origin = "2010-09-30 23:00:00"
+            # origin of time steps (e.g. 01-01-2023)
+            settings.time_origin = self._get_time_origin(self._input_dir, 'forcing.nc')
 
             # enable specific processes
             settings.enable_groundwater_boundary = False
@@ -124,13 +132,16 @@ def main():
         )
         def set_grid(self, state):
             vs = state.variables
+            settings = state.settings
+
             # spatial grid
             dx = allocate(state.dimensions, ("x"))
-            dx = update(dx, at[:], 1)
+            dx = update(dx, at[:], settings.dx)
             dy = allocate(state.dimensions, ("y"))
-            dy = update(dy, at[:], 1)
-            vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
-            vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
+            dy = update(dy, at[:], settings.dy)
+            # distance from origin
+            vs.x = update(vs.x, at[3:-2], settings.x_origin + npx.cumsum(dx[3:-2]))
+            vs.y = update(vs.y, at[3:-2], settings.y_origin + npx.cumsum(dy[3:-2]))
 
         @roger_routine
         def set_look_up_tables(self, state):

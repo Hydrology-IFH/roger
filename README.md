@@ -11,7 +11,7 @@ Roger, *Runoff Generation Research*, is a process-based hydrologic model that ca
 Roger supports a NumPy backend for small-scale problems, and a
 high-performance [JAX](https://github.com/google/jax) backend
 with CPU and GPU support. Parallel computation is available via MPI and supports
-distributed execution on any number of nodes/CPU cores, including multi-GPU architectures.
+distributed execution on any number of nodes/CPU cores.
 
 Inspired by [Veros](https://veros.readthedocs.io/en/latest/).
 

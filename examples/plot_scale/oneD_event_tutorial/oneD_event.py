@@ -58,6 +58,7 @@ def main():
     class ONEDEVENTSetup(RogerSetup):
         """A 1D model for a single event.
         """
+        # custom attributes required by helper functions
         _base_path = Path(__file__).parent
         _input_dir = None
 
@@ -109,13 +110,13 @@ def main():
             settings.dx = 1
             settings.dy = 1
 
+            # origin of spatial grid
             settings.x_origin = 0.0
             settings.y_origin = 0.0
 
             # enable specific processes
             settings.enable_groundwater_boundary = False
             settings.enable_lateral_flow = True
-            settings.enable_routing = False
 
         @roger_routine(
             dist_safe=False,
@@ -128,17 +129,19 @@ def main():
         )
         def set_grid(self, state):
             vs = state.variables
+            settings = state.settings
 
             # temporal grid
             vs.dt_secs = 10 * 60
             vs.dt = 1 / 6
             # spatial grid
             dx = allocate(state.dimensions, ("x"))
-            dx = update(dx, at[:], 1)
+            dx = update(dx, at[:], settings.dx)
             dy = allocate(state.dimensions, ("y"))
-            dy = update(dy, at[:], 1)
-            vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
-            vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
+            dy = update(dy, at[:], settings.dy)
+            # distance from origin
+            vs.x = update(vs.x, at[3:-2], settings.x_origin + npx.cumsum(dx[3:-2]))
+            vs.y = update(vs.y, at[3:-2], settings.y_origin + npx.cumsum(dy[3:-2]))
 
         @roger_routine
         def set_look_up_tables(self, state):
@@ -260,7 +263,7 @@ def main():
 
             # variables written to output files
             diagnostics["rates"].output_variables = OUTPUT_FLUXES
-            # required to be equal or greater than time increments of input
+            # required to be equal or greater than time increments of forcing
             diagnostics["rates"].output_frequency = 10 * 60  # in seconds
             diagnostics["rates"].sampling_frequency = 1
 
