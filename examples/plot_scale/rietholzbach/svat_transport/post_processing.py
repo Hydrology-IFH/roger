@@ -45,7 +45,6 @@ def main(tmp_dir, sas_solver):
 
     # merge model output into a single file
     transport_models = ['complete-mixing', 'advection-dispersion', 'time-variant advection-dispersion', 'preferential', 'time_variant preferential', 'time-variant']
-    transport_models = ['advection-dispersion']
     for tm in transport_models:
         path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tm}.*.nc")
         diag_files = glob.glob(path)
@@ -147,7 +146,6 @@ def main(tmp_dir, sas_solver):
 
     # load transport simulation
     transport_models = ['complete-mixing', 'advection-dispersion', 'time-variant advection-dispersion', 'preferential', 'time_variant preferential', 'time-variant']
-    transport_models = ['advection-dispersion']
     for tm in transport_models:
         tm1 = tm.replace(" ", "_")
         states_tm_file = base_path / sas_solver / age_max / f"states_{tm1}.nc"

@@ -80,7 +80,7 @@ def _round_to_multiple(num, divisor):
     "-n",
     "--nproc",
     type=int,
-    default=4,
+    default=25,
     help="Number of processes / threads for parallel execution",
 )
 @click.option(
@@ -109,7 +109,7 @@ def _round_to_multiple(num, divisor):
 )
 @click.option("--mpiexec", default="mpirun", help="Executable used for calling MPI (e.g. mpirun, mpiexec)")
 @click.option("--debug", is_flag=True, help="Additionally print each command that is executed")
-@click.option("--local", is_flag=True, help="Execute on local computer")
+@click.option("--local", is_flag=True, help="Run benchmark on local computer")
 @click.option("--float-type", default="float64", help="Data type for floating point arrays in Roger components")
 @click.option("--burnin", default=3, type=int, help="Number of iterations to exclude in timings")
 def run(**kwargs):
