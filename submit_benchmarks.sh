@@ -10,4 +10,4 @@ python run_benchmarks.py --sizes 1000000. --backends numpy-mpi --backends jax-mp
 python run_benchmarks.py --sizes 1000000. --backends numpy-mpi --backends jax-mpi --nproc 25 --pmem 4000 --debug
 python run_benchmarks.py --sizes 1000000. --backends numpy-mpi --backends jax-mpi --nproc 50 --pmem 4000 --debug
 python run_benchmarks.py --sizes 1000000. --backends numpy-mpi --backends jax-mpi --nproc 100 --pmem 4000 --debug
-python run_benchmarks.py --sizes 1000000. --backends numpy-mpi --backends jax-mpi --nproc 2000 --pmem 4000 --debug
+python run_benchmarks.py --sizes 1000000. --backends numpy-mpi --backends jax-mpi --nproc 200 --pmem 4000 --debug

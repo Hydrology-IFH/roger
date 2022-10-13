@@ -229,7 +229,7 @@ def main(tmp_dir, sas_solver):
             # plot observed and simulated d18O in percolation
             ax.scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=4)
             ax.scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=4)
-            ax.plot(ds_sim_tm.Time.values, sim_vals, color='red')
+            ax.plot(ds_sim_tm.Time.values, ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=0).values, color='red')
 
         # write figure to .png
         ax.set_ylabel(r'$\delta^{18}$O [‰]')
@@ -317,7 +317,7 @@ def main(tmp_dir, sas_solver):
             df_tt.loc[:, 'MEDIANTT'] = mediantt[1:]
             df_tt.loc[:, 'TT25'] = tt25[1:]
             df_tt.loc[:, 'TT75'] = tt75[1:]
-            df_tt.loc[:, var_sim] = ds_sim_hm[var_sim].isel(x=nrow, y=0).values[1:]
+            df_tt.loc[:, var_sim] = ds_sim_hm[var_sim].isel(x=idx_best, y=0).values[1:]
 
             # mean and median travel time over entire simulation period
             df_tt_mean_median = pd.DataFrame(index=['mean', 'median'], columns=['MTT', 'MEDIANTT'])
@@ -356,12 +356,12 @@ def main(tmp_dir, sas_solver):
             fig.savefig(path_fig, dpi=250)
 
             # plot numerical errors
-            sd_dS_num_error = '{:.2e}'.format(onp.std(ds_sim_tm['dS_num_error'].isel(x=nrow, y=0).values))
-            max_dS_num_error = '{:.2e}'.format(onp.max(ds_sim_tm['dS_num_error'].isel(x=nrow, y=0).values))
-            sd_dC_num_error = '{:.2e}'.format(onp.std(ds_sim_tm['dC_num_error'].isel(x=nrow, y=0).values))
-            max_dC_num_error = '{:.2e}'.format(onp.max(ds_sim_tm['dC_num_error'].isel(x=nrow, y=0).values))
+            sd_dS_num_error = '{:.2e}'.format(onp.std(ds_sim_tm['dS_num_error'].isel(x=idx_best, y=0).values))
+            max_dS_num_error = '{:.2e}'.format(onp.max(ds_sim_tm['dS_num_error'].isel(x=idx_best, y=0).values))
+            sd_dC_num_error = '{:.2e}'.format(onp.std(ds_sim_tm['dC_num_error'].isel(x=idx_best, y=0).values))
+            max_dC_num_error = '{:.2e}'.format(onp.max(ds_sim_tm['dC_num_error'].isel(x=idx_best, y=0).values))
             fig, axes = plt.subplots(2, 1, sharex=True, sharey=False, figsize=(14, 7))
-            axes[0].plot(ds_sim_tm.Time.values, ds_sim_tm['dS_num_error'].isel(x=nrow, y=0).values, ls='-', lw=1, color='black')
+            axes[0].plot(ds_sim_tm.Time.values, ds_sim_tm['dS_num_error'].isel(x=idx_best, y=0).values, ls='-', lw=1, color='black')
             axes[0].set_ylabel('Bias\n[mm]')
             axes[0].set_ylim(0,)
             axes[0].set_xlim((ds_sim_tm.Time.values[0], ds_sim_tm.Time.values[-1]))
@@ -369,7 +369,7 @@ def main(tmp_dir, sas_solver):
                          verticalalignment='center', transform=axes[0].transAxes)
             axes[0].text(0.75, 0.83, r'Error Max: %s' % (max_dS_num_error), size=12, horizontalalignment='left',
                          verticalalignment='center', transform=axes[0].transAxes)
-            axes[1].plot(ds_sim_tm.Time.values, ds_sim_tm['dC_num_error'].isel(x=nrow, y=0).values, ls='-', lw=1, color='black')
+            axes[1].plot(ds_sim_tm.Time.values, ds_sim_tm['dC_num_error'].isel(x=idx_best, y=0).values, ls='-', lw=1, color='black')
             axes[1].set_ylabel('Bias\n[mg/l]')
             axes[1].set_ylim(0,)
             axes[1].set_xlim((ds_sim_tm.Time.values[0], ds_sim_tm.Time.values[-1]))
