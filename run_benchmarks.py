@@ -255,7 +255,7 @@ def run(**kwargs):
 
                     try:
                         # read output stream
-                        output = subprocess.run(cmd, check=True, capture_output=True, text=True).stdout
+                        output = subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True).stdout
                     except subprocess.CalledProcessError as e:
                         click.echo("failed")
                         click.echo(e.output.decode("utf-8"))
