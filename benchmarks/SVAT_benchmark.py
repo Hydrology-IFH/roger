@@ -6,7 +6,7 @@ import h5netcdf
 @benchmark_cli
 def main(size, timesteps):
     from roger import roger_routine, roger_kernel, KernelOutput
-    from roger.models.oneD import SVATSetup
+    from roger.models.SVAT import SVATSetup
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
     from roger.core.surface import calc_parameters_surface_kernel

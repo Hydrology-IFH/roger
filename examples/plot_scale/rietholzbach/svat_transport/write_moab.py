@@ -26,7 +26,7 @@ def main(job_type, sas_solver):
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{sas_solver}_{tm1}'
+            script_name = f'{tracer}_{sas_solver}_svat_{tm1}'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport'
             tms = tm.replace(" ", "_")
             lines = []
@@ -47,11 +47,11 @@ def main(job_type, sas_solver):
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
             lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
-            file_path = base_path / f'{script_name}_moab.sh'
+            file_path = base_path / f'{script_name}.sh'
             file = open(file_path, "w")
             file.writelines(lines)
             file.close()
-            subprocess.Popen(f"chmod +x {script_name}_moab.sh", shell=True)
+            subprocess.Popen(f"chmod +x {script_name}.sh", shell=True)
 
     return
 

@@ -21,7 +21,7 @@ def main(job_type, sas_solver):
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{sas_solver}_{tm1}_sa'
+            script_name = f'{tracer}_{sas_solver}_svat_{tm1}_sa'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
             tms = tm.replace(" ", "_")
             lines = []
@@ -42,16 +42,16 @@ def main(job_type, sas_solver):
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
             lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
-            file_path = base_path / f'{script_name}_moab.sh'
+            file_path = base_path / f'{script_name}.sh'
             file = open(file_path, "w")
             file.writelines(lines)
             file.close()
-            subprocess.Popen(f"chmod +x {script_name}_moab.sh", shell=True)
+            subprocess.Popen(f"chmod +x {script_name}.sh", shell=True)
 
         elif job_type == 'single-node':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{sas_solver}_{tm1}_sa'
+            script_name = f'{tracer}_{sas_solver}_svat_{tm1}_sa'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
             tms = tm.replace(" ", "_")
             lines = []
@@ -76,16 +76,16 @@ def main(job_type, sas_solver):
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
             lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
-            file_path = base_path / f'{script_name}_moab.sh'
+            file_path = base_path / f'{script_name}.sh'
             file = open(file_path, "w")
             file.writelines(lines)
             file.close()
-            subprocess.Popen(f"chmod +x {script_name}_moab.sh", shell=True)
+            subprocess.Popen(f"chmod +x {script_name}.sh", shell=True)
 
         elif job_type == 'multi-node':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{sas_solver}_{tm1}_sa'
+            script_name = f'{tracer}_{sas_solver}_svat_{tm1}_sa'
             output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
             tms = tm.replace(" ", "_")
             lines = []
@@ -106,11 +106,11 @@ def main(job_type, sas_solver):
             lines.append(' \n')
             lines.append('# adapt command to your available scheduler / MPI implementation\n')
             lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes -b jax -d cpu -n 32 1 -ns 1024 -tms %s -td %s -ss %s\n' % (tms, output_path_ws.as_posix(), sas_solver))
-            file_path = base_path / f'{script_name}_moab.sh'
+            file_path = base_path / f'{script_name}.sh'
             file = open(file_path, "w")
             file.writelines(lines)
             file.close()
-            subprocess.Popen(f"chmod +x {script_name}_moab.sh", shell=True)
+            subprocess.Popen(f"chmod +x {script_name}.sh", shell=True)
 
     return
 

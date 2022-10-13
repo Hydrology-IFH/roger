@@ -194,7 +194,7 @@ def run(**kwargs):
                         if backend in ['numpy-mpi', 'jax-mpi', 'jax-gpu', 'jax-gpu-mpi']:
                             lines.append('# load module dependencies\n')
                             lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
-                        lines.append(' \n')
+                            lines.append(' \n')
                         if backend in ['numpy']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger\n')
