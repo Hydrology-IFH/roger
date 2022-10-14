@@ -452,7 +452,7 @@ def main(tmp_dir, sas_solver):
                 ax[0, 0].set_ylabel(r'$KGE_{\delta^{18}O_{PERC}}$ [-]')
 
                 fig.tight_layout()
-                file = base_path_figs / f"dotty_plots_{tm_structure}.png"
+                file = base_path_figs / f"dotty_plots_{tms}.png"
                 fig.savefig(file, dpi=250)
                 plt.close('all')
             else:
@@ -471,7 +471,7 @@ def main(tmp_dir, sas_solver):
                 ax.set_xlabel(xlabel)
                 ax.set_ylabel(r'$KGE_{\delta^{18}O_{PERC}}$ [-]')
                 fig.tight_layout()
-                file = base_path_figs / f"dotty_plots_{tm_structure}.png"
+                file = base_path_figs / f"dotty_plots_{tms}.png"
                 fig.savefig(file, dpi=250)
                 plt.close('all')
 

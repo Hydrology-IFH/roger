@@ -42,6 +42,7 @@ def main(tmp_dir):
         diag_files = glob.glob(path)
         states_tm_file = base_path / f"states_{tms}_sensitivity.nc"
         if not os.path.exists(states_tm_file):
+            click.echo(f'Merge output files of {tm_structure} into {states_tm_file.as_posix()}')
             with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
                 f.attrs.update(
                     date_created=datetime.datetime.today().isoformat(),
@@ -166,6 +167,7 @@ def main(tmp_dir):
     tm_structures = ['advection-dispersion',
                      'time-variant advection-dispersion']
     for tm_structure in tm_structures:
+        click.echo(f'Calculate metrics for {tm_structure} ...')
         tms = tm_structure.replace(" ", "_")
 
         # load simulation
@@ -304,7 +306,7 @@ def main(tmp_dir):
             v.attrs.update(long_name="bulk sample of d18O in percolation",
                            units="permil")
         # write to .txt
-        file = base_path_results / f"params_metrics_{tm_structure}.txt"
+        file = base_path_results / f"params_metrics_{tms}.txt"
         df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
         dict_params_metrics[tm_structure] = df_params_metrics
     return
