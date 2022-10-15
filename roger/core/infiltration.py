@@ -549,9 +549,7 @@ def calc_inf_mp(state):
             at[2:-2, 2:-2], y[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
-        carry = (y1, y2, y3, ym1, a, b1, b2, c, inf_mp_pot_di, inf_mp_di, z0_di, inf_mp, inf_mp_pot, inf_mp_event_csum, t, y)
-
-        return carry
+        return y1, y2, y3, ym1, a, b1, b2, c, inf_mp_pot_di, inf_mp_di, z0_di, inf_mp, inf_mp_pot, inf_mp_event_csum, t, y
 
     carry = (y1, y2, y3, ym1, a, b1, b2, c, inf_mp_pot_di, inf_mp_di, z0_di, inf_mp, inf_mp_pot, inf_mp_event_csum, t, y)
     res = for_loop(0, substeps, loop_body, carry)
@@ -853,9 +851,7 @@ def calc_inf_sc(state):
             at[2:-2, 2:-2], y[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
-        carry = (y, ym1, inf_sc_pot_di, inf_sc_di, z0_di, inf_sc_event_csum, t, inf_sc)
-
-        return carry
+        return y, ym1, inf_sc_pot_di, inf_sc_di, z0_di, inf_sc_event_csum, t, inf_sc
 
     carry = (y, ym1, inf_sc_pot_di, inf_sc_di, z0_di, inf_sc_event_csum, t, inf_sc)
     res = for_loop(0, substeps, loop_body, carry)

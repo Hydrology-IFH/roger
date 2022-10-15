@@ -1,9 +1,7 @@
-from roger import roger_kernel
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, scipy_special as spsx, update, at
 
 
-@roger_kernel
 def uniform(state, SA, sas_params):
     """Uniform SAS function"""
     vs = state.variables
@@ -37,7 +35,6 @@ def uniform(state, SA, sas_params):
     return Omega
 
 
-@roger_kernel
 def kumaraswami(state, SA, sas_params):
     """Kumaraswami SAS function"""
     vs = state.variables
@@ -127,7 +124,6 @@ def kumaraswami(state, SA, sas_params):
     return Omega, sas_params
 
 
-@roger_kernel
 def gamma(state, SA, sas_params):
     """Gamma SAS function"""
     vs = state.variables
@@ -154,7 +150,6 @@ def gamma(state, SA, sas_params):
     return Omega
 
 
-@roger_kernel
 def exponential(state, SA, sas_params):
     """Exponential SAS function"""
     vs = state.variables
@@ -186,7 +181,6 @@ def exponential(state, SA, sas_params):
     return Omega
 
 
-@roger_kernel
 def power(state, SA, sas_params):
     """Power SAS function"""
     vs = state.variables
@@ -236,7 +230,6 @@ def power(state, SA, sas_params):
     return Omega, sas_params
 
 
-@roger_kernel
 def dirac(state, SA, sas_params):
     """Dirac SAS function"""
     vs = state.variables

@@ -461,6 +461,7 @@ def calculate_evaporation_transport_iso_kernel(state):
         vs.SA_rz,
         at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
+
     vs.tt_evap_soil = update(
         vs.tt_evap_soil,
         at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.evap_soil, vs.sas_params_evap_soil)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],

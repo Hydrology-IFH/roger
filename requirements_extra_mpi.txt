@@ -1,4 +1,0 @@
-jaxlib==0.3.7
-jax
-xarray
-salib

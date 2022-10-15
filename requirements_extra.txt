@@ -1,3 +1,2 @@
-xarray
-cftime
-salib
+xarray==2022.6.0
+salib==1.4.6

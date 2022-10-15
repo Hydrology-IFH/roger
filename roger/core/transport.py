@@ -37,9 +37,8 @@ def calc_age_percentile(state, age_dist, percentile):
             age_perc,
             at[xi, yi], npx.interp(percentile, age_dist[xi, yi, :], ages),
         )
-        carry = (grid, ages, age_perc)
 
-        return carry
+        return grid, ages, age_perc
 
     # generate array with sequential grid cell ids
     grids = npx.array(npx.meshgrid(x[2:-2], y[2:-2]), dtype=int).T.reshape(-1, 2)
@@ -279,6 +278,9 @@ def calc_tt(state, SA, sa, flux, sas_params):
     ttn = allocate(state.dimensions, ("x", "y", "ages"))
     SAn = allocate(state.dimensions, ("x", "y", "timesteps", "nages"))
     san = allocate(state.dimensions, ("x", "y", "timesteps", "ages"))
+    TTi = allocate(state.dimensions, ("x", "y", "nages"))
+    tti = allocate(state.dimensions, ("x", "y", "ages"))
+    ttqi = allocate(state.dimensions, ("x", "y", "ages"))
 
     SAn = update(
         SAn,
@@ -293,10 +295,19 @@ def calc_tt(state, SA, sa, flux, sas_params):
 
     # loop over substeps
     def loop_body(i, carry):
-        state, TTn, ttn, SAn, san, flux, sas_params = carry
-        TTi = allocate(state.dimensions, ("x", "y", "nages"))
-        tti = allocate(state.dimensions, ("x", "y", "ages"))
-        ttqi = allocate(state.dimensions, ("x", "y", "ages"))
+        state, TTn, ttn, SAn, san, flux, sas_params, TTi, tti, ttqi = carry
+        TTi = update(
+            TTi,
+            at[2:-2, 2:-2, :], 0,
+        )
+        tti = update(
+            tti,
+            at[2:-2, 2:-2, :], 0,
+        )
+        ttqi = update(
+            ttqi,
+            at[2:-2, 2:-2, :], 0,
+        )
         # derive cumulative backward travel time distribution with SAS functions
         # at substep i
         TTi = update_add(
@@ -357,13 +368,15 @@ def calc_tt(state, SA, sa, flux, sas_params):
             TTn,
             at[2:-2, 2:-2, 1:], npx.cumsum(tti[2:-2, 2:-2, :], axis=-1),
         )
-        carry = (state, TTn, ttn, SAn, san, flux, sas_params)
 
-        return carry
+        return state, TTn, ttn, SAn, san, flux, sas_params, TTi, tti, ttqi
 
-    carry = (state, TTn, ttn, SAn, san, flux, sas_params)
+    carry = (state, TTn, ttn, SAn, san, flux, sas_params, TTi, tti, ttqi)
     res = for_loop(0, settings.sas_solver_substeps, loop_body, carry)
-    TTn = res[1]
+    TTn = update(
+        TTn,
+        at[2:-2, 2:-2, 1:], res[1][2:-2, 2:-2, 1:],
+    )
 
     TT = allocate(state.dimensions, ("x", "y", "nages"))
     tt = allocate(state.dimensions, ("x", "y", "ages"))
