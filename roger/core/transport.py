@@ -692,7 +692,7 @@ def calculate_ageing_sa_msa_iso_kernel(state):
         at[2:-2, 2:-2, :, :], msa_ss[2:-2, 2:-2, :, :],
     )
 
-    return KernelOutput(msa_rz=vs.msa_rz, msa_ss=vs.msa_ss)
+    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss)
 
 
 @roger_kernel
