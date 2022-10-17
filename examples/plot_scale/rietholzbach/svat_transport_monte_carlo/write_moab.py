@@ -95,7 +95,7 @@ def main(job_type, sas_solver):
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
             lines.append('# adapt command to your available scheduler / MPI implementation\n')
-            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes -b jax -d cpu -n 20 1 -ns 2000 -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
+            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes -b jax -d cpu -n 20 1 -ns 5000 -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
