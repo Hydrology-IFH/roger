@@ -362,7 +362,7 @@ def main(tmp_dir):
     for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
         df_params = df_params_metrics.loc[:, bounds['names']]
         df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'r_dS{sc1}', f'KGE_q_ss{sc1}', f'E_multi{sc1}']]
-        df_metrics.columns = ['KGE_aet', 'KGE_q_ss', 'r_dS', 'E_multi']
+        df_metrics.columns = ['KGE_aet', 'r_dS', 'KGE_q_ss', 'E_multi']
         dict_si = {}
         for name in df_metrics.columns:
             Y = df_metrics[name].values
