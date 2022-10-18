@@ -673,9 +673,9 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
     model._set_sas_solver(sas_solver)
     model._set_tm_structure(tms)
     if sas_solver in ['RK4', 'Euler']:
-        identifier = f'SVATTRANSPORT_{tms}_{sas_solver}'
+        identifier = f'SVATTRANSPORT_{transport_model_structure}_{sas_solver}'
     else:
-        identifier = f'SVATTRANSPORT_{tms}'
+        identifier = f'SVATTRANSPORT_{transport_model_structure}'
     model._set_identifier(identifier)
     model._sample_params(nsamples)
     input_path = model._base_path / "input"

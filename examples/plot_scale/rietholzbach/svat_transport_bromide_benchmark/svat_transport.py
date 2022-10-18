@@ -441,9 +441,9 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         model._set_sas_solver(sas_solver)
         model._set_tm_structure(tms)
         if sas_solver:
-            identifier = f'SVATTRANSPORT_{tms}_{year}_{sas_solver}'
+            identifier = f'SVATTRANSPORT_{transport_model_structure}_{year}_{sas_solver}'
         else:
-            identifier = f'SVATTRANSPORT_{tms}_{year}'
+            identifier = f'SVATTRANSPORT_{transport_model_structure}_{year}'
         model._set_identifier(identifier)
         # set year
         model._set_year(year)

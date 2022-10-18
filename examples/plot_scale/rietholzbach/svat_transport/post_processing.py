@@ -51,9 +51,9 @@ def main(tmp_dir, sas_solver):
 
     # merge model output into a single file
     for tm in transport_models:
+        tm1 = tm.replace(" ", "_")
         path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tm}.*.nc")
         diag_files = glob.glob(path)
-        tm1 = tm.replace(" ", "_")
         states_tm_file = base_path / sas_solver / age_max / f"states_{tm1}.nc"
         click.echo(f'Merge output files of {tm} into {states_tm_file.as_posix()}')
         with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
