@@ -1,6 +1,6 @@
 import warnings
 from contextlib import contextmanager
-from time import time
+from time import time_ns
 import os
 
 from roger import runtime_settings, runtime_state, roger_kernel
@@ -96,7 +96,7 @@ def where_numpy(*args, **kwargs):
 
 def random_uniform_numpy(lower, upper, shape):
     import numpy as np
-    seed = int(time() + os.getpid())
+    seed = int(time_ns() + os.getpid())
     rng = np.random.default_rng(seed)
     return rng.uniform(lower, upper, size=shape[0]*shape[1]).reshape(shape)
 
@@ -173,7 +173,7 @@ def update_multiply_jax(arr, at, to):
 
 def random_uniform_jax(lower, upper, shape):
     import jax
-    seed = int(time() + os.getpid())
+    seed = int(time_ns() + os.getpid())
     key = jax.random.PRNGKey(seed)
     return jax.random.uniform(key, shape=shape, minval=lower, maxval=upper)
 
