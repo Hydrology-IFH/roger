@@ -9,6 +9,6 @@ tqdm==4.64.1
 pandas==1.5.0
 pyyaml==6.0
 matplotlib==3.6.1
-seaborn==0.11.2
+seaborn==0.12.0
 cftime==1.6.1
 diag-eff==1.1
