@@ -159,7 +159,7 @@ def main(job_type, sas_solver):
             lines.append('conda activate roger-gpu\n')
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
-            lines.append('python svat_transport.py --log-all-processes -b jax -d gpu -ns 1000 -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
+            lines.append('python svat_transport.py --log-all-processes -b jax -d gpu -ns 200 -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
@@ -194,16 +194,16 @@ def main(job_type, sas_solver):
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
             lines.append('# adapt command to your available scheduler / MPI implementation\n')
-            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes -b jax -d gpu -n 2 1 -ns 2000 -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
+            lines.append('MPI4JAX_USE_CUDA_MPI=1 mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes -b jax -d gpu -n 2 1 -ns 400 -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
             lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
-            file_path = base_path / f'{script_name}_gpu.sh'
+            file_path = base_path / f'{script_name}_multi_gpu.sh'
             file = open(file_path, "w")
             file.writelines(lines)
             file.close()
-            subprocess.Popen(f"chmod +x {script_name}_gpu.sh", shell=True)
+            subprocess.Popen(f"chmod +x {script_name}_multi_gpu.sh", shell=True)
 
     return
 

@@ -3,7 +3,7 @@ import subprocess
 import click
 
 
-@click.option("--job-type", type=click.Choice(['serial', 'serial-gpu']), default='serial')
+@click.option("--job-type", type=click.Choice(['serial', 'gpu']), default='serial')
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.command("main")
 def main(job_type, sas_solver):
@@ -53,7 +53,7 @@ def main(job_type, sas_solver):
             file.close()
             subprocess.Popen(f"chmod +x {script_name}.sh", shell=True)
 
-        elif job_type == 'serial-gpu':
+        elif job_type == 'gpu':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
             script_name = f'{tracer}_{sas_solver}_svat_{tm1}_gpu'
