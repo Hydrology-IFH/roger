@@ -97,8 +97,8 @@ def where_numpy(*args, **kwargs):
 def random_uniform_numpy(lower, upper, shape):
     import numpy as np
     seed = int(time() + os.getpid())
-    np.random.seed(seed)
-    return np.random.uniform(lower, upper, size=shape[0]*shape[1]).reshape(shape)
+    rng = np.random.default_rng(seed)
+    return rng.uniform(lower, upper, size=shape[0]*shape[1]).reshape(shape)
 
 
 def scan_numpy(f, init, xs, length=None):

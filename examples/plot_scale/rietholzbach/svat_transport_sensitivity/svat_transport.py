@@ -1,19 +1,18 @@
 from pathlib import Path
 import os
 import h5netcdf
-import yaml
-from SALib.sample import saltelli
 import numpy as onp
 import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-ns", "--nsamples", type=int, default=1024)
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['advection-dispersion', 'time-variant_advection-dispersion', 'power', 'time-variant_power']), default='advection-dispersion')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['advection-dispersion', 'time-variant_advection-dispersion']), default='advection-dispersion')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
+@click.option("--x1", type=int, default=None)
+@click.option("--x2", type=int, default=None)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
+def main(transport_model_structure, sas_solver, x1, x2, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, for_loop
@@ -24,8 +23,6 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
         """A SVAT transport model.
         """
         _base_path = Path(__file__).parent
-        _bounds = None
-        _params = None
         _nrows = None
         _tm_structure = None
         _identifier = None
@@ -63,12 +60,6 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 var_obj = infile.variables['Time']
                 return len(onp.array(var_obj)) * 60 * 60 * 24
 
-        def _get_nx(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['x']
-                return len(onp.array(var_obj))
-
         def _set_tm_structure(self, tm_structure):
             self._tm_structure = tm_structure
 
@@ -77,15 +68,6 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
 
         def _set_identifier(self, identifier):
             self._identifier = identifier
-
-        def _sample_params(self, nsamples):
-            file_path = self._base_path / "param_bounds.yml"
-            with open(file_path, 'r') as file:
-                bounds = yaml.safe_load(file)
-
-            self._bounds = bounds[self._tm_structure]
-            self._params = saltelli.sample(self._bounds, nsamples, calc_second_order=False)
-            self._nrows = self._params.shape[0]
 
         def _bfill_3d(self, state, arr):
             idx_shape = tuple([slice(None)] + [npx.newaxis] * (3 - 2 - 1))
@@ -130,7 +112,7 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             if settings.sas_solver in ['RK4', 'Euler']:
                 settings.h = 1 / settings.sas_solver_substeps
 
-            settings.nx, settings.ny = self._nrows, 1
+            settings.nx, settings.ny = x2 - x1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
             settings.ages = settings.nitt
             settings.nages = settings.ages + 1
@@ -211,13 +193,7 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc', group=self._tm_structure)[:, :, vs.itt])
             vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.nc', group=self._tm_structure)[:, :, vs.itt])
 
-            if settings.tm_structure == "complete-mixing":
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 1)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 1)
-            elif settings.tm_structure == "piston":
+            if settings.tm_structure == "advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], 100)
@@ -226,44 +202,12 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], 100)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, :, 2], self._read_var_from_nc("b_transp", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 100)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._read_var_from_nc("a_q_rz", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 100)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1)
-            elif settings.tm_structure == "preferential":
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], 100)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, :, 2], self._params[:, 0, npx.newaxis])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, :, 1], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, :, 2], self._params[:, 1, npx.newaxis])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, :, 1], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, :, 2], self._params[:, 2, npx.newaxis])
-            elif settings.tm_structure == "advection-dispersion":
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], 100)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, :, 2], self._params[:, 0, npx.newaxis])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._params[:, 1, npx.newaxis])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._params[:, 2, npx.newaxis])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._read_var_from_nc("a_q_ss", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1)
             elif settings.tm_structure == "time-variant advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
@@ -273,99 +217,18 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 31)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], self._params[:, 0, npx.newaxis] * self._params[:, 1, npx.newaxis])
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, :, 4], self._params[:, 0, npx.newaxis] * (1 - self._params[:, 1, npx.newaxis]))
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], self._read_var_from_nc("c1_transp", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, :, 4], (self._read_var_from_nc("c1_transp", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :] + self._read_var_from_nc("c2_transp", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :]) - self._read_var_from_nc("c1_transp", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :])
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 32)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], self._params[:, 2, npx.newaxis] * self._params[:, 3, npx.newaxis])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._params[:, 2, npx.newaxis] * (1 - self._params[:, 3, npx.newaxis]))
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], self._read_var_from_nc("c1_q_rz", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], (self._read_var_from_nc("c1_q_rz", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :] + self._read_var_from_nc("c2_q_rz", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :]) - self._read_var_from_nc("c1_q_rz", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 32)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], self._params[:, 4, npx.newaxis] * self._params[:, 5, npx.newaxis])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._params[:, 4, npx.newaxis] * (1 - self._params[:, 5, npx.newaxis]))
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
-            elif settings.tm_structure == "time-variant preferential":
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], 100)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 31)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], self._params[:, 0, npx.newaxis] * self._params[:, 1, npx.newaxis])
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, :, 4], self._params[:, 0, npx.newaxis] * (1 - self._params[:, 1, npx.newaxis]))
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 31)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], self._params[:, 2, npx.newaxis] * self._params[:, 3, npx.newaxis])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._params[:, 2, npx.newaxis] * (1 - self._params[:, 3, npx.newaxis]))
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 31)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], self._params[:, 4, npx.newaxis] * self._params[:, 5, npx.newaxis])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._params[:, 4, npx.newaxis] * (1 - self._params[:, 5, npx.newaxis]))
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
-            elif settings.tm_structure == "time-variant":
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], 100)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 35)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, :, 4], self._params[:, 0, npx.newaxis])
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 35)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._params[:, 1, npx.newaxis])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 35)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._params[:, 2, npx.newaxis])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
-            elif settings.tm_structure == "power":
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 0.1)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 0.1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], self._params[:, 0, npx.newaxis])
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._params[:, 1, npx.newaxis])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._params[:, 2, npx.newaxis])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
-            elif settings.tm_structure == "time-variant power":
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 0.1)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 0.1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 62)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], self._params[:, 0, npx.newaxis] * self._params[:, 1, npx.newaxis])
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], self._params[:, 0, npx.newaxis] * (1 - self._params[:, 1, npx.newaxis]))
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 61)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], self._params[:, 2, npx.newaxis] * self._params[:, 3, npx.newaxis])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._params[:, 2, npx.newaxis] * (1 - self._params[:, 3, npx.newaxis]))
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 61)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], self._params[:, 4, npx.newaxis] * self._params[:, 5, npx.newaxis])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._params[:, 4, npx.newaxis] * (1 - self._params[:, 5, npx.newaxis]))
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], self._read_var_from_nc("c1_q_ss", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], (self._read_var_from_nc("c1_q_ss", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :] + self._read_var_from_nc("c2_q_ss", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :]) - self._read_var_from_nc("c1_q_ss", self._base_path, 'saltelli_params.nc', group=self._tm_structure)[x1:x2, :])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
 
@@ -672,9 +535,8 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
     model = SVATTRANSPORTSetup()
     model._set_sas_solver(sas_solver)
     model._set_tm_structure(tms)
-    identifier = f'SVATTRANSPORT_{transport_model_structure}_{sas_solver}'
+    identifier = f'SVATTRANSPORT_{transport_model_structure}_{sas_solver}_{x1}_{x2}'
     model._set_identifier(identifier)
-    model._sample_params(nsamples)
     input_path = model._base_path / "input"
     model._set_input_dir(input_path)
     write_forcing_tracer(input_path, 'd18O')

@@ -34,13 +34,7 @@ def main(job_type, sas_solver):
                               'time-variant power': 'powt'}
 
     tracer = 'oxygen18'
-    transport_models = ['preferential', 'preferential1', 'preferential2',
-                        'advection-dispersion', 'advection-dispersion1', 'advection-dispersion2',
-                        'time-variant preferential', 'time-variant preferential1', 'time-variant preferential2',
-                        'time-variant advection-dispersion', 'time-variant advection-dispersion1', 'time-variant advection-dispersion2',
-                        'time-variant', 'time-variant1', 'time-variant2',
-                        'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion',
-                        'power', 'time-variant power']
+    transport_models = ['advection-dispersion', 'time-variant advection-dispersion']
     for tm in transport_models:
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]
@@ -139,36 +133,37 @@ def main(job_type, sas_solver):
         elif job_type == 'gpu':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            script_name = f'{tracer}_{sas_solver}_svat_{tm1}_mc'
-            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_monte_carlo'
-            tms = tm.replace(" ", "_")
-            lines = []
-            lines.append('#!/bin/bash\n')
-            lines.append('#PBS -l nodes=1:ppn=1:gpus=1:default\n')
-            lines.append('#PBS -l walltime=4:00:00\n')
-            lines.append('#PBS -l pmem=24000mb\n')
-            lines.append(f'#PBS -N {script_name}\n')
-            lines.append('#PBS -m bea\n')
-            lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
-            lines.append(' \n')
-            lines.append('# load module dependencies\n')
-            lines.append('module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4\n')
-            lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
-            lines.append('module load lib/cudnn/8.2-cuda-11.4\n')
-            lines.append('eval "$(conda shell.bash hook)"\n')
-            lines.append('conda activate roger-gpu\n')
-            lines.append(f'cd {base_path_binac}\n')
-            lines.append(' \n')
-            lines.append('python svat_transport.py --log-all-processes -b jax -d gpu -ns 200 -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
-            lines.append('# Move output from local SSD to global workspace\n')
-            lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
-            lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-            lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
-            file_path = base_path / f'{script_name}_gpu.sh'
-            file = open(file_path, "w")
-            file.writelines(lines)
-            file.close()
-            subprocess.Popen(f"chmod +x {script_name}_gpu.sh", shell=True)
+            for i in range(20):
+                script_name = f'{tracer}_{sas_solver}_svat_{tm1}_mc_{i}'
+                output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_monte_carlo'
+                tms = tm.replace(" ", "_")
+                lines = []
+                lines.append('#!/bin/bash\n')
+                lines.append('#PBS -l nodes=1:ppn=1:gpus=1:default\n')
+                lines.append('#PBS -l walltime=10:00:00\n')
+                lines.append('#PBS -l pmem=4000mb\n')
+                lines.append(f'#PBS -N {script_name}\n')
+                lines.append('#PBS -m bea\n')
+                lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
+                lines.append(' \n')
+                lines.append('# load module dependencies\n')
+                lines.append('module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4\n')
+                lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
+                lines.append('module load lib/cudnn/8.2-cuda-11.4\n')
+                lines.append('eval "$(conda shell.bash hook)"\n')
+                lines.append('conda activate roger-gpu\n')
+                lines.append(f'cd {base_path_binac}\n')
+                lines.append(' \n')
+                lines.append('python svat_transport.py --log-all-processes --id %s -b jax -d gpu -ns 500 -tms %s -td "${TMPDIR}" -ss %s\n' % (i, tms, sas_solver))
+                lines.append('# Move output from local SSD to global workspace\n')
+                lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
+                lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
+                lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
+                file_path = base_path / f'{script_name}_gpu.sh'
+                file = open(file_path, "w")
+                file.writelines(lines)
+                file.close()
+                subprocess.Popen(f"chmod +x {script_name}_gpu.sh", shell=True)
 
         elif job_type == 'multi-gpu':
             tm1 = transport_models_abrev[tm]
@@ -180,7 +175,7 @@ def main(job_type, sas_solver):
             lines.append('#!/bin/bash\n')
             lines.append('#PBS -l nodes=1:ppn=2:gpus=2:default\n')
             lines.append('#PBS -l walltime=24:00:00\n')
-            lines.append('#PBS -l pmem=24000mb\n')
+            lines.append('#PBS -l pmem=4000mb\n')
             lines.append(f'#PBS -N {script_name}\n')
             lines.append('#PBS -m bea\n')
             lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
