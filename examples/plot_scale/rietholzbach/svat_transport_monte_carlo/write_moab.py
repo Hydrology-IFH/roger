@@ -11,17 +11,12 @@ def main(job_type, sas_solver):
     base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
 
-    transport_models_abrev = {'complete-mixing': 'cm',
-                              'piston': 'pi',
-                              'preferential': 'pf',
+    transport_models_abrev = {'preferential': 'pf',
                               'preferential1': 'pf1',
                               'preferential2': 'pf2',
                               'advection-dispersion': 'ad',
                               'advection-dispersion1': 'ad1',
                               'advection-dispersion2': 'ad2',
-                              'time-variant preferential': 'pft',
-                              'time-variant preferential1': 'pft1',
-                              'time-variant preferential2': 'pft2',
                               'time-variant advection-dispersion': 'adt',
                               'time-variant advection-dispersion1': 'adt1',
                               'time-variant advection-dispersion2': 'adt2',
@@ -29,12 +24,10 @@ def main(job_type, sas_solver):
                               'time-variant1': 'tv1',
                               'time-variant2': 'tv2',
                               'preferential + advection-dispersion': 'pfad',
-                              'time-variant preferential + advection-dispersion': 'pfadt',
-                              'power': 'pow',
-                              'time-variant power': 'powt'}
+                              'power': 'pow'}
 
     tracer = 'oxygen18'
-    transport_models = ['advection-dispersion', 'time-variant advection-dispersion']
+    transport_models = ['advection-dispersion', 'time-variant advection-dispersion', 'preferential', 'power']
     for tm in transport_models:
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]
@@ -140,7 +133,7 @@ def main(job_type, sas_solver):
                 lines = []
                 lines.append('#!/bin/bash\n')
                 lines.append('#PBS -l nodes=1:ppn=1:gpus=1:default\n')
-                lines.append('#PBS -l walltime=10:00:00\n')
+                lines.append('#PBS -l walltime=12:00:00\n')
                 lines.append('#PBS -l pmem=4000mb\n')
                 lines.append(f'#PBS -N {script_name}\n')
                 lines.append('#PBS -m bea\n')
