@@ -47,8 +47,9 @@ def main(tmp_dir, sas_solver):
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
+    transport_models = ['complete-mixing', 'piston', 'advection-dispersion', 'time-variant advection-dispersion']
+
     # merge model output into a single file
-    transport_models = ['complete-mixing', 'piston', 'advection-dispersion', 'time-variant advection-dispersion', 'preferential', 'time_variant preferential', 'time-variant']
     for tm in transport_models:
         path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tm}.*.nc")
         diag_files = glob.glob(path)
@@ -150,7 +151,6 @@ def main(tmp_dir, sas_solver):
     ds_obs = ds_obs.assign_coords(Time=("Time", date_obs))
 
     # load transport simulation
-    transport_models = ['complete-mixing', 'piston', 'advection-dispersion', 'time-variant advection-dispersion', 'preferential', 'time_variant preferential', 'time-variant']
     for tm in transport_models:
         click.echo(f'Plot results of {tm}')
         tm1 = tm.replace(" ", "_")

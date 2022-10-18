@@ -335,7 +335,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
     @roger_routine
     def step(self, state):
         from roger import diagnostics, restart
-        from roger.core import surface, soil, root_zone, subsoil, groundwater, interception, snow, evapotranspiration, infiltration, film_flow, subsurface_runoff, capillary_rise, crop, groundwater_flow, numerics, transport
+        from roger.core import surface, soil, root_zone, subsoil, groundwater, interception, snow, evapotranspiration, infiltration, film_flow, subsurface_runoff, capillary_rise, crop, groundwater_flow, numerics, transport, adaptive_time_stepping
 
         self._ensure_setup_done()
 
@@ -351,6 +351,9 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     self.set_boundary_conditions(state)
                 with state.timers["forcing"]:
                     self.set_forcing(state)
+                if settings.enable_adaptive_time_stepping:
+                    with state.timers["adaptive time-stepping"]:
+                        adaptive_time_stepping.adaptive_time_stepping(state)
                 with state.timers["time-variant parameters"]:
                     self.set_parameters(state)
                 if settings.enable_crop_phenology:

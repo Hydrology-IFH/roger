@@ -73,6 +73,7 @@ LUT_RDLU_GRID = ("n_lu", "n_params7")
 LUT_CROPS_GRID = ("n_crop_types", "n_crop_params")
 LUT_GCM_GRID = ("n_lu", "n_params2")
 TIMESTEPS = ("timesteps",)
+TIMESTEPS_DAY = ("timesteps_day",)
 TIMESTEPS_EVENT_FF = ("timesteps_event_ff",)
 TIMESTEPS_EVENT_FF_P1 = ("timesteps_event_ff_p1",)
 TIME = ("t",)
@@ -96,6 +97,7 @@ DIM_TO_SHAPE_VAR = {
     "z": "nz",
     "t": "nitt",
     "timesteps": 2,
+    "timesteps_day": 6 * 24,
     "timesteps_event_ff": "nittevent_ff",
     "timesteps_event_ff_p1": "nittevent_ff_p1",
     "ages": "ages",
@@ -665,6 +667,14 @@ VARIABLES = {
         "degC",
         "air temperature",
         time_dependent=True,
+    ),
+    "ta_day": Variable(
+        "air temperature",
+        CATCH_GRID + TIMESTEPS_DAY,
+        "degC",
+        "air temperature",
+        time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     # soil temperature
     "ta_year": Variable(
@@ -2875,6 +2885,13 @@ VARIABLES = {
         "mm/dt",
         "precipitation",
     ),
+    "prec_day": Variable(
+        "precipitation",
+        CATCH_GRID + TIMESTEPS_DAY,
+        "mm/dt",
+        "precipitation",
+        active=lambda settings: not settings.enable_offline_transport,
+    ),
     "rain": Variable(
         "rainfall",
         CATCH_GRID,
@@ -3355,6 +3372,14 @@ VARIABLES = {
         "mm/dt",
         "potential evapotranspiration",
         time_dependent=True,
+    ),
+    "pet_day": Variable(
+        "potential evapotranspiration",
+        CATCH_GRID + TIMESTEPS_DAY,
+        "mm/dt",
+        "potential evapotranspiration",
+        time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "pet_res": Variable(
         "Residual potential evapotranspiration",

@@ -175,17 +175,17 @@ def run(**kwargs):
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-mpi\n')
                             lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
+                            lines.append(f'mpirun -n {nproc} {cmd_sh}\n')
                         elif backend in ['jax-mpi']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-mpi\n')
                             lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
+                            lines.append(f'mpirun -n {nproc} {cmd_sh}\n')
                         elif backend in ['jax-gpu-mpi']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
                             lines.append('conda activate roger-gpu\n')
                             lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'MPI4JAX_USE_CUDA_MPI=1 mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
+                            lines.append(f'MPI4JAX_USE_CUDA_MPI=1 mpirun -n {nproc} {cmd_sh}\n')
                     else:
                         # write shell script to submit job to cluster
                         lines = []
@@ -253,7 +253,7 @@ def run(**kwargs):
                         elif backend in ['jax-gpu']:
                             cmd = f"qsub -q gpu -N benchmark_{backend}_{real_size} -l nodes=1:ppn=1:gpus=1:default,walltime=1:00:00,pmem=24000mb job.sh"
                         elif backend in ['jax-gpu-mpi']:
-                            cmd = f"qsub -q gpu -N benchmark_{backend}_{real_size} -l nodes=2:ppn=1:gpus=1:default,walltime=1:00:00,pmem=24000mb job.sh"
+                            cmd = f"qsub -q gpu -N benchmark_{backend}_{real_size} -l nodes=1:ppn=2:gpus=2:default,walltime=1:00:00,pmem=24000mb job.sh"
 
                     if kwargs["debug"]:
                         click.echo(f"  $ {cmd}")

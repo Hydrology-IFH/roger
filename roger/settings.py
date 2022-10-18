@@ -90,6 +90,7 @@ SETTINGS = {
     "enable_runon_infiltration": Setting(False, bool, "enable run-on infiltration"),
     "enable_urban": Setting(False, bool, "enable urban"),
     "enable_macropore_lower_boundary_condition": Setting(False, bool, "enable lower boundary condition of macropores"),
+    "enable_adaptive_time_stepping": Setting(False, bool, "enable_adaptive_time_stepping"),
     "tm_structure": Setting("UNNAMED", str, "transport model structure"),
     "enable_age_statistics": Setting(False, bool, "enable calculation of age statistics"),
     "warmup_done": Setting(False, bool, "True if after model warmup"),

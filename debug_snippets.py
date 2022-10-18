@@ -313,3 +313,7 @@ msa_ss0 = msan_ss[2:-2, 2:-2, 0, :]
 
 with model.state.settings.unlock():
     model.state.settings.warmup_done = True
+
+
+# local benchmark
+python run_benchmarks.py --sizes 1000. --sizes 10000. --sizes 100000. --sizes 200000. --backends numpy --backends jax --backends numpy-mpi --backends jax-mpi --nproc 2 --only oneD_benchmark.py --debug --local

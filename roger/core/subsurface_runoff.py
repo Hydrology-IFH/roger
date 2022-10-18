@@ -775,9 +775,6 @@ def calculate_subsurface_runoff(state):
     vs = state.variables
     settings = state.settings
 
-    vs = state.variables
-    settings = state.settings
-
     if settings.enable_lateral_flow:
         vs.update(calc_z_sat_rise(state))
         vs.update(calc_S_zsat(state))

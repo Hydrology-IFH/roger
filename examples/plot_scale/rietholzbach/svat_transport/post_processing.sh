@@ -10,3 +10,4 @@ eval "$(conda shell.bash hook)"
 conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport
 python post_processing.py -td /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport
+python post_processing.py --sas_solver RK4 -td /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport

@@ -266,7 +266,7 @@ def calc_inf_mat(state):
     )
     vs.no_wf = update(
         vs.no_wf,
-        at[2:-2, 2:-2], npx.where(mask20[2:-2, 2:-2], 1, vs.no_wf[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask20[2:-2, 2:-2], 1, vs.no_wf[2:-2, 2:-2]),
     )
     vs.z_wf = update(
         vs.z_wf,
@@ -1116,7 +1116,7 @@ def calc_pi_gr(state):
     """
     vs = state.variables
 
-    pi_gr = allocate(state.dimensions, ("x", "y"), dtype=int)
+    pi_gr = allocate(state.dimensions, ("x", "y"))
 
     pi_gr = update(
         pi_gr,
@@ -1231,7 +1231,7 @@ def set_event_vars(state):
 
     vs.no_wf = update(
         vs.no_wf,
-        at[2:-2, 2:-2], 1 * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], 1,
     )
 
     # wetting front depth (in mm)

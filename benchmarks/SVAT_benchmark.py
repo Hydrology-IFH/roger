@@ -6,7 +6,7 @@ import h5netcdf
 @benchmark_cli
 def main(size, timesteps):
     from roger import roger_routine, roger_kernel, KernelOutput
-    from roger.models.SVAT import SVATSetup
+    from roger.models.svat import SVATSetup
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
     from roger.core.surface import calc_parameters_surface_kernel
@@ -47,6 +47,7 @@ def main(size, timesteps):
 
             # enable specific processes
             settings.enable_groundwater_boundary = False
+            settings.enable_adaptive_time_stepping = True
 
         @roger_routine(
             dist_safe=False,
@@ -128,144 +129,30 @@ def main(size, timesteps):
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "dt_secs",
-                "dt",
-                "itt",
-                "itt_forc",
+                "time",
                 "itt_day",
-                "prec",
-                "ta",
-                "pet",
-                "pet_res",
-                "event_id",
-                "event_id_counter",
+                "itt_forc",
+                "prec_day",
+                "ta_day",
+                "pet_day",
                 "year",
                 "month",
                 "doy",
-                "tau",
-                "taum1",
-                "q_snow",
-                "swe",
-                "swe_top",
-                "time",
-                "time_event0"
             ],
         )
         def set_forcing(self, state):
             vs = state.variables
-            settings = state.settings
 
-            vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, 'forcing.nc')[vs.itt_forc])
-            vs.month = update(vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, 'forcing.nc')[vs.itt_forc])
-            vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, 'forcing.nc')[vs.itt_forc])
-
-            # adaptive time stepping
-            condt = (vs.time % (24 * 60 * 60) == 0) & (vs.itt > 0)
+            condt = (vs.time % (24 * 60 * 60) == 0)
             if condt:
+                vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, 'forcing.nc')[vs.itt_forc])
+                vs.month = update(vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, 'forcing.nc')[vs.itt_forc])
+                vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, 'forcing.nc')[vs.itt_forc])
                 vs.itt_day = 0
                 vs.itt_forc = vs.itt_forc + 6 * 24
-            prec_day = self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
-            ta_day = self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
-            pet_day = self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24]
-            cond0 = (prec_day <= 0).all() & (vs.swe[2:-2, 2:-2, vs.tau] <= 0).all() & (vs.swe_top[2:-2, 2:-2, vs.tau] <= 0).all() & (ta_day > settings.ta_fm).all()
-            cond00 = ((prec_day > 0) & (ta_day <= settings.ta_fm)).any() | ((prec_day <= 0) & (ta_day <= settings.ta_fm)).all()
-            cond1 = (prec_day > settings.hpi).any() & (prec_day > 0).any() & (ta_day > settings.ta_fm).any()
-            cond2 = (prec_day <= settings.hpi).all() & (prec_day > 0).any() & (ta_day > settings.ta_fm).any()
-            cond3 = (prec_day > settings.hpi).any() & (prec_day > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
-            cond4 = (prec_day <= settings.hpi).all() & (prec_day > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
-            cond5 = (prec_day <= 0).all() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (ta_day > settings.ta_fm).any())
-            # no event or snowfall - daily time steps
-            if cond0 or cond00:
-                prec = npx.sum(prec_day, axis=-1)
-                ta = npx.mean(ta_day, axis=-1)
-                if (vs.time % (24 * 60 * 60) == 0):
-                    vs.dt_secs = 24 * 60 * 60
-                else:
-                    vs.dt_secs = 60 * 60
-            # rainfall/snow melt event - hourly time steps
-            elif (cond2 or cond4 or cond5) and not cond1 and not cond3:
-                prec_hour = prec_day[:, :, vs.itt_day:vs.itt_day+6]
-                ta_hour = ta_day[:, :, vs.itt_day:vs.itt_day+6]
-                prec = npx.sum(prec_hour, axis=-1)
-                ta = npx.mean(ta_hour, axis=-1)
-                vs.dt_secs = 60 * 60
-            # heavy rainfall event - 10 minutes time steps
-            elif (cond1 or cond3) and not cond2 and not cond4 and not cond5:
-                prec = prec_day[:, :, vs.itt_day]
-                ta = ta_day[:, :, vs.itt_day]
-                vs.dt_secs = 10 * 60
-
-            # determine end of event
-            if ((prec > 0).any() | ((vs.swe[2:-2, 2:-2, vs.tau] > 0) | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0)).any() and (ta > settings.ta_fm)).any():
-                vs.time_event0 = 0
-            elif ((prec <= 0) & (ta > settings.ta_fm)).all() or ((prec > 0) & (ta <= settings.ta_fm)).all() or ((vs.swe[2:-2, 2:-2, vs.taum1] > 0).any() & (vs.swe[2:-2, 2:-2, vs.tau] <= 0).all()):
-                vs.time_event0 = vs.time_event0 + vs.dt_secs
-
-            # increase time stepping at end of event if either full hour
-            # or full day, respectively
-            if vs.time_event0 <= settings.end_event and (vs.dt_secs == 10 * 60):
-                ta = ta_day[:, :, vs.itt_day]
-                pet = pet_day[:, :, vs.itt_day]
-                vs.event_id = update(
-                    vs.event_id,
-                    at[vs.tau], vs.event_id_counter,
-                )
-                vs.dt = 1 / 6
-                vs.itt_day = vs.itt_day + 1
-            elif vs.time_event0 <= settings.end_event and (vs.dt_secs == 60 * 60):
-                ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
-                pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
-                vs.event_id = update(
-                    vs.event_id,
-                    at[vs.tau], vs.event_id_counter,
-                )
-                vs.dt = 1
-                vs.itt_day = vs.itt_day + 6
-            elif vs.time_event0 <= settings.end_event and (vs.dt_secs == 24 * 60 * 60):
-                ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
-                pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
-                vs.dt = 24
-                vs.itt_day = 0
-            elif vs.time_event0 > settings.end_event and (vs.time % (60 * 60) != 0) and (vs.dt_secs == 10 * 60):
-                vs.dt_secs = 10 * 60
-                vs.dt = 1 / 6
-                ta = ta_day[:, :, vs.itt_day]
-                pet = pet_day[:, :, vs.itt_day]
-                vs.itt_day = vs.itt_day + 1
-                vs.event_id = update(
-                    vs.event_id,
-                    at[vs.tau], 0,
-                )
-            elif vs.time_event0 > settings.end_event and (vs.time % (60 * 60) == 0) and ((vs.dt_secs == 10 * 60) or (vs.dt_secs == 60 * 60)):
-                ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
-                pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+6], axis=-1)
-                vs.dt_secs = 60 * 60
-                vs.dt = 1
-                vs.itt_day = vs.itt_day + 6
-                vs.event_id = update(
-                    vs.event_id,
-                    at[vs.tau], 0,
-                )
-            elif vs.time_event0 > settings.end_event and (vs.time % (24 * 60 * 60) == 0) and (vs.dt_secs == 24 * 60 * 60):
-                ta = npx.mean(ta_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
-                pet = npx.sum(pet_day[:, :, vs.itt_day:vs.itt_day+24*6], axis=-1)
-                vs.dt_secs = 24 * 60 * 60
-                vs.dt = 24
-                vs.itt_day = 0
-                vs.event_id = update(
-                    vs.event_id,
-                    at[vs.tau], 0,
-                )
-
-            # set event id for next event
-            if (vs.event_id[vs.taum1] > 0) & (vs.event_id[vs.tau] == 0):
-                vs.event_id_counter = vs.event_id_counter + 1
-
-            # set forcing for current time step
-            vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], prec)
-            vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], ta)
-            vs.pet = update(vs.pet, at[2:-2, 2:-2], pet)
-            vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], pet)
+                vs.prec_day = update(vs.prec_day, at[:, :, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
+                vs.ta_day = update(vs.ta_day, at[:, :, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
+                vs.pet_day = update(vs.pet_day, at[:, :, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
 
         @roger_routine
         def set_diagnostics(self, state):
