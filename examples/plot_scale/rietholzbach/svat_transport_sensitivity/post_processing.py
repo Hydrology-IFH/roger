@@ -278,7 +278,8 @@ def main(tmp_dir):
             # avoid defragmentation of DataFrame
             df_params_metrics = df_params_metrics.copy()
 
-        # write bulk sample to output file
+        # write simulated bulk sample to output file
+        ds_sim_tm = ds_sim_tm.load()
         ds_sim_tm = ds_sim_tm.close()
         del ds_sim_tm
         states_tm_file = base_path / f"states_{tms}_sensitivity.nc"

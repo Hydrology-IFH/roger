@@ -52,7 +52,7 @@ def main(tmp_dir, sas_solver):
     # merge model output into a single file
     for tm in transport_models:
         tm1 = tm.replace(" ", "_")
-        path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tm}.*.nc")
+        path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tm1}.*.nc")
         diag_files = glob.glob(path)
         states_tm_file = base_path / sas_solver / age_max / f"states_{tm1}.nc"
         click.echo(f'Merge output files of {tm} into {states_tm_file.as_posix()}')
@@ -99,7 +99,7 @@ def main(tmp_dir, sas_solver):
                         v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
                         var_obj = df.variables.get('Time')
                         v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                                       units=var_obj.attrs["units"])
+                                        units=var_obj.attrs["units"])
                         v[:] = time
                     for var_sim in list(df.variables.keys()):
                         var_obj = df.variables.get(var_sim)
@@ -108,7 +108,7 @@ def main(tmp_dir, sas_solver):
                             vals = onp.array(var_obj)
                             v[:, :, :] = vals.swapaxes(0, 2)
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
+                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
                             v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
                             vals = onp.array(var_obj)
@@ -116,7 +116,7 @@ def main(tmp_dir, sas_solver):
                             vals = vals.swapaxes(1, 2)
                             v[:, :, :] = vals[:, :, :, 0]
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
+                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
                             v = f.create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
                             vals = onp.array(var_obj)
@@ -125,7 +125,7 @@ def main(tmp_dir, sas_solver):
                             vals = vals.swapaxes(2, 3)
                             v[:, :, :, :] = vals
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
+                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
                             v = f.create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
                             vals = onp.array(var_obj)
@@ -134,7 +134,7 @@ def main(tmp_dir, sas_solver):
                             vals = vals.swapaxes(2, 3)
                             v[:, :, :, :] = vals
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
+                                            units=var_obj.attrs["units"])
 
     # load hydrologic simulation
     states_hm_file = base_path / "states_hm1_bootstrap.nc"
@@ -175,8 +175,8 @@ def main(tmp_dir, sas_solver):
         df_params_metrics.loc[:, 'theta_pwp'] = ds_sim_hm["theta_pwp"].values.flatten()
         df_params_metrics.loc[:, 'ks'] = ds_sim_hm["ks"].values.flatten()
         # loop over simulations
+        d18O_perc_bs = onp.zeros((nrows, 1, len(idx)))
         for nrow in range(nrows):
-            d18O_perc_bs = onp.zeros((nrows, 1, len(idx)))
             df_idx_bs = pd.DataFrame(index=date_obs, columns=['sol'])
             df_idx_bs.loc[:, 'sol'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
             idx_bs = df_idx_bs['sol'].dropna().index
@@ -233,9 +233,9 @@ def main(tmp_dir, sas_solver):
             key_r = f'r_{var_sim}'
             df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
             # plot observed and simulated d18O in percolation
-            ax.plot(ds_sim_tm.Time.values, ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=0).values, color='red')
-            ax.scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=4)
-            ax.scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=4)
+            ax.plot(ds_sim_tm.Time.values, ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=0).values, color='red', zorder=2)
+            ax.scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=4, zorder=1)
+            ax.scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=4, zorder=3)
 
         # write figure to .png
         ax.set_ylabel(r'$\delta^{18}$O [‰]')
@@ -318,22 +318,26 @@ def main(tmp_dir, sas_solver):
             for i in range(len(ds_sim_tm['Time'].values)):
                 tt75[i] = onp.interp(0.75, TT[i, 1:], ages)
             # calculate upper interquartile travel time for each time step
-            df_tt = pd.DataFrame(index=idx[1:], columns=['MTT', 'MEDIANTT', 'TT25', 'TT75'])
-            df_tt.loc[:, 'MTT'] = mtt[1:]
-            df_tt.loc[:, 'MEDIANTT'] = mediantt[1:]
-            df_tt.loc[:, 'TT25'] = tt25[1:]
-            df_tt.loc[:, 'TT75'] = tt75[1:]
-            df_tt.loc[:, var_sim] = ds_sim_hm[var_sim].isel(x=idx_best, y=0).values[1:]
+            df_tt = pd.DataFrame(index=idx[2:], columns=['MTT', 'MEDIANTT', 'TT25', 'TT75', 'MRT', 'MEDIANRT', 'RT25', 'RT75',])
+            df_tt.loc[:, 'MTT'] = ds_sim_tm["ttavg_q_ss"].isel(x=idx_best, y=0).values[2:]
+            df_tt.loc[:, 'MEDIANTT'] = ds_sim_tm["tt50_q_ss"].isel(x=idx_best, y=0).values[2:]
+            df_tt.loc[:, 'TT25'] = ds_sim_tm["tt25_q_ss"].isel(x=idx_best, y=0).values[2:]
+            df_tt.loc[:, 'TT75'] = ds_sim_tm["tt75_q_ss"].isel(x=idx_best, y=0).values[2:]
+            df_tt.loc[:, 'MRT'] = ds_sim_tm["rtavg_s"].isel(x=idx_best, y=0).values[2:]
+            df_tt.loc[:, 'MEDIANRT'] = ds_sim_tm["rt50_s"].isel(x=idx_best, y=0).values[2:]
+            df_tt.loc[:, 'RT25'] = ds_sim_tm["rt50_s"].isel(x=idx_best, y=0).values[2:]
+            df_tt.loc[:, 'RT75'] = ds_sim_tm["rt25_s"].isel(x=idx_best, y=0).values[2:]
+            df_tt.loc[:, var_sim] = ds_sim_hm[var_sim].isel(x=idx_best, y=0).values[2:]
 
             # mean and median travel time over entire simulation period
-            df_tt_mean_median = pd.DataFrame(index=['mean', 'median'], columns=['MTT', 'MEDIANTT'])
-            df_tt_mean_median.loc['mean', 'MTT'] = onp.nanmean(df_tt['MTT'].values)
-            df_tt_mean_median.loc['mean', 'MEDIANTT'] = onp.nanmean(df_tt['MEDIANTT'].values)
-            df_tt_mean_median.loc['median', 'MTT'] = onp.nanmedian(df_tt['MTT'].values)
-            df_tt_mean_median.loc['median', 'MEDIANTT'] = onp.nanmedian(df_tt['MEDIANTT'].values)
-            file_str = 'tt_mean_median_%s_%s.csv' % (var_sim, tm1)
+            df_age_mean = pd.DataFrame(index=['avg'], columns=['MTT', 'MEDIANTT', 'MRT', 'MEDIANRT'])
+            df_age_mean.loc['avg', 'MTT'] = onp.nanmean(df_tt['MTT'].values)
+            df_age_mean.loc['avg', 'MEDIANTT'] = onp.nanmean(df_tt['MEDIANTT'].values)
+            df_age_mean.loc['avg', 'MRT'] = onp.nanmean(df_tt['MRT'].values)
+            df_age_mean.loc['avg', 'MEDIANRT'] = onp.nanmean(df_tt['MEDIANRT'].values)
+            file_str = 'age_mean_%s_%s.csv' % (var_sim, tm1)
             path_csv = base_path_figs / file_str
-            df_tt_mean_median.to_csv(path_csv, header=True, index=True, sep="\t")
+            df_age_mean.to_csv(path_csv, header=True, index=True, sep="\t")
 
             # plot mean and median travel time
             fig, axes = plt.subplots(2, 1, sharex=True, figsize=(14, 7))
@@ -341,14 +345,14 @@ def main(tmp_dir, sas_solver):
             axes[0].plot(df_tt.index, df_tt['MEDIANTT'], ls=':', lw=2, color='purple')
             axes[0].fill_between(df_tt.index, df_tt['TT25'], df_tt['TT75'], color='purple',
                                  edgecolor=None, alpha=0.2)
-            tt_50 = str(int(df_tt_mean_median.loc['mean', 'MEDIANTT']))
-            tt_mean = str(int(df_tt_mean_median.loc['mean', 'MTT']))
+            tt_50 = str(int(df_age_mean.loc['mean', 'MEDIANTT']))
+            tt_mean = str(int(df_age_mean.loc['mean', 'MTT']))
             axes[0].text(0.75, 0.93, r'$\overline{TT}_{50}$: %s days' % (tt_50), size=12, horizontalalignment='left',
                          verticalalignment='center', transform=axes[0].transAxes)
             axes[0].text(0.75, 0.83, r'$\overline{TT}$: %s days' % (tt_mean), size=12, horizontalalignment='left',
                          verticalalignment='center', transform=axes[0].transAxes)
             axes[0].set_ylabel('age\n[days]')
-            axes[0].set_ylim((0,))
+            axes[0].set_ylim(0,)
             axes[0].set_xlim((df_tt.index[0], df_tt.index[-1]))
             axes[1].bar(df_tt.index, df_tt[var_sim], width=-1, align='edge', edgecolor='grey')
             axes[1].set_ylim(0,)
@@ -360,6 +364,63 @@ def main(tmp_dir, sas_solver):
             file_str = 'mean_median_tt_%s_%s.pdf' % (var_sim, tm1)
             path_fig = base_path_figs / file_str
             fig.savefig(path_fig, dpi=250)
+
+            # plot mean and median travel time and residence time
+            fig, axes = plt.subplots(2, 1, sharex=True, figsize=(14, 7))
+            axes[0].plot(df_tt.index, df_tt['MRT'], ls='--', lw=2, color='magenta')
+            axes[0].plot(df_tt.index, df_tt['MEDIANRT'], ls=':', lw=2, color='purple')
+            axes[0].fill_between(df_tt.index, df_tt['RT25'], df_tt['RT75'], color='purple',
+                                 edgecolor=None, alpha=0.2)
+            rt_50 = str(int(df_age_mean.loc['mean', 'MEDIANRT']))
+            rt_mean = str(int(df_age_mean.loc['mean', 'MRT']))
+            axes[0].text(0.75, 0.93, r'$\overline{RT}_{50}$: %s days' % (rt_50), size=12, horizontalalignment='left',
+                         verticalalignment='center', transform=axes[0].transAxes)
+            axes[0].text(0.75, 0.83, r'$\overline{RT}$: %s days' % (rt_mean), size=12, horizontalalignment='left',
+                         verticalalignment='center', transform=axes[0].transAxes)
+            axes[0].set_ylabel('age\n[days]')
+            axes[0].set_ylim(0,)
+            axes[0].set_xlim((df_tt.index[0], df_tt.index[-1]))
+            axes[0].plot(df_tt.index, df_tt['MTT'], ls='--', lw=2, color='magenta')
+            axes[0].plot(df_tt.index, df_tt['MEDIANTT'], ls=':', lw=2, color='purple')
+            axes[0].fill_between(df_tt.index, df_tt['TT25'], df_tt['TT75'], color='purple',
+                                 edgecolor=None, alpha=0.2)
+            tt_50 = str(int(df_age_mean.loc['mean', 'MEDIANTT']))
+            tt_mean = str(int(df_age_mean.loc['mean', 'MTT']))
+            axes[1].text(0.75, 0.93, r'$\overline{TT}_{50}$: %s days' % (tt_50), size=12, horizontalalignment='left',
+                         verticalalignment='center', transform=axes[1].transAxes)
+            axes[1].text(0.75, 0.83, r'$\overline{TT}$: %s days' % (tt_mean), size=12, horizontalalignment='left',
+                         verticalalignment='center', transform=axes[1].transAxes)
+            axes[1].set_ylabel('age\n[days]')
+            axes[1].set_ylim(0,)
+            axes[1].set_xlim((df_tt.index[0], df_tt.index[-1]))
+            axes[1].set_xlabel(r'Time [year]')
+            fig.tight_layout()
+            file_str = 'mean_median_rt_tt_%s_%s.pdf' % (var_sim, tm1)
+            path_fig = base_path_figs / file_str
+            fig.savefig(path_fig, dpi=250)
+
+            # plot observed and simulated d18O in percolation
+            fig, ax = plt.subplots(figsize=(14, 3.5))
+            # join observations on simulations
+            obs_vals_bs = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+            sim_vals_bs = d18O_perc_bs[idx_best, 0, :]
+            sim_vals = ds_sim_tm['C_iso_q_ss'].isel(x=idx_best, y=0).values
+            df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+            df_obs.loc[:, 'obs'] = obs_vals_bs
+            df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals_bs, df_obs)
+            df_eval = df_eval.dropna()
+            # plot observed and simulated d18O in percolation
+            ax.plot(ds_sim_tm.Time.values, ds_sim_tm['C_iso_q_ss'].isel(x=idx_best, y=0).values, color='red', zorder=2)
+            ax.scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=4, zorder=3)
+            # write figure to .png
+            ax.set_ylabel(r'$\delta^{18}$O [‰]')
+            ax.set_xlabel('Time [year]')
+            ax.set_xlim((ds_sim_tm.Time.values[0], ds_sim_tm.Time.values[-1]))
+            ax.set_ylim((-20, -5))
+            fig.tight_layout()
+            file = base_path_figs / f"d18O_perc_sim_obs_{tm1}_best.png"
+            fig.savefig(file, dpi=250)
+            plt.close('all')
 
             # plot numerical errors
             sd_dS_num_error = '{:.2e}'.format(onp.std(ds_sim_tm['dS_num_error'].isel(x=idx_best, y=0).values))
@@ -389,6 +450,28 @@ def main(tmp_dir, sas_solver):
             path_fig = base_path_figs / file_str
             fig.savefig(path_fig, dpi=250)
 
+        # write states of best hydrologic simulation corresponding to best transport simulation
+        ds_sim_hm_best = ds_sim_hm.loc[dict(x=idx_best)]
+        ds_sim_hm_best.attrs['title'] = f'Best hydrologic simulation corresponding to best {tm} simulation'
+        file = base_path / f"states_hm_best_for_{tm1}.nc"
+        ds_sim_hm_best.to_netcdf(file, engine="h5netcdf")
+
+        # write simulated bulk sample to output file
+        ds_sim_tm = ds_sim_tm.load()  # required to release file lock
+        ds_sim_tm = ds_sim_tm.close()
+        del ds_sim_tm
+        states_tm_file = base_path / sas_solver / age_max / f"states_{tm1}.nc"
+        with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+            try:
+                v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                v[:, :, :] = d18O_perc_bs
+                v.attrs.update(long_name="bulk sample of d18O in percolation",
+                               units="permil")
+            except ValueError:
+                v = f.get('d18O_perc_bs')
+                v[:, :, :] = d18O_perc_bs
+                v.attrs.update(long_name="bulk sample of d18O in percolation",
+                               units="permil")
     return
 
 

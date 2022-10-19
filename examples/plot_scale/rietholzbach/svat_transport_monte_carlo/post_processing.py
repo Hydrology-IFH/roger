@@ -27,18 +27,19 @@ def main(nsamples, sas_solver, tmp_dir):
         base_path = Path(tmp_dir)
     else:
         base_path = Path(__file__).parent
+    age_max = "age_max_11"
     # directory of results
     base_path_results = base_path / "results" / sas_solver
     if not os.path.exists(base_path_results):
         os.mkdir(base_path_results)
-    base_path_results = base_path / "results" / sas_solver / "age_max_11"
+    base_path_results = base_path / "results" / sas_solver / age_max
     if not os.path.exists(base_path_results):
         os.mkdir(base_path_results)
     # directory of figures
     base_path_figs = base_path / "figures" / sas_solver
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
-    base_path_figs = base_path / "figures" / sas_solver / "age_max_11"
+    base_path_figs = base_path / "figures" / sas_solver / age_max
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
@@ -54,11 +55,11 @@ def main(nsamples, sas_solver, tmp_dir):
     for tm_structure in tm_structures:
         for diagnostic in diagnostics:
             tms = tm_structure.replace(" ", "_")
-            path = str(base_path / sas_solver / "age_max_11" / f"SVATTRANSPORT_{tms}_{sas_solver}_*.{diagnostic}.nc")
+            path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}_*.{diagnostic}.nc")
             diag_files = glob.glob(path)
             if diag_files:
                 click.echo(f'Merge {diagnostic} of {tm_structure} ...')
-                diag_file = base_path / sas_solver / "age_max_11" / f"SVATTRANSPORT_{tms}_{sas_solver}.{diagnostic}.nc"
+                diag_file = base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}.{diagnostic}.nc"
                 # initial diagnostic file
                 with h5netcdf.File(diag_file, 'w', decode_vlen_strings=False) as f:
                     f.attrs.update(
@@ -160,12 +161,60 @@ def main(nsamples, sas_solver, tmp_dir):
                                                    units=var_obj.attrs["units"])
                                     del var_obj, vals
 
+    states_hm1_file = base_path / "states_hm1_bootstrap.nc"
+    states_hm_mc_file = base_path / "states_hm_for_tm_mc.nc"
+    n_repeat = int(nsamples / 500)
+    with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
+        f.attrs.update(
+          date_created=datetime.datetime.today().isoformat(),
+          title='RoGeR best 1% monte carlo simulations (bootstrapped) at Rietholzbach lysimeter site',
+          institution='University of Freiburg, Chair of Hydrology',
+          references='',
+          comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
+          model_structure='SVAT model with free drainage',
+          roger_version=f'{roger.__version__}'
+        )
+        with h5netcdf.File(states_hm1_file, 'r', decode_vlen_strings=False) as df:
+            # set dimensions with a dictionary
+            dict_dim = {'x': nsamples, 'y': 1, 'Time': len(df.variables['Time'])}
+            if not f.dimensions:
+                f.dimensions = dict_dim
+                v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
+                v.attrs['long_name'] = 'Number of model run'
+                v.attrs['units'] = ''
+                v[:] = onp.arange(dict_dim["x"])
+                v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
+                v.attrs['long_name'] = ''
+                v.attrs['units'] = ''
+                v[:] = onp.arange(dict_dim["y"])
+                v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
+                var_obj = df.variables.get('Time')
+                v.attrs.update(time_origin=var_obj.attrs["time_origin"],
+                               units=var_obj.attrs["units"])
+                v[:] = onp.array(var_obj)
+            for var_sim in list(df.variables.keys()):
+                var_obj = df.variables.get(var_sim)
+                if var_sim not in list(f.dimensions.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
+                    v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                    vals = onp.array(var_obj)
+                    vals_rep = onp.repeat(vals, n_repeat, axis=0)
+                    v[:, :, :] = vals_rep
+                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                   units=var_obj.attrs["units"])
+                elif var_sim not in list(f.dimensions.keys()) and ('x', 'y') == var_obj.dimensions:
+                    v = f.create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
+                    vals = onp.array(var_obj)
+                    vals_rep = onp.repeat(vals, n_repeat, axis=0)
+                    v[:, :] = vals_rep
+                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                   units=var_obj.attrs["units"])
+
     # merge results into single file
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        path = str(base_path / sas_solver / "age_max_11" / f"SVATTRANSPORT_{tms}_{sas_solver}.*.nc")
+        path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}.*.nc")
         diag_files = glob.glob(path)
-        states_tm_file = base_path / sas_solver / "age_max_11" / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
         if not os.path.exists(states_tm_file):
             click.echo(f'Merge output files of {tm_structure} into {states_tm_file.as_posix()}')
             with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
@@ -262,7 +311,7 @@ def main(nsamples, sas_solver, tmp_dir):
                                 del var_obj, vals
 
     # load hydrologic simulation
-    states_hm_file = base_path / "states_hm1_bootstrap.nc"
+    states_hm_file = base_path / "states_hm_for_tm_mc.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -299,7 +348,7 @@ def main(nsamples, sas_solver, tmp_dir):
             click.echo(f'Calculate metrics for {tm_structure} ...')
 
             # load transport simulation
-            states_tm_file = base_path / sas_solver / "age_max_11" / f"states_{tms}_monte_carlo.nc"
+            states_tm_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
             ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
             days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
             date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -408,7 +457,7 @@ def main(nsamples, sas_solver, tmp_dir):
             # write bulk sample to output file
             ds_sim_tm = ds_sim_tm.close()
             del ds_sim_tm
-            states_tm_file = base_path / sas_solver / "age_max_11" / f"states_{tms}_monte_carlo.nc"
+            states_tm_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
             with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
                 try:
                     v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
@@ -488,9 +537,9 @@ def main(nsamples, sas_solver, tmp_dir):
 
         # write SAS parameters of best model run
         click.echo(f'Write SAS params of best {tm_structure} simulation ...')
-        states_tm_file = base_path / sas_solver / "age_max_11" / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-        params_tm_file = base_path / sas_solver / "age_max_11" / f"sas_params_{tms}.nc"
+        params_tm_file = base_path / sas_solver / age_max / f"sas_params_{tms}.nc"
         with h5netcdf.File(params_tm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
@@ -549,8 +598,8 @@ def main(nsamples, sas_solver, tmp_dir):
 
         # write states of best transport simulation
         click.echo(f'Write states of best {tm_structure} simulation ...')
-        states_tm_mc_file = base_path / sas_solver / "age_max_11" / f"states_{tms}_monte_carlo.nc"
-        states_tm_file = base_path / sas_solver / "age_max_11" / f"states_{tms}.nc"
+        states_tm_mc_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / sas_solver / age_max / f"states_{tms}.nc"
         with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
@@ -634,89 +683,27 @@ def main(nsamples, sas_solver, tmp_dir):
 
         # write hydrologic states corresponding to best transport simulation
         click.echo(f'Write states of best hydrologic simulation corresponding to {tm_structure} ...')
-        states_hmb_file = base_path / "states_hm1_bootstrap.nc"
-        states_hm_file = base_path / "states_hm.nc"
-        with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
-            if tm_structure not in list(f.groups.keys()):
-                f.create_group(tm_structure)
-            f.attrs.update(
-                date_created=datetime.datetime.today().isoformat(),
-                title='RoGeR hydrologic Monte Carlo simulations corresponding to best transport simulation at Rietholzbach lysimeter site',
-                institution='University of Freiburg, Chair of Hydrology',
-                references='',
-                comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
-                model_structure='SVAT model with free drainage',
-                roger_version=ds_sim_tm.attrs['roger_version']
-            )
-            # collect dimensions
-            with h5netcdf.File(states_hmb_file, 'r', decode_vlen_strings=False) as df:
-                # set dimensions with a dictionary
-                dict_dim = {'x': 1, 'y': 1, 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
-                time = onp.array(df.variables.get('Time'))
-                if not f.groups[tm_structure].dimensions:
-                    f.groups[tm_structure].dimensions = dict_dim
-                    v = f.groups[tm_structure].create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
-                    v.attrs['long_name'] = 'model run'
-                    v.attrs['units'] = ''
-                    v[:] = onp.arange(dict_dim["x"])
-                    v = f.groups[tm_structure].create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
-                    v.attrs['long_name'] = ''
-                    v.attrs['units'] = ''
-                    v[:] = onp.arange(dict_dim["y"])
-                    v = f.groups[tm_structure].create_variable('ages', ('ages',), float, compression="gzip", compression_opts=1)
-                    v.attrs['long_name'] = 'Water ages'
-                    v.attrs['units'] = 'days'
-                    v[:] = onp.arange(1, dict_dim["ages"]+1)
-                    v = f.groups[tm_structure].create_variable('nages', ('nages',), float, compression="gzip", compression_opts=1)
-                    v.attrs['long_name'] = 'Water ages (cumulated)'
-                    v.attrs['units'] = 'days'
-                    v[:] = onp.arange(0, dict_dim["nages"])
-                    v = f.groups[tm_structure].create_variable('n_sas_params', ('n_sas_params',), float, compression="gzip", compression_opts=1)
-                    v.attrs['long_name'] = 'Number of SAS parameters'
-                    v.attrs['units'] = ''
-                    v[:] = onp.arange(0, dict_dim["n_sas_params"])
-                    v = f.groups[tm_structure].create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
-                    var_obj = df.variables.get('Time')
-                    v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                                   units=var_obj.attrs["units"])
-                    v[:] = time
-                for var_sim in list(df.variables.keys()):
-                    var_obj = df.variables.get(var_sim)
-                    if var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
-                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                        vals = onp.array(var_obj)
-                        v[:, :, :] = vals[idx_best, :, :]
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                       units=var_obj.attrs["units"])
-                        del var_obj, vals
-                    elif var_sim not in list(dict_dim.keys()) and ('x', 'y') == var_obj.dimensions:
-                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y'), float)
-                        vals = onp.array(var_obj)
-                        v[:, :] = vals[idx_best, :]
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                       units=var_obj.attrs["units"])
-                        del var_obj, vals
-                    elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'n_sas_params') == var_obj.dimensions:
-                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
-                        vals = onp.array(var_obj)
-                        v[:, :, :] = vals[idx_best, :, :]
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                       units=var_obj.attrs["units"])
-                        del var_obj, vals
-                    elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time', 'ages') == var_obj.dimensions:
-                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
-                        vals = onp.array(var_obj)
-                        v[:, :, :, :] = vals[idx_best, :, :, :]
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                       units=var_obj.attrs["units"])
-                        del var_obj, vals
-                    elif var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time', 'nages') == var_obj.dimensions:
-                        v = f.groups[tm_structure].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
-                        vals = onp.array(var_obj)
-                        v[:, :, :, :] = vals[idx_best, :, :, :]
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                       units=var_obj.attrs["units"])
-                        del var_obj, vals
+
+        # write states of best hydrologic simulation corresponding to best transport simulation
+        states_hm_mc_file = base_path / "states_hm_for_tm_mc.nc"
+        ds_sim_hm_mc = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
+        ds_sim_hm_best = ds_sim_hm_mc.loc[dict(x=idx_best)]
+        ds_sim_hm_best.attrs['title'] = f'Best hydrologic simulation corresponding to best {tm_structure} oxygen-18 simulation'
+        file = base_path / f"states_hm_best_for_{tms}.nc"
+        ds_sim_hm_best.to_netcdf(file, engine="h5netcdf")
+
+        # write simulated bulk sample to output file
+        ds_sim_tm = ds_sim_tm.close()
+        del ds_sim_tm
+        states_tm_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
+        with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+            try:
+                v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+            except ValueError:
+                v = f.get('d18O_perc_bs')
+            v[:, :, :] = d18O_perc_bs
+            v.attrs.update(long_name="bulk sample of d18O in percolation",
+                           units="permil")
 
     return
 
