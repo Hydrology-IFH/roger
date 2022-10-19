@@ -105,7 +105,7 @@ def main(nsamples, job_type, sas_solver, split_size):
                 x2 = x1x2[i+1]
                 tm1 = transport_models_abrev[tm]
                 tms = tm.replace(" ", "_")
-                script_name = f'{tracer}_{sas_solver}_svat_{tm1}_mc_{x1}_{x2}'
+                script_name = f'{tracer}_{sas_solver}_svat_{tm1}_sa_{x1}_{x2}'
                 output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_monte_carlo'
                 tms = tm.replace(" ", "_")
                 lines = []

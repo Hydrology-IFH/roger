@@ -1,8 +1,8 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1:gpus=1:default
-#PBS -l walltime=4:00:00
+#PBS -l walltime=10:00:00
 #PBS -l pmem=4000mb
-#PBS -N oxygen18_deterministic_svat_adt_mc_4000_4500
+#PBS -N oxygen18_deterministic_svat_ad_sa_5000_5120
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  
@@ -14,7 +14,7 @@ eval "$(conda shell.bash hook)"
 conda activate roger-gpu
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_sensitivity
  
-python svat_transport.py --log-all-processes --x1 4000 --x2 4500 -b jax -d gpu -tms time-variant_advection-dispersion -td "${TMPDIR}" -ss deterministic
+python svat_transport.py --log-all-processes --x1 5000 --x2 5120 -b jax -d gpu -tms advection-dispersion -td "${TMPDIR}" -ss deterministic
 # Move output from local SSD to global workspace
 echo "Move output to /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo"
 mkdir -p /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_monte_carlo
