@@ -8,8 +8,9 @@ import numpy as onp
 @click.option("-ns", "--nsamples", type=int, default=1024)
 @click.option("--job-type", type=click.Choice(['single-node', 'multi-node', 'gpu']), default='gpu')
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
+@click.option("--split-size", type=int, default=500)
 @click.command("main")
-def main(nsamples, job_type, sas_solver):
+def main(nsamples, job_type, sas_solver, split_size):
     base_path = Path(__file__).parent
     base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_sensitivity'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
@@ -95,7 +96,7 @@ def main(nsamples, job_type, sas_solver):
             subprocess.Popen(f"chmod +x {script_name}.sh", shell=True)
 
         elif job_type == 'gpu':
-            x1x2 = onp.arange(0, nruns, 500).tolist()
+            x1x2 = onp.arange(0, nruns, split_size).tolist()
             if nruns not in x1x2:
                 x1x2.append(nruns)
 

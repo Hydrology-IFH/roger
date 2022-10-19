@@ -18,10 +18,11 @@ import matplotlib.pyplot as plt  # noqa: E402
 sns.set_style("ticks")
 
 
+@click.option("-ns", "--nsamples", type=int, default=10000)
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
-def main(tmp_dir, sas_solver):
+def main(nsamples, sas_solver, tmp_dir):
     if tmp_dir:
         base_path = Path(tmp_dir)
     else:
@@ -41,13 +42,128 @@ def main(tmp_dir, sas_solver):
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
+    # merge diagnostics into single file
+    x1x2 = onp.arange(0, nsamples, 500).tolist()
+    if nsamples not in x1x2:
+        x1x2.append(nsamples)
     tm_structures = ['advection-dispersion',
                      'time-variant advection-dispersion']
+    diagnostics = ['averages',
+                   'constant',
+                   'maximum']
+    for tm_structure in tm_structures:
+        for diagnostic in diagnostics:
+            tms = tm_structure.replace(" ", "_")
+            path = str(base_path / sas_solver / "age_max_11" / f"SVATTRANSPORT_{tms}_{sas_solver}_*.{diagnostic}.nc")
+            diag_files = glob.glob(path)
+            if diag_files:
+                click.echo(f'Merge {diagnostic} of {tm_structure} ...')
+                diag_file = base_path / sas_solver / "age_max_11" / f"SVATTRANSPORT_{tms}_{sas_solver}.{diagnostic}.nc"
+                # initial diagnostic file
+                with h5netcdf.File(diag_file, 'w', decode_vlen_strings=False) as f:
+                    f.attrs.update(
+                        date_created=datetime.datetime.today().isoformat(),
+                        title=f'RoGeR {tm_structure} transport model Monte Carlo simulations at Rietholzbach lysimeter site',
+                        institution='University of Freiburg, Chair of Hydrology',
+                        references='',
+                        comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
+                        model_structure=f'SVAT {tm_structure} transport model with free drainage',
+                        sas_solver=f'{sas_solver}',
+                        roger_version=f'{roger.__version__}'
+                    )
+                    # collect dimensions
+                    with h5netcdf.File(diag_files[0], 'r', decode_vlen_strings=False) as df:
+                        dict_dim = {'x': nsamples, 'y': 1, 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
+                    time = onp.array(df.variables.get('Time'))
+                    f.dimensions = dict_dim
+                    v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = 'model run'
+                    v.attrs['units'] = ''
+                    v[:] = onp.arange(dict_dim["x"])
+                    v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = ''
+                    v.attrs['units'] = ''
+                    v[:] = onp.arange(dict_dim["y"])
+                    v = f.create_variable('ages', ('ages',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = 'Water ages'
+                    v.attrs['units'] = 'days'
+                    v[:] = onp.arange(1, dict_dim["ages"]+1)
+                    v = f.create_variable('nages', ('nages',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = 'Water ages (cumulated)'
+                    v.attrs['units'] = 'days'
+                    v[:] = onp.arange(0, dict_dim["nages"])
+                    v = f.create_variable('n_sas_params', ('n_sas_params',), float, compression="gzip", compression_opts=1)
+                    v.attrs['long_name'] = 'Number of SAS parameters'
+                    v.attrs['units'] = ''
+                    v[:] = onp.arange(0, dict_dim["n_sas_params"])
+                    v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
+                    var_obj = df.variables.get('Time')
+                    v.attrs.update(time_origin=var_obj.attrs["time_origin"],
+                                   units=var_obj.attrs["units"])
+                    v[:] = time
+
+                with h5netcdf.File(diag_file, 'a', decode_vlen_strings=False) as f:
+                    for i, dfs in enumerate(diag_files):
+                        x1 = x1x2[i]
+                        x2 = x1x2[i+1]
+                        with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                            for var_sim in list(df.variables.keys()):
+                                var_obj = df.variables.get(var_sim)
+                                if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
+                                    try:
+                                        v = f.create_variable(var_sim, ('Time', 'y', 'x'), float, compression="gzip", compression_opts=1)
+                                    except ValueError:
+                                        v = f.get(var_sim)
+                                    vals = onp.array(var_obj)
+                                    v[:, :, x1:x2] = vals
+                                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                   units=var_obj.attrs["units"])
+                                    del var_obj, vals
+                                elif var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
+                                    try:
+                                        v = f.create_variable(var_sim, ('Time', 'y', 'x'), float, compression="gzip", compression_opts=1)
+                                    except ValueError:
+                                        v = f.get(var_sim)
+                                    vals = onp.array(var_obj)
+                                    v[:, :, x1:x2] = vals
+                                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                   units=var_obj.attrs["units"])
+                                    del var_obj, vals
+                                elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
+                                    try:
+                                        v = f.create_variable(var_sim, ('Time', 'n_sas_params', 'y', 'x'), float, compression="gzip", compression_opts=1)
+                                    except ValueError:
+                                        v = f.get(var_sim)
+                                    vals = onp.array(var_obj)
+                                    v[:, :, :, x1:x2] = vals
+                                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                   units=var_obj.attrs["units"])
+                                    del var_obj, vals
+                                elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
+                                    try:
+                                        v = f.create_variable(var_sim, ('Time', 'ages', 'y', 'x'), float, compression="gzip", compression_opts=1)
+                                    except ValueError:
+                                        v = f.get(var_sim)
+                                    vals = onp.array(var_obj)
+                                    v[:, :, :, x1:x2] = vals
+                                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                   units=var_obj.attrs["units"])
+                                    del var_obj, vals
+                                elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
+                                    try:
+                                        v = f.create_variable(var_sim, ('Time', 'nages', 'y', 'x'), float, compression="gzip", compression_opts=1)
+                                    except ValueError:
+                                        v = f.get(var_sim)
+                                    vals = onp.array(var_obj)
+                                    v[:, :, :, x1:x2] = vals
+                                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                   units=var_obj.attrs["units"])
+                                    del var_obj, vals
 
     # merge results into single file
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        path = str(base_path / sas_solver / "age_max_11" / f"SVATTRANSPORT_{tm_structure}.*.nc")
+        path = str(base_path / sas_solver / "age_max_11" / f"SVATTRANSPORT_{tms}_{sas_solver}.*.nc")
         diag_files = glob.glob(path)
         states_tm_file = base_path / sas_solver / "age_max_11" / f"states_{tms}_monte_carlo.nc"
         if not os.path.exists(states_tm_file):
@@ -60,6 +176,7 @@ def main(tmp_dir, sas_solver):
                     references='',
                     comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
                     model_structure=f'SVAT {tm_structure} transport model with free drainage',
+                    sas_solver=f'{sas_solver}',
                     roger_version=f'{roger.__version__}'
                 )
                 # collect dimensions
@@ -175,7 +292,6 @@ def main(tmp_dir, sas_solver):
     df_thetap.loc[cond2, 'sc'] = 2  # normal
     df_thetap.loc[cond3, 'sc'] = 3  # wet
 
-    dict_params_metrics = {}
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
         file = base_path_results / f"params_metrics_{tms}.txt"
@@ -206,11 +322,19 @@ def main(tmp_dir, sas_solver):
                 df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
             elif tm_structure == "time-variant advection-dispersion":
                 df_params_metrics.loc[:, 'b1_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten()
-                df_params_metrics.loc[:, 'a1_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten()
-                df_params_metrics.loc[:, 'a1_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten()
                 df_params_metrics.loc[:, 'b2_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+                df_params_metrics.loc[:, 'a1_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten()
                 df_params_metrics.loc[:, 'a2_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+                df_params_metrics.loc[:, 'a1_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten()
                 df_params_metrics.loc[:, 'a2_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+            elif tm_structure == "preferential":
+                df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
+            elif tm_structure == "power":
+                df_params_metrics.loc[:, 'k_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'k_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'k_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
 
             # compare observations and simulations
             ncol = 0
@@ -297,76 +421,70 @@ def main(tmp_dir, sas_solver):
             # write to .txt
             file = base_path_results / f"params_metrics_{tms}.txt"
             df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
-            dict_params_metrics[tm_structure] = {}
-            dict_params_metrics[tm_structure]['params_metrics'] = df_params_metrics
 
         # dotty plots
-        if tm_structure in ['preferential', 'preferential1', 'preferential2',
-                            'advection-dispersion1', 'advection-dispersion2',
-                            'time-variant preferential',
-                            'time-variant advection-dispersion',
-                            'time-variant',
-                            'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion',
-                            'power', 'time-variant power']:
-            click.echo(f'Dotty plots for {tm_structure} ...')
-            tms = tm_structure.replace(" ", "_")
-            file = base_path_results / f"params_metrics_{tms}.txt"
-            df_params_metrics = pd.read_csv(file, header=0, index_col=False, sep="\t")
-            df_metrics = df_params_metrics.loc[:, ['KGE_C_iso_q_ss']]
-            if tm_structure == "advection-dispersion":
-                df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'a_q_rz', 'a_q_ss']]
-            elif tm_structure == "time-variant advection-dispersion":
-                df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'a_q_rz', 'a_q_ss']]
-            # select best model run
-            idx_best = df_params_metrics['KGE_C_iso_q_ss'].idxmax()
-            dict_params_metrics[tm_structure]['idx_best'] = idx_best
-            nrow = len(df_metrics.columns)
-            ncol = len(df_params.columns)
-            fig, ax1 = plt.subplots(nrow, ncol, sharey=True, figsize=(ncol*3.5, 3.5))
-            if ncol > 1:
-                ax = ax1.reshape(nrow, ncol)
-                for i in range(nrow):
-                    for j in range(ncol):
-                        y = df_metrics.iloc[:, i]
-                        x = df_params.iloc[:, j]
-                        ax[i, j].scatter(x, y, s=4, c='grey', alpha=0.5)
-                        ax[i, j].set_xlabel('')
-                        ax[i, j].set_ylabel('')
-                        ax[i, j].set_ylim(-1, 1)
-                        # best model run
-                        y_best = df_metrics.iloc[idx_best, i]
-                        x_best = df_params.iloc[idx_best, j]
-                        ax[i, j].scatter(x_best, y_best, s=12, c='red', alpha=0.8)
-
+        click.echo(f'Dotty plots for {tm_structure} ...')
+        tms = tm_structure.replace(" ", "_")
+        file = base_path_results / f"params_metrics_{tms}.txt"
+        df_params_metrics = pd.read_csv(file, header=0, index_col=False, sep="\t")
+        df_metrics = df_params_metrics.loc[:, ['KGE_C_iso_q_ss']]
+        if tm_structure == "advection-dispersion":
+            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'a_q_rz', 'a_q_ss']]
+        elif tm_structure == "time-variant advection-dispersion":
+            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b1_transp', 'b2_transp', 'a1_q_rz', 'a2_q_rz', 'a1_q_ss', 'a2_q_ss']]
+        elif tm_structure == "preferential":
+            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'b_q_rz', 'b_q_ss']]
+        elif tm_structure == "power":
+            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'k_transp', 'k_q_rz', 'k_q_ss']]
+        # select best model run
+        idx_best = df_params_metrics['KGE_C_iso_q_ss'].idxmax()
+        nrow = len(df_metrics.columns)
+        ncol = len(df_params.columns)
+        fig, ax1 = plt.subplots(nrow, ncol, sharey=True, figsize=(ncol*3.5, 3.5))
+        if ncol > 1:
+            ax = ax1.reshape(nrow, ncol)
+            for i in range(nrow):
                 for j in range(ncol):
-                    xlabel = labs._LABS[df_params.columns[j]]
-                    ax[-1, j].set_xlabel(xlabel)
+                    y = df_metrics.iloc[:, i]
+                    x = df_params.iloc[:, j]
+                    ax[i, j].scatter(x, y, s=4, c='grey', alpha=0.5)
+                    ax[i, j].set_xlabel('')
+                    ax[i, j].set_ylabel('')
+                    ax[i, j].set_ylim(-1, 1)
+                    # best model run
+                    y_best = df_metrics.iloc[idx_best, i]
+                    x_best = df_params.iloc[idx_best, j]
+                    ax[i, j].scatter(x_best, y_best, s=12, c='red', alpha=0.8)
 
-                ax[0, 0].set_ylabel(r'$KGE_{\delta^{18}O_{PERC}}$ [-]')
+            for j in range(ncol):
+                xlabel = labs._LABS[df_params.columns[j]]
+                ax[-1, j].set_xlabel(xlabel)
 
-                fig.tight_layout()
-                file = base_path_figs / f"dotty_plots_{tms}.png"
-                fig.savefig(file, dpi=250)
-                plt.close('all')
-            else:
-                ax = ax1
-                y = df_metrics.iloc[:, 0]
-                x = df_params.iloc[:, 0]
-                ax.scatter(x, y, s=4, c='grey', alpha=0.5)
-                ax.set_xlabel('')
-                ax.set_ylabel('')
-                ax.set_ylim(-1, 1)
-                # best model run
-                y_best = df_metrics.iloc[idx_best, 0]
-                x_best = df_params.iloc[idx_best, 0]
-                ax.scatter(x_best, y_best, s=12, c='red', alpha=0.8)
-                xlabel = labs._LABS[df_params.columns[0]]
-                ax.set_xlabel(xlabel)
-                ax.set_ylabel(r'$KGE_{\delta^{18}O_{PERC}}$ [-]')
-                fig.tight_layout()
-                file = base_path_figs / f"dotty_plots_{tms}.png"
-                fig.savefig(file, dpi=250)
-                plt.close('all')
+            ax[0, 0].set_ylabel(r'$KGE_{\delta^{18}O_{PERC}}$ [-]')
+
+            fig.tight_layout()
+            file = base_path_figs / f"dotty_plots_{tms}.png"
+            fig.savefig(file, dpi=250)
+            plt.close('all')
+        else:
+            ax = ax1
+            y = df_metrics.iloc[:, 0]
+            x = df_params.iloc[:, 0]
+            ax.scatter(x, y, s=4, c='grey', alpha=0.5)
+            ax.set_xlabel('')
+            ax.set_ylabel('')
+            ax.set_ylim(-1, 1)
+            # best model run
+            y_best = df_metrics.iloc[idx_best, 0]
+            x_best = df_params.iloc[idx_best, 0]
+            ax.scatter(x_best, y_best, s=12, c='red', alpha=0.8)
+            xlabel = labs._LABS[df_params.columns[0]]
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel(r'$KGE_{\delta^{18}O_{PERC}}$ [-]')
+            fig.tight_layout()
+            file = base_path_figs / f"dotty_plots_{tms}.png"
+            fig.savefig(file, dpi=250)
+            plt.close('all')
 
         # write SAS parameters of best model run
         click.echo(f'Write SAS params of best {tm_structure} simulation ...')
@@ -380,6 +498,7 @@ def main(tmp_dir, sas_solver):
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
                 model_structure=f'SVAT {tm_structure} model with free drainage',
+                sas_solver=f'{sas_solver}',
                 roger_version=f'{roger.__version__}'
             )
             dict_dim = {'x': nx, 'y': 1, 'n_sas_params': 8}
@@ -440,6 +559,7 @@ def main(tmp_dir, sas_solver):
                 references='',
                 comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
                 model_structure=f'SVAT {tm_structure} model with free drainage',
+                sas_solver=f'{sas_solver}',
                 roger_version=ds_sim_tm.attrs['roger_version']
             )
             # collect dimensions
