@@ -427,15 +427,15 @@ def main(tmp_dir):
     # path = base_path_figs / file
     # fig.savefig(path, dpi=250)
 
-    # # load metrics of transport simulations
-    # dict_params_metrics_tm_mc = {}
-    # for tm_structure in transport_models:
-    #     tms = tm_structure.replace(" ", "_")
-    #     file = base_path / "svat_transport" / "results" / "deterministic" / "age_max_11" / f"params_metrics_{tms}.txt"
-    #     df_params_metrics = pd.read_csv(file, sep="\t")
-    #     dict_params_metrics_tm_mc[tm_structure] = {}
-    #     dict_params_metrics_tm_mc[tm_structure]['params_metrics'] = df_params_metrics
-    #
+    # load metrics of transport simulations
+    dict_params_metrics_tm_mc = {}
+    for tm_structure in transport_models:
+        tms = tm_structure.replace(" ", "_")
+        file = base_path / "svat_transport" / "results" / "deterministic" / "age_max_11" / f"params_metrics_{tms}.txt"
+        df_params_metrics = pd.read_csv(file, sep="\t")
+        dict_params_metrics_tm_mc[tm_structure] = {}
+        dict_params_metrics_tm_mc[tm_structure]['params_metrics'] = df_params_metrics
+
     # # compare best model runs
     # fig, ax = plt.subplots(2, 2, sharey=True, figsize=(14, 7))
     # for i, tm_structure in enumerate(transport_models):
@@ -481,7 +481,7 @@ def main(tmp_dir):
     #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
     #     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     #     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    #     ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
+    #     ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
     #     # join observations on simulations
     #     obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
     #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
@@ -556,7 +556,33 @@ def main(tmp_dir):
     fig.savefig(path_fig, dpi=250)
 
     # compare backward travel time distributions
-    # fig, ax = plt.subplots(2, 2, sharey=True, figsize=(14, 7))
+    fig, axes = plt.subplots(1, 5, sharey=True, figsize=(14, 4))
+    for i, tm_structure in enumerate(transport_models):
+        idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
+        tms = tm_structure.replace(" ", "_")
+        states_tm_file = base_path / "svat_transport" / "deterministic" / "age_max_11" / f"states_{tms}.nc"
+        with xr.open_dataset(states_tm_file, engine="h5netcdf") as ds_sim_tm:
+            days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+            date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+            ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+            TT = ds_sim_tm['TT_q_ss'].isel(x=idx_best, y=0).values
+            for j in range(len(ds_sim_tm["Time"].values)):
+                axes[i].plot(TT[j, :], lw=1, color='grey')
+            axes[i].set_xlim((0, 4000))
+            axes[i].set_ylim((0, 1))
+            axes[i].set_xlabel('T [days]')
+
+    TT = ds_hydrus_tt['bTT_perc'].values
+    fig, axs = plt.subplots()
+    for i in range(len(date_hydrus_tt)):
+        axes[-1].plot(TT[i, :], lw=1, color='grey')
+    axes[-1].set_xlim((0, 4000))
+    axes[-1].set_ylim((0, 1))
+    axes[0].set_ylabel(r'$\overrightarrow{P}(T,t)$')
+    fig.tight_layout()
+    file_str = 'bTTD_roger_hydrus.png'
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=250)
 
     # plot cumulative forward travel time distributions
     TT = ds_hydrus_tt['fTT_perc'].values

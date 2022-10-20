@@ -465,19 +465,6 @@ def main(nsamples, sas_solver, tmp_dir):
                 # avoid defragmentation of DataFrame
                 df_params_metrics = df_params_metrics.copy()
 
-            # write bulk sample to output file
-            ds_sim_tm = ds_sim_tm.close()
-            del ds_sim_tm
-            states_tm_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
-            with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
-                try:
-                    v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                except ValueError:
-                    v = f.get('d18O_perc_bs')
-                v[:, :, :] = d18O_perc_bs
-                v.attrs.update(long_name="bulk sample of oxygen-18 in percolation",
-                                units="per mil")
-
             # write to .txt
             file = base_path_results / f"params_metrics_{tms}.txt"
             df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
