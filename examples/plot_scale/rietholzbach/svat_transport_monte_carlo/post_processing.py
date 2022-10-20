@@ -546,7 +546,6 @@ def main(nsamples, sas_solver, tmp_dir):
                 references='',
                 model_structure=f'SVAT {tm_structure} model with free drainage',
                 sas_solver=f'{sas_solver}',
-                roger_version=f'{roger.__version__}'
             )
             dict_dim = {'x': nx, 'y': 1, 'n_sas_params': 8}
             if not f.dimensions:
@@ -608,10 +607,12 @@ def main(nsamples, sas_solver, tmp_dir):
                 comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
                 model_structure=f'SVAT {tm_structure} model with free drainage',
                 sas_solver=f'{sas_solver}',
-                roger_version=ds_sim_tm.attrs['roger_version']
             )
             # collect dimensions
             with h5netcdf.File(states_tm_mc_file, 'r', decode_vlen_strings=False) as df:
+                # f.attrs.update(
+                #     roger_version=df.attrs['roger_version']
+                # )
                 # set dimensions with a dictionary
                 dict_dim = {'x': 1, 'y': 1, 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
                 time = onp.array(df.variables.get('Time'))

@@ -19,6 +19,7 @@ import seaborn as sns
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
 sns.set_style("ticks")
+sns.plotting_context("paper", font_scale=0.8)
 
 _LABS_HYDRUS = {
                 'n': r'$n$ [-]',
@@ -114,7 +115,7 @@ def main(tmp_dir):
     # # measured oxygen-18 in precipitation and percolation
     # d18O_prec_mean = onp.round(onp.nanmean(df_obs.loc[:, 'd18O_prec'].values), 2)
     # d18O_perc_mean = onp.round(onp.nanmean(df_obs.loc[:, 'd18O_perc'].values), 2)
-    # fig, axs = plt.subplots(2, 1, figsize=(10, 6))
+    # fig, axs = plt.subplots(2, 1, figsize=(6, 2))
     # axs[0].plot(df_obs.index,
     #             df_obs.loc[:, 'd18O_prec'].fillna(method='bfill'),
     #             '-', color='blue')
@@ -156,7 +157,7 @@ def main(tmp_dir):
     #     df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
     #     nrow = len(df_metrics.columns)
     #     ncol = len(df_params.columns)
-    #     fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(14, 7))
+    #     fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 2))
     #     for i in range(nrow):
     #         for j in range(ncol):
     #             y = df_metrics.iloc[:, i]
@@ -332,7 +333,7 @@ def main(tmp_dir):
     # plt.close('all')
 
     # # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
-    # fig, axes = plt.subplots(3, 1, sharex=True, figsize=(14, 7))
+    # fig, axes = plt.subplots(3, 1, sharex=True, figsize=(6, 2))
     # axes[0].plot(dict_obs['prec'].index, dict_obs['prec'].cumsum(), lw=1.5, color='blue', ls='-', alpha=1)
     # axes[0].set_ylabel('PREC\n[mm]')
     # axes[0].set_xlim((dict_obs['prec'].index[0], dict_obs['prec'].index[-1]))
@@ -379,7 +380,7 @@ def main(tmp_dir):
 
     # # compare best 1% simulations with observations
     # nx = ds_sim_hm1.dims['x']
-    # fig, axes = plt.subplots(3, 1, sharex=True, figsize=(14, 7))
+    # fig, axes = plt.subplots(3, 1, sharex=True, figsize=(6, 2))
     # axes[0].plot(dict_obs['prec'].index, dict_obs['prec'].cumsum(), lw=1.5, color='blue', ls='-', alpha=1)
     # axes[0].set_ylabel('PREC\n[mm]')
     # axes[0].set_xlim((dict_obs['prec'].index[0], dict_obs['prec'].index[-1]))
@@ -437,7 +438,7 @@ def main(tmp_dir):
         dict_params_metrics_tm_mc[tm_structure]['params_metrics'] = df_params_metrics
 
     # # compare best model runs
-    # fig, ax = plt.subplots(2, 2, sharey=True, figsize=(14, 7))
+    # fig, ax = plt.subplots(1, 4, sharey=True, figsize=(6, 2))
     # for i, tm_structure in enumerate(transport_models):
     #     idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
     #     tms = tm_structure.replace(" ", "_")
@@ -472,7 +473,7 @@ def main(tmp_dir):
     # fig.savefig(file, dpi=250)
     #
     # # compare duration curve of 18O in percolation
-    # fig, ax = plt.subplots(2, 2, sharey=True, figsize=(14, 7))
+    # fig, ax = plt.subplots(2, 2, sharey=True, figsize=(6, 2))
     # for i, tm_structure in enumerate(transport_models):
     #     idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
     #     tms = tm_structure.replace(" ", "_")
@@ -524,7 +525,7 @@ def main(tmp_dir):
 
     # bromide benchmark
     years = onp.arange(1997, 2007).tolist()
-    fig, ax = plt.subplots(1, 1, figsize=(5.5, 4), dpi=250)
+    fig, ax = plt.subplots(1, 1, figsize=(6, 2))
     for year in years:
         states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
         with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
@@ -542,7 +543,7 @@ def main(tmp_dir):
 
     # travel time benchmark
     # compare backward travel time distributions
-    fig, axes = plt.subplots(1, 5, sharey=True, figsize=(14, 2.5))
+    fig, axes = plt.subplots(1, 5, sharey=True, figsize=(6, 1.5))
     for i, tm_structure in enumerate(transport_models):
         idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
         tms = tm_structure.replace(" ", "_")
@@ -635,7 +636,7 @@ def main(tmp_dir):
     #     cmap = cm.get_cmap('Greys')
     #     norm = Normalize(vmin=0, vmax=2)
     #     colors = cmap(norm([0.5, 1.5]))
-    #     fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(14, 5))
+    #     fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(6, 2))
     #     for i, name in enumerate(df_metrics.columns):
     #         indices = dict_si[name][['S1', 'ST']]
     #         err = dict_si[name][['S1_conf', 'ST_conf']]
@@ -654,7 +655,7 @@ def main(tmp_dir):
     #     # make dotty plots
     #     nrow = len(df_metrics.columns)
     #     ncol = bounds[tm_structure]['num_vars']
-    #     fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(14, 7))
+    #     fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
     #     for i in range(nrow):
     #         for j in range(ncol):
     #             y = df_metrics.iloc[:, i]
@@ -686,7 +687,7 @@ def main(tmp_dir):
     # nrow = len(df_metrics_hydrus.columns)
     # ncol = len(df_params_hydrus.columns)
     # idx_best = df_metrics_hydrus['kge_multi'].idxmax()
-    # fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(14, 7))
+    # fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
     # for i in range(nrow):
     #     for j in range(ncol):
     #         y = df_metrics_hydrus.iloc[:, i]
@@ -720,7 +721,7 @@ def main(tmp_dir):
     cmap = copy.copy(plt.cm.get_cmap('Blues_r'))
     norm = mpl.colors.Normalize(vmin=0, vmax=500)
 
-    fig, axes = plt.subplots(1, 1, figsize=(10, 3))
+    fig, axes = plt.subplots(1, 1, figsize=(6, 1.5))
     sns.heatmap(ds_hydrus_tt['mrt_s'].values, xticklabels=366, yticklabels=int(50/2), cmap='Blues_r',
                 vmax=500, vmin=0, cbar=False, ax=axes)
     axes.set_yticks([0, 25, 50, 75, 100])
@@ -735,16 +736,44 @@ def main(tmp_dir):
                                     ticks=[0, 100, 200, 300, 400, 500])
     cb1.ax.invert_yaxis()
     cb1.set_label(r'age [days]')
-    fig.subplots_adjust(bottom=0.15)
+    fig.subplots_adjust(bottom=0.25, right=0.9)
     file = 'mean_residence_time_soil.png'
     path = base_path_figs / file
     fig.savefig(path, dpi=250)
+
+    # plot soil bromide concentrations
+    years = onp.arange(1997, 2007).tolist()
+    cmap = copy.copy(plt.cm.get_cmap('Oranges_r'))
+    norm = mpl.colors.Normalize(vmin=0, vmax=1)
+    fig, axes = plt.subplots(5, 2, figsize=(6, 10))
+    for i, year in enumerate(years):
+        states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
+        with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
+            sns.heatmap(ds['Br_soil'].values, xticklabels=100, yticklabels=int(50/2), cmap='Oranges_r',
+                        vmax=1, vmin=0, cbar=False, ax=axes.flatten()[i])
+        axes.set_yticks([0, 25, 50, 75, 100])
+        axes.set_yticklabels([0, 0.5, 1, 1.5, 2])
+        axes.set_ylabel('Soil depth [m]')
+        axes.set_xlabel('Time [days since injection]')
+
+    axl = fig.add_axes([0.92, 0.2, 0.02, 0.6])
+    cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
+                                    orientation='vertical',
+                                    ticks=[0, 0.5, 1])
+    cb1.ax.invert_yaxis()
+    cb1.set_yticklabels(['0', '0.5', '>1'])
+    cb1.set_label(r'age [days]')
+    fig.subplots_adjust(bottom=0.1)
+    file = 'bromide_soil.png'
+    path = base_path_figs / file
+    fig.savefig(path, dpi=250)
+
 
     # # plot isotope ratios of precipitation and soil
     # cmap = copy.copy(plt.cm.get_cmap('YlGnBu_r'))
     # norm = mpl.colors.Normalize(vmin=-20, vmax=5)
     #
-    # fig, axes = plt.subplots(2, 1, sharex=False, figsize=(14, 7))
+    # fig, axes = plt.subplots(2, 1, sharex=False, figsize=(6, 2))
     # axes[0].bar(date_hydrus_18O, ds_hydrus_18O['prec'].values, width=-1, color=cmap(norm(ds_hydrus_18O['d18O_prec'].values)), align='edge', edgecolor=cmap(norm(ds_hydrus_18O['d18O_prec'].values)))
     # axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
     # axes[0].set_xlim(date_hydrus_18O[0], date_hydrus_18O[-1])
@@ -769,7 +798,7 @@ def main(tmp_dir):
     # cmap = copy.copy(plt.cm.get_cmap('YlGnBu_r'))
     # norm = mpl.colors.Normalize(vmin=-20, vmax=5)
 
-    # fig, axes = plt.subplots(3, 1, sharex=False, figsize=(14, 7))
+    # fig, axes = plt.subplots(3, 1, sharex=False, figsize=(6, 2))
     # axes[0].bar(date_hydrus_18O, ds_hydrus_18O['prec'].values, width=-1, edgecolor=cmap(norm(ds_hydrus_18O['d18O_prec'].values)), align='edge')
     # axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
     # axes[0].set_xlim(date_hydrus_18O[0], date_hydrus_18O[-1])
@@ -801,7 +830,7 @@ def main(tmp_dir):
     # cmap = copy.copy(plt.cm.get_cmap('YlGnBu'))
     # norm = mpl.colors.Normalize(vmin=0.1, vmax=0.4)
 
-    # fig, axes = plt.subplots(3, 1, sharex=False, figsize=(14, 7))
+    # fig, axes = plt.subplots(3, 1, sharex=False, figsize=(6, 2))
     # axes[0].bar(date_hydrus_18O, ds_hydrus_18O['prec'].values, width=-1, edgecolor='blue', align='edge')
     # axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
     # axes[0].set_xlim(date_hydrus_18O[0], date_hydrus_18O[-1])
