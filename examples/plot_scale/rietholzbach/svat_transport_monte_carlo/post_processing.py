@@ -691,9 +691,6 @@ def main(nsamples, sas_solver, tmp_dir):
         ds_sim_hm_best.to_netcdf(file, engine="h5netcdf")
 
         # write simulated bulk sample to output file
-        ds_sim_tm = ds_sim_tm.load()
-        ds_sim_tm = ds_sim_tm.close()
-        del ds_sim_tm
         states_tm_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             try:
