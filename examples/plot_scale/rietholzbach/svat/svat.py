@@ -163,11 +163,11 @@ def main():
         def set_diagnostics(self, state, base_path=None):
             diagnostics = state.diagnostics
 
-            diagnostics["rates"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow", "q_hof"]
-            diagnostics["rates"].output_frequency = 24 * 60 * 60
-            diagnostics["rates"].sampling_frequency = 1
+            diagnostics["rate"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow", "q_hof"]
+            diagnostics["rate"].output_frequency = 24 * 60 * 60
+            diagnostics["rate"].sampling_frequency = 1
             if base_path:
-                diagnostics["rates"].base_output_path = base_path
+                diagnostics["rate"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = ["S_rz", "S_ss",
                                                        "S_pwp_rz", "S_fc_rz",
@@ -185,11 +185,11 @@ def main():
             if base_path:
                 diagnostics["maximum"].base_output_path = base_path
 
-            diagnostics["averages"].output_variables = ["ta"]
-            diagnostics["averages"].output_frequency = 24 * 60 * 60
-            diagnostics["averages"].sampling_frequency = 1
+            diagnostics["average"].output_variables = ["ta"]
+            diagnostics["average"].output_frequency = 24 * 60 * 60
+            diagnostics["average"].sampling_frequency = 1
             if base_path:
-                diagnostics["averages"].base_output_path = base_path
+                diagnostics["average"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error"]

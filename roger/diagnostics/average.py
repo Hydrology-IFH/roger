@@ -6,15 +6,15 @@ from roger.variables import TIMESTEPS, Variable
 from roger.core.operators import numpy as npx
 
 
-class Averages(RogerDiagnostic):
+class Average(RogerDiagnostic):
     """Average output diagnostic.
 
     All registered variables are summed up when :meth:`diagnose` is called,
     and averaged and output upon calling :meth:`output`.
     """
 
-    name = "averages"  #:
-    output_path = "{identifier}.averages.nc"  #: File to write to. May contain format strings that are replaced with Roger attributes.
+    name = "average"  #:
+    output_path = "{identifier}.average.nc"  #: File to write to. May contain format strings that are replaced with Roger attributes.
     output_variables = None  #: Iterable containing all variables to be averaged. Changes have no effect after ``initialize`` has been called.
     output_frequency = None  #: Frequency (in seconds) in which output is written.
     sampling_frequency = None  #: Frequency (in seconds) in which variables are accumulated.
@@ -74,7 +74,7 @@ class Averages(RogerDiagnostic):
                 setattr(avg_vs, key, var_data + getattr(vs, key))
 
     def output(self, state):
-        """Write averages to netcdf file and zero array"""
+        """Write average to netcdf file and zero array"""
         avg_vs = self.variables
 
         if not os.path.isfile(self.get_output_file_name(state)):

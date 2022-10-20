@@ -437,13 +437,13 @@ def main(nsamples, lys_experiment, transport_model_structure, sas_solver):
         def set_diagnostics(self, state):
             diagnostics = state.diagnostics
 
-            diagnostics["rates"].output_variables = ["q_ss", "M_q_ss", "transp", "M_transp"]
-            diagnostics["rates"].output_frequency = 24 * 60 * 60
-            diagnostics["rates"].sampling_frequency = 1
+            diagnostics["rate"].output_variables = ["q_ss", "M_q_ss", "transp", "M_transp"]
+            diagnostics["rate"].output_frequency = 24 * 60 * 60
+            diagnostics["rate"].sampling_frequency = 1
 
-            diagnostics["averages"].output_variables = ["C_q_ss"]
-            diagnostics["averages"].output_frequency = 24 * 60 * 60
-            diagnostics["averages"].sampling_frequency = 1
+            diagnostics["average"].output_variables = ["C_q_ss"]
+            diagnostics["average"].output_frequency = 24 * 60 * 60
+            diagnostics["average"].sampling_frequency = 1
 
             diagnostics["constant"].output_variables = ["sas_params_transp", "sas_params_q_rz",
                                                         "sas_params_q_ss", "alpha_transp",

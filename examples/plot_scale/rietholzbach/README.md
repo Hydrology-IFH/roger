@@ -1,7 +1,7 @@
 # Modelling oxygen-18 transport and bromide transport with RoGeR at Rietholzbach lysimeter site
 
 - `post_processing.py`: Produces figures and tables from data of the modelling experiment
-- `write_moab.py`: Generates job scripts for computation on BinAC cluster using the MOAB workload manager
+- `write_moab_jobs.py`: Generates job scripts for computation on BinAC cluster using the MOAB workload manager
 
 ## observations
 Contains measured lysimeter data as .nc-file and measured data from bromide experiment as .csv.

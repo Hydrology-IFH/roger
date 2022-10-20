@@ -3,17 +3,17 @@ from roger import logger, time
 
 def create_default_diagnostics(state):
     # do not import these at module level to make sure core import is deferred
-    from roger.diagnostics.averages import Averages
+    from roger.diagnostics.average import Average
     from roger.diagnostics.snapshot import Snapshot
     from roger.diagnostics.collect import Collect
     from roger.diagnostics.constant import Constant
-    from roger.diagnostics.rates import Rates
+    from roger.diagnostics.rate import Rate
     from roger.diagnostics.minimum import Minimum
     from roger.diagnostics.maximum import Maximum
     from roger.diagnostics.tracer_monitor import TracerMonitor
     from roger.diagnostics.water_monitor import WaterMonitor
 
-    return {Diag.name: Diag(state) for Diag in (Averages, Snapshot, Collect, Constant, Rates, Minimum, Maximum, TracerMonitor, WaterMonitor)}
+    return {Diag.name: Diag(state) for Diag in (Average, Snapshot, Collect, Constant, Rate, Minimum, Maximum, TracerMonitor, WaterMonitor)}
 
 
 def initialize(state):

@@ -192,13 +192,13 @@ def main(nsamples, tmp_dir):
             diagnostics = state.diagnostics
             settings = state.settings
 
-            diagnostics["rates"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS"]
+            diagnostics["rate"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS"]
             if settings.enable_groundwater_boundary:
-                diagnostics["rates"].output_variables += ["cpr_ss"]
-            diagnostics["rates"].output_frequency = 24 * 60 * 60
-            diagnostics["rates"].sampling_frequency = 1
+                diagnostics["rate"].output_variables += ["cpr_ss"]
+            diagnostics["rate"].output_frequency = 24 * 60 * 60
+            diagnostics["rate"].sampling_frequency = 1
             if base_path:
-                diagnostics["rates"].base_output_path = base_path
+                diagnostics["rate"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = ["S_rz", "S_ss",
                                                        "S_pwp_rz", "S_fc_rz",
@@ -211,11 +211,11 @@ def main(nsamples, tmp_dir):
             if base_path:
                 diagnostics["collect"].base_output_path = base_path
 
-            diagnostics["averages"].output_variables = ["ta"]
-            diagnostics["averages"].output_frequency = 24 * 60 * 60
-            diagnostics["averages"].sampling_frequency = 1
+            diagnostics["average"].output_variables = ["ta"]
+            diagnostics["average"].output_frequency = 24 * 60 * 60
+            diagnostics["average"].sampling_frequency = 1
             if base_path:
-                diagnostics["averages"].base_output_path = base_path
+                diagnostics["average"].base_output_path = base_path
 
             diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'theta_eff', 'frac_lp', 'frac_fp']
             diagnostics["constant"].output_frequency = 0

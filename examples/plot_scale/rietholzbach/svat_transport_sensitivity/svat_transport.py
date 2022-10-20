@@ -459,16 +459,16 @@ def main(transport_model_structure, sas_solver, x1, x2, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["averages"].output_variables = ["C_iso_transp", "C_iso_q_ss", "C_iso_rz", "C_iso_ss", "C_iso_s",
+            diagnostics["average"].output_variables = ["C_iso_transp", "C_iso_q_ss", "C_iso_rz", "C_iso_ss", "C_iso_s",
                                                         "tt25_transp", "tt50_transp", "tt75_transp",  "ttavg_transp",
                                                         "tt25_q_ss", "tt50_q_ss", "tt75_q_ss",  "ttavg_q_ss",
                                                         "rt25_rz", "rt50_rz", "rt75_rz",  "rtavg_rz",
                                                         "rt25_ss", "rt50_ss", "rt75_ss",  "rtavg_ss",
                                                         "rt25_s", "rt50_s", "rt75_s",  "rtavg_s"]
-            diagnostics["averages"].output_frequency = 24 * 60 * 60
-            diagnostics["averages"].sampling_frequency = 1
+            diagnostics["average"].output_frequency = 24 * 60 * 60
+            diagnostics["average"].sampling_frequency = 1
             if base_path:
-                diagnostics["averages"].base_output_path = base_path
+                diagnostics["average"].base_output_path = base_path
 
             diagnostics["constant"].output_variables = ["sas_params_transp", "sas_params_q_rz", "sas_params_q_ss"]
             diagnostics["constant"].output_frequency = 0

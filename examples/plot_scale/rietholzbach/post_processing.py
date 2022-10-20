@@ -551,10 +551,10 @@ def main(tmp_dir):
     axs.set_ylabel('$P(T,t)$')
     axs.set_xlabel('T [days]')
     fig.tight_layout()
-    file_str = 'TTD_hydrus.pdf'
+    file_str = 'bTTD_hydrus.pdf'
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=250)
-    
+
     # plot cumulative forward travel time distributions
     TT = ds_hydrus_tt['fTT_perc'].values
     fig, axs = plt.subplots()

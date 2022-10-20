@@ -5,15 +5,15 @@ from roger.diagnostics.base import RogerDiagnostic
 from roger.variables import TIMESTEPS, AGES, NEVENTS_FF
 
 
-class Rates(RogerDiagnostic):
-    """Rates output diagnostic.
+class Rate(RogerDiagnostic):
+    """Rate output diagnostic.
 
     All registered variables are summed up when :meth:`diagnose` is called,
     and output upon calling :meth:`output`.
     """
 
-    name = "rates"  #:
-    output_path = "{identifier}.rates.nc"  #: File to write to. May contain format strings that are replaced with Roger attributes.
+    name = "rate"  #:
+    output_path = "{identifier}.rate.nc"  #: File to write to. May contain format strings that are replaced with Roger attributes.
     output_variables = None  #: Iterable containing all variables to be averaged. Changes have no effect after ``initialize`` has been called.
     output_frequency = None  #: Frequency (in hours) in which output is written.
     sampling_frequency = None  #: Frequency (in hours) in which variables are accumulated.
@@ -71,7 +71,7 @@ class Rates(RogerDiagnostic):
                 setattr(rate_vs, key, var_data + getattr(vs, key))
 
     def output(self, state):
-        """Write rates to netcdf file and zero array"""
+        """Write rate to netcdf file and zero array"""
         rate_vs = self.variables
 
         if not os.path.isfile(self.get_output_file_name(state)):

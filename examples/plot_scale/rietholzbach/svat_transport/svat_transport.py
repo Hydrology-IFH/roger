@@ -756,13 +756,13 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["averages"].output_variables = ["C_iso_q_ss", "C_iso_s", "TT_q_ss",
+            diagnostics["average"].output_variables = ["C_iso_q_ss", "C_iso_s", "TT_q_ss",
                                                         "tt25_q_ss", "tt50_q_ss", "tt75_q_ss",  "ttavg_q_ss",
                                                         "rt25_s", "rt50_s", "rt75_s",  "rtavg_s"]
-            diagnostics["averages"].output_frequency = 24 * 60 * 60
-            diagnostics["averages"].sampling_frequency = 1
+            diagnostics["average"].output_frequency = 24 * 60 * 60
+            diagnostics["average"].sampling_frequency = 1
             if base_path:
-                diagnostics["averages"].base_output_path = base_path
+                diagnostics["average"].base_output_path = base_path
 
             # maximum bias of numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error", "dC_num_error"]

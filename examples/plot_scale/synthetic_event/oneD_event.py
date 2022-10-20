@@ -200,9 +200,9 @@ def main():
         def set_diagnostics(self, state):
             diagnostics = state.diagnostics
 
-            diagnostics["rates"].output_variables = ["prec", "inf_mat", "inf_mp", "inf_sc", "q_ss", "q_sub", "q_sub_mp", "q_sub_mat", "q_hof", "q_sof", "int_rain_top", "int_rain_ground", "int_prec"]
-            diagnostics["rates"].output_frequency = 10 * 60
-            diagnostics["rates"].sampling_frequency = 1
+            diagnostics["rate"].output_variables = ["prec", "inf_mat", "inf_mp", "inf_sc", "q_ss", "q_sub", "q_sub_mp", "q_sub_mat", "q_hof", "q_sof", "int_rain_top", "int_rain_ground", "int_prec"]
+            diagnostics["rate"].output_frequency = 10 * 60
+            diagnostics["rate"].sampling_frequency = 1
 
             diagnostics["collect"].output_variables = ["theta", "z0", "S_s"]
             diagnostics["collect"].output_frequency = 10 * 60

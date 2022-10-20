@@ -203,7 +203,7 @@ def main():
         def set_diagnostics(self, state):
             diagnostics = state.diagnostics
 
-            diagnostics["rates"].output_variables = ["aet", "pet", "transp",
+            diagnostics["rate"].output_variables = ["aet", "pet", "transp",
                                                      "evap_soil", "inf_mat",
                                                      "inf_mp", "inf_sc", "q_ss",
                                                      "q_sub", "q_sub_mp",
@@ -213,8 +213,8 @@ def main():
                                                      "int_rain_ground", "int_snow_top",
                                                      "int_snow_ground", "q_snow",
                                                      "evap_sur", "cpr_ss"]
-            diagnostics["rates"].output_frequency = 24 * 60 * 60
-            diagnostics["rates"].sampling_frequency = 1
+            diagnostics["rate"].output_frequency = 24 * 60 * 60
+            diagnostics["rate"].sampling_frequency = 1
 
             diagnostics["collect"].output_variables = ["z_sat", "theta", "S_s"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60

@@ -411,17 +411,17 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["rates"].output_variables = ["M_q_ss"]
-            diagnostics["rates"].output_frequency = 24 * 60 * 60
-            diagnostics["rates"].sampling_frequency = 1
+            diagnostics["rate"].output_variables = ["M_q_ss"]
+            diagnostics["rate"].output_frequency = 24 * 60 * 60
+            diagnostics["rate"].sampling_frequency = 1
             if base_path:
-                diagnostics["rates"].base_output_path = base_path
+                diagnostics["rate"].base_output_path = base_path
 
-            diagnostics["averages"].output_variables = ["C_in", "C_s", "C_q_ss", "ttavg_q_ss", "tt50_q_ss"]
-            diagnostics["averages"].output_frequency = 24 * 60 * 60
-            diagnostics["averages"].sampling_frequency = 1
+            diagnostics["average"].output_variables = ["C_in", "C_s", "C_q_ss", "ttavg_q_ss", "tt50_q_ss"]
+            diagnostics["average"].output_frequency = 24 * 60 * 60
+            diagnostics["average"].sampling_frequency = 1
             if base_path:
-                diagnostics["averages"].base_output_path = base_path
+                diagnostics["average"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = ["M_s", "M_in"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60

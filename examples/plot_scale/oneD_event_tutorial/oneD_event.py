@@ -262,10 +262,10 @@ def main():
             diagnostics = state.diagnostics
 
             # variables written to output files
-            diagnostics["rates"].output_variables = OUTPUT_FLUXES
+            diagnostics["rate"].output_variables = OUTPUT_FLUXES
             # required to be equal or greater than time increments of forcing
-            diagnostics["rates"].output_frequency = 10 * 60  # in seconds
-            diagnostics["rates"].sampling_frequency = 1
+            diagnostics["rate"].output_frequency = 10 * 60  # in seconds
+            diagnostics["rate"].sampling_frequency = 1
 
             # maximum bias of deterministic/numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error"]
@@ -431,7 +431,7 @@ def main():
     write_forcing_event(path_input)
     # runs the model setup
     model.setup()
-    # iterates over time steps
+    # iterate over time steps
     model.run()
     return
 
