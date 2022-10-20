@@ -286,11 +286,13 @@ def main(tmp_dir):
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             try:
                 v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                v.attrs.update(long_name="bulk sample of d18O in percolation",
+                               units="permil")
+                v[:, :, :] = d18O_perc_bs
             except ValueError:
                 v = f.get('d18O_perc_bs')
-            v[:, :, :] = d18O_perc_bs
-            v.attrs.update(long_name="bulk sample of d18O in percolation",
-                           units="permil")
+                v[:, :, :] = d18O_perc_bs
+
         # write to .txt
         file = base_path_results / f"params_metrics_{tms}.txt"
         df_params_metrics.to_csv(file, header=True, index=False, sep="\t")

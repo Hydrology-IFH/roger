@@ -19,7 +19,13 @@ import seaborn as sns
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
 sns.set_style("ticks")
-sns.plotting_context("paper", font_scale=0.8)
+sns.plotting_context("paper", font_scale=1, rc={'font.size': 7.0,
+                                                'axes.labelsize': 8.0,
+                                                'axes.titlesize': 9.0,
+                                                'xtick.labelsize': 7.0,
+                                                'ytick.labelsize': 7.0,
+                                                'legend.fontsize': 7.0,
+                                                'legend.title_fontsize': 8.0})
 
 _LABS_HYDRUS = {
                 'n': r'$n$ [-]',
@@ -376,12 +382,12 @@ def main(tmp_dir):
     axes[2].set_xlim((dict_obs_sim['q_ss'].index[0], dict_obs_sim['q_ss'].index[-1]))
     axes[2].set_ylabel('PERC\n[mm]')
     axes[2].set_xlabel(r'Time [year]')
-    axes[0].text(0.015, 0.9, '(a)', size=15, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[0].transAxes, fontsize=8)
-    axes[1].text(0.015, 0.9, '(b)', size=15, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[1].transAxes, fontsize=8)
-    axes[2].text(0.015, 0.9, '(c)', size=15, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[2].transAxes, fontsize=8)
+    axes[0].text(0.025, 0.88, '(a)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0].transAxes)
+    axes[1].text(0.025, 0.88, '(b)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1].transAxes)
+    axes[2].text(0.025, 0.88, '(c)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2].transAxes)
     fig.tight_layout()
     file = 'prec_et_dS_perc_obs_sim_cumulated.png'
     path = base_path_figs / file
@@ -400,38 +406,38 @@ def main(tmp_dir):
         ax2.plot(dict_obs_sim1['aet'].index, dict_obs_sim1['aet'].iloc[:, nrow].cumsum(),
                   lw=1, color='red', ls='-', alpha=.8)
     ax2.plot(dict_obs_sim1['aet'].index, dict_obs_sim1['aet']['obs'].cumsum(),
-              lw=2, color='blue', ls='-', alpha=1)
+              lw=1, color='blue', ls='-', alpha=1)
     ax2.plot(dict_obs_sim_hydrus['aet'].index, dict_obs_sim_hydrus['aet']['sim'].cumsum(),
-              lw=2, color='gray', ls='-.')
+              lw=1, color='gray', ls='-.')
     ax2.set_ylim(0,)
     ax2.set_ylabel('ET\n[mm]')
     for nrow in range(nx):
         axes[1].plot(dict_obs_sim1['dS'].loc['2000':, :].index, dict_obs_sim1['dS'].loc['2000':, f'sim{nrow}'].cumsum(),
                   lw=1, color='red', ls='-')
     axes[1].plot(dict_obs_sim1['dS'].loc['2000':, :].index, dict_obs_sim1['dS'].loc['2000':, 'obs'].cumsum(),
-                  lw=2, color='blue', ls='-', alpha=1)
+                  lw=1, color='blue', ls='-', alpha=1)
     axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2000':, :].index, dict_obs_sim_hydrus['dS'].loc['2000':, 'sim'].cumsum(),
-                  lw=2, color='gray', ls='-.', alpha=.8)
+                  lw=1, color='gray', ls='-.', alpha=.8)
     axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
     axes[1].set_xlim((dict_obs_sim['dS'].index[0], dict_obs_sim['dS'].index[-1]))
     for nrow in range(nx):
         axes[2].plot(dict_obs_sim1['q_ss'].index, dict_obs_sim1['q_ss'].iloc[:, nrow].cumsum(),
                   lw=1, color='red', ls='-', alpha=.8)
     axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['obs'].cumsum(),
-                  lw=2, color='blue', ls='-', alpha=1)
+                  lw=1, color='blue', ls='-', alpha=1)
     axes[2].plot(dict_obs_sim_hydrus['perc'].index, dict_obs_sim_hydrus['perc']['sim'].cumsum(),
-                  lw=2, color='gray', ls='-.')
+                  lw=1, color='gray', ls='-.')
     axes[2].set_ylim(0,)
     axes[2].invert_yaxis()
     axes[2].set_xlim((dict_obs_sim1['q_ss'].index[0], dict_obs_sim1['q_ss'].index[-1]))
     axes[2].set_ylabel('PERC\n[mm]')
     axes[2].set_xlabel(r'Time [year]')
-    axes[0].text(0.05, 0.9, '(a)', size=15, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[0].transAxes, fontsize=8)
-    axes[1].text(0.05, 0.9, '(b)', size=15, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[1].transAxes, fontsize=8)
-    axes[2].text(0.05, 0.9, '(c)', size=15, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[2].transAxes, fontsize=8)
+    axes[0].text(0.025, 0.88, '(a)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0].transAxes)
+    axes[1].text(0.025, 0.88, '(b)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1].transAxes)
+    axes[2].text(0.025, 0.88, '(c)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2].transAxes)
     fig.tight_layout()
     file = 'prec_et_dS_perc_obs_sim_cumulated_best_1perc.png'
     path = base_path_figs / file
@@ -773,7 +779,7 @@ def main(tmp_dir):
     axes[4, 0].set_ylabel('Soil depth [m]')
     axes[4, 0].set_xlabel('Time [days since injection]')
     axes[4, 1].set_xlabel('Time [days since injection]')
-    axl = fig.add_axes([0.88, 0.35, 0.02, 0.2])
+    axl = fig.add_axes([0.88, 0.4, 0.02, 0.2])
     cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
                                     orientation='vertical',
                                     ticks=[0, 50, 100])
