@@ -77,7 +77,7 @@ def plot_sim(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
         Plot for observed and simulated values
     """
     # plot observed and simulated values
-    fig, axs = plt.subplots(figsize=(9, 4))
+    fig, axs = plt.subplots(figsize=(6, 2))
     axs.plot(df.index, df.iloc[:, 0], lw=1, ls='-', color='black')
     axs.set_xlim((df.index[0], df.index[-1]))
     if ylim:
@@ -115,7 +115,7 @@ def plot_sim_cum(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
         Plot for observed and simulated values
     """
     # plot observed and simulated values
-    fig, axs = plt.subplots(figsize=(9, 4))
+    fig, axs = plt.subplots(figsize=(6, 2))
     axs.plot(df.index, df.iloc[:, 0].cumsum(), lw=1, ls='-', color='black')
     axs.set_xlim((df.index[0], df.index[-1]))
     if ylim:
@@ -157,7 +157,7 @@ def plot_obs_sim(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
         Plot for observed and simulated values
     """
     # plot observed and simulated values
-    fig, axs = plt.subplots(figsize=(9, 4))
+    fig, axs = plt.subplots(figsize=(6, 2))
     for i in range(len(df.columns)-1):
         axs.plot(df.index, df.iloc[:, i], lw=1, ls='-.', color='red')
     if (ls_obs == 'line'):
@@ -208,7 +208,7 @@ def plot_obs_sim_year(df, y_lab, start_month_hyd_year=10, ls_obs='line', x_lab='
         df_year = df.loc[df.hyd_year == year].copy()
         df_year.loc[df_year.isnull().any(axis=1)] = 0
         # plot observed and simulated values
-        fig, axs = plt.subplots(figsize=(9, 4))
+        fig, axs = plt.subplots(figsize=(6, 2))
         for i in range(len(df.columns)-1):
             axs.plot(df_year.index, df_year.iloc[:, i], lw=1, ls='-.', color='red')
         if (ls_obs == 'line'):
@@ -251,7 +251,7 @@ def plot_obs_sim_cum(df, y_lab, x_lab='Time'):
     df.loc[df.isna().any(axis=1)] = 0
 
     # plot observed and simulated values
-    fig, axs = plt.subplots(figsize=(9, 4))
+    fig, axs = plt.subplots(figsize=(6, 2))
     for i in range(len(df.columns)-1):
         axs.plot(df.index, df.iloc[:, i].cumsum(), lw=1, ls='-.', color='red')
     axs.plot(df.index, df.iloc[:, -1].cumsum(), lw=1.5, color='blue', alpha=0.5)
