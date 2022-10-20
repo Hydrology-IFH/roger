@@ -541,22 +541,8 @@ def main(tmp_dir):
     fig.savefig(file, dpi=250)
 
     # travel time benchmark
-    # plot cumulative backward travel time distributions
-    TT = ds_hydrus_tt['TT_perc'].values
-    fig, axs = plt.subplots()
-    for i in range(len(date_hydrus_tt)):
-        axs.plot(TT[i, :], lw=1, color='grey')
-    axs.set_xlim((0, 4000))
-    axs.set_ylim((0, 1))
-    axs.set_ylabel(r'$\overleftarrow{P}(T,t)$')
-    axs.set_xlabel('T [days]')
-    fig.tight_layout()
-    file_str = 'bTTD_hydrus.pdf'
-    path_fig = base_path_figs / file_str
-    fig.savefig(path_fig, dpi=250)
-
     # compare backward travel time distributions
-    fig, axes = plt.subplots(1, 5, sharey=True, figsize=(14, 4))
+    fig, axes = plt.subplots(1, 5, sharey=True, figsize=(14, 2.5))
     for i, tm_structure in enumerate(transport_models):
         idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
         tms = tm_structure.replace(" ", "_")
@@ -572,15 +558,29 @@ def main(tmp_dir):
             axes[i].set_ylim((0, 1))
             axes[i].set_xlabel('T [days]')
 
-    TT = ds_hydrus_tt['bTT_perc'].values
-    fig, axs = plt.subplots()
+    TT = ds_hydrus_tt['TT_perc'].values
     for i in range(len(date_hydrus_tt)):
         axes[-1].plot(TT[i, :], lw=1, color='grey')
     axes[-1].set_xlim((0, 4000))
     axes[-1].set_ylim((0, 1))
-    axes[0].set_ylabel(r'$\overrightarrow{P}(T,t)$')
+    axes[-1].set_xlabel('T [days]')
+    axes[0].set_ylabel(r'$\overleftarrow{P}(T,t)$')
     fig.tight_layout()
     file_str = 'bTTD_roger_hydrus.png'
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=250)
+
+    # plot cumulative backward travel time distributions
+    TT = ds_hydrus_tt['TT_perc'].values
+    fig, axs = plt.subplots()
+    for i in range(len(date_hydrus_tt)):
+        axs.plot(TT[i, :], lw=1, color='grey')
+    axs.set_xlim((0, 4000))
+    axs.set_ylim((0, 1))
+    axs.set_ylabel(r'$\overleftarrow{P}(T,t)$')
+    axs.set_xlabel('T [days]')
+    fig.tight_layout()
+    file_str = 'bTTD_hydrus.png'
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=250)
 
@@ -594,7 +594,7 @@ def main(tmp_dir):
     axs.set_ylabel(r'$\overrightarrow{P}(T,t)$')
     axs.set_xlabel('T [days]')
     fig.tight_layout()
-    file_str = 'fTTD_hydrus.pdf'
+    file_str = 'fTTD_hydrus.png'
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=250)
 

@@ -592,12 +592,13 @@ def main(nsamples, sas_solver, tmp_dir):
             v[:, :, :] = ds_sim_tm["sas_params_q_ss"].isel(x=idx_best)
             v.attrs.update(long_name="SAS parameters of subsoil percolation",
                             units=" ")
+        ds_sim_tm = ds_sim_tm.load()
         ds_sim_tm = ds_sim_tm.close()
 
         # write states of best transport simulation
         click.echo(f'Write states of best {tm_structure} simulation ...')
         states_tm_mc_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
-        states_tm_file = base_path / sas_solver / age_max / f"states_{tms}.nc"
+        states_tm_file = base_path / sas_solver / age_max / f"states_best_{tms}.nc"
         with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
