@@ -63,6 +63,8 @@ def main(nsamples, sas_solver, tmp_dir):
             tms = tm_structure.replace(" ", "_")
             path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}_*.{diagnostic}.nc")
             diag_files = glob.glob(path)
+            click.echo(f'{path}')
+            click.echo(f'{diag_files}')
             if diag_files:
                 click.echo(f'Merge {diagnostic} of {tm_structure} ...')
                 diag_file = base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}.{diagnostic}.nc"
