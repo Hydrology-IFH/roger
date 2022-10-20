@@ -683,7 +683,7 @@ def main(nsamples, sas_solver, tmp_dir):
         click.echo(f'Write states of best hydrologic simulation corresponding to {tm_structure} ...')
 
         # write states of best hydrologic simulation corresponding to best transport simulation
-        states_hm_mc_file = base_path / "states_hm_best_for_tm.nc"
+        states_hm_mc_file = base_path / "states_hm_for_tm.nc"
         ds_sim_hm_mc = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
         ds_sim_hm_best = ds_sim_hm_mc.loc[dict(x=idx_best)]
         ds_sim_hm_best.attrs['title'] = f'Best hydrologic simulation corresponding to best {tm_structure} oxygen-18 simulation'
