@@ -548,12 +548,15 @@ def main(tmp_dir):
         axs.plot(TT[i, :], lw=1, color='grey')
     axs.set_xlim((0, 4000))
     axs.set_ylim((0, 1))
-    axs.set_ylabel('$P(T,t)$')
+    axs.set_ylabel(r'$\overleftarrow{P}(T,t)$')
     axs.set_xlabel('T [days]')
     fig.tight_layout()
     file_str = 'bTTD_hydrus.pdf'
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=250)
+
+    # compare backward travel time distributions
+    # fig, ax = plt.subplots(2, 2, sharey=True, figsize=(14, 7))
 
     # plot cumulative forward travel time distributions
     TT = ds_hydrus_tt['fTT_perc'].values
@@ -562,7 +565,7 @@ def main(tmp_dir):
         axs.plot(TT[i, :], lw=1, color='grey')
     axs.set_xlim((0, 4000))
     axs.set_ylim((0, 1))
-    axs.set_ylabel('$P(T,t)$')
+    axs.set_ylabel(r'$\overrightarrow{P}(T,t)$')
     axs.set_xlabel('T [days]')
     fig.tight_layout()
     file_str = 'fTTD_hydrus.pdf'
