@@ -395,7 +395,6 @@ def main(nsamples, sas_solver, tmp_dir):
                 df_params_metrics.loc[:, 'k_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
 
             # compare observations and simulations
-            ncol = 0
             idx = ds_sim_tm.Time.values  # time index
             d18O_perc_bs = onp.zeros((nsamples, 1, len(idx)))
             df_idx_bs = pd.DataFrame(index=date_obs, columns=['sol'])
@@ -411,7 +410,7 @@ def main(nsamples, sas_solver, tmp_dir):
                 sample_no['sample_no'] = range(len(sample_no.index))
                 df_perc_18O_sim = pd.DataFrame(index=date_sim_tm, columns=['perc_sim', 'd18O_perc_sim'])
                 df_perc_18O_sim['perc_sim'] = ds_sim_hm['q_ss'].isel(x=nrow, y=0).values
-                df_perc_18O_sim['d18O_perc_sim'] = ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=ncol).values
+                df_perc_18O_sim['d18O_perc_sim'] = ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=0).values
                 df_perc_18O_sim = df_perc_18O_sim.join(sample_no)
                 df_perc_18O_sim.loc[:, 'sample_no'] = df_perc_18O_sim.loc[:, 'sample_no'].fillna(method='bfill', limit=14)
                 perc_sum = df_perc_18O_sim.groupby(['sample_no']).sum().loc[:, 'perc_sim']
@@ -425,7 +424,7 @@ def main(nsamples, sas_solver, tmp_dir):
                 df_perc_18O_sim = df_perc_18O_sim.join(sample_no['d18O_sample'])
                 cond = (df_perc_18O_sim['d18O_sample'] == 0)
                 df_perc_18O_sim.loc[cond, 'd18O_sample'] = onp.NaN
-                d18O_perc_bs[nrow, ncol, :] = df_perc_18O_sim.loc[:, 'd18O_sample'].values
+                d18O_perc_bs[nrow, 0, :] = df_perc_18O_sim.loc[:, 'd18O_sample'].values
                 # calculate observed oxygen-18 bulk sample
                 df_perc_18O_obs.loc[:, 'd18O_perc_bs'] = df_perc_18O_obs['d18O_perc_obs'].fillna(method='bfill', limit=14)
 
@@ -437,7 +436,7 @@ def main(nsamples, sas_solver, tmp_dir):
                 # join observations on simulations
                 for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
                     obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-                    sim_vals = d18O_perc_bs[nrow, ncol, :]
+                    sim_vals = d18O_perc_bs[nrow, 0, :]
                     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
                     df_obs.loc[:, 'obs'] = obs_vals
                     df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
@@ -608,9 +607,9 @@ def main(nsamples, sas_solver, tmp_dir):
             )
             # collect dimensions
             with h5netcdf.File(states_tm_mc_file, 'r', decode_vlen_strings=False) as df:
-                # f.attrs.update(
-                #     roger_version=df.attrs['roger_version']
-                # )
+                f.attrs.update(
+                    roger_version=df.attrs['roger_version']
+                )
                 # set dimensions with a dictionary
                 dict_dim = {'x': 1, 'y': 1, 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
                 time = onp.array(df.variables.get('Time'))
@@ -643,6 +642,7 @@ def main(nsamples, sas_solver, tmp_dir):
                     v[:] = time
                 for var_sim in list(df.variables.keys()):
                     var_obj = df.variables.get(var_sim)
+                    click.echo(f'{var_sim}')
                     if var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
                         v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                         vals = onp.array(var_obj)

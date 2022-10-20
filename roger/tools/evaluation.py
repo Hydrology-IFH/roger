@@ -161,7 +161,7 @@ def plot_obs_sim(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
     for i in range(len(df.columns)-1):
         axs.plot(df.index, df.iloc[:, i], lw=1, ls='-.', color='red')
     if (ls_obs == 'line'):
-        axs.plot(df.index, df.iloc[:, -1], lw=1.5, color='blue', alpha=0.5)
+        axs.plot(df.index, df.iloc[:, -1], lw=1.2, color='blue', alpha=0.5)
     axs.scatter(df.index, df.iloc[:, -1], color='blue', s=1, alpha=0.5)
     axs.set_xlim((df.index[0], df.index[-1]))
     if ylim:
@@ -212,7 +212,7 @@ def plot_obs_sim_year(df, y_lab, start_month_hyd_year=10, ls_obs='line', x_lab='
         for i in range(len(df.columns)-1):
             axs.plot(df_year.index, df_year.iloc[:, i], lw=1, ls='-.', color='red')
         if (ls_obs == 'line'):
-            axs.plot(df_year.index, df_year.iloc[:, -1], lw=1.5, color='blue', alpha=0.5)
+            axs.plot(df_year.index, df_year.iloc[:, -1], lw=1.2, color='blue', alpha=0.5)
         axs.scatter(df_year.index, df_year.iloc[:, -1], color='blue', s=1, alpha=0.5)
         axs.set_xlim((df_year.index[0], df_year.index[-1]))
         if ylim:
@@ -256,7 +256,7 @@ def plot_obs_sim_cum(df, y_lab, x_lab='Time'):
         axs.plot(df.index, df.iloc[:, i].cumsum(), lw=1, ls='-.', color='red')
     axs.plot(df.index, df.iloc[:, -1].cumsum(), lw=1.5, color='blue', alpha=0.5)
     if ('PET' in df.columns.to_list()):
-        axs.plot(df.index, df.loc[:, 'PET'].cumsum(), lw=1.5, ls=':', color='silver')
+        axs.plot(df.index, df.loc[:, 'PET'].cumsum(), lw=1.2, ls=':', color='silver')
     axs.set_xlim((df.index[0], df.index[-1]))
     axs.set_ylabel(y_lab)
     axs.set_xlabel(x_lab)
@@ -299,7 +299,7 @@ def plot_obs_sim_cum_year(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
             axs.plot(df_year.index, df_year.iloc[:, i].cumsum(), lw=1, ls='-.', color='red')
         axs.plot(df_year.index, df_year.iloc[:, -1].cumsum(), lw=1, color='blue')
         if ('PET' in df_year.columns.to_list()):
-            axs.plot(df_year.index, df_year.loc[:, 'PET'].cumsum(), lw=1.5, ls=':', color='silver')
+            axs.plot(df_year.index, df_year.loc[:, 'PET'].cumsum(), lw=1.2, ls=':', color='silver')
         axs.set_xlim((df_year.index[0], df_year.index[-1]))
         axs.set_ylabel(y_lab)
         axs.set_xlabel(str(year))

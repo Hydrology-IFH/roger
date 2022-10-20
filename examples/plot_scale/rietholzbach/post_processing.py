@@ -124,7 +124,7 @@ def main(tmp_dir):
     # measured oxygen-18 in precipitation and percolation
     d18O_prec_mean = onp.round(onp.nanmean(df_obs.loc[:, 'd18O_prec'].values), 2)
     d18O_perc_mean = onp.round(onp.nanmean(df_obs.loc[:, 'd18O_perc'].values), 2)
-    fig, axs = plt.subplots(2, 1, figsize=(6, 2))
+    fig, axs = plt.subplots(2, 1, figsize=(6, 3))
     axs[0].plot(df_obs.index,
                 df_obs.loc[:, 'd18O_prec'].fillna(method='bfill'),
                 '-', color='blue')
@@ -143,10 +143,10 @@ def main(tmp_dir):
     axs[1].set_ylim([-20, 0])
     axs[1].set_xlim(df_obs.index[0], df_obs.index[-1])
     fig.tight_layout()
-    fig.text(0.115, 0.92, "(a)", ha="center", va="center")
-    fig.text(0.89, 0.615, r"$\overline{\delta^{18}O}_{prec}$: %s" % (d18O_prec_mean), ha="center", va="center")
-    fig.text(0.89, 0.155, r"$\overline{\delta^{18}O}_{perc}$: %s" % (d18O_perc_mean), ha="center", va="center")
-    fig.text(0.115, 0.46, "(b)", ha="center", va="center")
+    fig.text(0.15, 0.92, "(a)", ha="center", va="center", fontsize=8)
+    fig.text(0.89, 0.7, r"$\overline{\delta^{18}O}_{prec}$: %s" % (d18O_prec_mean), ha="center", va="center", fontsize=8)
+    fig.text(0.75, 0.4, r"$\overline{\delta^{18}O}_{perc}$: %s" % (d18O_perc_mean), ha="center", va="center", fontsize=8)
+    fig.text(0.15, 0.46, "(b)", ha="center", va="center", fontsize=8)
     file = base_path_figs / 'observed_d18O_prec_perc.pdf'
     fig.savefig(file, dpi=250)
     plt.close(fig=fig)
@@ -171,7 +171,7 @@ def main(tmp_dir):
             for j in range(ncol):
                 y = df_metrics.iloc[:, i]
                 x = df_params.iloc[:, j]
-                ax[i, j].scatter(x, y, s=4, c='grey', alpha=0.5)
+                ax[i, j].scatter(x, y, s=1, c='grey', alpha=0.5)
                 ax[i, j].set_xlabel('')
                 ax[i, j].set_ylabel('')
                 # best parameter set for individual evaluation metric at specific storage conditions
@@ -182,12 +182,12 @@ def main(tmp_dir):
                 for idx_best_sc in idx_best_sc1:
                     y_best_sc = df_metrics.iloc[idx_best_sc, i]
                     x_best_sc = df_params.iloc[idx_best_sc, j]
-                    ax[i, j].scatter(x_best_sc, y_best_sc, s=12, c='blue', alpha=0.8)
+                    ax[i, j].scatter(x_best_sc, y_best_sc, s=1, c='blue', alpha=0.8)
                 # best parameter sets for multi-objective criteria
                 for ii, idx_best in enumerate(idx_best1):
                     y_best = df_metrics.iloc[idx_best, i]
                     x_best = df_params.iloc[idx_best, j]
-                    ax[i, j].scatter(x_best, y_best, s=12, c='red', alpha=1)
+                    ax[i, j].scatter(x_best, y_best, s=1, c='red', alpha=1)
                     dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
 
         for j in range(ncol):
@@ -199,7 +199,7 @@ def main(tmp_dir):
         ax[2, 0].set_ylabel('$KGE_{PERC}$\n [-]')
         ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
 
-        fig.subplots_adjust(wspace=0.2, hspace=0.3)
+        fig.subplots_adjust(bottom=0.2, wspace=0.2, hspace=0.6)
         file = base_path_figs / f"dotty_plots_{sc1}.png"
         fig.savefig(file, dpi=250)
 
@@ -343,14 +343,14 @@ def main(tmp_dir):
 
     # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
     fig, axes = plt.subplots(3, 1, sharex=True, figsize=(6, 3))
-    axes[0].plot(dict_obs['prec'].index, dict_obs['prec'].cumsum(), lw=1.5, color='blue', ls='-', alpha=1)
+    axes[0].plot(dict_obs['prec'].index, dict_obs['prec'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
     axes[0].set_ylabel('PREC\n[mm]')
     axes[0].set_xlim((dict_obs['prec'].index[0], dict_obs['prec'].index[-1]))
     axes[0].set_ylim(0,)
     axes[0].invert_yaxis()
     ax2 = axes[0].twinx()
     ax2.plot(dict_obs_sim['aet'].index, dict_obs_sim['aet']['obs'].cumsum(),
-              lw=1.5, color='blue', ls='-', alpha=0.5)
+              lw=1, color='blue', ls='-', alpha=0.5)
     ax2.plot(dict_obs_sim['aet'].index, dict_obs_sim['aet']['sim'].cumsum(),
               lw=1, color='red', ls='-.')
     ax2.plot(dict_obs_sim_hydrus['aet'].index, dict_obs_sim_hydrus['aet']['sim'].cumsum(),
@@ -358,7 +358,7 @@ def main(tmp_dir):
     ax2.set_ylim(0,)
     ax2.set_ylabel('ET\n[mm]')
     axes[1].plot(dict_obs_sim['dS'].loc['2000':, :].index, dict_obs_sim['dS'].loc['2000':, 'obs'].cumsum(),
-                  lw=1.5, color='blue', ls='-', alpha=0.5)
+                  lw=1, color='blue', ls='-', alpha=0.5)
     axes[1].plot(dict_obs_sim['dS'].loc['2000':, :].index, dict_obs_sim['dS'].loc['2000':, 'sim'].cumsum(),
                   lw=1, color='red', ls='-.')
     axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2000':, :].index, dict_obs_sim_hydrus['dS'].loc['2000':, 'sim'].cumsum(),
@@ -366,7 +366,7 @@ def main(tmp_dir):
     axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
     axes[1].set_xlim((dict_obs_sim['dS'].index[0], dict_obs_sim['dS'].index[-1]))
     axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['obs'].cumsum(),
-                  lw=1.5, color='blue', ls='-', alpha=0.5)
+                  lw=1, color='blue', ls='-', alpha=0.5)
     axes[2].plot(dict_obs_sim['q_ss'].index, dict_obs_sim['q_ss']['sim'].cumsum(),
                   lw=1, color='red', ls='-.')
     axes[2].plot(dict_obs_sim_hydrus['perc'].index, dict_obs_sim_hydrus['perc']['sim'].cumsum(),
@@ -377,11 +377,11 @@ def main(tmp_dir):
     axes[2].set_ylabel('PERC\n[mm]')
     axes[2].set_xlabel(r'Time [year]')
     axes[0].text(0.015, 0.9, '(a)', size=15, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[0].transAxes)
+                  verticalalignment='center', transform=axes[0].transAxes, fontsize=8)
     axes[1].text(0.015, 0.9, '(b)', size=15, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[1].transAxes)
+                  verticalalignment='center', transform=axes[1].transAxes, fontsize=8)
     axes[2].text(0.015, 0.9, '(c)', size=15, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[2].transAxes)
+                  verticalalignment='center', transform=axes[2].transAxes, fontsize=8)
     fig.tight_layout()
     file = 'prec_et_dS_perc_obs_sim_cumulated.png'
     path = base_path_figs / file
@@ -390,7 +390,7 @@ def main(tmp_dir):
     # compare best 1% simulations with observations
     nx = ds_sim_hm1.dims['x']
     fig, axes = plt.subplots(3, 1, sharex=True, figsize=(6, 3))
-    axes[0].plot(dict_obs['prec'].index, dict_obs['prec'].cumsum(), lw=1.5, color='blue', ls='-', alpha=1)
+    axes[0].plot(dict_obs['prec'].index, dict_obs['prec'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
     axes[0].set_ylabel('PREC\n[mm]')
     axes[0].set_xlim((dict_obs['prec'].index[0], dict_obs['prec'].index[-1]))
     axes[0].set_ylim(0,)
@@ -426,12 +426,12 @@ def main(tmp_dir):
     axes[2].set_xlim((dict_obs_sim1['q_ss'].index[0], dict_obs_sim1['q_ss'].index[-1]))
     axes[2].set_ylabel('PERC\n[mm]')
     axes[2].set_xlabel(r'Time [year]')
-    axes[0].text(0.015, 0.9, '(a)', size=15, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[0].transAxes)
-    axes[1].text(0.015, 0.9, '(b)', size=15, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[1].transAxes)
-    axes[2].text(0.015, 0.9, '(c)', size=15, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[2].transAxes)
+    axes[0].text(0.05, 0.9, '(a)', size=15, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0].transAxes, fontsize=8)
+    axes[1].text(0.05, 0.9, '(b)', size=15, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1].transAxes, fontsize=8)
+    axes[2].text(0.05, 0.9, '(c)', size=15, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2].transAxes, fontsize=8)
     fig.tight_layout()
     file = 'prec_et_dS_perc_obs_sim_cumulated_best_1perc.png'
     path = base_path_figs / file
@@ -543,7 +543,7 @@ def main(tmp_dir):
             df_sim_br = pd.DataFrame(index=df_obs_br.index)
             df_sim_br.loc[:, "Br"] = ds["Br_perc_mmol"].values
         ax.plot(df_sim_br.dropna().index, df_sim_br.dropna()["Br"], color="grey", lw=1)
-    ax.plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1.5)
+    ax.plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1)
     ax.set_ylim(0,)
     ax.set_xlim([0, 400])
     ax.set_ylabel(r'Bromide [mmol/l]')
@@ -773,7 +773,7 @@ def main(tmp_dir):
     axes[4, 0].set_ylabel('Soil depth [m]')
     axes[4, 0].set_xlabel('Time [days since injection]')
     axes[4, 1].set_xlabel('Time [days since injection]')
-    axl = fig.add_axes([0.88, 0.1, 0.02, 0.14])
+    axl = fig.add_axes([0.88, 0.35, 0.02, 0.2])
     cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
                                     orientation='vertical',
                                     ticks=[0, 50, 100])
@@ -781,31 +781,6 @@ def main(tmp_dir):
     cb1.set_label('Bromide [mg/l]', labelpad=-1)
     fig.subplots_adjust(bottom=0.1, right=0.85, hspace=0.7)
     file = 'bromide_soil.png'
-    path = base_path_figs / file
-    fig.savefig(path, dpi=250)
-
-    # plot isotope ratios of precipitation and soil
-    cmap = copy.copy(plt.cm.get_cmap('YlGnBu_r'))
-    norm = mpl.colors.Normalize(vmin=-20, vmax=5)
-    
-    fig, axes = plt.subplots(2, 1, sharex=False, figsize=(6, 2))
-    axes[0].bar(date_hydrus_18O, ds_hydrus_18O['prec'].values, width=-1, color=cmap(norm(ds_hydrus_18O['d18O_prec'].values)), align='edge', edgecolor=cmap(norm(ds_hydrus_18O['d18O_prec'].values)))
-    axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
-    axes[0].set_xlim(date_hydrus_18O[0], date_hydrus_18O[-1])
-    sns.heatmap(ds_hydrus_18O['d18O_soil'].values, xticklabels=366, yticklabels=int(50/2), cmap='YlGnBu_r',
-                vmax=5, vmin=-20, cbar=False, ax=axes[1])
-    axes[1].set_yticks([0, 25, 50, 75, 100])
-    axes[1].set_yticklabels([0, 0.5, 1, 1.5, 2])
-    axes[1].set_xticklabels(list(range(1997, 2008)))
-    axes[1].set_ylabel('Soil depth\n[m]')
-    axes[1].set_xlabel('Time [years]')
-    
-    axl = fig.add_axes([0.92, 0.3, 0.02, 0.3])
-    cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
-                                  orientation='vertical',
-                                  ticks=[0, -5, -10, -15])
-    cb1.set_label(r'$\delta^{18}$O [‰]')
-    file = 'hydrus_d18O_prec_soil.png'
     path = base_path_figs / file
     fig.savefig(path, dpi=250)
 
@@ -817,11 +792,12 @@ def main(tmp_dir):
     axes[0].bar(date_hydrus_18O, ds_hydrus_18O['prec'].values, width=-1, edgecolor=cmap(norm(ds_hydrus_18O['d18O_prec'].values)), align='edge')
     axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
     axes[0].set_xlim(date_hydrus_18O[0], date_hydrus_18O[-1])
+    axes[0].set_xticklabels([])
     sns.heatmap(ds_hydrus_18O['d18O_soil'].values, xticklabels=366, yticklabels=int(50/2), cmap='YlGnBu_r',
               vmax=5, vmin=-20, cbar=False, ax=axes[1])
     axes[1].set_yticks([0, 25, 50, 75, 100])
     axes[1].set_yticklabels([0, 0.5, 1, 1.5, 2])
-    axes[1].set_xticklabels(list(range(1997, 2008)))
+    axes[1].set_xticklabels([])
     axes[1].set_ylabel('Soil depth\n[m]')
 
     axes[2].bar(date_hydrus_18O, ds_hydrus_18O['perc'].values, width=-1, edgecolor=cmap(norm(ds_hydrus_18O['d18O_perc'].values)), align='edge')
@@ -831,12 +807,12 @@ def main(tmp_dir):
     axes[2].invert_yaxis()
     axes[2].set_xlabel('Time [year]')
 
-    axl = fig.add_axes([0.92, 0.33, 0.02, 0.3])
+    axl = fig.add_axes([0.87, 0.33, 0.02, 0.3])
     cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
                                     orientation='vertical',
                                     ticks=[0, -5, -10, -15])
     cb1.set_label(r'$\delta^{18}$O [‰]')
-
+    fig.subplots_adjust(bottom=0.15, right=0.85)
     file = 'hydrus_d18O_prec_soil_perc.png'
     path = base_path_figs / file
     fig.savefig(path, dpi=250)
@@ -849,11 +825,12 @@ def main(tmp_dir):
     axes[0].bar(date_hydrus_18O, ds_hydrus_18O['prec'].values, width=-1, edgecolor='blue', align='edge')
     axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
     axes[0].set_xlim(date_hydrus_18O[0], date_hydrus_18O[-1])
+    axes[0].set_xticklabels([])
     sns.heatmap(ds_hydrus_18O['swc'].values, xticklabels=366, yticklabels=int(50/2), cmap='YlGnBu',
-              vmax=0.4, vmin=0.1, cbar=False, ax=axes[1])
+                vmax=0.4, vmin=0.1, cbar=False, ax=axes[1])
     axes[1].set_yticks([0, 25, 50, 75, 100])
     axes[1].set_yticklabels([0, 0.5, 1, 1.5, 2])
-    axes[1].set_xticklabels(list(range(1997, 2008)))
+    axes[1].set_xticklabels([])
     axes[1].set_ylabel('Soil depth\n[m]')
 
     axes[2].bar(date_hydrus_18O, ds_hydrus_18O['perc'].values, width=-1, edgecolor='grey', align='edge')
@@ -863,12 +840,12 @@ def main(tmp_dir):
     axes[2].invert_yaxis()
     axes[2].set_xlabel('Time [year]')
 
-    axl = fig.add_axes([0.92, 0.33, 0.02, 0.3])
+    axl = fig.add_axes([0.87, 0.33, 0.02, 0.3])
     cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
                                     orientation='vertical',
                                     ticks=[0.1, 0.2, 0.3, 0.4])
     cb1.set_label(r'$\theta$ [-]')
-
+    fig.subplots_adjust(bottom=0.15, right=0.85)
     file = 'hydrus_prec_theta_perc.png'
     path = base_path_figs / file
     fig.savefig(path, dpi=250)
