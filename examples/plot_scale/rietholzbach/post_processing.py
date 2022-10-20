@@ -111,6 +111,15 @@ def main(tmp_dir):
     df_thetap.loc[cond1, 'sc'] = 1  # dry
     df_thetap.loc[cond2, 'sc'] = 2  # normal
     df_thetap.loc[cond3, 'sc'] = 3  # wet
+    fig, axs = plt.subplots(1, 1, figsize=(6, 1.2))
+    axs.plot(df_thetap.index, df_thetap['theta'], '-', color='black')
+    axs.plot(df_thetap.index, onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0), '-', color='grey')
+    axs.set_ylabel(r'$\delta^{18}$O [‰]')
+    axs.set_xlim(df_thetap.index[0], df_thetap.index[-1])
+    fig.tight_layout()
+    file = base_path_figs / 'theta_5days.pdf'
+    fig.savefig(file, dpi=250)
+    plt.close(fig=fig)
 
     # measured oxygen-18 in precipitation and percolation
     d18O_prec_mean = onp.round(onp.nanmean(df_obs.loc[:, 'd18O_prec'].values), 2)
@@ -203,7 +212,7 @@ def main(tmp_dir):
     df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
     # write average and standard deviation of best parameters to .txt
-    df_avg_std = pd.DataFrame(index=['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
+    df_avg_std = pd.DataFrame(index=['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
     df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics1.loc[:df_params_metrics1.index[99], ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
     df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics1.loc[:df_params_metrics1.index[99], ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
     file = base_path_figs / "params_best_1perc_avg_std.txt"
