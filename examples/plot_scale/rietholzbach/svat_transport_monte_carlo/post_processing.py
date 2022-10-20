@@ -366,9 +366,7 @@ def main(nsamples, sas_solver, tmp_dir):
             ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
 
             # DataFrame with sampled model parameters and the corresponding metrics
-            nx = ds_sim_tm.dims['x']  # number of rows
-            ny = ds_sim_tm.dims['y']  # number of columns
-            df_params_metrics = pd.DataFrame(index=range(nx * ny))
+            df_params_metrics = pd.DataFrame(index=range(nsamples))
             df_params_metrics.loc[:, 'dmpv'] = ds_sim_hm["dmpv"].values.flatten()
             df_params_metrics.loc[:, 'lmpv'] = ds_sim_hm["lmpv"].values.flatten()
             df_params_metrics.loc[:, 'theta_ac'] = ds_sim_hm["theta_ac"].values.flatten()
@@ -399,11 +397,11 @@ def main(nsamples, sas_solver, tmp_dir):
             # compare observations and simulations
             ncol = 0
             idx = ds_sim_tm.Time.values  # time index
-            d18O_perc_bs = onp.zeros((nx, 1, len(idx)))
+            d18O_perc_bs = onp.zeros((nsamples, 1, len(idx)))
             df_idx_bs = pd.DataFrame(index=date_obs, columns=['sol'])
             df_idx_bs.loc[:, 'sol'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
             idx_bs = df_idx_bs['sol'].dropna().index
-            for nrow in range(nx):
+            for nrow in range(nsamples):
                 # calculate simulated oxygen-18 bulk sample
                 df_perc_18O_obs = pd.DataFrame(index=date_obs, columns=['perc_obs', 'd18O_perc_obs'])
                 df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=0, y=0).values
@@ -547,7 +545,7 @@ def main(nsamples, sas_solver, tmp_dir):
                 model_structure=f'SVAT {tm_structure} model with free drainage',
                 sas_solver=f'{sas_solver}',
             )
-            dict_dim = {'x': nx, 'y': 1, 'n_sas_params': 8}
+            dict_dim = {'x': 1, 'y': 1, 'n_sas_params': 8}
             if not f.dimensions:
                 f.dimensions = dict_dim
                 v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
