@@ -182,7 +182,7 @@ def main(tmp_dir):
     #     dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best1)))
     # for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
     #     df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'r_dS{sc1}', f'KGE_q_ss{sc1}', f'E_multi{sc1}']]
-    #     df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+    #     df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
     #     nrow = len(df_metrics.columns)
     #     ncol = len(df_params.columns)
     #     fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
@@ -232,9 +232,9 @@ def main(tmp_dir):
     # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
     # # write average and standard deviation of best parameters to .txt
-    # df_avg_std = pd.DataFrame(index=['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
-    # df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics1.loc[:df_params_metrics1.index[99], ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
-    # df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics1.loc[:df_params_metrics1.index[99], ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
+    # df_avg_std = pd.DataFrame(index=['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
+    # df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics1.loc[:df_params_metrics1.index[99], ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
+    # df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics1.loc[:df_params_metrics1.index[99], ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
     # file = base_path_figs / "params_best_1perc_avg_std.txt"
     # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 

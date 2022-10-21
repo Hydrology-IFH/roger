@@ -204,6 +204,8 @@ def main(tmp_dir, sas_solver):
             df_metrics_year.loc[year, 'Br_mass_recovery'] = onp.sum(ds_sim_tm['M_q_ss'].isel(x=0, y=0).values[315:716] * 3.14) / 79900
             # average travel time of percolation (in days)
             df_metrics_year.loc[year, 'ttavg'] = onp.nanmean(ds_sim_tm['ttavg_q_ss'].isel(x=0, y=0).values[315:716])
+            # average median travel time of percolation (in days)
+            df_metrics_year.loc[year, 'tt50'] = onp.nanmedian(ds_sim_tm['ttavg_q_ss'].isel(x=0, y=0).values[315:716])
 
         # write evaluation metrics to .csv
         path_csv = base_path / "results" / f"bromide_metrics_{tms}.csv"
