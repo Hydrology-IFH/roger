@@ -700,7 +700,7 @@ def main(nsamples, sas_solver, tmp_dir):
         ds_hm_for_tm_mc = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
         ds_hm_best = ds_sim_hm.loc[dict(x=idx_best)]
         ds_hm_best.attrs['title'] = f'Best hydrologic simulation corresponding to best {tm_structure} oxygen-18 simulation'
-        days = date2num(ds_hm_best["Time"].values.astype('M8[ms]').astype('O'), units=f"days since {ds_hm_for_tm_mc['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+        days = date2num(ds_hm_best["Time"].values.astype('M8[ms]').astype('O'), units=f"days since {ds_hm_for_tm_mc['Time'].attrs['time_origin']}", calendar='standard')
         ds_hm_best = ds_hm_best.assign_coords(Time=("Time", days))
         ds_hm_best.Time.attrs['units'] = "days"
         ds_hm_best.Time.attrs['time_origin'] = ds_hm_for_tm_mc['Time'].attrs['time_origin']

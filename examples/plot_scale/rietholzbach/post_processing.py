@@ -599,7 +599,7 @@ def main(tmp_dir):
             axes[i].set_ylim((0, 1))
             axes[i].set_xlabel('T [days]')
 
-    TT = ds_hydrus_tt['TT_perc'].values
+    TT = ds_hydrus_tt['bTT_perc'].values
     # for i in range(len(date_hydrus_tt)):
     #     axes[-1].plot(TT[i, :], lw=1, color='grey')
     x = onp.arange(TT.shape[-1])
