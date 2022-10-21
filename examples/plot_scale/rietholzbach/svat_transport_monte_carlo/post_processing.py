@@ -642,7 +642,6 @@ def main(nsamples, sas_solver, tmp_dir):
                     v[:] = time
                 for var_sim in list(df.variables.keys()):
                     var_obj = df.variables.get(var_sim)
-                    click.echo(f'{var_sim}')
                     if var_sim not in list(dict_dim.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
                         v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                         vals = onp.array(var_obj)
