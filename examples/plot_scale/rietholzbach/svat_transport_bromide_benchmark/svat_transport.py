@@ -2,6 +2,7 @@ from pathlib import Path
 import pandas as pd
 import h5netcdf
 import xarray as xr
+from cftime import num2date, date2num
 import os
 import numpy as onp
 import click
@@ -473,9 +474,17 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         write_forcing_tracer(input_path, 'Br')
         nc_file = model._base_path / f"states_hm_best_for_{transport_model_structure}.nc"
         with xr.open_dataset(nc_file, engine="h5netcdf") as ds:
+            days = (ds['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+            date = num2date(days, units=f"days since {ds['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+            ds = ds.assign_coords(Time=("Time", date))
             ds_year = ds.sel(Time=slice(f'{year - 1}-12-31', f'{year + 1}-12-31'))
+            days_year = date2num(ds_year["Time"].values.astype('M8[ms]').astype('O'), units=f"days since {year-1}-12-31", calendar='standard')
+            ds_year = ds_year.assign_coords(Time=("Time", days_year))
+            ds_year.Time.attrs['units'] = "days"
+            ds_year.Time.attrs['time_origin'] = f"{year-1}-12-31"
             nc_file_year = model._base_path / "input" / str(year) / f"states_hm_best_for_{transport_model_structure}.nc"
             ds_year.to_netcdf(nc_file_year, engine="h5netcdf")
+            ds_year = ds_year.load()
             ds_year = ds_year.close()
             del ds_year
         model.setup()

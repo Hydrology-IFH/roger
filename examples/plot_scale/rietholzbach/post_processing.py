@@ -119,22 +119,21 @@ def main(tmp_dir):
     df_thetap.loc[df_thetap.index[window-1]:, 'theta'] = df_thetap.loc[:, 'theta'].rolling(window=window).mean().iloc[window-1:].values
     df_thetap.iloc[:window, 1] = onp.nan
     df_thetap_doy = df_thetap.groupby(by=["doy"], dropna=False).mean()
-    # theta_p33 = onp.quantile(df_thetap_doy['theta'].values, 0.33)
-    # theta_p66 = onp.quantile(df_thetap_doy['theta'].values, 0.66)
-    theta_p33 = 0.425
-    theta_p66 = 0.475
-    cond1 = (df_thetap['theta'] < theta_p33)
-    cond2 = (df_thetap['theta'] >= theta_p33) & (df_thetap['theta'] < theta_p66)
-    cond3 = (df_thetap['theta'] >= theta_p66)
+    theta_lower = onp.quantile(df_thetap_doy['theta'].values, 0.1)
+    theta_upper = onp.quantile(df_thetap_doy['theta'].values, 0.9)
+    cond1 = (df_thetap['theta'] < theta_lower)
+    cond2 = (df_thetap['theta'] >= theta_lower) & (df_thetap['theta'] < theta_upper)
+    cond3 = (df_thetap['theta'] >= theta_upper)
     df_thetap.loc[cond1, 'sc'] = 1  # dry
     df_thetap.loc[cond2, 'sc'] = 2  # normal
     df_thetap.loc[cond3, 'sc'] = 3  # wet
     fig, axs = plt.subplots(1, 1, figsize=(6, 1.2))
-    axs.axhline(y=theta_p33, color='grey', linestyle='--', lw=1)
-    axs.axhline(y=theta_p66, color='grey', linestyle='--', lw=1)
+    axs.axhline(y=theta_lower, color='grey', linestyle='--', lw=1)
+    axs.axhline(y=theta_upper, color='grey', linestyle='--', lw=1)
     axs.plot(df_thetap.index, df_thetap['theta'], '-', color='black', lw=1)
     # axs.plot(df_thetap.index, onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0), '-', color='grey')
     axs.set_ylabel(r'$\theta$ [-]')
+    axs.set_xlabel('Time [year]')
     axs.set_xlim(df_thetap.index[0], df_thetap.index[-1])
     fig.tight_layout()
     file = base_path_figs / f'theta_previous_{window}_days.png'
@@ -167,7 +166,7 @@ def main(tmp_dir):
     fig.text(0.91, 0.65, r"$\overline{\delta^{18}O}_{prec}$: %s" % (d18O_prec_mean), ha="center", va="center", fontsize=8)
     fig.text(0.91, 0.45, r"$\overline{\delta^{18}O}_{perc}$: %s" % (d18O_perc_mean), ha="center", va="center", fontsize=8)
     fig.text(0.12, 0.46, "(b)", ha="center", va="center", fontsize=8)
-    file = base_path_figs / 'observed_d18O_prec_perc.pdf'
+    file = base_path_figs / 'observed_d18O_prec_perc.png'
     fig.savefig(file, dpi=250)
     plt.close(fig=fig)
 
@@ -565,8 +564,8 @@ def main(tmp_dir):
             df_sim_br = pd.DataFrame(index=df_obs_br.index)
             df_sim_br.loc[:, f"{year}"] = ds["Br_perc_mmol"].values
         ax.plot(df_sim_br.dropna().index, df_sim_br.dropna()[f"{year}"], color="grey", lw=0.8, alpha=0.25, label=f'{year}')
-    ax.plot(df_sim_br.dropna().index, df_sim_br.dropna().mean(axis=1), color="black", lw=1, alpha=1, label='')
-    ax.plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1, label='')
+    ax.plot(df_sim_br.dropna().index, df_sim_br.dropna().mean(axis=1), color="black", lw=1, alpha=1, label='avg')
+    ax.plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1, label='obs')
     labelLines(ax.get_lines(), fontsize=4, color='grey')
     ax.set_ylim(0,)
     ax.set_xlim([0, 400])
@@ -604,11 +603,11 @@ def main(tmp_dir):
     # for i in range(len(date_hydrus_tt)):
     #     axes[-1].plot(TT[i, :], lw=1, color='grey')
     x = onp.arange(TT.shape[-1])
-    y1 = onp.quantile(TT, 0.05, axis=0)
-    y2 = onp.quantile(TT, 0.95, axis=0)
+    y1 = onp.quantile(TT[:TT.shape[0]-365, :], 0.05, axis=0)
+    y2 = onp.quantile(TT[:TT.shape[0]-365, :], 0.95, axis=0)
     axes[-1].fill_between(x, y1, y2, facecolor='grey')
-    axes[-1].plot(onp.quantile(TT, 0.5, axis=0), ls='--', lw=1, color='black')
-    axes[-1].plot(onp.mean(TT, axis=0), lw=1, color='black')
+    axes[-1].plot(onp.quantile(TT[:TT.shape[0]-365, :], 0.5, axis=0), ls='--', lw=1, color='black')
+    axes[-1].plot(onp.mean(TT[:TT.shape[0]-365, :], axis=0), lw=1, color='black')
     axes[-1].set_xlim((0, 4000))
     axes[-1].set_ylim((0, 1))
     axes[-1].set_xlabel('T [days]')
@@ -621,7 +620,7 @@ def main(tmp_dir):
     # plot cumulative backward travel time distributions
     TT = ds_hydrus_tt['TT_perc'].values
     fig, axs = plt.subplots()
-    for i in range(len(date_hydrus_tt)):
+    for i in range(365, len(date_hydrus_tt)):
         axs.plot(TT[i, :], lw=1, color='grey')
     axs.set_xlim((0, 4000))
     axs.set_ylim((0, 1))
@@ -635,7 +634,7 @@ def main(tmp_dir):
     # plot cumulative forward travel time distributions
     TT = ds_hydrus_tt['fTT_perc'].values
     fig, axs = plt.subplots()
-    for i in range(len(date_hydrus_tt)):
+    for i in range(len(date_hydrus_tt)-365):
         axs.plot(TT[i, :], lw=1, color='grey')
     axs.set_xlim((0, 4000))
     axs.set_ylim((0, 1))
@@ -816,9 +815,41 @@ def main(tmp_dir):
     cb1.ax.set_yticklabels(['0', '50', '>100'])
     cb1.set_label('Bromide [mg/l]', labelpad=-1)
     fig.subplots_adjust(bottom=0.1, right=0.85, hspace=0.7)
-    file = 'bromide_soil.png'
+    file = 'bromide_conc_soil.png'
     path = base_path_figs / file
     fig.savefig(path, dpi=250)
+
+    # # plot soil bromide mass
+    # years = onp.arange(1997, 2007).tolist()
+    # cmap = copy.copy(plt.cm.get_cmap('Oranges'))
+    # norm = mpl.colors.Normalize(vmin=0, vmax=100)
+    # fig, axes = plt.subplots(5, 2, figsize=(6, 10))
+    # for i, year in enumerate(years):
+    #     states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
+    #     with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
+    #         sns.heatmap(ds['Br_soil'].values * ds['swc'].values * 20, xticklabels=100, yticklabels=int(50/2), cmap='Oranges',
+    #                     vmax=100, vmin=0, cbar=False, ax=axes.flatten()[i])
+    #     axes.flatten()[i].set_title(r'$12^{th}$ Nov %s' % (year))
+    #     axes.flatten()[i].set_yticks([0, 25, 50, 75, 100])
+    #     axes.flatten()[i].set_yticklabels([0, 0.5, 1, 1.5, 2])
+    #
+    # axes[0, 0].set_ylabel('Soil depth [m]')
+    # axes[1, 0].set_ylabel('Soil depth [m]')
+    # axes[2, 0].set_ylabel('Soil depth [m]')
+    # axes[3, 0].set_ylabel('Soil depth [m]')
+    # axes[4, 0].set_ylabel('Soil depth [m]')
+    # axes[4, 0].set_xlabel('Time [days since injection]')
+    # axes[4, 1].set_xlabel('Time [days since injection]')
+    # axl = fig.add_axes([0.88, 0.38, 0.02, 0.2])
+    # cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
+    #                                 orientation='vertical',
+    #                                 ticks=[0, 50, 100])
+    # cb1.ax.set_yticklabels(['0', '50', '>100'])
+    # cb1.set_label('Bromide [mg]', labelpad=-1)
+    # fig.subplots_adjust(bottom=0.1, right=0.85, hspace=0.7)
+    # file = 'bromide_mass_soil.png'
+    # path = base_path_figs / file
+    # fig.savefig(path, dpi=250)
 
     # plot isotope ratios of precipitation, soil and percolation
     cmap = copy.copy(plt.cm.get_cmap('YlGnBu_r'))
@@ -876,7 +907,7 @@ def main(tmp_dir):
     axes[2].invert_yaxis()
     axes[2].set_xlabel('Time [year]')
 
-    axl = fig.add_axes([0.87, 0.33, 0.02, 0.3])
+    axl = fig.add_axes([0.87, 0.34, 0.02, 0.3])
     cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
                                     orientation='vertical',
                                     ticks=[0.1, 0.2, 0.3, 0.4])

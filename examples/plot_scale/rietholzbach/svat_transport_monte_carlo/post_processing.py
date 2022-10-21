@@ -4,7 +4,7 @@ import glob
 import datetime
 import h5netcdf
 import xarray as xr
-from cftime import num2date
+from cftime import num2date, date2num
 import pandas as pd
 import numpy as onp
 import click
@@ -343,11 +343,11 @@ def main(nsamples, sas_solver, tmp_dir):
     df_thetap.loc[:, 'theta'] = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0)
     df_thetap.loc[df_thetap.index[window-1]:, f'theta_avg{window}'] = df_thetap.loc[:, 'theta'].rolling(window=window).mean().iloc[window-1:].values
     df_thetap.iloc[:window, 2] = onp.nan
-    theta_p33 = df_thetap.loc[:, f'theta_avg{window}'].quantile(0.33)
-    theta_p66 = df_thetap.loc[:, f'theta_avg{window}'].quantile(0.66)
-    cond1 = (df_thetap[f'theta_avg{window}'] < theta_p33)
-    cond2 = (df_thetap[f'theta_avg{window}'] >= theta_p33) & (df_thetap[f'theta_avg{window}'] < theta_p66)
-    cond3 = (df_thetap[f'theta_avg{window}'] >= theta_p66)
+    theta_lower = df_thetap.loc[:, f'theta_avg{window}'].quantile(0.1)
+    theta_upper = df_thetap.loc[:, f'theta_avg{window}'].quantile(0.9)
+    cond1 = (df_thetap[f'theta_avg{window}'] < theta_lower)
+    cond2 = (df_thetap[f'theta_avg{window}'] >= theta_lower) & (df_thetap[f'theta_avg{window}'] < theta_upper)
+    cond3 = (df_thetap[f'theta_avg{window}'] >= theta_upper)
     df_thetap.loc[cond1, 'sc'] = 1  # dry
     df_thetap.loc[cond2, 'sc'] = 2  # normal
     df_thetap.loc[cond3, 'sc'] = 3  # wet
@@ -465,6 +465,20 @@ def main(nsamples, sas_solver, tmp_dir):
             # write to .txt
             file = base_path_results / f"params_metrics_{tms}.txt"
             df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
+
+            # write simulated bulk sample to output file
+            ds_sim_tm = ds_sim_tm.load()
+            ds_sim_tm = ds_sim_tm.close()
+            states_tm_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
+            with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+                try:
+                    v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                    v.attrs.update(long_name="bulk sample of d18O in percolation",
+                                   units="permil")
+                    v[:, :, :] = d18O_perc_bs
+                except ValueError:
+                    v = f.get('d18O_perc_bs')
+                    v[:, :, :] = d18O_perc_bs
 
         # dotty plots
         click.echo(f'Dotty plots for {tm_structure} ...')
@@ -683,23 +697,15 @@ def main(nsamples, sas_solver, tmp_dir):
 
         # write states of best hydrologic simulation corresponding to best transport simulation
         states_hm_mc_file = base_path / "states_hm_for_tm_mc.nc"
-        ds_sim_hm_mc = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
-        ds_sim_hm_best = ds_sim_hm_mc.loc[dict(x=idx_best)]
-        ds_sim_hm_best.attrs['title'] = f'Best hydrologic simulation corresponding to best {tm_structure} oxygen-18 simulation'
+        ds_hm_for_tm_mc = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
+        ds_hm_best = ds_sim_hm.loc[dict(x=idx_best)]
+        ds_hm_best.attrs['title'] = f'Best hydrologic simulation corresponding to best {tm_structure} oxygen-18 simulation'
+        days = date2num(ds_hm_best["Time"].values.astype('M8[ms]').astype('O'), units=f"days since {ds_hm_for_tm_mc['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+        ds_hm_best = ds_hm_best.assign_coords(Time=("Time", days))
+        ds_hm_best.Time.attrs['units'] = "days"
+        ds_hm_best.Time.attrs['time_origin'] = ds_hm_for_tm_mc['Time'].attrs['time_origin']
         file = base_path / f"states_hm_best_for_{tms}.nc"
-        ds_sim_hm_best.to_netcdf(file, engine="h5netcdf")
-
-        # write simulated bulk sample to output file
-        states_tm_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
-        with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
-            try:
-                v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                v.attrs.update(long_name="bulk sample of d18O in percolation",
-                               units="permil")
-                v[:, :, :] = d18O_perc_bs
-            except ValueError:
-                v = f.get('d18O_perc_bs')
-                v[:, :, :] = d18O_perc_bs
+        ds_hm_best.to_netcdf(file, engine="h5netcdf")
 
     return
 

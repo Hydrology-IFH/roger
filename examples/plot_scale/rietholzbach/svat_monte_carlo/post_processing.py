@@ -114,11 +114,11 @@ def main(tmp_dir):
     df_thetap.loc[:, 'theta'] = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0)
     df_thetap.loc[df_thetap.index[window-1]:, f'theta_avg{window}'] = df_thetap.loc[:, 'theta'].rolling(window=window).mean().iloc[window-1:].values
     df_thetap.iloc[:window, 2] = onp.nan
-    theta_p33 = df_thetap.loc[:, f'theta_avg{window}'].quantile(0.33)
-    theta_p66 = df_thetap.loc[:, f'theta_avg{window}'].quantile(0.66)
-    cond1 = (df_thetap[f'theta_avg{window}'] < theta_p33)
-    cond2 = (df_thetap[f'theta_avg{window}'] >= theta_p33) & (df_thetap[f'theta_avg{window}'] < theta_p66)
-    cond3 = (df_thetap[f'theta_avg{window}'] >= theta_p66)
+    theta_lower = df_thetap.loc[:, f'theta_avg{window}'].quantile(0.1)
+    theta_upper = df_thetap.loc[:, f'theta_avg{window}'].quantile(0.9)
+    cond1 = (df_thetap[f'theta_avg{window}'] < theta_lower)
+    cond2 = (df_thetap[f'theta_avg{window}'] >= theta_lower) & (df_thetap[f'theta_avg{window}'] < theta_upper)
+    cond3 = (df_thetap[f'theta_avg{window}'] >= theta_upper)
     df_thetap.loc[cond1, 'sc'] = 1  # dry
     df_thetap.loc[cond2, 'sc'] = 2  # normal
     df_thetap.loc[cond3, 'sc'] = 3  # wet

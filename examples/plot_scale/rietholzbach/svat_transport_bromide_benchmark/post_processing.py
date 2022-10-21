@@ -51,7 +51,7 @@ def main(tmp_dir, sas_solver):
                     f.create_group(f"{tm_structure}-{year}")
                 f.attrs.update(
                     date_created=datetime.datetime.today().isoformat(),
-                    title='RoGeR transport model results for virtual bromide experiments at Rietholzbach Lysimeter site',
+                    title='RoGeR transport simulations for virtual bromide experiments at Rietholzbach Lysimeter site',
                     institution='University of Freiburg, Chair of Hydrology',
                     references='',
                     comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
@@ -127,10 +127,6 @@ def main(tmp_dir, sas_solver):
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
 
-    # load simulation
-    states_hm_file = base_path / "states_hm.nc"
-    ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
-
     tm_structures = ['complete-mixing', 'piston',
                      'preferential', 'advection-dispersion',
                      'time-variant preferential',
@@ -140,6 +136,13 @@ def main(tmp_dir, sas_solver):
     norm = Normalize(vmin=onp.min(years), vmax=onp.max(years))
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
+        # load hydrologic simulation
+        states_hm_file = base_path / f"states_hm_best_for_{tms}.nc"
+        ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
+        # assign date
+        days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+        date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+        ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
         fig, axes = plt.subplots(1, 1, figsize=(10, 6))
         df_metrics_year = pd.DataFrame(index=years)
         for year in years:
@@ -150,16 +153,9 @@ def main(tmp_dir, sas_solver):
             # load simulation
             states_tm_file = base_path / "states_tm_bromide_benchmark.nc"
             ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{tm_structure}-{year}", engine="h5netcdf")
-
-            # plot simulated time series
-            base_path_figs = base_path / "figures"
-
             # assign date
-            days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
             days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-            date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
             date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-            ds_sim_hm = ds_sim_hm.assign_coords(date=("Time", date_sim_hm))
             ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
 
             # plot percolation rate (in l/h) and bromide concentration (mmol/l)
