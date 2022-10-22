@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Analysis of Roger output &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>Analysis of simulations with Roger &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,7 +14,9 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -30,7 +32,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -48,8 +50,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Analysis of Roger output</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#load-and-aggregate-rates">Load and aggregate rates</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Analysis of simulations with Roger</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#load-and-aggregate-rate">Load and aggregate rate</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="cluster.html">Running Roger on a cluster</a></li>
@@ -93,7 +95,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Analysis of Roger output</li>
+      <li>Analysis of simulations with Roger</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/tutorial/analysis.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -103,8 +105,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="analysis-of-roger-output">
-<h1>Analysis of Roger output<a class="headerlink" href="#analysis-of-roger-output" title="Permalink to this headline">¶</a></h1>
+  <section id="analysis-of-simulations-with-roger">
+<h1>Analysis of simulations with Roger<a class="headerlink" href="#analysis-of-simulations-with-roger" title="Permalink to this heading">¶</a></h1>
 <p>In this tutorial, we will use <a class="reference external" href="http://xarray.pydata.org/en/stable/">xarray</a> and <a class="reference external" href="https://matplotlib.org">matplotlib</a> to load, analyze, and plot the model output. You can run these commands in <a class="reference external" href="https://ipython.readthedocs.io/en/stable/">IPython</a> or a <a class="reference external" href="https://jupyter.org">Jupyter Notebook</a>. Just make sure to install the dependencies first:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install xarray matplotlib netcdf4 cftime
 </pre></div>
@@ -122,7 +124,7 @@
 </div>
 <p>Set the paths to the example data:</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [5]: </span><span class="n">OUTPUT_FILES</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">   ...: </span>    <span class="s2">&quot;rates&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;_data&quot;</span> <span class="o">/</span> <span class="s2">&quot;ONED.rates.nc&quot;</span><span class="p">,</span>
+<span class="gp">   ...: </span>    <span class="s2">&quot;rate&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;_data&quot;</span> <span class="o">/</span> <span class="s2">&quot;ONED.rate.nc&quot;</span><span class="p">,</span>
 <span class="gp">   ...: </span>    <span class="s2">&quot;collect&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;_data&quot;</span> <span class="o">/</span> <span class="s2">&quot;ONED.collect.nc&quot;</span><span class="p">,</span>
 <span class="gp">   ...: </span>    <span class="s2">&quot;maximum&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;_data&quot;</span> <span class="o">/</span> <span class="s2">&quot;ONED.maximum.nc&quot;</span><span class="p">,</span>
 <span class="gp">   ...: </span><span class="p">}</span>
@@ -130,12 +132,12 @@
 </pre></div>
 </div>
 <p>Most of the heavy lifting will be done by <code class="docutils literal notranslate"><span class="pre">xarray</span></code>, which provides a data structure and API for working with labeled N-dimensional arrays. <code class="docutils literal notranslate"><span class="pre">xarray</span></code> datasets automatically keep track how the values of the underlying arrays map to locations in space and time, which makes them immensely useful for analyzing model output.</p>
-<section id="load-and-aggregate-rates">
-<h2>Load and aggregate rates<a class="headerlink" href="#load-and-aggregate-rates" title="Permalink to this headline">¶</a></h2>
+<section id="load-and-aggregate-rate">
+<h2>Load and aggregate rate<a class="headerlink" href="#load-and-aggregate-rate" title="Permalink to this heading">¶</a></h2>
 <p>In order to load our first output file and display its content execute the following two commands:</p>
-<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [6]: </span><span class="n">ds_rates</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">OUTPUT_FILES</span><span class="p">[</span><span class="s2">&quot;rates&quot;</span><span class="p">])</span>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [6]: </span><span class="n">ds_rate</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">OUTPUT_FILES</span><span class="p">[</span><span class="s2">&quot;rate&quot;</span><span class="p">])</span>
 
-<span class="gp">In [7]: </span><span class="n">ds_rates</span>
+<span class="gp">In [7]: </span><span class="n">ds_rate</span>
 <span class="gh">Out[7]: </span><span class="go"></span>
 <span class="go">&lt;xarray.Dataset&gt;</span>
 <span class="go">Dimensions:                (Time: 366, y: 1, x: 1, cr: 2, crops: 1,</span>
@@ -179,28 +181,28 @@
 <span class="go">    setup_identifier:  ONED</span>
 
 <span class="go"># convert to datetime</span>
-<span class="gp">In [8]: </span><span class="n">days</span> <span class="o">=</span> <span class="p">(</span><span class="n">ds_rates</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">))</span>
+<span class="gp">In [8]: </span><span class="n">days</span> <span class="o">=</span> <span class="p">(</span><span class="n">ds_rate</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">))</span>
 
-<span class="gp">In [9]: </span><span class="n">date</span> <span class="o">=</span> <span class="n">num2date</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;days since </span><span class="si">{</span><span class="n">ds_rates</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;time_origin&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="n">only_use_cftime_datetimes</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">In [9]: </span><span class="n">date</span> <span class="o">=</span> <span class="n">num2date</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;days since </span><span class="si">{</span><span class="n">ds_rate</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;time_origin&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="n">only_use_cftime_datetimes</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-<span class="gp">In [10]: </span><span class="n">ds_rates</span> <span class="o">=</span> <span class="n">ds_rates</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">Time</span><span class="o">=</span><span class="n">date</span><span class="p">)</span>
+<span class="gp">In [10]: </span><span class="n">ds_rate</span> <span class="o">=</span> <span class="n">ds_rate</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span><span class="n">Time</span><span class="o">=</span><span class="n">date</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Now, we select the time series of <code class="docutils literal notranslate"><span class="pre">inf_mat</span></code> and plot the daily data:</p>
-<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [11]: </span><span class="n">ds_rates</span><span class="p">[</span><span class="s2">&quot;inf_mat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-<span class="gh">Out[11]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x136518d60&gt;]</span>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [11]: </span><span class="n">ds_rate</span><span class="p">[</span><span class="s2">&quot;inf_mat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="gh">Out[11]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x165549af0&gt;]</span>
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/inf_mat_daily.png"><img alt="../_images/inf_mat_daily.png" src="../_images/inf_mat_daily.png" style="width: 5in;" /></a>
 <p>To compute the monthly sums and plot the monthly data:</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [12]: </span><span class="p">(</span>
-<span class="gp">   ....: </span>    <span class="n">ds_rates</span><span class="p">[</span><span class="s2">&quot;inf_mat&quot;</span><span class="p">]</span>
+<span class="gp">   ....: </span>    <span class="n">ds_rate</span><span class="p">[</span><span class="s2">&quot;inf_mat&quot;</span><span class="p">]</span>
 <span class="gp">   ....: </span>    <span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">Time</span><span class="o">=</span><span class="s1">&#39;1M&#39;</span><span class="p">)</span>
 <span class="gp">   ....: </span>    <span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 <span class="gp">   ....: </span>    <span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 <span class="gp">   ....: </span><span class="p">)</span>
 <span class="gp">   ....: </span>
-<span class="gh">Out[12]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x136905dc0&gt;]</span>
+<span class="gh">Out[12]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x16591bd90&gt;]</span>
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/inf_mat_monthly.png"><img alt="../_images/inf_mat_monthly.png" src="../_images/inf_mat_monthly.png" style="width: 5in;" /></a>

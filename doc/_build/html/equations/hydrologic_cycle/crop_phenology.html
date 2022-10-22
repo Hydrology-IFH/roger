@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Crop phenology &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>Crop phenology &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,7 +14,10 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -30,7 +33,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -48,7 +51,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/analysis.html">Analysis of simulations with Roger</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
@@ -65,11 +68,11 @@
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Crop phenology</a></li>
 <li class="toctree-l4"><a class="reference internal" href="storages/surface.html">Surface</a></li>
 <li class="toctree-l4"><a class="reference internal" href="storages/soil.html">Soil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html">Evapotranspiration</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/snow.html">Snow accumulation and snow melt</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/interception.html">Interception</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/infiltration.html">Infiltration</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html">Percolation / Capillary rise</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html">Evapotranspiration</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="model_structures.html#oned">ONED</a></li>
@@ -124,8 +127,58 @@
            <div itemprop="articleBody">
              
   <section id="crop-phenology">
-<h1>Crop phenology<a class="headerlink" href="#crop-phenology" title="Permalink to this headline">¶</a></h1>
-<p>Contains equations to describe crop phenology.</p>
+<h1>Crop phenology<a class="headerlink" href="#crop-phenology" title="Permalink to this heading">¶</a></h1>
+<p>Growing degree day <span class="math notranslate nohighlight">\(GDD\)</span> at time step t (<span class="math notranslate nohighlight">\(°C day^{-1}\)</span>):</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}GDD = \begin{cases}
+TA_{ceil} - TA_{base} &amp; \frac{(TA_{max}+TA_{min})}{2} &gt; TA_{ceil} \\
+\frac{(TA_{max}+TA_{min})}{2}]-TA_{base} &amp; TA_{base} \leq \frac{(TA_{max}+TA_{min})}{2} \leq TA_{ceil} \\
+TA_{base} &amp; \frac{(TA_{max}+TA_{min})}{2} &lt; TA_{base}
+\end{cases}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(TA_{max}\)</span> is the daily maximum air temperature (<span class="math notranslate nohighlight">\(°C\)</span>), <span class="math notranslate nohighlight">\(TA_{min}\)</span> is the daily minimum air temperature (<span class="math notranslate nohighlight">\(°C\)</span>),
+<span class="math notranslate nohighlight">\(TA_{base}\)</span> is the lower threshold of crop growth (<span class="math notranslate nohighlight">\(°C\)</span>) and <span class="math notranslate nohighlight">\(TA_{ceil}\)</span> is the upper threshold of crop growth (<span class="math notranslate nohighlight">\(°C\)</span>).</p>
+<p>Time since growth (i.e sum of growing degree day) <span class="math notranslate nohighlight">\(t_{grow}\)</span> (<span class="math notranslate nohighlight">\(°C day^{-1}\)</span>):</p>
+<div class="math notranslate nohighlight">
+\[t_{grow}=\sum_{t=t_{sowing}}^{t_{harvesting}} GDD_t\]</div>
+<p>Time since decay (i.e sum of growing degree day) <span class="math notranslate nohighlight">\(t_{grow}\)</span> (<span class="math notranslate nohighlight">\(°C day^{-1}\)</span>):</p>
+<div class="math notranslate nohighlight">
+\[t_{decay}=\sum_{t=t_{0-decay}}^{t_{harvesting}} GDD_t\]</div>
+<p>Coefficient of crop water stress <span class="math notranslate nohighlight">\(c_{ws}\)</span> (-):</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}c_{ws}=\begin{cases}
+1 &amp; \theta&gt;\theta_{ws} \\
+\frac{\theta-\theta_{pwp}}{\theta_{ws}-\theta_{pwp}} &amp; \theta_{pwp} \leq \theta \leq \theta_{ws}
+\end{cases}\end{split}\]</div>
+<p>Growth of crop canopy:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}CC = \begin{cases}
+CC_0 \cdot e^{c_{ccg} \cdot c_{ws} \cdot t_{grow}} &amp; CC &lt; CC_{max} / 2  \\
+CC_{max} - (CC_{max} - CC_0) \cdot e^{-(c_{ccg} \cdot c_{ws} \cdot  t_{grow})} &amp; CC \geq CC_{max} / 2 \\
+\end{cases}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(CC\)</span> is the fraction of ground covered by crop canopy (-) at
+time step t, <span class="math notranslate nohighlight">\(CC_0\)</span> is the initial fraction of ground covered by crop
+canopy (-), <span class="math notranslate nohighlight">\(CC_{max}\)</span> is the the maximum fraction of ground covered by
+crop canopy (-), <span class="math notranslate nohighlight">\(c_{ccg}\)</span> is the coefficient of crop canopy growth (-) and
+<span class="math notranslate nohighlight">\(t_{grow}\)</span> is the time since crop growth (<span class="math notranslate nohighlight">\(°C day^{-1}\)</span>).</p>
+<p>Decay of crop canopy:</p>
+<div class="math notranslate nohighlight">
+\[CC=CC_{max} \cdot [1-0.05(e^{\frac{c_{ccd}}{CC_{max}} \cdot t_{decay}} - 1)]\]</div>
+<p>where <span class="math notranslate nohighlight">\(c_{ccd}\)</span> is the coefficient of crop canopy decay (-) and <span class="math notranslate nohighlight">\(t_{decay}\)</span>
+is the time since crop decay (<span class="math notranslate nohighlight">\(°C day^{-1}\)</span>).</p>
+<p>Crop root growth:</p>
+<div class="math notranslate nohighlight">
+\[z_{root}=z_{root-max}-(z_{root-max}-z_{root-0}) * e^{c_{crg} \cdot c_{ws} \cdot t_{grow}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(z_{root}\)</span> is the crop root depth (m) at time step t, <span class="math notranslate nohighlight">\(z_{root-0}\)</span>
+is the initial crop root depth (m), <span class="math notranslate nohighlight">\(z_{root-max}\)</span> is the the maximum crop
+root depth (m) and <span class="math notranslate nohighlight">\(c_{crg}\)</span> is the coefficient of crop root growth (-).</p>
+<p>Crop transpiration <span class="math notranslate nohighlight">\(TRANSP_{crop}\)</span> at time step t (<span class="math notranslate nohighlight">\(mm \Delta t^{-1}\)</span>):</p>
+<div class="math notranslate nohighlight">
+\[TRANSP_{crop}=PET_{res} * k_{cb} * c_{ws}\]</div>
+<div class="math notranslate nohighlight">
+\[k_{cb}=k_{cb-min} + CC \cdot (k_{cb-mid} - k_{cb-min})\]</div>
+<p>where <span class="math notranslate nohighlight">\(k_{cb}\)</span> is the basal crop coeffcient (-), <span class="math notranslate nohighlight">\(k_{cb-min}\)</span> is the
+minimum basal crop coeffcient (-) and <span class="math notranslate nohighlight">\(k_{cb-mid}\)</span> is the the basal crop
+coeffcient at full canopy development (-).</p>
 </section>
 
 

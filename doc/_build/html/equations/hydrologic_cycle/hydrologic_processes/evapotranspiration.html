@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Evapotranspiration &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>Evapotranspiration &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,13 +14,15 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Groundwater flow" href="groundwater_flow.html" />
-    <link rel="prev" title="Subsurface runoff" href="lateral_flow_soil.html" /> 
+    <link rel="next" title="Snow accumulation and snow melt" href="snow.html" />
+    <link rel="prev" title="Hydrologic processes" href="../hydrologic_processes.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +33,7 @@
             <a href="../../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -49,7 +51,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/analysis.html">Analysis of simulations with Roger</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
@@ -57,55 +59,26 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../equations.html">Model equations</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../hydrologic_cycle.html">Hydrologic cycle</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../hydrologic_processes.html">Hydrologic processes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../hydrologic_processes.html">Hydrologic processes</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Evapotranspiration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#evaporation-from-interception-storage">Evaporation from interception storage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#soil-evaporation">Soil evaporation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transpiration">Transpiration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="snow.html">Snow accumulation and snow melt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="interception.html">Interception</a></li>
+<li class="toctree-l3"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="surface_runoff.html">Surface runoff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
+<li class="toctree-l3"><a class="reference internal" href="viscous_flow.html">Viscous flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lateral_flow_soil.html">Subsurface runoff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="groundwater_flow.html">Groundwater flow</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../storages.html">Storages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../crop_phenology.html">Crop phenology</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../model_structures.html">Model structures</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#svat">SVAT</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="../storages/surface.html">Surface</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../storages/soil.html">Soil</a></li>
-<li class="toctree-l4"><a class="reference internal" href="snow.html">Snow accumulation and snow melt</a></li>
-<li class="toctree-l4"><a class="reference internal" href="interception.html">Interception</a></li>
-<li class="toctree-l4"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
-<li class="toctree-l4"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Evapotranspiration</a></li>
-</ul>
-</li>
-<li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#svat-crop">SVAT-CROP</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="../crop_phenology.html">Crop phenology</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../storages/surface.html">Surface</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../storages/soil.html">Soil</a></li>
-<li class="toctree-l4"><a class="reference internal" href="snow.html">Snow accumulation and snow melt</a></li>
-<li class="toctree-l4"><a class="reference internal" href="interception.html">Interception</a></li>
-<li class="toctree-l4"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
-<li class="toctree-l4"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Evapotranspiration</a></li>
-</ul>
-</li>
-<li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#oned">ONED</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="../storages/surface.html">Surface</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../storages/soil.html">Soil</a></li>
-<li class="toctree-l4"><a class="reference internal" href="snow.html">Snow accumulation and snow melt</a></li>
-<li class="toctree-l4"><a class="reference internal" href="interception.html">Interception</a></li>
-<li class="toctree-l4"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
-<li class="toctree-l4"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
-<li class="toctree-l4"><a class="reference internal" href="lateral_flow_soil.html">Subsurface runoff</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Evapotranspiration</a></li>
-</ul>
-</li>
-<li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#oned-event">ONED-EVENT</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="../storages/surface.html">Surface</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../storages/soil.html">Soil</a></li>
-<li class="toctree-l4"><a class="reference internal" href="snow.html">Snow accumulation and snow melt</a></li>
-<li class="toctree-l4"><a class="reference internal" href="interception.html">Interception</a></li>
-<li class="toctree-l4"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
-<li class="toctree-l4"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
-<li class="toctree-l4"><a class="reference internal" href="lateral_flow_soil.html">Subsurface runoff</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Evapotranspiration</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../model_structures.html">Model structures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../solute_transport.html">Solute transport</a></li>
@@ -155,21 +128,21 @@
            <div itemprop="articleBody">
              
   <section id="evapotranspiration">
-<h1>Evapotranspiration<a class="headerlink" href="#evapotranspiration" title="Permalink to this headline">¶</a></h1>
+<h1>Evapotranspiration<a class="headerlink" href="#evapotranspiration" title="Permalink to this heading">¶</a></h1>
 <p>The calculation of evapotranspiration requires daily potential evapotranspiration.
 Actual evapotranspiration is energy-limited or water-limited, respectively. The
 evapotranspiration processes sequentially subtract from available PET.</p>
 <section id="evaporation-from-interception-storage">
-<h2>Evaporation from interception storage<a class="headerlink" href="#evaporation-from-interception-storage" title="Permalink to this headline">¶</a></h2>
+<h2>Evaporation from interception storage<a class="headerlink" href="#evaporation-from-interception-storage" title="Permalink to this heading">¶</a></h2>
 <p>Evaporation from interception storage <span class="math notranslate nohighlight">\(EVAP_{int}\)</span> (mm <span class="math notranslate nohighlight">\(\Delta t^{-1}\)</span>):</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}EVAP_{int}=\left\{\begin{array}{lr}
-S_{int-} &amp; PET_{res} &gt; S_{int} \\
+S_{int} &amp; PET_{res} &gt; S_{int} \\
 PET_{res} &amp; PET_{res} \leq S_{int}
 \end{array}\right.\end{split}\]</div>
 </section>
 <section id="soil-evaporation">
-<h2>Soil evaporation<a class="headerlink" href="#soil-evaporation" title="Permalink to this headline">¶</a></h2>
+<h2>Soil evaporation<a class="headerlink" href="#soil-evaporation" title="Permalink to this heading">¶</a></h2>
 <p>Soil evaporation <span class="math notranslate nohighlight">\(EVAP_{soil}\)</span> (mm <span class="math notranslate nohighlight">\(\Delta t^{-1}\)</span>) implemented with
 Stage I-Stage II approach (Or et al., 2013). Threshold between Stage I and Stage
 II is defined by readily evaporable water <span class="math notranslate nohighlight">\(S_{rew}\)</span>. Within Stage I capillary
@@ -200,18 +173,18 @@ Stage II capillary flow collapses (i.e. vapour diffusion rate).</p>
 to the soil surface (mm; <span class="math notranslate nohighlight">\(z_{evap-max}=150\)</span>)</p>
 </section>
 <section id="transpiration">
-<h2>Transpiration<a class="headerlink" href="#transpiration" title="Permalink to this headline">¶</a></h2>
-<p>Transpiration <span class="math notranslate nohighlight">\(TRANSP\)</span> (mm <span class="math notranslate nohighlight">\(\Delta t^{-1}\)</span>) with seasonally-variant transpiration coefficients <span class="math notranslate nohighlight">\(c_{transp}\)</span> and water stress coeffcient of transpiration <span class="math notranslate nohighlight">\(c_{transp-stress}\)</span>:</p>
+<h2>Transpiration<a class="headerlink" href="#transpiration" title="Permalink to this heading">¶</a></h2>
+<p>Transpiration <span class="math notranslate nohighlight">\(TRANSP\)</span> (mm <span class="math notranslate nohighlight">\(\Delta t^{-1}\)</span>) with seasonally-variant transpiration coefficients <span class="math notranslate nohighlight">\(c_{transp}\)</span> and water stress coeffcient of transpiration <span class="math notranslate nohighlight">\(c_{ws}\)</span>:</p>
 <div class="math notranslate nohighlight">
 \[TRANSP=PET_{res} \cdot c_{transp}\]</div>
 <p>with</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}c_{transp}=\left\{\begin{array}{lr}
-\frac{f_{ground-cover}}{max(f_{ground-cover})} &amp; c_{transp-stress} \geq 1 \\
-\frac{f_{ground-cover}}{max(f_{ground-cover})} \cdot c_{transp-stress} &amp; c_{transp-stress} &lt; 1
+\frac{f_{ground-cover}}{max(f_{ground-cover})} &amp; c_{ws} \geq 1 \\
+\frac{f_{ground-cover}}{max(f_{ground-cover})} \cdot c_{ws} &amp; c_{ws} &lt; 1
 \end{array}\right.\end{split}\]</div>
 <div class="math notranslate nohighlight">
-\[c_{transp-stress}=\frac{\theta - \theta_{pwp}}{f_{pwt} \cdot \theta_{fc} - \theta_{pwp}}\]</div>
+\[c_{ws}=\frac{\theta - \theta_{pwp}}{f_{pwt} \cdot \theta_{fc} - \theta_{pwp}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(f_{pwt}\)</span> is the fraction of plant water stress (-; <span class="math notranslate nohighlight">\(f_{pwt}=0.75\)</span>)</p>
 </section>
 </section>
@@ -220,8 +193,8 @@ to the soil surface (mm; <span class="math notranslate nohighlight">\(z_{evap-ma
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="lateral_flow_soil.html" class="btn btn-neutral float-left" title="Subsurface runoff" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="groundwater_flow.html" class="btn btn-neutral float-right" title="Groundwater flow" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../hydrologic_processes.html" class="btn btn-neutral float-left" title="Hydrologic processes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="snow.html" class="btn btn-neutral float-right" title="Snow accumulation and snow melt" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Model variables &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>Model variables &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,7 +14,9 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -30,7 +32,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -63,8 +65,605 @@
 <li class="toctree-l1"><a class="reference internal" href="model-gallery.html">Model gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Constant model parameters</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Model variables</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#variable-class">Variable class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#available-variables">Available variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#variable-class">Variable class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#roger.variables.Variable"><code class="docutils literal notranslate"><span class="pre">Variable</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#available-variables">Available variables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tau"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tau</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.taup1"><code class="docutils literal notranslate"><span class="pre">RogerVariables.taup1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.taum1"><code class="docutils literal notranslate"><span class="pre">RogerVariables.taum1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tau_event"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tau_event</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.time"><code class="docutils literal notranslate"><span class="pre">RogerVariables.time</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.time_event0"><code class="docutils literal notranslate"><span class="pre">RogerVariables.time_event0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ages"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ages</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.nages"><code class="docutils literal notranslate"><span class="pre">RogerVariables.nages</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.itt"><code class="docutils literal notranslate"><span class="pre">RogerVariables.itt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.itt_substep"><code class="docutils literal notranslate"><span class="pre">RogerVariables.itt_substep</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.itt_day"><code class="docutils literal notranslate"><span class="pre">RogerVariables.itt_day</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.itt_event"><code class="docutils literal notranslate"><span class="pre">RogerVariables.itt_event</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.itt_forc"><code class="docutils literal notranslate"><span class="pre">RogerVariables.itt_forc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.itt_cr"><code class="docutils literal notranslate"><span class="pre">RogerVariables.itt_cr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.year"><code class="docutils literal notranslate"><span class="pre">RogerVariables.year</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.month"><code class="docutils literal notranslate"><span class="pre">RogerVariables.month</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.doy"><code class="docutils literal notranslate"><span class="pre">RogerVariables.doy</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dt"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dt_secs"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dt_secs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.event_id"><code class="docutils literal notranslate"><span class="pre">RogerVariables.event_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.event_id_counter"><code class="docutils literal notranslate"><span class="pre">RogerVariables.event_id_counter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.maskCatch"><code class="docutils literal notranslate"><span class="pre">RogerVariables.maskCatch</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.maskRiver"><code class="docutils literal notranslate"><span class="pre">RogerVariables.maskRiver</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.maskLake"><code class="docutils literal notranslate"><span class="pre">RogerVariables.maskLake</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.maskUrban"><code class="docutils literal notranslate"><span class="pre">RogerVariables.maskUrban</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.maskBoundGw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.maskBoundGw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.x"><code class="docutils literal notranslate"><span class="pre">RogerVariables.x</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.y"><code class="docutils literal notranslate"><span class="pre">RogerVariables.y</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.lu_id"><code class="docutils literal notranslate"><span class="pre">RogerVariables.lu_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sealing"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sealing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z0"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.elev"><code class="docutils literal notranslate"><span class="pre">RogerVariables.elev</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q0_out"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q0_out</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dz0"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dz0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dz_sub"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dz_sub</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.v0"><code class="docutils literal notranslate"><span class="pre">RogerVariables.v0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.v_sub"><code class="docutils literal notranslate"><span class="pre">RogerVariables.v_sub</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_mat_out"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_mat_out</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_mp_out"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_mp_out</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.slope"><code class="docutils literal notranslate"><span class="pre">RogerVariables.slope</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.slope_per"><code class="docutils literal notranslate"><span class="pre">RogerVariables.slope_per</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_dep_tot"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_dep_tot</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ground_cover"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ground_cover</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.lai"><code class="docutils literal notranslate"><span class="pre">RogerVariables.lai</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.throughfall_coeff_top"><code class="docutils literal notranslate"><span class="pre">RogerVariables.throughfall_coeff_top</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.throughfall_coeff_ground"><code class="docutils literal notranslate"><span class="pre">RogerVariables.throughfall_coeff_ground</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.basal_evap_coeff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.basal_evap_coeff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.k_stress_evap"><code class="docutils literal notranslate"><span class="pre">RogerVariables.k_stress_evap</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.evap_coeff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.evap_coeff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.basal_transp_coeff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.basal_transp_coeff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.k_stress_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.k_stress_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.transp_coeff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.transp_coeff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_int_top_tot"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_int_top_tot</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_int_ground_tot"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_int_ground_tot</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dS"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_snow"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_snow</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dS_snow"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dS_snow</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.swe"><code class="docutils literal notranslate"><span class="pre">RogerVariables.swe</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.swe_top"><code class="docutils literal notranslate"><span class="pre">RogerVariables.swe_top</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.swe_top_tot"><code class="docutils literal notranslate"><span class="pre">RogerVariables.swe_top_tot</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.swe_ground"><code class="docutils literal notranslate"><span class="pre">RogerVariables.swe_ground</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_dep"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_dep</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_sur"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_sur</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dS_sur"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dS_sur</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_int_top"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_int_top</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_int_ground"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_int_ground</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ta"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ta_day"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ta_day</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ta_year"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ta_year</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ta_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ta_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.damp_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.damp_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.phi_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.phi_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.clay"><code class="docutils literal notranslate"><span class="pre">RogerVariables.clay</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sand"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sand</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.lmpv"><code class="docutils literal notranslate"><span class="pre">RogerVariables.lmpv</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.lmpv_non_sat"><code class="docutils literal notranslate"><span class="pre">RogerVariables.lmpv_non_sat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_sc"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_sc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_sc_non_sat"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_sc_non_sat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dmpv"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dmpv</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mp_drain_area"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mp_drain_area</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dmph"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dmph</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.frac_lp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.frac_lp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.frac_fp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.frac_fp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_eff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_eff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_ufc"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_ufc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_ac"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_ac</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_pwp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_pwp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_sat"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_sat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_fc"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_fc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_27"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_27</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_4"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_4</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_6"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_6</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_pc"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_pc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_ufc_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_ufc_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_ac_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_ac_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_pwp_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_pwp_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_sat_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_sat_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_fc_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_fc_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.wfs"><code class="docutils literal notranslate"><span class="pre">RogerVariables.wfs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ks"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ks</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ha"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ha</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.lambda_bc"><code class="docutils literal notranslate"><span class="pre">RogerVariables.lambda_bc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.m_bc"><code class="docutils literal notranslate"><span class="pre">RogerVariables.m_bc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.n_salv"><code class="docutils literal notranslate"><span class="pre">RogerVariables.n_salv</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_sc_max"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_sc_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.v_mp_layer_1"><code class="docutils literal notranslate"><span class="pre">RogerVariables.v_mp_layer_1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.v_mp_layer_2"><code class="docutils literal notranslate"><span class="pre">RogerVariables.v_mp_layer_2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.v_mp_layer_3"><code class="docutils literal notranslate"><span class="pre">RogerVariables.v_mp_layer_3</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.v_mp_layer_4"><code class="docutils literal notranslate"><span class="pre">RogerVariables.v_mp_layer_4</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.v_mp_layer_5"><code class="docutils literal notranslate"><span class="pre">RogerVariables.v_mp_layer_5</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.v_mp_layer_6"><code class="docutils literal notranslate"><span class="pre">RogerVariables.v_mp_layer_6</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.v_mp_layer_7"><code class="docutils literal notranslate"><span class="pre">RogerVariables.v_mp_layer_7</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.v_mp_layer_8"><code class="docutils literal notranslate"><span class="pre">RogerVariables.v_mp_layer_8</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.event_no_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.event_no_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.event_id_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.event_id_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.event_id_ff_counter"><code class="docutils literal notranslate"><span class="pre">RogerVariables.event_id_ff_counter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.event_start_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.event_start_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.event_end_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.event_end_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rain_int_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rain_int_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rain_event"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rain_event</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rain_event_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rain_event_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rain_event_sum"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rain_event_sum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rain_event_csum"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rain_event_csum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.t_end_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.t_end_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ti_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ti_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tb_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tb_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ts_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ts_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tw_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tw_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tp_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tp_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.qs_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.qs_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.zi_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.zi_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rain_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rain_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.v_wf"><code class="docutils literal notranslate"><span class="pre">RogerVariables.v_wf</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.v_perc"><code class="docutils literal notranslate"><span class="pre">RogerVariables.v_perc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ff_abs_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ff_abs_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ff_abs_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ff_abs_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ff_abs"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ff_abs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_d_rel_rz_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_d_rel_rz_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_d_rel_ss_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_d_rel_ss_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_f_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_f_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_f_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_f_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_f"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_f</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ff_drain"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ff_drain</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_rz_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_rz_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_ss_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_ss_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_rz_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_rz_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_ss_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_ss_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.itt_event_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.itt_event_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_wf_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_wf_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_pf_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_pf_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_pf"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_pf</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.a_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.a_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.c_ff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.c_ff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.kf"><code class="docutils literal notranslate"><span class="pre">RogerVariables.kf</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_fp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_fp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_lp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_lp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_d"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_d</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_d_fp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_d_fp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_d_rel"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_d_rel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_d_rel_t0"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_d_rel_t0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_d_rel_t1"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_d_rel_t1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_d_t0"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_d_t0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_d_t1"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_d_t1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dS_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dS_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_fp_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_fp_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_lp_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_lp_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_zsat"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_zsat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.k"><code class="docutils literal notranslate"><span class="pre">RogerVariables.k</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.h"><code class="docutils literal notranslate"><span class="pre">RogerVariables.h</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.y_mp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.y_mp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.y_sc"><code class="docutils literal notranslate"><span class="pre">RogerVariables.y_sc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_wf"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_wf</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_wf_t0"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_wf_t0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_wf_t1"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_wf_t1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_wf_fc"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_wf_fc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_sat_layer_1"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_sat_layer_1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_sat_layer_2"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_sat_layer_2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_sat_layer_3"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_sat_layer_3</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_sat_layer_4"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_sat_layer_4</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_sat_layer_5"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_sat_layer_5</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_sat_layer_6"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_sat_layer_6</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_sat_layer_7"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_sat_layer_7</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_sat_layer_8"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_sat_layer_8</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_sat"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_sat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dz_sat"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dz_sat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sa_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sa_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.SA_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.SA_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.msa_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.msa_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.csa_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.csa_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mr_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mr_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ma_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ma_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rt25_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rt25_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rt50_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rt50_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rt75_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rt75_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rtavg_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rtavg_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.Nmin_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.Nmin_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_root"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_root</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_evap"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_evap</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tew"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tew</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rew"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rew</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.de"><code class="docutils literal notranslate"><span class="pre">RogerVariables.de</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_water_stress"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_water_stress</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.water_stress_fp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.water_stress_fp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.k_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.k_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.h_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.h_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_fp_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_fp_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_lp_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_lp_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_rz_init"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_rz_init</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dS_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dS_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_fp_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_fp_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_lp_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_lp_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_zsat_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_zsat_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_pwp_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_pwp_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_fc_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_fc_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_sat_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_sat_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_ufc_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_ufc_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_ac_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_ac_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sa_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sa_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.SA_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.SA_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.msa_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.msa_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.csa_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.csa_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rt25_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rt25_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rt50_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rt50_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rt75_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rt75_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rtavg_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rtavg_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.km_denit_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.km_denit_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dmax_denit_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dmax_denit_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.km_nit_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.km_nit_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dmax_nit_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dmax_nit_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.kmin_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.kmin_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mr_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mr_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ma_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ma_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.Nmin_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.Nmin_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.k_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.k_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.h_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.h_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_fp_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_fp_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_lp_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_lp_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_ss_init"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_ss_init</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dS_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dS_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_fp_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_fp_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_lp_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_lp_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_zsat_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_zsat_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_pwp_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_pwp_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_fc_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_fc_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_sat_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_sat_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_ufc_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_ufc_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_ac_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_ac_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sa_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sa_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.SA_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.SA_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.msa_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.msa_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.csa_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.csa_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rt25_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rt25_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rt50_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rt50_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rt75_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rt75_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rtavg_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rtavg_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.km_denit_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.km_denit_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dmax_denit_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dmax_denit_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.km_nit_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.km_nit_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dmax_nit_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dmax_nit_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.kmin_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.kmin_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mr_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mr_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ma_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ma_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.Nmin_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.Nmin_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_gw_tot"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_gw_tot</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_gw_tot"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_gw_tot</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.npor"><code class="docutils literal notranslate"><span class="pre">RogerVariables.npor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.nuy"><code class="docutils literal notranslate"><span class="pre">RogerVariables.nuy</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.n0"><code class="docutils literal notranslate"><span class="pre">RogerVariables.n0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.k_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.k_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.k_leak"><code class="docutils literal notranslate"><span class="pre">RogerVariables.k_leak</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.bdec"><code class="docutils literal notranslate"><span class="pre">RogerVariables.bdec</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dz_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dz_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_gw_res"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_gw_res</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dS_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dS_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_vad_tot"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_vad_tot</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_vad"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_vad</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_vad_res"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_vad_res</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dS_vad"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dS_vad</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sa_vad"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sa_vad</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.SA_vad"><code class="docutils literal notranslate"><span class="pre">RogerVariables.SA_vad</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.msa_vad"><code class="docutils literal notranslate"><span class="pre">RogerVariables.msa_vad</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_vad"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_vad</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_vad"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_vad</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sa_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sa_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.SA_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.SA_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.msa_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.msa_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.k_denit_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.k_denit_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_re"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_re</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sas_params_q_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sas_params_q_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.TT_q_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.TT_q_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt_q_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt_q_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.MTT_q_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.MTT_q_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mtt_q_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mtt_q_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_q_gw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_q_gw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_q_qw"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_q_qw</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_leak"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_leak</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.prec"><code class="docutils literal notranslate"><span class="pre">RogerVariables.prec</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.prec_day"><code class="docutils literal notranslate"><span class="pre">RogerVariables.prec_day</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rain"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rain</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rain_top"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rain_top</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rain_ground"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rain_ground</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rain_on_snow"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rain_on_snow</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.snow"><code class="docutils literal notranslate"><span class="pre">RogerVariables.snow</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.snow_melt_drip"><code class="docutils literal notranslate"><span class="pre">RogerVariables.snow_melt_drip</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.snow_top"><code class="docutils literal notranslate"><span class="pre">RogerVariables.snow_top</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.snow_ground"><code class="docutils literal notranslate"><span class="pre">RogerVariables.snow_ground</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.int_top"><code class="docutils literal notranslate"><span class="pre">RogerVariables.int_top</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.int_ground"><code class="docutils literal notranslate"><span class="pre">RogerVariables.int_ground</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.int_prec"><code class="docutils literal notranslate"><span class="pre">RogerVariables.int_prec</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.int_rain_top"><code class="docutils literal notranslate"><span class="pre">RogerVariables.int_rain_top</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.int_rain_ground"><code class="docutils literal notranslate"><span class="pre">RogerVariables.int_rain_ground</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.int_snow_top"><code class="docutils literal notranslate"><span class="pre">RogerVariables.int_snow_top</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.int_snow_ground"><code class="docutils literal notranslate"><span class="pre">RogerVariables.int_snow_ground</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.snow_melt_top"><code class="docutils literal notranslate"><span class="pre">RogerVariables.snow_melt_top</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.snow_melt_ground"><code class="docutils literal notranslate"><span class="pre">RogerVariables.snow_melt_ground</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.snow_melt"><code class="docutils literal notranslate"><span class="pre">RogerVariables.snow_melt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_rain_on_snow"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_rain_on_snow</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_snow"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_snow</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_mat"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_mat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_mat_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_mat_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_mat_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_mat_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_mat_pot"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_mat_pot</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_sc"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_sc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_sc_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_sc_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_mp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_mp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_mp_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_mp_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_mp_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_mp_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_pf_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_pf_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_pf_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_pf_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.no_wf"><code class="docutils literal notranslate"><span class="pre">RogerVariables.no_wf</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.pi_gr"><code class="docutils literal notranslate"><span class="pre">RogerVariables.pi_gr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.pi_m"><code class="docutils literal notranslate"><span class="pre">RogerVariables.pi_m</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.t_sat"><code class="docutils literal notranslate"><span class="pre">RogerVariables.t_sat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.t_sat_t0"><code class="docutils literal notranslate"><span class="pre">RogerVariables.t_sat_t0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.t_sat_t1"><code class="docutils literal notranslate"><span class="pre">RogerVariables.t_sat_t1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.Fs"><code class="docutils literal notranslate"><span class="pre">RogerVariables.Fs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.Fs_t0"><code class="docutils literal notranslate"><span class="pre">RogerVariables.Fs_t0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.Fs_t1"><code class="docutils literal notranslate"><span class="pre">RogerVariables.Fs_t1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_mat_pot_event_csum"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_mat_pot_event_csum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_mat_event_csum"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_mat_event_csum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_mp_event_csum"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_mp_event_csum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.inf_sc_event_csum"><code class="docutils literal notranslate"><span class="pre">RogerVariables.inf_sc_event_csum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt_inf_mat_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt_inf_mat_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mtt_inf_mat_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mtt_inf_mat_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_inf_mat_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_inf_mat_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_inf_mat_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_inf_mat_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_inf_mat_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_inf_mat_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt_inf_pf_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt_inf_pf_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mtt_inf_pf_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mtt_inf_pf_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_inf_pf_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_inf_pf_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_inf_pf_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_inf_pf_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_inf_pf_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_inf_pf_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt_inf_pf_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt_inf_pf_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mtt_inf_pf_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mtt_inf_pf_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_inf_pf_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_inf_pf_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_inf_pf_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_inf_pf_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_inf_pf_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_inf_pf_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.aet"><code class="docutils literal notranslate"><span class="pre">RogerVariables.aet</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.aet_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.aet_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.pet"><code class="docutils literal notranslate"><span class="pre">RogerVariables.pet</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.pet_day"><code class="docutils literal notranslate"><span class="pre">RogerVariables.pet_day</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.pet_res"><code class="docutils literal notranslate"><span class="pre">RogerVariables.pet_res</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ptransp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ptransp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ptransp_res"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ptransp_res</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.evap"><code class="docutils literal notranslate"><span class="pre">RogerVariables.evap</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.evap_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.evap_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.evap_int"><code class="docutils literal notranslate"><span class="pre">RogerVariables.evap_int</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.evap_int_top"><code class="docutils literal notranslate"><span class="pre">RogerVariables.evap_int_top</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.evap_int_ground"><code class="docutils literal notranslate"><span class="pre">RogerVariables.evap_int_ground</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.evap_sur"><code class="docutils literal notranslate"><span class="pre">RogerVariables.evap_sur</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.evap_dep"><code class="docutils literal notranslate"><span class="pre">RogerVariables.evap_dep</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sas_params_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sas_params_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.TT_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.TT_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.MTT_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.MTT_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mtt_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mtt_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ctt_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ctt_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt25_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt25_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt50_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt50_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt75_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt75_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ttavg_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ttavg_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sas_params_evap_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sas_params_evap_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.TT_evap_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.TT_evap_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt_evap_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt_evap_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.MTT_evap_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.MTT_evap_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mtt_evap_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mtt_evap_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ctt_evap_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ctt_evap_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_evap_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_evap_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_evap_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_evap_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_evap_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_evap_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_fp_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_fp_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_lp_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_lp_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_fp_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_fp_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_lp_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_lp_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.re_rl"><code class="docutils literal notranslate"><span class="pre">RogerVariables.re_rl</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sas_params_re_rl"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sas_params_re_rl</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.TT_re_rl"><code class="docutils literal notranslate"><span class="pre">RogerVariables.TT_re_rl</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt_re_rl"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt_re_rl</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.MTT_re_rl"><code class="docutils literal notranslate"><span class="pre">RogerVariables.MTT_re_rl</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mtt_re_rl"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mtt_re_rl</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ctt_re_rl"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ctt_re_rl</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_re_rl"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_re_rl</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_re_rl"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_re_rl</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_re_rl"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_re_rl</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sas_params_q_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sas_params_q_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.TT_q_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.TT_q_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt_q_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt_q_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mtt_q_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mtt_q_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ctt_q_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ctt_q_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_q_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_q_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_q_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_q_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_q_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_q_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sas_params_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sas_params_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.TT_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.TT_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.MTT_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.MTT_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mtt_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mtt_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ctt_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ctt_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt25_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt25_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt50_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt50_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt75_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt75_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ttavg_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ttavg_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.cpr_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.cpr_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.cpr_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.cpr_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.re_rg"><code class="docutils literal notranslate"><span class="pre">RogerVariables.re_rg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sas_params_re_rg"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sas_params_re_rg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.TT_re_rg"><code class="docutils literal notranslate"><span class="pre">RogerVariables.TT_re_rg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt_re_rg"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt_re_rg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.MTT_re_rg"><code class="docutils literal notranslate"><span class="pre">RogerVariables.MTT_re_rg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mtt_re_rg"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mtt_re_rg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ctt_re_rg"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ctt_re_rg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_re_rg"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_re_rg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_re_rg"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_re_rg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_re_rg"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_re_rg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sas_params_cpr_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sas_params_cpr_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.TT_cpr_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.TT_cpr_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt_cpr_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt_cpr_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.MTT_cpr_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.MTT_cpr_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mtt_cpr_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mtt_cpr_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ctt_cpr_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ctt_cpr_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_cpr_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_cpr_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_cpr_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_cpr_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_cpr_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_cpr_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sas_params_cpr_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sas_params_cpr_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.TT_cpr_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.TT_cpr_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt_cpr_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt_cpr_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.MTT_cpr_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.MTT_cpr_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mtt_cpr_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mtt_cpr_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ctt_cpr_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ctt_cpr_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_cpr_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_cpr_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_cpr_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_cpr_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_cpr_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_cpr_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sur"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sur</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_hof"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_hof</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sof"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sof</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_pot"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_pot</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_pot_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_pot_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_mat"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_mat</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_mat_pot"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_mat_pot</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_mat_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_mat_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_mat_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_mat_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_mat_pot_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_mat_pot_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_mp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_mp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_mp_pot"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_mp_pot</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_mp_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_mp_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_mp_pot_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_mp_pot_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_mp_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_mp_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_mp_pot_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_mp_pot_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_pot_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_pot_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_pot_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_pot_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_mp_share"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_mp_share</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.q_sub_mat_share"><code class="docutils literal notranslate"><span class="pre">RogerVariables.q_sub_mat_share</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sas_params_q_sub_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sas_params_q_sub_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.TT_q_sub_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.TT_q_sub_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt_q_sub_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt_q_sub_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.MTT_q_sub_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.MTT_q_sub_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mtt_q_sub_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mtt_q_sub_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_q_sub_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_q_sub_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_q_sub_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_q_sub_rz</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sas_params_q_sub_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sas_params_q_sub_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.TT_q_sub_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.TT_q_sub_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt_q_sub_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt_q_sub_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.MTT_q_sub_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.MTT_q_sub_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mtt_q_sub_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mtt_q_sub_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_q_sub_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_q_sub_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_q_sub_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_q_sub_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.alpha_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.alpha_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.alpha_q"><code class="docutils literal notranslate"><span class="pre">RogerVariables.alpha_q</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.prec_event_csum"><code class="docutils literal notranslate"><span class="pre">RogerVariables.prec_event_csum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.t_event_csum"><code class="docutils literal notranslate"><span class="pre">RogerVariables.t_event_csum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_IN"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_IN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_ISO_IN"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_ISO_IN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_in"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_in</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_in"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_in</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_snow"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_snow</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_snow"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_snow</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_snow"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_snow</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_IN"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_IN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_in"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_in</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.NMIN_IN"><code class="docutils literal notranslate"><span class="pre">RogerVariables.NMIN_IN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.Nmin_in"><code class="docutils literal notranslate"><span class="pre">RogerVariables.Nmin_in</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.NORG_IN"><code class="docutils literal notranslate"><span class="pre">RogerVariables.NORG_IN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.Norg_in"><code class="docutils literal notranslate"><span class="pre">RogerVariables.Norg_in</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_stream_tot"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_stream_tot</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_stream"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_stream</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ta_min"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ta_min</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ta_max"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ta_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.crop_type"><code class="docutils literal notranslate"><span class="pre">RogerVariables.crop_type</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.crop_height"><code class="docutils literal notranslate"><span class="pre">RogerVariables.crop_height</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.crop_height_max"><code class="docutils literal notranslate"><span class="pre">RogerVariables.crop_height_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.lai_crop"><code class="docutils literal notranslate"><span class="pre">RogerVariables.lai_crop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.S_int_tot_crop"><code class="docutils literal notranslate"><span class="pre">RogerVariables.S_int_tot_crop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.doy_start"><code class="docutils literal notranslate"><span class="pre">RogerVariables.doy_start</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.doy_mid"><code class="docutils literal notranslate"><span class="pre">RogerVariables.doy_mid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.doy_dec"><code class="docutils literal notranslate"><span class="pre">RogerVariables.doy_dec</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.doy_end"><code class="docutils literal notranslate"><span class="pre">RogerVariables.doy_end</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ta_base"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ta_base</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ta_ceil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ta_ceil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.gdd"><code class="docutils literal notranslate"><span class="pre">RogerVariables.gdd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.gdd_sum"><code class="docutils literal notranslate"><span class="pre">RogerVariables.gdd_sum</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.t_grow_cc"><code class="docutils literal notranslate"><span class="pre">RogerVariables.t_grow_cc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.t_grow_root"><code class="docutils literal notranslate"><span class="pre">RogerVariables.t_grow_root</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.t_half_mid"><code class="docutils literal notranslate"><span class="pre">RogerVariables.t_half_mid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.t_decay"><code class="docutils literal notranslate"><span class="pre">RogerVariables.t_decay</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ccc_growth_rate"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ccc_growth_rate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ccc"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ccc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ccc_min"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ccc_min</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ccc_mid"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ccc_mid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ccc_max"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ccc_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.crop_dev_coeff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.crop_dev_coeff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.basal_evap_coeff_crop"><code class="docutils literal notranslate"><span class="pre">RogerVariables.basal_evap_coeff_crop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.k_stress_transp_crop"><code class="docutils literal notranslate"><span class="pre">RogerVariables.k_stress_transp_crop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.basal_crop_coeff"><code class="docutils literal notranslate"><span class="pre">RogerVariables.basal_crop_coeff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.crop_scale"><code class="docutils literal notranslate"><span class="pre">RogerVariables.crop_scale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.lut_crop_scale"><code class="docutils literal notranslate"><span class="pre">RogerVariables.lut_crop_scale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.basal_crop_coeff_mid"><code class="docutils literal notranslate"><span class="pre">RogerVariables.basal_crop_coeff_mid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.theta_water_stress_crop"><code class="docutils literal notranslate"><span class="pre">RogerVariables.theta_water_stress_crop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.water_stress_coeff_crop"><code class="docutils literal notranslate"><span class="pre">RogerVariables.water_stress_coeff_crop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.root_growth_rate"><code class="docutils literal notranslate"><span class="pre">RogerVariables.root_growth_rate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_root_crop"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_root_crop</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_root_crop_max"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_root_crop_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.k_stress_root_growth"><code class="docutils literal notranslate"><span class="pre">RogerVariables.k_stress_root_growth</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.lut_ilu"><code class="docutils literal notranslate"><span class="pre">RogerVariables.lut_ilu</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.lut_gc"><code class="docutils literal notranslate"><span class="pre">RogerVariables.lut_gc</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.lut_gcm"><code class="docutils literal notranslate"><span class="pre">RogerVariables.lut_gcm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.lut_is"><code class="docutils literal notranslate"><span class="pre">RogerVariables.lut_is</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.lut_mlms"><code class="docutils literal notranslate"><span class="pre">RogerVariables.lut_mlms</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.lut_rdlu"><code class="docutils literal notranslate"><span class="pre">RogerVariables.lut_rdlu</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.lut_crops"><code class="docutils literal notranslate"><span class="pre">RogerVariables.lut_crops</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dS_num_error"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dS_num_error</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.dC_num_error"><code class="docutils literal notranslate"><span class="pre">RogerVariables.dC_num_error</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="diagnostics.html">Diagnostics</a></li>
@@ -105,7 +704,7 @@
            <div itemprop="articleBody">
              
   <section id="model-variables">
-<span id="variables"></span><h1>Model variables<a class="headerlink" href="#model-variables" title="Permalink to this headline">¶</a></h1>
+<span id="variables"></span><h1>Model variables<a class="headerlink" href="#model-variables" title="Permalink to this heading">¶</a></h1>
 <p>The variable meta-data (i.e., all instances of <a class="reference internal" href="#roger.variables.Variable" title="roger.variables.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a>)
 are available in a dictionary as the attribute <a class="reference internal" href="api/roger-state.html#roger.state.RogerState.var_meta" title="roger.state.RogerState.var_meta"><code class="xref py py-attr docutils literal notranslate"><span class="pre">RogerState.var_meta</span></code></a>. The actual
 data arrays are attributes of <a class="reference internal" href="api/roger-state.html#roger.state.RogerState.variables" title="roger.state.RogerState.variables"><code class="xref py py-attr docutils literal notranslate"><span class="pre">RogerState.variables</span></code></a>:</p>
@@ -114,7 +713,7 @@ data arrays are attributes of <a class="reference internal" href="api/roger-stat
 </pre></div>
 </div>
 <section id="variable-class">
-<h2>Variable class<a class="headerlink" href="#variable-class" title="Permalink to this headline">¶</a></h2>
+<h2>Variable class<a class="headerlink" href="#variable-class" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="roger.variables.Variable">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.variables.</span></span><span class="sig-name descname"><span class="pre">Variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dims</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">long_description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_dependent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_to_restart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roger/variables.html#Variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.variables.Variable" title="Permalink to this definition">¶</a></dt>
@@ -123,7 +722,7 @@ data arrays are attributes of <a class="reference internal" href="api/roger-stat
 
 </section>
 <section id="available-variables">
-<h2>Available variables<a class="headerlink" href="#available-variables" title="Permalink to this headline">¶</a></h2>
+<h2>Available variables<a class="headerlink" href="#available-variables" title="Permalink to this heading">¶</a></h2>
 <p>There are two kinds of variables in Roger. Main variables are always present in a
 simulation, while conditional variables are only available if their respective
 condition is <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a> at the time of variable allocation.</p>
@@ -1624,6 +2223,29 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </dd>
 <dt class="field-even">Attributes</dt>
 <dd class="field-even"><p><em class="fa fa-clock-o"></em></p>
+</dd>
+</dl>
+<p>air temperature</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.ta_day">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">ta_day</span></span><a class="headerlink" href="#RogerVariables.ta_day" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>degC</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y, timesteps_day)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Condition</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">settings:</span> <span class="pre">not</span> <span class="pre">settings.enable_offline_transport</span></code></p>
+</dd>
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><p><em class="fa fa-clock-o"></em> <em class="fa fa-question-circle"></em></p>
 </dd>
 </dl>
 <p>air temperature</p>
@@ -7473,6 +8095,29 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.prec_day">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">prec_day</span></span><a class="headerlink" href="#RogerVariables.prec_day" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>mm/dt</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y, timesteps_day)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Condition</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">settings:</span> <span class="pre">not</span> <span class="pre">settings.enable_offline_transport</span></code></p>
+</dd>
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><p><em class="fa fa-clock-o"></em> <em class="fa fa-question-circle"></em></p>
+</dd>
+</dl>
+<p>precipitation</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="RogerVariables.rain">
 <span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">rain</span></span><a class="headerlink" href="#RogerVariables.rain" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -8862,6 +9507,29 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </dd>
 <dt class="field-even">Attributes</dt>
 <dd class="field-even"><p><em class="fa fa-clock-o"></em></p>
+</dd>
+</dl>
+<p>potential evapotranspiration</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.pet_day">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">pet_day</span></span><a class="headerlink" href="#RogerVariables.pet_day" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>mm/dt</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y, timesteps_day)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Condition</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">settings:</span> <span class="pre">not</span> <span class="pre">settings.enable_offline_transport</span></code></p>
+</dd>
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><p><em class="fa fa-clock-o"></em> <em class="fa fa-question-circle"></em></p>
 </dd>
 </dl>
 <p>potential evapotranspiration</p>

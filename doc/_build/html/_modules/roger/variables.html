@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.variables &mdash; RoGeR 0.0.1+40.gd2c6e02.dirty documentation</title>
+  <title>roger.variables &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -13,7 +13,9 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -27,7 +29,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+40.gd2c6e02.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -57,7 +59,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../reference/setup-gallery.html">Setup gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/model-gallery.html">Model gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/settings.html">Constant model parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/variables.html">Model variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/diagnostics.html">Diagnostics</a></li>
@@ -173,6 +175,7 @@
 <span class="n">LUT_CROPS_GRID</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;n_crop_types&quot;</span><span class="p">,</span> <span class="s2">&quot;n_crop_params&quot;</span><span class="p">)</span>
 <span class="n">LUT_GCM_GRID</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;n_lu&quot;</span><span class="p">,</span> <span class="s2">&quot;n_params2&quot;</span><span class="p">)</span>
 <span class="n">TIMESTEPS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;timesteps&quot;</span><span class="p">,)</span>
+<span class="n">TIMESTEPS_DAY</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;timesteps_day&quot;</span><span class="p">,)</span>
 <span class="n">TIMESTEPS_EVENT_FF</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;timesteps_event_ff&quot;</span><span class="p">,)</span>
 <span class="n">TIMESTEPS_EVENT_FF_P1</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;timesteps_event_ff_p1&quot;</span><span class="p">,)</span>
 <span class="n">TIME</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">,)</span>
@@ -196,6 +199,7 @@
     <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;nz&quot;</span><span class="p">,</span>
     <span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="s2">&quot;nitt&quot;</span><span class="p">,</span>
     <span class="s2">&quot;timesteps&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">&quot;timesteps_day&quot;</span><span class="p">:</span> <span class="mi">6</span> <span class="o">*</span> <span class="mi">24</span><span class="p">,</span>
     <span class="s2">&quot;timesteps_event_ff&quot;</span><span class="p">:</span> <span class="s2">&quot;nittevent_ff&quot;</span><span class="p">,</span>
     <span class="s2">&quot;timesteps_event_ff_p1&quot;</span><span class="p">:</span> <span class="s2">&quot;nittevent_ff_p1&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ages&quot;</span><span class="p">:</span> <span class="s2">&quot;ages&quot;</span><span class="p">,</span>
@@ -765,6 +769,14 @@
         <span class="s2">&quot;degC&quot;</span><span class="p">,</span>
         <span class="s2">&quot;air temperature&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;ta_day&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;air temperature&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIMESTEPS_DAY</span><span class="p">,</span>
+        <span class="s2">&quot;degC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;air temperature&quot;</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="c1"># soil temperature</span>
     <span class="s2">&quot;ta_year&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
@@ -2975,6 +2987,13 @@
         <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
         <span class="s2">&quot;precipitation&quot;</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="s2">&quot;prec_day&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;precipitation&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIMESTEPS_DAY</span><span class="p">,</span>
+        <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;precipitation&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;rain&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;rainfall&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
@@ -3455,6 +3474,14 @@
         <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
         <span class="s2">&quot;potential evapotranspiration&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;pet_day&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;potential evapotranspiration&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIMESTEPS_DAY</span><span class="p">,</span>
+        <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;potential evapotranspiration&quot;</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;pet_res&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;Residual potential evapotranspiration&quot;</span><span class="p">,</span>

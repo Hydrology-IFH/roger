@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>Index &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -13,7 +13,9 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -27,7 +29,7 @@
             <a href="index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -45,7 +47,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/analysis.html">Analysis of simulations with Roger</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
@@ -146,7 +148,7 @@
 </li>
       <li><a href="reference/variables.html#RogerVariables.alpha_transp">alpha_transp (RogerVariables attribute)</a>
 </li>
-      <li><a href="reference/diagnostics.html#roger.diagnostics.averages.Averages">Averages (class in roger.diagnostics.averages)</a>
+      <li><a href="reference/diagnostics.html#roger.diagnostics.average.Average">Average (class in roger.diagnostics.average)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -827,7 +829,7 @@
 </li>
       <li><a href="reference/variables.html#RogerVariables.nages">nages (RogerVariables attribute)</a>
 </li>
-      <li><a href="reference/diagnostics.html#roger.diagnostics.averages.Averages.name">name (roger.diagnostics.averages.Averages attribute)</a>
+      <li><a href="reference/diagnostics.html#roger.diagnostics.average.Average.name">name (roger.diagnostics.average.Average attribute)</a>
 
       <ul>
         <li><a href="reference/diagnostics.html#roger.diagnostics.base.RogerDiagnostic.name">(roger.diagnostics.base.RogerDiagnostic attribute)</a>
@@ -840,9 +842,13 @@
 </li>
         <li><a href="reference/diagnostics.html#roger.diagnostics.minimum.Minimum.name">(roger.diagnostics.minimum.Minimum attribute)</a>
 </li>
-        <li><a href="reference/diagnostics.html#roger.diagnostics.rates.Rates.name">(roger.diagnostics.rates.Rates attribute)</a>
+        <li><a href="reference/diagnostics.html#roger.diagnostics.rate.Rate.name">(roger.diagnostics.rate.Rate attribute)</a>
 </li>
         <li><a href="reference/diagnostics.html#roger.diagnostics.snapshot.Snapshot.name">(roger.diagnostics.snapshot.Snapshot attribute)</a>
+</li>
+        <li><a href="reference/diagnostics.html#roger.diagnostics.tracer_monitor.TracerMonitor.name">(roger.diagnostics.tracer_monitor.TracerMonitor attribute)</a>
+</li>
+        <li><a href="reference/diagnostics.html#roger.diagnostics.water_monitor.WaterMonitor.name">(roger.diagnostics.water_monitor.WaterMonitor attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -881,7 +887,7 @@
 </li>
       <li><a href="reference/diagnostics.html#roger.diagnostics.base.RogerDiagnostic.output">output() (roger.diagnostics.base.RogerDiagnostic method)</a>
 </li>
-      <li><a href="reference/diagnostics.html#roger.diagnostics.averages.Averages.output_frequency">output_frequency (roger.diagnostics.averages.Averages attribute)</a>
+      <li><a href="reference/diagnostics.html#roger.diagnostics.average.Average.output_frequency">output_frequency (roger.diagnostics.average.Average attribute)</a>
 
       <ul>
         <li><a href="reference/diagnostics.html#roger.diagnostics.collect.Collect.output_frequency">(roger.diagnostics.collect.Collect attribute)</a>
@@ -892,7 +898,7 @@
 </li>
         <li><a href="reference/diagnostics.html#roger.diagnostics.minimum.Minimum.output_frequency">(roger.diagnostics.minimum.Minimum attribute)</a>
 </li>
-        <li><a href="reference/diagnostics.html#roger.diagnostics.rates.Rates.output_frequency">(roger.diagnostics.rates.Rates attribute)</a>
+        <li><a href="reference/diagnostics.html#roger.diagnostics.rate.Rate.output_frequency">(roger.diagnostics.rate.Rate attribute)</a>
 </li>
         <li><a href="reference/diagnostics.html#roger.diagnostics.snapshot.Snapshot.output_frequency">(roger.diagnostics.snapshot.Snapshot attribute)</a>
 </li>
@@ -903,7 +909,7 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="reference/diagnostics.html#roger.diagnostics.averages.Averages.output_path">output_path (roger.diagnostics.averages.Averages attribute)</a>
+      <li><a href="reference/diagnostics.html#roger.diagnostics.average.Average.output_path">output_path (roger.diagnostics.average.Average attribute)</a>
 
       <ul>
         <li><a href="reference/diagnostics.html#roger.diagnostics.collect.Collect.output_path">(roger.diagnostics.collect.Collect attribute)</a>
@@ -914,12 +920,12 @@
 </li>
         <li><a href="reference/diagnostics.html#roger.diagnostics.minimum.Minimum.output_path">(roger.diagnostics.minimum.Minimum attribute)</a>
 </li>
-        <li><a href="reference/diagnostics.html#roger.diagnostics.rates.Rates.output_path">(roger.diagnostics.rates.Rates attribute)</a>
+        <li><a href="reference/diagnostics.html#roger.diagnostics.rate.Rate.output_path">(roger.diagnostics.rate.Rate attribute)</a>
 </li>
         <li><a href="reference/diagnostics.html#roger.diagnostics.snapshot.Snapshot.output_path">(roger.diagnostics.snapshot.Snapshot attribute)</a>
 </li>
       </ul></li>
-      <li><a href="reference/diagnostics.html#roger.diagnostics.averages.Averages.output_variables">output_variables (roger.diagnostics.averages.Averages attribute)</a>
+      <li><a href="reference/diagnostics.html#roger.diagnostics.average.Average.output_variables">output_variables (roger.diagnostics.average.Average attribute)</a>
 
       <ul>
         <li><a href="reference/diagnostics.html#roger.diagnostics.collect.Collect.output_variables">(roger.diagnostics.collect.Collect attribute)</a>
@@ -930,7 +936,7 @@
 </li>
         <li><a href="reference/diagnostics.html#roger.diagnostics.minimum.Minimum.output_variables">(roger.diagnostics.minimum.Minimum attribute)</a>
 </li>
-        <li><a href="reference/diagnostics.html#roger.diagnostics.rates.Rates.output_variables">(roger.diagnostics.rates.Rates attribute)</a>
+        <li><a href="reference/diagnostics.html#roger.diagnostics.rate.Rate.output_variables">(roger.diagnostics.rate.Rate attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -940,6 +946,8 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reference/variables.html#RogerVariables.pet">pet (RogerVariables attribute)</a>
+</li>
+      <li><a href="reference/variables.html#RogerVariables.pet_day">pet_day (RogerVariables attribute)</a>
 </li>
       <li><a href="reference/variables.html#RogerVariables.pet_res">pet_res (RogerVariables attribute)</a>
 </li>
@@ -956,6 +964,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reference/variables.html#RogerVariables.prec">prec (RogerVariables attribute)</a>
+</li>
+      <li><a href="reference/variables.html#RogerVariables.prec_day">prec_day (RogerVariables attribute)</a>
 </li>
       <li><a href="reference/variables.html#RogerVariables.prec_event_csum">prec_event_csum (RogerVariables attribute)</a>
 </li>
@@ -1081,7 +1091,7 @@
 </li>
       <li><a href="reference/variables.html#RogerVariables.rain_top">rain_top (RogerVariables attribute)</a>
 </li>
-      <li><a href="reference/diagnostics.html#roger.diagnostics.rates.Rates">Rates (class in roger.diagnostics.rates)</a>
+      <li><a href="reference/diagnostics.html#roger.diagnostics.rate.Rate">Rate (class in roger.diagnostics.rate)</a>
 </li>
       <li><a href="reference/variables.html#RogerVariables.re_rg">re_rg (RogerVariables attribute)</a>
 </li>
@@ -1281,7 +1291,7 @@
 </li>
       <li><a href="reference/variables.html#RogerVariables.sa_vad">sa_vad (RogerVariables attribute)</a>
 </li>
-      <li><a href="reference/diagnostics.html#roger.diagnostics.averages.Averages.sampling_frequency">sampling_frequency (roger.diagnostics.averages.Averages attribute)</a>
+      <li><a href="reference/diagnostics.html#roger.diagnostics.average.Average.sampling_frequency">sampling_frequency (roger.diagnostics.average.Average attribute)</a>
 
       <ul>
         <li><a href="reference/diagnostics.html#roger.diagnostics.collect.Collect.sampling_frequency">(roger.diagnostics.collect.Collect attribute)</a>
@@ -1292,7 +1302,7 @@
 </li>
         <li><a href="reference/diagnostics.html#roger.diagnostics.minimum.Minimum.sampling_frequency">(roger.diagnostics.minimum.Minimum attribute)</a>
 </li>
-        <li><a href="reference/diagnostics.html#roger.diagnostics.rates.Rates.sampling_frequency">(roger.diagnostics.rates.Rates attribute)</a>
+        <li><a href="reference/diagnostics.html#roger.diagnostics.rate.Rate.sampling_frequency">(roger.diagnostics.rate.Rate attribute)</a>
 </li>
       </ul></li>
       <li><a href="reference/variables.html#RogerVariables.sand">sand (RogerVariables attribute)</a>
@@ -1416,6 +1426,8 @@
       <li><a href="reference/variables.html#RogerVariables.ta_base">ta_base (RogerVariables attribute)</a>
 </li>
       <li><a href="reference/variables.html#RogerVariables.ta_ceil">ta_ceil (RogerVariables attribute)</a>
+</li>
+      <li><a href="reference/variables.html#RogerVariables.ta_day">ta_day (RogerVariables attribute)</a>
 </li>
       <li><a href="reference/variables.html#RogerVariables.ta_max">ta_max (RogerVariables attribute)</a>
 </li>

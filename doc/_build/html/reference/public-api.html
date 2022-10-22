@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Python API &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>Python API &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,7 +14,9 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -30,7 +32,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -110,15 +112,62 @@
            <div itemprop="articleBody">
              
   <section id="python-api">
-<h1>Python API<a class="headerlink" href="#python-api" title="Permalink to this headline">¶</a></h1>
+<h1>Python API<a class="headerlink" href="#python-api" title="Permalink to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/roger-setup.html">Roger setup class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/roger-state.html">Roger state class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/routines.html">roger_routine and roger_kernel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/roger-setup.html">Roger setup class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup"><code class="docutils literal notranslate"><span class="pre">RogerSetup</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.set_settings"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_settings()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.set_look_up_tables"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_look_up_tables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.set_parameters_setup"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_parameters_setup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.set_parameters"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_parameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.set_initial_conditions_setup"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_initial_conditions_setup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.set_initial_conditions"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_initial_conditions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.set_boundary_conditions_setup"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_boundary_conditions_setup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.set_boundary_conditions"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_boundary_conditions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.set_grid"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.set_topography"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_topography()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.set_forcing_setup"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_forcing_setup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.set_forcing"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_forcing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.set_diagnostics"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_diagnostics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.after_timestep"><code class="docutils literal notranslate"><span class="pre">RogerSetup.after_timestep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.warmup"><code class="docutils literal notranslate"><span class="pre">RogerSetup.warmup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-setup.html#roger.RogerSetup.run"><code class="docutils literal notranslate"><span class="pre">RogerSetup.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/roger-state.html">Roger state class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/roger-state.html#roger.state.RogerState"><code class="docutils literal notranslate"><span class="pre">RogerState</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-state.html#roger.state.RogerState.initialize_variables"><code class="docutils literal notranslate"><span class="pre">RogerState.initialize_variables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-state.html#roger.state.RogerState.var_meta"><code class="docutils literal notranslate"><span class="pre">RogerState.var_meta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-state.html#roger.state.RogerState.variables"><code class="docutils literal notranslate"><span class="pre">RogerState.variables</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-state.html#roger.state.RogerState.settings"><code class="docutils literal notranslate"><span class="pre">RogerState.settings</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-state.html#roger.state.RogerState.dimensions"><code class="docutils literal notranslate"><span class="pre">RogerState.dimensions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-state.html#roger.state.RogerState.diagnostics"><code class="docutils literal notranslate"><span class="pre">RogerState.diagnostics</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-state.html#roger.state.RogerState.plugin_interfaces"><code class="docutils literal notranslate"><span class="pre">RogerState.plugin_interfaces</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/roger-state.html#roger.state.RogerState.to_xarray"><code class="docutils literal notranslate"><span class="pre">RogerState.to_xarray()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/roger-state.html#roger.state.RogerSettings"><code class="docutils literal notranslate"><span class="pre">RogerSettings</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/roger-state.html#roger.state.RogerVariables"><code class="docutils literal notranslate"><span class="pre">RogerVariables</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/routines.html">roger_routine and roger_kernel</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/routines.html#roger.roger_routine"><code class="docutils literal notranslate"><span class="pre">roger_routine()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/routines.html#roger.roger_kernel"><code class="docutils literal notranslate"><span class="pre">roger_kernel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/routines.html#roger.KernelOutput"><code class="docutils literal notranslate"><span class="pre">KernelOutput()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api/runtime.html">Runtime settings &amp; state</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/runtime.html#runtime-settings">Runtime settings</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/runtime.html#runtime-state">Runtime state</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/runtime.html#runtime-settings">Runtime settings</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/runtime.html#roger.runtime.RuntimeSettings"><code class="docutils literal notranslate"><span class="pre">RuntimeSettings</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/runtime.html#runtime-state">Runtime state</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/runtime.html#roger.runtime.RuntimeState"><code class="docutils literal notranslate"><span class="pre">RuntimeState</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api/tools.html">Tools &amp; utilities</a><ul>

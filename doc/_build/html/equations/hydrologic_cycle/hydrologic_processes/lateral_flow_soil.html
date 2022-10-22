@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Subsurface runoff &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>Subsurface runoff &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,7 +14,9 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -31,7 +33,7 @@
             <a href="../../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -57,24 +59,37 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../equations.html">Model equations</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../hydrologic_cycle.html">Hydrologic cycle</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../hydrologic_processes.html">Hydrologic processes</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
-<li class="toctree-l3"><a class="reference internal" href="snow.html">Snow accumulation and snow melt</a></li>
-<li class="toctree-l3"><a class="reference internal" href="interception.html">Interception</a></li>
-<li class="toctree-l3"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
-<li class="toctree-l3"><a class="reference internal" href="surface_runoff.html">Surface runoff</a></li>
-<li class="toctree-l3"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Subsurface runoff</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#lateral-subsurface-runoff-via-macropores">Lateral subsurface runoff via macropores</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lateral-subsurface-runoff-via-soil-matrix">Lateral subsurface runoff via soil matrix</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="groundwater_flow.html">Groundwater flow</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../hydrologic_processes.html">Hydrologic processes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../storages.html">Storages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../crop_phenology.html">Crop phenology</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../model_structures.html">Model structures</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../model_structures.html">Model structures</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../model_structures.html#svat">SVAT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../model_structures.html#svat-crop">SVAT-CROP</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#oned">ONED</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../storages/surface.html">Surface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../storages/soil.html">Soil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="snow.html">Snow accumulation and snow melt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="interception.html">Interception</a></li>
+<li class="toctree-l4"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="surface_runoff.html">Surface runoff</a></li>
+<li class="toctree-l4"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Subsurface runoff</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#oned-event">ONED-EVENT</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../storages/surface.html">Surface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../storages/soil.html">Soil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="snow.html">Snow accumulation and snow melt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="interception.html">Interception</a></li>
+<li class="toctree-l4"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="surface_runoff.html">Surface runoff</a></li>
+<li class="toctree-l4"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Subsurface runoff</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../solute_transport.html">Solute transport</a></li>
@@ -124,9 +139,9 @@
            <div itemprop="articleBody">
              
   <section id="subsurface-runoff">
-<h1>Subsurface runoff<a class="headerlink" href="#subsurface-runoff" title="Permalink to this headline">¶</a></h1>
+<h1>Subsurface runoff<a class="headerlink" href="#subsurface-runoff" title="Permalink to this heading">¶</a></h1>
 <section id="lateral-subsurface-runoff-via-macropores">
-<h2>Lateral subsurface runoff via macropores<a class="headerlink" href="#lateral-subsurface-runoff-via-macropores" title="Permalink to this headline">¶</a></h2>
+<h2>Lateral subsurface runoff via macropores<a class="headerlink" href="#lateral-subsurface-runoff-via-macropores" title="Permalink to this heading">¶</a></h2>
 <p>Flow velocities of fast subsurface flow via macropores <span class="math notranslate nohighlight">\(v_{mp}(j)\)</span> (m <span class="math notranslate nohighlight">\(h^{-1}\)</span>, <a class="reference internal" href="../../../introduction/introduction.html#steinbrich2016" id="id1"><span>[Steinbrich2016]</span></a>):</p>
 <a class="reference internal image-reference" href="../../../_images/lateral_macropore_flow_velocity.png"><img alt="../../../_images/lateral_macropore_flow_velocity.png" class="align-center" src="../../../_images/lateral_macropore_flow_velocity.png" style="width: 500px;" /></a>
 <p>Potential lateral subsurface flow via macropores <span class="math notranslate nohighlight">\(SSF_{mp-pot}\)</span> (<span class="math notranslate nohighlight">\(m^3 h^{-1}\)</span>):</p>
@@ -135,7 +150,7 @@
 <p>with <span class="math notranslate nohighlight">\(i\)</span> slope (<span class="math notranslate nohighlight">\(m m^{-1}\)</span>), <span class="math notranslate nohighlight">\(j\)</span> horizon, <span class="math notranslate nohighlight">\(z_{sat}(j)\)</span> saturated thickness of the jth horizon (m), <span class="math notranslate nohighlight">\(v_{mp}(i)\)</span>rho_{mph}` density of slope parallel macropores (<span class="math notranslate nohighlight">\(m^{-2}\)</span>) and <span class="math notranslate nohighlight">\(A_{mp}\)</span> cross-sectional area of one macropore (<span class="math notranslate nohighlight">\(m^2\)</span>)</p>
 </section>
 <section id="lateral-subsurface-runoff-via-soil-matrix">
-<h2>Lateral subsurface runoff via soil matrix<a class="headerlink" href="#lateral-subsurface-runoff-via-soil-matrix" title="Permalink to this headline">¶</a></h2>
+<h2>Lateral subsurface runoff via soil matrix<a class="headerlink" href="#lateral-subsurface-runoff-via-soil-matrix" title="Permalink to this heading">¶</a></h2>
 <p>Potential lateral subsurface flow via macropores <span class="math notranslate nohighlight">\(SSF_{mp-pot}\)</span> (<span class="math notranslate nohighlight">\(m^3 h^{-1}\)</span>):</p>
 <div class="math notranslate nohighlight">
 \[SSF_{mat-pot}= z_{sat} \cdot k_s \cdot i \cdot w\]</div>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Groundwater flow &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>Groundwater flow &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,13 +14,15 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Storages" href="../storages.html" />
-    <link rel="prev" title="Evapotranspiration" href="evapotranspiration.html" /> 
+    <link rel="prev" title="Subsurface runoff" href="lateral_flow_soil.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +33,7 @@
             <a href="../../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -58,13 +60,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../../equations.html">Model equations</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../hydrologic_cycle.html">Hydrologic cycle</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../hydrologic_processes.html">Hydrologic processes</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="snow.html">Snow accumulation and snow melt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="interception.html">Interception</a></li>
 <li class="toctree-l3"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
-<li class="toctree-l3"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
 <li class="toctree-l3"><a class="reference internal" href="surface_runoff.html">Surface runoff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lateral_flow_soil.html">Subsurface runoff</a></li>
-<li class="toctree-l3"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Groundwater flow</a></li>
 </ul>
 </li>
@@ -120,7 +122,7 @@
            <div itemprop="articleBody">
              
   <section id="groundwater-flow">
-<h1>Groundwater flow<a class="headerlink" href="#groundwater-flow" title="Permalink to this headline">¶</a></h1>
+<h1>Groundwater flow<a class="headerlink" href="#groundwater-flow" title="Permalink to this heading">¶</a></h1>
 <p>Transmissivity of the aquifer <span class="math notranslate nohighlight">\(T_{gw}\)</span> (m) at time step t:</p>
 <div class="math notranslate nohighlight">
 \[T_{gw} =  \int_{z_{gw}}^{Z_{gw-tot}} k_f \cdot exp (-\frac{z_{gw}}{b})dz_{gw}\]</div>
@@ -143,7 +145,7 @@ decay coeffcient.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="evapotranspiration.html" class="btn btn-neutral float-left" title="Evapotranspiration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="lateral_flow_soil.html" class="btn btn-neutral float-left" title="Subsurface runoff" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../storages.html" class="btn btn-neutral float-right" title="Storages" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

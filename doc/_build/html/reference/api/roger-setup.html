@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Roger setup class &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>Roger setup class &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,7 +14,9 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -30,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -66,7 +68,28 @@
 <li class="toctree-l1"><a class="reference internal" href="../diagnostics.html">Diagnostics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cli.html">Command line tools</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../public-api.html">Python API</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Roger setup class</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Roger setup class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#roger.RogerSetup"><code class="docutils literal notranslate"><span class="pre">RogerSetup</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.set_settings"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_settings()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.set_look_up_tables"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_look_up_tables()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.set_parameters_setup"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_parameters_setup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.set_parameters"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.set_initial_conditions_setup"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_initial_conditions_setup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.set_initial_conditions"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_initial_conditions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.set_boundary_conditions_setup"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_boundary_conditions_setup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.set_boundary_conditions"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_boundary_conditions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.set_grid"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.set_topography"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_topography()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.set_forcing_setup"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_forcing_setup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.set_forcing"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_forcing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.set_diagnostics"><code class="docutils literal notranslate"><span class="pre">RogerSetup.set_diagnostics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.after_timestep"><code class="docutils literal notranslate"><span class="pre">RogerSetup.after_timestep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.warmup"><code class="docutils literal notranslate"><span class="pre">RogerSetup.warmup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roger.RogerSetup.run"><code class="docutils literal notranslate"><span class="pre">RogerSetup.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="roger-state.html">Roger state class</a></li>
 <li class="toctree-l2"><a class="reference internal" href="routines.html">roger_routine and roger_kernel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="runtime.html">Runtime settings &amp; state</a></li>
@@ -111,7 +134,7 @@
            <div itemprop="articleBody">
              
   <section id="roger-setup-class">
-<h1>Roger setup class<a class="headerlink" href="#roger-setup-class" title="Permalink to this headline">¶</a></h1>
+<h1>Roger setup class<a class="headerlink" href="#roger-setup-class" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="roger.RogerSetup">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roger.</span></span><span class="sig-name descname"><span class="pre">RogerSetup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/roger.html#RogerSetup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.RogerSetup" title="Permalink to this definition">¶</a></dt>

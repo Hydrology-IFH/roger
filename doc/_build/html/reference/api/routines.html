@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger_routine and roger_kernel &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>roger_routine and roger_kernel &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,7 +14,9 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -30,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -68,7 +70,12 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../public-api.html">Python API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="roger-setup.html">Roger setup class</a></li>
 <li class="toctree-l2"><a class="reference internal" href="roger-state.html">Roger state class</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">roger_routine and roger_kernel</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">roger_routine and roger_kernel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#roger.roger_routine"><code class="docutils literal notranslate"><span class="pre">roger_routine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roger.roger_kernel"><code class="docutils literal notranslate"><span class="pre">roger_kernel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roger.KernelOutput"><code class="docutils literal notranslate"><span class="pre">KernelOutput()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="runtime.html">Runtime settings &amp; state</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools.html">Tools &amp; utilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Numerical operators</a></li>
@@ -111,7 +118,7 @@
            <div itemprop="articleBody">
              
   <section id="roger-routine-and-roger-kernel">
-<h1>roger_routine and roger_kernel<a class="headerlink" href="#roger-routine-and-roger-kernel" title="Permalink to this headline">¶</a></h1>
+<h1>roger_routine and roger_kernel<a class="headerlink" href="#roger-routine-and-roger-kernel" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="roger.roger_routine">
 <span class="sig-prename descclassname"><span class="pre">roger.</span></span><span class="sig-name descname"><span class="pre">roger_routine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_safe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/routines.html#roger_routine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.roger_routine" title="Permalink to this definition">¶</a></dt>

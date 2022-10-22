@@ -17,9 +17,9 @@ Output aggregated to daily:
        ...
        def set_diagnostics(self, state):
            diagnostics = state.diagnostics
-           diagnostics['rates'].output_variables = ['transp', 'q_ss']
-           diagnostics['rates'].sampling_frequency = 1
-           diagnostics['rates'].output_frequency =  24 * 60 * 60
+           diagnostics['rate'].output_variables = ['transp', 'q_ss']
+           diagnostics['rate'].sampling_frequency = 1
+           diagnostics['rate'].output_frequency =  24 * 60 * 60
 
 Output aggregated to hourly:
 
@@ -29,9 +29,9 @@ Output aggregated to hourly:
       ...
       def set_diagnostics(self, state):
           diagnostics = state.diagnostics
-          diagnostics['rates'].output_variables = ['transp', 'q_ss']
-          diagnostics['rates'].sampling_frequency = 1
-          diagnostics['rates'].output_frequency =  60 * 60
+          diagnostics['rate'].output_variables = ['transp', 'q_ss']
+          diagnostics['rate'].sampling_frequency = 1
+          diagnostics['rate'].output_frequency =  60 * 60
 
 
 Output aggregated to 10 minutes:
@@ -42,9 +42,9 @@ Output aggregated to 10 minutes:
       ...
       def set_diagnostics(self, state):
           diagnostics = state.diagnostics
-          diagnostics['rates'].output_variables = ['transp', 'q_ss']
-          diagnostics['rates'].sampling_frequency = 1
-          diagnostics['rates'].output_frequency =  10 * 60
+          diagnostics['rate'].output_variables = ['transp', 'q_ss']
+          diagnostics['rate'].sampling_frequency = 1
+          diagnostics['rate'].output_frequency =  10 * 60
 
 Please not, that within the adaptive-time stepping greater time steps
 than provided `output_frequency` will not be downscaled (e.g. from daily to hourly).
@@ -71,10 +71,10 @@ Snapshot
 .. autoclass:: roger.diagnostics.snapshot.Snapshot
    :members: name, output_variables, sampling_frequency, output_frequency, output_path
 
-Averages
+Average
 ++++++++
 
-.. autoclass:: roger.diagnostics.averages.Averages
+.. autoclass:: roger.diagnostics.average.Average
    :members: name, output_variables, sampling_frequency, output_frequency, output_path
 
 Minimum
@@ -89,10 +89,10 @@ Maximum
 .. autoclass:: roger.diagnostics.maximum.Maximum
   :members: name, output_variables, sampling_frequency, output_frequency, output_path
 
-Rates
+Rate
 +++++++++++
 
-.. autoclass:: roger.diagnostics.rates.Rates
+.. autoclass:: roger.diagnostics.rate.Rate
    :members: name, output_variables, sampling_frequency, output_frequency, output_path
 
 Collect

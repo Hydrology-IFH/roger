@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Getting started &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>Getting started &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,7 +14,9 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -30,7 +32,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -117,11 +119,11 @@
            <div itemprop="articleBody">
              
   <section id="getting-started">
-<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this heading">¶</a></h1>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h2>
 <section id="quick-installation-via-pip">
-<h3>Quick installation via pip<a class="headerlink" href="#quick-installation-via-pip" title="Permalink to this headline">¶</a></h3>
+<h3>Quick installation via pip<a class="headerlink" href="#quick-installation-via-pip" title="Permalink to this heading">¶</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>You should only install Roger this way if you want to get going as quickly as possible, and do not plan to access or modify the model source code. The recommended way to install Roger is by checking out the repository (see below).</p>
@@ -137,7 +139,7 @@
 <p>to use Roger with JAX.</p>
 </section>
 <section id="using-conda-multi-platform">
-<h3>Using Conda (multi-platform)<a class="headerlink" href="#using-conda-multi-platform" title="Permalink to this headline">¶</a></h3>
+<h3>Using Conda (multi-platform)<a class="headerlink" href="#using-conda-multi-platform" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic">
 <li><p><a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Download and install Miniconda</a>. If you are using Windows, you may use the Anaconda prompt to execute the following steps.</p></li>
 <li><p>Clone the Roger repository</p>
@@ -161,7 +163,7 @@
 </ol>
 </section>
 <section id="using-pip-linux-osx">
-<h3>Using pip (Linux / OSX)<a class="headerlink" href="#using-pip-linux-osx" title="Permalink to this headline">¶</a></h3>
+<h3>Using pip (Linux / OSX)<a class="headerlink" href="#using-pip-linux-osx" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic">
 <li><p>Ensure you have a working Python 3.x installation.</p></li>
 <li><p>Clone our repository:</p>
@@ -189,7 +191,7 @@
 </section>
 </section>
 <section id="setting-up-a-model">
-<h2>Setting up a model<a class="headerlink" href="#setting-up-a-model" title="Permalink to this headline">¶</a></h2>
+<h2>Setting up a model<a class="headerlink" href="#setting-up-a-model" title="Permalink to this heading">¶</a></h2>
 <p>To run Roger, you need to set up a model - i.e., specify which settings and model domain you want to use. This is done by subclassing the <a class="reference internal" href="../reference/api/roger-setup.html#roger.RogerSetup" title="roger.RogerSetup"><code class="xref py py-class docutils literal notranslate"><span class="pre">Roger</span> <span class="pre">setup</span> <span class="pre">base</span> <span class="pre">class</span></code></a> in a <em>setup script</em> that is written in Python. You should have a look at the pre-implemented model setups in the repository’s <code class="file docutils literal notranslate"><span class="pre">setup</span></code> folder, or use the <strong class="command">roger copy-setup</strong> command to copy one into your current folder. A good place to start is the <code class="xref py py-class docutils literal notranslate"><span class="pre">ACC</span> <span class="pre">model</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ roger copy-setup acc
 </pre></div>
@@ -217,7 +219,7 @@
 </ul>
 </section>
 <section id="running-roger">
-<h2>Running Roger<a class="headerlink" href="#running-roger" title="Permalink to this headline">¶</a></h2>
+<h2>Running Roger<a class="headerlink" href="#running-roger" title="Permalink to this heading">¶</a></h2>
 <p>After adapting your setup script, you are ready to run your first simulation. Just execute the following:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ roger run my_setup.py
 </pre></div>
@@ -231,7 +233,7 @@
 <p>You are not required to use the command line, and you are welcome to include your simulation class into other Python files and call it dynamically or interactively (e.g. in an IPython session). All you need to do is to call the <code class="docutils literal notranslate"><span class="pre">setup()</span></code> and <code class="docutils literal notranslate"><span class="pre">run()</span></code> methods of your <a class="reference internal" href="../reference/api/roger-setup.html#roger.RogerSetup" title="roger.RogerSetup"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.RogerSetup</span></code></a> object.</p>
 </div>
 <section id="reading-roger-output">
-<h3>Reading Roger output<a class="headerlink" href="#reading-roger-output" title="Permalink to this headline">¶</a></h3>
+<h3>Reading Roger output<a class="headerlink" href="#reading-roger-output" title="Permalink to this heading">¶</a></h3>
 <p>All output is handled by <a class="reference internal" href="../reference/diagnostics.html"><span class="doc">the available diagnostics</span></a>. The most basic diagnostic, <code class="xref py py-class docutils literal notranslate"><span class="pre">snapshot</span></code>, writes some model variables to netCDF files in regular intervals (and puts them into your current working directory).</p>
 <p>NetCDF is a binary format that is widely adopted in the geophysical modeling community. There are various packages for reading, visualizing and processing netCDF files (such as <a class="reference external" href="http://meteora.ucsd.edu/~pierce/ncview_home_page.html">ncview</a> and <a class="reference external" href="http://ferret.pmel.noaa.gov/Ferret/">ferret</a>), and bindings for many programming languages (such as C, Fortran, MATLAB, and Python).</p>
 <p>For post-processing in Python, we recommend that you use <a class="reference external" href="http://xarray.pydata.org/en/stable/">xarray</a>:</p>
@@ -246,14 +248,14 @@
 </div>
 </section>
 <section id="re-starting-from-a-previous-run">
-<h3>Re-starting from a previous run<a class="headerlink" href="#re-starting-from-a-previous-run" title="Permalink to this headline">¶</a></h3>
+<h3>Re-starting from a previous run<a class="headerlink" href="#re-starting-from-a-previous-run" title="Permalink to this heading">¶</a></h3>
 <p>Restart data (in HDF5 format) is written at the end of each simulation or after a regular time interval if the setting <a class="reference internal" href="../reference/settings.html#setting-restart-frequency"><span class="std std-ref">restart_frequency</span></a> is set to a finite value. To use this restart file as initial conditions for another simulation, you will have to point <a class="reference internal" href="../reference/settings.html#setting-restart-input-filename"><span class="std std-ref">restart_input_filename</span></a> of the new simulation to the corresponding restart file. This can also be given via the command line (as all settings):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ roger run my_setup.py -s restart_input_filename /path/to/restart_file.h5
 </pre></div>
 </div>
 </section>
 <section id="running-roger-on-multiple-processes-via-mpi">
-<span id="mpi-exec"></span><h3>Running Roger on multiple processes via MPI<a class="headerlink" href="#running-roger-on-multiple-processes-via-mpi" title="Permalink to this headline">¶</a></h3>
+<span id="mpi-exec"></span><h3>Running Roger on multiple processes via MPI<a class="headerlink" href="#running-roger-on-multiple-processes-via-mpi" title="Permalink to this heading">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This assumes that you are familiar with running applications through MPI, and is most useful on large architectures like a compute cluster. For smaller architectures, it is usually easier to stick to the thread-based parallelism of JAX.</p>
@@ -275,7 +277,7 @@
 </section>
 </section>
 <section id="enhancing-roger">
-<h2>Enhancing Roger<a class="headerlink" href="#enhancing-roger" title="Permalink to this headline">¶</a></h2>
+<h2>Enhancing Roger<a class="headerlink" href="#enhancing-roger" title="Permalink to this heading">¶</a></h2>
 <p>Roger was written with extensibility in mind. If you already know some Python and have worked with NumPy, you are pretty much ready to write your own extension. The model code is located in the <code class="file docutils literal notranslate"><span class="pre">roger</span></code> subfolder, while all of the numerical routines are located in <code class="file docutils literal notranslate"><span class="pre">roger/core</span></code>.</p>
 <p>We believe that the best way to learn how Roger works is to read its source code. Starting from the <a class="reference internal" href="../reference/api/roger-setup.html#roger.RogerSetup" title="roger.RogerSetup"><code class="xref py py-class docutils literal notranslate"><span class="pre">Roger</span> <span class="pre">base</span> <span class="pre">class</span></code></a>, you should be able to work your way through the flow of the program, and figure out where to add your modifications. If you installed Roger through <strong class="command">pip -e</strong> or <strong class="command">setup.py develop</strong>, all changes you make will immediately be reflected when running the code.</p>
 <p>In case you want to add additional output capabilities or compute additional quantities without changing the main solution of the simulation, you should consider <a class="reference internal" href="../reference/diagnostics.html"><span class="doc">adding a custom diagnostic</span></a>.</p>

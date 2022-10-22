@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Advanced installation &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>Advanced installation &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,7 +14,9 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -30,7 +32,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -106,7 +108,7 @@
            <div itemprop="articleBody">
              
   <section id="advanced-installation">
-<h1>Advanced installation<a class="headerlink" href="#advanced-installation" title="Permalink to this headline">¶</a></h1>
+<h1>Advanced installation<a class="headerlink" href="#advanced-installation" title="Permalink to this heading">¶</a></h1>
 <p>Because Roger should be usable by both beginners and experts, it has a number of <em>optional</em> dependencies that are not strictly required to run Roger, but highly recommended in high-performance contexts.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -140,7 +142,7 @@
 <p>On this page, we give all installation instructions via <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code>. If you used conda to install Roger, consider replacing them with <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span></code>.</p>
 </div>
 <section id="using-jax">
-<h2>Using JAX<a class="headerlink" href="#using-jax" title="Permalink to this headline">¶</a></h2>
+<h2>Using JAX<a class="headerlink" href="#using-jax" title="Permalink to this heading">¶</a></h2>
 <p>Using the JAX backend, Roger is typically about 4x faster than with NumPy, so this should be the first thing to try if you want to get more performance.</p>
 <p>JAX is available on all major platforms and can be installed via:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install jax jaxlib
@@ -153,7 +155,7 @@
 <p>(see also <a class="reference external" href="https://github.com/google/jax#installation">the JAX installation guide</a>).</p>
 </section>
 <section id="using-mpi">
-<h2>Using MPI<a class="headerlink" href="#using-mpi" title="Permalink to this headline">¶</a></h2>
+<h2>Using MPI<a class="headerlink" href="#using-mpi" title="Permalink to this heading">¶</a></h2>
 <p>To run Roger on more than one process you need to use MPI. This requires that you install an MPI implementation (such as OpenMPI) on your system. Additionally, you have to install <code class="docutils literal notranslate"><span class="pre">mpi4py</span></code> to interface with it:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install mpi4py
 </pre></div>
@@ -161,7 +163,7 @@
 <p>Then, you can <a class="reference internal" href="get-started.html#mpi-exec"><span class="std std-ref">run Roger in parallel via MPI</span></a>.</p>
 </section>
 <section id="using-jax-mpi">
-<h2>Using JAX + MPI<a class="headerlink" href="#using-jax-mpi" title="Permalink to this headline">¶</a></h2>
+<h2>Using JAX + MPI<a class="headerlink" href="#using-jax-mpi" title="Permalink to this heading">¶</a></h2>
 <p>To use JAX together with MPI, you need to install <code class="docutils literal notranslate"><span class="pre">mpi4jax</span></code> after installing <code class="docutils literal notranslate"><span class="pre">mpi4py</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install mpi4jax
 </pre></div>

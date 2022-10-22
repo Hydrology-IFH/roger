@@ -4,8 +4,10 @@ A short introduction to Roger
 The model architecture
 ----------------------
 
+We adapted the model architecture from [Haefner2018]_.
+
 1. **Easy to access**: Python modules are simple to install, and projects like `Anaconda <https://www.continuum.io/anaconda-overview>`_ are doing a great job in creating platform-independent environments.
-2. **Easy to use**: Anyone with some experience can use their favorite Python tools to set up, control, and post-process Roger.
+2. **Easy to use**: Anyone with some experience can use their favourite Python tools to set up, modify, and post-process simulations with Roger.
 3. **Easy to modify**: Due to Python's popularity, available abstractions, and dynamic nature, Roger can be extended and modified with relatively little effort.
 
 However, choosing Python over a compiled language like Fortran or C usually comes at a high computational cost. We overcome this gap by using `JAX <https://github.com/google/jax>`_, a framework that can act as a high-performance replacement for NumPy. JAX takes care of all performance optimizations in the background, and runs on CPUs and GPUs.
@@ -13,21 +15,21 @@ However, choosing Python over a compiled language like Fortran or C usually come
 Available processes
 +++++++++++++++++++
 
-Soil hydraulic parameters are approximated by the Brooks-Corey scheme.
+Soil hydraulic parameters are approximated by the Brooks-Corey scheme ([Brooks1966]_).
 
 **Interception**:
 
-- rainfall and snowfall interception by vegetation
+- rainfall and snowfall interception by vegetation ([Larsim2021]_)
 
 **Snow**:
 
 - snow accumulation
-- snow melt based on day-degree approach
+- delayed snow melt is based on day-degree approach and water retention of snow cover ([Larsim2021]_)
 - rain-on-snow
 
 **Infiltration**:
 
-- matrix-driven infiltration based on Green-Ampt approach ([Weiler2005]_)
+- matrix-driven infiltration based on Green-Ampt approach ([Peschke1985]_, [Weiler2005]_)
 - gravity-driven infiltration based on viscous flow approach ([Germann2018]_)
 
 **Evaporation**:
@@ -55,7 +57,7 @@ Soil hydraulic parameters are approximated by the Brooks-Corey scheme.
 
 **Groundwater flow**:
 
-- spatial explicit representation of shallow groundwater following [Stoll2010]_
+- spatial explicit representation of shallow groundwater follows the aproach presented in [Stoll2010]_
 
 **Crop phenology and crop rotation**:
 
@@ -65,6 +67,9 @@ Soil hydraulic parameters are approximated by the Brooks-Corey scheme.
 
 - StorAge selection (SAS) functions ([Rinaldo2015]_) are used to calculate travel time distributions, residence time distribution and solute concentrations
 
+**Biogeochemical processes**:
+
+- Solute specific transformation processes (e.g. denitrification; [Kunkel2012]_)
 
 Available model structures
 +++++++++++++++++++++++++++
@@ -116,18 +121,28 @@ Roger is still in development. There are many open issues that we would like to 
 References
 ++++++++++
 
+.. [Brooks1966] Brooks, R. H., and Corey, A. T.: Properties of porous media affecting fluid flow, Journal of the Irrigation and Drainage Division, 92, 61-90, 1966.
+
+.. [Haefner2018] Häfner, D., Jacobsen, R. L., Eden, C., Kristensen, M. R. B., Jochum, M., Nuterman, R., and Vinter, B.: Veros v0.1 – a fast and versatile ocean simulator in pure Python, Geosci. Model Dev., 11, 3299-3312, 2018.
+
+.. [Germann2018] Germann, P. F. and Prasuhn, V.: Viscous Flow Approach to Rapid Infiltration and Drainage in a Weighing Lysimeter, Vadose Zone Journal, 17, 170020, 2018.
+
+.. [Kunkel2012] Kunkel, R., and Wendland, F.: Diffuse Nitrateinträge in die Grund- und Oberflächengewässer von Rhein und Ems - Ist-Zustands- und Maßnahmenanalysen, Forschungszentrum Jülich, Jülich, Germany, 143, 2012.
+
+.. [Larsim2021] LARSIM-Entwicklergemeinschaft: Das Wasserhaushaltsmodell LARSIM: Modellgrundlagen und Anwendungsbeispiele, LARSIM-Entwicklergemeinschaft - Hochwasserzentralen LUBW, BLfU, LfU RP, HLNUG, BAFU, 258, 2021.
+
+.. [Peschke1985] Peschke, G.: Zur Bildung und Berechnung von Regenabfluss, Wissenschaftliche Zeitschrift der Technischen Universität Dresden, 34, 1985.
+
+.. [Rinaldo2015] Rinaldo, A., Benettin, P., Harman, C. J., Hrachowitz, M., McGuire, K. J., van der Velde, Y., Bertuzzo, E., and Botter, G.: Storage selection functions: A coherent framework for quantifying how catchments store and release water and solutes, Water Resources Research, 51, 4840-4847, 2015.
+
 .. [Salvucci1993] Salvucci, G. D.: An approximate solution for steady vertical flux of moisture through an unsaturated homogeneous soil, Water Resources Research, 29, 3749-3753, 1993.
 
-.. [Weiler2005] Weiler, M.: An infiltration model based on flow variability in macropores: development, sensitivity analysis and applications, Journal of Hydrology, 310, 294-315, 2005.
-
 .. [Steduto2009] Steduto, P., Hsiao, T. C., Raes, D., and Fereres, E.: AquaCrop—The FAO Crop Model to Simulate Yield Response to Water: I. Concepts and Underlying Principles, Agronomy Journal, 101, 426-437, 2009.
+
+.. [Steinbrich2016] Steinbrich, A., Leistert, H., and Weiler, M.: Model-based quantification of runoff generation processes at high spatial and temporal resolution, Environmental Earth Sciences, 75, 1423, 2016.
 
 .. [Stoll2010] Stoll, S. and Weiler, M.: Explicit simulations of stream networks to guide hydrological modelling in ungauged basins, Hydrol. Earth Syst. Sci., 14, 1435-1448, 2010.
 
 .. [Torres2010] Torres, E. A. and Calera, A.: Bare soil evaporation under high evaporation demand: a proposed modification to the FAO-56 model, Hydrological Sciences Journal, 55, 303-315, 2010.
 
-.. [Rinaldo2015] Rinaldo, A., Benettin, P., Harman, C. J., Hrachowitz, M., McGuire, K. J., van der Velde, Y., Bertuzzo, E., and Botter, G.: Storage selection functions: A coherent framework for quantifying how catchments store and release water and solutes, Water Resources Research, 51, 4840-4847, 2015.
-
-.. [Steinbrich2016] Steinbrich, A., Leistert, H., and Weiler, M.: Model-based quantification of runoff generation processes at high spatial and temporal resolution, Environmental Earth Sciences, 75, 1423, 2016.
-
-.. [Germann2018] Germann, P. F. and Prasuhn, V.: Viscous Flow Approach to Rapid Infiltration and Drainage in a Weighing Lysimeter, Vadose Zone Journal, 17, 170020, 2018.
+.. [Weiler2005] Weiler, M.: An infiltration model based on flow variability in macropores: development, sensitivity analysis and applications, Journal of Hydrology, 310, 294-315, 2005.

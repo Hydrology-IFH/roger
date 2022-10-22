@@ -11,7 +11,7 @@ Evaporation from interception storage :math:`EVAP_{int}` (mm :math:`\Delta t^{-1
 
 .. math::
   EVAP_{int}=\left\{\begin{array}{lr}
-  S_{int-} & PET_{res} > S_{int} \\
+  S_{int} & PET_{res} > S_{int} \\
   PET_{res} & PET_{res} \leq S_{int}
   \end{array}\right.
 
@@ -59,7 +59,7 @@ to the soil surface (mm; :math:`z_{evap-max}=150`)
 Transpiration
 -------------
 
-Transpiration :math:`TRANSP` (mm :math:`\Delta t^{-1}`) with seasonally-variant transpiration coefficients :math:`c_{transp}` and water stress coeffcient of transpiration :math:`c_{transp-stress}`:
+Transpiration :math:`TRANSP` (mm :math:`\Delta t^{-1}`) with seasonally-variant transpiration coefficients :math:`c_{transp}` and water stress coeffcient of transpiration :math:`c_{ws}`:
 
 .. math::
   TRANSP=PET_{res} \cdot c_{transp}
@@ -68,11 +68,11 @@ with
 
 .. math::
   c_{transp}=\left\{\begin{array}{lr}
-  \frac{f_{ground-cover}}{max(f_{ground-cover})} & c_{transp-stress} \geq 1 \\
-  \frac{f_{ground-cover}}{max(f_{ground-cover})} \cdot c_{transp-stress} & c_{transp-stress} < 1
+  \frac{f_{ground-cover}}{max(f_{ground-cover})} & c_{ws} \geq 1 \\
+  \frac{f_{ground-cover}}{max(f_{ground-cover})} \cdot c_{ws} & c_{ws} < 1
   \end{array}\right.
 
 .. math::
-  c_{transp-stress}=\frac{\theta - \theta_{pwp}}{f_{pwt} \cdot \theta_{fc} - \theta_{pwp}}
+  c_{ws}=\frac{\theta - \theta_{pwp}}{f_{pwt} \cdot \theta_{fc} - \theta_{pwp}}
 
 where :math:`f_{pwt}` is the fraction of plant water stress (-; :math:`f_{pwt}=0.75`)

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Snow accumulation and snow melt &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>Snow accumulation and snow melt &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,13 +14,15 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Interception" href="interception.html" />
-    <link rel="prev" title="Hydrologic processes" href="../hydrologic_processes.html" /> 
+    <link rel="prev" title="Evapotranspiration" href="evapotranspiration.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +33,7 @@
             <a href="../../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -64,33 +66,34 @@
 <li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#svat">SVAT</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../storages/surface.html">Surface</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../storages/soil.html">Soil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Snow accumulation and snow melt</a></li>
 <li class="toctree-l4"><a class="reference internal" href="interception.html">Interception</a></li>
 <li class="toctree-l4"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
 <li class="toctree-l4"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
-<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#svat-crop">SVAT-CROP</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../crop_phenology.html">Crop phenology</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../storages/surface.html">Surface</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../storages/soil.html">Soil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Snow accumulation and snow melt</a></li>
 <li class="toctree-l4"><a class="reference internal" href="interception.html">Interception</a></li>
 <li class="toctree-l4"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
 <li class="toctree-l4"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
-<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#oned">ONED</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../storages/surface.html">Surface</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../storages/soil.html">Soil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Snow accumulation and snow melt</a></li>
 <li class="toctree-l4"><a class="reference internal" href="interception.html">Interception</a></li>
 <li class="toctree-l4"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="surface_runoff.html">Surface runoff</a></li>
 <li class="toctree-l4"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lateral_flow_soil.html">Subsurface runoff</a></li>
-<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#oned-event">ONED-EVENT</a><ul class="current">
@@ -99,9 +102,9 @@
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Snow accumulation and snow melt</a></li>
 <li class="toctree-l4"><a class="reference internal" href="interception.html">Interception</a></li>
 <li class="toctree-l4"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="surface_runoff.html">Surface runoff</a></li>
 <li class="toctree-l4"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lateral_flow_soil.html">Subsurface runoff</a></li>
-<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 </ul>
 </li>
 </ul>
@@ -155,7 +158,7 @@
            <div itemprop="articleBody">
              
   <section id="snow-accumulation-and-snow-melt">
-<h1>Snow accumulation and snow melt<a class="headerlink" href="#snow-accumulation-and-snow-melt" title="Permalink to this headline">¶</a></h1>
+<h1>Snow accumulation and snow melt<a class="headerlink" href="#snow-accumulation-and-snow-melt" title="Permalink to this heading">¶</a></h1>
 <p>Solid precipitation accumulates in the interception storage and at the land
 surface if air temperatures are below 0 °C. Snow melt occurs for air
 temperatures above 0 °C and is based on degree-day approach. Snow melt runoff
@@ -177,7 +180,7 @@ the retention capacity of the snow cover <span class="math notranslate nohighlig
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../hydrologic_processes.html" class="btn btn-neutral float-left" title="Hydrologic processes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="evapotranspiration.html" class="btn btn-neutral float-left" title="Evapotranspiration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="interception.html" class="btn btn-neutral float-right" title="Interception" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

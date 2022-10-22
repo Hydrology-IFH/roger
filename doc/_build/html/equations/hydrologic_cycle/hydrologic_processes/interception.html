@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Interception &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>Interception &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,7 +14,9 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -31,7 +33,7 @@
             <a href="../../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -64,33 +66,34 @@
 <li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#svat">SVAT</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../storages/surface.html">Surface</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../storages/soil.html">Soil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 <li class="toctree-l4"><a class="reference internal" href="snow.html">Snow accumulation and snow melt</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Interception</a></li>
 <li class="toctree-l4"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
 <li class="toctree-l4"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
-<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#svat-crop">SVAT-CROP</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../crop_phenology.html">Crop phenology</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../storages/surface.html">Surface</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../storages/soil.html">Soil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 <li class="toctree-l4"><a class="reference internal" href="snow.html">Snow accumulation and snow melt</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Interception</a></li>
 <li class="toctree-l4"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
 <li class="toctree-l4"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
-<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#oned">ONED</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../storages/surface.html">Surface</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../storages/soil.html">Soil</a></li>
+<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 <li class="toctree-l4"><a class="reference internal" href="snow.html">Snow accumulation and snow melt</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Interception</a></li>
 <li class="toctree-l4"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="surface_runoff.html">Surface runoff</a></li>
 <li class="toctree-l4"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lateral_flow_soil.html">Subsurface runoff</a></li>
-<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="reference internal" href="../model_structures.html#oned-event">ONED-EVENT</a><ul class="current">
@@ -99,9 +102,9 @@
 <li class="toctree-l4"><a class="reference internal" href="snow.html">Snow accumulation and snow melt</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Interception</a></li>
 <li class="toctree-l4"><a class="reference internal" href="infiltration.html">Infiltration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="surface_runoff.html">Surface runoff</a></li>
 <li class="toctree-l4"><a class="reference internal" href="vertical_flow_soil.html">Percolation / Capillary rise</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lateral_flow_soil.html">Subsurface runoff</a></li>
-<li class="toctree-l4"><a class="reference internal" href="evapotranspiration.html">Evapotranspiration</a></li>
 </ul>
 </li>
 </ul>
@@ -155,19 +158,30 @@
            <div itemprop="articleBody">
              
   <section id="interception">
-<h1>Interception<a class="headerlink" href="#interception" title="Permalink to this headline">¶</a></h1>
+<h1>Interception<a class="headerlink" href="#interception" title="Permalink to this heading">¶</a></h1>
 <p>Interception storage is represented by a bucket. The storage is filled by
 liquid and solid precipitation and spills if the storage is full.</p>
 <section id="interception-from-upper-interception-storage">
-<h2>Interception from upper interception storage<a class="headerlink" href="#interception-from-upper-interception-storage" title="Permalink to this headline">¶</a></h2>
+<h2>Interception from upper interception storage<a class="headerlink" href="#interception-from-upper-interception-storage" title="Permalink to this heading">¶</a></h2>
+<p>Interception by upper interception storage <span class="math notranslate nohighlight">\(INT_{upper}\)</span> at time step <span class="math notranslate nohighlight">\(t\)</span> (mm <span class="math notranslate nohighlight">\(\Delta t^{-1}\)</span>):</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}INT_{upper}=\left\{\begin{array}{lr}
+PREC \cdot (1 - c_{throughfall}) &amp; PREC \cdot (1 - c_{throughfall}) \leq S_{tot-int-upper} - S_{int-upper} \\
+S_{tot-int-upper} - S_{int-upper} &amp; PREC \cdot (1 - c_{throughfall}) &gt; S_{tot-int-upper} - S_{int-upper}
+\end{array}\right.\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(PREC\)</span> is precipitation (mm <span class="math notranslate nohighlight">\(\Delta t^{-1}\)</span>), <span class="math notranslate nohighlight">\(c_{throughfall}\)</span> is the throughfall coeffcient of the canopy, <span class="math notranslate nohighlight">\(S_{int-upper}\)</span> is the
+storage volume of the upper interception storage at time step t (mm) and <span class="math notranslate nohighlight">\(S_{tot-int-upper}\)</span> is the  available storage volume of the upper interception storage (mm).</p>
 </section>
 <section id="interception-from-lower-interception-storage">
-<h2>Interception from lower interception storage<a class="headerlink" href="#interception-from-lower-interception-storage" title="Permalink to this headline">¶</a></h2>
+<h2>Interception from lower interception storage<a class="headerlink" href="#interception-from-lower-interception-storage" title="Permalink to this heading">¶</a></h2>
+<p>Interception by lower interception storage <span class="math notranslate nohighlight">\(INT_{lower}\)</span> at time step <span class="math notranslate nohighlight">\(t\)</span> (mm <span class="math notranslate nohighlight">\(\Delta t^{-1}\)</span>):</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}\frac{\Delta S_{int-lower}}{\Delta t}=\left\{\begin{array}{lr}
-PREC(i) &amp; PREC(i) \leq S_{tot-int-lower} - S_{int-lower} \\
-S_{tot-int-lower} - S_{int-lower} &amp; PREC(i) &gt; S_{tot-int-lower} - S_{int-lower}
+\[\begin{split}INT_{lower}=\left\{\begin{array}{lr}
+PREC &amp; PREC \leq S_{tot-int-lower} - S_{int-lower} \\
+S_{tot-int-lower} - S_{int-lower} &amp; PREC &gt; S_{tot-int-lower} - S_{int-lower}
 \end{array}\right.\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(PREC\)</span> is precipitation (mm <span class="math notranslate nohighlight">\(\Delta t^{-1}\)</span>), <span class="math notranslate nohighlight">\(S_{int-lower}\)</span> is the
+storage volume of the lower interception storage at time step t (mm) and <span class="math notranslate nohighlight">\(S_{tot-int-lower}\)</span> is the available storage volume of the lower interception storage (mm).</p>
 </section>
 </section>
 

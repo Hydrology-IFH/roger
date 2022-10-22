@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1:gpus=1:default
-#PBS -l walltime=12:00:00
+#PBS -l walltime=8:00:00
 #PBS -l pmem=4000mb
 #PBS -N oxygen18_deterministic_svat_pow_mc_10
 #PBS -m bea

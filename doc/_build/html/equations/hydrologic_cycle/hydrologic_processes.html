@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hydrologic processes &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>Hydrologic processes &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,7 +14,9 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -30,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -48,7 +50,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/analysis.html">Analysis of simulations with Roger</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
@@ -63,6 +65,7 @@
 <li class="toctree-l3"><a class="reference internal" href="hydrologic_processes/infiltration.html">Infiltration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hydrologic_processes/surface_runoff.html">Surface runoff</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html">Percolation / Capillary rise</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrologic_processes/viscous_flow.html">Viscous flow</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hydrologic_processes/lateral_flow_soil.html">Subsurface runoff</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hydrologic_processes/groundwater_flow.html">Groundwater flow</a></li>
 </ul>
@@ -118,8 +121,10 @@
            <div itemprop="articleBody">
              
   <section id="hydrologic-processes">
-<h1>Hydrologic processes<a class="headerlink" href="#hydrologic-processes" title="Permalink to this headline">¶</a></h1>
-<p>Contains equations to describe hydrologic processes.</p>
+<h1>Hydrologic processes<a class="headerlink" href="#hydrologic-processes" title="Permalink to this heading">¶</a></h1>
+<p>Contains equations to describe the hydrologic processes. The processes have
+a sequential order and updates implicitely the corresponding storage voluem by either
+subtracting or adding to the storage volume.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/evapotranspiration.html">Evapotranspiration</a><ul>
@@ -150,6 +155,7 @@
 <li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/vertical_flow_soil.html#capillary-rise">Capillary rise</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/viscous_flow.html">Viscous flow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydrologic_processes/lateral_flow_soil.html">Subsurface runoff</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/lateral_flow_soil.html#lateral-subsurface-runoff-via-macropores">Lateral subsurface runoff via macropores</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydrologic_processes/lateral_flow_soil.html#lateral-subsurface-runoff-via-soil-matrix">Lateral subsurface runoff via soil matrix</a></li>

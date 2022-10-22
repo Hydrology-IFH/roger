@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StorAge selection (SAS) functions &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>StorAge selection (SAS) functions &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,7 +14,9 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -31,7 +33,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -118,7 +120,7 @@
            <div itemprop="articleBody">
              
   <section id="storage-selection-sas-functions">
-<h1>StorAge selection (SAS) functions<a class="headerlink" href="#storage-selection-sas-functions" title="Permalink to this headline">¶</a></h1>
+<h1>StorAge selection (SAS) functions<a class="headerlink" href="#storage-selection-sas-functions" title="Permalink to this heading">¶</a></h1>
 <a class="reference internal image-reference" href="../../_images/SAS_functions.png"><img alt="../../_images/SAS_functions.png" class="align-center" src="../../_images/SAS_functions.png" style="width: 300px;" /></a>
 <p>Travel time distributions are calculated with fractional SAS functions
 (-; see van der Velde et al., 2012):</p>
@@ -134,13 +136,13 @@ distribution of the hydrologic flux (where <span class="math notranslate nohighl
 (mm; i.e. storage volume below permanent wilting point is not considered) and
 <span class="math notranslate nohighlight">\(P_S (T,t)\)</span> is the cumulative probability distribution of the storage (where <span class="math notranslate nohighlight">\(p_S (T,t)\)</span> is the probability distribution).</p>
 <section id="uniform">
-<h2>Uniform<a class="headerlink" href="#uniform" title="Permalink to this headline">¶</a></h2>
+<h2>Uniform<a class="headerlink" href="#uniform" title="Permalink to this heading">¶</a></h2>
 <p>The uniform distribution function has no age preference.</p>
 <div class="math notranslate nohighlight">
 \[\Omega_Q(T,t)=P_S(T,t)\]</div>
 </section>
 <section id="dirac">
-<h2>Dirac<a class="headerlink" href="#dirac" title="Permalink to this headline">¶</a></h2>
+<h2>Dirac<a class="headerlink" href="#dirac" title="Permalink to this heading">¶</a></h2>
 <div class="math notranslate nohighlight">
 \[\begin{split}\Omega_Q(T,t)= \begin{cases}0, &amp; T \leq T_{dirac} \\
 1, &amp; T &gt; T_{dirac} \end{cases}\end{split}\]</div>
@@ -149,7 +151,7 @@ Please note, that a closed form of <span class="math notranslate nohighlight">\(
 is not available.</p>
 </section>
 <section id="kumaraswamy">
-<h2>Kumaraswamy<a class="headerlink" href="#kumaraswamy" title="Permalink to this headline">¶</a></h2>
+<h2>Kumaraswamy<a class="headerlink" href="#kumaraswamy" title="Permalink to this heading">¶</a></h2>
 <p>The Kumaraswamy distribution function (Kumaraswamy, 1980) provides flexibility to
 represent a preference for younger water (<span class="math notranslate nohighlight">\(\alpha_Q = 1\)</span> and <span class="math notranslate nohighlight">\(\beta_Q &gt; 1\)</span>)
 or preference for older water (<span class="math notranslate nohighlight">\(\alpha_Q &gt; 1\)</span> and <span class="math notranslate nohighlight">\(\beta_Q = 1\)</span>).</p>
@@ -157,7 +159,7 @@ or preference for older water (<span class="math notranslate nohighlight">\(\alp
 \[\Omega_Q(T,t)=1-((1-(P_S(T,t))^{\alpha_Q})^{\beta_Q})\]</div>
 </section>
 <section id="gamma">
-<h2>Gamma<a class="headerlink" href="#gamma" title="Permalink to this headline">¶</a></h2>
+<h2>Gamma<a class="headerlink" href="#gamma" title="Permalink to this heading">¶</a></h2>
 <div class="math notranslate nohighlight">
 \[\Omega_Q(T,t)=\frac{\gamma(\alpha, \beta \cdot P_S(T,t)}{\Gamma(\alpha)}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\gamma\)</span> is the regularized lower incomplete gamma function.
@@ -165,12 +167,12 @@ Please note, that a closed form of <span class="math notranslate nohighlight">\(
 function is not available (see Harman, 2015).</p>
 </section>
 <section id="exponential">
-<h2>Exponential<a class="headerlink" href="#exponential" title="Permalink to this headline">¶</a></h2>
+<h2>Exponential<a class="headerlink" href="#exponential" title="Permalink to this heading">¶</a></h2>
 <div class="math notranslate nohighlight">
 \[\Omega_Q(T,t)=1-e^{-k \cdot (P_S(T,t)}\]</div>
 </section>
 <section id="power">
-<h2>Power<a class="headerlink" href="#power" title="Permalink to this headline">¶</a></h2>
+<h2>Power<a class="headerlink" href="#power" title="Permalink to this heading">¶</a></h2>
 <p>The power distribution function provides flexibility to
 represent a preference for younger water (<span class="math notranslate nohighlight">\(k &lt; 1\)</span>)
 or preference for older water (<span class="math notranslate nohighlight">\(k &gt; 1\)</span>).</p>
@@ -178,14 +180,14 @@ or preference for older water (<span class="math notranslate nohighlight">\(k &g
 \[\Omega_Q(T,t)=P_S(T,t)^k\]</div>
 </section>
 <section id="time-variant-sas-function-parameters">
-<h2>Time-variant SAS function parameters<a class="headerlink" href="#time-variant-sas-function-parameters" title="Permalink to this headline">¶</a></h2>
+<h2>Time-variant SAS function parameters<a class="headerlink" href="#time-variant-sas-function-parameters" title="Permalink to this heading">¶</a></h2>
 <p>SAS function parameters can be time-variant. For example, time-variant may be
 described by a linear relationship of the storage volume:</p>
 <div class="math notranslate nohighlight">
 \[a_Q(t)=a_1+a_2 \cdot (1-\frac{S(t)}{S_{sat}-S_{pwp}})\]</div>
 </section>
 <section id="short-description-of-sas-parameterization">
-<h2>Short description of SAS parameterization<a class="headerlink" href="#short-description-of-sas-parameterization" title="Permalink to this headline">¶</a></h2>
+<h2>Short description of SAS parameterization<a class="headerlink" href="#short-description-of-sas-parameterization" title="Permalink to this heading">¶</a></h2>
 <p>SAS parameters are defined in <cite>sas_params_q</cite> where <cite>_q</cite> corresponds
 to the flux e.g. transp.</p>
 <ul class="simple">

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.roger &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>roger.roger &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -13,7 +13,9 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -27,7 +29,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+113.g98149b1.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -435,7 +437,7 @@
     <span class="nd">@roger_routine</span>
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">diagnostics</span><span class="p">,</span> <span class="n">restart</span>
-        <span class="kn">from</span> <span class="nn">roger.core</span> <span class="kn">import</span> <span class="n">surface</span><span class="p">,</span> <span class="n">soil</span><span class="p">,</span> <span class="n">root_zone</span><span class="p">,</span> <span class="n">subsoil</span><span class="p">,</span> <span class="n">groundwater</span><span class="p">,</span> <span class="n">interception</span><span class="p">,</span> <span class="n">snow</span><span class="p">,</span> <span class="n">evapotranspiration</span><span class="p">,</span> <span class="n">infiltration</span><span class="p">,</span> <span class="n">film_flow</span><span class="p">,</span> <span class="n">subsurface_runoff</span><span class="p">,</span> <span class="n">capillary_rise</span><span class="p">,</span> <span class="n">crop</span><span class="p">,</span> <span class="n">groundwater_flow</span><span class="p">,</span> <span class="n">numerics</span><span class="p">,</span> <span class="n">transport</span>
+        <span class="kn">from</span> <span class="nn">roger.core</span> <span class="kn">import</span> <span class="n">surface</span><span class="p">,</span> <span class="n">soil</span><span class="p">,</span> <span class="n">root_zone</span><span class="p">,</span> <span class="n">subsoil</span><span class="p">,</span> <span class="n">groundwater</span><span class="p">,</span> <span class="n">interception</span><span class="p">,</span> <span class="n">snow</span><span class="p">,</span> <span class="n">evapotranspiration</span><span class="p">,</span> <span class="n">infiltration</span><span class="p">,</span> <span class="n">film_flow</span><span class="p">,</span> <span class="n">subsurface_runoff</span><span class="p">,</span> <span class="n">capillary_rise</span><span class="p">,</span> <span class="n">crop</span><span class="p">,</span> <span class="n">groundwater_flow</span><span class="p">,</span> <span class="n">numerics</span><span class="p">,</span> <span class="n">transport</span><span class="p">,</span> <span class="n">adaptive_time_stepping</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_setup_done</span><span class="p">()</span>
 
@@ -451,6 +453,9 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">set_boundary_conditions</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;forcing&quot;</span><span class="p">]:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">set_forcing</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_adaptive_time_stepping</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;adaptive time-stepping&quot;</span><span class="p">]:</span>
+                        <span class="n">adaptive_time_stepping</span><span class="o">.</span><span class="n">adaptive_time_stepping</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">state</span><span class="o">.</span><span class="n">timers</span><span class="p">[</span><span class="s2">&quot;time-variant parameters&quot;</span><span class="p">]:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_crop_phenology</span><span class="p">:</span>
