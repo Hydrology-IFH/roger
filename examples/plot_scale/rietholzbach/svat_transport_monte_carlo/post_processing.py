@@ -574,20 +574,13 @@ def main(nsamples, sas_solver, tmp_dir):
                 v.attrs['units'] = ' '
                 v[:] = onp.arange(dict_dim["n_sas_params"])
 
-            if tm_structure in ['preferential', 'preferential1', 'preferential2',
-                                'advection-dispersion1', 'advection-dispersion2',
-                                'time-variant preferential',
-                                'time-variant advection-dispersion',
-                                'time-variant',
-                                'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion',
-                                'power', 'time-variant power']:
-                try:
-                    v = f.create_variable('sas_params_transp', ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
-                except ValueError:
-                    v = f.get('sas_params_transp')
-                v[:, :, :] = ds_sim_tm["sas_params_transp"].isel(x=idx_best)
-                v.attrs.update(long_name="SAS parameters of transpiration",
-                                units=" ")
+            try:
+                v = f.create_variable('sas_params_transp', ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
+            except ValueError:
+                v = f.get('sas_params_transp')
+            v[:, :, :] = ds_sim_tm["sas_params_transp"].isel(x=idx_best)
+            v.attrs.update(long_name="SAS parameters of transpiration",
+                            units=" ")
             try:
                 v = f.create_variable('sas_params_q_rz', ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
             except ValueError:
