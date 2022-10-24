@@ -45,7 +45,7 @@ def main(tmp_dir, sas_solver):
         for year in years:
             path = str(base_path / "deterministic" / f'SVATTRANSPORT_{tms}_{year}_{sas_solver}.*.nc')
             diag_files = glob.glob(path)
-            states_tm_file = base_path / "deterministic" / "states_bromide_benchmark.nc"
+            states_tm_file = base_path / "states_bromide_benchmark.nc"
             if not os.path.exists(states_tm_file):
                 with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
                     click.echo(f'Merge output files of {tm_structure}-{year} into {states_tm_file.as_posix()}')
@@ -150,7 +150,7 @@ def main(tmp_dir, sas_solver):
             br_obs_file = base_path.parent / "observations" / "bromide_breakthrough.csv"
             df_br_obs = pd.read_csv(br_obs_file, sep=';', skiprows=1, index_col=0)
             # load simulation
-            states_tm_file = base_path / "deterministic" / "states_bromide_benchmark.nc"
+            states_tm_file = base_path / "states_bromide_benchmark.nc"
             ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{tm_structure}-{year}", engine="h5netcdf")
             # assign date
             days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
@@ -195,11 +195,28 @@ def main(tmp_dir, sas_solver):
             # average median travel time of percolation (in days)
             df_metrics_year.loc[year, 'tt50'] = onp.nanmedian(ds_sim_tm['ttavg_q_ss'].isel(x=0, y=0).values[315:716])
 
+            # write simulated bulk sample to output file
+            ds_sim_tm = ds_sim_tm.load()  # required to release file lock
+            ds_sim_tm = ds_sim_tm.close()
+            del ds_sim_tm
+            states_tm_file = base_path / "states_bromide_benchmark.nc"
+            with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+                try:
+                    v = f.groups[f"{tm_structure}-{year}"].create_variable('C_q_ss_mmol', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                    v[0, 0, :] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
+                    v.attrs.update(long_name="bulk sample of bromide in percolation",
+                                   units="mmol/l")
+                except ValueError:
+                    v = f.groups[f"{tm_structure}-{year}"].get('d18O_perc_bs')
+                    v[0, 0, :] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
+                    v.attrs.update(long_name="bulk sample of bromide in percolation",
+                                   units="mmol/l")
+
         axes.set_ylabel('Br [mmol $l^{-1}$]')
         axes.set_xlabel('Time [days since injection]')
         axes.set_ylim(0,)
         axes.set_xlim((0, 400))
-        axes.legend(fontsize=6, frameon=False, bbox_to_anchor=(1,1), loc="upper left")
+        axes.legend(fontsize=6, frameon=False, bbox_to_anchor=(1, 1), loc="upper left")
         fig.tight_layout()
         file = f'bromide_breakthrough_{tms}.png'
         path = base_path_figs / file

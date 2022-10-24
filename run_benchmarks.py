@@ -193,13 +193,17 @@ def run(**kwargs):
                         lines.append(' \n')
                         if backend in ['numpy-mpi', 'jax-mpi']:
                             lines.append('# load module dependencies\n')
+                            lines.append('module purge\n')
                             lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
+                            lines.append('export OMP_NUM_THREADS=1\n')
                             lines.append(' \n')
                         elif backend in ['jax-gpu', 'jax-gpu-mpi']:
                             lines.append('# load module dependencies\n')
+                            lines.append('module purge\n')
                             lines.append('module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4\n')
                             lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
                             lines.append('module load lib/cudnn/8.2-cuda-11.4\n')
+                            lines.append('export OMP_NUM_THREADS=1\n')
                             lines.append(' \n')
                         if backend in ['numpy']:
                             lines.append('eval "$(conda shell.bash hook)"\n')
