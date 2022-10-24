@@ -677,13 +677,13 @@ def main(tmp_dir):
     TT = ds_hydrus_tt['bTT_perc'].values
     # for i in range(len(date_hydrus_tt)):
     #     axes[-1].plot(TT[i, :], lw=1, color='grey')
-    tend = 700
+    skipt = 1000
     x = onp.arange(TT.shape[-1])
-    y1 = onp.quantile(TT[:TT.shape[0]-tend, :], 0.05, axis=0)
-    y2 = onp.quantile(TT[:TT.shape[0]-tend, :], 0.95, axis=0)
+    y1 = onp.nanquantile(TT[skipt:, :], 0.05, axis=0)
+    y2 = onp.nanquantile(TT[skipt:, :], 0.95, axis=0)
     axes[-1].fill_between(x, y1, y2, facecolor='grey', alpha=0.5)
-    axes[-1].plot(onp.quantile(TT[:TT.shape[0]-tend, :], 0.5, axis=0), ls='--', lw=1, color='black')
-    axes[-1].plot(onp.mean(TT[:TT.shape[0]-tend, :], axis=0), lw=1, color='black')
+    axes[-1].plot(onp.nanquantile(TT[skipt:, :], 0.5, axis=0), ls='--', lw=1, color='black')
+    axes[-1].plot(onp.nanmean(TT[skipt:, :], axis=0), lw=1, color='black')
     axes[-1].set_xlim((0, 4000))
     axes[-1].set_ylim((0, 1))
     axes[-1].set_xlabel('T [days]')
@@ -693,34 +693,36 @@ def main(tmp_dir):
     file_str = 'bTTD_benchmark.png'
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=250)
-    #
-    # # plot cumulative backward travel time distributions
-    # TT = ds_hydrus_tt['TT_perc'].values
-    # fig, axs = plt.subplots(figsize=(6, 3))
-    # for i in range(365, len(date_hydrus_tt)):
-    #     axs.plot(TT[i, :], lw=1, color='grey')
-    # axs.set_xlim((0, 4000))
-    # axs.set_ylim((0, 1))
-    # axs.set_ylabel(r'$\overleftarrow{P}(T,t)$')
-    # axs.set_xlabel('T [days]')
-    # fig.tight_layout()
-    # file_str = 'bTTD_hydrus.png'
-    # path_fig = base_path_figs / file_str
-    # fig.savefig(path_fig, dpi=250)
-    #
-    # # plot cumulative forward travel time distributions
-    # TT = ds_hydrus_tt['fTT_perc'].values
-    # fig, axs = plt.subplots(figsize=(6, 3))
-    # for i in range(len(date_hydrus_tt)-365):
-    #     axs.plot(TT[i, :], lw=1, color='grey')
-    # axs.set_xlim((0, 4000))
-    # axs.set_ylim((0, 1))
-    # axs.set_ylabel(r'$\overrightarrow{P}(T,t)$')
-    # axs.set_xlabel('T [days]')
-    # fig.tight_layout()
-    # file_str = 'fTTD_hydrus.png'
-    # path_fig = base_path_figs / file_str
-    # fig.savefig(path_fig, dpi=250)
+
+    # plot cumulative backward travel time distributions
+    skipt = 1000
+    TT = ds_hydrus_tt['TT_perc'].values
+    fig, axs = plt.subplots(figsize=(6, 3))
+    for i in range(0, len(date_hydrus_tt)-skipt):
+        axs.plot(TT[i, :], lw=1, color='grey')
+    axs.set_xlim((0, 4000))
+    axs.set_ylim((0, 1))
+    axs.set_ylabel(r'$\overleftarrow{P}(T,t)$')
+    axs.set_xlabel('T [days]')
+    fig.tight_layout()
+    file_str = 'bTTD_hydrus.png'
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=250)
+
+    # plot cumulative forward travel time distributions
+    skipt = 1000
+    TT = ds_hydrus_tt['fTT_perc'].values
+    fig, axs = plt.subplots(figsize=(6, 3))
+    for i in range(skipt, len(date_hydrus_tt)):
+        axs.plot(TT[i, :], lw=1, color='grey')
+    axs.set_xlim((0, 4000))
+    axs.set_ylim((0, 1))
+    axs.set_ylabel(r'$\overrightarrow{P}(T,t)$')
+    axs.set_xlabel('T [days]')
+    fig.tight_layout()
+    file_str = 'fTTD_hydrus.png'
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=250)
 
     # # perform sensitivity analysis
     # dict_params_metrics_tm_sa = {}
