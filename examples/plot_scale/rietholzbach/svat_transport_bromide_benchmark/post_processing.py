@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 sns.set_style("ticks")
 
 
+@click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir, sas_solver):
@@ -42,7 +43,7 @@ def main(tmp_dir, sas_solver):
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
         for year in years:
-            path = str(base_path / f'SVATTRANSPORT_{tms}_{year}.*.nc')
+            path = str(base_path / f'SVATTRANSPORT_{tms}_{year}_{sas_solver}.*.nc')
             diag_files = glob.glob(path)
             states_tm_file = base_path / "states_bromide_benchmark.nc"
             with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
@@ -56,6 +57,7 @@ def main(tmp_dir, sas_solver):
                     references='',
                     comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
                     model_structure='SVAT transport model with free drainage',
+                    sas_solver=f'{sas_solver}',
                 )
                 # collect dimensions
                 for dfs in diag_files:

@@ -87,7 +87,7 @@ def _round_to_multiple(num, divisor):
     "-pm",
     "--pmem",
     type=int,
-    default=8000,
+    default=4000,
     help="Process memory in mb",
 )
 @click.option(
@@ -246,14 +246,13 @@ def run(**kwargs):
                             pmem = int(4000 * (size / 10000))
                             if pmem > 128000:
                                 pmem = 128000
-                            cmd = f"qsub -q short -N benchmark_{backend}_{real_size} -l nodes=1:ppn=1,walltime=1:00:00,pmem={pmem}mb job.sh"
+                            cmd = f"qsub -q short -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=1,walltime=1:00:00,pmem={pmem}mb job.sh"
                         elif backend in ['numpy-mpi', 'jax-mpi']:
-                            nnodes = int(nproc/25)
-                            cmd = f"qsub -q short -N benchmark_{backend}_{real_size} -l nodes={nnodes}:ppn=25,walltime=1:00:00,pmem={pmem}mb job.sh"
+                            cmd = f"qsub -q short -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn={nproc},walltime=1:00:00,pmem={pmem}mb job.sh"
                         elif backend in ['jax-gpu']:
-                            cmd = f"qsub -q gpu -N benchmark_{backend}_{real_size} -l nodes=1:ppn=1:gpus=1:default,walltime=1:00:00,pmem=24000mb job.sh"
+                            cmd = f"qsub -q gpu -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=1:gpus=1:default,walltime=1:00:00,pmem=24000mb job.sh"
                         elif backend in ['jax-gpu-mpi']:
-                            cmd = f"qsub -q gpu -N benchmark_{backend}_{real_size} -l nodes=1:ppn=2:gpus=2:default,walltime=1:00:00,pmem=24000mb job.sh"
+                            cmd = f"qsub -q gpu -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=2:gpus=2:default,walltime=1:00:00,pmem=24000mb job.sh"
 
                     if kwargs["debug"]:
                         click.echo(f"  $ {cmd}")
@@ -304,12 +303,12 @@ def run(**kwargs):
                             all_passed = False
                             continue
 
-                        click.echo(f"submitted benchmark_{backend}_{real_size}")
+                        click.echo(f"submitted {f.split('.')[0]}_{backend}_{real_size}")
                         out_data[f].append(
                             {
                                 "backend": backend,
                                 "size": real_size,
-                                "timing_file": f"benchmark_{backend}_{real_size}.o{job_id}",
+                                "timing_file": f"{f.split('.')[0]}_{backend}_{real_size}.o{job_id}",
                             }
                         )
 
