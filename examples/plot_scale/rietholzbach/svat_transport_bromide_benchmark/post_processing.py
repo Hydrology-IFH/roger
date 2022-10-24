@@ -43,98 +43,95 @@ def main(tmp_dir, sas_solver):
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
         for year in years:
-            path = str(base_path / f'SVATTRANSPORT_{tms}_{year}_{sas_solver}.*.nc')
+            path = str(base_path / "deterministic" / f'SVATTRANSPORT_{tms}_{year}_{sas_solver}.*.nc')
             diag_files = glob.glob(path)
-            states_tm_file = base_path / "states_bromide_benchmark.nc"
-            with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
-                click.echo(f'Merge output files of {tm_structure}-{year} into {states_tm_file.as_posix()}')
-                if f"{tm_structure}-{year}" not in list(f.groups.keys()):
-                    f.create_group(f"{tm_structure}-{year}")
-                f.attrs.update(
-                    date_created=datetime.datetime.today().isoformat(),
-                    title='RoGeR transport simulations for virtual bromide experiments at Rietholzbach Lysimeter site',
-                    institution='University of Freiburg, Chair of Hydrology',
-                    references='',
-                    comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
-                    model_structure='SVAT transport model with free drainage',
-                    sas_solver=f'{sas_solver}',
-                )
-                # collect dimensions
-                for dfs in diag_files:
-                    with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                        f.attrs.update(
-                            roger_version=df.attrs['roger_version']
-                        )
-                        # set dimensions with a dictionary
-                        if not dfs.split('/')[-1].split('.')[1] == 'constant':
-                            dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
-                            time = onp.array(df.variables.get('Time'))
-                for dfs in diag_files:
-                    with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                        if not f.groups[f"{tm_structure}-{year}"].dimensions:
-                            f.groups[f"{tm_structure}-{year}"].dimensions = dict_dim
-                            v = f.groups[f"{tm_structure}-{year}"].create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
-                            v.attrs['long_name'] = 'Number of model run'
-                            v.attrs['units'] = ''
-                            v[:] = onp.arange(dict_dim["x"])
-                            v = f.groups[f"{tm_structure}-{year}"].create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
-                            v.attrs['long_name'] = ''
-                            v.attrs['units'] = ''
-                            v[:] = onp.arange(dict_dim["y"])
-                            v = f.groups[f"{tm_structure}-{year}"].create_variable('ages', ('ages',), float, compression="gzip", compression_opts=1)
-                            v.attrs['long_name'] = 'Water ages'
-                            v.attrs['units'] = 'days'
-                            v[:] = onp.arange(1, dict_dim["ages"]+1)
-                            v = f.groups[f"{tm_structure}-{year}"].create_variable('nages', ('nages',), float, compression="gzip", compression_opts=1)
-                            v.attrs['long_name'] = 'Water ages (cumulated)'
-                            v.attrs['units'] = 'days'
-                            v[:] = onp.arange(0, dict_dim["nages"])
-                            v = f.groups[f"{tm_structure}-{year}"].create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
-                            var_obj = df.variables.get('Time')
-                            v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                                           units=var_obj.attrs["units"])
-                            v[:] = time
-                        for var_sim in list(df.variables.keys()):
-                            var_obj = df.variables.get(var_sim)
-                            if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions:
-                                v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                                vals = onp.array(var_obj)
-                                v[:, :, :] = vals.swapaxes(0, 2)
-                                v.attrs.update(long_name=var_obj.attrs["long_name"],
+            states_tm_file = base_path / "deterministic" / "states_bromide_benchmark.nc"
+            if not os.path.exists(states_tm_file):
+                with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+                    click.echo(f'Merge output files of {tm_structure}-{year} into {states_tm_file.as_posix()}')
+                    if f"{tm_structure}-{year}" not in list(f.groups.keys()):
+                        f.create_group(f"{tm_structure}-{year}")
+                    f.attrs.update(
+                        date_created=datetime.datetime.today().isoformat(),
+                        title='RoGeR transport simulations for virtual bromide experiments at Rietholzbach Lysimeter site',
+                        institution='University of Freiburg, Chair of Hydrology',
+                        references='',
+                        comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
+                        model_structure='SVAT transport model with free drainage',
+                        sas_solver=f'{sas_solver}',
+                    )
+                    # collect dimensions
+                    for dfs in diag_files:
+                        with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                            f.attrs.update(
+                                roger_version=df.attrs['roger_version']
+                            )
+                            # set dimensions with a dictionary
+                            if not dfs.split('/')[-1].split('.')[1] == 'constant':
+                                dict_dim = {'x': len(df.variables['x']), 'y': len(df.variables['y']), 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
+                                time = onp.array(df.variables.get('Time'))
+                    for dfs in diag_files:
+                        with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                            if not f.groups[f"{tm_structure}-{year}"].dimensions:
+                                f.groups[f"{tm_structure}-{year}"].dimensions = dict_dim
+                                v = f.groups[f"{tm_structure}-{year}"].create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
+                                v.attrs['long_name'] = 'Number of model run'
+                                v.attrs['units'] = ''
+                                v[:] = onp.arange(dict_dim["x"])
+                                v = f.groups[f"{tm_structure}-{year}"].create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
+                                v.attrs['long_name'] = ''
+                                v.attrs['units'] = ''
+                                v[:] = onp.arange(dict_dim["y"])
+                                v = f.groups[f"{tm_structure}-{year}"].create_variable('ages', ('ages',), float, compression="gzip", compression_opts=1)
+                                v.attrs['long_name'] = 'Water ages'
+                                v.attrs['units'] = 'days'
+                                v[:] = onp.arange(1, dict_dim["ages"]+1)
+                                v = f.groups[f"{tm_structure}-{year}"].create_variable('nages', ('nages',), float, compression="gzip", compression_opts=1)
+                                v.attrs['long_name'] = 'Water ages (cumulated)'
+                                v.attrs['units'] = 'days'
+                                v[:] = onp.arange(0, dict_dim["nages"])
+                                v = f.groups[f"{tm_structure}-{year}"].create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
+                                var_obj = df.variables.get('Time')
+                                v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                                units=var_obj.attrs["units"])
-                            elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
-                                v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
-                                vals = onp.array(var_obj)
-                                vals = vals.swapaxes(0, 3)
-                                vals = vals.swapaxes(1, 2)
-                                v[:, :, :] = vals[:, :, :, 0]
-                                v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                               units=var_obj.attrs["units"])
-                            elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
-                                v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
-                                vals = onp.array(var_obj)
-                                vals = vals.swapaxes(0, 3)
-                                vals = vals.swapaxes(1, 2)
-                                vals = vals.swapaxes(2, 3)
-                                v[:, :, :, :] = vals
-                                v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                               units=var_obj.attrs["units"])
-                            elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
-                                v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
-                                vals = onp.array(var_obj)
-                                vals = vals.swapaxes(0, 3)
-                                vals = vals.swapaxes(1, 2)
-                                vals = vals.swapaxes(2, 3)
-                                v[:, :, :, :] = vals
-                                v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                               units=var_obj.attrs["units"])
+                                v[:] = time
+                            for var_sim in list(df.variables.keys()):
+                                var_obj = df.variables.get(var_sim)
+                                if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions:
+                                    v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                                    vals = onp.array(var_obj)
+                                    v[:, :, :] = vals.swapaxes(0, 2)
+                                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                   units=var_obj.attrs["units"])
+                                elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
+                                    v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
+                                    vals = onp.array(var_obj)
+                                    vals = vals.swapaxes(0, 3)
+                                    vals = vals.swapaxes(1, 2)
+                                    v[:, :, :] = vals[:, :, :, 0]
+                                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                   units=var_obj.attrs["units"])
+                                elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
+                                    v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
+                                    vals = onp.array(var_obj)
+                                    vals = vals.swapaxes(0, 3)
+                                    vals = vals.swapaxes(1, 2)
+                                    vals = vals.swapaxes(2, 3)
+                                    v[:, :, :, :] = vals
+                                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                   units=var_obj.attrs["units"])
+                                elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
+                                    v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
+                                    vals = onp.array(var_obj)
+                                    vals = vals.swapaxes(0, 3)
+                                    vals = vals.swapaxes(1, 2)
+                                    vals = vals.swapaxes(2, 3)
+                                    v[:, :, :, :] = vals
+                                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                   units=var_obj.attrs["units"])
 
-    tm_structures = ['complete-mixing', 'piston',
-                     'preferential', 'advection-dispersion',
-                     'time-variant preferential',
-                     'time-variant advection-dispersion']
     years = onp.arange(1997, 2007).tolist()
-    cmap = cm.get_cmap('Greys')
+    cmap = cm.get_cmap('Reds')
     norm = Normalize(vmin=onp.min(years), vmax=onp.max(years))
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
@@ -145,29 +142,30 @@ def main(tmp_dir, sas_solver):
         days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
         date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
         ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
-        fig, axes = plt.subplots(1, 1, figsize=(10, 6))
         df_metrics_year = pd.DataFrame(index=years)
+        fig, axes = plt.subplots(1, 1, figsize=(6, 2))
         for year in years:
             click.echo(f'Calculate metrics for {tm_structure}-{year} ...')
             # load observations
             br_obs_file = base_path.parent / "observations" / "bromide_breakthrough.csv"
             df_br_obs = pd.read_csv(br_obs_file, sep=';', skiprows=1, index_col=0)
             # load simulation
-            states_tm_file = base_path / "states_tm_bromide_benchmark.nc"
+            states_tm_file = base_path / "deterministic" / "states_bromide_benchmark.nc"
             ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{tm_structure}-{year}", engine="h5netcdf")
             # assign date
             days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
             date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-            ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
+            ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
 
             # plot percolation rate (in l/h) and bromide concentration (mmol/l)
-            df_perc_br_sim = pd.DataFrame(index=date_sim_hm, columns=['perc', 'Br_conc_mg', 'Br_conc_mmol'])
+            idx = pd.date_range(start=f'1/1/{year}', end=f'31/12/{year+1}')
+            df_perc_br_sim = pd.DataFrame(index=idx, columns=['perc', 'Br_conc_mg', 'Br_conc_mmol'])
             # in liter per hour
-            df_perc_br_sim.loc[:, 'perc'] = ds_sim_hm.sel(date=slice(str(year), str(year + 1)))['q_ss'].isel(x=0, y=0).values * (3.14/24)
+            df_perc_br_sim.loc[:, 'perc'] = ds_sim_hm.sel(Time=slice(str(year), str(year + 1)))['q_ss'].isel(y=0).values * (3.14/24)
             # in mg per liter
-            df_perc_br_sim.loc[:, 'Br_conc_mg'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values
+            df_perc_br_sim.loc[:, 'Br_conc_mg'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values[1:]
             # in mmol per liter
-            df_perc_br_sim.loc[:, 'Br_conc_mmol'] = df_perc_br_sim.loc[:, 'Br_conc_mg'] / 79.904
+            df_perc_br_sim.loc[:, 'Br_conc_mmol'] = (df_perc_br_sim.loc[:, 'Br_conc_mg'] / 79.904) * 3.14
             # daily samples from day 0 to day 220
             df_daily = df_perc_br_sim.loc[:df_perc_br_sim.index[315+220], 'Br_conc_mmol'].to_frame()
             # weekly samples after 220 days
@@ -176,19 +174,7 @@ def main(tmp_dir, sas_solver):
             df_perc_br_sim = df_perc_br_sim.loc[:, 'perc':'Br_conc_mg'].join(df_daily_weekly)
             df_perc_br_sim = df_perc_br_sim.iloc[315:716, :]
             df_perc_br_sim.index = range(len(df_perc_br_sim.index))
-            fig, axes = plt.subplots(1, 1, figsize=(10, 6))
-            axes.plot(df_perc_br_sim.index, df_perc_br_sim['Br_conc_mmol'], color='black', ls='-', colors=cmap(norm(year)))
-            axes.set_ylabel('Br [mmol $l^{-1}$]')
-            axes.set_xlabel('Time [days since injection]')
-            axes.set_ylim(0,)
-            axes.set_xlim(0,)
-            ax2 = axes.twinx()
-            ax2.plot(df_perc_br_sim.index, df_perc_br_sim['perc'], lw=1.5, color='black', ls=':')
-            ax2.set_ylabel('Percolation [l $hour^{-1}$]')
-            ax2.set_ylim(0,)
-            file = f'perc_br_{tms}.png'
-            path = base_path_figs / file
-            fig.savefig(path, dpi=250)
+            axes.plot(df_perc_br_sim.dropna().index, df_perc_br_sim.dropna()['Br_conc_mmol'], ls='-', color=cmap(norm(year)), label=f'{year}')
 
             # join observations on simulations
             obs_vals = df_br_obs.iloc[:, 0].values
@@ -208,6 +194,16 @@ def main(tmp_dir, sas_solver):
             df_metrics_year.loc[year, 'ttavg'] = onp.nanmean(ds_sim_tm['ttavg_q_ss'].isel(x=0, y=0).values[315:716])
             # average median travel time of percolation (in days)
             df_metrics_year.loc[year, 'tt50'] = onp.nanmedian(ds_sim_tm['ttavg_q_ss'].isel(x=0, y=0).values[315:716])
+
+        axes.set_ylabel('Br [mmol $l^{-1}$]')
+        axes.set_xlabel('Time [days since injection]')
+        axes.set_ylim(0,)
+        axes.set_xlim((0, 400))
+        axes.legend(fontsize=6, frameon=False, bbox_to_anchor=(1,1), loc="upper left")
+        fig.tight_layout()
+        file = f'bromide_breakthrough_{tms}.png'
+        path = base_path_figs / file
+        fig.savefig(path, dpi=250)
 
         # write evaluation metrics to .csv
         path_csv = base_path / "results" / f"bromide_metrics_{tms}.csv"

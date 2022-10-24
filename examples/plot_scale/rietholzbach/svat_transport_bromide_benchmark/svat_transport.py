@@ -9,7 +9,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant_advection-dispersion', 'power', 'time-variant_power']), default='complete-mixing')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant_advection-dispersion', 'power', 'time-variant_power']), default='time-variant_advection-dispersion')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
@@ -435,7 +435,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         def after_timestep(self, state):
             pass
 
-    years = onp.arange(1997, 2007).tolist()
+    years = onp.arange(1998, 2007).tolist()
     tms = transport_model_structure.replace("_", " ")
     for year in years:
         model = SVATTRANSPORTSetup()
