@@ -409,7 +409,7 @@ def main(sas_solver, tmp_dir):
                         rows = (df_rows['sc'].values == sc)
                         df_eval = df_eval.loc[rows, :]
                     df_eval = df_eval.dropna()
-                    df_params_metrics.loc[nrow, var_sim] = onp.mean(df_eval.loc[:, 'sim'].values)
+                    df_params_metrics.loc[nrow, f'{var_sim}{sc1}'] = onp.nanmean(df_eval.loc[:, 'sim'].values)
 
             # avoid defragmentation of DataFrame
             df_params_metrics = df_params_metrics.copy()
