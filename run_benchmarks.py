@@ -53,11 +53,15 @@ def _factorize(num):
 
 
 def _decompose_num(num, into=2):
-    out = [1] * into
-    for fac, i in zip(_factorize(num), itertools.cycle(range(into))):
-        out[i] *= fac
+    if into > 1:
+        out = [1] * into
+        for fac, i in zip(_factorize(num), itertools.cycle(range(into))):
+            out[i] *= fac
+            result = tuple(map(int, out))
+    else:
+        result = tuple(int(num), 1)
 
-    return tuple(map(int, out))
+    return result
 
 
 def _round_to_multiple(num, divisor):
@@ -113,7 +117,7 @@ def _round_to_multiple(num, divisor):
 @click.option("--float-type", default="float64", help="Data type for floating point arrays in Roger components")
 @click.option("--burnin", default=3, type=int, help="Number of iterations to exclude in performance statistic")
 def run(**kwargs):
-    proc_decom = _decompose_num(kwargs["nproc"], 2)
+    proc_decom = _decompose_num(kwargs["nproc"], 1)
     nproc = kwargs["nproc"]
     pmem = kwargs["pmem"]
 
@@ -128,9 +132,11 @@ def run(**kwargs):
             click.echo(f"running benchmark {f}")
 
             for size in kwargs["sizes"]:
-                n = math.ceil((size) ** (1 / 2))
-                nx = _round_to_multiple(n, proc_decom[0])
-                ny = _round_to_multiple(n, proc_decom[1])
+                # n = math.ceil((size) ** (1 / 2))
+                # nx = _round_to_multiple(n, proc_decom[0])
+                # ny = _round_to_multiple(n, proc_decom[1])
+                nx = _round_to_multiple(size, proc_decom[0])
+                ny = 1
                 real_size = nx * ny
 
                 click.echo(f" current size: {real_size}")
