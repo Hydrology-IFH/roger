@@ -59,7 +59,7 @@ def _decompose_num(num, into=2):
             out[i] *= fac
             result = tuple(map(int, out))
     else:
-        result = tuple(int(num), 1)
+        result = (int(num), 1)
 
     return result
 
