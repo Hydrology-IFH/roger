@@ -430,7 +430,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         def after_timestep(self, state):
             pass
 
-    years = onp.arange(1997, 2006).tolist()
+    years = onp.arange(1997, 2007).tolist()
     tms = transport_model_structure.replace("_", " ")
     for year in years:
         model = SVATTRANSPORTSetup()

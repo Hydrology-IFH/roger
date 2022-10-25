@@ -130,7 +130,7 @@ def main(tmp_dir, sas_solver):
                                     v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                    units=var_obj.attrs["units"])
 
-    years = onp.arange(1997, 2007).tolist()
+    years = onp.arange(1997, 2006).tolist()
     cmap = cm.get_cmap('Reds')
     norm = Normalize(vmin=onp.min(years), vmax=onp.max(years))
     for tm_structure in tm_structures:
