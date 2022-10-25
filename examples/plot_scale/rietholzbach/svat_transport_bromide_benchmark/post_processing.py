@@ -165,7 +165,7 @@ def main(tmp_dir, sas_solver):
             # in mg per liter
             df_perc_br_sim.loc[:, 'Br_conc_mg'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values[1:]
             # in mmol per liter
-            df_perc_br_sim.loc[:, 'Br_conc_mmol'] = (df_perc_br_sim.loc[:, 'Br_conc_mg'] * 3.14) / 79900
+            df_perc_br_sim.loc[:, 'Br_conc_mmol'] = (df_perc_br_sim.loc[:, 'Br_conc_mg'] / 79.904)
             # daily samples from day 0 to day 220
             df_daily = df_perc_br_sim.loc[:df_perc_br_sim.index[315+220], 'Br_conc_mmol'].to_frame()
             # weekly samples after 220 days
@@ -207,7 +207,7 @@ def main(tmp_dir, sas_solver):
                     v.attrs.update(long_name="bulk sample of bromide in percolation",
                                    units="mmol/l")
                 except ValueError:
-                    v = f.groups[f"{tm_structure}-{year}"].get('d18O_perc_bs')
+                    v = f.groups[f"{tm_structure}-{year}"].get('Br_conc_mmol')
                     v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
                     v.attrs.update(long_name="bulk sample of bromide in percolation",
                                    units="mmol/l")
