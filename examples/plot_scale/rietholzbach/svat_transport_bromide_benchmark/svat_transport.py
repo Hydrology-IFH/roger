@@ -86,15 +86,10 @@ def main(transport_model_structure, sas_solver, tmp_dir):
 
             # join solute input on closest rainfall event
             for i in range(nn_sol):
-                rain_sum = allocate(state.dimensions, ("x", "y"))
                 input_itt = npx.nanargmin(npx.where(rain_idx[2:-2, 2:-2, :] - sol_idx[i] < 0, npx.nan, rain_idx[2:-2, 2:-2, :] - sol_idx[i]), axis=-1)
                 for x in range(input_itt.shape[0]):
                     for y in range(input_itt.shape[1]):
                         start_rain = input_itt[x, y]
-                        rain_sum = update(
-                            rain_sum,
-                            at[x+2, y+2], npx.max(npx.where(npx.cumsum(prec[x, y, start_rain:], axis=-1) <= 20, npx.max(npx.cumsum(prec[x, y, start_rain:], axis=-1), axis=-1), 0)),
-                        )
                         end_rain = npx.max(npx.where(npx.cumsum(prec[x, y, start_rain:]) <= 20, npx.arange(prec.shape[-1])[start_rain:], 0))
                         if npx.sum(prec[x, y, start_rain:end_rain]) <= 0:
                             end_rain = end_rain + 1
@@ -102,7 +97,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                         # proportions for redistribution
                         M_IN = update(
                             M_IN,
-                            at[x+2, y+2, start_rain:end_rain], vs.M_IN[x+2, y+2, sol_idx[i], npx.newaxis] * (prec[x, y, start_rain:end_rain] / rain_sum[x+2, y+2, npx.newaxis]),
+                            at[x+2, y+2, start_rain:end_rain], vs.M_IN[x+2, y+2, sol_idx[i]] * (prec[x, y, start_rain:end_rain] / npx.sum(prec[x, y, start_rain:end_rain])),
                         )
 
             C_IN = update(
