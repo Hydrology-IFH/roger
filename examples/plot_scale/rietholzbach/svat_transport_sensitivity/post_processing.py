@@ -117,7 +117,8 @@ def main(sas_solver, tmp_dir):
                         for i, dfs in enumerate(diag_files):
                             x1 = x1x2[i]
                             x2 = x1x2[i+1]
-                            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                            file = base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}_{x1}_{x2}.{diagnostic}.nc"
+                            with h5netcdf.File(file, 'r', decode_vlen_strings=False) as df:
                                 for var_sim in list(df.variables.keys()):
                                     var_obj = df.variables.get(var_sim)
                                     if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
