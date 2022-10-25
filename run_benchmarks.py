@@ -117,7 +117,7 @@ def _round_to_multiple(num, divisor):
 @click.option("--float-type", default="float64", help="Data type for floating point arrays in Roger components")
 @click.option("--burnin", default=3, type=int, help="Number of iterations to exclude in performance statistic")
 def run(**kwargs):
-    proc_decom = _decompose_num(kwargs["nproc"], 1)
+    proc_decom = _decompose_num(kwargs["nproc"], 2)
     nproc = kwargs["nproc"]
     pmem = kwargs["pmem"]
 
@@ -132,11 +132,9 @@ def run(**kwargs):
             click.echo(f"running benchmark {f}")
 
             for size in kwargs["sizes"]:
-                # n = math.ceil((size) ** (1 / 2))
-                # nx = _round_to_multiple(n, proc_decom[0])
-                # ny = _round_to_multiple(n, proc_decom[1])
-                nx = _round_to_multiple(size, proc_decom[0])
-                ny = 1
+                n = math.ceil((size) ** (1 / 2))
+                nx = _round_to_multiple(n, proc_decom[0])
+                ny = _round_to_multiple(n, proc_decom[1])
                 real_size = nx * ny
 
                 click.echo(f" current size: {real_size}")
@@ -271,7 +269,7 @@ def run(**kwargs):
                             cmd = f"qsub -q gpu -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=2:gpus=2:default,walltime=2:00:00,pmem=24000mb job.sh"
 
                     if kwargs["debug"]:
-                        click.echo(f"  $ {cmd} {nproc} {proc_decom[0]} {proc_decom[1]}")
+                        click.echo(f"  $ {cmd}")
 
                     sys.stdout.write(f"  {backend:<15} ... ")
                     sys.stdout.flush()
