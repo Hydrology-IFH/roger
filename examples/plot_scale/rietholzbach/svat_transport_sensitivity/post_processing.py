@@ -71,7 +71,7 @@ def main(sas_solver, tmp_dir):
                     # initial diagnostic file
                     with h5netcdf.File(diag_file, 'w', decode_vlen_strings=False) as f:
                         f.attrs.update(
-                            date_created=datetime.Timetime.today().isoformat(),
+                            date_created=datetime.datetime.today().isoformat(),
                             title=f'RoGeR {tm_structure} transport model Monte Carlo simulations at Rietholzbach lysimeter site',
                             institution='University of Freiburg, Chair of Hydrology',
                             references='',
