@@ -175,9 +175,9 @@ def main(sas_solver, tmp_dir):
     # merge results into single file
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        path = str(base_path / f"SVATTRANSPORT_{tms}.*.nc")
+        path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}.*.nc")
         diag_files = glob.glob(path)
-        states_tm_file = base_path / f"states_{tms}_sensitivity.nc"
+        states_tm_file = base_path / f"states_{tms}_saltelli.nc"
         if not os.path.exists(states_tm_file):
             click.echo(f'Merge output files of {tm_structure} into {states_tm_file.as_posix()}')
             with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
@@ -309,7 +309,7 @@ def main(sas_solver, tmp_dir):
         ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
 
         # load transport simulations
-        states_tm_file = base_path / f"states_{tms}_sensitivity.nc"
+        states_tm_file = base_path / f"states_{tms}_saltelli.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
         # assign date
         days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
@@ -422,7 +422,7 @@ def main(sas_solver, tmp_dir):
         # write simulated bulk sample to output file
         ds_sim_tm = ds_sim_tm.load()
         ds_sim_tm = ds_sim_tm.close()
-        states_tm_file = base_path / f"states_{tms}_sensitivity.nc"
+        states_tm_file = base_path / f"states_{tms}_saltelli.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             try:
                 v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)

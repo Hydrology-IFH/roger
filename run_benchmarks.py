@@ -250,7 +250,7 @@ def run(**kwargs):
                             pmem_serial = int(4000 * (size / 10000))
                             if pmem_serial > 128000:
                                 pmem_serial = 128000
-                            cmd = f"qsub -q short -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=1,walltime=0:30:00,pmem={pmem_serial}mb job.sh"
+                            cmd = f"qsub -q short -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=1,walltime=2:00:00,pmem={pmem_serial}mb job.sh"
                         elif backend in ['numpy-mpi', 'jax-mpi']:
                             if nproc <= 28:
                                 nnodes = 1
@@ -258,11 +258,11 @@ def run(**kwargs):
                             else:
                                 nnodes = int(nproc/28)
                                 ppn = 28
-                            cmd = f"qsub -q short -N {f.split('.')[0]}_{backend}_{real_size} -l nodes={nnodes}:ppn={ppn},walltime=0:30:00,pmem={pmem}mb job.sh"
+                            cmd = f"qsub -q short -N {f.split('.')[0]}_{backend}_{real_size} -l nodes={nnodes}:ppn={ppn},walltime=2:00:00,pmem={pmem}mb job.sh"
                         elif backend in ['jax-gpu']:
-                            cmd = f"qsub -q gpu -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=1:gpus=1:default,walltime=0:30:00,pmem=24000mb job.sh"
+                            cmd = f"qsub -q gpu -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=1:gpus=1:default,walltime=2:00:00,pmem=24000mb job.sh"
                         elif backend in ['jax-gpu-mpi']:
-                            cmd = f"qsub -q gpu -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=2:gpus=2:default,walltime=0:30:00,pmem=24000mb job.sh"
+                            cmd = f"qsub -q gpu -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=2:gpus=2:default,walltime=2:00:00,pmem=24000mb job.sh"
 
                     if kwargs["debug"]:
                         click.echo(f"  $ {cmd}")
