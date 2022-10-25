@@ -189,7 +189,7 @@ def main(tmp_dir, sas_solver):
             # temporal correlation
             df_metrics_year.loc[year, 'r'] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
             # tracer recovery (in %)
-            df_metrics_year.loc[year, 'Br_mass_recovery'] = onp.sum(ds_sim_tm['M_q_ss'].isel(x=0, y=0).values[315:716] * 3.14) / 79900
+            df_metrics_year.loc[year, 'Br_mass_recovery'] = onp.sum(ds_sim_tm['M_q_ss'].isel(x=0, y=0).values[315:716]) / (79900 / 3.14)
             # average travel time of percolation (in days)
             df_metrics_year.loc[year, 'ttavg'] = onp.nanmean(ds_sim_tm['ttavg_q_ss'].isel(x=0, y=0).values[315:716])
             # average median travel time of percolation (in days)

@@ -265,7 +265,7 @@ def run(**kwargs):
                             cmd = f"qsub -q gpu -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=2:gpus=2:default,walltime=2:00:00,pmem=24000mb job.sh"
 
                     if kwargs["debug"]:
-                        click.echo(f"  $ {cmd}")
+                        click.echo(f"  $ {cmd} {nproc} {proc_decom[0]} {proc_decom[1]}")
 
                     sys.stdout.write(f"  {backend:<15} ... ")
                     sys.stdout.flush()

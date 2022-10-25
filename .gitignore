@@ -11,7 +11,7 @@ debug_snippets.py
 # benchmark jobs and output
 benchmark_*.json
 timing_files_*.json
-benchmarks/*.sh
+benchmarks/job.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

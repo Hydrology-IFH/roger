@@ -175,7 +175,7 @@ def main(sas_solver, tmp_dir):
     # merge results into single file
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}.*.nc")
+        path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}.*.nc")
         diag_files = glob.glob(path)
         states_tm_file = base_path / f"states_{tms}_saltelli.nc"
         if not os.path.exists(states_tm_file):
