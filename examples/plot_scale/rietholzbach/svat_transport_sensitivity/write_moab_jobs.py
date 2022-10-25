@@ -106,7 +106,7 @@ def main(nsamples, job_type, sas_solver, split_size):
                 tm1 = transport_models_abrev[tm]
                 tms = tm.replace(" ", "_")
                 script_name = f'{tracer}_{sas_solver}_svat_{tm1}_sa_{x1}_{x2}'
-                output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_monte_carlo'
+                output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
                 tms = tm.replace(" ", "_")
                 lines = []
                 lines.append('#!/bin/bash\n')

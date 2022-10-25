@@ -433,13 +433,9 @@ def main(transport_model_structure, sas_solver, tmp_dir):
 
         @roger_routine
         def after_timestep(self, state):
-            vs = state.variables
+            pass
 
-            print(vs.C_s[2, 2, 1])
-            print(vs.C_q_ss[2, 2])
-            print(vs.ttavg_q_ss[2, 2])
-
-    years = onp.arange(2002, 2003).tolist()
+    years = onp.arange(2006, 2007).tolist()
     tms = transport_model_structure.replace("_", " ")
     for year in years:
         model = SVATTRANSPORTSetup()

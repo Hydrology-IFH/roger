@@ -16,26 +16,162 @@ mpl.use("agg")
 sns.set_style("ticks")
 
 
+@click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
-def main(tmp_dir):
+def main(sas_solver, tmp_dir):
     if tmp_dir:
         base_path = Path(tmp_dir)
     else:
         base_path = Path(__file__).parent
-
+    age_max = "age_max_11"
     # directory of results
     base_path_results = base_path / "results"
+    if not os.path.exists(base_path_results):
+        os.mkdir(base_path_results)
+    base_path_results = base_path / "results" / sas_solver
+    if not os.path.exists(base_path_results):
+        os.mkdir(base_path_results)
+    base_path_results = base_path / "results" / sas_solver / age_max
     if not os.path.exists(base_path_results):
         os.mkdir(base_path_results)
     # directory of figures
     base_path_figs = base_path / "figures"
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
+    base_path_figs = base_path / "figures" / sas_solver
+    if not os.path.exists(base_path_figs):
+        os.mkdir(base_path_figs)
+    base_path_figs = base_path / "figures" / sas_solver / age_max
+    if not os.path.exists(base_path_figs):
+        os.mkdir(base_path_figs)
 
-    # merge results into single file
+    # merge diagnostics into single file
     tm_structures = ['advection-dispersion',
                      'time-variant advection-dispersion']
+    diagnostics = ['average',
+                   'constant',
+                   'maximum']
+    for tm_structure in tm_structures:
+        if tm_structure in ['advection-dispersion']:
+            nsamples = 1024 * 5
+        elif tm_structure in ['time-variant advection-dispersion']:
+            nsamples = 1024 * 8
+        x1x2 = onp.arange(0, nsamples, 500).tolist()
+        if nsamples not in x1x2:
+            x1x2.append(nsamples)
+        for diagnostic in diagnostics:
+            tms = tm_structure.replace(" ", "_")
+            path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}_*_*.{diagnostic}.nc")
+            diag_files = glob.glob(path)
+            if diag_files:
+                diag_file = base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}.{diagnostic}.nc"
+                if not os.path.exists(diag_file):
+                    click.echo(f'Merge {diagnostic} of {tm_structure} ...')
+                    # initial diagnostic file
+                    with h5netcdf.File(diag_file, 'w', decode_vlen_strings=False) as f:
+                        f.attrs.update(
+                            date_created=datetime.Timetime.today().isoformat(),
+                            title=f'RoGeR {tm_structure} transport model Monte Carlo simulations at Rietholzbach lysimeter site',
+                            institution='University of Freiburg, Chair of Hydrology',
+                            references='',
+                            comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
+                            model_structure=f'SVAT {tm_structure} transport model with free drainage',
+                            sas_solver=f'{sas_solver}',
+                            roger_version=f'{roger.__version__}'
+                        )
+                        # collect dimensions
+                        with h5netcdf.File(diag_files[0], 'r', decode_vlen_strings=False) as df:
+                            dict_dim = {'x': nsamples, 'y': 1, 'Time': len(df.variables['Time']), 'ages': len(df.variables['ages']), 'nages': len(df.variables['nages']), 'n_sas_params': len(df.variables['n_sas_params'])}
+                            time_obj = df.variables.get('Time')
+                            time_origin = time_obj.attrs["time_origin"]
+                            time_unit = time_obj.attrs["units"]
+                            time = onp.array(df.variables.get('Time'))
+                        f.dimensions = dict_dim
+                        v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
+                        v.attrs['long_name'] = 'model run'
+                        v.attrs['units'] = ''
+                        v[:] = onp.arange(dict_dim["x"])
+                        v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
+                        v.attrs['long_name'] = ''
+                        v.attrs['units'] = ''
+                        v[:] = onp.arange(dict_dim["y"])
+                        v = f.create_variable('ages', ('ages',), float, compression="gzip", compression_opts=1)
+                        v.attrs['long_name'] = 'Water ages'
+                        v.attrs['units'] = 'days'
+                        v[:] = onp.arange(1, dict_dim["ages"]+1)
+                        v = f.create_variable('nages', ('nages',), float, compression="gzip", compression_opts=1)
+                        v.attrs['long_name'] = 'Water ages (cumulated)'
+                        v.attrs['units'] = 'days'
+                        v[:] = onp.arange(0, dict_dim["nages"])
+                        v = f.create_variable('n_sas_params', ('n_sas_params',), float, compression="gzip", compression_opts=1)
+                        v.attrs['long_name'] = 'Number of SAS parameters'
+                        v.attrs['units'] = ''
+                        v[:] = onp.arange(0, dict_dim["n_sas_params"])
+                        v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
+                        v.attrs.update(time_origin=time_origin,
+                                       units=time_unit)
+                        v[:] = time
+
+                    with h5netcdf.File(diag_file, 'a', decode_vlen_strings=False) as f:
+                        for i, dfs in enumerate(diag_files):
+                            x1 = x1x2[i]
+                            x2 = x1x2[i+1]
+                            with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
+                                for var_sim in list(df.variables.keys()):
+                                    var_obj = df.variables.get(var_sim)
+                                    if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
+                                        try:
+                                            v = f.create_variable(var_sim, ('Time', 'y', 'x'), float, compression="gzip", compression_opts=1)
+                                        except ValueError:
+                                            v = f.get(var_sim)
+                                        vals = onp.array(var_obj)
+                                        v[:, :, x1:x2] = vals
+                                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                       units=var_obj.attrs["units"])
+                                        del var_obj, vals
+                                    elif var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
+                                        try:
+                                            v = f.create_variable(var_sim, ('Time', 'y', 'x'), float, compression="gzip", compression_opts=1)
+                                        except ValueError:
+                                            v = f.get(var_sim)
+                                        vals = onp.array(var_obj)
+                                        v[:, :, x1:x2] = vals
+                                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                       units=var_obj.attrs["units"])
+                                        del var_obj, vals
+                                    elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
+                                        try:
+                                            v = f.create_variable(var_sim, ('Time', 'n_sas_params', 'y', 'x'), float, compression="gzip", compression_opts=1)
+                                        except ValueError:
+                                            v = f.get(var_sim)
+                                        vals = onp.array(var_obj)
+                                        v[:, :, :, x1:x2] = vals
+                                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                       units=var_obj.attrs["units"])
+                                        del var_obj, vals
+                                    elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
+                                        try:
+                                            v = f.create_variable(var_sim, ('Time', 'ages', 'y', 'x'), float, compression="gzip", compression_opts=1)
+                                        except ValueError:
+                                            v = f.get(var_sim)
+                                        vals = onp.array(var_obj)
+                                        v[:, :, :, x1:x2] = vals
+                                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                       units=var_obj.attrs["units"])
+                                        del var_obj, vals
+                                    elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
+                                        try:
+                                            v = f.create_variable(var_sim, ('Time', 'nages', 'y', 'x'), float, compression="gzip", compression_opts=1)
+                                        except ValueError:
+                                            v = f.get(var_sim)
+                                        vals = onp.array(var_obj)
+                                        v[:, :, :, x1:x2] = vals
+                                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                       units=var_obj.attrs["units"])
+                                        del var_obj, vals
+
+    # merge results into single file
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
         path = str(base_path / f"SVATTRANSPORT_{tms}.*.nc")
@@ -135,10 +271,6 @@ def main(tmp_dir):
                                                units=var_obj.attrs["units"])
                                 del var_obj, vals
 
-    # load simulation
-    states_hm_file = base_path / "states_hm.nc"
-    ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
-
     # load observations (measured data)
     path_obs = base_path.parent / "observations" / "rietholzbach_lysimeter.nc"
     ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
@@ -163,24 +295,25 @@ def main(tmp_dir):
     df_thetap.loc[cond2, 'sc'] = 2  # normal
     df_thetap.loc[cond3, 'sc'] = 3  # wet
 
-    dict_params_metrics = {}
-    tm_structures = ['advection-dispersion',
-                     'time-variant advection-dispersion']
     for tm_structure in tm_structures:
         click.echo(f'Calculate metrics for {tm_structure} ...')
         tms = tm_structure.replace(" ", "_")
 
-        # load simulation
-        states_tm_file = base_path / f"states_{tms}_sensitivity.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-
+        # load hydrologic simulations
+        states_hm_file = base_path / f"states_hm_best_for_{tms}.nc"
+        ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
         # assign date
         days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-        days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
         date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+        ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
+
+        # load transport simulations
+        states_tm_file = base_path / f"states_{tms}_sensitivity.nc"
+        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+        # assign date
+        days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
         date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-        ds_sim_hm = ds_sim_hm.assign_coords(date=("Time", date_sim_hm))
-        ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
+        ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
 
         # DataFrame with sampled model parameters and the corresponding metrics
         nx = ds_sim_tm.dims['x']  # number of rows
@@ -192,13 +325,16 @@ def main(tmp_dir):
             df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
             df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
         elif tm_structure == "time-variant advection-dispersion":
-            df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
-            df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
-            df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'b1_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten()
+            df_params_metrics.loc[:, 'b2_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'a1_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten()
+            df_params_metrics.loc[:, 'a2_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'a1_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten()
+            df_params_metrics.loc[:, 'a2_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
 
         # compare observations and simulations
         ncol = 0
-        idx = ds_sim_tm.date.values  # time index
+        idx = ds_sim_tm.Time.values  # time index
         d18O_perc_bs = onp.zeros((nx, 1, len(idx)))
         df_idx_bs = pd.DataFrame(index=date_obs, columns=['sol'])
         df_idx_bs.loc[:, 'sol'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
@@ -278,10 +414,13 @@ def main(tmp_dir):
             # avoid defragmentation of DataFrame
             df_params_metrics = df_params_metrics.copy()
 
+        # write to .txt
+        file = base_path_results / f"params_metrics_{tms}.txt"
+        df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
+
         # write simulated bulk sample to output file
         ds_sim_tm = ds_sim_tm.load()
         ds_sim_tm = ds_sim_tm.close()
-        del ds_sim_tm
         states_tm_file = base_path / f"states_{tms}_sensitivity.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             try:
@@ -292,11 +431,6 @@ def main(tmp_dir):
             except ValueError:
                 v = f.get('d18O_perc_bs')
                 v[:, :, :] = d18O_perc_bs
-
-        # write to .txt
-        file = base_path_results / f"params_metrics_{tms}.txt"
-        df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
-        dict_params_metrics[tm_structure] = df_params_metrics
     return
 
 
