@@ -40,13 +40,13 @@ def main(tmp_dir, sas_solver):
                      'advection-dispersion',
                      'time-variant advection-dispersion']
     years = onp.arange(1997, 2007).tolist()
-    for tm_structure in tm_structures:
-        tms = tm_structure.replace(" ", "_")
-        for year in years:
-            path = str(base_path / "deterministic" / f'SVATTRANSPORT_{tms}_{year}_{sas_solver}.*.nc')
-            diag_files = glob.glob(path)
-            states_tm_file = base_path / "states_bromide_benchmark.nc"
-            if not os.path.exists(states_tm_file):
+    states_tm_file = base_path / "states_bromide_benchmark.nc"
+    if not os.path.exists(states_tm_file):
+        for tm_structure in tm_structures:
+            tms = tm_structure.replace(" ", "_")
+            for year in years:
+                path = str(base_path / "deterministic" / f'SVATTRANSPORT_{tms}_{year}_{sas_solver}.*.nc')
+                diag_files = glob.glob(path)
                 with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
                     click.echo(f'Merge output files of {tm_structure}-{year} into {states_tm_file.as_posix()}')
                     if f"{tm_structure}-{year}" not in list(f.groups.keys()):
@@ -165,7 +165,7 @@ def main(tmp_dir, sas_solver):
             # in mg per liter
             df_perc_br_sim.loc[:, 'Br_conc_mg'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values[1:]
             # in mmol per liter
-            df_perc_br_sim.loc[:, 'Br_conc_mmol'] = (df_perc_br_sim.loc[:, 'Br_conc_mg'] / 79.904) * 3.14
+            df_perc_br_sim.loc[:, 'Br_conc_mmol'] = (df_perc_br_sim.loc[:, 'Br_conc_mg'] * 3.14) / 79900
             # daily samples from day 0 to day 220
             df_daily = df_perc_br_sim.loc[:df_perc_br_sim.index[315+220], 'Br_conc_mmol'].to_frame()
             # weekly samples after 220 days
@@ -203,12 +203,12 @@ def main(tmp_dir, sas_solver):
             with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
                 try:
                     v = f.groups[f"{tm_structure}-{year}"].create_variable('C_q_ss_mmol', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                    v[0, 0, :] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
+                    v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
                     v.attrs.update(long_name="bulk sample of bromide in percolation",
                                    units="mmol/l")
                 except ValueError:
                     v = f.groups[f"{tm_structure}-{year}"].get('d18O_perc_bs')
-                    v[0, 0, :] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
+                    v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
                     v.attrs.update(long_name="bulk sample of bromide in percolation",
                                    units="mmol/l")
 
