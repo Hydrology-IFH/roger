@@ -350,7 +350,7 @@ def main(sas_solver, tmp_dir):
             sample_no['sample_no'] = range(len(sample_no.index))
             df_perc_18O_sim = pd.DataFrame(index=date_sim_tm, columns=['perc_sim', 'd18O_perc_sim'])
             df_perc_18O_sim['perc_sim'] = ds_sim_hm['q_ss'].isel(y=0).values
-            df_perc_18O_sim['d18O_perc_sim'] = ds_sim_tm['C_q_ss'].isel(x=nrow, y=ncol).values
+            df_perc_18O_sim['d18O_perc_sim'] = ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=ncol).values
             df_perc_18O_sim = df_perc_18O_sim.join(sample_no)
             df_perc_18O_sim.loc[:, 'sample_no'] = df_perc_18O_sim.loc[:, 'sample_no'].fillna(method='bfill', limit=14)
             perc_sum = df_perc_18O_sim.groupby(['sample_no']).sum().loc[:, 'perc_sim']
@@ -387,7 +387,7 @@ def main(sas_solver, tmp_dir):
                 df_eval = df_eval.dropna()
 
                 # calculate metrics
-                var_sim = 'C_q_ss'
+                var_sim = 'C_iso_q_ss'
                 obs_vals = df_eval.loc[:, 'obs'].values
                 sim_vals = df_eval.loc[:, 'sim'].values
                 key_kge = f'KGE_{var_sim}{sc1}'
