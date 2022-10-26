@@ -183,8 +183,8 @@ def main(tmp_dir):
                         key_kge = 'KGE_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_kge] = (Nz / Ni) * eff_swc
                     elif var_sim in ['dS', 'dS_s']:
-                        obs_vals = df_eval.loc[:, 'obs'].values
-                        sim_vals = df_eval.loc[:, 'sim'].values
+                        obs_vals = df_eval.loc['2001':, 'obs'].values
+                        sim_vals = df_eval.loc['2001':, 'sim'].values
                         key_r = 'r_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
                     else:
