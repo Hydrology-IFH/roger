@@ -310,10 +310,9 @@ def main(sas_solver, tmp_dir):
 
         # load transport simulations
         states_tm_file = base_path / f"states_{tms}_saltelli.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
         # assign date
-        days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-        date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+        date_sim_tm = num2date(ds_sim_tm['Time'].values, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
         ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
 
         # DataFrame with sampled model parameters and the corresponding metrics
