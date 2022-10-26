@@ -732,84 +732,84 @@ def main(tmp_dir):
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=250)
 
-    # # perform sensitivity analysis
-    # dict_params_metrics_tm_sa = {}
-    # for tm_structure in transport_models:
-    #     tms = tm_structure.replace(" ", "_")
-    #     file = base_path / "svat_transport_sensitivity" / "results" / f"params_metrics_{tms}.txt"
-    #     df_params_metrics = pd.read_csv(file, sep="\t")
-    #     dict_params_metrics_tm_sa[tm_structure] = {}
-    #     dict_params_metrics_tm_sa[tm_structure]['params_metrics'] = df_params_metrics
-    #
-    # # sampled parameter space
-    # file_path = base_path / "svat_transport_sensitivity" / "param_bounds.yml"
-    # with open(file_path, 'r') as file:
-    #     bounds = yaml.safe_load(file)
-    #
-    # for tm_structure in transport_models:
-    #     tms = tm_structure.replace(" ", "_")
-    #     df_params_metrics = dict_params_metrics_tm_sa[tm_structure]['params_metrics']
-    #     df_params = df_params_metrics.loc[:, bounds[tm_structure]['names']]
-    #     n_params = len(bounds[tm_structure]['names'])
-    #     df_metrics = df_params_metrics.iloc[:, n_params:]
-    #     dict_si = {}
-    #     for name in df_metrics.columns:
-    #         Y = df_metrics[name].values
-    #         Si = sobol.analyze(bounds[tm_structure], Y, calc_second_order=False)
-    #         Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
-    #         dict_si[name] = pd.DataFrame(Si_filter, index=bounds[tm_structure]['names'])
-    #
-    #     # plot sobol indices
-    #     _LABS = {'KGE_C_q_ss': 'KGE',
-    #              'median_TT_q_ss': r'$tt_{50}$',
-    #              'median_SA_s': r'rt_{50}$',
-    #              }
-    #     ncol = len(df_metrics.columns)
-    #     xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds[tm_structure]['names']]
-    #     cmap = cm.get_cmap('Greys')
-    #     norm = Normalize(vmin=0, vmax=2)
-    #     colors = cmap(norm([0.5, 1.5]))
-    #     fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(6, 2))
-    #     for i, name in enumerate(df_metrics.columns):
-    #         indices = dict_si[name][['S1', 'ST']]
-    #         err = dict_si[name][['S1_conf', 'ST_conf']]
-    #         indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
-    #         ax[i].set_xticklabels(xaxis_labels)
-    #         ax[i].set_title(_LABS[name])
-    #         ax[i].legend(["First-order", "Total"], frameon=False)
-    #     ax[-1].legend().set_visible(False)
-    #     ax[-2].legend().set_visible(False)
-    #     ax[-3].legend().set_visible(False)
-    #     ax[0].set_ylabel('Sobol index [-]')
-    #     fig.tight_layout()
-    #     file = base_path_figs / f"sobol_indices_{tms}.png"
-    #     fig.savefig(file, dpi=250)
-    #
-    #     # make dotty plots
-    #     nrow = len(df_metrics.columns)
-    #     ncol = bounds[tm_structure]['num_vars']
-    #     fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
-    #     for i in range(nrow):
-    #         for j in range(ncol):
-    #             y = df_metrics.iloc[:, i]
-    #             x = df_params.iloc[:, j]
-    #             sns.regplot(x=x, y=y, ax=ax[i, j], ci=None, color='k',
-    #                         scatter_kws={'alpha': 0.2, 's': 4, 'color': 'grey'})
-    #             ax[i, j].set_xlabel('')
-    #             ax[i, j].set_ylabel('')
-    #
-    #     for j in range(ncol):
-    #         xlabel = labs._LABS[bounds[tm_structure]['names'][j].split(' ')[0]]
-    #         ax[-1, j].set_xlabel(xlabel)
-    #
-    #     ax[0, 0].set_ylabel(r'$KGE$ [-]')
-    #     ax[1, 0].set_ylabel(r'$\alpha$ [-]')
-    #     ax[2, 0].set_ylabel(r'$\beta$ [-]')
-    #     ax[3, 0].set_ylabel(r'r [-]')
-    #
-    #     fig.subplots_adjust(wspace=0.2, hspace=0.3)
-    #     file = base_path_figs / f"dotty_plots_{tms}.png"
-    #     fig.savefig(file, dpi=250)
+    # perform sensitivity analysis
+    dict_params_metrics_tm_sa = {}
+    for tm_structure in ['advection-dispersion']:
+        tms = tm_structure.replace(" ", "_")
+        file = base_path / "svat_transport_sensitivity" / "results" / f"params_metrics_{tms}.txt"
+        df_params_metrics = pd.read_csv(file, sep="\t")
+        dict_params_metrics_tm_sa[tm_structure] = {}
+        dict_params_metrics_tm_sa[tm_structure]['params_metrics'] = df_params_metrics
+
+    # sampled parameter space
+    file_path = base_path / "svat_transport_sensitivity" / "param_bounds.yml"
+    with open(file_path, 'r') as file:
+        bounds = yaml.safe_load(file)
+
+    metrics_sa = ['KGE_C_iso_q_ss', 'tt50_q_ss', 'rt50_s']
+    for tm_structure in ['advection-dispersion']:
+        tms = tm_structure.replace(" ", "_")
+        df_params_metrics = dict_params_metrics_tm_sa[tm_structure]['params_metrics']
+        df_params = df_params_metrics.loc[:, bounds[tm_structure]['names']]
+        df_metrics = df_params_metrics.loc[:, metrics_sa]
+        dict_si = {}
+        for name in df_metrics.columns:
+            Y = df_metrics[name].values
+            Si = sobol.analyze(bounds[tm_structure], Y, calc_second_order=False)
+            Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
+            dict_si[name] = pd.DataFrame(Si_filter, index=bounds[tm_structure]['names'])
+
+        # plot sobol indices
+        _LABS = {'KGE_C_iso_q_ss': 'KGE',
+                 'tt50_q_ss': r'$TT_{50}$',
+                 'rt50_s': r'RT_{50}$',
+                 }
+        ncol = len(df_metrics.columns)
+        xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds[tm_structure]['names']]
+        cmap = cm.get_cmap('Greys')
+        norm = Normalize(vmin=0, vmax=2)
+        colors = cmap(norm([0.5, 1.5]))
+        fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(6, 2))
+        for i, name in enumerate(df_metrics.columns):
+            indices = dict_si[name][['S1', 'ST']]
+            err = dict_si[name][['S1_conf', 'ST_conf']]
+            indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
+            ax[i].set_xticklabels(xaxis_labels)
+            ax[i].set_title(_LABS[name])
+            ax[i].legend(["First-order", "Total"], frameon=False)
+        ax[-1].legend().set_visible(False)
+        ax[-2].legend().set_visible(False)
+        ax[-3].legend().set_visible(False)
+        ax[0].set_ylabel('Sobol index [-]')
+        fig.tight_layout()
+        file = base_path_figs / f"sobol_indices_{tms}.png"
+        fig.savefig(file, dpi=250)
+
+        # make dotty plots
+        nrow = len(df_metrics.columns)
+        ncol = bounds[tm_structure]['num_vars']
+        fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
+        for i in range(nrow):
+            for j in range(ncol):
+                y = df_metrics.iloc[:, i]
+                x = df_params.iloc[:, j]
+                sns.regplot(x=x, y=y, ax=ax[i, j], ci=None, color='k',
+                            scatter_kws={'alpha': 0.2, 's': 4, 'color': 'grey'})
+                ax[i, j].set_xlabel('')
+                ax[i, j].set_ylabel('')
+
+        for j in range(ncol):
+            xlabel = labs._LABS[bounds[tm_structure]['names'][j].split(' ')[0]]
+            ax[-1, j].set_xlabel(xlabel)
+
+        ax[0, 0].set_ylabel(r'$KGE$ [-]')
+        ax[1, 0].set_ylabel(r'$\alpha$ [-]')
+        ax[2, 0].set_ylabel(r'$\beta$ [-]')
+        ax[3, 0].set_ylabel(r'r [-]')
+
+        fig.subplots_adjust(wspace=0.2, hspace=0.3)
+        file = base_path_figs / f"dotty_plots_{tms}.png"
+        fig.savefig(file, dpi=250)
 
     # # dotty plots of HYDRUS-1D monte carlo simulations
     # file = base_path / "hydrus_benchmark" / "params_metrics.txt"
