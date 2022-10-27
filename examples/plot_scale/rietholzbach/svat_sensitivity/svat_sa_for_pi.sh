@@ -14,7 +14,7 @@ conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_sensitivity
 
 # adapt command to your available scheduler / MPI implementation
-python svat.py -b numpy -d cpu -td "${TMPDIR}" -tms piston
+python svat.py -b jax -d cpu -td "${TMPDIR}" -tms piston
 
 # Write output to temporary SSD of computing node
 echo "Write output to $TMPDIR"
