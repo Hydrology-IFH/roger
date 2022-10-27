@@ -5,7 +5,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant advection-dispersion']), default='advection-dispersion')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant_advection-dispersion']), default='advection-dispersion')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(transport_model_structure, tmp_dir):
@@ -55,10 +55,10 @@ def main(transport_model_structure, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            tms = transport_model_structure.replace(" ", "_")
-            settings.identifier = f"SVAT_for_{tms}"
+            tms = transport_model_structure.replace("_", " ")
+            settings.identifier = f"SVAT_for_{transport_model_structure}"
 
-            settings.nx, settings.ny = self._get_nx(self._base_path, 'params_saltelli.nc', group=transport_model_structure), 1
+            settings.nx, settings.ny = self._get_nx(self._base_path, 'params_saltelli.nc', group=tms), 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
             settings.dx = 1
