@@ -54,7 +54,7 @@ def main(tmp_dir):
         states_hm_si_file = base_path / f"states_hm_saltelli_for_{tms}.nc"
         if not os.path.exists(states_hm_si_file):
             click.echo(f'Merge output files into {states_hm_si_file.as_posix()}')
-            path = str(base_path / "SVAT.*.nc")
+            path = str(base_path / f"SVAT_for_{tms}.*.nc")
             diag_files = glob.glob(path)
             with h5netcdf.File(states_hm_si_file, 'w', decode_vlen_strings=False) as f:
                 f.attrs.update(
