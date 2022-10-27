@@ -431,8 +431,8 @@ def main(tmp_dir):
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                         units=var_obj.attrs["units"])
 
-        # select best 1% simulations
-        click.echo('Write best 1% simulations ...')
+        # select best 100 simulations
+        click.echo('Write best 100 simulations ...')
         df_params_metrics1 = df_params_metrics.copy()
         df_params_metrics1.loc[:, 'id'] = range(len(df_params_metrics1.index))
         df_params_metrics1 = df_params_metrics1.sort_values(by=['E_multi'], ascending=False)

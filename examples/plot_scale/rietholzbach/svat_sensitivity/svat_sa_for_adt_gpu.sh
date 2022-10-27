@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=1
+#PBS -l nodes=1:ppn=1:gpus=1:default
 #PBS -l walltime=24:00:00
 #PBS -l pmem=16000mb
 #PBS -N svat_sa_for_adt_gpu
