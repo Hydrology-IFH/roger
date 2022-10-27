@@ -9,11 +9,12 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
+@click.option("-y", "--year", type=click.Choice([1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006]), default=1997)
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant_advection-dispersion', 'power', 'time-variant_power']), default='time-variant_advection-dispersion')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(transport_model_structure, sas_solver, tmp_dir):
+def main(year, transport_model_structure, sas_solver, tmp_dir):
     from roger import RogerSetup, roger_routine
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, where
@@ -429,55 +430,53 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         def after_timestep(self, state):
             pass
 
-    years = onp.arange(1997, 2007).tolist()
     tms = transport_model_structure.replace("_", " ")
-    for year in years:
-        model = SVATTRANSPORTSetup()
-        # set transport model structure
-        model._set_sas_solver(sas_solver)
-        model._set_tm_structure(tms)
-        identifier = f'SVATTRANSPORT_{transport_model_structure}_{year}_{sas_solver}'
-        model._set_identifier(identifier)
-        # set year
-        model._set_year(year)
-        tms = model._tm_structure.replace(" ", "_")
-        input_path = model._base_path / "input" / str(year)
-        model._set_input_dir(input_path)
-        # export bromide data to .txt
-        idx_start = '%s-01-01' % (year)
-        year_end = year + 1
-        idx_end = '%s-12-31' % (year_end)
-        idx = pd.date_range(start=idx_start,
-                            end=idx_end, freq='D')
-        df_Br = pd.DataFrame(index=idx, columns=['YYYY', 'MM', 'DD', 'hh', 'mm', 'Br'])
-        df_Br['YYYY'] = df_Br.index.year.values
-        df_Br['MM'] = df_Br.index.month.values
-        df_Br['DD'] = df_Br.index.day.values
-        df_Br['hh'] = df_Br.index.hour.values
-        df_Br['mm'] = 0
-        injection_date = '%s-11-12' % (year)
-        df_Br.loc[injection_date, 'Br'] = 79900/3.14  # bromide mass in mg per m2
-        path_txt = input_path / "Br.txt"
-        df_Br.to_csv(path_txt, header=True, index=False, sep="\t")
-        write_forcing_tracer(input_path, 'Br')
-        nc_file = model._base_path / f"states_hm_best_for_{transport_model_structure}.nc"
-        with xr.open_dataset(nc_file, engine="h5netcdf") as ds:
-            days = (ds['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-            date = num2date(days, units=f"days since {ds['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-            ds = ds.assign_coords(Time=("Time", date))
-            ds_year = ds.sel(Time=slice(f'{year - 1}-12-31', f'{year + 1}-12-31'))
-            days_year = date2num(ds_year["Time"].values.astype('M8[ms]').astype('O'), units=f"days since {year-1}-12-31", calendar='standard')
-            ds_year = ds_year.assign_coords(Time=("Time", days_year))
-            ds_year.Time.attrs['units'] = "days"
-            ds_year.Time.attrs['time_origin'] = f"{year-1}-12-31"
-            nc_file_year = model._base_path / "input" / str(year) / f"states_hm_best_for_{transport_model_structure}.nc"
-            ds_year.to_netcdf(nc_file_year, engine="h5netcdf")
-            ds_year = ds_year.load()
-            ds_year = ds_year.close()
-            del ds_year
-        model.setup()
-        model.warmup()
-        model.run()
+    model = SVATTRANSPORTSetup()
+    # set transport model structure
+    model._set_sas_solver(sas_solver)
+    model._set_tm_structure(tms)
+    identifier = f'SVATTRANSPORT_{transport_model_structure}_{year}_{sas_solver}'
+    model._set_identifier(identifier)
+    # set year
+    model._set_year(year)
+    tms = model._tm_structure.replace(" ", "_")
+    input_path = model._base_path / "input" / str(year)
+    model._set_input_dir(input_path)
+    # export bromide data to .txt
+    idx_start = '%s-01-01' % (year)
+    year_end = year + 1
+    idx_end = '%s-12-31' % (year_end)
+    idx = pd.date_range(start=idx_start,
+                        end=idx_end, freq='D')
+    df_Br = pd.DataFrame(index=idx, columns=['YYYY', 'MM', 'DD', 'hh', 'mm', 'Br'])
+    df_Br['YYYY'] = df_Br.index.year.values
+    df_Br['MM'] = df_Br.index.month.values
+    df_Br['DD'] = df_Br.index.day.values
+    df_Br['hh'] = df_Br.index.hour.values
+    df_Br['mm'] = 0
+    injection_date = '%s-11-12' % (year)
+    df_Br.loc[injection_date, 'Br'] = 79900/3.14  # bromide mass in mg per m2
+    path_txt = input_path / "Br.txt"
+    df_Br.to_csv(path_txt, header=True, index=False, sep="\t")
+    write_forcing_tracer(input_path, 'Br')
+    nc_file = model._base_path / f"states_hm_best_for_{transport_model_structure}.nc"
+    with xr.open_dataset(nc_file, engine="h5netcdf") as ds:
+        days = (ds['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+        date = num2date(days, units=f"days since {ds['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+        ds = ds.assign_coords(Time=("Time", date))
+        ds_year = ds.sel(Time=slice(f'{year - 1}-12-31', f'{year + 1}-12-31'))
+        days_year = date2num(ds_year["Time"].values.astype('M8[ms]').astype('O'), units=f"days since {year-1}-12-31", calendar='standard')
+        ds_year = ds_year.assign_coords(Time=("Time", days_year))
+        ds_year.Time.attrs['units'] = "days"
+        ds_year.Time.attrs['time_origin'] = f"{year-1}-12-31"
+        nc_file_year = model._base_path / "input" / str(year) / f"states_hm_best_for_{transport_model_structure}.nc"
+        ds_year.to_netcdf(nc_file_year, engine="h5netcdf")
+        ds_year = ds_year.load()
+        ds_year = ds_year.close()
+        del ds_year
+    model.setup()
+    model.warmup()
+    model.run()
     return
 
 
