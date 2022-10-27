@@ -25,11 +25,16 @@ def main(nsamples, transport_model_structure, tmp_dir):
         def _set_input_dir(self, path):
             self._input_dir = path
 
-        def _read_var_from_nc(self, var, path_dir, file):
+        def _read_var_from_nc(self, var, path_dir, file, group=None):
             nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables[var]
-                return npx.array(var_obj)
+            if group:
+                with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                    var_obj = infile.groups[group].variables[var]
+                    return npx.array(var_obj)
+            else:
+                with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                    var_obj = infile.variables[var]
+                    return npx.array(var_obj)
 
         def _get_runlen(self, path_dir, file):
             nc_file = path_dir / file
@@ -37,13 +42,24 @@ def main(nsamples, transport_model_structure, tmp_dir):
                 var_obj = infile.variables['dt']
                 return onp.sum(onp.array(var_obj))
 
+        def _get_nx(self, path_dir, file, group=None):
+            nc_file = path_dir / file
+            if group:
+                with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                    var_obj = infile.groups[group].dimensions['x'].size
+                    return int(var_obj)
+            else:
+                with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                    var_obj = infile.dimensions['x'].size
+                    return int(var_obj)
+
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
             tms = transport_model_structure.replace(" ", "_")
             settings.identifier = f"SVAT_for_{tms}"
 
-            settings.nx, settings.ny = self._nrows, 1
+            settings.nx, settings.ny = self._get_nx(self._base_path, 'params_saltelli.nc', group=transport_model_structure), 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
             settings.dx = 1
@@ -118,7 +134,7 @@ def main(nsamples, transport_model_structure, tmp_dir):
             vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], vs.theta_eff[2:-2, 2:-2] * vs.frac_lp[2:-2, 2:-2])
             vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], vs.theta_eff[2:-2, 2:-2] * vs.frac_fp[2:-2, 2:-2])
             vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_nc("theta_pwp", self._base_path, 'params_saltelli.nc', group=transport_model_structure))
-            vs.ks = update(vs.ks, at[2:-2, :], self._params[:, 5, npx.newaxis])
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path, 'params_saltelli.nc', group=transport_model_structure))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
         @roger_routine
