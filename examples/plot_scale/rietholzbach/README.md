@@ -24,13 +24,13 @@ Single run of hydrologic model
 Monte Carlo simulations with hydrologic model used for parameter estimation
 - `svat_mc.sh`: job script to run Monte Carlo simulations
 - `states_hm_mc.mc`: Hydrologic Monte Carlo simulations
-- `states_hm.mc`: States of best hydrologic simulations
-- `states_hm1.mc`: States of best 1% hydrologic simulations
+- `states_hm1.mc`: States of best hydrologic simulations
+- `states_hm100.mc`: States of best 100 hydrologic simulations
 
 ### svat_sensitivity
 Saltelli simulations with hydrologic model used for sensitvity analysis
 - `svat_sa.sh`: job script to run Saltelli simulations
-- `states_hm_sa.nc`: Hydrologic Saltelli simulations
+- `states_hm_sa_for_*.nc`: Hydrologic Saltelli simulations for corresponding model structure
 
 ## Transport simulations
 In order to solve the transport with StorAge selection (SAS) functions, three schemes (sas_solver) are available:
@@ -44,8 +44,8 @@ Single run of transport model. Requires hydrologic simulations.
 ### svat_transport_monte_carlo
 Monte Carlo simulations with oxygen-18 transport models used for parameter estimation. Requires hydrologic simulations.
 - `oxygen18_*_*_mc.sh`: job script to run Monte Carlo simulations with the provided sas solver and provided transport model structure (e.g. ad=advection-dispersion)
-- `bootstrap.py`: Bootstrap best 1% hydrologic simulations based on size of Monte Carlo samples
-- `states_hm1_bootstrap.nc`: Bootstrap samples of best 1% hydrologic simulations
+- `bootstrap.py`: Bootstrap best 100 hydrologic simulations based on size of Monte Carlo samples
+- `states_hm100_bootstrap.nc`: Bootstrap samples of best 100 hydrologic simulations
 - `states_*_mc.nc`: Monte Carlo transport simulations with provided transport model structure
 - `states_hm.nc`: Hydrologic simulation corresponding to best transport simulation
 

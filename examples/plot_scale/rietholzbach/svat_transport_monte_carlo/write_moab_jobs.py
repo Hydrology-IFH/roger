@@ -5,29 +5,21 @@ import click
 
 @click.option("--job-type", type=click.Choice(['serial', 'single-node', 'multi-node', 'gpu', 'multi-gpu']), default='serial')
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
+@click.option("--split-size", type=int, default=1000)
 @click.command("main")
-def main(job_type, sas_solver):
+def main(job_type, sas_solver, split_size):
     base_path = Path(__file__).parent
     base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
 
     transport_models_abrev = {'preferential': 'pf',
-                              'preferential1': 'pf1',
-                              'preferential2': 'pf2',
                               'advection-dispersion': 'ad',
-                              'advection-dispersion1': 'ad1',
-                              'advection-dispersion2': 'ad2',
                               'time-variant advection-dispersion': 'adt',
-                              'time-variant advection-dispersion1': 'adt1',
-                              'time-variant advection-dispersion2': 'adt2',
                               'time-variant': 'tv',
-                              'time-variant1': 'tv1',
-                              'time-variant2': 'tv2',
-                              'preferential + advection-dispersion': 'pfad',
                               'power': 'pow'}
 
     tracer = 'oxygen18'
-    transport_models = ['advection-dispersion', 'time-variant advection-dispersion', 'preferential', 'power']
+    transport_models = ['advection-dispersion', 'time-variant advection-dispersion', 'preferential', 'power', 'time-variant']
     for tm in transport_models:
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]
@@ -126,7 +118,7 @@ def main(job_type, sas_solver):
         elif job_type == 'gpu':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            for i in range(20):
+            for i in range(10):
                 script_name = f'{tracer}_{sas_solver}_svat_{tm1}_mc_{i}'
                 output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_monte_carlo'
                 tms = tm.replace(" ", "_")
@@ -147,7 +139,7 @@ def main(job_type, sas_solver):
                 lines.append('conda activate roger-gpu\n')
                 lines.append(f'cd {base_path_binac}\n')
                 lines.append(' \n')
-                lines.append('python svat_transport.py --log-all-processes --id %s -b jax -d gpu -ns 500 -tms %s -td "${TMPDIR}" -ss %s\n' % (i, tms, sas_solver))
+                lines.append('python svat_transport.py --log-all-processes --id %s -b jax -d gpu -ns %s -tms %s -td "${TMPDIR}" -ss %s\n' % (i, split_size, tms, sas_solver))
                 lines.append('# Move output from local SSD to global workspace\n')
                 lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                 lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))

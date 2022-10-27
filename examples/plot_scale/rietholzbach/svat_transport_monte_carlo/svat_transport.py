@@ -28,7 +28,7 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
         _identifier = None
         _sas_solver = None
         _nsamples = 1
-        _states_file = 'states_hm1_bootstrap.nc'
+        _states_file = 'states_hm100_bootstrap.nc'
 
         def _set_input_dir(self, path):
             if os.path.exists(path):

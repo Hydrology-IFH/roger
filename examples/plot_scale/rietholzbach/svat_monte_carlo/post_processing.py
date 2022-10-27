@@ -385,7 +385,7 @@ def main(tmp_dir):
         # write states of best simulation
         click.echo('Write best simulation ...')
         states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"
-        states_hm_file = base_path / "states_hm.nc"
+        states_hm_file = base_path / "states_hm1.nc"
         with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
@@ -439,7 +439,7 @@ def main(tmp_dir):
         idx_best1 = df_params_metrics1.loc[:df_params_metrics1.index[99], 'id'].values.tolist()
         # write states of best model run
         states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"
-        states_hm_file = base_path / "states_hm1.nc"
+        states_hm_file = base_path / "states_hm100.nc"
         with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),

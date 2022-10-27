@@ -6,7 +6,7 @@ import click
 import roger
 
 
-@click.option("-rs", "--resample-size", type=int, default=10000)
+@click.option("-rs", "--resample-size", type=int, default=1000)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir, resample_size):
@@ -25,7 +25,7 @@ def main(tmp_dir, resample_size):
     if n_repeat <= 1:
         n_repeat = 1
     # write states of best model run
-    states_hmb_file = base_path / "states_hm1_bootstrap.nc"
+    states_hmb_file = base_path / "states_hm100_bootstrap.nc"
     with h5netcdf.File(states_hmb_file, 'w', decode_vlen_strings=False) as f:
         f.attrs.update(
           date_created=datetime.datetime.today().isoformat(),
