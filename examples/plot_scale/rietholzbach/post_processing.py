@@ -63,7 +63,7 @@ def main(tmp_dir):
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
-    transport_models = ['complete-mixing', 'piston',
+    tm_structures = ['complete-mixing', 'piston',
                         'advection-dispersion',
                         'time-variant advection-dispersion']
 
@@ -577,7 +577,7 @@ def main(tmp_dir):
     #
     # # load metrics of transport simulations
     # dict_params_metrics_tm = {}
-    # for tm_structure in transport_models:
+    # for tm_structure in tm_structures:
     #     tms = tm_structure.replace(" ", "_")
     #     file = base_path / "svat_transport" / "results" / "deterministic" / "age_max_11" / f"params_metrics_{tms}.txt"
     #     df_params_metrics = pd.read_csv(file, sep="\t")
@@ -585,7 +585,7 @@ def main(tmp_dir):
     #     dict_params_metrics_tm[tm_structure]['params_metrics'] = df_params_metrics
     #
     # dict_params_metrics_tm_mc = {}
-    # for tm_structure in transport_models:
+    # for tm_structure in tm_structures:
     #     tms = tm_structure.replace(" ", "_")
     #     file = base_path / "svat_transport_monte_carlo" / "results" / "deterministic" / "age_max_11" / f"params_metrics_{tms}.txt"
     #     df_params_metrics = pd.read_csv(file, sep="\t")
@@ -594,7 +594,7 @@ def main(tmp_dir):
 
     # # dotty plots of transport simulations
     # fig, axes = plt.subplots(12, 4, sharey=True, figsize=(6, 10))
-    # for ncol, tm_structure in enumerate(transport_models):
+    # for ncol, tm_structure in enumerate(tm_structures):
     #     tms = tm_structure.replace(" ", "_")
     #     df_params_metrics = dict_params_metrics_tm_mc[tm_structure]['params_metrics']
     #     df_metrics = df_params_metrics.loc[:, ['KGE_C_iso_q_ss']]
@@ -646,7 +646,7 @@ def main(tmp_dir):
     #
     # # compare best model runs
     # fig, ax = plt.subplots(4, 1, sharey=False, figsize=(6, 5))
-    # for i, tm_structure in enumerate(transport_models):
+    # for i, tm_structure in enumerate(tm_structures):
     #     idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
     #     tms = tm_structure.replace(" ", "_")
     #     # load transport simulation
@@ -675,12 +675,12 @@ def main(tmp_dir):
     #     ax.flatten()[i].set_xlim(df_eval.index[0], df_eval.index[-1])
     # ax[-1].set_xlabel('Time [year]')
     # fig.tight_layout()
-    # file = base_path_figs / "d18O_perc_sim_obs_transport_models.png"
+    # file = base_path_figs / "d18O_perc_sim_obs_tm_structures.png"
     # fig.savefig(file, dpi=250)
     #
     # # compare duration curve of 18O in percolation
     # fig, ax = plt.subplots(1, 4, sharey=True, figsize=(6, 1.2))
-    # for i, tm_structure in enumerate(transport_models):
+    # for i, tm_structure in enumerate(tm_structures):
     #     idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
     #     tms = tm_structure.replace(" ", "_")
     #     # load transport simulation
@@ -730,7 +730,7 @@ def main(tmp_dir):
     # ax[2].set_xlabel('Exceedence probabilty [-]', fontsize=7)
     # ax[3].set_xlabel('Exceedence probabilty [-]', fontsize=7)
     # fig.tight_layout()
-    # file = base_path_figs / "fdc_d18O_perc_sim_obs_transport_models.png"
+    # file = base_path_figs / "fdc_d18O_perc_sim_obs_tm_structures.png"
     # fig.savefig(file, dpi=250)
     #
     # # bromide benchmark
@@ -739,7 +739,7 @@ def main(tmp_dir):
     # cmap_hydrus = cm.get_cmap('Greys')
     # norm = Normalize(vmin=onp.min(years), vmax=onp.max(years))
     # fig, axes = plt.subplots(5, 1, figsize=(6, 5), sharey=False)
-    # for i, tm_structure in enumerate(transport_models):
+    # for i, tm_structure in enumerate(tm_structures):
     #     df_sim_br = pd.DataFrame(index=df_obs_br.index)
     #     for year in years:
     #         states_hydrus_br_file = base_path / "svat_transport_bromide_benchmark" / "states_bromide_benchmark.nc"
@@ -776,7 +776,7 @@ def main(tmp_dir):
     # # travel time benchmark
     # # compare backward travel time distributions
     # fig, axes = plt.subplots(2, 5, sharey=True, figsize=(6, 3))
-    # for i, tm_structure in enumerate(transport_models):
+    # for i, tm_structure in enumerate(tm_structures):
     #     idx_best = dict_params_metrics_tm[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
     #     tms = tm_structure.replace(" ", "_")
     #     states_tm_file = base_path / "svat_transport" / "deterministic" / "age_max_11" / f"states_{tms}.nc"
@@ -849,7 +849,7 @@ def main(tmp_dir):
     #
     # # compare age statistics
     # df_age = pd.DataFrame(index=['MTT_transp', 'MTT_perc'], columns=['CM', 'PI', 'AD', 'AD-TV', 'HYDRUS-1D'])
-    # for i, tm_structure in enumerate(transport_models):
+    # for i, tm_structure in enumerate(tm_structures):
     #     idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
     #     tms = tm_structure.replace(" ", "_")
     #     # load transport simulation
@@ -864,7 +864,7 @@ def main(tmp_dir):
     #
     # # perform sensitivity analysis
     # dict_params_metrics_tm_sa = {}
-    # for tm_structure in ['advection-dispersion']:
+    # for tm_structure in tm_structures:
     #     tms = tm_structure.replace(" ", "_")
     #     file = base_path / "svat_transport_sensitivity" / "results" / "deterministic" / "age_max_11" / f"params_metrics_{tms}.txt"
     #     df_params_metrics = pd.read_csv(file, sep="\t")
@@ -878,12 +878,12 @@ def main(tmp_dir):
     #
     # metrics_sa = ['ttavg_transp', 'tt50_transp', 'ttavg_q_rz', 'tt50_q_rz', 'ttavg_q_ss', 'tt50_q_ss']
     # ncol = len(metrics_sa)
-    # nrow = 2
+    # nrow = len(tm_structures)
     # cmap = cm.get_cmap('Greys')
     # norm = Normalize(vmin=0, vmax=2)
     # colors = cmap(norm([0.5, 1.5]))
-    # fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(6, 3))
-    # for j, tm_structure in enumerate(['advection-dispersion', 'time-variant advection-dispersion']):
+    # fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(6, 6))
+    # for j, tm_structure in enumerate(tm_structures):
     #     tms = tm_structure.replace(" ", "_")
     #     states_tm_file = base_path / "svat_transport_sensitivity" / f"states_{tms}_saltelli.nc"
     #     ds_tm_sa = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)

@@ -160,10 +160,12 @@ def main(tmp_dir, sas_solver):
             # plot percolation rate (in l/h) and bromide concentration (mmol/l)
             idx = pd.date_range(start=f'1/1/{year}', end=f'31/12/{year+1}')
             df_perc_br_sim = pd.DataFrame(index=idx, columns=['perc', 'Br_conc_mg', 'Br_conc_mmol'])
-            # in liter per hour
-            df_perc_br_sim.loc[:, 'perc'] = ds_sim_hm.sel(Time=slice(str(year), str(year + 1)))['q_ss'].isel(y=0).values * (3.14/24)
+            # in mm per day
+            df_perc_br_sim.loc[:, 'perc'] = ds_sim_hm.sel(Time=slice(str(year), str(year + 1)))['q_ss'].isel(y=0).values
             # in mg per liter
             df_perc_br_sim.loc[:, 'Br_conc_mg'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values[1:]
+            # in mg
+            df_perc_br_sim.loc[:, 'Br_mg'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values[1:] * ds_sim_hm.sel(Time=slice(str(year), str(year + 1)))['q_ss'].isel(y=0).values[1:]
             # in mmol per liter
             df_perc_br_sim.loc[:, 'Br_conc_mmol'] = (df_perc_br_sim.loc[:, 'Br_conc_mg'] / 79.904)
             # daily samples from day 0 to day 220
@@ -202,15 +204,30 @@ def main(tmp_dir, sas_solver):
             states_tm_file = base_path / "states_bromide_benchmark.nc"
             with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
                 try:
-                    v = f.groups[f"{tm_structure}-{year}"].create_variable('C_q_ss_mmol', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                    v = f.groups[f"{tm_structure}-{year}"].create_variable('C_q_ss_mmol_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                     v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
                     v.attrs.update(long_name="bulk sample of bromide in percolation",
                                    units="mmol/l")
                 except ValueError:
-                    v = f.groups[f"{tm_structure}-{year}"].get('Br_conc_mmol')
+                    v = f.groups[f"{tm_structure}-{year}"].get('C_q_ss_mmol_bs')
                     v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
-                    v.attrs.update(long_name="bulk sample of bromide in percolation",
-                                   units="mmol/l")
+                try:
+                    v = f.groups[f"{tm_structure}-{year}"].create_variable('q_ss_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                    v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'perc'].values
+                    v.attrs.update(long_name="bulk sample of percolation",
+                                   units="mm/dt")
+                except ValueError:
+                    v = f.groups[f"{tm_structure}-{year}"].get('M_q_ss_bs')
+                    v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'perc'].values
+                try:
+                    v = f.groups[f"{tm_structure}-{year}"].create_variable('M_q_ss_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                    v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_mg'].values
+                    v.attrs.update(long_name="bulk sample bromide mass in percolation",
+                                   units="mg")
+                except ValueError:
+                    v = f.groups[f"{tm_structure}-{year}"].get('M_q_ss_bs')
+                    v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_mg'].values
+
 
         axes.set_ylabel('Br [mmol $l^{-1}$]')
         axes.set_xlabel('Time [days since injection]')
