@@ -5,11 +5,10 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-ns", "--nsamples", type=int, default=1024)
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant advection-dispersion']), default='advection-dispersion')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(nsamples, transport_model_structure, tmp_dir):
+def main(transport_model_structure, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
