@@ -1,29 +1,161 @@
-num_vars: 6
+complete-mixing:
+  num_vars: 6
 
-names:
-- 'dmpv'
-- 'lmpv'
-- 'theta_eff'
-- 'frac_lp'
-- 'theta_pwp'
-- 'ks'
+  names:
+  - 'dmpv'
+  - 'lmpv'
+  - 'theta_eff'
+  - 'frac_lp'
+  - 'theta_pwp'
+  - 'ks'
 
-bounds:
--
-  - 1
-  - 400
--
-  - 1
-  - 2000
--
-  - 0.15
-  - 0.35
--
-  - 0.1
-  - 0.9
--
-  - 0.15
-  - 0.33
--
-  - 1
-  - 150
+  bounds:
+  -
+    - 1
+    - 400
+  -
+    - 1
+    - 2000
+  -
+    - 0.15
+    - 0.35
+  -
+    - 0.1
+    - 0.9
+  -
+    - 0.15
+    - 0.33
+  -
+    - 1
+    - 150
+
+piston:
+  num_vars: 6
+
+  names:
+  - 'dmpv'
+  - 'lmpv'
+  - 'theta_eff'
+  - 'frac_lp'
+  - 'theta_pwp'
+  - 'ks'
+
+  bounds:
+  -
+    - 1
+    - 400
+  -
+    - 1
+    - 2000
+  -
+    - 0.15
+    - 0.35
+  -
+    - 0.1
+    - 0.9
+  -
+    - 0.15
+    - 0.33
+  -
+    - 1
+    - 150
+
+
+
+advection-dispersion:
+  num_vars: 9
+
+  names:
+  - 'dmpv'
+  - 'lmpv'
+  - 'theta_eff'
+  - 'frac_lp'
+  - 'theta_pwp'
+  - 'ks'
+  - 'b_transp'
+  - 'a_q_rz'
+  - 'a_q_ss'
+
+  bounds:
+  -
+    - 1
+    - 400
+  -
+    - 1
+    - 2000
+  -
+    - 0.15
+    - 0.35
+  -
+    - 0.1
+    - 0.9
+  -
+    - 0.15
+    - 0.33
+  -
+    - 1
+    - 150
+  -
+    - 1
+    - 50
+  -
+    - 1
+    - 50
+  -
+    - 1
+    - 50
+
+time-variant advection-dispersion:
+  num_vars: 12
+
+  names:
+  - 'dmpv'
+  - 'lmpv'
+  - 'theta_eff'
+  - 'frac_lp'
+  - 'theta_pwp'
+  - 'ks'
+  - 'c1_transp'
+  - 'c2_transp'
+  - 'c1_q_rz'
+  - 'c2_q_rz'
+  - 'c1_q_ss'
+  - 'c2_q_ss'
+
+  bounds:
+  -
+    - 1
+    - 400
+  -
+    - 1
+    - 2000
+  -
+    - 0.15
+    - 0.35
+  -
+    - 0.1
+    - 0.9
+  -
+    - 0.15
+    - 0.33
+  -
+    - 1
+    - 150
+  -
+    - 1
+    - 50
+  -
+    - 1
+    - 50
+  -
+    - 1
+    - 50
+  -
+    - 1
+    - 50
+  -
+    - 1
+    - 50
+  -
+    - 1
+    - 50

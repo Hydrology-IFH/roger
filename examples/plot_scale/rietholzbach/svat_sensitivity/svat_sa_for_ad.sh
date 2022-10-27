@@ -1,8 +1,8 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1
-#PBS -l walltime=24:00:00
-#PBS -l pmem=8000mb
-#PBS -N svat_sa
+#PBS -l walltime=48:00:00
+#PBS -l pmem=16000mb
+#PBS -N svat_sa_for_ad
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
 
@@ -14,7 +14,7 @@ conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_sensitivity
 
 # adapt command to your available scheduler / MPI implementation
-python svat.py -b numpy -d cpu -td "${TMPDIR}"
+python svat.py -b numpy -d cpu -td "${TMPDIR}" -tms advection-dispersion
 
 # Write output to temporary SSD of computing node
 echo "Write output to $TMPDIR"

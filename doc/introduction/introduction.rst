@@ -77,7 +77,7 @@ Available model structures
 **SVAT**:
 
 - only vertical processes are considered
-- no lateral processes (i.e. no lateral exchange between grid cells)
+- no lateral processes
 
 **SVAT-CROP**:
 
@@ -92,9 +92,9 @@ Available model structures
 - vertical and lateral processes are considered
 - simulation of a single event
 
-**SVAT_TRANSPORT**:
+**SVAT-TRANSPORT**:
 
-- calculates offline coupled solute transport based on the hydrologic simulations from the SVAT model
+- calculates offline coupled solute transport based on the hydrologic simulations with the SVAT model
 
 
 Diagnostics

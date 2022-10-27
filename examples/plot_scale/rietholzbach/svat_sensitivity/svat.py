@@ -1,16 +1,15 @@
 from pathlib import Path
 import h5netcdf
-import yaml
-from SALib.sample import saltelli
 import numpy as onp
 import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-ns", "--nsamples", type=int, default=1024)
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['advection-dispersion', 'time-variant_advection-dispersion']), default='advection-dispersion')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(nsamples, tmp_dir):
+def main(nsamples, transport_model_structure, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
@@ -22,13 +21,6 @@ def main(nsamples, tmp_dir):
         """A SVAT model.
         """
         _base_path = Path(__file__).parent
-        # sampled parameters with Saltelli's extension of the Sobol' sequence
-        file_path = _base_path / "param_bounds.yml"
-        with open(file_path, 'r') as file:
-            _bounds = yaml.safe_load(file)
-        _params = saltelli.sample(_bounds, nsamples, calc_second_order=False)
-        _nrows = _params.shape[0]
-        _input_dir = None
 
         def _set_input_dir(self, path):
             self._input_dir = path
@@ -48,14 +40,14 @@ def main(nsamples, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = "SVAT"
+            tms = transport_model_structure.replace(" ", "_")
+            settings.identifier = f"SVAT_for_{tms}"
 
             settings.nx, settings.ny = self._nrows, 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
-            # lysimeter surface 3.14 square meter (2m diameter)
-            settings.dx = 1.77
-            settings.dy = 1.77
+            settings.dx = 1
+            settings.dy = 1
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0
@@ -118,14 +110,14 @@ def main(nsamples, tmp_dir):
 
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
-            vs.dmpv = update(vs.dmpv, at[2:-2, :], npx.array(self._params[:, 0, npx.newaxis], dtype=int))
-            vs.lmpv = update(vs.lmpv, at[2:-2, :], npx.array(self._params[:, 1, npx.newaxis], dtype=int))
-            vs.theta_eff = update(vs.theta_eff, at[2:-2, :], self._params[:, 2, npx.newaxis])
-            vs.frac_lp = update(vs.frac_lp, at[2:-2, :], self._params[:, 3, npx.newaxis])
-            vs.frac_fp = update(vs.frac_fp, at[2:-2, :], 1 - vs.frac_lp[2:-2, :])
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, :], vs.theta_eff[2:-2, :] * vs.frac_lp[2:-2, :])
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, :], vs.theta_eff[2:-2, :] * vs.frac_fp[2:-2, :])
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, :], self._params[:, 4, npx.newaxis])
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_nc("dmpv", self._base_path, 'params_saltelli.nc', group=transport_model_structure))
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_nc("lmpv", self._base_path, 'params_saltelli.nc', group=transport_model_structure))
+            vs.theta_eff = update(vs.theta_eff, at[2:-2, 2:-2], self._read_var_from_nc("theta_eff", self._base_path, 'params_saltelli.nc', group=transport_model_structure))
+            vs.frac_lp = update(vs.frac_lp, at[2:-2, 2:-2], self._read_var_from_nc("frac_lp", self._base_path, 'params_saltelli.nc', group=transport_model_structure))
+            vs.frac_fp = update(vs.frac_fp, at[2:-2, 2:-2], 1 - vs.frac_lp[2:-2, 2:-2])
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], vs.theta_eff[2:-2, 2:-2] * vs.frac_lp[2:-2, 2:-2])
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], vs.theta_eff[2:-2, 2:-2] * vs.frac_fp[2:-2, 2:-2])
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_nc("theta_pwp", self._base_path, 'params_saltelli.nc', group=transport_model_structure))
             vs.ks = update(vs.ks, at[2:-2, :], self._params[:, 5, npx.newaxis])
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 

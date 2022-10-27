@@ -14,7 +14,6 @@ import click
 import copy
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
-from labellines import labelLines
 import matplotlib as mpl
 import seaborn as sns
 mpl.use("agg")
@@ -184,14 +183,14 @@ def main(tmp_dir):
     dict_metrics_best = {}
     for sc in ['', 'dry', 'normal', 'wet']:
         dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best1)))
-    for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
+    for sc, sc1 in enumerate(['', 'dry', 'normal', 'wet']):
         df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'r_dS{sc1}', f'KGE_q_ss{sc1}', f'E_multi{sc1}']]
         df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
         nrow = len(df_metrics.columns)
         ncol = len(df_params.columns)
         fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
-        for i in range(nrow):
-            for j in range(ncol):
+        for i, metric_var in enumerate(df_metrics.columns):
+            for j, param_var in enumerate(df_params.columns):
                 y = df_metrics.iloc[:, i]
                 x = df_params.iloc[:, j]
                 ax[i, j].scatter(x, y, s=1, c='grey', alpha=0.5)
@@ -225,6 +224,51 @@ def main(tmp_dir):
 
         fig.subplots_adjust(bottom=0.2, wspace=0.2, hspace=0.6)
         file = base_path_figs / f"dotty_plots_{sc1}.png"
+        fig.savefig(file, dpi=250)
+
+        fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
+        for i, metric_var in enumerate(df_metrics.columns):
+            for j, param_var in enumerate(df_params.columns):
+                y = df_metrics.iloc[:, i]
+                x = df_params.iloc[:, j]
+                ax[i, j].scatter(x, y, s=1, c='grey', alpha=0.5)
+                ax[i, j].set_xlabel('')
+                ax[i, j].set_ylabel('')
+                if metric_var in ['KGE_aet', 'KGE_aetwet', 'KGE_aetnormal', 'KGE_aetdry']:
+                    ax[i, j].set_ylim(0.6,)
+                elif metric_var in ['r_dS', 'r_dSwet', 'r_dSnormal', 'r_dSdry']:
+                    ax[i, j].set_ylim(0.6,)
+                elif metric_var in ['KGE_q_ss', 'KGE_q_sswet', 'KGE_q_ssnormal', 'KGE_q_ssdry']:
+                    ax[i, j].set_ylim(0.1,)
+                elif metric_var in ['E_multi', 'E_multiwet', 'E_multinormal', 'E_multidry']:
+                    ax[i, j].set_ylim(0.5,)
+                # best parameter set for individual evaluation metric at specific storage conditions
+                df_params_metrics_sc1 = df_params_metrics.copy()
+                df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics1.index))
+                df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
+                idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[99], 'id'].values.tolist()
+                for idx_best_sc in idx_best_sc1:
+                    y_best_sc = df_metrics.iloc[idx_best_sc, i]
+                    x_best_sc = df_params.iloc[idx_best_sc, j]
+                    ax[i, j].scatter(x_best_sc, y_best_sc, s=1, c='blue', alpha=0.8)
+                # best parameter sets for multi-objective criteria
+                for ii, idx_best in enumerate(idx_best1):
+                    y_best = df_metrics.iloc[idx_best, i]
+                    x_best = df_params.iloc[idx_best, j]
+                    ax[i, j].scatter(x_best, y_best, s=1, c='red', alpha=1)
+                    dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
+
+        for j in range(ncol):
+            xlabel = labs._LABS[df_params.columns[j]]
+            ax[-1, j].set_xlabel(xlabel)
+
+        ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
+        ax[1, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
+        ax[2, 0].set_ylabel('$KGE_{PERC}$\n [-]')
+        ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
+
+        fig.subplots_adjust(bottom=0.2, wspace=0.2, hspace=0.6)
+        file = base_path_figs / f"dotty_plots_{sc1}inset.png"
         fig.savefig(file, dpi=250)
 
     # write evaluation metrics for different storage condtions to .txt
@@ -389,6 +433,9 @@ def main(tmp_dir):
             elif var_sim in ['dS']:
                 key_r = 'r_' + var_sim
                 df_params_metrics_hydrus.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+
+    file = base_path_figs / "metrics_best_hydrus.txt"
+    df_params_metrics_hydrus.to_csv(file, header=True, index=True, sep="\t")
 
     # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
     fig, axes = plt.subplots(3, 1, sharex=True, figsize=(6, 3))
@@ -660,7 +707,6 @@ def main(tmp_dir):
             axes.flatten()[i].plot(df_sim_br.dropna().index, df_sim_br.dropna()[f"{year}"], ls='--', color=cmap(norm(year)), lw=0.8, alpha=0.6, label=f'{year}')
         axes.flatten()[i].plot(df_sim_br.dropna().index, df_sim_br.dropna().mean(axis=1), color="red", lw=1, alpha=1, label='average')
         axes.flatten()[i].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1)
-        # labelLines(axes.flatten()[i].get_lines(), fontsize=4, color='grey')
         axes.flatten()[i].set_xlim([0, 400])
         axes.flatten()[i].set_ylabel('Bromide\n [mmol/l]')
         axes.flatten()[i].set_title(_LABS_TM[tm_structure], fontsize=8)
@@ -673,7 +719,6 @@ def main(tmp_dir):
         axes.flatten()[-1].plot(df_sim_br.dropna().index, df_sim_br.dropna()[f"{year}"], ls='--', color=cmap_hydrus(norm(year)), lw=0.8, alpha=0.5, label=f'{year}')
     axes.flatten()[-1].plot(df_sim_br.dropna().index, df_sim_br.dropna().mean(axis=1), color="grey", lw=1, alpha=1, label='average')
     axes.flatten()[-1].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1, label='observed')
-    # labelLines(axes.flatten()[-1].get_lines(), fontsize=2, color='grey', zorder=2.5)
     axes.flatten()[-1].set_xlim([0, 400])
     axes.flatten()[-1].set_ylabel('Bromide\n [mmol/l]')
     axes.flatten()[-1].set_xlabel(r'Time [days since injection]')

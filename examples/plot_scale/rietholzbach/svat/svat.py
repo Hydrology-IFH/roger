@@ -48,9 +48,8 @@ def main():
             settings.nx, settings.ny = 1, 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
-            # lysimeter surface 3.14 square meter (2m diameter)
-            settings.dx = 1.77
-            settings.dy = 1.77
+            settings.dx = 1
+            settings.dy = 1
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0

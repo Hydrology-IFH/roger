@@ -113,13 +113,12 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
 
             settings.nx, settings.ny = self._nsamples, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
-            settings.ages = settings.nitt
+            settings.ages = 1500
             settings.nages = settings.ages + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
 
-            # lysimeter surface 3.14 square meter (2m diameter)
-            settings.dx = 1.77
-            settings.dy = 1.77
+            settings.dx = 1
+            settings.dy = 1
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0
