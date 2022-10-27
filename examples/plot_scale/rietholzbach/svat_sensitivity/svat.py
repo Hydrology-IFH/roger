@@ -55,10 +55,9 @@ def main(transport_model_structure, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            tms = transport_model_structure.replace("_", " ")
             settings.identifier = f"SVAT_for_{transport_model_structure}"
 
-            settings.nx, settings.ny = self._get_nx(self._base_path, 'params_saltelli.nc', group=tms), 1
+            settings.nx, settings.ny = self._get_nx(self._base_path, 'params_saltelli.nc', group=transport_model_structure.replace("_", " ")), 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
             settings.dx = 1
@@ -125,15 +124,15 @@ def main(transport_model_structure, tmp_dir):
 
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_nc("dmpv", self._base_path, 'params_saltelli.nc', group=transport_model_structure))
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_nc("lmpv", self._base_path, 'params_saltelli.nc', group=transport_model_structure))
-            vs.theta_eff = update(vs.theta_eff, at[2:-2, 2:-2], self._read_var_from_nc("theta_eff", self._base_path, 'params_saltelli.nc', group=transport_model_structure))
-            vs.frac_lp = update(vs.frac_lp, at[2:-2, 2:-2], self._read_var_from_nc("frac_lp", self._base_path, 'params_saltelli.nc', group=transport_model_structure))
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_nc("dmpv", self._base_path, 'params_saltelli.nc', group=transport_model_structure.replace("_", " ")))
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_nc("lmpv", self._base_path, 'params_saltelli.nc', group=transport_model_structure.replace("_", " ")))
+            vs.theta_eff = update(vs.theta_eff, at[2:-2, 2:-2], self._read_var_from_nc("theta_eff", self._base_path, 'params_saltelli.nc', group=transport_model_structure.replace("_", " ")))
+            vs.frac_lp = update(vs.frac_lp, at[2:-2, 2:-2], self._read_var_from_nc("frac_lp", self._base_path, 'params_saltelli.nc', group=transport_model_structure.replace("_", " ")))
             vs.frac_fp = update(vs.frac_fp, at[2:-2, 2:-2], 1 - vs.frac_lp[2:-2, 2:-2])
             vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], vs.theta_eff[2:-2, 2:-2] * vs.frac_lp[2:-2, 2:-2])
             vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], vs.theta_eff[2:-2, 2:-2] * vs.frac_fp[2:-2, 2:-2])
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_nc("theta_pwp", self._base_path, 'params_saltelli.nc', group=transport_model_structure))
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path, 'params_saltelli.nc', group=transport_model_structure))
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_nc("theta_pwp", self._base_path, 'params_saltelli.nc', group=transport_model_structure.replace("_", " ")))
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path, 'params_saltelli.nc', group=transport_model_structure.replace("_", " ")))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
         @roger_routine
