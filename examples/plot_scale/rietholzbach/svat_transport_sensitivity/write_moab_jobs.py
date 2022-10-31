@@ -34,7 +34,7 @@ def main(nsamples, job_type, sas_solver, split_size):
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
             script_name = f'{tracer}_{sas_solver}_svat_{tm1}_sa'
-            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
+            data_dir = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
             tms = tm.replace(" ", "_")
             lines = []
             lines.append('#!/bin/bash\n')
@@ -55,9 +55,9 @@ def main(nsamples, job_type, sas_solver, split_size):
             lines.append('# adapt command to your available scheduler / MPI implementation\n')
             lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes --x1 %s --x2 %s -b jax -d cpu -n 16 1 -tms %s -td "${TMPDIR}" -ss %s\n' % (x1, x2, tms, sas_solver))
             lines.append('# Move output from local SSD to global workspace\n')
-            lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
-            lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-            lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
+            lines.append(f'echo "Move output to {data_dir.as_posix()}"\n')
+            lines.append('mkdir -p %s\n' % (data_dir.as_posix()))
+            lines.append('mv "${TMPDIR}"/*.nc %s\n' % (data_dir.as_posix()))
             file_path = base_path / f'{script_name}.sh'
             file = open(file_path, "w")
             file.writelines(lines)
@@ -70,7 +70,7 @@ def main(nsamples, job_type, sas_solver, split_size):
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
             script_name = f'{tracer}_{sas_solver}_svat_{tm1}_sa'
-            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
+            data_dir = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
             tms = tm.replace(" ", "_")
             lines = []
             lines.append('#!/bin/bash\n')
@@ -89,7 +89,7 @@ def main(nsamples, job_type, sas_solver, split_size):
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
             lines.append('# adapt command to your available scheduler / MPI implementation\n')
-            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes --x1 %s --x2 %s -b jax -d cpu -n 32 1 -ns 1024 -tms %s -td %s -ss %s\n' % (x1, x2, tms, output_path_ws.as_posix(), sas_solver))
+            lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py --log-all-processes --x1 %s --x2 %s -b jax -d cpu -n 32 1 -ns 1024 -tms %s -td %s -ss %s\n' % (x1, x2, tms, data_dir.as_posix(), sas_solver))
             file_path = base_path / f'{script_name}.sh'
             file = open(file_path, "w")
             file.writelines(lines)
@@ -107,7 +107,7 @@ def main(nsamples, job_type, sas_solver, split_size):
                 tm1 = transport_models_abrev[tm]
                 tms = tm.replace(" ", "_")
                 script_name = f'{tracer}_{sas_solver}_svat_{tm1}_sa_{x1}_{x2}'
-                output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
+                data_dir = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
                 tms = tm.replace(" ", "_")
                 lines = []
                 lines.append('#!/bin/bash\n')
@@ -126,11 +126,11 @@ def main(nsamples, job_type, sas_solver, split_size):
                 lines.append('conda activate roger-gpu\n')
                 lines.append(f'cd {base_path_binac}\n')
                 lines.append(' \n')
-                lines.append('python svat_transport.py --log-all-processes --x1 %s --x2 %s -b jax -d gpu -tms %s -td "${TMPDIR}" -ss %s\n' % (x1, x2, tms, sas_solver))
+                lines.append('python svat_transport.py --log-all-processes --x1 %s --x2 %s -b jax -d gpu -tms %s -td "${TMPDIR}" -dd %s -ss %s\n' % (x1, x2, tms, data_dir.as_posix(), sas_solver))
                 lines.append('# Move output from local SSD to global workspace\n')
-                lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
-                lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-                lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
+                lines.append(f'echo "Move output to {data_dir.as_posix()}"\n')
+                lines.append('mkdir -p %s\n' % (data_dir.as_posix()))
+                lines.append('mv "${TMPDIR}"/*.nc %s\n' % (data_dir.as_posix()))
                 file_path = base_path / f'{script_name}_gpu.sh'
                 file = open(file_path, "w")
                 file.writelines(lines)

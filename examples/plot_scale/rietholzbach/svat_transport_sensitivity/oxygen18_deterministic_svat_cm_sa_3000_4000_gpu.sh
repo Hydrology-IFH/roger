@@ -14,7 +14,7 @@ eval "$(conda shell.bash hook)"
 conda activate roger-gpu
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_sensitivity
  
-python svat_transport.py --log-all-processes --x1 3000 --x2 4000 -b jax -d gpu -tms complete-mixing -td "${TMPDIR}" -ss deterministic
+python svat_transport.py --log-all-processes --x1 3000 --x2 4000 -b jax -d gpu -tms complete-mixing -td "${TMPDIR}" -dd /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_sensitivity -ss deterministic
 # Move output from local SSD to global workspace
 echo "Move output to /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_sensitivity"
 mkdir -p /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_transport_sensitivity

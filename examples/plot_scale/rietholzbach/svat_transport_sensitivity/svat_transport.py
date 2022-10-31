@@ -10,9 +10,10 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("--x1", type=int, default=None)
 @click.option("--x2", type=int, default=None)
+@click.option("-dd", "--data-dir", type=str, default=None)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(transport_model_structure, sas_solver, x1, x2, tmp_dir):
+def main(transport_model_structure, sas_solver, x1, x2, data_dir, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, for_loop
@@ -22,8 +23,8 @@ def main(transport_model_structure, sas_solver, x1, x2, tmp_dir):
     class SVATTRANSPORTSetup(RogerSetup):
         """A SVAT transport model.
         """
-        if tmp_dir:
-            _base_path = Path(tmp_dir)
+        if data_dir:
+            _base_path = Path(data_dir)
         else:
             _base_path = Path(__file__).parent
         _nrows = None
