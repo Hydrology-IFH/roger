@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ~/roger/examples/plot_scale/rietholzbach/svat_transport_sensitvity
+cd ~/roger/examples/plot_scale/rietholzbach/svat_transport_sensitivity
 FILES="$PWD/oxygen18_deterministic_svat_cm_sa_*_*_gpu.sh"
 for f in $FILES
 do

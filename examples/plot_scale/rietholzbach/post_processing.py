@@ -165,20 +165,25 @@ def main(tmp_dir):
     fig.savefig(file, dpi=250)
     plt.close(fig=fig)
 
+    df_lys_obs_nonan1 = df_lys_obs.loc[:, ['ta', 'prec', 'prec_corr', 'aet', 'perc', 'dS_flux']].dropna().copy()
+    df_lys_obs_nonan1.loc[:, 'dS_flux'] = df_lys_obs_nonan1.loc[:, 'prec'] - df_lys_obs_nonan1.loc[:, 'aet'] - df_lys_obs_nonan1.loc[:, 'perc']
+    df_lys_obs_nonan1.loc[:, 'dS_flux_corr'] = df_lys_obs_nonan1.loc[:, 'prec_corr'] - df_lys_obs_nonan1.loc[:, 'aet'] - df_lys_obs_nonan1.loc[:, 'perc']
+    df_lys_obs_nonan1.loc[:, 'hyd_year'] = df_lys_obs_nonan1.index.year
+    df_lys_obs_nonan1.loc[(df_lys_obs_nonan1.index.month >= 10), 'hyd_year'] += 1
     years = onp.arange(1997, 2001).tolist()
     for year in years:
         fig, axs = plt.subplots(1, 1, figsize=(3, 2))
-        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'prec'].cumsum(), '-', color='#034e7b', lw=1, label=r'PREC')
-        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'prec_corr'].cumsum(), '-', color='#0570b0', lw=1, label=r'PREC (corrected)')
-        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'aet'].cumsum(), '-', color='#238b45', lw=1, label=r'AET')
-        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'perc'].cumsum(), '-', color='#74a9cf', lw=1, label=r'PERC')
-        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_flux'].cumsum(), '-', color='#6a51a3', lw=1, label=r'dS from fluxes')
-        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_flux_corr'].cumsum(), '-', color='#9e9ac8', lw=1, label=r'dS from fluxes (corrected)')
+        axs.plot(df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index, df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, 'prec'].cumsum(), '-', color='#034e7b', lw=1, label=r'PREC')
+        axs.plot(df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index, df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, 'prec_corr'].cumsum(), '-', color='#0570b0', lw=1, label=r'PREC (corrected)')
+        axs.plot(df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index, df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, 'aet'].cumsum(), '-', color='#238b45', lw=1, label=r'AET')
+        axs.plot(df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index, df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, 'perc'].cumsum(), '-', color='#74a9cf', lw=1, label=r'PERC')
+        axs.plot(df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index, df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, 'dS_flux'].cumsum(), '-', color='#6a51a3', lw=1, label=r'dS from fluxes')
+        axs.plot(df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index, df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, 'dS_flux_corr'].cumsum(), '-', color='#9e9ac8', lw=1, label=r'dS from fluxes (corrected)')
         axs.tick_params(axis='x', rotation=45)
         axs.set_ylabel(r'[mm]')
         axs.set_xlabel('Time [year-month]')
         axs.legend(frameon=False, loc='upper left', fontsize=4, ncol=2)
-        axs.set_xlim(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index[0], df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index[-1])
+        axs.set_xlim(df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index[0], df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index[-1])
         fig.tight_layout()
         file = base_path_figs / f'lys_cumulated_{year}.png'
         fig.savefig(file, dpi=250)
@@ -545,38 +550,38 @@ def main(tmp_dir):
     #     fig.savefig(path_fig, dpi=250)
     # plt.close('all')
     #
-    df_params_metrics_hydrus = pd.DataFrame(index=['', 'dry', 'normal', 'wet'])
-    vars_obs = ['AET', 'dWEIGHT', 'PERC', 'd18O_PERC']
-    vars_sim = ['aet', 'dS', 'perc', 'd18O_perc_bs']
-    for var_obs, var_sim in zip(vars_obs, vars_sim):
-        for i, sc in enumerate(['', 'dry', 'normal', 'wet']):
-            obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-            df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-            df_obs.loc[:, 'obs'] = obs_vals
-            sim_vals = ds_hydrus_18O[var_sim].values
-            # join observations on simulations
-            df_eval = eval_utils.join_obs_on_sim(date_hydrus_18O, sim_vals, df_obs)
-            if i > 0:
-                df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
-                rows = (df_rows['sc'].values == i)
-                df_eval = df_eval.loc[rows, :]
-            df_eval.loc['2000-01':'2000-06', :] = onp.nan
-            df_eval = df_eval.dropna()
+    # df_params_metrics_hydrus = pd.DataFrame(index=['', 'dry', 'normal', 'wet'])
+    # vars_obs = ['AET', 'dWEIGHT', 'PERC', 'd18O_PERC']
+    # vars_sim = ['aet', 'dS', 'perc', 'd18O_perc_bs']
+    # for var_obs, var_sim in zip(vars_obs, vars_sim):
+    #     for i, sc in enumerate(['', 'dry', 'normal', 'wet']):
+    #         obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+    #         df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+    #         df_obs.loc[:, 'obs'] = obs_vals
+    #         sim_vals = ds_hydrus_18O[var_sim].values
+    #         # join observations on simulations
+    #         df_eval = eval_utils.join_obs_on_sim(date_hydrus_18O, sim_vals, df_obs)
+    #         if i > 0:
+    #             df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
+    #             rows = (df_rows['sc'].values == i)
+    #             df_eval = df_eval.loc[rows, :]
+    #         df_eval.loc['2000-01':'2000-06', :] = onp.nan
+    #         df_eval = df_eval.dropna()
 
-            obs_vals = df_eval.loc[:, 'obs'].values
-            sim_vals = df_eval.loc[:, 'sim'].values
-            if var_sim in ['aet', 'perc', 'd18O_perc_bs']:
-                key_kge = 'KGE_' + var_sim
-                try:
-                    df_params_metrics_hydrus.loc[sc, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-                except ValueError:
-                    df_params_metrics_hydrus.loc[sc, key_kge] = onp.nan
-            elif var_sim in ['dS']:
-                key_r = 'r_' + var_sim
-                try:
-                    df_params_metrics_hydrus.loc[sc, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
-                except ValueError:
-                    df_params_metrics_hydrus.loc[sc, key_r] = onp.nan
+    #         obs_vals = df_eval.loc[:, 'obs'].values
+    #         sim_vals = df_eval.loc[:, 'sim'].values
+    #         if var_sim in ['aet', 'perc', 'd18O_perc_bs']:
+    #             key_kge = 'KGE_' + var_sim
+    #             try:
+    #                 df_params_metrics_hydrus.loc[sc, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
+    #             except ValueError:
+    #                 df_params_metrics_hydrus.loc[sc, key_kge] = onp.nan
+    #         elif var_sim in ['dS']:
+    #             key_r = 'r_' + var_sim
+    #             try:
+    #                 df_params_metrics_hydrus.loc[sc, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+    #             except ValueError:
+    #                 df_params_metrics_hydrus.loc[sc, key_r] = onp.nan
 
     # file = base_path_figs / "metrics_best_hydrus.txt"
     # df_params_metrics_hydrus.to_csv(file, header=True, index=True, sep="\t")
@@ -597,11 +602,11 @@ def main(tmp_dir):
     #           lw=1, color='gray', ls='-.')
     # ax2.set_ylim(0,)
     # ax2.set_ylabel('ET\n[mm]')
-    # axes[1].plot(dict_obs_sim['dS'].loc['2001':, :].index, dict_obs_sim['dS'].loc['2001':, 'obs'].cumsum(),
+    # axes[1].plot(dict_obs_sim['dS'].loc['2000-07':, :].index, dict_obs_sim['dS'].loc['2000-07':, 'obs'].cumsum(),
     #               lw=1, color='blue', ls='-', alpha=0.5)
-    # axes[1].plot(dict_obs_sim['dS'].loc['2001':, :].index, dict_obs_sim['dS'].loc['2001':, 'sim'].cumsum(),
+    # axes[1].plot(dict_obs_sim['dS'].loc['2000-07':, :].index, dict_obs_sim['dS'].loc['2000-07':, 'sim'].cumsum(),
     #               lw=1, color='red', ls='-.')
-    # axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2001':, :].index, dict_obs_sim_hydrus['dS'].loc['2001':, 'sim'].cumsum(),
+    # axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2000-07':, :].index, dict_obs_sim_hydrus['dS'].loc['2000-07':, 'sim'].cumsum(),
     #               lw=1, color='gray', ls='-.')
     # axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
     # axes[1].set_xlim((dict_obs_sim['dS'].index[0], dict_obs_sim['dS'].index[-1]))
@@ -646,11 +651,11 @@ def main(tmp_dir):
     # ax2.set_ylim(0,)
     # ax2.set_ylabel('ET\n[mm]')
     # for nrow in range(nx):
-    #     axes[1].plot(dict_obs_sim1['dS'].loc['2001':, :].index, dict_obs_sim1['dS'].loc['2001':, f'sim{nrow}'].cumsum(),
+    #     axes[1].plot(dict_obs_sim1['dS'].loc['2000-07':, :].index, dict_obs_sim1['dS'].loc['2000-07':, f'sim{nrow}'].cumsum(),
     #               lw=1, color='red', ls='-')
-    # axes[1].plot(dict_obs_sim1['dS'].loc['2001':, :].index, dict_obs_sim1['dS'].loc['2001':, 'obs'].cumsum(),
+    # axes[1].plot(dict_obs_sim1['dS'].loc['2000-07':, :].index, dict_obs_sim1['dS'].loc['2000-07':, 'obs'].cumsum(),
     #               lw=1, color='blue', ls='-', alpha=1)
-    # axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2001':, :].index, dict_obs_sim_hydrus['dS'].loc['2001':, 'sim'].cumsum(),
+    # axes[1].plot(dict_obs_sim_hydrus['dS'].loc['2000-07':, :].index, dict_obs_sim_hydrus['dS'].loc['2000-07':, 'sim'].cumsum(),
     #               lw=1, color='gray', ls='-.', alpha=.8)
     # axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
     # axes[1].set_xlim((dict_obs_sim['dS'].index[0], dict_obs_sim['dS'].index[-1]))
