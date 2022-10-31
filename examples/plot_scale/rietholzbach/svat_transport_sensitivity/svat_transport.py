@@ -22,7 +22,10 @@ def main(transport_model_structure, sas_solver, x1, x2, tmp_dir):
     class SVATTRANSPORTSetup(RogerSetup):
         """A SVAT transport model.
         """
-        _base_path = Path(__file__).parent
+        if tmp_dir:
+            _base_path = Path(tmp_dir)
+        else:
+            _base_path = Path(__file__).parent
         _nrows = None
         _tm_structure = None
         _identifier = None
