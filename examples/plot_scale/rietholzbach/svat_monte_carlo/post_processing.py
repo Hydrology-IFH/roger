@@ -93,17 +93,17 @@ def main(tmp_dir):
 
     # load simulation
     ds_sim = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
+    # assign date
+    days_sim = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    date_sim = num2date(days_sim, units=f"days since {ds_sim['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    ds_sim = ds_sim.assign_coords(date=("Time", date_sim))
 
     # load observations (measured data)
     path_obs = Path(__file__).parent.parent / "observations" / "rietholzbach_lysimeter.nc"
     ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
-
     # assign date
-    days_sim = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     days_obs = (ds_obs['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    date_sim = num2date(days_sim, units=f"days since {ds_sim['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     date_obs = num2date(days_obs, units=f"days since {ds_obs['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    ds_sim = ds_sim.assign_coords(date=("Time", date_sim))
     ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
 
     # average observed soil water content of previous 5 days
@@ -164,6 +164,7 @@ def main(tmp_dir):
                         df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
                         rows = (df_rows['sc'].values == sc)
                         df_eval = df_eval.loc[rows, :]
+                    df_eval.loc['2000-01':'2000-06', :] = onp.nan
                     df_eval = df_eval.dropna()
 
                     if var_sim in ['theta_rz', 'theta_ss', 'theta']:

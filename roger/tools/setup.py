@@ -383,7 +383,7 @@ def precipitation_correction(prec, ta, month, horizontal_shielding="b1"):
         air temperature at time step t (in celsius)
 
     month : int
-        month at time step t (in celsius)
+        month at time step t
 
     horizontal_shielding : str
         b1 = open location
@@ -403,7 +403,7 @@ def precipitation_correction(prec, ta, month, horizontal_shielding="b1"):
     Deutschen Wetterdienstes, Selbstverlag des Deutschen Wetterdienstes,
     Offenbach am Main, 1995.
     """
-    # precipitation correction
+    # look-up table for correction
     LUT_PREC_CORR = pd.DataFrame(index=['summer', 'winter', 'mixed', 'snow'],
                                  columns=['eps', 'b1', 'b2', 'b3', 'b4'])
     LUT_PREC_CORR.loc[:, 'eps'] = [0.38, 0.46, 0.55, 0.82]
@@ -412,26 +412,31 @@ def precipitation_correction(prec, ta, month, horizontal_shielding="b1"):
     LUT_PREC_CORR.loc[:, 'b3'] = [0.28, 0.24, 0.305, 0.33]
     LUT_PREC_CORR.loc[:, 'b4'] = [0.245, 0.19, 0.185, 0.21]
 
-    if (ta <= -0.7):
-        eps = LUT_PREC_CORR.loc['snow', 'eps']
-        b = LUT_PREC_CORR.loc['snow', horizontal_shielding]
-    elif ((ta > -0.7) & (ta < 3.0)):
-        eps = LUT_PREC_CORR.loc['mixed', 'eps']
-        b = LUT_PREC_CORR.loc['mixed', horizontal_shielding]
-    elif ((ta >= 3.0) & (month in [9, 10, 11, 12, 1, 2])):
-        eps = LUT_PREC_CORR.loc['winter', 'eps']
-        b = LUT_PREC_CORR.loc['winter', horizontal_shielding]
-    elif ((ta >= 3.0) & (month in [3, 4, 5, 6, 7, 8])):
-        eps = LUT_PREC_CORR.loc['summer', 'eps']
-        b = LUT_PREC_CORR.loc['summer', horizontal_shielding]
+    # correction factor
+    dprec = onp.zeros((prec.shape))
+    eps = LUT_PREC_CORR.loc['snow', 'eps']
+    b = LUT_PREC_CORR.loc['snow', horizontal_shielding]
+    dprec = onp.where((ta <= -0.7), b * prec**eps, dprec)
 
-    dprec = b * prec**eps
+    eps = LUT_PREC_CORR.loc['mixed', 'eps']
+    b = LUT_PREC_CORR.loc['mixed', horizontal_shielding]
+    dprec = onp.where((ta > -0.7) & (ta < 3.0), b * prec**eps, dprec)
+
+    eps = LUT_PREC_CORR.loc['winter', 'eps']
+    b = LUT_PREC_CORR.loc['winter', horizontal_shielding]
+    dprec = onp.where((ta >= 3.0) & onp.isin(ta, onp.array([9, 10, 11, 12, 1, 2])), b * prec**eps, dprec)
+
+    eps = LUT_PREC_CORR.loc['summer', 'eps']
+    b = LUT_PREC_CORR.loc['summer', horizontal_shielding]
+    dprec = onp.where((ta >= 3.0) & onp.isin(ta, onp.array([3, 4, 5, 6, 7, 8])), b * prec**eps, dprec)
+
+    # corrected precipitation
     prec_corr = prec + dprec
 
     return prec_corr
 
 
-def validate(data: pd.DataFrame):
+def validate(data):
     """Check if Dataframe has correct type and is numerical.
 
     This function checks if the input is a pd.DataFrame throws an error in

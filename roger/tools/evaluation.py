@@ -294,7 +294,7 @@ def plot_obs_sim_cum_year(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
         df_year = df.loc[df.hyd_year == year].copy()
         df_year.loc[df_year.isnull().any(axis=1)] = 0
         # plot observed and simulated values
-        fig, axs = plt.subplots(figsize=(6, 4))
+        fig, axs = plt.subplots(figsize=(6, 3))
         for i in range(len(df.columns)-1):
             axs.plot(df_year.index, df_year.iloc[:, i].cumsum(), lw=1, ls='-.', color='red')
         axs.plot(df_year.index, df_year.iloc[:, -1].cumsum(), lw=1, color='blue')

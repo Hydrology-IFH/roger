@@ -14,6 +14,7 @@ import click
 import copy
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
+from roger.tools.setup import precipitation_correction
 import matplotlib as mpl
 import seaborn as sns
 mpl.use("agg")
@@ -64,8 +65,8 @@ def main(tmp_dir):
         os.mkdir(base_path_figs)
 
     tm_structures = ['complete-mixing', 'piston',
-                        'advection-dispersion',
-                        'time-variant advection-dispersion']
+                     'advection-dispersion',
+                     'time-variant advection-dispersion']
 
     # load observations (measured data)
     path_obs = Path(__file__).parent / "observations" / "rietholzbach_lysimeter.nc"
@@ -106,46 +107,146 @@ def main(tmp_dir):
     date_hydrus_tt = num2date(days_hydrus_tt, units=f"hours since {ds_hydrus_tt['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     ds_hydrus_tt = ds_hydrus_tt.assign_coords(Time=("Time", date_hydrus_tt))
 
-    # Monte Carlo simulations
-    states_hydrus_mc_file = base_path / "hydrus_benchmark" / "states_hydrus_18O_inv.nc"
-    ds_hydrus_mc = xr.open_dataset(states_hydrus_mc_file, engine="h5netcdf")
-    days_hydrus_mc = (ds_hydrus_mc['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    date_hydrus_mc = num2date(days_hydrus_mc, units=f"days since {ds_hydrus_mc['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    ds_hydrus_mc = ds_hydrus_mc.assign_coords(date=("Time", date_hydrus_mc))
+    # check water balance of lysimeter
+    df_lys_obs = pd.DataFrame(index=date_obs, columns=['ta', 'prec', 'prec_corr', 'aet', 'perc', 'dS_weight', 'dS_flux'])
+    df_lys_obs.loc[:, 'ta'] = ds_obs['TA'].isel(x=0, y=0).values
+    df_lys_obs.loc[:, 'prec'] = ds_obs['PREC'].isel(x=0, y=0).values
+    df_lys_obs.loc[:, 'prec_corr'] = precipitation_correction(df_lys_obs.loc[:, 'prec'].values, df_lys_obs.loc[:, 'ta'].values, df_lys_obs.index.month)
+    df_lys_obs.loc[:, 'aet'] = ds_obs['AET'].isel(x=0, y=0).values
+    df_lys_obs.loc[:, 'perc'] = ds_obs['PERC'].isel(x=0, y=0).values
+    df_lys_obs.loc[:, 'dS_weight'] = ds_obs['dWEIGHT'].isel(x=0, y=0).values
+    df_lys_obs.loc[:, 'dS_flux'] = df_lys_obs.loc[:, 'prec'] - df_lys_obs.loc[:, 'aet'] - df_lys_obs.loc[:, 'perc']
+    df_lys_obs.loc[:, 'dS_flux_corr'] = df_lys_obs.loc[:, 'prec_corr'] - df_lys_obs.loc[:, 'aet'] - df_lys_obs.loc[:, 'perc']
+    df_lys_obs.loc[:, 'hyd_year'] = df_lys_obs.index.year
+    df_lys_obs.loc[(df_lys_obs.index.month >= 10), 'hyd_year'] += 1
+    file = base_path_figs / "lysimeter_fluxes_weight.csv"
+    df_lys_obs.to_csv(file, header=True, index=True, sep=";")
+    df_lys_obs_nonan = df_lys_obs.dropna().copy()
+    df_lys_obs_nonan.loc[:, 'dS_flux'] = df_lys_obs_nonan.loc[:, 'prec'] - df_lys_obs_nonan.loc[:, 'aet'] - df_lys_obs_nonan.loc[:, 'perc']
+    df_lys_obs_nonan.loc[:, 'dS_flux_corr'] = df_lys_obs_nonan.loc[:, 'prec_corr'] - df_lys_obs_nonan.loc[:, 'aet'] - df_lys_obs_nonan.loc[:, 'perc']
+    df_lys_obs_nonan.loc[:, 'hyd_year'] = df_lys_obs_nonan.index.year
+    df_lys_obs_nonan.loc[(df_lys_obs_nonan.index.month >= 10), 'hyd_year'] += 1
 
-    # # check water balance of lysimeter
-    # df_lys_obs = pd.DataFrame(index=date_obs, columns=['prec', 'aet', 'perc', 'dS_weight', 'dS_flux'])
-    # df_lys_obs.loc[:, 'prec'] = ds_obs['PREC'].isel(x=0, y=0).values
-    # df_lys_obs.loc[:, 'aet'] = ds_obs['AET'].isel(x=0, y=0).values
-    # df_lys_obs.loc[:, 'perc'] = ds_obs['PERC'].isel(x=0, y=0).values
-    # df_lys_obs.loc[:, 'dS_weight'] = ds_obs['dWEIGHT'].isel(x=0, y=0).values
-    # df_lys_obs.loc[:, 'dS_flux'] = df_lys_obs.loc[:, 'prec'] - df_lys_obs.loc[:, 'aet'] - df_lys_obs.loc[:, 'perc']
-    #
-    # fig, axs = plt.subplots(1, 1, figsize=(6, 1.2))
-    # axs.plot(df_lys_obs.loc['2000':, :].index, df_lys_obs.loc['2000':, 'dS_weight'].cumsum(), '-', color='grey', lw=1, label=r'dS from weight')
-    # axs.plot(df_lys_obs.loc['2000':, :].index, df_lys_obs.loc['2000':, 'dS_flux'].cumsum(), '-', color='blue', lw=0.8, label=r'dS from fluxes')
-    # axs.set_ylabel(r'[mm]')
-    # axs.set_xlabel('Time [year]')
-    # axs.legend(frameon=False, loc='lower left')
-    # axs.set_xlim(df_lys_obs.loc['2000':, :].index[0], df_lys_obs.loc['2000':, :].index[-1])
-    # fig.tight_layout()
-    # file = base_path_figs / 'weight_vs_flux.png'
-    # fig.savefig(file, dpi=250)
-    # plt.close(fig=fig)
-    #
-    # df_lys_dS = df_lys_obs.loc['2000':, ['dS_weight', 'dS_flux']].resample('A').sum()
-    # df_lys_dS.columns = ['dS from weight', 'dS from fluxes']
-    # df_lys_dS.loc[:, 'year'] = df_lys_dS.index.year
-    # df_lys_dS = pd.melt(df_lys_dS, id_vars=['year'], value_vars=['dS from weight', 'dS from fluxes'])
-    # fig, axs = plt.subplots(1, 1, figsize=(4, 1.2))
-    # g = sns.barplot(df_lys_dS, x='year', hue='variable', y='value', ax=axs, palette='Greys')
-    # axs.set_ylabel(r'[mm]')
-    # axs.set_xlabel('Time [year]')
-    # g.legend(frameon=False)
-    # fig.tight_layout()
-    # file = base_path_figs / 'weight_vs_flux_annual.png'
-    # fig.savefig(file, dpi=250)
-    # plt.close(fig=fig)
+    fig, axs = plt.subplots(1, 1, figsize=(6, 1.2))
+    axs.plot(df_lys_obs_nonan.loc['2000':, :].index, df_lys_obs_nonan.loc['2000':, 'dS_flux'], '-', color='blue', lw=1, label=r'dS from fluxes')
+    axs.plot(df_lys_obs_nonan.loc['2000':, :].index, df_lys_obs_nonan.loc['2000':, 'dS_flux_corr'], '-', color='red', lw=0.8, label=r'dS from fluxes with corrected PREC')
+    axs.plot(df_lys_obs_nonan.loc['2000':, :].index, df_lys_obs_nonan.loc['2000':, 'dS_weight'], '--', color='grey', lw=0.5, label=r'dS from weight')
+    axs.set_ylabel(r'[mm]')
+    axs.set_xlabel('Time [year]')
+    axs.legend(frameon=False, loc='lower left')
+    axs.set_xlim(df_lys_obs.loc['2000':, :].index[0], df_lys_obs.loc['2000':, :].index[-1])
+    fig.tight_layout()
+    file = base_path_figs / 'dS_weight_vs_dS_flux.png'
+    fig.savefig(file, dpi=250)
+    plt.close(fig=fig)
+
+    fig, axs = plt.subplots(1, 1, figsize=(6, 1.2))
+    axs.plot(df_lys_obs_nonan.loc['2000':, :].index, df_lys_obs_nonan.loc['2000':, 'dS_flux'] - df_lys_obs_nonan.loc['2000':, 'dS_weight'], '-', color='blue', lw=1, label=r'dS from fluxes - dS from weight')
+    axs.plot(df_lys_obs_nonan.loc['2000':, :].index, df_lys_obs_nonan.loc['2000':, 'dS_flux_corr'] - df_lys_obs_nonan.loc['2000':, 'dS_weight'], '-', color='red', lw=0.8, label=r'dS from fluxes (corrected) - dS from weight')
+    axs.set_ylabel(r'[mm]')
+    axs.set_xlabel('Time [year]')
+    axs.legend(frameon=False, loc='lower left')
+    axs.set_xlim(df_lys_obs.loc['2000':, :].index[0], df_lys_obs.loc['2000':, :].index[-1])
+    fig.tight_layout()
+    file = base_path_figs / 'dS_weight_vs_dS_flux_residuals.png'
+    fig.savefig(file, dpi=250)
+    plt.close(fig=fig)
+
+    fig, axs = plt.subplots(1, 1, figsize=(6, 1.2))
+    axs.plot(df_lys_obs_nonan.loc['2000':, :].index, df_lys_obs_nonan.loc['2000':, 'dS_weight'].cumsum(), '-', color='grey', lw=1, label=r'dS from weight')
+    axs.plot(df_lys_obs_nonan.loc['2000':, :].index, df_lys_obs_nonan.loc['2000':, 'dS_flux'].cumsum(), '-', color='blue', lw=0.8, label=r'dS from fluxes')
+    axs.plot(df_lys_obs_nonan.loc['2000':, :].index, df_lys_obs_nonan.loc['2000':, 'dS_flux_corr'].cumsum(), '-', color='red', lw=0.5, label=r'dS from fluxes (corrected)')
+    axs.set_ylabel(r'[mm]')
+    axs.set_xlabel('Time [year]')
+    axs.legend(frameon=False, loc='lower left')
+    axs.set_xlim(df_lys_obs.loc['2000':, :].index[0], df_lys_obs.loc['2000':, :].index[-1])
+    fig.tight_layout()
+    file = base_path_figs / 'dS_weight_vs_dS_flux_cumulated.png'
+    fig.savefig(file, dpi=250)
+    plt.close(fig=fig)
+
+    years = onp.arange(1997, 2001).tolist()
+    for year in years:
+        fig, axs = plt.subplots(1, 1, figsize=(3, 2))
+        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'prec'].cumsum(), '-', color='#034e7b', lw=1, label=r'PREC')
+        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'prec_corr'].cumsum(), '-', color='#0570b0', lw=1, label=r'PREC (corrected)')
+        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'aet'].cumsum(), '-', color='#238b45', lw=1, label=r'AET')
+        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'perc'].cumsum(), '-', color='#74a9cf', lw=1, label=r'PERC')
+        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_flux'].cumsum(), '-', color='#6a51a3', lw=1, label=r'dS from fluxes')
+        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_flux_corr'].cumsum(), '-', color='#9e9ac8', lw=1, label=r'dS from fluxes (corrected)')
+        axs.tick_params(axis='x', rotation=45)
+        axs.set_ylabel(r'[mm]')
+        axs.set_xlabel('Time [year-month]')
+        axs.legend(frameon=False, loc='upper left', fontsize=4, ncol=2)
+        axs.set_xlim(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index[0], df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index[-1])
+        fig.tight_layout()
+        file = base_path_figs / f'lys_cumulated_{year}.png'
+        fig.savefig(file, dpi=250)
+        plt.close(fig=fig)
+
+    years = onp.arange(2000, 2008).tolist()
+    for year in years:
+        fig, axs = plt.subplots(1, 1, figsize=(3, 2))
+        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'prec'].cumsum(), '-', color='#034e7b', lw=1, label=r'PREC')
+        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'prec_corr'].cumsum(), '-', color='#0570b0', lw=1, label=r'PREC (corrected)')
+        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'aet'].cumsum(), '-', color='#238b45', lw=1, label=r'AET')
+        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'perc'].cumsum(), '-', color='#74a9cf', lw=1, label=r'PERC')
+        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_flux'].cumsum(), '-', color='#6a51a3', lw=1, label=r'dS from fluxes')
+        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_flux_corr'].cumsum(), '-', color='#9e9ac8', lw=1, label=r'dS from fluxes (corrected)')
+        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_weight'].cumsum(), '-', color='#d0d1e6', lw=1, label=r'dS from weight')
+        axs.tick_params(axis='x', rotation=45)
+        axs.set_ylabel(r'[mm]')
+        axs.set_xlabel('Time [year-month]')
+        axs.legend(frameon=False, loc='upper left', fontsize=4, ncol=2)
+        axs.set_xlim(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index[0], df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index[-1])
+        fig.tight_layout()
+        file = base_path_figs / f'lys_cumulated_{year}.png'
+        fig.savefig(file, dpi=250)
+        plt.close(fig=fig)
+
+    fig, axs = plt.subplots(1, 1, figsize=(3, 2))
+    axs.plot(df_lys_obs_nonan.loc['2001':, :].index, df_lys_obs_nonan.loc['2001':, 'prec'].cumsum(), '-', color='#034e7b', lw=1, label=r'PREC')
+    axs.plot(df_lys_obs_nonan.loc['2001':, :].index, df_lys_obs_nonan.loc['2001':, 'prec_corr'].cumsum(), '-', color='#0570b0', lw=1, label=r'PREC (corrected)')
+    axs.plot(df_lys_obs_nonan.loc['2001':, :].index, df_lys_obs_nonan.loc['2001':, 'aet'].cumsum(), '-', color='#238b45', lw=1, label=r'AET')
+    axs.plot(df_lys_obs_nonan.loc['2001':, :].index, df_lys_obs_nonan.loc['2001':, 'perc'].cumsum(), '-', color='#74a9cf', lw=1, label=r'PERC')
+    axs.plot(df_lys_obs_nonan.loc['2001':, :].index, df_lys_obs_nonan.loc['2001':, 'dS_flux'].cumsum(), '-', color='#6a51a3', lw=1, label=r'dS from fluxes')
+    axs.plot(df_lys_obs_nonan.loc['2001':, :].index, df_lys_obs_nonan.loc['2001':, 'dS_flux_corr'].cumsum(), '-', color='#9e9ac8', lw=1, label=r'dS from fluxes (corrected)')
+    axs.plot(df_lys_obs_nonan.loc['2001':, :].index, df_lys_obs_nonan.loc['2001':, 'dS_weight'].cumsum(), '-', color='#d0d1e6', lw=1, label=r'dS from weight')
+    axs.tick_params(axis='x', rotation=45)
+    axs.set_ylabel(r'[mm]')
+    axs.set_xlabel('Time [year]')
+    axs.legend(frameon=False, loc='upper left', fontsize=4, ncol=2)
+    axs.set_xlim(df_lys_obs_nonan.loc['2001':, :].index[0], df_lys_obs_nonan.loc['2001':, :].index[-1])
+    fig.tight_layout()
+    file = base_path_figs / 'lys_cumulated.png'
+    fig.savefig(file, dpi=250)
+    plt.close(fig=fig)
+
+    # df_eval = df_lys_obs_nonan.loc['2000':, ['dS_weight', 'dS_flux']]
+    # df_eval.columns = ['sim', 'obs']
+    # fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, '[mm]', x_lab='Time\n[day-month-hydyear]')
+    # file_str = 'dS_lys_cum_year_facet.pdf'
+    # path_fig = base_path_figs / file_str
+    # fig.savefig(path_fig, dpi=250)
+
+    df_lys_obs_nonan.loc[:, 'hyd_year'] = df_lys_obs_nonan.index.year
+    df_lys_obs_nonan.loc[(df_lys_obs_nonan.index.month >= 10), 'hyd_year'] += 1
+    df_lys_ann = df_lys_obs_nonan.loc['2000':, :].groupby('hyd_year').sum()
+    df_lys_ann = df_lys_ann.loc[:, ['prec', 'prec_corr', 'aet', 'perc', 'dS_weight']]
+    df_lys_ann.columns = ['PREC', 'PREC (corrected)', 'AET', 'PERC', 'dS from weight']
+    df_lys_ann.loc[:, 'year'] = df_lys_ann.index
+    df_lys_ann.loc[:, 'dS from fluxes'] = df_lys_ann.loc[:, 'PREC'] - df_lys_ann.loc[:, 'AET'] - df_lys_ann.loc[:, 'PERC']
+    df_lys_ann.loc[:, 'dS from fluxes (corrected)'] = df_lys_ann.loc[:, 'PREC (corrected)'] - df_lys_ann.loc[:, 'AET'] - df_lys_ann.loc[:, 'PERC']
+    df_lys_ann = pd.melt(df_lys_ann, id_vars=['year'], value_vars=['PREC', 'PREC (corrected)', 'AET', 'PERC', 'dS from fluxes', 'dS from fluxes (corrected)', 'dS from weight'])
+    fig, axs = plt.subplots(1, 1, figsize=(4, 1.2))
+    g = sns.barplot(df_lys_ann, x='year', hue='variable', y='value', ax=axs, palette='PuBu_r')
+    axs.set_ylabel(r'[mm]')
+    axs.set_xlabel('Time [year]')
+    g.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.6, 1.1))
+    fig.subplots_adjust(bottom=0.3, right=0.68)
+    file = base_path_figs / 'lysimeter_balance_annual.png'
+    fig.savefig(file, dpi=250)
+    plt.close(fig=fig)
 
     # average observed soil water content of previous days
     window = 5
@@ -459,6 +560,7 @@ def main(tmp_dir):
                 df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
                 rows = (df_rows['sc'].values == i)
                 df_eval = df_eval.loc[rows, :]
+            df_eval.loc['2000-01':'2000-06', :] = onp.nan
             df_eval = df_eval.dropna()
 
             obs_vals = df_eval.loc[:, 'obs'].values
@@ -476,8 +578,8 @@ def main(tmp_dir):
                 except ValueError:
                     df_params_metrics_hydrus.loc[sc, key_r] = onp.nan
 
-    file = base_path_figs / "metrics_best_hydrus.txt"
-    df_params_metrics_hydrus.to_csv(file, header=True, index=True, sep="\t")
+    # file = base_path_figs / "metrics_best_hydrus.txt"
+    # df_params_metrics_hydrus.to_csv(file, header=True, index=True, sep="\t")
     #
     # # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
     # fig, axes = plt.subplots(3, 1, sharex=True, figsize=(6, 3))
