@@ -14,10 +14,11 @@ def main(nsamples, job_type, sas_solver, split_size):
     base_path = Path(__file__).parent
     base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_sensitivity'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
-    transport_models_abrev = {'advection-dispersion': 'ad',
+    transport_models_abrev = {'complete-mixing': 'cm',
+                              'piston': 'pi',
+                              'advection-dispersion': 'ad',
                               'time-variant advection-dispersion': 'adt',
-                              'power': 'pow',
-                              'time-variant power': 'powt'}
+                              }
 
     file_path = base_path / "param_bounds.yml"
     with open(file_path, 'r') as file:
