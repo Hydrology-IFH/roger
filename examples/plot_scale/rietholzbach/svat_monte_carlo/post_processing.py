@@ -164,7 +164,7 @@ def main(tmp_dir):
                         df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
                         rows = (df_rows['sc'].values == sc)
                         df_eval = df_eval.loc[rows, :]
-                    df_eval.loc['2000-01':'2000-06', :] = onp.nan
+                    df_eval.loc['1999-11':'2000-06', :] = onp.nan
                     df_eval = df_eval.dropna()
 
                     if var_sim in ['theta_rz', 'theta_ss', 'theta']:

@@ -121,11 +121,20 @@ def main(tmp_dir):
     df_lys_obs.loc[(df_lys_obs.index.month >= 10), 'hyd_year'] += 1
     file = base_path_figs / "lysimeter_fluxes_weight.csv"
     df_lys_obs.to_csv(file, header=True, index=True, sep=";")
+    df_lys_obs.loc['1999-10':'1999-12', 'dS_flux'] = 0
+    df_lys_obs.loc['1999-10':'1999-12', 'dS_flux_corr'] = 0
+    df_lys_obs.loc['1999-10':'1999-12', 'dS_weight'] = 0
     df_lys_obs_nonan = df_lys_obs.dropna().copy()
     df_lys_obs_nonan.loc[:, 'dS_flux'] = df_lys_obs_nonan.loc[:, 'prec'] - df_lys_obs_nonan.loc[:, 'aet'] - df_lys_obs_nonan.loc[:, 'perc']
     df_lys_obs_nonan.loc[:, 'dS_flux_corr'] = df_lys_obs_nonan.loc[:, 'prec_corr'] - df_lys_obs_nonan.loc[:, 'aet'] - df_lys_obs_nonan.loc[:, 'perc']
     df_lys_obs_nonan.loc[:, 'hyd_year'] = df_lys_obs_nonan.index.year
     df_lys_obs_nonan.loc[(df_lys_obs_nonan.index.month >= 10), 'hyd_year'] += 1
+    df_lys_obs.loc['1999-10':'1999-12', 'dS_weight'] = onp.nan
+    df_lys_obs_nonan_1997_1999 = df_lys_obs.loc[:, ['ta', 'prec', 'prec_corr', 'aet', 'perc', 'dS_flux']].dropna().copy()
+    df_lys_obs_nonan_1997_1999.loc[:, 'dS_flux'] = df_lys_obs_nonan_1997_1999.loc[:, 'prec'] - df_lys_obs_nonan_1997_1999.loc[:, 'aet'] - df_lys_obs_nonan_1997_1999.loc[:, 'perc']
+    df_lys_obs_nonan_1997_1999.loc[:, 'dS_flux_corr'] = df_lys_obs_nonan_1997_1999.loc[:, 'prec_corr'] - df_lys_obs_nonan_1997_1999.loc[:, 'aet'] - df_lys_obs_nonan_1997_1999.loc[:, 'perc']
+    df_lys_obs_nonan_1997_1999.loc[:, 'hyd_year'] = df_lys_obs_nonan_1997_1999.index.year
+    df_lys_obs_nonan_1997_1999.loc[(df_lys_obs_nonan_1997_1999.index.month >= 10), 'hyd_year'] += 1
 
     fig, axs = plt.subplots(1, 1, figsize=(6, 1.2))
     axs.plot(df_lys_obs_nonan.loc['2000':, :].index, df_lys_obs_nonan.loc['2000':, 'dS_flux'], '-', color='blue', lw=1, label=r'dS from fluxes')
@@ -165,49 +174,46 @@ def main(tmp_dir):
     fig.savefig(file, dpi=250)
     plt.close(fig=fig)
 
-    df_lys_obs_nonan1 = df_lys_obs.loc[:, ['ta', 'prec', 'prec_corr', 'aet', 'perc', 'dS_flux']].dropna().copy()
-    df_lys_obs_nonan1.loc[:, 'dS_flux'] = df_lys_obs_nonan1.loc[:, 'prec'] - df_lys_obs_nonan1.loc[:, 'aet'] - df_lys_obs_nonan1.loc[:, 'perc']
-    df_lys_obs_nonan1.loc[:, 'dS_flux_corr'] = df_lys_obs_nonan1.loc[:, 'prec_corr'] - df_lys_obs_nonan1.loc[:, 'aet'] - df_lys_obs_nonan1.loc[:, 'perc']
-    df_lys_obs_nonan1.loc[:, 'hyd_year'] = df_lys_obs_nonan1.index.year
-    df_lys_obs_nonan1.loc[(df_lys_obs_nonan1.index.month >= 10), 'hyd_year'] += 1
-    years = onp.arange(1997, 2001).tolist()
-    for year in years:
-        fig, axs = plt.subplots(1, 1, figsize=(3, 2))
-        axs.plot(df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index, df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, 'prec'].cumsum(), '-', color='#034e7b', lw=1, label=r'PREC')
-        axs.plot(df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index, df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, 'prec_corr'].cumsum(), '-', color='#0570b0', lw=1, label=r'PREC (corrected)')
-        axs.plot(df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index, df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, 'aet'].cumsum(), '-', color='#238b45', lw=1, label=r'AET')
-        axs.plot(df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index, df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, 'perc'].cumsum(), '-', color='#74a9cf', lw=1, label=r'PERC')
-        axs.plot(df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index, df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, 'dS_flux'].cumsum(), '-', color='#6a51a3', lw=1, label=r'dS from fluxes')
-        axs.plot(df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index, df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, 'dS_flux_corr'].cumsum(), '-', color='#9e9ac8', lw=1, label=r'dS from fluxes (corrected)')
-        axs.tick_params(axis='x', rotation=45)
-        axs.set_ylabel(r'[mm]')
-        axs.set_xlabel('Time [year-month]')
-        axs.legend(frameon=False, loc='upper left', fontsize=4, ncol=2)
-        axs.set_xlim(df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index[0], df_lys_obs_nonan1.loc[df_lys_obs_nonan1['hyd_year'] == year, :].index[-1])
-        fig.tight_layout()
-        file = base_path_figs / f'lys_cumulated_{year}.png'
-        fig.savefig(file, dpi=250)
-        plt.close(fig=fig)
+    years = onp.arange(1997, 2008).tolist()
+    years1 = onp.arange(1997, 2001).tolist()
+    years2 = onp.arange(2000, 2008).tolist()
+    fig, axes = plt.subplots(4, 3, figsize=(6, 4.5))
+    axs = axes.flatten()
+    for i, year in enumerate(years):
+        if year in years1:
+            axs[i].plot(df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, :].index, df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, 'prec'].cumsum(), '-', color='#034e7b', lw=1, label=r'PREC')
+            axs[i].plot(df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, :].index, df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, 'prec_corr'].cumsum(), '-', color='#0570b0', lw=1, label=r'PREC (corrected)')
+            axs[i].plot(df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, :].index, df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, 'aet'].cumsum(), '-', color='#238b45', lw=1, label=r'AET')
+            axs[i].plot(df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, :].index, df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, 'perc'].cumsum(), '-', color='#74a9cf', lw=1, label=r'PERC')
+            axs[i].plot(df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, :].index, df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, 'dS_flux'].cumsum(), '-', color='#6a51a3', lw=1, label=r'dS from fluxes')
+            axs[i].plot(df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, :].index, df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, 'dS_flux_corr'].cumsum(), '-', color='#9e9ac8', lw=1, label=r'dS from fluxes (corrected)')
+            axs[i].tick_params(axis='x', rotation=45)
+            axs[i].set_xlim(df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, :].index[0], df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, :].index[-1])
 
-    years = onp.arange(2000, 2008).tolist()
-    for year in years:
-        fig, axs = plt.subplots(1, 1, figsize=(3, 2))
-        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'prec'].cumsum(), '-', color='#034e7b', lw=1, label=r'PREC')
-        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'prec_corr'].cumsum(), '-', color='#0570b0', lw=1, label=r'PREC (corrected)')
-        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'aet'].cumsum(), '-', color='#238b45', lw=1, label=r'AET')
-        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'perc'].cumsum(), '-', color='#74a9cf', lw=1, label=r'PERC')
-        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_flux'].cumsum(), '-', color='#6a51a3', lw=1, label=r'dS from fluxes')
-        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_flux_corr'].cumsum(), '-', color='#9e9ac8', lw=1, label=r'dS from fluxes (corrected)')
-        axs.plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_weight'].cumsum(), '-', color='#d0d1e6', lw=1, label=r'dS from weight')
-        axs.tick_params(axis='x', rotation=45)
-        axs.set_ylabel(r'[mm]')
-        axs.set_xlabel('Time [year-month]')
-        axs.legend(frameon=False, loc='upper left', fontsize=4, ncol=2)
-        axs.set_xlim(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index[0], df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index[-1])
-        fig.tight_layout()
-        file = base_path_figs / f'lys_cumulated_{year}.png'
-        fig.savefig(file, dpi=250)
-        plt.close(fig=fig)
+        elif year in years2:
+            axs[i].plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'prec'].cumsum(), '-', color='#034e7b', lw=1, label=r'PREC')
+            axs[i].plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'prec_corr'].cumsum(), '-', color='#0570b0', lw=1, label=r'PREC (corrected)')
+            axs[i].plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'aet'].cumsum(), '-', color='#238b45', lw=1, label=r'AET')
+            axs[i].plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'perc'].cumsum(), '-', color='#74a9cf', lw=1, label=r'PERC')
+            axs[i].plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_flux'].cumsum(), '-', color='#6a51a3', lw=1, label=r'dS from fluxes')
+            axs[i].plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_flux_corr'].cumsum(), '-', color='#9e9ac8', lw=1, label=r'dS from fluxes (corrected)')
+            axs[i].plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_weight'].cumsum(), '-', color='#d0d1e6', lw=1, label=r'dS from weight')
+            axs[i].tick_params(axis='x', rotation=45)
+            axs[i].set_xlim(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index[0], df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index[-1])
+
+    axes[-1, -1].axis('off')
+    axes[-1, 1].legend(frameon=False, loc='upper right', fontsize=6, ncol=2, bbox_to_anchor=(2, 1))
+    axes[0, 0].set_ylabel(r'[mm]')
+    axes[1, 0].set_ylabel(r'[mm]')
+    axes[2, 0].set_ylabel(r'[mm]')
+    axes[3, 0].set_ylabel(r'[mm]')
+    axes[2, 2].set_xlabel('Time [year-month]')
+    axes[3, 0].set_xlabel('Time [year-month]')
+    axes[3, 1].set_xlabel('Time [year-month]')
+    file = base_path_figs / 'lys_cumulated_annually.png'
+    fig.tight_layout()
+    fig.savefig(file, dpi=250)
+    plt.close(fig=fig)
 
     fig, axs = plt.subplots(1, 1, figsize=(3, 2))
     axs.plot(df_lys_obs_nonan.loc['2001':, :].index, df_lys_obs_nonan.loc['2001':, 'prec'].cumsum(), '-', color='#034e7b', lw=1, label=r'PREC')
@@ -565,7 +571,7 @@ def main(tmp_dir):
     #             df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
     #             rows = (df_rows['sc'].values == i)
     #             df_eval = df_eval.loc[rows, :]
-    #         df_eval.loc['2000-01':'2000-06', :] = onp.nan
+    #         df_eval.loc['1999-11':'2000-06', :] = onp.nan
     #         df_eval = df_eval.dropna()
 
     #         obs_vals = df_eval.loc[:, 'obs'].values
