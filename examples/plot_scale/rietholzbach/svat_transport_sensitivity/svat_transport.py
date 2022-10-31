@@ -9,7 +9,7 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant_advection-dispersion']), default='advection-dispersion')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("--x1", type=int, default=0)
-@click.option("--x2", type=int, default=1)
+@click.option("--x2", type=int, default=10)
 @click.option("-dd", "--data-dir", type=str, default=None)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
@@ -420,7 +420,7 @@ def main(transport_model_structure, sas_solver, x1, x2, data_dir, tmp_dir):
         def set_forcing(self, state):
             vs = state.variables
 
-            vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("ta", self._base_path, f'states_hm_saltelli_for_{transport_model_structure}.nc')[x1:x2, :, vs.itt])
+            vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("ta", self._base_path, f'states_hm_saltelli_for_{transport_model_structure}.nc')[x1:x2, :, vs.itt])
             vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("prec", self._base_path, f'states_hm_saltelli_for_{transport_model_structure}.nc')[x1:x2, :, vs.itt])
             vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mat_rz", self._base_path, f'states_hm_saltelli_for_{transport_model_structure}.nc')[x1:x2, :, vs.itt])
             vs.inf_pf_rz = update(vs.inf_pf_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mp_rz", self._base_path, f'states_hm_saltelli_for_{transport_model_structure}.nc')[x1:x2, :, vs.itt] + self._read_var_from_nc("inf_sc_rz", self._base_path, f'states_hm_saltelli_for_{transport_model_structure}.nc')[x1:x2, :, vs.itt])
