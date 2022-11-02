@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1:gpus=1:default
 #PBS -l walltime=52:00:00
-#PBS -l pmem=8000mb
+#PBS -l pmem=24000mb
 #PBS -N oxygen18_deterministic_svat_pi_sa_8000_8192
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de

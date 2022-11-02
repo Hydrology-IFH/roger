@@ -8,7 +8,7 @@ import numpy as onp
 @click.option("-ns", "--nsamples", type=int, default=1024)
 @click.option("--job-type", type=click.Choice(['single-node', 'multi-node', 'gpu']), default='gpu')
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
-@click.option("--split-size", type=int, default=1000)
+@click.option("--split-size", type=int, default=4000)
 @click.command("main")
 def main(nsamples, job_type, sas_solver, split_size):
     base_path = Path(__file__).parent
@@ -113,7 +113,7 @@ def main(nsamples, job_type, sas_solver, split_size):
                 lines.append('#!/bin/bash\n')
                 lines.append('#PBS -l nodes=1:ppn=1:gpus=1:default\n')
                 lines.append('#PBS -l walltime=52:00:00\n')
-                lines.append('#PBS -l pmem=8000mb\n')
+                lines.append('#PBS -l pmem=24000mb\n')
                 lines.append(f'#PBS -N {script_name}\n')
                 lines.append('#PBS -m bea\n')
                 lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
