@@ -157,9 +157,10 @@ def main(tmp_dir):
             df_params_metrics.loc[:, 'ks'] = ds_sim["ks"].isel(y=0).values.flatten()
             # calculate metrics
             click.echo('Calculate metrics ...')
-            vars_sim = ['aet', 'q_ss', 'theta', 'dS_s', 'dS']
-            vars_obs = ['AET', 'PERC', 'THETA', 'dWEIGHT', 'dWEIGHT']
-            for var_sim, var_obs in zip(vars_sim, vars_obs):
+            vars_sim1 = ['aet', 'q_ss', 'q_ss', 'theta', 'dS_s', 'dS']
+            vars_sim = ['aet', 'q_ss', 'q_ss_corr', 'theta', 'dS_s', 'dS']
+            vars_obs = ['AET', 'PERC', 'PERC_corr', 'THETA', 'dWEIGHT', 'dWEIGHT']
+            for var_sim, var_sim1, var_obs in zip(vars_sim, vars_sim1, vars_obs):
                 if var_sim == 'theta':
                     obs_vals = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0)
                 elif var_sim == 'theta_rz':
@@ -172,7 +173,7 @@ def main(tmp_dir):
                 df_obs.loc[:, 'obs'] = obs_vals
                 for nrow in range(nx * ny):
                     for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
-                        sim_vals = ds_sim[var_sim].isel(x=nrow, y=0).values
+                        sim_vals = ds_sim[var_sim1].isel(x=nrow, y=0).values
                         # join observations on simulations
                         df_eval = eval_utils.join_obs_on_sim(date_sim, sim_vals, df_obs)
 
@@ -180,10 +181,9 @@ def main(tmp_dir):
                             df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
                             rows = (df_rows['sc'].values == sc)
                             df_eval = df_eval.loc[rows, :]
-                        df_eval.loc['1999-11':'2000-06', :] = onp.nan
-                        df_eval = df_eval.dropna()
 
                         if var_sim in ['theta_rz', 'theta_ss', 'theta']:
+                            df_eval = df_eval.dropna()
                             Ni = len(df_eval.index)
                             obs_vals = df_eval.loc[:, 'obs'].values
                             sim_vals = df_eval.loc[:, 'sim'].values
@@ -192,11 +192,16 @@ def main(tmp_dir):
                             key_kge = 'KGE_' + var_sim + f'{sc1}'
                             df_params_metrics.loc[nrow, key_kge] = (Nz / Ni) * eff_swc
                         elif var_sim in ['dS', 'dS_s']:
+                            df_eval.loc['2000-01':'2000-06', :] = onp.nan
+                            df_eval = df_eval.dropna()
                             obs_vals = df_eval.loc[:, 'obs'].values
                             sim_vals = df_eval.loc[:, 'sim'].values
                             key_r = 'r_' + var_sim + f'{sc1}'
                             df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
                         else:
+                            if var_sim in ['q_ss']:
+                                df_eval.loc['1999-11':'2000-06', :] = onp.nan
+                            df_eval = df_eval.dropna()
                             obs_vals = df_eval.loc[:, 'obs'].values
                             sim_vals = df_eval.loc[:, 'sim'].values
                             key_kge = 'KGE_' + var_sim + f'{sc1}'
@@ -359,6 +364,7 @@ def main(tmp_dir):
             # Calculate multi-objective metric
             for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
                 df_params_metrics.loc[:, f'E_multi{sc1}'] = 1/3 * df_params_metrics.loc[:, f'r_dS{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
+                df_params_metrics.loc[:, f'E_multi_corr{sc1}'] = 1/3 * df_params_metrics.loc[:, f'r_dS{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_q_ss_corr{sc1}']
             # write .txt-file
             file = base_path_results / f"params_metrics_{tms}.txt"
             df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
@@ -408,7 +414,7 @@ def main(tmp_dir):
                 ax[-3].legend().set_visible(False)
                 ax[0].set_ylabel('Sobol index [-]')
                 fig.tight_layout()
-                file = base_path_figs / f"sobol_indices_{sc1}_for_{tms}.png"
+                file = base_path_figs / f"sobol_indices_{sc1}_for_{tms}_flags.png"
                 fig.savefig(file, dpi=250)
 
                 # make dotty plots
@@ -433,8 +439,73 @@ def main(tmp_dir):
                 ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
 
                 fig.subplots_adjust(wspace=0.2, hspace=0.3)
-                file = base_path_figs / f"dotty_plots_{sc1}_for_{tms}.png"
+                file = base_path_figs / f"dotty_plots_{sc1}_for_{tms}_flags.png"
                 fig.savefig(file, dpi=250)
+
+            for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
+                df_params = df_params_metrics.loc[:, bounds_sobol['names']]
+                df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'r_dS{sc1}', f'KGE_q_ss_corr{sc1}', f'E_multi_corr{sc1}']]
+                df_metrics.columns = ['KGE_aet', 'r_dS', 'KGE_q_ss', 'E_multi']
+
+                dict_si = {}
+                for name in df_metrics.columns:
+                    Y = df_metrics[name].values
+                    Si = sobol.analyze(bounds_sobol, Y, calc_second_order=False)
+                    Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
+                    dict_si[name] = pd.DataFrame(Si_filter, index=bounds_sobol['names'])
+
+                # plot sobol indices
+                _LABS = {'KGE_aet': 'evapotranspiration',
+                         'KGE_q_ss': 'percolation',
+                         'r_dS': 'storage change',
+                         'E_multi': 'multi-objective metric',
+                         }
+                ncol = len(df_metrics.columns)
+                xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds_sobol['names']]
+                cmap = cm.get_cmap('Greys')
+                norm = Normalize(vmin=0, vmax=2)
+                colors = cmap(norm([0.5, 1.5]))
+                fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(14, 5))
+                for i, name in enumerate(df_metrics.columns):
+                    indices = dict_si[name][['S1', 'ST']]
+                    err = dict_si[name][['S1_conf', 'ST_conf']]
+                    indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
+                    ax[i].set_xticklabels(xaxis_labels)
+                    ax[i].set_title(_LABS[name])
+                    ax[i].legend(["First-order", "Total"], frameon=False)
+                ax[-1].legend().set_visible(False)
+                ax[-2].legend().set_visible(False)
+                ax[-3].legend().set_visible(False)
+                ax[0].set_ylabel('Sobol index [-]')
+                fig.tight_layout()
+                file = base_path_figs / f"sobol_indices_{sc1}_for_{tms}_noflags.png"
+                fig.savefig(file, dpi=250)
+
+                # make dotty plots
+                nrow = len(df_metrics.columns)
+                ncol = bounds_sobol['num_vars']
+                fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(14, 7))
+                for i in range(nrow):
+                    for j in range(ncol):
+                        y = df_metrics.iloc[:, i]
+                        x = df_params.iloc[:, j]
+                        ax[i, j].scatter(x, y, s=4, c='grey', alpha=0.5)
+                        ax[i, j].set_xlabel('')
+                        ax[i, j].set_ylabel('')
+
+                for j in range(ncol):
+                    xlabel = labs._LABS[bounds_sobol['names'][j]]
+                    ax[-1, j].set_xlabel(xlabel)
+
+                ax[0, 0].set_ylabel('$KGE_{ET}$ [-]')
+                ax[1, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
+                ax[2, 0].set_ylabel('$KGE_{PERC}$ [-]')
+                ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
+
+                fig.subplots_adjust(wspace=0.2, hspace=0.3)
+                file = base_path_figs / f"dotty_plots_{sc1}_for_{tms}_noflags.png"
+                fig.savefig(file, dpi=250)
+
     return
 
 
