@@ -327,7 +327,7 @@ def main(tmp_dir):
         dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best1)))
     for sc, sc1 in enumerate(['', 'dry', 'normal', 'wet']):
         df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'r_dS{sc1}', f'KGE_q_ss{sc1}', f'E_multi{sc1}']]
-        df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+        df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
         nrow = len(df_metrics.columns)
         ncol = len(df_params.columns)
         fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
@@ -355,8 +355,8 @@ def main(tmp_dir):
                     ax[i, j].scatter(x_best, y_best, s=0.5, c='red', alpha=1)
                     dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
 
-        for j in range(ncol):
-            xlabel = labs._LABS[df_params.columns[j]]
+        for j, param_var in enumerate(df_params.columns):
+            xlabel = labs._LABS[param_var]
             ax[-1, j].set_xlabel(xlabel)
 
         ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
@@ -370,7 +370,7 @@ def main(tmp_dir):
 
         fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
         for i, metric_var in enumerate(df_metrics.columns):
-            for j, param_var in enumerate(['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']):
+            for j, param_var in enumerate(df_params.columns):
                 y = df_metrics.iloc[:, i]
                 x = df_params.iloc[:, j]
                 ax[i, j].scatter(x, y, s=1, c='grey', alpha=0.5)
@@ -400,8 +400,8 @@ def main(tmp_dir):
                     ax[i, j].scatter(x_best, y_best, s=0.5, c='red', alpha=1)
                     dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
 
-        for j in range(ncol):
-            xlabel = labs._LABS[df_params.columns[j]]
+        for j, param_var in enumerate(df_params.columns):
+            xlabel = labs._LABS[param_var]
             ax[-1, j].set_xlabel(xlabel)
 
         ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
@@ -508,7 +508,7 @@ def main(tmp_dir):
     #     path_fig = base_path_figs / file_str
     #     fig.savefig(path_fig, dpi=250)
     # plt.close('all')
-    #
+
     # vars_obs = ['TA']
     # vars_sim = ['ta']
     # for var_obs, var_sim in zip(vars_obs, vars_sim):
