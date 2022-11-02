@@ -165,10 +165,9 @@ def main(tmp_dir):
                         df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
                         rows = (df_rows['sc'].values == sc)
                         df_eval = df_eval.loc[rows, :]
-                    df_eval.loc['1999-11':'2000-06', :] = onp.nan
-                    df_eval = df_eval.dropna()
 
                     if var_sim in ['theta_rz', 'theta_ss', 'theta']:
+                        df_eval = df_eval.dropna()
                         Ni = len(df_eval.index)
                         obs_vals = df_eval.loc[:, 'obs'].values
                         sim_vals = df_eval.loc[:, 'sim'].values
@@ -177,11 +176,16 @@ def main(tmp_dir):
                         key_kge = 'KGE_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_kge] = (Nz / Ni) * metrics_swc
                     elif var_sim in ['dS', 'dS_s']:
+                        df_eval.loc['2000-01':'2000-06', :] = onp.nan
+                        df_eval = df_eval.dropna()
                         obs_vals = df_eval.loc[:, 'obs'].values
                         sim_vals = df_eval.loc[:, 'sim'].values
                         key_r = 'r_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
                     else:
+                        if var_sim in ['q_ss']:
+                            df_eval.loc['1999-11':'2000-06', :] = onp.nan
+                        df_eval = df_eval.dropna()
                         obs_vals = df_eval.loc[:, 'obs'].values
                         sim_vals = df_eval.loc[:, 'sim'].values
                         key_kge = 'KGE_' + var_sim + f'{sc1}'
