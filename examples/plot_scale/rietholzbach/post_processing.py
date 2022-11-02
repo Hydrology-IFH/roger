@@ -8,6 +8,7 @@ import xarray as xr
 from cftime import num2date
 import pandas as pd
 import numpy as onp
+import matplotlib.dates as mdates
 import matplotlib.cm as cm
 import yaml
 import click
@@ -187,7 +188,6 @@ def main(tmp_dir):
             axs[i].plot(df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, :].index, df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, 'perc'].cumsum(), '-', color='#74a9cf', lw=1, label=r'PERC')
             axs[i].plot(df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, :].index, df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, 'dS_flux'].cumsum(), '-', color='#6a51a3', lw=1, label=r'dS from fluxes')
             axs[i].plot(df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, :].index, df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, 'dS_flux_corr'].cumsum(), '-', color='#9e9ac8', lw=1, label=r'dS from fluxes (corrected)')
-            axs[i].tick_params(axis='x', rotation=45)
             axs[i].set_xlim(df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, :].index[0], df_lys_obs_nonan_1997_1999.loc[df_lys_obs_nonan_1997_1999['hyd_year'] == year, :].index[-1])
 
         elif year in years2:
@@ -198,20 +198,23 @@ def main(tmp_dir):
             axs[i].plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_flux'].cumsum(), '-', color='#6a51a3', lw=1, label=r'dS from fluxes')
             axs[i].plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_flux_corr'].cumsum(), '-', color='#9e9ac8', lw=1, label=r'dS from fluxes (corrected)')
             axs[i].plot(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index, df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, 'dS_weight'].cumsum(), '-', color='#d0d1e6', lw=1, label=r'dS from weight')
-            axs[i].tick_params(axis='x', rotation=45)
             axs[i].set_xlim(df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index[0], df_lys_obs_nonan.loc[df_lys_obs_nonan['hyd_year'] == year, :].index[-1])
 
+        axs[i].xaxis.set_major_formatter(mdates.DateFormatter('%m'))
+        axs[i].set_title(f'{year}')
+
     axes[-1, -1].axis('off')
-    axes[-1, 1].legend(frameon=False, loc='upper right', fontsize=6, ncol=2, bbox_to_anchor=(2, 1))
     axes[0, 0].set_ylabel(r'[mm]')
     axes[1, 0].set_ylabel(r'[mm]')
     axes[2, 0].set_ylabel(r'[mm]')
     axes[3, 0].set_ylabel(r'[mm]')
-    axes[2, 2].set_xlabel('Time [year-month]')
-    axes[3, 0].set_xlabel('Time [year-month]')
-    axes[3, 1].set_xlabel('Time [year-month]')
-    file = base_path_figs / 'lys_cumulated_annually.png'
+    axes[2, 2].set_xlabel('Time [month]')
+    axes[3, 0].set_xlabel('Time [month]')
+    axes[3, 1].set_xlabel('Time [month]')
+    lines, labels = axes[-1, 1].get_legend_handles_labels()
+    fig.legend(lines, labels, loc='lower right', fontsize=6, frameon=False, bbox_to_anchor=(0.95, 0.05))
     fig.tight_layout()
+    file = base_path_figs / 'lys_cumulated_annually.png'
     fig.savefig(file, dpi=250)
     plt.close(fig=fig)
 
