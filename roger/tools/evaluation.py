@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 import numpy as onp
 import scipy as sp
@@ -7,6 +8,10 @@ import seaborn as sns
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
 sns.set_style("ticks")
+
+
+def filter_headers(string, substr):
+    return [str for str in string if re.match(r'[^\d]+|^', str).group(0) in substr]
 
 
 def join_obs_on_sim(idx, sim_vals, df_obs, rm_na=False):
@@ -157,12 +162,17 @@ def plot_obs_sim(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
         Plot for observed and simulated values
     """
     # plot observed and simulated values
+    sim_headers = filter_headers(df.columns, ['sim'])
+    bench_headers = filter_headers(df.columns, ['bench'])
     fig, axs = plt.subplots(figsize=(6, 2))
-    for i in range(len(df.columns)-1):
-        axs.plot(df.index, df.iloc[:, i], lw=1, ls='-.', color='red')
+    for sim_header in sim_headers:
+        axs.plot(df.index, df.loc[:, sim_header], lw=1, ls='-.', color='red')
+    if bench_headers:
+        for bench_header in bench_headers:
+            axs.plot(df.index, df.loc[:, bench_header], lw=1, ls='-.', color='grey')
     if (ls_obs == 'line'):
-        axs.plot(df.index, df.iloc[:, -1], lw=1.2, color='blue', alpha=0.5)
-    axs.scatter(df.index, df.iloc[:, -1], color='blue', s=1, alpha=0.5)
+        axs.plot(df.index, df.loc[:, 'obs'], lw=1.2, color='blue', alpha=0.5)
+    axs.scatter(df.index, df.loc[:, 'obs'], color='blue', s=1, alpha=0.5)
     axs.set_xlim((df.index[0], df.index[-1]))
     if ylim:
         axs.set_ylim(ylim)
@@ -202,6 +212,8 @@ def plot_obs_sim_year(df, y_lab, start_month_hyd_year=10, ls_obs='line', x_lab='
         list with figures
     """
     figs = []
+    sim_headers = filter_headers(df.columns, ['sim'])
+    bench_headers = filter_headers(df.columns, ['bench'])
     df = assign_hyd_year(df.copy(), start_month_hyd_year=start_month_hyd_year)
     years = pd.unique(df.hyd_year)
     for year in years:
@@ -209,11 +221,14 @@ def plot_obs_sim_year(df, y_lab, start_month_hyd_year=10, ls_obs='line', x_lab='
         df_year.loc[df_year.isnull().any(axis=1)] = 0
         # plot observed and simulated values
         fig, axs = plt.subplots(figsize=(6, 2))
-        for i in range(len(df.columns)-1):
-            axs.plot(df_year.index, df_year.iloc[:, i], lw=1, ls='-.', color='red')
+        for sim_header in sim_headers:
+            axs.plot(df.index, df.loc[:, sim_header], lw=1, ls='-.', color='red')
+        if bench_headers:
+            for bench_header in bench_headers:
+                axs.plot(df.index, df.loc[:, bench_header], lw=1, ls='-.', color='grey')
         if (ls_obs == 'line'):
-            axs.plot(df_year.index, df_year.iloc[:, -1], lw=1.2, color='blue', alpha=0.5)
-        axs.scatter(df_year.index, df_year.iloc[:, -1], color='blue', s=1, alpha=0.5)
+            axs.plot(df_year.index, df_year.loc[:, 'obs'], lw=1.2, color='blue', alpha=0.5)
+        axs.scatter(df_year.index, df_year.iloc[:, 'obs'], color='blue', s=1, alpha=0.5)
         axs.set_xlim((df_year.index[0], df_year.index[-1]))
         if ylim:
             axs.set_ylim(ylim)
@@ -251,12 +266,15 @@ def plot_obs_sim_cum(df, y_lab, x_lab='Time'):
     df.loc[df.isna().any(axis=1)] = 0
 
     # plot observed and simulated values
+    sim_headers = filter_headers(df.columns, ['sim'])
+    bench_headers = filter_headers(df.columns, ['bench'])
     fig, axs = plt.subplots(figsize=(6, 2))
-    for i in range(len(df.columns)-1):
-        axs.plot(df.index, df.iloc[:, i].cumsum(), lw=1, ls='-.', color='red')
-    axs.plot(df.index, df.iloc[:, -1].cumsum(), lw=1.5, color='blue', alpha=0.5)
-    if ('PET' in df.columns.to_list()):
-        axs.plot(df.index, df.loc[:, 'PET'].cumsum(), lw=1.2, ls=':', color='silver')
+    for sim_header in sim_headers:
+        axs.plot(df.index, df.loc[:, sim_header].cumsum(), lw=1, ls='-.', color='red')
+    if bench_headers:
+        for bench_header in bench_headers:
+            axs.plot(df.index, df.loc[:, bench_header].cumsum(), lw=1, ls='-.', color='grey')
+    axs.plot(df.index, df.loc[:, 'obs'].cumsum(), lw=1.5, color='blue', alpha=0.5)
     axs.set_xlim((df.index[0], df.index[-1]))
     axs.set_ylabel(y_lab)
     axs.set_xlabel(x_lab)
@@ -288,6 +306,8 @@ def plot_obs_sim_cum_year(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
         list with figures
     """
     figs = []
+    sim_headers = filter_headers(df.columns, ['sim'])
+    bench_headers = filter_headers(df.columns, ['bench'])
     df = assign_hyd_year(df.copy(), start_month_hyd_year=start_month_hyd_year)
     years = pd.unique(df.hyd_year)
     for year in years:
@@ -295,11 +315,12 @@ def plot_obs_sim_cum_year(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
         df_year.loc[df_year.isnull().any(axis=1)] = 0
         # plot observed and simulated values
         fig, axs = plt.subplots(figsize=(6, 3))
-        for i in range(len(df.columns)-1):
-            axs.plot(df_year.index, df_year.iloc[:, i].cumsum(), lw=1, ls='-.', color='red')
-        axs.plot(df_year.index, df_year.iloc[:, -1].cumsum(), lw=1, color='blue')
-        if ('PET' in df_year.columns.to_list()):
-            axs.plot(df_year.index, df_year.loc[:, 'PET'].cumsum(), lw=1.2, ls=':', color='silver')
+        for sim_header in sim_headers:
+            axs.plot(df_year.index, df_year.loc[:, sim_header].cumsum(), lw=1, ls='-.', color='red')
+        if bench_headers:
+            for bench_header in bench_headers:
+                axs.plot(df.index, df.loc[:, bench_header].cumsum(), lw=1, ls='-.', color='grey')
+        axs.plot(df_year.index, df_year.loc[:, 'obs'].cumsum(), lw=1, color='blue')
         axs.set_xlim((df_year.index[0], df_year.index[-1]))
         axs.set_ylabel(y_lab)
         axs.set_xlabel(str(year))
@@ -334,24 +355,33 @@ def plot_obs_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'
     ----------
     fig : Figure
     """
-    header = df.columns
-    df_cs = pd.DataFrame(index=df.index, columns=header)
+    headers = df.columns
+    sim_headers = filter_headers(df.columns, ['sim'])
+    bench_headers = filter_headers(df.columns, ['bench'])
+    df_cs = pd.DataFrame(index=df.index, columns=headers)
     df = assign_hyd_year(df.copy(), start_month_hyd_year=start_month_hyd_year)
     years = pd.unique(df.hyd_year)
     for year in years:
-        df_cs.loc[(df.hyd_year == year), :] = onp.cumsum(df.loc[(df.hyd_year == year), :'obs'].values, axis=0)
+        df_cs.loc[(df.hyd_year == year), :] = onp.cumsum(df.loc[(df.hyd_year == year), headers].values, axis=0)
     df_cs.loc[df_cs.isnull().any(axis=1)] = 0
 
     # DataFrame from wide to long format
     ll_dfs = []
     palette = []
-    for i in range(len(header)-1):
-        df_sim = df_cs.iloc[:, i].to_frame()
+    for i, sim_header in enumerate(sim_headers):
+        df_sim = df_cs.loc[:, sim_header].to_frame()
         df_sim.columns = ['sim_obs']
         df_sim['type'] = f'sim{i}'
         ll_dfs.append(df_sim)
         palette.append('r')
-    df_obs = df_cs.iloc[:, -1].to_frame()
+    if bench_headers:
+        for i, bench_header in enumerate(bench_headers):
+            df_bench = df_cs.loc[:, bench_header].to_frame()
+            df_bench.columns = ['sim_obs']
+            df_bench['type'] = f'bench{i}'
+            ll_dfs.append(df_bench)
+            palette.append('grey')
+    df_obs = df_cs.loc[:, 'obs'].to_frame()
     df_obs.columns = ['sim_obs']
     df_obs['type'] = 'obs'
     ll_dfs.append(df_obs)
@@ -410,19 +440,34 @@ def plot_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
     ----------
     fig : Figure
     """
-    df.columns = ['sim']
+    headers = df.columns
+    sim_headers = filter_headers(df.columns, ['sim'])
+    bench_headers = filter_headers(df.columns, ['bench'])
+    df_cs = pd.DataFrame(index=df.index, columns=headers)
     df = assign_hyd_year(df.copy(), start_month_hyd_year=start_month_hyd_year)
-    df_cs = pd.DataFrame(index=df.index, columns=['sim'])
     years = pd.unique(df.hyd_year)
     for year in years:
-        df_cs.loc[(df.hyd_year == year), 'sim'] = df.loc[(df.hyd_year == year), 'sim'].cumsum()
+        df_cs.loc[(df.hyd_year == year), :] = onp.cumsum(df.loc[(df.hyd_year == year), headers].values, axis=0)
     df_cs.loc[df_cs.isnull().any(axis=1)] = 0
 
     # DataFrame from wide to long format
-    df_sim = df_cs.iloc[:, 0].to_frame()
-    df_sim.columns = ['sim_obs']
-    df_sim['type'] = 'sim'
-    df_sim_long = pd.melt(df_sim, id_vars=['type'], value_vars=['sim_obs'], ignore_index=False)
+    ll_dfs = []
+    palette = []
+    for i, sim_header in enumerate(sim_headers):
+        df_sim = df_cs.loc[:, sim_header].to_frame()
+        df_sim.columns = ['sim_obs']
+        df_sim['type'] = f'sim{i}'
+        ll_dfs.append(df_sim)
+        palette.append('r')
+    if bench_headers:
+        for i, bench_header in enumerate(bench_headers):
+            df_bench = df_cs.loc[:, bench_header].to_frame()
+            df_bench.columns = ['sim_obs']
+            df_bench['type'] = f'bench{i}'
+            ll_dfs.append(df_bench)
+            palette.append('grey')
+    df_sim_obs = pd.concat(ll_dfs)
+    df_sim_long = pd.melt(df_sim_obs, id_vars=['type'], value_vars=['sim_obs'], ignore_index=False)
     df_sim_long = assign_hyd_year(df_sim_long.copy(), start_month_hyd_year=start_month_hyd_year)
     df_sim_long['time'] = df_sim_long.index
     df_sim_long.loc[df_sim_long.isnull().any(axis=1)] = 0
@@ -437,7 +482,7 @@ def plot_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
         data=df_sim_long,
         x="time", y="value",
         hue="type", col="hyd_year",
-        kind="line", palette=["black"],
+        kind="line", palette=palette,
         facet_kws=dict(sharex=False),
         height=4, aspect=.7, col_wrap=4
     )
