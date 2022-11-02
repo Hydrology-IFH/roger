@@ -381,7 +381,7 @@ def main(tmp_dir):
             plt.close('all')
 
         # select best model run
-        idx_best = df_params_metrics['E_multi'].idxmax()
+        idx_best1 = df_params_metrics['E_multi'].idxmax()
 
         # write states of best simulation
         click.echo('Write best simulation ...')
@@ -422,13 +422,13 @@ def main(tmp_dir):
                     if var_sim not in list(f.dimensions.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
                         v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                         vals = onp.array(var_obj)
-                        v[:, :, :] = vals[idx_best, :, :]
+                        v[:, :, :] = vals[idx_best1, :, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                         units=var_obj.attrs["units"])
                     elif var_sim not in list(f.dimensions.keys()) and ('x', 'y') == var_obj.dimensions:
                         v = f.create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
                         vals = onp.array(var_obj)
-                        v[:, :] = vals[idx_best, :]
+                        v[:, :] = vals[idx_best1, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                         units=var_obj.attrs["units"])
 
@@ -437,7 +437,7 @@ def main(tmp_dir):
         df_params_metrics1 = df_params_metrics.copy()
         df_params_metrics1.loc[:, 'id'] = range(len(df_params_metrics1.index))
         df_params_metrics1 = df_params_metrics1.sort_values(by=['E_multi'], ascending=False)
-        idx_best1 = df_params_metrics1.loc[:df_params_metrics1.index[99], 'id'].values.tolist()
+        idx_best100 = df_params_metrics1.loc[:df_params_metrics1.index[99], 'id'].values.tolist()
         # write states of best model run
         states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"
         states_hm_file = base_path / "states_hm100.nc"
@@ -455,7 +455,7 @@ def main(tmp_dir):
                     roger_version=df.attrs['roger_version']
                 )
                 # set dimensions with a dictionary
-                dict_dim = {'x': len(idx_best1), 'y': 1, 'Time': len(df.variables['Time'])}
+                dict_dim = {'x': len(idx_best100), 'y': 1, 'Time': len(df.variables['Time'])}
                 if not f.dimensions:
                     f.dimensions = dict_dim
                     v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
@@ -476,13 +476,13 @@ def main(tmp_dir):
                     if var_sim not in list(f.dimensions.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
                         v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                         vals = onp.array(var_obj)
-                        v[:, :, :] = vals[idx_best1, :, :]
+                        v[:, :, :] = vals[idx_best100, :, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                         units=var_obj.attrs["units"])
                     elif var_sim not in list(f.dimensions.keys()) and ('x', 'y') == var_obj.dimensions:
                         v = f.create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
                         vals = onp.array(var_obj)
-                        v[:, :] = vals[idx_best1, :]
+                        v[:, :] = vals[idx_best100, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                         units=var_obj.attrs["units"])
     return
