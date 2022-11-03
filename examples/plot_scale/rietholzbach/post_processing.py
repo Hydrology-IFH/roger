@@ -771,194 +771,185 @@ def main(tmp_dir):
     # df_params_metrics_hydrus.to_csv(file, header=True, index=True, sep="\t")
     #
     # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
-    fig, axes = plt.subplots(3, 1, sharex=True, figsize=(6, 3))
-    axes[0].plot(dict_obs['PREC'].index, dict_obs['PREC'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
-    axes[0].set_ylabel('PREC\n[mm]')
-    axes[0].set_xlim((dict_obs['PREC'].index[0], dict_obs['PREC'].index[-1]))
-    axes[0].set_ylim(0,)
-    axes[0].invert_yaxis()
-    ax2 = axes[0].twinx()
-    ax2.plot(dict_obs_sim['AET'].index, dict_obs_sim['AET']['obs'].cumsum(),
+    fig, axes = plt.subplots(3, 2, sharex='col', figsize=(6, 3))
+    axes[0, 0].plot(dict_obs['PREC'].loc['1997':'1999', :].index, dict_obs['PREC'].loc['1997':'1999', 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
+    axes[0, 0].set_ylabel('PREC\n[mm]')
+    axes[0, 0].set_xlim((dict_obs['PREC'].loc['1997':'1999', :].index[0], dict_obs['PREC'].loc['1997':'1999', :].index[-1]))
+    axes[0, 0].set_ylim(0,)
+    axes[0, 0].invert_yaxis()
+    ax2 = axes[0, 0].twinx()
+    ax2.plot(dict_obs_sim['AET'].loc['1997':'1999', :].index, dict_obs_sim['AET'].loc['1997':'1999', 'obs'].cumsum(),
               lw=1, color='blue', ls='-', alpha=0.5)
-    ax2.plot(dict_obs_sim['AET'].index, dict_obs_sim['AET']['sim'].cumsum(),
+    ax2.plot(dict_obs_sim['AET'].loc['1997':'1999', :].index, dict_obs_sim['AET'].loc['1997':'1999', 'sim'].cumsum(),
               lw=1, color='red', ls='-.')
-    ax2.plot(dict_obs_sim_hydrus['AET'].index, dict_obs_sim_hydrus['AET']['sim'].cumsum(),
+    ax2.plot(dict_obs_sim_hydrus['AET'].loc['1997':'1999', :].index, dict_obs_sim_hydrus['AET'].loc['1997':'1999', 'sim'].cumsum(),
               lw=1, color='gray', ls='-.')
     ax2.set_ylim(0,)
     ax2.set_ylabel('ET\n[mm]')
-    axes[1].plot(dict_obs_sim['dWEIGHT'].loc['2000-07':, :].index, dict_obs_sim['dWEIGHT'].loc['2000-07':, 'obs'].cumsum(),
-                  lw=1, color='blue', ls='-', alpha=0.5)
-    axes[1].plot(dict_obs_sim['dWEIGHT'].loc['2000-07':, :].index, dict_obs_sim['dWEIGHT'].loc['2000-07':, 'sim'].cumsum(),
-                  lw=1, color='red', ls='-.')
-    axes[1].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['2000-07':, :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['2000-07':, 'sim'].cumsum(),
-                  lw=1, color='gray', ls='-.')
-    axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
-    axes[1].set_xlim((dict_obs['PREC'].index[0], dict_obs['PREC'].index[-1]))
-    axes[2].plot(dict_obs_sim['PERC'].index, dict_obs_sim['PERC']['obs'].cumsum(),
-                  lw=1, color='blue', ls='-', alpha=0.5)
-    axes[2].plot(dict_obs_sim['PERC'].index, dict_obs_sim['PERC']['sim'].cumsum(),
-                  lw=1, color='red', ls='-.')
-    axes[2].plot(dict_obs_sim_hydrus['PERC'].index, dict_obs_sim_hydrus['PERC']['sim'].cumsum(),
-                  lw=1, color='gray', ls='-.')
-    axes[2].set_ylim(0,)
-    axes[2].invert_yaxis()
-    axes[2].set_xlim((dict_obs['PREC'].index[0], dict_obs['PREC'].index[-1]))
-    axes[2].set_ylabel('PERC\n[mm]')
-    axes[2].set_xlabel(r'Time [year]')
-    axes[0].text(0.025, 0.88, '(a)', fontsize=8, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[0].transAxes)
-    axes[1].text(0.025, 0.88, '(b)', fontsize=8, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[1].transAxes)
-    axes[2].text(0.025, 0.88, '(c)', fontsize=8, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[2].transAxes)
-    fig.tight_layout()
-    file = 'prec_et_dS_perc_obs_sim_cumulated_flags.png'
-    path = base_path_figs / file
-    fig.savefig(path, dpi=250)
-
-    fig, axes = plt.subplots(3, 1, sharex=True, figsize=(6, 3))
-    axes[0].plot(dict_obs['PREC'].index, dict_obs['PREC'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
-    axes[0].set_ylabel('PREC\n[mm]')
-    axes[0].set_xlim((dict_obs['PREC'].index[0], dict_obs['PREC'].index[-1]))
-    axes[0].set_ylim(0,)
-    axes[0].invert_yaxis()
-    ax2 = axes[0].twinx()
-    ax2.plot(dict_obs_sim['AET'].index, dict_obs_sim['AET']['obs'].cumsum(),
+    axes[0, 1].plot(dict_obs['PREC'].loc['2006':, :].index, dict_obs['PREC'].loc['2006':, 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
+    axes[0, 1].set_ylabel('PREC\n[mm]')
+    axes[0, 1].set_xlim((dict_obs['PREC'].loc['2006':, :].index[0], dict_obs['PREC'].loc['2006':, :].index[-1]))
+    axes[0, 1].set_ylim(0,)
+    axes[0, 1].invert_yaxis()
+    ax2 = axes[0, 1].twinx()
+    ax2.plot(dict_obs_sim['AET'].loc['2006':, :].index, dict_obs_sim['AET'].loc['2006':, 'obs'].cumsum(),
               lw=1, color='blue', ls='-', alpha=0.5)
-    ax2.plot(dict_obs_sim['AET'].index, dict_obs_sim['AET']['sim'].cumsum(),
+    ax2.plot(dict_obs_sim['AET'].loc['2006':, :].index, dict_obs_sim['AET'].loc['2006':, 'sim'].cumsum(),
               lw=1, color='red', ls='-.')
-    ax2.plot(dict_obs_sim_hydrus['AET'].index, dict_obs_sim_hydrus['AET']['sim'].cumsum(),
+    ax2.plot(dict_obs_sim_hydrus['AET'].loc['2006':, :].index, dict_obs_sim_hydrus['AET'].loc['2006':, 'sim'].cumsum(),
               lw=1, color='gray', ls='-.')
     ax2.set_ylim(0,)
     ax2.set_ylabel('ET\n[mm]')
-    axes[1].plot(dict_obs_sim['dWEIGHT'].loc['2000-07':, :].index, dict_obs_sim['dWEIGHT'].loc['2000-07':, 'obs'].cumsum(),
-                  lw=1, color='blue', ls='-', alpha=0.5)
-    axes[1].plot(dict_obs_sim['dWEIGHT'].loc['2000-07':, :].index, dict_obs_sim['dWEIGHT'].loc['2000-07':, 'sim'].cumsum(),
+    axes[1, 0].plot(dict_obs_sim['dWEIGHT'].loc['1997':'1999', :].index, dict_obs_sim['dWEIGHT'].loc['1997':'1999', 'sim'].cumsum(),
                   lw=1, color='red', ls='-.')
-    axes[1].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['2000-07':, :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['2000-07':, 'sim'].cumsum(),
+    axes[1, 0].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['1997':'1999', :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['1997':'1999', 'sim'].cumsum(),
                   lw=1, color='gray', ls='-.')
-    axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
-    axes[1].set_xlim((dict_obs['PREC'].index[0], dict_obs['PREC'].index[-1]))
-    axes[2].plot(dict_obs_sim['PERC_corr'].index, dict_obs_sim['PERC_corr']['obs'].cumsum(),
+    axes[1, 0].set_ylabel('cum. $\Delta$S\n[mm]')
+    axes[1, 0].set_xlim((dict_obs['PREC'].loc['1997':'1999', :].index[0], dict_obs['PREC'].loc['1997':'1999', :].index[-1]))
+    axes[1, 1].plot(dict_obs_sim['dWEIGHT'].loc['2006':, :].index, dict_obs_sim['dWEIGHT'].loc['2006':, 'obs'].cumsum(),
                   lw=1, color='blue', ls='-', alpha=0.5)
-    axes[2].plot(dict_obs_sim['PERC_corr'].index, dict_obs_sim['PERC_corr']['sim'].cumsum(),
+    axes[1, 1].plot(dict_obs_sim['dWEIGHT'].loc['2006':, :].index, dict_obs_sim['dWEIGHT'].loc['2006':, 'sim'].cumsum(),
                   lw=1, color='red', ls='-.')
-    axes[2].plot(dict_obs_sim_hydrus['PERC_corr'].index, dict_obs_sim_hydrus['PERC_corr']['sim'].cumsum(),
+    axes[1, 1].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['2006':, :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['2006':, 'sim'].cumsum(),
                   lw=1, color='gray', ls='-.')
-    axes[2].set_ylim(0,)
-    axes[2].invert_yaxis()
-    axes[2].set_xlim((dict_obs['PREC'].index[0], dict_obs['PREC'].index[-1]))
-    axes[2].set_ylabel('PERC\n[mm]')
-    axes[2].set_xlabel(r'Time [year]')
-    axes[0].text(0.025, 0.88, '(a)', fontsize=8, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[0].transAxes)
-    axes[1].text(0.025, 0.88, '(b)', fontsize=8, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[1].transAxes)
-    axes[2].text(0.025, 0.88, '(c)', fontsize=8, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[2].transAxes)
+    axes[1, 1].set_ylabel('cum. $\Delta$S\n[mm]')
+    axes[1, 1].set_xlim((dict_obs['PREC'].loc['2006':, :].index[0], dict_obs['PREC'].loc['2006':, :].index[-1]))
+    axes[2, 0].plot(dict_obs_sim['PERC'].loc['1997':'1999', :].index, dict_obs_sim['PERC'].loc['1997':'1999', 'obs'].cumsum(),
+                  lw=1, color='blue', ls='-', alpha=0.5)
+    axes[2, 0].plot(dict_obs_sim['PERC'].loc['1997':'1999', :].index, dict_obs_sim['PERC'].loc['1997':'1999', 'sim'].cumsum(),
+                  lw=1, color='red', ls='-.')
+    axes[2, 0].plot(dict_obs_sim_hydrus['PERC'].loc['1997':'1999', :].index, dict_obs_sim_hydrus['PERC'].loc['1997':'1999', 'sim'].cumsum(),
+                  lw=1, color='gray', ls='-.')
+    axes[2, 0].set_ylim(0,)
+    axes[2, 0].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+    axes[2, 0].tick_params(axis='x', rotation=33)
+    axes[2, 0].invert_yaxis()
+    axes[2, 0].set_xlim((dict_obs['PREC'].loc['1997':'1999', :].index[0], dict_obs['PREC'].loc['1997':'1999', :].index[-1]))
+    axes[2, 0].set_ylabel('PERC\n[mm]')
+    axes[2, 0].set_xlabel(r'Time [year-month]')
+    axes[2, 1].plot(dict_obs_sim['PERC'].loc['2006':, :].index, dict_obs_sim['PERC'].loc['2006':, 'obs'].cumsum(),
+                  lw=1, color='blue', ls='-', alpha=0.5)
+    axes[2, 1].plot(dict_obs_sim['PERC'].loc['2006':, :].index, dict_obs_sim['PERC'].loc['2006':, 'sim'].cumsum(),
+                  lw=1, color='red', ls='-.')
+    axes[2, 1].plot(dict_obs_sim_hydrus['PERC'].loc['2006':, :].index, dict_obs_sim_hydrus['PERC'].loc['2006':, 'sim'].cumsum(),
+                  lw=1, color='gray', ls='-.')
+    axes[2, 1].set_ylim(0,)
+    axes[2, 1].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+    axes[2, 1].tick_params(axis='x', rotation=33)
+    axes[2, 1].invert_yaxis()
+    axes[2, 1].set_xlim((dict_obs['PREC'].loc['2006':, :].index[0], dict_obs['PREC'].loc['2006':, :].index[-1]))
+    axes[2, 1].set_ylabel('PERC\n[mm]')
+    axes[2, 1].set_xlabel(r'Time [year-month]')
+    axes[0, 0].text(0.525, 0.88, '(a)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0, 0].transAxes)
+    axes[1, 0].text(0.525, 0.88, '(b)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1, 0].transAxes)
+    axes[2, 0].text(0.525, 0.88, '(c)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2, 0].transAxes)
+    axes[0, 1].text(0.525, 0.88, '(d)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0, 1].transAxes)
+    axes[1, 1].text(0.525, 0.88, '(e)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1, 1].transAxes)
+    axes[2, 1].text(0.525, 0.88, '(f)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2, 1].transAxes)
     fig.tight_layout()
-    file = 'prec_et_dS_perc_obs_sim_cumulated_noflags.png'
+    file = 'prec_et_dS_perc_obs_sim_cumulated.png'
     path = base_path_figs / file
     fig.savefig(path, dpi=250)
 
     # compare best 100 simulations with observations
     nx = ds_sim_hm100.dims['x']
-    fig, axes = plt.subplots(3, 1, sharex=True, figsize=(6, 3))
-    axes[0].plot(dict_obs['PREC'].index, dict_obs['PREC'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
-    axes[0].set_ylabel('PREC\n[mm]')
-    axes[0].set_xlim((dict_obs['PREC'].index[0], dict_obs['PREC'].index[-1]))
-    axes[0].set_ylim(0,)
-    axes[0].invert_yaxis()
-    ax2 = axes[0].twinx()
+    fig, axes = plt.subplots(3, 2, sharex='col', figsize=(6, 3))
+    axes[0, 0].plot(dict_obs['PREC'].loc['1997':'1999', :].index, dict_obs['PREC'].loc['1997':'1999', 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
+    axes[0, 0].set_ylabel('PREC\n[mm]')
+    axes[0, 0].set_xlim((dict_obs['PREC'].loc['1997':'1999', :].index[0], dict_obs['PREC'].loc['1997':'1999', :].index[-1]))
+    axes[0, 0].set_ylim(0,)
+    axes[0, 0].invert_yaxis()
+    ax2 = axes[0, 0].twinx()
     for nrow in range(nx):
-        ax2.plot(dict_obs_sim100['AET'].index, dict_obs_sim100['AET'].iloc[:, nrow].cumsum(),
+        ax2.plot(dict_obs_sim100['AET'].loc['1997':'1999', :].index, dict_obs_sim100['AET'].loc['1997':'1999', f'sim{nrow}'].cumsum(),
                   lw=1, color='red', ls='-', alpha=.8)
-    ax2.plot(dict_obs_sim100['AET'].index, dict_obs_sim100['AET']['obs'].cumsum(),
+    ax2.plot(dict_obs_sim100['AET'].loc['1997':'1999', :].index, dict_obs_sim100['AET'].loc['1997':'1999', 'obs'].cumsum(),
               lw=1, color='blue', ls='-', alpha=1)
-    ax2.plot(dict_obs_sim_hydrus['AET'].index, dict_obs_sim_hydrus['AET']['sim'].cumsum(),
+    ax2.plot(dict_obs_sim_hydrus['AET'].loc['1997':'1999', :].index, dict_obs_sim_hydrus['AET'].loc['1997':'1999', 'sim'].cumsum(),
+              lw=1, color='gray', ls='-.')
+    ax2.set_ylim(0,)
+    ax2.set_ylabel('ET\n[mm]')
+    axes[0, 1].plot(dict_obs['PREC'].loc['2006':, :].index, dict_obs['PREC'].loc['2006':, 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
+    axes[0, 1].set_ylabel('PREC\n[mm]')
+    axes[0, 1].set_xlim((dict_obs['PREC'].loc['2006':, :].index[0], dict_obs['PREC'].loc['2006':, :].index[-1]))
+    axes[0, 1].set_ylim(0,)
+    axes[0, 1].invert_yaxis()
+    ax2 = axes[0, 1].twinx()
+    for nrow in range(nx):
+        ax2.plot(dict_obs_sim100['AET'].loc['2006':, :].index, dict_obs_sim100['AET'].loc['2006':, f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-', alpha=.8)
+    ax2.plot(dict_obs_sim100['AET'].loc['2006':, :].index, dict_obs_sim100['AET'].loc['2006':, 'obs'].cumsum(),
+              lw=1, color='blue', ls='-', alpha=1)
+    ax2.plot(dict_obs_sim_hydrus['AET'].loc['2006':, :].index, dict_obs_sim_hydrus['AET'].loc['2006':, 'sim'].cumsum(),
               lw=1, color='gray', ls='-.')
     ax2.set_ylim(0,)
     ax2.set_ylabel('ET\n[mm]')
     for nrow in range(nx):
-        axes[1].plot(dict_obs_sim100['dWEIGHT'].loc['2000-07':, :].index, dict_obs_sim100['dWEIGHT'].loc['2000-07':, f'sim{nrow}'].cumsum(),
+        axes[1, 0].plot(dict_obs_sim100['dWEIGHT'].loc['1997':'1999', :].index, dict_obs_sim100['dWEIGHT'].loc['1997':'1999', f'sim{nrow}'].cumsum(),
                   lw=1, color='red', ls='-')
-    axes[1].plot(dict_obs_sim100['dWEIGHT'].loc['2000-07':, :].index, dict_obs_sim100['dWEIGHT'].loc['2000-07':, 'obs'].cumsum(),
-                  lw=1, color='blue', ls='-', alpha=1)
-    axes[1].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['2000-07':, :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['2000-07':, 'sim'].cumsum(),
+    axes[1, 0].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['1997':'1999', :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['1997':'1999', 'sim'].cumsum(),
                   lw=1, color='gray', ls='-.', alpha=.8)
-    axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
-    axes[1].set_xlim((dict_obs['PREC'].index[0], dict_obs['PREC'].index[-1]))
+    axes[1, 0].set_ylabel('cum. $\Delta$S\n[mm]')
+    axes[1, 0].set_xlim((dict_obs['PREC'].loc['1997':'1999', :].index[0], dict_obs['PREC'].loc['1997':'1999', :].index[-1]))
     for nrow in range(nx):
-        axes[2].plot(dict_obs_sim100['PERC'].index, dict_obs_sim100['PERC'].iloc[:, nrow].cumsum(),
-                  lw=1, color='red', ls='-', alpha=.8)
-    axes[2].plot(dict_obs_sim['PERC'].index, dict_obs_sim['PERC']['obs'].cumsum(),
+        axes[1, 1].plot(dict_obs_sim100['dWEIGHT'].loc['2006':, :].index, dict_obs_sim100['dWEIGHT'].loc['2006':, f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-')
+    axes[1, 1].plot(dict_obs_sim100['dWEIGHT'].loc['2006':, :].index, dict_obs_sim100['dWEIGHT'].loc['2006':, 'obs'].cumsum(),
                   lw=1, color='blue', ls='-', alpha=1)
-    axes[2].plot(dict_obs_sim_hydrus['PERC'].index, dict_obs_sim_hydrus['PERC']['sim'].cumsum(),
+    axes[1, 1].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['2006':, :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['2006':, 'sim'].cumsum(),
+                  lw=1, color='gray', ls='-.', alpha=.8)
+    axes[1, 1].set_ylabel('cum. $\Delta$S\n[mm]')
+    axes[1, 1].set_xlim((dict_obs['PREC'].loc['2006':, :].index[0], dict_obs['PREC'].loc['2006':, :].index[-1]))
+    for nrow in range(nx):
+        axes[2, 0].plot(dict_obs_sim100['PERC'].loc['1997':'1999', :].index, dict_obs_sim100['PERC'].loc['1997':'1999', f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-', alpha=.8)
+    axes[2, 0].plot(dict_obs_sim['PERC'].loc['1997':'1999', :].index, dict_obs_sim['PERC'].loc['1997':'1999', 'obs'].cumsum(),
+                  lw=1, color='blue', ls='-', alpha=1)
+    axes[2, 0].plot(dict_obs_sim_hydrus['PERC'].loc['1997':'1999', :].index, dict_obs_sim_hydrus['PERC'].loc['1997':'1999', 'sim'].cumsum(),
                   lw=1, color='gray', ls='-.')
-    axes[2].set_ylim(0,)
-    axes[2].invert_yaxis()
-    axes[2].set_xlim((dict_obs['PREC'].index[0], dict_obs['PREC'].index[-1]))
-    axes[2].set_ylabel('PERC\n[mm]')
-    axes[2].set_xlabel(r'Time [year]')
-    axes[0].text(0.025, 0.88, '(a)', fontsize=8, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[0].transAxes)
-    axes[1].text(0.025, 0.88, '(b)', fontsize=8, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[1].transAxes)
-    axes[2].text(0.025, 0.88, '(c)', fontsize=8, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[2].transAxes)
+    axes[2, 0].set_ylim(0,)
+    axes[2, 0].invert_yaxis()
+    axes[2, 0].set_xlim((dict_obs['PREC'].loc['1997':'1999', :].index[0], dict_obs['PREC'].loc['1997':'1999', :].index[-1]))
+    axes[2, 0].set_ylabel('PERC\n[mm]')
+    axes[2, 0].set_xlabel(r'Time [year-month]')
+    axes[2, 0].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+    axes[2, 0].tick_params(axis='x', rotation=33)
+    for nrow in range(nx):
+        axes[2, 1].plot(dict_obs_sim100['PERC'].loc['2006':, :].index, dict_obs_sim100['PERC'].loc['2006':, f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-', alpha=.8)
+    axes[2, 1].plot(dict_obs_sim['PERC'].loc['2006':, :].index, dict_obs_sim['PERC'].loc['2006':, 'obs'].cumsum(),
+                  lw=1, color='blue', ls='-', alpha=1)
+    axes[2, 1].plot(dict_obs_sim_hydrus['PERC'].loc['2006':, :].index, dict_obs_sim_hydrus['PERC'].loc['2006':, 'sim'].cumsum(),
+                  lw=1, color='gray', ls='-.')
+    axes[2, 1].set_ylim(0,)
+    axes[2, 1].invert_yaxis()
+    axes[2, 1].set_xlim((dict_obs['PREC'].loc['2006':, :].index[0], dict_obs['PREC'].loc['2006':, :].index[-1]))
+    axes[2, 1].set_ylabel('PERC\n[mm]')
+    axes[2, 1].set_xlabel(r'Time [year-month]')
+    axes[2, 1].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+    axes[2, 1].tick_params(axis='x', rotation=33)
+    axes[0, 0].text(0.525, 0.88, '(a)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0, 0].transAxes)
+    axes[1, 0].text(0.525, 0.88, '(b)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1, 0].transAxes)
+    axes[2, 0].text(0.525, 0.88, '(c)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2, 0].transAxes)
+    axes[0, 1].text(0.525, 0.88, '(d)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0, 1].transAxes)
+    axes[1, 1].text(0.525, 0.88, '(e)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1, 1].transAxes)
+    axes[2, 1].text(0.525, 0.88, '(f)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2, 1].transAxes)
     fig.tight_layout()
     file = 'prec_et_dS_perc_obs_sim_cumulated_best_100.png'
     path = base_path_figs / file
     fig.savefig(path, dpi=250)
-
-    fig, axes = plt.subplots(3, 1, sharex=True, figsize=(6, 3))
-    axes[0].plot(dict_obs['PREC'].index, dict_obs['PREC'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
-    axes[0].set_ylabel('PREC\n[mm]')
-    axes[0].set_xlim((dict_obs['PREC'].index[0], dict_obs['PREC'].index[-1]))
-    axes[0].set_ylim(0,)
-    axes[0].invert_yaxis()
-    ax2 = axes[0].twinx()
-    for nrow in range(nx):
-        ax2.plot(dict_obs_sim100['AET'].index, dict_obs_sim100['AET'].iloc[:, nrow].cumsum(),
-                  lw=1, color='red', ls='-', alpha=.8)
-    ax2.plot(dict_obs_sim100['AET'].index, dict_obs_sim100['AET']['obs'].cumsum(),
-              lw=1, color='blue', ls='-', alpha=1)
-    ax2.plot(dict_obs_sim_hydrus['AET'].index, dict_obs_sim_hydrus['AET']['sim'].cumsum(),
-              lw=1, color='gray', ls='-.')
-    ax2.set_ylim(0,)
-    ax2.set_ylabel('ET\n[mm]')
-    for nrow in range(nx):
-        axes[1].plot(dict_obs_sim100['dWEIGHT'].loc['2000-07':, :].index, dict_obs_sim100['dWEIGHT'].loc['2000-07':, f'sim{nrow}'].cumsum(),
-                  lw=1, color='red', ls='-')
-    axes[1].plot(dict_obs_sim100['dWEIGHT'].loc['2000-07':, :].index, dict_obs_sim100['dWEIGHT'].loc['2000-07':, 'obs'].cumsum(),
-                  lw=1, color='blue', ls='-', alpha=1)
-    axes[1].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['2000-07':, :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['2000-07':, 'sim'].cumsum(),
-                  lw=1, color='gray', ls='-.', alpha=.8)
-    axes[1].set_ylabel('cum. $\Delta$S\n[mm]')
-    axes[1].set_xlim((dict_obs['PREC'].index[0], dict_obs['PREC'].index[-1]))
-    for nrow in range(nx):
-        axes[2].plot(dict_obs_sim100['PERC_corr'].index, dict_obs_sim100['PERC_corr'].iloc[:, nrow].cumsum(),
-                  lw=1, color='red', ls='-', alpha=.8)
-    axes[2].plot(dict_obs_sim['PERC_corr'].index, dict_obs_sim['PERC_corr']['obs'].cumsum(),
-                  lw=1, color='blue', ls='-', alpha=1)
-    axes[2].plot(dict_obs_sim_hydrus['PERC_corr'].index, dict_obs_sim_hydrus['PERC_corr']['sim'].cumsum(),
-                  lw=1, color='gray', ls='-.')
-    axes[2].set_ylim(0,)
-    axes[2].invert_yaxis()
-    axes[2].set_xlim((dict_obs['PREC'].index[0], dict_obs['PREC'].index[-1]))
-    axes[2].set_ylabel('PERC\n[mm]')
-    axes[2].set_xlabel(r'Time [year]')
-    axes[0].text(0.025, 0.88, '(a)', fontsize=8, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[0].transAxes)
-    axes[1].text(0.025, 0.88, '(b)', fontsize=8, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[1].transAxes)
-    axes[2].text(0.025, 0.88, '(c)', fontsize=8, horizontalalignment='center',
-                  verticalalignment='center', transform=axes[2].transAxes)
-    fig.tight_layout()
-    file = 'prec_et_dS_perc_obs_sim_cumulated_best_100_noflags.png'
-    path = base_path_figs / file
-    fig.savefig(path, dpi=250)
-
 
     # plot evapotranspiration, soil storage change and percolation
     years = onp.arange(1997, 2007).tolist()

@@ -156,7 +156,7 @@ def main(tmp_dir):
             df_params_metrics.loc[:, 'theta_pwp'] = ds_sim["theta_pwp"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'ks'] = ds_sim["ks"].isel(y=0).values.flatten()
             # calculate metrics
-            click.echo('Calculate metrics ...')
+            click.echo(f'Calculate metrics ({tm_structure}) ...')
             vars_sim1 = ['aet', 'q_ss', 'q_ss', 'theta', 'dS_s', 'dS']
             vars_sim = ['aet', 'q_ss', 'q_ss_corr', 'theta', 'dS_s', 'dS']
             vars_obs = ['AET', 'PERC', 'PERC_corr', 'THETA', 'dWEIGHT', 'dWEIGHT']
