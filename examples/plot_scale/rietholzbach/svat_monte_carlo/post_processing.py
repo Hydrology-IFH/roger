@@ -350,6 +350,7 @@ def main(tmp_dir):
         for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
             df_params_metrics.loc[:, f'E_multi{sc1}'] = 1/3 * df_params_metrics.loc[:, f'r_dS{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
             df_params_metrics.loc[:, f'E_multi_corr{sc1}'] = 1/3 * df_params_metrics.loc[:, f'r_dS{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_q_ss_corr{sc1}']
+
         # write .txt-file
         file = base_path_results / "params_metrics.txt"
         df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
@@ -414,7 +415,7 @@ def main(tmp_dir):
             plt.close('all')
 
         # select best model run
-        idx_best1 = df_params_metrics['E_multi'].idxmax()
+        idx_best1 = df_params_metrics['E_multi_corr'].idxmax()
 
         # write states of best simulation
         click.echo('Write best simulation ...')
@@ -469,7 +470,7 @@ def main(tmp_dir):
         click.echo('Write best 100 simulations ...')
         df_params_metrics1 = df_params_metrics.copy()
         df_params_metrics1.loc[:, 'id'] = range(len(df_params_metrics1.index))
-        df_params_metrics1 = df_params_metrics1.sort_values(by=['E_multi'], ascending=False)
+        df_params_metrics1 = df_params_metrics1.sort_values(by=['E_multi_corr'], ascending=False)
         idx_best100 = df_params_metrics1.loc[:df_params_metrics1.index[99], 'id'].values.tolist()
         # write states of best model run
         states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"

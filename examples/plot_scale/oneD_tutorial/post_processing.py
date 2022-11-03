@@ -28,7 +28,7 @@ states_hm_file = base_path / "states_hm.nc"
 with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
     f.attrs.update(
         date_created=datetime.datetime.today().isoformat(),
-        title='RoGeR model results for a single event (Tutorial)',
+        title='RoGeR simulations (Tutorial)',
         institution='University of Freiburg, Chair of Hydrology',
         references='',
         comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',

@@ -427,7 +427,7 @@ def main():
     # set path to directory containing the input files
     path_input = model._base_path / "input"
     model._set_input_dir(path_input)
-    # writes the forcing
+    # writes forcing data to netcdf
     write_forcing_event(path_input)
     # runs the model setup
     model.setup()
