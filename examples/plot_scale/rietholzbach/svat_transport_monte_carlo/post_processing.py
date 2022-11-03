@@ -170,7 +170,7 @@ def main(nsamples, sas_solver, tmp_dir):
                                                         units=var_obj.attrs["units"])
                                         del var_obj, vals
 
-    states_hm1_file = base_path / "states_hm1_bootstrap.nc"
+    states_hm1_file = base_path / "states_hm100_bootstrap.nc"
     states_hm_mc_file = base_path / "states_hm_for_tm_mc.nc"
     n_repeat = int(nsamples / 500)
     if not os.path.exists(states_hm_mc_file):

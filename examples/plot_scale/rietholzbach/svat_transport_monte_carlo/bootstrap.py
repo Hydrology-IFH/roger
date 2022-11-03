@@ -19,7 +19,7 @@ def main(tmp_dir, resample_size):
     idx_boot = onp.arange(resample_size)
     onp.random.shuffle(idx_boot)
     idx_boot = idx_boot.tolist()
-    states_hm1_file = base_path.parent / "svat_monte_carlo" / "states_hm1.nc"
+    states_hm1_file = base_path.parent / "svat_monte_carlo" / "states_hm100.nc"
     with h5netcdf.File(states_hm1_file, 'r', decode_vlen_strings=False) as df:
         n_repeat = int(resample_size / df.dims["x"].size)
     if n_repeat <= 1:
