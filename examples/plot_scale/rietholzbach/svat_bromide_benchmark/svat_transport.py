@@ -24,11 +24,9 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
         """A SVAT bromide transport model.
         """
         _base_path = Path(__file__).parent
-        _year = None
-        _tm_structure = None
-        _input_dir = None
-        _identifier = None
-        _sas_solver = None
+        _year = year
+        _tm_structure = transport_model_structure.replace("_", " ")
+        _input_dir = _base_path / "input" / str(year)
 
         def _set_input_dir(self, path):
             if os.path.exists(path):
@@ -55,18 +53,6 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables['Time']
                 return len(onp.array(var_obj)) * 60 * 60 * 24
-
-        def _set_year(self, year):
-            self._year = year
-
-        def _set_tm_structure(self, tm_structure):
-            self._tm_structure = tm_structure
-
-        def _set_sas_solver(self, sas_solver):
-            self._sas_solver = sas_solver
-
-        def _set_identifier(self, identifier):
-            self._identifier = identifier
 
         def _set_bromide_input(self, state, nn_rain, nn_sol, prec, ta):
             vs = state.variables
@@ -111,8 +97,8 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = self._identifier
-            settings.sas_solver = self._sas_solver
+            settings.identifier = f'SVATTRANSPORT_{transport_model_structure}_{year}_{sas_solver}'
+            settings.sas_solver = sas_solver
             settings.sas_solver_substeps = 6
             if settings.sas_solver in ['RK4', 'Euler']:
                 settings.h = 1 / settings.sas_solver_substeps
@@ -430,19 +416,8 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
         def after_timestep(self, state):
             pass
 
-    tms = transport_model_structure.replace("_", " ")
     model = SVATTRANSPORTSetup()
-    # set transport model structure
-    model._set_sas_solver(sas_solver)
-    model._set_tm_structure(tms)
-    identifier = f'SVATTRANSPORT_{transport_model_structure}_{year}_{sas_solver}'
-    model._set_identifier(identifier)
-    # set year
-    model._set_year(year)
-    tms = model._tm_structure.replace(" ", "_")
-    input_path = model._base_path / "input" / str(year)
-    model._set_input_dir(input_path)
-    # export bromide data to .txt
+    # write bromide data to .txt
     idx_start = '%s-01-01' % (year)
     year_end = year + 1
     idx_end = '%s-12-31' % (year_end)
@@ -456,9 +431,9 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
     df_Br['mm'] = 0
     injection_date = '%s-11-12' % (year)
     df_Br.loc[injection_date, 'Br'] = 79900/3.14  # bromide mass in mg per m2
-    path_txt = input_path / "Br.txt"
+    path_txt = model._input_dir / "Br.txt"
     df_Br.to_csv(path_txt, header=True, index=False, sep="\t")
-    write_forcing_tracer(input_path, 'Br')
+    write_forcing_tracer(model._input_dir, 'Br')
     nc_file = model._base_path / f"states_hm_best_for_{transport_model_structure}.nc"
     with xr.open_dataset(nc_file, engine="h5netcdf") as ds:
         days = (ds['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))

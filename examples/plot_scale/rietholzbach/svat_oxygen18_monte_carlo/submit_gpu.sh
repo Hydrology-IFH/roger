@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ~/roger/examples/plot_scale/rietholzbach/svat_transport_monte_carlo
+cd ~/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo
 FILES="$PWD/oxygen18_deterministic_svat_ad_mc_*_gpu.sh"
 for f in $FILES
 do

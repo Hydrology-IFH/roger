@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 import h5netcdf
 import numpy as onp
 import click
@@ -27,19 +26,9 @@ def main(transport_model_structure, sas_solver, x1, x2, data_dir, tmp_dir):
             _base_path = Path(data_dir)
         else:
             _base_path = Path(__file__).parent
-        _nrows = None
-        _tm_structure = None
-        _identifier = None
-        _sas_solver = None
-        _input_dir = None
-
-        def _set_input_dir(self, path):
-            if os.path.exists(path):
-                self._input_dir = path
-            else:
-                self._input_dir = path
-                if not os.path.exists(self._input_dir):
-                    os.mkdir(self._input_dir)
+        _input_dir = _base_path / "input"
+        _nrows = x2 - x1
+        _tm_structure = transport_model_structure.replace("_", " ")
 
         def _read_var_from_nc(self, var, path_dir, file, group=None):
             nc_file = path_dir / file
@@ -63,15 +52,6 @@ def main(transport_model_structure, sas_solver, x1, x2, data_dir, tmp_dir):
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables['Time']
                 return len(onp.array(var_obj)) * 60 * 60 * 24
-
-        def _set_tm_structure(self, tm_structure):
-            self._tm_structure = tm_structure
-
-        def _set_sas_solver(self, sas_solver):
-            self._sas_solver = sas_solver
-
-        def _set_identifier(self, identifier):
-            self._identifier = identifier
 
         def _bfill_3d(self, state, arr):
             idx_shape = tuple([slice(None)] + [npx.newaxis] * (3 - 2 - 1))
@@ -110,8 +90,8 @@ def main(transport_model_structure, sas_solver, x1, x2, data_dir, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = self._identifier
-            settings.sas_solver = self._sas_solver
+            settings.identifier = f'SVATTRANSPORT_{transport_model_structure}_{sas_solver}_{x1}_{x2}'
+            settings.sas_solver = sas_solver
             settings.sas_solver_substeps = 6
             if settings.sas_solver in ['RK4', 'Euler']:
                 settings.h = 1 / settings.sas_solver_substeps
@@ -556,15 +536,8 @@ def main(transport_model_structure, sas_solver, x1, x2, data_dir, tmp_dir):
 
         return loop_arr
 
-    tms = transport_model_structure.replace("_", " ")
     model = SVATTRANSPORTSetup()
-    model._set_sas_solver(sas_solver)
-    model._set_tm_structure(tms)
-    identifier = f'SVATTRANSPORT_{transport_model_structure}_{sas_solver}_{x1}_{x2}'
-    model._set_identifier(identifier)
-    input_path = model._base_path / "input"
-    model._set_input_dir(input_path)
-    write_forcing_tracer(input_path, 'd18O')
+    write_forcing_tracer(model._input_dir, 'd18O')
     model.setup()
     model.warmup()
     model.run()

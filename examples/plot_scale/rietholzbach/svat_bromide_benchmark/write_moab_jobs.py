@@ -9,7 +9,7 @@ import numpy as onp
 @click.command("main")
 def main(job_type, sas_solver):
     base_path = Path(__file__).parent
-    base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport'
+    base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_bromide_benchmark'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
     transport_models_abrev = {'piston': 'pi',
                               'complete-mixing': 'cm',

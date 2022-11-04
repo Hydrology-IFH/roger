@@ -49,7 +49,7 @@ class ONEDSetup(RogerSetup):
 
         # total grid numbers in x- and y-direction
         settings.nx, settings.ny = 1, 1
-        # derive total number of time steps from forcing
+        # length of simulation (in seconds)
         settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
         # spatial discretization (in meters)

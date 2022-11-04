@@ -1,0 +1,18 @@
+# --- Parameters ---------------------------------------------------------------
+SAS_SOLVER: 'deterministic'
+TRANSPORT_MODEL_STRUCTURE: 'advection-dispersion'
+
+# --- Initial conditions -------------------------------------------------------
+# initial oxygen18 ration ofsoil water in root zone/upper soil layer (-)
+d18O_RZ: -10
+# initial oxygen18 ration ofsoil water in subsoil/lower soil layer (-)
+d18O_SS: -10
+
+# --- Diagnostics --------------------------------------------------------------
+OUTPUT_AVERAGE:
+- "C_iso_transp"
+- "C_iso_s"
+- "C_iso_q_ss"
+- "TT_transp"
+- "SA_s"
+- "TT_q_ss"

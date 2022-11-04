@@ -20,9 +20,7 @@ def main(transport_model_structure, tmp_dir):
         """A SVAT model.
         """
         _base_path = Path(__file__).parent
-
-        def _set_input_dir(self, path):
-            self._input_dir = path
+        _input_dir = _base_path / "input"
 
         def _read_var_from_nc(self, var, path_dir, file, group=None):
             nc_file = path_dir / file
@@ -442,9 +440,7 @@ def main(transport_model_structure, tmp_dir):
         )
 
     model = SVATSetup()
-    input_path = model._base_path / "input"
-    model._set_input_dir(input_path)
-    write_forcing(input_path)
+    write_forcing(model._input_dir)
     model.setup()
     model.run()
     return

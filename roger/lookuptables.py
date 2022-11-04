@@ -4,19 +4,19 @@ import numpy as onp
 
 CSV_DIR = Path(__file__).parent / "look_up_tables"
 
-path_ilu = CSV_DIR / "intercept_land_use.csv"
+path_ilu = CSV_DIR / "land_use_dependent_interception.csv"
 df_ilu = pd.read_csv(path_ilu, sep=";")
 ARR_ILU = onp.asarray(df_ilu.values)
 
-path_is = CSV_DIR / "intercept_sealing.csv"
+path_is = CSV_DIR / "sealing_dependent_interception.csv"
 df_is = pd.read_csv(path_is, sep=";", skiprows=1)
 ARR_IS = onp.asarray(df_is.values)
 
-path_mlms = CSV_DIR / "mp_layer_manning_strickler.csv"
+path_mlms = CSV_DIR / "horizontal_macropore_flow_velocities.csv"
 df_mlms = pd.read_csv(path_mlms, sep=";", skiprows=1)
 ARR_MLMS = onp.asarray(df_mlms.values)
 
-path_rdlu = CSV_DIR / "root_depth_land_use.csv"
+path_rdlu = CSV_DIR / "land_use_dependent_rooting_depth.csv"
 df_rdlu = pd.read_csv(path_rdlu, sep=";", skiprows=1)
 ARR_RDLU = onp.asarray(df_rdlu.values)
 

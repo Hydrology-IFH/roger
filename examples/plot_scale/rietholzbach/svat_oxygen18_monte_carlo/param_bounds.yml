@@ -1,0 +1,63 @@
+advection-dispersion:
+  b_transp:
+  - 1
+  - 30
+  a_q_rz:
+  - 1
+  - 30
+  a_q_ss:
+  - 1
+  - 30
+
+time-variant advection-dispersion:
+  c1_transp:
+  - 1
+  - 30
+  c2_transp:
+  - 1
+  - 30
+  c1_q_rz:
+  - 1
+  - 30
+  c2_q_rz:
+  - 1
+  - 30
+  c1_q_ss:
+  - 1
+  - 30
+  c2_q_ss:
+  - 1
+  - 30
+
+preferential:
+  b_transp:
+  - 1
+  - 30
+  b_q_rz:
+  - 1
+  - 10
+  b_q_ss:
+  - 1
+  - 10
+
+power:
+  k_transp:
+  - 0.1
+  - 5
+  k_q_rz:
+  - 0.1
+  - 5
+  k_q_ss:
+  - 0.1
+  - 5
+
+time-variant:
+  c_transp:
+  - 1
+  - 30
+  c_q_rz:
+  - 1
+  - 30
+  c_q_ss:
+  - 1
+  - 30

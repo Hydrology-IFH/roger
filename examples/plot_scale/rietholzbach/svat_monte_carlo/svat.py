@@ -1,6 +1,6 @@
 from pathlib import Path
-import os
 import h5netcdf
+import yaml
 import click
 from roger.cli.roger_run_base import roger_base_cli
 
@@ -21,15 +21,11 @@ def main(nsamples, tmp_dir):
         """A SVAT model.
         """
         _base_path = Path(__file__).parent
-        _input_dir = None
-
-        def _set_input_dir(self, path):
-            if os.path.exists(path):
-                self._input_dir = path
-            else:
-                self._input_dir = path
-                if not os.path.exists(self._input_dir):
-                    os.mkdir(self._input_dir)
+        _input_dir = _base_path / "input"
+        # load parameter boundaries
+        _file_params = _base_path / "param_bounds.yml"
+        with open(_file_params, 'r') as file:
+            _bounds = yaml.safe_load(file)
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -115,15 +111,15 @@ def main(nsamples, tmp_dir):
 
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], npx.array(random_uniform(1, 400, vs.dmpv.shape), dtype=int)[2:-2, 2:-2])
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], npx.array(random_uniform(1, 2000, vs.lmpv.shape), dtype=int)[2:-2, 2:-2])
-            vs.theta_eff = update(vs.theta_eff, at[2:-2, 2:-2], random_uniform(0.15, 0.35, vs.theta_eff.shape)[2:-2, 2:-2])
-            vs.frac_lp = update(vs.frac_lp, at[2:-2, 2:-2], random_uniform(0.1, 0.9, vs.theta_eff.shape)[2:-2, 2:-2])
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], npx.array(random_uniform(self._bounds['dmpv'][0], self._bounds['dmpv'][1], vs.dmpv.shape), dtype=int)[2:-2, 2:-2])
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], npx.array(random_uniform(self._bounds['lmpv'][0], self._bounds['lmpv'][1], vs.lmpv.shape), dtype=int)[2:-2, 2:-2])
+            vs.theta_eff = update(vs.theta_eff, at[2:-2, 2:-2], random_uniform(self._bounds['theta_eff'][0], self._bounds['theta_eff'][1], vs.theta_eff.shape)[2:-2, 2:-2])
+            vs.frac_lp = update(vs.frac_lp, at[2:-2, 2:-2], random_uniform(self._bounds['frac_lp'][0], self._bounds['frac_lp'][1], vs.theta_eff.shape)[2:-2, 2:-2])
             vs.frac_fp = update(vs.frac_fp, at[2:-2, 2:-2], 1 - vs.frac_lp[2:-2, 2:-2])
             vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], vs.theta_eff[2:-2, 2:-2] * vs.frac_lp[2:-2, 2:-2])
             vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], vs.theta_eff[2:-2, 2:-2] * vs.frac_fp[2:-2, 2:-2])
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], random_uniform(0.15, 0.35, vs.theta_pwp.shape)[2:-2, 2:-2])
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], random_uniform(1, 150, vs.ks.shape)[2:-2, 2:-2])
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], random_uniform(self._bounds['theta_pwp'][0], self._bounds['theta_pwp'][1], vs.theta_pwp.shape)[2:-2, 2:-2])
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], random_uniform(self._bounds['ks'][0], self._bounds['ks'][1], vs.ks.shape)[2:-2, 2:-2])
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
         @roger_routine
@@ -430,9 +426,7 @@ def main(nsamples, tmp_dir):
         )
 
     model = SVATSetup()
-    input_path = model._base_path / "input"
-    model._set_input_dir(input_path)
-    write_forcing(input_path)
+    write_forcing(model._input_dir)
     model.setup()
     model.run()
     return

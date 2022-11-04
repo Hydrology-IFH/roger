@@ -1,52 +1,9 @@
 from pathlib import Path
-import os
 import h5netcdf
 import pandas as pd
 import numpy as onp
+import yaml
 from roger.cli.roger_run_base import roger_base_cli
-
-# --- set the model parameters ------------------------
-# land use ID (see README for description)
-LU_ID = 8
-# degree of sealing (-)
-SEALING = 0
-# surface slope (-)
-SLOPE = 0.05
-# total surface depression storage (mm)
-S_DEP_TOT = 0
-# soil depth (mm)
-Z_SOIL = 1000
-# density of vertical macropores (1/m2)
-DMPV = 50
-# density of horizontal macropores (1/m2)
-DMPH = 100
-# total length of vertical macropores (mm)
-LMPV = 500
-# air capacity (-)
-THETA_AC = 0.1
-# usable field capacity (-)
-THETA_UFC = 0.1
-# permanent wilting point (-)
-THETA_PWP = 0.2
-# saturated hydraulic conductivity (mm/h)
-KS = 9.2
-# hydraulic conductivity of bedrock/saturated zone (mm/h)
-KF = 5
-
-# --- set the initial conditions -----------------------
-# soil water content of root zone/upper soil layer (-)
-THETA_RZ = 0.3
-# soil water content of subsoil/lower soil layer (-)
-THETA_SS = 0.3
-
-# --- set the output variables -----------------------
-# list with simulated fluxes (see variables for description)
-OUTPUT_FLUXES = ["aet", "transp", "evap_soil", "inf_mat", "inf_mp", "inf_sc", "q_ss",
-                 "q_sub", "q_sub_mp", "q_sub_mat",
-                 "q_hof", "q_sof"]
-# list with simulated storages (see variables for description)
-OUTPUT_STORAGES = ["theta"]
-# !!!Do not modify the script below!!!
 
 
 @roger_base_cli
@@ -63,17 +20,13 @@ def main():
         """
         # custom attributes required by helper functions
         _base_path = Path(__file__).parent
-        _input_dir = None
+        _input_dir = _base_path / "input"
+        # load configuration file
+        _file_config = _base_path / "config.yml"
+        with open(_file_config, 'r') as file:
+            _config = yaml.safe_load(file)
 
         # custom helper functions
-        def _set_input_dir(self, path):
-            if os.path.exists(path):
-                self._input_dir = path
-            else:
-                if not os.path.exists(path):
-                    os.mkdir(self._input_dir)
-                    self._input_dir = path
-
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = self._input_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
@@ -170,33 +123,33 @@ def main():
             vs = state.variables
 
             # land use ID (see README for description)
-            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], LU_ID)
+            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], self._config["LU_ID"])
             # degree of sealing (-)
             vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
             # surface slope (-)
-            vs.slope = update(vs.slope, at[2:-2, 2:-2], SLOPE)
+            vs.slope = update(vs.slope, at[2:-2, 2:-2], self._config["SLOPE"])
             # convert slope to percentage
             vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
             # total surface depression storage (mm)
             vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
             # soil depth (mm)
-            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], Z_SOIL)
+            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._config["Z_SOIL"])
             # density of vertical macropores (1/m2)
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], DMPV)
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._config["DMPV"])
             # density of horizontal macropores (1/m2)
-            vs.dmph = update(vs.dmph, at[2:-2, 2:-2], DMPH)
+            vs.dmph = update(vs.dmph, at[2:-2, 2:-2], self._config["DMPH"])
             # total length of vertical macropores (mm)
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], LMPV)
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._config["LMPV"])
             # air capacity (-)
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], THETA_AC)
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], self._config["THETA_AC"])
             # usable field capacity (-)
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], THETA_UFC)
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], self._config["THETA_UFC"])
             # permanent wilting point (-)
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], THETA_PWP)
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._config["THETA_PWP"])
             # saturated hydraulic conductivity (-)
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], KS)
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._config["KS"])
             # hydraulic conductivity of bedrock/saturated zone (-)
-            vs.kf = update(vs.kf, at[2:-2, 2:-2], KF)
+            vs.kf = update(vs.kf, at[2:-2, 2:-2], self._config["KF"])
 
         @roger_routine
         def set_parameters(self, state):
@@ -228,9 +181,9 @@ def main():
             # snow water equivalent of snow cover (mm)
             vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
             # soil water content of root zone/upper soil layer (mm/h)
-            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], THETA_RZ)
+            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], self._config["THETA_RZ"])
             # soil water content of subsoil/lower soil layer (mm/h)
-            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], THETA_SS)
+            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], self._config["THETA_SS"])
 
         @roger_routine
         def set_boundary_conditions_setup(self, state):
@@ -277,12 +230,12 @@ def main():
             diagnostics = state.diagnostics
 
             # variables written to output files
-            diagnostics["rate"].output_variables = OUTPUT_FLUXES
+            diagnostics["rate"].output_variables = self._config["OUTPUT_RATE"]
             # values are aggregated to daily
             diagnostics["rate"].output_frequency = 24 * 60 * 60  # in seconds
             diagnostics["rate"].sampling_frequency = 1
 
-            diagnostics["collect"].output_variables = OUTPUT_STORAGES
+            diagnostics["collect"].output_variables = self._config["OUTPUT_COLLECT"]
             # values are aggregated to daily
             diagnostics["collect"].output_frequency = 24 * 60 * 60  # in seconds
             diagnostics["collect"].sampling_frequency = 1
@@ -479,11 +432,8 @@ def main():
 
     # initialize the model structure
     model = ONEDSetup()
-    # set path to directory containing the input files
-    path_input = model._base_path / "input"
-    model._set_input_dir(path_input)
     # writes forcing data to netcdf
-    write_forcing(path_input)
+    write_forcing(model._input_dir)
     # runs the model setup
     model.setup()
     # iterate over time steps

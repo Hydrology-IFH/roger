@@ -55,7 +55,9 @@ class SVATCROPSetup(RogerSetup):
         settings = state.settings
         settings.identifier = "SVATCROP"
 
+        # total grid numbers in x- and y-direction
         settings.nx, settings.ny = 1, 1
+        # length of simulation (in seconds)
         settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
         # spatial discretization (in meters)

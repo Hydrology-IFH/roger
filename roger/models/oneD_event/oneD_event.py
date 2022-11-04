@@ -49,6 +49,7 @@ class ONEDEVENTSetup(RogerSetup):
         settings.nx, settings.ny = 1, 1
         # derive total number of time steps from forcing
         settings.nitt = self._get_nitt(self._input_dir, 'forcing.nc')
+        # length of simulation (in seconds)
         settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
         # spatial discretization (in meters)

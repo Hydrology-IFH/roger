@@ -17,10 +17,10 @@ preferred-citation:
   authors:
   - family-names: Schwemmle
     given-names: Robin
-    - family-names: Leistert
-      given-names: Hannes
-    - family-names: Steinbrich
-      given-names: Andreas
+  - family-names: Leistert
+    given-names: Hannes
+  - family-names: Steinbrich
+    given-names: Andreas
   - family-names: Weiler
     given-names: Markus
   year: 2023

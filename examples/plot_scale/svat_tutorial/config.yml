@@ -1,7 +1,3 @@
-# --- Settings -----------------------------------------------------------------
-
-# --- Grid ---------------------------------------------------------------------
-
 # --- Parameters ---------------------------------------------------------------
 # land use ID (see README for description)
 LU_ID: 8
@@ -16,27 +12,25 @@ DMPV: 50
 # total length of vertical macropores (mm)
 LMPV: 300
 # air capacity (-)
-THETA_AC: 0.08
+THETA_AC: 0.1
 # usable field capacity (-)
-THETA_UFC: 0.15
+THETA_UFC: 0.1
 # permanent wilting point (-)
-THETA_PWP: 0.17
+THETA_PWP: 0.2
 # saturated hydraulic conductivity (-)
 KS: 9.2
 # hydraulic conductivity of bedrock/saturated zone (-)
-KF: 5
+KF: 2500
 
 # --- Initial conditions -------------------------------------------------------
-# soil water content of root zone/upper soil layer (-)
-THETA_RZ: 0.32
-# soil water content of subsoil/lower soil layer (-)
-THETA_SS: 0.32
-
-# --- Forcing ------------------------------------------------------------------
+# soil water content of root zone/upper soil layer (mm/h)
+THETA_RZ: 0.3
+# soil water content of subsoil/lower soil layer (mm/h)
+THETA_SS: 0.3
 
 # --- Diagnostics --------------------------------------------------------------
 # simulated hydrologic fluxes
-output_fluxes:
+OUTPUT_RATE:
 - "inf_mat"
 - "inf_mp"
 - "inf_sc"
@@ -45,5 +39,5 @@ output_fluxes:
 - "q_sof"
 
 # simulated hydrologic storages
-output_storages:
+OUTPUT_COLLECT:
 - "theta"

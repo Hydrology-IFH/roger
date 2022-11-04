@@ -12,7 +12,7 @@ import numpy as onp
 @click.command("main")
 def main(nsamples, job_type, sas_solver, split_size):
     base_path = Path(__file__).parent
-    base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport_sensitivity'
+    base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
     transport_models_abrev = {'complete-mixing': 'cm',
                               'piston': 'pi',
@@ -34,7 +34,7 @@ def main(nsamples, job_type, sas_solver, split_size):
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
             script_name = f'{tracer}_{sas_solver}_svat_{tm1}_sa'
-            data_dir = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
+            data_dir = base_path_ws / 'rietholzbach' / 'svat_oxygen18_sensitivity'
             tms = tm.replace(" ", "_")
             lines = []
             lines.append('#!/bin/bash\n')
@@ -70,7 +70,7 @@ def main(nsamples, job_type, sas_solver, split_size):
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
             script_name = f'{tracer}_{sas_solver}_svat_{tm1}_sa'
-            data_dir = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
+            data_dir = base_path_ws / 'rietholzbach' / 'svat_oxygen18_sensitivity'
             tms = tm.replace(" ", "_")
             lines = []
             lines.append('#!/bin/bash\n')
@@ -107,7 +107,7 @@ def main(nsamples, job_type, sas_solver, split_size):
                 tm1 = transport_models_abrev[tm]
                 tms = tm.replace(" ", "_")
                 script_name = f'{tracer}_{sas_solver}_svat_{tm1}_sa_{x1}_{x2}'
-                data_dir = base_path_ws / 'rietholzbach' / 'svat_transport_sensitivity'
+                data_dir = base_path_ws / 'rietholzbach' / 'svat_oxygen18_sensitivity'
                 tms = tm.replace(" ", "_")
                 lines = []
                 lines.append('#!/bin/bash\n')

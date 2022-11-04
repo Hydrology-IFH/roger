@@ -13,7 +13,7 @@ class SVATTRANSPORTSetup(RogerSetup):
     _base_path = Path(__file__).parent
     _tm_structure = "complete-mixing"
     _input_dir = _base_path / "input"
-    _identifier = "SVATTRANSPORT_complete-mixing"
+    _identifier = "SVATBROMIDE_complete-mixing"
     _sas_solver = "deterministic"
 
     # custom helper functions
@@ -109,6 +109,7 @@ class SVATTRANSPORTSetup(RogerSetup):
         # maximum water age (in days)
         settings.ages = settings.nitt
         settings.nages = settings.nitt + 1
+        # length of simulation (in seconds)
         settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
 
         # spatial discretization (in meters)

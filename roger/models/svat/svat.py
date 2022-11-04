@@ -40,7 +40,9 @@ class SVATSetup(RogerSetup):
         settings = state.settings
         settings.identifier = "SVAT"
 
+        # total grid numbers in x- and y-direction
         settings.nx, settings.ny, settings.nz = 1, 1, 1
+        # length of simulation (in seconds)
         settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
         # spatial discretization (in meters)

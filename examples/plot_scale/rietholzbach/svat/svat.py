@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 import h5netcdf
 from roger.cli.roger_run_base import roger_base_cli
 
@@ -18,15 +17,7 @@ def main():
         """A SVAT model.
         """
         _base_path = Path(__file__).parent
-        _input_dir = None
-
-        def _set_input_dir(self, path):
-            if os.path.exists(path):
-                self._input_dir = path
-            else:
-                self._input_dir = path
-                if not os.path.exists(self._input_dir):
-                    os.mkdir(self._input_dir)
+        _input_dir = _base_path / "input"
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -403,9 +394,7 @@ def main():
         )
 
     model = SVATSetup()
-    input_path = model._base_path / "input"
-    model._set_input_dir(input_path)
-    write_forcing(input_path)
+    write_forcing(model._input_dir)
     model.setup()
     model.run()
     return
