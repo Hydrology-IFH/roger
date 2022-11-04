@@ -198,8 +198,6 @@ def main(tmp_dir):
                             key_r = 'r_' + var_sim + f'{sc1}'
                             df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
                         else:
-                            if var_sim in ['q_ss']:
-                                df_eval.loc['1999-11':'2000-06', :] = onp.nan
                             df_eval = df_eval.dropna()
                             obs_vals = df_eval.loc[:, 'obs'].values
                             sim_vals = df_eval.loc[:, 'sim'].values
