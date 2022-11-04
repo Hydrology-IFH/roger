@@ -1,0 +1,16 @@
+# --- Parameters ---------------------------------------------------------------
+SAS_SOLVER: 'deterministic'
+TRANSPORT_MODEL_STRUCTURE: 'advection-dispersion'
+
+# --- Diagnostics --------------------------------------------------------------
+OUTPUT_RATE:
+- "M_transp"
+- "M_q_ss"
+
+OUTPUT_COLLECT:
+- "M_s"
+
+OUTPUT_AVERAGE:
+- "TT_transp"
+- "SA_s"
+- "TT_q_ss"

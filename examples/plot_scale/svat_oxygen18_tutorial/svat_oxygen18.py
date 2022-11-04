@@ -14,7 +14,7 @@ def main():
     from roger.core.transport import delta_to_conc, conc_to_delta
 
     class SVATTRANSPORTSetup(RogerSetup):
-        """A SVAT transport model.
+        """A SVAT oxygen18 transport model.
         """
         # custom attributes required by helper functions
         _base_path = Path(__file__).parent
@@ -62,10 +62,10 @@ def main():
 
             # total grid numbers in x- and y-direction
             settings.nx, settings.ny = 1, 1
-            # derive total number of iterations
-            settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
             # length of simulation (in seconds)
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
+            # total number of iterations
+            settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
             # maximum water age (in days)
             settings.ages = 1500
             settings.nages = settings.ages + 1
@@ -132,9 +132,9 @@ def main():
             settings = state.settings
 
             vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
             vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt])
             vs.S_fc_ss = update(vs.S_fc_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_fc_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
             vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt])
 
             # SAS parameterization
