@@ -32,7 +32,7 @@ def main(tmp_dir, sas_solver):
         base_path = Path(tmp_dir)
     else:
         base_path = Path(__file__).parent
-    age_max = "age_max_11"
+    age_max = "age_max_4"
     # directory of results
     base_path_results = base_path / "results"
     if not os.path.exists(base_path_results):
@@ -145,7 +145,7 @@ def main(tmp_dir, sas_solver):
                                                units=var_obj.attrs["units"])
 
     # load hydrologic simulation
-    states_hm_file = base_path / "states_hm1_bootstrap.nc"
+    states_hm_file = base_path / "states_hm100.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     time_origin = ds_sim_hm['Time'].attrs['time_origin']
