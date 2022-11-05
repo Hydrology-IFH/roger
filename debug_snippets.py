@@ -320,3 +320,8 @@ python run_benchmarks.py --sizes 1000. --sizes 10000. --sizes 100000. --sizes 20
 
 
 python run_benchmarks.py --sizes 50000. --backends numpy --backends numpy-mpi --nproc 2 --only oneD_benchmark.py --debug --local
+
+
+from roger.tools.make_toy_data import make_toy_forcing_tracer
+make_toy_forcing_tracer(model._input_dir, tracer="Br", start_date='1/10/2010', ndays=365)
+make_toy_forcing_tracer(model._input_dir, tracer="d18O", start_date='1/10/2010', ndays=365)

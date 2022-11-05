@@ -112,7 +112,7 @@ def main(nsamples, job_type, sas_solver, split_size):
                 lines = []
                 lines.append('#!/bin/bash\n')
                 lines.append('#PBS -l nodes=1:ppn=1:gpus=1:default\n')
-                lines.append('#PBS -l walltime=52:00:00\n')
+                lines.append('#PBS -l walltime=48:00:00\n')
                 lines.append('#PBS -l pmem=24000mb\n')
                 lines.append(f'#PBS -N {script_name}\n')
                 lines.append('#PBS -m bea\n')
@@ -126,7 +126,7 @@ def main(nsamples, job_type, sas_solver, split_size):
                 lines.append('conda activate roger-gpu\n')
                 lines.append(f'cd {base_path_binac}\n')
                 lines.append(' \n')
-                lines.append('python svat_transport.py --log-all-processes --x1 %s --x2 %s -b jax -d gpu -tms %s -td "${TMPDIR}" -ss %s\n' % (x1, x2, tms, sas_solver))
+                lines.append('python svat_transport.py --x1 %s --x2 %s -b jax -d gpu -tms %s -td "${TMPDIR}" -ss %s\n' % (x1, x2, tms, sas_solver))
                 lines.append('# Move output from local SSD to global workspace\n')
                 lines.append(f'echo "Move output to {data_dir.as_posix()}"\n')
                 lines.append('mkdir -p %s\n' % (data_dir.as_posix()))

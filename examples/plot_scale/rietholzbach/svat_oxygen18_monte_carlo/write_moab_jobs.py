@@ -139,7 +139,7 @@ def main(job_type, sas_solver, split_size):
                 lines.append('conda activate roger-gpu\n')
                 lines.append(f'cd {base_path_binac}\n')
                 lines.append(' \n')
-                lines.append('python svat_transport.py --log-all-processes --id %s -b jax -d gpu -ns %s -tms %s -td "${TMPDIR}" -ss %s\n' % (i, split_size, tms, sas_solver))
+                lines.append('python svat_transport.py --id %s -b jax -d gpu -ns %s -tms %s -td "${TMPDIR}" -ss %s\n' % (i, split_size, tms, sas_solver))
                 lines.append('# Move output from local SSD to global workspace\n')
                 lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                 lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))

@@ -363,7 +363,7 @@ def make_toy_forcing_event(base_path, ta=10, nhours=5, dt=10, nrows=1, ncols=1, 
         v[:] = onp.arange(ncols)
 
 
-def make_toy_forcing_tracer(base_path, tracer="Br", ndays=10, nrows=1, ncols=1,
+def make_toy_forcing_tracer(base_path, tracer="Br", start_date='1/10/2010', ndays=10, nrows=1, ncols=1,
                             float_type="float64"):
     """
     Make toy forcing with synthetically generated data.
@@ -374,7 +374,7 @@ def make_toy_forcing_tracer(base_path, tracer="Br", ndays=10, nrows=1, ncols=1,
         os.mkdir(input_dir)
     nc_file = input_dir / "forcing_tracer.nc"
     if tracer == "Br":
-        idx = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
+        idx = pd.date_range(start=start_date, periods=ndays, freq='D')
         df_tracer = pd.DataFrame(index=idx, columns=['Br'])
         df_tracer.iloc[:, 0] = 0
         df_tracer.iloc[2, 0] = 1000
@@ -408,7 +408,7 @@ def make_toy_forcing_tracer(base_path, tracer="Br", ndays=10, nrows=1, ncols=1,
             v.attrs['units'] = 'meters'
 
     elif tracer == "Cl":
-        idx = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
+        idx = pd.date_range(start=start_date, periods=ndays, freq='D')
         df_tracer = pd.DataFrame(index=idx, columns=['Cl'])
         df_tracer.iloc[:, 0] = rng.uniform(0.1, 1, ndays)
         with h5netcdf.File(nc_file, 'w', decode_vlen_strings=False) as f:
@@ -441,7 +441,7 @@ def make_toy_forcing_tracer(base_path, tracer="Br", ndays=10, nrows=1, ncols=1,
             v.attrs['units'] = 'meters'
 
     elif tracer == "d2H":
-        idx = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
+        idx = pd.date_range(start=start_date, periods=ndays, freq='D')
         df_tracer = pd.DataFrame(index=idx, columns=['d2H'])
         offset = -75 + rng.uniform(-2, 2, ndays)
         amp = 35 + rng.uniform(-2, 2, ndays)
@@ -477,7 +477,7 @@ def make_toy_forcing_tracer(base_path, tracer="Br", ndays=10, nrows=1, ncols=1,
             v.attrs['units'] = 'meters'
 
     elif tracer == "d18O":
-        idx = pd.date_range(start='1/1/2018', periods=ndays, freq='D')
+        idx = pd.date_range(start=start_date, periods=ndays, freq='D')
         df_tracer = pd.DataFrame(index=idx, columns=['d18O'])
         offset = -10 + rng.uniform(-0.3, 0.3, ndays)
         amp = 4.3 + rng.uniform(-0.4, 0.4, ndays)
