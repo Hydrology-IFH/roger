@@ -15,7 +15,6 @@ import click
 import copy
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
-from roger.tools.setup import precipitation_correction
 import matplotlib as mpl
 import seaborn as sns
 mpl.use("agg")
@@ -117,7 +116,7 @@ def main(tmp_dir):
     df_lys_obs = pd.DataFrame(index=date_obs)
     df_lys_obs.loc[:, 'ta'] = ds_obs['TA'].isel(x=0, y=0).values
     df_lys_obs.loc[:, 'prec'] = ds_obs['PREC'].isel(x=0, y=0).values
-    df_lys_obs.loc[:, 'prec_corr'] = precipitation_correction(df_lys_obs.loc[:, 'prec'].values, df_lys_obs.loc[:, 'ta'].values, df_lys_obs.index.month)
+    df_lys_obs.loc[:, 'prec_corr'] = ds_obs['PREC_corr'].isel(x=0, y=0).values
     df_lys_obs.loc[:, 'aet'] = ds_obs['AET'].isel(x=0, y=0).values
     df_lys_obs.loc[:, 'perc'] = ds_obs['PERC'].isel(x=0, y=0).values
     df_lys_obs.loc[:, 'dS_weight'] = ds_obs['dWEIGHT'].isel(x=0, y=0).values
