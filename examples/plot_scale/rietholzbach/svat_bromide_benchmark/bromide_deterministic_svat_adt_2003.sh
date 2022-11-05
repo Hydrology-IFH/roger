@@ -8,7 +8,7 @@
  
 eval "$(conda shell.bash hook)"
 conda activate roger
-cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport
+cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_bromide_benchmark
  
 python svat_transport.py -b jax -d cpu -tms time-variant_advection-dispersion -td "${TMPDIR}" -ss deterministic, -y 2003
 # Move output from local SSD to global workspace

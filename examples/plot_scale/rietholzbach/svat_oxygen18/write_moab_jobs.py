@@ -8,26 +8,24 @@ import click
 @click.command("main")
 def main(job_type, sas_solver):
     base_path = Path(__file__).parent
-    base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_transport'
+    base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
     transport_models_abrev = {'piston': 'pi',
                               'complete-mixing': 'cm',
                               'preferential': 'pf',
                               'advection-dispersion': 'ad',
-                              'time-variant preferential': 'pft',
                               'time-variant advection-dispersion': 'adt',
                               'time-variant': 'tv',
-                              'power': 'pow',
-                              'time-variant power': 'powt'}
+                              'power': 'pow'}
 
     tracer = 'oxygen18'
-    transport_models = ['piston', 'complete-mixing', 'advection-dispersion', 'time-variant advection-dispersion', 'power', 'time-variant power', 'preferential',  'time-variant preferential', 'time-variant']
+    transport_models = ['piston', 'complete-mixing', 'advection-dispersion', 'time-variant advection-dispersion', 'power', 'preferential', 'time-variant']
     for tm in transport_models:
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
             script_name = f'{tracer}_{sas_solver}_svat_{tm1}'
-            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport'
+            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_oxygen18'
             tms = tm.replace(" ", "_")
             lines = []
             lines.append('#!/bin/bash\n')
@@ -42,7 +40,7 @@ def main(job_type, sas_solver):
             lines.append('conda activate roger\n')
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
-            lines.append('python svat_transport.py -b jax -d cpu -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
+            lines.append('python svat_oxygen18.py -b jax -d cpu -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
@@ -57,7 +55,7 @@ def main(job_type, sas_solver):
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
             script_name = f'{tracer}_{sas_solver}_svat_{tm1}_gpu'
-            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport'
+            output_path_ws = base_path_ws / 'rietholzbach' / 'svat_oxygen18'
             tms = tm.replace(" ", "_")
             lines = []
             lines.append('#!/bin/bash\n')
@@ -76,7 +74,7 @@ def main(job_type, sas_solver):
             lines.append('module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4\n')
             lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
             lines.append('module load lib/cudnn/8.2-cuda-11.4\n')
-            lines.append('python svat_transport.py -b jax -d gpu -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
+            lines.append('python svat_oxygen18.py -b jax -d gpu -tms %s -td "${TMPDIR}" -ss %s\n' % (tms, sas_solver))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
