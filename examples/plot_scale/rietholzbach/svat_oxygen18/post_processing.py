@@ -58,10 +58,10 @@ def main(tmp_dir, sas_solver):
 
     # merge model output into a single file
     for tm in transport_models:
-        tm1 = tm.replace(" ", "_")
-        path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tm1}_{sas_solver}.*.nc")
+        tms = tm.replace(" ", "_")
+        path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}.*.nc")
         diag_files = glob.glob(path)
-        states_tm_file = base_path / sas_solver / age_max / f"states_{tm1}.nc"
+        states_tm_file = base_path / sas_solver / age_max / f"states_{tms}.nc"
         if not os.path.exists(states_tm_file):
             click.echo(f'Merge output files of {tm} into {states_tm_file.as_posix()}')
             with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
@@ -163,8 +163,8 @@ def main(tmp_dir, sas_solver):
     # load transport simulation
     for tm in transport_models:
         click.echo(f'Plot results of {tm}')
-        tm1 = tm.replace(" ", "_")
-        states_tm_file = base_path / sas_solver / age_max / f"states_{tm1}.nc"
+        tms = tm.replace(" ", "_")
+        states_tm_file = base_path / sas_solver / age_max / f"states_{tms}.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
         date_sim_tm = num2date(ds_sim_tm['Time'].values, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
         ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
@@ -251,12 +251,12 @@ def main(tmp_dir, sas_solver):
         ax.set_xlim((ds_sim_tm.Time.values[0], ds_sim_tm.Time.values[-1]))
         ax.set_ylim((-20, -5))
         fig.tight_layout()
-        file = base_path_figs / f"d18O_perc_sim_obs_{tm1}.png"
+        file = base_path_figs / f"d18O_perc_sim_obs_{tms}.png"
         fig.savefig(file, dpi=250)
         plt.close('all')
 
         # write to .txt
-        file = base_path_results / f"params_metrics_{tm1}.txt"
+        file = base_path_results / f"params_metrics_{tms}.txt"
         df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
 
         # select best simulation
@@ -287,7 +287,7 @@ def main(tmp_dir, sas_solver):
 
         ax[0, 0].set_ylabel(r'$KGE_{\delta^{18}O_{PERC}}$ [-]')
         fig.tight_layout()
-        file = base_path_figs / f"dotty_plots_{tm1}.png"
+        file = base_path_figs / f"dotty_plots_{tms}.png"
         fig.savefig(file, dpi=250)
         plt.close('all')
 
@@ -310,7 +310,7 @@ def main(tmp_dir, sas_solver):
         df_age_mean.loc['avg', 'TT_50'] = onp.nanmean(df_age['TT_50'].values)
         df_age_mean.loc['avg', 'MRT'] = onp.nanmean(df_age['MRT'].values)
         df_age_mean.loc['avg', 'RT_50'] = onp.nanmean(df_age['RT_50'].values)
-        file_str = 'age_mean_%s_%s.csv' % (var_sim, tm1)
+        file_str = 'age_mean_%s_%s.csv' % (var_sim, tms)
         path_csv = base_path_figs / file_str
         df_age_mean.to_csv(path_csv, header=True, index=True, sep="\t")
 
@@ -336,7 +336,7 @@ def main(tmp_dir, sas_solver):
         axes[1].set_ylabel('Percolation\n[mm $day^{-1}$]')
         axes[1].set_xlabel(r'Time [year]')
         fig.tight_layout()
-        file_str = 'mean_median_tt_%s_%s.pdf' % (var_sim, tm1)
+        file_str = 'mean_median_tt_%s_%s.pdf' % (var_sim, tms)
         path_fig = base_path_figs / file_str
         fig.savefig(path_fig, dpi=250)
 
@@ -370,7 +370,7 @@ def main(tmp_dir, sas_solver):
         axes[1].set_xlim((df_age.index[0], df_age.index[-1]))
         axes[1].set_xlabel(r'Time [year]')
         fig.tight_layout()
-        file_str = 'mean_median_rt_tt_%s_%s.pdf' % (var_sim, tm1)
+        file_str = 'mean_median_rt_tt_%s_%s.pdf' % (var_sim, tms)
         path_fig = base_path_figs / file_str
         fig.savefig(path_fig, dpi=250)
 
@@ -393,7 +393,7 @@ def main(tmp_dir, sas_solver):
         ax.set_xlim((ds_sim_tm.Time.values[0], ds_sim_tm.Time.values[-1]))
         ax.set_ylim((-20, -5))
         fig.tight_layout()
-        file = base_path_figs / f"d18O_perc_sim_obs_{tm1}_best.png"
+        file = base_path_figs / f"d18O_perc_sim_obs_{tms}_best.png"
         fig.savefig(file, dpi=250)
         plt.close('all')
 
@@ -421,7 +421,7 @@ def main(tmp_dir, sas_solver):
                      verticalalignment='center', transform=axes[1].transAxes)
         axes[1].set_xlabel(r'Time [year]')
         fig.tight_layout()
-        file_str = 'num_errors_%s.pdf' % (tm1)
+        file_str = 'num_errors_%s.pdf' % (tms)
         path_fig = base_path_figs / file_str
         fig.savefig(path_fig, dpi=250)
 
@@ -432,14 +432,14 @@ def main(tmp_dir, sas_solver):
         # ds_sim_hm_best = ds_sim_hm_best.assign_coords(Time=("Time", days))
         # ds_sim_hm_best.Time.attrs['units'] = "days"
         # ds_sim_hm_best.Time.attrs['time_origin'] = ds_sim_hm['Time'].attrs['time_origin']
-        # file = base_path / f"states_hm_best_for_{tm1}.nc"
+        # file = base_path / f"states_hm_best_for_{tms}.nc"
         # ds_sim_hm_best.to_netcdf(file, engine="h5netcdf")
 
         # # write simulated bulk sample to output file
         # ds_sim_tm = ds_sim_tm.load()  # required to release file lock
         # ds_sim_tm = ds_sim_tm.close()
         # del ds_sim_tm
-        # states_tm_file = base_path / sas_solver / age_max / f"states_{tm1}.nc"
+        # states_tm_file = base_path / sas_solver / age_max / f"states_{tms}.nc"
         # with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
         #     try:
         #         v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
