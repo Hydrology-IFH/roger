@@ -153,7 +153,7 @@ def main():
         def set_diagnostics(self, state, base_path=None):
             diagnostics = state.diagnostics
 
-            diagnostics["rate"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow", "q_hof"]
+            diagnostics["rate"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
@@ -163,17 +163,12 @@ def main():
                                                        "S_pwp_rz", "S_fc_rz",
                                                        "S_sat_rz", "S_pwp_ss",
                                                        "S_fc_ss", "S_sat_ss",
-                                                       "theta_rz", "theta_ss", "theta"]
+                                                       "theta_rz", "theta_ss", "theta",
+                                                       "S_snow"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
                 diagnostics["collect"].base_output_path = base_path
-
-            diagnostics["maximum"].output_variables = ["S_snow", "swe"]
-            diagnostics["maximum"].output_frequency = 24 * 60 * 60
-            diagnostics["maximum"].sampling_frequency = 1
-            if base_path:
-                diagnostics["maximum"].base_output_path = base_path
 
             diagnostics["average"].output_variables = ["ta"]
             diagnostics["average"].output_frequency = 24 * 60 * 60

@@ -22,7 +22,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         _base_path = Path(__file__).parent
         _tm_structure = transport_model_structure.replace("_", " ")
         _input_dir = _base_path / "input"
-        _states_hm_file = 'states_hm100.nc'
+        _states_hm_file = 'states_hm.nc'
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -569,7 +569,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
     model = SVATTRANSPORTSetup()
     write_forcing_tracer(model._input_dir, 'd18O')
     model.setup()
-    model.warmup()
+    # model.warmup()
     model.run()
     return
 
