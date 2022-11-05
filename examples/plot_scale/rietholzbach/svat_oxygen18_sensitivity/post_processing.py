@@ -24,7 +24,6 @@ def main(sas_solver, tmp_dir):
         base_path = Path(tmp_dir)
     else:
         base_path = Path(__file__).parent
-    age_max = "age_max_11"
     # directory of results
     base_path_results = base_path / "results"
     if not os.path.exists(base_path_results):
@@ -32,17 +31,11 @@ def main(sas_solver, tmp_dir):
     base_path_results = base_path / "results" / sas_solver
     if not os.path.exists(base_path_results):
         os.mkdir(base_path_results)
-    base_path_results = base_path / "results" / sas_solver / age_max
-    if not os.path.exists(base_path_results):
-        os.mkdir(base_path_results)
     # directory of figures
     base_path_figs = base_path / "figures"
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
     base_path_figs = base_path / "figures" / sas_solver
-    if not os.path.exists(base_path_figs):
-        os.mkdir(base_path_figs)
-    base_path_figs = base_path / "figures" / sas_solver / age_max
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
@@ -62,10 +55,10 @@ def main(sas_solver, tmp_dir):
             x1x2.append(nsamples)
         for diagnostic in diagnostics:
             tms = tm_structure.replace(" ", "_")
-            path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}_*_*.{diagnostic}.nc")
+            path = str(base_path / sas_solver / f"SVATTRANSPORT_{tms}_{sas_solver}_*_*.{diagnostic}.nc")
             diag_files = glob.glob(path)
             if diag_files:
-                diag_file = base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}.{diagnostic}.nc"
+                diag_file = base_path / sas_solver / f"SVATTRANSPORT_{tms}_{sas_solver}.{diagnostic}.nc"
                 if not os.path.exists(diag_file):
                     click.echo(f'Merge {diagnostic} of {tm_structure} ...')
                     # initial diagnostic file
@@ -117,7 +110,7 @@ def main(sas_solver, tmp_dir):
                         for i, dfs in enumerate(diag_files):
                             x1 = x1x2[i]
                             x2 = x1x2[i+1]
-                            file = base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}_{x1}_{x2}.{diagnostic}.nc"
+                            file = base_path / sas_solver / f"SVATTRANSPORT_{tms}_{sas_solver}_{x1}_{x2}.{diagnostic}.nc"
                             with h5netcdf.File(file, 'r', decode_vlen_strings=False) as df:
                                 for var_sim in list(df.variables.keys()):
                                     var_obj = df.variables.get(var_sim)
@@ -175,7 +168,7 @@ def main(sas_solver, tmp_dir):
     # merge results into single file
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}.*.nc")
+        path = str(base_path / sas_solver / f"SVATTRANSPORT_{tms}_{sas_solver}.*.nc")
         diag_files = glob.glob(path)
         states_tm_file = base_path / f"states_{tms}_saltelli.nc"
         if not os.path.exists(states_tm_file):
