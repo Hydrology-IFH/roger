@@ -378,6 +378,10 @@ def main(nsamples, sas_solver, tmp_dir):
                 df_params_metrics.loc[:, 'a2_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
                 df_params_metrics.loc[:, 'a1_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten()
                 df_params_metrics.loc[:, 'a2_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+            elif tm_structure == "time-variant":
+                df_params_metrics.loc[:, 'c_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+                df_params_metrics.loc[:, 'c_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+                df_params_metrics.loc[:, 'c_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
             elif tm_structure == "preferential":
                 df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
@@ -483,6 +487,8 @@ def main(nsamples, sas_solver, tmp_dir):
             df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'a_q_rz', 'a_q_ss']]
         elif tm_structure == "time-variant advection-dispersion":
             df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b1_transp', 'b2_transp', 'a1_q_rz', 'a2_q_rz', 'a1_q_ss', 'a2_q_ss']]
+        elif tm_structure == "time-variant":
+            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'c_transp', 'c_q_rz', 'c_q_ss']]
         elif tm_structure == "preferential":
             df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'b_q_rz', 'b_q_ss']]
         elif tm_structure == "power":
