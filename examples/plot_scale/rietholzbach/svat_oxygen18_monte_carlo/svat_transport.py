@@ -91,7 +91,7 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
             else:
                 identifier = f'SVATTRANSPORT_{transport_model_structure}_{sas_solver}'
             settings.identifier = identifier
-            settings.sas_solver = self._sas_solver
+            settings.sas_solver = sas_solver
             settings.sas_solver_substeps = 6
             if settings.sas_solver in ['RK4', 'Euler']:
                 settings.h = 1 / settings.sas_solver_substeps
