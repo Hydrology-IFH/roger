@@ -43,7 +43,7 @@ def main(nsamples, sas_solver, tmp_dir):
         os.mkdir(base_path_figs)
 
     # merge diagnostics into single file
-    x1x2 = onp.arange(0, nsamples, 500).tolist()
+    x1x2 = onp.arange(0, nsamples, 1000).tolist()
     if nsamples not in x1x2:
         x1x2.append(nsamples)
     tm_structures = ['advection-dispersion',
