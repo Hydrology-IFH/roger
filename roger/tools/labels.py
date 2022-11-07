@@ -1,5 +1,6 @@
 # y-axis labels
 _Y_LABS_DAILY = {'prec': r'$PREC$ [mm $day^{-1}$]',
+                 'prec_corr': r'$PREC_{corr}$ [mm $day^{-1}$]',
                  'q_hof': r'$q_{hof}$ [mm $day^{-1}$]',
                  'q_sof': r'$q_{sof}$ [mm $day^{-1}$]',
                  'q_sub': r'$q_{sub}$ [mm $day^{-1}$]',
@@ -25,6 +26,7 @@ _Y_LABS_DAILY = {'prec': r'$PREC$ [mm $day^{-1}$]',
                  }
 
 _Y_LABS_HOURLY = {'prec': r'$PREC$ [mm $hour^{-1}$]',
+                 'prec_corr': r'$PREC_{corr}$ [mm $hour^{-1}$]',
                  'q_hof': r'$q_{hof}$ [mm $hour^{-1}$]',
                  'q_sof': r'$q_{sof}$ [mm $hour^{-1}$]',
                  'q_sub': r'$q_{sub}$ [mm $hour^{-1}$]',
@@ -48,6 +50,7 @@ _Y_LABS_HOURLY = {'prec': r'$PREC$ [mm $hour^{-1}$]',
                  }
 
 _Y_LABS_10mins = {'prec': r'$PREC$ [mm $10 mins^{-1}$]',
+                  'prec_corr': r'$PREC_{corr}$ [mm $10 mins^{-1}$]',
                  'q_hof': r'$q_{hof}$ [mm $10 mins^{-1}$]',
                  'q_sof': r'$q_{sof}$ [mm $10 mins^{-1}$]',
                  'q_sub': r'$q_{sub}$ [mm $10 mins^{-1}$]',
@@ -72,6 +75,7 @@ _Y_LABS_10mins = {'prec': r'$PREC$ [mm $10 mins^{-1}$]',
 
 # ticklabels
 _TICKLABS = {'prec': r'$PREC$',
+             'prec_corr': r'$PREC_{corr}$',
              'int_prec': r'$INT$',
              'q_hof': r'$q_{hof}$',
              'q_sof': r'$q_{sof}$',
@@ -142,6 +146,7 @@ _TICKLABS = {'prec': r'$PREC$',
              }
 
 _Y_LABS_CUM = {'prec': r'$PREC$ [mm]',
+               'prec_corr': r'$PREC_{corr}$ [mm]',
                'aet': r'$ET$ [mm]',
                'transp': r'$TRANSP$ [mm]',
                'evap_soil': r'$EVAP_{soil}$ [mm]',

@@ -28,6 +28,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
         base_path = Path(tmp_dir)
     else:
         base_path = Path(__file__).parent
+    age_max = "age_max_4"
     # directory of results
     base_path_results = base_path / "results"
     if not os.path.exists(base_path_results):
@@ -35,11 +36,17 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
     base_path_results = base_path / "results" / sas_solver
     if not os.path.exists(base_path_results):
         os.mkdir(base_path_results)
+    base_path_results = base_path / "results" / sas_solver / age_max
+    if not os.path.exists(base_path_results):
+        os.mkdir(base_path_results)
     # directory of figures
     base_path_figs = base_path / "figures"
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
     base_path_figs = base_path / "figures" / sas_solver
+    if not os.path.exists(base_path_figs):
+        os.mkdir(base_path_figs)
+    base_path_figs = base_path / "figures" / sas_solver / age_max
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 

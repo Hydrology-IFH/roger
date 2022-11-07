@@ -4,7 +4,7 @@ import glob
 import datetime
 import h5netcdf
 import xarray as xr
-from cftime import num2date
+from cftime import num2date, date2num
 import pandas as pd
 import numpy as onp
 import click
@@ -54,7 +54,7 @@ def main(tmp_dir, sas_solver):
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
-    transport_models = ['complete-mixing', 'piston', 'advection-dispersion', 'time-variant advection-dispersion']
+    transport_models = ['complete-mixing', 'piston']
 
     # merge model output into a single file
     for tm in transport_models:
@@ -145,7 +145,7 @@ def main(tmp_dir, sas_solver):
                                                units=var_obj.attrs["units"])
 
     # load hydrologic simulation
-    states_hm_file = base_path / "states_hm100.nc"
+    states_hm_file = base_path.parent / "svat_monte_carlo" / "states_hm100.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     time_origin = ds_sim_hm['Time'].attrs['time_origin']
@@ -159,6 +159,23 @@ def main(tmp_dir, sas_solver):
     days_obs = (ds_obs['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     date_obs = num2date(days_obs, units=f"days since {ds_obs['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     ds_obs = ds_obs.assign_coords(Time=("Time", date_obs))
+
+    # average observed soil water content of previous 5 days
+    window = 5
+    df_thetap = pd.DataFrame(index=date_obs,
+                              columns=['doy', 'theta', 'sc'])
+    df_thetap.loc[:, 'doy'] = df_thetap.index.day_of_year
+    df_thetap.loc[:, 'theta'] = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0)
+    df_thetap.loc[df_thetap.index[window-1]:, f'theta_avg{window}'] = df_thetap.loc[:, 'theta'].rolling(window=window).mean().iloc[window-1:].values
+    df_thetap.iloc[:window, 2] = onp.nan
+    theta_lower = df_thetap.loc[:, f'theta_avg{window}'].quantile(0.1)
+    theta_upper = df_thetap.loc[:, f'theta_avg{window}'].quantile(0.9)
+    cond1 = (df_thetap[f'theta_avg{window}'] < theta_lower)
+    cond2 = (df_thetap[f'theta_avg{window}'] >= theta_lower) & (df_thetap[f'theta_avg{window}'] < theta_upper)
+    cond3 = (df_thetap[f'theta_avg{window}'] >= theta_upper)
+    df_thetap.loc[cond1, 'sc'] = 1  # dry
+    df_thetap.loc[cond2, 'sc'] = 2  # normal
+    df_thetap.loc[cond3, 'sc'] = 3  # wet
 
     # load transport simulation
     for tm in transport_models:
@@ -221,25 +238,30 @@ def main(tmp_dir, sas_solver):
             df_perc_18O_sim.loc[:, 'perc_obs_sum'] = df_perc_18O_sim.loc[:, 'perc_obs_sum'].fillna(method='bfill', limit=14)
 
             # join observations on simulations
-            obs_vals_bs = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-            sim_vals_bs = d18O_perc_bs[nrow, 0, :]
-            sim_vals = ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=0).values
-            df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-            df_obs.loc[:, 'obs'] = obs_vals_bs
-            df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals_bs, df_obs)
-            df_eval = df_eval.dropna()
-            # calculate metrics
-            var_sim = 'C_iso_q_ss'
-            obs_vals = df_eval.loc[:, 'obs'].values
-            sim_vals = df_eval.loc[:, 'sim'].values
-            key_kge = f'KGE_{var_sim}'
-            df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-            key_kge_alpha = f'KGE_alpha_{var_sim}'
-            df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
-            key_kge_beta = f'KGE_beta_{var_sim}'
-            df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
-            key_r = f'r_{var_sim}'
-            df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+            for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
+                obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+                sim_vals = d18O_perc_bs[nrow, 0, :]
+                df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+                df_obs.loc[:, 'obs'] = obs_vals
+                df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
+
+                if sc > 0:
+                    df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
+                    rows = (df_rows['sc'].values == sc)
+                    df_eval = df_eval.loc[rows, :]
+                df_eval = df_eval.dropna()
+                # calculate metrics
+                var_sim = 'C_iso_q_ss'
+                obs_vals = df_eval.loc[:, 'obs'].values
+                sim_vals = df_eval.loc[:, 'sim'].values
+                key_kge = f'KGE_{var_sim}{sc1}'
+                df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
+                key_kge_alpha = f'KGE_alpha_{var_sim}{sc1}'
+                df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
+                key_kge_beta = f'KGE_beta_{var_sim}{sc1}'
+                df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
+                key_r = f'r_{var_sim}{sc1}'
+                df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
             # plot observed and simulated d18O in percolation
             ax.plot(ds_sim_tm.Time.values, ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=0).values, color='red', zorder=2)
             ax.scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=4, zorder=1)
@@ -425,32 +447,32 @@ def main(tmp_dir, sas_solver):
         path_fig = base_path_figs / file_str
         fig.savefig(path_fig, dpi=250)
 
-        # # write states of best hydrologic simulation corresponding to best transport simulation
-        # ds_sim_hm_best = ds_sim_hm.loc[dict(x=idx_best)]
-        # ds_sim_hm_best.attrs['title'] = f'Best hydrologic simulation corresponding to best {tm} oxygen-18 simulation'
-        # days = date2num(ds_sim_hm_best["Time"].values.astype('M8[ms]').astype('O'), units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard')
-        # ds_sim_hm_best = ds_sim_hm_best.assign_coords(Time=("Time", days))
-        # ds_sim_hm_best.Time.attrs['units'] = "days"
-        # ds_sim_hm_best.Time.attrs['time_origin'] = ds_sim_hm['Time'].attrs['time_origin']
-        # file = base_path / f"states_hm_best_for_{tms}.nc"
-        # ds_sim_hm_best.to_netcdf(file, engine="h5netcdf")
+        # write states of best hydrologic simulation corresponding to best transport simulation
+        ds_sim_hm_best = ds_sim_hm.loc[dict(x=idx_best)]
+        ds_sim_hm_best.attrs['title'] = f'Best hydrologic simulation corresponding to best {tm} oxygen-18 simulation'
+        days = date2num(ds_sim_hm_best["Time"].values.astype('M8[ms]').astype('O'), units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard')
+        ds_sim_hm_best = ds_sim_hm_best.assign_coords(Time=("Time", days))
+        ds_sim_hm_best.Time.attrs['units'] = "days"
+        ds_sim_hm_best.Time.attrs['time_origin'] = ds_sim_hm['Time'].attrs['time_origin']
+        file = base_path / f"states_hm_best_for_{tms}.nc"
+        ds_sim_hm_best.to_netcdf(file, engine="h5netcdf")
 
-        # # write simulated bulk sample to output file
-        # ds_sim_tm = ds_sim_tm.load()  # required to release file lock
-        # ds_sim_tm = ds_sim_tm.close()
-        # del ds_sim_tm
-        # states_tm_file = base_path / sas_solver / age_max / f"states_{tms}.nc"
-        # with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
-        #     try:
-        #         v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-        #         v[:, :, :] = d18O_perc_bs
-        #         v.attrs.update(long_name="bulk sample of d18O in percolation",
-        #                        units="permil")
-        #     except ValueError:
-        #         v = f.get('d18O_perc_bs')
-        #         v[:, :, :] = d18O_perc_bs
-        #         v.attrs.update(long_name="bulk sample of d18O in percolation",
-        #                        units="permil")
+        # write simulated bulk sample to output file
+        ds_sim_tm = ds_sim_tm.load()  # required to release file lock
+        ds_sim_tm = ds_sim_tm.close()
+        del ds_sim_tm
+        states_tm_file = base_path / sas_solver / age_max / f"states_{tms}.nc"
+        with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+            try:
+                v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                v[:, :, :] = d18O_perc_bs
+                v.attrs.update(long_name="bulk sample of d18O in percolation",
+                               units="permil")
+            except ValueError:
+                v = f.get('d18O_perc_bs')
+                v[:, :, :] = d18O_perc_bs
+                v.attrs.update(long_name="bulk sample of d18O in percolation",
+                               units="permil")
     return
 
 

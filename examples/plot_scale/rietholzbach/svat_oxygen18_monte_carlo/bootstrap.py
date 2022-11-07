@@ -29,7 +29,7 @@ def main(tmp_dir, resample_size):
     with h5netcdf.File(states_hmb_file, 'w', decode_vlen_strings=False) as f:
         f.attrs.update(
           date_created=datetime.datetime.today().isoformat(),
-          title='RoGeR best 1% monte carlo simulations (bootstrapped) at Rietholzbach lysimeter site',
+          title='RoGeR best 100 monte carlo simulations (bootstrapped) at Rietholzbach lysimeter site',
           institution='University of Freiburg, Chair of Hydrology',
           references='',
           comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
