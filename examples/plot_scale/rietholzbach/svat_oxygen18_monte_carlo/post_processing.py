@@ -48,7 +48,10 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
     if nsamples not in x1x2:
         x1x2.append(nsamples)
     tm_structures = ['advection-dispersion',
-                     'time-variant advection-dispersion']
+                     'time-variant advection-dispersion',
+                     'preferential',
+                     'power',
+                     'time-variant']
     diagnostics = ['average',
                    'constant',
                    'maximum']

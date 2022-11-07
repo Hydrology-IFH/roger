@@ -802,7 +802,7 @@ def main(tmp_dir):
     # dict_params_metrics_tm = {}
     # for tm_structure in tm_structures:
     #     tms = tm_structure.replace(" ", "_")
-    #     file = base_path / "svat_transport" / "results" / "deterministic" / "age_max_11" / f"params_metrics_{tms}.txt"
+    #     file = base_path / "svat_transport" / "results" / "deterministic" / "age_max_4" / f"params_metrics_{tms}.txt"
     #     df_params_metrics = pd.read_csv(file, sep="\t")
     #     dict_params_metrics_tm[tm_structure] = {}
     #     dict_params_metrics_tm[tm_structure]['params_metrics'] = df_params_metrics
@@ -810,7 +810,7 @@ def main(tmp_dir):
     # dict_params_metrics_tm_mc = {}
     # for tm_structure in tm_structures:
     #     tms = tm_structure.replace(" ", "_")
-    #     file = base_path / "svat_transport_monte_carlo" / "results" / "deterministic" / "age_max_11" / f"params_metrics_{tms}.txt"
+    #     file = base_path / "svat_transport_monte_carlo" / "results" / "deterministic" / f"params_metrics_{tms}.txt"
     #     df_params_metrics = pd.read_csv(file, sep="\t")
     #     dict_params_metrics_tm_mc[tm_structure] = {}
     #     dict_params_metrics_tm_mc[tm_structure]['params_metrics'] = df_params_metrics
@@ -873,7 +873,7 @@ def main(tmp_dir):
     #     idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
     #     tms = tm_structure.replace(" ", "_")
     #     # load transport simulation
-    #     states_tm_file = base_path / "svat_transport_monte_carlo" / "deterministic" / "age_max_11" / f"states_{tms}.nc"
+    #     states_tm_file = base_path / "svat_transport_monte_carlo" / "deterministic" / f"states_{tms}.nc"
     #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
     #     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     #     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -907,7 +907,7 @@ def main(tmp_dir):
     #     idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
     #     tms = tm_structure.replace(" ", "_")
     #     # load transport simulation
-    #     states_tm_file = base_path / "svat_transport_monte_carlo" / "deterministic" / "age_max_11" / f"states_{tms}.nc"
+    #     states_tm_file = base_path / "svat_transport_monte_carlo" / "deterministic" / f"states_{tms}.nc"
     #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
     #     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     #     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -1002,7 +1002,7 @@ def main(tmp_dir):
     # for i, tm_structure in enumerate(tm_structures):
     #     idx_best = dict_params_metrics_tm[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
     #     tms = tm_structure.replace(" ", "_")
-    #     states_tm_file = base_path / "svat_transport" / "deterministic" / "age_max_11" / f"states_{tms}.nc"
+    #     states_tm_file = base_path / "svat_transport" / "deterministic" / "age_max_4" / f"states_{tms}.nc"
     #     with xr.open_dataset(states_tm_file, engine="h5netcdf") as ds_sim_tm:
     #         days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     #         date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -1076,7 +1076,7 @@ def main(tmp_dir):
     #     idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
     #     tms = tm_structure.replace(" ", "_")
     #     # load transport simulation
-    #     states_tm_file = base_path / "svat_transport_monte_carlo" / "deterministic" / "age_max_11" / f"states_{tms}.nc"
+    #     states_tm_file = base_path / "svat_transport_monte_carlo" / "deterministic" / f"states_{tms}.nc"
     #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
     #     for j, age_metric in enumerate('ttavg_transp', 'ttavg_q_ss'):
     #         df_age.iloc[j, i] = onp.nanmean(ds_sim_tm[age_metric].isel(x=idx_best, y=0).values)
@@ -1089,7 +1089,7 @@ def main(tmp_dir):
     # dict_params_metrics_tm_sa = {}
     # for tm_structure in tm_structures:
     #     tms = tm_structure.replace(" ", "_")
-    #     file = base_path / "svat_transport_sensitivity" / "results" / "deterministic" / "age_max_11" / f"params_metrics_{tms}.txt"
+    #     file = base_path / "svat_transport_sensitivity" / "results" / "deterministic" / f"params_metrics_{tms}.txt"
     #     df_params_metrics = pd.read_csv(file, sep="\t")
     #     dict_params_metrics_tm_sa[tm_structure] = {}
     #     dict_params_metrics_tm_sa[tm_structure]['params_metrics'] = df_params_metrics
@@ -1099,58 +1099,105 @@ def main(tmp_dir):
     # with open(file_path, 'r') as file:
     #     bounds = yaml.safe_load(file)
     #
-    # metrics_sa = ['ttavg_transp', 'tt50_transp', 'ttavg_q_rz', 'tt50_q_rz', 'ttavg_q_ss', 'tt50_q_ss']
-    # ncol = len(metrics_sa)
-    # nrow = len(tm_structures)
-    # cmap = cm.get_cmap('Greys')
-    # norm = Normalize(vmin=0, vmax=2)
-    # colors = cmap(norm([0.5, 1.5]))
-    # fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(6, 6))
-    # for j, tm_structure in enumerate(tm_structures):
-    #     tms = tm_structure.replace(" ", "_")
-    #     states_tm_file = base_path / "svat_transport_sensitivity" / f"states_{tms}_saltelli.nc"
-    #     ds_tm_sa = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
-    #     tms = tm_structure.replace(" ", "_")
-    #     # df_params_metrics = dict_params_metrics_tm_sa[tm_structure]['params_metrics']
-    #     # df_metrics = df_params_metrics.loc[:, metrics_sa]
-    #     dict_si = {}
-    #     for name in metrics_sa:
-    #         if name in ['ttavg_transp', 'tt50_transp', 'ttavg_q_rz', 'tt50_q_rz', 'ttavg_q_ss', 'tt50_q_ss']:
-    #             Y = onp.nanmean(ds_tm_sa[name].isel(y=0).values, axis=-1)
-    #         # else:
-    #         #     Y = df_metrics[name].values
-    #         Si = sobol.analyze(bounds[tm_structure], Y, calc_second_order=False)
-    #         Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
-    #         dict_si[name] = pd.DataFrame(Si_filter, index=bounds[tm_structure]['names'])
-    #
-    #     # plot sobol indices
-    #     _LABS = {'KGE_C_iso_q_ss': 'KGE',
-    #              'ttavg_transp': r'$\overline{TT_{transp}}$',
-    #              'tt50_transp': r'$TT_{50-transp}$',
-    #              'ttavg_q_rz': r'$\overline{TT_{perc_{rz}}}$',
-    #              'tt50_q_rz': r'$TT_{50-perc_{rz}}$',
-    #              'ttavg_q_ss': r'$\overline{TT_{perc_{ss}}}$',
-    #              'tt50_q_ss': r'$TT_{50-perc_{ss}}$',
-    #              'rtavg_s': r'$\overline{RT}$',
-    #              'rt50_s': r'$RT_{50}$',
-    #              }
-    #     xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds[tm_structure]['names']]
-    #     colors = cmap(norm([0.5, 1.5]))
-    #     for i, name in enumerate(metrics_sa):
-    #         indices = dict_si[name][['S1', 'ST']]
-    #         err = dict_si[name][['S1_conf', 'ST_conf']]
-    #         indices.plot.bar(yerr=err.values.T, ax=ax[j, i], color=colors)
-    #         ax[j, i].set_xticklabels(xaxis_labels)
-    #         ax[0, i].set_title(_LABS[name])
-    #         ax[j, i].legend(["First-order", "Total"], frameon=False)
-    #         ax[j, i].legend().set_visible(False)
-    # ax[-1, -1].legend().set_visible(True)
-    # ax[-1, -1].legend(["First-order", "Total"], frameon=False, loc='upper right', fontsize=6, bbox_to_anchor=(1.8, 1.1))
-    # ax[0, 0].set_ylabel('AD\nSobol index [-]')
-    # ax[1, 0].set_ylabel('AD-TV\nSobol index [-]')
-    # fig.subplots_adjust(bottom=0.2, right=0.85, hspace=0.65)
-    # file = base_path_figs / "sobol_indices_ages.png"
-    # fig.savefig(file, dpi=250)
+    _LABS_TITLE = {'KGE_C_iso_q_ss': 'KGE',
+                   'ttavg_transp': r'$\overline{TT_{transp}}$',
+                   'tt25_transp': r'$TT_{25-transp}$',
+                   'tt50_transp': r'$TT_{50-transp}$',
+                   'tt75_transp': r'$TT_{75-transp}$',
+                   'ttavg_q_rz': r'$\overline{TT_{perc_{rz}}}$',
+                   'tt25_q_rz': r'$TT_{25-perc_{rz}}$',
+                   'tt50_q_rz': r'$TT_{50-perc_{rz}}$',
+                   'tt75_q_rz': r'$TT_{75-perc_{rz}}$',
+                   'ttavg_q_ss': r'$\overline{TT_{perc_{ss}}}$',
+                   'tt25_q_ss': r'$TT_{25-perc_{ss}}$',
+                   'tt50_q_ss': r'$TT_{50-perc_{ss}}$',
+                   'tt75_q_ss': r'$TT_{75-perc_{ss}}$',
+                   'rtavg_s': r'$\overline{RT}$',
+                   'rt25_s': r'$RT_{25}$',
+                   'rt50_s': r'$RT_{50}$',
+                   'rt75_s': r'$RT_{75}$',
+                   }
+    metrics_tt = ['ttavg', 'tt25', 'tt50', 'tt75']
+    for metric_tt in metrics_tt:
+        metrics_sa = [f'{metric_tt}_transp', f'{metric_tt}_q_rz', f'{metric_tt}_q_ss']
+        ncol = len(metrics_sa)
+        nrow = len(tm_structures)
+        cmap = cm.get_cmap('Greys')
+        norm = Normalize(vmin=0, vmax=2)
+        colors = cmap(norm([0.5, 1.5]))
+        fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(6, 6))
+        for j, tm_structure in enumerate(tm_structures):
+            tms = tm_structure.replace(" ", "_")
+            states_tm_file = base_path / "svat_transport_sensitivity" / f"states_{tms}_saltelli.nc"
+            ds_tm_sa = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
+            tms = tm_structure.replace(" ", "_")
+            # df_params_metrics = dict_params_metrics_tm_sa[tm_structure]['params_metrics']
+            # df_metrics = df_params_metrics.loc[:, metrics_sa]
+            dict_si = {}
+            for name in metrics_sa:
+                Y = onp.nanmean(ds_tm_sa[name].isel(y=0).values, axis=-1)
+                Si = sobol.analyze(bounds[tm_structure], Y, calc_second_order=False)
+                Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
+                dict_si[name] = pd.DataFrame(Si_filter, index=bounds[tm_structure]['names'])
+
+            # plot sobol indices
+            xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds[tm_structure]['names']]
+            colors = cmap(norm([0.5, 1.5]))
+            for i, name in enumerate(metrics_sa):
+                indices = dict_si[name][['S1', 'ST']]
+                err = dict_si[name][['S1_conf', 'ST_conf']]
+                indices.plot.bar(yerr=err.values.T, ax=ax[j, i], color=colors)
+                ax[j, i].set_xticklabels(xaxis_labels)
+                ax[0, i].set_title(_LABS_TITLE[name])
+                ax[j, i].legend(["First-order", "Total"], frameon=False)
+                ax[j, i].legend().set_visible(False)
+        ax[-1, -1].legend().set_visible(True)
+        ax[-1, -1].legend(["First-order", "Total"], frameon=False, loc='upper right', fontsize=6, bbox_to_anchor=(1.8, 1.1))
+        ax[0, 0].set_ylabel('AD\nSobol index [-]')
+        ax[1, 0].set_ylabel('AD-TV\nSobol index [-]')
+        fig.subplots_adjust(bottom=0.2, right=0.85, hspace=0.65)
+        file = base_path_figs / f"sobol_indices_{metric_tt}.png"
+        fig.savefig(file, dpi=250)
+
+    metrics_sa = ['rtavg_s', 'rt25_s', 'rt50_s', 'rt75_s']
+    ncol = len(metrics_sa)
+    nrow = len(tm_structures)
+    cmap = cm.get_cmap('Greys')
+    norm = Normalize(vmin=0, vmax=2)
+    colors = cmap(norm([0.5, 1.5]))
+    fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(6, 6))
+    for j, tm_structure in enumerate(tm_structures):
+        tms = tm_structure.replace(" ", "_")
+        states_tm_file = base_path / "svat_transport_sensitivity" / f"states_{tms}_saltelli.nc"
+        ds_tm_sa = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
+        tms = tm_structure.replace(" ", "_")
+        # df_params_metrics = dict_params_metrics_tm_sa[tm_structure]['params_metrics']
+        # df_metrics = df_params_metrics.loc[:, metrics_sa]
+        dict_si = {}
+        for name in metrics_sa:
+            Y = onp.nanmean(ds_tm_sa[name].isel(y=0).values, axis=-1)
+            Si = sobol.analyze(bounds[tm_structure], Y, calc_second_order=False)
+            Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
+            dict_si[name] = pd.DataFrame(Si_filter, index=bounds[tm_structure]['names'])
+
+        # plot sobol indices
+        xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds[tm_structure]['names']]
+        colors = cmap(norm([0.5, 1.5]))
+        for i, name in enumerate(metrics_sa):
+            indices = dict_si[name][['S1', 'ST']]
+            err = dict_si[name][['S1_conf', 'ST_conf']]
+            indices.plot.bar(yerr=err.values.T, ax=ax[j, i], color=colors)
+            ax[j, i].set_xticklabels(xaxis_labels)
+            ax[0, i].set_title(_LABS_TITLE[name])
+            ax[j, i].legend(["First-order", "Total"], frameon=False)
+            ax[j, i].legend().set_visible(False)
+    ax[-1, -1].legend().set_visible(True)
+    ax[-1, -1].legend(["First-order", "Total"], frameon=False, loc='upper right', fontsize=6, bbox_to_anchor=(1.8, 1.1))
+    ax[0, 0].set_ylabel('AD\nSobol index [-]')
+    ax[1, 0].set_ylabel('AD-TV\nSobol index [-]')
+    fig.subplots_adjust(bottom=0.2, right=0.85, hspace=0.65)
+    file = base_path_figs / "sobol_indices_rt.png"
+    fig.savefig(file, dpi=250)
 
     # # dotty plots of HYDRUS-1D monte carlo simulations
     # file = base_path / "hydrus_benchmark" / "params_metrics.txt"
