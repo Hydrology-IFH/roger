@@ -19,10 +19,11 @@ sns.set_style("ticks")
 
 
 @click.option("-ns", "--nsamples", type=int, default=10000)
+@click.option("-ss", "--split-size", type=int, default=1000)
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
-def main(nsamples, sas_solver, tmp_dir):
+def main(nsamples, split_size, sas_solver, tmp_dir):
     if tmp_dir:
         base_path = Path(tmp_dir)
     else:
@@ -43,7 +44,7 @@ def main(nsamples, sas_solver, tmp_dir):
         os.mkdir(base_path_figs)
 
     # merge diagnostics into single file
-    x1x2 = onp.arange(0, nsamples, 1000).tolist()
+    x1x2 = onp.arange(0, nsamples, split_size).tolist()
     if nsamples not in x1x2:
         x1x2.append(nsamples)
     tm_structures = ['advection-dispersion',
@@ -165,7 +166,7 @@ def main(nsamples, sas_solver, tmp_dir):
 
     states_hm1_file = base_path / "states_hm100_bootstrap.nc"
     states_hm_mc_file = base_path / "states_hm_for_tm_mc.nc"
-    n_repeat = int(nsamples / 500)
+    n_repeat = int(nsamples / split_size)
     if not os.path.exists(states_hm_mc_file):
         click.echo('Repeat hydrologic simualtions ...')
         with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
