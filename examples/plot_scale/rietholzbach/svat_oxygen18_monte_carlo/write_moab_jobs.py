@@ -5,9 +5,10 @@ import click
 
 @click.option("--job-type", type=click.Choice(['serial', 'single-node', 'multi-node', 'gpu', 'multi-gpu']), default='serial')
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
-@click.option("--split-size", type=int, default=1000)
+@click.option("-ns", "--nsamples", type=int, default=10000)
+@click.option("-ss", "--split-size", type=int, default=500)
 @click.command("main")
-def main(job_type, sas_solver, split_size):
+def main(job_type, sas_solver, split_size, nsamples):
     base_path = Path(__file__).parent
     base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
@@ -118,7 +119,8 @@ def main(job_type, sas_solver, split_size):
         elif job_type == 'gpu':
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
-            for i in range(10):
+            nn = int(nsamples/split_size)
+            for i in range(nn):
                 script_name = f'{tracer}_{sas_solver}_svat_{tm1}_mc_{i}'
                 output_path_ws = base_path_ws / 'rietholzbach' / 'svat_oxygen18_monte_carlo'
                 tms = tm.replace(" ", "_")
