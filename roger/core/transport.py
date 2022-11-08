@@ -842,7 +842,7 @@ def calc_TT_num_nonneg(state, SA, TTq, flux):
 
 @roger_routine
 def svat_transport_model_deterministic(state):
-    """Calculates water transport model with deterministic method (i.e. not numerically)
+    """Calculates water transport model with deterministic method
     """
     vs = state.variables
     settings = state.settings
@@ -881,7 +881,7 @@ def svat_transport_model_deterministic(state):
 
 @roger_routine
 def svat_lbc_transport_model_deterministic(state):
-    """Calculates water transport model with deterministic method (i.e. not numerically)
+    """Calculates water transport model with deterministic method
     """
     vs = state.variables
     settings = state.settings
@@ -922,7 +922,7 @@ def svat_lbc_transport_model_deterministic(state):
 
 @roger_routine
 def svat_crop_transport_model_deterministic(state):
-    """Calculates water transport model with deterministic method (i.e. not numerically)
+    """Calculates water transport model with deterministic method
     """
     vs = state.variables
     settings = state.settings
@@ -939,6 +939,47 @@ def svat_crop_transport_model_deterministic(state):
         subsurface_runoff.calculate_percolation_rz_transport(state)
     with state.timers["subsurface runoff of subsoil"]:
         subsurface_runoff.calculate_percolation_ss_transport(state)
+    with state.timers["capillary rise into root zone"]:
+        capillary_rise.calculate_capillary_rise_rz_transport(state)
+    if settings.enable_nitrate:
+        with state.timers["nitrogen cycle"]:
+            nitrate.calculate_nitrogen_cycle(state)
+    with state.timers["StorAge"]:
+        root_zone.calculate_root_zone_transport(state)
+        subsoil.calculate_subsoil_transport(state)
+        soil.calculate_soil_transport(state)
+    if settings.enable_age_statistics:
+        with state.timers["age-statistics"]:
+            vs.update(calculate_age_statistics(state))
+    with state.timers["diagnostics"]:
+        write_output(state)
+    with state.timers["ageing"]:
+        calculate_ageing(state)
+    if settings.enable_oxygen18 or settings.enable_deuterium:
+        vs.update(after_substep_iso(state))
+    else:
+        vs.update(after_substep_anion(state))
+
+
+@roger_routine
+def oneD_transport_model_deterministic(state):
+    """Calculates water transport model with deterministic method
+    """
+    vs = state.variables
+    settings = state.settings
+
+    with state.timers["infiltration into root zone"]:
+        infiltration.calculate_infiltration_rz_transport(state)
+    with state.timers["evapotranspiration"]:
+        evapotranspiration.calculate_evapotranspiration_transport(state)
+    with state.timers["infiltration into subsoil"]:
+        infiltration.calculate_infiltration_ss_transport(state)
+    with state.timers["subsurface runoff of root zone"]:
+        subsurface_runoff.calculate_percolation_rz_transport(state)
+        subsurface_runoff.calculate_lateral_susburface_runoff_rz_transport(state)
+    with state.timers["subsurface runoff of subsoil"]:
+        subsurface_runoff.calculate_percolation_ss_transport(state)
+        subsurface_runoff.calculate_lateral_susburface_runoff_ss_transport(state)
     with state.timers["capillary rise into root zone"]:
         capillary_rise.calculate_capillary_rise_rz_transport(state)
     if settings.enable_nitrate:

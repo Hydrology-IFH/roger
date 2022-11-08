@@ -1210,7 +1210,7 @@ def update_alpha_transp(state):
 
 
 @roger_kernel
-def calculate_redistribution_root_growth_transport_kernel(state):
+def calc_redistribution_root_growth_transport_kernel(state):
     """
     Calculates transport of redistribution after root growth
     """
@@ -1250,7 +1250,7 @@ def calculate_redistribution_root_growth_transport_kernel(state):
 
 
 @roger_kernel
-def calculate_redistribution_root_growth_transport_iso_kernel(state):
+def calc_redistribution_root_growth_transport_iso_kernel(state):
     """
     Calculates isotope transport of redistribution after root growth
     """
@@ -1318,7 +1318,7 @@ def calculate_redistribution_root_growth_transport_iso_kernel(state):
 
 
 @roger_kernel
-def calculate_redistribution_root_growth_transport_anion_kernel(state):
+def calc_redistribution_root_growth_transport_anion_kernel(state):
     """
     Calculates chloride/bromide/nitrate transport of redistribution after root growth
     """
@@ -1382,7 +1382,7 @@ def calculate_redistribution_root_growth_transport_anion_kernel(state):
 
 
 @roger_kernel
-def calculate_redistribution_root_loss_transport_kernel(state):
+def calc_redistribution_root_loss_transport_kernel(state):
     """
     Calculates transport of redistribution after root loss
     """
@@ -1422,7 +1422,7 @@ def calculate_redistribution_root_loss_transport_kernel(state):
 
 
 @roger_kernel
-def calculate_redistribution_root_loss_transport_iso_kernel(state):
+def calc_redistribution_root_loss_transport_iso_kernel(state):
     """
     Calculates isotope transport of redistribution after root loss
     """
@@ -1490,7 +1490,7 @@ def calculate_redistribution_root_loss_transport_iso_kernel(state):
 
 
 @roger_kernel
-def calculate_redistribution_root_loss_transport_anion_kernel(state):
+def calc_redistribution_root_loss_transport_anion_kernel(state):
     """
     Calculates chloride/bromide/nitrate transport of redistribution after root loss
     """
@@ -1561,13 +1561,13 @@ def calculate_redistribution_transport(state):
     settings = state.settings
 
     if settings.enable_offline_transport and settings.enable_crop_phenology and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
-        vs.update(calculate_redistribution_root_growth_transport_kernel(state))
-        vs.update(calculate_redistribution_root_loss_transport_kernel(state))
+        vs.update(calc_redistribution_root_growth_transport_kernel(state))
+        vs.update(calc_redistribution_root_loss_transport_kernel(state))
 
     if settings.enable_offline_transport and settings.enable_crop_phenology and (settings.enable_oxygen18 | settings.enable_deuterium):
-        vs.update(calculate_redistribution_root_growth_transport_iso_kernel(state))
-        vs.update(calculate_redistribution_root_loss_transport_iso_kernel(state))
+        vs.update(calc_redistribution_root_growth_transport_iso_kernel(state))
+        vs.update(calc_redistribution_root_loss_transport_iso_kernel(state))
 
     if settings.enable_offline_transport and settings.enable_crop_phenology and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate):
-        vs.update(calculate_redistribution_root_growth_transport_anion_kernel(state))
-        vs.update(calculate_redistribution_root_loss_transport_anion_kernel(state))
+        vs.update(calc_redistribution_root_growth_transport_anion_kernel(state))
+        vs.update(calc_redistribution_root_loss_transport_anion_kernel(state))

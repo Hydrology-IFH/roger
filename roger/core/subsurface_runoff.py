@@ -180,7 +180,7 @@ def calc_z_sat_layer(state):
 
 
 @roger_kernel
-def calc_q_sub_pot(state):
+def calc_potential_lateral_subsurface_runoff(state):
     """
     Calculates potential lateral subsurface runoff
     """
@@ -259,7 +259,7 @@ def calc_q_sub_pot(state):
 
 
 @roger_kernel
-def calc_q_sub_rz(state):
+def calc_lateral_subsurface_runoff_rz(state):
     """
     Calculates lateral subsurface runoff in root zone
     """
@@ -319,7 +319,7 @@ def calc_q_sub_rz(state):
 
 
 @roger_kernel
-def calc_q_sub_pot_ss(state):
+def calc_potential_lateral_subsurface_runoff_ss(state):
     """
     Calculates potential lateral subsurface runoff in subsoil
     """
@@ -362,7 +362,7 @@ def calc_q_sub_pot_ss(state):
 
 
 @roger_kernel
-def calc_q_sub_ss(state):
+def calc_lateral_subsurface_runoff_ss(state):
     """
     Calculates lateral and vertical subsurface runoff in subsoil
     """
@@ -475,7 +475,7 @@ def calc_q_sub_ss(state):
 
 
 @roger_kernel
-def calc_q_sub(state):
+def calc_lateral_subsurface_runoff(state):
     """
     Calculates lateral and vertical subsurface runoff in subsoil
     """
@@ -500,7 +500,7 @@ def calc_q_sub(state):
 
 
 @roger_kernel
-def calc_z_sat_rise(state):
+def calc_rise_of_saturation_water_table(state):
     """
     Calculates rise of saturation water level
     """
@@ -543,7 +543,7 @@ def calc_z_sat_rise(state):
 
 
 @roger_kernel
-def calc_perc_pot_rz(state):
+def calc_potential_percolation_rz(state):
     """
     Calculates potential percolation in root zone
     """
@@ -610,7 +610,7 @@ def calc_perc_pot_rz(state):
 
 
 @roger_kernel
-def calc_perc_rz(state):
+def calc_percolation_rz(state):
     """
     Calculates percolation in root zone
     """
@@ -659,7 +659,7 @@ def calc_perc_rz(state):
 
 
 @roger_kernel
-def calc_perc_pot_ss(state):
+def calc_potential_percolation_ss(state):
     """
     Calculates potenital percolation in subsoil
     """
@@ -721,7 +721,7 @@ def calc_perc_pot_ss(state):
 
 
 @roger_kernel
-def calc_perc_ss(state):
+def calc_percolation_ss(state):
     """
     Calculates percolation in subsoil
     """
@@ -776,31 +776,31 @@ def calculate_subsurface_runoff(state):
     settings = state.settings
 
     if settings.enable_lateral_flow:
-        vs.update(calc_z_sat_rise(state))
+        vs.update(calc_rise_of_saturation_water_table(state))
         vs.update(calc_S_zsat(state))
         vs.update(calc_z_sat_layer(state))
-        vs.update(calc_perc_pot_rz(state))
-        vs.update(calc_perc_rz(state))
-        vs.update(calc_q_sub_pot(state))
-        vs.update(calc_q_sub_rz(state))
-        vs.update(calc_q_sub_pot_ss(state))
-        vs.update(calc_perc_pot_ss(state))
-        vs.update(calc_q_sub_ss(state))
-        vs.update(calc_q_sub(state))
+        vs.update(calc_potential_percolation_rz(state))
+        vs.update(calc_percolation_rz(state))
+        vs.update(calc_potential_lateral_subsurface_runoff(state))
+        vs.update(calc_lateral_subsurface_runoff_rz(state))
+        vs.update(calc_potential_lateral_subsurface_runoff_ss(state))
+        vs.update(calc_potential_percolation_ss(state))
+        vs.update(calc_lateral_subsurface_runoff_ss(state))
+        vs.update(calc_lateral_subsurface_runoff(state))
 
     elif not settings.enable_lateral_flow:
-        vs.update(calc_z_sat_rise(state))
+        vs.update(calc_rise_of_saturation_water_table(state))
         vs.update(calc_S_zsat(state))
-        vs.update(calc_perc_pot_rz(state))
-        vs.update(calc_perc_rz(state))
-        vs.update(calc_perc_pot_ss(state))
-        vs.update(calc_perc_ss(state))
+        vs.update(calc_potential_percolation_rz(state))
+        vs.update(calc_percolation_rz(state))
+        vs.update(calc_potential_percolation_ss(state))
+        vs.update(calc_percolation_ss(state))
 
     elif not settings.enable_lateral_flow and settings.enable_film_flow:
-        vs.update(calc_perc_pot_rz(state))
-        vs.update(calc_perc_rz(state))
-        vs.update(calc_perc_pot_ss(state))
-        vs.update(calc_perc_ss(state))
+        vs.update(calc_potential_percolation_rz(state))
+        vs.update(calc_percolation_rz(state))
+        vs.update(calc_potential_percolation_ss(state))
+        vs.update(calc_percolation_ss(state))
 
 
 @roger_kernel
@@ -817,34 +817,10 @@ def calc_subsurface_runoff_routing_2D(state):
     Calculates subsurface runoff routing
     """
     pass
-    # m, n = dem.shape
-    # fdir = np.zeros((8, m, n), dtype=np.float64)
-    # row_offsets = np.array([-1, -1, 0, 1, 1, 1, 0, -1])
-    # col_offsets = np.array([0, 1, 1, 1, 0, -1, -1, -1])
-    # dd = np.sqrt(dx**2 + dy**2)
-    # distances = np.array([dy, dd, dx, dd, dy, dd, dx, dd])
-    # for i in prange(1, m - 1):
-    #     for j in prange(1, n - 1):
-    #         if nodata_cells[i, j]:
-    #             fdir[:, i, j] = nodata_out
-    #         else:
-    #             elev = dem[i, j]
-    #             den = 0.
-    #             for k in range(8):
-    #                 row_offset = row_offsets[k]
-    #                 col_offset = col_offsets[k]
-    #                 distance = distances[k]
-    #                 num = (elev - dem[i + row_offset, j + col_offset])**p / distance
-    #                 if num > 0:
-    #                     fdir[k, i, j] = num
-    #                     den += num
-    #             if den > 0:
-    #                 fdir[:, i, j] /= den
-    # return fdir
 
 
 @roger_kernel
-def calculate_percolation_rz_transport_kernel(state):
+def calc_percolation_rz_transport_kernel(state):
     """
     Calculates travel time of percolation
     """
@@ -879,7 +855,7 @@ def calculate_percolation_rz_transport_kernel(state):
 
 
 @roger_kernel
-def calculate_percolation_rz_transport_iso_kernel(state):
+def calc_percolation_rz_transport_iso_kernel(state):
     """
     Calculates isotope transport of percolation
     """
@@ -938,7 +914,7 @@ def calculate_percolation_rz_transport_iso_kernel(state):
 
 
 @roger_kernel
-def calculate_percolation_rz_transport_anion_kernel(state):
+def calc_percolation_rz_transport_anion_kernel(state):
     """
     Calculates chloride/bromide/nitrate transport of percolation
     """
@@ -995,7 +971,7 @@ def calculate_percolation_rz_transport_anion_kernel(state):
 
 
 @roger_kernel
-def calculate_percolation_ss_transport_kernel(state):
+def calc_percolation_ss_transport_kernel(state):
     """
     Calculates travel time of percolation
     """
@@ -1025,7 +1001,7 @@ def calculate_percolation_ss_transport_kernel(state):
 
 
 @roger_kernel
-def calculate_percolation_ss_transport_iso_kernel(state):
+def calc_percolation_ss_transport_iso_kernel(state):
     """
     Calculates isotope transport of percolation
     """
@@ -1073,7 +1049,7 @@ def calculate_percolation_ss_transport_iso_kernel(state):
 
 
 @roger_kernel
-def calculate_percolation_ss_transport_anion_kernel(state):
+def calc_percolation_ss_transport_anion_kernel(state):
     """
     Calculates chloride/bromide/nitrate transport of percolation
     """
@@ -1122,34 +1098,316 @@ def calculate_percolation_ss_transport_anion_kernel(state):
 @roger_routine
 def calculate_percolation_rz_transport(state):
     """
-    Calculates percolation transport
+    Calculates transport of percolation in root zone
     """
     vs = state.variables
     settings = state.settings
 
     if settings.enable_offline_transport and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
-        vs.update(calculate_percolation_rz_transport_kernel(state))
+        vs.update(calc_percolation_rz_transport_kernel(state))
 
     if settings.enable_offline_transport and (settings.enable_oxygen18 | settings.enable_deuterium):
-        vs.update(calculate_percolation_rz_transport_iso_kernel(state))
+        vs.update(calc_percolation_rz_transport_iso_kernel(state))
 
     if settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate):
-        vs.update(calculate_percolation_rz_transport_anion_kernel(state))
+        vs.update(calc_percolation_rz_transport_anion_kernel(state))
 
 
 @roger_routine
 def calculate_percolation_ss_transport(state):
     """
-    Calculates percolation transport
+    Calculates transport of percolation in subsoil
     """
     vs = state.variables
     settings = state.settings
 
     if settings.enable_offline_transport and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
-        vs.update(calculate_percolation_ss_transport_kernel(state))
+        vs.update(calc_percolation_ss_transport_kernel(state))
 
     if settings.enable_offline_transport and (settings.enable_oxygen18 | settings.enable_deuterium):
-        vs.update(calculate_percolation_ss_transport_iso_kernel(state))
+        vs.update(calc_percolation_ss_transport_iso_kernel(state))
 
     if settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate):
-        vs.update(calculate_percolation_ss_transport_anion_kernel(state))
+        vs.update(calc_percolation_ss_transport_anion_kernel(state))
+
+
+@roger_kernel
+def calc_lateral_subsurface_runoff_rz_transport_kernel(state):
+    """
+    Calculates travel time of lateral subsurface runoff in root zone
+    """
+    vs = state.variables
+
+    vs.SA_rz = update(
+        vs.SA_rz,
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.tt_q_sub_rz = update(
+        vs.tt_q_sub_rz,
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.q_sub_rz, vs.sas_params_q_sub_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.TT_q_sub_rz = update(
+        vs.TT_q_sub_rz,
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_q_sub_rz[2:-2, 2:-2, :], axis=-1),
+    )
+
+    vs.sa_rz = update(
+        vs.sa_rz,
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_q_sub_rz, vs.q_sub_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    return KernelOutput(sa_rz=vs.sa_rz, tt_q_sub_rz=vs.tt_q_sub_rz, TT_q_sub_rz=vs.TT_q_sub_rz, sa_ss=vs.sa_ss)
+
+
+@roger_kernel
+def calc_lateral_subsurface_runoff_rz_transport_iso_kernel(state):
+    """
+    Calculates isotope transport of lateral subsurface runoff in root zone
+    """
+    vs = state.variables
+
+    vs.SA_rz = update(
+        vs.SA_rz,
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.tt_q_sub_rz = update(
+        vs.tt_q_sub_rz,
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.q_sub_rz, vs.sas_params_q_sub_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.TT_q_sub_rz = update(
+        vs.TT_q_sub_rz,
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_q_sub_rz[2:-2, 2:-2, :], axis=2),
+    )
+    # calculate isotope travel time distribution
+    vs.mtt_q_sub_rz = update(
+        vs.mtt_q_sub_rz,
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_q_sub_rz, vs.q_sub_rz, vs.msa_rz, vs.alpha_q)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+    vs.C_q_sub_rz = update(
+        vs.C_q_sub_rz,
+        at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_q_sub_rz, vs.tt_q_sub_rz, vs.q_sub_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.C_iso_q_sub_rz = update(
+        vs.C_iso_q_sub_rz,
+        at[2:-2, 2:-2], transport.conc_to_delta(state, vs.C_q_sub_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # update isotope StorAge
+    vs.msa_rz = update(
+        vs.msa_rz,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    return KernelOutput(sa_rz=vs.sa_rz, tt_q_sub_rz=vs.tt_q_sub_rz, TT_q_sub_rz=vs.TT_q_sub_rz, msa_rz=vs.msa_rz, mtt_q_sub_rz=vs.mtt_q_sub_rz, C_q_sub_rz=vs.C_q_sub_rz, C_iso_q_sub_rz=vs.C_iso_q_sub_rz, sa_ss=vs.sa_ss, msa_ss=vs.msa_ss)
+
+
+@roger_kernel
+def calc_lateral_subsurface_runoff_rz_transport_anion_kernel(state):
+    """
+    Calculates chloride/bromide/nitrate transport of lateral subsurface runoff in root zone
+    """
+    vs = state.variables
+
+    vs.SA_rz = update(
+        vs.SA_rz,
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.tt_q_sub_rz = update(
+        vs.tt_q_sub_rz,
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_rz, vs.sa_rz, vs.q_sub_rz, vs.sas_params_q_sub_rz)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.TT_q_sub_rz = update(
+        vs.TT_q_sub_rz,
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_q_sub_rz[2:-2, 2:-2, :], axis=2),
+    )
+
+    # calculate isotope travel time distribution
+    vs.mtt_q_sub_rz = update(
+        vs.mtt_q_sub_rz,
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_q_sub_rz, vs.q_sub_rz, vs.msa_rz, vs.alpha_q)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.C_q_sub_rz = update(
+        vs.C_q_sub_rz,
+        at[2:-2, 2:-2], npx.where(vs.q_sub_rz[2:-2, 2:-2] > 0, npx.sum(vs.mtt_q_sub_rz[2:-2, 2:-2, :], axis=-1) / vs.q_sub_rz[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # update StorAge with flux
+    vs.sa_rz = update(
+        vs.sa_rz,
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_q_sub_rz, vs.q_sub_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+    # update solute StorAge of root zone
+    vs.msa_rz = update_add(
+        vs.msa_rz,
+        at[2:-2, 2:-2, vs.tau, :], -vs.mtt_q_sub_rz[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    return KernelOutput(sa_rz=vs.sa_rz, tt_q_sub_rz=vs.tt_q_sub_rz, TT_q_sub_rz=vs.TT_q_sub_rz, msa_rz=vs.msa_rz, mtt_q_sub_rz=vs.mtt_q_sub_rz, C_q_sub_rz=vs.C_q_sub_rz, sa_ss=vs.sa_ss, msa_ss=vs.msa_ss)
+
+
+@roger_kernel
+def calc_lateral_subsurface_runoff_ss_transport_kernel(state):
+    """
+    Calculates travel time of lateral subsurface runoff in subsoil
+    """
+    vs = state.variables
+
+    vs.SA_ss = update(
+        vs.SA_ss,
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.tt_q_sub_ss = update(
+        vs.tt_q_sub_ss,
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_ss, vs.sa_ss, vs.q_sub_ss, vs.sas_params_q_sub_ss)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.TT_q_sub_ss = update(
+        vs.TT_q_sub_ss,
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_q_sub_ss[2:-2, 2:-2, :], axis=-1),
+    )
+
+    vs.sa_ss = update(
+        vs.sa_ss,
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_q_sub_ss, vs.q_sub_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    return KernelOutput(sa_ss=vs.sa_ss, tt_q_sub_ss=vs.tt_q_sub_ss, TT_q_sub_ss=vs.TT_q_sub_ss)
+
+
+@roger_kernel
+def calc_lateral_subsurface_runoff_ss_transport_iso_kernel(state):
+    """
+    Calculates isotope transport of lateral subsurface runoff in subsoil
+    """
+    vs = state.variables
+
+    vs.SA_ss = update(
+        vs.SA_ss,
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+    vs.tt_q_sub_ss = update(
+        vs.tt_q_sub_ss,
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_ss, vs.sa_ss, vs.q_sub_ss, vs.sas_params_q_sub_ss)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.TT_q_sub_ss = update(
+        vs.TT_q_sub_ss,
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_q_sub_ss[2:-2, 2:-2, :], axis=2),
+    )
+    # calculate solute travel time distribution
+    alpha = allocate(state.dimensions, ("x", "y"), fill=1)
+    vs.mtt_q_sub_ss = update(
+        vs.mtt_q_sub_ss,
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_ss, vs.tt_q_sub_ss, vs.q_sub_ss, vs.msa_ss, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+    vs.C_q_sub_ss = update(
+        vs.C_q_sub_ss,
+        at[2:-2, 2:-2], transport.calc_conc_iso_flux(state, vs.mtt_q_sub_ss, vs.tt_q_sub_ss, vs.q_sub_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.C_iso_q_sub_ss = update(
+        vs.C_iso_q_sub_ss,
+        at[2:-2, 2:-2], transport.conc_to_delta(state, vs.C_q_sub_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    # update StorAge with flux
+    vs.sa_ss = update(
+        vs.sa_ss,
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_q_sub_ss, vs.q_sub_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+    # update isotope StorAge
+    vs.msa_ss = update(
+        vs.msa_ss,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    return KernelOutput(sa_ss=vs.sa_ss, tt_q_sub_ss=vs.tt_q_sub_ss, TT_q_sub_ss=vs.TT_q_sub_ss, msa_ss=vs.msa_ss, mtt_q_sub_ss=vs.mtt_q_sub_ss, C_q_sub_ss=vs.C_q_sub_ss, C_iso_q_sub_ss=vs.C_iso_q_sub_ss)
+
+
+@roger_kernel
+def calc_lateral_subsurface_runoff_ss_transport_anion_kernel(state):
+    """
+    Calculates chloride/bromide/nitrate transport of lateral subsurface runoff in subsoil
+    """
+    vs = state.variables
+
+    vs.SA_ss = update(
+        vs.SA_ss,
+        at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.tt_q_sub_ss = update(
+        vs.tt_q_sub_ss,
+        at[2:-2, 2:-2, :], transport.calc_tt(state, vs.SA_ss, vs.sa_ss, vs.q_sub_ss, vs.sas_params_q_sub_ss)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.TT_q_sub_ss = update(
+        vs.TT_q_sub_ss,
+        at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_q_sub_ss[2:-2, 2:-2, :], axis=-1),
+    )
+
+    # calculate isotope travel time distribution
+    vs.mtt_q_sub_ss = update(
+        vs.mtt_q_sub_ss,
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_ss, vs.tt_q_sub_ss, vs.q_sub_ss, vs.msa_ss, vs.alpha_q)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.C_q_sub_ss = update(
+        vs.C_q_sub_ss,
+        at[2:-2, 2:-2], npx.where(vs.q_sub_ss[2:-2, 2:-2] > 0, npx.sum(vs.mtt_q_sub_ss[2:-2, 2:-2, :], axis=-1) / vs.q_sub_ss[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # update StorAge with flux
+    vs.sa_ss = update(
+        vs.sa_ss,
+        at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_ss, vs.tt_q_sub_ss, vs.q_sub_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+    # update solute StorAge of subsoil
+    vs.msa_ss = update_add(
+        vs.msa_ss,
+        at[2:-2, 2:-2, vs.tau, :], -vs.mtt_q_sub_ss[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    return KernelOutput(sa_ss=vs.sa_ss, tt_q_sub_ss=vs.tt_q_sub_ss, TT_q_sub_ss=vs.TT_q_sub_ss, msa_ss=vs.msa_ss, mtt_q_sub_ss=vs.mtt_q_sub_ss, C_q_sub_ss=vs.C_q_sub_ss)
+
+
+@roger_routine
+def calculate_lateral_subsurface_runoff_rz_transport(state):
+    """
+    Calculates transport of lateral subsurface runoff in root zone
+    """
+    vs = state.variables
+    settings = state.settings
+
+    if settings.enable_offline_transport and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
+        vs.update(calc_lateral_subsurface_runoff_rz_transport_kernel(state))
+
+    if settings.enable_offline_transport and (settings.enable_oxygen18 | settings.enable_deuterium):
+        vs.update(calc_lateral_subsurface_runoff_rz_transport_iso_kernel(state))
+
+    if settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate):
+        vs.update(calc_lateral_subsurface_runoff_rz_transport_anion_kernel(state))
+
+
+@roger_routine
+def calculate_lateral_subsurface_runoffn_ss_transport(state):
+    """
+    Calculates transport lateral subsurface runoff in subsoil
+    """
+    vs = state.variables
+    settings = state.settings
+
+    if settings.enable_offline_transport and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
+        vs.update(calc_lateral_subsurface_runoff_ss_transport_kernel(state))
+
+    if settings.enable_offline_transport and (settings.enable_oxygen18 | settings.enable_deuterium):
+        vs.update(calc_lateral_subsurface_runoff_ss_transport_iso_kernel(state))
+
+    if settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate):
+        vs.update(calc_lateral_subsurface_runoff_ss_transport_anion_kernel(state))

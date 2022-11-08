@@ -361,7 +361,7 @@ def calculate_capillary_rise_rz_transport_anion_kernel(state):
 
 
 @roger_kernel
-def calculate_capillary_rise_ss_transport_kernel(state):
+def calc_capillary_rise_ss_transport_kernel(state):
     """
     Calculates travel time of capillary rise
     """
@@ -369,7 +369,7 @@ def calculate_capillary_rise_ss_transport_kernel(state):
 
 
 @roger_kernel
-def calculate_capillary_rise_ss_transport_iso_kernel(state):
+def calc_capillary_rise_ss_transport_iso_kernel(state):
     """
     Calculates isotope transport of capillary rise
     """
@@ -377,7 +377,7 @@ def calculate_capillary_rise_ss_transport_iso_kernel(state):
 
 
 @roger_kernel
-def calculate_capillary_rise_ss_transport_anion_kernel(state):
+def calc_capillary_rise_ss_transport_anion_kernel(state):
     """
     Calculates chloride/bromide/nitrate transport of capillary rise
     """
@@ -411,10 +411,10 @@ def calculate_capillary_rise_ss_transport(state):
     settings = state.settings
 
     if settings.enable_offline_transport and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
-        vs.update(calculate_capillary_rise_ss_transport_kernel(state))
+        vs.update(calc_capillary_rise_ss_transport_kernel(state))
 
     if settings.enable_offline_transport and (settings.enable_oxygen18 | settings.enable_deuterium):
-        vs.update(calculate_capillary_rise_ss_transport_iso_kernel(state))
+        vs.update(calc_capillary_rise_ss_transport_iso_kernel(state))
 
     if settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate):
-        vs.update(calculate_capillary_rise_ss_transport_anion_kernel(state))
+        vs.update(calc_capillary_rise_ss_transport_anion_kernel(state))

@@ -145,7 +145,7 @@ def calc_denit_gw(state, msa, k):
 
 
 @roger_kernel
-def calculate_nitrogen_cycle_kernel(state):
+def calc_nitrogen_cycle_kernel(state):
     vs = state.variables
 
     vs.Nmin_rz = update_add(
@@ -227,7 +227,7 @@ def calculate_nitrogen_cycle_kernel(state):
 
 
 @roger_kernel
-def calculate_nitrogen_cycle_gw_kernel(state):
+def calc_nitrogen_cycle_gw_kernel(state):
     vs = state.variables
 
     vs.mr_gw = update(
@@ -251,6 +251,6 @@ def calculate_nitrogen_cycle(state):
     vs = state.variables
     settings = state.settings
 
-    vs.update(calculate_nitrogen_cycle_kernel(state))
+    vs.update(calc_nitrogen_cycle_kernel(state))
     if settings.enable_groundwater:
-        vs.update(calculate_nitrogen_cycle_gw_kernel(state))
+        vs.update(calc_nitrogen_cycle_gw_kernel(state))
