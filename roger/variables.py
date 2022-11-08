@@ -2892,13 +2892,6 @@ VARIABLES = {
         "precipitation",
         active=lambda settings: not settings.enable_offline_transport,
     ),
-    "prec_check": Variable(
-        "precipitation",
-        CATCH_GRID,
-        "mm",
-        "precipitation",
-        active=lambda settings: not settings.enable_offline_transport,
-    ),
     "rain": Variable(
         "rainfall",
         CATCH_GRID,

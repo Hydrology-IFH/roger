@@ -1,5 +1,5 @@
-from roger import roger_kernel, roger_routine, KernelOutput, logger
-from roger.core.operators import numpy as npx, update, at, update_add
+from roger import roger_kernel, roger_routine, KernelOutput
+from roger.core.operators import numpy as npx, update, at
 from roger.variables import allocate
 
 
@@ -93,11 +93,6 @@ def adaptive_time_stepping(state):
 
     # set residual PET
     vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], vs.pet[2:-2, 2:-2])
-
-    vs.prec_check = update_add(vs.prec_check, at[2:-2, 2:-2], vs.prec[2:-2, 2:-2, vs.tau])
-
-    if (vs.prec_check > npx.sum(vs.prec_day, axis=-1) + 0.001).any():
-        logger.warning(f"Precipitation diverged at iteration {vs.itt}.")
 
 
 @roger_kernel
