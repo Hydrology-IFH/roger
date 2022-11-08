@@ -85,6 +85,7 @@ def main(tmp_dir):
             settings.enable_offline_transport = True
             settings.enable_oxygen18 = True
             settings.tm_structure = self._tm_structure
+            settings.enable_age_statistics = True
 
         @roger_routine
         def set_grid(self, state):

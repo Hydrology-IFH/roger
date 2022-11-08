@@ -23,7 +23,7 @@ Single run of the hydrologic model
 
 ### svat_monte_carlo
 Monte Carlo simulations with hydrologic model used for parameter estimation
-- `param_bounds.yml`: contains parameter boundaries for uniform sampling
+- `param_bounds.yml`: contains parameter boundaries for Monte Carlo sampling
 - `svat_mc.sh`: job script to run Monte Carlo simulations
 - `states_hm_mc.mc`: Hydrologic Monte Carlo simulations
 - `states_hm1.mc`: States of best hydrologic simulations
@@ -48,7 +48,7 @@ Single run of oxygen 18 transport model. Requires hydrologic simulations.
 
 ### svat_oxygen18_monte_carlo
 Monte Carlo simulations with oxygen-18 transport models used for parameter estimation. Requires hydrologic simulations.
-- `param_bounds.yml`: contains parameter boundaries for uniform sampling
+- `param_bounds.yml`: contains parameter boundaries for Monte Carlo sampling
 - `oxygen18_*_*_mc.sh`: job script to run Monte Carlo simulations with the provided sas solver and provided transport model structure (e.g. ad=advection-dispersion).
 - `bootstrap.py`: Bootstrap best 100 hydrologic simulations based on size of Monte Carlo samples (e.g. 1000)
 - `states_hm100_bootstrap.nc`: Bootstrapped samples of best 100 hydrologic simulations

@@ -33,18 +33,17 @@ THETA_RZ: 0.3
 THETA_SS: 0.3
 
 # --- Diagnostics --------------------------------------------------------------
-# simulated hydrologic fluxes
 OUTPUT_RATE:
-- "inf_mat"
-- "inf_mp"
-- "inf_sc"
-- "q_ss"
-- "q_sub"
-- "q_sub_mp"
-- "q_sub_mat"
-- "q_hof"
-- "q_sof"
+- "inf_mat"  # soil matrix infiltration (mm/day)
+- "inf_mp"  # macropore infiltration (mm/day)
+- "inf_sc"  # shrinkage crack infiltration (mm/day)
+- "q_ss"  # percolation from subsoil (mm/day)
+- "q_sub"  # lateral subsurface runoff (mm/day)
+- "q_sub_mp"  # lateral macropore subsurface runoff (mm/day)
+- "q_sub_mat"  # lateral matrix subsurface runoff (mm/day)
+- "q_hof"  # hortonian surface runoff (mm/day)
+- "q_sof"  # saturation surface runoff (mm/day)
 
 # simulated hydrologic storages
 OUTPUT_COLLECT:
-- "theta"
+- "theta"  # soil water content (-)
