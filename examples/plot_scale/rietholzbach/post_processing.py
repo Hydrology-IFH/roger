@@ -820,7 +820,7 @@ def main(tmp_dir):
     # dict_params_metrics_tm = {}
     # for tm_structure in tm_structures:
     #     tms = tm_structure.replace(" ", "_")
-    #     file = base_path / "svat_oxygen18" / "results" / "deterministic" / "age_max_4" / f"params_metrics_{tms}.txt"
+    #     file = base_path / "svat_oxygen18" / "results" / "deterministic" / "age_max_1500_days" / f"params_metrics_{tms}.txt"
     #     df_params_metrics = pd.read_csv(file, sep="\t")
     #     dict_params_metrics_tm[tm_structure] = {}
     #     dict_params_metrics_tm[tm_structure]['params_metrics'] = df_params_metrics
@@ -828,7 +828,7 @@ def main(tmp_dir):
     # dict_params_metrics_tm_mc = {}
     # for tm_structure in tm_structures:
     #     tms = tm_structure.replace(" ", "_")
-    #     file = base_path / "svat_oxygen18_monte_carlo" / "results" / "deterministic" / "age_max_4" / f"params_metrics_{tms}.txt"
+    #     file = base_path / "svat_oxygen18_monte_carlo" / "results" / "deterministic" / "age_max_1500_days" / f"params_metrics_{tms}.txt"
     #     df_params_metrics = pd.read_csv(file, sep="\t")
     #     dict_params_metrics_tm_mc[tm_structure] = {}
     #     dict_params_metrics_tm_mc[tm_structure]['params_metrics'] = df_params_metrics
@@ -890,7 +890,7 @@ def main(tmp_dir):
     #     idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
     #     tms = tm_structure.replace(" ", "_")
     #     # load transport simulation
-    #     states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_4" / f"states_{tms}_monte_carlo.nc"
+    #     states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / f"states_{tms}_monte_carlo.nc"
     #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
     #     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     #     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -925,7 +925,7 @@ def main(tmp_dir):
     #     idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
     #     tms = tm_structure.replace(" ", "_")
     #     # load transport simulation
-    #     states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_4" / f"states_{tms}_monte_carlo.nc"
+    #     states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / f"states_{tms}_monte_carlo.nc"
     #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
     #     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     #     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -1020,7 +1020,7 @@ def main(tmp_dir):
     # for i, tm_structure in enumerate(tm_structures):
     #     idx_best = dict_params_metrics_tm[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
     #     tms = tm_structure.replace(" ", "_")
-    #     states_tm_file = base_path / "svat_oxygen18" / "deterministic" / "age_max_4" / f"states_{tms}.nc"
+    #     states_tm_file = base_path / "svat_oxygen18" / "deterministic" / "age_max_1500_days" / f"states_{tms}.nc"
     #     with xr.open_dataset(states_tm_file, engine="h5netcdf") as ds_sim_tm:
     #         days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     #         date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
