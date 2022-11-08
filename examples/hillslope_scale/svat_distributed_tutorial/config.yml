@@ -1,0 +1,31 @@
+# --- Diagnostics --------------------------------------------------------------
+# simulated hydrologic fluxes
+OUTPUT_RATE:
+- "prec"
+- "aet"
+- "transp"
+- "evap_soil"
+- "inf_mat_rz"
+- "inf_mp_rz"
+- "inf_sc_rz"
+- "inf_ss"
+- "q_rz"
+- "q_ss"
+- "cpr_rz"
+- "dS"
+- "q_snow"
+
+# simulated hydrologic storages
+OUTPUT_COLLECT:
+- "S_rz"
+- "S_ss"
+- "S_pwp_rz"
+- "S_fc_rz"
+- "S_sat_rz"
+- "S_pwp_ss"
+- "S_fc_ss"
+- "S_sat_ss"
+- "theta_rz"
+- "theta_ss"
+- "theta"
+- "S_snow"

@@ -134,6 +134,7 @@ examples/*/*/RK4/
 examples/*/*/*/RK4/
 examples/*/*/hydrus_benchmark/*.txt
 examples/*/*/hydrus_benchmark/*.py
+input_examples/
 
 # Slides or Word
 *.key

@@ -107,7 +107,6 @@ ax.set_xlim((df_d18O_in.index[0], df_d18O_in.index[-1]))
 ax.set_ylabel(r'$d_{18}O$ [permil]')
 ax.set_xlabel(r'Time [year]')
 fig.tight_layout()
-plt.show()
 
 # write HYDRUS-1D input for virtual bromide experiments
 years = onp.arange(1997, 2007).tolist()

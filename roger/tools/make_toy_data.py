@@ -479,10 +479,10 @@ def make_toy_forcing_tracer(base_path, tracer="Br", start_date='1/10/2010', nday
     elif tracer == "d18O":
         idx = pd.date_range(start=start_date, periods=ndays, freq='D')
         df_tracer = pd.DataFrame(index=idx, columns=['d18O'])
-        offset = -10 + rng.uniform(-0.3, 0.3, ndays)
-        amp = 4.3 + rng.uniform(-0.4, 0.4, ndays)
+        offset = -10 + rng.uniform(-0.5, 0.5, ndays)
+        amp = 4.3 + rng.uniform(-0.5, 0.5, ndays)
         t = (onp.arange(0, ndays) % 365) / 365
-        df_tracer.iloc[:, 0] = sin_func(t, amp, 1.5, offset)
+        df_tracer.iloc[:, 0] = sin_func(t, amp, 60, offset)
         with h5netcdf.File(nc_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),

@@ -28,7 +28,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
         base_path = Path(tmp_dir)
     else:
         base_path = Path(__file__).parent
-    age_max = "age_max_10"
+    age_max = "age_max_1500_days"
     # directory of results
     base_path_results = base_path / "results"
     if not os.path.exists(base_path_results):

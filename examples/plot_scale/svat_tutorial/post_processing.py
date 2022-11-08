@@ -77,13 +77,17 @@ days_sim = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
 ds_sim = ds_sim.assign_coords(date=("Time", days_sim))
 
 # plot simulated time series
-vars_sim = ["transp", "evap_soil", "inf_mat", "inf_mp", "inf_sc", "q_ss"]
+vars_sim = ["transp", "evap_soil", "q_ss"]
 for var_sim in vars_sim:
     sim_vals = ds_sim[var_sim].isel(x=0, y=0).values
     df_sim = pd.DataFrame(index=days_sim, columns=[var_sim])
     df_sim.loc[:, var_sim] = sim_vals
     fig1 = eval_utils.plot_sim(df_sim, y_lab=labs._Y_LABS_DAILY[var_sim], x_lab='Time [days]')
+    path = base_path_figs / f"{var_sim}.png"
+    fig1.savefig(path, dpi=250)
     fig2 = eval_utils.plot_sim_cum(df_sim, y_lab=labs._Y_LABS_CUM[var_sim], x_lab='Time [days]')
+    path = base_path_figs / f"{var_sim}_cumulated.png"
+    fig2.savefig(path, dpi=250)
 
 vars_sim = ["theta"]
 for var_sim in vars_sim:
@@ -91,3 +95,5 @@ for var_sim in vars_sim:
     df_sim = pd.DataFrame(index=days_sim, columns=[var_sim])
     df_sim.loc[:, var_sim] = sim_vals
     fig1 = eval_utils.plot_sim(df_sim, y_lab=labs._LABS[var_sim], x_lab='Time [days]')
+    path = base_path_figs / f"{var_sim}.png"
+    fig1.savefig(path, dpi=250)
