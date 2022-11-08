@@ -1,5 +1,5 @@
-from roger import roger_kernel, roger_routine, KernelOutput
-from roger.core.operators import numpy as npx, update, at
+from roger import roger_kernel, roger_routine, KernelOutput, logger
+from roger.core.operators import numpy as npx, update, at, update_add
 from roger.variables import allocate
 
 
@@ -8,13 +8,13 @@ def adaptive_time_stepping(state):
     vs = state.variables
     settings = state.settings
 
-    cond0 = (vs.prec_day <= 0).all() & (vs.swe[2:-2, 2:-2, vs.tau] <= 0).all() & (vs.swe_top[2:-2, 2:-2, vs.tau] <= 0).all() & (vs.ta_day > settings.ta_fm).all()
-    cond00 = ((vs.prec_day > 0) & (vs.ta_day <= settings.ta_fm)).any() | ((vs.prec_day <= 0) & (vs.ta_day <= settings.ta_fm)).all()
-    cond1 = (vs.prec_day > settings.hpi).any() & (vs.prec_day > 0).any() & (vs.ta_day > settings.ta_fm).any()
-    cond2 = (vs.prec_day <= settings.hpi).all() & (vs.prec_day > 0).any() & (vs.ta_day > settings.ta_fm).any()
-    cond3 = (vs.prec_day > settings.hpi).any() & (vs.prec_day > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (vs.ta_day > settings.ta_fm).any())
-    cond4 = (vs.prec_day <= settings.hpi).all() & (vs.prec_day > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (vs.ta_day > settings.ta_fm).any())
-    cond5 = (vs.prec_day <= 0).all() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (vs.ta_day > settings.ta_fm).any())
+    cond0 = (vs.prec_day[2:-2, 2:-2, :] <= 0).all() & (vs.swe[2:-2, 2:-2, vs.tau] <= 0).all() & (vs.swe_top[2:-2, 2:-2, vs.tau] <= 0).all() & (vs.ta_day[2:-2, 2:-2, :] > settings.ta_fm).all()
+    cond00 = ((vs.prec_day[2:-2, 2:-2, :] > 0) & (vs.ta_day[2:-2, 2:-2, :] <= settings.ta_fm)).any() | ((vs.prec_day[2:-2, 2:-2, :] <= 0) & (vs.ta_day[2:-2, 2:-2, :] <= settings.ta_fm)).all()
+    cond1 = (vs.prec_day[2:-2, 2:-2, :] > settings.hpi).any() & (vs.prec_day[2:-2, 2:-2, :] > 0).any() & (vs.ta_day[2:-2, 2:-2, :] > settings.ta_fm).any()
+    cond2 = (vs.prec_day[2:-2, 2:-2, :] <= settings.hpi).all() & (vs.prec_day[2:-2, 2:-2, :] > 0).any() & (vs.ta_day[2:-2, 2:-2, :] > settings.ta_fm).any()
+    cond3 = (vs.prec_day[2:-2, 2:-2, :] > settings.hpi).any() & (vs.prec_day[2:-2, 2:-2, :] > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (vs.ta_day[2:-2, 2:-2, :] > settings.ta_fm).any())
+    cond4 = (vs.prec_day[2:-2, 2:-2, :] <= settings.hpi).all() & (vs.prec_day[2:-2, 2:-2, :] > 0).any() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (vs.ta_day[2:-2, 2:-2, :] > settings.ta_fm).any())
+    cond5 = (vs.prec_day[2:-2, 2:-2, :] <= 0).all() & (((vs.swe[2:-2, 2:-2, vs.tau] > 0).any() | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0).any()) & (vs.ta_day[2:-2, 2:-2, :] > settings.ta_fm).any())
     # no event or snowfall - daily time steps
     if cond0 or cond00:
         vs.update(calc_prec_ta_daily(state))
@@ -93,6 +93,11 @@ def adaptive_time_stepping(state):
 
     # set residual PET
     vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], vs.pet[2:-2, 2:-2])
+
+    vs.prec_check = update_add(vs.prec_check, at[2:-2, 2:-2], vs.prec[2:-2, 2:-2, vs.tau])
+
+    if (vs.prec_check > npx.sum(vs.prec_day, axis=-1) + 0.001).any():
+        logger.warning(f"Precipitation diverged at iteration {vs.itt}.")
 
 
 @roger_kernel

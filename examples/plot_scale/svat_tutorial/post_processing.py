@@ -77,7 +77,7 @@ days_sim = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
 ds_sim = ds_sim.assign_coords(date=("Time", days_sim))
 
 # plot simulated time series
-vars_sim = ["aet", "transp", "evap_soil", "inf_mat", "inf_mp", "inf_sc", "q_ss", "q_sub", "q_sub_mp", "q_sub_mat", "q_hof", "q_sof"]
+vars_sim = ["transp", "evap_soil", "inf_mat", "inf_mp", "inf_sc", "q_ss"]
 for var_sim in vars_sim:
     sim_vals = ds_sim[var_sim].isel(x=0, y=0).values
     df_sim = pd.DataFrame(index=days_sim, columns=[var_sim])

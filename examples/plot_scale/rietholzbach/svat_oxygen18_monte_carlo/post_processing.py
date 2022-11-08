@@ -19,7 +19,7 @@ sns.set_style("ticks")
 
 
 @click.option("-ns", "--nsamples", type=int, default=10000)
-@click.option("-ss", "--split-size", type=int, default=1000)
+@click.option("-ss", "--split-size", type=int, default=500)
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
@@ -28,7 +28,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
         base_path = Path(tmp_dir)
     else:
         base_path = Path(__file__).parent
-    age_max = "age_max_4"
+    age_max = "age_max_10"
     # directory of results
     base_path_results = base_path / "results"
     if not os.path.exists(base_path_results):
@@ -54,21 +54,23 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
     x1x2 = onp.arange(0, nsamples, split_size).tolist()
     if nsamples not in x1x2:
         x1x2.append(nsamples)
+    # tm_structures = ['advection-dispersion',
+    #                  'time-variant advection-dispersion',
+    #                  'preferential',
+    #                  'power',
+    #                  'time-variant']
     tm_structures = ['advection-dispersion',
-                     'time-variant advection-dispersion',
-                     'preferential',
-                     'power',
-                     'time-variant']
+                     'time-variant advection-dispersion']
     diagnostics = ['average',
                    'constant',
                    'maximum']
     for tm_structure in tm_structures:
         for diagnostic in diagnostics:
             tms = tm_structure.replace(" ", "_")
-            path = str(base_path / sas_solver / f"SVATTRANSPORT_{tms}_{sas_solver}_*.{diagnostic}.nc")
+            path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}_*.{diagnostic}.nc")
             diag_files = glob.glob(path)
             if diag_files:
-                diag_file = base_path / sas_solver / f"SVATTRANSPORT_{tms}_{sas_solver}.{diagnostic}.nc"
+                diag_file = base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}.{diagnostic}.nc"
                 if not os.path.exists(diag_file):
                     click.echo(f'Merge {diagnostic} of {tm_structure} ...')
                     # initial diagnostic file
@@ -174,8 +176,8 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                                                         units=var_obj.attrs["units"])
                                         del var_obj, vals
 
-    states_hm1_file = base_path / "states_hm100_bootstrap.nc"
-    states_hm_mc_file = base_path / "states_hm_for_tm_mc.nc"
+    states_hm1_file = base_path / sas_solver / age_max / "states_hm100_bootstrap.nc"
+    states_hm_mc_file = base_path / sas_solver / age_max / "states_hm_for_tm_mc.nc"
     n_repeat = int(nsamples / split_size)
     if not os.path.exists(states_hm_mc_file):
         click.echo('Repeat hydrologic simualtions ...')

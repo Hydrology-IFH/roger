@@ -133,6 +133,7 @@ def main():
                 "year",
                 "month",
                 "doy",
+                "prec_check",
             ],
         )
         def set_forcing(self, state):
@@ -141,6 +142,7 @@ def main():
             condt = (vs.time % (24 * 60 * 60) == 0)
             if condt:
                 vs.itt_day = 0
+                vs.prec_check = update(vs.prec_check, at[2:-2, 2:-2], 0)
                 vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, 'forcing.nc')[vs.itt_forc])
                 vs.month = update(vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, 'forcing.nc')[vs.itt_forc])
                 vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, 'forcing.nc')[vs.itt_forc])
@@ -153,7 +155,7 @@ def main():
         def set_diagnostics(self, state, base_path=None):
             diagnostics = state.diagnostics
 
-            diagnostics["rate"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow"]
+            diagnostics["rate"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow", "prec_check"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
             if base_path:

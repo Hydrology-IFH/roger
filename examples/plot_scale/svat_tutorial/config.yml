@@ -10,7 +10,7 @@ Z_SOIL: 1000
 # density of vertical macropores (1/m2)
 DMPV: 50
 # total length of vertical macropores (mm)
-LMPV: 300
+LMPV: 500
 # air capacity (-)
 THETA_AC: 0.1
 # usable field capacity (-)
@@ -31,13 +31,31 @@ THETA_SS: 0.3
 # --- Diagnostics --------------------------------------------------------------
 # simulated hydrologic fluxes
 OUTPUT_RATE:
-- "inf_mat"
-- "inf_mp"
-- "inf_sc"
+- "prec"
+- "aet"
+- "transp"
+- "evap_soil"
+- "inf_mat_rz"
+- "inf_mp_rz"
+- "inf_sc_rz"
+- "inf_ss"
+- "q_rz"
 - "q_ss"
-- "q_hof"
-- "q_sof"
+- "cpr_rz"
+- "dS"
+- "q_snow"
 
 # simulated hydrologic storages
 OUTPUT_COLLECT:
+- "S_rz"
+- "S_ss"
+- "S_pwp_rz"
+- "S_fc_rz"
+- "S_sat_rz"
+- "S_pwp_ss"
+- "S_fc_ss"
+- "S_sat_ss"
+- "theta_rz"
+- "theta_ss"
 - "theta"
+- "S_snow"
