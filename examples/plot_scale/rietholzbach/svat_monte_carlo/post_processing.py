@@ -409,6 +409,7 @@ def main(tmp_dir):
         # Calculate multi-objective metric
         for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
             df_params_metrics.loc[:, f'E_multi{sc1}'] = 1/3 * df_params_metrics.loc[:, f'r_dS{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
+            df_params_metrics.loc[:, f'KGE_multi{sc1}'] = 1/3 * df_params_metrics.loc[:, f'KGE_dS{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
 
         # write .txt-file
         file = base_path_results / "params_metrics.txt"
