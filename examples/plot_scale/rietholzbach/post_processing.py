@@ -13,13 +13,14 @@ import matplotlib.cm as cm
 import yaml
 import click
 import copy
+from de import de
 import roger.tools.evaluation as eval_utils
 import roger.tools.labels as labs
 import matplotlib as mpl
 import seaborn as sns
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
-mpl.rcParams['font.size'] = 6
+mpl.rcParams['font.size'] = 8
 mpl.rcParams['axes.titlesize'] = 6
 mpl.rcParams['axes.labelsize'] = 7
 mpl.rcParams['xtick.labelsize'] = 6
@@ -27,7 +28,7 @@ mpl.rcParams['ytick.labelsize'] = 6
 mpl.rcParams['legend.fontsize'] = 6
 mpl.rcParams['legend.title_fontsize'] = 7
 sns.set_style("ticks")
-sns.plotting_context("paper", font_scale=0.5, rc={'font.size': 6.0,
+sns.plotting_context("paper", font_scale=1, rc={'font.size': 6.0,
                                                   'axes.labelsize': 7.0,
                                                   'axes.titlesize': 8.0,
                                                   'xtick.labelsize': 6.0,
@@ -325,98 +326,98 @@ def main(tmp_dir):
     df_params_metrics100 = df_params_metrics.copy()
     df_params_metrics100.loc[:, 'id'] = range(len(df_params_metrics100.index))
     df_params_metrics100 = df_params_metrics100.sort_values(by=['E_multi'], ascending=False)
-    idx_best1 = df_params_metrics100.loc[:df_params_metrics100.index[99], 'id'].values.tolist()
-    dict_metrics_best = {}
-    for sc in ['', 'dry', 'normal', 'wet']:
-        dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best1)))
-    for sc, sc1 in enumerate(['', 'dry', 'normal', 'wet']):
-        df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'r_dS{sc1}', f'KGE_q_ss{sc1}', f'E_multi{sc1}']]
-        df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
-        nrow = len(df_metrics.columns)
-        ncol = len(df_params.columns)
-        fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
-        for i, metric_var in enumerate(df_metrics.columns):
-            for j, param_var in enumerate(df_params.columns):
-                y = df_metrics.iloc[:, i]
-                x = df_params.iloc[:, j]
-                ax[i, j].scatter(x, y, s=0.5, c='grey', alpha=0.5)
-                ax[i, j].set_xlabel('')
-                ax[i, j].set_ylabel('')
-                ax[i, j].set_ylim((0, 1))
-                # best parameter set for individual evaluation metric at specific storage conditions
-                df_params_metrics_sc1 = df_params_metrics.copy()
-                df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics100.index))
-                df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
-                idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[99], 'id'].values.tolist()
-                for idx_best_sc in idx_best_sc1:
-                    y_best_sc = df_metrics.iloc[idx_best_sc, i]
-                    x_best_sc = df_params.iloc[idx_best_sc, j]
-                    ax[i, j].scatter(x_best_sc, y_best_sc, s=0.5, c='blue', alpha=0.8)
-                # best parameter sets for multi-objective criteria
-                for ii, idx_best in enumerate(idx_best1):
-                    y_best = df_metrics.iloc[idx_best, i]
-                    x_best = df_params.iloc[idx_best, j]
-                    ax[i, j].scatter(x_best, y_best, s=0.5, c='red', alpha=1)
-                    dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
+    # idx_best100 = df_params_metrics100.loc[:df_params_metrics100.index[99], 'id'].values.tolist()
+    # dict_metrics_best = {}
+    # for sc in ['', 'dry', 'normal', 'wet']:
+    #     dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best100)))
+    # for sc, sc1 in enumerate(['', 'dry', 'normal', 'wet']):
+    #     df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'r_dS{sc1}', f'KGE_q_ss{sc1}', f'E_multi{sc1}']]
+    #     df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+    #     nrow = len(df_metrics.columns)
+    #     ncol = len(df_params.columns)
+    #     fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
+    #     for i, metric_var in enumerate(df_metrics.columns):
+    #         for j, param_var in enumerate(df_params.columns):
+    #             y = df_metrics.iloc[:, i]
+    #             x = df_params.iloc[:, j]
+    #             ax[i, j].scatter(x, y, s=0.5, c='grey', alpha=0.5)
+    #             ax[i, j].set_xlabel('')
+    #             ax[i, j].set_ylabel('')
+    #             ax[i, j].set_ylim((0, 1))
+    #             # best parameter set for individual evaluation metric at specific storage conditions
+    #             df_params_metrics_sc1 = df_params_metrics.copy()
+    #             df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics100.index))
+    #             df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
+    #             idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[99], 'id'].values.tolist()
+    #             for idx_best_sc in idx_best_sc1:
+    #                 y_best_sc = df_metrics.iloc[idx_best_sc, i]
+    #                 x_best_sc = df_params.iloc[idx_best_sc, j]
+    #                 ax[i, j].scatter(x_best_sc, y_best_sc, s=0.5, c='blue', alpha=0.8)
+    #             # best parameter sets for multi-objective criteria
+    #             for ii, idx_best in enumerate(idx_best100):
+    #                 y_best = df_metrics.iloc[idx_best, i]
+    #                 x_best = df_params.iloc[idx_best, j]
+    #                 ax[i, j].scatter(x_best, y_best, s=0.5, c='red', alpha=1)
+    #                 dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
 
-        for j, param_var in enumerate(df_params.columns):
-            xlabel = labs._LABS[param_var]
-            ax[-1, j].set_xlabel(xlabel)
+    #     for j, param_var in enumerate(df_params.columns):
+    #         xlabel = labs._LABS[param_var]
+    #         ax[-1, j].set_xlabel(xlabel)
 
-        ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
-        ax[1, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
-        ax[2, 0].set_ylabel('$KGE_{PERC}$\n [-]')
-        ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
+    #     ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
+    #     ax[1, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
+    #     ax[2, 0].set_ylabel('$KGE_{PERC}$\n [-]')
+    #     ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
 
-        fig.subplots_adjust(bottom=0.2, wspace=0.2, hspace=0.6)
-        file = base_path_figs / f"dotty_plots_{sc1}.png"
-        fig.savefig(file, dpi=250)
+    #     fig.subplots_adjust(bottom=0.2, wspace=0.2, hspace=0.6)
+    #     file = base_path_figs / f"dotty_plots_{sc1}.png"
+    #     fig.savefig(file, dpi=250)
 
-        fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
-        for i, metric_var in enumerate(df_metrics.columns):
-            for j, param_var in enumerate(df_params.columns):
-                y = df_metrics.iloc[:, i]
-                x = df_params.iloc[:, j]
-                ax[i, j].scatter(x, y, s=1, c='grey', alpha=0.5)
-                ax[i, j].set_xlabel('')
-                ax[i, j].set_ylabel('')
-                if metric_var in ['KGE_aet', 'KGE_aetwet', 'KGE_aetnormal', 'KGE_aetdry']:
-                    ax[i, j].set_ylim((0.6, 0.9))
-                elif metric_var in ['r_dS', 'r_dSwet', 'r_dSnormal', 'r_dSdry']:
-                    ax[i, j].set_ylim((0.6, 1.0))
-                elif metric_var in ['KGE_q_ss', 'KGE_q_sswet', 'KGE_q_ssnormal', 'KGE_q_ssdry']:
-                    ax[i, j].set_ylim((0.4, 0.7))
-                elif metric_var in ['E_multi', 'E_multiwet', 'E_multinormal', 'E_multidry']:
-                    ax[i, j].set_ylim((0.5, 0.8))
-                # best parameter set for individual evaluation metric at specific storage conditions
-                df_params_metrics_sc1 = df_params_metrics.copy()
-                df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics100.index))
-                df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
-                idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[99], 'id'].values.tolist()
-                for idx_best_sc in idx_best_sc1:
-                    y_best_sc = df_metrics.iloc[idx_best_sc, i]
-                    x_best_sc = df_params.iloc[idx_best_sc, j]
-                    ax[i, j].scatter(x_best_sc, y_best_sc, s=0.5, c='blue', alpha=0.8)
-                # best parameter sets for multi-objective criteria
-                for ii, idx_best in enumerate(idx_best1):
-                    y_best = df_metrics.iloc[idx_best, i]
-                    x_best = df_params.iloc[idx_best, j]
-                    ax[i, j].scatter(x_best, y_best, s=0.5, c='red', alpha=1)
-                    dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
+    #     fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
+    #     for i, metric_var in enumerate(df_metrics.columns):
+    #         for j, param_var in enumerate(df_params.columns):
+    #             y = df_metrics.iloc[:, i]
+    #             x = df_params.iloc[:, j]
+    #             ax[i, j].scatter(x, y, s=1, c='grey', alpha=0.5)
+    #             ax[i, j].set_xlabel('')
+    #             ax[i, j].set_ylabel('')
+    #             if metric_var in ['KGE_aet', 'KGE_aetwet', 'KGE_aetnormal', 'KGE_aetdry']:
+    #                 ax[i, j].set_ylim((0.6, 0.9))
+    #             elif metric_var in ['r_dS', 'r_dSwet', 'r_dSnormal', 'r_dSdry']:
+    #                 ax[i, j].set_ylim((0.7, 1.0))
+    #             elif metric_var in ['KGE_q_ss', 'KGE_q_sswet', 'KGE_q_ssnormal', 'KGE_q_ssdry']:
+    #                 ax[i, j].set_ylim((0.4, 0.8))
+    #             elif metric_var in ['E_multi', 'E_multiwet', 'E_multinormal', 'E_multidry']:
+    #                 ax[i, j].set_ylim((0.6, 0.9))
+    #             # best parameter set for individual evaluation metric at specific storage conditions
+    #             df_params_metrics_sc1 = df_params_metrics.copy()
+    #             df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics100.index))
+    #             df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
+    #             idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[99], 'id'].values.tolist()
+    #             for idx_best_sc in idx_best_sc1:
+    #                 y_best_sc = df_metrics.iloc[idx_best_sc, i]
+    #                 x_best_sc = df_params.iloc[idx_best_sc, j]
+    #                 ax[i, j].scatter(x_best_sc, y_best_sc, s=0.5, c='blue', alpha=0.8)
+    #             # best parameter sets for multi-objective criteria
+    #             for ii, idx_best in enumerate(idx_best100):
+    #                 y_best = df_metrics.iloc[idx_best, i]
+    #                 x_best = df_params.iloc[idx_best, j]
+    #                 ax[i, j].scatter(x_best, y_best, s=0.5, c='red', alpha=1)
+    #                 dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
 
-        for j, param_var in enumerate(df_params.columns):
-            xlabel = labs._LABS[param_var]
-            ax[-1, j].set_xlabel(xlabel)
+    #     for j, param_var in enumerate(df_params.columns):
+    #         xlabel = labs._LABS[param_var]
+    #         ax[-1, j].set_xlabel(xlabel)
 
-        ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
-        ax[1, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
-        ax[2, 0].set_ylabel('$KGE_{PERC}$\n [-]')
-        ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
+    #     ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
+    #     ax[1, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
+    #     ax[2, 0].set_ylabel('$KGE_{PERC}$\n [-]')
+    #     ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
 
-        fig.subplots_adjust(bottom=0.2, wspace=0.2, hspace=0.6)
-        file = base_path_figs / f"dotty_plots_{sc1}inset.png"
-        fig.savefig(file, dpi=250)
-    #
+    #     fig.subplots_adjust(bottom=0.2, wspace=0.2, hspace=0.6)
+    #     file = base_path_figs / f"dotty_plots_{sc1}inset.png"
+    #     fig.savefig(file, dpi=250)
+
     # # write evaluation metrics for different storage condtions to .txt
     # df_avg_std = pd.DataFrame(columns=['KGE_aet', 'r_dS', 'KGE_q_ss', 'E_multi'])
     # for sc in ['', 'dry', 'normal', 'wet']:
@@ -424,7 +425,7 @@ def main(tmp_dir):
     #     df_avg_std.loc[f'std{sc}', :] = onp.std(dict_metrics_best[sc].values, axis=0)
     # file = base_path_figs / "metrics_best_100_avg_std.txt"
     # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
-    #
+
     # # write average and standard deviation of best parameters to .txt
     # df_avg_std = pd.DataFrame(index=['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
     # df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics100.loc[:df_params_metrics100.index[99], ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
@@ -432,7 +433,25 @@ def main(tmp_dir):
     # file = base_path_figs / "params_best_100_avg_std.txt"
     # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
-    # # compare best simulation with observations
+    # diagnostic polar plots
+    df_for_diag = df_params_metrics100.loc[:df_params_metrics100.index[99], :]
+    vars_sim = ['aet', 'q_ss']
+    for var_sim in vars_sim:
+        fig = de.diag_polar_plot_multi(df_for_diag.loc[:, f'brel_mean_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'temp_cor_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'DE_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'b_dir_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'phi_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'b_hf_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'b_lf_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'b_tot_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'err_hf_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'err_lf_{var_sim}'].values,)
+        file = f'diag_polar_plot_{var_sim}.png'
+        path = base_path_figs / file
+        fig.savefig(path, dpi=250)
+
+    # compare best simulation with observations
     vars_obs = ['AET', 'PERC', 'dWEIGHT']
     vars_sim = ['aet', 'q_ss', 'dS']
     vars_bench = ['aet', 'perc', 'dS']
@@ -453,21 +472,21 @@ def main(tmp_dir):
         # df_bench.loc[:, 'bench'] = bench_vals
         # df_eval = df_eval.join(df_bench)
         dict_obs_sim[var_obs] = df_eval
-        # plot observed and simulated time series
-        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-        file_str = '%s.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        # plot cumulated observed and simulated time series
-        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-        file_str = '%s_cum.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-        file_str = '%s_cum_year_facet.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-    plt.close('all')
+    #     # plot observed and simulated time series
+    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+    #     file_str = '%s.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    #     # plot cumulated observed and simulated time series
+    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+    #     file_str = '%s_cum.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+    #     file_str = '%s_cum_year_facet.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    # plt.close('all')
 
     # compare best 100 simulations with observations
     vars_obs = ['AET', 'PERC', 'dWEIGHT']
@@ -490,21 +509,21 @@ def main(tmp_dir):
         # df_bench.loc[:, 'bench'] = bench_vals
         # df_eval = df_eval.join(df_bench)
         dict_obs_sim100[var_obs] = df_eval
-        # plot observed and simulated time series
-        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-        file_str = '%s_best_100.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        # plot cumulated observed and simulated time series
-        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-        file_str = '%s_cum_best_100.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-        file_str = '%s_cum_year_facet_best_100.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-    plt.close('all')
+    #     # plot observed and simulated time series
+    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+    #     file_str = '%s_best_100.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    #     # plot cumulated observed and simulated time series
+    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+    #     file_str = '%s_cum_best_100.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+    #     file_str = '%s_cum_year_facet_best_100.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    # plt.close('all')
 
     vars_obs = ['PREC', 'PREC_corr']
     vars_sim = ['prec', 'prec_corr']
@@ -517,44 +536,44 @@ def main(tmp_dir):
         # join observations on simulations
         df_eval = eval_utils.join_obs_on_sim(date_sim_hm1, sim_vals, df_obs)
         dict_obs[var_obs] = df_eval
-        # plot observed and simulated time series
-        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-        file_str = '%s.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        # plot cumulated observed and simulated time series
-        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-        file_str = '%s_cum.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-        file_str = '%s_cum_year_facet.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-    plt.close('all')
+    #     # plot observed and simulated time series
+    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+    #     file_str = '%s.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    #     # plot cumulated observed and simulated time series
+    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+    #     file_str = '%s_cum.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+    #     file_str = '%s_cum_year_facet.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    # plt.close('all')
 
-    fig, axs = plt.subplots(1, 1, figsize=(6, 1.2))
-    axs.plot(df_eval.index, df_eval.loc[:, 'sim0'] - df_eval.loc[:, 'obs'], '-', color='black', lw=1)
-    axs.set_ylabel(r'[mm]')
-    axs.set_xlabel('Time [year]')
-    axs.set_xlim(df_eval.index[0], df_eval.index[-1])
-    fig.tight_layout()
-    file = base_path_figs / 'prec_residuals.png'
-    fig.savefig(file, dpi=250)
-    plt.close(fig=fig)
+    # fig, axs = plt.subplots(1, 1, figsize=(6, 1.2))
+    # axs.plot(df_eval.index, df_eval.loc[:, 'sim0'] - df_eval.loc[:, 'obs'], '-', color='black', lw=1)
+    # axs.set_ylabel(r'[mm]')
+    # axs.set_xlabel('Time [year]')
+    # axs.set_xlim(df_eval.index[0], df_eval.index[-1])
+    # fig.tight_layout()
+    # file = base_path_figs / 'prec_residuals.png'
+    # fig.savefig(file, dpi=250)
+    # plt.close(fig=fig)
 
-    vars_obs = ['TA']
-    vars_sim = ['ta']
-    for var_obs, var_sim in zip(vars_obs, vars_sim):
-        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-        df_obs.loc[:, 'obs'] = obs_vals
-        # plot observed time series
-        fig = eval_utils.plot_sim(df_obs, labs._Y_LABS_DAILY[var_sim])
-        file_str = '%s.pdf' % (var_obs)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-    plt.close('all')
+    # vars_obs = ['TA']
+    # vars_sim = ['ta']
+    # for var_obs, var_sim in zip(vars_obs, vars_sim):
+    #     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+    #     df_obs.loc[:, 'obs'] = obs_vals
+    #     # plot observed time series
+    #     fig = eval_utils.plot_sim(df_obs, labs._Y_LABS_DAILY[var_sim])
+    #     file_str = '%s.pdf' % (var_obs)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    # plt.close('all')
 
     # # compare HYDRUS-1D simulations with observations
     # vars_obs = ['AET', 'PERC', 'dWEIGHT']
@@ -605,7 +624,7 @@ def main(tmp_dir):
 
     # file = base_path_figs / "metrics_best_hydrus.txt"
     # df_params_metrics_hydrus.to_csv(file, header=True, index=True, sep="\t")
-    #
+
     # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
     fig, axes = plt.subplots(3, 2, sharex='col', figsize=(6, 3))
     axes[0, 0].plot(dict_obs['PREC_corr'].loc['1997':'1999', :].index, dict_obs['PREC_corr'].loc['1997':'1999', 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
@@ -791,8 +810,7 @@ def main(tmp_dir):
     years = onp.arange(1997, 2008).tolist()
     for year in years:
         fig, axes = plt.subplots(4, 1, sharex=True, figsize=(6, 4))
-        axes[0].plot(dict_obs['PREC'].loc[f'{year}', :].index, dict_obs['PREC'].loc[f'{year}', 'obs'], lw=1, color='blue', ls='-', alpha=0.1)
-        axes[0].plot(dict_obs['PREC_corr'].loc[f'{year}', :].index, dict_obs['PREC_corr'].loc[f'{year}', 'obs'], lw=1, color='blue', ls='-', alpha=1)
+        axes[0].bar(dict_obs['PREC_corr'].loc[f'{year}', :].index, dict_obs['PREC_corr'].loc[f'{year}', 'obs'], width=.1, color='blue', align='edge', edgecolor='blue')
         axes[0].set_ylabel('PREC\n[mm/day]')
         axes[0].set_xlim((dict_obs['PREC'].loc[f'{year}', :].index[0], dict_obs['PREC'].loc[f'{year}', :].index[-1]))
         axes[0].set_ylim(0,)
@@ -810,7 +828,7 @@ def main(tmp_dir):
         axes[3].set_ylabel('PERC\n[mm/day]')
         axes[3].set_xlim((dict_obs['PREC'].loc[f'{year}', :].index[0], dict_obs['PREC'].loc[f'{year}', :].index[-1]))
         axes[3].set_ylim(0,)
-        axes[3].set_xlabel(r'Time [year]')
+        axes[3].set_xlabel(r'Time [year-month]')
         fig.tight_layout()
         file = f'prec_et_dS_perc_obs_sim_{year}.png'
         path = base_path_figs / file

@@ -2,30 +2,30 @@
 # simulated hydrologic fluxes
 OUTPUT_RATE:
 - "prec"
-- "aet"
-- "transp"
-- "evap_soil"
-- "inf_mat_rz"
-- "inf_mp_rz"
-- "inf_sc_rz"
-- "inf_ss"
-- "q_rz"
-- "q_ss"
-- "cpr_rz"
-- "dS"
-- "q_snow"
+- "aet"  # actual evapotranspiration (mm/day)
+- "transp"  # transpiration (mm/day)
+- "evap_soil"  # soil evaporation (mm/day)
+- "inf_mat_rz"  # soil matrix infiltration into root zone (mm/day)
+- "inf_mp_rz"  # macropore infiltration into root zone (mm/day)
+- "inf_sc_rz"  # shrinkage crack infiltration into root zone (mm/day)
+- "inf_ss"  # infiltration into subsoil (mm/day)
+- "q_rz"  # percolation from root zone (mm/day)
+- "q_ss"  # percolation from subsoil (mm/day)
+- "cpr_rz" # capillary rise from subsoil into root zone (mm/day)
+- "dS"  # change of storage volume (mm/day)
+- "q_snow"  # snow melt (mm/day)
 
 # simulated hydrologic storages
 OUTPUT_COLLECT:
-- "S_rz"
-- "S_ss"
-- "S_pwp_rz"
-- "S_fc_rz"
-- "S_sat_rz"
-- "S_pwp_ss"
-- "S_fc_ss"
-- "S_sat_ss"
-- "theta_rz"
-- "theta_ss"
-- "theta"
-- "S_snow"
+- "S_rz"  # storage volume of root zone (mm)
+- "S_ss"  # storage volume of subsoil (mm)
+- "S_pwp_rz"  # storage volume at permanent wilting point of root zone (mm)
+- "S_fc_rz"  # storage volume at field capacity of root zone (mm)
+- "S_sat_rz"  # storage volume at saturation of root zone (mm)
+- "S_pwp_ss"  # storage volume at permanent wilting point of subsoil (mm)
+- "S_fc_ss"  # storage volume at field capacity of subsoil (mm)
+- "S_sat_ss"  # storage volume at saturation of subsoil (mm)
+- "theta_rz"  # soil water content of root zone (-)
+- "theta_ss"  # soil water content of subsoil (-)
+- "theta"  # soil water content (-)
+- "S_snow"  # storage volume snow cover (mm)

@@ -47,13 +47,13 @@ with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
             if not f.dimensions:
                 f.dimensions = dict_dim
                 v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
-                v.attrs['long_name'] = 'Model run'
-                v.attrs['units'] = ''
-                v[:] = onp.arange(dict_dim["x"])
+                v.attrs['long_name'] = 'x'
+                v.attrs['units'] = 'm'
+                v[:] = onp.arange(dict_dim["x"]) * 5
                 v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
-                v.attrs['long_name'] = ''
-                v.attrs['units'] = ''
-                v[:] = onp.arange(dict_dim["y"])
+                v.attrs['long_name'] = 'y'
+                v.attrs['units'] = 'm'
+                v[:] = onp.arange(dict_dim["y"]) * 5
                 v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
                 var_obj = df.variables.get('Time')
                 v.attrs.update(time_origin=var_obj.attrs["time_origin"],

@@ -179,8 +179,71 @@ def main(tmp_dir):
                         df_eval = df_eval.dropna()
                         obs_vals = df_eval.loc[:, 'obs'].values
                         sim_vals = df_eval.loc[:, 'sim'].values
+                        key_kge = 'KGE_' + var_sim + f'{sc1}'
+                        df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
+                        key_kge_alpha = 'KGE_alpha_' + var_sim
+                        df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
+                        key_kge_beta = 'KGE_beta_' + var_sim
+                        df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
                         key_r = 'r_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+                        # share of observations with zero values
+                        key_p0 = 'p0_' + var_sim + f'{sc1}'
+                        df_params_metrics.loc[nrow, key_p0] = 0
+                        # mean absolute relative error
+                        key_mare = 'MARE_' + var_sim + f'{sc1}'
+                        df_params_metrics.loc[nrow, key_mare] = eval_utils.calc_mare(obs_vals, sim_vals)
+                        # mean relative bias
+                        key_brel_mean = 'brel_mean_' + var_sim + f'{sc1}'
+                        brel_mean = de.calc_brel_mean(obs_vals, sim_vals)
+                        df_params_metrics.loc[nrow, key_brel_mean] = brel_mean
+                        # residual relative bias
+                        brel_res = de.calc_brel_res(obs_vals, sim_vals)
+                        # area of relative residual bias
+                        key_b_area = 'b_area_' + var_sim + f'{sc1}'
+                        b_area = de.calc_bias_area(brel_res)
+                        df_params_metrics.loc[nrow, key_b_area] = b_area
+                        # temporal correlation
+                        key_temp_cor = 'temp_cor_' + var_sim + f'{sc1}'
+                        temp_cor = de.calc_temp_cor(obs_vals, sim_vals)
+                        df_params_metrics.loc[nrow, key_temp_cor] = temp_cor
+                        # diagnostic efficiency
+                        key_de = 'DE_' + var_sim + f'{sc1}'
+                        df_params_metrics.loc[nrow, key_de] = de.calc_de(obs_vals, sim_vals)
+                        # relative bias
+                        brel = de.calc_brel(obs_vals, sim_vals)
+                        # total bias
+                        key_b_tot = 'b_tot_' + var_sim + f'{sc1}'
+                        b_tot = de.calc_bias_tot(brel)
+                        df_params_metrics.loc[nrow, key_b_tot] = b_tot
+                        # bias of lower exceedance probability
+                        key_b_hf = 'b_hf_' + var_sim + f'{sc1}'
+                        b_hf = de.calc_bias_hf(brel)
+                        df_params_metrics.loc[nrow, key_b_hf] = b_hf
+                        # error contribution of higher exceedance probability
+                        key_err_hf = 'err_hf_' + var_sim + f'{sc1}'
+                        err_hf = de.calc_err_hf(b_hf, b_tot)
+                        df_params_metrics.loc[nrow, key_err_hf] = err_hf
+                        # bias of higher exceedance probability
+                        key_b_lf = 'b_lf_' + var_sim + f'{sc1}'
+                        b_lf = de.calc_bias_lf(brel)
+                        df_params_metrics.loc[nrow, key_b_lf] = b_lf
+                        # error contribution of lower exceedance probability
+                        key_err_lf = 'err_lf_' + var_sim + f'{sc1}'
+                        err_lf = de.calc_err_hf(b_lf, b_tot)
+                        df_params_metrics.loc[nrow, key_err_lf] = err_lf
+                        # direction of bias
+                        key_b_dir = 'b_dir_' + var_sim + f'{sc1}'
+                        b_dir = de.calc_bias_dir(brel_res)
+                        df_params_metrics.loc[nrow, key_b_dir] = b_dir
+                        # slope of bias
+                        key_b_slope = 'b_slope_' + var_sim + f'{sc1}'
+                        b_slope = de.calc_bias_slope(b_area, b_dir)
+                        df_params_metrics.loc[nrow, key_b_slope] = b_slope
+                        # (y, x) trigonometric inverse tangent
+                        key_phi = 'phi_' + var_sim + f'{sc1}'
+                        df_params_metrics.loc[nrow, key_phi] = de.calc_phi(brel_mean, b_slope)
+
                     else:
                         df_eval = df_eval.dropna()
                         obs_vals = df_eval.loc[:, 'obs'].values

@@ -387,10 +387,10 @@ def main(tmp_dir):
                     dict_si[name] = pd.DataFrame(Si_filter, index=bounds_sobol['names'])
 
                 # plot sobol indices
-                _LABS = {'KGE_aet': 'evapotranspiration',
-                         'KGE_q_ss': 'percolation',
-                         'r_dS': 'storage change',
-                         'E_multi': 'multi-objective metric',
+                _LABS = {'KGE_aet': r'$KGE_{AET}$',
+                         'KGE_q_ss': r'$KGE_{PERC}$',
+                         'r_dS': r'$r_{\Delta S}$',
+                         'E_multi': r'$E_{multi}$',
                          }
                 ncol = len(df_metrics.columns)
                 xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds_sobol['names']]
@@ -404,7 +404,7 @@ def main(tmp_dir):
                     indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
                     ax[i].set_xticklabels(xaxis_labels)
                     ax[i].set_title(_LABS[name])
-                    ax[i].legend(["First-order", "Total"], frameon=False)
+                    ax[i].legend(["First-order", "Total"], frameon=False, loc='upper left')
                 ax[-1].legend().set_visible(False)
                 ax[-2].legend().set_visible(False)
                 ax[-3].legend().set_visible(False)

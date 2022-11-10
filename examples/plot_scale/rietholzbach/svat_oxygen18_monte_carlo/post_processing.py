@@ -19,7 +19,7 @@ sns.set_style("ticks")
 
 
 @click.option("-ns", "--nsamples", type=int, default=10000)
-@click.option("-ss", "--split-size", type=int, default=500)
+@click.option("-ss", "--split-size", type=int, default=1000)
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
