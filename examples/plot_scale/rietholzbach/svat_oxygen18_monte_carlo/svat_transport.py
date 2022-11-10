@@ -7,7 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("--id", type=int, default=None)
-@click.option("-ns", "--nsamples", type=int, default=2000)
+@click.option("-ns", "--nsamples", type=int, default=500)
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['preferential', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant', 'power']), default='advection-dispersion')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
