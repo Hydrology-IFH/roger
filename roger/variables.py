@@ -77,6 +77,7 @@ TIMESTEPS_DAY = ("timesteps_day",)
 TIMESTEPS_EVENT_FF = ("timesteps_event_ff",)
 TIMESTEPS_EVENT_FF_P1 = ("timesteps_event_ff_p1",)
 TIME = ("t",)
+TIME_FORCING = ("t_forc",)
 AGES = ("ages",)
 NAGES = ("nages",)
 NEVENTS_FF = ("events_ff",)
@@ -96,6 +97,7 @@ DIM_TO_SHAPE_VAR = {
     "y": "ny",
     "z": "nz",
     "t": "nitt",
+    "t_forc": "nitt_forc",
     "timesteps": 2,
     "timesteps_day": 6 * 24,
     "timesteps_event_ff": "nittevent_ff",
@@ -659,6 +661,13 @@ VARIABLES = {
         "mm",
         "interception storage of lower surface layer",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
+    ),
+    "TA": Variable(
+        "air temperature",
+        TIME_FORCING,
+        "degC",
+        "air temperature",
         active=lambda settings: not settings.enable_offline_transport,
     ),
     "ta": Variable(
@@ -2879,6 +2888,13 @@ VARIABLES = {
         active=lambda settings: settings.enable_groundwater,
     ),
     # precipitation variables
+    "PREC": Variable(
+        "precipitation",
+        TIME_FORCING,
+        "mm/10 minutes",
+        "precipitation",
+        active=lambda settings: not settings.enable_offline_transport,
+    ),
     "prec": Variable(
         "precipitation",
         CATCH_GRID + TIMESTEPS,
@@ -3365,6 +3381,12 @@ VARIABLES = {
         "mm/dt",
         "actual evapotranspiration from soil water storage",
         time_dependent=True,
+    ),
+    "PET": Variable(
+        "potential evapotranspiration",
+        TIME_FORCING,
+        "mm/dt",
+        "potential evapotranspiration",
     ),
     "pet": Variable(
         "potential evapotranspiration",

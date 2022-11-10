@@ -319,7 +319,7 @@ with model.state.settings.unlock():
 python run_benchmarks.py --sizes 1000. --sizes 10000. --sizes 100000. --sizes 200000. --backends numpy --backends jax --backends numpy-mpi --backends jax-mpi --nproc 2 --only oneD_benchmark.py --debug --local
 
 
-python run_benchmarks.py --sizes 50000. --backends numpy --backends numpy-mpi --nproc 2 --only oneD_benchmark.py --debug --local
+python run_benchmarks.py --sizes 10000. --backends numpy --backends numpy-mpi --nproc 2 --only SVAT_benchmark.py --debug --local
 
 python run_benchmarks.py --sizes 50000. --backends numpy --backends numpy-mpi --nproc 2 --only DUMMY_benchmark.py --debug --local
 

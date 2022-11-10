@@ -1,5 +1,6 @@
 from benchmark_base import benchmark_cli
 from pathlib import Path
+import numpy as onp
 import h5netcdf
 
 
@@ -22,6 +23,12 @@ def main(size, timesteps):
                 var_obj = infile.variables[var]
                 return npx.array(var_obj)
 
+        def _get_nitt(self, path_dir, file):
+            nc_file = path_dir / file
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables['Time']
+                return len(onp.array(var_obj))
+
         def _get_time_origin(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
@@ -36,6 +43,7 @@ def main(size, timesteps):
             # total grid numbers in x- and y-direction
             settings.nx, settings.ny = size
             settings.runlen = 24 * 60 * 60 * timesteps
+            settings.nitt_forc = self._get_nitt(self._input_dir, 'forcing.nc')
 
             # spatial discretization (in meters)
             settings.dx = 1
@@ -122,24 +130,22 @@ def main(size, timesteps):
         def set_boundary_conditions(self, state):
             pass
 
-        @roger_routine
-        def set_forcing_setup(self, state):
-            pass
-
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "time",
-                "itt_day",
-                "itt_forc",
-                "prec_day",
-                "ta_day",
-                "pet_day",
-                "year",
-                "month",
-                "doy",
+                "PREC",
+                "TA",
+                "PET",
             ],
         )
+        def set_forcing_setup(self, state):
+            vs = state.variables
+
+            vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[0, 0, :])
+            vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[0, 0, :])
+            vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[0, 0, :])
+
+        @roger_routine
         def set_forcing(self, state):
             vs = state.variables
 
@@ -149,10 +155,10 @@ def main(size, timesteps):
                 vs.month = update(vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, 'forcing.nc')[vs.itt_forc])
                 vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, 'forcing.nc')[vs.itt_forc])
                 vs.itt_day = 0
+                vs.prec_day = update(vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
+                vs.ta_day = update(vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
+                vs.pet_day = update(vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
                 vs.itt_forc = vs.itt_forc + 6 * 24
-                vs.prec_day = update(vs.prec_day, at[:, :, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
-                vs.ta_day = update(vs.ta_day, at[:, :, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
-                vs.pet_day = update(vs.pet_day, at[:, :, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
 
         @roger_routine
         def set_diagnostics(self, state):

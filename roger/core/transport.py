@@ -630,7 +630,7 @@ def calc_ageing_msa_iso(state, msa, sa):
 
 
 @roger_kernel
-def calculate_ageing_sa_kernel(state):
+def calc_ageing_sa_kernel(state):
     """Calculates ageing of solute StorAge
     """
     vs = state.variables
@@ -649,7 +649,7 @@ def calculate_ageing_sa_kernel(state):
 
 
 @roger_kernel
-def calculate_ageing_msa_kernel(state):
+def calc_ageing_msa_kernel(state):
     """Calculates ageing of solute StorAge
     """
     vs = state.variables
@@ -668,7 +668,7 @@ def calculate_ageing_msa_kernel(state):
 
 
 @roger_kernel
-def calculate_ageing_sa_msa_iso_kernel(state):
+def calc_ageing_sa_msa_iso_kernel(state):
     """Calculates ageing of solute StorAge
     """
     vs = state.variables
@@ -696,7 +696,7 @@ def calculate_ageing_sa_msa_iso_kernel(state):
 
 
 @roger_kernel
-def calculate_ageing_Nmin_kernel(state):
+def calc_ageing_Nmin_kernel(state):
     """Calculates ageing of mineral nitrogen StorAge
     """
     vs = state.variables
@@ -728,25 +728,25 @@ def calculate_ageing(state):
     settings = state.settings
 
     if settings.enable_offline_transport and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
-        vs.update(calculate_ageing_sa_kernel(state))
+        vs.update(calc_ageing_sa_kernel(state))
         if settings.enable_groundwater:
             pass
 
     elif settings.enable_offline_transport and (settings.enable_oxygen18 | settings.enable_deuterium):
-        vs.update(calculate_ageing_sa_msa_iso_kernel(state))
+        vs.update(calc_ageing_sa_msa_iso_kernel(state))
         if settings.enable_groundwater:
             pass
 
     elif settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide):
-        vs.update(calculate_ageing_sa_kernel(state))
-        vs.update(calculate_ageing_msa_kernel(state))
+        vs.update(calc_ageing_sa_kernel(state))
+        vs.update(calc_ageing_msa_kernel(state))
         if settings.enable_groundwater:
             pass
 
     elif settings.enable_offline_transport and settings.enable_nitrate:
-        vs.update(calculate_ageing_sa_kernel(state))
-        vs.update(calculate_ageing_msa_kernel(state))
-        vs.update(calculate_ageing_Nmin_kernel(state))
+        vs.update(calc_ageing_sa_kernel(state))
+        vs.update(calc_ageing_msa_kernel(state))
+        vs.update(calc_ageing_Nmin_kernel(state))
         if settings.enable_groundwater:
             pass
 

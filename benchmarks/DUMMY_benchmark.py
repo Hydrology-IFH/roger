@@ -109,15 +109,15 @@ def main(size, timesteps):
             at[2:-2, 2:-2], a[2:-2, 2:-2] * b[2:-2, 2:-2],
         )
 
-        # d = allocate(state.dimensions, ("x", "y"))
-        # d = update(
-        #     d,
-        #     at[2:-2, 2:-2], npx.fft.fft2(c[2:-2, 2:-2]),
-        # )
+        d = allocate(state.dimensions, ("x", "y"))
+        d = update(
+            d,
+            at[2:-2, 2:-2], npx.fft.fft2(c[2:-2, 2:-2]),
+        )
 
         vs.ta = update(
             vs.ta,
-            at[2:-2, 2:-2, vs.tau], c[2:-2, 2:-2],
+            at[2:-2, 2:-2, vs.tau], d[2:-2, 2:-2],
         )
 
         return KernelOutput(
