@@ -271,7 +271,7 @@ def main(tmp_dir):
                             # agreement of zero values
                             N_obs0 = (df_obs0_sim['obs'] == 0).sum()
                             N_sim0 = (df_obs0_sim['sim'] == 0).sum()
-                            ioa0 = 1 - (N_sim0 / N_obs0)
+                            ioa0 = N_sim0 / N_obs0
                             key_ioa0 = 'ioa0_' + var_sim + f'{sc1}'
                             df_params_metrics.loc[nrow, key_ioa0] = ioa0
                             # mean absolute error from observations with zero values

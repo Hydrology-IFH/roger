@@ -7,3 +7,8 @@ if '/Users/robinschwemmle/anaconda3/envs/roger/lib/python3.8/site-packages/UNKNO
     sys.path.remove('/Users/robinschwemmle/anaconda3/envs/roger/lib/python3.8/site-packages/UNKNOWN-0.0.0-py3.8.egg')
 if '/Users/robinschwemmle/anaconda3/envs/roger/lib/python3.8/site-packages/roger-0+unknown-py3.8-macosx-10.9-x86_64.egg' in sys.path:
     sys.path.remove('/Users/robinschwemmle/anaconda3/envs/roger/lib/python3.8/site-packages/roger-0+unknown-py3.8-macosx-10.9-x86_64.egg')
+
+sys.path.append('/Users/robinschwemmle/Desktop/PhD/models/roger')
+sys.path.append('/Users/robinschwemmle/Desktop/PhD/models/HYDRUS_1D')
+sys.path.append('/Users/robinschwemmle/Desktop/PhD/models/transep')
+sys.path.append('/Users/robinschwemmle/Desktop/PhD/data_analysis/diagnostic_efficiency/diag-eff')

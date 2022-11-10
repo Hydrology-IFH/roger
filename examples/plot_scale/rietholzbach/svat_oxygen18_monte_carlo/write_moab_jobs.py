@@ -6,7 +6,7 @@ import click
 @click.option("--job-type", type=click.Choice(['serial', 'single-node', 'multi-node', 'gpu', 'multi-gpu']), default='serial')
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-ns", "--nsamples", type=int, default=10000)
-@click.option("-ss", "--split-size", type=int, default=1000)
+@click.option("-ss", "--split-size", type=int, default=500)
 @click.command("main")
 def main(job_type, sas_solver, split_size, nsamples):
     base_path = Path(__file__).parent

@@ -20,7 +20,7 @@ import matplotlib as mpl
 import seaborn as sns
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
-mpl.rcParams['font.size'] = 8
+mpl.rcParams['font.size'] = 6
 mpl.rcParams['axes.titlesize'] = 6
 mpl.rcParams['axes.labelsize'] = 7
 mpl.rcParams['xtick.labelsize'] = 6
@@ -29,12 +29,12 @@ mpl.rcParams['legend.fontsize'] = 6
 mpl.rcParams['legend.title_fontsize'] = 7
 sns.set_style("ticks")
 sns.plotting_context("paper", font_scale=1, rc={'font.size': 6.0,
-                                                  'axes.labelsize': 7.0,
-                                                  'axes.titlesize': 8.0,
-                                                  'xtick.labelsize': 6.0,
-                                                  'ytick.labelsize': 6.0,
-                                                  'legend.fontsize': 6.0,
-                                                  'legend.title_fontsize': 7.0})
+                                                'axes.labelsize': 7.0,
+                                                'axes.titlesize': 8.0,
+                                                'xtick.labelsize': 6.0,
+                                                'ytick.labelsize': 6.0,
+                                                'legend.fontsize': 6.0,
+                                                'legend.title_fontsize': 7.0})
 
 
 _LABS_HYDRUS = {
@@ -446,9 +446,12 @@ def main(tmp_dir):
                                        df_for_diag.loc[:, f'b_lf_{var_sim}'].values,
                                        df_for_diag.loc[:, f'b_tot_{var_sim}'].values,
                                        df_for_diag.loc[:, f'err_hf_{var_sim}'].values,
-                                       df_for_diag.loc[:, f'err_lf_{var_sim}'].values,)
+                                       df_for_diag.loc[:, f'err_lf_{var_sim}'].values,
+                                       a0=1-df_for_diag.loc[:, f'ioa0_{var_sim}'].values,
+                                       share0=onp.round(onp.max(df_for_diag.loc[:, f'p0_{var_sim}']), 2))
         file = f'diag_polar_plot_{var_sim}.png'
         path = base_path_figs / file
+        # fig.tight_layout()
         fig.savefig(path, dpi=250)
 
     # compare best simulation with observations
