@@ -8,7 +8,7 @@ import numpy as onp
 @click.option("-ns", "--nsamples", type=int, default=1024)
 @click.option("--job-type", type=click.Choice(['single-node', 'multi-node', 'gpu']), default='gpu')
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
-@click.option("--split-size", type=int, default=1000)
+@click.option("--split-size", type=int, default=500)
 @click.command("main")
 def main(nsamples, job_type, sas_solver, split_size):
     base_path = Path(__file__).parent
