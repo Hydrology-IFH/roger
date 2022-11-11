@@ -320,8 +320,8 @@ def main(tmp_dir):
     # plt.close(fig=fig)
 
     # # dotty plots
-    file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
-    df_params_metrics = pd.read_csv(file, sep="\t")
+    # file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
+    # df_params_metrics = pd.read_csv(file, sep="\t")
     # # flagged values are considered
     # df_params_metrics100 = df_params_metrics.copy()
     # df_params_metrics100.loc[:, 'id'] = range(len(df_params_metrics100.index))
@@ -478,20 +478,20 @@ def main(tmp_dir):
         # df_eval = df_eval.join(df_bench)
         dict_obs_sim[var_obs] = df_eval
         # plot observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = '%s.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     # plot cumulated observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-    #     file_str = '%s_cum.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-    #     file_str = '%s_cum_year_facet.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
+        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+        file_str = '%s.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed and simulated time series
+        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = '%s_cum.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = '%s_cum_year_facet.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
 
     # compare best 100 simulations with observations
     vars_obs = ['AET', 'PERC', 'dWEIGHT']
@@ -517,20 +517,20 @@ def main(tmp_dir):
         # df_eval = df_eval.join(df_bench)
         dict_obs_sim100[var_obs] = df_eval
         # plot observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = '%s_best_100.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     # plot cumulated observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-    #     file_str = '%s_cum_best_100.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-    #     file_str = '%s_cum_year_facet_best_100.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
+        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+        file_str = '%s_best_100.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed and simulated time series
+        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = '%s_cum_best_100.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = '%s_cum_year_facet_best_100.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
 
     vars_obs = ['PREC', 'PREC_corr']
     vars_sim = ['prec', 'prec_corr']
