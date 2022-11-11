@@ -353,8 +353,8 @@ def main(tmp_dir):
                     df_params_metrics = df_params_metrics.copy()
             # Calculate multi-objective metric
             for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
-                df_params_metrics.loc[:, f'E_multi{sc1}'] = 0.2 * df_params_metrics.loc[:, f'r_dS{sc1}'] + 0.4 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 0.4 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
-                df_params_metrics.loc[:, f'KGE_multi{sc1}'] = 0.2 * df_params_metrics.loc[:, f'KGE_dS{sc1}'] + 0.4 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 0.4 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
+                df_params_metrics.loc[:, f'E_multi{sc1}'] = 0.2 * df_params_metrics.loc[:, f'r_dS{sc1}'] + 0.3 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 0.5 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
+                df_params_metrics.loc[:, f'KGE_multi{sc1}'] = 0.2 * df_params_metrics.loc[:, f'KGE_dS{sc1}'] + 0.3 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 0.5 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
             # write .txt-file
             file = base_path_results / f"params_metrics_{tms}.txt"
             df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
