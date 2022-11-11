@@ -7,9 +7,13 @@
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
 
 eval "$(conda shell.bash hook)"
-conda activate roger
+conda activate roger-gpu
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18
 
+# load module dependencies
+module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4
+module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
+module load lib/cudnn/8.2-cuda-11.4
 python svat_transport.py -b jax -d gpu -tms advection-dispersion  -td "${TMPDIR}"
 
 # Write output to temporary SSD of computing node
