@@ -101,6 +101,8 @@ def main():
             settings.nx, settings.ny = 1, 1
             # length of simulation (in seconds)
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
+            # length of warmup simulation (in seconds)
+            settings.runlen_warmup = settings.runlen
             # total number of iterations
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
             # maximum water age (in days)

@@ -100,6 +100,7 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
             settings.ages = 1500
             settings.nages = settings.ages + 1
+            settings.runlen_warmup = 5 * 365 * 24 * 60 * 60
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
 
             settings.dx = 1

@@ -481,7 +481,13 @@ class RogerSetup(metaclass=abc.ABCMeta):
         vs = self.state.variables
         settings = self.state.settings
 
-        time_length, time_unit = time.format_time(settings.runlen)
+        if not settings.warmup_done:
+            time_length, time_unit = time.format_time(settings.runlen_warmup)
+            runlen = settings.runlen_warmup
+        else:
+            time_length, time_unit = time.format_time(settings.runlen)
+            runlen = settings.runlen
+
         logger.info(f"\nStarting calculation for {time_length:.1f} {time_unit}")
 
         start_time = vs.time
@@ -493,7 +499,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
         try:
             with signals.signals_to_exception(), pbar:
-                while vs.time - start_time < settings.runlen:
+                while vs.time - start_time < runlen:
                     self.step(self.state)
 
                     if not timer_context.active:

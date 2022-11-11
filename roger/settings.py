@@ -38,6 +38,7 @@ SETTINGS = {
     "dt_gw": Setting(24.0, float, "Time step in hours for groundwater"),
     "dt_tracer": Setting(24.0, float, "Time step for tracers, can be larger than dt"),
     "runlen": Setting(0.0, float, "Length of simulation in seconds"),
+    "runlen_warmup": Setting(0.0, float, "Length of warmup simulation in seconds"),
     "x_origin": Setting(0, float, "Grid origin in x-direction"),
     "y_origin": Setting(0, float, "Grid origin in y-direction"),
     "time_origin": Setting("1900-01-01 00:00:00", str, "time origin"),

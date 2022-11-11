@@ -3,5 +3,5 @@
 INFILES=$(find $PWD/../benchmarks/var_size -type f -maxdepth 1 -name "benchmark_*.json")
 python plot_benchmarks.py --xaxis size -- $INFILES
 python plot_benchmarks.py --xaxis size --norm-component numpy -- $INFILES
-# INFILES=$(find $PWD/../benchmarks/var_proc -type f -maxdepth 1 -name "benchmark_*.json")
-# python plot_benchmarks.py --xaxis nproc -- $INFILES
+INFILES=$(find $PWD/../benchmarks/var_proc -type f -maxdepth 1 -name "benchmark_*.json")
+python plot_benchmarks.py --xaxis nproc -- $INFILES

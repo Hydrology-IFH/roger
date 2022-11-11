@@ -64,6 +64,8 @@ def main():
             settings.nx, settings.ny = 1, 1
             # length of simulation (in seconds)
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
+            # length of warmup simulation (in seconds)
+            settings.runlen_warmup = settings.runlen
             # total number of iterations
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
             # maximum water age (in days)
@@ -404,7 +406,6 @@ def main():
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "ta",
                 "prec",
                 "inf_mat_rz",
                 "inf_pf_rz",
@@ -434,7 +435,6 @@ def main():
         def set_forcing(self, state):
             vs = state.variables
 
-            vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("ta", self._base_path, 'states_hm.nc')[:, :, vs.itt])
             vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("prec", self._base_path, 'states_hm.nc')[:, :, vs.itt])
             vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mat_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
             vs.inf_pf_rz = update(vs.inf_pf_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mp_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt] + self._read_var_from_nc("inf_sc_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
@@ -495,10 +495,6 @@ def main():
     def after_timestep_kernel(state):
         vs = state.variables
 
-        vs.ta = update(
-            vs.ta,
-            at[2:-2, 2:-2, vs.taum1], vs.ta[2:-2, 2:-2, vs.tau],
-        )
         vs.S_snow = update(
             vs.S_snow,
             at[2:-2, 2:-2, vs.taum1], vs.S_snow[2:-2, 2:-2, vs.tau],
@@ -513,7 +509,6 @@ def main():
         )
 
         return KernelOutput(
-            ta=vs.ta,
             prec=vs.prec,
             C_snow=vs.C_snow,
             S_snow=vs.S_snow,
