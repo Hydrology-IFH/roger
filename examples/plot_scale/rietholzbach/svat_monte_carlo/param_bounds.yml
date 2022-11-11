@@ -1,11 +1,11 @@
 # density of vertical macropores (1/m2)
 dmpv:
 - 1  # lower boundary
-- 400  # upper boundary
+- 300  # upper boundary
 # total length of vertical macropores (mm)
 lmpv:
 - 1
-- 2000
+- 1500
 # effective porosity of soil (-)
 theta_eff:
 - 0.15

@@ -319,13 +319,13 @@ def main(tmp_dir):
     # fig.savefig(file, dpi=250)
     # plt.close(fig=fig)
 
-    # # dotty plots
-    # file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
-    # df_params_metrics = pd.read_csv(file, sep="\t")
-    # # flagged values are considered
-    # df_params_metrics100 = df_params_metrics.copy()
-    # df_params_metrics100.loc[:, 'id'] = range(len(df_params_metrics100.index))
-    # df_params_metrics100 = df_params_metrics100.sort_values(by=['KGE_q_ss'], ascending=False)
+    # dotty plots
+    file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
+    df_params_metrics = pd.read_csv(file, sep="\t")
+    # flagged values are considered
+    df_params_metrics100 = df_params_metrics.copy()
+    df_params_metrics100.loc[:, 'id'] = range(len(df_params_metrics100.index))
+    df_params_metrics100 = df_params_metrics100.sort_values(by=['KGE_q_ss'], ascending=False)
     # idx_best100 = df_params_metrics100.loc[:df_params_metrics100.index[99], 'id'].values.tolist()
     # dict_metrics_best = {}
     # for sc in ['', 'dry', 'normal', 'wet']:
@@ -433,26 +433,26 @@ def main(tmp_dir):
     # file = base_path_figs / "params_best_100_avg_std.txt"
     # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
-    # # diagnostic polar plots
-    # df_for_diag = df_params_metrics100.loc[:df_params_metrics100.index[99], :]
-    # vars_sim = ['aet', 'q_ss']
-    # for var_sim in vars_sim:
-    #     fig = de.diag_polar_plot_multi(df_for_diag.loc[:, f'brel_mean_{var_sim}'].values,
-    #                                    df_for_diag.loc[:, f'temp_cor_{var_sim}'].values,
-    #                                    df_for_diag.loc[:, f'DE_{var_sim}'].values,
-    #                                    df_for_diag.loc[:, f'b_dir_{var_sim}'].values,
-    #                                    df_for_diag.loc[:, f'phi_{var_sim}'].values,
-    #                                    df_for_diag.loc[:, f'b_hf_{var_sim}'].values,
-    #                                    df_for_diag.loc[:, f'b_lf_{var_sim}'].values,
-    #                                    df_for_diag.loc[:, f'b_tot_{var_sim}'].values,
-    #                                    df_for_diag.loc[:, f'err_hf_{var_sim}'].values,
-    #                                    df_for_diag.loc[:, f'err_lf_{var_sim}'].values,
-    #                                    a0=1-df_for_diag.loc[:, f'ioa0_{var_sim}'].values,
-    #                                    share0=onp.round(onp.max(df_for_diag.loc[:, f'p0_{var_sim}']), 2))
-    #     file = f'diag_polar_plot_{var_sim}.png'
-    #     path = base_path_figs / file
-    #     # fig.tight_layout()
-    #     fig.savefig(path, dpi=250)
+    # diagnostic polar plots
+    df_for_diag = df_params_metrics100.loc[:df_params_metrics100.index[99], :]
+    vars_sim = ['aet', 'q_ss']
+    for var_sim in vars_sim:
+        fig = de.diag_polar_plot_multi(df_for_diag.loc[:, f'brel_mean_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'temp_cor_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'DE_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'b_dir_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'phi_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'b_hf_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'b_lf_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'b_tot_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'err_hf_{var_sim}'].values,
+                                       df_for_diag.loc[:, f'err_lf_{var_sim}'].values,
+                                       a0=df_for_diag.loc[:, f'ioa0_{var_sim}'].values,
+                                       share0=onp.round(onp.max(df_for_diag.loc[:, f'p0_{var_sim}']), 2))
+        file = f'diag_polar_plot_{var_sim}.png'
+        path = base_path_figs / file
+        # fig.tight_layout()
+        fig.savefig(path, dpi=250)
 
     # compare best simulation with observations
     vars_obs = ['AET', 'PERC', 'dWEIGHT']
@@ -478,20 +478,20 @@ def main(tmp_dir):
         # df_eval = df_eval.join(df_bench)
         dict_obs_sim[var_obs] = df_eval
         # plot observed and simulated time series
-        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-        file_str = '%s.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        # plot cumulated observed and simulated time series
-        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-        file_str = '%s_cum.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-        file_str = '%s_cum_year_facet.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-    plt.close('all')
+    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+    #     file_str = '%s.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    #     # plot cumulated observed and simulated time series
+    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+    #     file_str = '%s_cum.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+    #     file_str = '%s_cum_year_facet.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    # plt.close('all')
 
     # compare best 100 simulations with observations
     vars_obs = ['AET', 'PERC', 'dWEIGHT']
@@ -517,20 +517,20 @@ def main(tmp_dir):
         # df_eval = df_eval.join(df_bench)
         dict_obs_sim100[var_obs] = df_eval
         # plot observed and simulated time series
-        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-        file_str = '%s_best_100.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        # plot cumulated observed and simulated time series
-        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-        file_str = '%s_cum_best_100.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-        file_str = '%s_cum_year_facet_best_100.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-    plt.close('all')
+    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+    #     file_str = '%s_best_100.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    #     # plot cumulated observed and simulated time series
+    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+    #     file_str = '%s_cum_best_100.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+    #     file_str = '%s_cum_year_facet_best_100.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    # plt.close('all')
 
     vars_obs = ['PREC', 'PREC_corr']
     vars_sim = ['prec', 'prec_corr']
@@ -821,17 +821,17 @@ def main(tmp_dir):
         axes[0].set_ylabel('PREC\n[mm/day]')
         axes[0].set_xlim((dict_obs['PREC'].loc[f'{year}', :].index[0], dict_obs['PREC'].loc[f'{year}', :].index[-1]))
         axes[0].set_ylim(0,)
-        axes[1].plot(dict_obs_sim['AET'].loc[f'{year}', :].index, dict_obs_sim['AET'].loc[f'{year}', 'sim'], lw=1, color='red', ls='-', alpha=1)
-        axes[1].plot(dict_obs_sim['AET'].loc[f'{year}', :].index, dict_obs_sim['AET'].loc[f'{year}', 'obs'], lw=1, color='blue', ls='-', alpha=1)
+        axes[1].plot(dict_obs_sim['AET'].loc[f'{year}', :].index, dict_obs_sim['AET'].loc[f'{year}', 'sim'], lw=1, color='red', ls='-.', alpha=1)
+        axes[1].plot(dict_obs_sim['AET'].loc[f'{year}', :].index, dict_obs_sim['AET'].loc[f'{year}', 'obs'], lw=1, color='blue', ls='-', alpha=0.5)
         axes[1].set_ylabel('ET\n[mm/day]')
         axes[1].set_xlim((dict_obs['PREC'].loc[f'{year}', :].index[0], dict_obs['PREC'].loc[f'{year}', :].index[-1]))
         axes[1].set_ylim(0,)
-        axes[2].plot(dict_obs_sim['dWEIGHT'].loc[f'{year}', :].index, dict_obs_sim['dWEIGHT'].loc[f'{year}', 'sim'], lw=1, color='red', ls='-', alpha=1)
-        axes[2].plot(dict_obs_sim['dWEIGHT'].loc[f'{year}', :].index, dict_obs_sim['dWEIGHT'].loc[f'{year}', 'obs'], lw=1, color='blue', ls='-', alpha=1)
+        axes[2].plot(dict_obs_sim['dWEIGHT'].loc[f'{year}', :].index, dict_obs_sim['dWEIGHT'].loc[f'{year}', 'sim'], lw=1, color='red', ls='-.', alpha=1)
+        axes[2].plot(dict_obs_sim['dWEIGHT'].loc[f'{year}', :].index, dict_obs_sim['dWEIGHT'].loc[f'{year}', 'obs'], lw=1, color='blue', ls='-', alpha=0.5)
         axes[2].set_ylabel('$\Delta$S\n[mm/day]')
         axes[2].set_xlim((dict_obs['PREC'].loc[f'{year}', :].index[0], dict_obs['PREC'].loc[f'{year}', :].index[-1]))
-        axes[3].plot(dict_obs_sim['PERC'].loc[f'{year}', :].index, dict_obs_sim['PERC'].loc[f'{year}', 'sim'], lw=1, color='red', ls='-', alpha=1)
-        axes[3].plot(dict_obs_sim['PERC'].loc[f'{year}', :].index, dict_obs_sim['PERC'].loc[f'{year}', 'obs'], lw=1, color='blue', ls='-', alpha=1)
+        axes[3].plot(dict_obs_sim['PERC'].loc[f'{year}', :].index, dict_obs_sim['PERC'].loc[f'{year}', 'sim'], lw=1, color='red', ls='-.', alpha=1)
+        axes[3].plot(dict_obs_sim['PERC'].loc[f'{year}', :].index, dict_obs_sim['PERC'].loc[f'{year}', 'obs'], lw=1, color='blue', ls='-', alpha=0.5)
         axes[3].set_ylabel('PERC\n[mm/day]')
         axes[3].set_xlim((dict_obs['PREC'].loc[f'{year}', :].index[0], dict_obs['PREC'].loc[f'{year}', :].index[-1]))
         axes[3].set_ylim(0,)
