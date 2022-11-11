@@ -6,7 +6,7 @@ import click
 import roger
 
 
-@click.option("-rs", "--resample-size", type=int, default=500)
+@click.option("-rs", "--resample-size", type=int, default=1000)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir, resample_size):

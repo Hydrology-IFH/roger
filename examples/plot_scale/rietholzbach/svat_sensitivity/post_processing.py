@@ -157,8 +157,8 @@ def main(tmp_dir):
             df_params_metrics.loc[:, 'ks'] = ds_sim["ks"].isel(y=0).values.flatten()
             # calculate metrics
             click.echo(f'Calculate metrics ({tm_structure}) ...')
-            vars_sim = ['aet', 'q_ss', 'theta', 'dS']
-            vars_obs = ['AET', 'PERC', 'THETA', 'dWEIGHT']
+            vars_sim = ['aet', 'q_ss', 'dS']
+            vars_obs = ['AET', 'PERC', 'dWEIGHT']
             for var_sim, var_obs in zip(vars_sim, vars_obs):
                 if var_sim == 'theta':
                     obs_vals = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0)
@@ -181,16 +181,7 @@ def main(tmp_dir):
                             rows = (df_rows['sc'].values == sc)
                             df_eval = df_eval.loc[rows, :]
 
-                        if var_sim in ['theta_rz', 'theta_ss', 'theta']:
-                            df_eval = df_eval.dropna()
-                            Ni = len(df_eval.index)
-                            obs_vals = df_eval.loc[:, 'obs'].values
-                            sim_vals = df_eval.loc[:, 'sim'].values
-                            Nz = len(obs_vals)
-                            eff_swc = eval_utils.calc_kge(obs_vals, sim_vals)
-                            key_kge = 'KGE_' + var_sim + f'{sc1}'
-                            df_params_metrics.loc[nrow, key_kge] = (Nz / Ni) * eff_swc
-                        elif var_sim in ['dS', 'dS_s']:
+                        if var_sim in ['dS', 'dS_s']:
                             df_eval.loc['2000-01':'2000-06', :] = onp.nan
                             df_eval = df_eval.dropna()
                             obs_vals = df_eval.loc[:, 'obs'].values
@@ -198,6 +189,8 @@ def main(tmp_dir):
                             key_r = 'r_' + var_sim + f'{sc1}'
                             df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
                         else:
+                            # skip first seven days for warmup
+                            df_eval.loc[:'1997-01-07', :] = onp.nan
                             df_eval = df_eval.dropna()
                             obs_vals = df_eval.loc[:, 'obs'].values
                             sim_vals = df_eval.loc[:, 'sim'].values
@@ -360,7 +353,8 @@ def main(tmp_dir):
                     df_params_metrics = df_params_metrics.copy()
             # Calculate multi-objective metric
             for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
-                df_params_metrics.loc[:, f'E_multi{sc1}'] = 1/3 * df_params_metrics.loc[:, f'r_dS{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
+                df_params_metrics.loc[:, f'E_multi{sc1}'] = 0.2 * df_params_metrics.loc[:, f'r_dS{sc1}'] + 0.4 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 0.4 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
+                df_params_metrics.loc[:, f'KGE_multi{sc1}'] = 0.2 * df_params_metrics.loc[:, f'KGE_dS{sc1}'] + 0.4 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 0.4 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
             # write .txt-file
             file = base_path_results / f"params_metrics_{tms}.txt"
             df_params_metrics.to_csv(file, header=True, index=False, sep="\t")

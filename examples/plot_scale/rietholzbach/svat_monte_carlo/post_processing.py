@@ -141,8 +141,8 @@ def main(tmp_dir):
         df_params_metrics.loc[:, 'theta_pwp'] = ds_sim["theta_pwp"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'ks'] = ds_sim["ks"].isel(y=0).values.flatten()
         # calculate metrics
-        vars_sim = ['aet', 'q_ss', 'theta', 'dS']
-        vars_obs = ['AET', 'PERC', 'THETA', 'dWEIGHT']
+        vars_sim = ['aet', 'q_ss', 'dS']
+        vars_obs = ['AET', 'PERC', 'dWEIGHT']
         for var_sim, var_obs in zip(vars_sim, vars_obs):
             if var_sim == 'theta':
                 obs_vals = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0)
@@ -165,16 +165,7 @@ def main(tmp_dir):
                         rows = (df_rows['sc'].values == sc)
                         df_eval = df_eval.loc[rows, :]
 
-                    if var_sim in ['theta_rz', 'theta_ss', 'theta']:
-                        df_eval = df_eval.dropna()
-                        Ni = len(df_eval.index)
-                        obs_vals = df_eval.loc[:, 'obs'].values
-                        sim_vals = df_eval.loc[:, 'sim'].values
-                        Nz = len(obs_vals)
-                        metrics_swc = eval_utils.calc_kge(obs_vals, sim_vals)
-                        key_kge = 'KGE_' + var_sim + f'{sc1}'
-                        df_params_metrics.loc[nrow, key_kge] = (Nz / Ni) * metrics_swc
-                    elif var_sim in ['dS', 'dS_s']:
+                    if var_sim in ['dS', 'dS_s']:
                         df_eval.loc['2000-01':'2000-06', :] = onp.nan
                         df_eval = df_eval.dropna()
                         obs_vals = df_eval.loc[:, 'obs'].values
@@ -245,6 +236,8 @@ def main(tmp_dir):
                         df_params_metrics.loc[nrow, key_phi] = de.calc_phi(brel_mean, b_slope)
 
                     else:
+                        # skip first seven days for warmup
+                        df_eval.loc[:'1997-01-07', :] = onp.nan
                         df_eval = df_eval.dropna()
                         obs_vals = df_eval.loc[:, 'obs'].values
                         sim_vals = df_eval.loc[:, 'sim'].values
@@ -408,8 +401,8 @@ def main(tmp_dir):
                 df_params_metrics = df_params_metrics.copy()
         # Calculate multi-objective metric
         for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
-            df_params_metrics.loc[:, f'E_multi{sc1}'] = 1/3 * df_params_metrics.loc[:, f'r_dS{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
-            df_params_metrics.loc[:, f'KGE_multi{sc1}'] = 1/3 * df_params_metrics.loc[:, f'KGE_dS{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 1/3 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
+            df_params_metrics.loc[:, f'E_multi{sc1}'] = 0.2 * df_params_metrics.loc[:, f'r_dS{sc1}'] + 0.4 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 0.4 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
+            df_params_metrics.loc[:, f'KGE_multi{sc1}'] = 0.2 * df_params_metrics.loc[:, f'KGE_dS{sc1}'] + 0.4 * df_params_metrics.loc[:, f'KGE_aet{sc1}'] + 0.4 * df_params_metrics.loc[:, f'KGE_q_ss{sc1}']
 
         # write .txt-file
         file = base_path_results / "params_metrics.txt"
@@ -420,7 +413,7 @@ def main(tmp_dir):
         # dotty plots
         click.echo('Dotty plots ...')
         for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
-            df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'r_dS{sc1}', f'KGE_q_ss{sc1}', f'E_multi{sc1}']]
+            df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'KGE_dS{sc1}', f'KGE_q_ss{sc1}', f'KGE_multi{sc1}']]
             df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
             nrow = len(df_metrics.columns)
             ncol = len(df_params.columns)
@@ -438,9 +431,9 @@ def main(tmp_dir):
                 ax[-1, j].set_xlabel(xlabel)
 
             ax[0, 0].set_ylabel('$KGE_{ET}$ [-]')
-            ax[1, 0].set_ylabel(r'$r_{\Delta S}$ [-]')
+            ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
             ax[2, 0].set_ylabel('$KGE_{PERC}$ [-]')
-            ax[3, 0].set_ylabel('$E_{multi}$\n [-]')
+            ax[3, 0].set_ylabel('$KGE_{multi}$\n [-]')
 
             fig.subplots_adjust(wspace=0.2, hspace=0.3)
             file = base_path_figs / f"dotty_plots_{sc1}.png"
@@ -448,7 +441,7 @@ def main(tmp_dir):
             plt.close('all')
 
         # select best model run
-        idx_best1 = df_params_metrics['E_multi'].idxmax()
+        idx_best1 = df_params_metrics['KGE_q_ss'].idxmax()
 
         # write states of best simulation
         click.echo('Write best simulation ...')
@@ -503,7 +496,7 @@ def main(tmp_dir):
         click.echo('Write best 100 simulations ...')
         df_params_metrics1 = df_params_metrics.copy()
         df_params_metrics1.loc[:, 'id'] = range(len(df_params_metrics1.index))
-        df_params_metrics1 = df_params_metrics1.sort_values(by=['E_multi'], ascending=False)
+        df_params_metrics1 = df_params_metrics1.sort_values(by=['KGE_q_ss'], ascending=False)
         idx_best100 = df_params_metrics1.loc[:df_params_metrics1.index[99], 'id'].values.tolist()
         # write states of best model run
         states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"
@@ -511,7 +504,7 @@ def main(tmp_dir):
         with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
-                title='RoGeR best 1% Monte Carlo simulations at Rietholzbach lysimeter site',
+                title='RoGeR best 100 Monte Carlo simulations at Rietholzbach lysimeter site',
                 institution='University of Freiburg, Chair of Hydrology',
                 references='',
                 comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',

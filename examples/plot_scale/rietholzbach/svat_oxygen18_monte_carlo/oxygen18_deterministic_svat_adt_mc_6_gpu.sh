@@ -14,7 +14,7 @@ eval "$(conda shell.bash hook)"
 conda activate roger-gpu
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo
  
-python svat_transport.py --id 6 -b jax -d gpu -ns 500 -tms time-variant_advection-dispersion -td "${TMPDIR}" -ss deterministic
+python svat_transport.py --id 6 -b jax -d gpu -ns 1000 -tms time-variant_advection-dispersion -td "${TMPDIR}" -ss deterministic
 # Move output from local SSD to global workspace
 echo "Move output to /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_oxygen18_monte_carlo"
 mkdir -p /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_oxygen18_monte_carlo
