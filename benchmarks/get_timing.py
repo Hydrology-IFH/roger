@@ -25,10 +25,11 @@ def get_timings(benchmark_type, infiles):
 
                 iteration_times = list(map(float, re.findall(TIME_PATTERN, output)))[data["settings"]["burnin"] :]
                 if not iteration_times:
-                    raise RuntimeError("could not extract iteration times from output")
+                    file_name = res["timing_file"]
+                    raise RuntimeError(f"could not extract iteration times from {file_name}")
 
                 total_elapsed = sum(iteration_times)
-                
+
                 data["benchmarks"][benchmark][i]["wall_time"] = total_elapsed
                 data["benchmarks"][benchmark][i]["per_iteration"] = {
                     "best": float(np.min(iteration_times)),
@@ -36,7 +37,6 @@ def get_timings(benchmark_type, infiles):
                     "mean": float(np.mean(iteration_times)),
                     "stdev": float(np.std(iteration_times)),
                 }
-
 
         with open(TESTDIR / benchmark_type / "benchmark_{}.json".format(time.time()), "w") as f:
             json.dump(data, f, indent=4, sort_keys=True)

@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1:gpus=1:default
-#PBS -l walltime=24:00:00
+#PBS -l walltime=8:00:00
 #PBS -l pmem=4000mb
 #PBS -N svat_oxygen18_gpu
 #PBS -m bea
@@ -8,7 +8,7 @@
 
 eval "$(conda shell.bash hook)"
 conda activate roger-gpu
-cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18
+cd /home/fr/fr_fr/fr_rs1092/roger/examples/hillslope_scale/svat_oxygen18_distributed_tutorial
 
 # load module dependencies
 module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4

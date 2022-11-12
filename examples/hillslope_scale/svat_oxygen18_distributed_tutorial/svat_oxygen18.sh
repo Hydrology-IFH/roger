@@ -8,7 +8,7 @@
 
 eval "$(conda shell.bash hook)"
 conda activate roger
-cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18
+cd /home/fr/fr_fr/fr_rs1092/roger/examples/hillslope_scale/svat_oxygen18_distributed_tutorial
 
 python svat_transport.py -b numpy -d cpu -tms advection-dispersion  -td "${TMPDIR}"
 
