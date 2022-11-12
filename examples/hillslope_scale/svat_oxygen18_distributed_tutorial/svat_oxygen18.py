@@ -523,8 +523,6 @@ def main(tmp_dir):
 
     # initializes the model structure
     model = SVATTRANSPORTSetup()
-    from roger.tools.make_toy_data import make_toy_forcing_tracer
-    make_toy_forcing_tracer(model._base_path, tracer="d18O", start_date='1/10/2010', ndays=1097)
     # writes the forcing data to netcdf
     write_forcing_tracer(model._input_dir, 'd18O')
     # runs the model setup

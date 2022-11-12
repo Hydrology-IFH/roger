@@ -13,16 +13,16 @@ This benchmark varies the size of the computational domain and records the runti
 We run the same model code with all Roger backends (``numpy``, ``numpy-mpi``, ``jax``, ``jax-mpi``, ``jax-gpu``).
 
 
-.. figure:: /_images/benchmarks/oneD_scaling_size.png
+.. figure:: /_images/benchmarks/oneD/oneD_size_scaling.png
    :width: 500px
    :align: center
 
-.. figure:: /_images/benchmarks/oneD_speedup_numpy.png
+.. figure:: /_images/benchmarks/oneD/oneD_speedup_numpy.png
   :width: 500px
   :align: center
 
 
-As a rule of thumb, we find that JAX is faster than NumPy for a greater grid cell count. GPUs are a competitive alternative to CPUs, **as long as the problem fits into GPU memory**.
+As a rule of thumb, we find that JAX and NumPy peforms equally well for a greater grid cell count. GPUs are a competitive alternative to CPUs, **as long as the problem fits into GPU memory**.
 
 
 Varying number of MPI processes
@@ -32,6 +32,8 @@ Roger is run for a fixed problem size, but varying number of processes. This all
 
 The computational benchmark experiment is executed on the `bwForCluster BinAC  <https://www.binac.uni-tuebingen.de/>`__ cluster. Each computing node contains 28 CPUs.
 
-
+.. figure:: /_images/benchmarks/oneD/oneD_nproc_scaling.png
+   :width: 500px
+   :align: center
 
 The results show that Roger scales well with increasing number of processes.

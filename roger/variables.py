@@ -580,6 +580,13 @@ VARIABLES = {
         "storage change",
     ),
     # surface variables
+    "S_SNOW": Variable(
+        "snow storage",
+        CATCH_GRID + TIME,
+        "mm",
+        "snow storage",
+        active=lambda settings: settings.enable_offline_transport,
+    ),
     "S_snow": Variable(
         "snow storage",
         CATCH_GRID + TIMESTEPS,
@@ -1564,6 +1571,13 @@ VARIABLES = {
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport,
     ),
+    "S_S": Variable(
+        "soil water content",
+        CATCH_GRID + TIME,
+        "mm",
+        "soil water content",
+        active=lambda settings: settings.enable_offline_transport,
+    ),
     "S_s": Variable(
         "soil water content",
         CATCH_GRID + TIMESTEPS,
@@ -1991,6 +2005,13 @@ VARIABLES = {
         "Soil water content in large pores",
         time_dependent=False,
     ),
+    "S_RZ": Variable(
+        "soil water content in root zone",
+        CATCH_GRID + TIME,
+        "mm",
+        "soil water content in root zone",
+        active=lambda settings: settings.enable_offline_transport,
+    ),
     "S_rz": Variable(
         "soil water content in root zone",
         CATCH_GRID + TIMESTEPS,
@@ -2040,6 +2061,13 @@ VARIABLES = {
         "soil water content in large pores below saturation water level",
         time_dependent=False,
     ),
+    "S_PWP_RZ": Variable(
+        "soil water content at permanent wilting point in root zone",
+        CATCH_GRID + TIME,
+        "mm",
+        "soil water content at permanent wilting point in root zone",
+        active=lambda settings: settings.enable_offline_transport & settings.enable_crop_phenology,
+    ),
     "S_pwp_rz": Variable(
         "soil water content at permanent wilting point in root zone",
         CATCH_GRID,
@@ -2055,6 +2083,13 @@ VARIABLES = {
         "soil water content at field capacity in root zone",
         time_dependent=False,
         write_to_restart=True,
+    ),
+    "S_SAT_RZ": Variable(
+        "soil water content at saturation in root zone",
+        CATCH_GRID + TIME,
+        "mm",
+        "soil water content at saturation in root zone",
+        active=lambda settings: settings.enable_offline_transport & settings.enable_crop_phenology,
     ),
     "S_sat_rz": Variable(
         "soil water content at saturation in root zone",
@@ -2288,6 +2323,13 @@ VARIABLES = {
         "Soil water content in large pores",
         time_dependent=False,
     ),
+    "S_SS": Variable(
+        "soil water content in subsoil",
+        CATCH_GRID + TIME,
+        "mm",
+        "soil water content in subsoil",
+        active=lambda settings: settings.enable_offline_transport,
+    ),
     "S_ss": Variable(
         "soil water content in subsoil",
         CATCH_GRID + TIMESTEPS,
@@ -2339,6 +2381,13 @@ VARIABLES = {
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport,
     ),
+    "S_PWP_SS": Variable(
+        "soil water content at permanent wilting point in subsoil",
+        CATCH_GRID + TIME,
+        "mm",
+        "soil water content at permanent wilting point in subsoil",
+        active=lambda settings: settings.enable_offline_transport & settings.enable_crop_phenology,
+    ),
     "S_pwp_ss": Variable(
         "soil water content at permanent wilting point in subsoil",
         CATCH_GRID,
@@ -2354,6 +2403,13 @@ VARIABLES = {
         "soil water content at field capacity in subsoil",
         time_dependent=False,
         write_to_restart=True,
+    ),
+    "S_SAT_SS": Variable(
+        "soil water content at saturation in subsoil",
+        CATCH_GRID + TIME,
+        "mm",
+        "soil water content at saturation in subsoil",
+        active=lambda settings: settings.enable_offline_transport & settings.enable_crop_phenology,
     ),
     "S_sat_ss": Variable(
         "soil water content at saturation in subsoil",
@@ -2892,8 +2948,15 @@ VARIABLES = {
         "precipitation",
         TIME_FORCING,
         "mm/10 minutes",
-        "precipitation",
+        "precipitation (uniform)",
         active=lambda settings: not settings.enable_offline_transport,
+    ),
+    "PREC_DIST_DAILY": Variable(
+        "precipitation",
+        CATCH_GRID + TIME,
+        "mm/10 minutes",
+        "precipitation (distributed)",
+        active=lambda settings: settings.enable_offline_transport,
     ),
     "prec": Variable(
         "precipitation",
@@ -3050,6 +3113,13 @@ VARIABLES = {
         "matrix infiltration",
         time_dependent=True,
     ),
+    "INF_MAT_RZ": Variable(
+        "matrix infiltration into root zone",
+        CATCH_GRID + TIME,
+        "mm/dt",
+        "matrix infiltration into root zone",
+        active=lambda settings: settings.enable_offline_transport,
+    ),
     "inf_mat_rz": Variable(
         "matrix infiltration into root zone",
         CATCH_GRID,
@@ -3106,12 +3176,26 @@ VARIABLES = {
         "macropore infiltration into subsoil",
         time_dependent=True,
     ),
+    "INF_PF_SS": Variable(
+        "preferential infiltration into subsoil",
+        CATCH_GRID + TIME,
+        "mm/dt",
+        "preferential infiltration into subsoil",
+        active=lambda settings: settings.enable_offline_transport,
+    ),
     "inf_pf_ss": Variable(
         "preferential infiltration into subsoil",
         CATCH_GRID,
         "mm/dt",
         "preferential infiltration into subsoil",
         time_dependent=True,
+    ),
+    "INF_PF_RZ ": Variable(
+        "preferential infiltration into root zone",
+        CATCH_GRID + TIME,
+        "mm/dt",
+        "preferential infiltration into root zone",
+        active=lambda settings: settings.enable_offline_transport,
     ),
     "inf_pf_rz": Variable(
         "preferential infiltration into root zone",
@@ -3424,6 +3508,13 @@ VARIABLES = {
         "Residual potential transpiration",
         time_dependent=True,
     ),
+    "TRANSP": Variable(
+        "actual transpiration",
+        CATCH_GRID + TIME,
+        "mm/dt",
+        "actual transpiration",
+        active=lambda settings: settings.enable_offline_transport,
+    ),
     "transp": Variable(
         "actual transpiration",
         CATCH_GRID,
@@ -3437,6 +3528,13 @@ VARIABLES = {
         "mm/dt",
         "actual evaporation",
         time_dependent=True,
+    ),
+    "EVAP_SOIL": Variable(
+        "actual soil evaporation",
+        CATCH_GRID + TIME,
+        "mm/dt",
+        "actual soil evaporation",
+        active=lambda settings: settings.enable_offline_transport,
     ),
     "evap_soil": Variable(
         "actual soil evaporation",
@@ -3673,6 +3771,13 @@ VARIABLES = {
         "vertical root zone drainage of large pores",
         time_dependent=True,
     ),
+    "Q_RZ": Variable(
+        "vertical root zone drainage",
+        CATCH_GRID + TIME,
+        "mm/dt",
+        "vertical root zone drainage",
+        active=lambda settings: settings.enable_offline_transport,
+    ),
     "q_rz": Variable(
         "vertical root zone drainage",
         CATCH_GRID,
@@ -3694,12 +3799,26 @@ VARIABLES = {
         "vertical subsoil drainage of large pores",
         time_dependent=True,
     ),
+    "Q_SS": Variable(
+        "vertical subsoil drainage",
+        CATCH_GRID + TIME,
+        "mm/dt",
+        "vertical subsoil drainage",
+        active=lambda settings: settings.enable_offline_transport,
+    ),
     "q_ss": Variable(
         "vertical subsoil drainage",
         CATCH_GRID,
         "mm/dt",
         "vertical subsoil drainage",
         time_dependent=True,
+    ),
+    "RE_RL": Variable(
+        "redistribution after root loss",
+        CATCH_GRID + TIME,
+        "mm/dt",
+        "redistribution after root loss",
+        active=lambda settings: settings.enable_offline_transport & settings.enable_crop_phenology,
     ),
     "re_rl": Variable(
         "redistribution after root loss",
@@ -3953,6 +4072,13 @@ VARIABLES = {
         active=lambda settings: settings.enable_offline_transport & settings.enable_age_statistics,
     ),
     # capillary rise variables
+    "CPR_RZ": Variable(
+        "capillary rise from subsoil into root zone",
+        CATCH_GRID + TIME,
+        "mm/dt",
+        "capillary rise from subsoil into root zone",
+        active=lambda settings: settings.enable_offline_transport
+    ),
     "cpr_rz": Variable(
         "capillary rise from subsoil into root zone",
         CATCH_GRID,
@@ -3966,6 +4092,13 @@ VARIABLES = {
         "mm/dt",
         "capillary rise from groundwater",
         time_dependent=True,
+    ),
+    "RE_RG": Variable(
+        "redistribution after root growth",
+        CATCH_GRID + TIME,
+        "mm/dt",
+        "redistribution after root growth",
+        active=lambda settings: settings.enable_offline_transport & settings.enable_crop_phenology,
     ),
     "re_rg": Variable(
         "redistribution after root growth",
