@@ -10,7 +10,7 @@ eval "$(conda shell.bash hook)"
 conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/hillslope_scale/svat_oxygen18_distributed_tutorial
 
-python svat_oxygen18.py -b numpy -d cpu -tms advection-dispersion  -td "${TMPDIR}"
+python svat_oxygen18.py -b numpy -d cpu -td "${TMPDIR}"
 
 # Write output to temporary SSD of computing node
 echo "Write output to $TMPDIR"

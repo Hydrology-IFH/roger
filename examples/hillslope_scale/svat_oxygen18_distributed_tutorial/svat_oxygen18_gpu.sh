@@ -14,7 +14,7 @@ cd /home/fr/fr_fr/fr_rs1092/roger/examples/hillslope_scale/svat_oxygen18_distrib
 module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4
 module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
 module load lib/cudnn/8.2-cuda-11.4
-python svat_oxygen18.py -b jax -d gpu -tms advection-dispersion  -td "${TMPDIR}"
+python svat_oxygen18.py -b jax -d gpu -td "${TMPDIR}"
 
 # Write output to temporary SSD of computing node
 echo "Write output to $TMPDIR"
