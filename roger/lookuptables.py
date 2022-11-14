@@ -26,7 +26,7 @@ ARR_CP = onp.asarray(df_cp.values)
 
 ARR_GC = onp.zeros((25, 13))
 ARR_GC[:, 0] = ARR_ILU[:, 0]
-ARR_GC[:, 1:] = 1 - 0.7**ARR_ILU[:, 1:]
+ARR_GC[:, 1:] = 1 - 0.7**(ARR_ILU[:, 1:]/0.2)
 
 ARR_GCM = onp.zeros((25, 2))
 ARR_GCM[:, 0] = ARR_ILU[:, 0]

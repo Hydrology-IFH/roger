@@ -483,7 +483,7 @@ def main(tmp_dir):
             diagnostics["average"].output_frequency = 24 * 60 * 60
             diagnostics["average"].sampling_frequency = 1
             if base_path:
-                diagnostics["rate"].base_output_path = base_path
+                diagnostics["average"].base_output_path = base_path
 
             # maximum bias of numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error", "dC_num_error"]

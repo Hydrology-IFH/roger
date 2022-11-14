@@ -22,7 +22,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         _base_path = Path(__file__).parent
         _tm_structure = transport_model_structure.replace("_", " ")
         _input_dir = _base_path / "input"
-        _states_hm_file = 'states_hm100.nc'
+        _states_hm_file = 'states_hm1.nc'
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -498,13 +498,6 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         @roger_routine
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
-
-            # maximum bias of numerical solution at time step t
-            diagnostics["maximum"].output_variables = ["dS_num_error", "dC_num_error"]
-            diagnostics["maximum"].output_frequency = 24 * 60 * 60
-            diagnostics["maximum"].sampling_frequency = 1
-            if base_path:
-                diagnostics["maximum"].base_output_path = base_path
 
             diagnostics["average"].output_variables = ["C_iso_q_ss", "C_iso_s", "TT_q_ss",
                                                        "tt25_q_ss", "tt50_q_ss", "tt75_q_ss",  "ttavg_q_ss",

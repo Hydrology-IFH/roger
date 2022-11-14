@@ -707,7 +707,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
         ds_hm_best = ds_hm_best.assign_coords(Time=("Time", days))
         ds_hm_best.Time.attrs['units'] = "days"
         ds_hm_best.Time.attrs['time_origin'] = ds_hm_for_tm_mc['Time'].attrs['time_origin']
-        file = base_path / f"states_hm_best_for_{tms}.nc"
+        file = base_path / sas_solver / age_max / f"states_hm_best_for_{tms}.nc"
         ds_hm_best.to_netcdf(file, engine="h5netcdf")
     return
 

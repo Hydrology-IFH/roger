@@ -40,10 +40,10 @@ preferential:
   - 30
   b_q_rz:
   - 1
-  - 10
+  - 30
   b_q_ss:
   - 1
-  - 10
+  - 30
 
 power:
   k_transp:
