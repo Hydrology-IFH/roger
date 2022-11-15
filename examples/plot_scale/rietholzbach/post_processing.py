@@ -105,7 +105,7 @@ def main(tmp_dir):
     hours_hydrus_18O = (ds_hydrus_18O['Time'].values / onp.timedelta64(60 * 60, "s"))
     date_hydrus_18O = num2date(hours_hydrus_18O, units=f"hours since {ds_hydrus_18O['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     ds_hydrus_18O = ds_hydrus_18O .assign_coords(Time=("Time", date_hydrus_18O))
-    
+
     # # travel time simulations
     # states_hydrus_file = base_path / "hydrus_benchmark" / "states_hydrus_tt.nc"
     # ds_hydrus_tt = xr.open_dataset(states_hydrus_file, engine="h5netcdf", decode_times=False)
@@ -319,13 +319,13 @@ def main(tmp_dir):
     # fig.savefig(file, dpi=250)
     # plt.close(fig=fig)
 
-    # dotty plots
-    file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
-    df_params_metrics = pd.read_csv(file, sep="\t")
-    # flagged values are considered
-    df_params_metrics100 = df_params_metrics.copy()
-    df_params_metrics100.loc[:, 'id'] = range(len(df_params_metrics100.index))
-    df_params_metrics100 = df_params_metrics100.sort_values(by=['KGE_multi'], ascending=False)
+    # # dotty plots
+    # file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
+    # df_params_metrics = pd.read_csv(file, sep="\t")
+    # # flagged values are considered
+    # df_params_metrics100 = df_params_metrics.copy()
+    # df_params_metrics100.loc[:, 'id'] = range(len(df_params_metrics100.index))
+    # df_params_metrics100 = df_params_metrics100.sort_values(by=['KGE_multi'], ascending=False)
     # idx_best100 = df_params_metrics100.loc[:df_params_metrics100.index[99], 'id'].values.tolist()
     # dict_metrics_best = {}
     # for sc in ['', 'dry', 'normal', 'wet']:
@@ -419,7 +419,7 @@ def main(tmp_dir):
     #     fig.savefig(file, dpi=250)
 
     # # write evaluation metrics for different storage condtions to .txt
-    # df_avg_std = pd.DataFrame(columns=['KGE_aet', 'r_dS', 'KGE_q_ss', 'E_multi'])
+    # df_avg_std = pd.DataFrame(columns=['KGE_aet', 'KGE_dS', 'KGE_q_ss', 'KGE_multi'])
     # for sc in ['', 'dry', 'normal', 'wet']:
     #     df_avg_std.loc[f'avg{sc}', :] = onp.mean(dict_metrics_best[sc].values, axis=0)
     #     df_avg_std.loc[f'std{sc}', :] = onp.std(dict_metrics_best[sc].values, axis=0)
@@ -433,26 +433,46 @@ def main(tmp_dir):
     # file = base_path_figs / "params_best_100_avg_std.txt"
     # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
-    # diagnostic polar plots
-    df_for_diag = df_params_metrics100.loc[:df_params_metrics100.index[99], :]
-    vars_sim = ['aet', 'q_ss']
-    for var_sim in vars_sim:
-        fig = de.diag_polar_plot_multi(df_for_diag.loc[:, f'brel_mean_{var_sim}'].values,
-                                        df_for_diag.loc[:, f'temp_cor_{var_sim}'].values,
-                                        df_for_diag.loc[:, f'DE_{var_sim}'].values,
-                                        df_for_diag.loc[:, f'b_dir_{var_sim}'].values,
-                                        df_for_diag.loc[:, f'phi_{var_sim}'].values,
-                                        df_for_diag.loc[:, f'b_hf_{var_sim}'].values,
-                                        df_for_diag.loc[:, f'b_lf_{var_sim}'].values,
-                                        df_for_diag.loc[:, f'b_tot_{var_sim}'].values,
-                                        df_for_diag.loc[:, f'err_hf_{var_sim}'].values,
-                                        df_for_diag.loc[:, f'err_lf_{var_sim}'].values,
-                                        a0=df_for_diag.loc[:, f'ioa0_{var_sim}'].values,
-                                        share0=onp.round(onp.max(df_for_diag.loc[:, f'p0_{var_sim}']), 2))
-        file = f'diag_polar_plot_{var_sim}.png'
-        path = base_path_figs / file
-        # fig.tight_layout()
-        fig.savefig(path, dpi=250)
+    # # diagnostic polar plots
+    # df_for_diag100 = df_params_metrics100.loc[:df_params_metrics100.index[99], :]
+    # vars_sim = ['aet', 'q_ss']
+    # for var_sim in vars_sim:
+    #     fig = de.diag_polar_plot_multi(df_for_diag100.loc[:, f'brel_mean_{var_sim}'].values,
+    #                                     df_for_diag100.loc[:, f'temp_cor_{var_sim}'].values,
+    #                                     df_for_diag100.loc[:, f'DE_{var_sim}'].values,
+    #                                     df_for_diag100.loc[:, f'b_dir_{var_sim}'].values,
+    #                                     df_for_diag100.loc[:, f'phi_{var_sim}'].values,
+    #                                     df_for_diag100.loc[:, f'b_hf_{var_sim}'].values,
+    #                                     df_for_diag100.loc[:, f'b_lf_{var_sim}'].values,
+    #                                     df_for_diag100.loc[:, f'b_tot_{var_sim}'].values,
+    #                                     df_for_diag100.loc[:, f'err_hf_{var_sim}'].values,
+    #                                     df_for_diag100.loc[:, f'err_lf_{var_sim}'].values,
+    #                                     a0=df_for_diag100.loc[:, f'ioa0_{var_sim}'].values,
+    #                                     share0=onp.round(onp.max(df_for_diag100.loc[:, f'p0_{var_sim}']), 2))
+    #     file = f'diag_polar_plot_{var_sim}_100.png'
+    #     path = base_path_figs / file
+    #     # fig.tight_layout()
+    #     fig.savefig(path, dpi=250)
+
+    # df_for_diag1 = df_params_metrics100.loc[:df_params_metrics100.index[0], :]
+    # vars_sim = ['aet', 'q_ss']
+    # for var_sim in vars_sim:
+    #     fig = de.diag_polar_plot_multi(df_for_diag1.loc[:, f'brel_mean_{var_sim}'].values,
+    #                                     df_for_diag1.loc[:, f'temp_cor_{var_sim}'].values,
+    #                                     df_for_diag1.loc[:, f'DE_{var_sim}'].values,
+    #                                     df_for_diag1.loc[:, f'b_dir_{var_sim}'].values,
+    #                                     df_for_diag1.loc[:, f'phi_{var_sim}'].values,
+    #                                     df_for_diag1.loc[:, f'b_hf_{var_sim}'].values,
+    #                                     df_for_diag1.loc[:, f'b_lf_{var_sim}'].values,
+    #                                     df_for_diag1.loc[:, f'b_tot_{var_sim}'].values,
+    #                                     df_for_diag1.loc[:, f'err_hf_{var_sim}'].values,
+    #                                     df_for_diag1.loc[:, f'err_lf_{var_sim}'].values,
+    #                                     a0=df_for_diag1.loc[:, f'ioa0_{var_sim}'].values,
+    #                                     share0=onp.round(onp.max(df_for_diag1.loc[:, f'p0_{var_sim}']), 2))
+    #     file = f'diag_polar_plot_{var_sim}_1.png'
+    #     path = base_path_figs / file
+    #     # fig.tight_layout()
+    #     fig.savefig(path, dpi=250)
 
     # compare best simulation with observations
     vars_obs = ['AET', 'PERC', 'dWEIGHT']
@@ -477,21 +497,21 @@ def main(tmp_dir):
         df_bench.loc[:, 'bench'] = bench_vals
         df_eval = df_eval.join(df_bench)
         dict_obs_sim[var_obs] = df_eval
-        # plot observed and simulated time series
-        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-        file_str = '%s.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        # plot cumulated observed and simulated time series
-        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-        file_str = '%s_cum.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-        file_str = '%s_cum_year_facet.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-    plt.close('all')
+    #     # plot observed and simulated time series
+    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+    #     file_str = '%s.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    #     # plot cumulated observed and simulated time series
+    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+    #     file_str = '%s_cum.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+    #     file_str = '%s_cum_year_facet.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    # plt.close('all')
 
     # compare best 100 simulations with observations
     vars_obs = ['AET', 'PERC', 'dWEIGHT']
@@ -516,21 +536,21 @@ def main(tmp_dir):
         df_bench.loc[:, 'bench'] = bench_vals
         df_eval = df_eval.join(df_bench)
         dict_obs_sim100[var_obs] = df_eval
-        # plot observed and simulated time series
-        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-        file_str = '%s_best_100.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        # plot cumulated observed and simulated time series
-        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-        file_str = '%s_cum_best_100.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-        file_str = '%s_cum_year_facet_best_100.pdf' % (var_sim)
-        path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
-    plt.close('all')
+    #     # plot observed and simulated time series
+    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+    #     file_str = '%s_best_100.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    #     # plot cumulated observed and simulated time series
+    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+    #     file_str = '%s_cum_best_100.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+    #     file_str = '%s_cum_year_facet_best_100.pdf' % (var_sim)
+    #     path_fig = base_path_figs / file_str
+    #     fig.savefig(path_fig, dpi=250)
+    # plt.close('all')
 
     vars_obs = ['PREC', 'PREC_corr']
     vars_sim = ['prec', 'prec_corr']
@@ -611,23 +631,19 @@ def main(tmp_dir):
     #             df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
     #             rows = (df_rows['sc'].values == i)
     #             df_eval = df_eval.loc[rows, :]
-    #         df_eval.loc['1999-11':'2000-06', :] = onp.nan
+    #         if var_sim in ['dS']:
+    #             df_eval.loc['2000-01':'2000-06', :] = onp.nan
+    #         # skip first seven days for warmup
+    #         df_eval.loc[:'1997-01-07', :] = onp.nan
     #         df_eval = df_eval.dropna()
 
     #         obs_vals = df_eval.loc[:, 'obs'].values
     #         sim_vals = df_eval.loc[:, 'sim'].values
-    #         if var_sim in ['aet', 'perc', 'd18O_perc_bs']:
-    #             key_kge = 'KGE_' + var_sim
-    #             try:
-    #                 df_params_metrics_hydrus.loc[sc, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-    #             except ValueError:
-    #                 df_params_metrics_hydrus.loc[sc, key_kge] = onp.nan
-    #         elif var_sim in ['dS']:
-    #             key_r = 'r_' + var_sim
-    #             try:
-    #                 df_params_metrics_hydrus.loc[sc, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
-    #             except ValueError:
-    #                 df_params_metrics_hydrus.loc[sc, key_r] = onp.nan
+    #         key_kge = 'KGE_' + var_sim
+    #         try:
+    #             df_params_metrics_hydrus.loc[sc, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
+    #         except ValueError:
+    #             df_params_metrics_hydrus.loc[sc, key_kge] = onp.nan
 
     # file = base_path_figs / "metrics_best_hydrus.txt"
     # df_params_metrics_hydrus.to_csv(file, header=True, index=True, sep="\t")
@@ -1280,24 +1296,24 @@ def main(tmp_dir):
     # file = base_path / "hydrus_benchmark" / "params_metrics.txt"
     # df_params_metrics_hydrus = pd.read_csv(file, sep="\t")
     # df_params_metrics_hydrus.loc[:, 'ks'] = df_params_metrics_hydrus.loc[:, 'ks'] * (10/24)
-    # df_metrics_hydrus = df_params_metrics_hydrus.loc[:, ['kge_aet', 'kge_theta', 'kge_perc', 'kge_perc_18O', 'kge_multi']]
+    # df_metrics_hydrus = df_params_metrics_hydrus.loc[:, ['kge_aet', 'kge_theta', 'kge_perc', 'kge_d18O_perc_bs', 'kge_multi']]
     # df_params_hydrus = df_params_metrics_hydrus.loc[:, ['theta_sat_m', 'alpha', 'n', 'ks', 'theta_sat_im', 'omega', 'D_l']]
     # nrow = len(df_metrics_hydrus.columns)
     # ncol = len(df_params_hydrus.columns)
     # idx_best = df_metrics_hydrus['kge_multi'].idxmax()
-    # fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
+    # fig, ax = plt.subplots(nrow, ncol, sharey=True, sharex="col", figsize=(6, 3))
     # for i in range(nrow):
     #     for j in range(ncol):
     #         y = df_metrics_hydrus.iloc[:, i]
     #         x = df_params_hydrus.iloc[:, j]
-    #         ax[i, j].scatter(x, y, s=4, c='grey', alpha=0.5)
+    #         ax[i, j].scatter(x, y, s=1, c='grey', alpha=0.5)
     #         ax[i, j].set_xlabel('')
     #         ax[i, j].set_ylabel('')
-    #         ax[i, j].set_ylim(-1, 1)
+    #         ax[i, j].set_ylim(0, 1)
     #         # best parameter set for multi-objective criteria
     #         y_best = df_metrics_hydrus.iloc[idx_best, i]
     #         x_best = df_params_hydrus.iloc[idx_best, j]
-    #         ax[i, j].scatter(x_best, y_best, s=12, c='red', alpha=0.8)
+    #         ax[i, j].scatter(x_best, y_best, s=4, c='red', alpha=1)
 
     # for j in range(ncol):
     #     xlabel = _LABS_HYDRUS[df_params_hydrus.columns[j]]
@@ -1352,7 +1368,7 @@ def main(tmp_dir):
     #     axes.flatten()[i].set_title(r'$12^{th}$ Nov %s' % (year))
     #     axes.flatten()[i].set_yticks([0, 25, 50, 75, 100])
     #     axes.flatten()[i].set_yticklabels([0, 0.5, 1, 1.5, 2])
-    #
+    
     # axes[0, 0].set_ylabel('Soil depth [m]')
     # axes[1, 0].set_ylabel('Soil depth [m]')
     # axes[2, 0].set_ylabel('Soil depth [m]')
@@ -1370,7 +1386,7 @@ def main(tmp_dir):
     # file = 'bromide_conc_soil.png'
     # path = base_path_figs / file
     # fig.savefig(path, dpi=250)
-    #
+    
     # # plot soil bromide mass
     # years = onp.arange(1997, 2007).tolist()
     # cmap = copy.copy(plt.cm.get_cmap('Oranges'))
@@ -1384,7 +1400,7 @@ def main(tmp_dir):
     #     axes.flatten()[i].set_title(r'$12^{th}$ Nov %s' % (year))
     #     axes.flatten()[i].set_yticks([0, 25, 50, 75, 100])
     #     axes.flatten()[i].set_yticklabels([0, 0.5, 1, 1.5, 2])
-    #
+    
     # axes[0, 0].set_ylabel('Soil depth [m]')
     # axes[1, 0].set_ylabel('Soil depth [m]')
     # axes[2, 0].set_ylabel('Soil depth [m]')
@@ -1406,7 +1422,7 @@ def main(tmp_dir):
     # # plot isotope ratios of precipitation, soil and percolation
     # cmap = copy.copy(plt.cm.get_cmap('YlGnBu_r'))
     # norm = mpl.colors.Normalize(vmin=-20, vmax=0)
-    #
+
     # fig, axes = plt.subplots(3, 1, sharex=False, figsize=(6, 3))
     # axes[0].bar(date_hydrus_18O, ds_hydrus_18O['prec'].values, width=-1, edgecolor=cmap(norm(ds_hydrus_18O['d18O_prec'].values)), align='edge')
     # axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
@@ -1418,14 +1434,14 @@ def main(tmp_dir):
     # axes[1].set_yticklabels([0, 0.5, 1, 1.5, 2])
     # axes[1].set_xticklabels([])
     # axes[1].set_ylabel('Soil depth\n[m]')
-    #
+
     # axes[2].bar(date_hydrus_18O, ds_hydrus_18O['perc'].values, width=-1, edgecolor=cmap(norm(ds_hydrus_18O['d18O_perc'].values)), align='edge')
     # axes[2].set_xlim(date_hydrus_18O[0], date_hydrus_18O[-1])
     # axes[2].set_ylabel('Percolation\n[mm $day^{-1}$]')
     # axes[2].set_ylim(0, )
     # axes[2].invert_yaxis()
     # axes[2].set_xlabel('Time [year]')
-    #
+
     # axl = fig.add_axes([0.87, 0.34, 0.02, 0.3])
     # cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
     #                                 orientation='vertical',
@@ -1435,34 +1451,34 @@ def main(tmp_dir):
     # file = 'hydrus_d18O_prec_soil_perc.png'
     # path = base_path_figs / file
     # fig.savefig(path, dpi=250)
-    #
+
     # # plot precipitation, soil water content and percolation
     # cmap = copy.copy(plt.cm.get_cmap('YlGnBu'))
-    # norm = mpl.colors.Normalize(vmin=0.1, vmax=0.4)
-    #
+    # norm = mpl.colors.Normalize(vmin=0.2, vmax=0.4)
+
     # fig, axes = plt.subplots(3, 1, sharex=False, figsize=(6, 3))
     # axes[0].bar(date_hydrus_18O, ds_hydrus_18O['prec'].values, width=-1, edgecolor='blue', align='edge')
     # axes[0].set_ylabel('Precipitation\n[mm $day^{-1}$]')
     # axes[0].set_xlim(date_hydrus_18O[0], date_hydrus_18O[-1])
     # axes[0].set_xticklabels([])
     # sns.heatmap(ds_hydrus_18O['swc'].values, xticklabels=366, yticklabels=int(50/2), cmap='YlGnBu',
-    #             vmax=0.4, vmin=0.1, cbar=False, ax=axes[1])
+    #             vmax=0.4, vmin=0.2, cbar=False, ax=axes[1])
     # axes[1].set_yticks([0, 25, 50, 75, 100])
     # axes[1].set_yticklabels([0, 0.5, 1, 1.5, 2])
     # axes[1].set_xticklabels([])
     # axes[1].set_ylabel('Soil depth\n[m]')
-    #
+
     # axes[2].bar(date_hydrus_18O, ds_hydrus_18O['perc'].values, width=-1, edgecolor='grey', align='edge')
     # axes[2].set_xlim(date_hydrus_18O[0], date_hydrus_18O[-1])
     # axes[2].set_ylabel('Percolation\n[mm $day^{-1}$]')
     # axes[2].set_ylim(0, )
     # axes[2].invert_yaxis()
     # axes[2].set_xlabel('Time [year]')
-    #
+
     # axl = fig.add_axes([0.87, 0.34, 0.02, 0.3])
     # cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
     #                                 orientation='vertical',
-    #                                 ticks=[0.1, 0.2, 0.3, 0.4])
+    #                                 ticks=[0.2, 0.3, 0.4])
     # cb1.set_label(r'$\theta$ [-]')
     # fig.subplots_adjust(bottom=0.15, right=0.85)
     # file = 'hydrus_prec_theta_perc.png'

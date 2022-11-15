@@ -8,7 +8,7 @@
 
 eval "$(conda shell.bash hook)"
 conda activate roger
-cd /home/fr/fr_fr/fr_rs1092/roger/examples/hillslope_scale/svat_distributed_tutorial
+cd /home/fr/fr_fr/fr_rs1092/roger/examples/hillslope_scale/svat_distributed_tutorial/svat_distributed
 
 # adapt command to your available scheduler / MPI implementation
 python svat.py -b numpy -d cpu -td "${TMPDIR}"

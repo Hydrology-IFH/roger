@@ -8,7 +8,7 @@
 
 eval "$(conda shell.bash hook)"
 conda activate roger-gpu
-cd /home/fr/fr_fr/fr_rs1092/roger/examples/hillslope_scale/svat_oxygen18_distributed_tutorial
+cd /home/fr/fr_fr/fr_rs1092/roger/examples/hillslope_scale/svat_distributed_tutorial/svat_oxygen18_distributed
 
 # load module dependencies
 module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4

@@ -10,7 +10,9 @@ d18O_SS: -10
 
 # --- Diagnostics --------------------------------------------------------------
 OUTPUT_AVERAGE:
+- "C_iso_in"
 - "C_iso_transp"
+- "C_iso_evap_soil"
 - "C_iso_s"
 - "C_iso_q_ss"
 - "TT_transp"

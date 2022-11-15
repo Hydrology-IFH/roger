@@ -124,34 +124,3 @@ if not os.path.exists(states_tm_file):
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
                         del var_obj, vals
-
-# load simulation
-states_hm_file = base_path / "states_advection-dispersion.nc"
-ds = xr.open_dataset(states_hm_file, engine="h5netcdf", decode_times=False)
-# assign date
-days = ds['Time'].values
-date = num2date(days, units="days since 2019-10-31", calendar='standard', only_use_cftime_datetimes=False)
-ds = ds.assign_coords(Time=("Time", date))
-
-# plot spatially distributed age statistic at different dates
-fig, axes = plt.subplots(1, 2, figsize=(4, 2))
-axes[0].imshow(ds['tt50_q_ss'].isel(Time=120).values.T, origin="lower", cmap='Blues', vmin=50, vmax=300)
-axes[0].set_xticks(onp.arange(-.5, 11, 5))
-axes[0].set_yticks(onp.arange(-.5, 23, 5))
-axes[0].set_xticklabels(onp.arange(0, 12, 5) * 5)
-axes[0].set_yticklabels(onp.arange(0, 24, 5) * 5)
-axes[0].set_xlabel('[m]')
-axes[0].set_ylabel('[m]')
-axes[0].set_title(str(ds['Time'].values[120]).split('T')[0])
-axes[1].imshow(ds['tt50_q_ss'].isel(Time=300).values.T, origin="lower", cmap='Blues', vmin=50, vmax=300)
-axes[1].set_xticks(onp.arange(-.5, 11, 5))
-axes[1].set_yticks(onp.arange(-.5, 23, 5))
-axes[1].set_xticklabels(onp.arange(0, 12, 5) * 5)
-axes[1].set_yticklabels(onp.arange(0, 24, 5) * 5)
-axes[1].set_xlabel('[m]')
-axes[1].set_title(str(ds['Time'].values[300]).split('T')[0])
-fig.tight_layout()
-file = base_path_figs / "travel_time.png"
-fig.savefig(file, dpi=250)
-
-# plot isotopic signals of a single grid cell
