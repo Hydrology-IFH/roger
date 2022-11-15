@@ -10,7 +10,6 @@ import roger.cli
 
 MODELS = (
     "svat",
-    "oneD",
 )
 
 

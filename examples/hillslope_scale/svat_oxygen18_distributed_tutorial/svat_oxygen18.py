@@ -82,7 +82,7 @@ def main(tmp_dir):
             settings.x_origin = 0.0
             settings.y_origin = 0.0
             # origin of time steps (e.g. 01-01-2023)
-            settings.time_origin = self._get_time_origin(self._input_dir, 'forcing_tracer.nc')
+            settings.time_origin = '31-10-2019'
 
             settings.enable_offline_transport = True
             settings.enable_oxygen18 = True

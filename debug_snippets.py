@@ -319,12 +319,28 @@ with model.state.settings.unlock():
 python run_benchmarks.py --sizes 1000. --sizes 10000. --sizes 100000. --sizes 200000. --backends numpy --backends jax --backends numpy-mpi --backends jax-mpi --nproc 2 --only oneD_benchmark.py --debug --local
 
 
-python run_benchmarks.py --sizes 10000. --backends numpy --backends numpy-mpi --nproc 2 --only SVAT_benchmark.py --debug --local
+python run_benchmarks.py --sizes 10000. --backends numpy --backends numpy-mpi --nproc 4 --only SVAT_benchmark.py --debug --local
 
 python run_benchmarks.py --sizes 50000. --backends numpy --backends numpy-mpi --nproc 2 --only DUMMY_benchmark.py --debug --local
 
+python run_benchmarks.py --sizes 1000 --backends numpy --backends numpy-mpi --nproc 4 --only SVATOXYGEN18_benchmark.py --debug --local
+
+python run_benchmarks.py --sizes 1000. --backends numpy --backends numpy-mpi --nproc 4 --only SVAT_benchmark.py --debug --local
+
+
+
+python run_benchmarks.py --sizes 100. --sizes 1000. --sizes 10000. --sizes 100000. --backends numpy --backends jax --backends numpy-mpi --backends jax-mpi --backends jax-gpu --nproc 20 --pmem 4000 --only SVATOXYGEN18_benchmark.py --debug
+
+
+python run_benchmarks.py --sizes 100000. --backends numpy-mpi --backends jax-mpi --nproc 4 --pmem 32000 --only SVATOXYGEN18_benchmark.py --debug
+python run_benchmarks.py --sizes 100000. --backends numpy-mpi --backends jax-mpi --nproc 8 --pmem 16000 --only SVATOXYGEN18_benchmark.py --debug
+python run_benchmarks.py --sizes 100000. --backends numpy-mpi --backends jax-mpi --nproc 16 --pmem 8000 --only SVATOXYGEN18_benchmark.py --debug
+python run_benchmarks.py --sizes 100000. --backends numpy-mpi --backends jax-mpi --nproc 28 --pmem 4000 --only SVATOXYGEN18_benchmark.py --debug
+python run_benchmarks.py --sizes 100000. --backends numpy-mpi --backends jax-mpi --nproc 56 --pmem 4000 --only SVATOXYGEN18_benchmark.py --debug
+python run_benchmarks.py --sizes 100000. --backends numpy-mpi --backends jax-mpi --nproc 112 --pmem 4000 --only SVATOXYGEN18_benchmark.py --debug
+
 
 from roger.tools.make_toy_data import make_toy_forcing_tracer
-make_toy_forcing_tracer(model._base_path, tracer="d18O", start_date='1/10/2010', ndays=365*3)
+make_toy_forcing_tracer(model._base_path, tracer="d18O", start_date='31/10/2019', ndays=1097)
 make_toy_forcing_tracer(model._base_path, tracer="Br", start_date='1/10/2010', ndays=366)
 make_toy_forcing_tracer(model._base_path, tracer="d18O", start_date='1/10/2010', ndays=366)

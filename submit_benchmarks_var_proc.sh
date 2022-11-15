@@ -8,3 +8,18 @@ python run_benchmarks.py --sizes 2000000. --backends numpy-mpi --backends jax-mp
 python run_benchmarks.py --sizes 2000000. --backends numpy-mpi --backends jax-mpi --nproc 56 --pmem 4000 --only SVAT_benchmark.py --debug
 python run_benchmarks.py --sizes 2000000. --backends numpy-mpi --backends jax-mpi --nproc 112 --pmem 4000 --only SVAT_benchmark.py --debug
 python run_benchmarks.py --sizes 2000000. --backends numpy-mpi --backends jax-mpi --nproc 224 --pmem 4000 --only SVAT_benchmark.py --debug
+
+python run_benchmarks.py --sizes 2000000. --backends numpy-mpi --backends jax-mpi --nproc 4 --pmem 32000 --only oneD_benchmark.py --debug
+python run_benchmarks.py --sizes 2000000. --backends numpy-mpi --backends jax-mpi --nproc 8 --pmem 16000 --only oneD_benchmark.py --debug
+python run_benchmarks.py --sizes 2000000. --backends numpy-mpi --backends jax-mpi --nproc 16 --pmem 8000 --only oneD_benchmark.py --debug
+python run_benchmarks.py --sizes 2000000. --backends numpy-mpi --backends jax-mpi --nproc 28 --pmem 4000 --only oneD_benchmark.py --debug
+python run_benchmarks.py --sizes 2000000. --backends numpy-mpi --backends jax-mpi --nproc 56 --pmem 4000 --only oneD_benchmark.py --debug
+python run_benchmarks.py --sizes 2000000. --backends numpy-mpi --backends jax-mpi --nproc 112 --pmem 4000 --only oneD_benchmark.py --debug
+python run_benchmarks.py --sizes 2000000. --backends numpy-mpi --backends jax-mpi --nproc 224 --pmem 4000 --only oneD_benchmark.py --debug
+
+python run_benchmarks.py --sizes 100000. --backends numpy-mpi --backends jax-mpi --nproc 4 --pmem 32000 --only SVATOXYGEN18_benchmark.py --debug
+python run_benchmarks.py --sizes 100000. --backends numpy-mpi --backends jax-mpi --nproc 8 --pmem 16000 --only SVATOXYGEN18_benchmark.py --debug
+python run_benchmarks.py --sizes 100000. --backends numpy-mpi --backends jax-mpi --nproc 16 --pmem 8000 --only SVATOXYGEN18_benchmark.py --debug
+python run_benchmarks.py --sizes 100000. --backends numpy-mpi --backends jax-mpi --nproc 28 --pmem 4000 --only SVATOXYGEN18_benchmark.py --debug
+python run_benchmarks.py --sizes 100000. --backends numpy-mpi --backends jax-mpi --nproc 56 --pmem 4000 --only SVATOXYGEN18_benchmark.py --debug
+python run_benchmarks.py --sizes 100000. --backends numpy-mpi --backends jax-mpi --nproc 112 --pmem 4000 --only SVATOXYGEN18_benchmark.py --debug

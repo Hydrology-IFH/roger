@@ -1,18 +1,17 @@
 from benchmark_base import benchmark_cli
 from pathlib import Path
-import numpy as onp
 import h5netcdf
 
 
 @benchmark_cli
 def main(size, timesteps):
     from roger import roger_routine, roger_kernel, KernelOutput
-    from roger.models.svat import SVATOXYGEN18Setup
+    from roger.models.svat_oxygen18 import SVATTRANSPORTSetup
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
     from roger.core.transport import delta_to_conc, conc_to_delta
 
-    class SVATOXYGEN182Benchmark(SVATOXYGEN18Setup):
+    class SVATOXYGEN182Benchmark(SVATTRANSPORTSetup):
         _base_path = Path(__file__).parent
         _input_dir = _base_path / 'input' / 'SVATOXYGEN18_benchmark'
 
@@ -21,18 +20,6 @@ def main(size, timesteps):
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables[var]
                 return npx.array(var_obj)
-
-        def _get_nitt(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['Time']
-                return len(onp.array(var_obj)) + 1
-
-        def _get_time_origin(self, path_dir, file):
-            nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                date = infile.variables['Time'].attrs['time_origin'].split(" ")[0]
-                return f"{date} 00:00:00"
 
         @roger_routine
         def set_settings(self, state):
@@ -49,9 +36,9 @@ def main(size, timesteps):
             # length of simulation (in seconds)
             settings.runlen = 24 * 60 * 60 * timesteps
             # length of warmup simulation (in seconds)
-            settings.runlen_warmup = settings.runlen
+            settings.runlen_warmup = 0
             # total number of iterations
-            settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
+            settings.nitt = 366
             # maximum water age (in days)
             settings.ages = 1500
             settings.nages = settings.ages + 1
@@ -64,7 +51,7 @@ def main(size, timesteps):
             settings.x_origin = 0.0
             settings.y_origin = 0.0
             # origin of time steps (e.g. 01-01-2023)
-            settings.time_origin = self._get_time_origin(self._input_dir, 'forcing_tracer.nc')
+            settings.time_origin = "01-01-2022"
 
             settings.enable_offline_transport = True
             settings.enable_oxygen18 = True
@@ -119,11 +106,11 @@ def main(size, timesteps):
             settings = state.settings
 
             # storage volumes at permanent wilting point and at saturation
-            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.S_fc_ss = update(vs.S_fc_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_fc_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt])
-            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_fc_ss = update(vs.S_fc_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_fc_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
 
             # SAS parameterization
             if settings.tm_structure == "complete-mixing":
@@ -258,9 +245,9 @@ def main(size, timesteps):
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_snow", self._base_path, 'states_hm.nc')[:, :, vs.itt, npx.newaxis])
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc')[:, :, vs.itt, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc')[:, :, vs.itt, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_snow", self._input_dir, 'states_hm.nc')[:, :, vs.itt, npx.newaxis])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
             vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
             vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
@@ -301,8 +288,8 @@ def main(size, timesteps):
 
             if settings.enable_oxygen18:
                 vs.C_iso_snow = update(vs.C_iso_snow, at[2:-2, 2:-2, :vs.taup1], npx.nan)
-                vs.C_iso_rz = update(vs.C_iso_rz, at[2:-2, 2:-2, :vs.taup1], self._config["d18O_RZ"])
-                vs.C_iso_ss = update(vs.C_iso_ss, at[2:-2, 2:-2, :vs.taup1], self._config["d18O_SS"])
+                vs.C_iso_rz = update(vs.C_iso_rz, at[2:-2, 2:-2, :vs.taup1], -10)
+                vs.C_iso_ss = update(vs.C_iso_ss, at[2:-2, 2:-2, :vs.taup1], -10)
                 vs.C_rz = update(
                     vs.C_rz,
                     at[2:-2, 2:-2, :vs.taup1], delta_to_conc(state, vs.C_iso_rz[2:-2, 2:-2, vs.tau, npx.newaxis]),
@@ -375,7 +362,7 @@ def main(size, timesteps):
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "PREC_DIST",
+                "PREC_DIST_DAILY",
                 "INF_MAT_RZ",
                 "INF_PF_RZ",
                 "INF_PF_SS",
@@ -396,31 +383,31 @@ def main(size, timesteps):
             vs = state.variables
             settings = state.settings
 
-            vs.PREC_DIST = update(vs.PREC_DIST, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._base_path, 'states_hm.nc'))
-            vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", self._base_path, 'states_hm.nc'))
-            vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", self._base_path, 'states_hm.nc') + self._read_var_from_nc("inf_sc_rz", self._base_path, 'states_hm.nc'))
-            vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._base_path, 'states_hm.nc'))
-            vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._base_path, 'states_hm.nc'))
-            vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", self._base_path, 'states_hm.nc'))
-            vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._base_path, 'states_hm.nc'))
-            vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.nc'))
-            vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc'))
+            vs.PREC_DIST_DAILY = update(vs.PREC_DIST_DAILY, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._input_dir, 'states_hm.nc'))
+            vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", self._input_dir, 'states_hm.nc'))
+            vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", self._input_dir, 'states_hm.nc') + self._read_var_from_nc("inf_sc_rz", self._input_dir, 'states_hm.nc'))
+            vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._input_dir, 'states_hm.nc'))
+            vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._input_dir, 'states_hm.nc'))
+            vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", self._input_dir, 'states_hm.nc'))
+            vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._input_dir, 'states_hm.nc'))
+            vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._input_dir, 'states_hm.nc'))
+            vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._input_dir, 'states_hm.nc'))
 
-            vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc') - self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.nc')[2:-2, 2:-2, :])
-            vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc') - self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.nc')[2:-2, 2:-2, :])
+            vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._input_dir, 'states_hm.nc') - self._read_var_from_nc("S_pwp_rz", self._input_dir, 'states_hm.nc'))
+            vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._input_dir, 'states_hm.nc') - self._read_var_from_nc("S_pwp_ss", self._input_dir, 'states_hm.nc'))
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
-            vs.S_SNOW = update(vs.S_SNOW, at[2:-2, 2:-2, :], self._read_var_from_nc("S_snow", self._base_path, 'states_hm.nc'))
+            vs.S_SNOW = update(vs.S_SNOW, at[2:-2, 2:-2, :], self._read_var_from_nc("S_snow", self._input_dir, 'states_hm.nc'))
 
             if settings.enable_oxygen18:
                 vs.C_ISO_IN = update(vs.C_ISO_IN, at[2:-2, 2:-2, 0], npx.nan)
-                vs.C_ISO_IN = update(vs.C_ISO_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
+                vs.C_ISO_IN = update(vs.C_ISO_IN, at[2:-2, 2:-2, 1:], -7)
                 vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], delta_to_conc(state, vs.C_ISO_IN)[2:-2, 2:-2, :])
 
         @roger_routine
         def set_forcing(self, state):
             vs = state.variables
 
-            vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], vs.PREC_DIST[2:-2, 2:-2, vs.itt])
+            vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], vs.PREC_DIST_DAILY[2:-2, 2:-2, vs.itt])
             vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], vs.INF_MAT_RZ[2:-2, 2:-2, vs.itt])
             vs.inf_pf_rz = update(vs.inf_pf_rz, at[2:-2, 2:-2], vs.INF_PF_RZ[2:-2, 2:-2, vs.itt])
             vs.inf_pf_ss = update(vs.inf_pf_ss, at[2:-2, 2:-2], vs.INF_PF_SS[2:-2, 2:-2, vs.itt])

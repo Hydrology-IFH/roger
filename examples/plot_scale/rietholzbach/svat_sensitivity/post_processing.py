@@ -6,7 +6,6 @@ from cftime import num2date
 import h5netcdf
 import xarray as xr
 import pandas as pd
-from de import de
 from SALib.analyze import sobol
 import matplotlib.cm as cm
 from matplotlib.colors import Normalize
@@ -224,7 +223,7 @@ def main(tmp_dir):
             file = base_path_results / f"params_metrics_{tms}.txt"
             df_params_metrics = pd.read_csv(file, header=0, index_col=False, sep="\t")
             bounds_sobol = {}
-            bounds_sobol['num_vars'] = bounds[tm_structure]['num_vars']
+            bounds_sobol['num_vars'] = 6
             bounds_sobol['names'] = bounds[tm_structure]['names'][:6]
             bounds_sobol['bounds'] = bounds[tm_structure]['bounds'][:6]
             for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
@@ -270,7 +269,7 @@ def main(tmp_dir):
 
                 # make dotty plots
                 nrow = len(df_metrics.columns)
-                ncol = bounds_sobol['num_vars']
+                ncol = 6
                 fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(14, 7))
                 for i in range(nrow):
                     for j in range(ncol):

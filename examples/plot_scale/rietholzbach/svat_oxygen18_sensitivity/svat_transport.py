@@ -20,7 +20,7 @@ def main(transport_model_structure, sas_solver, x1, x2, data_dir, tmp_dir):
     from roger.core.transport import delta_to_conc, conc_to_delta
 
     class SVATTRANSPORTSetup(RogerSetup):
-        """A SVAT transport model.
+        """A SVAT transport model for oxygen-18.
         """
         if data_dir:
             _base_path = Path(data_dir)

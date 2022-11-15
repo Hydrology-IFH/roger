@@ -21,7 +21,7 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
     from roger.tools.setup import write_forcing_tracer
 
     class SVATTRANSPORTSetup(RogerSetup):
-        """A SVAT bromide transport model.
+        """A SVAT transport model for bromide.
         """
         _base_path = Path(__file__).parent
         _year = year

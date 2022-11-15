@@ -3190,7 +3190,7 @@ VARIABLES = {
         "preferential infiltration into subsoil",
         time_dependent=True,
     ),
-    "INF_PF_RZ ": Variable(
+    "INF_PF_RZ": Variable(
         "preferential infiltration into root zone",
         CATCH_GRID + TIME,
         "mm/dt",

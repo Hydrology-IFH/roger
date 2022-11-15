@@ -87,13 +87,13 @@ def test_setup_oneD_event_float_types(float_type):
 
 
 @pytest.mark.parametrize("float_type", ("float32", "float64"))
-def test_setup_svat_transport_bromide(float_type):
+def test_setup_svat_bromide(float_type):
     from roger import runtime_settings
 
     object.__setattr__(runtime_settings, "diskless_mode", False)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
-    from roger.models.svat_transport_bromide import SVATTRANSPORTSetup
+    from roger.models.svat_bromide import SVATTRANSPORTSetup
     from roger.tools.make_toy_data import make_toy_forcing_tracer
     from make_data_for_svat_transport import make_data
 
@@ -117,7 +117,7 @@ def test_setup_svat_transport_oxygen18(float_type):
     object.__setattr__(runtime_settings, "diskless_mode", False)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
-    from roger.models.svat_transport_oxygen18 import SVATTRANSPORTSetup
+    from roger.models.svat_oxygen18 import SVATTRANSPORTSetup
     from roger.tools.make_toy_data import make_toy_forcing_tracer
     from make_data_for_svat_transport import make_data
 
