@@ -5,21 +5,22 @@ import numpy as np
 import time
 from pathlib import Path
 
-TESTDIR = Path(__file__).parent
 TIME_PATTERN = r"Time step took ([-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)s"
 
 
 @click.option("--benchmark-type", type=click.Choice(['var_size', 'var_proc']), default='var_size')
+@click.option("--infolder", type=click.Choice(['svat', 'oneD', 'svat_oxygen18']), default='svat')
 @click.argument("INFILES", nargs=-1, type=click.Path(dir_okay=False, exists=True))
 @click.command()
-def get_timings(benchmark_type, infiles):
+def get_timings(benchmark_type, infolder, infiles):
+    base_path = Path(__file__).parent
     for infile in infiles:
-        with open(TESTDIR / benchmark_type / infile) as f:
+        with open(base_path / benchmark_type / infolder / infile) as f:
             data = json.load(f)
 
         for benchmark, bench_res in data["benchmarks"].items():
             for i, res in enumerate(bench_res):
-                with open(TESTDIR / benchmark_type / res["timing_file"]) as file:
+                with open(base_path / benchmark_type / infolder / res["timing_file"]) as file:
                     lines = file.read().splitlines()
                 output = "\n".join(lines)
 
@@ -38,7 +39,7 @@ def get_timings(benchmark_type, infiles):
                     "stdev": float(np.std(iteration_times)),
                 }
 
-        with open(TESTDIR / benchmark_type / "benchmark_{}.json".format(time.time()), "w") as f:
+        with open(base_path / benchmark_type / infolder / "benchmark_{}.json".format(time.time()), "w") as f:
             json.dump(data, f, indent=4, sort_keys=True)
 
 
