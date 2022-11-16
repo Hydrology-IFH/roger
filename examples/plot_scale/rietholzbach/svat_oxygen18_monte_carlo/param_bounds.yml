@@ -112,7 +112,7 @@ time-variant:
   c_q_rz:
   - 1
   - 30
-  c_q_ss:
+  a_q_ss:
   - 1
   - 30
 

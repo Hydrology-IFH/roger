@@ -6,10 +6,11 @@ import click
 import roger
 
 
+@click.option("--nruns", type=int, default=100)
 @click.option("-rs", "--resample-size", type=int, default=1000)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
-def main(tmp_dir, resample_size):
+def main(tmp_dir, resample_size, nruns):
     if tmp_dir:
         base_path = Path(tmp_dir)
     else:
@@ -19,17 +20,17 @@ def main(tmp_dir, resample_size):
     idx_boot = onp.arange(resample_size)
     onp.random.shuffle(idx_boot)
     idx_boot = idx_boot.tolist()
-    states_hm1_file = base_path.parent / "svat_monte_carlo" / "states_hm100.nc"
+    states_hm1_file = base_path.parent / "svat_monte_carlo" / "optimized_with_KGE_multi" / f"states_hm{nruns}.nc"
     with h5netcdf.File(states_hm1_file, 'r', decode_vlen_strings=False) as df:
         n_repeat = int(resample_size / df.dims["x"].size)
     if n_repeat <= 1:
         n_repeat = 1
     # write states of best model run
-    states_hmb_file = base_path / "states_hm100_bootstrap.nc"
+    states_hmb_file = base_path / f"states_hm{nruns}_bootstrap.nc"
     with h5netcdf.File(states_hmb_file, 'w', decode_vlen_strings=False) as f:
         f.attrs.update(
           date_created=datetime.datetime.today().isoformat(),
-          title='RoGeR best 100 monte carlo simulations (bootstrapped) at Rietholzbach lysimeter site',
+          title=f'RoGeR best {nruns} hydrologic monte carlo simulations (bootstrapped) at Rietholzbach lysimeter site',
           institution='University of Freiburg, Chair of Hydrology',
           references='',
           comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',

@@ -184,54 +184,105 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                                         del var_obj, vals
 
     states_hm1_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm100_bootstrap.nc"
-    states_hm_mc_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
-    n_repeat = int(nsamples / split_size)
-    if not os.path.exists(states_hm_mc_file):
-        click.echo('Repeat hydrologic simualtions ...')
-        with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
-            f.attrs.update(
-              date_created=datetime.datetime.today().isoformat(),
-              title='RoGeR best 1% monte carlo simulations (bootstrapped) at Rietholzbach lysimeter site',
-              institution='University of Freiburg, Chair of Hydrology',
-              references='',
-              comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
-              model_structure='SVAT model with free drainage',
-              roger_version=f'{roger.__version__}'
-            )
-            with h5netcdf.File(states_hm1_file, 'r', decode_vlen_strings=False) as df:
-                # set dimensions with a dictionary
-                dict_dim = {'x': nsamples, 'y': 1, 'Time': len(df.variables['Time'])}
-                if not f.dimensions:
-                    f.dimensions = dict_dim
-                    v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
-                    v.attrs['long_name'] = 'Number of model run'
-                    v.attrs['units'] = ''
-                    v[:] = onp.arange(dict_dim["x"])
-                    v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
-                    v.attrs['long_name'] = ''
-                    v.attrs['units'] = ''
-                    v[:] = onp.arange(dict_dim["y"])
-                    v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
-                    var_obj = df.variables.get('Time')
-                    v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                                   units=var_obj.attrs["units"])
-                    v[:] = onp.array(var_obj)
-                for var_sim in list(df.variables.keys()):
-                    var_obj = df.variables.get(var_sim)
-                    if var_sim not in list(f.dimensions.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
-                        v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                        vals = onp.array(var_obj)
-                        vals_rep = onp.repeat(vals, n_repeat, axis=0)
-                        v[:, :, :] = vals_rep
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+    if os.path.exists(states_hm1_file):
+        states_hm_mc_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
+        n_repeat = int(nsamples / split_size)
+        if not os.path.exists(states_hm_mc_file):
+            click.echo('Repeat hydrologic simualtions ...')
+            with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
+                f.attrs.update(
+                  date_created=datetime.datetime.today().isoformat(),
+                  title='RoGeR best 100 monte carlo simulations (bootstrapped) at Rietholzbach lysimeter site',
+                  institution='University of Freiburg, Chair of Hydrology',
+                  references='',
+                  comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
+                  model_structure='SVAT model with free drainage',
+                  roger_version=f'{roger.__version__}'
+                )
+                with h5netcdf.File(states_hm1_file, 'r', decode_vlen_strings=False) as df:
+                    # set dimensions with a dictionary
+                    dict_dim = {'x': nsamples, 'y': 1, 'Time': len(df.variables['Time'])}
+                    if not f.dimensions:
+                        f.dimensions = dict_dim
+                        v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
+                        v.attrs['long_name'] = 'Number of model run'
+                        v.attrs['units'] = ''
+                        v[:] = onp.arange(dict_dim["x"])
+                        v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
+                        v.attrs['long_name'] = ''
+                        v.attrs['units'] = ''
+                        v[:] = onp.arange(dict_dim["y"])
+                        v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
+                        var_obj = df.variables.get('Time')
+                        v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                        units=var_obj.attrs["units"])
-                    elif var_sim not in list(f.dimensions.keys()) and ('x', 'y') == var_obj.dimensions:
-                        v = f.create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
-                        vals = onp.array(var_obj)
-                        vals_rep = onp.repeat(vals, n_repeat, axis=0)
-                        v[:, :] = vals_rep
-                        v.attrs.update(long_name=var_obj.attrs["long_name"],
+                        v[:] = onp.array(var_obj)
+                    for var_sim in list(df.variables.keys()):
+                        var_obj = df.variables.get(var_sim)
+                        if var_sim not in list(f.dimensions.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
+                            v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                            vals = onp.array(var_obj)
+                            vals_rep = onp.repeat(vals, n_repeat, axis=0)
+                            v[:, :, :] = vals_rep
+                            v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                           units=var_obj.attrs["units"])
+                        elif var_sim not in list(f.dimensions.keys()) and ('x', 'y') == var_obj.dimensions:
+                            v = f.create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
+                            vals = onp.array(var_obj)
+                            vals_rep = onp.repeat(vals, n_repeat, axis=0)
+                            v[:, :] = vals_rep
+                            v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                           units=var_obj.attrs["units"])
+    else:
+        states_hm1_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm1.nc"
+        states_hm_mc_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
+        n_repeat = 1000
+        if not os.path.exists(states_hm_mc_file):
+            click.echo('Repeat hydrologic simualtions ...')
+            with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
+                f.attrs.update(
+                  date_created=datetime.datetime.today().isoformat(),
+                  title='RoGeR best 100 monte carlo simulations (bootstrapped) at Rietholzbach lysimeter site',
+                  institution='University of Freiburg, Chair of Hydrology',
+                  references='',
+                  comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
+                  model_structure='SVAT model with free drainage',
+                  roger_version=f'{roger.__version__}'
+                )
+                with h5netcdf.File(states_hm1_file, 'r', decode_vlen_strings=False) as df:
+                    # set dimensions with a dictionary
+                    dict_dim = {'x': 1000, 'y': 1, 'Time': len(df.variables['Time'])}
+                    if not f.dimensions:
+                        f.dimensions = dict_dim
+                        v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
+                        v.attrs['long_name'] = 'Number of model run'
+                        v.attrs['units'] = ''
+                        v[:] = onp.arange(dict_dim["x"])
+                        v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
+                        v.attrs['long_name'] = ''
+                        v.attrs['units'] = ''
+                        v[:] = onp.arange(dict_dim["y"])
+                        v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
+                        var_obj = df.variables.get('Time')
+                        v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                        units=var_obj.attrs["units"])
+                        v[:] = onp.array(var_obj)
+                    for var_sim in list(df.variables.keys()):
+                        var_obj = df.variables.get(var_sim)
+                        if var_sim not in list(f.dimensions.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
+                            v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                            vals = onp.array(var_obj)
+                            vals_rep = onp.repeat(vals, n_repeat, axis=0)
+                            v[:, :, :] = vals_rep
+                            v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                           units=var_obj.attrs["units"])
+                        elif var_sim not in list(f.dimensions.keys()) and ('x', 'y') == var_obj.dimensions:
+                            v = f.create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
+                            vals = onp.array(var_obj)
+                            vals_rep = onp.repeat(vals, n_repeat, axis=0)
+                            v[:, :] = vals_rep
+                            v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                           units=var_obj.attrs["units"])
 
     # merge results into single file
     for tm_structure in tm_structures:
@@ -379,7 +430,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
             ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
 
             # DataFrame with sampled model parameters and the corresponding metrics
-            df_params_metrics = pd.DataFrame(index=range(nsamples))
+            df_params_metrics = pd.DataFrame(index=range(ds_sim_tm.dims['x']))
             df_params_metrics.loc[:, 'dmpv'] = ds_sim_hm["dmpv"].values.flatten()
             df_params_metrics.loc[:, 'lmpv'] = ds_sim_hm["lmpv"].values.flatten()
             df_params_metrics.loc[:, 'theta_ac'] = ds_sim_hm["theta_ac"].values.flatten()
@@ -388,10 +439,17 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
             df_params_metrics.loc[:, 'ks'] = ds_sim_hm["ks"].values.flatten()
             # sampled model parameters
             if tm_structure == "advection-dispersion":
+                df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
+            elif tm_structure == "older-preference":
+                df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
             elif tm_structure == "time-variant advection-dispersion":
+                df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'b1_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten()
                 df_params_metrics.loc[:, 'b2_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
                 df_params_metrics.loc[:, 'a1_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten()
@@ -399,25 +457,38 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                 df_params_metrics.loc[:, 'a1_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten()
                 df_params_metrics.loc[:, 'a2_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
             elif tm_structure == "time-variant":
+                df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'c_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
                 df_params_metrics.loc[:, 'c_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
                 df_params_metrics.loc[:, 'c_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+            elif tm_structure == "time-variant-transp":
+                df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'c_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+                df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
             elif tm_structure == "preferential":
+                df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
+            elif tm_structure == "preferential + advection-dispersion":
+                df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
             elif tm_structure == "power":
+                df_params_metrics.loc[:, 'k_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'k_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'k_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'k_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
 
             # compare observations and simulations
             idx = ds_sim_tm.Time.values  # time index
-            d18O_perc_bs = onp.zeros((nsamples, 1, len(idx)))
+            d18O_perc_bs = onp.zeros((ds_sim_tm.dims['x'], 1, len(idx)))
             df_idx_bs = pd.DataFrame(index=date_obs, columns=['sol'])
             df_idx_bs.loc[:, 'sol'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
             idx_bs = df_idx_bs['sol'].dropna().index
-            for nrow in range(nsamples):
+            for nrow in range(ds_sim_tm.dims['x']):
                 # calculate simulated oxygen-18 bulk sample
                 df_perc_18O_obs = pd.DataFrame(index=date_obs, columns=['perc_obs', 'd18O_perc_obs'])
                 df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=0, y=0).values
@@ -504,15 +575,21 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
         df_params_metrics = pd.read_csv(file, header=0, index_col=False, sep="\t")
         df_metrics = df_params_metrics.loc[:, ['KGE_C_iso_q_ss']]
         if tm_structure == "advection-dispersion":
-            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'a_q_rz', 'a_q_ss']]
+            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_evap_soil', 'b_transp', 'a_q_rz', 'a_q_ss']]
+        if tm_structure == "older-preference":
+            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_evap_soil', 'a_transp', 'a_q_rz', 'a_q_ss']]
         elif tm_structure == "time-variant advection-dispersion":
-            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b1_transp', 'b2_transp', 'a1_q_rz', 'a2_q_rz', 'a1_q_ss', 'a2_q_ss']]
+            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_evap_soil', 'b1_transp', 'b2_transp', 'a1_q_rz', 'a2_q_rz', 'a1_q_ss', 'a2_q_ss']]
+        elif tm_structure == "time-variant-transp":
+            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_evap_soil', 'c_transp', 'a_q_rz', 'a_q_ss']]
         elif tm_structure == "time-variant":
-            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'c_transp', 'c_q_rz', 'c_q_ss']]
+            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_evap_soil', 'c_transp', 'c_q_rz', 'a_q_ss']]
         elif tm_structure == "preferential":
-            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'b_q_rz', 'b_q_ss']]
+            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_evap_soil', 'b_transp', 'b_q_rz', 'b_q_ss']]
+        elif tm_structure == "preferential + advection-dispersion":
+            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_evap_soil', 'b_transp', 'b_q_rz', 'a_q_ss']]
         elif tm_structure == "power":
-            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'k_transp', 'k_q_rz', 'k_q_ss']]
+            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'k_evap_soil', 'k_transp', 'k_q_rz', 'k_q_ss']]
         # select best model run
         idx_best = df_params_metrics['KGE_C_iso_q_ss'].idxmax()
         nrow = len(df_metrics.columns)
