@@ -33,6 +33,7 @@ def main(tmp_dir, sas_solver):
     else:
         base_path = Path(__file__).parent
     age_max = "age_max_1500_days"
+    metric_for_optimization = "optimized_with_KGE_multi"
     # directory of results
     base_path_results = base_path / "results"
     if not os.path.exists(base_path_results):
@@ -41,6 +42,9 @@ def main(tmp_dir, sas_solver):
     if not os.path.exists(base_path_results):
         os.mkdir(base_path_results)
     base_path_results = base_path / "results" / sas_solver / age_max
+    if not os.path.exists(base_path_results):
+        os.mkdir(base_path_results)
+    base_path_results = base_path / "results" / sas_solver / age_max / metric_for_optimization
     if not os.path.exists(base_path_results):
         os.mkdir(base_path_results)
     # directory of figures
@@ -53,15 +57,18 @@ def main(tmp_dir, sas_solver):
     base_path_figs = base_path / "figures" / sas_solver / age_max
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
+    base_path_figs = base_path / "figures" / sas_solver / age_max / metric_for_optimization
+    if not os.path.exists(base_path_figs):
+        os.mkdir(base_path_figs)
 
     transport_models = ['complete-mixing', 'piston']
 
     # merge model output into a single file
     for tm in transport_models:
         tms = tm.replace(" ", "_")
-        path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}.*.nc")
+        path = str(base_path / sas_solver / age_max / metric_for_optimization / f"SVATTRANSPORT_{tms}_{sas_solver}.*.nc")
         diag_files = glob.glob(path)
-        states_tm_file = base_path / sas_solver / age_max / f"states_{tms}.nc"
+        states_tm_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_{tms}.nc"
         if not os.path.exists(states_tm_file):
             click.echo(f'Merge output files of {tm} into {states_tm_file.as_posix()}')
             with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
@@ -152,14 +159,14 @@ def main(tmp_dir, sas_solver):
     date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
     ds_sim_hm.Time.attrs['time_origin'] = time_origin
-    
+
     # load observations (measured data)
     path_obs = base_path.parent / "observations" / "rietholzbach_lysimeter.nc"
     ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
     days_obs = (ds_obs['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     date_obs = num2date(days_obs, units=f"days since {ds_obs['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     ds_obs = ds_obs.assign_coords(Time=("Time", date_obs))
-    
+
     # average observed soil water content of previous 5 days
     window = 5
     df_thetap = pd.DataFrame(index=date_obs,
@@ -176,16 +183,16 @@ def main(tmp_dir, sas_solver):
     df_thetap.loc[cond1, 'sc'] = 1  # dry
     df_thetap.loc[cond2, 'sc'] = 2  # normal
     df_thetap.loc[cond3, 'sc'] = 3  # wet
-    
+
     # load transport simulation
     for tm in transport_models:
         click.echo(f'Plot results of {tm}')
         tms = tm.replace(" ", "_")
-        states_tm_file = base_path / sas_solver / age_max / f"states_{tms}.nc"
+        states_tm_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_{tms}.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
         date_sim_tm = num2date(ds_sim_tm['Time'].values, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
         ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
-    
+
         # compare observations and simulations
         nrows = ds_sim_tm.dims['x']
         idx = ds_sim_tm.Time.values  # time index
@@ -231,12 +238,12 @@ def main(tmp_dir, sas_solver):
             d18O_perc_bs[nrow, 0, :] = df_perc_18O_sim.loc[:, 'd18O_sample'].values
             # calculate observed oxygen-18 bulk sample
             df_perc_18O_obs.loc[:, 'd18O_perc_bs'] = df_perc_18O_obs['d18O_perc_obs'].fillna(method='bfill', limit=14)
-    
+
             perc_sample_sum_obs = df_perc_18O_sim.join(df_perc_18O_obs).groupby(['sample_no']).sum().loc[:, 'perc_obs']
             sample_no['perc_obs_sum'] = perc_sample_sum_obs.values
             df_perc_18O_sim = df_perc_18O_sim.join(sample_no['perc_obs_sum'])
             df_perc_18O_sim.loc[:, 'perc_obs_sum'] = df_perc_18O_sim.loc[:, 'perc_obs_sum'].fillna(method='bfill', limit=14)
-    
+
             # join observations on simulations
             for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
                 obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
@@ -244,7 +251,7 @@ def main(tmp_dir, sas_solver):
                 df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
                 df_obs.loc[:, 'obs'] = obs_vals
                 df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
-    
+
                 if sc > 0:
                     df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
                     rows = (df_rows['sc'].values == sc)
@@ -266,7 +273,7 @@ def main(tmp_dir, sas_solver):
             ax.plot(ds_sim_tm.Time.values, ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=0).values, color='red', zorder=2)
             ax.scatter(df_eval.index, df_eval.iloc[:, 0], color='red', s=4, zorder=1)
             ax.scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=4, zorder=3)
-    
+
         # write figure to .png
         ax.set_ylabel(r'$\delta^{18}$O [‰]')
         ax.set_xlabel('Time [year]')
@@ -276,14 +283,14 @@ def main(tmp_dir, sas_solver):
         file = base_path_figs / f"d18O_perc_sim_obs_{tms}.png"
         fig.savefig(file, dpi=250)
         plt.close('all')
-    
+
         # write to .txt
         file = base_path_results / f"params_metrics_{tms}.txt"
         df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
-    
+
         # select best simulation
         idx_best = df_params_metrics['KGE_C_iso_q_ss'].idxmax()
-    
+
         # dotty plots
         df_metrics = df_params_metrics.loc[:, ['KGE_C_iso_q_ss']]
         df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
@@ -306,13 +313,13 @@ def main(tmp_dir, sas_solver):
         for j in range(ncol):
             xlabel = labs._LABS[df_params.columns[j]]
             ax[-1, j].set_xlabel(xlabel)
-    
+
         ax[0, 0].set_ylabel(r'$KGE_{\delta^{18}O_{PERC}}$ [-]')
         fig.tight_layout()
         file = base_path_figs / f"dotty_plots_{tms}.png"
         fig.savefig(file, dpi=250)
         plt.close('all')
-    
+
         var_sim = 'q_ss'
         # calculate upper interquartile travel time for each time step
         df_age = pd.DataFrame(index=idx[2:], columns=['MTT', 'TT_50', 'TT25', 'TT75', 'MRT', 'RT_50', 'RT25', 'RT75'])
@@ -325,7 +332,7 @@ def main(tmp_dir, sas_solver):
         df_age.loc[:, 'RT25'] = ds_sim_tm["rt25_s"].isel(x=idx_best, y=0).values[2:]
         df_age.loc[:, 'RT75'] = ds_sim_tm["rt75_s"].isel(x=idx_best, y=0).values[2:]
         df_age.loc[:, var_sim] = ds_sim_hm[var_sim].isel(x=idx_best, y=0).values[2:]
-    
+
         # mean and median travel time over entire simulation period
         df_age_mean = pd.DataFrame(index=['avg'], columns=['MTT', 'TT_50', 'MRT', 'RT_50'])
         df_age_mean.loc['avg', 'MTT'] = onp.nanmean(df_age['MTT'].values)
@@ -335,7 +342,7 @@ def main(tmp_dir, sas_solver):
         file_str = 'age_mean_%s_%s.csv' % (var_sim, tms)
         path_csv = base_path_figs / file_str
         df_age_mean.to_csv(path_csv, header=True, index=True, sep="\t")
-    
+
         # plot mean and median travel time
         fig, axes = plt.subplots(2, 1, sharex=True, figsize=(6, 3))
         axes[0].plot(df_age.index, df_age['MTT'], ls='--', lw=2, color='magenta')
@@ -361,7 +368,7 @@ def main(tmp_dir, sas_solver):
         file_str = 'mean_median_tt_%s_%s.pdf' % (var_sim, tms)
         path_fig = base_path_figs / file_str
         fig.savefig(path_fig, dpi=250)
-    
+
         # plot mean and median travel time and residence time
         fig, axes = plt.subplots(2, 1, sharex=True, figsize=(6, 3))
         axes[0].plot(df_age.index, df_age['MRT'], ls='--', lw=2, color='magenta')
@@ -395,7 +402,7 @@ def main(tmp_dir, sas_solver):
         file_str = 'mean_median_rt_tt_%s_%s.pdf' % (var_sim, tms)
         path_fig = base_path_figs / file_str
         fig.savefig(path_fig, dpi=250)
-    
+
         # plot observed and simulated d18O in percolation
         fig, ax = plt.subplots(figsize=(6, 1.5))
         # join observations on simulations
@@ -418,7 +425,7 @@ def main(tmp_dir, sas_solver):
         file = base_path_figs / f"d18O_perc_sim_obs_{tms}_best.png"
         fig.savefig(file, dpi=250)
         plt.close('all')
-    
+
         # plot numerical errors
         sd_dS_num_error = '{:.2e}'.format(onp.std(ds_sim_tm['dS_num_error'].isel(x=idx_best, y=0).values))
         max_dS_num_error = '{:.2e}'.format(onp.max(ds_sim_tm['dS_num_error'].isel(x=idx_best, y=0).values))
@@ -446,7 +453,7 @@ def main(tmp_dir, sas_solver):
         file_str = 'num_errors_%s.pdf' % (tms)
         path_fig = base_path_figs / file_str
         fig.savefig(path_fig, dpi=250)
-    
+
         # write states of best hydrologic simulation corresponding to best transport simulation
         ds_sim_hm_best = ds_sim_hm.loc[dict(x=idx_best)]
         ds_sim_hm_best.attrs['title'] = f'Best hydrologic simulation corresponding to best {tm} oxygen-18 simulation'
@@ -456,12 +463,12 @@ def main(tmp_dir, sas_solver):
         ds_sim_hm_best.Time.attrs['time_origin'] = ds_sim_hm['Time'].attrs['time_origin']
         file = base_path / f"states_hm_best_for_{tms}.nc"
         ds_sim_hm_best.to_netcdf(file, engine="h5netcdf")
-    
+
         # write simulated bulk sample to output file
         ds_sim_tm = ds_sim_tm.load()  # required to release file lock
         ds_sim_tm = ds_sim_tm.close()
         del ds_sim_tm
-        states_tm_file = base_path / sas_solver / age_max / f"states_{tms}.nc"
+        states_tm_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_{tms}.nc"
         with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
             try:
                 v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)

@@ -29,6 +29,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
     else:
         base_path = Path(__file__).parent
     age_max = "age_max_1500_days"
+    metric_for_optimization = "optimized_with_KGE_perc"
     # directory of results
     base_path_results = base_path / "results"
     if not os.path.exists(base_path_results):
@@ -39,6 +40,9 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
     base_path_results = base_path / "results" / sas_solver / age_max
     if not os.path.exists(base_path_results):
         os.mkdir(base_path_results)
+    base_path_results = base_path / "results" / sas_solver / age_max / metric_for_optimization
+    if not os.path.exists(base_path_results):
+        os.mkdir(base_path_results)
     # directory of figures
     base_path_figs = base_path / "figures"
     if not os.path.exists(base_path_figs):
@@ -47,6 +51,9 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
     base_path_figs = base_path / "figures" / sas_solver / age_max
+    if not os.path.exists(base_path_figs):
+        os.mkdir(base_path_figs)
+    base_path_figs = base_path / "figures" / sas_solver / age_max / metric_for_optimization
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
@@ -65,10 +72,10 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
     for tm_structure in tm_structures:
         for diagnostic in diagnostics:
             tms = tm_structure.replace(" ", "_")
-            path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}_*.{diagnostic}.nc")
+            path = str(base_path / sas_solver / age_max / metric_for_optimization / f"SVATTRANSPORT_{tms}_{sas_solver}_*.{diagnostic}.nc")
             diag_files = glob.glob(path)
             if diag_files:
-                diag_file = base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}.{diagnostic}.nc"
+                diag_file = base_path / sas_solver / age_max / metric_for_optimization / f"SVATTRANSPORT_{tms}_{sas_solver}.{diagnostic}.nc"
                 if not os.path.exists(diag_file):
                     click.echo(f'Merge {diagnostic} of {tm_structure} ...')
                     # initial diagnostic file
@@ -174,8 +181,8 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                                                         units=var_obj.attrs["units"])
                                         del var_obj, vals
 
-    states_hm1_file = base_path / sas_solver / age_max / "states_hm100_bootstrap.nc"
-    states_hm_mc_file = base_path / sas_solver / age_max / "states_hm_for_tm_mc.nc"
+    states_hm1_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm100_bootstrap.nc"
+    states_hm_mc_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
     n_repeat = int(nsamples / split_size)
     if not os.path.exists(states_hm_mc_file):
         click.echo('Repeat hydrologic simualtions ...')
@@ -227,9 +234,9 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
     # merge results into single file
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}.*.nc")
+        path = str(base_path / sas_solver / age_max / metric_for_optimization / f"SVATTRANSPORT_{tms}_{sas_solver}.*.nc")
         diag_files = glob.glob(path)
-        states_tm_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_{tms}_monte_carlo.nc"
         if not os.path.exists(states_tm_file):
             click.echo(f'Merge output files of {tm_structure} into {states_tm_file.as_posix()}')
             with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
@@ -326,7 +333,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                                 del var_obj, vals
 
     # load hydrologic simulation
-    states_hm_file = base_path / sas_solver / age_max / "states_hm_for_tm_mc.nc"
+    states_hm_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -363,7 +370,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
             click.echo(f'Calculate metrics for {tm_structure} ...')
 
             # load transport simulation
-            states_tm_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
+            states_tm_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_{tms}_monte_carlo.nc"
             ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
             days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
             date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -477,7 +484,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
             # write simulated bulk sample to output file
             ds_sim_tm = ds_sim_tm.load()
             ds_sim_tm = ds_sim_tm.close()
-            states_tm_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
+            states_tm_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_{tms}_monte_carlo.nc"
             with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
                 try:
                     v = f.create_variable('d18O_perc_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
@@ -556,9 +563,9 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
 
         # write SAS parameters of best model run
         click.echo(f'Write SAS params of best {tm_structure} simulation ...')
-        states_tm_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_{tms}_monte_carlo.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-        params_tm_file = base_path / sas_solver / age_max / f"sas_params_{tms}.nc"
+        params_tm_file = base_path / sas_solver / age_max / metric_for_optimization / f"sas_params_{tms}.nc"
         with h5netcdf.File(params_tm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
@@ -610,8 +617,8 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
 
         # write states of best transport simulation
         click.echo(f'Write states of best {tm_structure} simulation ...')
-        states_tm_mc_file = base_path / sas_solver / age_max / f"states_{tms}_monte_carlo.nc"
-        states_tm_file = base_path / sas_solver / age_max / f"states_best_{tms}.nc"
+        states_tm_mc_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_{tms}_monte_carlo.nc"
+        states_tm_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_best_{tms}.nc"
         with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
@@ -699,7 +706,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
         click.echo(f'Write states of best hydrologic simulation corresponding to {tm_structure} ...')
 
         # write states of best hydrologic simulation corresponding to best transport simulation
-        states_hm_mc_file = base_path / sas_solver / age_max / "states_hm_for_tm_mc.nc"
+        states_hm_mc_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
         ds_hm_for_tm_mc = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
         ds_hm_best = ds_sim_hm.loc[dict(x=idx_best)]
         ds_hm_best.attrs['title'] = f'Best hydrologic simulation corresponding to best {tm_structure} oxygen-18 simulation'
@@ -707,7 +714,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
         ds_hm_best = ds_hm_best.assign_coords(Time=("Time", days))
         ds_hm_best.Time.attrs['units'] = "days"
         ds_hm_best.Time.attrs['time_origin'] = ds_hm_for_tm_mc['Time'].attrs['time_origin']
-        file = base_path / sas_solver / age_max / f"states_hm_best_for_{tms}.nc"
+        file = base_path / sas_solver / age_max / metric_for_optimization / f"states_hm_best_for_{tms}.nc"
         ds_hm_best.to_netcdf(file, engine="h5netcdf")
     return
 

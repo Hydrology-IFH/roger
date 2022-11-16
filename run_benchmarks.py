@@ -251,7 +251,7 @@ def run(**kwargs):
                     else:
                         # submit job to queue
                         if backend in ['numpy', 'jax']:
-                            pmem_serial = int(4000 * (size / 10000))
+                            pmem_serial = int(4000 * (size / 500))
                             if pmem_serial > 128000:
                                 pmem_serial = 128000
                             cmd = f"qsub -q short -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=1,walltime=2:00:00,pmem={pmem_serial}mb job.sh"
@@ -262,7 +262,7 @@ def run(**kwargs):
                             else:
                                 nnodes = int(nproc/28)
                                 ppn = 28
-                            cmd = f"qsub -q short -N {f.split('.')[0]}_{backend}_{real_size} -l nodes={nnodes}:ppn={ppn},walltime=2:00:00,pmem={pmem}mb job.sh"
+                            cmd = f"qsub -q short -N {f.split('.')[0]}_{backend}_{real_size} -l nodes={nnodes}:ppn={ppn},walltime=2:00:00,pmem=4000mb job.sh"
                         elif backend in ['jax-gpu']:
                             cmd = f"qsub -q gpu -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=1:gpus=1:default,walltime=2:00:00,pmem=24000mb job.sh"
                         elif backend in ['jax-gpu-mpi']:

@@ -93,21 +93,21 @@ def plot_benchmarks(infiles, xaxis, norm_component):
 
         title_kwargs = dict(fontdict=dict(weight="bold", size=11), ha="left", x=0.05, y=1.05)
         if xaxis == "nproc":
-            plt.xlabel("Number of MPI processes (# CPU cores)")
+            plt.xlabel("Number of MPI processes [# CPU cores]")
             mantissa, exponent = f"{list(sizes)[0]:.1e}".split("e")
             exponent = exponent.lstrip("+0")
             plt.title(f"Benchmark '{benchmark}' for size {mantissa} $\\times$ 10$^{{{exponent}}}$", **title_kwargs)
 
         elif xaxis == "size":
             nproc = list(nprocs)[0]
-            plt.xlabel("Grid size (# grid cells)")
+            plt.xlabel("Grid size [# grid cells]")
             plt.title(f"Benchmark '{benchmark}' on {nproc} processes", **title_kwargs)
 
         if norm_component:
-            plt.ylabel(f"Relative speedup to {norm_component} (-)")
+            plt.ylabel(f"Relative speedup to {norm_component} [-]")
             plt.text(0.05, 1.05, "Speedup (higher is better)", transform=ax.transAxes, va="top", color="0.4")
         else:
-            plt.ylabel("Time per iteration (s)")
+            plt.ylabel("Average time per iteration [s]")
             plt.text(0.05, 1.05, "Wall time (lower is better)", transform=ax.transAxes, va="top", color="0.4")
 
         plt.xscale("log")
@@ -140,11 +140,11 @@ def plot_benchmarks(infiles, xaxis, norm_component):
 
         suffix = ""
         if norm_component:
-            suffix = f"-speedup_{norm_component}"
+            suffix = f"_speedup_{norm_component}"
         else:
-            suffix = "-scaling"
+            suffix = "_scaling"
 
-        fig.savefig(f"{benchmark}-{xaxis}{suffix}.png")
+        fig.savefig(f"{benchmark.split('_')[0]}_{xaxis}{suffix}.png")
         plt.close(fig)
 
 

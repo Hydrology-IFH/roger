@@ -17,7 +17,7 @@ We run the same model code with all Roger backends (``numpy``, ``numpy-mpi``, ``
    :width: 500px
    :align: center
 
-.. figure:: /_images/benchmarks/oneD/oneD_speedup_numpy.png
+.. figure:: /_images/benchmarks/oneD/oneD_size_speedup_numpy.png
   :width: 500px
   :align: center
 
