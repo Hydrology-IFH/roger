@@ -25,7 +25,7 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
         _base_path = Path(__file__).parent
         _tm_structure = transport_model_structure.replace("_", " ")
         _input_dir = _base_path / "input"
-        _states_hm_file = 'states_hm1.nc'
+        _states_hm_file = 'states_hm10_bootstrap.nc'
         # load parameter boundaries
         _file_params = _base_path / "param_bounds.yml"
         with open(_file_params, 'r') as file:
