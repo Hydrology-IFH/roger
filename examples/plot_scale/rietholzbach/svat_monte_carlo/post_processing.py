@@ -441,7 +441,7 @@ def main(tmp_dir):
             plt.close('all')
 
         # select best model run
-        idx_best1 = df_params_metrics['KGE_multi'].idxmax()
+        idx_best1 = df_params_metrics['KGE_q_ss'].idxmax()
 
         # write states of best simulation
         click.echo('Write best simulation ...')
@@ -496,7 +496,7 @@ def main(tmp_dir):
         click.echo('Write best 100 simulations ...')
         df_params_metrics1 = df_params_metrics.copy()
         df_params_metrics1.loc[:, 'id'] = range(len(df_params_metrics1.index))
-        df_params_metrics1 = df_params_metrics1.sort_values(by=['KGE_multi'], ascending=False)
+        df_params_metrics1 = df_params_metrics1.sort_values(by=['KGE_q_ss'], ascending=False)
         idx_best100 = df_params_metrics1.loc[:df_params_metrics1.index[99], 'id'].values.tolist()
         # write states of best model run
         states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"
