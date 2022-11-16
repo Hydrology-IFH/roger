@@ -2,7 +2,7 @@
 #PBS -l nodes=1:ppn=1:gpus=1:default
 #PBS -l walltime=6:00:00
 #PBS -l pmem=4000mb
-#PBS -N oxygen18_deterministic_svat_tvt_mc_0
+#PBS -N oxygen18_deterministic_svat_tvt_mc
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
 

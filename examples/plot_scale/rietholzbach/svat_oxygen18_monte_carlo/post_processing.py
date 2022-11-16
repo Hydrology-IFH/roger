@@ -29,7 +29,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
     else:
         base_path = Path(__file__).parent
     age_max = "age_max_1500_days"
-    metric_for_optimization = "optimized_with_KGE_perc"
+    metric_for_optimization = "optimized_with_KGE_perc_hm100"
     # directory of results
     base_path_results = base_path / "results"
     if not os.path.exists(base_path_results):
