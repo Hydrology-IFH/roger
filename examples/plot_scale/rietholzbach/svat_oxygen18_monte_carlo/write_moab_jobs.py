@@ -15,12 +15,15 @@ def main(job_type, sas_solver, split_size, nsamples):
 
     transport_models_abrev = {'preferential': 'pf',
                               'advection-dispersion': 'ad',
+                              'preferential + advection-dispersion': 'pfad',
+                              'older-preference': 'op',
                               'time-variant advection-dispersion': 'adt',
                               'time-variant': 'tv',
+                              'time-variant-transp': 'tvt',
                               'power': 'pow'}
 
     tracer = 'oxygen18'
-    transport_models = ['advection-dispersion', 'time-variant advection-dispersion', 'preferential', 'power', 'time-variant']
+    transport_models = ['advection-dispersion', 'time-variant advection-dispersion', 'preferential + advection-dispersion', 'preferential', 'power', 'time-variant', 'time-variant-transp', 'older-preference']
     for tm in transport_models:
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]

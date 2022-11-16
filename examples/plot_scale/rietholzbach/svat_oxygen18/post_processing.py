@@ -152,7 +152,7 @@ def main(tmp_dir, sas_solver):
                                                units=var_obj.attrs["units"])
 
     # load hydrologic simulation
-    states_hm_file = base_path.parent / "svat_monte_carlo" / "states_hm100.nc"
+    states_hm_file = base_path.parent / "svat_monte_carlo" / metric_for_optimization / "states_hm100.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     time_origin = ds_sim_hm['Time'].attrs['time_origin']
