@@ -83,7 +83,7 @@ def main():
             vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
             vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 226)
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 256)
             vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 766)
             vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.094)
             vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.066)
