@@ -153,23 +153,34 @@ for tm_structure in tm_structures:
 for i, tm_structure in enumerate(tm_structures):
     tms = tm_structure.replace(" ", "_")
     # load transport simulation
-    states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi" / f"states_{tms}_monte_carlo.nc"
+    states_tm_file = base_path / f"states_{tms}.nc"
     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+    fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
     ax.flatten()[0].plot(ds_sim_tm['Time'].values,
                 ds_sim_tm['C_iso_in'].isel(x=0, y=0).values,
-                '-', color='blue')
+                '-', color='black')
     ax.flatten()[0].set_ylabel(r'$\delta^{18}$O [‰]')
     ax.flatten()[0].set_ylim([-20, 0])
     ax.flatten()[0].set_xlim(df_obs.index[0], df_obs.index[-1])
-    ax.flatten()[i+1].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_ss'].isel(x=idx_best, y=0).values, color='red', lw=1)
-    ax.flatten()[i+1].plot(ds_hydrus_18O['Time'].values, ds_hydrus_18O['d18O_perc'].values, color='grey', lw=1)
-    ax.flatten()[i+1].scatter(df_obs.index, df_obs.iloc[:, 0], color='blue', s=1)
-    ax[i+1].set_ylabel(r'$\delta^{18}$O [‰]')
-    ax.flatten()[i+1].set_ylim((-15, -5))
-    ax.flatten()[i+1].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in range(ds_sim_tm.dims["x"]):
+        ax.flatten()[1].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_rz'].isel(x=x, y=0).values, color='black', lw=1)
+    ax[1].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[1].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in range(ds_sim_tm.dims["x"]):
+        ax.flatten()[2].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_rz'].isel(x=x, y=0).values, color='black', lw=1)
+    ax[1].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[2].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in range(ds_sim_tm.dims["x"]):
+        ax.flatten()[3].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_ss'].isel(x=x, y=0).values, color='black', lw=1)
+    ax[3].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[3].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in range(ds_sim_tm.dims["x"]):
+        ax.flatten()[3].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_ss'].isel(x=x, y=0).values, color='black', lw=1)
+    ax[3].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[3].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
 ax[-1].set_xlabel('Time [year]')
 fig.tight_layout()
 file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"

@@ -23,11 +23,16 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         _input_dir = _base_path / "input"
 
         # custom helper functions
-        def _read_var_from_nc(self, var, path_dir, file):
+        def _read_var_from_nc(self, var, path_dir, file, group=None):
             nc_file = path_dir / file
-            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables[var]
-                return npx.array(var_obj)
+            if group:
+                with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                    var_obj = infile.groups[group].variables[var]
+                    return npx.array(var_obj)
+            else:
+                with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                    var_obj = infile.variables[var]
+                    return npx.array(var_obj)
 
         def _get_nitt(self, path_dir, file):
             nc_file = path_dir / file
