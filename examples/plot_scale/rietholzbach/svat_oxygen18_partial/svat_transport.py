@@ -5,12 +5,11 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("--id", type=int, default=None)
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['preferential', 'advection-dispersion', 'power', 'older-preference', 'preferential + advection-dispersion']), default='advection-dispersion')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
+def main(transport_model_structure, sas_solver, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, for_loop
@@ -85,10 +84,7 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            if id or id == 0:
-                identifier = f'SVATTRANSPORT_{transport_model_structure}_{sas_solver}_{id}'
-            else:
-                identifier = f'SVATTRANSPORT_{transport_model_structure}_{sas_solver}'
+            identifier = f'SVATTRANSPORT_{transport_model_structure}_{sas_solver}'
             settings.identifier = identifier
             settings.sas_solver = sas_solver
             settings.sas_solver_substeps = 6
