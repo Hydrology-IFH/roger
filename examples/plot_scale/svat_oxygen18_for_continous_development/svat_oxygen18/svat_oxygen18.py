@@ -470,8 +470,8 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                                                        "C_iso_in", "C_iso_inf_mat_rz", "C_iso_inf_pf_rz", "C_iso_inf_pf_ss", "C_iso_evap_soil", "C_iso_transp", "C_iso_cpr_rz", "C_iso_q_rz", "C_iso_q_ss",
                                                        "csa_rz", "csa_ss", "csa_s",
                                                        "SA_rz", "SA_ss", "SA_s",
-                                                       "tt_transp", "tt_q_ss",
-                                                       "mtt_transp", "mtt_q_ss"]
+                                                       "tt_transp", "tt_q_rz", "tt_q_ss",
+                                                       "mtt_transp", "mtt_q_rz", "mtt_q_ss"]
             diagnostics["average"].output_frequency = 24 * 60 * 60
             diagnostics["average"].sampling_frequency = 1
             if base_path:
