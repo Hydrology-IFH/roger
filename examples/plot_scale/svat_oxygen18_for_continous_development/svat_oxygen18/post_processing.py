@@ -159,6 +159,7 @@ for i, tm_structure in enumerate(tm_structures):
     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+    
     fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
     ax.flatten()[0].plot(ds_sim_tm['Time'].values,
                          ds_sim_tm['C_iso_in'].isel(x=0, y=0).values,
