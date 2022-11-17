@@ -66,7 +66,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                      'older-preference',
                      'preferential',
                      'power',
-                     'time-variant-transp'
+                     'time-variant-transp',
                      'time-variant']
     diagnostics = ['average',
                    'constant',
