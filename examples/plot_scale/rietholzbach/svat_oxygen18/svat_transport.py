@@ -500,7 +500,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             diagnostics = state.diagnostics
 
             diagnostics["average"].output_variables = ["C_iso_rz", "C_iso_ss", "C_iso_s",
-                                                       "C_iso_in", "C_iso_inf_mat_rz", "C_iso_inf_pf_rz", "C_iso_inf_pf_ss", "C_iso_evap_soil", "C_iso_transp", "C_iso_cpr_rz", "C_iso_q_rz", "C_iso_q_ss"
+                                                       "C_iso_in", "C_iso_inf_mat_rz", "C_iso_inf_pf_rz", "C_iso_inf_pf_ss", "C_iso_evap_soil", "C_iso_transp", "C_iso_cpr_rz", "C_iso_q_rz", "C_iso_q_ss",
                                                        "csa_rz", "csa_ss", "csa_s",
                                                        "SA_rz", "SA_ss", "SA_s"]
             diagnostics["average"].output_frequency = 24 * 60 * 60

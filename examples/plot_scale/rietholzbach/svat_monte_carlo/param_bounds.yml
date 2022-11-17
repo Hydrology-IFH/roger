@@ -18,7 +18,7 @@ frac_lp:
 theta_pwp:
 - 0.25
 - 0.35
-# saturated hydraulic conductivity (-)
+# saturated hydraulic conductivity (mm/h)
 ks:
 - 5
 - 150
