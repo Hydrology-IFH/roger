@@ -4,6 +4,8 @@ import h5netcdf
 import datetime
 from pathlib import Path
 from cftime import num2date
+from matplotlib.colors import Normalize
+import matplotlib.cm as cm
 import numpy as onp
 import xarray as xr
 import roger
@@ -51,10 +53,11 @@ tm_structures = ['advection-dispersion',
                  'preferential',
                  'preferential + advection-dispersion',
                  'power']
+tm_structures = ['advection-dispersion']
 # merge results into single file
 for tm_structure in tm_structures:
     tms = tm_structure.replace(" ", "_")
-    path = str(base_path / f"SVATTRANSPORT_{tms}_deterministic.*.nc")
+    path = str(base_path / f"SVATOXYGEN18_{tms}_deterministic.*.nc")
     diag_files = glob.glob(path)
     states_tm_file = base_path / f"states_{tms}.nc"
     if not os.path.exists(states_tm_file):
@@ -151,15 +154,25 @@ for tm_structure in tm_structures:
                                             units=var_obj.attrs["units"])
                             del var_obj, vals
 
-for i, tm_structure in enumerate(tm_structures):
-    tms = tm_structure.replace(" ", "_")
-    # load transport simulation
-    states_tm_file = base_path / f"states_{tms}.nc"
-    ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-    days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
-    
+
+tm_structure = 'advection-dispersion'
+tms = tm_structure.replace(" ", "_")
+# load transport simulation
+states_tm_file = base_path / f"states_{tms}.nc"
+ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+params_tm_file = base_path / "parameters.nc"
+ds_params = xr.open_dataset(params_tm_file, engine="h5netcdf", group=tm_structure)
+
+b_transp = onp.unique(ds_params['b_transp'].isel(y=0).values).tolist()
+a_q_rz = onp.unique(ds_params['a_q_rz'].isel(y=0).values).tolist()
+rows = onp.where((ds_params['b_transp'].isel(y=0).values == 5) & (ds_params['a_q_rz'].isel(y=0).values == 2))[0]
+cmap = cm.get_cmap('Reds')
+norm = Normalize(vmin=2, vmax=10)
+
+for b, a in zip(b_transp, a_q_rz):
     fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
     ax.flatten()[0].plot(ds_sim_tm['Time'].values,
                          ds_sim_tm['C_iso_in'].isel(x=0, y=0).values,
@@ -167,56 +180,51 @@ for i, tm_structure in enumerate(tm_structures):
     ax.flatten()[0].set_ylabel(r'$\delta^{18}$O [‰]')
     ax.flatten()[0].set_ylim([-20, 0])
     ax.flatten()[0].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
-    for x in range(ds_sim_tm.dims["x"]):
-        ax.flatten()[1].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_rz'].isel(x=x, y=0).values, color='black', lw=1)
+    for x in rows:
+        ax.flatten()[1].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_rz'].isel(x=x, y=0).values, color=cmap(ds_params['a_q_ss'].isel(x=x, y=0).values), lw=1)
     ax[1].set_ylabel(r'$\delta^{18}$O [‰]')
     ax.flatten()[1].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
-    for x in range(ds_sim_tm.dims["x"]):
-        ax.flatten()[2].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_rz'].isel(x=x, y=0).values, color='black', lw=1)
-    ax[1].set_ylabel(r'$\delta^{18}$O [‰]')
+    for x in rows:
+        ax.flatten()[2].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_rz'].isel(x=x, y=0).values, color=cmap(ds_params['a_q_ss'].isel(x=x, y=0).values), lw=1)
+    ax[2].set_ylabel(r'$\delta^{18}$O [‰]')
     ax.flatten()[2].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
-    for x in range(ds_sim_tm.dims["x"]):
-        ax.flatten()[3].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_ss'].isel(x=x, y=0).values, color='black', lw=1)
+    for x in rows:
+        ax.flatten()[3].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_ss'].isel(x=x, y=0).values, color=cmap(ds_params['a_q_ss'].isel(x=x, y=0).values), lw=1)
     ax[3].set_ylabel(r'$\delta^{18}$O [‰]')
     ax.flatten()[3].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
-    for x in range(ds_sim_tm.dims["x"]):
-        ax.flatten()[3].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_ss'].isel(x=x, y=0).values, color='black', lw=1)
-    ax[3].set_ylabel(r'$\delta^{18}$O [‰]')
-    ax.flatten()[3].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
-ax[-1].set_xlabel('Time [year]')
-fig.tight_layout()
-file = base_path_figs / f"d18O_perc_{tms}.png"
-fig.savefig(file, dpi=250)
+    for x in rows:
+        ax.flatten()[4].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_ss'].isel(x=x, y=0).values, color=cmap(ds_params['a_q_ss'].isel(x=x, y=0).values), lw=1)
+    ax[4].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[4].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    ax[4].set_xlabel('Time')
+    fig.tight_layout()
+    file = base_path_figs / f"d18O_drain_{tms}_b{b}_a{a}.png"
+    fig.savefig(file, dpi=250)
 
-fig, ax = plt.subplots(4, 1, sharey=False, figsize=(6, 5))
-for i, tm_structure in enumerate(tm_structures):
-    tms = tm_structure.replace(" ", "_")
-    # load transport simulation
-    states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi" / f"states_{tms}_monte_carlo.nc"
-    ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-    days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
-    # join observations on simulations
-    obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-    sim_vals = ds_sim_tm['C_iso_q_ss'].isel(y=0).values
-    sim_vals = onp.where((sim_vals > 0) | (sim_vals < -20), onp.nan, sim_vals)
-    sim_vals_avg = onp.nanmean(sim_vals, axis=0)
-    sim_vals_5 = onp.nanquantile(sim_vals, 0.05, axis=0)
-    sim_vals_50 = onp.nanmedian(sim_vals, axis=0)
-    sim_vals_95 = onp.nanquantile(sim_vals, 0.95, axis=0)
-    sim_vals_hydrus = ds_hydrus_18O['d18O_perc_bs'].values
-    ax.flatten()[i].plot(ds_sim_tm['Time'].values, sim_vals_avg, ls='--', color='red', lw=1)
-    ax.flatten()[i].plot(ds_sim_tm['Time'].values, sim_vals_50, ls='-', color='red', lw=1)
-    ax.flatten()[i].fill_between(ds_sim_tm['Time'].values, sim_vals_5, sim_vals_95, color='red',
-                          edgecolor=None, alpha=0.2)
-    ax.flatten()[i].plot(ds_hydrus_18O['Time'].values, sim_vals_hydrus, color='grey', lw=1)
-    ax.flatten()[i].scatter(date_obs, obs_vals, color='blue', s=1)
-    ax.flatten()[i].set_title(_LABS_TM[tm_structure])
-    ax[i].set_ylabel(r'$\delta^{18}$O [‰]')
-    ax.flatten()[i].set_ylim((-20, 0))
-    ax.flatten()[i].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
-ax[-1].set_xlabel('Time [year]')
-fig.tight_layout()
-file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_conf_int_optimized_with_{metric_for_opt}.png"
-fig.savefig(file, dpi=250)
+
+for b, a in zip(b_transp, a_q_rz):
+    fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
+    for x in rows:
+        ax.flatten()[0].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_evap_soil'].isel(x=x, y=0).values, color=cmap(ds_params['a_q_ss'].isel(x=x, y=0).values), lw=1)
+    ax[0].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[0].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in rows:
+        ax.flatten()[1].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_transp'].isel(x=x, y=0).values, color=cmap(ds_params['a_q_ss'].isel(x=x, y=0).values), lw=1)
+    ax[1].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[1].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in rows:
+        ax.flatten()[2].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_rz'].isel(x=x, y=0).values, color=cmap(ds_params['a_q_ss'].isel(x=x, y=0).values), lw=1)
+    ax[2].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[2].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in rows:
+        ax.flatten()[3].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_cpr_rz'].isel(x=x, y=0).values, color=cmap(ds_params['a_q_ss'].isel(x=x, y=0).values), lw=1)
+    ax[3].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[3].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in rows:
+        ax.flatten()[4].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_ss'].isel(x=x, y=0).values, color=cmap(ds_params['a_q_ss'].isel(x=x, y=0).values), lw=1)
+    ax[4].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[4].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    ax[4].set_xlabel('Time')
+    fig.tight_layout()
+    file = base_path_figs / f"d18O_uptake_{tms}_b{b}_a{a}.png"
+    fig.savefig(file, dpi=250)

@@ -504,7 +504,9 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                                                        "csa_rz", "csa_ss", "csa_s",
                                                        "msa_rz", "msa_ss", "msa_s",
                                                        "sa_rz", "sa_ss", "sa_s",
-                                                       "SA_rz", "SA_ss", "SA_s"]
+                                                       "SA_rz", "SA_ss", "SA_s",
+                                                       "tt_transp", "tt_q_rz", "tt_q_ss",
+                                                       "mtt_transp", "mtt_q_rz", "mtt_q_ss"]
             diagnostics["average"].output_frequency = 24 * 60 * 60
             diagnostics["average"].sampling_frequency = 1
             if base_path:
