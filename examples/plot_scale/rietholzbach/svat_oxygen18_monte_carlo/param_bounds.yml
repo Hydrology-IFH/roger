@@ -5,15 +5,15 @@ advection-dispersion:
   - 100  # upper boundary
   b_transp:
   - 1  # lower boundary
-  - 30  # upper boundary
+  - 10  # upper boundary
   # SAS parameter of percolation from root zone
   a_q_rz:
   - 1
-  - 30
+  - 5
   # SAS parameter of percolation from subsoil
   a_q_ss:
   - 1
-  - 30
+  - 5
 
 preferential + advection-dispersion:
   # SAS parameter of transpiration
@@ -22,15 +22,15 @@ preferential + advection-dispersion:
   - 100  # upper boundary
   b_transp:
   - 1  # lower boundary
-  - 30  # upper boundary
+  - 10  # upper boundary
   # SAS parameter of percolation from root zone
   b_q_rz:
   - 1
-  - 30
+  - 5
   # SAS parameter of percolation from subsoil
   a_q_ss:
   - 1
-  - 30
+  - 5
 
 time-variant advection-dispersion:
   # SAS parameter of transpiration
@@ -39,23 +39,23 @@ time-variant advection-dispersion:
   - 100  # upper boundary
   c1_transp:
   - 1
-  - 30
+  - 5
   # SAS parameter of transpiration
   c2_transp:
   - 1
-  - 30
+  - 5
   c1_q_rz:
   - 1
-  - 30
+  - 5
   c2_q_rz:
   - 1
-  - 30
+  - 5
   c1_q_ss:
   - 1
-  - 30
+  - 5
   c2_q_ss:
   - 1
-  - 30
+  - 5
 
 older-preference:
   # SAS parameter of transpiration
@@ -64,15 +64,15 @@ older-preference:
   - 100  # upper boundary
   a_transp:
   - 1  # lower boundary
-  - 30  # upper boundary
+  - 5  # upper boundary
   # SAS parameter of percolation from root zone
   a_q_rz:
   - 1
-  - 30
+  - 5
   # SAS parameter of percolation from subsoil
   a_q_ss:
   - 1
-  - 30
+  - 5
 
 preferential:
   b_evap_soil:
@@ -80,13 +80,13 @@ preferential:
   - 100  # upper boundary
   b_transp:
   - 1
-  - 30
+  - 10
   b_q_rz:
   - 1
-  - 30
+  - 5
   b_q_ss:
   - 1
-  - 30
+  - 5
 
 power:
   k_evap_soil:
@@ -94,12 +94,12 @@ power:
   - 0.2  # upper boundary
   k_transp:
   - 0.1
-  - 5
+  - 1
   k_q_rz:
-  - 0.1
+  - 1
   - 5
   k_q_ss:
-  - 0.1
+  - 1
   - 5
 
 time-variant:
@@ -108,13 +108,13 @@ time-variant:
   - 100  # upper boundary
   c_transp:
   - 1
-  - 30
+  - 10
   c_q_rz:
   - 1
-  - 30
+  - 10
   a_q_ss:
   - 1
-  - 30
+  - 10
 
 time-variant-transp:
   b_evap_soil:
@@ -122,10 +122,10 @@ time-variant-transp:
   - 100  # upper boundary
   c_transp:
   - 1
-  - 30
+  - 10
   a_q_rz:
   - 1
-  - 30
+  - 5
   a_q_ss:
   - 1
-  - 30
+  - 5

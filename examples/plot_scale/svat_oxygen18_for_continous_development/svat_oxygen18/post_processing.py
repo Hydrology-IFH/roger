@@ -57,7 +57,7 @@ ds_params = xr.open_dataset(params_tm_file, engine="h5netcdf", group=tm_structur
 
 b_transp = onp.unique(ds_params['b_transp'].isel(y=0).values).tolist()
 a_q_rz = onp.unique(ds_params['a_q_rz'].isel(y=0).values).tolist()
-cmap = cm.get_cmap('Reds_r')
+cmap = cm.get_cmap('Reds')
 norm = Normalize(vmin=2, vmax=10)
 
 for b, a in zip(b_transp, a_q_rz):
@@ -83,15 +83,17 @@ for b, a in zip(b_transp, a_q_rz):
     ax.flatten()[3].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
     for x in rows:
         ax.flatten()[4].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_ss'].isel(x=x, y=0).values, color=cmap(norm(ds_params['a_q_ss'].isel(x=x, y=0).values)), lw=1)
+    ax.flatten()[4].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_ss'].isel(x=x, y=0).values, color=cmap(norm(ds_params['a_q_ss'].isel(x=x, y=0).values)), lw=1)
     ax[4].set_ylabel(r'$\delta^{18}$O [‰]')
     ax.flatten()[4].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
     ax[4].set_xlabel('Time')
     fig.tight_layout()
-    file = base_path_figs / f"d18O_drain_{tms}_b{int(b)}_a{int(a)}.png"
+    file = base_path_figs / f"d18O_drain_{tms}_b{int(b)}_a{int(a)}_partial_q_ss.png"
     fig.savefig(file, dpi=250)
-
+plt.close('all')
 
 for b, a in zip(b_transp, a_q_rz):
+    rows = onp.where((ds_params['b_transp'].isel(y=0).values == b) & (ds_params['a_q_rz'].isel(y=0).values == a))[0]
     fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
     for x in rows:
         ax.flatten()[0].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_evap_soil'].isel(x=x, y=0).values, color=cmap(norm(ds_params['a_q_ss'].isel(x=x, y=0).values)), lw=1)
@@ -115,7 +117,71 @@ for b, a in zip(b_transp, a_q_rz):
     ax.flatten()[4].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
     ax[4].set_xlabel('Time')
     fig.tight_layout()
-    file = base_path_figs / f"d18O_uptake_{tms}_b{int(b)}_a{int(a)}.png"
+    file = base_path_figs / f"d18O_uptake_{tms}_b{int(b)}_a{int(a)}_partial_q_ss.png"
     fig.savefig(file, dpi=250)
+plt.close('all')
 
+a_q_rz = onp.unique(ds_params['a_q_rz'].isel(y=0).values).tolist()
+a_q_ss = onp.unique(ds_params['a_q_ss'].isel(y=0).values).tolist()
+cmap = cm.get_cmap('Greens')
+norm = Normalize(vmin=2, vmax=30)
+
+for a1, a2 in zip(a_q_rz, a_q_ss):
+    rows = onp.where((ds_params['a_q_rz'].isel(y=0).values == a1) & (ds_params['a_q_ss'].isel(y=0).values == a2))[0]
+    fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
+    ax.flatten()[0].plot(ds_sim_tm['Time'].values,
+                         ds_sim_tm['C_iso_in'].isel(x=0, y=0).values,
+                         '-', color='black')
+    ax.flatten()[0].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[0].set_ylim([-20, 0])
+    ax.flatten()[0].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in rows:
+        ax.flatten()[1].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_rz'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+    ax[1].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[1].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in rows:
+        ax.flatten()[2].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_rz'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+    ax[2].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[2].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in rows:
+        ax.flatten()[3].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_ss'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+    ax[3].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[3].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in rows:
+        ax.flatten()[4].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_ss'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+    ax[4].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[4].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    ax[4].set_xlabel('Time')
+    fig.tight_layout()
+    file = base_path_figs / f"d18O_drain_{tms}_a{int(a1)}_a{int(a2)}_partial_transp.png"
+    fig.savefig(file, dpi=250)
+plt.close('all')
+
+for a1, a2 in zip(a_q_rz, a_q_ss):
+    rows = onp.where((ds_params['a_q_rz'].isel(y=0).values == a1) & (ds_params['a_q_ss'].isel(y=0).values == a2))[0]
+    fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
+    for x in rows:
+        ax.flatten()[0].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_evap_soil'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+    ax[0].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[0].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in rows:
+        ax.flatten()[1].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_transp'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+    ax[1].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[1].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in rows:
+        ax.flatten()[2].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_rz'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+    ax[2].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[2].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in rows:
+        ax.flatten()[3].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_cpr_rz'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+    ax[3].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[3].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    for x in rows:
+        ax.flatten()[4].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_ss'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+    ax[4].set_ylabel(r'$\delta^{18}$O [‰]')
+    ax.flatten()[4].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    ax[4].set_xlabel('Time')
+    fig.tight_layout()
+    file = base_path_figs / f"d18O_uptake_{tms}_a{int(a1)}_a{int(a2)}_partial_transp.png"
+    fig.savefig(file, dpi=250)
 plt.close('all')

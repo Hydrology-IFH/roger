@@ -1,10 +1,10 @@
 advection-dispersion:
   b_transp:
-  - 2  # lower boundary
-  - 30  # upper boundary
+  - 1  # lower boundary
+  - 10  # upper boundary
   - 10  # number of samples
   a_q_rz:
-  - 2
+  - 1
   - 10
   - 10
   a_q_ss:
@@ -14,11 +14,11 @@ advection-dispersion:
 
 older-preference:
   a_transp:
-  - 2
+  - 1
   - 10
   - 10
   a_q_rz:
-  - 2
+  - 1
   - 10
   - 10
   a_q_ss:
@@ -28,11 +28,11 @@ older-preference:
 
 preferential:
   b_transp:
-  - 2
+  - 1
   - 30
   - 10
   b_q_rz:
-  - 2
+  - 1
   - 10
   - 10
   b_q_ss:
