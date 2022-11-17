@@ -54,7 +54,7 @@ def main(tmp_dir):
             settings.identifier = "SVAT"
 
             # total grid numbers in x- and y-direction
-            settings.nx, settings.ny = 1, 1
+            settings.nx, settings.ny = len(self._read_var_from_nc("x", self._base_path, 'parameters.nc')), len(self._read_var_from_nc("y", self._base_path, 'parameters.nc'))
             # derive total number of time steps from forcing
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
