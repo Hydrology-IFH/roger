@@ -1,24 +1,24 @@
 # density of vertical macropores (1/m2)
 dmpv:
-- 1  # lower boundary
+- 10  # lower boundary
 - 300  # upper boundary
 # total length of vertical macropores (mm)
 lmpv:
-- 1
+- 15
 - 1500
 # effective porosity of soil (-)
 theta_eff:
-- 0.15
-- 0.35
+- 0.2
+- 0.4
 # fraction of large pores (-)
 frac_lp:
 - 0.1
 - 0.9
 # permanent wilting point of soil (-)
 theta_pwp:
-- 0.15
-- 0.33
+- 0.25
+- 0.35
 # saturated hydraulic conductivity (-)
 ks:
-- 1
+- 5
 - 150
