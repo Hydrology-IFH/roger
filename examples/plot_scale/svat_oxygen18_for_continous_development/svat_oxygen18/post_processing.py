@@ -4,7 +4,35 @@ import h5netcdf
 import datetime
 from pathlib import Path
 import numpy as onp
+import xarray as xr
 import roger
+import matplotlib as mpl
+import seaborn as sns
+mpl.use("agg")
+import matplotlib.pyplot as plt  # noqa: E402
+mpl.rcParams['font.size'] = 6
+mpl.rcParams['axes.titlesize'] = 6
+mpl.rcParams['axes.labelsize'] = 7
+mpl.rcParams['xtick.labelsize'] = 6
+mpl.rcParams['ytick.labelsize'] = 6
+mpl.rcParams['legend.fontsize'] = 6
+mpl.rcParams['legend.title_fontsize'] = 7
+sns.set_style("ticks")
+sns.plotting_context("paper", font_scale=1, rc={'font.size': 6.0,
+                                                'axes.labelsize': 7.0,
+                                                'axes.titlesize': 8.0,
+                                                'xtick.labelsize': 6.0,
+                                                'ytick.labelsize': 6.0,
+                                                'legend.fontsize': 6.0,
+                                                'legend.title_fontsize': 7.0})
+
+_LABS_TM = {'complete-mixing': 'CM',
+            'piston': 'PI',
+            'advection-dispersion': 'AD',
+            'older-prefrence': 'OP',
+            'power': 'POW',
+            'preferential + advection-dispersion': 'PF-AD',
+            'preferential': 'PF'}
 
 
 base_path = Path(__file__).parent
@@ -122,21 +150,17 @@ for tm_structure in tm_structures:
                                             units=var_obj.attrs["units"])
                             del var_obj, vals
 
-
+for tm_structure in tm_structures:
     fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
     df_obs = pd.DataFrame(index=date_obs)
     df_obs.loc[:, 'd18O_prec'] = ds_obs['d18O_PREC'].isel(x=0, y=0).values
     ax.flatten()[0].plot(df_obs.index,
                 df_obs.loc[:, 'd18O_prec'].fillna(method='bfill'),
                 '-', color='blue')
-    ax.flatten()[0].scatter(df_obs.index,
-                   df_obs.loc[:, 'd18O_prec'],
-                   color='blue', s=1)
     ax.flatten()[0].set_ylabel(r'$\delta^{18}$O [‰]')
     ax.flatten()[0].set_ylim([-20, 0])
     ax.flatten()[0].set_xlim(df_obs.index[0], df_obs.index[-1])
     for i, tm_structure in enumerate(tm_structures):
-        idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
         tms = tm_structure.replace(" ", "_")
         # load transport simulation
         states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi" / f"states_{tms}_monte_carlo.nc"
@@ -144,6 +168,12 @@ for tm_structure in tm_structures:
         days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
         date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
         ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+        ax.flatten()[0].plot(df_obs.index,
+                    df_obs.loc[:, 'd18O_prec'].fillna(method='bfill'),
+                    '-', color='blue')
+        ax.flatten()[0].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[0].set_ylim([-20, 0])
+        ax.flatten()[0].set_xlim(df_obs.index[0], df_obs.index[-1])
         # join observations on simulations
         obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
         # sim_vals = ds_sim_tm['d18O_perc_bs'].isel(x=idx_best, y=0).values
