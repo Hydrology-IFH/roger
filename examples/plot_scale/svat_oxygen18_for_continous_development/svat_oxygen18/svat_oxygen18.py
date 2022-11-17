@@ -86,7 +86,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
 
             settings.enable_offline_transport = True
             settings.enable_oxygen18 = True
-            settings.tm_structure = self._tm_structure
+            settings.tm_structure = transport_model_structure
 
         @roger_routine
         def set_grid(self, state):
