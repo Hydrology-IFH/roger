@@ -48,13 +48,17 @@ def main(split_size, sas_solver, tmp_dir):
         os.mkdir(base_path_figs)
 
     # merge diagnostics into single file
-    tm_structures = ['advection-dispersion',
+    tm_structures = ['complete-mixing',
+                     'piston',
+                     'advection-dispersion',
                      'time-variant advection-dispersion']
     diagnostics = ['average',
                    'constant',
                    'maximum']
     for tm_structure in tm_structures:
-        if tm_structure in ['advection-dispersion']:
+        if tm_structure in ['complete-mixing', 'piston']:
+            nsamples = 1024 * 8
+        elif tm_structure in ['advection-dispersion']:
             nsamples = 1024 * 11
         elif tm_structure in ['time-variant advection-dispersion']:
             nsamples = 1024 * 14
@@ -118,7 +122,7 @@ def main(split_size, sas_solver, tmp_dir):
                         for i, dfs in enumerate(diag_files):
                             x1 = x1x2[i]
                             x2 = x1x2[i+1]
-                            file = base_path / sas_solver / f"SVATTRANSPORT_{tms}_{sas_solver}_{x1}_{x2}.{diagnostic}.nc"
+                            file = base_path / sas_solver / age_max / f"SVATTRANSPORT_{tms}_{sas_solver}_{x1}_{x2}.{diagnostic}.nc"
                             with h5netcdf.File(file, 'r', decode_vlen_strings=False) as df:
                                 for var_sim in list(df.variables.keys()):
                                     var_obj = df.variables.get(var_sim)
