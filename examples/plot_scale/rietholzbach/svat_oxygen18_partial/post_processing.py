@@ -78,7 +78,7 @@ def main(sas_solver, tmp_dir):
         fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
         ax.flatten()[0].plot(ds_sim_tm['Time'].values,
                              ds_sim_tm['C_iso_in'].isel(x=0, y=0).values,
-                             '-', color='black')
+                             '-', color='blue')
         ax.flatten()[0].set_ylabel(r'$\delta^{18}$O [‰]')
         ax.flatten()[0].set_ylim([-20, 0])
         ax.flatten()[0].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
@@ -104,6 +104,7 @@ def main(sas_solver, tmp_dir):
         fig.tight_layout()
         file = base_path_figs / f"d18O_drain_{tms}_b{int(b)}_a{int(a)}_partial_q_ss.png"
         fig.savefig(file, dpi=250)
+    plt.close('all')
 
     for b, a in zip(b_transp, a_q_rz):
         rows = onp.where((ds_params['b_transp'].isel(y=0).values == b) & (ds_params['a_q_rz'].isel(y=0).values == a))[0]
@@ -133,18 +134,19 @@ def main(sas_solver, tmp_dir):
         fig.tight_layout()
         file = base_path_figs / f"d18O_uptake_{tms}_b{int(b)}_a{int(a)}_partial_q_ss.png"
         fig.savefig(file, dpi=250)
+    plt.close('all')
 
     a_q_rz = onp.unique(ds_params['a_q_rz'].isel(y=0).values).tolist()
     a_q_ss = onp.unique(ds_params['a_q_ss'].isel(y=0).values).tolist()
     cmap = cm.get_cmap('Greens')
-    norm = Normalize(vmin=2, vmax=30)
+    norm = Normalize(vmin=1, vmax=10)
 
     for a1, a2 in zip(a_q_rz, a_q_ss):
         rows = onp.where((ds_params['a_q_rz'].isel(y=0).values == a1) & (ds_params['a_q_ss'].isel(y=0).values == a2))[0]
         fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
         ax.flatten()[0].plot(ds_sim_tm['Time'].values,
                              ds_sim_tm['C_iso_in'].isel(x=0, y=0).values,
-                             '-', color='black')
+                             '-', color='blue')
         ax.flatten()[0].set_ylabel(r'$\delta^{18}$O [‰]')
         ax.flatten()[0].set_ylim([-20, 0])
         ax.flatten()[0].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
@@ -169,6 +171,7 @@ def main(sas_solver, tmp_dir):
         fig.tight_layout()
         file = base_path_figs / f"d18O_drain_{tms}_a{int(a1)}_a{int(a2)}_partial_transp.png"
         fig.savefig(file, dpi=250)
+    plt.close('all')
 
     for a1, a2 in zip(a_q_rz, a_q_ss):
         rows = onp.where((ds_params['a_q_rz'].isel(y=0).values == a1) & (ds_params['a_q_ss'].isel(y=0).values == a2))[0]
@@ -198,8 +201,154 @@ def main(sas_solver, tmp_dir):
         fig.tight_layout()
         file = base_path_figs / f"d18O_uptake_{tms}_a{int(a1)}_a{int(a2)}_partial_transp.png"
         fig.savefig(file, dpi=250)
-
     plt.close('all')
+
+    tm_structure = 'preferential'
+    tms = tm_structure.replace(" ", "_")
+    # load transport simulation
+    states_tm_file = base_path / f"SVATTRANSPORT_{tms}_deterministic.average.nc"
+    ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+    params_tm_file = base_path / "parameters.nc"
+    ds_params = xr.open_dataset(params_tm_file, engine="h5netcdf", group=tm_structure)
+
+    b_transp = onp.unique(ds_params['b_transp'].isel(y=0).values).tolist()
+    b_q_rz = onp.unique(ds_params['b_q_rz'].isel(y=0).values).tolist()
+    cmap = cm.get_cmap('Reds')
+    norm = Normalize(vmin=2, vmax=10)
+
+    for b1, b2 in zip(b_transp, b_q_rz):
+        rows = onp.where((ds_params['b_transp'].isel(y=0).values == b1) & (ds_params['b_q_rz'].isel(y=0).values == b2))[0]
+        fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
+        ax.flatten()[0].plot(ds_sim_tm['Time'].values,
+                             ds_sim_tm['C_iso_in'].isel(x=0, y=0).values,
+                             '-', color='blue')
+        ax.flatten()[0].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[0].set_ylim([-20, 0])
+        ax.flatten()[0].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[1].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_rz'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_q_ss'].isel(x=x, y=0).values)), lw=1)
+        ax[1].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[1].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[2].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_rz'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_q_ss'].isel(x=x, y=0).values)), lw=1)
+        ax[2].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[2].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[3].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_ss'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_q_ss'].isel(x=x, y=0).values)), lw=1)
+        ax[3].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[3].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[4].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_ss'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_q_ss'].isel(x=x, y=0).values)), lw=1)
+        ax.flatten()[4].scatter(ds_obs['Time'].values, ds_obs['d18O_PERC'].isel(x=0, y=0).values, color='blue', s=1)
+        ax.flatten()[4].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_ss'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_q_ss'].isel(x=x, y=0).values)), lw=1)
+        ax[4].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[4].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        ax[4].set_xlabel('Time')
+        fig.tight_layout()
+        file = base_path_figs / f"d18O_drain_{tms}_b{int(b1)}_b{int(b2)}_partial_q_ss.png"
+        fig.savefig(file, dpi=250)
+    plt.close('all')
+
+    for b1, b2 in zip(b_transp, b_q_rz):
+        rows = onp.where((ds_params['b_transp'].isel(y=0).values == b1) & (ds_params['a_q_rz'].isel(y=0).values == b2))[0]
+        fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
+        for x in rows:
+            ax.flatten()[0].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_evap_soil'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_q_ss'].isel(x=x, y=0).values)), lw=1)
+        ax[0].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[0].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[1].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_transp'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_q_ss'].isel(x=x, y=0).values)), lw=1)
+        ax[1].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[1].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[2].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_rz'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_q_ss'].isel(x=x, y=0).values)), lw=1)
+        ax[2].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[2].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[3].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_cpr_rz'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_q_ss'].isel(x=x, y=0).values)), lw=1)
+        ax[3].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[3].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[4].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_ss'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_q_ss'].isel(x=x, y=0).values)), lw=1)
+        ax.flatten()[4].scatter(ds_obs['Time'].values, ds_obs['d18O_PERC'].isel(x=0, y=0).values, color='blue', s=1)
+        ax[4].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[4].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        ax[4].set_xlabel('Time')
+        fig.tight_layout()
+        file = base_path_figs / f"d18O_uptake_{tms}_b{int(b1)}_b{int(b2)}_partial_q_ss.png"
+        fig.savefig(file, dpi=250)
+    plt.close('all')
+
+    b_q_rz = onp.unique(ds_params['b_q_rz'].isel(y=0).values).tolist()
+    b_q_ss = onp.unique(ds_params['b_q_ss'].isel(y=0).values).tolist()
+    cmap = cm.get_cmap('Greens')
+    norm = Normalize(vmin=1, vmax=10)
+
+    for b1, b2 in zip(b_q_rz, b_q_ss):
+        rows = onp.where((ds_params['b_q_rz'].isel(y=0).values == b1) & (ds_params['b_q_ss'].isel(y=0).values == b2))[0]
+        fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
+        ax.flatten()[0].plot(ds_sim_tm['Time'].values,
+                             ds_sim_tm['C_iso_in'].isel(x=0, y=0).values,
+                             '-', color='blue')
+        ax.flatten()[0].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[0].set_ylim([-20, 0])
+        ax.flatten()[0].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[1].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_rz'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+        ax[1].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[1].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[2].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_rz'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+        ax[2].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[2].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[3].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_ss'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+        ax[3].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[3].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[4].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_ss'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+        ax.flatten()[4].scatter(ds_obs['Time'].values, ds_obs['d18O_PERC'].isel(x=0, y=0).values, color='blue', s=1)
+        ax[4].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[4].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        ax[4].set_xlabel('Time')
+        fig.tight_layout()
+        file = base_path_figs / f"d18O_drain_{tms}_b{int(b1)}_b{int(b2)}_partial_transp.png"
+        fig.savefig(file, dpi=250)
+    plt.close('all')
+
+    for b1, b2 in zip(b_q_rz, b_q_ss):
+        rows = onp.where((ds_params['b_q_rz'].isel(y=0).values == b1) & (ds_params['b_q_ss'].isel(y=0).values == b2))[0]
+        fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
+        for x in rows:
+            ax.flatten()[0].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_evap_soil'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+        ax[0].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[0].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[1].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_transp'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+        ax[1].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[1].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[2].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_rz'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+        ax[2].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[2].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[3].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_cpr_rz'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+        ax[3].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[3].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        for x in rows:
+            ax.flatten()[4].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_ss'].isel(x=x, y=0).values, color=cmap(norm(ds_params['b_transp'].isel(x=x, y=0).values)), lw=1)
+        ax.flatten()[4].scatter(ds_obs['Time'].values, ds_obs['d18O_PERC'].isel(x=0, y=0).values, color='blue', s=1)
+        ax[4].set_ylabel(r'$\delta^{18}$O [‰]')
+        ax.flatten()[4].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+        ax[4].set_xlabel('Time')
+        fig.tight_layout()
+        file = base_path_figs / f"d18O_uptake_{tms}_b{int(b1)}_b{int(b2)}_partial_transp.png"
+        fig.savefig(file, dpi=250)
+    plt.close('all')
+
     return
 
 

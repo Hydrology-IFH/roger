@@ -5,7 +5,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'power', 'older-prefrence', 'preferential + advection-dispersion']), default='advection-dispersion')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'power', 'older-prefrence', 'preferential_+_advection-dispersion']), default='advection-dispersion')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
@@ -21,6 +21,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         # custom attributes required by helper functions
         _base_path = Path(__file__).parent
         _input_dir = _base_path / "input"
+        _tm_structure = transport_model_structure.replace("_", " ")
 
         # custom helper functions
         def _read_var_from_nc(self, var, path_dir, file, group=None):
@@ -63,7 +64,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 settings.h = 1 / settings.sas_solver_substeps
 
             # total grid numbers in x- and y-direction
-            settings.nx, settings.ny = len(self._read_var_from_nc("x", self._base_path, 'parameters.nc', group=transport_model_structure)), len(self._read_var_from_nc("y", self._base_path, 'parameters.nc', group=transport_model_structure))
+            settings.nx, settings.ny = len(self._read_var_from_nc("x", self._base_path, 'parameters.nc', group=self._tm_structure)), len(self._read_var_from_nc("y", self._base_path, 'parameters.nc', group=self._tm_structure))
             # length of simulation (in seconds)
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
             # length of warmup simulation (in seconds)
@@ -174,13 +175,13 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], self._read_var_from_nc("b_transp", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], self._read_var_from_nc("b_transp", self._base_path, 'parameters.nc', group=self._tm_structure))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], self._read_var_from_nc("b_q_rz", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], self._read_var_from_nc("b_q_rz", self._base_path, 'parameters.nc', group=self._tm_structure))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], self._read_var_from_nc("b_q_ss", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], self._read_var_from_nc("b_q_ss", self._base_path, 'parameters.nc', group=self._tm_structure))
             elif settings.tm_structure == "advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
@@ -190,12 +191,12 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], self._read_var_from_nc("b_transp", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], self._read_var_from_nc("b_transp", self._base_path, 'parameters.nc', group=self._tm_structure))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._read_var_from_nc("a_q_rz", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._read_var_from_nc("a_q_rz", self._base_path, 'parameters.nc', group=self._tm_structure))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._read_var_from_nc("a_q_ss", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._read_var_from_nc("a_q_ss", self._base_path, 'parameters.nc', group=self._tm_structure))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1)
             elif settings.tm_structure == "older-preference":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
@@ -205,13 +206,13 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], self._read_var_from_nc("a_transp", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], self._read_var_from_nc("a_transp", self._base_path, 'parameters.nc', group=self._tm_structure))
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], 1)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._read_var_from_nc("a_q_rz", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._read_var_from_nc("a_q_rz", self._base_path, 'parameters.nc', group=self._tm_structure))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._read_var_from_nc("a_q_ss", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._read_var_from_nc("a_q_ss", self._base_path, 'parameters.nc', group=self._tm_structure))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1)
             elif settings.tm_structure == "preferential + advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
@@ -222,12 +223,12 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], self._read_var_from_nc("b_transp", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], self._read_var_from_nc("b_transp", self._base_path, 'parameters.nc', group=self._tm_structure))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], self._read_var_from_nc("b_q_rz", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], self._read_var_from_nc("b_q_rz", self._base_path, 'parameters.nc', group=self._tm_structure))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._read_var_from_nc("a_q_ss", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._read_var_from_nc("a_q_ss", self._base_path, 'parameters.nc', group=self._tm_structure))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1)
             elif settings.tm_structure == "power":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 6)
@@ -235,11 +236,11 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 6)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 0.1)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], self._read_var_from_nc("k_transp", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], self._read_var_from_nc("k_transp", self._base_path, 'parameters.nc', group=self._tm_structure))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._read_var_from_nc("k_q_rz", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._read_var_from_nc("k_q_rz", self._base_path, 'parameters.nc', group=self._tm_structure))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._read_var_from_nc("k_q_ss", self._base_path, 'parameters.nc', group=transport_model_structure))
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._read_var_from_nc("k_q_ss", self._base_path, 'parameters.nc', group=self._tm_structure))
 
         @roger_routine
         def set_parameters(self, state):
