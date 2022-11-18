@@ -407,7 +407,7 @@ def calc_tt(state, SA, sa, flux, sas_params):
         # sanity check of SAS function (works only for numpy backend)
         mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=settings.atol, rtol=settings.rtol)
         if not npx.all(mask[2:-2, 2:-2]):
-            logger.warning(f"Solution of SAS function diverged at iteration {vs.itt}.\nProbabilities of travel time distribution will not cumulate to 1.\n")
+            logger.warning(f"Solution of SAS function diverged at iteration {vs.itt}.\nProbabilities of travel time distribution do not cumulate to 1.\n")
         mask2 = (tt >= 0)
         if not npx.all(mask2[2:-2, 2:-2, :]):
             logger.warning(f"Negative probabilities at iteration {vs.itt}.\n")

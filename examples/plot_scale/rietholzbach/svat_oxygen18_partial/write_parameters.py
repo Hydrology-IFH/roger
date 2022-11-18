@@ -24,7 +24,7 @@ def main():
             comment='',
         )
 
-    transport_models = ['preferential', 'advection-dispersion', 'power', 'older-preference', 'preferential + advection-dispersion']
+    transport_models = ['preferential', 'advection-dispersion', 'power', 'older-preference', 'preferential + advection-dispersion', 'time-variant', 'time-variant-transp']
     for tm in transport_models:
         n_params = len(bounds[tm].keys())
         args = []

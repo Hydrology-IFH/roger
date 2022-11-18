@@ -67,3 +67,31 @@ power:
   - 0.5
   - 5
   - 10
+
+time-variant:
+  c_transp:
+  - 2
+  - 20
+  - 10
+  c_q_rz:
+  - 2
+  - 10
+  - 10
+  c_q_ss:
+  - 2
+  - 10
+  - 10
+
+time-variant-transp:
+  c_transp:
+  - 2
+  - 20
+  - 10
+  a_q_rz:
+  - 1
+  - 10
+  - 10
+  a_q_ss:
+  - 2
+  - 10
+  - 10

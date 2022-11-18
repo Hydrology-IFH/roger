@@ -310,6 +310,9 @@ cond4 = (sa_ss1 > 0) & (msa_ss1 == 0)
 msa_rz0 = msan_rz[2:-2, 2:-2, 0, :]
 msa_ss0 = msan_ss[2:-2, 2:-2, 0, :]
 
+tt_transp = vs.tt_transp[2:-2, 2:-2, :]
+mtt_transp = vs.mtt_transp[2:-2, 2:-2, :]
+
 
 with model.state.settings.unlock():
     model.state.settings.warmup_done = True
