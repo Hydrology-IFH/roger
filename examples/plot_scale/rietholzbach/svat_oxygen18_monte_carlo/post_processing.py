@@ -183,7 +183,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                                                         units=var_obj.attrs["units"])
                                         del var_obj, vals
 
-    states_hm1_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm100_bootstrap.nc"
+    states_hm1_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm10_bootstrap.nc"
     if os.path.exists(states_hm1_file):
         states_hm_mc_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
         n_repeat = int(nsamples / split_size)
