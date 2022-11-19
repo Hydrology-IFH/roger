@@ -8,7 +8,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 @click.option("--id", type=int, default=None)
 @click.option("-ns", "--nsamples", type=int, default=1000)
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['preferential', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant', 'power', 'time-variant-transp', 'older-preference', 'preferential + advection-dispersion']), default='advection-dispersion')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['preferential', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant', 'power', 'time-variant-transp', 'older-preference', 'preferential_+_advection-dispersion']), default='advection-dispersion')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
@@ -384,8 +384,8 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
 
             if settings.enable_oxygen18:
                 vs.C_iso_snow = update(vs.C_iso_snow, at[2:-2, 2:-2, :vs.taup1], npx.nan)
-                vs.C_iso_rz = update(vs.C_iso_rz, at[2:-2, 2:-2, :vs.taup1], -13)
-                vs.C_iso_ss = update(vs.C_iso_ss, at[2:-2, 2:-2, :vs.taup1], -7)
+                vs.C_iso_rz = update(vs.C_iso_rz, at[2:-2, 2:-2, :vs.taup1], -10.5)
+                vs.C_iso_ss = update(vs.C_iso_ss, at[2:-2, 2:-2, :vs.taup1], -10.5)
                 vs.C_rz = update(
                     vs.C_rz,
                     at[2:-2, 2:-2, :vs.taup1], delta_to_conc(state, vs.C_iso_rz[2:-2, 2:-2, vs.tau, npx.newaxis]),

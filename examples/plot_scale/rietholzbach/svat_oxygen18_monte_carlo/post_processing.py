@@ -67,7 +67,8 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                      'preferential',
                      'power',
                      'time-variant-transp',
-                     'time-variant']
+                     'time-variant',
+                     'preferential + advection-dispersion']
     diagnostics = ['average',
                    'constant',
                    'maximum']

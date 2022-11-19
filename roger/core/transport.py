@@ -849,12 +849,12 @@ def svat_transport_model_deterministic(state):
 
     with state.timers["infiltration into root zone"]:
         infiltration.calculate_infiltration_rz_transport(state)
+    with state.timers["subsurface runoff of root zone"]:
+        subsurface_runoff.calculate_percolation_rz_transport(state)
     with state.timers["evapotranspiration"]:
         evapotranspiration.calculate_evapotranspiration_transport(state)
     with state.timers["infiltration into subsoil"]:
         infiltration.calculate_infiltration_ss_transport(state)
-    with state.timers["subsurface runoff of root zone"]:
-        subsurface_runoff.calculate_percolation_rz_transport(state)
     with state.timers["subsurface runoff of subsoil"]:
         subsurface_runoff.calculate_percolation_ss_transport(state)
     with state.timers["capillary rise into root zone"]:
@@ -888,12 +888,12 @@ def svat_lbc_transport_model_deterministic(state):
 
     with state.timers["infiltration into root zone"]:
         infiltration.calculate_infiltration_rz_transport(state)
+    with state.timers["subsurface runoff of root zone"]:
+        subsurface_runoff.calculate_percolation_rz_transport(state)
     with state.timers["evapotranspiration"]:
         evapotranspiration.calculate_evapotranspiration_transport(state)
     with state.timers["infiltration into subsoil"]:
         infiltration.calculate_infiltration_ss_transport(state)
-    with state.timers["subsurface runoff of root zone"]:
-        subsurface_runoff.calculate_percolation_rz_transport(state)
     with state.timers["subsurface runoff of subsoil"]:
         subsurface_runoff.calculate_percolation_ss_transport(state)
     with state.timers["capillary rise into root zone"]:
@@ -931,12 +931,12 @@ def svat_crop_transport_model_deterministic(state):
         crop.calculate_redistribution_transport(state)
     with state.timers["infiltration into root zone"]:
         infiltration.calculate_infiltration_rz_transport(state)
+    with state.timers["subsurface runoff of root zone"]:
+        subsurface_runoff.calculate_percolation_rz_transport(state)
     with state.timers["evapotranspiration"]:
         evapotranspiration.calculate_evapotranspiration_transport(state)
     with state.timers["infiltration into subsoil"]:
         infiltration.calculate_infiltration_ss_transport(state)
-    with state.timers["subsurface runoff of root zone"]:
-        subsurface_runoff.calculate_percolation_rz_transport(state)
     with state.timers["subsurface runoff of subsoil"]:
         subsurface_runoff.calculate_percolation_ss_transport(state)
     with state.timers["capillary rise into root zone"]:
@@ -970,13 +970,13 @@ def oneD_transport_model_deterministic(state):
 
     with state.timers["infiltration into root zone"]:
         infiltration.calculate_infiltration_rz_transport(state)
+    with state.timers["subsurface runoff of root zone"]:
+        subsurface_runoff.calculate_percolation_rz_transport(state)
+        subsurface_runoff.calculate_lateral_susburface_runoff_rz_transport(state)
     with state.timers["evapotranspiration"]:
         evapotranspiration.calculate_evapotranspiration_transport(state)
     with state.timers["infiltration into subsoil"]:
         infiltration.calculate_infiltration_ss_transport(state)
-    with state.timers["subsurface runoff of root zone"]:
-        subsurface_runoff.calculate_percolation_rz_transport(state)
-        subsurface_runoff.calculate_lateral_susburface_runoff_rz_transport(state)
     with state.timers["subsurface runoff of subsoil"]:
         subsurface_runoff.calculate_percolation_ss_transport(state)
         subsurface_runoff.calculate_lateral_susburface_runoff_ss_transport(state)

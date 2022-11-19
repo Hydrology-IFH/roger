@@ -83,12 +83,12 @@ def main():
             vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
             vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 256)
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 766)
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.094)
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.066)
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2],  0.17)
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], 87.29)
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 209)
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 935)
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.092)
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.061)
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2],  0.155)
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], 103.25)
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
         @roger_routine
@@ -153,7 +153,7 @@ def main():
         def set_diagnostics(self, state, base_path=None):
             diagnostics = state.diagnostics
 
-            diagnostics["rate"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow"]
+            diagnostics["rate"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow", "int_ground", "evap_int_ground"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
@@ -164,7 +164,7 @@ def main():
                                                        "S_sat_rz", "S_pwp_ss",
                                                        "S_fc_ss", "S_sat_ss",
                                                        "theta_rz", "theta_ss", "theta",
-                                                       "S_snow"]
+                                                       "S_snow", "swe"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
@@ -177,7 +177,7 @@ def main():
                 diagnostics["average"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
-            diagnostics["maximum"].output_variables = ["dS_num_error"]
+            diagnostics["maximum"].output_variables = ["dS_num_error", "z_wf"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1
             if base_path:
