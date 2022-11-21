@@ -257,7 +257,6 @@ restart_file = "SVATTRANSPORT_preferential.warmup_restart.h5"
 model = SVATTRANSPORTSetup(override=dict(
         restart_input_filename=restart_file,
     ))
-model._warmup_done = True
 model._set_tm_structure(tms)
 identifier = f'SVATTRANSPORT_{transport_model_structure}1'
 model._set_identifier(identifier)

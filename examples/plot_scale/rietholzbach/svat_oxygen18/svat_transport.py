@@ -632,7 +632,9 @@ def main(transport_model_structure, sas_solver, tmp_dir):
     model = SVATTRANSPORTSetup()
     write_forcing_tracer(model._input_dir, 'd18O')
     model.setup()
-    model.warmup()
+    with model.state.settings.unlock():
+        model.state.settings.warmup_done = True
+    # model.warmup()
     model.run()
     return
 
