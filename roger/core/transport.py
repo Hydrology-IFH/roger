@@ -240,9 +240,10 @@ def conc_to_delta(state, conc):
     settings = state.settings
     if settings.enable_oxygen18:
         delta_iso = 1000.*(conc/(settings.VSMOW_conc18O*(1.-conc))-1.)
+        delta_iso = npx.where(delta_iso < -99, npx.nan, delta_iso)
     elif settings.enable_deuterium:
         delta_iso = 1000.*(conc/(settings.VSMOW_conc2H*(1.-conc))-1.)
-    delta_iso = npx.where(delta_iso < -999, npx.nan, delta_iso)
+        delta_iso = npx.where(delta_iso < -999, npx.nan, delta_iso)
 
     return delta_iso
 

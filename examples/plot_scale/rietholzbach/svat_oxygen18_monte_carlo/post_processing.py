@@ -29,7 +29,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
     else:
         base_path = Path(__file__).parent
     age_max = "age_max_1500_days"
-    metric_for_optimization = "optimized_with_KGE_multi_hm10"
+    metric_for_optimization = "optimized_with_KGE_multi_hm1"
     # directory of results
     base_path_results = base_path / "results"
     if not os.path.exists(base_path_results):
@@ -63,12 +63,12 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
         x1x2.append(nsamples)
     tm_structures = ['advection-dispersion',
                      'time-variant advection-dispersion',
-                     'older-preference',
-                     'preferential',
-                     'power',
-                     'time-variant-transp',
-                     'time-variant',
-                     'preferential + advection-dispersion']
+                     'preferential + advection-dispersion',
+                     'time-variant-transp']
+                     # 'older-preference',
+                     # 'preferential',
+                     # 'power',
+                     # 'time-variant']
     diagnostics = ['average',
                    'constant',
                    'maximum']
