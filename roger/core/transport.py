@@ -545,6 +545,10 @@ def calc_ageing_sa(state, sa):
         sa,
         at[2:-2, 2:-2, vs.tau, -1], sam1[2:-2, 2:-2, -1],
     )
+    sa = update(
+        sa,
+        at[2:-2, 2:-2, vs.tau, -1], npx.where(sa[2:-2, 2:-2, vs.tau, -1] < 1e-8, 0, sa[2:-2, 2:-2, vs.tau, -1]),
+    )
 
     return sa
 
@@ -624,6 +628,14 @@ def calc_ageing_msa_iso(state, msa, sa):
     sa = update_add(
         sa,
         at[2:-2, 2:-2, vs.tau, -1], sam1[2:-2, 2:-2, -1],
+    )
+    sa = update(
+        sa,
+        at[2:-2, 2:-2, vs.tau, -1], npx.where(sa[2:-2, 2:-2, vs.tau, -1] < 1e-8, 0, sa[2:-2, 2:-2, vs.tau, -1]),
+    )
+    msa = update(
+        msa,
+        at[2:-2, 2:-2, vs.tau, -1], npx.where(sa[2:-2, 2:-2, vs.tau, -1] <= 0, npx.nan, msa[2:-2, 2:-2, vs.tau, -1]),
     )
 
     return msa, sa
