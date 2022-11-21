@@ -137,6 +137,11 @@ def calc_root_zone_transport_kernel(state):
     """
     vs = state.variables
 
+    vs.sa_rz = update(
+        vs.sa_rz,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] < 1e-8, 0, vs.sa_rz[2:-2, 2:-2, vs.tau, :]),
+    )
+
     vs.SA_rz = update(
         vs.SA_rz,
         at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
@@ -151,6 +156,15 @@ def calc_root_zone_transport_iso_kernel(state):
     Calculates StorAge and isotope ratio
     """
     vs = state.variables
+
+    vs.sa_rz = update(
+        vs.sa_rz,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] < 1e-8, 0, vs.sa_rz[2:-2, 2:-2, vs.tau, :]),
+    )
+    vs.msa_rz = update(
+        vs.msa_rz,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]),
+    )
 
     vs.csa_rz = update(
         vs.csa_rz,
@@ -178,6 +192,11 @@ def calc_root_zone_transport_anion_kernel(state):
     Calculates StorAge and solute concentration
     """
     vs = state.variables
+
+    vs.sa_rz = update(
+        vs.sa_rz,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] < 1e-8, 0, vs.sa_rz[2:-2, 2:-2, vs.tau, :]),
+    )
 
     vs.SA_rz = update(
         vs.SA_rz,

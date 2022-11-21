@@ -137,6 +137,11 @@ def calc_subsoil_transport_kernel(state):
     """
     vs = state.variables
 
+    vs.sa_ss = update(
+        vs.sa_ss,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] < 1e-8, 0, vs.sa_ss[2:-2, 2:-2, vs.tau, :]),
+    )
+
     vs.SA_ss = update(
         vs.SA_ss,
         at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
@@ -151,6 +156,11 @@ def calc_subsoil_transport_iso_kernel(state):
     Calculates StorAge and isotope ratio
     """
     vs = state.variables
+
+    vs.sa_ss = update(
+        vs.sa_ss,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] < 1e-8, 0, vs.sa_ss[2:-2, 2:-2, vs.tau, :]),
+    )
 
     vs.csa_ss = update(
         vs.csa_ss,
@@ -178,6 +188,15 @@ def calc_subsoil_transport_anion_kernel(state):
     Calculates StorAge and solute concentration
     """
     vs = state.variables
+
+    vs.sa_ss = update(
+        vs.sa_ss,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] < 1e-8, 0, vs.sa_ss[2:-2, 2:-2, vs.tau, :]),
+    )
+    vs.msa_ss = update(
+        vs.msa_ss,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :]),
+    )
 
     vs.SA_ss = update(
         vs.SA_ss,

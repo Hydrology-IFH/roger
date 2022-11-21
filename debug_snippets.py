@@ -344,6 +344,9 @@ python run_benchmarks.py --sizes 100000. --backends numpy-mpi --backends jax-mpi
 
 
 from roger.tools.make_toy_data import make_toy_forcing_tracer
+make_toy_forcing_tracer(model._base_path, tracer="Br", start_date='31/10/2021', ndays=366)
+make_toy_forcing_tracer(model._base_path, tracer="d18O", start_date='31/10/2021', ndays=366)
 make_toy_forcing_tracer(model._base_path, tracer="d18O", start_date='31/10/2019', ndays=1097)
-make_toy_forcing_tracer(model._base_path, tracer="Br", start_date='1/10/2010', ndays=366)
-make_toy_forcing_tracer(model._base_path, tracer="d18O", start_date='1/10/2010', ndays=366)
+make_toy_forcing_tracer(model._base_path, tracer="d18O", start_date='31/10/2017', ndays=1827)
+make_toy_forcing_tracer(model._base_path, tracer="d18O", start_date='31/10/2012', ndays=3653)
+make_toy_forcing_tracer(model._base_path, tracer="d18O", start_date='31/10/1994', ndays=10228)

@@ -6,11 +6,11 @@ SEALING: 0
 # total surface depression storage (mm)
 S_DEP_TOT: 0
 # soil depth (mm)
-Z_SOIL: 1000
+Z_SOIL: 2200
 # density of vertical macropores (1/m2)
 DMPV: 50
 # total length of vertical macropores (mm)
-LMPV: 500
+LMPV: 1000
 # air capacity (-)
 THETA_AC: 0.1
 # usable field capacity (-)
@@ -18,7 +18,7 @@ THETA_UFC: 0.1
 # permanent wilting point (-)
 THETA_PWP: 0.2
 # saturated hydraulic conductivity (-)
-KS: 9.2
+KS: 100
 # hydraulic conductivity of bedrock/saturated zone (-)
 KF: 2500
 

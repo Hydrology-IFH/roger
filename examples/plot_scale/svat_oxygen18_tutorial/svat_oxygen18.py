@@ -516,8 +516,6 @@ def main():
 
     # initializes the model structure
     model = SVATTRANSPORTSetup()
-    # writes the forcing data to netcdf
-    write_forcing_tracer(model._input_dir, 'd18O')
     # runs the model setup
     model.setup()
     # runs the model warmup

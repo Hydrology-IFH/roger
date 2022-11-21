@@ -22,7 +22,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         _base_path = Path(__file__).parent
         _tm_structure = transport_model_structure.replace("_", " ")
         _input_dir = _base_path / "input"
-        _states_hm_file = 'states_hm10.nc'
+        _states_hm_file = 'states_hm.nc'
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -540,6 +540,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                                                        "sa_rz", "sa_ss", "sa_s",
                                                        "SA_rz", "SA_ss", "SA_s",
                                                        "tt_transp", "tt_q_rz", "tt_q_ss",
+                                                       "TT_transp", "TT_q_rz", "TT_q_ss",
                                                        "mtt_transp", "mtt_q_rz", "mtt_q_ss"]
             diagnostics["average"].output_frequency = 24 * 60 * 60
             diagnostics["average"].sampling_frequency = 1
