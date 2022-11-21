@@ -74,7 +74,9 @@ advection-dispersion:
   - 'ks'
   - 'b_transp'
   - 'a_q_rz'
+  - 'b_q_rz'
   - 'a_q_ss'
+  - 'b_q_ss'
 
   bounds:
   -
@@ -95,6 +97,12 @@ advection-dispersion:
   -
     - 1
     - 150
+  -
+    - 1
+    - 50
+  -
+    - 1
+    - 50
   -
     - 1
     - 50

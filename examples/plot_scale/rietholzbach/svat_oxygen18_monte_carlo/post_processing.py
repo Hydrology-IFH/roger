@@ -441,9 +441,12 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
             # sampled model parameters
             if tm_structure == "advection-dispersion":
                 df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
             elif tm_structure == "older-preference":
                 df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
@@ -464,9 +467,13 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                 df_params_metrics.loc[:, 'c_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
             elif tm_structure == "time-variant-transp":
                 df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
-                df_params_metrics.loc[:, 'c_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'c1_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten()
+                df_params_metrics.loc[:, 'c2_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
                 df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
             elif tm_structure == "preferential":
                 df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
@@ -477,6 +484,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                 df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
             elif tm_structure == "power":
                 df_params_metrics.loc[:, 'k_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'k_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()

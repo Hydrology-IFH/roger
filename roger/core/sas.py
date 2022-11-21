@@ -39,12 +39,15 @@ def kumaraswami(state, SA, sas_params):
     """Kumaraswami SAS function"""
     vs = state.variables
 
-    mask3 = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 31, 32, 33, 34, 35]))
+    mask3 = npx.isin(sas_params[:, :, 0, npx.newaxis], npx.array([3, 31, 32, 33, 34, 35, 36, 37, 38]))
     mask31 = (sas_params[:, :, 0] == 31)
     mask32 = (sas_params[:, :, 0] == 32)
     mask33 = (sas_params[:, :, 0] == 33)
     mask34 = (sas_params[:, :, 0] == 34)
     mask35 = (sas_params[:, :, 0] == 35)
+    mask36 = (sas_params[:, :, 0] == 36)
+    mask37 = (sas_params[:, :, 0] == 37)
+    mask38 = (sas_params[:, :, 0] == 38)
 
     S = allocate(state.dimensions, ("x", "y", 1))
     Omega = allocate(state.dimensions, ("x", "y", "nages"))
@@ -107,6 +110,26 @@ def kumaraswami(state, SA, sas_params):
     sas_params = update(
         sas_params,
         at[2:-2, 2:-2, 2], npx.where(mask35[2:-2, 2:-2], sas_params[2:-2, 2:-2, 3] + (S_rel[2:-2, 2:-2] * sas_params[2:-2, 2:-2, 4]), sas_params[2:-2, 2:-2, 2]),
+    )
+    sas_params = update(
+        sas_params,
+        at[2:-2, 2:-2, 1], npx.where(mask36[2:-2, 2:-2], sas_params[2:-2, 2:-2, 3] + ((1 - S_rel[2:-2, 2:-2]) * sas_params[2:-2, 2:-2, 4]), sas_params[2:-2, 2:-2, 1]),
+    )
+    sas_params = update(
+        sas_params,
+        at[2:-2, 2:-2, 2], npx.where(mask36[2:-2, 2:-2], sas_params[2:-2, 2:-2, 3] + (S_rel[2:-2, 2:-2] * sas_params[2:-2, 2:-2, 4]), sas_params[2:-2, 2:-2, 1]),
+    )
+    sas_params = update(
+        sas_params,
+        at[2:-2, 2:-2, 1], npx.where(mask37[2:-2, 2:-2], sas_params[2:-2, 2:-2, 3] + (S_rel[2:-2, 2:-2] * sas_params[2:-2, 2:-2, 4]), sas_params[2:-2, 2:-2, 2]),
+    )
+    sas_params = update(
+        sas_params,
+        at[2:-2, 2:-2, 2], npx.where(mask37[2:-2, 2:-2], sas_params[2:-2, 2:-2, 3] + ((1 - S_rel[2:-2, 2:-2]) * sas_params[2:-2, 2:-2, 4]), sas_params[2:-2, 2:-2, 2]),
+    )
+    sas_params = update(
+        sas_params,
+        at[2:-2, 2:-2, 2], npx.where(mask38[2:-2, 2:-2], sas_params[2:-2, 2:-2, 3] + (S_rel[2:-2, 2:-2] * sas_params[2:-2, 2:-2, 4]), sas_params[2:-2, 2:-2, 2]),
     )
 
     Omega = update(

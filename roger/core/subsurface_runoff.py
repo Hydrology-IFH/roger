@@ -199,13 +199,13 @@ def calc_potential_lateral_subsurface_runoff(state):
     vs.q_sub_mp_pot = update(
         vs.q_sub_mp_pot,
         at[2:-2, 2:-2], ((vs.z_sat_layer_1[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_1[2:-2, 2:-2] +
-                    vs.z_sat_layer_2[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_2[2:-2, 2:-2] +
-                    vs.z_sat_layer_3[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_3[2:-2, 2:-2] +
-                    vs.z_sat_layer_4[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_4[2:-2, 2:-2] +
-                    vs.z_sat_layer_5[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_5[2:-2, 2:-2] +
-                    vs.z_sat_layer_6[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_6[2:-2, 2:-2] +
-                    vs.z_sat_layer_7[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_7[2:-2, 2:-2] +
-                    vs.z_sat_layer_8[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_8[2:-2, 2:-2]) * vs.dt * vs.dmph[2:-2, 2:-2] * settings.r_mp**2 * settings.pi * 1e-9) * vs.maskCatch[2:-2, 2:-2],
+                          vs.z_sat_layer_2[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_2[2:-2, 2:-2] +
+                          vs.z_sat_layer_3[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_3[2:-2, 2:-2] +
+                          vs.z_sat_layer_4[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_4[2:-2, 2:-2] +
+                          vs.z_sat_layer_5[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_5[2:-2, 2:-2] +
+                          vs.z_sat_layer_6[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_6[2:-2, 2:-2] +
+                          vs.z_sat_layer_7[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_7[2:-2, 2:-2] +
+                          vs.z_sat_layer_8[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_8[2:-2, 2:-2]) * vs.dt * vs.dmph[2:-2, 2:-2] * settings.r_mp**2 * settings.pi * 1e-9) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.q_sub_mp_pot = update(
         vs.q_sub_mp_pot,

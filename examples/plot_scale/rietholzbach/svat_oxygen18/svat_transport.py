@@ -22,7 +22,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         _base_path = Path(__file__).parent
         _tm_structure = transport_model_structure.replace("_", " ")
         _input_dir = _base_path / "input"
-        _states_hm_file = 'states_hm10.nc'
+        _states_hm_file = 'states_hm1.nc'
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -211,10 +211,10 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], 20)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 3)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 2)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 3)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 2)
             elif settings.tm_structure == "older-preference":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
@@ -533,21 +533,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            # diagnostics["average"].output_variables = ["C_iso_rz", "C_iso_ss", "C_iso_s",
-            #                                            "C_iso_in", "C_iso_inf_mat_rz", "C_iso_inf_pf_rz", "C_iso_inf_pf_ss", "C_iso_evap_soil", "C_iso_transp", "C_iso_cpr_rz", "C_iso_q_rz", "C_iso_q_ss",
-            #                                            "csa_rz", "csa_ss", "csa_s",
-            #                                            "msa_rz", "msa_ss", "msa_s",
-            #                                            "sa_rz", "sa_ss", "sa_s",
-            #                                            "SA_rz", "SA_ss", "SA_s",
-            #                                            "tt_transp", "tt_q_rz", "tt_q_ss",
-            #                                            "TT_transp", "TT_q_rz", "TT_q_ss",
-            #                                            "mtt_transp", "mtt_q_rz", "mtt_q_ss"]
-            # diagnostics["average"].output_frequency = 24 * 60 * 60
-            # diagnostics["average"].sampling_frequency = 1
-            # if base_path:
-            #     diagnostics["average"].base_output_path = base_path
-
-            diagnostics["collect"].output_variables = ["C_iso_rz", "C_iso_ss", "C_iso_s",
+            diagnostics["average"].output_variables = ["C_iso_rz", "C_iso_ss", "C_iso_s",
                                                        "C_iso_in", "C_iso_inf_mat_rz", "C_iso_inf_pf_rz", "C_iso_inf_pf_ss", "C_iso_evap_soil", "C_iso_transp", "C_iso_cpr_rz", "C_iso_q_rz", "C_iso_q_ss",
                                                        "csa_rz", "csa_ss", "csa_s",
                                                        "msa_rz", "msa_ss", "msa_s",
@@ -556,10 +542,10 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                                                        "tt_transp", "tt_q_rz", "tt_q_ss",
                                                        "TT_transp", "TT_q_rz", "TT_q_ss",
                                                        "mtt_transp", "mtt_q_rz", "mtt_q_ss"]
-            diagnostics["collect"].output_frequency = 24 * 60 * 60
-            diagnostics["collect"].sampling_frequency = 1
+            diagnostics["average"].output_frequency = 24 * 60 * 60
+            diagnostics["average"].sampling_frequency = 1
             if base_path:
-                diagnostics["collect"].base_output_path = base_path
+                diagnostics["average"].base_output_path = base_path
 
             # diagnostics["average"].output_variables = ["C_iso_q_ss", "C_iso_s", "TT_q_ss",
             #                                            "tt25_q_ss", "tt50_q_ss", "tt75_q_ss",  "ttavg_q_ss",
