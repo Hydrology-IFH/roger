@@ -98,7 +98,7 @@ class Minimum(RogerDiagnostic):
         # set to zero after output
         for var in self.output_variables:
             if self._has_timestep_dim(state, var):
-                var_data = allocate(state.dimensions, ("x", "y", 2))
+                var_data = allocate(state.dimensions, ("x", "y"))
                 setattr(min_vs, var, var_data)
             else:
                 var_data = allocate(state.dimensions, ("x", "y"))
