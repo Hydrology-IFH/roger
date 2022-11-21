@@ -107,7 +107,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             settings.enable_offline_transport = True
             settings.enable_oxygen18 = True
             settings.tm_structure = self._tm_structure
-            settings.enable_age_statistics = True
+            # settings.enable_age_statistics = True
 
         @roger_routine
         def set_grid(self, state):
@@ -618,9 +618,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
     model = SVATTRANSPORTSetup()
     write_forcing_tracer(model._input_dir, 'd18O')
     model.setup()
-    with model.state.settings.unlock():
-        model.state.settings.warmup_done = True
-    # model.warmup()
+    model.warmup()
     model.run()
     return
 
