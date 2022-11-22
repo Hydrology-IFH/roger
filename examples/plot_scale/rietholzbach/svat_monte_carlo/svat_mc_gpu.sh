@@ -17,7 +17,7 @@ conda activate roger-gpu
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_monte_carlo
 
 # adapt command to your available scheduler / MPI implementation
-python svat.py -b jax -d gpu -td "${TMPDIR}"
+python svat.py -b jax -d gpu -td "${TMPDIR}" -ns 1000
 
 # Write output to temporary SSD of computing node
 echo "Write output to $TMPDIR"

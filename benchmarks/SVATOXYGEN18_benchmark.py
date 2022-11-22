@@ -25,7 +25,7 @@ def main(size, timesteps):
         def set_settings(self, state):
             settings = state.settings
             settings.identifier = 'SVATOXYGEN18_benchmark'
-            settings.sas_solver = 'deterministic'
+            settings.sas_solver = 'RK4'
             # number of substeps
             settings.sas_solver_substeps = 6
             if settings.sas_solver in ['RK4', 'Euler']:

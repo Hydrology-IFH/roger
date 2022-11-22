@@ -19,8 +19,8 @@ sns.set_style("ticks")
 
 
 @click.option("-ns", "--nsamples", type=int, default=10000)
-@click.option("-ss", "--split-size", type=int, default=1000)
-@click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
+@click.option("-ss", "--split-size", type=int, default=500)
+@click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='RK4')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(nsamples, split_size, sas_solver, tmp_dir):
@@ -64,11 +64,11 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
     tm_structures = ['advection-dispersion',
                      'time-variant advection-dispersion',
                      'preferential + advection-dispersion',
-                     'time-variant-transp']
-                     # 'older-preference',
-                     # 'preferential',
-                     # 'power',
-                     # 'time-variant']
+                     'time-variant-transp',
+                     'older-preference',
+                     'preferential',
+                     'power',
+                     'time-variant']
     diagnostics = ['average',
                    'constant',
                    'maximum']
@@ -237,7 +237,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
     else:
         states_hm1_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm1.nc"
         states_hm_mc_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
-        n_repeat = 1000
+        n_repeat = split_size
         if not os.path.exists(states_hm_mc_file):
             click.echo('Repeat hydrologic simualtions ...')
             with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
@@ -252,7 +252,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                 )
                 with h5netcdf.File(states_hm1_file, 'r', decode_vlen_strings=False) as df:
                     # set dimensions with a dictionary
-                    dict_dim = {'x': 1000, 'y': 1, 'Time': len(df.variables['Time'])}
+                    dict_dim = {'x': n_repeat, 'y': 1, 'Time': len(df.variables['Time'])}
                     if not f.dimensions:
                         f.dimensions = dict_dim
                         v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
@@ -464,7 +464,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                 df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'c_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
                 df_params_metrics.loc[:, 'c_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
-                df_params_metrics.loc[:, 'c_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+                df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
             elif tm_structure == "time-variant-transp":
                 df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
@@ -509,7 +509,8 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                 sample_no['sample_no'] = range(len(sample_no.index))
                 df_perc_18O_sim = pd.DataFrame(index=date_sim_tm, columns=['perc_sim', 'd18O_perc_sim'])
                 df_perc_18O_sim['perc_sim'] = ds_sim_hm['q_ss'].isel(x=nrow, y=0).values
-                df_perc_18O_sim['d18O_perc_sim'] = ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=0).values
+                C_iso_q_ss = ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=0).values
+                df_perc_18O_sim['d18O_perc_sim'] = onp.where(C_iso_q_ss < -20, onp.nan, C_iso_q_ss)
                 df_perc_18O_sim = df_perc_18O_sim.join(sample_no)
                 df_perc_18O_sim.loc[:, 'sample_no'] = df_perc_18O_sim.loc[:, 'sample_no'].fillna(method='bfill', limit=14)
                 perc_sum = df_perc_18O_sim.groupby(['sample_no']).sum().loc[:, 'perc_sim']

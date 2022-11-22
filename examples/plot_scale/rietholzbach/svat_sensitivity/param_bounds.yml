@@ -61,7 +61,7 @@ piston:
     - 150
 
 advection-dispersion:
-  num_vars: 9
+  num_vars: 12
 
   names:
   - 'dmpv'
@@ -70,9 +70,12 @@ advection-dispersion:
   - 'frac_lp'
   - 'theta_pwp'
   - 'ks'
+  - 'a_transp'  # SAS parameter of transpiration
   - 'b_transp'  # SAS parameter of transpiration
   - 'a_q_rz'  # SAS parameter of percolation from root zone
+  - 'b_q_rz'  # SAS parameter of percolation from root zone
   - 'a_q_ss'  # SAS parameter of percolation from subsoil
+  - 'b_q_ss'  # SAS parameter of percolation from subsoil
 
   bounds:
   -
@@ -93,6 +96,15 @@ advection-dispersion:
   -
     - 1
     - 150
+  -
+    - 1
+    - 50
+  -
+    - 1
+    - 50
+  -
+    - 1
+    - 50
   -
     - 1
     - 50

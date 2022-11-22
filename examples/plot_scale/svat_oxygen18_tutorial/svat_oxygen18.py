@@ -10,7 +10,6 @@ def main():
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
-    from roger.tools.setup import write_forcing_tracer
     from roger.core.transport import delta_to_conc, conc_to_delta
 
     class SVATTRANSPORTSetup(RogerSetup):
