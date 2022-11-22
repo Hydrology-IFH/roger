@@ -2,17 +2,17 @@ complete-mixing:
   num_vars: 6
 
   names:
-  - 'dmpv'
-  - 'lmpv'
-  - 'theta_eff'
-  - 'frac_lp'
-  - 'theta_pwp'
-  - 'ks'
+  - 'dmpv'  # density of vertical macropores (1/m2)
+  - 'lmpv'  # total length of vertical macropores (mm)
+  - 'theta_eff'  # effective porosity of soil (-)
+  - 'frac_lp'  # fraction of large pores (-)
+  - 'theta_pwp'  # permanent wilting point of soil (-)
+  - 'ks'  # saturated hydraulic conductivity (-)
 
   bounds:
   -
-    - 1
-    - 400
+    - 1  # lower boundary
+    - 400  # upper boundary
   -
     - 1
     - 2000
@@ -60,8 +60,6 @@ piston:
     - 1
     - 150
 
-
-
 advection-dispersion:
   num_vars: 12
 
@@ -72,12 +70,12 @@ advection-dispersion:
   - 'frac_lp'
   - 'theta_pwp'
   - 'ks'
-  - 'a_transp'
-  - 'b_transp'
-  - 'a_q_rz'
-  - 'b_q_rz'
-  - 'a_q_ss'
-  - 'b_q_ss'
+  - 'a_transp'  # SAS parameter of transpiration
+  - 'b_transp'  # SAS parameter of transpiration
+  - 'a_q_rz'  # SAS parameter of percolation from root zone
+  - 'b_q_rz'  # SAS parameter of percolation from root zone
+  - 'a_q_ss'  # SAS parameter of percolation from subsoil
+  - 'b_q_ss'  # SAS parameter of percolation from subsoil
 
   bounds:
   -
@@ -118,7 +116,7 @@ advection-dispersion:
     - 50
 
 time-variant advection-dispersion:
-  num_vars: 12
+  num_vars: 15
 
   names:
   - 'dmpv'
@@ -127,12 +125,15 @@ time-variant advection-dispersion:
   - 'frac_lp'
   - 'theta_pwp'
   - 'ks'
-  - 'c1_transp'
-  - 'c2_transp'
-  - 'c1_q_rz'
-  - 'c2_q_rz'
-  - 'c1_q_ss'
-  - 'c2_q_ss'
+  - 'a_transp'  # SAS parameter of transpiration
+  - 'c1_transp'  # SAS parameter of transpiration
+  - 'c2_transp'  # SAS parameter of transpiration
+  - 'b_q_rz'  # SAS parameter of percolation from root zone
+  - 'c1_q_rz'  # SAS parameter of percolation from root zone
+  - 'c2_q_rz'  # SAS parameter of percolation from root zone
+  - 'b_q_ss'  # SAS parameter of percolation from subsoil
+  - 'c1_q_ss'  # SAS parameter of percolation from subsoil
+  - 'c2_q_ss'  # SAS parameter of percolation from subsoil
 
   bounds:
   -
@@ -154,20 +155,29 @@ time-variant advection-dispersion:
     - 1
     - 150
   -
-    - 1
+    - 0.1
     - 50
   -
-    - 1
+    - 0.1
     - 50
   -
-    - 1
+    - 0.1
     - 50
   -
-    - 1
+    - 0.1
     - 50
   -
-    - 1
+    - 0.1
     - 50
   -
-    - 1
+    - 0.1
+    - 50
+  -
+    - 0.1
+    - 50
+  -
+    - 0.1
+    - 50
+  -
+    - 0.1
     - 50

@@ -24,12 +24,18 @@ def main():
             comment='',
         )
 
-    transport_models = ['preferential', 'advection-dispersion', 'power', 'older-preference', 'preferential + advection-dispersion', 'time-variant', 'time-variant-transp']
+    transport_models = ['preferential', 'advection-dispersion', 'time-variant advection-dispersion', 'power', 'older-preference', 'preferential + advection-dispersion', 'time-variant', 'time-variant-transp']
     for tm in transport_models:
         n_params = len(bounds[tm].keys())
         args = []
         for key in bounds[tm].keys():
-            arr = onp.linspace(bounds[tm][key][0], bounds[tm][key][1], num=bounds[tm][key][2])
+            if bounds[tm][key][0] < 1:
+                ll1 = onp.linspace(bounds[tm][key][0], 1, num=int(bounds[tm][key][2]/2)).tolist()
+                ll2 = onp.linspace(2, bounds[tm][key][1], num=int(bounds[tm][key][2]/2)).tolist()
+                ll = ll1 + ll2
+                arr = onp.array(ll)
+            else:
+                arr = onp.linspace(bounds[tm][key][0], bounds[tm][key][1], num=bounds[tm][key][2])
             args.append(arr)
         params = onp.array(onp.meshgrid(*args)).T.reshape(-1, n_params)
 

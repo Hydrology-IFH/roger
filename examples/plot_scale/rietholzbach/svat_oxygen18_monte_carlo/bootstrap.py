@@ -6,7 +6,7 @@ import click
 import roger
 
 
-@click.option("--nruns", type=int, default=100)
+@click.option("--nruns", type=int, default=10)
 @click.option("-rs", "--resample-size", type=int, default=1000)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")

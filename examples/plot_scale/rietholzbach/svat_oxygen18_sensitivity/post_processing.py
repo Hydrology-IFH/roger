@@ -338,9 +338,6 @@ def main(split_size, sas_solver, tmp_dir):
             df_params_metrics.loc[:, 'theta_ufc'] = df_params_metrics.loc[:, 'frac_fp'] * df_params_metrics.loc[:, 'theta_eff']
             df_params_metrics.loc[:, 'theta_pwp'] = ds_params["theta_pwp"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'ks'] = ds_params["ks"].isel(y=0).values.flatten()
-            df_params_metrics.loc[:, 'b_transp'] = ds_params["b_transp"].isel(y=0).values.flatten()
-            df_params_metrics.loc[:, 'a_q_rz'] = ds_params["a_q_rz"].isel(y=0).values.flatten()
-            df_params_metrics.loc[:, 'a_q_ss'] = ds_params["a_q_ss"].isel(y=0).values.flatten()
         elif tm_structure == "piston":
             df_params_metrics.loc[:, 'dmpv'] = ds_params["dmpv"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'lmpv'] = ds_params["lmpv"].isel(y=0).values.flatten()
@@ -351,9 +348,6 @@ def main(split_size, sas_solver, tmp_dir):
             df_params_metrics.loc[:, 'theta_ufc'] = df_params_metrics.loc[:, 'frac_fp'] * df_params_metrics.loc[:, 'theta_eff']
             df_params_metrics.loc[:, 'theta_pwp'] = ds_params["theta_pwp"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'ks'] = ds_params["ks"].isel(y=0).values.flatten()
-            df_params_metrics.loc[:, 'b_transp'] = ds_params["b_transp"].isel(y=0).values.flatten()
-            df_params_metrics.loc[:, 'a_q_rz'] = ds_params["a_q_rz"].isel(y=0).values.flatten()
-            df_params_metrics.loc[:, 'a_q_ss'] = ds_params["a_q_ss"].isel(y=0).values.flatten()
         elif tm_structure == "advection-dispersion":
             df_params_metrics.loc[:, 'dmpv'] = ds_params["dmpv"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'lmpv'] = ds_params["lmpv"].isel(y=0).values.flatten()
@@ -364,9 +358,12 @@ def main(split_size, sas_solver, tmp_dir):
             df_params_metrics.loc[:, 'theta_ufc'] = df_params_metrics.loc[:, 'frac_fp'] * df_params_metrics.loc[:, 'theta_eff']
             df_params_metrics.loc[:, 'theta_pwp'] = ds_params["theta_pwp"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'ks'] = ds_params["ks"].isel(y=0).values.flatten()
+            df_params_metrics.loc[:, 'a_transp'] = ds_params["a_transp"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'b_transp'] = ds_params["b_transp"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'a_q_rz'] = ds_params["a_q_rz"].isel(y=0).values.flatten()
+            df_params_metrics.loc[:, 'b_q_rz'] = ds_params["b_q_rz"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'a_q_ss'] = ds_params["a_q_ss"].isel(y=0).values.flatten()
+            df_params_metrics.loc[:, 'b_q_ss'] = ds_params["b_q_ss"].isel(y=0).values.flatten()
         elif tm_structure == "time-variant advection-dispersion":
             df_params_metrics.loc[:, 'dmpv'] = ds_params["dmpv"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'lmpv'] = ds_params["lmpv"].isel(y=0).values.flatten()
@@ -377,12 +374,15 @@ def main(split_size, sas_solver, tmp_dir):
             df_params_metrics.loc[:, 'theta_ufc'] = df_params_metrics.loc[:, 'frac_fp'] * df_params_metrics.loc[:, 'theta_eff']
             df_params_metrics.loc[:, 'theta_pwp'] = ds_params["theta_pwp"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'ks'] = ds_params["ks"].isel(y=0).values.flatten()
-            df_params_metrics.loc[:, 'b1_transp'] = ds_params["b1_transp"].isel(y=0).values.flatten()
-            df_params_metrics.loc[:, 'b2_transp'] = ds_params["b2_transp"].isel(y=0).values.flatten()
+            df_params_metrics.loc[:, 'a_transp'] = ds_params["a_transp"].isel(y=0).values.flatten()
+            df_params_metrics.loc[:, 'b1_transp'] = ds_params["c1_transp"].isel(y=0).values.flatten()
+            df_params_metrics.loc[:, 'b2_transp'] = ds_params["c1_transp"].isel(y=0).values.flatten() + ds_params["c2_transp"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'a1_q_rz'] = ds_params["c1_q_rz"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'a2_q_rz'] = ds_params["c1_q_rz"].isel(y=0).values.flatten() + ds_params["c2_q_rz"].isel(y=0).values.flatten()
+            df_params_metrics.loc[:, 'b_q_rz'] = ds_params["b_q_rz"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'a1_q_ss'] = ds_params["c1_q_ss"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'a2_q_ss'] = ds_params["c1_q_ss"].isel(y=0).values.flatten() + ds_params["c2_q_ss"].isel(y=0).values.flatten()
+            df_params_metrics.loc[:, 'b_q_ss'] = ds_params["b_q_ss"].isel(y=0).values.flatten()
 
         # compare observations and simulations
         ncol = 0

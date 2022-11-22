@@ -184,7 +184,7 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                                                         units=var_obj.attrs["units"])
                                         del var_obj, vals
 
-    states_hm1_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm10_bootstrap.nc"
+    states_hm1_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_hm10_bootstrap_for_{sas_solver}.nc"
     if os.path.exists(states_hm1_file):
         states_hm_mc_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
         n_repeat = int(nsamples / split_size)
@@ -587,21 +587,21 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
         df_params_metrics = pd.read_csv(file, header=0, index_col=False, sep="\t")
         df_metrics = df_params_metrics.loc[:, ['KGE_C_iso_q_ss']]
         if tm_structure == "advection-dispersion":
-            df_params = df_params_metrics.loc[:, ['b_evap_soil', 'a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
+            df_params = df_params_metrics.loc[:, ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
         if tm_structure == "older-preference":
-            df_params = df_params_metrics.loc[:, ['b_evap_soil', 'a_transp', 'a_q_rz', 'a_q_ss']]
+            df_params = df_params_metrics.loc[:, ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
         elif tm_structure == "time-variant advection-dispersion":
-            df_params = df_params_metrics.loc[:, ['b_evap_soil', 'b1_transp', 'b2_transp', 'a1_q_rz', 'a2_q_rz', 'a1_q_ss', 'a2_q_ss']]
+            df_params = df_params_metrics.loc[:, ['a_transp', 'c1_transp', 'c2_transp', 'b_q_rz', 'c1_q_rz', 'c2_q_rz', 'b_q_ss', 'c1_q_ss', 'c2_q_ss']]
         elif tm_structure == "time-variant-transp":
-            df_params = df_params_metrics.loc[:, ['b_evap_soil', 'a_transp', 'c1_transp', 'c2_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
+            df_params = df_params_metrics.loc[:, ['a_transp', 'c1_transp', 'c2_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
         elif tm_structure == "time-variant":
-            df_params = df_params_metrics.loc[:, ['b_evap_soil', 'c_transp', 'c_q_rz', 'a_q_ss']]
+            df_params = df_params_metrics.loc[:, ['c_transp', 'c_q_rz', 'a_q_ss', 'b_q_ss']]
         elif tm_structure == "preferential":
-            df_params = df_params_metrics.loc[:, ['b_evap_soil', 'b_transp', 'b_q_rz', 'b_q_ss']]
+            df_params = df_params_metrics.loc[:, ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
         elif tm_structure == "preferential + advection-dispersion":
-            df_params = df_params_metrics.loc[:, ['b_evap_soil', 'a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
+            df_params = df_params_metrics.loc[:, ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
         elif tm_structure == "power":
-            df_params = df_params_metrics.loc[:, ['k_evap_soil', 'k_transp', 'k_q_rz', 'k_q_ss']]
+            df_params = df_params_metrics.loc[:, ['k_transp', 'k_q_rz', 'k_q_ss']]
         # select best model run
         idx_best = df_params_metrics['KGE_C_iso_q_ss'].idxmax()
         nrow = len(df_metrics.columns)

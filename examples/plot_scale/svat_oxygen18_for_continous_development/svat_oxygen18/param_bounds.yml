@@ -1,65 +1,27 @@
 advection-dispersion:
-  b_transp:
-  - 5  # lower boundary
-  - 30  # upper boundary
-  - 10  # number of samples
   a_q_rz:
-  - 2
-  - 10
-  - 10
-  a_q_ss:
-  - 2
+  - 0.1  # lower boundary
+  - 10  # upper boundary
+  - 10  # number of samples
+  b_q_ss:
+  - 0.1
   - 10
   - 10
 
 older-preference:
-  a_transp:
-  - 2
-  - 10
-  - 10
-  a_q_rz:
-  - 2
-  - 10
-  - 10
   a_q_ss:
   - 2
   - 10
   - 10
-
-time-variant advection-dispersion:
-  c1_transp:
-  - 5
-  - 20
-  - 3
-  c2_transp:
-  - 5
-  - 20
-  - 3
-  c1_q_rz:
+  b_q_ss:
+  - 1
   - 2
   - 10
-  - 3
-  c2_q_rz:
-  - 2
-  - 10
-  - 3
-  c1_q_ss:
-  - 2
-  - 10
-  - 3
-  c2_q_ss:
-  - 2
-  - 10
-  - 3
 
 preferential:
-  b_transp:
-  - 5
-  - 30
-  - 10
-  b_q_rz:
+  a_q_ss:
+  - 1
   - 2
-  - 10
   - 10
   b_q_ss:
   - 2
@@ -67,16 +29,12 @@ preferential:
   - 10
 
 preferential + advection-dispersion:
-  b_transp:
-  - 5
-  - 30
-  - 10
-  b_q_rz:
-  - 2
-  - 10
-  - 10
   a_q_ss:
-  - 2
+  - 0.1
+  - 10
+  - 10
+  b_q_ss:
+  - 0.1
   - 10
   - 10
 
@@ -92,4 +50,28 @@ power:
   k_q_ss:
   - 0.5
   - 5
+  - 10
+
+time-variant:
+  c_transp:
+  - 2
+  - 20
+  - 10
+  c_q_rz:
+  - 2
+  - 10
+  - 10
+  a_q_ss:
+  - 2
+  - 10
+  - 10
+
+time-variant-transp:
+  a_q_ss:
+  - 0.1
+  - 10
+  - 10
+  b_q_ss:
+  - 0.1
+  - 10
   - 10

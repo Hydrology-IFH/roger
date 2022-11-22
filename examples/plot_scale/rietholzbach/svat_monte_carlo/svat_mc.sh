@@ -11,7 +11,7 @@ conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_monte_carlo
 
 # adapt command to your available scheduler / MPI implementation
-python svat.py -b numpy -d cpu -td "${TMPDIR}" -ns 500
+python svat.py -b numpy -d cpu -td "${TMPDIR}" -ns 30000
 
 # Write output to temporary SSD of computing node
 echo "Write output to $TMPDIR"
