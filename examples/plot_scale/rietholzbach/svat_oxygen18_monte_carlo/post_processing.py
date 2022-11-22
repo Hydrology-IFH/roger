@@ -19,8 +19,8 @@ sns.set_style("ticks")
 
 
 @click.option("-ns", "--nsamples", type=int, default=10000)
-@click.option("-ss", "--split-size", type=int, default=500)
-@click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='RK4')
+@click.option("-ss", "--split-size", type=int, default=1000)
+@click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(nsamples, split_size, sas_solver, tmp_dir):
@@ -440,7 +440,6 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
             df_params_metrics.loc[:, 'ks'] = ds_sim_hm["ks"].values.flatten()
             # sampled model parameters
             if tm_structure == "advection-dispersion":
-                df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
@@ -448,12 +447,13 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                 df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
             elif tm_structure == "older-preference":
-                df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
-                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
             elif tm_structure == "time-variant advection-dispersion":
-                df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'b1_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten()
                 df_params_metrics.loc[:, 'b2_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
                 df_params_metrics.loc[:, 'a1_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten()
@@ -461,34 +461,35 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                 df_params_metrics.loc[:, 'a1_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten()
                 df_params_metrics.loc[:, 'a2_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
             elif tm_structure == "time-variant":
-                df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'c_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
                 df_params_metrics.loc[:, 'c_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
                 df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
             elif tm_structure == "time-variant-transp":
-                df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'c1_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten()
                 df_params_metrics.loc[:, 'c2_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+                df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'c1_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten()
+                df_params_metrics.loc[:, 'c2_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+                df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'c1_q_ss'] = ds_sim_tm["sas_params_q_s"].isel(n_sas_params=3).values.flatten()
+                df_params_metrics.loc[:, 'c2_q_ss'] = ds_sim_tm["sas_params_q_s"].isel(n_sas_params=4).values.flatten()
+            elif tm_structure == "preferential":
+                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
-            elif tm_structure == "preferential":
-                df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
-                df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
-                df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
-                df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
             elif tm_structure == "preferential + advection-dispersion":
-                df_params_metrics.loc[:, 'b_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=2).values.flatten()
-                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
+                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
             elif tm_structure == "power":
-                df_params_metrics.loc[:, 'k_evap_soil'] = ds_sim_tm["sas_params_evap_soil"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'k_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'k_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'k_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()

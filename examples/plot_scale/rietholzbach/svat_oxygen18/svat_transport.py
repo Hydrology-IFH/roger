@@ -22,7 +22,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         _base_path = Path(__file__).parent
         _tm_structure = transport_model_structure.replace("_", " ")
         _input_dir = _base_path / "input"
-        _states_hm_file = 'states_hm500.nc'
+        _states_hm_file = 'states_hm10.nc'
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -107,7 +107,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             settings.enable_offline_transport = True
             settings.enable_oxygen18 = True
             settings.tm_structure = self._tm_structure
-            # settings.enable_age_statistics = True
+            settings.enable_age_statistics = True
 
         @roger_routine
         def set_grid(self, state):
@@ -191,14 +191,14 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1.5)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], 20)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 1)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 1.5)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 3)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 3)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 1.5)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 5)
             elif settings.tm_structure == "advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
@@ -207,14 +207,14 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1.5)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], 20)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 3)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 2)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1.5)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 5)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 2)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1.5)
             elif settings.tm_structure == "older-preference":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
@@ -224,13 +224,13 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 3)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], 1)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 2], 1.5)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 3)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1.5)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 3)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 5)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1.5)
             elif settings.tm_structure == "time-variant advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
@@ -239,16 +239,19 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 37)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 5)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 5)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 1.5)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 10)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 20)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 36)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1.5)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 2)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 3)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 36)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1.5)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 2)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 3)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
@@ -289,21 +292,21 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 3)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], 1.5)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 3)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 3)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 5)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 1.5)
             elif settings.tm_structure == "power":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 6)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 0.1)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 6)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 0.1)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 0.2)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 0.5)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 3)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 2)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 3)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 4)
 
         @roger_routine
         def set_parameters(self, state):
@@ -533,27 +536,13 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["average"].output_variables = ["C_iso_rz", "C_iso_ss", "C_iso_s",
-                                                       "C_iso_in", "C_iso_inf_mat_rz", "C_iso_inf_pf_rz", "C_iso_inf_pf_ss", "C_iso_evap_soil", "C_iso_transp", "C_iso_cpr_rz", "C_iso_q_rz", "C_iso_q_ss",
-                                                       "csa_rz", "csa_ss", "csa_s",
-                                                       "msa_rz", "msa_ss", "msa_s",
-                                                       "sa_rz", "sa_ss", "sa_s",
-                                                       "SA_rz", "SA_ss", "SA_s",
-                                                       "tt_transp", "tt_q_rz", "tt_q_ss",
-                                                       "TT_transp", "TT_q_rz", "TT_q_ss",
-                                                       "mtt_transp", "mtt_q_rz", "mtt_q_ss"]
+            diagnostics["average"].output_variables = ["C_iso_q_ss", "C_iso_s", "TT_q_ss",
+                                                       "tt25_q_ss", "tt50_q_ss", "tt75_q_ss",  "ttavg_q_ss",
+                                                       "rt25_s", "rt50_s", "rt75_s",  "rtavg_s"]
             diagnostics["average"].output_frequency = 24 * 60 * 60
             diagnostics["average"].sampling_frequency = 1
             if base_path:
                 diagnostics["average"].base_output_path = base_path
-
-            # diagnostics["average"].output_variables = ["C_iso_q_ss", "C_iso_s", "TT_q_ss",
-            #                                            "tt25_q_ss", "tt50_q_ss", "tt75_q_ss",  "ttavg_q_ss",
-            #                                            "rt25_s", "rt50_s", "rt75_s",  "rtavg_s"]
-            # diagnostics["average"].output_frequency = 24 * 60 * 60
-            # diagnostics["average"].sampling_frequency = 1
-            # if base_path:
-            #     diagnostics["average"].base_output_path = base_path
 
             # maximum bias of numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error", "dC_num_error"]
