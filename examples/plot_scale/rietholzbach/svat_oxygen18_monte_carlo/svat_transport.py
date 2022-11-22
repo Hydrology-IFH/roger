@@ -25,7 +25,7 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
         _base_path = Path(__file__).parent
         _tm_structure = transport_model_structure.replace("_", " ")
         _input_dir = _base_path / "input"
-        _states_hm_file = 'states_hm1.nc'
+        _states_hm_file = 'states_hm10_bootstrap.nc'
         # load parameter boundaries
         _file_params = _base_path / "param_bounds.yml"
         with open(_file_params, 'r') as file:
@@ -179,7 +179,7 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
             if settings.tm_structure == "preferential":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], random_uniform(self._bounds['b_evap_soil'][0], self._bounds['b_evap_soil'][1], tuple((vs.sas_params_evap_soil.shape[0], vs.sas_params_evap_soil.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
@@ -211,7 +211,7 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
             elif settings.tm_structure == "advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], random_uniform(self._bounds['b_evap_soil'][0], self._bounds['b_evap_soil'][1], tuple((vs.sas_params_evap_soil.shape[0], vs.sas_params_evap_soil.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
@@ -227,7 +227,7 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
             elif settings.tm_structure == "older-preference":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], random_uniform(self._bounds['b_evap_soil'][0], self._bounds['b_evap_soil'][1], tuple((vs.sas_params_evap_soil.shape[0], vs.sas_params_evap_soil.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
@@ -243,7 +243,7 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
             elif settings.tm_structure == "time-variant advection-dispersion":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], random_uniform(self._bounds['b_evap_soil'][0], self._bounds['b_evap_soil'][1], tuple((vs.sas_params_evap_soil.shape[0], vs.sas_params_evap_soil.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
@@ -271,7 +271,7 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
             elif settings.tm_structure == "time-variant":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], random_uniform(self._bounds['b_evap_soil'][0], self._bounds['b_evap_soil'][1], tuple((vs.sas_params_evap_soil.shape[0], vs.sas_params_evap_soil.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)
@@ -291,7 +291,7 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
             elif settings.tm_structure == "time-variant-transp":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 1)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], random_uniform(self._bounds['b_evap_soil'][0], self._bounds['b_evap_soil'][1], tuple((vs.sas_params_evap_soil.shape[0], vs.sas_params_evap_soil.shape[1])))[2:-2, 2:-2])
+                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 2], 100)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 3)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 1)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 2], 100)

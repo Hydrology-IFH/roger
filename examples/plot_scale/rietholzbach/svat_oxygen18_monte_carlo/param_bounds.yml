@@ -1,35 +1,27 @@
 advection-dispersion:
-  # SAS parameter of soil evaporation
-  b_evap_soil:
-  - 50  # lower boundary
-  - 100  # upper boundary
   # SAS parameter of transpiration
   a_transp:
-  - 1  # lower boundary
+  - 0.1  # lower boundary
   - 3  # upper boundary
   b_transp:
-  - 1  # lower boundary
-  - 20  # upper boundary
+  - 0.1
+  - 20
   # SAS parameter of percolation from root zone
   a_q_rz:
-  - 1
+  - 0.1
   - 10
   b_q_rz:
-  - 1
+  - 0.1
   - 10
   # SAS parameter of percolation from subsoil
   a_q_ss:
-  - 1
+  - 0.1
   - 10
   b_q_ss:
-  - 1
+  - 0.1
   - 10
 
 preferential + advection-dispersion:
-  # SAS parameter of soil evaporation
-  b_evap_soil:
-  - 50  # lower boundary
-  - 100  # upper boundary
   # SAS parameter of transpiration
   a_transp:
   - 1  # lower boundary
@@ -46,17 +38,13 @@ preferential + advection-dispersion:
   - 5
   # SAS parameter of percolation from subsoil
   a_q_ss:
-  - 1
+  - 0.1
   - 10
   b_q_ss:
-  - 1
+  - 0.1
   - 10
 
 time-variant advection-dispersion:
-  # SAS parameter of soil evaporation
-  b_evap_soil:
-  - 50  # lower boundary
-  - 100  # upper boundary
   # SAS parameter of transpiration
   c1_transp:
   - 1
@@ -80,10 +68,6 @@ time-variant advection-dispersion:
   - 10
 
 older-preference:
-  # SAS parameter of soil evaporation
-  b_evap_soil:
-  - 50  # lower boundary
-  - 100  # upper boundary
   # SAS parameter of transpiration
   a_transp:
   - 1  # lower boundary
@@ -98,10 +82,6 @@ older-preference:
   - 5
 
 preferential:
-  # SAS parameter of soil evaporation
-  b_evap_soil:
-  - 50  # lower boundary
-  - 100  # upper boundary
   # SAS parameter of transpiration
   b_transp:
   - 1
@@ -115,10 +95,6 @@ preferential:
   - 5
 
 power:
-  # SAS parameter of soil evaporation
-  k_evap_soil:
-  - 0.1  # lower boundary
-  - 0.2  # upper boundary
   # SAS parameter of transpiration
   k_transp:
   - 0.1
@@ -133,10 +109,6 @@ power:
   - 5
 
 time-variant:
-  # SAS parameter of soil evaporation
-  b_evap_soil:
-  - 50  # lower boundary
-  - 100  # upper boundary
   # SAS parameter of transpiration
   c_transp:
   - 1
@@ -151,10 +123,6 @@ time-variant:
   - 10
 
 time-variant-transp:
-  # SAS parameter of soil evaporation
-  b_evap_soil:
-  - 50  # lower boundary
-  - 100  # upper boundary
   # SAS parameter of transpiration
   a_transp:
   - 1

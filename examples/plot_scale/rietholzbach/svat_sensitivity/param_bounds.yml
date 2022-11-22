@@ -97,22 +97,22 @@ advection-dispersion:
     - 1
     - 150
   -
-    - 1
+    - 0.1
     - 50
   -
-    - 1
+    - 0.1
     - 50
   -
-    - 1
+    - 0.1
     - 50
   -
-    - 1
+    - 0.1
     - 50
   -
-    - 1
+    - 0.1
     - 50
   -
-    - 1
+    - 0.1
     - 50
 
 time-variant advection-dispersion:

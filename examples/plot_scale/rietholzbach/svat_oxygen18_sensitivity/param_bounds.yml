@@ -63,7 +63,7 @@ piston:
 
 
 advection-dispersion:
-  num_vars: 9
+  num_vars: 12
 
   names:
   - 'dmpv'
@@ -72,6 +72,7 @@ advection-dispersion:
   - 'frac_lp'
   - 'theta_pwp'
   - 'ks'
+  - 'a_transp'
   - 'b_transp'
   - 'a_q_rz'
   - 'b_q_rz'
@@ -98,19 +99,22 @@ advection-dispersion:
     - 1
     - 150
   -
-    - 1
+    - 0.1
     - 50
   -
-    - 1
+    - 0.1
     - 50
   -
-    - 1
+    - 0.1
     - 50
   -
-    - 1
+    - 0.1
     - 50
   -
-    - 1
+    - 0.1
+    - 50
+  -
+    - 0.1
     - 50
 
 time-variant advection-dispersion:

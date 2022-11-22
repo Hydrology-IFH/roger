@@ -1,14 +1,26 @@
 advection-dispersion:
-  b_transp:
-  - 1  # lower boundary
+  a_transp:
+  - 0.1  # lower boundary
   - 10  # upper boundary
   - 10  # number of samples
+  b_transp:
+  - 0.1
+  - 10
+  - 10
   a_q_rz:
-  - 1
+  - 0.1
+  - 10
+  - 10
+  b_q_rz:
+  - 0.1
   - 10
   - 10
   a_q_ss:
-  - 2
+  - 0.1
+  - 10
+  - 10
+  b_q_ss:
+  - 0.1
   - 10
   - 10
 
