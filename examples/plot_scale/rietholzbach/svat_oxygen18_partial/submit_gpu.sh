@@ -1,49 +1,49 @@
 #!/bin/bash
 
-cd ~/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo
-FILES="$PWD/oxygen18_deterministic_svat_ad_mc_*_gpu.sh"
+cd ~/roger/examples/plot_scale/rietholzbach/svat_oxygen18_partial
+FILES="$PWD/oxygen18_deterministic_svat_ad_partial_*_gpu.sh"
 for f in $FILES
 do
   qsub -q gpu $f
 done
 
-FILES="$PWD/oxygen18_deterministic_svat_adt_mc_*_gpu.sh"
+FILES="$PWD/oxygen18_deterministic_svat_adt_partial_*_gpu.sh"
 for f in $FILES
 do
   qsub -q gpu $f
 done
 
-FILES="$PWD/oxygen18_deterministic_svat_pf_mc_*_gpu.sh"
+FILES="$PWD/oxygen18_deterministic_svat_pf_partial_*_gpu.sh"
 for f in $FILES
 do
   qsub -q gpu $f
 done
 
-FILES="$PWD/oxygen18_deterministic_svat_pfad_mc_*_gpu.sh"
+FILES="$PWD/oxygen18_deterministic_svat_pfad_partial_*_gpu.sh"
 for f in $FILES
 do
   qsub -q gpu $f
 done
 
-FILES="$PWD/oxygen18_deterministic_svat_op_mc_*_gpu.sh"
+FILES="$PWD/oxygen18_deterministic_svat_op_partial_*_gpu.sh"
 for f in $FILES
 do
   qsub -q gpu $f
 done
 
-FILES="$PWD/oxygen18_deterministic_svat_pow_mc_*_gpu.sh"
+FILES="$PWD/oxygen18_deterministic_svat_pow_partial_*_gpu.sh"
 for f in $FILES
 do
   qsub -q gpu $f
 done
 
-FILES="$PWD/oxygen18_deterministic_svat_tvt_mc_*_gpu.sh"
+FILES="$PWD/oxygen18_deterministic_svat_tvt_partial_*_gpu.sh"
 for f in $FILES
 do
   qsub -q gpu $f
 done
 
-FILES="$PWD/oxygen18_deterministic_svat_tv_mc_*_gpu.sh"
+FILES="$PWD/oxygen18_deterministic_svat_tv_partial_*_gpu.sh"
 for f in $FILES
 do
   qsub -q gpu $f
