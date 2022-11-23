@@ -35,7 +35,7 @@ def main(job_type, sas_solver):
                 lines = []
                 lines.append('#!/bin/bash\n')
                 lines.append('#PBS -l nodes=1:ppn=1\n')
-                lines.append('#PBS -l walltime=96:00:00\n')
+                lines.append('#PBS -l walltime=8:00:00\n')
                 lines.append('#PBS -l pmem=4000mb\n')
                 lines.append(f'#PBS -N {script_name}\n')
                 lines.append('#PBS -m bea\n')
@@ -45,7 +45,7 @@ def main(job_type, sas_solver):
                 lines.append('conda activate roger\n')
                 lines.append(f'cd {base_path_binac}\n')
                 lines.append(' \n')
-                lines.append('python svat_transport.py -b jax -d cpu -tms %s -td "${TMPDIR}" -ss %s, -y %s\n' % (tms, sas_solver, year))
+                lines.append('python svat_transport.py -b jax -d cpu -tms %s -td "${TMPDIR}" -ss %s -y %s\n' % (tms, sas_solver, year))
                 lines.append('# Move output from local SSD to global workspace\n')
                 lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                 lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
