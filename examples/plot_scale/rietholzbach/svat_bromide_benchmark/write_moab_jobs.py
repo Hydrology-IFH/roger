@@ -30,7 +30,7 @@ def main(job_type, sas_solver):
                 tm1 = transport_models_abrev[tm]
                 tms = tm.replace(" ", "_")
                 script_name = f'{tracer}_{sas_solver}_svat_{tm1}_{year}'
-                output_path_ws = base_path_ws / 'rietholzbach' / 'svat_transport'
+                output_path_ws = base_path_ws / 'rietholzbach' / 'svat_bromide_benchmark'
                 tms = tm.replace(" ", "_")
                 lines = []
                 lines.append('#!/bin/bash\n')
@@ -38,8 +38,6 @@ def main(job_type, sas_solver):
                 lines.append('#PBS -l walltime=8:00:00\n')
                 lines.append('#PBS -l pmem=4000mb\n')
                 lines.append(f'#PBS -N {script_name}\n')
-                lines.append('#PBS -m bea\n')
-                lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
                 lines.append(' \n')
                 lines.append('eval "$(conda shell.bash hook)"\n')
                 lines.append('conda activate roger\n')
