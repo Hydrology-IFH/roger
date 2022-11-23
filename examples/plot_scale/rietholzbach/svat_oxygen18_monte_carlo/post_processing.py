@@ -548,17 +548,28 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                         df_eval = df_eval.loc[rows, :]
                     df_eval = df_eval.dropna()
                     # calculate metrics
-                    var_sim = 'C_iso_q_ss'
-                    obs_vals = df_eval.loc[:, 'obs'].values
-                    sim_vals = df_eval.loc[:, 'sim'].values
-                    key_kge = f'KGE_{var_sim}{sc1}'
-                    df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-                    key_kge_alpha = f'KGE_alpha_{var_sim}{sc1}'
-                    df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
-                    key_kge_beta = f'KGE_beta_{var_sim}{sc1}'
-                    df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
-                    key_r = f'r_{var_sim}{sc1}'
-                    df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+                    if len(df_eval.index) > 30:
+                        var_sim = 'C_iso_q_ss'
+                        obs_vals = df_eval.loc[:, 'obs'].values
+                        sim_vals = df_eval.loc[:, 'sim'].values
+                        key_kge = f'KGE_{var_sim}{sc1}'
+                        df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
+                        key_kge_alpha = f'KGE_alpha_{var_sim}{sc1}'
+                        df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
+                        key_kge_beta = f'KGE_beta_{var_sim}{sc1}'
+                        df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
+                        key_r = f'r_{var_sim}{sc1}'
+                        df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+                    else:
+                        var_sim = 'C_iso_q_ss'
+                        key_kge = f'KGE_{var_sim}{sc1}'
+                        df_params_metrics.loc[nrow, key_kge] = onp.nan
+                        key_kge_alpha = f'KGE_alpha_{var_sim}{sc1}'
+                        df_params_metrics.loc[nrow, key_kge_alpha] = onp.nan
+                        key_kge_beta = f'KGE_beta_{var_sim}{sc1}'
+                        df_params_metrics.loc[nrow, key_kge_beta] = onp.nan
+                        key_r = f'r_{var_sim}{sc1}'
+                        df_params_metrics.loc[nrow, key_r] = onp.nan
 
                 # avoid defragmentation of DataFrame
                 df_params_metrics = df_params_metrics.copy()
