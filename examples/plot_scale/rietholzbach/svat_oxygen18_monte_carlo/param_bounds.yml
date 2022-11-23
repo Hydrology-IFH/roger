@@ -159,10 +159,10 @@ time-variant-transp:
   - 2
   c1_transp:
   - 1
-  - 10
+  - 25
   c2_transp:
   - 1
-  - 10
+  - 25
   # SAS parameter of percolation from root zone
   a_q_rz:
   - 0.1

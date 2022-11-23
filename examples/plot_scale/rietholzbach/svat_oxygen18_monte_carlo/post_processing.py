@@ -64,11 +64,11 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
     tm_structures = ['advection-dispersion',
                      'time-variant advection-dispersion',
                      'preferential + advection-dispersion',
-                     'time-variant-transp',
                      'older-preference',
                      'preferential',
                      'power',
-                     'time-variant']
+                     'time-variant',
+                     'time-variant-transp']
     diagnostics = ['average',
                    'constant',
                    'maximum']
