@@ -25,8 +25,7 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
         _base_path = Path(__file__).parent
         _tm_structure = transport_model_structure.replace("_", " ")
         _input_dir = _base_path / "input"
-        # _states_hm_file = f'states_hm10_bootstrap_for_{sas_solver}.nc'
-        _states_hm_file = 'states_hm1.nc'
+        _states_hm_file = f'states_hm10_bootstrap_for_{sas_solver}.nc'
         # load parameter boundaries
         _file_params = _base_path / "param_bounds.yml"
         with open(_file_params, 'r') as file:
@@ -514,8 +513,8 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
             vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mat_rz", self._base_path, self._states_hm_file)[:, :, vs.itt])
             vs.inf_pf_rz = update(vs.inf_pf_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mp_rz", self._base_path, self._states_hm_file)[:, :, vs.itt] + self._read_var_from_nc("inf_sc_rz", self._base_path, self._states_hm_file)[:, :, vs.itt])
             vs.inf_pf_ss = update(vs.inf_pf_ss, at[2:-2, 2:-2], self._read_var_from_nc("inf_ss", self._base_path, self._states_hm_file)[:, :, vs.itt])
-            vs.transp = update(vs.transp, at[2:-2, 2:-2], self._read_var_from_nc("transp", self._base_path, self._states_hm_file)[:, :, vs.itt] * 0.66)
-            vs.evap_soil = update(vs.evap_soil, at[2:-2, 2:-2], self._read_var_from_nc("evap_soil", self._base_path, self._states_hm_file)[:, :, vs.itt] * 0.66)
+            vs.transp = update(vs.transp, at[2:-2, 2:-2], self._read_var_from_nc("transp", self._base_path, self._states_hm_file)[:, :, vs.itt])
+            vs.evap_soil = update(vs.evap_soil, at[2:-2, 2:-2], self._read_var_from_nc("evap_soil", self._base_path, self._states_hm_file)[:, :, vs.itt])
             vs.cpr_rz = update(vs.cpr_rz, at[2:-2, 2:-2], self._read_var_from_nc("cpr_rz", self._base_path, self._states_hm_file)[:, :, vs.itt])
             vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], self._read_var_from_nc("q_rz", self._base_path, self._states_hm_file)[:, :, vs.itt])
             vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], self._read_var_from_nc("q_ss", self._base_path, self._states_hm_file)[:, :, vs.itt])
