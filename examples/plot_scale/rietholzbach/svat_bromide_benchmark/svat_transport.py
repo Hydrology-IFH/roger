@@ -424,7 +424,7 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
     model = SVATTRANSPORTSetup()
     # write bromide data to .txt
     idx_start = '%s-01-01' % (year)
-    year_end = year + 1
+    year_end = int(year) + 1
     idx_end = '%s-12-31' % (year_end)
     idx = pd.date_range(start=idx_start,
                         end=idx_end, freq='D')
