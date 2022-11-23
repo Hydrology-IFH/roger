@@ -260,7 +260,7 @@ def run(**kwargs):
                                 nnodes = 1
                                 ppn = nproc
                             else:
-                                nnodes = int(nproc/28)
+                                nnodes = int(np.ceil(nproc/28))
                                 ppn = 28
                             cmd = f"qsub -q short -N {f.split('.')[0]}_{backend}_{real_size} -l nodes={nnodes}:ppn={ppn},walltime=2:00:00,pmem={pmem}mb job.sh"
                         elif backend in ['jax-gpu']:
