@@ -3,14 +3,8 @@ import os
 import glob
 import datetime
 import h5netcdf
-import xarray as xr
-from cftime import num2date, date2num
-import pandas as pd
 import numpy as onp
-import click
 import roger
-import roger.tools.evaluation as eval_utils
-import roger.tools.labels as labs
 import matplotlib as mpl
 import seaborn as sns
 mpl.use("agg")
@@ -28,7 +22,7 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 # merge results into single file
-path = str(base_path / "SVATOXYGEN18_advection-dispersion_deterministic.*.nc")
+path = str(base_path / "SVATOXYGEN18_advection-dispersion_RK4.*.nc")
 diag_files = glob.glob(path)
 states_tm_file = base_path / "states_advection-dispersion.nc"
 if not os.path.exists(states_tm_file):
@@ -40,7 +34,7 @@ if not os.path.exists(states_tm_file):
             references='',
             comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
             model_structure='SVAT advection-dispersion transport model with free drainage',
-            sas_solver='deterministic',
+            sas_solver='RK4',
             roger_version=f'{roger.__version__}'
         )
         # collect dimensions

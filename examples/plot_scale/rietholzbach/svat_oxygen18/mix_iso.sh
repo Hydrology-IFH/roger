@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1:gpus=1:default
-#PBS -l walltime=6:00:00
+#PBS -l walltime=2:00:00
 #PBS -l pmem=4000mb
 #PBS -N mix_iso
 #PBS -m bea

@@ -37,7 +37,7 @@ ds_obs = ds_obs.assign_coords(Time=("Time", date_obs))
 # load transport simulation which contains modified isotope input signal
 # (could be any transport model) since each transport model uses the same
 # approach for mixing isotopes while snowfall/snow melt
-states_tm_file = base_path / "states_for_hydrus.nc"
+states_tm_file = base_path / "d18O_in_for_hydrus.nc"
 ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
 days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
 date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -66,7 +66,7 @@ df_rroot = pd.DataFrame(index=date_obs, columns=['rRoot'])
 df_rroot.loc[:, 'rRoot'] = ds_obs['PET'].isel(x=0, y=0).values * df_scf['scf'].values
 df_rroot.iloc[0, 0] = 0.03
 df_prec = pd.DataFrame(index=date_sim_hm, columns=['Prec'])
-df_prec.loc[:, 'Prec'] = onp.where(ds_sim_hm['ta'].isel(x=0, y=0).values > 0, ds_sim_hm['prec'].isel(x=0, y=0).values, 0) + ds_sim_hm['q_snow'].isel(x=0, y=0).values
+df_prec.loc[:, 'Prec'] = onp.where(ds_sim_hm['ta'].isel(x=0, y=0).values > 0, ds_sim_hm['prec'].isel(x=0, y=0).values - ds_sim_hm['int_ground'].isel(x=0, y=0).values, 0) + ds_sim_hm['q_snow'].isel(x=0, y=0).values
 df_ttop = pd.DataFrame(index=date_obs, columns=['tTop'])
 df_ttop.loc[:, 'tTop'] = ds_obs['TA'].isel(x=0, y=0).values
 df_hcrita = pd.DataFrame(index=date_obs, columns=['hCritA'])
