@@ -24,7 +24,7 @@ def test_restart(tmpdir):
     os.chdir(tmpdir)
 
     timesteps_1 = 5 * 24 * 60 * 60
-    timesteps_2 = 10 * 24 * 60 * 60
+    timesteps_2 = 5 * 24 * 60 * 60
 
     restart_file = "restart.h5"
 
@@ -53,9 +53,14 @@ def test_restart(tmpdir):
     svat_restart.setup()
     svat_restart.run()
 
-    with svat_no_restart.state.settings.unlock():
-        svat_no_restart.state.settings.runlen = timesteps_2
-
+    svat_no_restart = RestartSetup(
+        override=dict(
+            identifier="svat_no_restart",
+            restart_input_filename=None,
+            runlen=10 * 24 * 60 * 60,
+        )
+    )
+    svat_no_restart.setup()
     svat_no_restart.run()
 
     state_1, state_2 = svat_restart.state, svat_no_restart.state

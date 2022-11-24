@@ -16,7 +16,7 @@ if rst.proc_num > 1:
     assert rst.proc_num == 4
 
 
-from roger.setups.svat import SVATSetup  # noqa: E402
+from roger.models.svat import SVATSetup  # noqa: E402
 from roger.tools.make_toy_data import make_toy_forcing  # noqa: E402
 
 dict_settings = dict(

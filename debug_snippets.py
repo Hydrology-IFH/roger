@@ -349,3 +349,6 @@ make_toy_forcing_tracer(model._base_path, tracer="d18O", start_date='31/10/2019'
 make_toy_forcing_tracer(model._base_path, tracer="d18O", start_date='31/10/2017', ndays=1827)
 make_toy_forcing_tracer(model._base_path, tracer="d18O", start_date='31/10/2012', ndays=3653)
 make_toy_forcing_tracer(model._base_path, tracer="d18O", start_date='31/10/1994', ndays=10228)
+
+
+mpirun -n 4 python -m pytest distributed_test.py

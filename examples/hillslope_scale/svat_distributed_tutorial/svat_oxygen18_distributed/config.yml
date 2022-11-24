@@ -1,5 +1,5 @@
 # --- Parameters ---------------------------------------------------------------
-SAS_SOLVER: 'RK4'
+SAS_SOLVER: 'deterministic'
 TRANSPORT_MODEL_STRUCTURE: 'advection-dispersion'
 
 # --- Initial conditions -------------------------------------------------------

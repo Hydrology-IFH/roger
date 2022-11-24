@@ -41,7 +41,7 @@ class SVATSetup(RogerSetup):
         settings.identifier = "SVAT"
 
         # total grid numbers in x- and y-direction
-        settings.nx, settings.ny, settings.nz = 1, 1, 1
+        settings.nx, settings.ny = 1, 1
         # length of simulation (in seconds)
         settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
@@ -97,7 +97,7 @@ class SVATSetup(RogerSetup):
         vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
         vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2000)
         vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
-        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 50)
+        vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 500)
         vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.1)
         vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.1)
         vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2],  0.2)
