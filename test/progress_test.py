@@ -21,6 +21,7 @@ def test_progress_format(capsys):
     dummy_state = Dummy()
     dummy_state.settings = Dummy()
     dummy_state.variables = Dummy()
+    dummy_state.settings.warmup_done = True
     dummy_state.settings.runlen = 8000
     dummy_state.variables.time = 0
     dummy_state.variables.itt = 0

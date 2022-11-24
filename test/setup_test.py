@@ -111,7 +111,7 @@ def test_setup_svat_bromide(float_type):
 
 
 @pytest.mark.parametrize("float_type", ("float32", "float64"))
-def test_setup_svat_transport_oxygen18(float_type):
+def test_setup_svat_oxygen18(float_type):
     from roger import runtime_settings
 
     object.__setattr__(runtime_settings, "diskless_mode", False)

@@ -13,9 +13,9 @@ if not have_click:
 del click
 del have_click
 
-from roger.cli import roger, roger_run, roger_copy_setup, roger_create_mask, roger_resubmit  # noqa: E402
+from roger.cli import roger, roger_run, roger_copy_model, roger_create_mask, roger_resubmit  # noqa: E402
 
 roger.cli.add_command(roger_run.cli, "run")
-roger.cli.add_command(roger_copy_setup.cli, "copy-setup")
+roger.cli.add_command(roger_copy_model.cli, "copy-model")
 roger.cli.add_command(roger_create_mask.cli, "create-mask")
 roger.cli.add_command(roger_resubmit.cli, "resubmit")
