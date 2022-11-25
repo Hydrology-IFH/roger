@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Command line tools &mdash; RoGeR 0.0.1+144.gd44f97e.dirty documentation</title>
+  <title>Command line tools &mdash; RoGeR 0.0.1+333.ga951c01 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+144.gd44f97e.dirty
+                0.0.1+333.ga951c01
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -69,7 +69,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Command line tools</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#roger">roger</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#roger-create-mask">roger-create-mask</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#roger-copy-setup">roger-copy-setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#roger-copy-model">roger-copy-model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#roger-resubmit">roger-resubmit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#roger-run">roger-run</a></li>
 </ul>
@@ -124,7 +124,7 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  copy-setup   Copy a standard setup to another directory.
+  copy-model   Copy a standard setup to another directory.
   create-mask  Creates a mask image from a given netCDF file
   resubmit     Re-run a roger setup several times
   run          Runs a roger setup from given file
@@ -144,22 +144,23 @@ Options:
 </pre></div>
 </div>
 </section>
-<section id="roger-copy-setup">
-<h2>roger-copy-setup<a class="headerlink" href="#roger-copy-setup" title="Permalink to this heading">¶</a></h2>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Usage: roger copy-setup [OPTIONS] SETUP
+<section id="roger-copy-model">
+<h2>roger-copy-model<a class="headerlink" href="#roger-copy-model" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Usage: roger copy-model [OPTIONS] MODEL
 
   Copy a standard setup to another directory.
 
-  Available setups:
+  Available models:
 
-
+      dummy, oneD, oneD_event, svat, svat_bromide, svat_crop, svat_crop_bromide,
+      svat_crop_nitrate, svat_oxygen18
 
   Example:
 
-      $ roger copy-setup svat--to ~/roger-setups/svat
+      $ roger copy-model svat--to ~/roger-models/svat
 
-  Further directories containing setup templates can be added to this command
-  via the ROGER_SETUP_DIR environment variable.
+  Further directories containing model templates can be added to this command
+  via the ROGER_MODEL_DIR environment variable.
 
 Options:
   --to PATH  Target directory, must not exist (default: copy to current working

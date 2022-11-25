@@ -43,7 +43,6 @@ Soil hydraulic parameters are approximated by the Brooks-Corey scheme ([Brooks19
 
 **Subsurface Runoff**:
 
-- gravity-driven infiltration based on viscous flow approach ([Germann2018]_)
 - lateral subsurface runoff in the soil as described in [Steinbrich2016]_
 
 **Percolation**:
@@ -65,7 +64,7 @@ Soil hydraulic parameters are approximated by the Brooks-Corey scheme ([Brooks19
 
 **Offline transport**:
 
-- StorAge selection (SAS) functions ([Rinaldo2015]_) are used to calculate travel time distributions, residence time distribution and solute concentrations
+- StorAge selection (SAS) functions ([Rinaldo2015]_) are coupled with hydrologic simulations. SAS functions are used to calculate travel time distributions, residence time distribution and solute concentrations
 
 **Biogeochemical processes**:
 
@@ -92,9 +91,13 @@ Available model structures
 - vertical and lateral processes are considered
 - simulation of a single event
 
-**SVAT-TRANSPORT**:
+**SVAT-OXYGEN18**:
 
-- calculates offline coupled solute transport based on the hydrologic simulations with the SVAT model
+- calculates offline coupled oxygen-18 transport based on the hydrologic simulations with the SVAT model
+
+**SVAT-BROMIDE**:
+
+- calculates offline coupled bromide transport based on the hydrologic simulations with the SVAT model
 
 
 Diagnostics
@@ -116,16 +119,19 @@ Current limitations
 
 Roger is still in development. There are many open issues that we would like to fix later on:
 
-- ...
+- A routing scheme is not implemented, yet
+- Simulations with biogeochemical processes have not been compared to measured data
+- Simulations with gravity-driven infiltration have not been compared to measured data
+- Sowing and harvesting of crops is time-invariant i.e. fixed dates are assumed for sowing and harvesting
 
 References
 ++++++++++
 
 .. [Brooks1966] Brooks, R. H., and Corey, A. T.: Properties of porous media affecting fluid flow, Journal of the Irrigation and Drainage Division, 92, 61-90, 1966.
 
-.. [Haefner2018] Häfner, D., Jacobsen, R. L., Eden, C., Kristensen, M. R. B., Jochum, M., Nuterman, R., and Vinter, B.: Veros v0.1 – a fast and versatile ocean simulator in pure Python, Geosci. Model Dev., 11, 3299-3312, 2018.
-
 .. [Germann2018] Germann, P. F. and Prasuhn, V.: Viscous Flow Approach to Rapid Infiltration and Drainage in a Weighing Lysimeter, Vadose Zone Journal, 17, 170020, 2018.
+
+.. [Haefner2018] Häfner, D., Jacobsen, R. L., Eden, C., Kristensen, M. R. B., Jochum, M., Nuterman, R., and Vinter, B.: Veros v0.1 – a fast and versatile ocean simulator in pure Python, Geosci. Model Dev., 11, 3299-3312, 2018.
 
 .. [Kunkel2012] Kunkel, R., and Wendland, F.: Diffuse Nitrateinträge in die Grund- und Oberflächengewässer von Rhein und Ems - Ist-Zustands- und Maßnahmenanalysen, Forschungszentrum Jülich, Jülich, Germany, 143, 2012.
 

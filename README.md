@@ -27,8 +27,9 @@ Future Online-Documentation will be here: [visit our documentation](https://roge
 
 Roger provides
 
--   grid-based **1D models** and **distributed models**
+-   grid-based **1D models**
 -   **offline solute transport** with several **StorAge selection (SAS) functions**
+-   solute-specific biogeochemical processes
 -   implementations of **capillary-driven infiltration (Green-Ampt)** and **gravity-driven infiltration (Viscous-Flow)**
 -   several **pre-implemented diagnostics** such as averages or collecting values
     at given time interval, variable time aggregation, travel time distributions
@@ -271,10 +272,6 @@ groundwater-related processes
 - implement surface runoff generation for gravity-driven infiltration
 - implement gravity-driven infiltration and percolation in transport routine
 - implement time-variant sowing and harvesting of crops
-- use physically-constrained artificial neural network to set time-dependent
-model parameters (e.g. number of active macropores)
-- add equations to docstrings
-- write online documentation (see `doc/`)
 
 ## License
 This software can be distributed freely under the MIT license. Please read the LICENSE for further information.

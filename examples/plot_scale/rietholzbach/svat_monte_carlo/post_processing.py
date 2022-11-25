@@ -398,6 +398,7 @@ def main(tmp_dir):
                             df_params_metrics.loc[nrow, key_phi] = de.calc_phi(brel_mean, b_slope)
 
                 # avoid defragmentation of DataFrame
+                click.echo(f'{var_sim}: {nrow}')
                 df_params_metrics = df_params_metrics.copy()
         # Calculate multi-objective metric
         for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):

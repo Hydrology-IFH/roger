@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.variables &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
+  <title>roger.variables &mdash; RoGeR 0.0.1+333.ga951c01 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -29,7 +29,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+113.g98149b1.dirty
+                0.0.1+333.ga951c01
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -47,7 +47,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/analysis.html">Analysis of simulations with Roger</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
@@ -179,6 +179,7 @@
 <span class="n">TIMESTEPS_EVENT_FF</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;timesteps_event_ff&quot;</span><span class="p">,)</span>
 <span class="n">TIMESTEPS_EVENT_FF_P1</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;timesteps_event_ff_p1&quot;</span><span class="p">,)</span>
 <span class="n">TIME</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">,)</span>
+<span class="n">TIME_FORCING</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;t_forc&quot;</span><span class="p">,)</span>
 <span class="n">AGES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;ages&quot;</span><span class="p">,)</span>
 <span class="n">NAGES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;nages&quot;</span><span class="p">,)</span>
 <span class="n">NEVENTS_FF</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;events_ff&quot;</span><span class="p">,)</span>
@@ -198,6 +199,7 @@
     <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="s2">&quot;ny&quot;</span><span class="p">,</span>
     <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;nz&quot;</span><span class="p">,</span>
     <span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="s2">&quot;nitt&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;t_forc&quot;</span><span class="p">:</span> <span class="s2">&quot;nitt_forc&quot;</span><span class="p">,</span>
     <span class="s2">&quot;timesteps&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
     <span class="s2">&quot;timesteps_day&quot;</span><span class="p">:</span> <span class="mi">6</span> <span class="o">*</span> <span class="mi">24</span><span class="p">,</span>
     <span class="s2">&quot;timesteps_event_ff&quot;</span><span class="p">:</span> <span class="s2">&quot;nittevent_ff&quot;</span><span class="p">,</span>
@@ -619,36 +621,42 @@
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;-&quot;</span><span class="p">,</span>
         <span class="s2">&quot;basal soil evaporation coefficient&quot;</span><span class="p">,</span>
+        <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;k_stress_evap&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;water stress coefficient of soil evaporation&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;-&quot;</span><span class="p">,</span>
         <span class="s2">&quot;water stress coefficient of soil evaporation&quot;</span><span class="p">,</span>
+        <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;evap_coeff&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;soil evaporation coefficient&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;-&quot;</span><span class="p">,</span>
         <span class="s2">&quot;soil evaporation coefficient&quot;</span><span class="p">,</span>
+        <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;basal_transp_coeff&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;basal transpiration coefficient&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;-&quot;</span><span class="p">,</span>
         <span class="s2">&quot;basal transpiration coefficient&quot;</span><span class="p">,</span>
+        <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;k_stress_transp&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;water stress coefficient of transpiration&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;-&quot;</span><span class="p">,</span>
         <span class="s2">&quot;water stress coefficient of transpiration&quot;</span><span class="p">,</span>
+        <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;transp_coeff&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;transpiration coefficient&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;-&quot;</span><span class="p">,</span>
         <span class="s2">&quot;transpiration coefficient&quot;</span><span class="p">,</span>
+        <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;S_int_top_tot&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;total interception storage of upper surface layer&quot;</span><span class="p">,</span>
@@ -680,6 +688,13 @@
         <span class="s2">&quot;storage change&quot;</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="c1"># surface variables</span>
+    <span class="s2">&quot;S_SNOW&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;snow storage&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;snow storage&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;S_snow&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;snow storage&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIMESTEPS</span><span class="p">,</span>
@@ -761,6 +776,13 @@
         <span class="s2">&quot;mm&quot;</span><span class="p">,</span>
         <span class="s2">&quot;interception storage of lower surface layer&quot;</span><span class="p">,</span>
         <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;TA&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;air temperature&quot;</span><span class="p">,</span>
+        <span class="n">TIME_FORCING</span><span class="p">,</span>
+        <span class="s2">&quot;degC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;air temperature&quot;</span><span class="p">,</span>
         <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;ta&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
@@ -1657,6 +1679,13 @@
         <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="s2">&quot;S_S&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;soil water content&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;soil water content&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;S_s&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;soil water content&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIMESTEPS</span><span class="p">,</span>
@@ -2075,14 +2104,23 @@
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;-&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Soil water content in fine pores&quot;</span><span class="p">,</span>
-        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;theta_lp_rz&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;Soil water content in large pores&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;-&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Soil water content in large pores&quot;</span><span class="p">,</span>
-        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;S_RZ&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;soil water content in root zone&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;soil water content in root zone&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;S_rz&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;soil water content in root zone&quot;</span><span class="p">,</span>
@@ -2133,6 +2171,13 @@
         <span class="s2">&quot;soil water content in large pores below saturation water level&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="s2">&quot;S_PWP_RZ&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;soil water content at permanent wilting point in root zone&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;soil water content at permanent wilting point in root zone&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_crop_phenology</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;S_pwp_rz&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;soil water content at permanent wilting point in root zone&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
@@ -2148,6 +2193,13 @@
         <span class="s2">&quot;soil water content at field capacity in root zone&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;S_SAT_RZ&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;soil water content at saturation in root zone&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;soil water content at saturation in root zone&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_crop_phenology</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;S_sat_rz&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;soil water content at saturation in root zone&quot;</span><span class="p">,</span>
@@ -2372,14 +2424,23 @@
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;-&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Soil water content in fine pores&quot;</span><span class="p">,</span>
-        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;theta_lp_ss&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;Soil water content in large pores&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;-&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Soil water content in large pores&quot;</span><span class="p">,</span>
-        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;S_SS&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;soil water content in subsoil&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;soil water content in subsoil&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;S_ss&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;soil water content in subsoil&quot;</span><span class="p">,</span>
@@ -2432,6 +2493,13 @@
         <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="s2">&quot;S_PWP_SS&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;soil water content at permanent wilting point in subsoil&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;soil water content at permanent wilting point in subsoil&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_crop_phenology</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;S_pwp_ss&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;soil water content at permanent wilting point in subsoil&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
@@ -2447,6 +2515,13 @@
         <span class="s2">&quot;soil water content at field capacity in subsoil&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;S_SAT_SS&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;soil water content at saturation in subsoil&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;soil water content at saturation in subsoil&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_crop_phenology</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;S_sat_ss&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;soil water content at saturation in subsoil&quot;</span><span class="p">,</span>
@@ -2981,6 +3056,20 @@
         <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_groundwater</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="c1"># precipitation variables</span>
+    <span class="s2">&quot;PREC&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;precipitation&quot;</span><span class="p">,</span>
+        <span class="n">TIME_FORCING</span><span class="p">,</span>
+        <span class="s2">&quot;mm/10 minutes&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;precipitation (uniform)&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;PREC_DIST_DAILY&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;precipitation&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm/10 minutes&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;precipitation (distributed)&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;prec&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;precipitation&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIMESTEPS</span><span class="p">,</span>
@@ -3136,6 +3225,13 @@
         <span class="s2">&quot;matrix infiltration&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="s2">&quot;INF_MAT_RZ&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;matrix infiltration into root zone&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;matrix infiltration into root zone&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;inf_mat_rz&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;matrix infiltration into root zone&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
@@ -3192,12 +3288,26 @@
         <span class="s2">&quot;macropore infiltration into subsoil&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="s2">&quot;INF_PF_SS&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;preferential infiltration into subsoil&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;preferential infiltration into subsoil&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;inf_pf_ss&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;preferential infiltration into subsoil&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
         <span class="s2">&quot;preferential infiltration into subsoil&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;INF_PF_RZ&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;preferential infiltration into root zone&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;preferential infiltration into root zone&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;inf_pf_rz&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;preferential infiltration into root zone&quot;</span><span class="p">,</span>
@@ -3468,6 +3578,12 @@
         <span class="s2">&quot;actual evapotranspiration from soil water storage&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="s2">&quot;PET&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;potential evapotranspiration&quot;</span><span class="p">,</span>
+        <span class="n">TIME_FORCING</span><span class="p">,</span>
+        <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;potential evapotranspiration&quot;</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;pet&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;potential evapotranspiration&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
@@ -3504,6 +3620,13 @@
         <span class="s2">&quot;Residual potential transpiration&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="s2">&quot;TRANSP&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;actual transpiration&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;actual transpiration&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;transp&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;actual transpiration&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
@@ -3518,6 +3641,13 @@
         <span class="s2">&quot;actual evaporation&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="s2">&quot;EVAP_SOIL&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;actual soil evaporation&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;actual soil evaporation&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;evap_soil&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;actual soil evaporation&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
@@ -3531,6 +3661,7 @@
         <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
         <span class="s2">&quot;actual evaporation of intercepted water&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;evap_int_top&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;actual evaporation of intercepted water from upper surface layer&quot;</span><span class="p">,</span>
@@ -3753,6 +3884,13 @@
         <span class="s2">&quot;vertical root zone drainage of large pores&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="s2">&quot;Q_RZ&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;vertical root zone drainage&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vertical root zone drainage&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;q_rz&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;vertical root zone drainage&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
@@ -3774,12 +3912,26 @@
         <span class="s2">&quot;vertical subsoil drainage of large pores&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="s2">&quot;Q_SS&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;vertical subsoil drainage&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vertical subsoil drainage&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;q_ss&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;vertical subsoil drainage&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
         <span class="s2">&quot;vertical subsoil drainage&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;RE_RL&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;redistribution after root loss&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;redistribution after root loss&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_crop_phenology</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;re_rl&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;redistribution after root loss&quot;</span><span class="p">,</span>
@@ -4033,6 +4185,13 @@
         <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_age_statistics</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="c1"># capillary rise variables</span>
+    <span class="s2">&quot;CPR_RZ&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;capillary rise from subsoil into root zone&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;capillary rise from subsoil into root zone&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span>
+    <span class="p">),</span>
     <span class="s2">&quot;cpr_rz&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;capillary rise from subsoil into root zone&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
@@ -4046,6 +4205,13 @@
         <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
         <span class="s2">&quot;capillary rise from groundwater&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;RE_RG&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;redistribution after root growth&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIME</span><span class="p">,</span>
+        <span class="s2">&quot;mm/dt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;redistribution after root growth&quot;</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_crop_phenology</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="s2">&quot;re_rg&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;redistribution after root growth&quot;</span><span class="p">,</span>

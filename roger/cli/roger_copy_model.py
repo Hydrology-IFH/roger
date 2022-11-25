@@ -12,7 +12,7 @@ import click
 BASE_PATH = Path(__file__).parent
 MODELDIR = BASE_PATH.parent / "models"
 MODELDIR_ENVVAR = "ROGER_MODEL_DIR"
-IGNORE_PATTERNS = ["__init__.py", "*.pyc", "__pycache__", '.DS_Store']
+IGNORE_PATTERNS = ["__init__.py", "*.pyc", "__pycache__", ".DS_Store", "dummy"]
 MODELS = {}
 
 model_dirs = []

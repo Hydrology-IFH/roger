@@ -22,7 +22,7 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 # merge results into single file
-path = str(base_path / "SVATOXYGEN18_advection-dispersion_RK4.*.nc")
+path = str(base_path / "SVATOXYGEN18_advection-dispersion_deterministic.*.nc")
 diag_files = glob.glob(path)
 states_tm_file = base_path / "states_advection-dispersion.nc"
 if not os.path.exists(states_tm_file):
@@ -34,7 +34,7 @@ if not os.path.exists(states_tm_file):
             references='',
             comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
             model_structure='SVAT advection-dispersion transport model with free drainage',
-            sas_solver='RK4',
+            sas_solver='deterministic',
             roger_version=f'{roger.__version__}'
         )
         # collect dimensions

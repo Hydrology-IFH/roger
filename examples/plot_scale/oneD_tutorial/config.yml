@@ -14,7 +14,7 @@ DMPV: 50
 # density of horizontal macropores (1/m2)
 DMPH: 300
 # total length of vertical macropores (mm)
-LMPV: 300
+LMPV: 800
 # air capacity (-)
 THETA_AC: 0.1
 # usable field capacity (-)
@@ -22,9 +22,9 @@ THETA_UFC: 0.1
 # permanent wilting point (-)
 THETA_PWP: 0.2
 # saturated hydraulic conductivity (-)
-KS: 9.2
+KS: 100
 # hydraulic conductivity of bedrock/saturated zone (-)
-KF: 2500
+KF: 5
 
 # --- Initial conditions -------------------------------------------------------
 # soil water content of root zone/upper soil layer (mm/h)

@@ -87,9 +87,9 @@ Using pip (Linux / OSX)
 Setting up a model
 ------------------
 
-To run Roger, you need to set up a model - i.e., specify which settings and model domain you want to use. This is done by subclassing the :class:`Roger setup base class <roger.RogerSetup>` in a *setup script* that is written in Python. You should have a look at the pre-implemented model setups in the repository's :file:`setup` folder, or use the :command:`roger copy-setup` command to copy one into your current folder. A good place to start is the :class:`ACC model <acc.ACCSetup>`::
+To run Roger, you need to set up a model - i.e., specify which settings and model domain you want to use. This is done by subclassing the :class:`Roger setup base class <roger.RogerSetup>` in a *setup script* that is written in Python. You should have a look at the pre-implemented model setups in the repository's :file:`models` folder, or use the :command:`roger copy-model` command to copy one into your current folder. A good place to start is the :class:`SVAT model <svat.SVATetup>`::
 
-    $ roger copy-setup acc
+    $ roger copy-setup svat
 
 By working through the existing models, you should quickly be able to figure out how to write your own simulation. Just keep in mind this general advice:
 
@@ -112,7 +112,7 @@ By working through the existing models, you should quickly be able to figure out
 
 - There is another type of decorator called :func:`@roger_kernel <roger.roger_kernel>`. A kernel is a pure function that may be compiled to machine code by JAX. Kernels typically execute much faster, but are more restrictive to implement, as they cannot interact with the model state directly.
 
-  A common pattern in large setups is to implement :meth:`set_forcing` as a kernel for optimal performance (see e.g. :class:`the global_1deg setup file <roger.setups.global_1deg.GlobalOneDegreeSetup>`).
+  A common pattern in large setups is to implement :meth:`set_forcing` as a kernel for optimal performance.
 
 
 Running Roger
@@ -134,7 +134,7 @@ After adapting your setup script, you are ready to run your first simulation. Ju
 Reading Roger output
 ++++++++++++++++++++
 
-All output is handled by :doc:`the available diagnostics </reference/diagnostics>`. The most basic diagnostic, :class:`snapshot <roger.diagnostics.Snapshot>`, writes some model variables to netCDF files in regular intervals (and puts them into your current working directory).
+All output is handled by :doc:`the available diagnostics </reference/diagnostics>`. The most basic diagnostic, :class:`collect <roger.diagnostics.Collect>`, writes some model variables to netCDF files in regular intervals (and puts them into your current working directory).
 
 NetCDF is a binary format that is widely adopted in the geophysical modeling community. There are various packages for reading, visualizing and processing netCDF files (such as `ncview <http://meteora.ucsd.edu/~pierce/ncview_home_page.html>`_ and `ferret <http://ferret.pmel.noaa.gov/Ferret/>`_), and bindings for many programming languages (such as C, Fortran, MATLAB, and Python).
 
@@ -142,9 +142,9 @@ For post-processing in Python, we recommend that you use `xarray <http://xarray.
 
    import xarray as xr
 
-   ds = xr.open_dataset("ONED.rates.nc", engine="h5netcdf")
+   ds = xr.open_dataset("SVAT.rate.nc", engine="h5netcdf")
 
-   # plot surface velocity at the last time step included in the file
+   # plot macropore infiltration
    inf_mp = ds.inf_mp.isel(x=0, y=0)
    inf_mp.plot()
 
@@ -184,7 +184,7 @@ In this case, Roger would run on 4 processes, each process computing one-quarter
 Enhancing Roger
 ---------------
 
-Roger was written with extensibility in mind. If you already know some Python and have worked with NumPy, you are pretty much ready to write your own extension. The model code is located in the :file:`roger` subfolder, while all of the numerical routines are located in :file:`roger/core`.
+Roger was written with a strong focus on extensibility. If you already know some Python and have worked with NumPy, you are pretty much ready to write your own extension. The model code is located in the :file:`roger` subfolder, while all of the numerical routines are located in :file:`roger/core`.
 
 We believe that the best way to learn how Roger works is to read its source code. Starting from the :py:class:`Roger base class <roger.RogerSetup>`, you should be able to work your way through the flow of the program, and figure out where to add your modifications. If you installed Roger through :command:`pip -e` or :command:`setup.py develop`, all changes you make will immediately be reflected when running the code.
 

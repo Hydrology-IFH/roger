@@ -111,11 +111,10 @@ axes[0, 0].bar(date_hm, ds_hm['prec'].isel(x=0, y=0).values, width=.1, color='bl
 axes[0, 0].set_ylabel(r'PREC [mm/day]')
 axes[0, 0].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
 
-axes[0, 1].set_axis_off()
-# axes[0, 1].plot(date_tm, ds_tm['C_iso_in'].isel(x=0, y=0).values, '-', color='blue', lw=1)
-# axes[0, 1].set_xlim(date_tm[0], date_tm[-1])
-# axes[0, 1].set_ylabel(r'$\delta^{18}$O [‰]')
-# axes[0, 1].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+axes[0, 1].plot(date_tm, ds_tm['C_iso_in'].isel(x=0, y=0).values, '-', color='blue', lw=1)
+axes[0, 1].set_xlim(date_tm[0], date_tm[-1])
+axes[0, 1].set_ylabel(r'$\delta^{18}$O [‰]')
+axes[0, 1].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
 
 
 axes[1, 0].plot(date_hm, ds_hm['transp'].isel(x=0, y=0).values, '-', color='green', lw=1)

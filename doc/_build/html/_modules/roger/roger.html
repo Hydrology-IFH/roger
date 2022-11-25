@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.roger &mdash; RoGeR 0.0.1+113.g98149b1.dirty documentation</title>
+  <title>roger.roger &mdash; RoGeR 0.0.1+333.ga951c01 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -29,7 +29,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+113.g98149b1.dirty
+                0.0.1+333.ga951c01
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -47,7 +47,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/analysis.html">Analysis of simulations with Roger</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
@@ -583,7 +583,13 @@
         <span class="n">vs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">variables</span>
         <span class="n">settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">settings</span>
 
-        <span class="n">time_length</span><span class="p">,</span> <span class="n">time_unit</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">format_time</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">runlen</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">warmup_done</span><span class="p">:</span>
+            <span class="n">time_length</span><span class="p">,</span> <span class="n">time_unit</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">format_time</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">runlen_warmup</span><span class="p">)</span>
+            <span class="n">runlen</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">runlen_warmup</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">time_length</span><span class="p">,</span> <span class="n">time_unit</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">format_time</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">runlen</span><span class="p">)</span>
+            <span class="n">runlen</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">runlen</span>
+
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Starting calculation for </span><span class="si">{</span><span class="n">time_length</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">time_unit</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="n">start_time</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">time</span>
@@ -595,7 +601,7 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">signals</span><span class="o">.</span><span class="n">signals_to_exception</span><span class="p">(),</span> <span class="n">pbar</span><span class="p">:</span>
-                <span class="k">while</span> <span class="n">vs</span><span class="o">.</span><span class="n">time</span> <span class="o">-</span> <span class="n">start_time</span> <span class="o">&lt;</span> <span class="n">settings</span><span class="o">.</span><span class="n">runlen</span><span class="p">:</span>
+                <span class="k">while</span> <span class="n">vs</span><span class="o">.</span><span class="n">time</span> <span class="o">-</span> <span class="n">start_time</span> <span class="o">&lt;</span> <span class="n">runlen</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">timer_context</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>

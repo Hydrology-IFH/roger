@@ -16,11 +16,11 @@ roger-create-mask
 .. run-click:: roger.cli.roger:cli
    :args: create-mask --help
 
-roger-copy-setup
+roger-copy-model
 ----------------
 
 .. run-click:: roger.cli.roger:cli
-   :args: copy-setup --help
+   :args: copy-model --help
 
 roger-resubmit
 --------------

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.models.oneD_event.oneD_event &mdash; RoGeR 0.0.1+62.g04ad513.dirty documentation</title>
+  <title>roger.models.oneD_event.oneD_event &mdash; RoGeR 0.0.1+333.ga951c01 documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -13,7 +13,9 @@
         <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
         <script src="../../../../_static/jquery.js"></script>
         <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -27,7 +29,7 @@
             <a href="../../../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+62.g04ad513.dirty
+                0.0.1+333.ga951c01
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -45,7 +47,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/analysis.html">Analysis of Roger output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/analysis.html">Analysis of simulations with Roger</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/cluster.html">Running Roger on a cluster</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/dev.html">Making changes in Roger</a></li>
 </ul>
@@ -149,6 +151,7 @@
         <span class="n">settings</span><span class="o">.</span><span class="n">nx</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ny</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
         <span class="c1"># derive total number of time steps from forcing</span>
         <span class="n">settings</span><span class="o">.</span><span class="n">nitt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_nitt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_dir</span><span class="p">,</span> <span class="s1">&#39;forcing.nc&#39;</span><span class="p">)</span>
+        <span class="c1"># length of simulation (in seconds)</span>
         <span class="n">settings</span><span class="o">.</span><span class="n">runlen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_runlen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_dir</span><span class="p">,</span> <span class="s1">&#39;forcing.nc&#39;</span><span class="p">)</span>
 
         <span class="c1"># spatial discretization (in meters)</span>

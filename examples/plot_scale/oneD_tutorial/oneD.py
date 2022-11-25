@@ -74,7 +74,6 @@ def main():
             # enable specific processes
             settings.enable_groundwater_boundary = False
             settings.enable_lateral_flow = True
-            settings.enable_routing = False
             settings.enable_adaptive_time_stepping = True
 
         @roger_routine(
@@ -241,7 +240,7 @@ def main():
             diagnostics["collect"].sampling_frequency = 1
 
             # maximum bias of deterministic/numerical solution at time step t
-            diagnostics["maximum"].output_variables = ["dS_num_error"]
+            diagnostics["maximum"].output_variables = ["dS_num_error", "z_sat"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1
 

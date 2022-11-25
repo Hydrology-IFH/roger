@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger_routine and roger_kernel &mdash; RoGeR 0.0.1+144.gd44f97e.dirty documentation</title>
+  <title>roger_routine and roger_kernel &mdash; RoGeR 0.0.1+333.ga951c01 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+144.gd44f97e.dirty
+                0.0.1+333.ga951c01
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -132,10 +132,10 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dist_safe</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – If set to False, all variables specified in local_variables are synced
+<li><p><strong>dist_safe</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – If set to False, all variables specified in local_variables are synced
 to the root process before execution and synced back after. This means that the routine
 will only be executed on rank 0. Has no effect in non-distributed contexts.</p></li>
-<li><p><strong>local_variables</strong> (<em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – List of variable names to be synced if dist_safe=False. This
+<li><p><strong>local_variables</strong> (<em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – List of variable names to be synced if dist_safe=False. This
 must include all variables retrieved from the state object throughout the routine (inputs
 <em>and</em> outputs).</p></li>
 </ul>
@@ -163,7 +163,7 @@ by the backend.</p>
 returned explicitly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>static_args</strong> (<em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – Names of kernel arguments that should be static.</p>
+<dd class="field-odd"><p><strong>static_args</strong> (<em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – Names of kernel arguments that should be static.</p>
 </dd>
 </dl>
 <p class="rubric">Example</p>

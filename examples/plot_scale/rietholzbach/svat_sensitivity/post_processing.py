@@ -208,6 +208,7 @@ def main(tmp_dir):
                             key_r = 'r_' + var_sim + f'{sc1}'
                             df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
                     # avoid defragmentation of DataFrame
+                    click.echo(f'{var_sim}: {nrow}')
                     df_params_metrics = df_params_metrics.copy()
             # Calculate multi-objective metric
             for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
