@@ -148,6 +148,8 @@ def main(tmp_dir):
         if not os.path.exists(file):
             df_params_metrics = pd.DataFrame(index=range(nx * ny))
             # sampled model parameters
+            df_params_metrics.loc[:, 'c1_mak'] = ds_sim["c1_mak"].isel(y=0).values.flatten()
+            df_params_metrics.loc[:, 'c2_mak'] = ds_sim["c2_mak"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'dmpv'] = ds_sim["dmpv"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'lmpv'] = ds_sim["lmpv"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'theta_eff'] = ds_sim["theta_eff"].isel(y=0).values.flatten()
@@ -224,9 +226,9 @@ def main(tmp_dir):
             file = base_path_results / f"params_metrics_{tms}.txt"
             df_params_metrics = pd.read_csv(file, header=0, index_col=False, sep="\t")
             bounds_sobol = {}
-            bounds_sobol['num_vars'] = 6
-            bounds_sobol['names'] = bounds[tm_structure]['names'][:6]
-            bounds_sobol['bounds'] = bounds[tm_structure]['bounds'][:6]
+            bounds_sobol['num_vars'] = 8
+            bounds_sobol['names'] = bounds[tm_structure]['names'][:8]
+            bounds_sobol['bounds'] = bounds[tm_structure]['bounds'][:8]
             for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
                 df_params = df_params_metrics.loc[:, bounds_sobol['names']]
                 df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'KGE_dS{sc1}', f'KGE_q_ss{sc1}', f'KGE_multi{sc1}']]
@@ -270,7 +272,7 @@ def main(tmp_dir):
 
                 # make dotty plots
                 nrow = len(df_metrics.columns)
-                ncol = 6
+                ncol = 8
                 fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(14, 7))
                 for i in range(nrow):
                     for j in range(ncol):

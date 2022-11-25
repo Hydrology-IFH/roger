@@ -57,6 +57,10 @@ _LABS_TM = {'complete-mixing': 'CM',
             'time-variant-transp': 'TVT-AD'}
 
 
+def kumaraswami(x, a, b):
+    return 1 - (1 - (x)**a)**b
+
+
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir):
@@ -88,28 +92,28 @@ def main(tmp_dir):
     path_obs_br = Path(__file__).parent / "observations" / "bromide_breakthrough.csv"
     df_obs_br = pd.read_csv(path_obs_br, skiprows=1, sep=';', na_values='')
 
-    # load best monte carlo simulations
-    states_hm1_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm1.nc"
-    ds_sim_hm1 = xr.open_dataset(states_hm1_file, engine="h5netcdf")
-    # assign date
-    days_sim_hm1 = (ds_sim_hm1['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    date_sim_hm1 = num2date(days_sim_hm1, units=f"days since {ds_sim_hm1['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    ds_sim_hm1 = ds_sim_hm1.assign_coords(Time=("Time", date_sim_hm1))
-    # load best 10 monte carlo simulations
-    states_hm10_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm10.nc"
-    ds_sim_hm10 = xr.open_dataset(states_hm10_file, engine="h5netcdf")
-    # assign date
-    days_sim_hm10 = (ds_sim_hm10['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    date_sim_hm10 = num2date(days_sim_hm10, units=f"days since {ds_sim_hm10['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    ds_sim_hm10 = ds_sim_hm10.assign_coords(Time=("Time", date_sim_hm10))
+    # # load best monte carlo simulations
+    # states_hm1_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm1.nc"
+    # ds_sim_hm1 = xr.open_dataset(states_hm1_file, engine="h5netcdf")
+    # # assign date
+    # days_sim_hm1 = (ds_sim_hm1['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    # date_sim_hm1 = num2date(days_sim_hm1, units=f"days since {ds_sim_hm1['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    # ds_sim_hm1 = ds_sim_hm1.assign_coords(Time=("Time", date_sim_hm1))
+    # # load best 10 monte carlo simulations
+    # states_hm10_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm10.nc"
+    # ds_sim_hm10 = xr.open_dataset(states_hm10_file, engine="h5netcdf")
+    # # assign date
+    # days_sim_hm10 = (ds_sim_hm10['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    # date_sim_hm10 = num2date(days_sim_hm10, units=f"days since {ds_sim_hm10['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    # ds_sim_hm10 = ds_sim_hm10.assign_coords(Time=("Time", date_sim_hm10))
 
-    # load best 100 monte carlo simulations
-    states_hm100_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm100.nc"
-    ds_sim_hm100 = xr.open_dataset(states_hm100_file, engine="h5netcdf")
-    # assign date
-    days_sim_hm100 = (ds_sim_hm100['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    date_sim_hm100 = num2date(days_sim_hm100, units=f"days since {ds_sim_hm100['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    ds_sim_hm100 = ds_sim_hm100.assign_coords(Time=("Time", date_sim_hm100))
+    # # load best 100 monte carlo simulations
+    # states_hm100_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm100.nc"
+    # ds_sim_hm100 = xr.open_dataset(states_hm100_file, engine="h5netcdf")
+    # # assign date
+    # days_sim_hm100 = (ds_sim_hm100['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    # date_sim_hm100 = num2date(days_sim_hm100, units=f"days since {ds_sim_hm100['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    # ds_sim_hm100 = ds_sim_hm100.assign_coords(Time=("Time", date_sim_hm100))
 
     # # load HYDRUS-1D benchmarks
     # # oxygen-18 simulations
@@ -125,6 +129,23 @@ def main(tmp_dir):
     # days_hydrus_tt = ds_hydrus_tt['Time'].values / 24
     # date_hydrus_tt = num2date(days_hydrus_tt, units=f"hours since {ds_hydrus_tt['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     # ds_hydrus_tt = ds_hydrus_tt.assign_coords(Time=("Time", date_hydrus_tt))
+
+    fig, axs = plt.subplots(1, 1, figsize=(3, 2))
+    x = onp.linspace(0, 1, num=1000)
+    axs.plot(x, kumaraswami(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
+    axs.plot(x, kumaraswami(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
+    axs.plot(x, kumaraswami(x, 3, 1), color='#3690c0', lw=1, label='a=3, b=1')
+    axs.plot(x, kumaraswami(x, 5, 1), color='#74a9cf', lw=1, label='a=5, b=1')
+    axs.plot(x, kumaraswami(x, 5, 1.5), color='#a6bddb', lw=1, label='a=5, b=1.5')
+    axs.set_xlim((0, 1))
+    axs.set_ylim((0, 1))
+    axs.set_xlabel('$P_S$ [-]')
+    axs.set_ylabel('$P_Q$ [-]')
+    axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1.05))
+    fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
+    file = base_path_figs / 'kumaraswami.png'
+    fig.savefig(file, dpi=250)
+    plt.close(fig=fig)
 
     # # check water balance of lysimeter
     # df_lys_obs = pd.DataFrame(index=date_obs)
@@ -346,7 +367,7 @@ def main(tmp_dir):
     # for sc, sc1 in enumerate(['', 'dry', 'normal', 'wet']):
     for sc, sc1 in enumerate(['']):
         df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'KGE_dS{sc1}', f'KGE_q_ss{sc1}', f'KGE_multi{sc1}']]
-        df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+        df_params = df_params_metrics.loc[:, ['c1_mak', 'c2_mak', 'c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
         nrow = len(df_metrics.columns)
         ncol = len(df_params.columns)
         fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
@@ -441,9 +462,9 @@ def main(tmp_dir):
     # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
     # # write average and standard deviation of best parameters to .txt
-    # df_avg_std = pd.DataFrame(index=['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
-    # df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics10.loc[:df_params_metrics10.index[99], ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
-    # df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics10.loc[:df_params_metrics10.index[99], ['dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
+    # df_avg_std = pd.DataFrame(index=['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
+    # df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics10.loc[:df_params_metrics10.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
+    # df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics10.loc[:df_params_metrics10.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
     # file = base_path_figs / f"params_best_100_avg_std_optimized_with_{metric_for_opt}.txt"
     # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
@@ -651,19 +672,19 @@ def main(tmp_dir):
     #     fig.savefig(path_fig, dpi=250)
     # plt.close('all')
 
-    # compare HYDRUS-1D simulations with observations
-    vars_obs = ['AET', 'PERC', 'dWEIGHT']
-    vars_sim = ['aet', 'perc', 'dS']
-    dict_obs_sim_hydrus = {}
-    for var_obs, var_sim in zip(vars_obs, vars_sim):
-        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-        df_obs.loc[:, 'obs'] = obs_vals
-        sim_vals = ds_hydrus_18O[var_sim].values
-        # join observations on simulations
-        df_eval = eval_utils.join_obs_on_sim(ds_hydrus_18O['Time'].values, sim_vals, df_obs)
-        df_eval = df_eval.iloc[:, :]
-        dict_obs_sim_hydrus[var_obs] = df_eval
+    # # compare HYDRUS-1D simulations with observations
+    # vars_obs = ['AET', 'PERC', 'dWEIGHT']
+    # vars_sim = ['aet', 'perc', 'dS']
+    # dict_obs_sim_hydrus = {}
+    # for var_obs, var_sim in zip(vars_obs, vars_sim):
+    #     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+    #     df_obs.loc[:, 'obs'] = obs_vals
+    #     sim_vals = ds_hydrus_18O[var_sim].values
+    #     # join observations on simulations
+    #     df_eval = eval_utils.join_obs_on_sim(ds_hydrus_18O['Time'].values, sim_vals, df_obs)
+    #     df_eval = df_eval.iloc[:, :]
+    #     dict_obs_sim_hydrus[var_obs] = df_eval
 
     # df_params_metrics_hydrus = pd.DataFrame(index=['', 'dry', 'normal', 'wet'])
     # vars_obs = ['AET', 'dWEIGHT', 'PERC', 'd18O_PERC']
@@ -1024,13 +1045,13 @@ def main(tmp_dir):
     #     df_params_metrics = dict_params_metrics_tm_mc[tm_structure]['params_metrics']
     #     df_metrics = df_params_metrics.loc[:, ['KGE_C_iso_q_ss']]
     #     if tm_structure == "complete-mixing":
-    #         df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+    #         df_params = df_params_metrics.loc[:, ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
     #     elif tm_structure == "piston":
-    #         df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+    #         df_params = df_params_metrics.loc[:, ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
     #     elif tm_structure == "advection-dispersion":
-    #         df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'a_q_rz', 'a_q_ss']]
+    #         df_params = df_params_metrics.loc[:, ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b_transp', 'a_q_rz', 'a_q_ss']]
     #     elif tm_structure == "time-variant advection-dispersion":
-    #         df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b1_transp', 'b2_transp', 'a1_q_rz', 'a2_q_rz', 'a1_q_ss', 'a2_q_ss']]
+    #         df_params = df_params_metrics.loc[:, ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'b1_transp', 'b2_transp', 'a1_q_rz', 'a2_q_rz', 'a1_q_ss', 'a2_q_ss']]
     #     # select best model run
     #     idx_best = df_params_metrics['KGE_C_iso_q_ss'].idxmax()
     #     for nrow, param_name in enumerate(df_params.columns):
@@ -1165,72 +1186,72 @@ def main(tmp_dir):
     #     file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}_{year}_{year+2}.png"
     #     fig.savefig(file, dpi=250)
 
-    fig, ax = plt.subplots(4, 1, sharey=False, figsize=(6, 5))
-    for i, tm_structure in enumerate(tm_structures):
-        tms = tm_structure.replace(" ", "_")
-        # load transport simulation
-        states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm10" / f"states_{tms}_monte_carlo.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-        days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-        date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-        ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
-        # join observations on simulations
-        obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-        sim_vals = ds_sim_tm['C_iso_q_ss'].isel(y=0).values
-        sim_vals = onp.where((sim_vals > 0) | (sim_vals < -20), onp.nan, sim_vals)
-        sim_vals_avg = onp.nanmean(sim_vals, axis=0)
-        sim_vals_5 = onp.nanquantile(sim_vals, 0.05, axis=0)
-        sim_vals_50 = onp.nanmedian(sim_vals, axis=0)
-        sim_vals_95 = onp.nanquantile(sim_vals, 0.95, axis=0)
-        sim_vals_hydrus = ds_hydrus_18O['d18O_perc'].values
-        ax.flatten()[i].plot(ds_sim_tm['Time'].values, sim_vals_avg, ls='--', color='red', lw=1)
-        ax.flatten()[i].plot(ds_sim_tm['Time'].values, sim_vals_50, ls='-', color='red', lw=1)
-        ax.flatten()[i].fill_between(ds_sim_tm['Time'].values, sim_vals_5, sim_vals_95, color='red',
-                                      edgecolor=None, alpha=0.2)
-        ax.flatten()[i].plot(ds_hydrus_18O['Time'].values, sim_vals_hydrus, color='grey', lw=1)
-        ax.flatten()[i].scatter(date_obs, obs_vals, color='blue', s=1)
-        ax.flatten()[i].set_title(_LABS_TM[tm_structure])
-        ax[i].set_ylabel(r'$\delta^{18}$O [‰]')
-        ax.flatten()[i].set_ylim((-20, 0))
-        ax.flatten()[i].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
-    ax[-1].set_xlabel('Time [year]')
-    fig.tight_layout()
-    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_conf_int_optimized_with_{metric_for_opt}.png"
-    fig.savefig(file, dpi=250)
+    # fig, ax = plt.subplots(4, 1, sharey=False, figsize=(6, 5))
+    # for i, tm_structure in enumerate(tm_structures):
+    #     tms = tm_structure.replace(" ", "_")
+    #     # load transport simulation
+    #     states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm10" / f"states_{tms}_monte_carlo.nc"
+    #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    #     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    #     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    #     ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+    #     # join observations on simulations
+    #     obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+    #     sim_vals = ds_sim_tm['C_iso_q_ss'].isel(y=0).values
+    #     sim_vals = onp.where((sim_vals > 0) | (sim_vals < -20), onp.nan, sim_vals)
+    #     sim_vals_avg = onp.nanmean(sim_vals, axis=0)
+    #     sim_vals_5 = onp.nanquantile(sim_vals, 0.05, axis=0)
+    #     sim_vals_50 = onp.nanmedian(sim_vals, axis=0)
+    #     sim_vals_95 = onp.nanquantile(sim_vals, 0.95, axis=0)
+    #     sim_vals_hydrus = ds_hydrus_18O['d18O_perc'].values
+    #     ax.flatten()[i].plot(ds_sim_tm['Time'].values, sim_vals_avg, ls='--', color='red', lw=1)
+    #     ax.flatten()[i].plot(ds_sim_tm['Time'].values, sim_vals_50, ls='-', color='red', lw=1)
+    #     ax.flatten()[i].fill_between(ds_sim_tm['Time'].values, sim_vals_5, sim_vals_95, color='red',
+    #                                   edgecolor=None, alpha=0.2)
+    #     ax.flatten()[i].plot(ds_hydrus_18O['Time'].values, sim_vals_hydrus, color='grey', lw=1)
+    #     ax.flatten()[i].scatter(date_obs, obs_vals, color='blue', s=1)
+    #     ax.flatten()[i].set_title(_LABS_TM[tm_structure])
+    #     ax[i].set_ylabel(r'$\delta^{18}$O [‰]')
+    #     ax.flatten()[i].set_ylim((-20, 0))
+    #     ax.flatten()[i].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    # ax[-1].set_xlabel('Time [year]')
+    # fig.tight_layout()
+    # file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_conf_int_optimized_with_{metric_for_opt}.png"
+    # fig.savefig(file, dpi=250)
 
-    fig, ax = plt.subplots(4, 1, sharey=False, figsize=(6, 5))
-    tm_structures_extra = ['preferential', 'power', 'older-preference', 'time-variant-transp']
-    for i, tm_structure in enumerate(tm_structures_extra):
-        tms = tm_structure.replace(" ", "_")
-        # load transport simulation
-        states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm10" / f"states_{tms}_monte_carlo.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-        days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-        date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-        ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
-        # join observations on simulations
-        obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-        sim_vals = ds_sim_tm['C_iso_q_ss'].isel(y=0).values
-        sim_vals = onp.where((sim_vals > 0) | (sim_vals < -20), onp.nan, sim_vals)
-        sim_vals_avg = onp.nanmean(sim_vals, axis=0)
-        sim_vals_5 = onp.nanquantile(sim_vals, 0.05, axis=0)
-        sim_vals_50 = onp.nanmedian(sim_vals, axis=0)
-        sim_vals_95 = onp.nanquantile(sim_vals, 0.95, axis=0)
-        sim_vals_hydrus = ds_hydrus_18O['d18O_perc'].values
-        ax.flatten()[i].plot(ds_sim_tm['Time'].values, sim_vals_avg, ls='--', color='red', lw=1)
-        ax.flatten()[i].plot(ds_sim_tm['Time'].values, sim_vals_50, ls='-', color='red', lw=1)
-        ax.flatten()[i].fill_between(ds_sim_tm['Time'].values, sim_vals_5, sim_vals_95, color='red',
-                                      edgecolor=None, alpha=0.2)
-        ax.flatten()[i].plot(ds_hydrus_18O['Time'].values, sim_vals_hydrus, color='grey', lw=1)
-        ax.flatten()[i].scatter(date_obs, obs_vals, color='blue', s=1)
-        ax.flatten()[i].set_title(_LABS_TM[tm_structure])
-        ax[i].set_ylabel(r'$\delta^{18}$O [‰]')
-        ax.flatten()[i].set_ylim((-20, 0))
-        ax.flatten()[i].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
-    ax[-1].set_xlabel('Time [year]')
-    fig.tight_layout()
-    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_conf_int_optimized_with_{metric_for_opt}_extra.png"
-    fig.savefig(file, dpi=250)
+    # fig, ax = plt.subplots(4, 1, sharey=False, figsize=(6, 5))
+    # tm_structures_extra = ['preferential', 'power', 'older-preference', 'time-variant-transp']
+    # for i, tm_structure in enumerate(tm_structures_extra):
+    #     tms = tm_structure.replace(" ", "_")
+    #     # load transport simulation
+    #     states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm10" / f"states_{tms}_monte_carlo.nc"
+    #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    #     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    #     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    #     ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+    #     # join observations on simulations
+    #     obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+    #     sim_vals = ds_sim_tm['C_iso_q_ss'].isel(y=0).values
+    #     sim_vals = onp.where((sim_vals > 0) | (sim_vals < -20), onp.nan, sim_vals)
+    #     sim_vals_avg = onp.nanmean(sim_vals, axis=0)
+    #     sim_vals_5 = onp.nanquantile(sim_vals, 0.05, axis=0)
+    #     sim_vals_50 = onp.nanmedian(sim_vals, axis=0)
+    #     sim_vals_95 = onp.nanquantile(sim_vals, 0.95, axis=0)
+    #     sim_vals_hydrus = ds_hydrus_18O['d18O_perc'].values
+    #     ax.flatten()[i].plot(ds_sim_tm['Time'].values, sim_vals_avg, ls='--', color='red', lw=1)
+    #     ax.flatten()[i].plot(ds_sim_tm['Time'].values, sim_vals_50, ls='-', color='red', lw=1)
+    #     ax.flatten()[i].fill_between(ds_sim_tm['Time'].values, sim_vals_5, sim_vals_95, color='red',
+    #                                   edgecolor=None, alpha=0.2)
+    #     ax.flatten()[i].plot(ds_hydrus_18O['Time'].values, sim_vals_hydrus, color='grey', lw=1)
+    #     ax.flatten()[i].scatter(date_obs, obs_vals, color='blue', s=1)
+    #     ax.flatten()[i].set_title(_LABS_TM[tm_structure])
+    #     ax[i].set_ylabel(r'$\delta^{18}$O [‰]')
+    #     ax.flatten()[i].set_ylim((-20, 0))
+    #     ax.flatten()[i].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    # ax[-1].set_xlabel('Time [year]')
+    # fig.tight_layout()
+    # file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_conf_int_optimized_with_{metric_for_opt}_extra.png"
+    # fig.savefig(file, dpi=250)
 
     # fig, ax = plt.subplots(4, 1, sharey=False, figsize=(6, 5))
     # for i, tm_structure in enumerate(tm_structures):

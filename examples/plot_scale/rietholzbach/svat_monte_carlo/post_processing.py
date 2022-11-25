@@ -131,6 +131,8 @@ def main(tmp_dir):
         click.echo('Calculate metrics ...')
         df_params_metrics = pd.DataFrame(index=range(nx * ny))
         # sampled model parameters
+        df_params_metrics.loc[:, 'c1_mak'] = ds_sim["c1_mak"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'c2_mak'] = ds_sim["c2_mak"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'dmpv'] = ds_sim["dmpv"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'lmpv'] = ds_sim["lmpv"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'theta_eff'] = ds_sim["theta_eff"].isel(y=0).values.flatten()
@@ -415,7 +417,7 @@ def main(tmp_dir):
         click.echo('Dotty plots ...')
         for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
             df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'KGE_dS{sc1}', f'KGE_q_ss{sc1}', f'KGE_multi{sc1}']]
-            df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+            df_params = df_params_metrics.loc[:, ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
             nrow = len(df_metrics.columns)
             ncol = len(df_params.columns)
             fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(14, 7))
