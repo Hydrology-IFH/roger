@@ -7,7 +7,9 @@ import numpy as onp
 import click
 
 
-_UNITS = {'dmpv': '1/m2',
+_UNITS = {'c1_mak': '-',
+          'c2_mak': '-',
+          'dmpv': '1/m2',
           'lmpv': 'mm',
           'theta_eff': '-',
           'frac_lp': '-',

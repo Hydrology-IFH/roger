@@ -33,16 +33,28 @@ def read_meteo(path_to_dir: Path):
     Ta_path = path_to_dir / "TA.txt"
     PREC_path = path_to_dir / "PREC.txt"
     PET_path = path_to_dir / "PET.txt"
+    RS_path = path_to_dir / "RS.txt"
 
     df_PREC = pd.read_csv(PREC_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
                           index_col=0, na_values=-9999)
     df_PREC.index = pd.to_datetime(df_PREC.index, format='%Y %m %d %H %M')
     df_PREC.index = df_PREC.index.rename('Index')
 
-    df_pet = pd.read_csv(PET_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
-                         index_col=0, na_values=-9999)
-    df_pet.index = pd.to_datetime(df_pet.index, format='%Y %m %d %H %M')
-    df_pet.index = df_pet.index.rename('Index')
+    if os.path.exists(PET_path):
+        df_pet = pd.read_csv(PET_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
+                             index_col=0, na_values=-9999)
+        df_pet.index = pd.to_datetime(df_pet.index, format='%Y %m %d %H %M')
+        df_pet.index = df_pet.index.rename('Index')
+    else:
+        df_pet = None
+
+    if os.path.exists(RS_path):
+        df_rs = pd.read_csv(RS_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
+                            index_col=0, na_values=-9999)
+        df_rs.index = pd.to_datetime(df_rs.index, format='%Y %m %d %H %M')
+        df_rs.index = df_rs.index.rename('Index')
+    else:
+        df_rs = None
 
     df_ta = pd.read_csv(Ta_path, sep=r"\s+", skiprows=0, header=0, parse_dates=[[0, 1, 2, 3, 4]],
                         index_col=0, na_values=-9999)
@@ -53,13 +65,13 @@ def read_meteo(path_to_dir: Path):
     # time series starts on first day at 00:00 and ends on last day at 23:50
     prec_ind = df_PREC.index
     new_prec_ind = pd.date_range(start=datetime(prec_ind[0].year, prec_ind[0].month, prec_ind[0].day, 0, 0),
-                              end=datetime(prec_ind[-1].year, prec_ind[-1].month, prec_ind[-1].day, 23, 50),
-                              freq='10T')
+                                 end=datetime(prec_ind[-1].year, prec_ind[-1].month, prec_ind[-1].day, 23, 50),
+                                 freq='10T')
     prec_10mins = pd.DataFrame(index=new_prec_ind)
     prec_10mins['PREC'] = 0
     prec_10mins.loc[df_PREC.index, 'PREC'] = df_PREC['PREC'].values
 
-    return prec_10mins, df_pet, df_ta
+    return prec_10mins, df_pet, df_ta, df_rs
 
 
 def write_meteo_csv_from_dwd(path_to_dir: Path):

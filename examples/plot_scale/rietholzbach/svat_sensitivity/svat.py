@@ -50,6 +50,53 @@ def main(transport_model_structure, tmp_dir):
                     var_obj = infile.dimensions['x'].size
                     return int(var_obj)
 
+        def _calc_pet_with_makkink(self, rs, ta, z, c1=0.63, c2=-0.05):
+            """Calculate potential evapotranspiration according to Makkink.
+
+            Args
+            ----------
+            rs : np.ndarray
+                solar radiation (in MJ m-2)
+
+            ta : np.ndarray
+                air temperature (in celsius)
+
+            z : float
+                elevation above sea level (in m)
+
+            c1 : float, optional
+                Makkink coefficient (-)
+
+            c2 : float, optional
+                Makkink coefficient (-)
+
+            Reference
+            ----------
+            Makkink, G. F., Testing the Penman formula by means of lysimeters,
+            J. Inst. Wat. Engrs, 11, 277-288, 1957.
+
+            Returns
+            ----------
+            pet : np.ndarray
+                potential evapotranspiration
+            """
+            # slope of saturation vapour pressure curve (in kPa celsius-1)
+            svpc = 4098 * (0.6108 * npx.exp((17.27 * ta) / (ta + 237.3))) / (ta + 237.3)**2
+
+            # atmospheric pressure (in kPa)
+            p = 101.3 * ((293-0.0065 * z) / 293)**5.26
+
+            # psychometric constant (in kPa celsius-1)
+            gam = 0.665 * 1e-3 * p
+
+            # special heat of evaporation (in MJ m-2 mm-1)
+            lam = 0.0864 * (28.4 - 0.028 * ta)
+
+            # potential evapotranspiration (in mm)
+            pet = (svpc / (svpc + gam)) * ((c1 * rs / lam) + c2)
+
+            return npx.where(pet < 0, 0, pet)
+
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
@@ -105,6 +152,8 @@ def main(transport_model_structure, tmp_dir):
             local_variables=[
                 "lu_id",
                 "z_soil",
+                "c1_mak",
+                "c2_mak",
                 "dmpv",
                 "lmpv",
                 "theta_eff",
@@ -122,6 +171,8 @@ def main(transport_model_structure, tmp_dir):
 
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 2200)
+            vs.c1_mak = update(vs.c1_mak, at[2:-2, 2:-2], self._read_var_from_nc("c1_mak", self._base_path, 'params_saltelli.nc', group=transport_model_structure.replace("_", " ")))
+            vs.c2_mak = update(vs.c2_mak, at[2:-2, 2:-2], self._read_var_from_nc("c2_mak", self._base_path, 'params_saltelli.nc', group=transport_model_structure.replace("_", " ")))
             vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_nc("dmpv", self._base_path, 'params_saltelli.nc', group=transport_model_structure.replace("_", " ")))
             vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_nc("lmpv", self._base_path, 'params_saltelli.nc', group=transport_model_structure.replace("_", " ")))
             vs.theta_eff = update(vs.theta_eff, at[2:-2, 2:-2], self._read_var_from_nc("theta_eff", self._base_path, 'params_saltelli.nc', group=transport_model_structure.replace("_", " ")))
@@ -171,6 +222,9 @@ def main(transport_model_structure, tmp_dir):
                 "itt_forc",
                 "prec_day",
                 "ta_day",
+                "rs_day",
+                "c1_mak",
+                "c2_mak",
                 "pet_day",
                 "year",
                 "month",
@@ -188,7 +242,8 @@ def main(transport_model_structure, tmp_dir):
                 vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, 'forcing.nc')[vs.itt_forc])
                 vs.prec_day = update(vs.prec_day, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
                 vs.ta_day = update(vs.ta_day, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
-                vs.pet_day = update(vs.pet_day, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
+                vs.rs_day = update(vs.rs_day, at[2:-2, 2:-2, :], self._read_var_from_nc("RS", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
+                vs.pet_day = update(vs.pet_day, at[2:-2, 2:-2, :], self._calc_pet_with_makkink(npx.mean(vs.rs_day[2:-2, 2:-2, :], axis=-1), npx.mean(vs.ta_day[2:-2, 2:-2, :], axis=-1), 755, c1=vs.c1_mak[2:-2, 2:-2], c2=vs.c2_mak[2:-2, 2:-2])[:, :, npx.newaxis] / (6*24))
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
         @roger_routine
@@ -221,7 +276,7 @@ def main(transport_model_structure, tmp_dir):
             if base_path:
                 diagnostics["average"].base_output_path = base_path
 
-            diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'theta_eff', 'frac_lp', 'frac_fp']
+            diagnostics["constant"].output_variables = ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'theta_eff', 'frac_lp', 'frac_fp']
             diagnostics["constant"].output_frequency = 0
             diagnostics["constant"].sampling_frequency = 1
             if base_path:

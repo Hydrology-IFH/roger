@@ -538,7 +538,6 @@ def calc_rise_of_saturation_water_table(state):
         vs.z_sat,
         at[2:-2, 2:-2, vs.tau], npx.where(z_sat_top[2:-2, 2:-2] > z_nomp[2:-2, 2:-2], npx.where((vs.S_fp_ss[2:-2, 2:-2] >= vs.S_ufc_ss[2:-2, 2:-2]) & ((vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2]) < (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])), vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], npx.where((vs.S_fp_rz[2:-2, 2:-2] >= vs.S_ufc_rz[2:-2, 2:-2]) & (vs.S_lp_ss[2:-2, 2:-2] >= vs.S_ac_ss[2:-2, 2:-2]), vs.S_lp_rz[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2], vs.S_lp_ss[2:-2, 2:-2] / vs.theta_ac[2:-2, 2:-2])), 0) * vs.maskCatch[2:-2, 2:-2],
     )
-    print(vs.z_sat[2:-2, 2:-2, vs.tau])
 
     return KernelOutput(z_sat=vs.z_sat)
 

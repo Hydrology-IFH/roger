@@ -1,7 +1,9 @@
 complete-mixing:
-  num_vars: 6
+  num_vars: 8
 
   names:
+  - 'c1_mak'  # Makkink coefficient (-)
+  - 'c2_mak'  # Makkink coefficient (-)
   - 'dmpv'  # density of vertical macropores (1/m2)
   - 'lmpv'  # total length of vertical macropores (mm)
   - 'theta_eff'  # effective porosity of soil (-)
@@ -11,8 +13,14 @@ complete-mixing:
 
   bounds:
   -
-    - 1  # lower boundary
-    - 400  # upper boundary
+    - 0.4  # lower boundary
+    - 0.7  # upper boundary
+  -
+    - -0.5
+    - 0.1
+  -
+    - 1
+    - 400
   -
     - 1
     - 2000
@@ -30,9 +38,11 @@ complete-mixing:
     - 150
 
 piston:
-  num_vars: 6
+  num_vars: 8
 
   names:
+  - 'c1_mak'  # Makkink coefficient (-)
+  - 'c2_mak'  # Makkink coefficient (-)
   - 'dmpv'
   - 'lmpv'
   - 'theta_eff'
@@ -41,6 +51,12 @@ piston:
   - 'ks'
 
   bounds:
+  -
+    - 0.4  # lower boundary
+    - 0.7  # upper boundary
+  -
+    - -0.5
+    - 0.1
   -
     - 1
     - 400
@@ -61,9 +77,11 @@ piston:
     - 150
 
 advection-dispersion:
-  num_vars: 12
+  num_vars: 14
 
   names:
+  - 'c1_mak'  # Makkink coefficient (-)
+  - 'c2_mak'  # Makkink coefficient (-)
   - 'dmpv'
   - 'lmpv'
   - 'theta_eff'
@@ -78,6 +96,12 @@ advection-dispersion:
   - 'b_q_ss'  # SAS parameter of percolation from subsoil
 
   bounds:
+  -
+    - 0.4  # lower boundary
+    - 0.7  # upper boundary
+  -
+    - -0.5
+    - 0.1
   -
     - 1
     - 400
@@ -116,9 +140,11 @@ advection-dispersion:
     - 50
 
 time-variant advection-dispersion:
-  num_vars: 15
+  num_vars: 17
 
   names:
+  - 'c1_mak'  # Makkink coefficient (-)
+  - 'c2_mak'  # Makkink coefficient (-)
   - 'dmpv'
   - 'lmpv'
   - 'theta_eff'
@@ -136,6 +162,12 @@ time-variant advection-dispersion:
   - 'c2_q_ss'  # SAS parameter of percolation from subsoil
 
   bounds:
+  -
+    - 0.4  # lower boundary
+    - 0.7  # upper boundary
+  -
+    - -0.5
+    - 0.1
   -
     - 1
     - 400

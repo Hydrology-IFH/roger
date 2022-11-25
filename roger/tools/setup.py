@@ -494,7 +494,7 @@ def write_forcing(input_dir, nrows=1, ncols=1, uniform=True,
         _lock = True
         while _lock:
             try:
-                df_PREC, df_PET, df_TA = read_meteo(input_dir)
+                df_PREC, df_PET, df_TA, df_RS = read_meteo(input_dir)
                 _lock = False
                 break
             except BlockingIOError:
@@ -503,12 +503,18 @@ def write_forcing(input_dir, nrows=1, ncols=1, uniform=True,
                 time.wait(10)
 
         validate(df_PREC)
-        validate(df_PET)
         validate(df_TA)
-        df_meteo = df_PREC.join([df_TA, df_PET.loc[:, 'PET'].to_frame()])
-        df_meteo = df_meteo.ffill()
-        # downscale daily PET to 10 minutes
-        df_meteo.loc[:, 'PET'] = (df_meteo.loc[:, 'PET'] / 24) / 6
+        if df_PET:
+            validate(df_PET)
+            df_meteo = df_PREC.join([df_TA, df_PET.loc[:, 'PET'].to_frame()])
+            df_meteo = df_meteo.ffill()
+            # downscale daily PET to 10 minutes
+            df_meteo.loc[:, 'PET'] = (df_meteo.loc[:, 'PET'] / 24) / 6
+        else:
+            validate(df_RS)
+            df_meteo = df_PREC.join([df_TA, df_RS.loc[:, 'RS'].to_frame()])
+            df_meteo = df_meteo.ffill()
+
         if prec_correction:
             prec_corr = precipitation_correction(df_meteo['PREC'].values,
                                                  df_meteo['TA'].values,
@@ -538,11 +544,18 @@ def write_forcing(input_dir, nrows=1, ncols=1, uniform=True,
             v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
             v.attrs['long_name'] = 'Air temperature'
             v.attrs['units'] = 'degC'
-            v = f.create_variable('PET', ('x', 'y', 'Time'), float_type)
-            arr = df_meteo['PET'].astype(float_type).values
-            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
-            v.attrs['long_name'] = 'Potential Evapotranspiration'
-            v.attrs['units'] = 'mm/10 minutes'
+            if isinstance(df_PET, pd.DataFrame):
+                v = f.create_variable('PET', ('x', 'y', 'Time'), float_type)
+                arr = df_meteo['PET'].astype(float_type).values
+                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+                v.attrs['long_name'] = 'Potential Evapotranspiration'
+                v.attrs['units'] = 'mm/10 minutes'
+            if isinstance(df_RS, pd.DataFrame):
+                v = f.create_variable('RS', ('x', 'y', 'Time'), float_type)
+                arr = df_meteo['RS'].astype(float_type).values
+                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+                v.attrs['long_name'] = 'Solar radiation'
+                v.attrs['units'] = 'MJ/m2'
             v = f.create_variable('dt', ('Time',), float_type)
             v[:] = 10 * 60
             v.attrs['long_name'] = 'time step'

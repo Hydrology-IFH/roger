@@ -1,7 +1,15 @@
+# Makkink coefficient (-)
+c1_mak:
+- 0.5  # lower boundary
+- 0.65  # upper boundary
+# Makkink coefficient (-)
+c2_mak:
+- -0.2
+- 0
 # density of vertical macropores (1/m2)
 dmpv:
-- 1  # lower boundary
-- 300  # upper boundary
+- 1
+- 300
 # total length of vertical macropores (mm)
 lmpv:
 - 1

@@ -7,15 +7,20 @@ import numpy as onp
 import click
 
 
-_UNITS = {'dmpv': '1/m2',
+_UNITS = {'c1_mak': '-',
+          'c2_mak': '-',
+          'dmpv': '1/m2',
           'lmpv': 'mm',
           'theta_eff': '-',
           'frac_lp': '-',
           'theta_pwp': '-',
           'ks': 'mm/hour',
+          'a_transp': '-',
           'b_transp': '-',
           'a_q_rz': '-',
+          'b_q_rz': '-',
           'a_q_ss': '-',
+          'b_q_ss': '-',
           'c1_transp': '-',
           'c2_transp': '-',
           'c1_q_rz': '-',
