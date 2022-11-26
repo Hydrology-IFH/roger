@@ -239,7 +239,7 @@ def main(nsamples, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["rate"].output_variables = ["prec", "pet", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow"]
+            diagnostics["rate"].output_variables = ["prec", "pet", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow", "int_ground"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
             if base_path:

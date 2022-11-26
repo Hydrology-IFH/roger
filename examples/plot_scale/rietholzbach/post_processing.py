@@ -96,20 +96,20 @@ def main(tmp_dir):
     path_obs_br = Path(__file__).parent / "observations" / "bromide_breakthrough.csv"
     df_obs_br = pd.read_csv(path_obs_br, skiprows=1, sep=';', na_values='')
 
-    # # load best monte carlo simulations
-    # states_hm1_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm1.nc"
-    # ds_sim_hm1 = xr.open_dataset(states_hm1_file, engine="h5netcdf")
-    # # assign date
-    # days_sim_hm1 = (ds_sim_hm1['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    # date_sim_hm1 = num2date(days_sim_hm1, units=f"days since {ds_sim_hm1['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    # ds_sim_hm1 = ds_sim_hm1.assign_coords(Time=("Time", date_sim_hm1))
-    # # load best 10 monte carlo simulations
-    # states_hm10_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm10.nc"
-    # ds_sim_hm10 = xr.open_dataset(states_hm10_file, engine="h5netcdf")
-    # # assign date
-    # days_sim_hm10 = (ds_sim_hm10['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    # date_sim_hm10 = num2date(days_sim_hm10, units=f"days since {ds_sim_hm10['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    # ds_sim_hm10 = ds_sim_hm10.assign_coords(Time=("Time", date_sim_hm10))
+    # load best monte carlo simulations
+    states_hm1_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm1.nc"
+    ds_sim_hm1 = xr.open_dataset(states_hm1_file, engine="h5netcdf")
+    # assign date
+    days_sim_hm1 = (ds_sim_hm1['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    date_sim_hm1 = num2date(days_sim_hm1, units=f"days since {ds_sim_hm1['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    ds_sim_hm1 = ds_sim_hm1.assign_coords(Time=("Time", date_sim_hm1))
+    # load best 10 monte carlo simulations
+    states_hm10_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm10.nc"
+    ds_sim_hm10 = xr.open_dataset(states_hm10_file, engine="h5netcdf")
+    # assign date
+    days_sim_hm10 = (ds_sim_hm10['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    date_sim_hm10 = num2date(days_sim_hm10, units=f"days since {ds_sim_hm10['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    ds_sim_hm10 = ds_sim_hm10.assign_coords(Time=("Time", date_sim_hm10))
 
     # # load best 100 monte carlo simulations
     # states_hm100_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm100.nc"
@@ -134,39 +134,40 @@ def main(tmp_dir):
     # date_hydrus_tt = num2date(days_hydrus_tt, units=f"hours since {ds_hydrus_tt['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     # ds_hydrus_tt = ds_hydrus_tt.assign_coords(Time=("Time", date_hydrus_tt))
 
-    fig, axs = plt.subplots(1, 1, figsize=(3, 2))
-    x = onp.linspace(0, 1, num=1000)
-    axs.plot(x, kumaraswami_cdf(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
-    axs.plot(x, kumaraswami_cdf(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
-    axs.plot(x, kumaraswami_cdf(x, 3, 1), color='#3690c0', lw=1, label='a=3, b=1')
-    axs.plot(x, kumaraswami_cdf(x, 5, 1), color='#74a9cf', lw=1, label='a=5, b=1')
-    axs.plot(x, kumaraswami_cdf(x, 5, 1.5), color='#a6bddb', lw=1, label='a=5, b=1.5')
-    axs.set_xlim((0, 1))
-    axs.set_ylim((0, 1))
-    axs.set_xlabel('$P_S$ [-]')
-    axs.set_ylabel('$P_Q$ [-]')
-    axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1.05))
-    fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
-    file = base_path_figs / 'kumaraswami_cdf.png'
-    fig.savefig(file, dpi=250)
-    plt.close(fig=fig)
+    # # plot SAS function
+    # fig, axs = plt.subplots(1, 1, figsize=(3, 2))
+    # x = onp.linspace(0, 1, num=1000)
+    # axs.plot(x, kumaraswami_cdf(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
+    # axs.plot(x, kumaraswami_cdf(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
+    # axs.plot(x, kumaraswami_cdf(x, 3, 1), color='#3690c0', lw=1, label='a=3, b=1')
+    # axs.plot(x, kumaraswami_cdf(x, 5, 1), color='#74a9cf', lw=1, label='a=5, b=1')
+    # axs.plot(x, kumaraswami_cdf(x, 5, 1.5), color='#a6bddb', lw=1, label='a=5, b=1.5')
+    # axs.set_xlim((0, 1))
+    # axs.set_ylim((0, 1))
+    # axs.set_xlabel('$P_S$ [-]')
+    # axs.set_ylabel('$P_Q$ [-]')
+    # axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1.05))
+    # fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
+    # file = base_path_figs / 'kumaraswami_cdf.png'
+    # fig.savefig(file, dpi=250)
+    # plt.close(fig=fig)
 
-    fig, axs = plt.subplots(1, 1, figsize=(3, 2))
-    x = onp.linspace(0, 1, num=1000)
-    axs.plot(x, kumaraswami_pdf(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
-    axs.plot(x, kumaraswami_pdf(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
-    axs.plot(x, kumaraswami_pdf(x, 3, 1), color='#3690c0', lw=1, label='a=3, b=1')
-    axs.plot(x, kumaraswami_pdf(x, 5, 1), color='#74a9cf', lw=1, label='a=5, b=1')
-    axs.plot(x, kumaraswami_pdf(x, 5, 1.5), color='#a6bddb', lw=1, label='a=5, b=1.5')
-    axs.set_xlim((0, 1))
-    axs.set_ylim(0,)
-    axs.set_xlabel('$P_S$ [-]')
-    axs.set_ylabel('$pdf_Q$ [-]')
-    axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1.05))
-    fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
-    file = base_path_figs / 'kumaraswami_pdf.png'
-    fig.savefig(file, dpi=250)
-    plt.close(fig=fig)
+    # fig, axs = plt.subplots(1, 1, figsize=(3, 2))
+    # x = onp.linspace(0, 1, num=1000)
+    # axs.plot(x, kumaraswami_pdf(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
+    # axs.plot(x, kumaraswami_pdf(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
+    # axs.plot(x, kumaraswami_pdf(x, 3, 1), color='#3690c0', lw=1, label='a=3, b=1')
+    # axs.plot(x, kumaraswami_pdf(x, 5, 1), color='#74a9cf', lw=1, label='a=5, b=1')
+    # axs.plot(x, kumaraswami_pdf(x, 5, 1.5), color='#a6bddb', lw=1, label='a=5, b=1.5')
+    # axs.set_xlim((0, 1))
+    # axs.set_ylim(0,)
+    # axs.set_xlabel('$P_S$ [-]')
+    # axs.set_ylabel('$pdf_Q$ [-]')
+    # axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1.05))
+    # fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
+    # file = base_path_figs / 'kumaraswami_pdf.png'
+    # fig.savefig(file, dpi=250)
+    # plt.close(fig=fig)
 
     # # check water balance of lysimeter
     # df_lys_obs = pd.DataFrame(index=date_obs)
@@ -382,13 +383,11 @@ def main(tmp_dir):
     df_params_metrics10 = df_params_metrics10.sort_values(by=[metric_for_opt], ascending=False)
     idx_best100 = df_params_metrics10.loc[:df_params_metrics10.index[9], 'id'].values.tolist()
     dict_metrics_best = {}
-    # for sc in ['', 'dry', 'normal', 'wet']:
-    for sc in ['']:
+    for sc in ['', 'dry', 'normal', 'wet']:
         dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best100)))
-    # for sc, sc1 in enumerate(['', 'dry', 'normal', 'wet']):
-    for sc, sc1 in enumerate(['']):
+    for sc, sc1 in enumerate(['', 'dry', 'normal', 'wet']):
         df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'KGE_dS{sc1}', f'KGE_q_ss{sc1}', f'KGE_multi{sc1}']]
-        df_params = df_params_metrics.loc[:, ['c1_mak', 'c2_mak', 'c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+        df_params = df_params_metrics.loc[:, ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
         nrow = len(df_metrics.columns)
         ncol = len(df_params.columns)
         fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
@@ -438,9 +437,9 @@ def main(tmp_dir):
                 ax[i, j].set_xlabel('')
                 ax[i, j].set_ylabel('')
                 if metric_var in ['KGE_aet', 'KGE_aetwet', 'KGE_aetnormal', 'KGE_aetdry']:
-                    ax[i, j].set_ylim((0.6, 0.9))
+                    ax[i, j].set_ylim((0.6, 1.0))
                 elif metric_var in ['KGE_dS', 'KGE_dSwet', 'KGE_dSnormal', 'KGE_dSdry']:
-                    ax[i, j].set_ylim((0.5, 0.9))
+                    ax[i, j].set_ylim((0.6, 1.0))
                 elif metric_var in ['KGE_q_ss', 'KGE_q_sswet', 'KGE_q_ssnormal', 'KGE_q_ssdry']:
                     ax[i, j].set_ylim((0.4, 0.8))
                 elif metric_var in ['KGE_multi', 'KGE_multiwet', 'KGE_multinormal', 'KGE_multidry']:
@@ -474,66 +473,66 @@ def main(tmp_dir):
         file = base_path_figs / f"dotty_plots_{sc1}inset_optimized_with_{metric_for_opt}.png"
         fig.savefig(file, dpi=250)
 
-    # # write evaluation metrics for different storage condtions to .txt
-    # df_avg_std = pd.DataFrame(columns=['KGE_aet', 'KGE_dS', 'KGE_q_ss', 'KGE_multi'])
-    # for sc in ['', 'dry', 'normal', 'wet']:
-    #     df_avg_std.loc[f'avg{sc}', :] = onp.mean(dict_metrics_best[sc].values, axis=0)
-    #     df_avg_std.loc[f'std{sc}', :] = onp.std(dict_metrics_best[sc].values, axis=0)
-    # file = base_path_figs / f"metrics_best_100_avg_std_optimized_with_{metric_for_opt}.txt"
-    # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
+    # write evaluation metrics for different storage condtions to .txt
+    df_avg_std = pd.DataFrame(columns=['KGE_aet', 'KGE_dS', 'KGE_q_ss', 'KGE_multi'])
+    for sc in ['', 'dry', 'normal', 'wet']:
+        df_avg_std.loc[f'avg{sc}', :] = onp.mean(dict_metrics_best[sc].values, axis=0)
+        df_avg_std.loc[f'std{sc}', :] = onp.std(dict_metrics_best[sc].values, axis=0)
+    file = base_path_figs / f"metrics_best_10_avg_std_optimized_with_{metric_for_opt}.txt"
+    df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
-    # # write average and standard deviation of best parameters to .txt
-    # df_avg_std = pd.DataFrame(index=['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
-    # df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics10.loc[:df_params_metrics10.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
-    # df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics10.loc[:df_params_metrics10.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
-    # file = base_path_figs / f"params_best_100_avg_std_optimized_with_{metric_for_opt}.txt"
-    # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
+    # write average and standard deviation of best parameters to .txt
+    df_avg_std = pd.DataFrame(index=['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
+    df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics10.loc[:df_params_metrics10.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
+    df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics10.loc[:df_params_metrics10.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
+    file = base_path_figs / f"params_best_10_avg_std_optimized_with_{metric_for_opt}.txt"
+    df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
-    # # diagnostic polar plots
-    # file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
-    # df_params_metrics = pd.read_csv(file, sep="\t")
-    # df_params_metrics10 = df_params_metrics.copy()
-    # df_params_metrics10.loc[:, 'id'] = range(len(df_params_metrics10.index))
-    # df_params_metrics10 = df_params_metrics10.sort_values(by=[metric_for_opt], ascending=False)
-    # df_for_diag100 = df_params_metrics10.loc[:df_params_metrics10.index[99], :]
-    # vars_sim = ['aet', 'q_ss']
-    # for var_sim in vars_sim:
-    #     fig = de.diag_polar_plot_multi(df_for_diag100.loc[:, f'brel_mean_{var_sim}'].values,
-    #                                     df_for_diag100.loc[:, f'temp_cor_{var_sim}'].values,
-    #                                     df_for_diag100.loc[:, f'DE_{var_sim}'].values,
-    #                                     df_for_diag100.loc[:, f'b_dir_{var_sim}'].values,
-    #                                     df_for_diag100.loc[:, f'phi_{var_sim}'].values,
-    #                                     df_for_diag100.loc[:, f'b_hf_{var_sim}'].values,
-    #                                     df_for_diag100.loc[:, f'b_lf_{var_sim}'].values,
-    #                                     df_for_diag100.loc[:, f'b_tot_{var_sim}'].values,
-    #                                     df_for_diag100.loc[:, f'err_hf_{var_sim}'].values,
-    #                                     df_for_diag100.loc[:, f'err_lf_{var_sim}'].values,
-    #                                     a0=df_for_diag100.loc[:, f'ioa0_{var_sim}'].values,
-    #                                     share0=onp.round(onp.max(df_for_diag100.loc[:, f'p0_{var_sim}']), 2))
-    #     file = f'diag_polar_plot_{var_sim}_100_optimized_with_{metric_for_opt}.png'
-    #     path = base_path_figs / file
-    #     # fig.tight_layout()
-    #     fig.savefig(path, dpi=250)
+    # diagnostic polar plots
+    file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
+    df_params_metrics = pd.read_csv(file, sep="\t")
+    df_params_metrics10 = df_params_metrics.copy()
+    df_params_metrics10.loc[:, 'id'] = range(len(df_params_metrics10.index))
+    df_params_metrics10 = df_params_metrics10.sort_values(by=[metric_for_opt], ascending=False)
+    df_for_diag10 = df_params_metrics10.loc[:df_params_metrics10.index[9], :]
+    vars_sim = ['aet', 'q_ss']
+    for var_sim in vars_sim:
+        fig = de.diag_polar_plot_multi(df_for_diag10.loc[:, f'brel_mean_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'temp_cor_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'DE_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'b_dir_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'phi_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'b_hf_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'b_lf_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'b_tot_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'err_hf_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'err_lf_{var_sim}'].values,
+                                        a0=df_for_diag10.loc[:, f'ioa0_{var_sim}'].values,
+                                        share0=onp.round(onp.max(df_for_diag10.loc[:, f'p0_{var_sim}']), 2))
+        file = f'diag_polar_plot_{var_sim}_10_optimized_with_{metric_for_opt}.png'
+        path = base_path_figs / file
+        # fig.tight_layout()
+        fig.savefig(path, dpi=250)
 
-    # df_for_diag1 = df_params_metrics10.loc[:df_params_metrics10.index[0], :]
-    # vars_sim = ['aet', 'q_ss']
-    # for var_sim in vars_sim:
-    #     fig = de.diag_polar_plot_multi(df_for_diag1.loc[:, f'brel_mean_{var_sim}'].values,
-    #                                     df_for_diag1.loc[:, f'temp_cor_{var_sim}'].values,
-    #                                     df_for_diag1.loc[:, f'DE_{var_sim}'].values,
-    #                                     df_for_diag1.loc[:, f'b_dir_{var_sim}'].values,
-    #                                     df_for_diag1.loc[:, f'phi_{var_sim}'].values,
-    #                                     df_for_diag1.loc[:, f'b_hf_{var_sim}'].values,
-    #                                     df_for_diag1.loc[:, f'b_lf_{var_sim}'].values,
-    #                                     df_for_diag1.loc[:, f'b_tot_{var_sim}'].values,
-    #                                     df_for_diag1.loc[:, f'err_hf_{var_sim}'].values,
-    #                                     df_for_diag1.loc[:, f'err_lf_{var_sim}'].values,
-    #                                     a0=df_for_diag1.loc[:, f'ioa0_{var_sim}'].values,
-    #                                     share0=onp.round(onp.max(df_for_diag1.loc[:, f'p0_{var_sim}']), 2))
-    #     file = f'diag_polar_plot_{var_sim}_1_optimized_with_{metric_for_opt}.png'
-    #     path = base_path_figs / file
-    #     # fig.tight_layout()
-    #     fig.savefig(path, dpi=250)
+    df_for_diag1 = df_params_metrics10.loc[:df_params_metrics10.index[0], :]
+    vars_sim = ['aet', 'q_ss']
+    for var_sim in vars_sim:
+        fig = de.diag_polar_plot_multi(df_for_diag1.loc[:, f'brel_mean_{var_sim}'].values,
+                                        df_for_diag1.loc[:, f'temp_cor_{var_sim}'].values,
+                                        df_for_diag1.loc[:, f'DE_{var_sim}'].values,
+                                        df_for_diag1.loc[:, f'b_dir_{var_sim}'].values,
+                                        df_for_diag1.loc[:, f'phi_{var_sim}'].values,
+                                        df_for_diag1.loc[:, f'b_hf_{var_sim}'].values,
+                                        df_for_diag1.loc[:, f'b_lf_{var_sim}'].values,
+                                        df_for_diag1.loc[:, f'b_tot_{var_sim}'].values,
+                                        df_for_diag1.loc[:, f'err_hf_{var_sim}'].values,
+                                        df_for_diag1.loc[:, f'err_lf_{var_sim}'].values,
+                                        a0=df_for_diag1.loc[:, f'ioa0_{var_sim}'].values,
+                                        share0=onp.round(onp.max(df_for_diag1.loc[:, f'p0_{var_sim}']), 2))
+        file = f'diag_polar_plot_{var_sim}_1_optimized_with_{metric_for_opt}.png'
+        path = base_path_figs / file
+        # fig.tight_layout()
+        fig.savefig(path, dpi=250)
 
     # compare best simulation with observations
     vars_obs = ['AET', 'PERC', 'dWEIGHT']
@@ -555,21 +554,21 @@ def main(tmp_dir):
         # df_bench.loc[:, 'bench'] = bench_vals
         # df_eval = df_eval.join(df_bench)
         dict_obs_sim[var_obs] = df_eval
-    #     # plot observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = '%s.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     # plot cumulated observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-    #     file_str = '%s_cum.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-    #     file_str = '%s_cum_year_facet.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
+        # plot observed and simulated time series
+        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+        file_str = '%s.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed and simulated time series
+        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = '%s_cum.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = '%s_cum_year_facet.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
 
     # compare best 10 simulations with observations
     vars_obs = ['AET', 'PERC', 'dWEIGHT']
@@ -591,42 +590,42 @@ def main(tmp_dir):
         # df_bench.loc[:, 'bench'] = bench_vals
         # df_eval = df_eval.join(df_bench)
         dict_obs_sim10[var_obs] = df_eval
-    #     # plot observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = '%s_best_10.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     # plot cumulated observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-    #     file_str = '%s_cum_best_10.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-    #     file_str = '%s_cum_year_facet_best_10.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
+        # plot observed and simulated time series
+        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+        file_str = '%s_best_10.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed and simulated time series
+        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = '%s_cum_best_10.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = '%s_cum_year_facet_best_10.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
 
-    # compare best 100 simulations with observations
-    vars_obs = ['AET', 'PERC', 'dWEIGHT']
-    vars_sim = ['aet', 'q_ss', 'dS']
-    vars_bench = ['aet', 'perc', 'dS']
-    dict_obs_sim100 = {}
-    for var_obs, var_sim, var_bench in zip(vars_obs, vars_sim, vars_bench):
-        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-        df_obs.loc[:, 'obs'] = obs_vals
-        sim_vals = ds_sim_hm100[var_sim].isel(y=0).values.T
-        # join observations on simulations
-        df_eval = eval_utils.join_obs_on_sim(date_sim_hm100, sim_vals, df_obs)
-        # skip first seven days for warmup
-        df_eval.loc[:'1997-01-07', :] = onp.nan
-        # # join benchmark simulations
-        # bench_vals = ds_hydrus_18O[var_bench].values
-        # df_bench = pd.DataFrame(index=ds_hydrus_18O['Time'].values, columns=['bench'])
-        # df_bench.loc[:, 'bench'] = bench_vals
-        # df_eval = df_eval.join(df_bench)
-        dict_obs_sim100[var_obs] = df_eval
+    # # compare best 100 simulations with observations
+    # vars_obs = ['AET', 'PERC', 'dWEIGHT']
+    # vars_sim = ['aet', 'q_ss', 'dS']
+    # vars_bench = ['aet', 'perc', 'dS']
+    # dict_obs_sim100 = {}
+    # for var_obs, var_sim, var_bench in zip(vars_obs, vars_sim, vars_bench):
+    #     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+    #     df_obs.loc[:, 'obs'] = obs_vals
+    #     sim_vals = ds_sim_hm100[var_sim].isel(y=0).values.T
+    #     # join observations on simulations
+    #     df_eval = eval_utils.join_obs_on_sim(date_sim_hm100, sim_vals, df_obs)
+    #     # skip first seven days for warmup
+    #     df_eval.loc[:'1997-01-07', :] = onp.nan
+    #     # join benchmark simulations
+    #     bench_vals = ds_hydrus_18O[var_bench].values
+    #     df_bench = pd.DataFrame(index=ds_hydrus_18O['Time'].values, columns=['bench'])
+    #     df_bench.loc[:, 'bench'] = bench_vals
+    #     df_eval = df_eval.join(df_bench)
+    #     dict_obs_sim100[var_obs] = df_eval
     #     # plot observed and simulated time series
     #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
     #     file_str = '%s_best_100.pdf' % (var_sim)
@@ -739,92 +738,92 @@ def main(tmp_dir):
     # file = base_path_figs / "metrics_best_hydrus.txt"
     # df_params_metrics_hydrus.to_csv(file, header=True, index=True, sep="\t")
 
-    # # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
-    # fig, axes = plt.subplots(3, 2, sharex='col', figsize=(6, 3))
-    # axes[0, 0].plot(dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index, dict_obs['PREC_corr'].loc['1997-01-07':'1999', 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
-    # axes[0, 0].set_ylabel('PREC\n[mm]')
-    # axes[0, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
-    # axes[0, 0].set_ylim(0,)
-    # axes[0, 0].invert_yaxis()
-    # ax2 = axes[0, 0].twinx()
-    # ax2.plot(dict_obs_sim['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim['AET'].loc['1997-01-07':'1999', 'obs'].cumsum(),
-    #           lw=1, color='blue', ls='-', alpha=0.5)
-    # ax2.plot(dict_obs_sim['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim['AET'].loc['1997-01-07':'1999', 'sim'].cumsum(),
-    #           lw=1, color='red', ls='-.')
+    # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
+    fig, axes = plt.subplots(3, 2, sharex='col', figsize=(6, 3))
+    axes[0, 0].plot(dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index, dict_obs['PREC_corr'].loc['1997-01-07':'1999', 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
+    axes[0, 0].set_ylabel('PREC\n[mm]')
+    axes[0, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
+    axes[0, 0].set_ylim(0,)
+    axes[0, 0].invert_yaxis()
+    ax2 = axes[0, 0].twinx()
+    ax2.plot(dict_obs_sim['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim['AET'].loc['1997-01-07':'1999', 'obs'].cumsum(),
+              lw=1, color='blue', ls='-', alpha=0.5)
+    ax2.plot(dict_obs_sim['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim['AET'].loc['1997-01-07':'1999', 'sim'].cumsum(),
+              lw=1, color='red', ls='-.')
     # ax2.plot(dict_obs_sim_hydrus['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim_hydrus['AET'].loc['1997-01-07':'1999', 'sim'].cumsum(),
     #           lw=1, color='gray', ls='-.')
-    # ax2.set_ylim(0,)
-    # ax2.set_ylabel('ET\n[mm]')
-    # axes[0, 1].plot(dict_obs['PREC_corr'].loc['2006':, :].index, dict_obs['PREC_corr'].loc['2006':, 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
-    # axes[0, 1].set_ylabel('PREC\n[mm]')
-    # axes[0, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
-    # axes[0, 1].set_ylim(0,)
-    # axes[0, 1].invert_yaxis()
-    # ax2 = axes[0, 1].twinx()
-    # ax2.plot(dict_obs_sim['AET'].loc['2006':, :].index, dict_obs_sim['AET'].loc['2006':, 'obs'].cumsum(),
-    #           lw=1, color='blue', ls='-', alpha=0.5)
-    # ax2.plot(dict_obs_sim['AET'].loc['2006':, :].index, dict_obs_sim['AET'].loc['2006':, 'sim'].cumsum(),
-    #           lw=1, color='red', ls='-.')
+    ax2.set_ylim(0,)
+    ax2.set_ylabel('ET\n[mm]')
+    axes[0, 1].plot(dict_obs['PREC_corr'].loc['2006':, :].index, dict_obs['PREC_corr'].loc['2006':, 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
+    axes[0, 1].set_ylabel('PREC\n[mm]')
+    axes[0, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
+    axes[0, 1].set_ylim(0,)
+    axes[0, 1].invert_yaxis()
+    ax2 = axes[0, 1].twinx()
+    ax2.plot(dict_obs_sim['AET'].loc['2006':, :].index, dict_obs_sim['AET'].loc['2006':, 'obs'].cumsum(),
+              lw=1, color='blue', ls='-', alpha=0.5)
+    ax2.plot(dict_obs_sim['AET'].loc['2006':, :].index, dict_obs_sim['AET'].loc['2006':, 'sim'].cumsum(),
+              lw=1, color='red', ls='-.')
     # ax2.plot(dict_obs_sim_hydrus['AET'].loc['2006':, :].index, dict_obs_sim_hydrus['AET'].loc['2006':, 'sim'].cumsum(),
     #           lw=1, color='gray', ls='-.')
-    # ax2.set_ylim(0,)
-    # ax2.set_ylabel('ET\n[mm]')
-    # axes[1, 0].plot(dict_obs_sim['dWEIGHT'].loc['1997-01-07':'1999', :].index, dict_obs_sim['dWEIGHT'].loc['1997-01-07':'1999', 'sim'].cumsum(),
-    #               lw=1, color='red', ls='-.')
+    ax2.set_ylim(0,)
+    ax2.set_ylabel('ET\n[mm]')
+    axes[1, 0].plot(dict_obs_sim['dWEIGHT'].loc['1997-01-07':'1999', :].index, dict_obs_sim['dWEIGHT'].loc['1997-01-07':'1999', 'sim'].cumsum(),
+                  lw=1, color='red', ls='-.')
     # axes[1, 0].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['1997-01-07':'1999', :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['1997-01-07':'1999', 'sim'].cumsum(),
     #               lw=1, color='gray', ls='-.')
-    # axes[1, 0].set_ylabel('cum. $\Delta$S\n[mm]')
-    # axes[1, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
-    # axes[1, 1].plot(dict_obs_sim['dWEIGHT'].loc['2006':, :].index, dict_obs_sim['dWEIGHT'].loc['2006':, 'obs'].cumsum(),
-    #               lw=1, color='blue', ls='-', alpha=0.5)
-    # axes[1, 1].plot(dict_obs_sim['dWEIGHT'].loc['2006':, :].index, dict_obs_sim['dWEIGHT'].loc['2006':, 'sim'].cumsum(),
-    #               lw=1, color='red', ls='-.')
+    axes[1, 0].set_ylabel('cum. $\Delta$S\n[mm]')
+    axes[1, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
+    axes[1, 1].plot(dict_obs_sim['dWEIGHT'].loc['2006':, :].index, dict_obs_sim['dWEIGHT'].loc['2006':, 'obs'].cumsum(),
+                  lw=1, color='blue', ls='-', alpha=0.5)
+    axes[1, 1].plot(dict_obs_sim['dWEIGHT'].loc['2006':, :].index, dict_obs_sim['dWEIGHT'].loc['2006':, 'sim'].cumsum(),
+                  lw=1, color='red', ls='-.')
     # axes[1, 1].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['2006':, :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['2006':, 'sim'].cumsum(),
     #               lw=1, color='gray', ls='-.')
-    # axes[1, 1].set_ylabel('cum. $\Delta$S\n[mm]')
-    # axes[1, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
-    # axes[2, 0].plot(dict_obs_sim['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim['PERC'].loc['1997-01-07':'1999', 'obs'].cumsum(),
-    #               lw=1, color='blue', ls='-', alpha=0.5)
-    # axes[2, 0].plot(dict_obs_sim['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim['PERC'].loc['1997-01-07':'1999', 'sim'].cumsum(),
-    #               lw=1, color='red', ls='-.')
+    axes[1, 1].set_ylabel('cum. $\Delta$S\n[mm]')
+    axes[1, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
+    axes[2, 0].plot(dict_obs_sim['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim['PERC'].loc['1997-01-07':'1999', 'obs'].cumsum(),
+                  lw=1, color='blue', ls='-', alpha=0.5)
+    axes[2, 0].plot(dict_obs_sim['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim['PERC'].loc['1997-01-07':'1999', 'sim'].cumsum(),
+                  lw=1, color='red', ls='-.')
     # axes[2, 0].plot(dict_obs_sim_hydrus['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim_hydrus['PERC'].loc['1997-01-07':'1999', 'sim'].cumsum(),
     #               lw=1, color='gray', ls='-.')
-    # axes[2, 0].set_ylim(0,)
-    # axes[2, 0].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
-    # axes[2, 0].tick_params(axis='x', rotation=33)
-    # axes[2, 0].invert_yaxis()
-    # axes[2, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
-    # axes[2, 0].set_ylabel('PERC\n[mm]')
-    # axes[2, 0].set_xlabel(r'Time [year-month]')
-    # axes[2, 1].plot(dict_obs_sim['PERC'].loc['2006':, :].index, dict_obs_sim['PERC'].loc['2006':, 'obs'].cumsum(),
-    #               lw=1, color='blue', ls='-', alpha=0.5)
-    # axes[2, 1].plot(dict_obs_sim['PERC'].loc['2006':, :].index, dict_obs_sim['PERC'].loc['2006':, 'sim'].cumsum(),
-    #               lw=1, color='red', ls='-.')
+    axes[2, 0].set_ylim(0,)
+    axes[2, 0].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+    axes[2, 0].tick_params(axis='x', rotation=33)
+    axes[2, 0].invert_yaxis()
+    axes[2, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
+    axes[2, 0].set_ylabel('PERC\n[mm]')
+    axes[2, 0].set_xlabel(r'Time [year-month]')
+    axes[2, 1].plot(dict_obs_sim['PERC'].loc['2006':, :].index, dict_obs_sim['PERC'].loc['2006':, 'obs'].cumsum(),
+                  lw=1, color='blue', ls='-', alpha=0.5)
+    axes[2, 1].plot(dict_obs_sim['PERC'].loc['2006':, :].index, dict_obs_sim['PERC'].loc['2006':, 'sim'].cumsum(),
+                  lw=1, color='red', ls='-.')
     # axes[2, 1].plot(dict_obs_sim_hydrus['PERC'].loc['2006':, :].index, dict_obs_sim_hydrus['PERC'].loc['2006':, 'sim'].cumsum(),
     #               lw=1, color='gray', ls='-.')
-    # axes[2, 1].set_ylim(0,)
-    # axes[2, 1].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
-    # axes[2, 1].tick_params(axis='x', rotation=33)
-    # axes[2, 1].invert_yaxis()
-    # axes[2, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
-    # axes[2, 1].set_ylabel('PERC\n[mm]')
-    # axes[2, 1].set_xlabel(r'Time [year-month]')
-    # axes[0, 0].text(0.525, 0.88, '(a)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[0, 0].transAxes)
-    # axes[1, 0].text(0.525, 0.88, '(b)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[1, 0].transAxes)
-    # axes[2, 0].text(0.525, 0.88, '(c)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[2, 0].transAxes)
-    # axes[0, 1].text(0.525, 0.88, '(d)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[0, 1].transAxes)
-    # axes[1, 1].text(0.525, 0.88, '(e)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[1, 1].transAxes)
-    # axes[2, 1].text(0.525, 0.88, '(f)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[2, 1].transAxes)
-    # fig.tight_layout()
-    # file = f'prec_et_dS_perc_obs_sim_cumulated_optimized_with_{metric_for_opt}.png'
-    # path = base_path_figs / file
-    # fig.savefig(path, dpi=250)
+    axes[2, 1].set_ylim(0,)
+    axes[2, 1].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+    axes[2, 1].tick_params(axis='x', rotation=33)
+    axes[2, 1].invert_yaxis()
+    axes[2, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
+    axes[2, 1].set_ylabel('PERC\n[mm]')
+    axes[2, 1].set_xlabel(r'Time [year-month]')
+    axes[0, 0].text(0.525, 0.88, '(a)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0, 0].transAxes)
+    axes[1, 0].text(0.525, 0.88, '(b)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1, 0].transAxes)
+    axes[2, 0].text(0.525, 0.88, '(c)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2, 0].transAxes)
+    axes[0, 1].text(0.525, 0.88, '(d)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0, 1].transAxes)
+    axes[1, 1].text(0.525, 0.88, '(e)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1, 1].transAxes)
+    axes[2, 1].text(0.525, 0.88, '(f)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2, 1].transAxes)
+    fig.tight_layout()
+    file = f'prec_et_dS_perc_obs_sim_cumulated_optimized_with_{metric_for_opt}.png'
+    path = base_path_figs / file
+    fig.savefig(path, dpi=250)
 
     # # compare best 100 simulations with observations
     # nx = ds_sim_hm100.dims['x']
@@ -919,128 +918,128 @@ def main(tmp_dir):
     # file = f'prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}.png'
     # path = base_path_figs / file
     # fig.savefig(path, dpi=250)
-    #
-    # # compare best 10 simulations with observations
-    # nx = ds_sim_hm10.dims['x']
-    # fig, axes = plt.subplots(3, 2, sharex='col', figsize=(6, 3))
-    # axes[0, 0].plot(dict_obs['PREC'].loc['1997-01-07':'1999', :].index, dict_obs['PREC'].loc['1997-01-07':'1999', 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
-    # axes[0, 0].set_ylabel('PREC\n[mm]')
-    # axes[0, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
-    # axes[0, 0].set_ylim(0,)
-    # axes[0, 0].invert_yaxis()
-    # ax2 = axes[0, 0].twinx()
-    # for nrow in range(nx):
-    #     ax2.plot(dict_obs_sim10['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim10['AET'].loc['1997-01-07':'1999', f'sim{nrow}'].cumsum(),
-    #               lw=1, color='red', ls='-', alpha=.8)
-    # ax2.plot(dict_obs_sim10['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim10['AET'].loc['1997-01-07':'1999', 'obs'].cumsum(),
-    #           lw=1, color='blue', ls='-', alpha=1)
+    
+    # compare best 10 simulations with observations
+    nx = ds_sim_hm10.dims['x']
+    fig, axes = plt.subplots(3, 2, sharex='col', figsize=(6, 3))
+    axes[0, 0].plot(dict_obs['PREC'].loc['1997-01-07':'1999', :].index, dict_obs['PREC'].loc['1997-01-07':'1999', 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
+    axes[0, 0].set_ylabel('PREC\n[mm]')
+    axes[0, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
+    axes[0, 0].set_ylim(0,)
+    axes[0, 0].invert_yaxis()
+    ax2 = axes[0, 0].twinx()
+    for nrow in range(nx):
+        ax2.plot(dict_obs_sim10['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim10['AET'].loc['1997-01-07':'1999', f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-', alpha=.8)
+    ax2.plot(dict_obs_sim10['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim10['AET'].loc['1997-01-07':'1999', 'obs'].cumsum(),
+              lw=1, color='blue', ls='-', alpha=1)
     # ax2.plot(dict_obs_sim_hydrus['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim_hydrus['AET'].loc['1997-01-07':'1999', 'sim'].cumsum(),
     #           lw=1, color='gray', ls='-.')
-    # ax2.set_ylim(0,)
-    # ax2.set_ylabel('ET\n[mm]')
-    # axes[0, 1].plot(dict_obs['PREC_corr'].loc['2006':, :].index, dict_obs['PREC_corr'].loc['2006':, 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
-    # axes[0, 1].set_ylabel('PREC\n[mm]')
-    # axes[0, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
-    # axes[0, 1].set_ylim(0,)
-    # axes[0, 1].invert_yaxis()
-    # ax2 = axes[0, 1].twinx()
-    # for nrow in range(nx):
-    #     ax2.plot(dict_obs_sim10['AET'].loc['2006':, :].index, dict_obs_sim10['AET'].loc['2006':, f'sim{nrow}'].cumsum(),
-    #               lw=1, color='red', ls='-', alpha=.8)
-    # ax2.plot(dict_obs_sim10['AET'].loc['2006':, :].index, dict_obs_sim10['AET'].loc['2006':, 'obs'].cumsum(),
-    #           lw=1, color='blue', ls='-', alpha=1)
+    ax2.set_ylim(0,)
+    ax2.set_ylabel('ET\n[mm]')
+    axes[0, 1].plot(dict_obs['PREC_corr'].loc['2006':, :].index, dict_obs['PREC_corr'].loc['2006':, 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
+    axes[0, 1].set_ylabel('PREC\n[mm]')
+    axes[0, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
+    axes[0, 1].set_ylim(0,)
+    axes[0, 1].invert_yaxis()
+    ax2 = axes[0, 1].twinx()
+    for nrow in range(nx):
+        ax2.plot(dict_obs_sim10['AET'].loc['2006':, :].index, dict_obs_sim10['AET'].loc['2006':, f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-', alpha=.8)
+    ax2.plot(dict_obs_sim10['AET'].loc['2006':, :].index, dict_obs_sim10['AET'].loc['2006':, 'obs'].cumsum(),
+              lw=1, color='blue', ls='-', alpha=1)
     # ax2.plot(dict_obs_sim_hydrus['AET'].loc['2006':, :].index, dict_obs_sim_hydrus['AET'].loc['2006':, 'sim'].cumsum(),
     #           lw=1, color='gray', ls='-.')
-    # ax2.set_ylim(0,)
-    # ax2.set_ylabel('ET\n[mm]')
-    # for nrow in range(nx):
-    #     axes[1, 0].plot(dict_obs_sim10['dWEIGHT'].loc['1997-01-07':'1999', :].index, dict_obs_sim10['dWEIGHT'].loc['1997-01-07':'1999', f'sim{nrow}'].cumsum(),
-    #               lw=1, color='red', ls='-')
+    ax2.set_ylim(0,)
+    ax2.set_ylabel('ET\n[mm]')
+    for nrow in range(nx):
+        axes[1, 0].plot(dict_obs_sim10['dWEIGHT'].loc['1997-01-07':'1999', :].index, dict_obs_sim10['dWEIGHT'].loc['1997-01-07':'1999', f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-')
     # axes[1, 0].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['1997-01-07':'1999', :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['1997-01-07':'1999', 'sim'].cumsum(),
     #               lw=1, color='gray', ls='-.', alpha=.8)
-    # axes[1, 0].set_ylabel('cum. $\Delta$S\n[mm]')
-    # axes[1, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
-    # for nrow in range(nx):
-    #     axes[1, 1].plot(dict_obs_sim10['dWEIGHT'].loc['2006':, :].index, dict_obs_sim10['dWEIGHT'].loc['2006':, f'sim{nrow}'].cumsum(),
-    #               lw=1, color='red', ls='-')
-    # axes[1, 1].plot(dict_obs_sim10['dWEIGHT'].loc['2006':, :].index, dict_obs_sim10['dWEIGHT'].loc['2006':, 'obs'].cumsum(),
-    #               lw=1, color='blue', ls='-', alpha=1)
+    axes[1, 0].set_ylabel('cum. $\Delta$S\n[mm]')
+    axes[1, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
+    for nrow in range(nx):
+        axes[1, 1].plot(dict_obs_sim10['dWEIGHT'].loc['2006':, :].index, dict_obs_sim10['dWEIGHT'].loc['2006':, f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-')
+    axes[1, 1].plot(dict_obs_sim10['dWEIGHT'].loc['2006':, :].index, dict_obs_sim10['dWEIGHT'].loc['2006':, 'obs'].cumsum(),
+                  lw=1, color='blue', ls='-', alpha=1)
     # axes[1, 1].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['2006':, :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['2006':, 'sim'].cumsum(),
     #               lw=1, color='gray', ls='-.', alpha=.8)
-    # axes[1, 1].set_ylabel('cum. $\Delta$S\n[mm]')
-    # axes[1, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
-    # for nrow in range(nx):
-    #     axes[2, 0].plot(dict_obs_sim10['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim10['PERC'].loc['1997-01-07':'1999', f'sim{nrow}'].cumsum(),
-    #               lw=1, color='red', ls='-', alpha=.8)
-    # axes[2, 0].plot(dict_obs_sim['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim['PERC'].loc['1997-01-07':'1999', 'obs'].cumsum(),
-    #               lw=1, color='blue', ls='-', alpha=1)
+    axes[1, 1].set_ylabel('cum. $\Delta$S\n[mm]')
+    axes[1, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
+    for nrow in range(nx):
+        axes[2, 0].plot(dict_obs_sim10['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim10['PERC'].loc['1997-01-07':'1999', f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-', alpha=.8)
+    axes[2, 0].plot(dict_obs_sim['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim['PERC'].loc['1997-01-07':'1999', 'obs'].cumsum(),
+                  lw=1, color='blue', ls='-', alpha=1)
     # axes[2, 0].plot(dict_obs_sim_hydrus['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim_hydrus['PERC'].loc['1997-01-07':'1999', 'sim'].cumsum(),
     #               lw=1, color='gray', ls='-.')
-    # axes[2, 0].set_ylim(0,)
-    # axes[2, 0].invert_yaxis()
-    # axes[2, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
-    # axes[2, 0].set_ylabel('PERC\n[mm]')
-    # axes[2, 0].set_xlabel(r'Time [year-month]')
-    # axes[2, 0].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
-    # axes[2, 0].tick_params(axis='x', rotation=33)
-    # for nrow in range(nx):
-    #     axes[2, 1].plot(dict_obs_sim10['PERC'].loc['2006':, :].index, dict_obs_sim10['PERC'].loc['2006':, f'sim{nrow}'].cumsum(),
-    #               lw=1, color='red', ls='-', alpha=.8)
-    # axes[2, 1].plot(dict_obs_sim['PERC'].loc['2006':, :].index, dict_obs_sim['PERC'].loc['2006':, 'obs'].cumsum(),
-    #               lw=1, color='blue', ls='-', alpha=1)
+    axes[2, 0].set_ylim(0,)
+    axes[2, 0].invert_yaxis()
+    axes[2, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
+    axes[2, 0].set_ylabel('PERC\n[mm]')
+    axes[2, 0].set_xlabel(r'Time [year-month]')
+    axes[2, 0].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+    axes[2, 0].tick_params(axis='x', rotation=33)
+    for nrow in range(nx):
+        axes[2, 1].plot(dict_obs_sim10['PERC'].loc['2006':, :].index, dict_obs_sim10['PERC'].loc['2006':, f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-', alpha=.8)
+    axes[2, 1].plot(dict_obs_sim['PERC'].loc['2006':, :].index, dict_obs_sim['PERC'].loc['2006':, 'obs'].cumsum(),
+                  lw=1, color='blue', ls='-', alpha=1)
     # axes[2, 1].plot(dict_obs_sim_hydrus['PERC'].loc['2006':, :].index, dict_obs_sim_hydrus['PERC'].loc['2006':, 'sim'].cumsum(),
     #               lw=1, color='gray', ls='-.')
-    # axes[2, 1].set_ylim(0,)
-    # axes[2, 1].invert_yaxis()
-    # axes[2, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
-    # axes[2, 1].set_ylabel('PERC\n[mm]')
-    # axes[2, 1].set_xlabel(r'Time [year-month]')
-    # axes[2, 1].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
-    # axes[2, 1].tick_params(axis='x', rotation=33)
-    # axes[0, 0].text(0.525, 0.88, '(a)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[0, 0].transAxes)
-    # axes[1, 0].text(0.525, 0.88, '(b)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[1, 0].transAxes)
-    # axes[2, 0].text(0.525, 0.88, '(c)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[2, 0].transAxes)
-    # axes[0, 1].text(0.525, 0.88, '(d)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[0, 1].transAxes)
-    # axes[1, 1].text(0.525, 0.88, '(e)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[1, 1].transAxes)
-    # axes[2, 1].text(0.525, 0.88, '(f)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[2, 1].transAxes)
-    # fig.tight_layout()
-    # file = f'prec_et_dS_perc_obs_sim_cumulated_best_10_optimized_with_{metric_for_opt}.png'
-    # path = base_path_figs / file
-    # fig.savefig(path, dpi=250)
+    axes[2, 1].set_ylim(0,)
+    axes[2, 1].invert_yaxis()
+    axes[2, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
+    axes[2, 1].set_ylabel('PERC\n[mm]')
+    axes[2, 1].set_xlabel(r'Time [year-month]')
+    axes[2, 1].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+    axes[2, 1].tick_params(axis='x', rotation=33)
+    axes[0, 0].text(0.525, 0.88, '(a)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0, 0].transAxes)
+    axes[1, 0].text(0.525, 0.88, '(b)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1, 0].transAxes)
+    axes[2, 0].text(0.525, 0.88, '(c)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2, 0].transAxes)
+    axes[0, 1].text(0.525, 0.88, '(d)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0, 1].transAxes)
+    axes[1, 1].text(0.525, 0.88, '(e)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1, 1].transAxes)
+    axes[2, 1].text(0.525, 0.88, '(f)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2, 1].transAxes)
+    fig.tight_layout()
+    file = f'prec_et_dS_perc_obs_sim_cumulated_best_10_optimized_with_{metric_for_opt}.png'
+    path = base_path_figs / file
+    fig.savefig(path, dpi=250)
 
-    # # plot evapotranspiration, soil storage change and percolation
-    # years = onp.arange(1997, 2008).tolist()
-    # for year in years:
-    #     fig, axes = plt.subplots(4, 1, sharex=True, figsize=(6, 4))
-    #     axes[0].bar(dict_obs['PREC_corr'].loc[f'{year}', :].index, dict_obs['PREC_corr'].loc[f'{year}', 'obs'], width=.1, color='blue', align='edge', edgecolor='blue')
-    #     axes[0].set_ylabel('PREC\n[mm/day]')
-    #     axes[0].set_xlim((dict_obs['PREC'].loc[f'{year}', :].index[0], dict_obs['PREC'].loc[f'{year}', :].index[-1]))
-    #     axes[0].set_ylim(0,)
-    #     axes[1].plot(dict_obs_sim['AET'].loc[f'{year}', :].index, dict_obs_sim['AET'].loc[f'{year}', 'sim'], lw=1, color='red', ls='-.', alpha=1)
-    #     axes[1].plot(dict_obs_sim['AET'].loc[f'{year}', :].index, dict_obs_sim['AET'].loc[f'{year}', 'obs'], lw=1, color='blue', ls='-', alpha=0.5)
-    #     axes[1].set_ylabel('ET\n[mm/day]')
-    #     axes[1].set_xlim((dict_obs['PREC'].loc[f'{year}', :].index[0], dict_obs['PREC'].loc[f'{year}', :].index[-1]))
-    #     axes[1].set_ylim(0,)
-    #     axes[2].plot(dict_obs_sim['dWEIGHT'].loc[f'{year}', :].index, dict_obs_sim['dWEIGHT'].loc[f'{year}', 'sim'], lw=1, color='red', ls='-.', alpha=1)
-    #     axes[2].plot(dict_obs_sim['dWEIGHT'].loc[f'{year}', :].index, dict_obs_sim['dWEIGHT'].loc[f'{year}', 'obs'], lw=1, color='blue', ls='-', alpha=0.5)
-    #     axes[2].set_ylabel('$\Delta$S\n[mm/day]')
-    #     axes[2].set_xlim((dict_obs['PREC'].loc[f'{year}', :].index[0], dict_obs['PREC'].loc[f'{year}', :].index[-1]))
-    #     axes[3].plot(dict_obs_sim['PERC'].loc[f'{year}', :].index, dict_obs_sim['PERC'].loc[f'{year}', 'sim'], lw=1, color='red', ls='-.', alpha=1)
-    #     axes[3].plot(dict_obs_sim['PERC'].loc[f'{year}', :].index, dict_obs_sim['PERC'].loc[f'{year}', 'obs'], lw=1, color='blue', ls='-', alpha=0.5)
-    #     axes[3].set_ylabel('PERC\n[mm/day]')
-    #     axes[3].set_xlim((dict_obs['PREC'].loc[f'{year}', :].index[0], dict_obs['PREC'].loc[f'{year}', :].index[-1]))
-    #     axes[3].set_ylim(0,)
-    #     axes[3].set_xlabel(r'Time [year-month]')
-    #     fig.tight_layout()
-    #     file = f'prec_et_dS_perc_obs_sim_{year}_optimized_with_{metric_for_opt}.png'
-    #     path = base_path_figs / file
-    #     fig.savefig(path, dpi=250)
+    # plot evapotranspiration, soil storage change and percolation
+    years = onp.arange(1997, 2008).tolist()
+    for year in years:
+        fig, axes = plt.subplots(4, 1, sharex=True, figsize=(6, 4))
+        axes[0].bar(dict_obs['PREC_corr'].loc[f'{year}', :].index, dict_obs['PREC_corr'].loc[f'{year}', 'obs'], width=.1, color='blue', align='edge', edgecolor='blue')
+        axes[0].set_ylabel('PREC\n[mm/day]')
+        axes[0].set_xlim((dict_obs['PREC'].loc[f'{year}', :].index[0], dict_obs['PREC'].loc[f'{year}', :].index[-1]))
+        axes[0].set_ylim(0,)
+        axes[1].plot(dict_obs_sim['AET'].loc[f'{year}', :].index, dict_obs_sim['AET'].loc[f'{year}', 'sim'], lw=1, color='red', ls='-.', alpha=1)
+        axes[1].plot(dict_obs_sim['AET'].loc[f'{year}', :].index, dict_obs_sim['AET'].loc[f'{year}', 'obs'], lw=1, color='blue', ls='-', alpha=0.5)
+        axes[1].set_ylabel('ET\n[mm/day]')
+        axes[1].set_xlim((dict_obs['PREC'].loc[f'{year}', :].index[0], dict_obs['PREC'].loc[f'{year}', :].index[-1]))
+        axes[1].set_ylim(0,)
+        axes[2].plot(dict_obs_sim['dWEIGHT'].loc[f'{year}', :].index, dict_obs_sim['dWEIGHT'].loc[f'{year}', 'sim'], lw=1, color='red', ls='-.', alpha=1)
+        axes[2].plot(dict_obs_sim['dWEIGHT'].loc[f'{year}', :].index, dict_obs_sim['dWEIGHT'].loc[f'{year}', 'obs'], lw=1, color='blue', ls='-', alpha=0.5)
+        axes[2].set_ylabel('$\Delta$S\n[mm/day]')
+        axes[2].set_xlim((dict_obs['PREC'].loc[f'{year}', :].index[0], dict_obs['PREC'].loc[f'{year}', :].index[-1]))
+        axes[3].plot(dict_obs_sim['PERC'].loc[f'{year}', :].index, dict_obs_sim['PERC'].loc[f'{year}', 'sim'], lw=1, color='red', ls='-.', alpha=1)
+        axes[3].plot(dict_obs_sim['PERC'].loc[f'{year}', :].index, dict_obs_sim['PERC'].loc[f'{year}', 'obs'], lw=1, color='blue', ls='-', alpha=0.5)
+        axes[3].set_ylabel('PERC\n[mm/day]')
+        axes[3].set_xlim((dict_obs['PREC'].loc[f'{year}', :].index[0], dict_obs['PREC'].loc[f'{year}', :].index[-1]))
+        axes[3].set_ylim(0,)
+        axes[3].set_xlabel(r'Time [year-month]')
+        fig.tight_layout()
+        file = f'prec_et_dS_perc_obs_sim_{year}_optimized_with_{metric_for_opt}.png'
+        path = base_path_figs / file
+        fig.savefig(path, dpi=250)
 
     # # load metrics of transport simulations
     # dict_params_metrics_tm = {}
