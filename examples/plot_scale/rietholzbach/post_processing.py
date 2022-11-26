@@ -57,8 +57,12 @@ _LABS_TM = {'complete-mixing': 'CM',
             'time-variant-transp': 'TVT-AD'}
 
 
-def kumaraswami(x, a, b):
+def kumaraswami_cdf(x, a, b):
     return 1 - (1 - (x)**a)**b
+
+
+def kumaraswami_pdf(x, a, b):
+    return a * b * x**(a-1)*(1-x**a)**(b-1)
 
 
 @click.option("-td", "--tmp-dir", type=str, default=None)
@@ -132,18 +136,35 @@ def main(tmp_dir):
 
     fig, axs = plt.subplots(1, 1, figsize=(3, 2))
     x = onp.linspace(0, 1, num=1000)
-    axs.plot(x, kumaraswami(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
-    axs.plot(x, kumaraswami(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
-    axs.plot(x, kumaraswami(x, 3, 1), color='#3690c0', lw=1, label='a=3, b=1')
-    axs.plot(x, kumaraswami(x, 5, 1), color='#74a9cf', lw=1, label='a=5, b=1')
-    axs.plot(x, kumaraswami(x, 5, 1.5), color='#a6bddb', lw=1, label='a=5, b=1.5')
+    axs.plot(x, kumaraswami_cdf(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
+    axs.plot(x, kumaraswami_cdf(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
+    axs.plot(x, kumaraswami_cdf(x, 3, 1), color='#3690c0', lw=1, label='a=3, b=1')
+    axs.plot(x, kumaraswami_cdf(x, 5, 1), color='#74a9cf', lw=1, label='a=5, b=1')
+    axs.plot(x, kumaraswami_cdf(x, 5, 1.5), color='#a6bddb', lw=1, label='a=5, b=1.5')
     axs.set_xlim((0, 1))
     axs.set_ylim((0, 1))
     axs.set_xlabel('$P_S$ [-]')
     axs.set_ylabel('$P_Q$ [-]')
     axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1.05))
     fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
-    file = base_path_figs / 'kumaraswami.png'
+    file = base_path_figs / 'kumaraswami_cdf.png'
+    fig.savefig(file, dpi=250)
+    plt.close(fig=fig)
+
+    fig, axs = plt.subplots(1, 1, figsize=(3, 2))
+    x = onp.linspace(0, 1, num=1000)
+    axs.plot(x, kumaraswami_pdf(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
+    axs.plot(x, kumaraswami_pdf(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
+    axs.plot(x, kumaraswami_pdf(x, 3, 1), color='#3690c0', lw=1, label='a=3, b=1')
+    axs.plot(x, kumaraswami_pdf(x, 5, 1), color='#74a9cf', lw=1, label='a=5, b=1')
+    axs.plot(x, kumaraswami_pdf(x, 5, 1.5), color='#a6bddb', lw=1, label='a=5, b=1.5')
+    axs.set_xlim((0, 1))
+    axs.set_ylim(0,)
+    axs.set_xlabel('$P_S$ [-]')
+    axs.set_ylabel('$pdf_Q$ [-]')
+    axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1.05))
+    fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
+    file = base_path_figs / 'kumaraswami_pdf.png'
     fig.savefig(file, dpi=250)
     plt.close(fig=fig)
 

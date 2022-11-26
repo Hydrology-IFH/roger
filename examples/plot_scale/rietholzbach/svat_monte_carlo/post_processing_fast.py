@@ -125,11 +125,13 @@ def main(tmp_dir):
     # DataFrame with sampled model parameters and the corresponding metrics
     nx = ds_sim.dims['x']  # number of rows
     ny = ds_sim.dims['y']  # number of columns
-    file = base_path_results / "params_metrics.txt"
+    file = base_path_results / "params_metrics_fast.txt"
     if not os.path.exists(file):
         click.echo('Calculate metrics ...')
         df_params_metrics = pd.DataFrame(index=range(nx * ny))
         # sampled model parameters
+        df_params_metrics.loc[:, 'c1_mak'] = ds_sim["c1_mak"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'c2_mak'] = ds_sim["c2_mak"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'dmpv'] = ds_sim["dmpv"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'lmpv'] = ds_sim["lmpv"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'theta_eff'] = ds_sim["theta_eff"].isel(y=0).values.flatten()
@@ -185,7 +187,7 @@ def main(tmp_dir):
         df_params_metrics.loc[:, 'KGE_multi'] = 0.2 * df_params_metrics.loc[:, 'KGE_dS'] + 0.4 * df_params_metrics.loc[:, 'KGE_aet'] + 0.4 * df_params_metrics.loc[:, 'KGE_q_ss']
 
         # write .txt-file
-        file = base_path_results / "params_metrics.txt"
+        file = base_path_results / "params_metrics_fast.txt"
         df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
 
     else:
@@ -193,7 +195,7 @@ def main(tmp_dir):
         # dotty plots
         click.echo('Dotty plots ...')
         df_metrics = df_params_metrics.loc[:, ['KGE_aet', 'KGE_dS', 'KGE_q_ss', 'KGE_multi']]
-        df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+        df_params = df_params_metrics.loc[:, ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
         nrow = len(df_metrics.columns)
         ncol = len(df_params.columns)
         fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(14, 7))
