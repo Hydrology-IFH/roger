@@ -504,13 +504,13 @@ def write_forcing(input_dir, nrows=1, ncols=1, uniform=True,
 
         validate(df_PREC)
         validate(df_TA)
-        if df_PET:
+        if isinstance(df_PET, pd.DataFrame):
             validate(df_PET)
             df_meteo = df_PREC.join([df_TA, df_PET.loc[:, 'PET'].to_frame()])
             df_meteo = df_meteo.ffill()
             # downscale daily PET to 10 minutes
             df_meteo.loc[:, 'PET'] = (df_meteo.loc[:, 'PET'] / 24) / 6
-        else:
+        elif isinstance(df_RS, pd.DataFrame):
             validate(df_RS)
             df_meteo = df_PREC.join([df_TA, df_RS.loc[:, 'RS'].to_frame()])
             df_meteo = df_meteo.ffill()
