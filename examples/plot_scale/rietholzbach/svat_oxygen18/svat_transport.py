@@ -90,7 +90,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             if settings.sas_solver in ['RK4', 'Euler']:
                 settings.h = 1 / settings.sas_solver_substeps
 
-            settings.nx, settings.ny = self._get_nx(self._base_path, self._states_hm_file), 1
+            settings.nx, settings.ny = 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
             settings.ages = 1500
             settings.nages = settings.ages + 1

@@ -171,11 +171,11 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
             vs = state.variables
             settings = state.settings
 
-            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._input_dir, self._states_hm_file)[:, :, vs.itt])
-            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._input_dir, self._states_hm_file)[:, :, vs.itt])
-            vs.S_fc_ss = update(vs.S_fc_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_fc_ss", self._input_dir, self._states_hm_file)[:, :, vs.itt])
-            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._input_dir, self._states_hm_file)[:, :, vs.itt])
-            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._input_dir, self._states_hm_file)[:, :, vs.itt])
+            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
+            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
+            vs.S_fc_ss = update(vs.S_fc_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_fc_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
+            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
+            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
 
             vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], 0.8)
             vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], 0.8)
@@ -265,8 +265,8 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file)[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file)[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
             vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
             vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
@@ -323,8 +323,8 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
         def set_forcing_setup(self, state):
             vs = state.variables
 
-            TA = self._read_var_from_nc("ta", self._input_dir, self._states_hm_file)[:, :, :]
-            PREC = self._read_var_from_nc("prec", self._input_dir, self._states_hm_file)[:, :, :]
+            TA = self._read_var_from_nc("ta", self._input_dir, self._states_hm_file)[npx.newaxis, :, :]
+            PREC = self._read_var_from_nc("prec", self._input_dir, self._states_hm_file)[npx.newaxis, :, :]
 
             vs.M_IN = update(vs.M_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("Br", self._input_dir, 'forcing_tracer.nc'))
 
@@ -367,19 +367,19 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
         def set_forcing(self, state):
             vs = state.variables
 
-            vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("ta", self._input_dir, self._states_hm_file)[:, :, vs.itt])
-            vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("prec", self._input_dir, self._states_hm_file)[:, :, vs.itt])
-            vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mat_rz", self._input_dir, self._states_hm_file)[:, :, vs.itt])
-            vs.inf_pf_rz = update(vs.inf_pf_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mp_rz", self._input_dir, self._states_hm_file)[:, :, vs.itt] + self._read_var_from_nc("inf_sc_rz", self._input_dir, self._states_hm_file)[:, :, vs.itt])
-            vs.inf_pf_ss = update(vs.inf_pf_ss, at[2:-2, 2:-2], self._read_var_from_nc("inf_ss", self._input_dir, self._states_hm_file)[:, :, vs.itt])
-            vs.transp = update(vs.transp, at[2:-2, 2:-2], self._read_var_from_nc("transp", self._input_dir, self._states_hm_file)[:, :, vs.itt])
-            vs.evap_soil = update(vs.evap_soil, at[2:-2, 2:-2], self._read_var_from_nc("evap_soil", self._input_dir, self._states_hm_file)[:, :, vs.itt])
-            vs.cpr_rz = update(vs.cpr_rz, at[2:-2, 2:-2], self._read_var_from_nc("cpr_rz", self._input_dir, self._states_hm_file)[:, :, vs.itt])
-            vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], self._read_var_from_nc("q_rz", self._input_dir, self._states_hm_file)[:, :, vs.itt])
-            vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], self._read_var_from_nc("q_ss", self._input_dir, self._states_hm_file)[:, :, vs.itt])
+            vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("ta", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
+            vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("prec", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
+            vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mat_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
+            vs.inf_pf_rz = update(vs.inf_pf_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mp_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt] + self._read_var_from_nc("inf_sc_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
+            vs.inf_pf_ss = update(vs.inf_pf_ss, at[2:-2, 2:-2], self._read_var_from_nc("inf_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
+            vs.transp = update(vs.transp, at[2:-2, 2:-2], self._read_var_from_nc("transp", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
+            vs.evap_soil = update(vs.evap_soil, at[2:-2, 2:-2], self._read_var_from_nc("evap_soil", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
+            vs.cpr_rz = update(vs.cpr_rz, at[2:-2, 2:-2], self._read_var_from_nc("cpr_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
+            vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], self._read_var_from_nc("q_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
+            vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], self._read_var_from_nc("q_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file)[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file)[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
 
             vs.C_in = update(vs.C_in, at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt])
