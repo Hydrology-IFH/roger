@@ -27,7 +27,7 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
         _year = int(year)
         _tm_structure = transport_model_structure.replace("_", " ")
         _input_dir = _base_path / "input" / str(year)
-        _states_hm_file = 'states_hm1.nc'
+        _states_hm_file = f'states_hm_best_for_{transport_model_structure}.nc'
 
         def _set_input_dir(self, path):
             if os.path.exists(path):
