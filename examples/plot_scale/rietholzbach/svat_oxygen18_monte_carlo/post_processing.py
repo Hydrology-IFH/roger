@@ -440,26 +440,29 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
             df_params_metrics.loc[:, 'ks'] = ds_sim_hm["ks"].values.flatten()
             # sampled model parameters
             if tm_structure == "advection-dispersion":
-                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
             elif tm_structure == "older-preference":
-                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
             elif tm_structure == "time-variant advection-dispersion":
+                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b1_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten()
                 df_params_metrics.loc[:, 'b2_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
                 df_params_metrics.loc[:, 'a1_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten()
                 df_params_metrics.loc[:, 'a2_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+                df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a1_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten()
                 df_params_metrics.loc[:, 'a2_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+                df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
             elif tm_structure == "time-variant":
                 df_params_metrics.loc[:, 'c_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
                 df_params_metrics.loc[:, 'c_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
@@ -467,23 +470,21 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
                 df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
             elif tm_structure == "time-variant-transp":
                 df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
-                df_params_metrics.loc[:, 'c1_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten()
-                df_params_metrics.loc[:, 'c2_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+                df_params_metrics.loc[:, 'b1_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten()
+                df_params_metrics.loc[:, 'b2_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+                df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
-                df_params_metrics.loc[:, 'c1_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten()
-                df_params_metrics.loc[:, 'c2_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+                df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
-                df_params_metrics.loc[:, 'c1_q_ss'] = ds_sim_tm["sas_params_q_s"].isel(n_sas_params=3).values.flatten()
-                df_params_metrics.loc[:, 'c2_q_ss'] = ds_sim_tm["sas_params_q_s"].isel(n_sas_params=4).values.flatten()
             elif tm_structure == "preferential":
-                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
             elif tm_structure == "preferential + advection-dispersion":
-                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
+                df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=2).values.flatten()
                 df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
                 df_params_metrics.loc[:, 'b_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=2).values.flatten()
@@ -603,9 +604,9 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
         if tm_structure == "older-preference":
             df_params = df_params_metrics.loc[:, ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
         elif tm_structure == "time-variant advection-dispersion":
-            df_params = df_params_metrics.loc[:, ['a_transp', 'c1_transp', 'c2_transp', 'b_q_rz', 'c1_q_rz', 'c2_q_rz', 'b_q_ss', 'c1_q_ss', 'c2_q_ss']]
+            df_params = df_params_metrics.loc[:, ['a_transp', 'b1_transp', 'b2_transp', 'a1_q_rz', 'a2_q_rz', 'b_q_rz', 'a1_q_ss', 'a2_q_ss', 'b_q_ss']]
         elif tm_structure == "time-variant-transp":
-            df_params = df_params_metrics.loc[:, ['a_transp', 'c1_transp', 'c2_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
+            df_params = df_params_metrics.loc[:, ['a_transp', 'b1_transp', 'b2_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
         elif tm_structure == "time-variant":
             df_params = df_params_metrics.loc[:, ['c_transp', 'c_q_rz', 'a_q_ss', 'b_q_ss']]
         elif tm_structure == "preferential":

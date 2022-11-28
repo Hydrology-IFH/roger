@@ -21,7 +21,7 @@ if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
 # load hydrologic simulation
-states_hm_file = base_path / "states_hm1.nc"
+states_hm_file = base_path / "states_hm.nc"
 ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
 days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
 date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
