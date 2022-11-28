@@ -461,7 +461,7 @@ def main(tmp_dir, sas_solver):
         ds_sim_hm_best = ds_sim_hm_best.assign_coords(Time=("Time", days))
         ds_sim_hm_best.Time.attrs['units'] = "days"
         ds_sim_hm_best.Time.attrs['time_origin'] = ds_sim_hm['Time'].attrs['time_origin']
-        file = base_path / f"states_hm_best_for_{tms}.nc"
+        file = base_path / sas_solver / age_max / metric_for_optimization / f"states_hm_best_for_{tms}.nc"
         ds_sim_hm_best.to_netcdf(file, engine="h5netcdf")
 
         # write simulated bulk sample to output file

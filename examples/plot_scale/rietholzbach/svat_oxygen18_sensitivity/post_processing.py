@@ -59,9 +59,9 @@ def main(split_size, sas_solver, tmp_dir):
         if tm_structure in ['complete-mixing', 'piston']:
             nsamples = 1024 * 8
         elif tm_structure in ['advection-dispersion']:
-            nsamples = 1024 * 11
-        elif tm_structure in ['time-variant advection-dispersion']:
             nsamples = 1024 * 14
+        elif tm_structure in ['time-variant advection-dispersion']:
+            nsamples = 1024 * 17
         x1x2 = onp.arange(0, nsamples, split_size).tolist()
         if nsamples not in x1x2:
             x1x2.append(nsamples)
@@ -329,6 +329,8 @@ def main(split_size, sas_solver, tmp_dir):
         df_params_metrics = pd.DataFrame(index=range(nx * ny))
         # sampled model parameters
         if tm_structure == "complete-mixing":
+            df_params_metrics.loc[:, 'c1_mak'] = ds_params["c1_mak"].isel(y=0).values.flatten()
+            df_params_metrics.loc[:, 'c2_mak'] = ds_params["c2_mak"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'dmpv'] = ds_params["dmpv"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'lmpv'] = ds_params["lmpv"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'theta_eff'] = ds_params["theta_eff"].isel(y=0).values.flatten()
@@ -339,6 +341,8 @@ def main(split_size, sas_solver, tmp_dir):
             df_params_metrics.loc[:, 'theta_pwp'] = ds_params["theta_pwp"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'ks'] = ds_params["ks"].isel(y=0).values.flatten()
         elif tm_structure == "piston":
+            df_params_metrics.loc[:, 'c1_mak'] = ds_params["c1_mak"].isel(y=0).values.flatten()
+            df_params_metrics.loc[:, 'c2_mak'] = ds_params["c2_mak"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'dmpv'] = ds_params["dmpv"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'lmpv'] = ds_params["lmpv"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'theta_eff'] = ds_params["theta_eff"].isel(y=0).values.flatten()
@@ -349,6 +353,8 @@ def main(split_size, sas_solver, tmp_dir):
             df_params_metrics.loc[:, 'theta_pwp'] = ds_params["theta_pwp"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'ks'] = ds_params["ks"].isel(y=0).values.flatten()
         elif tm_structure == "advection-dispersion":
+            df_params_metrics.loc[:, 'c1_mak'] = ds_params["c1_mak"].isel(y=0).values.flatten()
+            df_params_metrics.loc[:, 'c2_mak'] = ds_params["c2_mak"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'dmpv'] = ds_params["dmpv"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'lmpv'] = ds_params["lmpv"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'theta_eff'] = ds_params["theta_eff"].isel(y=0).values.flatten()
@@ -365,6 +371,8 @@ def main(split_size, sas_solver, tmp_dir):
             df_params_metrics.loc[:, 'a_q_ss'] = ds_params["a_q_ss"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'b_q_ss'] = ds_params["b_q_ss"].isel(y=0).values.flatten()
         elif tm_structure == "time-variant advection-dispersion":
+            df_params_metrics.loc[:, 'c1_mak'] = ds_params["c1_mak"].isel(y=0).values.flatten()
+            df_params_metrics.loc[:, 'c2_mak'] = ds_params["c2_mak"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'dmpv'] = ds_params["dmpv"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'lmpv'] = ds_params["lmpv"].isel(y=0).values.flatten()
             df_params_metrics.loc[:, 'theta_eff'] = ds_params["theta_eff"].isel(y=0).values.flatten()
