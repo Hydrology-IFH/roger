@@ -8,7 +8,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 @click.option("--id", type=int, default=None)
 @click.option("-ns", "--nsamples", type=int, default=1000)
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['preferential', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant', 'power', 'time-variant-transp', 'older-preference', 'preferential_+_advection-dispersion']), default='advection-dispersion')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant', 'power', 'time-variant-transp', 'older-preference', 'preferential_+_advection-dispersion']), default='advection-dispersion')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
@@ -25,7 +25,10 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
         _base_path = Path(__file__).parent
         _tm_structure = transport_model_structure.replace("_", " ")
         _input_dir = _base_path / "input"
-        _states_hm_file = f'states_hm10_bootstrap_for_{sas_solver}.nc'
+        if transport_model_structure in ['complete-mixing', 'piston']:
+            _states_hm_file = 'states_hm10.nc'
+        else:
+            _states_hm_file = f'states_hm10_bootstrap_for_{sas_solver}.nc'
         # load parameter boundaries
         _file_params = _base_path / "param_bounds.yml"
         with open(_file_params, 'r') as file:
