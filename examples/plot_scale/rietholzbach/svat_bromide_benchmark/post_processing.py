@@ -30,8 +30,14 @@ def main(tmp_dir, sas_solver):
     base_path_results = base_path / "results"
     if not os.path.exists(base_path_results):
         os.mkdir(base_path_results)
+    base_path_results = base_path / "results" / sas_solver
+    if not os.path.exists(base_path_results):
+        os.mkdir(base_path_results)
     # directory of figures
     base_path_figs = base_path / "figures"
+    if not os.path.exists(base_path_figs):
+        os.mkdir(base_path_figs)
+    base_path_figs = base_path / "figures" / sas_solver
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
@@ -40,12 +46,12 @@ def main(tmp_dir, sas_solver):
                      'advection-dispersion',
                      'time-variant advection-dispersion']
     years = onp.arange(1997, 2007).tolist()
-    states_tm_file = base_path / "states_bromide_benchmark.nc"
+    states_tm_file = base_path / sas_solver / "states_bromide_benchmark.nc"
     if not os.path.exists(states_tm_file):
         for tm_structure in tm_structures:
             tms = tm_structure.replace(" ", "_")
             for year in years:
-                path = str(base_path / "deterministic" / f'SVATTRANSPORT_{tms}_{year}_{sas_solver}.*.nc')
+                path = str(base_path / sas_solver / f'SVATTRANSPORT_{tms}_{year}_{sas_solver}.*.nc')
                 diag_files = glob.glob(path)
                 with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
                     click.echo(f'Merge output files of {tm_structure}-{year} into {states_tm_file.as_posix()}')
@@ -150,7 +156,7 @@ def main(tmp_dir, sas_solver):
             br_obs_file = base_path.parent / "observations" / "bromide_breakthrough.csv"
             df_br_obs = pd.read_csv(br_obs_file, sep=';', skiprows=1, index_col=0)
             # load simulation
-            states_tm_file = base_path / "states_bromide_benchmark.nc"
+            states_tm_file = base_path / sas_solver / "states_bromide_benchmark.nc"
             ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{tm_structure}-{year}", engine="h5netcdf")
             # assign date
             days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
@@ -201,7 +207,7 @@ def main(tmp_dir, sas_solver):
             ds_sim_tm = ds_sim_tm.load()  # required to release file lock
             ds_sim_tm = ds_sim_tm.close()
             del ds_sim_tm
-            states_tm_file = base_path / "states_bromide_benchmark.nc"
+            states_tm_file = base_path / sas_solver / "states_bromide_benchmark.nc"
             with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
                 try:
                     v = f.groups[f"{tm_structure}-{year}"].create_variable('C_q_ss_mmol_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
@@ -228,7 +234,6 @@ def main(tmp_dir, sas_solver):
                     v = f.groups[f"{tm_structure}-{year}"].get('M_q_ss_bs')
                     v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_mg'].values
 
-
         axes.set_ylabel('Br [mmol $l^{-1}$]')
         axes.set_xlabel('Time [days since injection]')
         axes.set_ylim(0,)
@@ -240,7 +245,7 @@ def main(tmp_dir, sas_solver):
         fig.savefig(path, dpi=250)
 
         # write evaluation metrics to .csv
-        path_csv = base_path / "results" / f"bromide_metrics_{tms}.csv"
+        path_csv = base_path_results / f"bromide_metrics_{tms}.csv"
         df_metrics_year.to_csv(path_csv, header=True, index=True, sep=";")
 
     return
