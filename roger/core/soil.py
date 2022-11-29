@@ -1103,15 +1103,37 @@ def rescale_sa_msa_anion_soil_kernel(state):
             vs.C_rz,
             at[2:-2, 2:-2, :], 0,
         )
-
         vs.C_ss = update(
             vs.C_ss,
             at[2:-2, 2:-2, :], 0,
         )
-
         vs.C_s = update(
             vs.C_s,
             at[2:-2, 2:-2, :], 0,
+        )
+        vs.M_rz = update(
+            vs.M_rz,
+            at[2:-2, 2:-2, :], 0,
+        )
+        vs.M_ss = update(
+            vs.M_ss,
+            at[2:-2, 2:-2, :], 0,
+        )
+        vs.M_s = update(
+            vs.M_s,
+            at[2:-2, 2:-2, :], 0,
+        )
+        vs.msa_rz = update(
+            vs.msa_rz,
+            at[2:-2, 2:-2, :, :], 0,
+        )
+        vs.msa_ss = update(
+            vs.msa_ss,
+            at[2:-2, 2:-2, :, :], 0,
+        )
+        vs.msa_s = update(
+            vs.msa_s,
+            at[2:-2, 2:-2, :, :], 0,
         )
 
         vs.sa_rz = update_multiply(

@@ -104,9 +104,9 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
             if settings.sas_solver in ['RK4', 'Euler']:
                 settings.h = 1 / settings.sas_solver_substeps
 
-            settings.nx, settings.ny = 1, 1
+            settings.nx, settings.ny = 100, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
-            settings.ages = settings.nitt
+            settings.ages = 1500
             settings.nages = settings.ages + 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
             settings.runlen_warmup = settings.runlen
@@ -177,8 +177,10 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
             vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
             vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
 
-            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], 0.8)
-            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], 0.8)
+            alpha = npx.linspace(0.1, 1, num=10).tolist()
+            params = npx.array(onp.meshgrid(alpha, alpha)).T.reshape(-1, 2)
+            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], params[:, 0])
+            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], params[:, 1])
 
             if settings.tm_structure == "complete-mixing":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 1)
@@ -409,6 +411,12 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
                 diagnostics["collect"].base_output_path = base_path
+
+            diagnostics["constant"].output_variables = ["alpha_transp", "alpha_q"]
+            diagnostics["constant"].output_frequency = 24 * 60 * 60
+            diagnostics["constant"].sampling_frequency = 1
+            if base_path:
+                diagnostics["constant"].base_output_path = base_path
 
             # maximum bias of numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error", "dC_num_error"]

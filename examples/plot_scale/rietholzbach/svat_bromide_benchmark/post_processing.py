@@ -150,6 +150,7 @@ def main(tmp_dir, sas_solver):
         ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
         df_metrics_year = pd.DataFrame(index=years)
         fig, axes = plt.subplots(1, 1, figsize=(6, 2))
+        nrows = ds_sim_hm.dims['x']
         for year in years:
             click.echo(f'Calculate metrics for {tm_structure}-{year} ...')
             # load observations
@@ -162,94 +163,96 @@ def main(tmp_dir, sas_solver):
             days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
             date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
             ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+            for nrow in range(nrows):
+                alpha_transp = onp.round(ds_sim_tm['alpha_transp'].isel(x=nrow, y=0).values, 2)
+                alpha_q = onp.round(ds_sim_tm['alpha_q'].isel(x=nrow, y=0).values, 2)
+                # plot percolation rate (in l/h) and bromide concentration (mmol/l)
+                idx = pd.date_range(start=f'1/1/{year}', end=f'31/12/{year+1}')
+                df_perc_br_sim = pd.DataFrame(index=idx, columns=['perc', 'Br_conc_mg', 'Br_mg', 'Br_conc_mmol'])
+                # in mm per day
+                df_perc_br_sim.loc[:, 'perc'] = ds_sim_hm.sel(Time=slice(str(year), str(year + 1)))['q_ss'].isel(y=0).values
+                # in mg per liter
+                df_perc_br_sim.loc[:, 'Br_conc_mg'] = ds_sim_tm['C_q_ss'].isel(x=nrow, y=0).values[1:]
+                # in mg
+                df_perc_br_sim.loc[:, 'Br_mg'] = ds_sim_tm['C_q_ss'].isel(x=nrow, y=0).values[1:] * ds_sim_hm.sel(Time=slice(str(year), str(year + 1)))['q_ss'].isel(y=0).values
+                # in mmol per liter
+                df_perc_br_sim.loc[:, 'Br_conc_mmol'] = (df_perc_br_sim.loc[:, 'Br_conc_mg'] / 79.904)
+                # daily samples from day 0 to day 220
+                df_daily = df_perc_br_sim.loc[:df_perc_br_sim.index[315+220], :]
+                # weekly samples after 220 days
+                df_weekly = df_perc_br_sim.loc[df_perc_br_sim.index[316+220]:, 'perc'].resample('7D').sum().to_frame()
+                df_weekly.loc[:, 'Br_mg'] = df_perc_br_sim.loc[df_perc_br_sim.index[316+220]:, 'Br_mg'].resample('7D').sum()
+                df_weekly.loc[:, 'Br_conc_mg'] = df_perc_br_sim.loc[df_perc_br_sim.index[316+220]:, 'Br_mg'].resample('7D').sum() / df_perc_br_sim.loc[df_perc_br_sim.index[316+220]:, 'perc'].resample('7D').sum()
+                df_weekly.loc[:, 'Br_conc_mmol'] = (df_weekly.loc[:, 'Br_conc_mg'] / 79.904)
+                df_daily_weekly = pd.concat([df_daily, df_weekly])
+                df_perc_br_sim = pd.DataFrame(index=idx).join(df_daily_weekly)
+                df_perc_br_sim = df_perc_br_sim.iloc[315:716, :]
+                df_perc_br_sim.index = range(len(df_perc_br_sim.index))
+                axes.plot(df_perc_br_sim.dropna().index, df_perc_br_sim.dropna()['Br_conc_mmol'], ls='-', color=cmap(norm(year)), label=f'{year}')
 
-            # plot percolation rate (in l/h) and bromide concentration (mmol/l)
-            idx = pd.date_range(start=f'1/1/{year}', end=f'31/12/{year+1}')
-            df_perc_br_sim = pd.DataFrame(index=idx, columns=['perc', 'Br_conc_mg', 'Br_mg', 'Br_conc_mmol'])
-            # in mm per day
-            df_perc_br_sim.loc[:, 'perc'] = ds_sim_hm.sel(Time=slice(str(year), str(year + 1)))['q_ss'].isel(y=0).values
-            # in mg per liter
-            df_perc_br_sim.loc[:, 'Br_conc_mg'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values[1:]
-            # in mg
-            df_perc_br_sim.loc[:, 'Br_mg'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values[1:] * ds_sim_hm.sel(Time=slice(str(year), str(year + 1)))['q_ss'].isel(y=0).values
-            # in mmol per liter
-            df_perc_br_sim.loc[:, 'Br_conc_mmol'] = (df_perc_br_sim.loc[:, 'Br_conc_mg'] / 79.904)
-            # daily samples from day 0 to day 220
-            df_daily = df_perc_br_sim.loc[:df_perc_br_sim.index[315+220], :]
-            # weekly samples after 220 days
-            df_weekly = df_perc_br_sim.loc[df_perc_br_sim.index[316+220]:, 'perc'].resample('7D').sum().to_frame()
-            df_weekly.loc[:, 'Br_mg'] = df_perc_br_sim.loc[df_perc_br_sim.index[316+220]:, 'Br_mg'].resample('7D').sum()
-            df_weekly.loc[:, 'Br_conc_mg'] = df_perc_br_sim.loc[df_perc_br_sim.index[316+220]:, 'Br_mg'].resample('7D').sum() / df_perc_br_sim.loc[df_perc_br_sim.index[316+220]:, 'perc'].resample('7D').sum()
-            df_weekly.loc[:, 'Br_conc_mmol'] = (df_weekly.loc[:, 'Br_conc_mg'] / 79.904)
-            df_daily_weekly = pd.concat([df_daily, df_weekly])
-            df_perc_br_sim = pd.DataFrame(index=idx).join(df_daily_weekly)
-            df_perc_br_sim = df_perc_br_sim.iloc[315:716, :]
-            df_perc_br_sim.index = range(len(df_perc_br_sim.index))
-            axes.plot(df_perc_br_sim.dropna().index, df_perc_br_sim.dropna()['Br_conc_mmol'], ls='-', color=cmap(norm(year)), label=f'{year}')
+                # join observations on simulations
+                obs_vals = df_br_obs.iloc[:, 0].values
+                sim_vals = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
+                df_obs = pd.DataFrame(index=df_br_obs.index, columns=['obs'])
+                df_obs.loc[:, 'obs'] = obs_vals
+                df_eval = eval_utils.join_obs_on_sim(df_perc_br_sim.index, sim_vals, df_obs)
+                df_eval = df_eval.dropna()
+                # calculate metrics
+                obs_vals = df_eval.loc[:, 'obs'].values
+                sim_vals = df_eval.loc[:, 'sim'].values
+                # temporal correlation
+                df_metrics_year.loc[year, 'r'] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+                # tracer recovery (in %)
+                df_metrics_year.loc[year, 'Br_mass_recovery'] = onp.sum(ds_sim_tm['M_q_ss'].isel(x=nrow, y=0).values[315:716]) / (79900 / 3.14)
+                # average travel time of percolation (in days)
+                df_metrics_year.loc[year, 'ttavg'] = onp.nanmean(ds_sim_tm['ttavg_q_ss'].isel(x=nrow, y=0).values[315:716])
+                # average median travel time of percolation (in days)
+                df_metrics_year.loc[year, 'tt50'] = onp.nanmedian(ds_sim_tm['ttavg_q_ss'].isel(x=nrow, y=0).values[315:716])
 
-            # join observations on simulations
-            obs_vals = df_br_obs.iloc[:, 0].values
-            sim_vals = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
-            df_obs = pd.DataFrame(index=df_br_obs.index, columns=['obs'])
-            df_obs.loc[:, 'obs'] = obs_vals
-            df_eval = eval_utils.join_obs_on_sim(df_perc_br_sim.index, sim_vals, df_obs)
-            df_eval = df_eval.dropna()
-            # calculate metrics
-            obs_vals = df_eval.loc[:, 'obs'].values
-            sim_vals = df_eval.loc[:, 'sim'].values
-            # temporal correlation
-            df_metrics_year.loc[year, 'r'] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
-            # tracer recovery (in %)
-            df_metrics_year.loc[year, 'Br_mass_recovery'] = onp.sum(ds_sim_tm['M_q_ss'].isel(x=0, y=0).values[315:716]) / (79900 / 3.14)
-            # average travel time of percolation (in days)
-            df_metrics_year.loc[year, 'ttavg'] = onp.nanmean(ds_sim_tm['ttavg_q_ss'].isel(x=0, y=0).values[315:716])
-            # average median travel time of percolation (in days)
-            df_metrics_year.loc[year, 'tt50'] = onp.nanmedian(ds_sim_tm['ttavg_q_ss'].isel(x=0, y=0).values[315:716])
+                # write simulated bulk sample to output file
+                ds_sim_tm = ds_sim_tm.load()  # required to release file lock
+                ds_sim_tm = ds_sim_tm.close()
+                del ds_sim_tm
+                states_tm_file = base_path / sas_solver / "states_bromide_benchmark.nc"
+                with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
+                    try:
+                        v = f.groups[f"{tm_structure}-{year}"].create_variable('C_q_ss_mmol_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                        v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
+                        v.attrs.update(long_name="bulk sample of bromide in percolation",
+                                       units="mmol/l")
+                    except ValueError:
+                        v = f.groups[f"{tm_structure}-{year}"].get('C_q_ss_mmol_bs')
+                        v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
+                    try:
+                        v = f.groups[f"{tm_structure}-{year}"].create_variable('q_ss_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                        v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, 'perc'].values
+                        v.attrs.update(long_name="bulk sample of percolation",
+                                       units="mm/dt")
+                    except ValueError:
+                        v = f.groups[f"{tm_structure}-{year}"].get('M_q_ss_bs')
+                        v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, 'perc'].values
+                    try:
+                        v = f.groups[f"{tm_structure}-{year}"].create_variable('M_q_ss_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                        v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_mg'].values
+                        v.attrs.update(long_name="bulk sample bromide mass in percolation",
+                                       units="mg")
+                    except ValueError:
+                        v = f.groups[f"{tm_structure}-{year}"].get('M_q_ss_bs')
+                        v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_mg'].values
 
-            # write simulated bulk sample to output file
-            ds_sim_tm = ds_sim_tm.load()  # required to release file lock
-            ds_sim_tm = ds_sim_tm.close()
-            del ds_sim_tm
-            states_tm_file = base_path / sas_solver / "states_bromide_benchmark.nc"
-            with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
-                try:
-                    v = f.groups[f"{tm_structure}-{year}"].create_variable('C_q_ss_mmol_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                    v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
-                    v.attrs.update(long_name="bulk sample of bromide in percolation",
-                                   units="mmol/l")
-                except ValueError:
-                    v = f.groups[f"{tm_structure}-{year}"].get('C_q_ss_mmol_bs')
-                    v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
-                try:
-                    v = f.groups[f"{tm_structure}-{year}"].create_variable('q_ss_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                    v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'perc'].values
-                    v.attrs.update(long_name="bulk sample of percolation",
-                                   units="mm/dt")
-                except ValueError:
-                    v = f.groups[f"{tm_structure}-{year}"].get('M_q_ss_bs')
-                    v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'perc'].values
-                try:
-                    v = f.groups[f"{tm_structure}-{year}"].create_variable('M_q_ss_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                    v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_mg'].values
-                    v.attrs.update(long_name="bulk sample bromide mass in percolation",
-                                   units="mg")
-                except ValueError:
-                    v = f.groups[f"{tm_structure}-{year}"].get('M_q_ss_bs')
-                    v[0, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_mg'].values
+                axes.set_ylabel('Br [mmol $l^{-1}$]')
+                axes.set_xlabel('Time [days since injection]')
+                axes.set_ylim(0,)
+                axes.set_xlim((0, 400))
+                axes.legend(fontsize=6, frameon=False, bbox_to_anchor=(1, 1), loc="upper left")
+                fig.tight_layout()
+                file = f'bromide_breakthrough_{tms}_alpha_transp_{alpha_transp}_alpha_q_{alpha_q}.png'
+                path = base_path_figs / file
+                fig.savefig(path, dpi=250)
 
-        axes.set_ylabel('Br [mmol $l^{-1}$]')
-        axes.set_xlabel('Time [days since injection]')
-        axes.set_ylim(0,)
-        axes.set_xlim((0, 400))
-        axes.legend(fontsize=6, frameon=False, bbox_to_anchor=(1, 1), loc="upper left")
-        fig.tight_layout()
-        file = f'bromide_breakthrough_{tms}.png'
-        path = base_path_figs / file
-        fig.savefig(path, dpi=250)
-
-        # write evaluation metrics to .csv
-        path_csv = base_path_results / f"bromide_metrics_{tms}.csv"
-        df_metrics_year.to_csv(path_csv, header=True, index=True, sep=";")
+                # write evaluation metrics to .csv
+                path_csv = base_path_results / f"bromide_metrics_{tms}_alpha_transp_{alpha_transp}_alpha_q_{alpha_q}.csv"
+                df_metrics_year.to_csv(path_csv, header=True, index=True, sep=";")
 
     return
 
