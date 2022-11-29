@@ -7,8 +7,8 @@ do
   qsub -q short $f
 done
 
-# FILES="$PWD/bromide_RK4_svat_*_*.sh"
-# for f in $FILES
-# do
-#   qsub -q short $f
-# done
+FILES="$PWD/bromide_RK4_svat_*_*.sh"
+for f in $FILES
+do
+  qsub -q short $f
+done

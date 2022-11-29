@@ -165,21 +165,24 @@ def main(tmp_dir, sas_solver):
 
             # plot percolation rate (in l/h) and bromide concentration (mmol/l)
             idx = pd.date_range(start=f'1/1/{year}', end=f'31/12/{year+1}')
-            df_perc_br_sim = pd.DataFrame(index=idx, columns=['perc', 'Br_conc_mg', 'Br_conc_mmol'])
+            df_perc_br_sim = pd.DataFrame(index=idx, columns=['perc', 'Br_conc_mg', 'Br_mg', 'Br_conc_mmol'])
             # in mm per day
             df_perc_br_sim.loc[:, 'perc'] = ds_sim_hm.sel(Time=slice(str(year), str(year + 1)))['q_ss'].isel(y=0).values
             # in mg per liter
             df_perc_br_sim.loc[:, 'Br_conc_mg'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values[1:]
             # in mg
-            df_perc_br_sim.loc[:, 'Br_mg'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values[1:] * ds_sim_hm.sel(Time=slice(str(year), str(year + 1)))['q_ss'].isel(y=0).values[1:]
+            df_perc_br_sim.loc[:, 'Br_mg'] = ds_sim_tm['C_q_ss'].isel(x=0, y=0).values[1:] * ds_sim_hm.sel(Time=slice(str(year), str(year + 1)))['q_ss'].isel(y=0).values
             # in mmol per liter
             df_perc_br_sim.loc[:, 'Br_conc_mmol'] = (df_perc_br_sim.loc[:, 'Br_conc_mg'] / 79.904)
             # daily samples from day 0 to day 220
-            df_daily = df_perc_br_sim.loc[:df_perc_br_sim.index[315+220], 'Br_conc_mmol'].to_frame()
+            df_daily = df_perc_br_sim.loc[:df_perc_br_sim.index[315+220], :]
             # weekly samples after 220 days
-            df_weekly = df_perc_br_sim.loc[df_perc_br_sim.index[316+220]:, 'Br_conc_mmol'].resample('7D').mean().to_frame()
+            df_weekly = df_perc_br_sim.loc[df_perc_br_sim.index[316+220]:, 'perc'].resample('7D').sum().to_frame()
+            df_weekly.loc[:, 'Br_mg'] = df_perc_br_sim.loc[df_perc_br_sim.index[316+220]:, 'Br_mg'].resample('7D').sum()
+            df_weekly.loc[:, 'Br_conc_mg'] = df_perc_br_sim.loc[df_perc_br_sim.index[316+220]:, 'Br_mg'].resample('7D').sum() / df_perc_br_sim.loc[df_perc_br_sim.index[316+220]:, 'perc'].resample('7D').sum()
+            df_weekly.loc[:, 'Br_conc_mmol'] = (df_weekly.loc[:, 'Br_conc_mg'] / 79.904)
             df_daily_weekly = pd.concat([df_daily, df_weekly])
-            df_perc_br_sim = df_perc_br_sim.loc[:, 'perc':'Br_conc_mg'].join(df_daily_weekly)
+            df_perc_br_sim = pd.DataFrame(index=idx).join(df_daily_weekly)
             df_perc_br_sim = df_perc_br_sim.iloc[315:716, :]
             df_perc_br_sim.index = range(len(df_perc_br_sim.index))
             axes.plot(df_perc_br_sim.dropna().index, df_perc_br_sim.dropna()['Br_conc_mmol'], ls='-', color=cmap(norm(year)), label=f'{year}')
