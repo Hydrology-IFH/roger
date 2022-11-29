@@ -532,8 +532,9 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["average"].output_variables = ["C_iso_q_ss", "C_iso_s", "TT_q_ss",
+            diagnostics["average"].output_variables = ["C_iso_transp", "C_iso_q_ss", "C_iso_s", "TT_transp", "TT_q_ss",
                                                        "tt25_q_ss", "tt50_q_ss", "tt75_q_ss",  "ttavg_q_ss",
+                                                       "tt25_transp", "tt50_transp", "tt75_transp",  "ttavg_transp",
                                                        "rt25_s", "rt50_s", "rt75_s",  "rtavg_s"]
             diagnostics["average"].output_frequency = 24 * 60 * 60
             diagnostics["average"].sampling_frequency = 1

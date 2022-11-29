@@ -180,6 +180,7 @@ def main(tmp_dir):
                         df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
                         key_r = 'r_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+                        # add offset since diagnostic efficiency requires positive values
                         offset = df_eval.min() * (-1) + 1
                         obs_vals = df_eval.loc[:, 'obs'].values + offset
                         sim_vals = df_eval.loc[:, 'sim'].values + offset

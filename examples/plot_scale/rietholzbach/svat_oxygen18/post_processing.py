@@ -200,6 +200,8 @@ def main(tmp_dir, sas_solver):
         fig, ax = plt.subplots(figsize=(14, 3.5))
         # DataFrame with sampled model parameters and the corresponding metrics
         df_params_metrics = pd.DataFrame(index=range(nrows))
+        df_params_metrics.loc[:, 'c1_mak'] = ds_sim_hm["c1_mak"].values.flatten()
+        df_params_metrics.loc[:, 'c2_mak'] = ds_sim_hm["c2_mak"].values.flatten()
         df_params_metrics.loc[:, 'dmpv'] = ds_sim_hm["dmpv"].values.flatten()
         df_params_metrics.loc[:, 'lmpv'] = ds_sim_hm["lmpv"].values.flatten()
         df_params_metrics.loc[:, 'theta_ac'] = ds_sim_hm["theta_ac"].values.flatten()
@@ -293,7 +295,7 @@ def main(tmp_dir, sas_solver):
 
         # dotty plots
         df_metrics = df_params_metrics.loc[:, ['KGE_C_iso_q_ss']]
-        df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+        df_params = df_params_metrics.loc[:, ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
         nrow = len(df_metrics.columns)
         ncol = len(df_params.columns)
         fig, ax1 = plt.subplots(nrow, ncol, sharey=True, figsize=(ncol*1.2, 1.2))
