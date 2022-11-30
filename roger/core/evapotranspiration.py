@@ -630,7 +630,7 @@ def calc_transpiration_transport_anion_kernel(state):
         at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_transp[2:-2, 2:-2, :], axis=2),
     )
 
-    # calculate isotope travel time distribution
+    # calculate anion travel time distribution
     vs.mtt_transp = update(
         vs.mtt_transp,
         at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_transp, vs.transp, vs.msa_rz, vs.alpha_transp)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
@@ -639,6 +639,11 @@ def calc_transpiration_transport_anion_kernel(state):
     vs.C_transp = update(
         vs.C_transp,
         at[2:-2, 2:-2], npx.where(vs.transp > 0, npx.sum(vs.mtt_transp, axis=2) / vs.transp, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.M_transp = update(
+        vs.M_transp,
+        at[2:-2, 2:-2], npx.sum(vs.mtt_transp[2:-2, 2:-2, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update StorAge with flux
@@ -652,7 +657,7 @@ def calc_transpiration_transport_anion_kernel(state):
         at[2:-2, 2:-2, vs.tau, :], - vs.mtt_transp[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    return KernelOutput(sa_rz=vs.sa_rz, tt_transp=vs.tt_transp, TT_transp=vs.TT_transp, msa_rz=vs.msa_rz, mtt_transp=vs.mtt_transp, C_transp=vs.C_transp)
+    return KernelOutput(sa_rz=vs.sa_rz, tt_transp=vs.tt_transp, TT_transp=vs.TT_transp, msa_rz=vs.msa_rz, mtt_transp=vs.mtt_transp, C_transp=vs.C_transp, M_transp=vs.M_transp)
 
 
 @roger_routine

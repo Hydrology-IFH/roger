@@ -239,7 +239,7 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 5.8)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 37)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 36)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], 7.8)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 3.5)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 8.2)
@@ -393,13 +393,13 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["rate"].output_variables = ["M_q_ss"]
+            diagnostics["rate"].output_variables = ["M_q_ss", "M_transp"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
                 diagnostics["rate"].base_output_path = base_path
 
-            diagnostics["average"].output_variables = ["C_in", "C_s", "C_q_ss", "ttavg_q_ss", "tt50_q_ss"]
+            diagnostics["average"].output_variables = ["C_in", "C_s", "C_rz", "C_ss", "C_transp", "C_q_ss", "ttavg_q_ss", "tt50_q_ss"]
             diagnostics["average"].output_frequency = 24 * 60 * 60
             diagnostics["average"].sampling_frequency = 1
             if base_path:

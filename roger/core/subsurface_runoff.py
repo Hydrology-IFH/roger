@@ -946,6 +946,11 @@ def calc_percolation_rz_transport_anion_kernel(state):
         at[2:-2, 2:-2], npx.where(vs.q_rz[2:-2, 2:-2] > 0, npx.sum(vs.mtt_q_rz[2:-2, 2:-2, :], axis=-1) / vs.q_rz[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
+    vs.M_q_rz = update(
+        vs.M_q_rz,
+        at[2:-2, 2:-2], npx.sum(vs.mtt_q_rz[2:-2, 2:-2, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     # update StorAge with flux
     vs.sa_rz = update(
         vs.sa_rz,
@@ -967,7 +972,7 @@ def calc_percolation_rz_transport_anion_kernel(state):
         at[2:-2, 2:-2, vs.tau, :], vs.tt_q_rz[2:-2, 2:-2, :] * vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    return KernelOutput(sa_rz=vs.sa_rz, tt_q_rz=vs.tt_q_rz, TT_q_rz=vs.TT_q_rz, msa_rz=vs.msa_rz, mtt_q_rz=vs.mtt_q_rz, C_q_rz=vs.C_q_rz, sa_ss=vs.sa_ss, msa_ss=vs.msa_ss)
+    return KernelOutput(sa_rz=vs.sa_rz, tt_q_rz=vs.tt_q_rz, TT_q_rz=vs.TT_q_rz, msa_rz=vs.msa_rz, mtt_q_rz=vs.mtt_q_rz, C_q_rz=vs.C_q_rz, M_q_rz=vs.M_q_rz, sa_ss=vs.sa_ss, msa_ss=vs.msa_ss)
 
 
 @roger_kernel
@@ -1070,7 +1075,7 @@ def calc_percolation_ss_transport_anion_kernel(state):
         at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_q_ss[2:-2, 2:-2, :], axis=-1),
     )
 
-    # calculate isotope travel time distribution
+    # calculate anion travel time distribution
     vs.mtt_q_ss = update(
         vs.mtt_q_ss,
         at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_ss, vs.tt_q_ss, vs.q_ss, vs.msa_ss, vs.alpha_q)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
@@ -1079,6 +1084,11 @@ def calc_percolation_ss_transport_anion_kernel(state):
     vs.C_q_ss = update(
         vs.C_q_ss,
         at[2:-2, 2:-2], npx.where(vs.q_ss[2:-2, 2:-2] > 0, npx.sum(vs.mtt_q_ss[2:-2, 2:-2, :], axis=-1) / vs.q_ss[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.M_q_ss = update(
+        vs.M_q_ss,
+        at[2:-2, 2:-2], npx.sum(vs.mtt_q_ss[2:-2, 2:-2, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update StorAge with flux
@@ -1092,7 +1102,7 @@ def calc_percolation_ss_transport_anion_kernel(state):
         at[2:-2, 2:-2, vs.tau, :], -vs.mtt_q_ss[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    return KernelOutput(sa_ss=vs.sa_ss, tt_q_ss=vs.tt_q_ss, TT_q_ss=vs.TT_q_ss, msa_ss=vs.msa_ss, mtt_q_ss=vs.mtt_q_ss, C_q_ss=vs.C_q_ss)
+    return KernelOutput(sa_ss=vs.sa_ss, tt_q_ss=vs.tt_q_ss, TT_q_ss=vs.TT_q_ss, msa_ss=vs.msa_ss, mtt_q_ss=vs.mtt_q_ss, C_q_ss=vs.C_q_ss, M_q_ss=vs.M_q_ss)
 
 
 @roger_routine

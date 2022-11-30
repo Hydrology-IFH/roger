@@ -324,7 +324,7 @@ def calc_capillary_rise_rz_transport_anion_kernel(state):
         at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_cpr_rz[2:-2, 2:-2, :], axis=2),
     )
 
-    # calculate isotope travel time distribution
+    # calculate anion travel time distribution
     vs.mtt_cpr_rz = update(
         vs.mtt_cpr_rz,
         at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_ss, vs.tt_cpr_rz, vs.cpr_rz, vs.msa_ss, vs.alpha_q)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
@@ -333,6 +333,11 @@ def calc_capillary_rise_rz_transport_anion_kernel(state):
     vs.C_cpr_rz = update(
         vs.C_cpr_rz,
         at[2:-2, 2:-2], npx.where(vs.cpr_rz[2:-2, 2:-2] > 0, npx.sum(vs.mtt_cpr_rz[2:-2, 2:-2, :], axis=-1) / vs.cpr_rz[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.M_cpr_rz = update(
+        vs.M_cpr_rz,
+        at[2:-2, 2:-2], npx.sum(vs.mtt_cpr_rz[2:-2, 2:-2, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update StorAge with flux
@@ -357,7 +362,7 @@ def calc_capillary_rise_rz_transport_anion_kernel(state):
         at[2:-2, 2:-2, vs.tau, :], vs.mtt_cpr_rz[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    return KernelOutput(sa_ss=vs.sa_ss, msa_ss=vs.msa_ss, tt_cpr_rz=vs.tt_cpr_rz, TT_cpr_rz=vs.TT_cpr_rz, mtt_cpr_rz=vs.mtt_cpr_rz, C_cpr_rz=vs.C_cpr_rz, sa_rz=vs.sa_rz, msa_rz=vs.msa_rz)
+    return KernelOutput(sa_ss=vs.sa_ss, msa_ss=vs.msa_ss, tt_cpr_rz=vs.tt_cpr_rz, TT_cpr_rz=vs.TT_cpr_rz, mtt_cpr_rz=vs.mtt_cpr_rz, C_cpr_rz=vs.C_cpr_rz, M_cpr_rz=vs.M_cpr_rz, sa_rz=vs.sa_rz, msa_rz=vs.msa_rz)
 
 
 @roger_kernel

@@ -18,6 +18,7 @@ def main(nsamples, job_type, sas_solver, split_size):
                               'piston': 'pi',
                               'advection-dispersion': 'ad',
                               'time-variant advection-dispersion': 'adt',
+                              'time-variant preferential + advection-dispersion': 'pfadt',
                               }
 
     file_path = base_path / "param_bounds.yml"
