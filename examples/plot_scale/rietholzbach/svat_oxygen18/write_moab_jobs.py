@@ -14,12 +14,14 @@ def main(job_type, sas_solver):
                               'complete-mixing': 'cm',
                               'preferential': 'pf',
                               'advection-dispersion': 'ad',
+                              'preferential + advection-dispersion': 'pfad',
                               'time-variant advection-dispersion': 'adt',
+                              'time-variant preferential + advection-dispersion': 'pfadt',
                               'time-variant': 'tv',
                               'power': 'pow'}
 
     tracer = 'oxygen18'
-    transport_models = ['piston', 'complete-mixing', 'advection-dispersion', 'time-variant advection-dispersion', 'power', 'preferential', 'time-variant']
+    transport_models = ['piston', 'complete-mixing', 'advection-dispersion', 'time-variant advection-dispersion', 'preferential + advection-dispersion', 'time-variant preferential + advection-dispersion', 'power', 'preferential', 'time-variant']
     for tm in transport_models:
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]

@@ -22,6 +22,20 @@ time-variant advection-dispersion:
   - 10
   - 10
 
+time-variant preferential + advection-dispersion:
+  b_q_ss:
+  - 0.1  # lower boundary
+  - 3  # upper boundary
+  - 10  # number of samples
+  c1_q_ss:
+  - 1
+  - 10
+  - 10
+  c2_q_ss:
+  - 1
+  - 10
+  - 10
+
 older-preference:
   a_q_ss:
   - 2
