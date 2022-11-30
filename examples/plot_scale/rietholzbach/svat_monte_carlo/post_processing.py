@@ -181,7 +181,7 @@ def main(tmp_dir):
                         key_r = 'r_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
                         # add offset since diagnostic efficiency requires positive values
-                        offset = df_eval.min() * (-1) + 1
+                        offset = onp.nanmin(df_eval.values) * (-1) + 1
                         obs_vals = df_eval.loc[:, 'obs'].values + offset
                         sim_vals = df_eval.loc[:, 'sim'].values + offset
                         # share of observations with zero values
