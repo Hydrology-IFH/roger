@@ -261,18 +261,16 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
                 "S_ss_init",
                 "S_s",
                 "itt",
-                "taum1",
-                "tau",
                 "taup1"
             ],
         )
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.taum1], self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.taum1], self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2])
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, 0], self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, 0], self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, 1], self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, 1], self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
             vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
             vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
@@ -328,10 +326,9 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
         )
         def set_forcing_setup(self, state):
             vs = state.variables
-            
+
             TA = allocate(state.dimensions, ("x", "y", "t"))
             PREC = allocate(state.dimensions, ("x", "y", "t"))
-
             TA = update(TA, at[2:-2, 2:-2, :], self._read_var_from_nc("ta", self._input_dir, self._states_hm_file)[npx.newaxis, :, :])
             PREC = update(PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._input_dir, self._states_hm_file)[npx.newaxis, :, :])
 
