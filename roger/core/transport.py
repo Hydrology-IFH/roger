@@ -495,6 +495,10 @@ def calc_mtt(state, sa, tt, flux, msa, alpha):
             mtt,
             at[2:-2, 2:-2, :], npx.where(mtt[2:-2, 2:-2, :] <= 0, 0, mtt[2:-2, 2:-2, :]),
         )
+        mtt = update(
+            mtt,
+            at[2:-2, 2:-2, :], npx.where(mtt[2:-2, 2:-2, :] > msa[2:-2, 2:-2, vs.tau, :], msa[2:-2, 2:-2, vs.tau, :], mtt[2:-2, 2:-2, :]),
+        )
 
     return mtt
 
