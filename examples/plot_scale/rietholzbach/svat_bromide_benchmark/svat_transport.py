@@ -78,19 +78,19 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
                 for x in range(input_itt.shape[0]):
                     for y in range(input_itt.shape[1]):
                         start_rain = input_itt[x, y]
-                        end_rain = npx.max(npx.where(npx.cumsum(prec[x, y, start_rain:]) <= 20, npx.arange(prec.shape[-1])[start_rain:], 0))
-                        if npx.sum(prec[x, y, start_rain:end_rain]) <= 0:
+                        end_rain = npx.max(npx.where(npx.cumsum(prec[x+2, y+2, start_rain:]) <= 20, npx.arange(prec.shape[-1])[start_rain:], 0))
+                        if npx.sum(prec[x+2, y+2, start_rain:end_rain]) <= 0:
                             end_rain = end_rain + 1
 
                         # proportions for redistribution
                         M_IN = update(
                             M_IN,
-                            at[x+2, y+2, start_rain:end_rain], vs.M_IN[x+2, y+2, sol_idx[i]] * (prec[x, y, start_rain:end_rain] / npx.sum(prec[x, y, start_rain:end_rain])),
+                            at[x+2, y+2, start_rain:end_rain], vs.M_IN[x+2, y+2, sol_idx[i]] * (prec[x+2, y+2, start_rain:end_rain] / npx.sum(prec[x+2, y+2, start_rain:end_rain])),
                         )
 
             C_IN = update(
                 C_IN,
-                at[2:-2, 2:-2, :], npx.where(prec > 0, M_IN[2:-2, 2:-2, :] / prec, 0),
+                at[2:-2, 2:-2, :], npx.where(prec[2:-2, 2:-2, :] > 0, M_IN[2:-2, 2:-2, :] / prec[2:-2, 2:-2, :], 0),
             )
 
             return M_IN, C_IN
@@ -179,8 +179,8 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
 
             alpha = npx.linspace(0.1, 1, num=10).tolist()
             params = npx.array(onp.meshgrid(alpha, alpha)).T.reshape(-1, 2)
-            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], params[:, 0])
-            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], params[:, 1])
+            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], params[:, 0, npx.newaxis])
+            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], params[:, 1, npx.newaxis])
 
             if settings.tm_structure == "complete-mixing":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 1)
@@ -261,14 +261,18 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
                 "S_ss_init",
                 "S_s",
                 "itt",
+                "taum1",
+                "tau",
                 "taup1"
             ],
         )
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.taum1], self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.taum1], self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
             vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
             vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
@@ -324,9 +328,12 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
         )
         def set_forcing_setup(self, state):
             vs = state.variables
+            
+            TA = allocate(state.dimensions, ("x", "y", "t"))
+            PREC = allocate(state.dimensions, ("x", "y", "t"))
 
-            TA = self._read_var_from_nc("ta", self._input_dir, self._states_hm_file)[npx.newaxis, :, :]
-            PREC = self._read_var_from_nc("prec", self._input_dir, self._states_hm_file)[npx.newaxis, :, :]
+            TA = update(TA, at[2:-2, 2:-2, :], self._read_var_from_nc("ta", self._input_dir, self._states_hm_file)[npx.newaxis, :, :])
+            PREC = update(PREC, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._input_dir, self._states_hm_file)[npx.newaxis, :, :])
 
             vs.M_IN = update(vs.M_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("Br", self._input_dir, 'forcing_tracer.nc'))
 
@@ -406,7 +413,7 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
             if base_path:
                 diagnostics["average"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["M_s", "M_in"]
+            diagnostics["collect"].output_variables = ["M_in", "M_s"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:

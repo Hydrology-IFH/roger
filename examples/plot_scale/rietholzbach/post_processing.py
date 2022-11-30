@@ -1441,7 +1441,7 @@ def main(tmp_dir):
             with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{tm_structure}-{year}') as ds:
                 df_sim_br = pd.DataFrame(index=df_obs_br.index)
                 sim_vals = ds["C_q_ss_mmol_bs"].isel(x=0, y=0).values[315:716]
-                sim_vals = onp.where(sim_vals < 0), onp.nan, sim_vals)
+                sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
                 df_sim_br.loc[:, f"{year}"] = sim_vals
             axes.flatten()[i].plot(df_sim_br.dropna().index, df_sim_br.dropna()[f"{year}"], ls='--', color=cmap(norm(year)), lw=0.8, alpha=0.6, label=f'{year}')
         axes.flatten()[i].plot(df_sim_br.dropna().index, df_sim_br.dropna().mean(axis=1), color="red", lw=1, alpha=1, label='average')
