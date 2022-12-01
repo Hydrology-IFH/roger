@@ -296,12 +296,22 @@ def calc_int(state):
     """
     vs = state.variables
 
+    vs.int_top = update(
+        vs.int_top,
+        at[2:-2, 2:-2], (vs.int_rain_top[2:-2, 2:-2] + vs.int_snow_top[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.int_ground = update(
+        vs.int_ground,
+        at[2:-2, 2:-2], (vs.int_rain_ground[2:-2, 2:-2] + vs.int_snow_ground[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     vs.int_prec = update(
         vs.int_prec,
         at[2:-2, 2:-2], (vs.int_rain_top[2:-2, 2:-2] + vs.int_rain_ground[2:-2, 2:-2] + vs.int_snow_top[2:-2, 2:-2] + vs.int_snow_ground[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(int_prec=vs.int_prec)
+    return KernelOutput(int_top=vs.int_top, int_ground=vs.int_ground, int_prec=vs.int_prec)
 
 
 @roger_routine
