@@ -103,10 +103,16 @@ def main(tmp_dir, sas_solver):
                                 v[:] = time
                             for var_sim in list(df.variables.keys()):
                                 var_obj = df.variables.get(var_sim)
-                                if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions:
+                                if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
                                     v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                                     vals = onp.array(var_obj)
                                     v[:, :, :] = vals.swapaxes(0, 2)
+                                    v.attrs.update(long_name=var_obj.attrs["long_name"],
+                                                   units=var_obj.attrs["units"])
+                                elif var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
+                                    v = f.groups[f"{tm_structure}-{year}"].create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
+                                    vals = onp.array(var_obj)
+                                    v[:, :, :] = vals.swapaxes(0, 2)[:, :, 0]
                                     v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                    units=var_obj.attrs["units"])
                                 elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
@@ -150,22 +156,23 @@ def main(tmp_dir, sas_solver):
         ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
         df_metrics_year = pd.DataFrame(index=years)
         fig, axes = plt.subplots(1, 1, figsize=(6, 2))
-        nrows = ds_sim_hm.dims['x']
-        for year in years:
-            click.echo(f'Calculate metrics for {tm_structure}-{year} ...')
-            # load observations
-            br_obs_file = base_path.parent / "observations" / "bromide_breakthrough.csv"
-            df_br_obs = pd.read_csv(br_obs_file, sep=';', skiprows=1, index_col=0)
-            # load simulation
-            states_tm_file = base_path / sas_solver / "states_bromide_benchmark.nc"
-            ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{tm_structure}-{year}", engine="h5netcdf")
-            # assign date
-            days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-            date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-            ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
-            for nrow in range(nrows):
-                alpha_transp = onp.round(ds_sim_tm['alpha_transp'].isel(x=nrow, y=0).values, 2)
-                alpha_q = onp.round(ds_sim_tm['alpha_q'].isel(x=nrow, y=0).values, 2)
+        # load observations
+        br_obs_file = base_path.parent / "observations" / "bromide_breakthrough.csv"
+        df_br_obs = pd.read_csv(br_obs_file, sep=';', skiprows=1, index_col=0)
+        nrows = 100
+        for nrow in range(nrows):
+            fig, axes = plt.subplots(1, 1, figsize=(6, 2))
+            for year in years:
+                # load simulation
+                states_tm_file = base_path / sas_solver / "states_bromide_benchmark.nc"
+                ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{tm_structure}-{year}", engine="h5netcdf")
+                # assign date
+                days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+                date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+                ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+                alpha_transp = onp.round(ds_sim_tm['alpha_transp'].isel(x=nrow, y=0).values[0], 2)
+                alpha_q = onp.round(ds_sim_tm['alpha_q'].isel(x=nrow, y=0).values[0], 2)
+                click.echo(f'Calculate metrics for {tm_structure}-{year} alpha_transp: {alpha_transp} alpha_q: {alpha_q} ...')
                 # plot percolation rate (in l/h) and bromide concentration (mmol/l)
                 idx = pd.date_range(start=f'1/1/{year}', end=f'31/12/{year+1}')
                 df_perc_br_sim = pd.DataFrame(index=idx, columns=['perc', 'Br_conc_mg', 'Br_mg', 'Br_conc_mmol'])
@@ -189,7 +196,7 @@ def main(tmp_dir, sas_solver):
                 df_perc_br_sim = df_perc_br_sim.iloc[315:716, :]
                 df_perc_br_sim.index = range(len(df_perc_br_sim.index))
                 axes.plot(df_perc_br_sim.dropna().index, df_perc_br_sim.dropna()['Br_conc_mmol'], ls='-', color=cmap(norm(year)), label=f'{year}')
-
+    
                 # join observations on simulations
                 obs_vals = df_br_obs.iloc[:, 0].values
                 sim_vals = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
@@ -208,7 +215,7 @@ def main(tmp_dir, sas_solver):
                 df_metrics_year.loc[year, 'ttavg'] = onp.nanmean(ds_sim_tm['ttavg_q_ss'].isel(x=nrow, y=0).values[315:716])
                 # average median travel time of percolation (in days)
                 df_metrics_year.loc[year, 'tt50'] = onp.nanmedian(ds_sim_tm['ttavg_q_ss'].isel(x=nrow, y=0).values[315:716])
-
+    
                 # write simulated bulk sample to output file
                 ds_sim_tm = ds_sim_tm.load()  # required to release file lock
                 ds_sim_tm = ds_sim_tm.close()
@@ -239,7 +246,7 @@ def main(tmp_dir, sas_solver):
                     except ValueError:
                         v = f.groups[f"{tm_structure}-{year}"].get('M_q_ss_bs')
                         v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_mg'].values
-
+    
                 axes.set_ylabel('Br [mmol $l^{-1}$]')
                 axes.set_xlabel('Time [days since injection]')
                 axes.set_ylim(0,)
@@ -249,7 +256,7 @@ def main(tmp_dir, sas_solver):
                 file = f'bromide_breakthrough_{tms}_alpha_transp_{alpha_transp}_alpha_q_{alpha_q}.png'
                 path = base_path_figs / file
                 fig.savefig(path, dpi=250)
-
+    
                 # write evaluation metrics to .csv
                 path_csv = base_path_results / f"bromide_metrics_{tms}_alpha_transp_{alpha_transp}_alpha_q_{alpha_q}.csv"
                 df_metrics_year.to_csv(path_csv, header=True, index=True, sep=";")
