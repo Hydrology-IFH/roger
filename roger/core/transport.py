@@ -111,73 +111,73 @@ def calculate_age_statistics(state):
         at[2:-2, 2:-2], npx.where(npx.sum(vs.tt_q_ss, axis=-1) > 0, npx.sum(ages * vs.tt_q_ss, axis=-1), npx.nan)[2:-2, 2:-2],
     )
 
-    # age statistics of root zone
-    # cumulative residence time distribution of root zone
-    RT_rz = allocate(state.dimensions, ("x", "y", "nages"))
-    RT_rz = update(
-        RT_rz,
-        at[2:-2, 2:-2, :], npx.where(npx.max(vs.SA_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] > 0, vs.SA_rz[2:-2, 2:-2, vs.tau, :]/npx.max(vs.SA_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis], 0),
-    )
-    # residence time distribution of soil
-    rt_rz = allocate(state.dimensions, ("x", "y", "ages"))
-    rt_rz = update(
-        rt_rz,
-        at[2:-2, 2:-2, :], npx.diff(RT_rz[2:-2, 2:-2, :], axis=-1),
-    )
-
-    vs.rt25_rz = update(
-        vs.rt25_rz,
-        at[2:-2, 2:-2], calc_age_percentile(state, RT_rz[:, :, 1:], 0.25)[2:-2, 2:-2],
-    )
-
-    vs.rt50_rz = update(
-        vs.rt50_rz,
-        at[2:-2, 2:-2], calc_age_percentile(state, RT_rz[:, :, 1:], 0.5)[2:-2, 2:-2],
-    )
-
-    vs.rt75_rz = update(
-        vs.rt75_rz,
-        at[2:-2, 2:-2], calc_age_percentile(state, RT_rz[:, :, 1:], 0.75)[2:-2, 2:-2],
-    )
-
-    vs.rtavg_rz = update(
-        vs.rtavg_rz,
-        at[2:-2, 2:-2], npx.where(npx.sum(rt_rz, axis=-1) > 0, npx.sum(ages * rt_rz, axis=-1), npx.nan)[2:-2, 2:-2],
-    )
-
-    # age statistics of subsoil
-    # cumulative residence time distribution of subsoil
-    RT_ss = allocate(state.dimensions, ("x", "y", "nages"))
-    RT_ss = update(
-        RT_ss,
-        at[2:-2, 2:-2, :], npx.where(npx.max(vs.SA_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] > 0, vs.SA_ss[2:-2, 2:-2, vs.tau, :]/npx.max(vs.SA_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis], 0),
-    )
-    # residence time distribution of subsoil
-    rt_ss = allocate(state.dimensions, ("x", "y", "ages"))
-    rt_ss = update(
-        rt_ss,
-        at[2:-2, 2:-2, :], npx.diff(RT_ss[2:-2, 2:-2, :], axis=-1),
-    )
-
-    vs.rt25_ss = update(
-        vs.rt25_ss,
-        at[2:-2, 2:-2], calc_age_percentile(state, RT_ss[:, :, 1:], 0.25)[2:-2, 2:-2],
-    )
-
-    vs.rt50_ss = update(
-        vs.rt50_ss,
-        at[2:-2, 2:-2], calc_age_percentile(state, RT_ss[:, :, 1:], 0.5)[2:-2, 2:-2],
-    )
-
-    vs.rt75_ss = update(
-        vs.rt75_ss,
-        at[2:-2, 2:-2], calc_age_percentile(state, RT_ss[:, :, 1:], 0.75)[2:-2, 2:-2],
-    )
-
-    vs.rtavg_ss = update(
-        vs.rtavg_ss,
-        at[2:-2, 2:-2], npx.where(npx.sum(rt_ss, axis=-1) > 0, npx.sum(ages * rt_ss, axis=-1), npx.nan)[2:-2, 2:-2],
-    )
+    # # age statistics of root zone
+    # # cumulative residence time distribution of root zone
+    # RT_rz = allocate(state.dimensions, ("x", "y", "nages"))
+    # RT_rz = update(
+    #     RT_rz,
+    #     at[2:-2, 2:-2, :], npx.where(npx.max(vs.SA_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] > 0, vs.SA_rz[2:-2, 2:-2, vs.tau, :]/npx.max(vs.SA_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis], 0),
+    # )
+    # # residence time distribution of soil
+    # rt_rz = allocate(state.dimensions, ("x", "y", "ages"))
+    # rt_rz = update(
+    #     rt_rz,
+    #     at[2:-2, 2:-2, :], npx.diff(RT_rz[2:-2, 2:-2, :], axis=-1),
+    # )
+    #
+    # vs.rt25_rz = update(
+    #     vs.rt25_rz,
+    #     at[2:-2, 2:-2], calc_age_percentile(state, RT_rz[:, :, 1:], 0.25)[2:-2, 2:-2],
+    # )
+    #
+    # vs.rt50_rz = update(
+    #     vs.rt50_rz,
+    #     at[2:-2, 2:-2], calc_age_percentile(state, RT_rz[:, :, 1:], 0.5)[2:-2, 2:-2],
+    # )
+    #
+    # vs.rt75_rz = update(
+    #     vs.rt75_rz,
+    #     at[2:-2, 2:-2], calc_age_percentile(state, RT_rz[:, :, 1:], 0.75)[2:-2, 2:-2],
+    # )
+    #
+    # vs.rtavg_rz = update(
+    #     vs.rtavg_rz,
+    #     at[2:-2, 2:-2], npx.where(npx.sum(rt_rz, axis=-1) > 0, npx.sum(ages * rt_rz, axis=-1), npx.nan)[2:-2, 2:-2],
+    # )
+    #
+    # # age statistics of subsoil
+    # # cumulative residence time distribution of subsoil
+    # RT_ss = allocate(state.dimensions, ("x", "y", "nages"))
+    # RT_ss = update(
+    #     RT_ss,
+    #     at[2:-2, 2:-2, :], npx.where(npx.max(vs.SA_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] > 0, vs.SA_ss[2:-2, 2:-2, vs.tau, :]/npx.max(vs.SA_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis], 0),
+    # )
+    # # residence time distribution of subsoil
+    # rt_ss = allocate(state.dimensions, ("x", "y", "ages"))
+    # rt_ss = update(
+    #     rt_ss,
+    #     at[2:-2, 2:-2, :], npx.diff(RT_ss[2:-2, 2:-2, :], axis=-1),
+    # )
+    #
+    # vs.rt25_ss = update(
+    #     vs.rt25_ss,
+    #     at[2:-2, 2:-2], calc_age_percentile(state, RT_ss[:, :, 1:], 0.25)[2:-2, 2:-2],
+    # )
+    #
+    # vs.rt50_ss = update(
+    #     vs.rt50_ss,
+    #     at[2:-2, 2:-2], calc_age_percentile(state, RT_ss[:, :, 1:], 0.5)[2:-2, 2:-2],
+    # )
+    #
+    # vs.rt75_ss = update(
+    #     vs.rt75_ss,
+    #     at[2:-2, 2:-2], calc_age_percentile(state, RT_ss[:, :, 1:], 0.75)[2:-2, 2:-2],
+    # )
+    #
+    # vs.rtavg_ss = update(
+    #     vs.rtavg_ss,
+    #     at[2:-2, 2:-2], npx.where(npx.sum(rt_ss, axis=-1) > 0, npx.sum(ages * rt_ss, axis=-1), npx.nan)[2:-2, 2:-2],
+    # )
 
     # age statistics of soil
     # cumulative residence time distribution of soil
@@ -210,7 +210,7 @@ def calculate_age_statistics(state):
 
     vs.rtavg_s = update(
         vs.rtavg_s,
-        at[2:-2, 2:-2], npx.where(npx.sum(rt_ss, axis=-1) > 0, npx.sum(ages * rt_s, axis=-1), npx.nan)[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(npx.sum(rt_s, axis=-1) > 0, npx.sum(ages * rt_s, axis=-1), npx.nan)[2:-2, 2:-2],
     )
 
     return KernelOutput(tt25_transp=vs.tt25_transp, tt50_transp=vs.tt50_transp, tt75_transp=vs.tt75_transp, ttavg_transp=vs.ttavg_transp,

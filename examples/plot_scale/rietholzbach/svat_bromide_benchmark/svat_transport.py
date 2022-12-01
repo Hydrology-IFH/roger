@@ -163,19 +163,18 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
                 "sas_params_cpr_rz",
                 "sas_params_transp",
                 "sas_params_q_rz",
-                "sas_params_q_ss",
-                "itt"
+                "sas_params_q_ss"
             ],
         )
         def set_parameters_setup(self, state):
             vs = state.variables
             settings = state.settings
 
-            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
-            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
-            vs.S_fc_ss = update(vs.S_fc_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_fc_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
-            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
-            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt])
+            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, 0])
+            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, 0])
+            vs.S_fc_ss = update(vs.S_fc_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_fc_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, 0])
+            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, 0])
+            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, 0])
 
             alpha = npx.linspace(0.1, 1, num=10).tolist()
             params = npx.array(onp.meshgrid(alpha, alpha)).T.reshape(-1, 2)
