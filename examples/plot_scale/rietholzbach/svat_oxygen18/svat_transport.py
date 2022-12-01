@@ -42,40 +42,6 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 var_obj = infile.variables['Time']
                 return len(onp.array(var_obj)) * 60 * 60 * 24
 
-        def _bfill_3d(self, state, arr):
-            idx_shape = tuple([slice(None)] + [npx.newaxis] * (3 - 2 - 1))
-            idx = allocate(state.dimensions, ("x", "y", "t"), dtype=int)
-            arr1 = allocate(state.dimensions, ("x", 1, 1), dtype=int)
-            arr2 = allocate(state.dimensions, (1, "y", 1), dtype=int)
-            arr3 = allocate(state.dimensions, ("x", "y", "t"), dtype=int)
-            arr_fill = allocate(state.dimensions, ("x", "y", "t"))
-            idx = update(
-                idx,
-                at[2:-2, 2:-2, :], npx.where(npx.isfinite(arr), npx.arange(npx.shape(arr)[2])[idx_shape], 0)[2:-2, 2:-2, :],
-            )
-            idx = update(
-                idx,
-                at[2:-2, 2:-2, :], _bfill(idx)[2:-2, 2:-2, :],
-            )
-            arr1 = update(
-                arr1,
-                at[:, 0, 0], npx.arange(npx.shape(arr)[0]),
-            )
-            arr2 = update(
-                arr2,
-                at[0, :, 0], npx.arange(npx.shape(arr)[1]),
-            )
-            arr3 = update(
-                arr3,
-                at[:, :, :], idx,
-            )
-            arr_fill = update(
-                arr_fill,
-                at[:, :, :], arr[arr1, arr2, arr3],
-            )
-
-            return arr_fill
-
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
@@ -521,7 +487,6 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             if settings.enable_oxygen18:
                 vs.C_ISO_IN = update(vs.C_ISO_IN, at[2:-2, 2:-2, 0], npx.nan)
                 vs.C_ISO_IN = update(vs.C_ISO_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("d18O", self._input_dir, 'forcing_tracer.nc'))
-                vs.C_ISO_IN = update(vs.C_ISO_IN, at[2:-2, 2:-2, :], self._bfill_3d(state, vs.C_ISO_IN)[2:-2, 2:-2, :])
                 vs.C_IN = update(vs.C_IN, at[2:-2, 2:-2, :], delta_to_conc(state, vs.C_ISO_IN)[2:-2, 2:-2, :])
 
         @roger_routine
