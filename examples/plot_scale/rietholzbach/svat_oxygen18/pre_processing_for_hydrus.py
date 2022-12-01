@@ -138,7 +138,7 @@ for year in years:
     df_rroot.loc[:, 'rRoot'] = ds_obs_year['PET'].isel(x=0, y=0).values * df_scf_year['scf'].values
     df_rroot.iloc[0, 0] = 0.03
     df_prec = pd.DataFrame(index=date_sim_hm_year, columns=['Prec'])
-    df_prec.loc[:, 'Prec'] = onp.where(ds_sim_hm_year['ta'].isel(x=0, y=0).values > 0, ds_sim_hm_year['prec'].isel(x=0, y=0).values - ds_sim_hm['int_ground'].isel(x=0, y=0).values, 0) + ds_sim_hm_year['q_snow'].isel(x=0, y=0).values
+    df_prec.loc[:, 'Prec'] = onp.where(ds_sim_hm_year['ta'].isel(x=0, y=0).values > 0, ds_sim_hm_year['prec'].isel(x=0, y=0).values - ds_sim_hm_year['int_ground'].isel(x=0, y=0).values, 0) + ds_sim_hm_year['q_snow'].isel(x=0, y=0).values
     df_ttop = pd.DataFrame(index=date_obs_year, columns=['tTop'])
     df_ttop.loc[:, 'tTop'] = ds_obs_year['TA'].isel(x=0, y=0).values
     df_hcrita = pd.DataFrame(index=date_obs_year, columns=['hCritA'])
