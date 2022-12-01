@@ -123,8 +123,18 @@ def plot_benchmarks(infiles, xaxis, norm_component):
             tp = max(tp, last_text_pos + 20)
             _, y = trans.inverted().transform((0, tp))
 
+            if norm_component:
+                speedup = np.round(y, 2)
+                if component == 'numpy':
+                    component_label = component
+                else:
+                    component_label = component + f' ({speedup}x)'
+            else:
+                time_last = np.round(y, 2)
+                component_label = component + f' ({time_last} s)'
+
             plt.annotate(
-                component,
+                component_label,
                 (x, y),
                 xytext=(10, 0),
                 textcoords="offset points",
@@ -145,6 +155,7 @@ def plot_benchmarks(infiles, xaxis, norm_component):
             suffix = "_scaling"
 
         fig.savefig(f"{benchmark.split('_')[0]}_{xaxis}{suffix}.png")
+        fig.savefig(f"{benchmark.split('_')[0]}_{xaxis}{suffix}.pdf")
         plt.close(fig)
 
 
