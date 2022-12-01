@@ -24,3 +24,9 @@ for f in $FILES
 do
   qsub -q gpu $f
 done
+
+FILES="$PWD/oxygen18_deterministic_svat_pfadt_sa_*_*_gpu.sh"
+for f in $FILES
+do
+  qsub -q gpu $f
+done
