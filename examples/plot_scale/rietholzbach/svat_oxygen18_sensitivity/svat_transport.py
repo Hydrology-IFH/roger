@@ -15,7 +15,7 @@ from roger.cli.roger_run_base import roger_base_cli
 def main(transport_model_structure, sas_solver, x1, x2, data_dir, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, at, for_loop
+    from roger.core.operators import numpy as npx, update, at
     from roger.tools.setup import write_forcing_tracer
     from roger.core.transport import delta_to_conc, conc_to_delta
 

@@ -179,10 +179,6 @@ def write_forcing_tracer(input_dir, tracer, nrows=1, ncols=1, uniform=True, floa
         if tracer in ['Nmin', 'Norg', 'NO3']:
             df_tracer = read_tracer_input(input_dir, 'Nmin')
             df_tracer1 = read_tracer_input(input_dir, 'Norg')
-        elif tracer in ['d2H', 'd18O']:
-            df_tracer = read_tracer_input(input_dir, tracer)
-            # replace nan values
-            df_tracer = df_tracer.bfill().ffill()
         else:
             df_tracer = read_tracer_input(input_dir, tracer)
 

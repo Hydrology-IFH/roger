@@ -12,7 +12,7 @@ from roger.cli.roger_run_base import roger_base_cli
 def main(transport_model_structure, sas_solver, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, at, for_loop
+    from roger.core.operators import numpy as npx, update, at
     from roger.tools.setup import write_forcing_tracer
     from roger.core.transport import delta_to_conc, conc_to_delta
 
@@ -582,25 +582,6 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             C_snow=vs.C_snow,
             S_snow=vs.S_snow,
             )
-
-    @roger_kernel
-    def _bfill(loop_arr):
-        def loop_body(i, loop_arr):
-            j = loop_arr.shape[2] - i
-            loop_arr = update(
-                loop_arr,
-                at[:, :, j-1], npx.where(loop_arr[:, :, j-1] == 0, loop_arr[:, :, j], loop_arr[:, :, j-1]),
-            )
-
-            return loop_arr
-
-        loop_arr = for_loop(1, loop_arr.shape[2], loop_body, loop_arr)
-        loop_arr = update(
-            loop_arr,
-            at[:, :, -1], npx.where(loop_arr[:, :, -1] == 0, loop_arr[:, :, -2], loop_arr[:, :, -1]),
-        )
-
-        return loop_arr
 
     model = SVATTRANSPORTSetup()
     write_forcing_tracer(model._input_dir, 'd18O')

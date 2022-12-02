@@ -455,6 +455,16 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
             df_params_metrics.loc[:, 'a1_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten()
             df_params_metrics.loc[:, 'a2_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
             df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
+        elif transport_model_structure == "time-variant preferential + advection-dispersion":
+            df_params_metrics.loc[:, 'a_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
+            df_params_metrics.loc[:, 'b1_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten()
+            df_params_metrics.loc[:, 'b2_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'a_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
+            df_params_metrics.loc[:, 'b1_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten()
+            df_params_metrics.loc[:, 'b2_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'a1_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten()
+            df_params_metrics.loc[:, 'a2_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'b_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=2).values.flatten()
         elif transport_model_structure == "time-variant":
             df_params_metrics.loc[:, 'c_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
             df_params_metrics.loc[:, 'c_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
@@ -657,6 +667,8 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
         df_params = df_params_metrics.loc[:, ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
     elif transport_model_structure == "time-variant advection-dispersion":
         df_params = df_params_metrics.loc[:, ['a_transp', 'b1_transp', 'b2_transp', 'a1_q_rz', 'a2_q_rz', 'b_q_rz', 'a1_q_ss', 'a2_q_ss', 'b_q_ss']]
+    elif transport_model_structure == "time-variant preferential + advection-dispersion":
+        df_params = df_params_metrics.loc[:, ['a_transp', 'b1_transp', 'b2_transp', 'a_q_rz', 'b1_q_rz', 'b2_q_rz', 'a1_q_ss', 'a2_q_ss', 'b_q_ss']]
     elif transport_model_structure == "time-variant-transp":
         df_params = df_params_metrics.loc[:, ['a_transp', 'b1_transp', 'b2_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
     elif transport_model_structure == "time-variant":
