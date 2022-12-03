@@ -6,9 +6,7 @@
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
 
-# load module dependencies\n
-module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
 eval "$(conda shell.bash hook)"
-conda activate roger-mpi
+conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_bromide_benchmark
 python post_processing.py -td /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_bromide_benchmark -tms time-variant_advection-dispersion

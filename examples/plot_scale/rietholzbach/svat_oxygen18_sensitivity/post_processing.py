@@ -315,7 +315,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
     ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
     # load parameters
     params_file = base_path / "params_saltelli.nc"
-    ds_params = xr.open_dataset(params_file, engine="h5netcdf", decode_times=False, group=tms)
+    ds_params = xr.open_dataset(params_file, engine="h5netcdf", decode_times=False, group=transport_model_structure)
 
     # DataFrame with sampled model parameters and the corresponding metrics
     nx = ds_sim_tm.dims['x']  # number of rows
