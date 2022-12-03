@@ -507,7 +507,7 @@ def main(tmp_dir):
     # df_params_metrics10.loc[:, 'id'] = range(len(df_params_metrics10.index))
     # df_params_metrics10 = df_params_metrics10.sort_values(by=[metric_for_opt], ascending=False)
     # df_for_diag10 = df_params_metrics10.loc[:df_params_metrics10.index[9], :]
-    # vars_sim = ['aet', 'q_ss']
+    # vars_sim = ['aet', 'dS', 'q_ss']
     # for var_sim in vars_sim:
     #     fig = de.diag_polar_plot_multi(df_for_diag10.loc[:, f'brel_mean_{var_sim}'].values,
     #                                     df_for_diag10.loc[:, f'temp_cor_{var_sim}'].values,
@@ -527,7 +527,7 @@ def main(tmp_dir):
     #     fig.savefig(path, dpi=250)
 
     # df_for_diag1 = df_params_metrics10.loc[:df_params_metrics10.index[0], :]
-    # vars_sim = ['aet', 'q_ss']
+    # vars_sim = ['aet', 'dS', 'q_ss']
     # for var_sim in vars_sim:
     #     fig = de.diag_polar_plot_multi(df_for_diag1.loc[:, f'brel_mean_{var_sim}'].values,
     #                                     df_for_diag1.loc[:, f'temp_cor_{var_sim}'].values,
@@ -1469,7 +1469,7 @@ def main(tmp_dir):
     # fig.subplots_adjust(bottom=0.1, right=0.85, hspace=0.8)
     # file = base_path_figs / "bromide_benchmark.png"
     # fig.savefig(file, dpi=250)
-    
+
     # travel time benchmark
     # compare backward travel time distributions
     fig, axes = plt.subplots(2, 5, sharey=True, figsize=(6, 3))
@@ -1496,7 +1496,7 @@ def main(tmp_dir):
                 axes[j, i].set_ylim((0, 1))
                 axes[j, i].set_xlabel('T [days]')
                 axes[0, i].set_title(_LABS_TM[tm_structure])
-    
+
     # for j, var_sim in enumerate(['bTT_transp', 'bTT_perc']):
     #     TT = onp.where(ds_hydrus_tt[var_sim].values <= 0, onp.nan, ds_hydrus_tt[var_sim].values)
     #     skipt = 1000
@@ -1516,7 +1516,7 @@ def main(tmp_dir):
     file_str = 'bTTD_benchmark.png'
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=250)
-    
+
     # # plot cumulative backward travel time distributions
     # skipt = 1000
     # TT = ds_hydrus_tt['bTT_perc'].values

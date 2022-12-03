@@ -300,7 +300,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
     tms = tms.replace(" ", "_")
 
     # load hydrologic simulations
-    states_hm_file = base_path / sas_solver / age_max / f"states_hm_best_for_{transport_model_structure}.nc"
+    states_hm_file = Path(__file__).parent / sas_solver / age_max / f"states_hm_saltelli_for_{transport_model_structure}.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
     # assign date
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))

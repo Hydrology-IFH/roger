@@ -329,6 +329,9 @@ python run_benchmarks.py --sizes 1000 --backends numpy --backends numpy-mpi --np
 
 python run_benchmarks.py --sizes 1000. --backends numpy --backends numpy-mpi --nproc 4 --only SVAT_benchmark.py --debug --local
 
+python run_benchmarks.py --sizes 4. --sizes 12. --sizes 100. --sizes 1000. --sizes 10000. --sizes 100000. --backends numpy --backends jax --backends numpy-mpi --backends jax-mpi --nproc 4 --pmem 4000 --only SVAT_benchmark.py --debug --local
+python run_benchmarks.py --sizes 4. --sizes 12. --sizes 100. --sizes 500. --sizes 1000. --backends numpy --backends jax --backends numpy-mpi --backends jax-mpi --nproc 4 --pmem 4000 --only SVATOXYGEN18_benchmark.py --timesteps 20 --debug --local
+
 
 
 python run_benchmarks.py --sizes 100. --sizes 1000. --sizes 10000. --sizes 100000. --backends numpy --backends jax --backends numpy-mpi --backends jax-mpi --backends jax-gpu --nproc 20 --pmem 4000 --only SVATOXYGEN18_benchmark.py --debug
