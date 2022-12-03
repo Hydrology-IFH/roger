@@ -284,35 +284,35 @@ def adaptive_time_stepping_kernel(state):
         vs.ta,
         at[2:-2, 2:-2, vs.tau], npx.where(((cond0_arr[2:-2, 2:-2] == 1) | (cond00_arr[2:-2, 2:-2] == 1)), ta_daily, vs.ta[2:-2, 2:-2, vs.tau]),
     )
-    vs.dt_secs = float(npx.where((cond0 | cond00), 24 * 60 * 60, vs.dt_secs))
-    vs.dt_secs = float(npx.where(cond_time, 24 * 60 * 60, 60 * 60))
+    vs.dt_secs = npx.where((cond0 | cond00), 24 * 60 * 60, vs.dt_secs)
+    vs.dt_secs = npx.where(cond_time, 24 * 60 * 60, 60 * 60)
 
     # rainfall/snow melt event - hourly time steps
     vs.prec = update(
         vs.prec,
-        at[2:-2, 2:-2, vs.tau], npx.where(((cond2_arr[2:-2, 2:-2] == 1) | (cond4_arr[2:-2, 2:-2] == 1) | (cond5_arr[2:-2, 2:-2] == 1)) & ((cond1_arr[2:-2, 2:-2] == 0) & (cond3_arr[2:-2, 2:-2] == 0)), prec_daily, vs.prec[2:-2, 2:-2, vs.tau]),
+        at[2:-2, 2:-2, vs.tau], npx.where(((cond2_arr[2:-2, 2:-2] == 1) | (cond4_arr[2:-2, 2:-2] == 1) | (cond5_arr[2:-2, 2:-2] == 1)) & ((cond1_arr[2:-2, 2:-2] == 0) & (cond3_arr[2:-2, 2:-2] == 0)), prec_hourly, vs.prec[2:-2, 2:-2, vs.tau]),
     )
     vs.ta = update(
         vs.ta,
-        at[2:-2, 2:-2, vs.tau], npx.where(((cond2_arr[2:-2, 2:-2] == 1) | (cond4_arr[2:-2, 2:-2] == 1) | (cond5_arr[2:-2, 2:-2] == 1)) & ((cond1_arr[2:-2, 2:-2] == 0) & (cond3_arr[2:-2, 2:-2] == 0)), ta_daily, vs.ta[2:-2, 2:-2, vs.tau]),
+        at[2:-2, 2:-2, vs.tau], npx.where(((cond2_arr[2:-2, 2:-2] == 1) | (cond4_arr[2:-2, 2:-2] == 1) | (cond5_arr[2:-2, 2:-2] == 1)) & ((cond1_arr[2:-2, 2:-2] == 0) & (cond3_arr[2:-2, 2:-2] == 0)), ta_hourly, vs.ta[2:-2, 2:-2, vs.tau]),
     )
-    vs.dt_secs = float(npx.where((cond2 | cond4 | cond5) & (~cond1 & ~cond3), 60 * 60, vs.dt_secs))
+    vs.dt_secs = npx.where((cond2 | cond4 | cond5) & ~cond1 & ~cond3, 60 * 60, vs.dt_secs)
     # heavy rainfall event - 10 minutes time steps
     vs.prec = update(
         vs.prec,
-        at[2:-2, 2:-2, vs.tau], npx.where(((cond1_arr[2:-2, 2:-2] == 1) | (cond3_arr[2:-2, 2:-2] == 1)) & ((cond2_arr[2:-2, 2:-2] == 0) & (cond4_arr[2:-2, 2:-2] == 0) & (cond5_arr[2:-2, 2:-2] == 0)), prec_daily, vs.prec[2:-2, 2:-2, vs.tau]),
+        at[2:-2, 2:-2, vs.tau], npx.where(((cond1_arr[2:-2, 2:-2] == 1) | (cond3_arr[2:-2, 2:-2] == 1)) & ((cond2_arr[2:-2, 2:-2] == 0) & (cond4_arr[2:-2, 2:-2] == 0) & (cond5_arr[2:-2, 2:-2] == 0)), prec_10mins, vs.prec[2:-2, 2:-2, vs.tau]),
     )
     vs.ta = update(
         vs.ta,
-        at[2:-2, 2:-2, vs.tau], npx.where(((cond1_arr[2:-2, 2:-2] == 1) | (cond3_arr[2:-2, 2:-2] == 1)) & ((cond2_arr[2:-2, 2:-2] == 0) & (cond4_arr[2:-2, 2:-2] == 0) & (cond5_arr[2:-2, 2:-2] == 0)), ta_daily, vs.ta[2:-2, 2:-2, vs.tau]),
+        at[2:-2, 2:-2, vs.tau], npx.where(((cond1_arr[2:-2, 2:-2] == 1) | (cond3_arr[2:-2, 2:-2] == 1)) & ((cond2_arr[2:-2, 2:-2] == 0) & (cond4_arr[2:-2, 2:-2] == 0) & (cond5_arr[2:-2, 2:-2] == 0)), ta_10mins, vs.ta[2:-2, 2:-2, vs.tau]),
     )
-    vs.dt_secs = float(npx.where((cond2 | cond4 | cond5) & (~cond1 & ~cond3), 10 * 60, vs.dt_secs))
+    vs.dt_secs = npx.where((cond1 | cond3) & ~ cond2 & ~cond4 & ~cond5, 10 * 60, vs.dt_secs)
 
     # determine end of event
     cond_event1 = ((vs.prec[2:-2, 2:-2] > 0).any() | ((vs.swe[2:-2, 2:-2, vs.tau] > 0) | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0)).any() & (vs.ta[2:-2, 2:-2] > settings.ta_fm)).any()
     cond_event2 = ((vs.prec[2:-2, 2:-2] <= 0) & (vs.ta[2:-2, 2:-2] > settings.ta_fm)).all() | ((vs.prec[2:-2, 2:-2] > 0) & (vs.ta[2:-2, 2:-2] <= settings.ta_fm)).all() | ((vs.swe[2:-2, 2:-2, vs.taum1] > 0).any() & (vs.swe[2:-2, 2:-2, vs.tau] <= 0).all())
-    vs.time_event0 = float(npx.where(cond_event1, 0, vs.time_event0))
-    vs.time_event0 = float(npx.where(cond_event2, vs.time_event0 + vs.dt_secs, vs.time_event0))
+    vs.time_event0 = npx.where(cond_event1, 0, vs.time_event0)
+    vs.time_event0 = npx.where(cond_event2, vs.time_event0 + vs.dt_secs, vs.time_event0)
 
     # increase time stepping at end of event if either full hour
     # or full day, respectively
@@ -363,10 +363,10 @@ def adaptive_time_stepping_kernel(state):
     )
     vs.event_id = update(
         vs.event_id,
-        at[vs.tau], int(npx.where(cond6, vs.event_id_counter, vs.event_id[vs.tau])),
+        at[vs.tau], npx.where(cond6, vs.event_id_counter, vs.event_id[vs.tau]),
     )
-    vs.dt = float(npx.where(cond6, 1 / 6, vs.dt))
-    vs.itt_day = float(npx.where(cond6, vs.itt_day + 1, vs.itt_day))
+    vs.dt = npx.where(cond6, 1 / 6, vs.dt)
+    vs.itt_day = npx.where(cond6, vs.itt_day + 1, vs.itt_day)
 
     vs.pet = update(
         vs.pet,
@@ -378,10 +378,10 @@ def adaptive_time_stepping_kernel(state):
     )
     vs.event_id = update(
         vs.event_id,
-        at[vs.tau], int(npx.where(cond7, vs.event_id_counter, vs.event_id[vs.tau])),
+        at[vs.tau], npx.where(cond7, vs.event_id_counter, vs.event_id[vs.tau]),
     )
-    vs.dt = float(npx.where(cond7, 1, vs.dt))
-    vs.itt_day = float(npx.where(cond7, vs.itt_day + 6, vs.itt_day))
+    vs.dt = npx.where(cond7, 1, vs.dt)
+    vs.itt_day = npx.where(cond7, vs.itt_day + 6, vs.itt_day)
 
     vs.pet = update(
         vs.pet,
@@ -391,8 +391,8 @@ def adaptive_time_stepping_kernel(state):
         vs.ta,
         at[2:-2, 2:-2, vs.tau], npx.where((cond8_arr[2:-2, 2:-2] == 1), ta_daily, vs.ta[2:-2, 2:-2, vs.tau]),
     )
-    vs.dt = float(npx.where(cond8, 24, vs.dt))
-    vs.itt_day = float(npx.where(cond8, 0, vs.itt_day))
+    vs.dt = npx.where(cond8, 24, vs.dt)
+    vs.itt_day = npx.where(cond8, 0, vs.itt_day)
 
     vs.pet = update(
         vs.pet,
@@ -404,11 +404,11 @@ def adaptive_time_stepping_kernel(state):
     )
     vs.event_id = update(
         vs.event_id,
-        at[vs.tau], int(npx.where(cond9, 0, vs.event_id[vs.tau])),
+        at[vs.tau], npx.where(cond9, 0, vs.event_id[vs.tau]),
     )
-    vs.dt = float(npx.where(cond9, 1 / 6, vs.dt))
-    vs.dt_secs = float(npx.where(cond9, 10 * 60, vs.dt_secs))
-    vs.itt_day = float(npx.where(cond9, vs.itt_day + 1, vs.itt_day))
+    vs.dt = npx.where(cond9, 1 / 6, vs.dt)
+    vs.dt_secs = npx.where(cond9, 10 * 60, vs.dt_secs)
+    vs.itt_day = npx.where(cond9, vs.itt_day + 1, vs.itt_day)
 
     vs.pet = update(
         vs.pet,
@@ -420,11 +420,11 @@ def adaptive_time_stepping_kernel(state):
     )
     vs.event_id = update(
         vs.event_id,
-        at[vs.tau], int(npx.where(cond10, 0, vs.event_id[vs.tau])),
+        at[vs.tau], npx.where(cond10, 0, vs.event_id[vs.tau]),
     )
-    vs.dt = float(npx.where(cond10, 1, vs.dt))
-    vs.dt_secs = float(npx.where(cond9, 60 * 60, vs.dt_secs))
-    vs.itt_day = float(npx.where(cond9, vs.itt_day + 6, vs.itt_day))
+    vs.dt = npx.where(cond10, 1, vs.dt)
+    vs.dt_secs = npx.where(cond10, 60 * 60, vs.dt_secs)
+    vs.itt_day = npx.where(cond10, vs.itt_day + 6, vs.itt_day)
 
     vs.pet = update(
         vs.pet,
@@ -436,14 +436,14 @@ def adaptive_time_stepping_kernel(state):
     )
     vs.event_id = update(
         vs.event_id,
-        at[vs.tau], int(npx.where(cond11, 0, vs.event_id[vs.tau])),
+        at[vs.tau], npx.where(cond11, 0, vs.event_id[vs.tau]),
     )
-    vs.dt = float(npx.where(cond11, 24, vs.dt))
-    vs.dt_secs = float(npx.where(cond11, 24 * 60 * 60, vs.dt_secs))
-    vs.itt_day = float(npx.where(cond11, 0, vs.itt_day))
+    vs.dt = npx.where(cond11, 24, vs.dt)
+    vs.dt_secs = npx.where(cond11, 24 * 60 * 60, vs.dt_secs)
+    vs.itt_day = npx.where(cond11, 0, vs.itt_day)
 
     # set event id for next event
-    vs.event_id_counter = int(npx.where((vs.event_id[vs.taum1] > 0) & (vs.event_id[vs.tau] == 0), vs.event_id_counter + 1, vs.event_id_counter))
+    vs.event_id_counter = npx.where((vs.event_id[vs.taum1] > 0) & (vs.event_id[vs.tau] == 0), vs.event_id_counter + 1, vs.event_id_counter)
 
     # set residual PET
     vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], vs.pet[2:-2, 2:-2])
