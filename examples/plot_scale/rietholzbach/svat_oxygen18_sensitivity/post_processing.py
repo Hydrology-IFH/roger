@@ -51,8 +51,8 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
 
     # merge diagnostics into single file
     diagnostics = ['average',
-                   'constant',
-                   'maximum']
+                    'constant',
+                    'maximum']
     if tms in ['complete-mixing', 'piston']:
         nsamples = 1024 * 10
     elif tms in ['advection-dispersion']:
@@ -112,7 +112,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                     v[:] = onp.arange(0, dict_dim["n_sas_params"])
                     v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
                     v.attrs.update(time_origin=time_origin,
-                                   units=time_unit)
+                                    units=time_unit)
                     v[:] = time
 
                 with h5netcdf.File(diag_file, 'a', decode_vlen_strings=False) as f:
@@ -131,7 +131,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                                     vals = onp.array(var_obj)
                                     v[:, :, x1:x2] = vals
                                     v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                                   units=var_obj.attrs["units"])
+                                                    units=var_obj.attrs["units"])
                                     del var_obj, vals
                                 elif var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
                                     try:
@@ -141,7 +141,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                                     vals = onp.array(var_obj)
                                     v[:, :, x1:x2] = vals
                                     v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                                   units=var_obj.attrs["units"])
+                                                    units=var_obj.attrs["units"])
                                     del var_obj, vals
                                 elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
                                     try:
@@ -151,7 +151,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                                     vals = onp.array(var_obj)
                                     v[:, :, :, x1:x2] = vals
                                     v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                                   units=var_obj.attrs["units"])
+                                                    units=var_obj.attrs["units"])
                                     del var_obj, vals
                                 elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
                                     try:
@@ -161,7 +161,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                                     vals = onp.array(var_obj)
                                     v[:, :, :, x1:x2] = vals
                                     v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                                   units=var_obj.attrs["units"])
+                                                    units=var_obj.attrs["units"])
                                     del var_obj, vals
                                 elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
                                     try:
@@ -171,7 +171,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                                     vals = onp.array(var_obj)
                                     v[:, :, :, x1:x2] = vals
                                     v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                                   units=var_obj.attrs["units"])
+                                                    units=var_obj.attrs["units"])
                                     del var_obj, vals
 
     # merge results into single file
@@ -224,7 +224,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                         v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
                         var_obj = df.variables.get('Time')
                         v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                                       units=var_obj.attrs["units"])
+                                        units=var_obj.attrs["units"])
                         v[:] = time
                     for var_sim in list(df.variables.keys()):
                         var_obj = df.variables.get(var_sim)
@@ -233,14 +233,14 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                             vals = onp.array(var_obj)
                             v[:, :, :] = vals.swapaxes(0, 2)
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
+                                            units=var_obj.attrs["units"])
                             del var_obj, vals
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
                             v = f.create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
                             vals = onp.array(var_obj)
                             v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
+                                            units=var_obj.attrs["units"])
                             del var_obj, vals
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
                             v = f.create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
@@ -249,7 +249,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                             vals = vals.swapaxes(1, 2)
                             v[:, :, :] = vals[:, :, :, 0]
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
+                                            units=var_obj.attrs["units"])
                             del var_obj, vals
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
                             v = f.create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
@@ -259,7 +259,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                             vals = vals.swapaxes(2, 3)
                             v[:, :, :, :] = vals
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
+                                            units=var_obj.attrs["units"])
                             del var_obj, vals
                         elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
                             v = f.create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
@@ -269,7 +269,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                             vals = vals.swapaxes(2, 3)
                             v[:, :, :, :] = vals
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
+                                            units=var_obj.attrs["units"])
                             del var_obj, vals
 
     # load observations (measured data)
@@ -282,7 +282,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
     # average observed soil water content of previous 5 days
     window = 5
     df_thetap = pd.DataFrame(index=date_obs,
-                             columns=['doy', 'theta', 'sc'])
+                              columns=['doy', 'theta', 'sc'])
     df_thetap.loc[:, 'doy'] = df_thetap.index.day_of_year
     df_thetap.loc[:, 'theta'] = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0)
     df_thetap.loc[df_thetap.index[window-1]:, f'theta_avg{window}'] = df_thetap.loc[:, 'theta'].rolling(window=window).mean().iloc[window-1:].values
@@ -315,7 +315,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
     ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
     # load parameters
     params_file = base_path / "params_saltelli.nc"
-    ds_params = xr.open_dataset(params_file, engine="h5netcdf", decode_times=False, group=transport_model_structure)
+    ds_params = xr.open_dataset(params_file, engine="h5netcdf", decode_times=False, group=tms)
 
     # DataFrame with sampled model parameters and the corresponding metrics
     nx = ds_sim_tm.dims['x']  # number of rows
