@@ -461,17 +461,18 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
             df_eval = df_eval.dropna()
 
             # calculate metrics
-            var_sim = 'C_iso_q_ss'
-            obs_vals = df_eval.loc[:, 'obs'].values
-            sim_vals = df_eval.loc[:, 'sim'].values
-            key_kge = f'KGE_{var_sim}{sc1}'
-            df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-            key_kge_alpha = f'KGE_alpha_{var_sim}{sc1}'
-            df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
-            key_kge_beta = f'KGE_beta_{var_sim}{sc1}'
-            df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
-            key_r = f'r_{var_sim}{sc1}'
-            df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+            if len(df_eval.index) > 10:
+                var_sim = 'C_iso_q_ss'
+                obs_vals = df_eval.loc[:, 'obs'].values
+                sim_vals = df_eval.loc[:, 'sim'].values
+                key_kge = f'KGE_{var_sim}{sc1}'
+                df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
+                key_kge_alpha = f'KGE_alpha_{var_sim}{sc1}'
+                df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
+                key_kge_beta = f'KGE_beta_{var_sim}{sc1}'
+                df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
+                key_r = f'r_{var_sim}{sc1}'
+                df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
             # average age metrics
             vars_sim = ['tt25_transp', 'tt50_transp', 'tt75_transp', 'ttavg_transp',
                         'tt25_q_ss', 'tt50_q_ss', 'tt75_q_ss', 'ttavg_q_ss',
