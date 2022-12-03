@@ -51,8 +51,8 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
 
     # merge diagnostics into single file
     diagnostics = ['average',
-                    'constant',
-                    'maximum']
+                   'constant',
+                   'maximum']
     if tms in ['complete-mixing', 'piston']:
         nsamples = 1024 * 10
     elif tms in ['advection-dispersion']:
@@ -63,7 +63,6 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
     if nsamples not in x1x2:
         x1x2.append(nsamples)
     for diagnostic in diagnostics:
-        tms = tms.replace(" ", "_")
         path = str(base_path / sas_solver / age_max / f"SVATTRANSPORT_{transport_model_structure}_{sas_solver}_*_*.{diagnostic}.nc")
         diag_files = glob.glob(path)
         if diag_files:
@@ -297,7 +296,6 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
     df_thetap.loc[cond3, 'sc'] = 3  # wet
 
     click.echo(f'Calculate metrics for {tms} ...')
-    tms = tms.replace(" ", "_")
 
     # load hydrologic simulations
     states_hm_file = Path(__file__).parent / f"states_hm_saltelli_for_{transport_model_structure}.nc"
