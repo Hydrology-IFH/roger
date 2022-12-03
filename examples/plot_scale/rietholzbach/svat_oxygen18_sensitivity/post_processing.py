@@ -56,9 +56,9 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
     if tms in ['complete-mixing', 'piston']:
         nsamples = 1024 * 10
     elif tms in ['advection-dispersion']:
-        nsamples = 1024 * 14
+        nsamples = 1024 * 16
     elif tms in ['time-variant advection-dispersion', 'time-variant preferential + advection-dispersion']:
-        nsamples = 1024 * 17
+        nsamples = 1024 * 19
     x1x2 = onp.arange(0, nsamples, split_size).tolist()
     if nsamples not in x1x2:
         x1x2.append(nsamples)
