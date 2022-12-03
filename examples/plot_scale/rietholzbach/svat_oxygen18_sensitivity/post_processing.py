@@ -54,7 +54,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                    'constant',
                    'maximum']
     if tms in ['complete-mixing', 'piston']:
-        nsamples = 1024 * 8
+        nsamples = 1024 * 10
     elif tms in ['advection-dispersion']:
         nsamples = 1024 * 14
     elif tms in ['time-variant advection-dispersion', 'time-variant preferential + advection-dispersion']:
