@@ -256,12 +256,12 @@ def run(**kwargs):
                                 pmem_serial = 128000
                             cmd = f"qsub -q short -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=1,walltime=0:30:00,pmem={pmem_serial}mb job.sh"
                         elif backend in ['numpy-mpi', 'jax-mpi']:
-                            if nproc <= 24:
+                            if nproc <= 28:
                                 nnodes = 1
                                 ppn = nproc
                             else:
-                                nnodes = int(np.ceil(nproc/24))
-                                ppn = 24
+                                nnodes = int(np.ceil(nproc/28))
+                                ppn = 28
                             cmd = f"qsub -q short -N {f.split('.')[0]}_{backend}_{real_size} -l nodes={nnodes}:ppn={ppn},walltime=0:30:00,pmem={pmem}mb job.sh"
                         elif backend in ['jax-gpu']:
                             cmd = f"qsub -q gpu -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=1:gpus=1:default,walltime=0:30:00,pmem=24000mb job.sh"
