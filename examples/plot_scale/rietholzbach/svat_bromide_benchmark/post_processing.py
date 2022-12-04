@@ -48,7 +48,7 @@ def main(tmp_dir, transport_model_structure, sas_solver):
     states_tm_file = base_path / sas_solver / "states_bromide_benchmark.nc"
     if not os.path.exists(states_tm_file):
         for year in years:
-            path = str(base_path / sas_solver / f'SVATTRANSPORT_{tms}_{year}_{sas_solver}.*.nc')
+            path = str(base_path / sas_solver / f'SVATTRANSPORT_{transport_model_structure}_{year}_{sas_solver}.*.nc')
             diag_files = glob.glob(path)
             with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
                 click.echo(f'Merge output files of {tms}-{year} into {states_tm_file.as_posix()}')
@@ -143,7 +143,7 @@ def main(tmp_dir, transport_model_structure, sas_solver):
     cmap = cm.get_cmap('Reds')
     norm = Normalize(vmin=onp.min(years), vmax=onp.max(years))
     # load hydrologic simulation
-    states_hm_file = base_path / f"states_hm_best_for_{tms}.nc"
+    states_hm_file = base_path / f"states_hm_best_for_{transport_model_structure}.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
     # assign date
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
@@ -248,12 +248,12 @@ def main(tmp_dir, transport_model_structure, sas_solver):
             axes.set_xlim((0, 400))
             axes.legend(fontsize=6, frameon=False, bbox_to_anchor=(1, 1), loc="upper left")
             fig.tight_layout()
-            file = f'bromide_breakthrough_{tms}_alpha_transp_{alpha_transp}_alpha_q_{alpha_q}.png'
+            file = f'bromide_breakthrough_{transport_model_structure}_alpha_transp_{alpha_transp}_alpha_q_{alpha_q}.png'
             path = base_path_figs / file
             fig.savefig(path, dpi=250)
 
             # write evaluation metrics to .csv
-            path_csv = base_path_results / f"bromide_metrics_{tms}_alpha_transp_{alpha_transp}_alpha_q_{alpha_q}.csv"
+            path_csv = base_path_results / f"bromide_metrics_{transport_model_structure}_alpha_transp_{alpha_transp}_alpha_q_{alpha_q}.csv"
             df_metrics_year.to_csv(path_csv, header=True, index=True, sep=";")
 
     return
