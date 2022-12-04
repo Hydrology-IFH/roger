@@ -210,27 +210,22 @@ def main(transport_model_structure, tmp_dir):
         def set_boundary_conditions(self, state):
             pass
 
-        @roger_routine
-        def set_forcing_setup(self, state):
-            pass
-
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "time",
-                "itt_day",
-                "itt_forc",
-                "prec_day",
-                "ta_day",
-                "rs_day",
-                "c1_mak",
-                "c2_mak",
-                "pet_day",
-                "year",
-                "month",
-                "doy",
+                "PREC",
+                "TA",
+                "RS",
             ],
         )
+        def set_forcing_setup(self, state):
+            vs = state.variables
+
+            vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[0, 0, :])
+            vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[0, 0, :])
+            vs.RS = update(vs.RS, at[:], self._read_var_from_nc("RS", self._input_dir, 'forcing.nc')[0, 0, :])
+
+        @roger_routine
         def set_forcing(self, state):
             vs = state.variables
 
@@ -240,9 +235,9 @@ def main(transport_model_structure, tmp_dir):
                 vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, 'forcing.nc')[vs.itt_forc])
                 vs.month = update(vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, 'forcing.nc')[vs.itt_forc])
                 vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, 'forcing.nc')[vs.itt_forc])
-                vs.prec_day = update(vs.prec_day, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
-                vs.ta_day = update(vs.ta_day, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
-                vs.rs_day = update(vs.rs_day, at[2:-2, 2:-2, :], self._read_var_from_nc("RS", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
+                vs.prec_day = update(vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
+                vs.ta_day = update(vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
+                vs.rs_day = update(vs.rs_day, at[:, :, :], vs.RS[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
                 vs.pet_day = update(vs.pet_day, at[2:-2, 2:-2, :], self._calc_pet_with_makkink(npx.mean(vs.rs_day[2:-2, 2:-2, :], axis=-1), npx.mean(vs.ta_day[2:-2, 2:-2, :], axis=-1), 755, c1=vs.c1_mak[2:-2, 2:-2], c2=vs.c2_mak[2:-2, 2:-2])[:, :, npx.newaxis] / (6*24))
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
