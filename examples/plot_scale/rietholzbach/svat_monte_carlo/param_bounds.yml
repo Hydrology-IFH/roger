@@ -1,7 +1,7 @@
 # Makkink coefficient (-)
 c1_mak:
-- 0.5  # lower boundary
-- 0.65  # upper boundary
+- 0.55  # lower boundary
+- 0.63  # upper boundary
 # Makkink coefficient (-)
 c2_mak:
 - -0.2
