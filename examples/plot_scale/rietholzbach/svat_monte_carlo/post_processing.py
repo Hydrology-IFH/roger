@@ -146,14 +146,7 @@ def main(tmp_dir):
         vars_sim = ['aet', 'q_ss', 'dS']
         vars_obs = ['AET', 'PERC', 'dWEIGHT']
         for var_sim, var_obs in zip(vars_sim, vars_obs):
-            if var_sim == 'theta':
-                obs_vals = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0)
-            elif var_sim == 'theta_rz':
-                obs_vals = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values[:5, :], axis=0)
-            elif var_sim == 'theta_ss':
-                obs_vals = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values[5:, :], axis=0)
-            else:
-                obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+            obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
             df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
             df_obs.loc[:, 'obs'] = obs_vals
             for nrow in range(nx * ny):
@@ -167,7 +160,7 @@ def main(tmp_dir):
                         rows = (df_rows['sc'].values == sc)
                         df_eval = df_eval.loc[rows, :]
 
-                    if var_sim in ['dS', 'dS_s']:
+                    if var_sim in ['dS']:
                         df_eval.loc['2000-01':'2000-06', :] = onp.nan
                         df_eval = df_eval.dropna()
                         obs_vals = df_eval.loc[:, 'obs'].values
@@ -255,6 +248,8 @@ def main(tmp_dir):
                         df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
                         key_r = 'r_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+                        key_relsum = 'rel_sum_' + var_sim
+                        df_params_metrics.loc[nrow, key_relsum] = onp.sum(sim_vals) / onp.sum(obs_vals)
                         cond0 = (df_eval['obs'] == 0)
                         if cond0.any():
                             # number of data points

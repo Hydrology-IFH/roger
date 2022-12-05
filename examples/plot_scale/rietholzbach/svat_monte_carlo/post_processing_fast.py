@@ -145,14 +145,7 @@ def main(tmp_dir):
         vars_sim = ['aet', 'q_ss', 'dS']
         vars_obs = ['AET', 'PERC', 'dWEIGHT']
         for var_sim, var_obs in zip(vars_sim, vars_obs):
-            if var_sim == 'theta':
-                obs_vals = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values, axis=0)
-            elif var_sim == 'theta_rz':
-                obs_vals = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values[:5, :], axis=0)
-            elif var_sim == 'theta_ss':
-                obs_vals = onp.mean(ds_obs['THETA'].isel(x=0, y=0).values[5:, :], axis=0)
-            else:
-                obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+            obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
             df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
             df_obs.loc[:, 'obs'] = obs_vals
             for nrow in range(nx * ny):
@@ -160,16 +153,13 @@ def main(tmp_dir):
                 # join observations on simulations
                 df_eval = eval_utils.join_obs_on_sim(date_sim, sim_vals, df_obs)
 
-                if var_sim in ['dS', 'dS_s']:
+                if var_sim in ['dS']:
                     df_eval.loc['2000-01':'2000-06', :] = onp.nan
                     df_eval = df_eval.dropna()
                     obs_vals = df_eval.loc[:, 'obs'].values
                     sim_vals = df_eval.loc[:, 'sim'].values
                     key_kge = 'KGE_' + var_sim
                     df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-                    key_r = 'r_' + var_sim
-                    df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
-
                 else:
                     # skip first seven days for warmup
                     df_eval.loc[:'1997-01-07', :] = onp.nan
@@ -178,12 +168,13 @@ def main(tmp_dir):
                     sim_vals = df_eval.loc[:, 'sim'].values
                     key_kge = 'KGE_' + var_sim
                     df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
+                    key_relsum = 'rel_sum_' + var_sim
+                    df_params_metrics.loc[nrow, key_relsum] = onp.sum(sim_vals) / onp.sum(obs_vals)
 
                 # avoid defragmentation of DataFrame
                 click.echo(f'{var_sim}: {nrow}')
                 df_params_metrics = df_params_metrics.copy()
         # Calculate multi-objective metric
-        df_params_metrics.loc[:, 'E_multi'] = 0.2 * df_params_metrics.loc[:, 'r_dS'] + 0.4 * df_params_metrics.loc[:, 'KGE_aet'] + 0.4 * df_params_metrics.loc[:, 'KGE_q_ss']
         df_params_metrics.loc[:, 'KGE_multi'] = 0.2 * df_params_metrics.loc[:, 'KGE_dS'] + 0.4 * df_params_metrics.loc[:, 'KGE_aet'] + 0.4 * df_params_metrics.loc[:, 'KGE_q_ss']
 
         # write .txt-file
