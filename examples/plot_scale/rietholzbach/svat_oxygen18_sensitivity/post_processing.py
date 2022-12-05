@@ -486,6 +486,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                 df_params_metrics.loc[nrow, f'{var_sim}{sc1}'] = onp.nanmean(df_eval.loc[:, 'sim'].values)
 
         # avoid defragmentation of DataFrame
+        click.echo(f'{nrow}')
         df_params_metrics = df_params_metrics.copy()
 
     # write to .txt

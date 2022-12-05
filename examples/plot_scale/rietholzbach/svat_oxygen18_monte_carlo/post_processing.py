@@ -636,6 +636,7 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
                     df_params_metrics.loc[nrow, key_r] = onp.nan
 
             # avoid defragmentation of DataFrame
+            click.echo(f'{nrow}')
             df_params_metrics = df_params_metrics.copy()
 
         # write to .txt
