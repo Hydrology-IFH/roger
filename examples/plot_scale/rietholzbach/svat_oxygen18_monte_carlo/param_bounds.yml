@@ -165,7 +165,7 @@ power:
   # SAS parameter of percolation from subsoil
   k_q_ss:
   - 1.5
-  - 5
+  - 8
 
 time-variant power:
   # SAS parameter of transpiration
@@ -188,7 +188,7 @@ time-variant power:
   - 2
   c2_q_ss:
   - 0.1
-  - 3
+  - 6
 
 time-variant:
   # SAS parameter of transpiration

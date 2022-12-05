@@ -70,7 +70,7 @@ def power_cdf(x, k):
 
 
 def power_pdf(x, k):
-    return onp.where((x > 0) & (x <= 1/k), k**k * x**(k-1), 0)
+    return k**k * x**(k-1)
 
 
 @click.option("-td", "--tmp-dir", type=str, default=None)
@@ -142,49 +142,55 @@ def main(tmp_dir):
     # date_hydrus_tt = num2date(days_hydrus_tt, units=f"hours since {ds_hydrus_tt['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     # ds_hydrus_tt = ds_hydrus_tt.assign_coords(Time=("Time", date_hydrus_tt))
 
-    # # plot SAS function
-    # fig, axs = plt.subplots(1, 1, figsize=(3, 2))
-    # x = onp.linspace(0, 1, num=1000)
-    # axs.plot(x, kumaraswami_cdf(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
-    # axs.plot(x, kumaraswami_cdf(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
-    # axs.plot(x, kumaraswami_cdf(x, 3, 1), color='#3690c0', lw=1, label='a=3, b=1')
-    # axs.plot(x, kumaraswami_cdf(x, 5, 1), color='#74a9cf', lw=1, label='a=5, b=1')
-    # axs.plot(x, kumaraswami_cdf(x, 5, 1.5), color='#a6bddb', lw=1, label='a=5, b=1.5')
-    # axs.set_xlim((0, 1))
-    # axs.set_ylim((0, 1))
-    # axs.set_xlabel('$P_S$ [-]')
-    # axs.set_ylabel('$P_Q$ [-]')
-    # axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1.05))
-    # fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
-    # file = base_path_figs / 'kumaraswami_cdf.png'
-    # fig.savefig(file, dpi=250)
-    # plt.close(fig=fig)
+    # plot SAS function
+    fig, axs = plt.subplots(1, 1, figsize=(3, 2))
+    x = onp.linspace(0, 1, num=1000)
+    axs.plot(x, kumaraswami_cdf(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
+    axs.plot(x, kumaraswami_cdf(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
+    axs.plot(x, kumaraswami_cdf(x, 1, 10), color='#3690c0', lw=1, label='a=1, b=10')
+    axs.plot(x, kumaraswami_cdf(x, 3, 1), color='#74a9cf', lw=1, label='a=3, b=1')
+    axs.plot(x, kumaraswami_cdf(x, 5, 1), color='#a6bddb', lw=1, label='a=5, b=1')
+    axs.plot(x, kumaraswami_cdf(x, 5, 1.5), color='#d0d1e6', lw=1, label='a=5, b=1.5')
+    axs.set_xlim((0, 1))
+    axs.set_ylim((0, 1))
+    axs.set_xlabel('$P_S$ [-]')
+    axs.set_ylabel('$P_Q$ [-]')
+    axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1.05))
+    fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
+    file = base_path_figs / 'kumaraswami_cdf.png'
+    fig.savefig(file, dpi=250)
+    file = base_path_figs / 'kumaraswami_cdf.pdf'
+    fig.savefig(file, dpi=250)
+    plt.close(fig=fig)
 
-    # fig, axs = plt.subplots(1, 1, figsize=(3, 2))
-    # x = onp.linspace(0, 1, num=1000)
-    # axs.plot(x, kumaraswami_pdf(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
-    # axs.plot(x, kumaraswami_pdf(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
-    # axs.plot(x, kumaraswami_pdf(x, 3, 1), color='#3690c0', lw=1, label='a=3, b=1')
-    # axs.plot(x, kumaraswami_pdf(x, 5, 1), color='#74a9cf', lw=1, label='a=5, b=1')
-    # axs.plot(x, kumaraswami_pdf(x, 5, 1.5), color='#a6bddb', lw=1, label='a=5, b=1.5')
-    # axs.set_xlim((0, 1))
-    # axs.set_ylim(0,)
-    # axs.set_xlabel('$P_S$ [-]')
-    # axs.set_ylabel('$pdf_Q$ [-]')
-    # axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1.05))
-    # fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
-    # file = base_path_figs / 'kumaraswami_pdf.png'
-    # fig.savefig(file, dpi=250)
-    # plt.close(fig=fig)
+    fig, axs = plt.subplots(1, 1, figsize=(3, 2))
+    x = onp.linspace(0, 1, num=1000)
+    axs.plot(x, kumaraswami_pdf(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
+    axs.plot(x, kumaraswami_pdf(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
+    axs.plot(x, kumaraswami_pdf(x, 1, 10), color='#3690c0', lw=1, label='a=1, b=10')
+    axs.plot(x, kumaraswami_pdf(x, 3, 1), color='#74a9cf', lw=1, label='a=3, b=1')
+    axs.plot(x, kumaraswami_pdf(x, 5, 1), color='#a6bddb', lw=1, label='a=5, b=1')
+    axs.plot(x, kumaraswami_pdf(x, 5, 1.5), color='#d0d1e6', lw=1, label='a=5, b=1.5')
+    axs.set_xlim((0, 1))
+    axs.set_ylim(0,)
+    axs.set_xlabel('$P_S$ [-]')
+    axs.set_ylabel('$pdf_Q$ [-]')
+    axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1.05))
+    fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
+    file = base_path_figs / 'kumaraswami_pdf.png'
+    fig.savefig(file, dpi=250)
+    file = base_path_figs / 'kumaraswami_pdf.pdf'
+    fig.savefig(file, dpi=250)
+    plt.close(fig=fig)
 
     fig, axs = plt.subplots(1, 1, figsize=(3, 2))
     x = onp.linspace(0, 1, num=1000)
     axs.plot(x, power_cdf(x, 0.3), color='#034e7b', lw=1, label='k=0.3')
     axs.plot(x, power_cdf(x, 0.5), color='#0570b0', lw=1, label='k=0.5')
     axs.plot(x, power_cdf(x, 0.7), color='#3690c0', lw=1, label='k=0.7')
-    axs.plot(x, power_cdf(x, 2), color='#74a9cf', lw=1, label='k=2')
-    axs.plot(x, power_cdf(x, 3), color='#a6bddb', lw=1, label='k=3')
-    axs.plot(x, power_cdf(x, 4), color='#d0d1e6', lw=1, label='k=4')
+    axs.plot(x, power_cdf(x, 1.5), color='#74a9cf', lw=1, label='k=1.5')
+    axs.plot(x, power_cdf(x, 2), color='#a6bddb', lw=1, label='k=2')
+    axs.plot(x, power_cdf(x, 3), color='#d0d1e6', lw=1, label='k=3')
     axs.set_xlim((0, 1))
     axs.set_ylim((0, 1))
     axs.set_xlabel('$P_S$ [-]')
@@ -193,6 +199,8 @@ def main(tmp_dir):
     fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
     file = base_path_figs / 'power_cdf.png'
     fig.savefig(file, dpi=250)
+    file = base_path_figs / 'power_cdf.pdf'
+    fig.savefig(file, dpi=250)
     plt.close(fig=fig)
 
     fig, axs = plt.subplots(1, 1, figsize=(3, 2))
@@ -200,9 +208,9 @@ def main(tmp_dir):
     axs.plot(x, power_pdf(x, 0.3), color='#034e7b', lw=1, label='k=0.3')
     axs.plot(x, power_pdf(x, 0.5), color='#0570b0', lw=1, label='k=0.5')
     axs.plot(x, power_pdf(x, 0.7), color='#3690c0', lw=1, label='k=0.7')
-    axs.plot(x, power_pdf(x, 2), color='#74a9cf', lw=1, label='k=2')
-    axs.plot(x, power_pdf(x, 3), color='#a6bddb', lw=1, label='k=3')
-    axs.plot(x, power_pdf(x, 4), color='#d0d1e6', lw=1, label='k=4')
+    axs.plot(x, power_pdf(x, 1.5), color='#74a9cf', lw=1, label='k=1.5')
+    axs.plot(x, power_pdf(x, 2), color='#a6bddb', lw=1, label='k=3')
+    axs.plot(x, power_pdf(x, 3), color='#d0d1e6', lw=1, label='k=3')
     axs.set_xlim((0, 1))
     axs.set_ylim(0,)
     axs.set_xlabel('$P_S$ [-]')
@@ -210,6 +218,8 @@ def main(tmp_dir):
     axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.4, 1.05))
     fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
     file = base_path_figs / 'power_pdf.png'
+    fig.savefig(file, dpi=250)
+    file = base_path_figs / 'power_pdf.pdf'
     fig.savefig(file, dpi=250)
     plt.close(fig=fig)
 

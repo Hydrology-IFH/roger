@@ -21,7 +21,7 @@ sns.set_style("ticks")
 
 @click.option("-ns", "--nsamples", type=int, default=10000)
 @click.option("-ss", "--split-size", type=int, default=1000)
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'time-variant', 'power', 'time-variant-transp', 'older-preference', 'preferential_+_advection-dispersion']), default='advection-dispersion')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'time-variant', 'power', 'time-variant-transp', 'older-preference', 'preferential_+_advection-dispersion']), default='complete-mixing')
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
@@ -329,7 +329,7 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
                             del var_obj, vals
 
     # load hydrologic simulation
-    if tms in ["complete_mixing", "piston"]:
+    if tms in ['complete-mixing', 'piston']:
         states_hm_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm10.nc"
     else:
         states_hm_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
