@@ -168,8 +168,10 @@ def main(tmp_dir):
                     sim_vals = df_eval.loc[:, 'sim'].values
                     key_kge = 'KGE_' + var_sim
                     df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-                    key_relsum = 'rel_sum_' + var_sim
-                    df_params_metrics.loc[nrow, key_relsum] = onp.sum(sim_vals) / onp.sum(obs_vals)
+                    key_kge = 'KGE_beta' + var_sim
+                    df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
+                    key_rbs = 'RBS_' + var_sim
+                    df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals, sim_vals)
 
                 # avoid defragmentation of DataFrame
                 click.echo(f'{var_sim}: {nrow}')
