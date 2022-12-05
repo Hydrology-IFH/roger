@@ -174,7 +174,7 @@ def main(tmp_dir):
     axs.set_xlim((0, 1))
     axs.set_ylim(0,)
     axs.set_xlabel('$P_S$ [-]')
-    axs.set_ylabel('$pdf_Q$ [-]')
+    axs.set_ylabel(r'$\omega_Q$ [-]')
     axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1.05))
     fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
     file = base_path_figs / 'kumaraswami_pdf.png'
@@ -214,7 +214,7 @@ def main(tmp_dir):
     axs.set_xlim((0, 1))
     axs.set_ylim(0,)
     axs.set_xlabel('$P_S$ [-]')
-    axs.set_ylabel('$pdf_Q$ [-]')
+    axs.set_ylabel(r'$\omega_Q$ [-]')
     axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.4, 1.05))
     fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
     file = base_path_figs / 'power_pdf.png'
