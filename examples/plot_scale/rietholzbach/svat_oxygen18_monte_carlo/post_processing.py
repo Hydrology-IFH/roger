@@ -228,56 +228,6 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
                             v[:, :] = vals_rep
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
-    else:
-        states_hm1_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm1.nc"
-        states_hm_mc_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
-        n_repeat = split_size
-        if not os.path.exists(states_hm_mc_file):
-            click.echo('Repeat hydrologic simualtions ...')
-            with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
-                f.attrs.update(
-                  date_created=datetime.datetime.today().isoformat(),
-                  title='RoGeR best 100 monte carlo simulations (bootstrapped) at Rietholzbach lysimeter site',
-                  institution='University of Freiburg, Chair of Hydrology',
-                  references='',
-                  comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
-                  model_structure='SVAT model with free drainage',
-                  roger_version=f'{roger.__version__}'
-                )
-                with h5netcdf.File(states_hm1_file, 'r', decode_vlen_strings=False) as df:
-                    # set dimensions with a dictionary
-                    dict_dim = {'x': n_repeat, 'y': 1, 'Time': len(df.variables['Time'])}
-                    if not f.dimensions:
-                        f.dimensions = dict_dim
-                        v = f.create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
-                        v.attrs['long_name'] = 'Number of model run'
-                        v.attrs['units'] = ''
-                        v[:] = onp.arange(dict_dim["x"])
-                        v = f.create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
-                        v.attrs['long_name'] = ''
-                        v.attrs['units'] = ''
-                        v[:] = onp.arange(dict_dim["y"])
-                        v = f.create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
-                        var_obj = df.variables.get('Time')
-                        v.attrs.update(time_origin=var_obj.attrs["time_origin"],
-                                       units=var_obj.attrs["units"])
-                        v[:] = onp.array(var_obj)
-                    for var_sim in list(df.variables.keys()):
-                        var_obj = df.variables.get(var_sim)
-                        if var_sim not in list(f.dimensions.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
-                            vals = onp.array(var_obj)
-                            vals_rep = onp.repeat(vals, n_repeat, axis=0)
-                            v[:, :, :] = vals_rep
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
-                        elif var_sim not in list(f.dimensions.keys()) and ('x', 'y') == var_obj.dimensions:
-                            v = f.create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
-                            vals = onp.array(var_obj)
-                            vals_rep = onp.repeat(vals, n_repeat, axis=0)
-                            v[:, :] = vals_rep
-                            v.attrs.update(long_name=var_obj.attrs["long_name"],
-                                           units=var_obj.attrs["units"])
 
     # merge results into single file
     path = str(base_path / sas_solver / age_max / metric_for_optimization / f"SVATTRANSPORT_{transport_model_structure}_{sas_solver}.*.nc")
@@ -379,7 +329,10 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
                             del var_obj, vals
 
     # load hydrologic simulation
-    states_hm_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
+    if tms in ["complete_mixing", "piston"]:
+        states_hm_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm10.nc"
+    else:
+        states_hm_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
     days_sim_hm = (ds_sim_hm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     date_sim_hm = num2date(days_sim_hm, units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
