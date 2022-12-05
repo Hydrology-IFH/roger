@@ -65,6 +65,14 @@ def kumaraswami_pdf(x, a, b):
     return a * b * x**(a-1)*(1-x**a)**(b-1)
 
 
+def power_cdf(x, k):
+    return x**k
+
+
+def power_pdf(x, k):
+    return onp.where((x > 0) & (x <= 1/k), k**k * x**(k-1), 0)
+
+
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir):
@@ -387,118 +395,118 @@ def main(tmp_dir):
     # fig.savefig(file, dpi=250)
     # plt.close(fig=fig)
 
-    # # dotty plots
-    # file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
-    # df_params_metrics = pd.read_csv(file, sep="\t")
-    # df_params_metrics10 = df_params_metrics.copy()
-    # df_params_metrics10.loc[:, 'id'] = range(len(df_params_metrics10.index))
-    # df_params_metrics10 = df_params_metrics10.sort_values(by=[metric_for_opt], ascending=False)
-    # idx_best100 = df_params_metrics10.loc[:df_params_metrics10.index[9], 'id'].values.tolist()
-    # dict_metrics_best = {}
-    # for sc in ['', 'dry', 'normal', 'wet']:
-    #     dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best100)))
-    # for sc, sc1 in enumerate(['', 'dry', 'normal', 'wet']):
-    #     df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'KGE_dS{sc1}', f'KGE_q_ss{sc1}', f'KGE_multi{sc1}']]
-    #     df_params = df_params_metrics.loc[:, ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
-    #     nrow = len(df_metrics.columns)
-    #     ncol = len(df_params.columns)
-    #     fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
-    #     for i, metric_var in enumerate(df_metrics.columns):
-    #         for j, param_var in enumerate(df_params.columns):
-    #             y = df_metrics.iloc[:, i]
-    #             x = df_params.iloc[:, j]
-    #             ax[i, j].scatter(x, y, s=0.5, c='grey', alpha=0.5)
-    #             ax[i, j].set_xlabel('')
-    #             ax[i, j].set_ylabel('')
-    #             ax[i, j].set_ylim((0, 1))
-    #             # best parameter set for individual evaluation metric at specific storage conditions
-    #             df_params_metrics_sc1 = df_params_metrics.copy()
-    #             df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics10.index))
-    #             df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
-    #             idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[9], 'id'].values.tolist()
-    #             for idx_best_sc in idx_best_sc1:
-    #                 y_best_sc = df_metrics.iloc[idx_best_sc, i]
-    #                 x_best_sc = df_params.iloc[idx_best_sc, j]
-    #                 ax[i, j].scatter(x_best_sc, y_best_sc, s=0.5, c='blue', alpha=0.8)
-    #             # best parameter sets for multi-objective criteria
-    #             for ii, idx_best in enumerate(idx_best100):
-    #                 y_best = df_metrics.iloc[idx_best, i]
-    #                 x_best = df_params.iloc[idx_best, j]
-    #                 ax[i, j].scatter(x_best, y_best, s=0.5, c='red', alpha=1)
-    #                 dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
+    # dotty plots
+    file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
+    df_params_metrics = pd.read_csv(file, sep="\t")
+    df_params_metrics10 = df_params_metrics.copy()
+    df_params_metrics10.loc[:, 'id'] = range(len(df_params_metrics10.index))
+    df_params_metrics10 = df_params_metrics10.sort_values(by=[metric_for_opt], ascending=False)
+    idx_best100 = df_params_metrics10.loc[:df_params_metrics10.index[9], 'id'].values.tolist()
+    dict_metrics_best = {}
+    for sc in ['', 'dry', 'normal', 'wet']:
+        dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best100)))
+    for sc, sc1 in enumerate(['', 'dry', 'normal', 'wet']):
+        df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'KGE_dS{sc1}', f'KGE_q_ss{sc1}', f'KGE_multi{sc1}']]
+        df_params = df_params_metrics.loc[:, ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+        nrow = len(df_metrics.columns)
+        ncol = len(df_params.columns)
+        fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
+        for i, metric_var in enumerate(df_metrics.columns):
+            for j, param_var in enumerate(df_params.columns):
+                y = df_metrics.iloc[:, i]
+                x = df_params.iloc[:, j]
+                ax[i, j].scatter(x, y, s=0.5, c='grey', alpha=0.5)
+                ax[i, j].set_xlabel('')
+                ax[i, j].set_ylabel('')
+                ax[i, j].set_ylim((0, 1))
+                # best parameter set for individual evaluation metric at specific storage conditions
+                df_params_metrics_sc1 = df_params_metrics.copy()
+                df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics10.index))
+                df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
+                idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[9], 'id'].values.tolist()
+                for idx_best_sc in idx_best_sc1:
+                    y_best_sc = df_metrics.iloc[idx_best_sc, i]
+                    x_best_sc = df_params.iloc[idx_best_sc, j]
+                    ax[i, j].scatter(x_best_sc, y_best_sc, s=0.5, c='blue', alpha=0.8)
+                # best parameter sets for multi-objective criteria
+                for ii, idx_best in enumerate(idx_best100):
+                    y_best = df_metrics.iloc[idx_best, i]
+                    x_best = df_params.iloc[idx_best, j]
+                    ax[i, j].scatter(x_best, y_best, s=0.5, c='red', alpha=1)
+                    dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
 
-    #     for j, param_var in enumerate(df_params.columns):
-    #         xlabel = labs._LABS[param_var]
-    #         ax[-1, j].set_xlabel(xlabel)
+        for j, param_var in enumerate(df_params.columns):
+            xlabel = labs._LABS[param_var]
+            ax[-1, j].set_xlabel(xlabel)
 
-    #     ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
-    #     ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
-    #     ax[2, 0].set_ylabel('$KGE_{PERC}$\n [-]')
-    #     ax[3, 0].set_ylabel('$KGE_{multi}$\n [-]')
+        ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
+        ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
+        ax[2, 0].set_ylabel('$KGE_{PERC}$\n [-]')
+        ax[3, 0].set_ylabel('$KGE_{multi}$\n [-]')
 
-    #     fig.subplots_adjust(bottom=0.2, wspace=0.2, hspace=0.6)
-    #     file = base_path_figs / f"dotty_plots_{sc1}_optimized_with_{metric_for_opt}.png"
-    #     fig.savefig(file, dpi=250)
+        fig.subplots_adjust(bottom=0.2, wspace=0.2, hspace=0.6)
+        file = base_path_figs / f"dotty_plots_{sc1}_optimized_with_{metric_for_opt}.png"
+        fig.savefig(file, dpi=250)
 
-    #     fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
-    #     for i, metric_var in enumerate(df_metrics.columns):
-    #         for j, param_var in enumerate(df_params.columns):
-    #             y = df_metrics.iloc[:, i]
-    #             x = df_params.iloc[:, j]
-    #             ax[i, j].scatter(x, y, s=1, c='grey', alpha=0.5)
-    #             ax[i, j].set_xlabel('')
-    #             ax[i, j].set_ylabel('')
-    #             if metric_var in ['KGE_aet', 'KGE_aetwet', 'KGE_aetnormal', 'KGE_aetdry']:
-    #                 ax[i, j].set_ylim((0.6, 1.0))
-    #             elif metric_var in ['KGE_dS', 'KGE_dSwet', 'KGE_dSnormal', 'KGE_dSdry']:
-    #                 ax[i, j].set_ylim((0.6, 1.0))
-    #             elif metric_var in ['KGE_q_ss', 'KGE_q_sswet', 'KGE_q_ssnormal', 'KGE_q_ssdry']:
-    #                 ax[i, j].set_ylim((0.4, 0.8))
-    #             elif metric_var in ['KGE_multi', 'KGE_multiwet', 'KGE_multinormal', 'KGE_multidry']:
-    #                 ax[i, j].set_ylim((0.4, 0.8))
-    #             # best parameter set for individual evaluation metric at specific storage conditions
-    #             df_params_metrics_sc1 = df_params_metrics.copy()
-    #             df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics10.index))
-    #             df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
-    #             idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[9], 'id'].values.tolist()
-    #             for idx_best_sc in idx_best_sc1:
-    #                 y_best_sc = df_metrics.iloc[idx_best_sc, i]
-    #                 x_best_sc = df_params.iloc[idx_best_sc, j]
-    #                 ax[i, j].scatter(x_best_sc, y_best_sc, s=0.5, c='blue', alpha=0.8)
-    #             # best parameter sets for multi-objective criteria
-    #             for ii, idx_best in enumerate(idx_best100):
-    #                 y_best = df_metrics.iloc[idx_best, i]
-    #                 x_best = df_params.iloc[idx_best, j]
-    #                 ax[i, j].scatter(x_best, y_best, s=0.5, c='red', alpha=1)
-    #                 dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
+        fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
+        for i, metric_var in enumerate(df_metrics.columns):
+            for j, param_var in enumerate(df_params.columns):
+                y = df_metrics.iloc[:, i]
+                x = df_params.iloc[:, j]
+                ax[i, j].scatter(x, y, s=1, c='grey', alpha=0.5)
+                ax[i, j].set_xlabel('')
+                ax[i, j].set_ylabel('')
+                if metric_var in ['KGE_aet', 'KGE_aetwet', 'KGE_aetnormal', 'KGE_aetdry']:
+                    ax[i, j].set_ylim((0.6, 1.0))
+                elif metric_var in ['KGE_dS', 'KGE_dSwet', 'KGE_dSnormal', 'KGE_dSdry']:
+                    ax[i, j].set_ylim((0.6, 1.0))
+                elif metric_var in ['KGE_q_ss', 'KGE_q_sswet', 'KGE_q_ssnormal', 'KGE_q_ssdry']:
+                    ax[i, j].set_ylim((0.4, 0.8))
+                elif metric_var in ['KGE_multi', 'KGE_multiwet', 'KGE_multinormal', 'KGE_multidry']:
+                    ax[i, j].set_ylim((0.4, 0.8))
+                # best parameter set for individual evaluation metric at specific storage conditions
+                df_params_metrics_sc1 = df_params_metrics.copy()
+                df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics10.index))
+                df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
+                idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[9], 'id'].values.tolist()
+                for idx_best_sc in idx_best_sc1:
+                    y_best_sc = df_metrics.iloc[idx_best_sc, i]
+                    x_best_sc = df_params.iloc[idx_best_sc, j]
+                    ax[i, j].scatter(x_best_sc, y_best_sc, s=0.5, c='blue', alpha=0.8)
+                # best parameter sets for multi-objective criteria
+                for ii, idx_best in enumerate(idx_best100):
+                    y_best = df_metrics.iloc[idx_best, i]
+                    x_best = df_params.iloc[idx_best, j]
+                    ax[i, j].scatter(x_best, y_best, s=0.5, c='red', alpha=1)
+                    dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
 
-    #     for j, param_var in enumerate(df_params.columns):
-    #         xlabel = labs._LABS[param_var]
-    #         ax[-1, j].set_xlabel(xlabel)
+        for j, param_var in enumerate(df_params.columns):
+            xlabel = labs._LABS[param_var]
+            ax[-1, j].set_xlabel(xlabel)
 
-    #     ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
-    #     ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
-    #     ax[2, 0].set_ylabel('$KGE_{PERC}$\n [-]')
-    #     ax[3, 0].set_ylabel('$KGE_{multi}$\n [-]')
+        ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
+        ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
+        ax[2, 0].set_ylabel('$KGE_{PERC}$\n [-]')
+        ax[3, 0].set_ylabel('$KGE_{multi}$\n [-]')
 
-    #     fig.subplots_adjust(bottom=0.2, wspace=0.2, hspace=0.6)
-    #     file = base_path_figs / f"dotty_plots_{sc1}inset_optimized_with_{metric_for_opt}.png"
-    #     fig.savefig(file, dpi=250)
+        fig.subplots_adjust(bottom=0.2, wspace=0.2, hspace=0.6)
+        file = base_path_figs / f"dotty_plots_{sc1}inset_optimized_with_{metric_for_opt}.png"
+        fig.savefig(file, dpi=250)
 
-    # # write evaluation metrics for different storage condtions to .txt
-    # df_avg_std = pd.DataFrame(columns=['KGE_aet', 'KGE_dS', 'KGE_q_ss', 'KGE_multi'])
-    # for sc in ['', 'dry', 'normal', 'wet']:
-    #     df_avg_std.loc[f'avg{sc}', :] = onp.mean(dict_metrics_best[sc].values, axis=0)
-    #     df_avg_std.loc[f'std{sc}', :] = onp.std(dict_metrics_best[sc].values, axis=0)
-    # file = base_path_figs / f"metrics_best_10_avg_std_optimized_with_{metric_for_opt}.txt"
-    # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
+    # write evaluation metrics for different storage condtions to .txt
+    df_avg_std = pd.DataFrame(columns=['KGE_aet', 'KGE_dS', 'KGE_q_ss', 'KGE_multi'])
+    for sc in ['', 'dry', 'normal', 'wet']:
+        df_avg_std.loc[f'avg{sc}', :] = onp.mean(dict_metrics_best[sc].values, axis=0)
+        df_avg_std.loc[f'std{sc}', :] = onp.std(dict_metrics_best[sc].values, axis=0)
+    file = base_path_figs / f"metrics_best_10_avg_std_optimized_with_{metric_for_opt}.txt"
+    df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
-    # # write average and standard deviation of best parameters to .txt
-    # df_avg_std = pd.DataFrame(index=['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
-    # df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics10.loc[:df_params_metrics10.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
-    # df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics10.loc[:df_params_metrics10.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
-    # file = base_path_figs / f"params_best_10_avg_std_optimized_with_{metric_for_opt}.txt"
-    # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
+    # write average and standard deviation of best parameters to .txt
+    df_avg_std = pd.DataFrame(index=['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
+    df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics10.loc[:df_params_metrics10.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
+    df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics10.loc[:df_params_metrics10.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
+    file = base_path_figs / f"params_best_10_avg_std_optimized_with_{metric_for_opt}.txt"
+    df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
     # # diagnostic polar plots
     # file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
@@ -1373,60 +1381,60 @@ def main(tmp_dir):
     # file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_trace_optimized_with_{metric_for_opt}_extra.png"
     # fig.savefig(file, dpi=250)
 
-    # compare duration curve of 18O in percolation
-    fig, ax = plt.subplots(1, 4, sharey=True, figsize=(6, 1.2))
-    for i, tm_structure in enumerate(tm_structures):
-        idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
-        tms = tm_structure.replace(" ", "_")
-        # load transport simulation
-        states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm10" / f"states_{tms}_monte_carlo.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-        days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-        date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-        ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
-        # join observations on simulations
-        obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-        df_obs.loc[:, 'obs'] = obs_vals
-        df_sim = pd.DataFrame(index=ds_sim_tm['Time'].values)
-        df_sim.loc[:, 'sim0'] = ds_sim_tm['d18O_perc_bs'].isel(x=idx_best, y=0).values
-        # df_sim.loc[df_sim.index[1]:, 'sim1'] = ds_hydrus_18O['d18O_perc_bs'].values
-        df_sim = df_sim.iloc[1:, :]
-        df_eval = eval_utils.join_obs_on_sim(ds_sim_tm['Time'].values[1:], df_sim.values, df_obs)
-        df_eval = df_eval.dropna()
-        obs = df_eval.sort_values(by=["obs"], ascending=True)
-        sim0 = df_eval.sort_values(by=["sim0"], ascending=True)
-        # sim1 = df_eval.sort_values(by=["sim1"], ascending=True)
-
-        # calculate exceedence probability
-        ranks_obs = sp.stats.rankdata(obs["obs"], method="ordinal")
-        ranks_obs = ranks_obs[::-1]
-        prob_obs = [(ranks_obs[i] / (len(obs["obs"]) + 1)) for i in range(len(obs["obs"]))]
-
-        ranks_sim0 = sp.stats.rankdata(sim0["sim0"], method="ordinal")
-        ranks_sim0 = ranks_sim0[::-1]
-        prob_sim0 = [(ranks_sim0[i] / (len(sim0["sim0"]) + 1)) for i in range(len(sim0["sim0"]))]
-
-        # ranks_sim1 = sp.stats.rankdata(sim1["sim1"], method="ordinal")
-        # ranks_sim1 = ranks_sim1[::-1]
-        # prob_sim1 = [(ranks_sim1[i] / (len(sim1["sim1"]) + 1)) for i in range(len(sim1["sim1"]))]
-
-        ax.flatten()[i].plot(prob_obs, obs["obs"], color="blue", lw=1)
-        ax.flatten()[i].plot(prob_sim0, sim0["sim0"], color="red", lw=1, ls="-.", alpha=0.8)
-        # ax.flatten()[i].plot(prob_sim1, sim1["sim1"], color="grey", lw=1, ls="-.", alpha=0.8)
-        ax.flatten()[i].set_xlim(0, 1)
-        ax.flatten()[i].tick_params(axis='x', labelsize=6)
-        ax.flatten()[i].tick_params(axis='y', labelsize=6)
-        ax.flatten()[i].set_title(_LABS_TM[tm_structure], fontsize=8)
-
-    ax[0].set_ylabel(r'$\delta^{18}$$O_{PERC}$ [‰]', fontsize=6)
-    ax[0].set_xlabel('Exceedence probabilty [-]', fontsize=6)
-    ax[1].set_xlabel('Exceedence probabilty [-]', fontsize=6)
-    ax[2].set_xlabel('Exceedence probabilty [-]', fontsize=6)
-    ax[3].set_xlabel('Exceedence probabilty [-]', fontsize=6)
-    fig.tight_layout()
-    file = base_path_figs / f"fdc_d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"
-    fig.savefig(file, dpi=250)
+    # # compare duration curve of 18O in percolation
+    # fig, ax = plt.subplots(1, 4, sharey=True, figsize=(6, 1.2))
+    # for i, tm_structure in enumerate(tm_structures):
+    #     idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
+    #     tms = tm_structure.replace(" ", "_")
+    #     # load transport simulation
+    #     states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm10" / f"states_{tms}_monte_carlo.nc"
+    #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    #     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    #     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    #     ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+    #     # join observations on simulations
+    #     obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+    #     df_obs.loc[:, 'obs'] = obs_vals
+    #     df_sim = pd.DataFrame(index=ds_sim_tm['Time'].values)
+    #     df_sim.loc[:, 'sim0'] = ds_sim_tm['d18O_perc_bs'].isel(x=idx_best, y=0).values
+    #     # df_sim.loc[df_sim.index[1]:, 'sim1'] = ds_hydrus_18O['d18O_perc_bs'].values
+    #     df_sim = df_sim.iloc[1:, :]
+    #     df_eval = eval_utils.join_obs_on_sim(ds_sim_tm['Time'].values[1:], df_sim.values, df_obs)
+    #     df_eval = df_eval.dropna()
+    #     obs = df_eval.sort_values(by=["obs"], ascending=True)
+    #     sim0 = df_eval.sort_values(by=["sim0"], ascending=True)
+    #     # sim1 = df_eval.sort_values(by=["sim1"], ascending=True)
+    #
+    #     # calculate exceedence probability
+    #     ranks_obs = sp.stats.rankdata(obs["obs"], method="ordinal")
+    #     ranks_obs = ranks_obs[::-1]
+    #     prob_obs = [(ranks_obs[i] / (len(obs["obs"]) + 1)) for i in range(len(obs["obs"]))]
+    #
+    #     ranks_sim0 = sp.stats.rankdata(sim0["sim0"], method="ordinal")
+    #     ranks_sim0 = ranks_sim0[::-1]
+    #     prob_sim0 = [(ranks_sim0[i] / (len(sim0["sim0"]) + 1)) for i in range(len(sim0["sim0"]))]
+    #
+    #     # ranks_sim1 = sp.stats.rankdata(sim1["sim1"], method="ordinal")
+    #     # ranks_sim1 = ranks_sim1[::-1]
+    #     # prob_sim1 = [(ranks_sim1[i] / (len(sim1["sim1"]) + 1)) for i in range(len(sim1["sim1"]))]
+    #
+    #     ax.flatten()[i].plot(prob_obs, obs["obs"], color="blue", lw=1)
+    #     ax.flatten()[i].plot(prob_sim0, sim0["sim0"], color="red", lw=1, ls="-.", alpha=0.8)
+    #     # ax.flatten()[i].plot(prob_sim1, sim1["sim1"], color="grey", lw=1, ls="-.", alpha=0.8)
+    #     ax.flatten()[i].set_xlim(0, 1)
+    #     ax.flatten()[i].tick_params(axis='x', labelsize=6)
+    #     ax.flatten()[i].tick_params(axis='y', labelsize=6)
+    #     ax.flatten()[i].set_title(_LABS_TM[tm_structure], fontsize=8)
+    #
+    # ax[0].set_ylabel(r'$\delta^{18}$$O_{PERC}$ [‰]', fontsize=6)
+    # ax[0].set_xlabel('Exceedence probabilty [-]', fontsize=6)
+    # ax[1].set_xlabel('Exceedence probabilty [-]', fontsize=6)
+    # ax[2].set_xlabel('Exceedence probabilty [-]', fontsize=6)
+    # ax[3].set_xlabel('Exceedence probabilty [-]', fontsize=6)
+    # fig.tight_layout()
+    # file = base_path_figs / f"fdc_d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"
+    # fig.savefig(file, dpi=250)
 
     # # bromide benchmark
     # years = onp.arange(1997, 2007).tolist()
@@ -1470,52 +1478,52 @@ def main(tmp_dir):
     # file = base_path_figs / "bromide_benchmark.png"
     # fig.savefig(file, dpi=250)
 
-    # travel time benchmark
-    # compare backward travel time distributions
-    fig, axes = plt.subplots(2, 5, sharey=True, figsize=(6, 3))
-    for i, tm_structure in enumerate(tm_structures):
-        tms = tm_structure.replace(" ", "_")
-        states_tm_file = base_path / "svat_oxygen18" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm1" / f"states_{tms}.nc"
-        with xr.open_dataset(states_tm_file, engine="h5netcdf") as ds_sim_tm:
-            days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-            date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-            ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
-            for j, var_sim in enumerate(['TT_transp', 'TT_q_ss']):
-                TT = ds_sim_tm[var_sim].isel(x=0, y=0).values
-                TT = TT[~onp.all(TT == 0, axis=1)]
-                x = onp.arange(TT.shape[-1])
-                y1 = onp.nanquantile(TT, 0.05, axis=0)
-                y2 = onp.nanquantile(TT, 0.95, axis=0)
-                axes[j, i].fill_between(x, y1, y2, facecolor='red', alpha=0.5)
-                axes[j, i].plot(onp.nanquantile(TT, 0.5, axis=0), ls='--', lw=1, color='black')
-                axes[j, i].plot(onp.mean(TT, axis=0), lw=1, color='black')
-                if var_sim == 'TT_transp':
-                    axes[j, i].set_xlim((0, 150))
-                elif var_sim == 'TT_q_ss':
-                    axes[j, i].set_xlim((0, 1000))
-                axes[j, i].set_ylim((0, 1))
-                axes[j, i].set_xlabel('T [days]')
-                axes[0, i].set_title(_LABS_TM[tm_structure])
-
-    # for j, var_sim in enumerate(['bTT_transp', 'bTT_perc']):
-    #     TT = onp.where(ds_hydrus_tt[var_sim].values <= 0, onp.nan, ds_hydrus_tt[var_sim].values)
-    #     skipt = 1000
-    #     x = onp.arange(TT.shape[-1])
-    #     y1 = onp.nanquantile(TT[skipt:, :], 0.05, axis=0)
-    #     y2 = onp.nanquantile(TT[skipt:, :], 0.95, axis=0)
-    #     axes[j, -1].fill_between(x, y1, y2, facecolor='grey', alpha=0.5)
-    #     axes[j, -1].plot(onp.nanmedian(TT[skipt:, :], axis=0), ls='--', lw=1, color='black')
-    #     axes[j, -1].plot(onp.nanmean(TT[skipt:, :], axis=0), lw=1, color='black')
-    #     axes[j, -1].set_xlim((0, 1000))
-    #     axes[j, -1].set_ylim((0, 1))
-    #     axes[j, -1].set_xlabel('T [days]')
-    axes[0, 0].set_ylabel(r'$\overleftarrow{P_{transp}}(T,t)$')
-    axes[1, 0].set_ylabel(r'$\overleftarrow{P_{perc}}(T,t)$')
-    axes[0, -1].set_title('HYDRUS-1D', fontsize=8)
-    fig.tight_layout()
-    file_str = 'bTTD_benchmark.png'
-    path_fig = base_path_figs / file_str
-    fig.savefig(path_fig, dpi=250)
+    # # travel time benchmark
+    # # compare backward travel time distributions
+    # fig, axes = plt.subplots(2, 5, sharey=True, figsize=(6, 3))
+    # for i, tm_structure in enumerate(tm_structures):
+    #     tms = tm_structure.replace(" ", "_")
+    #     states_tm_file = base_path / "svat_oxygen18" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm1" / f"states_{tms}.nc"
+    #     with xr.open_dataset(states_tm_file, engine="h5netcdf") as ds_sim_tm:
+    #         days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    #         date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    #         ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+    #         for j, var_sim in enumerate(['TT_transp', 'TT_q_ss']):
+    #             TT = ds_sim_tm[var_sim].isel(x=0, y=0).values
+    #             TT = TT[~onp.all(TT == 0, axis=1)]
+    #             x = onp.arange(TT.shape[-1])
+    #             y1 = onp.nanquantile(TT, 0.05, axis=0)
+    #             y2 = onp.nanquantile(TT, 0.95, axis=0)
+    #             axes[j, i].fill_between(x, y1, y2, facecolor='red', alpha=0.5)
+    #             axes[j, i].plot(onp.nanquantile(TT, 0.5, axis=0), ls='--', lw=1, color='black')
+    #             axes[j, i].plot(onp.mean(TT, axis=0), lw=1, color='black')
+    #             if var_sim == 'TT_transp':
+    #                 axes[j, i].set_xlim((0, 150))
+    #             elif var_sim == 'TT_q_ss':
+    #                 axes[j, i].set_xlim((0, 1000))
+    #             axes[j, i].set_ylim((0, 1))
+    #             axes[j, i].set_xlabel('T [days]')
+    #             axes[0, i].set_title(_LABS_TM[tm_structure])
+    #
+    # # for j, var_sim in enumerate(['bTT_transp', 'bTT_perc']):
+    # #     TT = onp.where(ds_hydrus_tt[var_sim].values <= 0, onp.nan, ds_hydrus_tt[var_sim].values)
+    # #     skipt = 1000
+    # #     x = onp.arange(TT.shape[-1])
+    # #     y1 = onp.nanquantile(TT[skipt:, :], 0.05, axis=0)
+    # #     y2 = onp.nanquantile(TT[skipt:, :], 0.95, axis=0)
+    # #     axes[j, -1].fill_between(x, y1, y2, facecolor='grey', alpha=0.5)
+    # #     axes[j, -1].plot(onp.nanmedian(TT[skipt:, :], axis=0), ls='--', lw=1, color='black')
+    # #     axes[j, -1].plot(onp.nanmean(TT[skipt:, :], axis=0), lw=1, color='black')
+    # #     axes[j, -1].set_xlim((0, 1000))
+    # #     axes[j, -1].set_ylim((0, 1))
+    # #     axes[j, -1].set_xlabel('T [days]')
+    # axes[0, 0].set_ylabel(r'$\overleftarrow{P_{transp}}(T,t)$')
+    # axes[1, 0].set_ylabel(r'$\overleftarrow{P_{perc}}(T,t)$')
+    # axes[0, -1].set_title('HYDRUS-1D', fontsize=8)
+    # fig.tight_layout()
+    # file_str = 'bTTD_benchmark.png'
+    # path_fig = base_path_figs / file_str
+    # fig.savefig(path_fig, dpi=250)
 
     # # plot cumulative backward travel time distributions
     # skipt = 1000
