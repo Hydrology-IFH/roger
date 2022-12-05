@@ -31,8 +31,11 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
             _states_hm_file = f'states_hm10_bootstrap_for_{sas_solver}.nc'
         # load parameter boundaries
         _file_params = _base_path / "param_bounds.yml"
-        with open(_file_params, 'r') as file:
-            _bounds = yaml.safe_load(file)[_tm_structure]
+        if transport_model_structure in ['complete-mixing', 'piston']:
+            _bounds = None
+        else:
+            with open(_file_params, 'r') as file:
+                _bounds = yaml.safe_load(file)[_tm_structure]
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
