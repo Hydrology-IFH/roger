@@ -168,7 +168,7 @@ def main(tmp_dir):
                     sim_vals = df_eval.loc[:, 'sim'].values
                     key_kge = 'KGE_' + var_sim
                     df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-                    key_kge = 'KGE_beta' + var_sim
+                    key_kge = 'KGE_beta_' + var_sim
                     df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
                     key_rbs = 'RBS_' + var_sim
                     df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals, sim_vals)
@@ -215,6 +215,8 @@ def main(tmp_dir):
         plt.close('all')
 
         # select best model run
+        cond = (df_params_metrics['KGE_beta_aet'] >= 1) & (df_params_metrics['RBS_aet'] >= 0)
+        df_params_metrics.loc[cond, 'KGE_multi'] = -9999
         idx_best1 = df_params_metrics['KGE_multi'].idxmax()
 
         # write states of best simulation
