@@ -15,12 +15,13 @@ def main(tmp_dir, resample_size, nruns):
         base_path = Path(tmp_dir)
     else:
         base_path = Path(__file__).parent
+    metric_name = "KGE_multi"
     # bootstrap best 1% simulations
     onp.random.seed(42)
     idx_boot = onp.arange(resample_size)
     onp.random.shuffle(idx_boot)
     idx_boot = idx_boot.tolist()
-    states_hm1_file = base_path.parent / "svat_monte_carlo" / "optimized_with_KGE_multi" / f"states_hm{nruns}.nc"
+    states_hm1_file = base_path.parent / "svat_monte_carlo" / f"optimized_with_{metric_name}" / f"states_hm{nruns}.nc"
     with h5netcdf.File(states_hm1_file, 'r', decode_vlen_strings=False) as df:
         n_repeat = int(resample_size / df.dims["x"].size)
     if n_repeat <= 1:
@@ -30,7 +31,7 @@ def main(tmp_dir, resample_size, nruns):
     with h5netcdf.File(states_hmb_file, 'w', decode_vlen_strings=False) as f:
         f.attrs.update(
           date_created=datetime.datetime.today().isoformat(),
-          title=f'RoGeR best {nruns} hydrologic monte carlo simulations (bootstrapped) at Rietholzbach lysimeter site',
+          title=f'RoGeR best {nruns} hydrologic monte carlo simulations (bootstrapped) optimized with {metric_name} at Rietholzbach lysimeter site',
           institution='University of Freiburg, Chair of Hydrology',
           references='',
           comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
