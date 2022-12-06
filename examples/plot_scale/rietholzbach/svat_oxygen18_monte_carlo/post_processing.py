@@ -31,7 +31,7 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
     else:
         base_path = Path(__file__).parent
     age_max = "age_max_1500_days"
-    metric_for_optimization = "optimized_with_KGE_multi_hm100"
+    metric_for_optimization = "optimized_with_KGE_multi_hm10"
     tms = transport_model_structure.replace("_", " ")
     # directory of results
     base_path_results = base_path / "results"
