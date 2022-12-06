@@ -31,7 +31,9 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
     else:
         base_path = Path(__file__).parent
     age_max = "age_max_1500_days"
-    metric_for_optimization = "optimized_with_KGE_multi_hm10"
+    nruns_hm = 100
+    metric_name = "KGE_multi"
+    metric_for_optimization = f"optimized_with_{metric_name}_hm{nruns_hm}"
     tms = transport_model_structure.replace("_", " ")
     # directory of results
     base_path_results = base_path / "results"
@@ -178,7 +180,7 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
                                                     units=var_obj.attrs["units"])
                                     del var_obj, vals
 
-    states_hm1_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_hm100_bootstrap_for_{sas_solver}.nc"
+    states_hm1_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_hm{nruns_hm}_bootstrap_for_{sas_solver}.nc"
     if os.path.exists(states_hm1_file):
         states_hm_mc_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
         n_repeat = int(nsamples / split_size)
@@ -187,7 +189,7 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
             with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
                 f.attrs.update(
                   date_created=datetime.datetime.today().isoformat(),
-                  title='RoGeR best 100 monte carlo simulations (bootstrapped) at Rietholzbach lysimeter site',
+                  title=f'RoGeR best {nruns_hm} monte carlo simulations (bootstrapped) optimized with {metric_name} at Rietholzbach lysimeter site',
                   institution='University of Freiburg, Chair of Hydrology',
                   references='',
                   comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
@@ -330,7 +332,7 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
 
     # load hydrologic simulation
     if tms in ['complete-mixing', 'piston']:
-        states_hm_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm100.nc"
+        states_hm_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_hm{nruns_hm}.nc"
     else:
         states_hm_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
