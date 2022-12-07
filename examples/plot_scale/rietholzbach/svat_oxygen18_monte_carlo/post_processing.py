@@ -21,7 +21,7 @@ sns.set_style("ticks")
 
 @click.option("-ns", "--nsamples", type=int, default=10000)
 @click.option("-ss", "--split-size", type=int, default=1000)
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'time-variant', 'power', 'time-variant-transp', 'older-preference', 'preferential_+_advection-dispersion']), default='complete-mixing')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'time-variant', 'power', 'time-variant_power', 'time-variant-transp', 'older-preference', 'preferential_+_advection-dispersion']), default='complete-mixing')
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
