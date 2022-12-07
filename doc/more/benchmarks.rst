@@ -22,8 +22,7 @@ We run the same model code with all Roger backends (``numpy``, ``numpy-mpi``, ``
   :align: center
 
 
-As a rule of thumb, we find that JAX and NumPy peforms equally well for a greater grid cell count. GPUs are a competitive alternative to CPUs, **as long as the problem fits into GPU memory**.
-
+As a rule of thumb, we find that JAX improves computational time (approximately 2 times faster). GPUs are a competitive alternative to CPUs, **as long as the problem fits into GPU memory**.
 
 Varying number of MPI processes
 -------------------------------
