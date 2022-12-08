@@ -48,7 +48,9 @@ def main(tmp_dir):
     tm_structures = ['complete-mixing', 'piston',
                      'advection-dispersion',
                      'time-variant advection-dispersion',
-                     'time-variant preferential + advection-dispersion']
+                     'time-variant preferential + advection-dispersion',
+                     'power',
+                     'time-variant power']
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
         states_hm_si_file = base_path / f"states_hm_saltelli_for_{tms}.nc"

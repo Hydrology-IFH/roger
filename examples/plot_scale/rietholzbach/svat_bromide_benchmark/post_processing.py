@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 sns.set_style("ticks")
 
 
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'time-variant', 'power', 'time-variant-transp', 'older-preference', 'preferential_+_advection-dispersion']), default='advection-dispersion')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_advection-dispersion', 'power', 'time-variant_power']), default='advection-dispersion')
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")

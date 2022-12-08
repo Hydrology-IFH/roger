@@ -10,7 +10,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-y", "--year", type=click.Choice(['1997', '1998', '1999', '2000', '2001', '2002', '2003', '2004', '2005', '2006']), default='1997')
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'power']), default='time-variant_advection-dispersion')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'power', 'time-variant_power']), default='time-variant_advection-dispersion')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli

@@ -13,16 +13,13 @@ def main(job_type, sas_solver):
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
     transport_models_abrev = {'piston': 'pi',
                               'complete-mixing': 'cm',
-                              'preferential': 'pf',
                               'advection-dispersion': 'ad',
-                              'time-variant preferential': 'pft',
                               'time-variant advection-dispersion': 'adt',
-                              'time-variant': 'tv',
                               'power': 'pow',
                               'time-variant power': 'powt'}
 
     tracer = 'bromide'
-    transport_models = ['piston', 'complete-mixing', 'advection-dispersion', 'time-variant advection-dispersion']
+    transport_models = ['piston', 'complete-mixing', 'advection-dispersion', 'time-variant advection-dispersion', 'power', 'time-variant power']
     if job_type == 'serial':
         years = onp.arange(1997, 2007).tolist()
         for tm in transport_models:
