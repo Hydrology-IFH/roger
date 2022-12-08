@@ -32,7 +32,7 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
         base_path = Path(__file__).parent
     age_max = "age_max_1500_days"
     nruns_hm = 100
-    metric_name = "KGE_perc"
+    metric_name = "KGE_multi"
     metric_for_optimization = f"optimized_with_{metric_name}_hm{nruns_hm}"
     tms = transport_model_structure.replace("_", " ")
     # directory of results
@@ -451,6 +451,13 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
             df_params_metrics.loc[:, 'k_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=1).values.flatten()
             df_params_metrics.loc[:, 'k_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=1).values.flatten()
             df_params_metrics.loc[:, 'k_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=1).values.flatten()
+        elif tms == "time-variant power":
+            df_params_metrics.loc[:, 'k1_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten()
+            df_params_metrics.loc[:, 'k2_transp'] = ds_sim_tm["sas_params_transp"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_transp"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'k1_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten()
+            df_params_metrics.loc[:, 'k2_q_rz'] = ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_rz"].isel(n_sas_params=4).values.flatten()
+            df_params_metrics.loc[:, 'k1_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten()
+            df_params_metrics.loc[:, 'k2_q_ss'] = ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=3).values.flatten() + ds_sim_tm["sas_params_q_ss"].isel(n_sas_params=4).values.flatten()
 
         # compare observations and simulations
         idx = ds_sim_tm.Time.values  # time index
@@ -617,9 +624,13 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
     file = base_path_results / f"params_metrics_{transport_model_structure}.txt"
     df_params_metrics = pd.read_csv(file, header=0, index_col=False, sep="\t")
     df_metrics = df_params_metrics.loc[:, ['KGE_C_iso_q_ss']]
-    if tms == "advection-dispersion":
+    if tms == "complete-mixing":
+        df_params = df_params_metrics.loc[:, ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+    elif tms == "piston":
+        df_params = df_params_metrics.loc[:, ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+    elif tms == "advection-dispersion":
         df_params = df_params_metrics.loc[:, ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
-    if tms == "older-preference":
+    elif tms == "older-preference":
         df_params = df_params_metrics.loc[:, ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
     elif tms == "time-variant advection-dispersion":
         df_params = df_params_metrics.loc[:, ['a_transp', 'b1_transp', 'b2_transp', 'a1_q_rz', 'a2_q_rz', 'b_q_rz', 'a1_q_ss', 'a2_q_ss', 'b_q_ss']]
@@ -635,6 +646,8 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
         df_params = df_params_metrics.loc[:, ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
     elif tms == "power":
         df_params = df_params_metrics.loc[:, ['k_transp', 'k_q_rz', 'k_q_ss']]
+    elif tms == "time-variant power":
+        df_params = df_params_metrics.loc[:, ['k1_transp', 'k2_transp', 'k1_q_rz', 'k2_q_rz', 'k1_q_ss', 'k2_q_ss']]
     # select best model run
     idx_best = df_params_metrics['KGE_C_iso_q_ss'].idxmax()
     nrow = len(df_metrics.columns)
