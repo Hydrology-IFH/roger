@@ -288,3 +288,117 @@ time-variant preferential + advection-dispersion:
   -
     - 0.1
     - 50
+
+power:
+  num_vars: 11
+
+  names:
+  - 'c1_mak'  # Makkink coefficient (-)
+  - 'c2_mak'  # Makkink coefficient (-)
+  - 'dmpv'
+  - 'lmpv'
+  - 'theta_eff'
+  - 'frac_lp'
+  - 'theta_pwp'
+  - 'ks'
+  - 'k_transp'  # SAS parameter of transpiration
+  - 'k_q_rz'  # SAS parameter of percolation from root zone
+  - 'k_q_ss'  # SAS parameter of percolation from subsoil
+
+  bounds:
+  -
+    - 0.4  # lower boundary
+    - 0.7  # upper boundary
+  -
+    - -0.5
+    - 0.1
+  -
+    - 1
+    - 400
+  -
+    - 1
+    - 2000
+  -
+    - 0.15
+    - 0.35
+  -
+    - 0.1
+    - 0.9
+  -
+    - 0.15
+    - 0.33
+  -
+    - 1
+    - 150
+  -
+    - 0.1
+    - 5
+  -
+    - 0.1
+    - 5
+  -
+    - 0.1
+    - 5
+
+time-variant power:
+  num_vars: 14
+
+  names:
+  - 'c1_mak'  # Makkink coefficient (-)
+  - 'c2_mak'  # Makkink coefficient (-)
+  - 'dmpv'
+  - 'lmpv'
+  - 'theta_eff'
+  - 'frac_lp'
+  - 'theta_pwp'
+  - 'ks'
+  - 'c1_transp'  # SAS parameter of transpiration
+  - 'c2_transp'  # SAS parameter of transpiration
+  - 'c1_q_rz'  # SAS parameter of percolation from root zone
+  - 'c2_q_rz'  # SAS parameter of percolation from root zone
+  - 'c1_q_ss'  # SAS parameter of percolation from subsoil
+  - 'c2_q_ss'  # SAS parameter of percolation from subsoil
+
+  bounds:
+  -
+    - 0.4  # lower boundary
+    - 0.7  # upper boundary
+  -
+    - -0.5
+    - 0.1
+  -
+    - 1
+    - 400
+  -
+    - 1
+    - 2000
+  -
+    - 0.15
+    - 0.35
+  -
+    - 0.1
+    - 0.9
+  -
+    - 0.15
+    - 0.33
+  -
+    - 1
+    - 150
+  -
+    - 0.1
+    - 5
+  -
+    - 0.1
+    - 5
+  -
+    - 0.1
+    - 5
+  -
+    - 0.1
+    - 5
+  -
+    - 0.1
+    - 5
+  -
+    - 0.1
+    - 5

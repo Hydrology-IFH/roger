@@ -17,7 +17,7 @@ sns.set_style("ticks")
 
 
 @click.option("-ss", "--split-size", type=int, default=1000)
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion']), default='advection-dispersion')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'power', 'time-variant_power']), default='advection-dispersion')
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
@@ -55,7 +55,9 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                    'maximum']
     if tms in ['complete-mixing', 'piston']:
         nsamples = 1024 * 10
-    elif tms in ['advection-dispersion']:
+    elif tms in ['power']:
+        nsamples = 1024 * 13
+    elif tms in ['advection-dispersion', 'time-variant power']:
         nsamples = 1024 * 16
     elif tms in ['time-variant advection-dispersion', 'time-variant preferential + advection-dispersion']:
         nsamples = 1024 * 19
