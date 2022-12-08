@@ -38,6 +38,7 @@ def main():
 
             settings.nx, settings.ny = 1, 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
+            settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, 'forcing.nc'))
 
             settings.dx = 1
             settings.dy = 1

@@ -104,6 +104,7 @@ def main(transport_model_structure, tmp_dir):
 
             settings.nx, settings.ny = self._get_nx(self._base_path, 'params_saltelli.nc', group=transport_model_structure.replace("_", " ")), 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
+            settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, 'forcing.nc'))
 
             settings.dx = 1
             settings.dy = 1
