@@ -31,8 +31,8 @@ do
   qsub -q short $f
 done
 
-# FILES="$PWD/bromide_deterministic_svat_powt_*.sh"
-# for f in $FILES
-# do
-#   qsub -q short $f
-# done
+FILES="$PWD/bromide_deterministic_svat_powt_*.sh"
+for f in $FILES
+do
+  qsub -q short $f
+done
