@@ -31,7 +31,7 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
     else:
         base_path = Path(__file__).parent
     age_max = "age_max_1500_days"
-    nruns_hm = 10
+    nruns_hm = 100
     metric_name = "KGE_multi"
     metric_for_optimization = f"optimized_with_{metric_name}_hm{nruns_hm}"
     tms = transport_model_structure.replace("_", " ")
