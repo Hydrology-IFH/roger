@@ -45,15 +45,15 @@ def main(tmp_dir, transport_model_structure, sas_solver):
 
     # merge model output into single file
     years = onp.arange(1997, 2007).tolist()
-    states_tm_file = base_path / sas_solver / "states_bromide_benchmark.nc"
+    states_tm_file = base_path / sas_solver / f"states_{tms}_bromide_benchmark.nc"
     if not os.path.exists(states_tm_file):
         for year in years:
             path = str(base_path / sas_solver / f'SVATTRANSPORT_{transport_model_structure}_{year}_{sas_solver}.*.nc')
             diag_files = glob.glob(path)
             with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
                 click.echo(f'Merge output files of {tms}-{year} into {states_tm_file.as_posix()}')
-                if f"{tms}-{year}" not in list(f.groups.keys()):
-                    f.create_group(f"{tms}-{year}")
+                if f"{year}" not in list(f.groups.keys()):
+                    f.create_group(f"{year}")
                 f.attrs.update(
                     date_created=datetime.datetime.today().isoformat(),
                     title='RoGeR transport simulations for virtual bromide experiments at Rietholzbach Lysimeter site',
@@ -75,25 +75,25 @@ def main(tmp_dir, transport_model_structure, sas_solver):
                             time = onp.array(df.variables.get('Time'))
                 for dfs in diag_files:
                     with h5netcdf.File(dfs, 'r', decode_vlen_strings=False) as df:
-                        if not f.groups[f"{tms}-{year}"].dimensions:
-                            f.groups[f"{tms}-{year}"].dimensions = dict_dim
-                            v = f.groups[f"{tms}-{year}"].create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
+                        if not f.groups[f"{year}"].dimensions:
+                            f.groups[f"{year}"].dimensions = dict_dim
+                            v = f.groups[f"{year}"].create_variable('x', ('x',), float, compression="gzip", compression_opts=1)
                             v.attrs['long_name'] = 'Number of model run'
                             v.attrs['units'] = ''
                             v[:] = onp.arange(dict_dim["x"])
-                            v = f.groups[f"{tms}-{year}"].create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
+                            v = f.groups[f"{year}"].create_variable('y', ('y',), float, compression="gzip", compression_opts=1)
                             v.attrs['long_name'] = ''
                             v.attrs['units'] = ''
                             v[:] = onp.arange(dict_dim["y"])
-                            v = f.groups[f"{tms}-{year}"].create_variable('ages', ('ages',), float, compression="gzip", compression_opts=1)
+                            v = f.groups[f"{year}"].create_variable('ages', ('ages',), float, compression="gzip", compression_opts=1)
                             v.attrs['long_name'] = 'Water ages'
                             v.attrs['units'] = 'days'
                             v[:] = onp.arange(1, dict_dim["ages"]+1)
-                            v = f.groups[f"{tms}-{year}"].create_variable('nages', ('nages',), float, compression="gzip", compression_opts=1)
+                            v = f.groups[f"{year}"].create_variable('nages', ('nages',), float, compression="gzip", compression_opts=1)
                             v.attrs['long_name'] = 'Water ages (cumulated)'
                             v.attrs['units'] = 'days'
                             v[:] = onp.arange(0, dict_dim["nages"])
-                            v = f.groups[f"{tms}-{year}"].create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
+                            v = f.groups[f"{year}"].create_variable('Time', ('Time',), float, compression="gzip", compression_opts=1)
                             var_obj = df.variables.get('Time')
                             v.attrs.update(time_origin=var_obj.attrs["time_origin"],
                                            units=var_obj.attrs["units"])
@@ -101,19 +101,19 @@ def main(tmp_dir, transport_model_structure, sas_solver):
                         for var_sim in list(df.variables.keys()):
                             var_obj = df.variables.get(var_sim)
                             if var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] > 2:
-                                v = f.groups[f"{tms}-{year}"].create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                                v = f.groups[f"{year}"].create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                                 vals = onp.array(var_obj)
                                 v[:, :, :] = vals.swapaxes(0, 2)
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
                             elif var_sim not in list(dict_dim.keys()) and ('Time', 'y', 'x') == var_obj.dimensions and var_obj.shape[0] <= 2:
-                                v = f.groups[f"{tms}-{year}"].create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
+                                v = f.groups[f"{year}"].create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
                                 vals = onp.array(var_obj)
                                 v[:, :, :] = vals.swapaxes(0, 2)[:, :, 0]
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
                             elif var_sim not in list(dict_dim.keys()) and ('Time', 'n_sas_params', 'y', 'x') == var_obj.dimensions:
-                                v = f.groups[f"{tms}-{year}"].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
+                                v = f.groups[f"{year}"].create_variable(var_sim, ('x', 'y', 'n_sas_params'), float, compression="gzip", compression_opts=1)
                                 vals = onp.array(var_obj)
                                 vals = vals.swapaxes(0, 3)
                                 vals = vals.swapaxes(1, 2)
@@ -121,7 +121,7 @@ def main(tmp_dir, transport_model_structure, sas_solver):
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
                             elif var_sim not in list(dict_dim.keys()) and ('Time', 'ages', 'y', 'x') == var_obj.dimensions:
-                                v = f.groups[f"{tms}-{year}"].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
+                                v = f.groups[f"{year}"].create_variable(var_sim, ('x', 'y', 'Time', 'ages'), float, compression="gzip", compression_opts=1)
                                 vals = onp.array(var_obj)
                                 vals = vals.swapaxes(0, 3)
                                 vals = vals.swapaxes(1, 2)
@@ -130,7 +130,7 @@ def main(tmp_dir, transport_model_structure, sas_solver):
                                 v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                units=var_obj.attrs["units"])
                             elif var_sim not in list(dict_dim.keys()) and ('Time', 'nages', 'y', 'x') == var_obj.dimensions:
-                                v = f.groups[f"{tms}-{year}"].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
+                                v = f.groups[f"{year}"].create_variable(var_sim, ('x', 'y', 'Time', 'nages'), float, compression="gzip", compression_opts=1)
                                 vals = onp.array(var_obj)
                                 vals = vals.swapaxes(0, 3)
                                 vals = vals.swapaxes(1, 2)
@@ -159,8 +159,8 @@ def main(tmp_dir, transport_model_structure, sas_solver):
         fig, axes = plt.subplots(1, 1, figsize=(6, 2))
         for year in years:
             # load simulation
-            states_tm_file = base_path / sas_solver / "states_bromide_benchmark.nc"
-            ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{tms}-{year}", engine="h5netcdf")
+            states_tm_file = base_path / sas_solver / f"states_{tms}_bromide_benchmark.nc"
+            ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{year}", engine="h5netcdf")
             # assign date
             days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
             date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
@@ -215,31 +215,31 @@ def main(tmp_dir, transport_model_structure, sas_solver):
             ds_sim_tm = ds_sim_tm.load()  # required to release file lock
             ds_sim_tm = ds_sim_tm.close()
             del ds_sim_tm
-            states_tm_file = base_path / sas_solver / "states_bromide_benchmark.nc"
+            states_tm_file = base_path / sas_solver / f"states_{tms}_bromide_benchmark.nc"
             with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
                 try:
-                    v = f.groups[f"{tms}-{year}"].create_variable('C_q_ss_mmol_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                    v = f.groups[f"{year}"].create_variable('C_q_ss_mmol_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                     v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
                     v.attrs.update(long_name="bulk sample of bromide in percolation",
                                    units="mmol/l")
                 except ValueError:
-                    v = f.groups[f"{tms}-{year}"].get('C_q_ss_mmol_bs')
+                    v = f.groups[f"{year}"].get('C_q_ss_mmol_bs')
                     v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_conc_mmol'].values
                 try:
-                    v = f.groups[f"{tms}-{year}"].create_variable('q_ss_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                    v = f.groups[f"{year}"].create_variable('q_ss_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                     v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, 'perc'].values
                     v.attrs.update(long_name="bulk sample of percolation",
                                    units="mm/dt")
                 except ValueError:
-                    v = f.groups[f"{tms}-{year}"].get('M_q_ss_bs')
+                    v = f.groups[f"{year}"].get('M_q_ss_bs')
                     v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, 'perc'].values
                 try:
-                    v = f.groups[f"{tms}-{year}"].create_variable('M_q_ss_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
+                    v = f.groups[f"{year}"].create_variable('M_q_ss_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                     v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_mg'].values
                     v.attrs.update(long_name="bulk sample bromide mass in percolation",
                                    units="mg")
                 except ValueError:
-                    v = f.groups[f"{tms}-{year}"].get('M_q_ss_bs')
+                    v = f.groups[f"{year}"].get('M_q_ss_bs')
                     v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_mg'].values
 
             axes.set_ylabel('Br [mmol $l^{-1}$]')
