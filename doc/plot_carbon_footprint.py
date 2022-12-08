@@ -14,9 +14,9 @@ sns.set_style("ticks")
 COMPONENT_COLORS = {
     "numpy": "orangered",
     "numpy-mpi": "coral",
-    "jax": "dodgerblue",
-    "jax-mpi": "steelblue",
-    "jax-gpu": "teal",
+    "jax": "#deebf7",
+    "jax-mpi": "#6baed6",
+    "jax-gpu": "#081d58",
 }
 
 
