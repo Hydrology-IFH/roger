@@ -61,7 +61,7 @@ def main(tmp_dir, sas_solver):
         os.mkdir(base_path_figs)
 
     transport_models = ['complete-mixing', 'piston', 'advection-dispersion', 'time-variant advection-dispersion', 'power', 'time-variant_power']
-
+    transport_models = ['complete-mixing', 'piston', 'advection-dispersion', 'time-variant advection-dispersion']
     # merge model output into a single file
     for tm in transport_models:
         tms = tm.replace(" ", "_")
