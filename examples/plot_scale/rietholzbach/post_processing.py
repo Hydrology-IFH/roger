@@ -51,10 +51,12 @@ _LABS_TM = {'complete-mixing': 'CM',
             'piston': 'PI',
             'advection-dispersion': 'AD',
             'time-variant advection-dispersion': 'AD-TV',
-            'preferential': 'PF',
             'power': 'POW',
+            'time-variant power': 'POW-TV',
             'older-preference': 'OP',
-            'time-variant-transp': 'TVT-AD'}
+            'preferential': 'PF',
+            'time-variant-transp': 'TVT',
+            'time-variant': 'TV'}
 
 
 def kumaraswami_cdf(x, a, b):
@@ -119,13 +121,13 @@ def main(tmp_dir):
     date_sim_hm10 = num2date(days_sim_hm10, units=f"days since {ds_sim_hm10['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     ds_sim_hm10 = ds_sim_hm10.assign_coords(Time=("Time", date_sim_hm10))
 
-    # # load best 100 monte carlo simulations
-    # states_hm100_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm100.nc"
-    # ds_sim_hm100 = xr.open_dataset(states_hm100_file, engine="h5netcdf")
-    # # assign date
-    # days_sim_hm100 = (ds_sim_hm100['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    # date_sim_hm100 = num2date(days_sim_hm100, units=f"days since {ds_sim_hm100['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    # ds_sim_hm100 = ds_sim_hm100.assign_coords(Time=("Time", date_sim_hm100))
+    # load best 100 monte carlo simulations
+    states_hm100_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm100.nc"
+    ds_sim_hm100 = xr.open_dataset(states_hm100_file, engine="h5netcdf")
+    # assign date
+    days_sim_hm100 = (ds_sim_hm100['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    date_sim_hm100 = num2date(days_sim_hm100, units=f"days since {ds_sim_hm100['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    ds_sim_hm100 = ds_sim_hm100.assign_coords(Time=("Time", date_sim_hm100))
 
     # load HYDRUS-1D benchmarks
     # oxygen-18 simulations
@@ -704,26 +706,26 @@ def main(tmp_dir):
     #     fig.savefig(path_fig, dpi=250)
     # plt.close('all')
 
-    # # compare best 100 simulations with observations
-    # vars_obs = ['AET', 'PERC', 'dWEIGHT']
-    # vars_sim = ['aet', 'q_ss', 'dS']
-    # vars_bench = ['aet', 'perc', 'dS']
-    # dict_obs_sim100 = {}
-    # for var_obs, var_sim, var_bench in zip(vars_obs, vars_sim, vars_bench):
-    #     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-    #     df_obs.loc[:, 'obs'] = obs_vals
-    #     sim_vals = ds_sim_hm100[var_sim].isel(y=0).values.T
-    #     # join observations on simulations
-    #     df_eval = eval_utils.join_obs_on_sim(date_sim_hm100, sim_vals, df_obs)
-    #     # skip first seven days for warmup
-    #     df_eval.loc[:'1997-01-07', :] = onp.nan
-    #     # join benchmark simulations
-    #     bench_vals = ds_hydrus_18O[var_bench].values
-    #     df_bench = pd.DataFrame(index=ds_hydrus_18O['Time'].values, columns=['bench'])
-    #     df_bench.loc[:, 'bench'] = bench_vals
-    #     df_eval = df_eval.join(df_bench)
-    #     dict_obs_sim100[var_obs] = df_eval
+    # compare best 100 simulations with observations
+    vars_obs = ['AET', 'PERC', 'dWEIGHT']
+    vars_sim = ['aet', 'q_ss', 'dS']
+    vars_bench = ['aet', 'perc', 'dS']
+    dict_obs_sim100 = {}
+    for var_obs, var_sim, var_bench in zip(vars_obs, vars_sim, vars_bench):
+        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals
+        sim_vals = ds_sim_hm100[var_sim].isel(y=0).values.T
+        # join observations on simulations
+        df_eval = eval_utils.join_obs_on_sim(date_sim_hm100, sim_vals, df_obs)
+        # skip first seven days for warmup
+        df_eval.loc[:'1997-01-07', :] = onp.nan
+        # join benchmark simulations
+        bench_vals = ds_hydrus_18O[var_bench].values
+        df_bench = pd.DataFrame(index=ds_hydrus_18O['Time'].values, columns=['bench'])
+        df_bench.loc[:, 'bench'] = bench_vals
+        df_eval = df_eval.join(df_bench)
+        dict_obs_sim100[var_obs] = df_eval
     #     # plot observed and simulated time series
     #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
     #     file_str = '%s_best_100.pdf' % (var_sim)
