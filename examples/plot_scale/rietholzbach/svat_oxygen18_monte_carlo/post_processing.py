@@ -183,7 +183,6 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
     states_hm1_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_hm{nruns_hm}_bootstrap_for_{sas_solver}.nc"
     if os.path.exists(states_hm1_file):
         states_hm_mc_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
-        n_repeat = int(nsamples / split_size)
         if not os.path.exists(states_hm_mc_file):
             click.echo('Repeat hydrologic simualtions ...')
             with h5netcdf.File(states_hm_mc_file, 'w', decode_vlen_strings=False) as f:
@@ -854,7 +853,7 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
     ds_hm_for_tm_mc = xr.open_dataset(states_hm_file, engine="h5netcdf")
     ds_hm_best = ds_hm_for_tm_mc.loc[dict(x=idx_best)]
     ds_hm_best.attrs['title'] = f'Best hydrologic simulation corresponding to best {tms} oxygen-18 simulation'
-    days = date2num(ds_hm_best["Time"].values.astype('M8[ms]').astype('O'), units=f"days since {ds_hm_for_tm_mc['Time'].attrs['time_origin']}", calendar='standard')
+    days = ds_hm_best["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     ds_hm_best = ds_hm_best.assign_coords(Time=("Time", days))
     ds_hm_best.Time.attrs['units'] = "days"
     ds_hm_best.Time.attrs['time_origin'] = ds_hm_for_tm_mc['Time'].attrs['time_origin']
