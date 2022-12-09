@@ -1489,7 +1489,7 @@ def main(tmp_dir):
     years = onp.arange(1997, 2007).tolist()
     cmap = cm.get_cmap('Reds')
     cmap_hydrus = cm.get_cmap('Greys')
-    norm = Normalize(vmin=onp.min(years), vmax=onp.max(years))
+    norm = Normalize(vmin=onp.min(years)-2, vmax=onp.max(years))
     fig, axes = plt.subplots(5, 1, figsize=(6, 5), sharey=False)
     for i, tm_structure in enumerate(tm_structures):
         tms = tm_structure.replace(" ", "_")
@@ -1498,14 +1498,15 @@ def main(tmp_dir):
         for year in years:
             states_hydrus_br_file = base_path / "svat_bromide_benchmark" / "deterministic" / f"states_{tms}_bromide_benchmark.nc"
             with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
-                sim_vals = ds["C_q_ss_mmol_bs"].isel(x=0, y=0).values[315:716]
+                x = onp.where((ds["alpha_transp"].isel(Time=0).values == 0.3) & (ds["alpha_q"].isel(Time=0).values == 0.3))[0][0]
+                sim_vals = ds["C_q_ss_mmol_bs"].isel(x=x, y=0).values[315:716]
                 sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
                 df_sim_br_conc.loc[:, f"{year}"] = sim_vals
-                sim_vals = ds["M_q_ss"].isel(x=0, y=0).values[315:716]
+                sim_vals = ds["M_q_ss"].isel(x=x, y=0).values[315:716]
                 sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
                 df_sim_br_mass.loc[:, f"{year}"] = sim_vals
             axes.flatten()[i].plot(df_sim_br_conc.dropna().index, df_sim_br_conc.dropna()[f"{year}"], ls='--', color=cmap(norm(year)), lw=0.8, alpha=0.6, label=f'{year}')
-        weights = df_sim_br_mass.values / df_sim_br_mass.sum(axis=0).values[onp.newaxis, :]
+        weights = df_sim_br_mass.values / df_sim_br_mass.sum(axis=1).values[:, onp.newaxis]
         df_sim_br_conc.loc[:, "avg_weighted"] = onp.sum(weights * df_sim_br_conc.values, axis=1)
         axes.flatten()[i].plot(df_sim_br_conc.dropna().index, df_sim_br_conc.dropna().loc[:, "avg_weighted"], color="red", lw=1, alpha=1, label='average')
         axes.flatten()[i].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1)
@@ -1527,58 +1528,60 @@ def main(tmp_dir):
     axes.flatten()[-1].set_title('HYDRUS-1D', fontsize=8)
     lines1, labels1 = axes.flatten()[-2].get_legend_handles_labels()
     lines2, labels2 = axes.flatten()[-1].get_legend_handles_labels()
-    fig.legend(lines1, labels1, loc='upper right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.34))
+    fig.legend(lines1, labels1, loc='upper right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.64))
     fig.legend(lines2, labels2, loc='lower right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.07))
     fig.subplots_adjust(bottom=0.1, right=0.85, hspace=0.8)
     file = base_path_figs / "bromide_benchmark.png"
     fig.savefig(file, dpi=250)
 
-    # # travel time benchmark
-    # # compare backward travel time distributions
-    # fig, axes = plt.subplots(2, 5, sharey=True, figsize=(6, 3))
-    # for i, tm_structure in enumerate(tm_structures):
-    #     tms = tm_structure.replace(" ", "_")
-    #     states_tm_file = base_path / "svat_oxygen18" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm1" / f"states_{tms}.nc"
-    #     with xr.open_dataset(states_tm_file, engine="h5netcdf") as ds_sim_tm:
-    #         days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    #         date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    #         ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
-    #         for j, var_sim in enumerate(['TT_transp', 'TT_q_ss']):
-    #             TT = ds_sim_tm[var_sim].isel(x=0, y=0).values
-    #             TT = TT[~onp.all(TT == 0, axis=1)]
-    #             x = onp.arange(TT.shape[-1])
-    #             y1 = onp.nanquantile(TT, 0.05, axis=0)
-    #             y2 = onp.nanquantile(TT, 0.95, axis=0)
-    #             axes[j, i].fill_between(x, y1, y2, facecolor='red', alpha=0.5)
-    #             axes[j, i].plot(onp.nanquantile(TT, 0.5, axis=0), ls='--', lw=1, color='black')
-    #             axes[j, i].plot(onp.mean(TT, axis=0), lw=1, color='black')
-    #             if var_sim == 'TT_transp':
-    #                 axes[j, i].set_xlim((0, 150))
-    #             elif var_sim == 'TT_q_ss':
-    #                 axes[j, i].set_xlim((0, 1000))
-    #             axes[j, i].set_ylim((0, 1))
-    #             axes[j, i].set_xlabel('T [days]')
-    #             axes[0, i].set_title(_LABS_TM[tm_structure])
-    #
-    # # for j, var_sim in enumerate(['bTT_transp', 'bTT_perc']):
-    # #     TT = onp.where(ds_hydrus_tt[var_sim].values <= 0, onp.nan, ds_hydrus_tt[var_sim].values)
-    # #     skipt = 1000
-    # #     x = onp.arange(TT.shape[-1])
-    # #     y1 = onp.nanquantile(TT[skipt:, :], 0.05, axis=0)
-    # #     y2 = onp.nanquantile(TT[skipt:, :], 0.95, axis=0)
-    # #     axes[j, -1].fill_between(x, y1, y2, facecolor='grey', alpha=0.5)
-    # #     axes[j, -1].plot(onp.nanmedian(TT[skipt:, :], axis=0), ls='--', lw=1, color='black')
-    # #     axes[j, -1].plot(onp.nanmean(TT[skipt:, :], axis=0), lw=1, color='black')
-    # #     axes[j, -1].set_xlim((0, 1000))
-    # #     axes[j, -1].set_ylim((0, 1))
-    # #     axes[j, -1].set_xlabel('T [days]')
-    # axes[0, 0].set_ylabel(r'$\overleftarrow{P_{transp}}(T,t)$')
-    # axes[1, 0].set_ylabel(r'$\overleftarrow{P_{perc}}(T,t)$')
+    # travel time benchmark
+    # compare backward travel time distributions
+    fig, axes = plt.subplots(2, 5, sharey=True, figsize=(6, 3))
+    for i, tm_structure in enumerate(tm_structures):
+        tms = tm_structure.replace(" ", "_")
+        states_tm_file = base_path / "svat_oxygen18" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm1" / f"states_{tms}.nc"
+        with xr.open_dataset(states_tm_file, engine="h5netcdf") as ds_sim_tm:
+            days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+            date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+            ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+            for j, var_sim in enumerate(['TT_transp', 'TT_q_ss']):
+                TT = ds_sim_tm[var_sim].isel(x=0, y=0).values
+                TT = TT[~onp.all(TT == 0, axis=1)]
+                x = onp.arange(TT.shape[-1])
+                y1 = onp.nanquantile(TT, 0.05, axis=0)
+                y2 = onp.nanquantile(TT, 0.95, axis=0)
+                axes[j, i].fill_between(x, y1, y2, facecolor='red', alpha=0.5)
+                axes[j, i].plot(onp.nanquantile(TT, 0.5, axis=0), ls='--', lw=1, color='black')
+                axes[j, i].plot(onp.mean(TT, axis=0), lw=1, color='black')
+                if var_sim == 'TT_transp':
+                    axes[j, i].set_xlim((0, 150))
+                elif var_sim == 'TT_q_ss':
+                    axes[j, i].set_xlim((0, 1000))
+                axes[j, i].set_ylim((0, 1))
+                axes[j, i].set_xlabel('T [days]')
+                axes[0, i].set_title(_LABS_TM[tm_structure])
+
+    # for j, var_sim in enumerate(['bTT_transp', 'bTT_perc']):
+    #     TT = onp.where(ds_hydrus_tt[var_sim].values <= 0, onp.nan, ds_hydrus_tt[var_sim].values)
+    #     skipt = 1000
+    #     x = onp.arange(TT.shape[-1])
+    #     y1 = onp.nanquantile(TT[skipt:, :], 0.05, axis=0)
+    #     y2 = onp.nanquantile(TT[skipt:, :], 0.95, axis=0)
+    #     axes[j, -1].fill_between(x, y1, y2, facecolor='grey', alpha=0.5)
+    #     axes[j, -1].plot(onp.nanmedian(TT[skipt:, :], axis=0), ls='--', lw=1, color='black')
+    #     axes[j, -1].plot(onp.nanmean(TT[skipt:, :], axis=0), lw=1, color='black')
+    #     axes[j, -1].set_xlim((0, 1000))
+    #     axes[j, -1].set_ylim((0, 1))
+    #     axes[j, -1].set_xlabel('T [days]')
     # axes[0, -1].set_title('HYDRUS-1D', fontsize=8)
-    # fig.tight_layout()
-    # file_str = 'bTTD_benchmark.png'
-    # path_fig = base_path_figs / file_str
-    # fig.savefig(path_fig, dpi=250)
+    axes[0, -1].axis('off')
+    axes[1, -1].axis('off')
+    axes[0, 0].set_ylabel(r'$\overleftarrow{P_{transp}}(T,t)$')
+    axes[1, 0].set_ylabel(r'$\overleftarrow{P_{perc}}(T,t)$')
+    fig.tight_layout()
+    file_str = 'bTTD_benchmark.png'
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=250)
 
     # # plot cumulative backward travel time distributions
     # skipt = 1000

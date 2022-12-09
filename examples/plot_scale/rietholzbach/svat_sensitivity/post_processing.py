@@ -202,7 +202,7 @@ def main(tmp_dir):
                             df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
                         else:
                             # skip first seven days for warmup
-                            df_eval.loc[:'1997-01-07', :] = onp.nan
+                            df_eval.loc[:'1998-01-01', :] = onp.nan
                             df_eval = df_eval.dropna()
                             obs_vals = df_eval.loc[:, 'obs'].values
                             sim_vals = df_eval.loc[:, 'sim'].values

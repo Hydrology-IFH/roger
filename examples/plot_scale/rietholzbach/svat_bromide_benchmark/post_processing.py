@@ -45,7 +45,7 @@ def main(tmp_dir, transport_model_structure, sas_solver):
 
     # merge model output into single file
     years = onp.arange(1997, 2007).tolist()
-    states_tm_file = base_path / sas_solver / f"states_{tms}_bromide_benchmark.nc"
+    states_tm_file = base_path / sas_solver / f"states_{transport_model_structure}_bromide_benchmark.nc"
     if not os.path.exists(states_tm_file):
         for year in years:
             path = str(base_path / sas_solver / f'SVATTRANSPORT_{transport_model_structure}_{year}_{sas_solver}.*.nc')
@@ -159,7 +159,7 @@ def main(tmp_dir, transport_model_structure, sas_solver):
         fig, axes = plt.subplots(1, 1, figsize=(6, 2))
         for year in years:
             # load simulation
-            states_tm_file = base_path / sas_solver / f"states_{tms}_bromide_benchmark.nc"
+            states_tm_file = base_path / sas_solver / f"states_{transport_model_structure}_bromide_benchmark.nc"
             ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{year}", engine="h5netcdf")
             # assign date
             days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
@@ -242,19 +242,19 @@ def main(tmp_dir, transport_model_structure, sas_solver):
                     v = f.groups[f"{year}"].get('M_q_ss_bs')
                     v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, 'Br_mg'].values
 
-            axes.set_ylabel('Br [mmol $l^{-1}$]')
-            axes.set_xlabel('Time [days since injection]')
-            axes.set_ylim(0,)
-            axes.set_xlim((0, 400))
-            axes.legend(fontsize=6, frameon=False, bbox_to_anchor=(1, 1), loc="upper left")
-            fig.tight_layout()
-            file = f'bromide_breakthrough_{transport_model_structure}_alpha_transp_{alpha_transp}_alpha_q_{alpha_q}.png'
-            path = base_path_figs / file
-            fig.savefig(path, dpi=250)
+        axes.set_ylabel('Br [mmol $l^{-1}$]')
+        axes.set_xlabel('Time [days since injection]')
+        axes.set_ylim(0,)
+        axes.set_xlim((0, 400))
+        axes.legend(fontsize=6, frameon=False, bbox_to_anchor=(1, 1), loc="upper left")
+        fig.tight_layout()
+        file = f'bromide_breakthrough_{transport_model_structure}_alpha_transp_{alpha_transp}_alpha_q_{alpha_q}.png'
+        path = base_path_figs / file
+        fig.savefig(path, dpi=250)
 
-            # write evaluation metrics to .csv
-            path_csv = base_path_results / f"bromide_metrics_{transport_model_structure}_alpha_transp_{alpha_transp}_alpha_q_{alpha_q}.csv"
-            df_metrics_year.to_csv(path_csv, header=True, index=True, sep=";")
+        # write evaluation metrics to .csv
+        path_csv = base_path_results / f"bromide_metrics_{transport_model_structure}_alpha_transp_{alpha_transp}_alpha_q_{alpha_q}.csv"
+        df_metrics_year.to_csv(path_csv, header=True, index=True, sep=";")
 
     return
 
