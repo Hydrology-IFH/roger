@@ -21,7 +21,7 @@ sns.set_style("ticks")
 
 @click.option("-ns", "--nsamples", type=int, default=10000)
 @click.option("-ss", "--split-size", type=int, default=1000)
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'time-variant', 'power', 'time-variant_power', 'time-variant-transp', 'older-preference', 'preferential_+_advection-dispersion']), default='complete-mixing')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'time-variant', 'power', 'time-variant_power', 'time-variant-transp', 'older-preference', 'preferential_+_advection-dispersion']), default='advection-dispersion')
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
@@ -219,15 +219,19 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
                         if var_sim not in list(f.dimensions.keys()) and ('x', 'y', 'Time') == var_obj.dimensions:
                             v = f.create_variable(var_sim, ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
                             vals = onp.array(var_obj)
-                            vals_rep = onp.repeat(vals, n_repeat, axis=0)
-                            v[:, :, :] = vals_rep
+                            for i in range(int(nsamples/split_size)):
+                                x1 = x1x2[i]
+                                x2 = x1x2[i+1]
+                                v[x1:x2, :, :] = vals
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
                         elif var_sim not in list(f.dimensions.keys()) and ('x', 'y') == var_obj.dimensions:
                             v = f.create_variable(var_sim, ('x', 'y'), float, compression="gzip", compression_opts=1)
                             vals = onp.array(var_obj)
-                            vals_rep = onp.repeat(vals, n_repeat, axis=0)
-                            v[:, :] = vals_rep
+                            for i in range(int(nsamples/split_size)):
+                                x1 = x1x2[i]
+                                x2 = x1x2[i+1]
+                                v[x1:x2, :] = vals
                             v.attrs.update(long_name=var_obj.attrs["long_name"],
                                            units=var_obj.attrs["units"])
 
@@ -843,9 +847,12 @@ def main(nsamples, transport_model_structure, split_size, sas_solver, tmp_dir):
     click.echo(f'Write states of best hydrologic simulation corresponding to {tms} ...')
 
     # write states of best hydrologic simulation corresponding to best transport simulation
-    states_hm_mc_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
-    ds_hm_for_tm_mc = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
-    ds_hm_best = ds_sim_hm.loc[dict(x=idx_best)]
+    if tms in ['complete-mixing', 'piston']:
+        states_hm_file = base_path / sas_solver / age_max / metric_for_optimization / f"states_hm{nruns_hm}.nc"
+    else:
+        states_hm_file = base_path / sas_solver / age_max / metric_for_optimization / "states_hm_for_tm_mc.nc"
+    ds_hm_for_tm_mc = xr.open_dataset(states_hm_file, engine="h5netcdf")
+    ds_hm_best = ds_hm_for_tm_mc.loc[dict(x=idx_best)]
     ds_hm_best.attrs['title'] = f'Best hydrologic simulation corresponding to best {tms} oxygen-18 simulation'
     days = date2num(ds_hm_best["Time"].values.astype('M8[ms]').astype('O'), units=f"days since {ds_hm_for_tm_mc['Time'].attrs['time_origin']}", calendar='standard')
     ds_hm_best = ds_hm_best.assign_coords(Time=("Time", days))
