@@ -1190,92 +1190,92 @@ def main(tmp_dir):
     #     path = base_path_figs / file
     #     fig.savefig(path, dpi=250)
 
-    # # load metrics of transport simulations
-    # dict_params_metrics_tm_mc = {}
-    # for tm_structure in tm_structures:
-    #     tms = tm_structure.replace(" ", "_")
-    #     file = base_path / "svat_oxygen18_monte_carlo" / "results" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm100" / f"params_metrics_{tms}.txt"
-    #     df_params_metrics = pd.read_csv(file, sep="\t")
-    #     dict_params_metrics_tm_mc[tm_structure] = {}
-    #     dict_params_metrics_tm_mc[tm_structure]['params_metrics'] = df_params_metrics
+    # load metrics of transport simulations
+    dict_params_metrics_tm_mc = {}
+    for tm_structure in tm_structures:
+        tms = tm_structure.replace(" ", "_")
+        file = base_path / "svat_oxygen18_monte_carlo" / "results" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm100" / f"params_metrics_{tms}.txt"
+        df_params_metrics = pd.read_csv(file, sep="\t")
+        dict_params_metrics_tm_mc[tm_structure] = {}
+        dict_params_metrics_tm_mc[tm_structure]['params_metrics'] = df_params_metrics
 
-    # # dotty plots of transport simulations
-    # fig, axes = plt.subplots(6, 4, sharey=True, figsize=(6, 6))
-    # for ncol, tm_structure in enumerate(tm_structures):
-    #     tms = tm_structure.replace(" ", "_")
-    #     df_params_metrics = dict_params_metrics_tm_mc[tm_structure]['params_metrics']
-    #     df_metrics = df_params_metrics.loc[:, ['KGE_C_iso_q_ss']]
-    #     df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
-    #     # select best model run
-    #     idx_best = df_params_metrics['KGE_C_iso_q_ss'].idxmax()
-    #     for nrow, param_name in enumerate(df_params.columns):
-    #         y = df_metrics.loc[:, 'KGE_C_iso_q_ss']
-    #         x = df_params.loc[:, param_name]
-    #         axes[nrow, ncol].scatter(x, y, s=1, c='grey', alpha=0.5)
-    #         xlabel = labs._LABS[param_name]
-    #         axes[nrow, ncol].set_xlabel(xlabel)
-    #         axes[nrow, ncol].set_ylabel('')
-    #         axes[nrow, ncol].set_ylim((-1, 0.7))
-    #         # best model run
-    #         y_best = df_metrics.iloc[idx_best, 0]
-    #         x_best = df_params.iloc[idx_best, nrow]
-    #         axes[nrow, ncol].scatter(x_best, y_best, s=2, c='red', alpha=1)
+    # dotty plots of transport simulations
+    fig, axes = plt.subplots(6, 4, sharey=True, figsize=(6, 6))
+    for ncol, tm_structure in enumerate(tm_structures):
+        tms = tm_structure.replace(" ", "_")
+        df_params_metrics = dict_params_metrics_tm_mc[tm_structure]['params_metrics']
+        df_metrics = df_params_metrics.loc[:, ['KGE_C_iso_q_ss']]
+        df_params = df_params_metrics.loc[:, ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']]
+        # select best model run
+        idx_best = df_params_metrics['KGE_C_iso_q_ss'].idxmax()
+        for nrow, param_name in enumerate(df_params.columns):
+            y = df_metrics.loc[:, 'KGE_C_iso_q_ss']
+            x = df_params.loc[:, param_name]
+            axes[nrow, ncol].scatter(x, y, s=1, c='grey', alpha=0.5)
+            xlabel = labs._LABS[param_name]
+            axes[nrow, ncol].set_xlabel(xlabel)
+            axes[nrow, ncol].set_ylabel('')
+            axes[nrow, ncol].set_ylim((-1, 0.7))
+            # best model run
+            y_best = df_metrics.iloc[idx_best, 0]
+            x_best = df_params.iloc[idx_best, nrow]
+            axes[nrow, ncol].scatter(x_best, y_best, s=2, c='red', alpha=1)
 
-    #     axes[0, ncol].set_title(_LABS_TM[tm_structure])
+        axes[0, ncol].set_title(_LABS_TM[tm_structure])
 
-    # for j in range(6):
-    #     axes[j, 0].set_ylabel(r'$KGE$ [-]')
+    for j in range(6):
+        axes[j, 0].set_ylabel(r'$KGE$ [-]')
 
-    # fig.tight_layout()
-    # file = base_path_figs / f"dotty_plots_hm_params_kge_d18O_perc_optimized_with_{metric_for_opt}.png"
-    # fig.savefig(file, dpi=250)
-    # plt.close('all')
+    fig.tight_layout()
+    file = base_path_figs / f"dotty_plots_hm_params_kge_d18O_perc_optimized_with_{metric_for_opt}.png"
+    fig.savefig(file, dpi=250)
+    plt.close('all')
 
-    # fig, axes = plt.subplots(9, 2, sharey=True, figsize=(3, 9))
-    # for ncol, tm_structure in enumerate(tm_structures[2:]):
-    #     tms = tm_structure.replace(" ", "_")
-    #     df_params_metrics = dict_params_metrics_tm_mc[tm_structure]['params_metrics']
-    #     df_metrics = df_params_metrics.loc[:, ['KGE_C_iso_q_ss']]
-    #     if tm_structure == "advection-dispersion":
-    #         df_params = df_params_metrics.loc[:, ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
-    #     elif tm_structure == "time-variant advection-dispersion":
-    #         df_params = df_params_metrics.loc[:, ['a_transp', 'b1_transp', 'b2_transp', 'a1_q_rz', 'a2_q_rz', 'b_q_rz', 'a1_q_ss', 'a2_q_ss', 'b_q_ss']]
-    #     # select best model run
-    #     idx_best = df_params_metrics['KGE_C_iso_q_ss'].idxmax()
-    #     for nrow, param_name in enumerate(df_params.columns):
-    #         y = df_metrics.loc[:, 'KGE_C_iso_q_ss']
-    #         x = df_params.loc[:, param_name]
-    #         axes[nrow, ncol].scatter(x, y, s=1, c='grey', alpha=0.5)
-    #         xlabel = labs._LABS[param_name]
-    #         axes[nrow, ncol].set_xlabel(xlabel)
-    #         axes[nrow, ncol].set_ylabel('')
-    #         axes[nrow, ncol].set_ylim((0.2, 0.6))
-    #         # best model run
-    #         y_best = df_metrics.iloc[idx_best, 0]
-    #         x_best = df_params.iloc[idx_best, nrow]
-    #         axes[nrow, ncol].scatter(x_best, y_best, s=2, c='red', alpha=1)
+    fig, axes = plt.subplots(9, 2, sharey=True, figsize=(3, 9))
+    for ncol, tm_structure in enumerate(tm_structures[2:]):
+        tms = tm_structure.replace(" ", "_")
+        df_params_metrics = dict_params_metrics_tm_mc[tm_structure]['params_metrics']
+        df_metrics = df_params_metrics.loc[:, ['KGE_C_iso_q_ss']]
+        if tm_structure == "advection-dispersion":
+            df_params = df_params_metrics.loc[:, ['a_transp', 'b_transp', 'a_q_rz', 'b_q_rz', 'a_q_ss', 'b_q_ss']]
+        elif tm_structure == "time-variant advection-dispersion":
+            df_params = df_params_metrics.loc[:, ['a_transp', 'b1_transp', 'b2_transp', 'a1_q_rz', 'a2_q_rz', 'b_q_rz', 'a1_q_ss', 'a2_q_ss', 'b_q_ss']]
+        # select best model run
+        idx_best = df_params_metrics['KGE_C_iso_q_ss'].idxmax()
+        for nrow, param_name in enumerate(df_params.columns):
+            y = df_metrics.loc[:, 'KGE_C_iso_q_ss']
+            x = df_params.loc[:, param_name]
+            axes[nrow, ncol].scatter(x, y, s=1, c='grey', alpha=0.5)
+            xlabel = labs._LABS[param_name]
+            axes[nrow, ncol].set_xlabel(xlabel)
+            axes[nrow, ncol].set_ylabel('')
+            axes[nrow, ncol].set_ylim((0.2, 0.6))
+            # best model run
+            y_best = df_metrics.iloc[idx_best, 0]
+            x_best = df_params.iloc[idx_best, nrow]
+            axes[nrow, ncol].scatter(x_best, y_best, s=2, c='red', alpha=1)
 
-    #     for nrow in range(9):
-    #         if not axes[nrow, ncol].has_data():
-    #             axes[nrow, ncol].set_axis_off()
+        for nrow in range(9):
+            if not axes[nrow, ncol].has_data():
+                axes[nrow, ncol].set_axis_off()
 
-    #     axes[0, ncol].set_title(_LABS_TM[tm_structure])
+        axes[0, ncol].set_title(_LABS_TM[tm_structure])
 
-    # for j in range(9):
-    #     axes[j, 0].set_ylabel(r'$KGE$ [-]')
+    for j in range(9):
+        axes[j, 0].set_ylabel(r'$KGE$ [-]')
 
-    # fig.tight_layout()
-    # file = base_path_figs / f"dotty_plots_sas_params_kge_d18O_perc_optimized_with_{metric_for_opt}.png"
-    # fig.savefig(file, dpi=250)
-    # plt.close('all')
+    fig.tight_layout()
+    file = base_path_figs / f"dotty_plots_sas_params_kge_d18O_perc_optimized_with_{metric_for_opt}.png"
+    fig.savefig(file, dpi=250)
+    plt.close('all')
 
-    # # write evaluation metrics for different storage condtions to .txt
-    # df_kge_d18O_perc = pd.DataFrame(columns=['CM', 'PI', 'AD', 'AD-TV'])
-    # for ncol, tm_structure in enumerate(tm_structures):
-    #     for sc in ['', 'dry', 'normal', 'wet']:
-    #         df_kge_d18O_perc.loc[f'{sc}', df_kge_d18O_perc.columns[ncol]] = onp.max(dict_params_metrics_tm_mc[tm_structure]['params_metrics'][f'KGE_C_iso_q_ss{sc}'])
-    # file = base_path_figs / f"kge_d18O_perc_optimized_with_{metric_for_opt}.txt"
-    # df_kge_d18O_perc.to_csv(file, header=True, index=True, sep="\t")
+    # write evaluation metrics for different storage condtions to .txt
+    df_kge_d18O_perc = pd.DataFrame(columns=['CM', 'PI', 'AD', 'AD-TV'])
+    for ncol, tm_structure in enumerate(tm_structures):
+        for sc in ['', 'dry', 'normal', 'wet']:
+            df_kge_d18O_perc.loc[f'{sc}', df_kge_d18O_perc.columns[ncol]] = onp.max(dict_params_metrics_tm_mc[tm_structure]['params_metrics'][f'KGE_C_iso_q_ss{sc}'])
+    file = base_path_figs / f"kge_d18O_perc_optimized_with_{metric_for_opt}.txt"
+    df_kge_d18O_perc.to_csv(file, header=True, index=True, sep="\t")
 
     # # compare best model runs
     # fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))

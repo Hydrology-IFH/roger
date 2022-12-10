@@ -167,9 +167,9 @@ def main(tmp_dir):
                         sim_vals = df_eval.loc[:, 'sim'].values
                         key_kge = 'KGE_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-                        key_kge_alpha = 'KGE_alpha_' + var_sim
+                        key_kge_alpha = 'KGE_alpha_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
-                        key_kge_beta = 'KGE_beta_' + var_sim
+                        key_kge_beta = 'KGE_beta_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
                         key_r = 'r_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
@@ -236,19 +236,19 @@ def main(tmp_dir):
 
                     else:
                         # skip first seven days for warmup
-                        df_eval.loc[:'1998-01-01', :] = onp.nan
+                        df_eval.loc[:'1997-01-07', :] = onp.nan
                         df_eval = df_eval.dropna()
                         obs_vals = df_eval.loc[:, 'obs'].values
                         sim_vals = df_eval.loc[:, 'sim'].values
                         key_kge = 'KGE_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-                        key_kge_alpha = 'KGE_alpha_' + var_sim
+                        key_kge_alpha = 'KGE_alpha_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
-                        key_kge_beta = 'KGE_beta_' + var_sim
+                        key_kge_beta = 'KGE_beta_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
                         key_r = 'r_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
-                        key_relsum = 'rel_sum_' + var_sim
+                        key_relsum = 'rel_sum_' + var_sim + f'{sc1}'
                         df_params_metrics.loc[nrow, key_relsum] = onp.sum(sim_vals) / onp.sum(obs_vals)
                         cond0 = (df_eval['obs'] == 0)
                         if cond0.any():
