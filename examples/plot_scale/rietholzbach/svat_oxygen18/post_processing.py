@@ -380,8 +380,10 @@ def main(tmp_dir, sas_solver):
         df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals_bs, df_obs)
         df_eval = df_eval.dropna()
         # plot observed and simulated d18O in percolation
-        ax.plot(ds_sim_tm.Time.values, ds_sim_tm['C_iso_q_ss'].isel(x=0, y=0).values, color='red', zorder=2)
-        ax.scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=4, zorder=3)
+        sim_vals = ds_sim_tm['C_iso_q_ss'].isel(x=0, y=0).values
+        sim_vals = onp.where((sim_vals > 0), onp.nan, sim_vals)
+        ax.plot(ds_sim_tm.Time.values, sim_vals, color='red', zorder=2)
+        ax.scatter(df_eval.index, df_eval.iloc[:, 1], color='blue', s=1, zorder=3)
         # write figure to .png
         ax.set_ylabel(r'$\delta^{18}$O [‰]')
         ax.set_xlabel('Time [year]')

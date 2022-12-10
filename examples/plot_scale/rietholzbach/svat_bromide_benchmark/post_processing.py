@@ -215,7 +215,7 @@ def main(tmp_dir, transport_model_structure, sas_solver):
             ds_sim_tm = ds_sim_tm.load()  # required to release file lock
             ds_sim_tm = ds_sim_tm.close()
             del ds_sim_tm
-            states_tm_file = base_path / sas_solver / f"states_{tms}_bromide_benchmark.nc"
+            states_tm_file = base_path / sas_solver / f"states_{transport_model_structure}_bromide_benchmark.nc"
             with h5netcdf.File(states_tm_file, 'a', decode_vlen_strings=False) as f:
                 try:
                     v = f.groups[f"{year}"].create_variable('C_q_ss_mmol_bs', ('x', 'y', 'Time'), float, compression="gzip", compression_opts=1)
