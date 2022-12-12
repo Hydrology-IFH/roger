@@ -1749,7 +1749,29 @@ def main(tmp_dir):
     # TT = onp.where(ds_hydrus_tt['bTT_perc'].values <= 0, onp.nan, ds_hydrus_tt['bTT_perc'].values)
     # skipt = 1000
     # df_age.iloc['MTT', 'HYDRUS-1D'] = onp.nanmean(TT[skipt:, :], axis=0)
-    #
+
+    for i, tm_structure in enumerate(tm_structures):
+        df_params_metrics10 = dict_params_metrics_tm_mc[tm_structure]['params_metrics'].copy()
+        df_params_metrics10.loc[:, 'id'] = range(len(df_params_metrics10.index))
+        df_params_metrics10 = df_params_metrics10.sort_values(by=[metric_for_opt], ascending=False)
+        df_for_diag10 = df_params_metrics10.loc[:df_params_metrics10.index[9], :]
+
+        var_sim = 'dS'
+        fig = de.diag_polar_plot_multi(df_for_diag10.loc[:, f'brel_mean_{var_sim}'].values,
+                                       df_for_diag10.loc[:, f'temp_cor_{var_sim}'].values,
+                                       df_for_diag10.loc[:, f'DE_{var_sim}'].values,
+                                       df_for_diag10.loc[:, f'b_dir_{var_sim}'].values,
+                                       df_for_diag10.loc[:, f'phi_{var_sim}'].values,
+                                       df_for_diag10.loc[:, f'b_hf_{var_sim}'].values,
+                                       df_for_diag10.loc[:, f'b_lf_{var_sim}'].values,
+                                       df_for_diag10.loc[:, f'b_tot_{var_sim}'].values,
+                                       df_for_diag10.loc[:, f'err_hf_{var_sim}'].values,
+                                       df_for_diag10.loc[:, f'err_lf_{var_sim}'].values)
+        file = f'diag_polar_plot_{var_sim}_10_optimized_with_{metric_for_opt}.png'
+        path = base_path_figs / file
+        # fig.tight_layout()
+        fig.savefig(path, dpi=250)
+
     # perform sensitivity analysis
     dict_params_metrics_tm_sa = {}
     for tm_structure in tm_structures:
