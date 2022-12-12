@@ -1607,54 +1607,54 @@ def main(tmp_dir):
     # file = base_path_figs / f"fdc_d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"
     # fig.savefig(file, dpi=250)
 
-    # bromide benchmark
-    years = onp.arange(1997, 2007).tolist()
-    cmap = cm.get_cmap('Reds')
-    cmap_hydrus = cm.get_cmap('Greys')
-    norm = Normalize(vmin=onp.min(years)-2, vmax=onp.max(years))
-    fig, axes = plt.subplots(5, 1, figsize=(6, 5), sharey=False)
-    for i, tm_structure in enumerate(tm_structures):
-        tms = tm_structure.replace(" ", "_")
-        df_sim_br_conc = pd.DataFrame(index=df_obs_br.index)
-        df_sim_br_mass = pd.DataFrame(index=df_obs_br.index)
-        for year in years:
-            states_hydrus_br_file = base_path / "svat_bromide_benchmark" / "deterministic" / f"states_{tms}_bromide_benchmark.nc"
-            with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
-                x = onp.where((ds["alpha_transp"].isel(Time=0).values == 0.7) & (ds["alpha_q"].isel(Time=0).values == 0.7))[0][0]
-                sim_vals = ds["C_q_ss_mmol_bs"].isel(x=x, y=0).values[315:716]
-                sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
-                df_sim_br_conc.loc[:, f"{year}"] = sim_vals
-                sim_vals = ds["M_q_ss"].isel(x=x, y=0).values[315:716]
-                sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
-                df_sim_br_mass.loc[:, f"{year}"] = sim_vals
-            axes.flatten()[i].plot(df_sim_br_conc.dropna().index, df_sim_br_conc.dropna()[f"{year}"], ls='--', color=cmap(norm(year)), lw=0.8, alpha=0.6, label=f'{year}')
-        weights = df_sim_br_mass.values / df_sim_br_mass.sum(axis=1).values[:, onp.newaxis]
-        df_sim_br_conc.loc[:, "avg_weighted"] = onp.sum(weights * df_sim_br_conc.values, axis=1)
-        axes.flatten()[i].plot(df_sim_br_conc.dropna().index, df_sim_br_conc.dropna().loc[:, "avg_weighted"], color="red", lw=1, alpha=1, label='average')
-        axes.flatten()[i].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1)
-        axes.flatten()[i].set_xlim([0, 400])
-        axes.flatten()[i].set_ylabel('Bromide\n [mmol/l]')
-        axes.flatten()[i].set_title(_LABS_TM[tm_structure], fontsize=8)
-    df_sim_br = pd.DataFrame(index=df_obs_br.index)
-    for year in years:
-        states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
-        with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
-            df_sim_br = pd.DataFrame(index=df_obs_br.index)
-            df_sim_br.loc[:, f"{year}"] = ds["Br_perc_mmol"].values
-        axes.flatten()[-1].plot(df_sim_br.dropna().index, df_sim_br.dropna()[f"{year}"], ls='--', color=cmap_hydrus(norm(year)), lw=0.8, alpha=0.5, label=f'{year}')
-    axes.flatten()[-1].plot(df_sim_br.dropna().index, df_sim_br.dropna().mean(axis=1), color="grey", lw=1, alpha=1, label='average')
-    axes.flatten()[-1].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1, label='observed')
-    axes.flatten()[-1].set_xlim([0, 400])
-    axes.flatten()[-1].set_ylabel('Bromide\n [mmol/l]')
-    axes.flatten()[-1].set_xlabel(r'Time [days since injection]')
-    axes.flatten()[-1].set_title('HYDRUS-1D', fontsize=8)
-    lines1, labels1 = axes.flatten()[-2].get_legend_handles_labels()
-    lines2, labels2 = axes.flatten()[-1].get_legend_handles_labels()
-    fig.legend(lines1, labels1, loc='upper right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.64))
-    fig.legend(lines2, labels2, loc='lower right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.07))
-    fig.subplots_adjust(bottom=0.1, right=0.85, hspace=0.8)
-    file = base_path_figs / "bromide_benchmark.png"
-    fig.savefig(file, dpi=250)
+    # # bromide benchmark
+    # years = onp.arange(1997, 2007).tolist()
+    # cmap = cm.get_cmap('Reds')
+    # cmap_hydrus = cm.get_cmap('Greys')
+    # norm = Normalize(vmin=onp.min(years)-2, vmax=onp.max(years))
+    # fig, axes = plt.subplots(5, 1, figsize=(6, 5), sharey=False)
+    # for i, tm_structure in enumerate(tm_structures):
+    #     tms = tm_structure.replace(" ", "_")
+    #     df_sim_br_conc = pd.DataFrame(index=df_obs_br.index)
+    #     df_sim_br_mass = pd.DataFrame(index=df_obs_br.index)
+    #     for year in years:
+    #         states_hydrus_br_file = base_path / "svat_bromide_benchmark" / "deterministic" / f"states_{tms}_bromide_benchmark.nc"
+    #         with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
+    #             x = onp.where((ds["alpha_transp"].isel(Time=0).values == 0.7) & (ds["alpha_q"].isel(Time=0).values == 0.7))[0][0]
+    #             sim_vals = ds["C_q_ss_mmol_bs"].isel(x=x, y=0).values[315:716]
+    #             sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
+    #             df_sim_br_conc.loc[:, f"{year}"] = sim_vals
+    #             sim_vals = ds["M_q_ss"].isel(x=x, y=0).values[315:716]
+    #             sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
+    #             df_sim_br_mass.loc[:, f"{year}"] = sim_vals
+    #         axes.flatten()[i].plot(df_sim_br_conc.dropna().index, df_sim_br_conc.dropna()[f"{year}"], ls='--', color=cmap(norm(year)), lw=0.8, alpha=0.6, label=f'{year}')
+    #     weights = df_sim_br_mass.values / df_sim_br_mass.sum(axis=1).values[:, onp.newaxis]
+    #     df_sim_br_conc.loc[:, "avg_weighted"] = onp.sum(weights * df_sim_br_conc.values, axis=1)
+    #     axes.flatten()[i].plot(df_sim_br_conc.dropna().index, df_sim_br_conc.dropna().loc[:, "avg_weighted"], color="red", lw=1, alpha=1, label='average')
+    #     axes.flatten()[i].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1)
+    #     axes.flatten()[i].set_xlim([0, 400])
+    #     axes.flatten()[i].set_ylabel('Bromide\n [mmol/l]')
+    #     axes.flatten()[i].set_title(_LABS_TM[tm_structure], fontsize=8)
+    # df_sim_br = pd.DataFrame(index=df_obs_br.index)
+    # for year in years:
+    #     states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
+    #     with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
+    #         df_sim_br = pd.DataFrame(index=df_obs_br.index)
+    #         df_sim_br.loc[:, f"{year}"] = ds["Br_perc_mmol"].values
+    #     axes.flatten()[-1].plot(df_sim_br.dropna().index, df_sim_br.dropna()[f"{year}"], ls='--', color=cmap_hydrus(norm(year)), lw=0.8, alpha=0.5, label=f'{year}')
+    # axes.flatten()[-1].plot(df_sim_br.dropna().index, df_sim_br.dropna().mean(axis=1), color="grey", lw=1, alpha=1, label='average')
+    # axes.flatten()[-1].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1, label='observed')
+    # axes.flatten()[-1].set_xlim([0, 400])
+    # axes.flatten()[-1].set_ylabel('Bromide\n [mmol/l]')
+    # axes.flatten()[-1].set_xlabel(r'Time [days since injection]')
+    # axes.flatten()[-1].set_title('HYDRUS-1D', fontsize=8)
+    # lines1, labels1 = axes.flatten()[-2].get_legend_handles_labels()
+    # lines2, labels2 = axes.flatten()[-1].get_legend_handles_labels()
+    # fig.legend(lines1, labels1, loc='upper right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.64))
+    # fig.legend(lines2, labels2, loc='lower right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.07))
+    # fig.subplots_adjust(bottom=0.1, right=0.85, hspace=0.8)
+    # file = base_path_figs / "bromide_benchmark.png"
+    # fig.savefig(file, dpi=250)
 
     # # travel time benchmark
     # # compare backward travel time distributions
@@ -1750,119 +1750,257 @@ def main(tmp_dir):
     # skipt = 1000
     # df_age.iloc['MTT', 'HYDRUS-1D'] = onp.nanmean(TT[skipt:, :], axis=0)
     #
-    # # perform sensitivity analysis
-    # dict_params_metrics_tm_sa = {}
-    # for tm_structure in tm_structures:
-    #     tms = tm_structure.replace(" ", "_")
-    #     file = base_path / "svat_oxygen18_sensitivity" / "results" / "deterministic" / f"params_metrics_{tms}.txt"
-    #     df_params_metrics = pd.read_csv(file, sep="\t")
-    #     dict_params_metrics_tm_sa[tm_structure] = {}
-    #     dict_params_metrics_tm_sa[tm_structure]['params_metrics'] = df_params_metrics
-    #
-    # # sampled parameter space
-    # file_path = base_path / "svat_oxygen18_sensitivity" / "param_bounds.yml"
-    # with open(file_path, 'r') as file:
-    #     bounds = yaml.safe_load(file)
-    #
-    # _LABS_TITLE = {'KGE_C_iso_q_ss': 'KGE',
-    #                'ttavg_transp': r'$\overline{TT_{transp}}$',
-    #                'tt25_transp': r'$TT_{25-transp}$',
-    #                'tt50_transp': r'$TT_{50-transp}$',
-    #                'tt75_transp': r'$TT_{75-transp}$',
-    #                'ttavg_q_rz': r'$\overline{TT_{perc_{rz}}}$',
-    #                'tt25_q_rz': r'$TT_{25-perc_{rz}}$',
-    #                'tt50_q_rz': r'$TT_{50-perc_{rz}}$',
-    #                'tt75_q_rz': r'$TT_{75-perc_{rz}}$',
-    #                'ttavg_q_ss': r'$\overline{TT_{perc_{ss}}}$',
-    #                'tt25_q_ss': r'$TT_{25-perc_{ss}}$',
-    #                'tt50_q_ss': r'$TT_{50-perc_{ss}}$',
-    #                'tt75_q_ss': r'$TT_{75-perc_{ss}}$',
-    #                'rtavg_s': r'$\overline{RT}$',
-    #                'rt25_s': r'$RT_{25}$',
-    #                'rt50_s': r'$RT_{50}$',
-    #                'rt75_s': r'$RT_{75}$',
-    #                }
-    # metrics_tt = ['ttavg', 'tt25', 'tt50', 'tt75']
-    # for metric_tt in metrics_tt:
-    #     metrics_sa = [f'{metric_tt}_transp', f'{metric_tt}_q_rz', f'{metric_tt}_q_ss']
-    #     ncol = len(metrics_sa)
-    #     nrow = len(tm_structures)
-    #     cmap = cm.get_cmap('Greys')
-    #     norm = Normalize(vmin=0, vmax=2)
-    #     colors = cmap(norm([0.5, 1.5]))
-    #     fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(6, 6))
-    #     for j, tm_structure in enumerate(tm_structures):
-    #         tms = tm_structure.replace(" ", "_")
-    #         states_tm_file = base_path / "svat_oxygen18_sensitivity" / f"states_{tms}_saltelli.nc"
-    #         ds_tm_sa = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
-    #         tms = tm_structure.replace(" ", "_")
-    #         # df_params_metrics = dict_params_metrics_tm_sa[tm_structure]['params_metrics']
-    #         # df_metrics = df_params_metrics.loc[:, metrics_sa]
-    #         dict_si = {}
-    #         for name in metrics_sa:
-    #             Y = onp.nanmean(ds_tm_sa[name].isel(y=0).values, axis=-1)
-    #             Si = sobol.analyze(bounds[tm_structure], Y, calc_second_order=False)
-    #             Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
-    #             dict_si[name] = pd.DataFrame(Si_filter, index=bounds[tm_structure]['names'])
+    # perform sensitivity analysis
+    dict_params_metrics_tm_sa = {}
+    for tm_structure in tm_structures:
+        tms = tm_structure.replace(" ", "_")
+        file = base_path / "svat_oxygen18_sensitivity" / "results" / "deterministic" / "age_max_1500_days" / f"params_metrics_{tms}.txt"
+        df_params_metrics = pd.read_csv(file, sep="\t")
+        dict_params_metrics_tm_sa[tm_structure] = {}
+        dict_params_metrics_tm_sa[tm_structure]['params_metrics'] = df_params_metrics
 
-    #         # plot sobol indices
-    #         xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds[tm_structure]['names']]
-    #         colors = cmap(norm([0.5, 1.5]))
-    #         for i, name in enumerate(metrics_sa):
-    #             indices = dict_si[name][['S1', 'ST']]
-    #             err = dict_si[name][['S1_conf', 'ST_conf']]
-    #             indices.plot.bar(yerr=err.values.T, ax=ax[j, i], color=colors)
-    #             ax[j, i].set_xticklabels(xaxis_labels)
-    #             ax[0, i].set_title(_LABS_TITLE[name])
-    #             ax[j, i].legend(["First-order", "Total"], frameon=False)
-    #             ax[j, i].legend().set_visible(False)
-    #     ax[-1, -1].legend().set_visible(True)
-    #     ax[-1, -1].legend(["First-order", "Total"], frameon=False, loc='upper right', fontsize=6, bbox_to_anchor=(1.8, 1.1))
-    #     ax[0, 0].set_ylabel('AD\nSobol index [-]')
-    #     ax[1, 0].set_ylabel('AD-TV\nSobol index [-]')
-    #     fig.subplots_adjust(bottom=0.2, right=0.85, hspace=0.65)
-    #     file = base_path_figs / f"sobol_indices_{metric_tt}.png"
-    #     fig.savefig(file, dpi=250)
+    # sampled parameter space
+    file_path = base_path / "svat_oxygen18_sensitivity" / "param_bounds.yml"
+    with open(file_path, 'r') as file:
+        bounds = yaml.safe_load(file)
 
-    # metrics_sa = ['rtavg_s', 'rt25_s', 'rt50_s', 'rt75_s']
-    # ncol = len(metrics_sa)
-    # nrow = len(tm_structures)
-    # cmap = cm.get_cmap('Greys')
-    # norm = Normalize(vmin=0, vmax=2)
-    # colors = cmap(norm([0.5, 1.5]))
-    # fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(6, 6))
-    # for j, tm_structure in enumerate(tm_structures):
-    #     tms = tm_structure.replace(" ", "_")
-    #     states_tm_file = base_path / "svat_oxygen18_sensitivity" / f"states_{tms}_saltelli.nc"
-    #     ds_tm_sa = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
-    #     tms = tm_structure.replace(" ", "_")
-    #     # df_params_metrics = dict_params_metrics_tm_sa[tm_structure]['params_metrics']
-    #     # df_metrics = df_params_metrics.loc[:, metrics_sa]
-    #     dict_si = {}
-    #     for name in metrics_sa:
-    #         Y = onp.nanmean(ds_tm_sa[name].isel(y=0).values, axis=-1)
-    #         Si = sobol.analyze(bounds[tm_structure], Y, calc_second_order=False)
-    #         Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
-    #         dict_si[name] = pd.DataFrame(Si_filter, index=bounds[tm_structure]['names'])
+    _LABS_TITLE = {'KGE_C_iso_q_ss': 'KGE',
+                   'ttavg_transp': r'$\overline{TT_{transp}}$',
+                   'tt25_transp': r'$TT_{25-transp}$',
+                   'tt50_transp': r'$TT_{50-transp}$',
+                   'tt75_transp': r'$TT_{75-transp}$',
+                   'ttavg_q_ss': r'$\overline{TT_{perc_{ss}}}$',
+                   'tt25_q_ss': r'$TT_{25-perc_{ss}}$',
+                   'tt50_q_ss': r'$TT_{50-perc_{ss}}$',
+                   'tt75_q_ss': r'$TT_{75-perc_{ss}}$',
+                   'rtavg_s': r'$\overline{RT}$',
+                   'rt25_s': r'$RT_{25}$',
+                   'rt50_s': r'$RT_{50}$',
+                   'rt75_s': r'$RT_{75}$',
+                   }
+    metrics_tt = ['ttavg', 'tt25', 'tt50', 'tt75']
+    for metric_tt in metrics_tt:
+        metrics_sa = [f'{metric_tt}_transp', f'{metric_tt}_q_ss']
+        ncol = len(metrics_sa)
+        nrow = len(tm_structures)
+        cmap = cm.get_cmap('Greys')
+        norm = Normalize(vmin=0, vmax=2)
+        colors = cmap(norm([0.5, 1.5]))
+        fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(6, 6))
+        for j, tm_structure in enumerate(tm_structures):
+            tms = tm_structure.replace(" ", "_")
+            df_params_metrics = dict_params_metrics_tm_sa[tm_structure]['params_metrics']
+            dict_si = {}
+            for name in metrics_sa:
+                Y = df_params_metrics.loc[:, name].values
+                Si = sobol.analyze(bounds[tm_structure], Y, calc_second_order=False)
+                Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
+                dict_si[name] = pd.DataFrame(Si_filter, index=bounds[tm_structure]['names'])
 
-    #     # plot sobol indices
-    #     xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds[tm_structure]['names']]
-    #     colors = cmap(norm([0.5, 1.5]))
-    #     for i, name in enumerate(metrics_sa):
-    #         indices = dict_si[name][['S1', 'ST']]
-    #         err = dict_si[name][['S1_conf', 'ST_conf']]
-    #         indices.plot.bar(yerr=err.values.T, ax=ax[j, i], color=colors)
-    #         ax[j, i].set_xticklabels(xaxis_labels)
-    #         ax[0, i].set_title(_LABS_TITLE[name])
-    #         ax[j, i].legend(["First-order", "Total"], frameon=False)
-    #         ax[j, i].legend().set_visible(False)
-    # ax[-1, -1].legend().set_visible(True)
-    # ax[-1, -1].legend(["First-order", "Total"], frameon=False, loc='upper right', fontsize=6, bbox_to_anchor=(1.8, 1.1))
-    # ax[0, 0].set_ylabel('AD\nSobol index [-]')
-    # ax[1, 0].set_ylabel('AD-TV\nSobol index [-]')
-    # fig.subplots_adjust(bottom=0.2, right=0.85, hspace=0.65)
-    # file = base_path_figs / "sobol_indices_rt.png"
-    # fig.savefig(file, dpi=250)
+            # plot sobol indices
+            xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds[tm_structure]['names']][:8]
+            colors = cmap(norm([0.5, 1.5]))
+            for i, name in enumerate(metrics_sa):
+                indices = dict_si[name][['S1', 'ST']].iloc[:8, :]
+                err = dict_si[name][['S1_conf', 'ST_conf']].iloc[:8, :]
+                indices.plot.bar(yerr=err.values.T, ax=ax[j, i], color=colors, width=1.0)
+                ax[j, i].set_xticklabels(xaxis_labels)
+                ax[0, i].set_title(_LABS_TITLE[name])
+                ax[j, i].legend(["First-order", "Total"], frameon=False)
+                ax[j, i].legend().set_visible(False)
+        ax[-1, -1].legend().set_visible(True)
+        ax[-1, -1].legend(["First-order", "Total"], frameon=False, loc='upper right', fontsize=6, bbox_to_anchor=(1.45, 1.0))
+        ax[0, 0].set_ylabel('CM\nSobol index [-]')
+        ax[1, 0].set_ylabel('PI\nSobol index [-]')
+        ax[2, 0].set_ylabel('AD\nSobol index [-]')
+        ax[3, 0].set_ylabel('AD-TV\nSobol index [-]')
+        fig.subplots_adjust(bottom=0.1, right=0.85, hspace=0.65)
+        file = base_path_figs / f"sobol_indices_{metric_tt}_hm.png"
+        fig.savefig(file, dpi=250)
+
+        metrics_sa = [f'{metric_tt}_transp', f'{metric_tt}_q_ss']
+        ncol = len(metrics_sa)
+        nrow = 2
+        cmap = cm.get_cmap('Greys')
+        norm = Normalize(vmin=0, vmax=2)
+        colors = cmap(norm([0.5, 1.5]))
+        fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(6, 3))
+        for j, tm_structure in enumerate(['power', 'time-variant power']):
+            tms = tm_structure.replace(" ", "_")
+            df_params_metrics = dict_params_metrics_tm_sa[tm_structure]['params_metrics']
+            dict_si = {}
+            for name in metrics_sa:
+                Y = df_params_metrics.loc[:, name].values
+                Si = sobol.analyze(bounds[tm_structure], Y, calc_second_order=False)
+                Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
+                dict_si[name] = pd.DataFrame(Si_filter, index=bounds[tm_structure]['names'])
+
+            # plot sobol indices
+            xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds[tm_structure]['names']][8:]
+            colors = cmap(norm([0.5, 1.5]))
+            for i, name in enumerate(metrics_sa):
+                indices = dict_si[name][['S1', 'ST']].iloc[8:, :]
+                err = dict_si[name][['S1_conf', 'ST_conf']].iloc[8:, :]
+                indices.plot.bar(yerr=err.values.T, ax=ax[j, i], color=colors)
+                ax[j, i].set_xticklabels(xaxis_labels)
+                ax[0, i].set_title(_LABS_TITLE[name])
+                ax[j, i].legend(["First-order", "Total"], frameon=False)
+                ax[j, i].legend().set_visible(False)
+        ax[-1, -1].legend().set_visible(True)
+        ax[-1, -1].legend(["First-order", "Total"], frameon=False, loc='upper right', fontsize=6, bbox_to_anchor=(1.45, 1.1))
+        ax[0, 0].set_ylabel('AD\nSobol index [-]')
+        ax[1, 0].set_ylabel('AD-TV\nSobol index [-]')
+        fig.subplots_adjust(bottom=0.2, right=0.85, hspace=0.65)
+        file = base_path_figs / f"sobol_indices_{metric_tt}_tm.png"
+        fig.savefig(file, dpi=250)
+
+    metrics_sa = ['rtavg_s', 'rt25_s', 'rt50_s', 'rt75_s']
+    ncol = len(metrics_sa)
+    nrow = len(tm_structures)
+    cmap = cm.get_cmap('Greys')
+    norm = Normalize(vmin=0, vmax=2)
+    colors = cmap(norm([0.5, 1.5]))
+    fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(6, 6))
+    for j, tm_structure in enumerate(tm_structures):
+        tms = tm_structure.replace(" ", "_")
+        df_params_metrics = dict_params_metrics_tm_sa[tm_structure]['params_metrics']
+        dict_si = {}
+        for name in metrics_sa:
+            Y = df_params_metrics.loc[:, name].values
+            Si = sobol.analyze(bounds[tm_structure], Y, calc_second_order=False)
+            Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
+            dict_si[name] = pd.DataFrame(Si_filter, index=bounds[tm_structure]['names'])
+
+        # plot sobol indices
+        xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds[tm_structure]['names']][:8]
+        colors = cmap(norm([0.5, 1.5]))
+        for i, name in enumerate(metrics_sa):
+            indices = dict_si[name][['S1', 'ST']].iloc[:8, :]
+            err = dict_si[name][['S1_conf', 'ST_conf']].iloc[:8, :]
+            indices.plot.bar(yerr=err.values.T, ax=ax[j, i], color=colors, width=1)
+            ax[j, i].set_xticklabels(xaxis_labels)
+            ax[0, i].set_title(_LABS_TITLE[name])
+            ax[j, i].legend(["First-order", "Total"], frameon=False)
+            ax[j, i].legend().set_visible(False)
+    ax[-1, -1].legend().set_visible(True)
+    ax[-1, -1].legend(["First-order", "Total"], frameon=False, loc='upper right', fontsize=6, bbox_to_anchor=(1.8, 1.1))
+    ax[0, 0].set_ylabel('CM\nSobol index [-]')
+    ax[1, 0].set_ylabel('PI\nSobol index [-]')
+    ax[2, 0].set_ylabel('AD\nSobol index [-]')
+    ax[3, 0].set_ylabel('AD-TV\nSobol index [-]')
+    fig.subplots_adjust(bottom=0.2, right=0.85, hspace=0.65)
+    file = base_path_figs / "sobol_indices_rt_hm.png"
+    fig.savefig(file, dpi=250)
+
+    ncol = len(metrics_sa)
+    nrow = 2
+    cmap = cm.get_cmap('Greys')
+    norm = Normalize(vmin=0, vmax=2)
+    colors = cmap(norm([0.5, 1.5]))
+    fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(6, 3))
+    for j, tm_structure in enumerate(['power', 'time-variant power']):
+        tms = tm_structure.replace(" ", "_")
+        df_params_metrics = dict_params_metrics_tm_sa[tm_structure]['params_metrics']
+        dict_si = {}
+        for name in metrics_sa:
+            Y = df_params_metrics.loc[:, name].values
+            Si = sobol.analyze(bounds[tm_structure], Y, calc_second_order=False)
+            Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
+            dict_si[name] = pd.DataFrame(Si_filter, index=bounds[tm_structure]['names'])
+
+        # plot sobol indices
+        xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds[tm_structure]['names']][8:]
+        colors = cmap(norm([0.5, 1.5]))
+        for i, name in enumerate(metrics_sa):
+            indices = dict_si[name][['S1', 'ST']].iloc[8:, :]
+            err = dict_si[name][['S1_conf', 'ST_conf']].iloc[8:, :]
+            indices.plot.bar(yerr=err.values.T, ax=ax[j, i], color=colors)
+            ax[j, i].set_xticklabels(xaxis_labels)
+            ax[0, i].set_title(_LABS_TITLE[name])
+            ax[j, i].legend(["First-order", "Total"], frameon=False)
+            ax[j, i].legend().set_visible(False)
+    ax[-1, -1].legend().set_visible(True)
+    ax[-1, -1].legend(["First-order", "Total"], frameon=False, loc='upper right', fontsize=6, bbox_to_anchor=(1.8, 1.1))
+    ax[0, 0].set_ylabel('AD\nSobol index [-]')
+    ax[1, 0].set_ylabel('AD-TV\nSobol index [-]')
+    fig.subplots_adjust(bottom=0.2, right=0.85, hspace=0.65)
+    file = base_path_figs / "sobol_indices_rt_tm.png"
+    fig.savefig(file, dpi=250)
+
+    metrics_sa = ['KGE_C_iso_q_ss']
+    nrow = len(metrics_sa)
+    ncol = len(tm_structures)
+    cmap = cm.get_cmap('Greys')
+    norm = Normalize(vmin=0, vmax=2)
+    colors = cmap(norm([0.5, 1.5]))
+    fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(6, 1.2))
+    for j, tm_structure in enumerate(tm_structures):
+        tms = tm_structure.replace(" ", "_")
+        df_params_metrics = dict_params_metrics_tm_sa[tm_structure]['params_metrics']
+        dict_si = {}
+        for name in metrics_sa:
+            Y = df_params_metrics.loc[:, name].values
+            Si = sobol.analyze(bounds[tm_structure], Y, calc_second_order=False)
+            Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
+            dict_si[name] = pd.DataFrame(Si_filter, index=bounds[tm_structure]['names'])
+
+        # plot sobol indices
+        xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds[tm_structure]['names']][:8]
+        colors = cmap(norm([0.5, 1.5]))
+        for i, name in enumerate(metrics_sa):
+            indices = dict_si[name][['S1', 'ST']].iloc[:8, :]
+            err = dict_si[name][['S1_conf', 'ST_conf']].iloc[:8, :]
+            indices.plot.bar(yerr=err.values.T, ax=ax[j], color=colors, width=1)
+            ax[j].set_xticklabels(xaxis_labels)
+            ax[j].legend(["First-order", "Total"], frameon=False)
+            ax[j].legend().set_visible(False)
+            ax[j].set_ylim((-0.5, 2))
+    ax[-1].legend().set_visible(True)
+    ax[-1].legend(["First-order", "Total"], frameon=False, loc='upper right', fontsize=6, bbox_to_anchor=(1.8, 1.0))
+    ax[0].set_title('CM')
+    ax[1].set_title('PI')
+    ax[2].set_title('AD')
+    ax[3].set_title('AD-TV')
+    ax[0].set_ylabel('Sobol index [-]')
+    fig.subplots_adjust(bottom=0.3, right=0.85, hspace=0.65)
+    file = base_path_figs / "sobol_indices_kge_18O_perc_hm.png"
+    fig.savefig(file, dpi=250)
+
+    nrow = len(metrics_sa)
+    ncol = 2
+    cmap = cm.get_cmap('Greys')
+    norm = Normalize(vmin=0, vmax=2)
+    colors = cmap(norm([0.5, 1.5]))
+    fig, ax = plt.subplots(nrow, ncol, sharey=True, figsize=(4, 1.2))
+    for j, tm_structure in enumerate(['power', 'time-variant power']):
+        tms = tm_structure.replace(" ", "_")
+        df_params_metrics = dict_params_metrics_tm_sa[tm_structure]['params_metrics']
+        dict_si = {}
+        for name in metrics_sa:
+            Y = df_params_metrics.loc[:, name].values
+            Si = sobol.analyze(bounds[tm_structure], Y, calc_second_order=False)
+            Si_filter = {k: Si[k] for k in ['ST', 'ST_conf', 'S1', 'S1_conf']}
+            dict_si[name] = pd.DataFrame(Si_filter, index=bounds[tm_structure]['names'])
+
+        # plot sobol indices
+        xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds[tm_structure]['names']][8:]
+        colors = cmap(norm([0.5, 1.5]))
+        for i, name in enumerate(metrics_sa):
+            indices = dict_si[name][['S1', 'ST']].iloc[8:, :]
+            err = dict_si[name][['S1_conf', 'ST_conf']].iloc[8:, :]
+            indices.plot.bar(yerr=err.values.T, ax=ax[j], color=colors, width=1)
+            ax[j].set_xticklabels(xaxis_labels)
+            ax[j].legend(["First-order", "Total"], frameon=False)
+            ax[j].legend().set_visible(False)
+            ax[j].set_ylim((-0.5, 2))
+    ax[-1].legend().set_visible(True)
+    ax[-1].legend(["First-order", "Total"], frameon=False, loc='upper right', fontsize=6, bbox_to_anchor=(1.5, 1.0))
+    ax[0].set_title('AD')
+    ax[1].set_title('AD-TV')
+    ax[0].set_ylabel('Sobol index [-]')
+    fig.subplots_adjust(bottom=0.4, right=0.8, hspace=0.65)
+    file = base_path_figs / "sobol_indices_kge_18O_perc_tm.png"
+    fig.savefig(file, dpi=250)
 
     # # dotty plots of HYDRUS-1D monte carlo simulations
     # file = base_path / "hydrus_benchmark" / "params_metrics.txt"

@@ -451,6 +451,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
         for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
             obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
             sim_vals = d18O_perc_bs[nrow, ncol, :]
+            sim_vals = onp.where((sim_vals < -20) & (sim_vals > 0), onp.nan, sim_vals)
             df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
             df_obs.loc[:, 'obs'] = obs_vals
             df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
