@@ -9,8 +9,8 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-y", "--year", type=click.Choice(['1997', '1998', '1999', '2000', '2001', '2002', '2003', '2004', '2005', '2006']), default='1997')
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'power', 'time-variant_power']), default='advection-dispersion')
+@click.option("-y", "--year", type=click.Choice(['1997', '1998', '1999', '2000', '2001', '2002', '2003', '2004', '2005', '2006']), default='2001')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'power', 'time-variant_power']), default='power')
 @click.option("-ss", "--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
@@ -55,7 +55,7 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
                 var_obj = infile.variables['Time']
                 return len(onp.array(var_obj)) * 60 * 60 * 24
 
-        def _set_bromide_input(self, state, nn_rain, nn_sol, prec, ta):
+        def _set_bromide_input(self, state, nn_rain, nn_sol, inf):
             vs = state.variables
 
             C_IN = allocate(state.dimensions, ("x", "y", "t"))
@@ -66,31 +66,30 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
                 at[2:-2, 2:-2, :], npx.arange(idx.shape[-1])[npx.newaxis, npx.newaxis, :],
             )
 
-            mask_rain = (prec > 0) & (ta > 0)
             mask_sol = (vs.M_IN > 0)
             sol_idx = npx.zeros((nn_sol,), dtype=int)
             sol_idx = update(sol_idx, at[:], where(npx.any(mask_sol, axis=(0, 1)), size=nn_sol, fill_value=0)[0])
-            rain_idx = npx.where(mask_rain, idx, 0)
+            inf_idx = npx.where((inf > 0), idx, 0)
 
             # join solute input on closest rainfall event
             for i in range(nn_sol):
-                input_itt = npx.nanargmin(npx.where(rain_idx[2:-2, 2:-2, :] - sol_idx[i] < 0, npx.nan, rain_idx[2:-2, 2:-2, :] - sol_idx[i]), axis=-1)
+                input_itt = npx.nanargmin(npx.where(inf_idx[2:-2, 2:-2, :] - sol_idx[i] < 0, npx.nan, inf_idx[2:-2, 2:-2, :] - sol_idx[i]), axis=-1)
                 for x in range(input_itt.shape[0]):
                     for y in range(input_itt.shape[1]):
-                        start_rain = input_itt[x, y]
-                        end_rain = npx.max(npx.where(npx.cumsum(prec[x+2, y+2, start_rain:]) <= 35, npx.arange(prec.shape[-1])[start_rain:], 0))
-                        if npx.sum(prec[x+2, y+2, start_rain:end_rain]) <= 0:
-                            end_rain = end_rain + 1
+                        start_inf = input_itt[x, y]
+                        end_inf = npx.max(npx.where(npx.cumsum(inf[x+2, y+2, start_inf:]) <= 40, npx.arange(inf.shape[-1])[start_inf:], 0)) + 1
+                        if npx.sum(inf[x+2, y+2, start_inf:end_inf]) <= 0:
+                            end_inf = end_inf + 1
 
                         # proportions for redistribution
                         M_IN = update(
                             M_IN,
-                            at[x+2, y+2, start_rain:end_rain], vs.M_IN[x+2, y+2, sol_idx[i]] * (prec[x+2, y+2, start_rain:end_rain] / npx.sum(prec[x+2, y+2, start_rain:end_rain])),
+                            at[x+2, y+2, start_inf:end_inf], vs.M_IN[x+2, y+2, sol_idx[i]] * (inf[x+2, y+2, start_inf:end_inf] / npx.sum(inf[x+2, y+2, start_inf:end_inf])),
                         )
 
             C_IN = update(
                 C_IN,
-                at[2:-2, 2:-2, :], npx.where(prec[2:-2, 2:-2, :] > 0, M_IN[2:-2, 2:-2, :] / prec[2:-2, 2:-2, :], 0),
+                at[2:-2, 2:-2, :], npx.where(inf[2:-2, 2:-2, :] > 0, M_IN[2:-2, 2:-2, :] / inf[2:-2, 2:-2, :], 0),
             )
 
             return M_IN, C_IN
@@ -391,7 +390,8 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
             mask_sol = (vs.M_IN > 0)
             nn_rain = npx.int64(npx.sum(npx.any(mask_rain, axis=(0, 1))))
             nn_sol = npx.int64(npx.sum(npx.any(mask_sol, axis=(0, 1))))
-            M_IN, C_IN = self._set_bromide_input(state, nn_rain, nn_sol, vs.PREC_DIST_DAILY, TA)
+            INF = vs.INF_MAT_RZ + vs.INF_PF_RZ + vs.INF_PF_SS
+            M_IN, C_IN = self._set_bromide_input(state, nn_rain, nn_sol, INF)
             vs.M_IN = update(vs.M_IN, at[:, :, :], M_IN)
             vs.C_IN = update(vs.C_IN, at[:, :, :], C_IN)
 
