@@ -188,7 +188,7 @@ time-variant power:
   - 2
   c2_q_ss:
   - 0.1
-  - 6
+  - 5
 
 time-variant:
   # SAS parameter of transpiration

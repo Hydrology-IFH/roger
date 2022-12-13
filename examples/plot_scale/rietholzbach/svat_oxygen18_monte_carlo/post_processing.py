@@ -4,7 +4,7 @@ import glob
 import datetime
 import h5netcdf
 import xarray as xr
-from cftime import num2date, date2num
+from cftime import num2date
 import pandas as pd
 from de import de
 import numpy as onp
