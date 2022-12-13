@@ -69,7 +69,11 @@ SETTINGS = {
     "basal_crop_coeff_min": Setting(0.15, float, "minimum basal crop coeffcient in -"),
     "ff_tc": Setting(0.15, float, "film flow termination criterium in -"),
     "VSMOW_conc18O": Setting(2005.2e-6, float, "oxygen-18 abundancy ratios according to VSMOW in -"),
+    "d18O_min": Setting(-20, float, "potentially lowest oxygen-18 value in per mil"),
+    "d18O_max": Setting(0, float, "potentially greatest oxygen-18 value in per mil"),
     "VSMOW_conc2H": Setting(155.76e-6, float, "deuterium abundancy ratios according to VSMOW in -"),
+    "d2H_min": Setting(-160, float, "potentially lowest deuterium value in per mil"),
+    "d2H_max": Setting(0, float, "potentially greatest deuterium value in per mil"),
     # Logical switches for general model setup
     "coord_degree": Setting(False, bool, "either spherical (True) or cartesian (False) coordinates"),
     "enable_distributed_input": Setting(False, bool, "enable distributed input"),
