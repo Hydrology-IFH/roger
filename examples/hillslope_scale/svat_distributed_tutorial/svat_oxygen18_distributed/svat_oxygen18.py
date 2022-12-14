@@ -89,6 +89,9 @@ def main(tmp_dir):
             settings.tm_structure = self._tm_structure
             settings.enable_age_statistics = True
 
+            settings.d18O_min = -15.0
+            settings.d18O_max = -4.9
+
         @roger_routine
         def set_grid(self, state):
             vs = state.variables

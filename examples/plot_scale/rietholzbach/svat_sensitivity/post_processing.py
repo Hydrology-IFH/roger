@@ -251,7 +251,7 @@ def main(tmp_dir):
                          'KGE_dS': r'$KGE_{\Delta S}$',
                          'r_dS': r'$r_{\Delta S}$',
                          'E_multi': r'$E_{multi}$',
-                         'KGE_multi': r'$KGE_{multi}$',
+                         'KGE_multi': r'$E_{multi}$',
                          }
                 ncol = len(df_metrics.columns)
                 xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds_sobol['names']]

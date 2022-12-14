@@ -81,6 +81,9 @@ def main(transport_model_structure, sas_solver, x1, x2, data_dir, tmp_dir):
             settings.tm_structure = self._tm_structure
             settings.enable_age_statistics = True
 
+            settings.d18O_min = -19.3
+            settings.d18O_max = -0.9
+
         @roger_routine(
             dist_safe=False,
             local_variables=[
