@@ -425,11 +425,6 @@ def calc_conc_iso_flux(state, mtt, tt, flux):
         conc,
         at[2:-2, 2:-2], npx.where(npx.sum(tt[2:-2, 2:-2, :], axis=-1) > 0, npx.sum(mtt[2:-2, 2:-2, :] * tt[2:-2, 2:-2, :], axis=-1) / npx.sum(tt[2:-2, 2:-2, :], axis=-1), npx.nan),
     )
-    # rescale weights to 1 to prevent errors in conversion from concentrations to delta
-    conc = update(
-        conc,
-        at[2:-2, 2:-2], npx.where((npx.sum(tt[2:-2, 2:-2, :], axis=-1) > 0) & (npx.sum(tt[2:-2, 2:-2, :], axis=-1) < 1), npx.sum(mtt[2:-2, 2:-2, :] * (tt[2:-2, 2:-2, :] / npx.sum(tt[2:-2, 2:-2, :], axis=-1)[:, :, npx.newaxis]), axis=-1), npx.nan),
-    )
     conc = update(
         conc,
         at[2:-2, 2:-2], npx.where(conc[2:-2, 2:-2] != 0, conc[2:-2, 2:-2], npx.nan),

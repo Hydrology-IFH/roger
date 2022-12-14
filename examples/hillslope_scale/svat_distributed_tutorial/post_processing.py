@@ -108,7 +108,7 @@ file = base_path_figs / "theta_and_tt50.pdf"
 fig.savefig(file, dpi=250)
 
 # plot fluxes and isotopic signals of a single grid cell
-fig, axes = plt.subplots(4, 2, figsize=(6, 4.8))
+fig, axes = plt.subplots(4, 3, figsize=(6, 5))
 axes[0, 0].bar(date_hm, ds_hm['prec'].isel(x=0, y=0).values, width=.1, color='blue', align='edge', edgecolor='blue')
 axes[0, 0].set_ylabel(r'PREC [mm/day]')
 axes[0, 0].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
@@ -163,8 +163,180 @@ axes[3, 1].set_ylim(-15, -5)
 axes[3, 1].set_ylabel(r'$\delta^{18}$O [‰]')
 axes[3, 1].set_xlabel(r'Time [year-month]')
 axes[3, 1].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+
+axes[0, 2].set_axis_off()
+
+axes[1, 2].fill_between(date_tm, ds_tm['tt25_transp'].isel(x=0, y=0).values, ds_tm['tt75_transp'].isel(x=0, y=0).values, color='#31a354',
+                        edgecolor=None, alpha=0.2)
+axes[1, 2].plot(date_tm, ds_tm['tt50_transp'].isel(x=0, y=0).values, '-', color='#31a354', lw=1)
+axes[1, 2].set_xlim(date_tm[0], date_tm[-1])
+axes[1, 2].set_ylabel(r'age [days]')
+axes[1, 2].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+
+axes[2, 2].fill_between(date_tm, ds_tm['rt25_s'].isel(x=0, y=0).values, ds_tm['rt75_s'].isel(x=0, y=0).values, color='brown',
+                        edgecolor=None, alpha=0.2)
+axes[2, 2].plot(date_tm, ds_tm['rt50_s'].isel(x=0, y=0).values, '-', color='brown', lw=1)
+axes[2, 2].set_xlim(date_tm[0], date_tm[-1])
+axes[2, 2].set_ylabel(r'age [days]')
+axes[2, 2].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+
+axes[3, 2].fill_between(date_tm, ds_tm['tt25_q_ss'].isel(x=0, y=0).values, ds_tm['tt75_q_ss'].isel(x=0, y=0).values, color='grey',
+                        edgecolor=None, alpha=0.2)
+axes[3, 2].plot(date_tm, ds_tm['tt50_q_ss'].isel(x=0, y=0).values, '-', color='grey', lw=1)
+axes[3, 2].set_xlim(date_tm[0], date_tm[-1])
+axes[3, 2].set_ylabel(r'age [days]')
+axes[3, 2].set_xlabel(r'Time [year-month]')
+axes[3, 2].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+
 fig.tight_layout()
 file = base_path_figs / "ts_single_grid_cell.png"
 fig.savefig(file, dpi=250)
 file = base_path_figs / "ts_single_grid_cell.pdf"
 fig.savefig(file, dpi=250)
+
+
+# load hydrologic model parameters
+params_file = base_path / "svat_distributed" / "parameters.nc"
+ds_params = xr.open_dataset(params_file, engine="h5netcdf")
+
+fig, axes = plt.subplots(1, 1, figsize=(2, 4))
+axes.imshow(ds_params['ks'].values.T, origin="lower", cmap='Greys', vmin=5, vmax=15)
+axes.set_xticks(onp.arange(-.5, 11, 5))
+axes.set_yticks(onp.arange(-.5, 23, 5))
+axes.set_xticklabels(onp.arange(0, 12, 5) * 5)
+axes.set_yticklabels(onp.arange(0, 24, 5) * 5)
+axes.set_xlabel('[m]')
+axes.set_ylabel('[m]')
+cmap = copy.copy(plt.cm.get_cmap('Greys'))
+norm = mpl.colors.Normalize(vmin=5, vmax=15)
+axl1 = fig.add_axes([0.745, 0.3, 0.04, 0.48])
+cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
+                                orientation='vertical',
+                                ticks=[5, 10, 15])
+cb1.ax.set_yticklabels(['5', '10', '15'])
+cb1.set_label(r'$k_s$ [mm/hour]')
+fig.subplots_adjust(left=0.2, bottom=0.2, right=0.68)
+file = base_path_figs / "ks_grid.png"
+fig.savefig(file, dpi=250)
+
+fig, axes = plt.subplots(1, 1, figsize=(2, 4))
+axes.imshow(ds_params['dmpv'].values.T, origin="lower", cmap='Greys', vmin=50, vmax=100)
+axes.set_xticks(onp.arange(-.5, 11, 5))
+axes.set_yticks(onp.arange(-.5, 23, 5))
+axes.set_xticklabels(onp.arange(0, 12, 5) * 5)
+axes.set_yticklabels(onp.arange(0, 24, 5) * 5)
+axes.set_xlabel('[m]')
+axes.set_ylabel('[m]')
+cmap = copy.copy(plt.cm.get_cmap('Greys'))
+norm = mpl.colors.Normalize(vmin=50, vmax=100)
+axl1 = fig.add_axes([0.745, 0.3, 0.04, 0.48])
+cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
+                                orientation='vertical',
+                                ticks=[50, 75, 100])
+cb1.ax.set_yticklabels(['50', '75', '100'])
+cb1.set_label(r'$\rho_{mpv}$ [1/$m^2$]')
+fig.subplots_adjust(left=0.2, bottom=0.2, right=0.68)
+file = base_path_figs / "dmpv_grid.png"
+fig.savefig(file, dpi=250)
+
+fig, axes = plt.subplots(1, 1, figsize=(2, 4))
+axes.imshow(ds_params['lmpv'].values.T, origin="lower", cmap='Greys', vmin=200, vmax=500)
+axes.set_xticks(onp.arange(-.5, 11, 5))
+axes.set_yticks(onp.arange(-.5, 23, 5))
+axes.set_xticklabels(onp.arange(0, 12, 5) * 5)
+axes.set_yticklabels(onp.arange(0, 24, 5) * 5)
+axes.set_xlabel('[m]')
+axes.set_ylabel('[m]')
+cmap = copy.copy(plt.cm.get_cmap('Greys'))
+norm = mpl.colors.Normalize(vmin=200, vmax=500)
+axl1 = fig.add_axes([0.745, 0.3, 0.04, 0.48])
+cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
+                                orientation='vertical',
+                                ticks=[200, 350, 500])
+cb1.ax.set_yticklabels(['200', '350', '500'])
+cb1.set_label(r'$l_{mpv}$ [mm]')
+fig.subplots_adjust(left=0.2, bottom=0.2, right=0.68)
+file = base_path_figs / "lmpv_grid.png"
+fig.savefig(file, dpi=250)
+
+fig, axes = plt.subplots(1, 1, figsize=(2, 4))
+axes.imshow(ds_params['z_soil'].values.T/1000, origin="lower", cmap='Greys', vmin=1, vmax=1.2)
+axes.set_xticks(onp.arange(-.5, 11, 5))
+axes.set_yticks(onp.arange(-.5, 23, 5))
+axes.set_xticklabels(onp.arange(0, 12, 5) * 5)
+axes.set_yticklabels(onp.arange(0, 24, 5) * 5)
+axes.set_xlabel('[m]')
+axes.set_ylabel('[m]')
+cmap = copy.copy(plt.cm.get_cmap('Greys'))
+norm = mpl.colors.Normalize(vmin=1, vmax=1.2)
+axl1 = fig.add_axes([0.745, 0.3, 0.04, 0.48])
+cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
+                                orientation='vertical',
+                                ticks=[1, 1.1, 1.2])
+cb1.ax.set_yticklabels(['1', '1.1', '1.2'])
+cb1.set_label(r'$z_{soil}$ [m]')
+fig.subplots_adjust(left=0.2, bottom=0.2, right=0.68)
+file = base_path_figs / "zsoil_grid.png"
+fig.savefig(file, dpi=250)
+
+fig, axes = plt.subplots(1, 1, figsize=(2, 4))
+axes.imshow(ds_params['theta_ac'].values.T, origin="lower", cmap='Greys', vmin=0.08, vmax=0.12)
+axes.set_xticks(onp.arange(-.5, 11, 5))
+axes.set_yticks(onp.arange(-.5, 23, 5))
+axes.set_xticklabels(onp.arange(0, 12, 5) * 5)
+axes.set_yticklabels(onp.arange(0, 24, 5) * 5)
+axes.set_xlabel('[m]')
+axes.set_ylabel('[m]')
+cmap = copy.copy(plt.cm.get_cmap('Greys'))
+norm = mpl.colors.Normalize(vmin=0.08, vmax=0.12)
+axl1 = fig.add_axes([0.745, 0.3, 0.04, 0.48])
+cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
+                                orientation='vertical',
+                                ticks=[0.08, 0.1, 0.12])
+cb1.ax.set_yticklabels(['0.08', '0.1', '0.12'])
+cb1.set_label(r'$\theta_{ac}$ [-]')
+fig.subplots_adjust(left=0.2, bottom=0.2, right=0.68)
+file = base_path_figs / "thetaac_grid.png"
+fig.savefig(file, dpi=250)
+
+fig, axes = plt.subplots(1, 1, figsize=(2, 4))
+axes.imshow(ds_params['theta_ufc'].values.T, origin="lower", cmap='Greys', vmin=0.08, vmax=0.12)
+axes.set_xticks(onp.arange(-.5, 11, 5))
+axes.set_yticks(onp.arange(-.5, 23, 5))
+axes.set_xticklabels(onp.arange(0, 12, 5) * 5)
+axes.set_yticklabels(onp.arange(0, 24, 5) * 5)
+axes.set_xlabel('[m]')
+axes.set_ylabel('[m]')
+cmap = copy.copy(plt.cm.get_cmap('Greys'))
+norm = mpl.colors.Normalize(vmin=0.08, vmax=0.12)
+axl1 = fig.add_axes([0.745, 0.3, 0.04, 0.48])
+cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
+                                orientation='vertical',
+                                ticks=[0.08, 0.1, 0.12])
+cb1.ax.set_yticklabels(['0.08', '0.1', '0.12'])
+cb1.set_label(r'$\theta_{ufc}$ [-]')
+fig.subplots_adjust(left=0.2, bottom=0.2, right=0.68)
+file = base_path_figs / "thetaufc_grid.png"
+fig.savefig(file, dpi=250)
+
+fig, axes = plt.subplots(1, 1, figsize=(2, 4))
+axes.imshow(ds_params['theta_pwp'].values.T, origin="lower", cmap='Greys', vmin=0.18, vmax=0.22)
+axes.set_xticks(onp.arange(-.5, 11, 5))
+axes.set_yticks(onp.arange(-.5, 23, 5))
+axes.set_xticklabels(onp.arange(0, 12, 5) * 5)
+axes.set_yticklabels(onp.arange(0, 24, 5) * 5)
+axes.set_xlabel('[m]')
+axes.set_ylabel('[m]')
+cmap = copy.copy(plt.cm.get_cmap('Greys'))
+norm = mpl.colors.Normalize(vmin=0.18, vmax=0.22)
+axl1 = fig.add_axes([0.745, 0.3, 0.04, 0.48])
+cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
+                                orientation='vertical',
+                                ticks=[0.18, 0.2, 0.22])
+cb1.ax.set_yticklabels(['0.18', '0.2', '0.22'])
+cb1.set_label(r'$\theta_{pwp}$ [-]')
+fig.subplots_adjust(left=0.2, bottom=0.2, right=0.68)
+file = base_path_figs / "thetapwp_grid.png"
+fig.savefig(file, dpi=250)
+
+plt.close('all')

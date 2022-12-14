@@ -5,11 +5,6 @@ import datetime
 import h5netcdf
 import numpy as onp
 import roger
-import matplotlib as mpl
-import seaborn as sns
-mpl.use("agg")
-import matplotlib.pyplot as plt  # noqa: E402
-sns.set_style("ticks")
 
 
 base_path = Path(__file__).parent
@@ -22,14 +17,14 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 # merge results into single file
-path = str(base_path / "SVATOXYGEN18_advection-dispersion_deterministic.*.nc")
+path = str(base_path / "SVATOXYGEN18_power_deterministic.*.nc")
 diag_files = glob.glob(path)
 states_tm_file = base_path / "states_advection-dispersion.nc"
 if not os.path.exists(states_tm_file):
     with h5netcdf.File(states_tm_file, 'w', decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
-            title='RoGeR simulations with advection-dispersion transport model (Tutorial)',
+            title='RoGeR simulations with advection-dispersion transport model of rectangular grassland',
             institution='University of Freiburg, Chair of Hydrology',
             references='',
             comment='First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).',
