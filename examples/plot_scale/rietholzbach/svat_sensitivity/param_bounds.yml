@@ -122,22 +122,22 @@ advection-dispersion:
     - 150
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
 
 time-variant advection-dispersion:
   num_vars: 17
@@ -188,31 +188,31 @@ time-variant advection-dispersion:
     - 150
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
 
 time-variant preferential + advection-dispersion:
   num_vars: 17
@@ -263,31 +263,31 @@ time-variant preferential + advection-dispersion:
     - 150
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
   -
     - 0.1
-    - 50
+    - 30
 
 power:
   num_vars: 11

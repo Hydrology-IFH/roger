@@ -406,6 +406,39 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
         df_params_metrics.loc[:, 'a1_q_ss'] = ds_params["c1_q_ss"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'a2_q_ss'] = ds_params["c1_q_ss"].isel(y=0).values.flatten() + ds_params["c2_q_ss"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'b_q_ss'] = ds_params["b_q_ss"].isel(y=0).values.flatten()
+    elif tms == "power":
+        df_params_metrics.loc[:, 'c1_mak'] = ds_params["c1_mak"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'c2_mak'] = ds_params["c2_mak"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'dmpv'] = ds_params["dmpv"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'lmpv'] = ds_params["lmpv"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'theta_eff'] = ds_params["theta_eff"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'frac_lp'] = ds_params["frac_lp"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'frac_fp'] = 1 - ds_params["frac_lp"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'theta_ac'] = df_params_metrics.loc[:, 'frac_lp'] * df_params_metrics.loc[:, 'theta_eff']
+        df_params_metrics.loc[:, 'theta_ufc'] = df_params_metrics.loc[:, 'frac_fp'] * df_params_metrics.loc[:, 'theta_eff']
+        df_params_metrics.loc[:, 'theta_pwp'] = ds_params["theta_pwp"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'ks'] = ds_params["ks"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'k_transp'] = ds_params["k_transp"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'k_q_rz'] = ds_params["k_q_rz"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'k_q_ss'] = ds_params["k_q_ss"].isel(y=0).values.flatten()
+    elif tms == "time-variant power":
+        df_params_metrics.loc[:, 'c1_mak'] = ds_params["c1_mak"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'c2_mak'] = ds_params["c2_mak"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'dmpv'] = ds_params["dmpv"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'lmpv'] = ds_params["lmpv"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'theta_eff'] = ds_params["theta_eff"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'frac_lp'] = ds_params["frac_lp"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'frac_fp'] = 1 - ds_params["frac_lp"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'theta_ac'] = df_params_metrics.loc[:, 'frac_lp'] * df_params_metrics.loc[:, 'theta_eff']
+        df_params_metrics.loc[:, 'theta_ufc'] = df_params_metrics.loc[:, 'frac_fp'] * df_params_metrics.loc[:, 'theta_eff']
+        df_params_metrics.loc[:, 'theta_pwp'] = ds_params["theta_pwp"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'ks'] = ds_params["ks"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'k1_transp'] = ds_params["c1_transp"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'k2_transp'] = ds_params["c1_transp"].isel(y=0).values.flatten() + ds_params["c1_transp"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'k1_q_rz'] = ds_params["c1_q_rz"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'k2_q_rz'] = ds_params["c1_q_rz"].isel(y=0).values.flatten() + ds_params["c2_q_rz"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'k1_q_ss'] = ds_params["c1_q_ss"].isel(y=0).values.flatten()
+        df_params_metrics.loc[:, 'k2_q_ss'] = ds_params["c1_q_ss"].isel(y=0).values.flatten() + ds_params["c2_q_ss"].isel(y=0).values.flatten()
 
     # compare observations and simulations
     ncol = 0
@@ -467,7 +500,10 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                 obs_vals = df_eval.loc[:, 'obs'].values
                 sim_vals = df_eval.loc[:, 'sim'].values
                 key_kge = f'KGE_{var_sim}{sc1}'
-                df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
+                kge_val = eval_utils.calc_kge(obs_vals, sim_vals)
+                if kge_val < -1:
+                    kge_val = -1
+                df_params_metrics.loc[nrow, key_kge] = kge_val
                 key_kge_alpha = f'KGE_alpha_{var_sim}{sc1}'
                 df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
                 key_kge_beta = f'KGE_beta_{var_sim}{sc1}'
