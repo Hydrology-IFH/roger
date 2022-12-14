@@ -17,7 +17,7 @@ sns.set_style("ticks")
 
 
 @click.option("-ss", "--split-size", type=int, default=1000)
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'power', 'time-variant_power']), default='advection-dispersion')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion-power', 'time-variant_advection-dispersion-power']), default='advection-dispersion-power')
 @click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
@@ -55,12 +55,10 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
                    'maximum']
     if tms in ['complete-mixing', 'piston']:
         nsamples = 1024 * 10
-    elif tms in ['power']:
+    elif tms in ['advection-dispersion-power']:
         nsamples = 1024 * 13
-    elif tms in ['advection-dispersion', 'time-variant power']:
+    elif tms in ['time-variant advection-dispersion-power']:
         nsamples = 1024 * 16
-    elif tms in ['time-variant advection-dispersion', 'time-variant preferential + advection-dispersion']:
-        nsamples = 1024 * 19
     x1x2 = onp.arange(0, nsamples, split_size).tolist()
     if nsamples not in x1x2:
         x1x2.append(nsamples)
@@ -346,67 +344,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
         df_params_metrics.loc[:, 'theta_ufc'] = df_params_metrics.loc[:, 'frac_fp'] * df_params_metrics.loc[:, 'theta_eff']
         df_params_metrics.loc[:, 'theta_pwp'] = ds_params["theta_pwp"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'ks'] = ds_params["ks"].isel(y=0).values.flatten()
-    elif tms == "advection-dispersion":
-        df_params_metrics.loc[:, 'c1_mak'] = ds_params["c1_mak"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'c2_mak'] = ds_params["c2_mak"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'dmpv'] = ds_params["dmpv"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'lmpv'] = ds_params["lmpv"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'theta_eff'] = ds_params["theta_eff"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'frac_lp'] = ds_params["frac_lp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'frac_fp'] = 1 - ds_params["frac_lp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'theta_ac'] = df_params_metrics.loc[:, 'frac_lp'] * df_params_metrics.loc[:, 'theta_eff']
-        df_params_metrics.loc[:, 'theta_ufc'] = df_params_metrics.loc[:, 'frac_fp'] * df_params_metrics.loc[:, 'theta_eff']
-        df_params_metrics.loc[:, 'theta_pwp'] = ds_params["theta_pwp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'ks'] = ds_params["ks"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'a_transp'] = ds_params["a_transp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'b_transp'] = ds_params["b_transp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'a_q_rz'] = ds_params["a_q_rz"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'b_q_rz'] = ds_params["b_q_rz"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'a_q_ss'] = ds_params["a_q_ss"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'b_q_ss'] = ds_params["b_q_ss"].isel(y=0).values.flatten()
-    elif tms == "time-variant advection-dispersion":
-        df_params_metrics.loc[:, 'c1_mak'] = ds_params["c1_mak"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'c2_mak'] = ds_params["c2_mak"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'dmpv'] = ds_params["dmpv"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'lmpv'] = ds_params["lmpv"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'theta_eff'] = ds_params["theta_eff"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'frac_lp'] = ds_params["frac_lp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'frac_fp'] = 1 - ds_params["frac_lp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'theta_ac'] = df_params_metrics.loc[:, 'frac_lp'] * df_params_metrics.loc[:, 'theta_eff']
-        df_params_metrics.loc[:, 'theta_ufc'] = df_params_metrics.loc[:, 'frac_fp'] * df_params_metrics.loc[:, 'theta_eff']
-        df_params_metrics.loc[:, 'theta_pwp'] = ds_params["theta_pwp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'ks'] = ds_params["ks"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'a_transp'] = ds_params["a_transp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'b1_transp'] = ds_params["c1_transp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'b2_transp'] = ds_params["c1_transp"].isel(y=0).values.flatten() + ds_params["c2_transp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'a1_q_rz'] = ds_params["c1_q_rz"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'a2_q_rz'] = ds_params["c1_q_rz"].isel(y=0).values.flatten() + ds_params["c2_q_rz"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'b_q_rz'] = ds_params["b_q_rz"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'a1_q_ss'] = ds_params["c1_q_ss"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'a2_q_ss'] = ds_params["c1_q_ss"].isel(y=0).values.flatten() + ds_params["c2_q_ss"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'b_q_ss'] = ds_params["b_q_ss"].isel(y=0).values.flatten()
-    elif tms == "time-variant preferential + advection-dispersion":
-        df_params_metrics.loc[:, 'c1_mak'] = ds_params["c1_mak"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'c2_mak'] = ds_params["c2_mak"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'dmpv'] = ds_params["dmpv"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'lmpv'] = ds_params["lmpv"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'theta_eff'] = ds_params["theta_eff"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'frac_lp'] = ds_params["frac_lp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'frac_fp'] = 1 - ds_params["frac_lp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'theta_ac'] = df_params_metrics.loc[:, 'frac_lp'] * df_params_metrics.loc[:, 'theta_eff']
-        df_params_metrics.loc[:, 'theta_ufc'] = df_params_metrics.loc[:, 'frac_fp'] * df_params_metrics.loc[:, 'theta_eff']
-        df_params_metrics.loc[:, 'theta_pwp'] = ds_params["theta_pwp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'ks'] = ds_params["ks"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'a_transp'] = ds_params["a_transp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'b1_transp'] = ds_params["c1_transp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'b2_transp'] = ds_params["c1_transp"].isel(y=0).values.flatten() + ds_params["c2_transp"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'a_q_rz'] = ds_params["a_q_rz"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'b1_q_rz'] = ds_params["c1_q_rz"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'b2_q_rz'] = ds_params["c1_q_rz"].isel(y=0).values.flatten() + ds_params["c2_q_rz"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'a1_q_ss'] = ds_params["c1_q_ss"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'a2_q_ss'] = ds_params["c1_q_ss"].isel(y=0).values.flatten() + ds_params["c2_q_ss"].isel(y=0).values.flatten()
-        df_params_metrics.loc[:, 'b_q_ss'] = ds_params["b_q_ss"].isel(y=0).values.flatten()
-    elif tms == "power":
+    elif tms == "advection-dispersion-power":
         df_params_metrics.loc[:, 'c1_mak'] = ds_params["c1_mak"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'c2_mak'] = ds_params["c2_mak"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'dmpv'] = ds_params["dmpv"].isel(y=0).values.flatten()
@@ -421,7 +359,7 @@ def main(split_size, transport_model_structure, sas_solver, tmp_dir):
         df_params_metrics.loc[:, 'k_transp'] = ds_params["k_transp"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'k_q_rz'] = ds_params["k_q_rz"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'k_q_ss'] = ds_params["k_q_ss"].isel(y=0).values.flatten()
-    elif tms == "time-variant power":
+    elif tms == "time-variant advection-dispersion-power":
         df_params_metrics.loc[:, 'c1_mak'] = ds_params["c1_mak"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'c2_mak'] = ds_params["c2_mak"].isel(y=0).values.flatten()
         df_params_metrics.loc[:, 'dmpv'] = ds_params["dmpv"].isel(y=0).values.flatten()

@@ -13,19 +13,15 @@ def main(job_type, sas_solver, split_size, nsamples):
     base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
 
-    transport_models_abrev = {'preferential': 'pf',
-                              'advection-dispersion': 'ad',
-                              'preferential + advection-dispersion': 'pfad',
-                              'older-preference': 'op',
-                              'time-variant advection-dispersion': 'adt',
-                              'time-variant preferential + advection-dispersion': 'pfadt',
-                              'time-variant': 'tv',
-                              'time-variant-transp': 'tvt',
-                              'power': 'pow',
-                              'time-variant power': 'powt'}
+    transport_models_abrev = {'advection-dispersion-power': 'adp',
+                              'advection-dispersion-kumaraswamy': 'adk',
+                              'preferential-power': 'pfp',
+                              'older-preference-power': 'opp',
+                              'time-variant advection-dispersion-power': 'adpt',
+                              'time-variant advection-dispersion-kumaraswamy': 'adkt'}
 
     tracer = 'oxygen18'
-    transport_models = ['advection-dispersion', 'time-variant advection-dispersion', 'time-variant preferential + advection-dispersion', 'preferential + advection-dispersion', 'preferential', 'power', 'time-variant power', 'time-variant', 'time-variant-transp', 'older-preference']
+    transport_models = ['advection-dispersion-power', 'time-variant advection-dispersion-power', 'preferential-power', 'older-preference-power', 'advection-dispersion-kumaraswamy', 'time-variant advection-dispersion-kumaraswamy']
     for tm in transport_models:
         if job_type == 'serial':
             tm1 = transport_models_abrev[tm]

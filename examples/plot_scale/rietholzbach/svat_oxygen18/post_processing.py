@@ -60,7 +60,7 @@ def main(tmp_dir, sas_solver):
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
-    transport_models = ['complete-mixing', 'piston', 'advection-dispersion', 'time-variant advection-dispersion', 'power', 'time-variant_power']
+    transport_models = ['complete-mixing', 'piston', 'advection-dispersion-power', 'time-variant advection-dispersion-power']
     # merge model output into a single file
     for tm in transport_models:
         tms = tm.replace(" ", "_")

@@ -1,6 +1,6 @@
 # --- Parameters ---------------------------------------------------------------
 SAS_SOLVER: 'RK4'
-TRANSPORT_MODEL_STRUCTURE: 'advection-dispersion'
+TRANSPORT_MODEL_STRUCTURE: 'power'
 
 # --- Initial conditions -------------------------------------------------------
 # initial oxygen18 ration ofsoil water in root zone/upper soil layer (-)

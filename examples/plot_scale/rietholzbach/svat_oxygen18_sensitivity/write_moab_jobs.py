@@ -16,11 +16,8 @@ def main(nsamples, job_type, sas_solver, split_size):
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
     transport_models_abrev = {'complete-mixing': 'cm',
                               'piston': 'pi',
-                              'advection-dispersion': 'ad',
-                              'time-variant advection-dispersion': 'adt',
-                              'time-variant preferential + advection-dispersion': 'pfadt',
-                              'power': 'pow',
-                              'time-variant power': 'powt'
+                              'advection-dispersion-power': 'adp',
+                              'time-variant advection-dispersion-power': 'adpt'
                               }
 
     file_path = base_path / "param_bounds.yml"

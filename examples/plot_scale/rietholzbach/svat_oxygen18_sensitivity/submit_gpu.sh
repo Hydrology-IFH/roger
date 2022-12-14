@@ -13,25 +13,13 @@ do
   qsub -q gpu $f
 done
 
-FILES="$PWD/oxygen18_deterministic_svat_ad_sa_*_*_gpu.sh"
+FILES="$PWD/oxygen18_deterministic_svat_adp_sa_*_*_gpu.sh"
 for f in $FILES
 do
   qsub -q gpu $f
 done
 
-FILES="$PWD/oxygen18_deterministic_svat_adt_sa_*_*_gpu.sh"
-for f in $FILES
-do
-  qsub -q gpu $f
-done
-
-FILES="$PWD/oxygen18_deterministic_svat_pow_sa_*_*_gpu.sh"
-for f in $FILES
-do
-  qsub -q gpu $f
-done
-
-FILES="$PWD/oxygen18_deterministic_svat_powt_sa_*_*_gpu.sh"
+FILES="$PWD/oxygen18_deterministic_svat_adpt_sa_*_*_gpu.sh"
 for f in $FILES
 do
   qsub -q gpu $f

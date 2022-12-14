@@ -1,6 +1,6 @@
 # --- Parameters ---------------------------------------------------------------
 SAS_SOLVER: 'RK4'
-TRANSPORT_MODEL_STRUCTURE: 'advection-dispersion'
+TRANSPORT_MODEL_STRUCTURE: 'power'
 
 # --- Diagnostics --------------------------------------------------------------
 OUTPUT_RATE:
