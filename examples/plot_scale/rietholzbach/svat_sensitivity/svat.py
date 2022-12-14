@@ -5,7 +5,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion', 'time-variant_advection-dispersion', 'time-variant_preferential_+_advection-dispersion', 'power', 'time-variant_power']), default='advection-dispersion')
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion-power', 'time-variant_advection-dispersion-power']), default='advection-dispersion-power')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(transport_model_structure, tmp_dir):

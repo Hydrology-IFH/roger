@@ -2,7 +2,7 @@
 #PBS -l nodes=1:ppn=1:gpus=1:default
 #PBS -l walltime=8:00:00
 #PBS -l pmem=8000mb
-#PBS -N svat_sa_for_pfadt_gpu
+#PBS -N svat_sa_for_adpt_gpu
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
 
@@ -17,7 +17,7 @@ conda activate roger-gpu
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_sensitivity
 
 # adapt command to your available scheduler / MPI implementation
-python svat.py -b jax -d gpu -td "${TMPDIR}" -tms time-variant_preferential_+_advection-dispersion
+python svat.py -b jax -d gpu -td "${TMPDIR}" -tms time-variant_advection-dispersion-power
 
 # Write output to temporary SSD of computing node
 echo "Write output to $TMPDIR"

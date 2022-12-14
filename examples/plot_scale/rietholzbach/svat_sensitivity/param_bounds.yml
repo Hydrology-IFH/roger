@@ -13,28 +13,28 @@ complete-mixing:
 
   bounds:
   -
-    - 0.4  # lower boundary
+    - 0.5  # lower boundary
     - 0.7  # upper boundary
   -
-    - -0.5
-    - 0.1
+    - -0.4
+    - 0.2
   -
-    - 1
-    - 400
+    - 10
+    - 300
   -
-    - 1
+    - 15
     - 2000
   -
     - 0.15
-    - 0.35
+    - 0.45
   -
     - 0.1
-    - 0.9
+    - 0.6
   -
     - 0.15
-    - 0.33
+    - 0.3
   -
-    - 1
+    - 5
     - 150
 
 piston:
@@ -52,244 +52,31 @@ piston:
 
   bounds:
   -
-    - 0.4  # lower boundary
+    - 0.5  # lower boundary
     - 0.7  # upper boundary
   -
-    - -0.5
-    - 0.1
+    - -0.4
+    - 0.2
   -
-    - 1
-    - 400
+    - 10
+    - 300
   -
-    - 1
+    - 15
     - 2000
   -
     - 0.15
-    - 0.35
+    - 0.45
   -
     - 0.1
-    - 0.9
+    - 0.6
   -
     - 0.15
-    - 0.33
+    - 0.3
   -
-    - 1
+    - 5
     - 150
 
-advection-dispersion:
-  num_vars: 14
-
-  names:
-  - 'c1_mak'  # Makkink coefficient (-)
-  - 'c2_mak'  # Makkink coefficient (-)
-  - 'dmpv'
-  - 'lmpv'
-  - 'theta_eff'
-  - 'frac_lp'
-  - 'theta_pwp'
-  - 'ks'
-  - 'a_transp'  # SAS parameter of transpiration
-  - 'b_transp'  # SAS parameter of transpiration
-  - 'a_q_rz'  # SAS parameter of percolation from root zone
-  - 'b_q_rz'  # SAS parameter of percolation from root zone
-  - 'a_q_ss'  # SAS parameter of percolation from subsoil
-  - 'b_q_ss'  # SAS parameter of percolation from subsoil
-
-  bounds:
-  -
-    - 0.4  # lower boundary
-    - 0.7  # upper boundary
-  -
-    - -0.5
-    - 0.1
-  -
-    - 1
-    - 400
-  -
-    - 1
-    - 2000
-  -
-    - 0.15
-    - 0.35
-  -
-    - 0.1
-    - 0.9
-  -
-    - 0.15
-    - 0.33
-  -
-    - 1
-    - 150
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-
-time-variant advection-dispersion:
-  num_vars: 17
-
-  names:
-  - 'c1_mak'  # Makkink coefficient (-)
-  - 'c2_mak'  # Makkink coefficient (-)
-  - 'dmpv'
-  - 'lmpv'
-  - 'theta_eff'
-  - 'frac_lp'
-  - 'theta_pwp'
-  - 'ks'
-  - 'a_transp'  # SAS parameter of transpiration
-  - 'c1_transp'  # SAS parameter of transpiration
-  - 'c2_transp'  # SAS parameter of transpiration
-  - 'b_q_rz'  # SAS parameter of percolation from root zone
-  - 'c1_q_rz'  # SAS parameter of percolation from root zone
-  - 'c2_q_rz'  # SAS parameter of percolation from root zone
-  - 'b_q_ss'  # SAS parameter of percolation from subsoil
-  - 'c1_q_ss'  # SAS parameter of percolation from subsoil
-  - 'c2_q_ss'  # SAS parameter of percolation from subsoil
-
-  bounds:
-  -
-    - 0.4  # lower boundary
-    - 0.7  # upper boundary
-  -
-    - -0.5
-    - 0.1
-  -
-    - 1
-    - 400
-  -
-    - 1
-    - 2000
-  -
-    - 0.15
-    - 0.35
-  -
-    - 0.1
-    - 0.9
-  -
-    - 0.15
-    - 0.33
-  -
-    - 1
-    - 150
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-
-time-variant preferential + advection-dispersion:
-  num_vars: 17
-
-  names:
-  - 'c1_mak'  # Makkink coefficient (-)
-  - 'c2_mak'  # Makkink coefficient (-)
-  - 'dmpv'
-  - 'lmpv'
-  - 'theta_eff'
-  - 'frac_lp'
-  - 'theta_pwp'
-  - 'ks'
-  - 'a_transp'  # SAS parameter of transpiration
-  - 'c1_transp'  # SAS parameter of transpiration
-  - 'c2_transp'  # SAS parameter of transpiration
-  - 'a_q_rz'  # SAS parameter of percolation from root zone
-  - 'c1_q_rz'  # SAS parameter of percolation from root zone
-  - 'c2_q_rz'  # SAS parameter of percolation from root zone
-  - 'b_q_ss'  # SAS parameter of percolation from subsoil
-  - 'c1_q_ss'  # SAS parameter of percolation from subsoil
-  - 'c2_q_ss'  # SAS parameter of percolation from subsoil
-
-  bounds:
-  -
-    - 0.4  # lower boundary
-    - 0.7  # upper boundary
-  -
-    - -0.5
-    - 0.1
-  -
-    - 1
-    - 400
-  -
-    - 1
-    - 2000
-  -
-    - 0.15
-    - 0.35
-  -
-    - 0.1
-    - 0.9
-  -
-    - 0.15
-    - 0.33
-  -
-    - 1
-    - 150
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-  -
-    - 0.1
-    - 50
-
-power:
+advection-dispersion-power:
   num_vars: 11
 
   names:
@@ -307,28 +94,28 @@ power:
 
   bounds:
   -
-    - 0.4  # lower boundary
+    - 0.5  # lower boundary
     - 0.7  # upper boundary
   -
-    - -0.5
-    - 0.1
+    - -0.4
+    - 0.2
   -
-    - 1
-    - 400
+    - 10
+    - 300
   -
-    - 1
+    - 15
     - 2000
   -
     - 0.15
-    - 0.35
+    - 0.45
   -
     - 0.1
-    - 0.9
+    - 0.6
   -
     - 0.15
-    - 0.33
+    - 0.3
   -
-    - 1
+    - 5
     - 150
   -
     - 0.1
@@ -340,7 +127,7 @@ power:
     - 0.1
     - 5
 
-time-variant power:
+time-variant advection-dispersion-power:
   num_vars: 14
 
   names:
@@ -361,28 +148,28 @@ time-variant power:
 
   bounds:
   -
-    - 0.4  # lower boundary
+    - 0.5  # lower boundary
     - 0.7  # upper boundary
   -
-    - -0.5
-    - 0.1
+    - -0.4
+    - 0.2
   -
-    - 1
-    - 400
+    - 10
+    - 300
   -
-    - 1
+    - 15
     - 2000
   -
     - 0.15
-    - 0.35
+    - 0.45
   -
     - 0.1
-    - 0.9
+    - 0.6
   -
     - 0.15
-    - 0.33
+    - 0.3
   -
-    - 1
+    - 5
     - 150
   -
     - 0.1
