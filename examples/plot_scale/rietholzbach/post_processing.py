@@ -49,14 +49,11 @@ _LABS_HYDRUS = {
 
 _LABS_TM = {'complete-mixing': 'CM',
             'piston': 'PI',
-            'advection-dispersion': 'AD2',
-            'time-variant advection-dispersion': 'AD2-TV',
-            'power': 'AD',
-            'time-variant power': 'AD-TV',
-            'older-preference': 'OP',
-            'preferential': 'PF',
-            'time-variant-transp': 'TVT',
-            'time-variant': 'TV'}
+            'advection-dispersion-power': 'AD',
+            'time-variant advection-dispersion-power': 'AD-TV',
+            'older-preference-power': 'OP',
+            'advection-dispersion-kumaraswamy': 'ADK',
+            'time-variant advection-dispersion-kumaraswamy': 'ADK-TV'}
 
 
 def kumaraswami_cdf(x, a, b):
@@ -88,8 +85,8 @@ def main(tmp_dir):
         os.mkdir(base_path_figs)
 
     tm_structures = ['complete-mixing', 'piston',
-                     'power',
-                     'time-variant power']
+                     'advection-dispersion-power',
+                     'time-variant advection-dispersion-power']
     metric_for_opt = 'KGE_multi'
 
     # load observations (measured data)
@@ -1537,7 +1534,7 @@ def main(tmp_dir):
     #     fig.savefig(file, dpi=250)
 
     # fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
-    # tm_structures_extra = ['preferential', 'older-preference', 'time-variant-transp', 'time-variant']
+    # tm_structures_extra = ['preferential-power', 'older-preference-power', 'advection-dispersion-kumaraswamy', 'time-variant advection-dispersion-kumaraswamy']
     # df_obs = pd.DataFrame(index=date_obs)
     # df_obs.loc[:, 'd18O_prec'] = ds_obs['d18O_PREC'].isel(x=0, y=0).values
     # ax.flatten()[0].plot(df_obs.index,
@@ -1578,7 +1575,7 @@ def main(tmp_dir):
     # fig.savefig(file, dpi=250)
 
     # fig, ax = plt.subplots(3, 1, sharey=False, figsize=(6, 3))
-    # tm_structures_extra = ['advection-dispersion', 'time-variant advection-dispersion']
+    # tm_structures_extra = ['advection-dispersion-kumaraswamy', 'time-variant advection-dispersion-kumaraswamy']
     # df_obs = pd.DataFrame(index=date_obs)
     # df_obs.loc[:, 'd18O_prec'] = ds_obs['d18O_PREC'].isel(x=0, y=0).values
     # ax.flatten()[0].plot(df_obs.index,
@@ -1650,7 +1647,7 @@ def main(tmp_dir):
     # fig.savefig(file, dpi=250)
 
     # fig, ax = plt.subplots(4, 1, sharey=False, figsize=(6, 5))
-    # tm_structures_extra = ['preferential', 'older-preference', 'time-variant-transp', 'time-variant']
+    # tm_structures_extra = ['preferential-power', 'older-preference-power', 'advection-dispersion-kumaraswamy', 'time-variant advection-dispersion-kumaraswamy']
     # for i, tm_structure in enumerate(tm_structures_extra):
     #     tms = tm_structure.replace(" ", "_")
     #     # load transport simulation

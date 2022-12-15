@@ -496,10 +496,10 @@ def main(tmp_dir):
 
         # select best 10 simulations
         click.echo('Write best 10 simulations ...')
-        df_params_metrics1 = df_params_metrics.copy()
-        df_params_metrics1.loc[:, 'id'] = range(len(df_params_metrics1.index))
-        df_params_metrics1 = df_params_metrics1.sort_values(by=['KGE_multi'], ascending=False)
-        idx_best10 = df_params_metrics1.loc[:df_params_metrics1.index[9], 'id'].values.tolist()
+        df_params_metrics10 = df_params_metrics.copy()
+        df_params_metrics10.loc[:, 'id'] = range(len(df_params_metrics10.index))
+        df_params_metrics10 = df_params_metrics10.sort_values(by=['KGE_multi'], ascending=False)
+        idx_best10 = df_params_metrics10.loc[:df_params_metrics10.index[9], 'id'].values.tolist()
         # write states of best model run
         states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"
         states_hm_file = base_path / "states_hm10.nc"
@@ -550,10 +550,10 @@ def main(tmp_dir):
 
         # select best 100 simulations
         click.echo('Write best 100 simulations ...')
-        df_params_metrics1 = df_params_metrics.copy()
-        df_params_metrics1.loc[:, 'id'] = range(len(df_params_metrics1.index))
-        df_params_metrics1 = df_params_metrics1.sort_values(by=['KGE_multi'], ascending=False)
-        idx_best100 = df_params_metrics1.loc[:df_params_metrics1.index[99], 'id'].values.tolist()
+        df_params_metrics100 = df_params_metrics.copy()
+        df_params_metrics100.loc[:, 'id'] = range(len(df_params_metrics100.index))
+        df_params_metrics100 = df_params_metrics100.sort_values(by=['KGE_multi'], ascending=False)
+        idx_best100 = df_params_metrics100.loc[:df_params_metrics100.index[99], 'id'].values.tolist()
         # write states of best model run
         states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"
         states_hm_file = base_path / "states_hm100.nc"
