@@ -1,7 +1,7 @@
 advection-dispersion-power:
   # SAS parameter of transpiration
   k_transp:
-  - 0.1
+  - 0.2
   - 1
   # SAS parameter of percolation from root zone
   k_q_rz:
@@ -38,15 +38,15 @@ time-variant advection-dispersion-power:
 preferential-power:
   # SAS parameter of transpiration
   k_transp:
-  - 0.1  # lower boundary
+  - 0.2  # lower boundary
   - 1  # upper boundary
   # SAS parameter of percolation from root zone
   k_q_rz:
-  - 0.1
+  - 0.2
   - 1
   # SAS parameter of percolation from subsoil
   k_q_ss:
-  - 0.1
+  - 0.2
   - 1
 
 older-preference-power:
