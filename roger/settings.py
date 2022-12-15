@@ -91,6 +91,7 @@ SETTINGS = {
     "enable_oxygen18": Setting(False, bool, "enable oxygen-18"),
     "enable_deuterium": Setting(False, bool, "enable deuterium"),
     "enable_nitrate": Setting(False, bool, "enable nitrate"),
+    "enable_virtualtracer": Setting(False, bool, "enable virtual tracer"),
     "enable_routing": Setting(False, bool, "enable routing"),
     "enable_runon_infiltration": Setting(False, bool, "enable run-on infiltration"),
     "enable_urban": Setting(False, bool, "enable urban"),

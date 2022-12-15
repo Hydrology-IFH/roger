@@ -56,11 +56,11 @@ _LABS_TM = {'complete-mixing': 'CM',
             'time-variant advection-dispersion-kumaraswamy': 'ADK-TV'}
 
 
-def kumaraswami_cdf(x, a, b):
+def kumaraswamy_cdf(x, a, b):
     return 1 - (1 - (x)**a)**b
 
 
-def kumaraswami_pdf(x, a, b):
+def kumaraswamy_pdf(x, a, b):
     return a * b * x**(a-1)*(1-x**a)**(b-1)
 
 
@@ -126,12 +126,12 @@ def main(tmp_dir):
     date_sim_hm100 = num2date(days_sim_hm100, units=f"days since {ds_sim_hm100['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     ds_sim_hm100 = ds_sim_hm100.assign_coords(Time=("Time", date_sim_hm100))
 
-    states_hm_for_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / f"optimized_with_{metric_for_opt}_hm100" / "states_hm_best_for_power.nc"
-    ds_sim_hm_for_tm = xr.open_dataset(states_hm_for_tm_file, engine="h5netcdf")
-    # assign date
-    days_sim_hm_for_tm = (ds_sim_hm_for_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    date_sim_hm_for_tm = num2date(days_sim_hm_for_tm, units=f"days since {ds_sim_hm_for_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    ds_sim_hm_for_tm = ds_sim_hm_for_tm.assign_coords(Time=("Time", date_sim_hm_for_tm))
+    # states_hm_for_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / f"optimized_with_{metric_for_opt}_hm100" / "states_hm_best_for_power.nc"
+    # ds_sim_hm_for_tm = xr.open_dataset(states_hm_for_tm_file, engine="h5netcdf")
+    # # assign date
+    # days_sim_hm_for_tm = (ds_sim_hm_for_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+    # date_sim_hm_for_tm = num2date(days_sim_hm_for_tm, units=f"days since {ds_sim_hm_for_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    # ds_sim_hm_for_tm = ds_sim_hm_for_tm.assign_coords(Time=("Time", date_sim_hm_for_tm))
 
     # load HYDRUS-1D benchmarks
     # oxygen-18 simulations
@@ -151,83 +151,83 @@ def main(tmp_dir):
     # # plot SAS function
     # fig, axs = plt.subplots(1, 1, figsize=(3, 2))
     # x = onp.linspace(0, 1, num=1000)
-    # axs.plot(x, kumaraswami_cdf(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
-    # axs.plot(x, kumaraswami_cdf(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
-    # axs.plot(x, kumaraswami_cdf(x, 1, 10), color='#3690c0', lw=1, label='a=1, b=10')
-    # axs.plot(x, kumaraswami_cdf(x, 3, 1), color='#74a9cf', lw=1, label='a=3, b=1')
-    # axs.plot(x, kumaraswami_cdf(x, 5, 1), color='#a6bddb', lw=1, label='a=5, b=1')
-    # axs.plot(x, kumaraswami_cdf(x, 5, 1.5), color='#d0d1e6', lw=1, label='a=5, b=1.5')
+    # axs.plot(x, kumaraswamy_cdf(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
+    # axs.plot(x, kumaraswamy_cdf(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
+    # axs.plot(x, kumaraswamy_cdf(x, 1, 10), color='#3690c0', lw=1, label='a=1, b=10')
+    # axs.plot(x, kumaraswamy_cdf(x, 3, 1), color='#74a9cf', lw=1, label='a=3, b=1')
+    # axs.plot(x, kumaraswamy_cdf(x, 5, 1), color='#a6bddb', lw=1, label='a=5, b=1')
+    # axs.plot(x, kumaraswamy_cdf(x, 5, 1.5), color='#d0d1e6', lw=1, label='a=5, b=1.5')
     # axs.set_xlim((0, 1))
     # axs.set_ylim((0, 1))
     # axs.set_xlabel('$P_S$ [-]')
     # axs.set_ylabel('$P_Q$ [-]')
     # axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1.05))
     # fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
-    # file = base_path_figs / 'kumaraswami_cdf.png'
+    # file = base_path_figs / 'kumaraswamy_cdf.png'
     # fig.savefig(file, dpi=250)
-    # file = base_path_figs / 'kumaraswami_cdf.pdf'
+    # file = base_path_figs / 'kumaraswamy_cdf.pdf'
     # fig.savefig(file, dpi=250)
     # plt.close(fig=fig)
 
     # fig, axs = plt.subplots(1, 1, figsize=(3, 2))
     # x = onp.linspace(0, 1, num=1000)
-    # axs.plot(x, kumaraswami_pdf(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
-    # axs.plot(x, kumaraswami_pdf(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
-    # axs.plot(x, kumaraswami_pdf(x, 1, 10), color='#3690c0', lw=1, label='a=1, b=10')
-    # axs.plot(x, kumaraswami_pdf(x, 3, 1), color='#74a9cf', lw=1, label='a=3, b=1')
-    # axs.plot(x, kumaraswami_pdf(x, 5, 1), color='#a6bddb', lw=1, label='a=5, b=1')
-    # axs.plot(x, kumaraswami_pdf(x, 5, 1.5), color='#d0d1e6', lw=1, label='a=5, b=1.5')
+    # axs.plot(x, kumaraswamy_pdf(x, 1, 20), color='#034e7b', lw=1, label='a=1, b=20')
+    # axs.plot(x, kumaraswamy_pdf(x, 1.5, 20), color='#0570b0', lw=1, label='a=1.5, b=20')
+    # axs.plot(x, kumaraswamy_pdf(x, 1, 10), color='#3690c0', lw=1, label='a=1, b=10')
+    # axs.plot(x, kumaraswamy_pdf(x, 3, 1), color='#74a9cf', lw=1, label='a=3, b=1')
+    # axs.plot(x, kumaraswamy_pdf(x, 5, 1), color='#a6bddb', lw=1, label='a=5, b=1')
+    # axs.plot(x, kumaraswamy_pdf(x, 5, 1.5), color='#d0d1e6', lw=1, label='a=5, b=1.5')
     # axs.set_xlim((0, 1))
     # axs.set_ylim(0,)
     # axs.set_xlabel('$P_S$ [-]')
     # axs.set_ylabel(r'$\omega_Q$ [-]')
     # axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1.05))
     # fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
-    # file = base_path_figs / 'kumaraswami_pdf.png'
+    # file = base_path_figs / 'kumaraswamy_pdf.png'
     # fig.savefig(file, dpi=250)
-    # file = base_path_figs / 'kumaraswami_pdf.pdf'
+    # file = base_path_figs / 'kumaraswamy_pdf.pdf'
     # fig.savefig(file, dpi=250)
     # plt.close(fig=fig)
 
-    fig, axs = plt.subplots(1, 1, figsize=(3, 2))
-    x = onp.linspace(0, 1, num=1000)
-    axs.plot(x, power_cdf(x, 0.3), color='#034e7b', lw=1, label='k=0.3')
-    axs.plot(x, power_cdf(x, 0.5), color='#0570b0', lw=1, label='k=0.5')
-    axs.plot(x, power_cdf(x, 0.7), color='#3690c0', lw=1, label='k=0.7')
-    axs.plot(x, power_cdf(x, 1.5), color='#74a9cf', lw=1, label='k=1.5')
-    axs.plot(x, power_cdf(x, 2), color='#a6bddb', lw=1, label='k=2')
-    axs.plot(x, power_cdf(x, 3), color='#d0d1e6', lw=1, label='k=3')
-    axs.set_xlim((0, 1))
-    axs.set_ylim((0, 1))
-    axs.set_xlabel('$P_S$ [-]')
-    axs.set_ylabel('$P_Q$ [-]')
-    axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.4, 1.05))
-    fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
-    file = base_path_figs / 'power_cdf.png'
-    fig.savefig(file, dpi=250)
-    file = base_path_figs / 'power_cdf.pdf'
-    fig.savefig(file, dpi=250)
-    plt.close(fig=fig)
-
-    fig, axs = plt.subplots(1, 1, figsize=(3, 2))
-    x = onp.linspace(0, 1, num=1000)
-    axs.plot(x, power_pdf(x, 0.3), color='#034e7b', lw=1, label='k=0.3')
-    axs.plot(x, power_pdf(x, 0.5), color='#0570b0', lw=1, label='k=0.5')
-    axs.plot(x, power_pdf(x, 0.7), color='#3690c0', lw=1, label='k=0.7')
-    axs.plot(x, power_pdf(x, 1.5), color='#74a9cf', lw=1, label='k=1.5')
-    axs.plot(x, power_pdf(x, 2), color='#a6bddb', lw=1, label='k=2')
-    axs.plot(x, power_pdf(x, 3), color='#d0d1e6', lw=1, label='k=3')
-    axs.set_xlim((0, 1))
-    axs.set_ylim((0, 30))
-    axs.set_xlabel('$P_S$ [-]')
-    axs.set_ylabel(r'$\omega_Q$ [-]')
-    axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.4, 1.05))
-    fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
-    file = base_path_figs / 'power_pdf.png'
-    fig.savefig(file, dpi=250)
-    file = base_path_figs / 'power_pdf.pdf'
-    fig.savefig(file, dpi=250)
-    plt.close(fig=fig)
+    # fig, axs = plt.subplots(1, 1, figsize=(3, 2))
+    # x = onp.linspace(0, 1, num=1000)
+    # axs.plot(x, power_cdf(x, 0.3), color='#034e7b', lw=1, label='k=0.3')
+    # axs.plot(x, power_cdf(x, 0.5), color='#0570b0', lw=1, label='k=0.5')
+    # axs.plot(x, power_cdf(x, 0.7), color='#3690c0', lw=1, label='k=0.7')
+    # axs.plot(x, power_cdf(x, 1.5), color='#74a9cf', lw=1, label='k=1.5')
+    # axs.plot(x, power_cdf(x, 2), color='#a6bddb', lw=1, label='k=2')
+    # axs.plot(x, power_cdf(x, 3), color='#d0d1e6', lw=1, label='k=3')
+    # axs.set_xlim((0, 1))
+    # axs.set_ylim((0, 1))
+    # axs.set_xlabel('$P_S$ [-]')
+    # axs.set_ylabel('$P_Q$ [-]')
+    # axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.4, 1.05))
+    # fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
+    # file = base_path_figs / 'power_cdf.png'
+    # fig.savefig(file, dpi=250)
+    # file = base_path_figs / 'power_cdf.pdf'
+    # fig.savefig(file, dpi=250)
+    # plt.close(fig=fig)
+    #
+    # fig, axs = plt.subplots(1, 1, figsize=(3, 2))
+    # x = onp.linspace(0, 1, num=1000)
+    # axs.plot(x, power_pdf(x, 0.3), color='#034e7b', lw=1, label='k=0.3')
+    # axs.plot(x, power_pdf(x, 0.5), color='#0570b0', lw=1, label='k=0.5')
+    # axs.plot(x, power_pdf(x, 0.7), color='#3690c0', lw=1, label='k=0.7')
+    # axs.plot(x, power_pdf(x, 1.5), color='#74a9cf', lw=1, label='k=1.5')
+    # axs.plot(x, power_pdf(x, 2), color='#a6bddb', lw=1, label='k=2')
+    # axs.plot(x, power_pdf(x, 3), color='#d0d1e6', lw=1, label='k=3')
+    # axs.set_xlim((0, 1))
+    # axs.set_ylim((0, 30))
+    # axs.set_xlabel('$P_S$ [-]')
+    # axs.set_ylabel(r'$\omega_Q$ [-]')
+    # axs.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.4, 1.05))
+    # fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
+    # file = base_path_figs / 'power_pdf.png'
+    # fig.savefig(file, dpi=250)
+    # file = base_path_figs / 'power_pdf.pdf'
+    # fig.savefig(file, dpi=250)
+    # plt.close(fig=fig)
 
     # # check water balance of lysimeter
     # df_lys_obs = pd.DataFrame(index=date_obs)
@@ -486,20 +486,20 @@ def main(tmp_dir):
     #                 x_best = df_params.iloc[idx_best, j]
     #                 ax[i, j].scatter(x_best, y_best, s=0.5, c='red', alpha=1)
     #                 dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
-
+    #
     #     for j, param_var in enumerate(df_params.columns):
     #         xlabel = labs._LABS[param_var]
     #         ax[-1, j].set_xlabel(xlabel)
-
+    #
     #     ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
     #     ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
     #     ax[2, 0].set_ylabel('$KGE_{PERC}$\n [-]')
     #     ax[3, 0].set_ylabel('$KGE_{multi}$\n [-]')
-
+    #
     #     fig.subplots_adjust(bottom=0.2, wspace=0.2, hspace=0.6)
     #     file = base_path_figs / f"dotty_plots_{sc1}_optimized_with_{metric_for_opt}.png"
     #     fig.savefig(file, dpi=250)
-
+    #
     #     fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 3))
     #     for i, metric_var in enumerate(df_metrics.columns):
     #         for j, param_var in enumerate(df_params.columns):
@@ -531,20 +531,20 @@ def main(tmp_dir):
     #                 x_best = df_params.iloc[idx_best, j]
     #                 ax[i, j].scatter(x_best, y_best, s=0.5, c='red', alpha=1)
     #                 dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
-
+    #
     #     for j, param_var in enumerate(df_params.columns):
     #         xlabel = labs._LABS[param_var]
     #         ax[-1, j].set_xlabel(xlabel)
-
+    #
     #     ax[0, 0].set_ylabel('$KGE_{ET}$\n [-]')
     #     ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
     #     ax[2, 0].set_ylabel('$KGE_{PERC}$\n [-]')
     #     ax[3, 0].set_ylabel('$KGE_{multi}$\n [-]')
-
+    #
     #     fig.subplots_adjust(bottom=0.2, wspace=0.2, hspace=0.6)
     #     file = base_path_figs / f"dotty_plots_{sc1}inset_optimized_with_{metric_for_opt}.png"
     #     fig.savefig(file, dpi=250)
-
+    #
     # # write evaluation metrics for different storage condtions to .txt
     # df_avg_std = pd.DataFrame(columns=['KGE_aet', 'KGE_dS', 'KGE_q_ss', 'KGE_multi'])
     # for sc in ['', 'dry', 'normal', 'wet']:
@@ -552,18 +552,18 @@ def main(tmp_dir):
     #     df_avg_std.loc[f'std{sc}', :] = onp.std(dict_metrics_best[sc].values, axis=0)
     # file = base_path_figs / f"metrics_best_100_avg_std_optimized_with_{metric_for_opt}.txt"
     # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
-
+    #
     # # write average and standard deviation of best parameters to .txt
     # df_avg_std = pd.DataFrame(index=['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
     # df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics100.loc[:df_params_metrics100.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
     # df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics100.loc[:df_params_metrics100.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
     # file = base_path_figs / f"params_best_100_avg_std_optimized_with_{metric_for_opt}.txt"
     # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
-
+    #
     # # diagnostic polar plots
     # file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
     # df_params_metrics = pd.read_csv(file, sep="\t")
-
+    #
     # df_params_metrics100 = df_params_metrics.copy()
     # df_params_metrics100.loc[:, 'id'] = range(len(df_params_metrics100.index))
     # df_params_metrics100 = df_params_metrics100.sort_values(by=[metric_for_opt], ascending=False)
@@ -586,7 +586,7 @@ def main(tmp_dir):
     #     path = base_path_figs / file
     #     # fig.tight_layout()
     #     fig.savefig(path, dpi=250)
-
+    #
     # var_sim = 'dS'
     # fig = de.diag_polar_plot_multi(df_for_diag100.loc[:, f'brel_mean_{var_sim}'].values,
     #                                df_for_diag100.loc[:, f'temp_cor_{var_sim}'].values,
@@ -602,7 +602,7 @@ def main(tmp_dir):
     # path = base_path_figs / file
     # # fig.tight_layout()
     # fig.savefig(path, dpi=250)
-
+    #
     # df_params_metrics10 = df_params_metrics.copy()
     # df_params_metrics10.loc[:, 'id'] = range(len(df_params_metrics10.index))
     # df_params_metrics10 = df_params_metrics10.sort_values(by=[metric_for_opt], ascending=False)
@@ -625,7 +625,7 @@ def main(tmp_dir):
     #     path = base_path_figs / file
     #     # fig.tight_layout()
     #     fig.savefig(path, dpi=250)
-
+    #
     # var_sim = 'dS'
     # fig = de.diag_polar_plot_multi(df_for_diag10.loc[:, f'brel_mean_{var_sim}'].values,
     #                                df_for_diag10.loc[:, f'temp_cor_{var_sim}'].values,
@@ -641,7 +641,7 @@ def main(tmp_dir):
     # path = base_path_figs / file
     # # fig.tight_layout()
     # fig.savefig(path, dpi=250)
-
+    #
     # df_for_diag1 = df_params_metrics10.loc[:df_params_metrics10.index[0], :]
     # vars_sim = ['aet', 'q_ss']
     # for var_sim in vars_sim:
@@ -661,7 +661,7 @@ def main(tmp_dir):
     #     path = base_path_figs / file
     #     # fig.tight_layout()
     #     fig.savefig(path, dpi=250)
-
+    #
     # var_sim = 'dS'
     # fig = de.diag_polar_plot_multi(df_for_diag1.loc[:, f'brel_mean_{var_sim}'].values,
     #                                df_for_diag1.loc[:, f'temp_cor_{var_sim}'].values,
@@ -698,21 +698,21 @@ def main(tmp_dir):
         df_bench.loc[:, 'bench'] = bench_vals
         df_eval = df_eval.join(df_bench)
         dict_obs_sim[var_obs] = df_eval
-    #     # plot observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = '%s.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     # plot cumulated observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-    #     file_str = '%s_cum.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-    #     file_str = '%s_cum_year_facet.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
+        # plot observed and simulated time series
+        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+        file_str = '%s.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed and simulated time series
+        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = '%s_cum.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = '%s_cum_year_facet.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
 
     # compare best 10 simulations with observations
     vars_obs = ['AET', 'PERC', 'dWEIGHT']
@@ -734,21 +734,21 @@ def main(tmp_dir):
         df_bench.loc[:, 'bench'] = bench_vals
         df_eval = df_eval.join(df_bench)
         dict_obs_sim10[var_obs] = df_eval
-    #     # plot observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = '%s_best_10.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     # plot cumulated observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-    #     file_str = '%s_cum_best_10.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-    #     file_str = '%s_cum_year_facet_best_10.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
+        # plot observed and simulated time series
+        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+        file_str = '%s_best_10.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed and simulated time series
+        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = '%s_cum_best_10.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = '%s_cum_year_facet_best_10.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
 
     # compare best 100 simulations with observations
     vars_obs = ['AET', 'PERC', 'dWEIGHT']
@@ -770,42 +770,42 @@ def main(tmp_dir):
         df_bench.loc[:, 'bench'] = bench_vals
         df_eval = df_eval.join(df_bench)
         dict_obs_sim100[var_obs] = df_eval
-    #     # plot observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
-    #     file_str = '%s_best_100.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     # plot cumulated observed and simulated time series
-    #     fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
-    #     file_str = '%s_cum_best_100.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    #     fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
-    #     file_str = '%s_cum_year_facet_best_100.pdf' % (var_sim)
-    #     path_fig = base_path_figs / file_str
-    #     fig.savefig(path_fig, dpi=250)
-    # plt.close('all')
+        # plot observed and simulated time series
+        fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
+        file_str = '%s_best_100.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        # plot cumulated observed and simulated time series
+        fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time [year]')
+        file_str = '%s_cum_best_100.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+        fig = eval_utils.plot_obs_sim_cum_year_facet(df_eval, labs._Y_LABS_CUM[var_sim], x_lab='Time\n[day-month-hydyear]')
+        file_str = '%s_cum_year_facet_best_100.pdf' % (var_sim)
+        path_fig = base_path_figs / file_str
+        fig.savefig(path_fig, dpi=250)
+    plt.close('all')
 
-    # compare best simulation corresponding to best transport model with observations
-    vars_obs = ['AET', 'PERC', 'dWEIGHT']
-    vars_sim = ['aet', 'q_ss', 'dS']
-    vars_bench = ['aet', 'perc', 'dS']
-    dict_obs_sim_for_tm = {}
-    for var_obs, var_sim, var_bench in zip(vars_obs, vars_sim, vars_bench):
-        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-        df_obs.loc[:, 'obs'] = obs_vals
-        sim_vals = ds_sim_hm_for_tm[var_sim].isel(y=0).values
-        # join observations on simulations
-        df_eval = eval_utils.join_obs_on_sim(date_sim_hm1, sim_vals, df_obs)
-        # skip first seven days for warmup
-        df_eval.loc[:'1997-01-07', :] = onp.nan
-        # join benchmark simulations
-        bench_vals = ds_hydrus_18O[var_bench].values
-        df_bench = pd.DataFrame(index=ds_hydrus_18O['Time'].values, columns=['bench'])
-        df_bench.loc[:, 'bench'] = bench_vals
-        df_eval = df_eval.join(df_bench)
-        dict_obs_sim_for_tm[var_obs] = df_eval
+    # # compare best simulation corresponding to best transport model with observations
+    # vars_obs = ['AET', 'PERC', 'dWEIGHT']
+    # vars_sim = ['aet', 'q_ss', 'dS']
+    # vars_bench = ['aet', 'perc', 'dS']
+    # dict_obs_sim_for_tm = {}
+    # for var_obs, var_sim, var_bench in zip(vars_obs, vars_sim, vars_bench):
+    #     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+    #     df_obs.loc[:, 'obs'] = obs_vals
+    #     sim_vals = ds_sim_hm_for_tm[var_sim].isel(y=0).values
+    #     # join observations on simulations
+    #     df_eval = eval_utils.join_obs_on_sim(date_sim_hm1, sim_vals, df_obs)
+    #     # skip first seven days for warmup
+    #     df_eval.loc[:'1997-01-07', :] = onp.nan
+    #     # join benchmark simulations
+    #     bench_vals = ds_hydrus_18O[var_bench].values
+    #     df_bench = pd.DataFrame(index=ds_hydrus_18O['Time'].values, columns=['bench'])
+    #     df_bench.loc[:, 'bench'] = bench_vals
+    #     df_eval = df_eval.join(df_bench)
+    #     dict_obs_sim_for_tm[var_obs] = df_eval
     #     # plot observed and simulated time series
     #     fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
     #     file_str = '%s_best_for_tm.pdf' % (var_sim)
@@ -1007,7 +1007,7 @@ def main(tmp_dir):
     # file = f'prec_et_dS_perc_obs_sim_cumulated_optimized_with_{metric_for_opt}.pdf'
     # path = base_path_figs / file
     # fig.savefig(path, dpi=250)
-
+    #
     # # compare best 100 simulations with observations
     # nx = ds_sim_hm100.dims['x']
     # fig, axes = plt.subplots(3, 2, sharex='col', figsize=(6, 3))
@@ -1104,7 +1104,7 @@ def main(tmp_dir):
     # file = f'prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}.pdf'
     # path = base_path_figs / file
     # fig.savefig(path, dpi=250)
-
+    #
     # # compare best 10 simulations with observations
     # nx = ds_sim_hm10.dims['x']
     # fig, axes = plt.subplots(3, 2, sharex='col', figsize=(6, 3))
@@ -1201,7 +1201,7 @@ def main(tmp_dir):
     # file = f'prec_et_dS_perc_obs_sim_cumulated_best_10_optimized_with_{metric_for_opt}.pdf'
     # path = base_path_figs / file
     # fig.savefig(path, dpi=250)
-
+    #
     # # plot evapotranspiration, soil storage change and percolation
     # years = onp.arange(1997, 2008).tolist()
     # for year in years:
@@ -1354,16 +1354,16 @@ def main(tmp_dir):
     # path = base_path_figs / file
     # fig.savefig(path, dpi=250)
 
-    # load metrics of transport simulations
-    dict_params_metrics_tm_mc = {}
-    for tm_structure in ['complete-mixing', 'piston', 'power',
-                         'time-variant power', 'preferential', 'older-preference', 'time-variant-transp', 'time-variant',
-                         'advection-dispersion', 'time-variant advection-dispersion']:
-        tms = tm_structure.replace(" ", "_")
-        file = base_path / "svat_oxygen18_monte_carlo" / "results" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm100" / f"params_metrics_{tms}.txt"
-        df_params_metrics = pd.read_csv(file, sep="\t")
-        dict_params_metrics_tm_mc[tm_structure] = {}
-        dict_params_metrics_tm_mc[tm_structure]['params_metrics'] = df_params_metrics
+    # # load metrics of transport simulations
+    # dict_params_metrics_tm_mc = {}
+    # for tm_structure in ['complete-mixing', 'piston', 'power',
+    #                      'time-variant power', 'preferential', 'older-preference', 'time-variant-transp', 'time-variant',
+    #                      'advection-dispersion', 'time-variant advection-dispersion']:
+    #     tms = tm_structure.replace(" ", "_")
+    #     file = base_path / "svat_oxygen18_monte_carlo" / "results" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm100" / f"params_metrics_{tms}.txt"
+    #     df_params_metrics = pd.read_csv(file, sep="\t")
+    #     dict_params_metrics_tm_mc[tm_structure] = {}
+    #     dict_params_metrics_tm_mc[tm_structure]['params_metrics'] = df_params_metrics
 
     # # dotty plots of transport simulations
     # fig, axes = plt.subplots(8, 4, sharey=True, figsize=(6, 8))

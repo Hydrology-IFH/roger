@@ -10,7 +10,7 @@ import click
 @click.command("main")
 def main(job_type, sas_solver, split_size, nsamples):
     base_path = Path(__file__).parent
-    base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo'
+    base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
 
     transport_models_abrev = {'advection-dispersion-power': 'adp',
