@@ -21,7 +21,7 @@ theta_eff:
 # fraction of large pores (-)
 frac_lp:
 - 0.1
-- 0.5
+- 0.7
 # permanent wilting point of soil (-)
 theta_pwp:
 - 0.15
