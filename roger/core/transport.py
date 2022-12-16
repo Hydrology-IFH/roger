@@ -243,13 +243,18 @@ def calculate_age_statistics(state):
         at[2:-2, 2:-2], npx.where(npx.sum(rt_s, axis=-1) > 0, npx.sum(ages * rt_s, axis=-1), npx.nan)[2:-2, 2:-2],
     )
 
+    # return KernelOutput(tt25_transp=vs.tt25_transp, tt50_transp=vs.tt50_transp, tt75_transp=vs.tt75_transp, ttavg_transp=vs.ttavg_transp,
+    #                     tt25_q_ss=vs.tt25_q_ss, tt50_q_ss=vs.tt50_q_ss, tt75_q_ss=vs.tt75_q_ss, ttavg_q_ss=vs.ttavg_q_ss,
+    #                     rt25_rz=vs.rt25_rz, rt50_rz=vs.rt50_rz, rt75_rz=vs.rt75_rz, rtavg_rz=vs.rtavg_rz,
+    #                     rt25_ss=vs.rt25_ss, rt50_ss=vs.rt50_ss, rt75_ss=vs.rt75_ss, rtavg_ss=vs.rtavg_ss,
+    #                     rt25_s=vs.rt25_s, rt50_s=vs.rt50_s, rt75_s=vs.rt75_s, rtavg_s=vs.rtavg_s,
+    #                     rt10_s=vs.rt10_s, rt90_s=vs.rt90_s, tt10_transp=vs.tt10_transp,
+    #                     tt90_transp=vs.tt90_transp, tt10_q_ss=vs.tt10_q_ss, tt90_q_ss=vs.tt90_q_ss)
     return KernelOutput(tt25_transp=vs.tt25_transp, tt50_transp=vs.tt50_transp, tt75_transp=vs.tt75_transp, ttavg_transp=vs.ttavg_transp,
                         tt25_q_ss=vs.tt25_q_ss, tt50_q_ss=vs.tt50_q_ss, tt75_q_ss=vs.tt75_q_ss, ttavg_q_ss=vs.ttavg_q_ss,
                         rt25_rz=vs.rt25_rz, rt50_rz=vs.rt50_rz, rt75_rz=vs.rt75_rz, rtavg_rz=vs.rtavg_rz,
                         rt25_ss=vs.rt25_ss, rt50_ss=vs.rt50_ss, rt75_ss=vs.rt75_ss, rtavg_ss=vs.rtavg_ss,
-                        rt25_s=vs.rt25_s, rt50_s=vs.rt50_s, rt75_s=vs.rt75_s, rtavg_s=vs.rtavg_s,
-                        rt10_s=vs.rt10_s, rt90_s=vs.rt90_s, tt10_transp=vs.tt10_transp,
-                        tt90_transp=vs.tt90_transp, tt10_q_ss=vs.tt10_q_ss, tt90_q_ss=vs.tt90_q_ss)
+                        rt25_s=vs.rt25_s, rt50_s=vs.rt50_s, rt75_s=vs.rt75_s, rtavg_s=vs.rtavg_s)
 
 
 @roger_kernel
