@@ -1,7 +1,7 @@
 # Makkink coefficient (-)
 c1_mak:
 - 0.55  # lower boundary
-- 0.63  # upper boundary
+- 0.65  # upper boundary
 # Makkink coefficient (-)
 c2_mak:
 - -0.2
@@ -17,15 +17,15 @@ lmpv:
 # effective porosity of soil (-)
 theta_eff:
 - 0.15
-- 0.45
+- 0.35
 # fraction of large pores (-)
 frac_lp:
 - 0.1
-- 0.6
+- 0.5
 # permanent wilting point of soil (-)
 theta_pwp:
-- 0.2
-- 0.3
+- 0.15
+- 0.25
 # saturated hydraulic conductivity (mm/h)
 ks:
 - 5
