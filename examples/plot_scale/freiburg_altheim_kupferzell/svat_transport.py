@@ -110,7 +110,6 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             local_variables=[
                 "S_pwp_rz",
                 "S_pwp_ss",
-                "S_fc_ss",
                 "S_sat_rz",
                 "S_sat_ss",
                 "sas_params_evap_soil",
@@ -125,7 +124,6 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
 
             vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.mc')[:, :, 0])
             vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.mc')[:, :, 0])
-            vs.S_fc_ss = update(vs.S_fc_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_fc_ss", self._base_path, 'states_hm.mc')[:, :, 0])
             vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.mc')[:, :, 0])
             vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.mc')[:, :, 0])
 
@@ -157,8 +155,6 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "S_pwp_rz",
-                "S_pwp_ss",
                 "S_rz",
                 "S_rz_init",
                 "S_ss",
@@ -171,8 +167,8 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.mc')[:, :, vs.itt, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.mc')[:, :, vs.itt, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.mc')[:, :, vs.itt, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.mc')[:, :, vs.itt, npx.newaxis])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
             vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
             vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
@@ -249,8 +245,8 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._base_path, 'states_hm.mc'))
             vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.mc'))
             vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.mc'))
-            vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.mc') - self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.mc'))
-            vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.mc') - self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.mc'))
+            vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.mc'))
+            vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.mc'))
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
 
         @roger_routine

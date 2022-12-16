@@ -104,7 +104,6 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             local_variables=[
                 "S_pwp_rz",
                 "S_pwp_ss",
-                "S_fc_ss",
                 "S_sat_rz",
                 "S_sat_ss",
                 "sas_params_evap_soil",
@@ -120,7 +119,6 @@ def main(transport_model_structure, sas_solver, tmp_dir):
 
             vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, 0])
             vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, 0])
-            vs.S_fc_ss = update(vs.S_fc_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_fc_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, 0])
             vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, 0])
             vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, 0])
 
@@ -160,18 +158,18 @@ def main(transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 62)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 0.166687)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 0.801740)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 61)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1.830619)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 2.332712)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 61)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1.655836)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 0.324578)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], vs.S_pwp_ss[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2])
 
         @roger_routine
         def set_parameters(self, state):
@@ -180,8 +178,6 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "S_pwp_rz",
-                "S_pwp_ss",
                 "S_snow",
                 "S_rz",
                 "S_rz_init",
@@ -196,8 +192,8 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             vs = state.variables
 
             vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_snow", self._base_path, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis])
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
             vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
             vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
@@ -342,8 +338,8 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
             vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
             vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
-            vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, :] - self._read_var_from_nc("S_pwp_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
-            vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, :] - self._read_var_from_nc("S_pwp_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
+            vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
+            vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
             vs.S_SNOW = update(vs.S_SNOW, at[2:-2, 2:-2, :], self._read_var_from_nc("S_snow", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
 

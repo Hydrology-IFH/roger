@@ -155,7 +155,6 @@ def main():
             local_variables=[
                 "S_pwp_rz",
                 "S_pwp_ss",
-                "S_fc_ss",
                 "S_sat_rz",
                 "S_sat_ss",
                 "alpha_transp",
@@ -176,7 +175,6 @@ def main():
             vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt])
             vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt])
             vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt])
-            vs.S_fc_ss = update(vs.S_fc_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_fc_ss", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt])
             vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt])
 
             # partition coefficients
@@ -241,8 +239,6 @@ def main():
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "S_pwp_rz",
-                "S_pwp_ss",
                 "S_rz",
                 "S_rz_init",
                 "S_ss",
@@ -255,8 +251,8 @@ def main():
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
             vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
             vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
@@ -339,9 +335,7 @@ def main():
                 "cpr_rz",
                 "q_rz",
                 "q_ss",
-                "S_pwp_rz",
                 "S_rz",
-                "S_pwp_ss",
                 "S_ss",
                 "S_s",
                 "S_snow",
@@ -368,8 +362,8 @@ def main():
             vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt])
             vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt])
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc')[npx.newaxis, :, vs.itt])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
 
             vs.C_in = update(vs.C_in, at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt])

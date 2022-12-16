@@ -207,8 +207,6 @@ class SVATTRANSPORTSetup(RogerSetup):
     @roger_routine(
         dist_safe=False,
         local_variables=[
-            "S_pwp_rz",
-            "S_pwp_ss",
             "S_rz",
             "S_rz_init",
             "S_ss",
@@ -221,8 +219,8 @@ class SVATTRANSPORTSetup(RogerSetup):
     def set_initial_conditions_setup(self, state):
         vs = state.variables
 
-        vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-        vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+        vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+        vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
         vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
         vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
         vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
@@ -305,9 +303,7 @@ class SVATTRANSPORTSetup(RogerSetup):
             "cpr_rz",
             "q_rz",
             "q_ss",
-            "S_pwp_rz",
             "S_rz",
-            "S_pwp_ss",
             "S_ss",
             "S_s",
             "S_snow",
@@ -334,8 +330,8 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], self._read_var_from_nc("q_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
         vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], self._read_var_from_nc("q_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
 
-        vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-        vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
+        vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
+        vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._input_dir, 'states_hm.nc')[:, :, vs.itt])
         vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
 
         vs.C_in = update(vs.C_in, at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt])

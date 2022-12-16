@@ -130,7 +130,6 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
             local_variables=[
                 "S_pwp_rz",
                 "S_pwp_ss",
-                "S_fc_ss",
                 "S_sat_rz",
                 "S_sat_ss",
                 "sas_params_evap_soil",
@@ -146,7 +145,6 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
 
             vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path, self._states_hm_file)[:, :, 0])
             vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path, self._states_hm_file)[:, :, 0])
-            vs.S_fc_ss = update(vs.S_fc_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_fc_ss", self._base_path, self._states_hm_file)[:, :, 0])
             vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, self._states_hm_file)[:, :, 0])
             vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, self._states_hm_file)[:, :, 0])
 
@@ -197,18 +195,18 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 62)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], random_uniform(self._bounds['c1_transp'][0], self._bounds['c1_transp'][1], tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], random_uniform(self._bounds['c2_transp'][0], self._bounds['c2_transp'][1], tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 61)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], random_uniform(self._bounds['c1_q_rz'][0], self._bounds['c1_q_rz'][1], tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], random_uniform(self._bounds['c2_q_rz'][0], self._bounds['c2_q_rz'][1], tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 61)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], random_uniform(self._bounds['c1_q_ss'][0], self._bounds['c1_q_ss'][1], tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], random_uniform(self._bounds['c2_q_ss'][0], self._bounds['c2_q_ss'][1], tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], vs.S_pwp_ss[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2])
             elif settings.tm_structure == "older-preference-power":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 6)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 0.1)
@@ -249,24 +247,24 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
                 c2 = random_uniform(self._bounds['c2_transp'][0], self._bounds['c2_transp'][1], tuple((vs.sas_params_transp.shape[0], vs.sas_params_transp.shape[1])))[2:-2, 2:-2]
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], c1)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], c2)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 36)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 2], random_uniform(self._bounds['b_q_rz'][0], self._bounds['b_q_rz'][1], tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2])
                 c1 = random_uniform(self._bounds['c1_q_rz'][0], self._bounds['c1_q_rz'][1], tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2]
                 c2 = random_uniform(self._bounds['c2_q_rz'][0], self._bounds['c2_q_rz'][1], tuple((vs.sas_params_q_rz.shape[0], vs.sas_params_q_rz.shape[1])))[2:-2, 2:-2]
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], c1)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], c2)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 36)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 2], random_uniform(self._bounds['b_q_ss'][0], self._bounds['b_q_ss'][1], tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2])
                 c1 = random_uniform(self._bounds['c1_q_ss'][0], self._bounds['c1_q_ss'][1], tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
                 c2 = random_uniform(self._bounds['c2_q_ss'][0], self._bounds['c2_q_ss'][1], tuple((vs.sas_params_q_ss.shape[0], vs.sas_params_q_ss.shape[1])))[2:-2, 2:-2]
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], c1)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], c2)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_fc_ss[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], vs.S_pwp_ss[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2])
 
         @roger_routine
         def set_parameters(self, state):
@@ -275,8 +273,6 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "S_pwp_rz",
-                "S_pwp_ss",
                 "S_snow",
                 "S_rz",
                 "S_rz_init",
