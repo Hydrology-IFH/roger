@@ -20,7 +20,6 @@ OUTPUT_COLLECT:
 - "S_rz"  # storage volume of root zone (mm)
 - "S_ss"  # storage volume of subsoil (mm)
 - "S_pwp_rz"  # storage volume at permanent wilting point of root zone (mm)
-- "S_fc_rz"  # storage volume at field capacity of root zone (mm)
 - "S_sat_rz"  # storage volume at saturation of root zone (mm)
 - "S_pwp_ss"  # storage volume at permanent wilting point of subsoil (mm)
 - "S_fc_ss"  # storage volume at field capacity of subsoil (mm)

@@ -311,7 +311,6 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
                 "S_RZ",
                 "S_SS",
                 "S_S",
-                "S_SNOW",
                 "M_IN",
                 "C_IN",
             ],
@@ -331,7 +330,6 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
             vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file))
             vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file))
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
-            vs.S_SNOW = update(vs.S_SNOW, at[2:-2, 2:-2, :], self._read_var_from_nc("S_snow", self._input_dir, self._states_hm_file))
             TA = allocate(state.dimensions, ("x", "y", "t"))
             TA = update(TA, at[2:-2, 2:-2, :], self._read_var_from_nc("ta", self._input_dir, self._states_hm_file)[npx.newaxis, :, :])
 
@@ -361,7 +359,6 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
             vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], vs.S_RZ[2:-2, 2:-2, vs.itt])
             vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], vs.S_SS[2:-2, 2:-2, vs.itt])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
-            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, vs.tau], vs.S_SNOW[2:-2, 2:-2, vs.itt])
 
             vs.C_in = update(vs.C_in, at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt])
             vs.M_in = update(

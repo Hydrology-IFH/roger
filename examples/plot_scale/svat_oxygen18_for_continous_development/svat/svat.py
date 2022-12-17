@@ -225,9 +225,9 @@ def main(tmp_dir):
                 diagnostics["rate"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = ["S_rz", "S_ss",
-                                                       "S_pwp_rz", "S_fc_rz",
+                                                       "S_pwp_rz",
                                                        "S_sat_rz", "S_pwp_ss",
-                                                       "S_fc_ss", "S_sat_ss",
+                                                       "S_sat_ss",
                                                        "theta_rz", "theta_ss", "theta",
                                                        "S_snow"]
             # values are aggregated to daily

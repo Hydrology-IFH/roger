@@ -86,12 +86,12 @@ def main(nsamples, lys_experiment, transport_model_structure, sas_solver):
         def _set_nsamples(self, nsamples):
             self._nsamples = nsamples
 
-        def _set_nitrate_input(self, state, nn_rain, nn_sol, prec, ta):
+        def _set_nitrate_input(self, state, nn_rain, nn_sol, inf):
             vs = state.variables
 
             NMIN_IN = allocate(state.dimensions, ("x", "y", "t"))
 
-            mask_rain = (prec > 0) & (ta > 0)
+            mask_rain = (inf > 0)
             mask_sol = (vs.NMIN_IN > 0)
             sol_idx = npx.zeros((nn_sol,), dtype=int)
             sol_idx = update(sol_idx, at[:], where(npx.any(mask_sol, axis=(0, 1)), size=nn_sol, fill_value=0)[0])
@@ -107,21 +107,21 @@ def main(nsamples, lys_experiment, transport_model_structure, sas_solver):
                 start_rain = rain_idx[input_itt]
                 rain_sum = update(
                     rain_sum,
-                    at[:, :], npx.max(npx.where(npx.cumsum(prec[:, :, start_rain:], axis=-1) <= 20, npx.max(npx.cumsum(prec[:, :, start_rain:], axis=-1), axis=-1)[:, :, npx.newaxis], 0), axis=-1),
+                    at[:, :], npx.max(npx.where(npx.cumsum(inf[:, :, start_rain:], axis=-1) <= 20, npx.max(npx.cumsum(inf[:, :, start_rain:], axis=-1), axis=-1)[:, :, npx.newaxis], 0), axis=-1),
                 )
-                nn_end = npx.max(npx.where(npx.cumsum(prec[:, :, start_rain:]) <= 20, npx.max(npx.arange(npx.shape(prec)[2])[npx.newaxis, npx.newaxis, npx.shape(prec)[2]-start_rain], axis=-1), 0))
+                nn_end = npx.max(npx.where(npx.cumsum(inf[:, :, start_rain:]) <= 20, npx.max(npx.arange(npx.shape(inf)[2])[npx.newaxis, npx.newaxis, npx.shape(inf)[2]-start_rain], axis=-1), 0))
                 end_rain = update(end_rain, at[:], start_rain + nn_end)
-                end_rain = update(end_rain, at[:], npx.where(end_rain > npx.shape(prec)[2], npx.shape(prec)[2], end_rain))
+                end_rain = update(end_rain, at[:], npx.where(end_rain > npx.shape(inf)[2], npx.shape(inf)[2], end_rain))
 
                 # proportions for redistribution
                 NMIN_IN = update(
                     NMIN_IN,
-                    at[:, :, start_rain:end_rain[0]], vs.M_IN[:, :, sol_idx[i], npx.newaxis] * (prec[:, :, start_rain:end_rain[0]] / rain_sum[:, :, npx.newaxis]),
+                    at[:, :, start_rain:end_rain[0]], vs.M_IN[:, :, sol_idx[i], npx.newaxis] * (inf[:, :, start_rain:end_rain[0]] / rain_sum[:, :, npx.newaxis]),
                 )
 
             # solute input concentration
             M_IN = NMIN_IN * 0.3
-            C_IN = npx.where(prec > 0, M_IN / prec, 0)
+            C_IN = npx.where(inf > 0, M_IN / inf, 0)
 
             NMIN_IN1 = NMIN_IN * 0.7
 
@@ -251,20 +251,23 @@ def main(nsamples, lys_experiment, transport_model_structure, sas_solver):
         @roger_routine(
             dist_safe=False,
             local_variables=[
-                "S_pwp_rz",
-                "S_pwp_ss",
                 "S_rz",
+                "S_rz_init",
                 "S_ss",
+                "S_ss_init",
                 "S_s",
-                "itt"
+                "itt",
+                "taup1"
             ],
         )
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :2], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2, npx.newaxis])
-            vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :2], vs.S_rz[2:-2, 2:-2, :2] + vs.S_ss[2:-2, 2:-2, :2])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.mc')[:, :, vs.itt, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.mc')[:, :, vs.itt, npx.newaxis])
+            vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
+            vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
+            vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
 
         @roger_routine
         def set_initial_conditions(self, state):
@@ -345,6 +348,18 @@ def main(nsamples, lys_experiment, transport_model_structure, sas_solver):
         @roger_routine(
             dist_safe=False,
             local_variables=[
+                "PREC_DIST_DAILY",
+                "INF_MAT_RZ",
+                "INF_PF_RZ",
+                "INF_PF_SS",
+                "TRANSP",
+                "EVAP_SOIL",
+                "CPR_RZ",
+                "Q_RZ",
+                "Q_SS",
+                "S_RZ",
+                "S_SS",
+                "S_S",
                 "NMIN_IN",
                 "NORG_IN",
                 "M_IN",
@@ -355,80 +370,58 @@ def main(nsamples, lys_experiment, transport_model_structure, sas_solver):
             vs = state.variables
             settings = state.settings
 
-            TA = self._read_var_from_nc("ta", self._base_path, 'states_hm.nc', group=self._lys)
-            PREC = self._read_var_from_nc("prec", self._base_path, 'states_hm.nc', group=self._lys)
+            vs.PREC_DIST_DAILY = update(vs.PREC_DIST_DAILY, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._base_path, 'states_hm.mc'))
+            vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", self._base_path, 'states_hm.mc'))
+            vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", self._base_path, 'states_hm.mc') + self._read_var_from_nc("inf_sc_rz", self._base_path, 'states_hm.mc'))
+            vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._base_path, 'states_hm.mc'))
+            vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._base_path, 'states_hm.mc'))
+            vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", self._base_path, 'states_hm.mc'))
+            vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._base_path, 'states_hm.mc'))
+            vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.mc'))
+            vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.mc'))
+            vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.mc'))
+            vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.mc'))
+            vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
+            TA = allocate(state.dimensions, ("x", "y", "t"))
+            TA = update(TA, at[2:-2, 2:-2, :], self._read_var_from_nc("ta", self._input_dir, 'states_hm.mc')[npx.newaxis, :, :])
 
             # convert kg N/ha to mg/square meter
             vs.NMIN_IN = update(vs.NMIN_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("Nmin", self._input_dir, 'forcing_tracer.nc') * 100 * settings.dx * settings.dy)
             vs.NORG_IN = update(vs.NORG_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("Norg", self._input_dir, 'forcing_tracer.nc') * 100 * settings.dx * settings.dy)
 
-            mask_rain = (PREC > 0) & (TA > 0)
+            INF = vs.INF_MAT_RZ + vs.INF_PF_RZ + vs.INF_PF_SS
+            mask_rain = (INF > 0)
             mask_sol = (vs.NMIN_IN > 0)
             nn_rain = npx.int64(npx.sum(npx.any(mask_rain, axis=(0, 1))))
             nn_sol = npx.int64(npx.sum(npx.any(mask_sol, axis=(0, 1))))
-            M_IN, C_IN, NMIN_IN = self._set_nitrate_input(state, nn_rain, nn_sol, PREC, TA)
+            M_IN, C_IN, NMIN_IN = self._set_nitrate_input(state, nn_rain, nn_sol, INF)
             vs.M_IN = update(vs.M_IN, at[:, :, :], M_IN)
             vs.C_IN = update(vs.C_IN, at[:, :, :], C_IN)
             vs.NMIN_IN = update(vs.NMIN_IN, at[:, :, :], NMIN_IN)
 
-        @roger_routine(
-            dist_safe=False,
-            local_variables=[
-                "ta",
-                "prec",
-                "inf_mat_rz",
-                "inf_pf_rz",
-                "inf_pf_ss",
-                "transp",
-                "evap_soil",
-                "cpr_rz",
-                "q_rz",
-                "q_ss",
-                "S_pwp_rz",
-                "S_rz",
-                "S_pwp_ss",
-                "S_ss",
-                "S_s",
-                "S_snow",
-                "tau",
-                "taum1",
-                "itt",
-                "C_in",
-                "C_IN",
-                "M_in",
-                "NMIN_IN",
-                "NORG_IN",
-                "Nmin_in",
-                "Norg_in"
-
-            ],
-        )
+        @roger_routine
         def set_forcing(self, state):
             vs = state.variables
 
-            vs.ta = update(vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("ta", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("prec", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mat_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.inf_pf_rz = update(vs.inf_pf_rz, at[2:-2, 2:-2], self._read_var_from_nc("inf_mp_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] + self._read_var_from_nc("inf_sc_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.inf_pf_ss = update(vs.inf_pf_ss, at[2:-2, 2:-2], self._read_var_from_nc("inf_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.transp = update(vs.transp, at[2:-2, 2:-2], self._read_var_from_nc("transp", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.evap_soil = update(vs.evap_soil, at[2:-2, 2:-2], self._read_var_from_nc("evap_soil", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.cpr_rz = update(vs.cpr_rz, at[2:-2, 2:-2], self._read_var_from_nc("cpr_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-
-            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt])
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_rz[2:-2, 2:-2])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.nc', group=self._lys)[:, :, vs.itt] - vs.S_pwp_ss[2:-2, 2:-2])
+            vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], vs.PREC_DIST_DAILY[2:-2, 2:-2, vs.itt])
+            vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], vs.INF_MAT_RZ[2:-2, 2:-2, vs.itt])
+            vs.inf_pf_rz = update(vs.inf_pf_rz, at[2:-2, 2:-2], vs.INF_PF_RZ[2:-2, 2:-2, vs.itt])
+            vs.inf_pf_ss = update(vs.inf_pf_ss, at[2:-2, 2:-2], vs.INF_PF_SS[2:-2, 2:-2, vs.itt])
+            vs.transp = update(vs.transp, at[2:-2, 2:-2], vs.TRANSP[2:-2, 2:-2, vs.itt])
+            vs.evap_soil = update(vs.evap_soil, at[2:-2, 2:-2], vs.EVAP_SOIL[2:-2, 2:-2, vs.itt])
+            vs.cpr_rz = update(vs.cpr_rz, at[2:-2, 2:-2], vs.CPR_RZ[2:-2, 2:-2, vs.itt])
+            vs.q_rz = update(vs.q_rz, at[2:-2, 2:-2], vs.Q_RZ[2:-2, 2:-2, vs.itt])
+            vs.q_ss = update(vs.q_ss, at[2:-2, 2:-2], vs.Q_SS[2:-2, 2:-2, vs.itt])
+            vs.re_rg = update(vs.re_rg, at[2:-2, 2:-2], vs.RE_RG[2:-2, 2:-2, vs.itt])
+            vs.re_rl = update(vs.re_rl, at[2:-2, 2:-2], vs.RE_RL[2:-2, 2:-2, vs.itt])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], vs.S_RZ[2:-2, 2:-2, vs.itt])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], vs.S_SS[2:-2, 2:-2, vs.itt])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
 
             vs.C_in = update(vs.C_in, at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt])
             vs.M_in = update(
                 vs.M_in,
-                at[2:-2, 2:-2], vs.C_in[2:-2, 2:-2] * vs.prec[2:-2, 2:-2, vs.tau],
+                at[2:-2, 2:-2], vs.C_in[2:-2, 2:-2] * (vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2]),
             )
             vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], vs.NMIN_IN[2:-2, 2:-2, vs.itt])
             vs.Norg_in = update(vs.Norg_in, at[2:-2, 2:-2], vs.NORG_IN[2:-2, 2:-2, vs.itt])
