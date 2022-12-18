@@ -13,25 +13,13 @@ do
   qsub -q short $f
 done
 
-FILES="$PWD/bromide_deterministic_svat_ad_*.sh"
+FILES="$PWD/bromide_deterministic_svat_adp_*.sh"
 for f in $FILES
 do
   qsub -q short $f
 done
 
-FILES="$PWD/bromide_deterministic_svat_adt_*.sh"
-for f in $FILES
-do
-  qsub -q short $f
-done
-
-FILES="$PWD/bromide_deterministic_svat_pow_*.sh"
-for f in $FILES
-do
-  qsub -q short $f
-done
-
-FILES="$PWD/bromide_deterministic_svat_powt_*.sh"
+FILES="$PWD/bromide_deterministic_svat_adpt_*.sh"
 for f in $FILES
 do
   qsub -q short $f
