@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1
-#PBS -l walltime=6:00:00
+#PBS -l walltime=24:00:00
 #PBS -l pmem=4000mb
 #PBS -N bromide_deterministic_svat_cm_2005
  

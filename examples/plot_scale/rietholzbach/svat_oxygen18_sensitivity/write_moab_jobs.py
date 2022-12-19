@@ -112,7 +112,7 @@ def main(nsamples, job_type, sas_solver, split_size):
                 lines = []
                 lines.append('#!/bin/bash\n')
                 lines.append('#PBS -l nodes=1:ppn=1:gpus=1:default\n')
-                lines.append('#PBS -l walltime=12:00:00\n')
+                lines.append('#PBS -l walltime=8:00:00\n')
                 lines.append('#PBS -l pmem=4000mb\n')
                 lines.append(f'#PBS -N {script_name}\n')
                 lines.append('#PBS -m bea\n')
