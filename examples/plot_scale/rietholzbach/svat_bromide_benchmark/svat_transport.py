@@ -1,9 +1,9 @@
 from pathlib import Path
+import os
 import pandas as pd
 import h5netcdf
 import xarray as xr
 from cftime import num2date, date2num
-import os
 import numpy as onp
 import click
 from roger.cli.roger_run_base import roger_base_cli
