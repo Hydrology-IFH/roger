@@ -251,7 +251,7 @@ def main(tmp_dir):
                          }
                 ncol = len(df_metrics.columns)
                 xaxis_labels = [labs._LABS[k].split(' ')[0] for k in bounds_sobol['names']]
-                cmap = cm.get_cmap('Greys')
+                cmap = cm.get_cmap('Reds')
                 norm = Normalize(vmin=0, vmax=2)
                 colors = cmap(norm([0.5, 1.5]))
                 fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(14, 5))
