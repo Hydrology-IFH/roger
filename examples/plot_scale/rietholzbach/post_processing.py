@@ -142,12 +142,12 @@ def main(tmp_dir):
     date_hydrus_18O = num2date(hours_hydrus_18O, units=f"hours since {ds_hydrus_18O['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
     ds_hydrus_18O = ds_hydrus_18O .assign_coords(Time=("Time", date_hydrus_18O))
 
-    # # travel time simulations
-    # states_hydrus_file = base_path / "hydrus_benchmark" / "states_hydrus_tt.nc"
-    # ds_hydrus_tt = xr.open_dataset(states_hydrus_file, engine="h5netcdf", decode_times=False)
-    # days_hydrus_tt = ds_hydrus_tt['Time'].values / 24
-    # date_hydrus_tt = num2date(days_hydrus_tt, units=f"hours since {ds_hydrus_tt['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    # ds_hydrus_tt = ds_hydrus_tt.assign_coords(Time=("Time", date_hydrus_tt))
+    # travel time simulations
+    states_hydrus_file = base_path / "hydrus_benchmark" / "states_hydrus_tt.nc"
+    ds_hydrus_tt = xr.open_dataset(states_hydrus_file, engine="h5netcdf", decode_times=False)
+    days_hydrus_tt = ds_hydrus_tt['Time'].values / 24
+    date_hydrus_tt = num2date(days_hydrus_tt, units=f"hours since {ds_hydrus_tt['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+    ds_hydrus_tt = ds_hydrus_tt.assign_coords(Time=("Time", date_hydrus_tt))
 
     # # plot SAS function
     # fig, axs = plt.subplots(1, 1, figsize=(3, 2))
@@ -1814,19 +1814,19 @@ def main(tmp_dir):
                 axes[j, i].set_xlabel('T [days]')
                 axes[0, i].set_title(_LABS_TM[tm_structure])
     
-    # for j, var_sim in enumerate(['bTT_transp', 'bTT_perc']):
-    #     TT = onp.where(ds_hydrus_tt[var_sim].values <= 0, onp.nan, ds_hydrus_tt[var_sim].values)
-    #     skipt = 1000
-    #     x = onp.arange(TT.shape[-1])
-    #     y1 = onp.nanquantile(TT[skipt:, :], 0.05, axis=0)
-    #     y2 = onp.nanquantile(TT[skipt:, :], 0.95, axis=0)
-    #     axes[j, -1].fill_between(x, y1, y2, facecolor='grey', alpha=0.5)
-    #     axes[j, -1].plot(onp.nanmedian(TT[skipt:, :], axis=0), ls='--', lw=1, color='black')
-    #     axes[j, -1].plot(onp.nanmean(TT[skipt:, :], axis=0), lw=1, color='black')
-    #     axes[j, -1].set_xlim((0, 1000))
-    #     axes[j, -1].set_ylim((0, 1))
-    #     axes[j, -1].set_xlabel('T [days]')
-    # axes[0, -1].set_title('HYDRUS-1D', fontsize=8)
+    for j, var_sim in enumerate(['bTT_transp', 'bTT_perc']):
+        TT = onp.where(ds_hydrus_tt[var_sim].values <= 0, onp.nan, ds_hydrus_tt[var_sim].values)
+        skipt = 1000
+        x = onp.arange(TT.shape[-1])
+        y1 = onp.nanquantile(TT[skipt:, :], 0.05, axis=0)
+        y2 = onp.nanquantile(TT[skipt:, :], 0.95, axis=0)
+        axes[j, -1].fill_between(x, y1, y2, facecolor='grey', alpha=0.5)
+        axes[j, -1].plot(onp.nanmedian(TT[skipt:, :], axis=0), ls='--', lw=1, color='black')
+        axes[j, -1].plot(onp.nanmean(TT[skipt:, :], axis=0), lw=1, color='black')
+        axes[j, -1].set_xlim((0, 1000))
+        axes[j, -1].set_ylim((0, 1))
+        axes[j, -1].set_xlabel('T [days]')
+    axes[0, -1].set_title('HYDRUS-1D', fontsize=8)
     axes[0, -1].axis('off')
     axes[1, -1].axis('off')
     axes[0, 0].set_ylabel(r'$\overleftarrow{P}_{transp}(T,t)$')
