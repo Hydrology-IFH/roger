@@ -11,7 +11,7 @@ eval "$(conda shell.bash hook)"
 conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_bromide_benchmark
  
-python svat_transport.py -b jax -d cpu -tms piston -td "${TMPDIR}" -ss deterministic -y 2003
+python svat_transport.py -b numpy -d cpu -tms piston -td "${TMPDIR}" -ss deterministic -y 2003
 # Move output from local SSD to global workspace
 echo "Move output to /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_bromide_benchmark"
 mkdir -p /beegfs/work/workspace/ws/fr_rs1092-workspace-0/rietholzbach/svat_bromide_benchmark
