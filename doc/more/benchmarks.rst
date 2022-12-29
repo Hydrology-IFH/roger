@@ -22,7 +22,12 @@ We run the same model code with all Roger backends (``numpy``, ``numpy-mpi``, ``
   :align: center
 
 
-As a rule of thumb, we find that JAX improves computational time (approximately 2 times faster). GPUs are a competitive alternative to CPUs, **as long as the problem fits into GPU memory**.
+.. figure:: /_images/benchmarks/svat/energy_footprint_svat_iteration_size.png
+  :width: 500px
+  :align: center
+
+
+As a rule of thumb, we find that JAX improves computational time (approximately 2 times faster) and reduces energy demand. GPUs are a competitive alternative to CPUs, **as long as the problem fits into GPU memory**.
 
 Varying number of MPI processes
 -------------------------------

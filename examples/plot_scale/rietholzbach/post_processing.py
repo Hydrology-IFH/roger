@@ -887,37 +887,37 @@ def main(tmp_dir):
         df_eval = df_eval.iloc[:, :]
         dict_obs_sim_hydrus[var_obs] = df_eval
 
-    # df_params_metrics_hydrus = pd.DataFrame(index=['', 'dry', 'normal', 'wet'])
-    # vars_obs = ['AET', 'dWEIGHT', 'PERC', 'd18O_PERC']
-    # vars_sim = ['aet', 'dS', 'perc', 'd18O_perc_bs']
-    # for var_obs, var_sim in zip(vars_obs, vars_sim):
-    #     for i, sc in enumerate(['', 'dry', 'normal', 'wet']):
-    #         obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
-    #         df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-    #         df_obs.loc[:, 'obs'] = obs_vals
-    #         sim_vals = ds_hydrus_18O[var_sim].values
-    #         # join observations on simulations
-    #         df_eval = eval_utils.join_obs_on_sim(ds_hydrus_18O['Time'].values, sim_vals, df_obs)
-    #         if i > 0:
-    #             df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
-    #             rows = (df_rows['sc'].values == i)
-    #             df_eval = df_eval.loc[rows, :]
-    #         if var_sim in ['dS']:
-    #             df_eval.loc['2000-01':'2000-06', :] = onp.nan
-    #         # skip first seven days for warmup
-    #         df_eval.loc[:'1997-01-07', :] = onp.nan
-    #         df_eval = df_eval.dropna()
+    df_params_metrics_hydrus = pd.DataFrame(index=['', 'dry', 'normal', 'wet'])
+    vars_obs = ['AET', 'dWEIGHT', 'PERC', 'd18O_PERC']
+    vars_sim = ['aet', 'dS', 'perc', 'd18O_perc_bs']
+    for var_obs, var_sim in zip(vars_obs, vars_sim):
+        for i, sc in enumerate(['', 'dry', 'normal', 'wet']):
+            obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
+            df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+            df_obs.loc[:, 'obs'] = obs_vals
+            sim_vals = ds_hydrus_18O[var_sim].values
+            # join observations on simulations
+            df_eval = eval_utils.join_obs_on_sim(ds_hydrus_18O['Time'].values, sim_vals, df_obs)
+            if i > 0:
+                df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
+                rows = (df_rows['sc'].values == i)
+                df_eval = df_eval.loc[rows, :]
+            if var_sim in ['dS']:
+                df_eval.loc['2000-01':'2000-06', :] = onp.nan
+            # skip first seven days for warmup
+            df_eval.loc[:'1997-01-07', :] = onp.nan
+            df_eval = df_eval.dropna()
 
-    #         obs_vals = df_eval.loc[:, 'obs'].values
-    #         sim_vals = df_eval.loc[:, 'sim'].values
-    #         key_kge = 'KGE_' + var_sim
-    #         try:
-    #             df_params_metrics_hydrus.loc[sc, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-    #         except ValueError:
-    #             df_params_metrics_hydrus.loc[sc, key_kge] = onp.nan
+            obs_vals = df_eval.loc[:, 'obs'].values
+            sim_vals = df_eval.loc[:, 'sim'].values
+            key_kge = 'KGE_' + var_sim
+            try:
+                df_params_metrics_hydrus.loc[sc, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
+            except ValueError:
+                df_params_metrics_hydrus.loc[sc, key_kge] = onp.nan
 
-    # file = base_path_figs / "metrics_best_hydrus.txt"
-    # df_params_metrics_hydrus.to_csv(file, header=True, index=True, sep="\t")
+    file = base_path_figs / "metrics_best_hydrus.txt"
+    df_params_metrics_hydrus.to_csv(file, header=True, index=True, sep="\t")
 
     # # plot cumulated precipitation, evapotranspiration, soil storage change and percolation
     # fig, axes = plt.subplots(3, 2, sharex='col', figsize=(6, 3))
@@ -1009,102 +1009,102 @@ def main(tmp_dir):
     # path = base_path_figs / file
     # fig.savefig(path, dpi=250)
     
-    # # compare best 100 simulations with observations
-    # nx = ds_sim_hm100.dims['x']
-    # fig, axes = plt.subplots(3, 2, sharex='col', figsize=(6, 3))
-    # axes[0, 0].plot(dict_obs['PREC'].loc['1997-01-07':'1999', :].index, dict_obs['PREC'].loc['1997-01-07':'1999', 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
-    # axes[0, 0].set_ylabel('PREC\n[mm]')
-    # axes[0, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
-    # axes[0, 0].set_ylim(0,)
-    # axes[0, 0].invert_yaxis()
-    # ax2 = axes[0, 0].twinx()
-    # for nrow in range(nx):
-    #     ax2.plot(dict_obs_sim100['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim100['AET'].loc['1997-01-07':'1999', f'sim{nrow}'].cumsum(),
-    #               lw=1, color='red', ls='-', alpha=.8)
-    # ax2.plot(dict_obs_sim100['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim100['AET'].loc['1997-01-07':'1999', 'obs'].cumsum(),
-    #           lw=1, color='blue', ls='-', alpha=1)
-    # ax2.plot(dict_obs_sim_hydrus['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim_hydrus['AET'].loc['1997-01-07':'1999', 'sim'].cumsum(),
-    #           lw=1, color='gray', ls='-.')
-    # ax2.set_ylim(0,)
+    # compare best 100 simulations with observations
+    nx = ds_sim_hm100.dims['x']
+    fig, axes = plt.subplots(3, 2, sharex='col', figsize=(6, 3))
+    axes[0, 0].plot(dict_obs['PREC'].loc['1997-01-07':'1999', :].index, dict_obs['PREC'].loc['1997-01-07':'1999', 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
+    axes[0, 0].set_ylabel('PREC\n[mm]')
+    axes[0, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
+    axes[0, 0].set_ylim(0,)
+    axes[0, 0].invert_yaxis()
+    ax2 = axes[0, 0].twinx()
+    for nrow in range(nx):
+        ax2.plot(dict_obs_sim100['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim100['AET'].loc['1997-01-07':'1999', f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-', alpha=.8)
+    ax2.plot(dict_obs_sim100['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim100['AET'].loc['1997-01-07':'1999', 'obs'].cumsum(),
+              lw=1, color='blue', ls='-', alpha=1)
+    ax2.plot(dict_obs_sim_hydrus['AET'].loc['1997-01-07':'1999', :].index, dict_obs_sim_hydrus['AET'].loc['1997-01-07':'1999', 'sim'].cumsum(),
+              lw=1, color='gray', ls='-.')
+    ax2.set_ylim(0,)
     # ax2.set_ylabel('ET\n[mm]')
-    # axes[0, 1].plot(dict_obs['PREC_corr'].loc['2006':, :].index, dict_obs['PREC_corr'].loc['2006':, 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
+    axes[0, 1].plot(dict_obs['PREC_corr'].loc['2006':, :].index, dict_obs['PREC_corr'].loc['2006':, 'obs'].cumsum(), lw=1, color='blue', ls='-', alpha=1)
     # axes[0, 1].set_ylabel('PREC\n[mm]')
-    # axes[0, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
-    # axes[0, 1].set_ylim(0,)
-    # axes[0, 1].invert_yaxis()
-    # ax2 = axes[0, 1].twinx()
-    # for nrow in range(nx):
-    #     ax2.plot(dict_obs_sim100['AET'].loc['2006':, :].index, dict_obs_sim100['AET'].loc['2006':, f'sim{nrow}'].cumsum(),
-    #               lw=1, color='red', ls='-', alpha=.8)
-    # ax2.plot(dict_obs_sim100['AET'].loc['2006':, :].index, dict_obs_sim100['AET'].loc['2006':, 'obs'].cumsum(),
-    #           lw=1, color='blue', ls='-', alpha=1)
-    # ax2.plot(dict_obs_sim_hydrus['AET'].loc['2006':, :].index, dict_obs_sim_hydrus['AET'].loc['2006':, 'sim'].cumsum(),
-    #           lw=1, color='gray', ls='-.')
-    # ax2.set_ylim(0,)
-    # ax2.set_ylabel('ET\n[mm]')
-    # for nrow in range(nx):
-    #     axes[1, 0].plot(dict_obs_sim100['dWEIGHT'].loc['1997-01-07':'1999', :].index, dict_obs_sim100['dWEIGHT'].loc['1997-01-07':'1999', f'sim{nrow}'].cumsum(),
-    #               lw=1, color='red', ls='-')
-    # axes[1, 0].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['1997-01-07':'1999', :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['1997-01-07':'1999', 'sim'].cumsum(),
-    #               lw=1, color='gray', ls='-.', alpha=.8)
-    # axes[1, 0].set_ylabel('cum. $\Delta$S\n[mm]')
-    # axes[1, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
-    # for nrow in range(nx):
-    #     axes[1, 1].plot(dict_obs_sim100['dWEIGHT'].loc['2006':, :].index, dict_obs_sim100['dWEIGHT'].loc['2006':, f'sim{nrow}'].cumsum(),
-    #               lw=1, color='red', ls='-')
-    # axes[1, 1].plot(dict_obs_sim100['dWEIGHT'].loc['2006':, :].index, dict_obs_sim100['dWEIGHT'].loc['2006':, 'obs'].cumsum(),
-    #               lw=1, color='blue', ls='-', alpha=1)
-    # axes[1, 1].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['2006':, :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['2006':, 'sim'].cumsum(),
-    #               lw=1, color='gray', ls='-.', alpha=.8)
+    axes[0, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
+    axes[0, 1].set_ylim(0,)
+    axes[0, 1].invert_yaxis()
+    ax2 = axes[0, 1].twinx()
+    for nrow in range(nx):
+        ax2.plot(dict_obs_sim100['AET'].loc['2006':, :].index, dict_obs_sim100['AET'].loc['2006':, f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-', alpha=.8)
+    ax2.plot(dict_obs_sim100['AET'].loc['2006':, :].index, dict_obs_sim100['AET'].loc['2006':, 'obs'].cumsum(),
+              lw=1, color='blue', ls='-', alpha=1)
+    ax2.plot(dict_obs_sim_hydrus['AET'].loc['2006':, :].index, dict_obs_sim_hydrus['AET'].loc['2006':, 'sim'].cumsum(),
+              lw=1, color='gray', ls='-.')
+    ax2.set_ylim(0,)
+    ax2.set_ylabel('ET\n[mm]')
+    for nrow in range(nx):
+        axes[1, 0].plot(dict_obs_sim100['dWEIGHT'].loc['1997-01-07':'1999', :].index, dict_obs_sim100['dWEIGHT'].loc['1997-01-07':'1999', f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-')
+    axes[1, 0].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['1997-01-07':'1999', :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['1997-01-07':'1999', 'sim'].cumsum(),
+                  lw=1, color='gray', ls='-.', alpha=.8)
+    axes[1, 0].set_ylabel('cum. $\Delta$S\n[mm]')
+    axes[1, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
+    for nrow in range(nx):
+        axes[1, 1].plot(dict_obs_sim100['dWEIGHT'].loc['2006':, :].index, dict_obs_sim100['dWEIGHT'].loc['2006':, f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-')
+    axes[1, 1].plot(dict_obs_sim100['dWEIGHT'].loc['2006':, :].index, dict_obs_sim100['dWEIGHT'].loc['2006':, 'obs'].cumsum(),
+                  lw=1, color='blue', ls='-', alpha=1)
+    axes[1, 1].plot(dict_obs_sim_hydrus['dWEIGHT'].loc['2006':, :].index, dict_obs_sim_hydrus['dWEIGHT'].loc['2006':, 'sim'].cumsum(),
+                  lw=1, color='gray', ls='-.', alpha=.8)
     # axes[1, 1].set_ylabel('cum. $\Delta$S\n[mm]')
-    # axes[1, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
-    # for nrow in range(nx):
-    #     axes[2, 0].plot(dict_obs_sim100['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim100['PERC'].loc['1997-01-07':'1999', f'sim{nrow}'].cumsum(),
-    #               lw=1, color='red', ls='-', alpha=.8)
-    # axes[2, 0].plot(dict_obs_sim['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim['PERC'].loc['1997-01-07':'1999', 'obs'].cumsum(),
-    #               lw=1, color='blue', ls='-', alpha=1)
-    # axes[2, 0].plot(dict_obs_sim_hydrus['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim_hydrus['PERC'].loc['1997-01-07':'1999', 'sim'].cumsum(),
-    #               lw=1, color='gray', ls='-.')
-    # axes[2, 0].set_ylim(0,)
-    # axes[2, 0].invert_yaxis()
-    # axes[2, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
-    # axes[2, 0].set_ylabel('PERC\n[mm]')
-    # axes[2, 0].set_xlabel(r'Time [year-month]')
-    # axes[2, 0].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
-    # axes[2, 0].tick_params(axis='x', rotation=33)
-    # for nrow in range(nx):
-    #     axes[2, 1].plot(dict_obs_sim100['PERC'].loc['2006':, :].index, dict_obs_sim100['PERC'].loc['2006':, f'sim{nrow}'].cumsum(),
-    #               lw=1, color='red', ls='-', alpha=.8)
-    # axes[2, 1].plot(dict_obs_sim['PERC'].loc['2006':, :].index, dict_obs_sim['PERC'].loc['2006':, 'obs'].cumsum(),
-    #               lw=1, color='blue', ls='-', alpha=1)
-    # axes[2, 1].plot(dict_obs_sim_hydrus['PERC'].loc['2006':, :].index, dict_obs_sim_hydrus['PERC'].loc['2006':, 'sim'].cumsum(),
-    #               lw=1, color='gray', ls='-.')
-    # axes[2, 1].set_ylim(0,)
-    # axes[2, 1].invert_yaxis()
-    # axes[2, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
+    axes[1, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
+    for nrow in range(nx):
+        axes[2, 0].plot(dict_obs_sim100['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim100['PERC'].loc['1997-01-07':'1999', f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-', alpha=.8)
+    axes[2, 0].plot(dict_obs_sim['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim['PERC'].loc['1997-01-07':'1999', 'obs'].cumsum(),
+                  lw=1, color='blue', ls='-', alpha=1)
+    axes[2, 0].plot(dict_obs_sim_hydrus['PERC'].loc['1997-01-07':'1999', :].index, dict_obs_sim_hydrus['PERC'].loc['1997-01-07':'1999', 'sim'].cumsum(),
+                  lw=1, color='gray', ls='-.')
+    axes[2, 0].set_ylim(0,)
+    axes[2, 0].invert_yaxis()
+    axes[2, 0].set_xlim((dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[0], dict_obs['PREC_corr'].loc['1997-01-07':'1999', :].index[-1]))
+    axes[2, 0].set_ylabel('PERC\n[mm]')
+    axes[2, 0].set_xlabel(r'Time [year-month]')
+    axes[2, 0].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+    axes[2, 0].tick_params(axis='x', rotation=33)
+    for nrow in range(nx):
+        axes[2, 1].plot(dict_obs_sim100['PERC'].loc['2006':, :].index, dict_obs_sim100['PERC'].loc['2006':, f'sim{nrow}'].cumsum(),
+                  lw=1, color='red', ls='-', alpha=.8)
+    axes[2, 1].plot(dict_obs_sim['PERC'].loc['2006':, :].index, dict_obs_sim['PERC'].loc['2006':, 'obs'].cumsum(),
+                  lw=1, color='blue', ls='-', alpha=1)
+    axes[2, 1].plot(dict_obs_sim_hydrus['PERC'].loc['2006':, :].index, dict_obs_sim_hydrus['PERC'].loc['2006':, 'sim'].cumsum(),
+                  lw=1, color='gray', ls='-.')
+    axes[2, 1].set_ylim(0,)
+    axes[2, 1].invert_yaxis()
+    axes[2, 1].set_xlim((dict_obs['PREC_corr'].loc['2006':, :].index[0], dict_obs['PREC_corr'].loc['2006':, :].index[-1]))
     # axes[2, 1].set_ylabel('PERC\n[mm]')
-    # axes[2, 1].set_xlabel(r'Time [year-month]')
-    # axes[2, 1].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
-    # axes[2, 1].tick_params(axis='x', rotation=33)
-    # axes[0, 0].text(0.525, 0.88, '(a)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[0, 0].transAxes)
-    # axes[1, 0].text(0.525, 0.88, '(b)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[1, 0].transAxes)
-    # axes[2, 0].text(0.525, 0.88, '(c)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[2, 0].transAxes)
-    # axes[0, 1].text(0.525, 0.88, '(d)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[0, 1].transAxes)
-    # axes[1, 1].text(0.525, 0.88, '(e)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[1, 1].transAxes)
-    # axes[2, 1].text(0.525, 0.88, '(f)', fontsize=8, horizontalalignment='center',
-    #               verticalalignment='center', transform=axes[2, 1].transAxes)
-    # fig.tight_layout()
-    # file = f'prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}.png'
-    # path = base_path_figs / file
-    # fig.savefig(path, dpi=250)
-    # file = f'prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}.pdf'
-    # path = base_path_figs / file
-    # fig.savefig(path, dpi=250)
+    axes[2, 1].set_xlabel(r'Time [year-month]')
+    axes[2, 1].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
+    axes[2, 1].tick_params(axis='x', rotation=33)
+    axes[0, 0].text(0.525, 0.88, '(a)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0, 0].transAxes)
+    axes[1, 0].text(0.525, 0.88, '(b)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1, 0].transAxes)
+    axes[2, 0].text(0.525, 0.88, '(c)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2, 0].transAxes)
+    axes[0, 1].text(0.525, 0.88, '(d)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[0, 1].transAxes)
+    axes[1, 1].text(0.525, 0.88, '(e)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[1, 1].transAxes)
+    axes[2, 1].text(0.525, 0.88, '(f)', fontsize=8, horizontalalignment='center',
+                  verticalalignment='center', transform=axes[2, 1].transAxes)
+    fig.tight_layout()
+    file = f'prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}.png'
+    path = base_path_figs / file
+    fig.savefig(path, dpi=250)
+    file = f'prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}.pdf'
+    path = base_path_figs / file
+    fig.savefig(path, dpi=250)
     
     # # compare best 10 simulations with observations
     # nx = ds_sim_hm10.dims['x']
@@ -1438,101 +1438,99 @@ def main(tmp_dir):
     # fig.savefig(file, dpi=250)
     # plt.close('all')
 
-    # # write evaluation metrics for different storage condtions to .txt
-    # df_kge_d18O_perc = pd.DataFrame(columns=['CM', 'PI', 'AD', 'AD-TV'])
-    # for ncol, tm_structure in enumerate(tm_structures):
-    #     for sc in ['', 'dry', 'normal', 'wet']:
-    #         df_kge_d18O_perc.loc[f'{sc}', df_kge_d18O_perc.columns[ncol]] = onp.max(dict_params_metrics_tm_mc[tm_structure]['params_metrics'][f'KGE_C_iso_q_ss{sc}'])
-    # file = base_path_figs / f"kge_d18O_perc_optimized_with_{metric_for_opt}.txt"
-    # df_kge_d18O_perc.to_csv(file, header=True, index=True, sep="\t")
+    # write evaluation metrics for different storage condtions to .txt
+    df_kge_d18O_perc = pd.DataFrame(columns=['CM', 'PI', 'AD', 'AD-TV'])
+    for ncol, tm_structure in enumerate(tm_structures):
+        for sc in ['', 'dry', 'normal', 'wet']:
+            df_kge_d18O_perc.loc[f'{sc}', df_kge_d18O_perc.columns[ncol]] = onp.max(dict_params_metrics_tm_mc[tm_structure]['params_metrics'][f'KGE_C_iso_q_ss{sc}'])
+    file = base_path_figs / f"kge_d18O_perc_optimized_with_{metric_for_opt}.txt"
+    df_kge_d18O_perc.to_csv(file, header=True, index=True, sep="\t")
 
-    # # compare best model runs
-    # fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
-    # df_obs = pd.DataFrame(index=date_obs)
-    # df_obs.loc[:, 'd18O_prec'] = ds_obs['d18O_PREC'].isel(x=0, y=0).values
-    # ax.flatten()[0].plot(df_obs.index,
-    #             df_obs.loc[:, 'd18O_prec'].fillna(method='bfill'),
-    #             '-', color='blue')
-    # ax.flatten()[0].scatter(df_obs.index,
-    #                 df_obs.loc[:, 'd18O_prec'],
-    #                 color='blue', s=1)
-    # ax.flatten()[0].set_ylabel(r'$\delta^{18}$$O_{PREC}$ [‰]')
-    # ax.flatten()[0].set_ylim([-20, 0])
-    # ax.flatten()[0].set_xlim(df_obs.index[0], df_obs.index[-1])
-    # for i, tm_structure in enumerate(tm_structures):
-    #     idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
-    #     tms = tm_structure.replace(" ", "_")
-    #     # load transport simulation
-    #     states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm100" / f"states_{tms}_monte_carlo.nc"
-    #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-    #     days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    #     date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    #     ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
-    #     # join observations on simulations
-    #     obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-    #     df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-    #     df_obs.loc[:, 'obs'] = obs_vals
-    #     ax.flatten()[i+1].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_ss'].isel(x=idx_best, y=0).values, color='red', lw=1)
-    #     ax.flatten()[i+1].plot(ds_hydrus_18O['Time'].values, ds_hydrus_18O['d18O_perc'].values, color='grey', lw=1)
-    #     ax.flatten()[i+1].scatter(df_obs.index, df_obs.iloc[:, 0], color='blue', s=1)
-    #     ax.flatten()[i+1].set_title(_LABS_TM[tm_structure])
-    #     ax[i+1].set_ylabel(r'$\delta^{18}$$O_{PERC}$ [‰]')
-    #     if tm_structure in ['piston']:
-    #         ax.flatten()[i+1].set_ylim((-20, 0))
-    #     else:
-    #         ax.flatten()[i+1].set_ylim((-15, -5))
-    #     ax.flatten()[i+1].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
-    # ax[-1].set_xlabel('Time [year]')
-    # fig.tight_layout()
-    # file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"
-    # fig.savefig(file, dpi=250)
+    # compare best model runs
+    fig, ax = plt.subplots(5, 1, sharex=True, figsize=(6, 6))
+    df_obs = pd.DataFrame(index=date_obs)
+    df_obs.loc[:, 'd18O_prec'] = ds_obs['d18O_PREC'].isel(x=0, y=0).values
+    ax.flatten()[0].plot(df_obs.index,
+                df_obs.loc[:, 'd18O_prec'].fillna(method='bfill'),
+                '-', color='blue')
+    ax.flatten()[0].scatter(df_obs.index,
+                    df_obs.loc[:, 'd18O_prec'],
+                    color='blue', s=1)
+    ax.flatten()[0].set_ylabel(r'$\delta^{18}$$O_{PREC}$ [‰]')
+    ax.flatten()[0].set_ylim([-20, 0])
+    ax.flatten()[0].set_xlim(df_obs.index[0], df_obs.index[-1])
+    for i, tm_structure in enumerate(tm_structures):
+        idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
+        tms = tm_structure.replace(" ", "_")
+        # load transport simulation
+        states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm100" / f"states_{tms}_monte_carlo.nc"
+        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+        days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+        date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+        ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+        # join observations on simulations
+        obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+        df_obs.loc[:, 'obs'] = obs_vals
+        ax.flatten()[i+1].plot(ds_sim_tm['Time'].values, ds_sim_tm['C_iso_q_ss'].isel(x=idx_best, y=0).values, color='red', lw=1)
+        ax.flatten()[i+1].plot(ds_hydrus_18O['Time'].values, ds_hydrus_18O['d18O_perc'].values, color='grey', lw=1)
+        ax.flatten()[i+1].scatter(df_obs.index, df_obs.iloc[:, 0], color='blue', s=1)
+        ax[i+1].set_ylabel('%s\n$\delta^{18}$$O_{PERC}$ [‰]' % (_LABS_TM[tm_structure]))
+        if tm_structure in ['piston']:
+            ax.flatten()[i+1].set_ylim((-20, -4))
+        else:
+            ax.flatten()[i+1].set_ylim((-15, -7))
+        ax.flatten()[i+1].set_xlim(ds_sim_tm['Time'].values[0], ds_sim_tm['Time'].values[-1])
+    ax[-1].set_xlabel('Time [year]')
+    fig.tight_layout()
+    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"
+    fig.savefig(file, dpi=250)
 
-    # # insets for 3 years
-    # years = onp.arange(1997, 2006).tolist()
-    # for year in years:
-    #     fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
-    #     df_obs = pd.DataFrame(index=date_obs)
-    #     df_obs.loc[:, 'd18O_prec'] = ds_obs['d18O_PREC'].isel(x=0, y=0).values
-    #     df_obs = df_obs.loc[f'{year}':f'{year+2}', 'd18O_prec'].to_frame()
-    #     ax.flatten()[0].plot(df_obs.index,
-    #                           df_obs.loc[:, 'd18O_prec'].fillna(method='bfill'),
-    #                           '-', color='blue')
-    #     ax.flatten()[0].scatter(df_obs.index,
-    #                             df_obs.loc[:, 'd18O_prec'],
-    #                             color='blue', s=1)
-    #     ax.flatten()[0].set_ylabel(r'$\delta^{18}$$O_{PREC}$ [‰]')
-    #     ax.flatten()[0].set_ylim(-20, 0)
-    #     ax.flatten()[0].set_xlim(df_obs.index[0], df_obs.index[-1])
-    #     for i, tm_structure in enumerate(tm_structures):
-    #         idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
-    #         tms = tm_structure.replace(" ", "_")
-    #         # load transport simulation
-    #         states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm100" / f"states_{tms}_monte_carlo.nc"
-    #         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
-    #         days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-    #         date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-    #         ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
-    #         ds_sim_tm_year = ds_sim_tm.sel(Time=slice(f'{year}-01-01', f'{year + 2}-12-31'))
-    #         ds_hydrus_18O_year = ds_hydrus_18O.sel(Time=slice(f'{year}-01-01', f'{year + 2}-12-31'))
-    #         # join observations on simulations
-    #         obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-    #         df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-    #         df_obs.loc[:, 'obs'] = obs_vals
-    #         df_obs = df_obs.loc[f'{year}':f'{year+2}', 'obs'].to_frame()
-    #         ax.flatten()[i+1].plot(ds_sim_tm_year['Time'].values, ds_sim_tm_year['C_iso_q_ss'].isel(x=idx_best, y=0).values, color='red', lw=1)
-    #         ax.flatten()[i+1].plot(ds_hydrus_18O_year['Time'].values, ds_hydrus_18O_year['d18O_perc'].values, color='grey', lw=1)
-    #         ax.flatten()[i+1].scatter(df_obs.index, df_obs.iloc[:, 0], color='blue', s=1)
-    #         ax.flatten()[i+1].set_title(_LABS_TM[tm_structure])
-    #         ax[i+1].set_ylabel(r'$\delta^{18}$$O_{PERC}$ [‰]')
-    #         if tm_structure in ['piston']:
-    #             ax.flatten()[i+1].set_ylim((-20, 0))
-    #         else:
-    #             ax.flatten()[i+1].set_ylim((-15, -5))
-    #         ax.flatten()[i+1].set_xlim(ds_sim_tm_year['Time'].values[0], ds_sim_tm_year['Time'].values[-1])
-    #     ax[-1].set_xlabel('Time [year]')
-    #     fig.tight_layout()
-    #     file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}_{year}_{year+2}.png"
-    #     fig.savefig(file, dpi=250)
+    # insets for 3 years
+    years = onp.arange(1997, 2006).tolist()
+    for year in years:
+        fig, ax = plt.subplots(5, 1, sharex=True, figsize=(6, 6))
+        df_obs = pd.DataFrame(index=date_obs)
+        df_obs.loc[:, 'd18O_prec'] = ds_obs['d18O_PREC'].isel(x=0, y=0).values
+        df_obs = df_obs.loc[f'{year}':f'{year+2}', 'd18O_prec'].to_frame()
+        ax.flatten()[0].plot(df_obs.index,
+                              df_obs.loc[:, 'd18O_prec'].fillna(method='bfill'),
+                              '-', color='blue')
+        ax.flatten()[0].scatter(df_obs.index,
+                                df_obs.loc[:, 'd18O_prec'],
+                                color='blue', s=1)
+        ax.flatten()[0].set_ylabel(r'$\delta^{18}$$O_{PREC}$ [‰]')
+        ax.flatten()[0].set_ylim(-20, 0)
+        ax.flatten()[0].set_xlim(df_obs.index[0], df_obs.index[-1])
+        for i, tm_structure in enumerate(tm_structures):
+            idx_best = dict_params_metrics_tm_mc[tm_structure]['params_metrics']['KGE_C_iso_q_ss'].idxmax()
+            tms = tm_structure.replace(" ", "_")
+            # load transport simulation
+            states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "deterministic" / "age_max_1500_days" / "optimized_with_KGE_multi_hm100" / f"states_{tms}_monte_carlo.nc"
+            ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+            days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+            date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
+            ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
+            ds_sim_tm_year = ds_sim_tm.sel(Time=slice(f'{year}-01-01', f'{year + 2}-12-31'))
+            ds_hydrus_18O_year = ds_hydrus_18O.sel(Time=slice(f'{year}-01-01', f'{year + 2}-12-31'))
+            # join observations on simulations
+            obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
+            df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+            df_obs.loc[:, 'obs'] = obs_vals
+            df_obs = df_obs.loc[f'{year}':f'{year+2}', 'obs'].to_frame()
+            ax.flatten()[i+1].plot(ds_sim_tm_year['Time'].values, ds_sim_tm_year['C_iso_q_ss'].isel(x=idx_best, y=0).values, color='red', lw=1)
+            ax.flatten()[i+1].plot(ds_hydrus_18O_year['Time'].values, ds_hydrus_18O_year['d18O_perc'].values, color='grey', lw=1)
+            ax.flatten()[i+1].scatter(df_obs.index, df_obs.iloc[:, 0], color='blue', s=1)
+            ax[i+1].set_ylabel('%s\n$\delta^{18}$$O_{PERC}$ [‰]' % (_LABS_TM[tm_structure]))
+            if tm_structure in ['piston']:
+                ax.flatten()[i+1].set_ylim((-20, -4))
+            else:
+                ax.flatten()[i+1].set_ylim((-15, -7))
+            ax.flatten()[i+1].set_xlim(ds_sim_tm_year['Time'].values[0], ds_sim_tm_year['Time'].values[-1])
+        ax[-1].set_xlabel('Time [year]')
+        fig.tight_layout()
+        file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}_{year}_{year+2}.png"
+        fig.savefig(file, dpi=250)
 
     # fig, ax = plt.subplots(5, 1, sharey=False, figsize=(6, 6))
     # tm_structures_extra = ['preferential-power', 'older-preference-power', 'advection-dispersion-kumaraswamy', 'time-variant advection-dispersion-kumaraswamy']
@@ -1736,56 +1734,54 @@ def main(tmp_dir):
     # file = base_path_figs / f"fdc_d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"
     # fig.savefig(file, dpi=250)
 
-    # # bromide benchmark
-    # years = onp.arange(1997, 2007).tolist()
-    # cmap = cm.get_cmap('Reds')
-    # cmap_hydrus = cm.get_cmap('Greys')
-    # norm = Normalize(vmin=onp.min(years)-2, vmax=onp.max(years))
-    # alphas = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-    # for alpha in alphas:
-    #     fig, axes = plt.subplots(5, 1, figsize=(6, 5), sharey=False)
-    #     for i, tm_structure in enumerate(tm_structures):
-    #         tms = tm_structure.replace(" ", "_")
-    #         df_sim_br_conc = pd.DataFrame(index=df_obs_br.index)
-    #         df_sim_br_mass = pd.DataFrame(index=df_obs_br.index)
-    #         for year in years:
-    #             states_hydrus_br_file = base_path / "svat_bromide_benchmark" / "deterministic" / f"states_{tms}_bromide_benchmark.nc"
-    #             with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
-    #                 x = onp.where((onp.round(ds["alpha_transp"].isel(Time=0).values, 1) == alpha) & (onp.round(ds["alpha_q"].isel(Time=0).values, 1) == alpha))[0][0]
-    #                 sim_vals = ds["C_q_ss_mmol_bs"].isel(x=x, y=0).values[315:716]
-    #                 sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
-    #                 df_sim_br_conc.loc[:, f"{year}"] = sim_vals
-    #                 sim_vals = ds["M_q_ss"].isel(x=x, y=0).values[315:716]
-    #                 sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
-    #                 df_sim_br_mass.loc[:, f"{year}"] = sim_vals
-    #             axes.flatten()[i].plot(df_sim_br_conc.dropna().index, df_sim_br_conc.dropna()[f"{year}"], ls='--', color=cmap(norm(year)), lw=0.8, alpha=0.6, label=f'{year}')
-    #         weights = df_sim_br_mass.values / df_sim_br_mass.sum(axis=1).values[:, onp.newaxis]
-    #         df_sim_br_conc.loc[:, "avg_weighted"] = onp.sum(weights * df_sim_br_conc.values, axis=1)
-    #         axes.flatten()[i].plot(df_sim_br_conc.dropna().index, df_sim_br_conc.dropna().loc[:, "avg_weighted"], color="red", lw=1, alpha=1, label='average')
-    #         axes.flatten()[i].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1)
-    #         axes.flatten()[i].set_xlim([0, 400])
-    #         axes.flatten()[i].set_ylabel('Bromide\n [mmol/l]')
-    #         axes.flatten()[i].set_title(_LABS_TM[tm_structure], fontsize=8)
-    #     df_sim_br = pd.DataFrame(index=df_obs_br.index)
-    #     for year in years:
-    #         states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
-    #         with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
-    #             df_sim_br = pd.DataFrame(index=df_obs_br.index)
-    #             df_sim_br.loc[:, f"{year}"] = ds["Br_perc_mmol"].values
-    #         axes.flatten()[-1].plot(df_sim_br.dropna().index, df_sim_br.dropna()[f"{year}"], ls='--', color=cmap_hydrus(norm(year)), lw=0.8, alpha=0.5, label=f'{year}')
-    #     axes.flatten()[-1].plot(df_sim_br.dropna().index, df_sim_br.dropna().mean(axis=1), color="grey", lw=1, alpha=1, label='average')
-    #     axes.flatten()[-1].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1, label='observed')
-    #     axes.flatten()[-1].set_xlim([0, 400])
-    #     axes.flatten()[-1].set_ylabel('Bromide\n [mmol/l]')
-    #     axes.flatten()[-1].set_xlabel(r'Time [days since injection]')
-    #     axes.flatten()[-1].set_title('HYDRUS-1D', fontsize=8)
-    #     lines1, labels1 = axes.flatten()[-2].get_legend_handles_labels()
-    #     lines2, labels2 = axes.flatten()[-1].get_legend_handles_labels()
-    #     fig.legend(lines1, labels1, loc='upper right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.64))
-    #     fig.legend(lines2, labels2, loc='lower right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.07))
-    #     fig.subplots_adjust(bottom=0.1, right=0.85, hspace=0.8)
-    #     file = base_path_figs / f"bromide_benchmark_alpha_{alpha}.png"
-    #     fig.savefig(file, dpi=250)
+    # bromide benchmark
+    years = onp.arange(1997, 2007).tolist()
+    cmap = cm.get_cmap('Reds')
+    cmap_hydrus = cm.get_cmap('Greys')
+    norm = Normalize(vmin=onp.min(years)-2, vmax=onp.max(years))
+    alphas = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+    for alpha in alphas:
+        fig, axes = plt.subplots(5, 1, figsize=(6, 5), sharex=True)
+        for i, tm_structure in enumerate(tm_structures):
+            tms = tm_structure.replace(" ", "_")
+            df_sim_br_conc = pd.DataFrame(index=df_obs_br.index)
+            df_sim_br_mass = pd.DataFrame(index=df_obs_br.index)
+            for year in years:
+                states_hydrus_br_file = base_path / "svat_bromide_benchmark" / "deterministic" / f"states_{tms}_bromide_benchmark.nc"
+                with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
+                    x = onp.where((onp.round(ds["alpha_transp"].isel(Time=0).values, 1) == alpha) & (onp.round(ds["alpha_q"].isel(Time=0).values, 1) == alpha))[0][0]
+                    sim_vals = ds["C_q_ss_mmol_bs"].isel(x=x, y=0).values[315:716]
+                    sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
+                    df_sim_br_conc.loc[:, f"{year}"] = sim_vals
+                    sim_vals = ds["M_q_ss"].isel(x=x, y=0).values[315:716]
+                    sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
+                    df_sim_br_mass.loc[:, f"{year}"] = sim_vals
+                axes.flatten()[i].plot(df_sim_br_conc.dropna().index, df_sim_br_conc.dropna()[f"{year}"], ls='--', color=cmap(norm(year)), lw=0.8, alpha=0.5, label=f'{year}')
+            weights = df_sim_br_mass.values / df_sim_br_mass.sum(axis=1).values[:, onp.newaxis]
+            df_sim_br_conc.loc[:, "avg_weighted"] = onp.sum(weights * df_sim_br_conc.values, axis=1)
+            axes.flatten()[i].plot(df_sim_br_conc.dropna().index, df_sim_br_conc.dropna().loc[:, "avg_weighted"], color="red", lw=1, alpha=1, label='average')
+            axes.flatten()[i].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1)
+            axes.flatten()[i].set_xlim([0, 400])
+            axes.flatten()[i].set_ylabel('%s\nBr [mmol/l]' % (_LABS_TM[tm_structure]))
+        df_sim_br = pd.DataFrame(index=df_obs_br.index)
+        for year in years:
+            states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
+            with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
+                df_sim_br = pd.DataFrame(index=df_obs_br.index)
+                df_sim_br.loc[:, f"{year}"] = ds["Br_perc_mmol"].values
+            axes.flatten()[-1].plot(df_sim_br.dropna().index, df_sim_br.dropna()[f"{year}"], ls='--', color=cmap_hydrus(norm(year)), lw=0.8, alpha=0.5, label=f'{year}')
+        axes.flatten()[-1].plot(df_sim_br.dropna().index, df_sim_br.dropna().mean(axis=1), color="grey", lw=1, alpha=1, label='average')
+        axes.flatten()[-1].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1, label='observed')
+        axes.flatten()[-1].set_xlim([0, 400])
+        axes.flatten()[-1].set_ylabel('HYDRUS-1D\nBr [mmol/l]')
+        axes.flatten()[-1].set_xlabel(r'Time [days since injection]')
+        lines1, labels1 = axes.flatten()[-2].get_legend_handles_labels()
+        lines2, labels2 = axes.flatten()[-1].get_legend_handles_labels()
+        fig.legend(lines1, labels1, loc='upper right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.64))
+        fig.legend(lines2, labels2, loc='lower right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.07))
+        fig.subplots_adjust(bottom=0.1, right=0.85, hspace=0.2)
+        file = base_path_figs / f"bromide_benchmark_alpha_{alpha}.png"
+        fig.savefig(file, dpi=250)
 
     # # travel time benchmark
     # # compare backward travel time distributions
@@ -2208,29 +2204,29 @@ def main(tmp_dir):
     # file = base_path_figs / "dotty_plots_hydrus.png"
     # fig.savefig(file, dpi=250)
 
-    # plot mean residence time along soil depth
-    cmap = copy.copy(plt.cm.get_cmap('Blues_r'))
-    norm = mpl.colors.Normalize(vmin=0, vmax=500)
+    # # plot mean residence time along soil depth
+    # cmap = copy.copy(plt.cm.get_cmap('Blues_r'))
+    # norm = mpl.colors.Normalize(vmin=0, vmax=500)
 
-    fig, axes = plt.subplots(1, 1, figsize=(6, 1.5))
-    sns.heatmap(ds_hydrus_tt['mrt_s'].values, xticklabels=366, yticklabels=int(50/2), cmap='Blues_r',
-                vmax=500, vmin=0, cbar=False, ax=axes)
-    axes.set_yticks([0, 25, 50, 75, 100])
-    axes.set_yticklabels([0, 0.5, 1, 1.5, 2])
-    axes.set_xticklabels(list(range(1997, 2008)))
-    axes.set_ylabel('Soil depth [m]')
-    axes.set_xlabel('Time [year]')
+    # fig, axes = plt.subplots(1, 1, figsize=(6, 1.5))
+    # sns.heatmap(ds_hydrus_tt['mrt_s'].values, xticklabels=366, yticklabels=int(50/2), cmap='Blues_r',
+    #             vmax=500, vmin=0, cbar=False, ax=axes)
+    # axes.set_yticks([0, 25, 50, 75, 100])
+    # axes.set_yticklabels([0, 0.5, 1, 1.5, 2])
+    # axes.set_xticklabels(list(range(1997, 2008)))
+    # axes.set_ylabel('Soil depth [m]')
+    # axes.set_xlabel('Time [year]')
 
-    axl = fig.add_axes([0.88, 0.3, 0.02, 0.58])
-    cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
-                                    orientation='vertical',
-                                    ticks=[0, 100, 200, 300, 400, 500])
-    cb1.ax.invert_yaxis()
-    cb1.set_label(r'age [days]')
-    fig.subplots_adjust(bottom=0.3, right=0.85)
-    file = 'mean_residence_time_soil.png'
-    path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    # axl = fig.add_axes([0.88, 0.3, 0.02, 0.58])
+    # cb1 = mpl.colorbar.ColorbarBase(axl, cmap=cmap, norm=norm,
+    #                                 orientation='vertical',
+    #                                 ticks=[0, 100, 200, 300, 400, 500])
+    # cb1.ax.invert_yaxis()
+    # cb1.set_label(r'age [days]')
+    # fig.subplots_adjust(bottom=0.3, right=0.85)
+    # file = 'mean_residence_time_soil.png'
+    # path = base_path_figs / file
+    # fig.savefig(path, dpi=250)
 
     # # plot soil bromide concentrations
     # years = onp.arange(1997, 2007).tolist()
