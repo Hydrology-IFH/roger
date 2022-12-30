@@ -25,6 +25,7 @@ Single run of the hydrologic model
 Monte Carlo simulations with hydrologic model used for parameter estimation
 - `param_bounds.yml`: contains parameter boundaries for Monte Carlo sampling
 - `svat_mc.sh`: job script to run Monte Carlo simulations
+- `svat_mc_gpu.sh`: job script to run Monte Carlo simulations on GPU
 - `states_hm_mc.mc`: Hydrologic Monte Carlo simulations
 - `states_hm1.mc`: States of best hydrologic simulations
 - `states_hm100.mc`: States of best 100 hydrologic simulations
@@ -35,6 +36,7 @@ Saltelli simulations with hydrologic model used for sensitvity analysis
 - `param_bounds.yml`: contains parameter boundaries for Saltelli sampling
 - `params_saltelli.nc`: Sampled hydrologic model parameters and transport model parameters
 - `svat_sa_for_*.sh`: job script to run hydrologic simulations required by transport model structures
+- `svat_sa_for_*_gpu.sh`: job script to run hydrologic simulations on GPU required by transport model structures
 - `states_hm_sa_for_*.nc`: Hydrologic simulations for corresponding model structure
 
 ## Transport simulations
@@ -49,15 +51,16 @@ Single run of oxygen 18 transport model. Requires hydrologic simulations.
 ### svat_oxygen18_monte_carlo
 Monte Carlo simulations with oxygen-18 transport models used for parameter estimation. Requires hydrologic simulations.
 - `param_bounds.yml`: contains parameter boundaries for Monte Carlo sampling
-- `oxygen18_*_*_mc.sh`: job script to run Monte Carlo simulations with the provided sas solver and provided transport model structure (e.g. ad=advection-dispersion).
-- `bootstrap.py`: Bootstrap best 100 hydrologic simulations based on size of Monte Carlo samples (e.g. 1000)
+- `oxygen18_*_*_mc_gpu.sh`: job script to run Monte Carlo simulations on GPU with the provided sas solver and provided transport model structure (e.g. adp=advection-dispersio-power).
+- `bootstrap.py`: Bootstrap best 10 or 100 hydrologic simulations based on size of Monte Carlo samples (e.g. 1000)
+- `states_hm10_bootstrap.nc`: Bootstrapped samples of best 10 hydrologic simulations
 - `states_hm100_bootstrap.nc`: Bootstrapped samples of best 100 hydrologic simulations
 - `states_*_mc.nc`: Monte Carlo transport simulations with provided transport model structure
 - `states_hm_best_for_*.nc`: Hydrologic simulation corresponding to best transport simulation
 
 ### svat_oxygen18_sensitivity
 Saltelli simulations with oxygen-18 transport model used for sensitvity analysis. Requires hydrologic simulations.
-- `oxygen18_*_*_sa.sh`: job script to run Saltelli simulations with the provided sas solver and provided transport model structure (e.g. ad=advection-dispersion)
+- `oxygen18_*_*_sa_gpu.sh`: job script to run Saltelli simulations on GPU with the provided sas solver and provided transport model structure (e.g. adp=advection-dispersion-power)
 - `states_*_sa.nc`: Saltelli transport simulations with provided transport model structure
 - `param_bounds.yml`: contains parameter boundaries for Saltelli sampling
 - `params_saltelli.nc`: Sampled hydrologic model parameters and transport model parameters
@@ -66,4 +69,3 @@ Saltelli simulations with oxygen-18 transport model used for sensitvity analysis
 Virtual bromide experiments with bromide transport model. Requires hydrologic simulations.
 - `bromide_*_*.sh`: job script to run simulations with the provided sas solver and provided transport model structure (e.g. ad=advection-dispersion)
 - `states_hm_best_for_*.nc`: Hydrologic simulation corresponding to best transport simulation
-- `sas_params_*.nc`: SAS parameters of best transport simulation
