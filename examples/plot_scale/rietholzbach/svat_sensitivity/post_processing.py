@@ -18,7 +18,21 @@ import matplotlib as mpl
 import seaborn as sns
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
+mpl.rcParams['font.size'] = 6
+mpl.rcParams['axes.titlesize'] = 6
+mpl.rcParams['axes.labelsize'] = 7
+mpl.rcParams['xtick.labelsize'] = 6
+mpl.rcParams['ytick.labelsize'] = 6
+mpl.rcParams['legend.fontsize'] = 6
+mpl.rcParams['legend.title_fontsize'] = 7
 sns.set_style("ticks")
+sns.plotting_context("paper", font_scale=1, rc={'font.size': 6.0,
+                                                'axes.labelsize': 7.0,
+                                                'axes.titlesize': 8.0,
+                                                'xtick.labelsize': 6.0,
+                                                'ytick.labelsize': 6.0,
+                                                'legend.fontsize': 6.0,
+                                                'legend.title_fontsize': 7.0})
 onp.random.seed(42)
 
 
@@ -254,7 +268,7 @@ def main(tmp_dir):
                 cmap = cm.get_cmap('Reds')
                 norm = Normalize(vmin=0, vmax=2)
                 colors = cmap(norm([0.5, 1.5]))
-                fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(14, 5))
+                fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(6, 1.5))
                 for i, name in enumerate(df_metrics.columns):
                     indices = dict_si[name][['S1', 'ST']]
                     err = dict_si[name][['S1_conf', 'ST_conf']]
@@ -273,7 +287,7 @@ def main(tmp_dir):
                 # make dotty plots
                 nrow = len(df_metrics.columns)
                 ncol = 8
-                fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(14, 7))
+                fig, ax = plt.subplots(nrow, ncol, sharey='row', figsize=(6, 5))
                 for i in range(nrow):
                     for j in range(ncol):
                         y = df_metrics.iloc[:, i]

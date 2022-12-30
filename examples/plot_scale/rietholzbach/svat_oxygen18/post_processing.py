@@ -23,7 +23,7 @@ mpl.rcParams['legend.title_fontsize'] = 8
 sns.set_style("ticks")
 
 
-@click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
+@click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='RK4')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir, sas_solver):

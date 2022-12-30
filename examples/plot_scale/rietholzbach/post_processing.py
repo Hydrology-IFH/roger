@@ -1734,54 +1734,54 @@ def main(tmp_dir):
     # file = base_path_figs / f"fdc_d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"
     # fig.savefig(file, dpi=250)
 
-    # bromide benchmark
-    years = onp.arange(1997, 2007).tolist()
-    cmap = cm.get_cmap('Reds')
-    cmap_hydrus = cm.get_cmap('Greys')
-    norm = Normalize(vmin=onp.min(years)-2, vmax=onp.max(years))
-    alphas = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-    for alpha in alphas:
-        fig, axes = plt.subplots(5, 1, figsize=(6, 5), sharex=True)
-        for i, tm_structure in enumerate(tm_structures):
-            tms = tm_structure.replace(" ", "_")
-            df_sim_br_conc = pd.DataFrame(index=df_obs_br.index)
-            df_sim_br_mass = pd.DataFrame(index=df_obs_br.index)
-            for year in years:
-                states_hydrus_br_file = base_path / "svat_bromide_benchmark" / "deterministic" / f"states_{tms}_bromide_benchmark.nc"
-                with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
-                    x = onp.where((onp.round(ds["alpha_transp"].isel(Time=0).values, 1) == alpha) & (onp.round(ds["alpha_q"].isel(Time=0).values, 1) == alpha))[0][0]
-                    sim_vals = ds["C_q_ss_mmol_bs"].isel(x=x, y=0).values[315:716]
-                    sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
-                    df_sim_br_conc.loc[:, f"{year}"] = sim_vals
-                    sim_vals = ds["M_q_ss"].isel(x=x, y=0).values[315:716]
-                    sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
-                    df_sim_br_mass.loc[:, f"{year}"] = sim_vals
-                axes.flatten()[i].plot(df_sim_br_conc.dropna().index, df_sim_br_conc.dropna()[f"{year}"], ls='--', color=cmap(norm(year)), lw=0.8, alpha=0.5, label=f'{year}')
-            weights = df_sim_br_mass.values / df_sim_br_mass.sum(axis=1).values[:, onp.newaxis]
-            df_sim_br_conc.loc[:, "avg_weighted"] = onp.sum(weights * df_sim_br_conc.values, axis=1)
-            axes.flatten()[i].plot(df_sim_br_conc.dropna().index, df_sim_br_conc.dropna().loc[:, "avg_weighted"], color="red", lw=1, alpha=1, label='average')
-            axes.flatten()[i].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1)
-            axes.flatten()[i].set_xlim([0, 400])
-            axes.flatten()[i].set_ylabel('%s\nBr [mmol/l]' % (_LABS_TM[tm_structure]))
-        df_sim_br = pd.DataFrame(index=df_obs_br.index)
-        for year in years:
-            states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
-            with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
-                df_sim_br = pd.DataFrame(index=df_obs_br.index)
-                df_sim_br.loc[:, f"{year}"] = ds["Br_perc_mmol"].values
-            axes.flatten()[-1].plot(df_sim_br.dropna().index, df_sim_br.dropna()[f"{year}"], ls='--', color=cmap_hydrus(norm(year)), lw=0.8, alpha=0.5, label=f'{year}')
-        axes.flatten()[-1].plot(df_sim_br.dropna().index, df_sim_br.dropna().mean(axis=1), color="grey", lw=1, alpha=1, label='average')
-        axes.flatten()[-1].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1, label='observed')
-        axes.flatten()[-1].set_xlim([0, 400])
-        axes.flatten()[-1].set_ylabel('HYDRUS-1D\nBr [mmol/l]')
-        axes.flatten()[-1].set_xlabel(r'Time [days since injection]')
-        lines1, labels1 = axes.flatten()[-2].get_legend_handles_labels()
-        lines2, labels2 = axes.flatten()[-1].get_legend_handles_labels()
-        fig.legend(lines1, labels1, loc='upper right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.64))
-        fig.legend(lines2, labels2, loc='lower right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.07))
-        fig.subplots_adjust(bottom=0.1, right=0.85, hspace=0.2)
-        file = base_path_figs / f"bromide_benchmark_alpha_{alpha}.png"
-        fig.savefig(file, dpi=250)
+    # # bromide benchmark
+    # years = onp.arange(1997, 2007).tolist()
+    # cmap = cm.get_cmap('Reds')
+    # cmap_hydrus = cm.get_cmap('Greys')
+    # norm = Normalize(vmin=onp.min(years)-2, vmax=onp.max(years))
+    # alphas = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+    # for alpha in alphas:
+    #     fig, axes = plt.subplots(5, 1, figsize=(6, 5), sharex=True)
+    #     for i, tm_structure in enumerate(tm_structures):
+    #         tms = tm_structure.replace(" ", "_")
+    #         df_sim_br_conc = pd.DataFrame(index=df_obs_br.index)
+    #         df_sim_br_mass = pd.DataFrame(index=df_obs_br.index)
+    #         for year in years:
+    #             states_hydrus_br_file = base_path / "svat_bromide_benchmark" / "deterministic" / f"states_{tms}_bromide_benchmark.nc"
+    #             with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
+    #                 x = onp.where((onp.round(ds["alpha_transp"].isel(Time=0).values, 1) == alpha) & (onp.round(ds["alpha_q"].isel(Time=0).values, 1) == alpha))[0][0]
+    #                 sim_vals = ds["C_q_ss_mmol_bs"].isel(x=x, y=0).values[315:716]
+    #                 sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
+    #                 df_sim_br_conc.loc[:, f"{year}"] = sim_vals
+    #                 sim_vals = ds["M_q_ss"].isel(x=x, y=0).values[315:716]
+    #                 sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
+    #                 df_sim_br_mass.loc[:, f"{year}"] = sim_vals
+    #             axes.flatten()[i].plot(df_sim_br_conc.dropna().index, df_sim_br_conc.dropna()[f"{year}"], ls='--', color=cmap(norm(year)), lw=0.8, alpha=0.5, label=f'{year}')
+    #         weights = df_sim_br_mass.values / df_sim_br_mass.sum(axis=1).values[:, onp.newaxis]
+    #         df_sim_br_conc.loc[:, "avg_weighted"] = onp.sum(weights * df_sim_br_conc.values, axis=1)
+    #         axes.flatten()[i].plot(df_sim_br_conc.dropna().index, df_sim_br_conc.dropna().loc[:, "avg_weighted"], color="red", lw=1, alpha=1, label='average')
+    #         axes.flatten()[i].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1)
+    #         axes.flatten()[i].set_xlim([0, 400])
+    #         axes.flatten()[i].set_ylabel('%s\nBr [mmol/l]' % (_LABS_TM[tm_structure]))
+    #     df_sim_br = pd.DataFrame(index=df_obs_br.index)
+    #     for year in years:
+    #         states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
+    #         with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f'{year}') as ds:
+    #             df_sim_br = pd.DataFrame(index=df_obs_br.index)
+    #             df_sim_br.loc[:, f"{year}"] = ds["Br_perc_mmol"].values
+    #         axes.flatten()[-1].plot(df_sim_br.dropna().index, df_sim_br.dropna()[f"{year}"], ls='--', color=cmap_hydrus(norm(year)), lw=0.8, alpha=0.5, label=f'{year}')
+    #     axes.flatten()[-1].plot(df_sim_br.dropna().index, df_sim_br.dropna().mean(axis=1), color="grey", lw=1, alpha=1, label='average')
+    #     axes.flatten()[-1].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1, label='observed')
+    #     axes.flatten()[-1].set_xlim([0, 400])
+    #     axes.flatten()[-1].set_ylabel('HYDRUS-1D\nBr [mmol/l]')
+    #     axes.flatten()[-1].set_xlabel(r'Time [days since injection]')
+    #     lines1, labels1 = axes.flatten()[-2].get_legend_handles_labels()
+    #     lines2, labels2 = axes.flatten()[-1].get_legend_handles_labels()
+    #     fig.legend(lines1, labels1, loc='upper right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.64))
+    #     fig.legend(lines2, labels2, loc='lower right', fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.07))
+    #     fig.subplots_adjust(bottom=0.1, right=0.85, hspace=0.2)
+    #     file = base_path_figs / f"bromide_benchmark_alpha_{alpha}.png"
+    #     fig.savefig(file, dpi=250)
 
     # # travel time benchmark
     # # compare backward travel time distributions
@@ -1889,29 +1889,29 @@ def main(tmp_dir):
     # file = base_path_figs / "kge_d18O_perc.txt"
     # df_kge_tm.to_csv(file, header=True, index=True, sep="\t")
 
-    # # diagnostic polar plots for transport models
-    # for i, tm_structure in enumerate(tm_structures):
-    #     tms = tm_structure.replace(" ", "_")
-    #     df_params_metrics10 = dict_params_metrics_tm_mc[tm_structure]['params_metrics'].copy()
-    #     df_params_metrics10.loc[:, 'id'] = range(len(df_params_metrics10.index))
-    #     df_params_metrics10 = df_params_metrics10.sort_values(by=['KGE_C_iso_q_ss'], ascending=False)
-    #     df_for_diag10 = df_params_metrics10.loc[:df_params_metrics10.index[9], :]
+    # diagnostic polar plots for transport models
+    for i, tm_structure in enumerate(tm_structures):
+        tms = tm_structure.replace(" ", "_")
+        df_params_metrics10 = dict_params_metrics_tm_mc[tm_structure]['params_metrics'].copy()
+        df_params_metrics10.loc[:, 'id'] = range(len(df_params_metrics10.index))
+        df_params_metrics10 = df_params_metrics10.sort_values(by=['KGE_C_iso_q_ss'], ascending=False)
+        df_for_diag10 = df_params_metrics10.loc[:df_params_metrics10.index[9], :]
 
-    #     var_sim = 'C_iso_q_ss'
-    #     fig = de.diag_polar_plot_multi(df_for_diag10.loc[:, f'brel_mean_{var_sim}'].values,
-    #                                     df_for_diag10.loc[:, f'temp_cor_{var_sim}'].values,
-    #                                     df_for_diag10.loc[:, f'DE_{var_sim}'].values,
-    #                                     df_for_diag10.loc[:, f'b_dir_{var_sim}'].values,
-    #                                     df_for_diag10.loc[:, f'phi_{var_sim}'].values,
-    #                                     df_for_diag10.loc[:, f'b_hf_{var_sim}'].values,
-    #                                     df_for_diag10.loc[:, f'b_lf_{var_sim}'].values,
-    #                                     df_for_diag10.loc[:, f'b_tot_{var_sim}'].values,
-    #                                     df_for_diag10.loc[:, f'err_hf_{var_sim}'].values,
-    #                                     df_for_diag10.loc[:, f'err_lf_{var_sim}'].values)
-    #     file = f'diag_polar_plot_{var_sim}_{tms}.png'
-    #     path = base_path_figs / file
-    #     # fig.tight_layout()
-    #     fig.savefig(path, dpi=250)
+        var_sim = 'C_iso_q_ss'
+        fig = de.diag_polar_plot_multi(df_for_diag10.loc[:, f'brel_mean_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'temp_cor_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'DE_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'b_dir_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'phi_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'b_hf_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'b_lf_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'b_tot_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'err_hf_{var_sim}'].values,
+                                        df_for_diag10.loc[:, f'err_lf_{var_sim}'].values)
+        file = f'diag_polar_plot_{var_sim}_{tms}.pdf'
+        path = base_path_figs / file
+        # fig.tight_layout()
+        fig.savefig(path, dpi=250)
 
     # perform sensitivity analysis
     dict_params_metrics_tm_sa = {}
