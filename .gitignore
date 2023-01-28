@@ -125,7 +125,6 @@ examples/*/*/*/results/
 examples/*/*/*/figures/
 examples/*/*/test_*
 EVENTS.txt
-!examples/*/*/observations/*
 examples/*/*/deterministic/
 examples/*/*/*/deterministic/
 examples/*/*/Euler/
@@ -135,20 +134,20 @@ examples/*/*/*/RK4/
 examples/*/*/hydrus_benchmark/*.txt
 examples/*/*/hydrus_benchmark/*.py
 input_examples/
-examples/reckenholz/observations/
-examples/reckenholz/svat/input/
-examples/reckenholz/svat_monte_carlo/input/
-examples/reckenholz/svat_sensitivity/input/
-examples/reckenholz/svat_transport/input/
-examples/reckenholz/svat_transport_monte_carlo/input/
-examples/reckenholz/svat_transport_sensitivity/input/
-examples/reckenholz_film/svat_film/input/
-examples/reckenholz_film/svat_film_event/input/
-examples/reckenholz_film/svat_film_event_monte_carlo/input/
-examples/reckenholz_film/svat_film_event_sensitivity/input/
-examples/reckenholz_film/svat_film_monte_carlo/input/
-examples/reckenholz_film/svat_film_sensitivity/input/
-examples/stgallen/
+examples/plot_scale/reckenholz/observations/
+examples/plot_scale/reckenholz/svat/input/
+examples/plot_scale/reckenholz/svat_monte_carlo/input/
+examples/plot_scale/reckenholz/svat_sensitivity/input/
+examples/plot_scale/reckenholz/svat_transport/input/
+examples/plot_scale/reckenholz/svat_transport_monte_carlo/input/
+examples/plot_scale/reckenholz/svat_transport_sensitivity/input/
+examples/plot_scale/reckenholz_film/svat_film/input/
+examples/plot_scale/reckenholz_film/svat_film_event/input/
+examples/plot_scale/reckenholz_film/svat_film_event_monte_carlo/input/
+examples/plot_scale/reckenholz_film/svat_film_event_sensitivity/input/
+examples/plot_scale/reckenholz_film/svat_film_monte_carlo/input/
+examples/plot_scale/reckenholz_film/svat_film_sensitivity/input/
+examples/plot_scale/stgallen/
 
 # Slides or Word
 *.key
