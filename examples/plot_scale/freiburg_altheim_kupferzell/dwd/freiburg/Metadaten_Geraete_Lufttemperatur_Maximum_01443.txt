@@ -1,0 +1,7 @@
+Stations_ID;Stationsname;Geo. Laenge [Grad];Geo. Breite [Grad];Stationshoehe [m];Geberhoehe ueber Grund [m];Von_Datum;Bis_Datum;Geraetetyp Name;Messverfahren;eor;
+1443;Freiburg;;;;;18810101;19490430;Gerätetyp unbekannt;Temperaturmessung, konv.;eor;
+1443;Freiburg;7.86;48;267;2;19490501;19580831;Maximumthermometer;Temperaturmessung, konv.;eor;
+1443;Freiburg;7.83;48;252;2;19580901;19671116;Maximumthermometer;Temperaturmessung, konv.;eor;
+1443;Freiburg;7.85;48;269;2.2;19671117;19970803;Maximumthermometer;Temperaturmessung, konv.;eor;
+1443;Freiburg;7.83;48.02;236.46;2;20061123;20220322;PT 100 (Luft);Temperaturmessung, elektr.;eor;
+generiert: 30.03.2022 --  Deutscher Wetterdienst  --

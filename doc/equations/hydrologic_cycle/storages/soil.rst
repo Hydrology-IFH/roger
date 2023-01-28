@@ -14,7 +14,7 @@ Pore size distribution parameter :math:`\lambda`:
 .. math::
   \lambda=\frac{1}{\frac{\log(\frac{h_{fc}}{h_{pwp}})}{\log(\frac{\omega_{fc}}{\omega_{pwp}})}}
 
-where :math:`h_{fc}` is soil water potential at field capacity (hPa;:math:`h_{fc}=63`) and :math:`h_{pwp}` is the soil water potential at permanent wilting point (hPa;:math:`h_{pwp}=15850`)
+where :math:`h_{fc}` is soil water potential at field capacity (hPa; :math:`h_{fc}=63`) and :math:`h_{pwp}` is the soil water potential at permanent wilting point (hPa; :math:`h_{pwp}=15850`)
 
 Pore size disconnectedness index :math:`m`:
 

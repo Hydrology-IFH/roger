@@ -22,8 +22,8 @@ or, optionally::
 to use Roger with JAX.
 
 
-Using Conda (multi-platform)
-++++++++++++++++++++++++++++
+Checking out the repository and using Conda (multi-platform)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 1. `Download and install Miniconda <https://docs.conda.io/en/latest/miniconda.html>`__. If you are using Windows, you may use the Anaconda prompt to execute the following steps.
 
@@ -52,8 +52,8 @@ Using Conda (multi-platform)
        $ conda activate roger
 
 
-Using pip (Linux / OSX)
-+++++++++++++++++++++++
+Checking out the repository and using pip (Linux / OSX)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 1. Ensure you have a working Python 3.x installation.
 
@@ -93,7 +93,7 @@ To run Roger, you need to set up a model - i.e., specify which settings and mode
 
 By working through the existing models, you should quickly be able to figure out how to write your own simulation. Just keep in mind this general advice:
 
-- You can (and should) use any (external) Python tools you want in your model setup. Before implementing a certain functionality, you should check whether it is already provided by a common library. Especially `the SciPy module family <https://www.scipy.org/>`_ provides countless implementations of common scientific functions (and SciPy is installed along with Roger).
+- You can (and should) use any (external) Python tools you want in your pre-processing or model setup. Before implementing a certain functionality, you should check whether it is already provided by a common library. Especially `the SciPy module family <https://www.scipy.org/>`_ provides countless implementations of common scientific functions (and SciPy is installed along with Roger).
 
 - You have to decorate your methods with :func:`@roger_routine <roger.roger_routine>`. Only Roger routines are able to modify the :class:`model state object <roger.RogerState>`, which is passed as the first argument. The current numerical backend is available from the :mod:`roger.core.operators` module::
 
@@ -165,7 +165,7 @@ Running Roger on multiple processes via MPI
 
   This assumes that you are familiar with running applications through MPI, and is most useful on large architectures like a compute cluster. For smaller architectures, it is usually easier to stick to the thread-based parallelism of JAX.
 
-Running Roger through MPI requires some additional dependencies. For optimal performance, you will need to install ``mpi4py``, ``h5py``, ``petsc4py``, and ``mpi4jax``, linked to your MPI library.
+Running Roger through MPI requires some additional dependencies. For optimal performance, you will need to install ``mpi4py``, ``h5py``, and ``mpi4jax``, linked to your MPI library.
 
 .. seealso::
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StorAge selection (SAS) functions &mdash; RoGeR 0.0.1+333.ga951c01 documentation</title>
+  <title>StorAge selection (SAS) functions &mdash; RoGeR 0.0.1+488.ge1b7b1c.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -33,7 +33,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+333.ga951c01
+                0.0.1+488.ge1b7b1c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -62,11 +62,12 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../solute_transport.html">Solute transport</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">StorAge selection (SAS) functions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#uniform">Uniform</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dirac">Dirac</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#kumaraswamy">Kumaraswamy</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#gamma">Gamma</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#exponential">Exponential</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#power">Power</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kumaraswamy">Kumaraswamy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exponential">Exponential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dirac">Dirac</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gamma">Gamma</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Exponential</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#time-variant-sas-function-parameters">Time-variant SAS function parameters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#short-description-of-sas-parameterization">Short description of SAS parameterization</a></li>
 </ul>
@@ -141,14 +142,13 @@ distribution of the hydrologic flux (where <span class="math notranslate nohighl
 <div class="math notranslate nohighlight">
 \[\Omega_Q(T,t)=P_S(T,t)\]</div>
 </section>
-<section id="dirac">
-<h2>Dirac<a class="headerlink" href="#dirac" title="Permalink to this heading">¶</a></h2>
+<section id="power">
+<h2>Power<a class="headerlink" href="#power" title="Permalink to this heading">¶</a></h2>
+<p>The power distribution function provides flexibility to
+represent a preference for younger water (<span class="math notranslate nohighlight">\(k &lt; 1\)</span>)
+or preference for older water (<span class="math notranslate nohighlight">\(k &gt; 1\)</span>).</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}\Omega_Q(T,t)= \begin{cases}0, &amp; T \leq T_{dirac} \\
-1, &amp; T &gt; T_{dirac} \end{cases}\end{split}\]</div>
-<p>where <span class="math notranslate nohighlight">\(T_{dirac}\)</span> is the water age of the pulse.
-Please note, that a closed form of <span class="math notranslate nohighlight">\(P_Q\)</span> using the Dirac distribution
-is not available.</p>
+\[\Omega_Q(T,t)=P_S(T,t)^k\]</div>
 </section>
 <section id="kumaraswamy">
 <h2>Kumaraswamy<a class="headerlink" href="#kumaraswamy" title="Permalink to this heading">¶</a></h2>
@@ -158,6 +158,20 @@ or preference for older water (<span class="math notranslate nohighlight">\(\alp
 <div class="math notranslate nohighlight">
 \[\Omega_Q(T,t)=1-((1-(P_S(T,t))^{\alpha_Q})^{\beta_Q})\]</div>
 </section>
+<section id="exponential">
+<h2>Exponential<a class="headerlink" href="#exponential" title="Permalink to this heading">¶</a></h2>
+<div class="math notranslate nohighlight">
+\[\Omega_Q(T,t)=1-e^{-k \cdot (P_S(T,t)}\]</div>
+</section>
+<section id="dirac">
+<h2>Dirac<a class="headerlink" href="#dirac" title="Permalink to this heading">¶</a></h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}\Omega_Q(T,t)= \begin{cases}0, &amp; T \leq T_{dirac} \\
+1, &amp; T &gt; T_{dirac} \end{cases}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(T_{dirac}\)</span> is the water age of the pulse.
+Please note, that a closed form of <span class="math notranslate nohighlight">\(P_Q\)</span> using the Dirac distribution
+is not available.</p>
+</section>
 <section id="gamma">
 <h2>Gamma<a class="headerlink" href="#gamma" title="Permalink to this heading">¶</a></h2>
 <div class="math notranslate nohighlight">
@@ -166,25 +180,17 @@ or preference for older water (<span class="math notranslate nohighlight">\(\alp
 Please note, that a closed form of <span class="math notranslate nohighlight">\(P_Q\)</span> using the Gamma distribution
 function is not available (see Harman, 2015).</p>
 </section>
-<section id="exponential">
-<h2>Exponential<a class="headerlink" href="#exponential" title="Permalink to this heading">¶</a></h2>
+<section id="id1">
+<h2>Exponential<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <div class="math notranslate nohighlight">
 \[\Omega_Q(T,t)=1-e^{-k \cdot (P_S(T,t)}\]</div>
-</section>
-<section id="power">
-<h2>Power<a class="headerlink" href="#power" title="Permalink to this heading">¶</a></h2>
-<p>The power distribution function provides flexibility to
-represent a preference for younger water (<span class="math notranslate nohighlight">\(k &lt; 1\)</span>)
-or preference for older water (<span class="math notranslate nohighlight">\(k &gt; 1\)</span>).</p>
-<div class="math notranslate nohighlight">
-\[\Omega_Q(T,t)=P_S(T,t)^k\]</div>
 </section>
 <section id="time-variant-sas-function-parameters">
 <h2>Time-variant SAS function parameters<a class="headerlink" href="#time-variant-sas-function-parameters" title="Permalink to this heading">¶</a></h2>
 <p>SAS function parameters can be time-variant. For example, time-variant may be
 described by a linear relationship of the storage volume:</p>
 <div class="math notranslate nohighlight">
-\[a_Q(t)=a_1+a_2 \cdot (1-\frac{S(t)}{S_{sat}-S_{pwp}})\]</div>
+\[b_Q(t)=c_1+c_2 \cdot (\frac{S(t)}{S_{sat}-S_{pwp}})\]</div>
 </section>
 <section id="short-description-of-sas-parameterization">
 <h2>Short description of SAS parameterization<a class="headerlink" href="#short-description-of-sas-parameterization" title="Permalink to this heading">¶</a></h2>
@@ -197,6 +203,8 @@ to the flux e.g. transp.</p>
 <li><p><cite>31</cite>: Kumaraswamy SAS function with time-variant preference for younger water</p></li>
 <li><p><cite>32</cite>: Kumaraswamy SAS function with time-variant preference for older water</p></li>
 <li><p><cite>35</cite>: Kumaraswamy SAS function with time-variant preference (e.g. preference for younger water while wetter conditions and preference for older water while drier conditions)</p></li>
+<li><p><cite>36</cite>: Kumaraswamy SAS function with time-variant parameter <cite>a</cite> and constant parameter <cite>b</cite></p></li>
+<li><p><cite>37</cite>: Kumaraswamy SAS function with time-variant with time-variant parameter <cite>b</cite> and constant parameter <cite>a</cite></p></li>
 <li><p><cite>4</cite>: Gamma SAS function</p></li>
 <li><p><cite>5</cite>: Exponential SAS function</p></li>
 <li><p><cite>6</cite>: Power SAS function</p></li>

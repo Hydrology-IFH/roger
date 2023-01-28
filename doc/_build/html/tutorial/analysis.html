@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Analysis of simulations with Roger &mdash; RoGeR 0.0.1+333.ga951c01 documentation</title>
+  <title>Analysis of simulations with Roger &mdash; RoGeR 0.0.1+488.ge1b7b1c.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+333.ga951c01
+                0.0.1+488.ge1b7b1c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -140,14 +140,15 @@
 <span class="gp">In [7]: </span><span class="n">ds_rate</span>
 <span class="gh">Out[7]: </span><span class="go"></span>
 <span class="go">&lt;xarray.Dataset&gt;</span>
-<span class="go">Dimensions:                (Time: 366, y: 1, x: 1, cr: 2, crops: 1,</span>
+<span class="go">Dimensions:                (Time: 366, cr: 2, crops: 1, y: 1, x: 1,</span>
 <span class="go">                            events_ff: 1, n_crop_params: 23, n_crop_types: 76,</span>
 <span class="go">                            n_flowdir: 8, n_lu: 25, n_params13: 13,</span>
 <span class="go">                            n_params2: 2, n_params7: 7, n_params9: 9,</span>
 <span class="go">                            n_sas_params: 8, n_sealing: 101, n_slope: 10000,</span>
-<span class="go">                            t: 1, timesteps_event_ff: 1,</span>
-<span class="go">                            timesteps_event_ff_p1: 2, z: 1)</span>
-<span class="go">Coordinates: (12/21)</span>
+<span class="go">                            t: 1, t_forc: 1, timesteps_day: 144,</span>
+<span class="go">                            timesteps_event_ff: 1, timesteps_event_ff_p1: 2,</span>
+<span class="go">                            z: 1)</span>
+<span class="go">Coordinates: (12/23)</span>
 <span class="go">  * Time                   (Time) timedelta64[ns] 0 days 1 days ... 365 days</span>
 <span class="go">  * cr                     (cr) float64 0.0 1.0</span>
 <span class="go">  * crops                  (crops) float64 0.0</span>
@@ -155,14 +156,13 @@
 <span class="go">  * n_crop_params          (n_crop_params) float64 0.0 1.0 2.0 ... 21.0 22.0</span>
 <span class="go">  * n_crop_types           (n_crop_types) float64 0.0 1.0 2.0 ... 73.0 74.0 75.0</span>
 <span class="go">    ...                     ...</span>
-<span class="go">  * t                      (t) float64 0.0</span>
+<span class="go">  * timesteps_day          (timesteps_day) float64 0.0 1.0 2.0 ... 142.0 143.0</span>
 <span class="go">  * timesteps_event_ff     (timesteps_event_ff) float64 0.0</span>
 <span class="go">  * timesteps_event_ff_p1  (timesteps_event_ff_p1) float64 0.0 1.0</span>
 <span class="go">  * x                      (x) float64 0.0</span>
 <span class="go">  * y                      (y) float64 0.0</span>
 <span class="go">  * z                      (z) float64 0.0</span>
 <span class="go">Data variables:</span>
-<span class="go">    aet                    (Time, y, x) float64 ...</span>
 <span class="go">    evap_soil              (Time, y, x) float64 ...</span>
 <span class="go">    inf_mat                (Time, y, x) float64 ...</span>
 <span class="go">    inf_mp                 (Time, y, x) float64 ...</span>
@@ -176,8 +176,8 @@
 <span class="go">    transp                 (Time, y, x) float64 ...</span>
 <span class="go">Attributes:</span>
 <span class="go">    comment:           First timestep (t=0) contains initial values. Simulati...</span>
-<span class="go">    date_created:      2022-10-07T16:17:22.554316</span>
-<span class="go">    roger_version:     0.0.1+26.gdc95c39.dirty</span>
+<span class="go">    date_created:      2022-11-24T19:10:07.461812</span>
+<span class="go">    roger_version:     0.0.1+333.ga951c01.dirty</span>
 <span class="go">    setup_identifier:  ONED</span>
 
 <span class="go"># convert to datetime</span>
@@ -190,7 +190,7 @@
 </div>
 <p>Now, we select the time series of <code class="docutils literal notranslate"><span class="pre">inf_mat</span></code> and plot the daily data:</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [11]: </span><span class="n">ds_rate</span><span class="p">[</span><span class="s2">&quot;inf_mat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-<span class="gh">Out[11]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x16ba15e80&gt;]</span>
+<span class="gh">Out[11]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x16a04b820&gt;]</span>
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/inf_mat_daily.png"><img alt="../_images/inf_mat_daily.png" src="../_images/inf_mat_daily.png" style="width: 5in;" /></a>
@@ -202,7 +202,7 @@
 <span class="gp">   ....: </span>    <span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 <span class="gp">   ....: </span><span class="p">)</span>
 <span class="gp">   ....: </span>
-<span class="gh">Out[12]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x16bdaaf40&gt;]</span>
+<span class="gh">Out[12]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x16a041ca0&gt;]</span>
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/inf_mat_monthly.png"><img alt="../_images/inf_mat_monthly.png" src="../_images/inf_mat_monthly.png" style="width: 5in;" /></a>

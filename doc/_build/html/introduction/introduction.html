@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A short introduction to Roger &mdash; RoGeR 0.0.1+333.ga951c01 documentation</title>
+  <title>A short introduction to Roger &mdash; RoGeR 0.0.1+488.ge1b7b1c.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Getting started" href="get-started.html" />
-    <link rel="prev" title="Runoff Generation Research in Pure Python" href="../index.html" /> 
+    <link rel="prev" title="Runoff Generation Research - a hydrologic toolbox in Python" href="../index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -32,7 +32,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+333.ga951c01
+                0.0.1+488.ge1b7b1c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -47,9 +47,9 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">A short introduction to Roger</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#the-model-architecture">The model architecture</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#available-processes">Available processes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#available-model-structures">Available model structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#available-pre-defined-model-structures">Available pre-defined model structures</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#diagnostics">Diagnostics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pre-configured-model-setups">Pre-configured model setups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pre-defined-model-setups">Pre-defined model setups</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#current-limitations">Current limitations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#references">References</a></li>
 </ul>
@@ -120,13 +120,17 @@
 <p>We adapted the model architecture from <a class="reference internal" href="#haefner2018" id="id1"><span>[Haefner2018]</span></a>.</p>
 <ol class="arabic simple">
 <li><p><strong>Easy to access</strong>: Python modules are simple to install, and projects like <a class="reference external" href="https://www.continuum.io/anaconda-overview">Anaconda</a> are doing a great job in creating platform-independent environments.</p></li>
-<li><p><strong>Easy to use</strong>: Anyone with some experience can use their favourite Python tools to set up, modify, and post-process simulations with Roger.</p></li>
+<li><p><strong>Easy to use</strong>: Anyone with some experience can use their favourite Python tools to pre-process rquired data, set up, modify, and post-process simulations with Roger.</p></li>
 <li><p><strong>Easy to modify</strong>: Due to Python’s popularity, available abstractions, and dynamic nature, Roger can be extended and modified with relatively little effort.</p></li>
 </ol>
 <p>However, choosing Python over a compiled language like Fortran or C usually comes at a high computational cost. We overcome this gap by using <a class="reference external" href="https://github.com/google/jax">JAX</a>, a framework that can act as a high-performance replacement for NumPy. JAX takes care of all performance optimizations in the background, and runs on CPUs and GPUs.</p>
 <section id="available-processes">
 <h3>Available processes<a class="headerlink" href="#available-processes" title="Permalink to this heading">¶</a></h3>
-<p>Soil hydraulic parameters are approximated by the Brooks-Corey scheme (<a class="reference internal" href="#brooks1966" id="id2"><span>[Brooks1966]</span></a>).</p>
+<p>Here, we provide a brief overview for the available processes and their underlying theories:</p>
+<p><strong>Soil hydraulics</strong>:</p>
+<ul class="simple">
+<li><p>soil hydraulic parameters are approximated by the Brooks-Corey scheme (<a class="reference internal" href="#brooks1966" id="id2"><span>[Brooks1966]</span></a>).</p></li>
+</ul>
 <p><strong>Interception</strong>:</p>
 <ul class="simple">
 <li><p>rainfall and snowfall interception by vegetation (<a class="reference internal" href="#larsim2021" id="id3"><span>[Larsim2021]</span></a>)</p></li>
@@ -134,7 +138,7 @@
 <p><strong>Snow</strong>:</p>
 <ul class="simple">
 <li><p>snow accumulation</p></li>
-<li><p>delayed snow melt is based on day-degree approach and water retention of snow cover (<a class="reference internal" href="#larsim2021" id="id4"><span>[Larsim2021]</span></a>)</p></li>
+<li><p>delayed snow melt is based on degree-day approach and water retention of snow cover (<a class="reference internal" href="#larsim2021" id="id4"><span>[Larsim2021]</span></a>)</p></li>
 <li><p>rain-on-snow</p></li>
 </ul>
 <p><strong>Infiltration</strong>:</p>
@@ -153,37 +157,36 @@
 </ul>
 <p><strong>Subsurface Runoff</strong>:</p>
 <ul class="simple">
-<li><p>gravity-driven infiltration based on viscous flow approach (<a class="reference internal" href="#germann2018" id="id9"><span>[Germann2018]</span></a>)</p></li>
-<li><p>lateral subsurface runoff in the soil as described in <a class="reference internal" href="#steinbrich2016" id="id10"><span>[Steinbrich2016]</span></a></p></li>
+<li><p>lateral subsurface runoff in the soil as described in <a class="reference internal" href="#steinbrich2016" id="id9"><span>[Steinbrich2016]</span></a></p></li>
 </ul>
 <p><strong>Percolation</strong>:</p>
 <ul class="simple">
-<li><p>capillary-driven vertical drainage (<a class="reference internal" href="#salvucci1993" id="id11"><span>[Salvucci1993]</span></a>)</p></li>
-<li><p>gravity-driven vertical drainage based on viscous flow approach (<a class="reference internal" href="#germann2018" id="id12"><span>[Germann2018]</span></a>)</p></li>
+<li><p>capillary-driven vertical drainage (<a class="reference internal" href="#salvucci1993" id="id10"><span>[Salvucci1993]</span></a>)</p></li>
+<li><p>gravity-driven vertical drainage based on viscous flow approach (<a class="reference internal" href="#germann2018" id="id11"><span>[Germann2018]</span></a>)</p></li>
 </ul>
 <p><strong>Capillary rise</strong>:</p>
 <ul class="simple">
-<li><p>capillary-driven vertical uplift (<a class="reference internal" href="#salvucci1993" id="id13"><span>[Salvucci1993]</span></a>)</p></li>
+<li><p>capillary-driven vertical uplift (<a class="reference internal" href="#salvucci1993" id="id12"><span>[Salvucci1993]</span></a>)</p></li>
 </ul>
 <p><strong>Groundwater flow</strong>:</p>
 <ul class="simple">
-<li><p>spatial explicit representation of shallow groundwater follows the aproach presented in <a class="reference internal" href="#stoll2010" id="id14"><span>[Stoll2010]</span></a></p></li>
+<li><p>spatial explicit representation of shallow groundwater follows the aproach presented in <a class="reference internal" href="#stoll2010" id="id13"><span>[Stoll2010]</span></a></p></li>
 </ul>
 <p><strong>Crop phenology and crop rotation</strong>:</p>
 <ul class="simple">
-<li><p>time-varying crop canopy cover and crop root depth is implemented as in <a class="reference internal" href="#steduto2009" id="id15"><span>[Steduto2009]</span></a></p></li>
+<li><p>time-varying crop canopy cover and crop root depth is implemented as in <a class="reference internal" href="#steduto2009" id="id14"><span>[Steduto2009]</span></a></p></li>
 </ul>
-<p><strong>Offline transport</strong>:</p>
+<p><strong>Solute transport</strong>:</p>
 <ul class="simple">
-<li><p>StorAge selection (SAS) functions (<a class="reference internal" href="#rinaldo2015" id="id16"><span>[Rinaldo2015]</span></a>) are used to calculate travel time distributions, residence time distribution and solute concentrations</p></li>
+<li><p>StorAge selection (SAS) functions (<a class="reference internal" href="#rinaldo2015" id="id15"><span>[Rinaldo2015]</span></a>) are coupled with hydrologic simulations. SAS functions are used to calculate travel time distributions, residence time distribution and solute concentrations</p></li>
 </ul>
 <p><strong>Biogeochemical processes</strong>:</p>
 <ul class="simple">
-<li><p>Solute specific transformation processes (e.g. denitrification; <a class="reference internal" href="#kunkel2012" id="id17"><span>[Kunkel2012]</span></a>)</p></li>
+<li><p>Solute specific transformation processes (e.g. denitrification; <a class="reference internal" href="#kunkel2012" id="id16"><span>[Kunkel2012]</span></a>)</p></li>
 </ul>
 </section>
-<section id="available-model-structures">
-<h3>Available model structures<a class="headerlink" href="#available-model-structures" title="Permalink to this heading">¶</a></h3>
+<section id="available-pre-defined-model-structures">
+<h3>Available pre-defined model structures<a class="headerlink" href="#available-pre-defined-model-structures" title="Permalink to this heading">¶</a></h3>
 <p><strong>SVAT</strong>:</p>
 <ul class="simple">
 <li><p>only vertical processes are considered</p></li>
@@ -202,9 +205,13 @@
 <li><p>vertical and lateral processes are considered</p></li>
 <li><p>simulation of a single event</p></li>
 </ul>
-<p><strong>SVAT-TRANSPORT</strong>:</p>
+<p><strong>SVAT-OXYGEN18</strong>:</p>
 <ul class="simple">
-<li><p>calculates offline coupled solute transport based on the hydrologic simulations with the SVAT model</p></li>
+<li><p>calculates offline coupled oxygen-18 transport based on the hydrologic simulations with the SVAT model</p></li>
+</ul>
+<p><strong>SVAT-BROMIDE</strong>:</p>
+<ul class="simple">
+<li><p>calculates offline coupled bromide transport based on the hydrologic simulations with the SVAT model</p></li>
 </ul>
 </section>
 <section id="diagnostics">
@@ -212,15 +219,18 @@
 <p>Diagnostics are responsible for handling all model output, sanity checks of the solution, and restart file handling. They are implemented in a modular fashion, so additional diagnostics can be implemented easily. Already implemented diagnostics handle snapshot output, aggregation of variables, and monitoring of mass balance.</p>
 <p>For more information, see <a class="reference internal" href="../reference/diagnostics.html"><span class="doc">Diagnostics</span></a>.</p>
 </section>
-<section id="pre-configured-model-setups">
-<h3>Pre-configured model setups<a class="headerlink" href="#pre-configured-model-setups" title="Permalink to this heading">¶</a></h3>
+<section id="pre-defined-model-setups">
+<h3>Pre-defined model setups<a class="headerlink" href="#pre-defined-model-setups" title="Permalink to this heading">¶</a></h3>
 <p>Roger supports a wide range of pre-configured models. Several setups are already implemented that highlight some of the capabilities of Roger, and that serve as a basis for users to set up their own configuration: <a class="reference internal" href="../reference/model-gallery.html"><span class="doc">Model gallery</span></a>.</p>
 </section>
 <section id="current-limitations">
 <h3>Current limitations<a class="headerlink" href="#current-limitations" title="Permalink to this heading">¶</a></h3>
 <p>Roger is still in development. There are many open issues that we would like to fix later on:</p>
 <ul class="simple">
-<li><p>…</p></li>
+<li><p>A routing scheme is not implemented, yet</p></li>
+<li><p>Simulations with biogeochemical processes have not been compared to measured data</p></li>
+<li><p>Simulations with gravity-driven infiltration have not been compared to measured data</p></li>
+<li><p>Sowing and harvesting of crops is time-invariant i.e. fixed dates are assumed for sowing and harvesting</p></li>
 </ul>
 </section>
 <section id="references">
@@ -229,11 +239,11 @@
 <dt class="label" id="brooks1966"><span class="brackets">Brooks1966</span></dt>
 <dd><p>Brooks, R. H., and Corey, A. T.: Properties of porous media affecting fluid flow, Journal of the Irrigation and Drainage Division, 92, 61-90, 1966.</p>
 </dd>
-<dt class="label" id="haefner2018"><span class="brackets">Haefner2018</span></dt>
-<dd><p>Häfner, D., Jacobsen, R. L., Eden, C., Kristensen, M. R. B., Jochum, M., Nuterman, R., and Vinter, B.: Veros v0.1 – a fast and versatile ocean simulator in pure Python, Geosci. Model Dev., 11, 3299-3312, 2018.</p>
-</dd>
 <dt class="label" id="germann2018"><span class="brackets">Germann2018</span></dt>
 <dd><p>Germann, P. F. and Prasuhn, V.: Viscous Flow Approach to Rapid Infiltration and Drainage in a Weighing Lysimeter, Vadose Zone Journal, 17, 170020, 2018.</p>
+</dd>
+<dt class="label" id="haefner2018"><span class="brackets">Haefner2018</span></dt>
+<dd><p>Häfner, D., Jacobsen, R. L., Eden, C., Kristensen, M. R. B., Jochum, M., Nuterman, R., and Vinter, B.: Veros v0.1 – a fast and versatile ocean simulator in pure Python, Geosci. Model Dev., 11, 3299-3312, 2018.</p>
 </dd>
 <dt class="label" id="kunkel2012"><span class="brackets">Kunkel2012</span></dt>
 <dd><p>Kunkel, R., and Wendland, F.: Diffuse Nitrateinträge in die Grund- und Oberflächengewässer von Rhein und Ems - Ist-Zustands- und Maßnahmenanalysen, Forschungszentrum Jülich, Jülich, Germany, 143, 2012.</p>
@@ -274,7 +284,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../index.html" class="btn btn-neutral float-left" title="Runoff Generation Research in Pure Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../index.html" class="btn btn-neutral float-left" title="Runoff Generation Research - a hydrologic toolbox in Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="get-started.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

@@ -44,8 +44,8 @@ date_hm = num2date(days_hm, units=f"days since {ds_hm['Time'].attrs['time_origin
 ds_hm = ds_hm.assign_coords(Time=("Time", date_hm))
 
 # load transport simulations
-states_hm_file = base_path / "svat_oxygen18_distributed" / "states_advection-dispersion.nc"
-ds_tm = xr.open_dataset(states_hm_file, engine="h5netcdf", decode_times=False)
+states_tm_file = base_path / "svat_oxygen18_distributed" / "states_power.nc"
+ds_tm = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
 # assign date
 days_tm = ds_tm['Time'].values
 date_tm = num2date(days_tm, units="days since 2019-10-31", calendar='standard', only_use_cftime_datetimes=False)
@@ -110,7 +110,7 @@ fig.savefig(file, dpi=250)
 # plot fluxes and isotopic signals of a single grid cell
 fig, axes = plt.subplots(4, 3, figsize=(6, 5))
 axes[0, 0].bar(date_hm, ds_hm['prec'].isel(x=0, y=0).values, width=.1, color='blue', align='edge', edgecolor='blue')
-axes[0, 0].set_ylabel(r'PREC [mm/day]')
+axes[0, 0].set_ylabel(r'PRECIP [mm/day]')
 axes[0, 0].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
 axes[0, 0].tick_params(axis='x', labelrotation=30)
 

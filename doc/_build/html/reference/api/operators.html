@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Numerical operators &mdash; RoGeR 0.0.1+333.ga951c01 documentation</title>
+  <title>Numerical operators &mdash; RoGeR 0.0.1+488.ge1b7b1c.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+333.ga951c01
+                0.0.1+488.ge1b7b1c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -73,7 +73,16 @@
 <li class="toctree-l2"><a class="reference internal" href="routines.html">roger_routine and roger_kernel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="runtime.html">Runtime settings &amp; state</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools.html">Tools &amp; utilities</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Numerical operators</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Numerical operators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#roger.core.operators.update"><code class="docutils literal notranslate"><span class="pre">update()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roger.core.operators.update_add"><code class="docutils literal notranslate"><span class="pre">update_add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roger.core.operators.update_multiply"><code class="docutils literal notranslate"><span class="pre">update_multiply()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roger.core.operators.solve_tridiagonal"><code class="docutils literal notranslate"><span class="pre">solve_tridiagonal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roger.core.operators.for_loop"><code class="docutils literal notranslate"><span class="pre">for_loop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roger.core.operators.scan"><code class="docutils literal notranslate"><span class="pre">scan()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roger.core.operators.flush"><code class="docutils literal notranslate"><span class="pre">flush()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="distributed.html">Distributed communication primitives</a></li>
 </ul>
 </li>
@@ -114,6 +123,41 @@
              
   <section id="module-roger.core.operators">
 <span id="numerical-operators"></span><h1>Numerical operators<a class="headerlink" href="#module-roger.core.operators" title="Permalink to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="roger.core.operators.update">
+<span class="sig-prename descclassname"><span class="pre">roger.core.operators.</span></span><span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roger.core.operators.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roger.core.operators.update_add">
+<span class="sig-prename descclassname"><span class="pre">roger.core.operators.</span></span><span class="sig-name descname"><span class="pre">update_add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roger.core.operators.update_add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roger.core.operators.update_multiply">
+<span class="sig-prename descclassname"><span class="pre">roger.core.operators.</span></span><span class="sig-name descname"><span class="pre">update_multiply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roger.core.operators.update_multiply" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roger.core.operators.solve_tridiagonal">
+<span class="sig-prename descclassname"><span class="pre">roger.core.operators.</span></span><span class="sig-name descname"><span class="pre">solve_tridiagonal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">water_mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_mask</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roger.core.operators.solve_tridiagonal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roger.core.operators.for_loop">
+<span class="sig-prename descclassname"><span class="pre">roger.core.operators.</span></span><span class="sig-name descname"><span class="pre">for_loop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_fun</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roger.core.operators.for_loop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roger.core.operators.scan">
+<span class="sig-prename descclassname"><span class="pre">roger.core.operators.</span></span><span class="sig-name descname"><span class="pre">scan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roger.core.operators.scan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roger.core.operators.flush">
+<span class="sig-prename descclassname"><span class="pre">roger.core.operators.</span></span><span class="sig-name descname"><span class="pre">flush</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roger.core.operators.flush" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </section>
 
 

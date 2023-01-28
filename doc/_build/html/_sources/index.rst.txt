@@ -6,8 +6,8 @@
 
 |
 
-Runoff Generation Research in Pure Python
-==========================================
+Runoff Generation Research - a hydrologic toolbox in Python
+===========================================================
 Roger, *Runoff Generation Research*, is a process-based hydrologic model that can be applied from plot to catchment scale. Roger is written in pure Python, which facilitates model setup and model workflows. We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.
 
 Roger supports a NumPy backend for small-scale problems, and a

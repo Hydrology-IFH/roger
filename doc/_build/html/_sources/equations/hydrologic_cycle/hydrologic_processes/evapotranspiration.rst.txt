@@ -2,7 +2,7 @@ Evapotranspiration
 ==================
 The calculation of evapotranspiration requires daily potential evapotranspiration.
 Actual evapotranspiration is energy-limited or water-limited, respectively. The
-evapotranspiration processes sequentially subtract from available PET.
+evapotranspiration processes sequentially subtract from available PET (:math:`PET_{res}`).
 
 Evaporation from interception storage
 -------------------------------------

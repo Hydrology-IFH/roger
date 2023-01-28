@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roger.variables &mdash; RoGeR 0.0.1+333.ga951c01 documentation</title>
+  <title>roger.variables &mdash; RoGeR 0.0.1+488.ge1b7b1c.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -29,7 +29,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+333.ga951c01
+                0.0.1+488.ge1b7b1c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -1967,6 +1967,14 @@
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_nitrate</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="s2">&quot;rt10_s&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;10th percentile of soil residence time&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span><span class="p">,</span>
+        <span class="s2">&quot;days&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;10th percentile of soil residence time&quot;</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_age_statistics</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;rt25_s&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;25th percentile of soil residence time&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
@@ -1988,6 +1996,14 @@
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;days&quot;</span><span class="p">,</span>
         <span class="s2">&quot;75th percentile of soil residence time&quot;</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_age_statistics</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;rt90_s&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;90th percentile of soil residence time&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span><span class="p">,</span>
+        <span class="s2">&quot;days&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;90th percentile of soil residence time&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_age_statistics</span><span class="p">,</span>
     <span class="p">),</span>
@@ -3578,6 +3594,41 @@
         <span class="s2">&quot;actual evapotranspiration from soil water storage&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="s2">&quot;RS&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;solar radiation&quot;</span><span class="p">,</span>
+        <span class="n">TIME_FORCING</span><span class="p">,</span>
+        <span class="s2">&quot;MJ/m2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;solar radiation&quot;</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;rs&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;solar radiation&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span><span class="p">,</span>
+        <span class="s2">&quot;MJ/m2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;solar radiation&quot;</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;rs_day&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;solar radiation&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span> <span class="o">+</span> <span class="n">TIMESTEPS_DAY</span><span class="p">,</span>
+        <span class="s2">&quot;MJ/m2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;solar radiation&quot;</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;c1_mak&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;Makkink coeffcient&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span><span class="p">,</span>
+        <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Makkink coeffcient&quot;</span><span class="p">,</span>
+        <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;c2_mak&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;Makkink coeffcient&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span><span class="p">,</span>
+        <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Makkink coeffcient&quot;</span><span class="p">,</span>
+        <span class="n">write_to_restart</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;PET&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;potential evapotranspiration&quot;</span><span class="p">,</span>
         <span class="n">TIME_FORCING</span><span class="p">,</span>
@@ -3764,6 +3815,14 @@
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_oxygen18</span> <span class="o">|</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_deuterium</span><span class="p">),</span>
     <span class="p">),</span>
+    <span class="s2">&quot;tt10_transp&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;10th percentile of transpiration travel time &quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span><span class="p">,</span>
+        <span class="s2">&quot;days&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;10th percentile of transpiration travel time &quot;</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_age_statistics</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;tt25_transp&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;25th percentile of transpiration travel time &quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
@@ -3785,6 +3844,14 @@
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;days&quot;</span><span class="p">,</span>
         <span class="s2">&quot;75th percentile of transpiration travel time &quot;</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_age_statistics</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;tt90_transp&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;90th percentile of transpiration travel time &quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span><span class="p">,</span>
+        <span class="s2">&quot;days&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;90th percentile of transpiration travel time &quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_age_statistics</span><span class="p">,</span>
     <span class="p">),</span>
@@ -4152,6 +4219,14 @@
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">enable_oxygen18</span> <span class="o">|</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_deuterium</span><span class="p">),</span>
     <span class="p">),</span>
+    <span class="s2">&quot;tt10_q_ss&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;10th percentile of subsoil percolation travel time&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span><span class="p">,</span>
+        <span class="s2">&quot;days&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;10th percentile of subsoil percolation travel time&quot;</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_age_statistics</span><span class="p">,</span>
+    <span class="p">),</span>
     <span class="s2">&quot;tt25_q_ss&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
         <span class="s2">&quot;25th percentile of subsoil percolation travel time&quot;</span><span class="p">,</span>
         <span class="n">CATCH_GRID</span><span class="p">,</span>
@@ -4173,6 +4248,14 @@
         <span class="n">CATCH_GRID</span><span class="p">,</span>
         <span class="s2">&quot;days&quot;</span><span class="p">,</span>
         <span class="s2">&quot;75th percentile of subsoil percolation travel time&quot;</span><span class="p">,</span>
+        <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_age_statistics</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;tt90_q_ss&quot;</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span>
+        <span class="s2">&quot;90th percentile of subsoil percolation travel time&quot;</span><span class="p">,</span>
+        <span class="n">CATCH_GRID</span><span class="p">,</span>
+        <span class="s2">&quot;days&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;90th percentile of subsoil percolation travel time&quot;</span><span class="p">,</span>
         <span class="n">time_dependent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">active</span><span class="o">=</span><span class="k">lambda</span> <span class="n">settings</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_offline_transport</span> <span class="o">&amp;</span> <span class="n">settings</span><span class="o">.</span><span class="n">enable_age_statistics</span><span class="p">,</span>
     <span class="p">),</span>

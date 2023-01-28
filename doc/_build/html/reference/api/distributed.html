@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Distributed communication primitives &mdash; RoGeR 0.0.1+333.ga951c01 documentation</title>
+  <title>Distributed communication primitives &mdash; RoGeR 0.0.1+488.ge1b7b1c.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+333.ga951c01
+                0.0.1+488.ge1b7b1c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -74,7 +74,15 @@
 <li class="toctree-l2"><a class="reference internal" href="runtime.html">Runtime settings &amp; state</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools.html">Tools &amp; utilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Numerical operators</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Distributed communication primitives</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Distributed communication primitives</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#roger.distributed.global_max"><code class="docutils literal notranslate"><span class="pre">global_max()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roger.distributed.global_sum"><code class="docutils literal notranslate"><span class="pre">global_sum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roger.distributed.gather"><code class="docutils literal notranslate"><span class="pre">gather()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roger.distributed.scatter"><code class="docutils literal notranslate"><span class="pre">scatter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roger.distributed.barrier"><code class="docutils literal notranslate"><span class="pre">barrier()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roger.distributed.abort"><code class="docutils literal notranslate"><span class="pre">abort()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -114,6 +122,36 @@
              
   <section id="module-roger.distributed">
 <span id="distributed-communication-primitives"></span><h1>Distributed communication primitives<a class="headerlink" href="#module-roger.distributed" title="Permalink to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="roger.distributed.global_max">
+<span class="sig-prename descclassname"><span class="pre">roger.distributed.</span></span><span class="sig-name descname"><span class="pre">global_max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/distributed.html#global_max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.distributed.global_max" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roger.distributed.global_sum">
+<span class="sig-prename descclassname"><span class="pre">roger.distributed.</span></span><span class="sig-name descname"><span class="pre">global_sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/distributed.html#global_sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.distributed.global_sum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roger.distributed.gather">
+<span class="sig-prename descclassname"><span class="pre">roger.distributed.</span></span><span class="sig-name descname"><span class="pre">gather</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_grid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/distributed.html#gather"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.distributed.gather" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roger.distributed.scatter">
+<span class="sig-prename descclassname"><span class="pre">roger.distributed.</span></span><span class="sig-name descname"><span class="pre">scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_grid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/distributed.html#scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.distributed.scatter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roger.distributed.barrier">
+<span class="sig-prename descclassname"><span class="pre">roger.distributed.</span></span><span class="sig-name descname"><span class="pre">barrier</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/distributed.html#barrier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.distributed.barrier" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roger.distributed.abort">
+<span class="sig-prename descclassname"><span class="pre">roger.distributed.</span></span><span class="sig-name descname"><span class="pre">abort</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roger/distributed.html#abort"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roger.distributed.abort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </section>
 
 

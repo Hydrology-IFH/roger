@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Getting started &mdash; RoGeR 0.0.1+333.ga951c01 documentation</title>
+  <title>Getting started &mdash; RoGeR 0.0.1+488.ge1b7b1c.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+333.ga951c01
+                0.0.1+488.ge1b7b1c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -48,8 +48,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#quick-installation-via-pip">Quick installation via pip</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#using-conda-multi-platform">Using Conda (multi-platform)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#using-pip-linux-osx">Using pip (Linux / OSX)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#checking-out-the-repository-and-using-conda-multi-platform">Checking out the repository and using Conda (multi-platform)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#checking-out-the-repository-and-using-pip-linux-osx">Checking out the repository and using pip (Linux / OSX)</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#setting-up-a-model">Setting up a model</a></li>
@@ -138,8 +138,8 @@
 </div>
 <p>to use Roger with JAX.</p>
 </section>
-<section id="using-conda-multi-platform">
-<h3>Using Conda (multi-platform)<a class="headerlink" href="#using-conda-multi-platform" title="Permalink to this heading">¶</a></h3>
+<section id="checking-out-the-repository-and-using-conda-multi-platform">
+<h3>Checking out the repository and using Conda (multi-platform)<a class="headerlink" href="#checking-out-the-repository-and-using-conda-multi-platform" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic">
 <li><p><a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Download and install Miniconda</a>. If you are using Windows, you may use the Anaconda prompt to execute the following steps.</p></li>
 <li><p>Clone the Roger repository</p>
@@ -162,8 +162,8 @@
 </li>
 </ol>
 </section>
-<section id="using-pip-linux-osx">
-<h3>Using pip (Linux / OSX)<a class="headerlink" href="#using-pip-linux-osx" title="Permalink to this heading">¶</a></h3>
+<section id="checking-out-the-repository-and-using-pip-linux-osx">
+<h3>Checking out the repository and using pip (Linux / OSX)<a class="headerlink" href="#checking-out-the-repository-and-using-pip-linux-osx" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic">
 <li><p>Ensure you have a working Python 3.x installation.</p></li>
 <li><p>Clone our repository:</p>
@@ -192,13 +192,13 @@
 </section>
 <section id="setting-up-a-model">
 <h2>Setting up a model<a class="headerlink" href="#setting-up-a-model" title="Permalink to this heading">¶</a></h2>
-<p>To run Roger, you need to set up a model - i.e., specify which settings and model domain you want to use. This is done by subclassing the <a class="reference internal" href="../reference/api/roger-setup.html#roger.RogerSetup" title="roger.RogerSetup"><code class="xref py py-class docutils literal notranslate"><span class="pre">Roger</span> <span class="pre">setup</span> <span class="pre">base</span> <span class="pre">class</span></code></a> in a <em>setup script</em> that is written in Python. You should have a look at the pre-implemented model setups in the repository’s <code class="file docutils literal notranslate"><span class="pre">setup</span></code> folder, or use the <strong class="command">roger copy-setup</strong> command to copy one into your current folder. A good place to start is the <code class="xref py py-class docutils literal notranslate"><span class="pre">ACC</span> <span class="pre">model</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ roger copy-setup acc
+<p>To run Roger, you need to set up a model - i.e., specify which settings and model domain you want to use. This is done by subclassing the <a class="reference internal" href="../reference/api/roger-setup.html#roger.RogerSetup" title="roger.RogerSetup"><code class="xref py py-class docutils literal notranslate"><span class="pre">Roger</span> <span class="pre">setup</span> <span class="pre">base</span> <span class="pre">class</span></code></a> in a <em>setup script</em> that is written in Python. You should have a look at the pre-implemented model setups in the repository’s <code class="file docutils literal notranslate"><span class="pre">models</span></code> folder, or use the <strong class="command">roger copy-model</strong> command to copy one into your current folder. A good place to start is the <code class="xref py py-class docutils literal notranslate"><span class="pre">SVAT</span> <span class="pre">model</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ roger copy-setup svat
 </pre></div>
 </div>
 <p>By working through the existing models, you should quickly be able to figure out how to write your own simulation. Just keep in mind this general advice:</p>
 <ul>
-<li><p>You can (and should) use any (external) Python tools you want in your model setup. Before implementing a certain functionality, you should check whether it is already provided by a common library. Especially <a class="reference external" href="https://www.scipy.org/">the SciPy module family</a> provides countless implementations of common scientific functions (and SciPy is installed along with Roger).</p></li>
+<li><p>You can (and should) use any (external) Python tools you want in your pre-processing or model setup. Before implementing a certain functionality, you should check whether it is already provided by a common library. Especially <a class="reference external" href="https://www.scipy.org/">the SciPy module family</a> provides countless implementations of common scientific functions (and SciPy is installed along with Roger).</p></li>
 <li><p>You have to decorate your methods with <a class="reference internal" href="../reference/api/routines.html#roger.roger_routine" title="roger.roger_routine"><code class="xref py py-func docutils literal notranslate"><span class="pre">&#64;roger_routine</span></code></a>. Only Roger routines are able to modify the <code class="xref py py-class docutils literal notranslate"><span class="pre">model</span> <span class="pre">state</span> <span class="pre">object</span></code>, which is passed as the first argument. The current numerical backend is available from the <a class="reference internal" href="../reference/api/operators.html#module-roger.core.operators" title="roger.core.operators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">roger.core.operators</span></code></a> module:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">RogerSetup</span><span class="p">,</span> <span class="n">roger_routine</span>
 <span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span>
@@ -214,7 +214,7 @@
 <li><p>If you are curious about the general process how a model is set up and ran, you should read the source code of <a class="reference internal" href="../reference/api/roger-setup.html#roger.RogerSetup" title="roger.RogerSetup"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.RogerSetup</span></code></a> (especially the <code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code> methods). This is also the best way to find out about the order in which routines are called.</p></li>
 <li><p>Out of all functions that need to be implemented by your subclass of <a class="reference internal" href="../reference/api/roger-setup.html#roger.RogerSetup" title="roger.RogerSetup"><code class="xref py py-class docutils literal notranslate"><span class="pre">roger.RogerSetup</span></code></a>, the only one that is called in every time step is <code class="xref py py-meth docutils literal notranslate"><span class="pre">set_forcing()</span></code> (at the beginning of each iteration). This implies that, to achieve optimal performance, you should consider moving calculations that are constant in time to other functions.</p></li>
 <li><p>There is another type of decorator called <a class="reference internal" href="../reference/api/routines.html#roger.roger_kernel" title="roger.roger_kernel"><code class="xref py py-func docutils literal notranslate"><span class="pre">&#64;roger_kernel</span></code></a>. A kernel is a pure function that may be compiled to machine code by JAX. Kernels typically execute much faster, but are more restrictive to implement, as they cannot interact with the model state directly.</p>
-<p>A common pattern in large setups is to implement <code class="xref py py-meth docutils literal notranslate"><span class="pre">set_forcing()</span></code> as a kernel for optimal performance (see e.g. <code class="xref py py-class docutils literal notranslate"><span class="pre">the</span> <span class="pre">global_1deg</span> <span class="pre">setup</span> <span class="pre">file</span></code>).</p>
+<p>A common pattern in large setups is to implement <code class="xref py py-meth docutils literal notranslate"><span class="pre">set_forcing()</span></code> as a kernel for optimal performance.</p>
 </li>
 </ul>
 </section>
@@ -234,14 +234,14 @@
 </div>
 <section id="reading-roger-output">
 <h3>Reading Roger output<a class="headerlink" href="#reading-roger-output" title="Permalink to this heading">¶</a></h3>
-<p>All output is handled by <a class="reference internal" href="../reference/diagnostics.html"><span class="doc">the available diagnostics</span></a>. The most basic diagnostic, <code class="xref py py-class docutils literal notranslate"><span class="pre">snapshot</span></code>, writes some model variables to netCDF files in regular intervals (and puts them into your current working directory).</p>
+<p>All output is handled by <a class="reference internal" href="../reference/diagnostics.html"><span class="doc">the available diagnostics</span></a>. The most basic diagnostic, <code class="xref py py-class docutils literal notranslate"><span class="pre">collect</span></code>, writes some model variables to netCDF files in regular intervals (and puts them into your current working directory).</p>
 <p>NetCDF is a binary format that is widely adopted in the geophysical modeling community. There are various packages for reading, visualizing and processing netCDF files (such as <a class="reference external" href="http://meteora.ucsd.edu/~pierce/ncview_home_page.html">ncview</a> and <a class="reference external" href="http://ferret.pmel.noaa.gov/Ferret/">ferret</a>), and bindings for many programming languages (such as C, Fortran, MATLAB, and Python).</p>
 <p>For post-processing in Python, we recommend that you use <a class="reference external" href="http://xarray.pydata.org/en/stable/">xarray</a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 
-<span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;ONED.rates.nc&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;h5netcdf&quot;</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="s2">&quot;SVAT.rate.nc&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;h5netcdf&quot;</span><span class="p">)</span>
 
-<span class="c1"># plot surface velocity at the last time step included in the file</span>
+<span class="c1"># plot macropore infiltration</span>
 <span class="n">inf_mp</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">inf_mp</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">inf_mp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
@@ -260,7 +260,7 @@
 <p class="admonition-title">Note</p>
 <p>This assumes that you are familiar with running applications through MPI, and is most useful on large architectures like a compute cluster. For smaller architectures, it is usually easier to stick to the thread-based parallelism of JAX.</p>
 </div>
-<p>Running Roger through MPI requires some additional dependencies. For optimal performance, you will need to install <code class="docutils literal notranslate"><span class="pre">mpi4py</span></code>, <code class="docutils literal notranslate"><span class="pre">h5py</span></code>, <code class="docutils literal notranslate"><span class="pre">petsc4py</span></code>, and <code class="docutils literal notranslate"><span class="pre">mpi4jax</span></code>, linked to your MPI library.</p>
+<p>Running Roger through MPI requires some additional dependencies. For optimal performance, you will need to install <code class="docutils literal notranslate"><span class="pre">mpi4py</span></code>, <code class="docutils literal notranslate"><span class="pre">h5py</span></code>, and <code class="docutils literal notranslate"><span class="pre">mpi4jax</span></code>, linked to your MPI library.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="advanced-installation.html"><span class="doc">Advanced installation</span></a></p>
@@ -278,7 +278,7 @@
 </section>
 <section id="enhancing-roger">
 <h2>Enhancing Roger<a class="headerlink" href="#enhancing-roger" title="Permalink to this heading">¶</a></h2>
-<p>Roger was written with extensibility in mind. If you already know some Python and have worked with NumPy, you are pretty much ready to write your own extension. The model code is located in the <code class="file docutils literal notranslate"><span class="pre">roger</span></code> subfolder, while all of the numerical routines are located in <code class="file docutils literal notranslate"><span class="pre">roger/core</span></code>.</p>
+<p>Roger was written with a strong focus on extensibility. If you already know some Python and have worked with NumPy, you are pretty much ready to write your own extension. The model code is located in the <code class="file docutils literal notranslate"><span class="pre">roger</span></code> subfolder, while all of the numerical routines are located in <code class="file docutils literal notranslate"><span class="pre">roger/core</span></code>.</p>
 <p>We believe that the best way to learn how Roger works is to read its source code. Starting from the <a class="reference internal" href="../reference/api/roger-setup.html#roger.RogerSetup" title="roger.RogerSetup"><code class="xref py py-class docutils literal notranslate"><span class="pre">Roger</span> <span class="pre">base</span> <span class="pre">class</span></code></a>, you should be able to work your way through the flow of the program, and figure out where to add your modifications. If you installed Roger through <strong class="command">pip -e</strong> or <strong class="command">setup.py develop</strong>, all changes you make will immediately be reflected when running the code.</p>
 <p>In case you want to add additional output capabilities or compute additional quantities without changing the main solution of the simulation, you should consider <a class="reference internal" href="../reference/diagnostics.html"><span class="doc">adding a custom diagnostic</span></a>.</p>
 <p>A convenient way to implement your modifications is to create your own fork of Roger on GitHub, and submit a <a class="reference external" href="https://github.com/Hydrology-IFH/roger/pulls">pull request</a> if you think your modifications could be useful for the Roger community.</p>

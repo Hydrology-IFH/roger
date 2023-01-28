@@ -30,6 +30,29 @@ The uniform distribution function has no age preference.
 .. math::
   \Omega_Q(T,t)=P_S(T,t)
 
+Power
+-----
+The power distribution function provides flexibility to
+represent a preference for younger water (:math:`k < 1`)
+or preference for older water (:math:`k > 1`).
+
+.. math::
+  \Omega_Q(T,t)=P_S(T,t)^k
+
+Kumaraswamy
+-----------
+The Kumaraswamy distribution function (Kumaraswamy, 1980) provides flexibility to
+represent a preference for younger water (:math:`\alpha_Q = 1` and :math:`\beta_Q > 1`)
+or preference for older water (:math:`\alpha_Q > 1` and :math:`\beta_Q = 1`).
+
+.. math::
+  \Omega_Q(T,t)=1-((1-(P_S(T,t))^{\alpha_Q})^{\beta_Q})
+
+Exponential
+-----------
+
+.. math::
+  \Omega_Q(T,t)=1-e^{-k \cdot (P_S(T,t)}
 
 Dirac
 -----
@@ -42,15 +65,6 @@ where :math:`T_{dirac}` is the water age of the pulse.
 Please note, that a closed form of :math:`P_Q` using the Dirac distribution
 is not available.
 
-
-Kumaraswamy
------------
-The Kumaraswamy distribution function (Kumaraswamy, 1980) provides flexibility to
-represent a preference for younger water (:math:`\alpha_Q = 1` and :math:`\beta_Q > 1`)
-or preference for older water (:math:`\alpha_Q > 1` and :math:`\beta_Q = 1`).
-
-.. math::
-  \Omega_Q(T,t)=1-((1-(P_S(T,t))^{\alpha_Q})^{\beta_Q})
 
 Gamma
 -----
@@ -67,15 +81,6 @@ Exponential
 
 .. math::
   \Omega_Q(T,t)=1-e^{-k \cdot (P_S(T,t)}
-
-Power
------
-The power distribution function provides flexibility to
-represent a preference for younger water (:math:`k < 1`)
-or preference for older water (:math:`k > 1`).
-
-.. math::
-  \Omega_Q(T,t)=P_S(T,t)^k
 
 
 Time-variant SAS function parameters

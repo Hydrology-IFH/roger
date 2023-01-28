@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Model variables &mdash; RoGeR 0.0.1+333.ga951c01 documentation</title>
+  <title>Model variables &mdash; RoGeR 0.0.1+488.ge1b7b1c.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+333.ga951c01
+                0.0.1+488.ge1b7b1c.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -274,9 +274,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_s</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.mr_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.mr_s</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ma_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ma_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rt10_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rt10_s</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rt25_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rt25_s</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rt50_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rt50_s</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rt75_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rt75_s</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rt90_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rt90_s</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rtavg_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rtavg_s</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.Nmin_s"><code class="docutils literal notranslate"><span class="pre">RogerVariables.Nmin_s</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.z_root"><code class="docutils literal notranslate"><span class="pre">RogerVariables.z_root</span></code></a></li>
@@ -472,6 +474,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_inf_pf_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_inf_pf_ss</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.aet"><code class="docutils literal notranslate"><span class="pre">RogerVariables.aet</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.aet_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.aet_soil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.RS"><code class="docutils literal notranslate"><span class="pre">RogerVariables.RS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rs"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.rs_day"><code class="docutils literal notranslate"><span class="pre">RogerVariables.rs_day</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.c1_mak"><code class="docutils literal notranslate"><span class="pre">RogerVariables.c1_mak</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.c2_mak"><code class="docutils literal notranslate"><span class="pre">RogerVariables.c2_mak</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.PET"><code class="docutils literal notranslate"><span class="pre">RogerVariables.PET</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.pet"><code class="docutils literal notranslate"><span class="pre">RogerVariables.pet</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.pet_day"><code class="docutils literal notranslate"><span class="pre">RogerVariables.pet_day</span></code></a></li>
@@ -497,9 +504,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_transp</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_transp</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt10_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt10_transp</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt25_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt25_transp</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt50_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt50_transp</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt75_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt75_transp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt90_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt90_transp</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ttavg_transp"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ttavg_transp</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.sas_params_evap_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.sas_params_evap_soil</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.TT_evap_soil"><code class="docutils literal notranslate"><span class="pre">RogerVariables.TT_evap_soil</span></code></a></li>
@@ -546,9 +555,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.M_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.M_q_ss</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_q_ss</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.C_iso_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.C_iso_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt10_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt10_q_ss</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt25_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt25_q_ss</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt50_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt50_q_ss</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt75_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt75_q_ss</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#RogerVariables.tt90_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.tt90_q_ss</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.ttavg_q_ss"><code class="docutils literal notranslate"><span class="pre">RogerVariables.ttavg_q_ss</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.CPR_RZ"><code class="docutils literal notranslate"><span class="pre">RogerVariables.CPR_RZ</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#RogerVariables.cpr_rz"><code class="docutils literal notranslate"><span class="pre">RogerVariables.cpr_rz</span></code></a></li>
@@ -5400,6 +5411,29 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.rt10_s">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">rt10_s</span></span><a class="headerlink" href="#RogerVariables.rt10_s" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>days</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Condition</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">settings:</span> <span class="pre">settings.enable_offline_transport</span> <span class="pre">&amp;</span> <span class="pre">settings.enable_age_statistics</span></code></p>
+</dd>
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><p><em class="fa fa-clock-o"></em> <em class="fa fa-question-circle"></em></p>
+</dd>
+</dl>
+<p>10th percentile of soil residence time</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="RogerVariables.rt25_s">
 <span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">rt25_s</span></span><a class="headerlink" href="#RogerVariables.rt25_s" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -5466,6 +5500,29 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </dd>
 </dl>
 <p>75th percentile of soil residence time</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.rt90_s">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">rt90_s</span></span><a class="headerlink" href="#RogerVariables.rt90_s" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>days</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Condition</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">settings:</span> <span class="pre">settings.enable_offline_transport</span> <span class="pre">&amp;</span> <span class="pre">settings.enable_age_statistics</span></code></p>
+</dd>
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><p><em class="fa fa-clock-o"></em> <em class="fa fa-question-circle"></em></p>
+</dd>
+</dl>
+<p>90th percentile of soil residence time</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -9841,6 +9898,113 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.RS">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">RS</span></span><a class="headerlink" href="#RogerVariables.RS" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>MJ/m2</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(t_forc)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Attributes</dt>
+<dd class="field-even"><p><em class="fa fa-clock-o"></em></p>
+</dd>
+</dl>
+<p>solar radiation</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.rs">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">rs</span></span><a class="headerlink" href="#RogerVariables.rs" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>MJ/m2</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Attributes</dt>
+<dd class="field-even"><p><em class="fa fa-clock-o"></em></p>
+</dd>
+</dl>
+<p>solar radiation</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.rs_day">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">rs_day</span></span><a class="headerlink" href="#RogerVariables.rs_day" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>MJ/m2</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y, timesteps_day)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Condition</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">settings:</span> <span class="pre">not</span> <span class="pre">settings.enable_offline_transport</span></code></p>
+</dd>
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><p><em class="fa fa-clock-o"></em> <em class="fa fa-question-circle"></em></p>
+</dd>
+</dl>
+<p>solar radiation</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.c1_mak">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">c1_mak</span></span><a class="headerlink" href="#RogerVariables.c1_mak" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><ul class="simple">
+<li></li>
+</ul>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Attributes</dt>
+<dd class="field-even"><p><em class="fa fa-clock-o"></em> <em class="fa fa-repeat"></em></p>
+</dd>
+</dl>
+<p>Makkink coeffcient</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.c2_mak">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">c2_mak</span></span><a class="headerlink" href="#RogerVariables.c2_mak" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><ul class="simple">
+<li></li>
+</ul>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Attributes</dt>
+<dd class="field-even"><p><em class="fa fa-clock-o"></em> <em class="fa fa-repeat"></em></p>
+</dd>
+</dl>
+<p>Makkink coeffcient</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="RogerVariables.PET">
 <span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">PET</span></span><a class="headerlink" href="#RogerVariables.PET" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -10389,6 +10553,29 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.tt10_transp">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">tt10_transp</span></span><a class="headerlink" href="#RogerVariables.tt10_transp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>days</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Condition</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">settings:</span> <span class="pre">settings.enable_offline_transport</span> <span class="pre">&amp;</span> <span class="pre">settings.enable_age_statistics</span></code></p>
+</dd>
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><p><em class="fa fa-clock-o"></em> <em class="fa fa-question-circle"></em></p>
+</dd>
+</dl>
+<p>10th percentile of transpiration travel time</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="RogerVariables.tt25_transp">
 <span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">tt25_transp</span></span><a class="headerlink" href="#RogerVariables.tt25_transp" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -10455,6 +10642,29 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </dd>
 </dl>
 <p>75th percentile of transpiration travel time</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.tt90_transp">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">tt90_transp</span></span><a class="headerlink" href="#RogerVariables.tt90_transp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>days</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Condition</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">settings:</span> <span class="pre">settings.enable_offline_transport</span> <span class="pre">&amp;</span> <span class="pre">settings.enable_age_statistics</span></code></p>
+</dd>
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><p><em class="fa fa-clock-o"></em> <em class="fa fa-question-circle"></em></p>
+</dd>
+</dl>
+<p>90th percentile of transpiration travel time</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -11544,6 +11754,29 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.tt10_q_ss">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">tt10_q_ss</span></span><a class="headerlink" href="#RogerVariables.tt10_q_ss" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>days</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Condition</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">settings:</span> <span class="pre">settings.enable_offline_transport</span> <span class="pre">&amp;</span> <span class="pre">settings.enable_age_statistics</span></code></p>
+</dd>
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><p><em class="fa fa-clock-o"></em> <em class="fa fa-question-circle"></em></p>
+</dd>
+</dl>
+<p>10th percentile of subsoil percolation travel time</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="RogerVariables.tt25_q_ss">
 <span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">tt25_q_ss</span></span><a class="headerlink" href="#RogerVariables.tt25_q_ss" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -11610,6 +11843,29 @@ condition is <a class="reference external" href="https://docs.python.org/3/libra
 </dd>
 </dl>
 <p>75th percentile of subsoil percolation travel time</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="RogerVariables.tt90_q_ss">
+<span class="sig-prename descclassname"><span class="pre">RogerVariables.</span></span><span class="sig-name descname"><span class="pre">tt90_q_ss</span></span><a class="headerlink" href="#RogerVariables.tt90_q_ss" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Units</dt>
+<dd class="field-odd"><p>days</p>
+</dd>
+<dt class="field-even">Dimensions</dt>
+<dd class="field-even"><p>(x, y)</p>
+</dd>
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+</dd>
+<dt class="field-even">Condition</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">settings:</span> <span class="pre">settings.enable_offline_transport</span> <span class="pre">&amp;</span> <span class="pre">settings.enable_age_statistics</span></code></p>
+</dd>
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><p><em class="fa fa-clock-o"></em> <em class="fa fa-question-circle"></em></p>
+</dd>
+</dl>
+<p>90th percentile of subsoil percolation travel time</p>
 </dd></dl>
 
 <dl class="py attribute">

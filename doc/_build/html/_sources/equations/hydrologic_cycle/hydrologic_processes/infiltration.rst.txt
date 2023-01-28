@@ -6,7 +6,7 @@ soil moisture deficit :math:`\Delta \theta`). For each event, we use two wetting
 fronts (:math:`wf1` and :math:`wf2`). The second wetting front is active after a rainfall pause
 (i.e. calculation of event-specific parameters of :math:`wf2`). :math:`wf2` is active while
 wetting front depth of :math:`wf2` is less than wetting front depth of :math:`wf1`. In the
-following are the equations applied for dual-wetting front approach.
+following, the equations are applied to a dual-wetting front approach.
 
 Total infiltration :math:`INF` at time step :math:`t` (mm :math:`\Delta t^{-1}`):
 

@@ -19,8 +19,8 @@ where :math:`TA_{year}` is the annual average air temperature (°C),
 is the dampening depth (mm), t is the day of year and :math:`\Phi` is a constant
 offset (days).
 
-Nitrogen cycle
---------------
+Nitrogen mass balance
+---------------------
 
 .. math::
   \frac{\partial NO_{3-soil}(T,t)}{\partial t} + \frac{\partial NO_{3-soil}(T,t)}{\partial T} = 0.3 \cdot N_{fert}(t) + Nit_{soil}(t) - Denit_{soil}(t) - N_{up}(t)

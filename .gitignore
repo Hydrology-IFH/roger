@@ -135,6 +135,20 @@ examples/*/*/*/RK4/
 examples/*/*/hydrus_benchmark/*.txt
 examples/*/*/hydrus_benchmark/*.py
 input_examples/
+examples/reckenholz/observations/
+examples/reckenholz/svat/input/
+examples/reckenholz/svat_monte_carlo/input/
+examples/reckenholz/svat_semsitivity/input/
+examples/reckenholz/svat_transport/input/
+examples/reckenholz/svat_transport_monte_carlo/input/
+examples/reckenholz/svat_transport_sensitivity/input/
+examples/reckenholz_film/svat_film/input/
+examples/reckenholz_film/svat_film_event/input/
+examples/reckenholz_film/svat_film_event_monte_carlo/input/
+examples/reckenholz_film/svat_film_event_sensitivity/input/
+examples/reckenholz_film/svat_film_monte_carlo/input/
+examples/reckenholz_film/svat_film_sensitivity/input/
+examples/stgallen
 
 # Slides or Word
 *.key

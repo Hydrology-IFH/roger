@@ -44,6 +44,7 @@ Submitting a CPU job to a cluster
 In order to run your simulations on the CPUs of a computing cluster, requires the submission of a job script. One possible way to write such a job script for the scheduling manager MOAB is presented here:
 
 ..  code-block:: shell
+
   #!/bin/bash
   #PBS -l nodes=1:ppn=4
   #PBS -l walltime=2:00:00
@@ -68,6 +69,7 @@ Submitting a GPU job to a cluster
 In order to run your simulations on the GPU of a computing cluster, requires the submission of a job script. One possible way to write such a job script for the scheduling manager MOAB is presented here:
 
 ..  code-block:: shell
+  
   #!/bin/bash
   #PBS -l nodes=1:ppn=1:gpus=1:default
   #PBS -l walltime=2:00:00

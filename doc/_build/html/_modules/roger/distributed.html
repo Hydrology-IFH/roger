@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>roger.distributed &mdash; RoGeR 0.0.1+488.ge1b7b1c.dirty documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> RoGeR
+          </a>
+              <div class="version">
+                0.0.1+488.ge1b7b1c.dirty
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Start here</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">A short introduction to Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/get-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/advanced-installation.html">Advanced installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/analysis.html">Analysis of simulations with Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/cluster.html">Running Roger on a cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/dev.html">Making changes in Roger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Model equations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../equations/equations.html">Model equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../equations/hydrologic_cycle.html">Hydrologic cycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../equations/solute_transport.html">Solute transport</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/model-gallery.html">Model gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/settings.html">Constant model parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/variables.html">Model variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/diagnostics.html">Diagnostics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/cli.html">Command line tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/public-api.html">Python API</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">More Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../more/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../more/howtocite.html">How to cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../more/publications.html">Publications involving Roger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Hydrology-IFH/roger">Visit us on GitHub</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">RoGeR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>roger.distributed</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for roger.distributed</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">functools</span>
+
+<span class="kn">from</span> <span class="nn">roger</span> <span class="kn">import</span> <span class="n">runtime_settings</span> <span class="k">as</span> <span class="n">rs</span><span class="p">,</span> <span class="n">runtime_state</span> <span class="k">as</span> <span class="n">rst</span>
+<span class="kn">from</span> <span class="nn">roger.routines</span> <span class="kn">import</span> <span class="n">CURRENT_CONTEXT</span>
+
+<span class="n">SCATTERED_DIMENSIONS</span> <span class="o">=</span> <span class="p">((</span><span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">dist_context_only</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">noop_return_arg</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">dist_context_only_wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">rst</span><span class="o">.</span><span class="n">proc_num</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">is_dist_safe</span><span class="p">:</span>
+                <span class="c1"># no-op for sequential execution</span>
+                <span class="k">if</span> <span class="n">noop_return_arg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+
+                <span class="c1"># return input array unchanged</span>
+                <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="n">noop_return_arg</span><span class="p">]</span>
+
+            <span class="k">return</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dist_context_only_wrapper</span>
+
+    <span class="k">if</span> <span class="n">function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">decorator</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">decorator</span>
+
+
+<span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">comm</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rs</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;jax&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">mpi4jax</span> <span class="kn">import</span> <span class="n">send</span>
+
+        <span class="n">token</span> <span class="o">=</span> <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span>
+        <span class="n">new_token</span> <span class="o">=</span> <span class="n">send</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span> <span class="o">=</span> <span class="n">new_token</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">comm</span><span class="o">.</span><span class="n">Send</span><span class="p">(</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">buf</span><span class="p">),</span> <span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">recv</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">comm</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rs</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;jax&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">mpi4jax</span> <span class="kn">import</span> <span class="n">recv</span>
+
+        <span class="n">token</span> <span class="o">=</span> <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span>
+        <span class="n">buf</span><span class="p">,</span> <span class="n">new_token</span> <span class="o">=</span> <span class="n">recv</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span> <span class="o">=</span> <span class="n">new_token</span>
+        <span class="k">return</span> <span class="n">buf</span>
+
+    <span class="n">buf</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">comm</span><span class="o">.</span><span class="n">Recv</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">buf</span>
+
+
+<span class="k">def</span> <span class="nf">sendrecv</span><span class="p">(</span><span class="n">sendbuf</span><span class="p">,</span> <span class="n">recvbuf</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">comm</span><span class="p">,</span> <span class="n">sendtag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">recvtag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">sendtag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sendtag</span><span class="o">=</span><span class="n">sendtag</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">recvtag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">recvtag</span><span class="o">=</span><span class="n">recvtag</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rs</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;jax&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">mpi4jax</span> <span class="kn">import</span> <span class="n">sendrecv</span>
+
+        <span class="n">token</span> <span class="o">=</span> <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span>
+        <span class="n">recvbuf</span><span class="p">,</span> <span class="n">new_token</span> <span class="o">=</span> <span class="n">sendrecv</span><span class="p">(</span><span class="n">sendbuf</span><span class="p">,</span> <span class="n">recvbuf</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span> <span class="o">=</span> <span class="n">new_token</span>
+        <span class="k">return</span> <span class="n">recvbuf</span>
+
+    <span class="n">recvbuf</span> <span class="o">=</span> <span class="n">recvbuf</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">comm</span><span class="o">.</span><span class="n">Sendrecv</span><span class="p">(</span><span class="n">sendbuf</span><span class="o">=</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">sendbuf</span><span class="p">),</span> <span class="n">recvbuf</span><span class="o">=</span><span class="n">recvbuf</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">dest</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">recvbuf</span>
+
+
+<span class="k">def</span> <span class="nf">bcast</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">comm</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">rs</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;jax&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">mpi4jax</span> <span class="kn">import</span> <span class="n">bcast</span>
+
+        <span class="n">token</span> <span class="o">=</span> <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span>
+        <span class="n">buf</span><span class="p">,</span> <span class="n">new_token</span> <span class="o">=</span> <span class="n">bcast</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">)</span>
+        <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span> <span class="o">=</span> <span class="n">new_token</span>
+        <span class="k">return</span> <span class="n">buf</span>
+
+    <span class="k">return</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">allreduce</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">comm</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">rs</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;jax&quot;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">mpi4jax</span> <span class="kn">import</span> <span class="n">allreduce</span>
+
+        <span class="n">token</span> <span class="o">=</span> <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span>
+        <span class="n">buf</span><span class="p">,</span> <span class="n">new_token</span> <span class="o">=</span> <span class="n">allreduce</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">op</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">)</span>
+        <span class="n">CURRENT_CONTEXT</span><span class="o">.</span><span class="n">mpi4jax_token</span> <span class="o">=</span> <span class="n">new_token</span>
+        <span class="k">return</span> <span class="n">buf</span>
+
+    <span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span>
+
+    <span class="n">recvbuf</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+    <span class="n">comm</span><span class="o">.</span><span class="n">Allreduce</span><span class="p">(</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">buf</span><span class="p">),</span> <span class="n">recvbuf</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">op</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">recvbuf</span>
+
+
+<span class="k">def</span> <span class="nf">ascontiguousarray</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">rs</span><span class="o">.</span><span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;numpy&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span>
+
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">validate_decomposition</span><span class="p">(</span><span class="n">dimensions</span><span class="p">):</span>
+    <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="n">dimensions</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="n">dimensions</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;mpi4py is required for distributed execution&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">comm_size</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">Get_size</span><span class="p">()</span>
+    <span class="n">proc_num</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">proc_num</span> <span class="o">!=</span> <span class="n">comm_size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;number of processes (</span><span class="si">{</span><span class="n">proc_num</span><span class="si">}</span><span class="s2">) does not match size of communicator (</span><span class="si">{</span><span class="n">comm_size</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">nx</span> <span class="o">%</span> <span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;processes do not divide domain evenly in x-direction&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ny</span> <span class="o">%</span> <span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;processes do not divide domain evenly in y-direction&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_chunk_size</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">nx</span> <span class="o">//</span> <span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ny</span> <span class="o">//</span> <span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">proc_rank_to_index</span><span class="p">(</span><span class="n">rank</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">rank</span> <span class="o">%</span> <span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rank</span> <span class="o">//</span> <span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">proc_index_to_rank</span><span class="p">(</span><span class="n">ix</span><span class="p">,</span> <span class="n">iy</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">ix</span> <span class="o">+</span> <span class="n">iy</span> <span class="o">*</span> <span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">get_chunk_slices</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">dim_grid</span><span class="p">,</span> <span class="n">proc_idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include_overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dim_grid</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">Ellipsis</span><span class="p">,</span> <span class="bp">Ellipsis</span>
+
+    <span class="k">if</span> <span class="n">proc_idx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">proc_idx</span> <span class="o">=</span> <span class="n">proc_rank_to_index</span><span class="p">(</span><span class="n">rst</span><span class="o">.</span><span class="n">proc_rank</span><span class="p">)</span>
+
+    <span class="n">px</span><span class="p">,</span> <span class="n">py</span> <span class="o">=</span> <span class="n">proc_idx</span>
+    <span class="n">nxl</span><span class="p">,</span> <span class="n">nyl</span> <span class="o">=</span> <span class="n">get_chunk_size</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">include_overlap</span><span class="p">:</span>
+        <span class="n">sxl</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">px</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">2</span>
+        <span class="n">sxu</span> <span class="o">=</span> <span class="n">nxl</span> <span class="o">+</span> <span class="mi">4</span> <span class="k">if</span> <span class="p">(</span><span class="n">px</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="n">nxl</span> <span class="o">+</span> <span class="mi">2</span>
+        <span class="n">syl</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">py</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">2</span>
+        <span class="n">syu</span> <span class="o">=</span> <span class="n">nyl</span> <span class="o">+</span> <span class="mi">4</span> <span class="k">if</span> <span class="p">(</span><span class="n">py</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="n">nyl</span> <span class="o">+</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sxl</span> <span class="o">=</span> <span class="n">syl</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">sxu</span> <span class="o">=</span> <span class="n">nxl</span>
+        <span class="n">syu</span> <span class="o">=</span> <span class="n">nyl</span>
+
+    <span class="n">global_slice</span><span class="p">,</span> <span class="n">local_slice</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dim_grid</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dim</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">global_slice</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">sxl</span> <span class="o">+</span> <span class="n">px</span> <span class="o">*</span> <span class="n">nxl</span><span class="p">,</span> <span class="n">sxu</span> <span class="o">+</span> <span class="n">px</span> <span class="o">*</span> <span class="n">nxl</span><span class="p">))</span>
+                <span class="n">local_slice</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">sxl</span><span class="p">,</span> <span class="n">sxu</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">global_slice</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">syl</span> <span class="o">+</span> <span class="n">py</span> <span class="o">*</span> <span class="n">nyl</span><span class="p">,</span> <span class="n">syu</span> <span class="o">+</span> <span class="n">py</span> <span class="o">*</span> <span class="n">nyl</span><span class="p">))</span>
+                <span class="n">local_slice</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">syl</span><span class="p">,</span> <span class="n">syu</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">global_slice</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
+                <span class="n">local_slice</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">global_slice</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">local_slice</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_process_neighbors</span><span class="p">():</span>
+    <span class="n">this_x</span><span class="p">,</span> <span class="n">this_y</span> <span class="o">=</span> <span class="n">proc_rank_to_index</span><span class="p">(</span><span class="n">rst</span><span class="o">.</span><span class="n">proc_rank</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">this_x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">west</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">west</span> <span class="o">=</span> <span class="n">this_x</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">this_x</span> <span class="o">==</span> <span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">east</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">east</span> <span class="o">=</span> <span class="n">this_x</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">south</span> <span class="o">=</span> <span class="n">this_y</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">this_y</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">north</span> <span class="o">=</span> <span class="n">this_y</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">this_y</span> <span class="o">!=</span> <span class="p">(</span><span class="n">rs</span><span class="o">.</span><span class="n">num_proc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="n">neighbors</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="c1"># direct neighbors</span>
+        <span class="n">west</span><span class="o">=</span><span class="p">(</span><span class="n">west</span><span class="p">,</span> <span class="n">this_y</span><span class="p">),</span>
+        <span class="n">south</span><span class="o">=</span><span class="p">(</span><span class="n">this_x</span><span class="p">,</span> <span class="n">south</span><span class="p">),</span>
+        <span class="n">east</span><span class="o">=</span><span class="p">(</span><span class="n">east</span><span class="p">,</span> <span class="n">this_y</span><span class="p">),</span>
+        <span class="n">north</span><span class="o">=</span><span class="p">(</span><span class="n">this_x</span><span class="p">,</span> <span class="n">north</span><span class="p">),</span>
+        <span class="c1"># corners</span>
+        <span class="n">southwest</span><span class="o">=</span><span class="p">(</span><span class="n">west</span><span class="p">,</span> <span class="n">south</span><span class="p">),</span>
+        <span class="n">southeast</span><span class="o">=</span><span class="p">(</span><span class="n">east</span><span class="p">,</span> <span class="n">south</span><span class="p">),</span>
+        <span class="n">northeast</span><span class="o">=</span><span class="p">(</span><span class="n">east</span><span class="p">,</span> <span class="n">north</span><span class="p">),</span>
+        <span class="n">northwest</span><span class="o">=</span><span class="p">(</span><span class="n">west</span><span class="p">,</span> <span class="n">north</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">global_neighbors</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">proc_index_to_rank</span><span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="kc">None</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">i</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="k">return</span> <span class="n">global_neighbors</span>
+
+
+<span class="nd">@dist_context_only</span><span class="p">(</span><span class="n">noop_return_arg</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">exchange_overlap</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">var_grid</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span><span class="p">,</span> <span class="n">update</span><span class="p">,</span> <span class="n">at</span>
+
+    <span class="c1"># start west, go clockwise</span>
+    <span class="n">send_order</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;west&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;northwest&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;north&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;northeast&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;east&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;southeast&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;south&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;southwest&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># start east, go clockwise</span>
+    <span class="n">recv_order</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;east&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;southeast&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;south&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;southwest&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;west&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;northwest&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;north&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;northeast&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_grid</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span> <span class="o">=</span> <span class="n">var_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span> <span class="o">=</span> <span class="n">var_grid</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">d1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">d1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">d2</span><span class="p">:</span>
+        <span class="c1"># neither x nor y dependent, nothing to do</span>
+        <span class="k">return</span> <span class="n">arr</span>
+
+    <span class="n">proc_neighbors</span> <span class="o">=</span> <span class="n">get_process_neighbors</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">d1</span><span class="p">)</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">overlap_slices_from</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">west</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">south</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">east</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">north</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">southwest</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">southeast</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">northeast</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">northwest</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">overlap_slices_to</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">west</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">south</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">east</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">north</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">southwest</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">southeast</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">northeast</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">northwest</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">d1</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">send_order</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;west&quot;</span><span class="p">,</span> <span class="s2">&quot;east&quot;</span><span class="p">)</span>
+            <span class="n">recv_order</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;east&quot;</span><span class="p">,</span> <span class="s2">&quot;west&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">d1</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">send_order</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;north&quot;</span><span class="p">,</span> <span class="s2">&quot;south&quot;</span><span class="p">)</span>
+            <span class="n">recv_order</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;south&quot;</span><span class="p">,</span> <span class="s2">&quot;north&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+        <span class="n">overlap_slices_from</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">west</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">south</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">east</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">north</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">overlap_slices_to</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">west</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">south</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">east</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+            <span class="n">north</span><span class="o">=</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="bp">Ellipsis</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">send_dir</span><span class="p">,</span> <span class="n">recv_dir</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">send_order</span><span class="p">,</span> <span class="n">recv_order</span><span class="p">):</span>
+        <span class="n">send_proc</span> <span class="o">=</span> <span class="n">proc_neighbors</span><span class="p">[</span><span class="n">send_dir</span><span class="p">]</span>
+        <span class="n">recv_proc</span> <span class="o">=</span> <span class="n">proc_neighbors</span><span class="p">[</span><span class="n">recv_dir</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">send_proc</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">recv_proc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">recv_idx</span> <span class="o">=</span> <span class="n">overlap_slices_to</span><span class="p">[</span><span class="n">recv_dir</span><span class="p">]</span>
+        <span class="n">recv_arr</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">recv_idx</span><span class="p">])</span>
+
+        <span class="n">send_idx</span> <span class="o">=</span> <span class="n">overlap_slices_from</span><span class="p">[</span><span class="n">send_dir</span><span class="p">]</span>
+        <span class="n">send_arr</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">send_idx</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">send_proc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">recv_arr</span> <span class="o">=</span> <span class="n">recv</span><span class="p">(</span><span class="n">recv_arr</span><span class="p">,</span> <span class="n">recv_proc</span><span class="p">,</span> <span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="p">)</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">at</span><span class="p">[</span><span class="n">recv_idx</span><span class="p">],</span> <span class="n">recv_arr</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">recv_proc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">send</span><span class="p">(</span><span class="n">send_arr</span><span class="p">,</span> <span class="n">send_proc</span><span class="p">,</span> <span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">recv_arr</span> <span class="o">=</span> <span class="n">sendrecv</span><span class="p">(</span><span class="n">send_arr</span><span class="p">,</span> <span class="n">recv_arr</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">recv_proc</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">send_proc</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="p">)</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">at</span><span class="p">[</span><span class="n">recv_idx</span><span class="p">],</span> <span class="n">recv_arr</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">arr</span>
+
+
+<span class="k">def</span> <span class="nf">_memoize</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+    <span class="n">cached</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">memoized</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+
+        <span class="c1"># MPI Comms are not hashable, so we use the underlying handle instead</span>
+        <span class="n">cache_args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">_handleof</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">MPI</span><span class="o">.</span><span class="n">Comm</span><span class="p">)</span> <span class="k">else</span> <span class="n">arg</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cache_args</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cached</span><span class="p">:</span>
+            <span class="n">cached</span><span class="p">[</span><span class="n">cache_args</span><span class="p">]</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cached</span><span class="p">[</span><span class="n">cache_args</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">memoized</span>
+
+
+<span class="nd">@_memoize</span>
+<span class="k">def</span> <span class="nf">_mpi_comm_along_axis</span><span class="p">(</span><span class="n">comm</span><span class="p">,</span> <span class="n">procs</span><span class="p">,</span> <span class="n">rank</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">comm</span><span class="o">.</span><span class="n">Split</span><span class="p">(</span><span class="n">procs</span><span class="p">,</span> <span class="n">rank</span><span class="p">)</span>
+
+
+<span class="nd">@dist_context_only</span><span class="p">(</span><span class="n">noop_return_arg</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_reduce</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span>
+
+    <span class="k">if</span> <span class="n">axis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">comm</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">pi</span> <span class="o">=</span> <span class="n">proc_rank_to_index</span><span class="p">(</span><span class="n">rst</span><span class="o">.</span><span class="n">proc_rank</span><span class="p">)</span>
+        <span class="n">other_axis</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">axis</span>
+        <span class="n">comm</span> <span class="o">=</span> <span class="n">_mpi_comm_along_axis</span><span class="p">(</span><span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="p">,</span> <span class="n">pi</span><span class="p">[</span><span class="n">other_axis</span><span class="p">],</span> <span class="n">rst</span><span class="o">.</span><span class="n">proc_rank</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">npx</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+        <span class="n">squeeze</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">arr</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">squeeze</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">allreduce</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">op</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">squeeze</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">res</span>
+
+
+<span class="nd">@dist_context_only</span><span class="p">(</span><span class="n">noop_return_arg</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">global_and</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+
+    <span class="k">return</span> <span class="n">_reduce</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">MPI</span><span class="o">.</span><span class="n">LAND</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+
+
+<span class="nd">@dist_context_only</span><span class="p">(</span><span class="n">noop_return_arg</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">global_or</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+
+    <span class="k">return</span> <span class="n">_reduce</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">MPI</span><span class="o">.</span><span class="n">LOR</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="global_max"><a class="viewcode-back" href="../../reference/api/distributed.html#roger.distributed.global_max">[docs]</a><span class="nd">@dist_context_only</span><span class="p">(</span><span class="n">noop_return_arg</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">global_max</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+
+    <span class="k">return</span> <span class="n">_reduce</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">MPI</span><span class="o">.</span><span class="n">MAX</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span></div>
+
+
+<span class="nd">@dist_context_only</span><span class="p">(</span><span class="n">noop_return_arg</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">global_min</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+
+    <span class="k">return</span> <span class="n">_reduce</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">MPI</span><span class="o">.</span><span class="n">MIN</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="global_sum"><a class="viewcode-back" href="../../reference/api/distributed.html#roger.distributed.global_sum">[docs]</a><span class="nd">@dist_context_only</span><span class="p">(</span><span class="n">noop_return_arg</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">global_sum</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+
+    <span class="k">return</span> <span class="n">_reduce</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">MPI</span><span class="o">.</span><span class="n">SUM</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span></div>
+
+
+<span class="nd">@dist_context_only</span><span class="p">(</span><span class="n">noop_return_arg</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_gather_1d</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span><span class="p">,</span> <span class="n">update</span><span class="p">,</span> <span class="n">at</span>
+
+    <span class="k">assert</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">otherdim</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">dim</span>
+    <span class="n">pi</span> <span class="o">=</span> <span class="n">proc_rank_to_index</span><span class="p">(</span><span class="n">rst</span><span class="o">.</span><span class="n">proc_rank</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pi</span><span class="p">[</span><span class="n">otherdim</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">arr</span>
+
+    <span class="n">dim_grid</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span> <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">gidx</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">get_chunk_slices</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">dim_grid</span><span class="p">,</span> <span class="n">include_overlap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">sendbuf</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">rst</span><span class="o">.</span><span class="n">proc_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">buffer_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">proc</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">rst</span><span class="o">.</span><span class="n">proc_num</span><span class="p">):</span>
+            <span class="n">pi</span> <span class="o">=</span> <span class="n">proc_rank_to_index</span><span class="p">(</span><span class="n">proc</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">pi</span><span class="p">[</span><span class="n">otherdim</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">idx_g</span><span class="p">,</span> <span class="n">idx_l</span> <span class="o">=</span> <span class="n">get_chunk_slices</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">dim_grid</span><span class="p">,</span> <span class="n">include_overlap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">proc_idx</span><span class="o">=</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">recvbuf</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">idx_l</span><span class="p">])</span>
+            <span class="n">recvbuf</span> <span class="o">=</span> <span class="n">recv</span><span class="p">(</span><span class="n">recvbuf</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="p">)</span>
+            <span class="n">buffer_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">idx_g</span><span class="p">,</span> <span class="n">recvbuf</span><span class="p">))</span>
+
+        <span class="n">out_shape</span> <span class="o">=</span> <span class="p">((</span><span class="n">nx</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="n">ny</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)[</span><span class="n">dim</span><span class="p">],)</span> <span class="o">+</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">out_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">at</span><span class="p">[</span><span class="n">gidx</span><span class="p">],</span> <span class="n">sendbuf</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">buffer_list</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">at</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">send</span><span class="p">(</span><span class="n">sendbuf</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">arr</span>
+
+
+<span class="nd">@dist_context_only</span><span class="p">(</span><span class="n">noop_return_arg</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_gather_xy</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">arr</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span><span class="p">,</span> <span class="n">update</span><span class="p">,</span> <span class="n">at</span>
+
+    <span class="n">nxi</span><span class="p">,</span> <span class="n">nyi</span> <span class="o">=</span> <span class="n">get_chunk_size</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="n">nxi</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="n">nyi</span> <span class="o">+</span> <span class="mi">4</span><span class="p">),</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="n">dim_grid</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">gidx</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">get_chunk_slices</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">dim_grid</span><span class="p">,</span> <span class="n">include_overlap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">sendbuf</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">rst</span><span class="o">.</span><span class="n">proc_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">buffer_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">proc</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">rst</span><span class="o">.</span><span class="n">proc_num</span><span class="p">):</span>
+            <span class="n">idx_g</span><span class="p">,</span> <span class="n">idx_l</span> <span class="o">=</span> <span class="n">get_chunk_slices</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">dim_grid</span><span class="p">,</span> <span class="n">include_overlap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">proc_idx</span><span class="o">=</span><span class="n">proc_rank_to_index</span><span class="p">(</span><span class="n">proc</span><span class="p">))</span>
+            <span class="n">recvbuf</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">idx_l</span><span class="p">])</span>
+            <span class="n">recvbuf</span> <span class="o">=</span> <span class="n">recv</span><span class="p">(</span><span class="n">recvbuf</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="p">)</span>
+            <span class="n">buffer_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">idx_g</span><span class="p">,</span> <span class="n">recvbuf</span><span class="p">))</span>
+
+        <span class="n">out_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">nx</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="n">ny</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">out_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">at</span><span class="p">[</span><span class="n">gidx</span><span class="p">],</span> <span class="n">sendbuf</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">buffer_list</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">at</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="n">send</span><span class="p">(</span><span class="n">sendbuf</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">arr</span>
+
+
+<div class="viewcode-block" id="gather"><a class="viewcode-back" href="../../reference/api/distributed.html#roger.distributed.gather">[docs]</a><span class="nd">@dist_context_only</span><span class="p">(</span><span class="n">noop_return_arg</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">gather</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">,</span> <span class="n">var_grid</span><span class="p">):</span>
+    <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="n">dimensions</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="n">dimensions</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">var_grid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">arr</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_grid</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span> <span class="o">=</span> <span class="n">var_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span> <span class="o">=</span> <span class="n">var_grid</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">d1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">d1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">d2</span><span class="p">:</span>
+        <span class="c1"># neither x nor y dependent, nothing to do</span>
+        <span class="k">return</span> <span class="n">arr</span>
+
+    <span class="k">if</span> <span class="n">d1</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">d2</span><span class="p">:</span>
+        <span class="c1"># only x dependent</span>
+        <span class="k">return</span> <span class="n">_gather_1d</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">d1</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="c1"># only y dependent</span>
+        <span class="k">return</span> <span class="n">_gather_1d</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">d1</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">d2</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="c1"># x and y dependent</span>
+        <span class="k">return</span> <span class="n">_gather_xy</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">arr</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+
+<span class="nd">@dist_context_only</span><span class="p">(</span><span class="n">noop_return_arg</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_scatter_constant</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">bcast</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+
+<span class="nd">@dist_context_only</span><span class="p">(</span><span class="n">noop_return_arg</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_scatter_1d</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span><span class="p">,</span> <span class="n">update</span><span class="p">,</span> <span class="n">at</span>
+
+    <span class="k">assert</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">out_nx</span> <span class="o">=</span> <span class="n">get_chunk_size</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">)[</span><span class="n">dim</span><span class="p">]</span>
+    <span class="n">dim_grid</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span> <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">local_slice</span> <span class="o">=</span> <span class="n">get_chunk_slices</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">dim_grid</span><span class="p">,</span> <span class="n">include_overlap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rst</span><span class="o">.</span><span class="n">proc_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">recvbuf</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">local_slice</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">proc</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">rst</span><span class="o">.</span><span class="n">proc_num</span><span class="p">):</span>
+            <span class="n">global_slice</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_chunk_slices</span><span class="p">(</span>
+                <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">dim_grid</span><span class="p">,</span> <span class="n">include_overlap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">proc_idx</span><span class="o">=</span><span class="n">proc_rank_to_index</span><span class="p">(</span><span class="n">proc</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">sendbuf</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">global_slice</span><span class="p">]</span>
+            <span class="n">send</span><span class="p">(</span><span class="n">sendbuf</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="p">)</span>
+
+        <span class="c1"># arr changes shape in main process</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">out_nx</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,)</span> <span class="o">+</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">recvbuf</span> <span class="o">=</span> <span class="n">recv</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">local_slice</span><span class="p">],</span> <span class="n">source</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="p">)</span>
+
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">at</span><span class="p">[</span><span class="n">local_slice</span><span class="p">],</span> <span class="n">recvbuf</span><span class="p">)</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">exchange_overlap</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span> <span class="k">if</span> <span class="n">dim</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;y&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">arr</span>
+
+
+<span class="nd">@dist_context_only</span><span class="p">(</span><span class="n">noop_return_arg</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_scatter_xy</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">arr</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span><span class="p">,</span> <span class="n">update</span><span class="p">,</span> <span class="n">at</span>
+
+    <span class="n">nxi</span><span class="p">,</span> <span class="n">nyi</span> <span class="o">=</span> <span class="n">get_chunk_size</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">)</span>
+
+    <span class="n">dim_grid</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">local_slice</span> <span class="o">=</span> <span class="n">get_chunk_slices</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">dim_grid</span><span class="p">,</span> <span class="n">include_overlap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rst</span><span class="o">.</span><span class="n">proc_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">recvbuf</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">local_slice</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">proc</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">rst</span><span class="o">.</span><span class="n">proc_num</span><span class="p">):</span>
+            <span class="n">global_slice</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_chunk_slices</span><span class="p">(</span>
+                <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">dim_grid</span><span class="p">,</span> <span class="n">include_overlap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">proc_idx</span><span class="o">=</span><span class="n">proc_rank_to_index</span><span class="p">(</span><span class="n">proc</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">sendbuf</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">global_slice</span><span class="p">]</span>
+            <span class="n">send</span><span class="p">(</span><span class="n">sendbuf</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">proc</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="p">)</span>
+
+        <span class="c1"># arr changes shape in main process</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">nxi</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="n">nyi</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">recvbuf</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">local_slice</span><span class="p">])</span>
+        <span class="n">recvbuf</span> <span class="o">=</span> <span class="n">recv</span><span class="p">(</span><span class="n">recvbuf</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="p">)</span>
+
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">at</span><span class="p">[</span><span class="n">local_slice</span><span class="p">],</span> <span class="n">recvbuf</span><span class="p">)</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">exchange_overlap</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">arr</span>
+
+
+<div class="viewcode-block" id="scatter"><a class="viewcode-back" href="../../reference/api/distributed.html#roger.distributed.scatter">[docs]</a><span class="nd">@dist_context_only</span><span class="p">(</span><span class="n">noop_return_arg</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">scatter</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">,</span> <span class="n">var_grid</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">roger.core.operators</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">npx</span>
+
+    <span class="k">if</span> <span class="n">var_grid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_scatter_constant</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+
+    <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="n">dimensions</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="n">dimensions</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_grid</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span> <span class="o">=</span> <span class="n">var_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span> <span class="o">=</span> <span class="n">var_grid</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">npx</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">d1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">d1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">d2</span><span class="p">:</span>
+        <span class="c1"># neither x nor y dependent</span>
+        <span class="k">return</span> <span class="n">_scatter_constant</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">d1</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">d2</span><span class="p">:</span>
+        <span class="c1"># only x dependent</span>
+        <span class="k">return</span> <span class="n">_scatter_1d</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">d1</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="c1"># only y dependent</span>
+        <span class="k">return</span> <span class="n">_scatter_1d</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">d1</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">d2</span> <span class="ow">in</span> <span class="n">SCATTERED_DIMENSIONS</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="c1"># x and y dependent</span>
+        <span class="k">return</span> <span class="n">_scatter_xy</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">arr</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;unreachable&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="barrier"><a class="viewcode-back" href="../../reference/api/distributed.html#roger.distributed.barrier">[docs]</a><span class="nd">@dist_context_only</span>
+<span class="k">def</span> <span class="nf">barrier</span><span class="p">():</span>
+    <span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="abort"><a class="viewcode-back" href="../../reference/api/distributed.html#roger.distributed.abort">[docs]</a><span class="nd">@dist_context_only</span>
+<span class="k">def</span> <span class="nf">abort</span><span class="p">():</span>
+    <span class="n">rs</span><span class="o">.</span><span class="n">mpi_comm</span><span class="o">.</span><span class="n">Abort</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2022, The RoGeR Team, University of Freiburg.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

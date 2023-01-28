@@ -17,7 +17,7 @@ import scipy.spatial
 
 
 def read_tracer_input(path_to_dir: Path, tracer: str):
-    """Importing the solute input data
+    """Reading the solute input data
 
     Data is imported from .txt files and stored in dataframes. Format of NA/NaN
     values is -9999.
@@ -151,7 +151,7 @@ def get_uniform_grid_steps(total_length, stepsize):
 
 @roger_sync
 def write_forcing_tracer(input_dir, tracer, nrows=1, ncols=1, uniform=True, float_type="float64"):
-    """Writes tracer forcing data
+    """Writes tracer forcing data from TXT to NetCDF
 
     Args
     ----------
@@ -227,7 +227,7 @@ def write_forcing_tracer(input_dir, tracer, nrows=1, ncols=1, uniform=True, floa
 
 @roger_sync
 def write_crop_rotation(input_dir, nrows=1, ncols=1, float_type="float64"):
-    """Writes crop rotation data
+    """Writes crop rotation data from CSV to NetCDF
 
     Args
     ----------
@@ -284,8 +284,7 @@ def write_crop_rotation(input_dir, nrows=1, ncols=1, float_type="float64"):
 
 @roger_sync
 def write_forcing_event(input_dir, nrows=1, ncols=1, uniform=True, prec_correction=False, float_type="float64"):
-    """Writes forcing data for a single event (i.e. no event classification is
-    required)
+    """Writes forcing data for a single event from TXT to NetCDF
 
     Args
     ----------
@@ -376,10 +375,10 @@ def precipitation_correction(prec, ta, month, horizontal_shielding="b1"):
 
     Args
     ----------
-    prec : onp.ndarray
+    prec : np.ndarray
         precipitation at time step t (in mm)
 
-    ta : onp.ndarray
+    ta : np.ndarray
         air temperature at time step t (in celsius)
 
     month : int
@@ -392,12 +391,12 @@ def precipitation_correction(prec, ta, month, horizontal_shielding="b1"):
         b4 = strongly protected
 
     Returns
-    ----------
+    -------
     prec_corr : onp.ndarray
         corrected precipitation at time step t (in mm)
 
-    Reference
-    ----------
+    Notes
+    -----
     Richter, D.: Ergebnisse methodischer Untersuchungen zur Korrektur des
     systematischen Meßfehlers des Hellmann-Niederschlagsmessers, Berichte des
     Deutschen Wetterdienstes, Selbstverlag des Deutschen Wetterdienstes,
@@ -448,8 +447,8 @@ def validate(data):
         model input data
 
     Raises
-    ----------
-    ValueError : Error
+    ------
+    ValueError
         In case non-numerical data is passed
     """
     if isinstance(data, (pd.DataFrame)):
@@ -463,7 +462,7 @@ def validate(data):
 def write_forcing(input_dir, nrows=1, ncols=1, uniform=True,
                   enable_crop_phenology=False,
                   prec_correction=None, float_type="float64"):
-    """Runs event classification and writes forcing data
+    """Writes forcing data to NetCDF
 
     Args
     ----------
