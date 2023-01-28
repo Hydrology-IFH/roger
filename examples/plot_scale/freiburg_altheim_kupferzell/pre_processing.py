@@ -32,6 +32,22 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
+periods = ['hist', 'future']
+station_ids = [1443, 2787, 4189]
+cms = ['CCCma-CanESM2_CCLM4-8-17', 'ICHEC-EC-EARTH_CCLM4-8-17', 
+       'ICHEC-EC-EARTH_RCA4', 'IPSL-IPSL-CM5A-MR_RCA4',
+       'MIROC-MIROC5_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_CCLM4-8-17', 
+       'MPI-M-MPI-ESM-LR_RCA4']
+station_label = {1443: 'Freiburg',
+                2787: 'Kupferzell',
+                4189: 'Altheim',
+
+}
+station_label1 = {1443: 'freiburg',
+                  2787: 'kupferzell',
+                  4189: 'altheim',
+}
+
 # --- time index to join data --------------------------------------------------
 idx_daily_2003_2005 = pd.date_range(start='2003-01-01',
                                     end='2005-12-31', freq='d')
@@ -71,17 +87,6 @@ idx_10mins_2040_2060 = pd.date_range(start='2040-01-01 00:00:00',
                                     end='2060-12-31 23:50:00', freq='10T')
 idx_10mins_2080_2100 = pd.date_range(start='2080-01-01 00:00:00',
                                     end='2100-12-31 23:50:00', freq='10T')
-
-periods = ['hist', 'future']
-station_ids = [1443, 2787, 4189]
-cms = ['CCCma-CanESM2_CCLM4-8-17', 'ICHEC-EC-EARTH_CCLM4-8-17', 
-       'ICHEC-EC-EARTH_RCA4', 'IPSL-IPSL-CM5A-MR_RCA4',
-       'MIROC-MIROC5_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_CCLM4-8-17', 
-       'MPI-M-MPI-ESM-LR_RCA4']
-station_label1 = {1443: 'freiburg',
-                  2787: 'kupferzell',
-                  4189: 'altheim',
-}
 
 # --- load climate projections ---------------------------------------------------
 dict_meteo = {}
@@ -173,13 +178,6 @@ label = {'CCCma-CanESM2_CCLM4-8-17': 'CCCma-CanESM2 CCLM4.8.17',
          'MIROC-MIROC5_CCLM4-8-17': 'MIROC-MIROC5 CCLM4.8.17', 
          'MPI-M-MPI-ESM-LR_CCLM4-8-17': 'MPI-M-MPI-ESM-LR CCLM4.8.17', 
          'MPI-M-MPI-ESM-LR_RCA4': 'MPI-M-MPI-ESM-LR RCA4'}
-        
-station_label = {1443: 'Freiburg',
-                2787: 'Kupferzell',
-                4189: 'Altheim',
-
-}
-
 
 for station_id in station_ids:
     fig, axs = plt.subplots(1, 1, figsize=(5, 3))
@@ -265,3 +263,5 @@ for station_id in station_ids:
 # df_TA.loc[:, 'TA_max'] = data_2003_2005[' TXK'].values
 # file = base_path / 'input' / f'{station_label[station_id]}' / 'observed' / '2003_2005' / 'TA.txt'
 # df_TA.to_csv(file, header=True, index=False, sep="\t")
+
+# --- downscale precipitation to 10 minutes ------------------------
