@@ -148,7 +148,7 @@ examples/reckenholz_film/svat_film_event_monte_carlo/input/
 examples/reckenholz_film/svat_film_event_sensitivity/input/
 examples/reckenholz_film/svat_film_monte_carlo/input/
 examples/reckenholz_film/svat_film_sensitivity/input/
-examples/stgallen
+examples/stgallen/
 
 # Slides or Word
 *.key
