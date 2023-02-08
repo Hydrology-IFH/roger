@@ -1,5 +1,0 @@
-Soil
-====
-
-Soil hydraulic properties
--------------------------
