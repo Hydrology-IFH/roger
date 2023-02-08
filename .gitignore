@@ -3,6 +3,7 @@ debug_snippets.py
 
 # binary files
 *.nc
+!doc/_data/*.nc
 *.h5
 
 # documentation and profiler output
