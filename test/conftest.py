@@ -3,7 +3,7 @@ import pytest
 
 
 def pytest_addoption(parser):
-    parser.addoption("--backend", choices=["numpy", "jax"], default="numpy", help="Numerical backend to test")
+    parser.addoption("--backend", choices=["numpy", "jax"], default="numpy", help="Computational backend to test")
 
 
 def pytest_configure(config):

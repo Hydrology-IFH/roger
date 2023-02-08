@@ -154,6 +154,7 @@ examples/plot_scale/reckenholz_film/
 # examples/plot_scale/reckenholz_film/svat_film_sensitivity/input/
 examples/plot_scale/stgallen/
 # examples/plot_scale/stgallen/input/*
+gpu_memory_profiling/
 
 # Slides or Word
 *.key

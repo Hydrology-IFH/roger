@@ -7,13 +7,13 @@ authors:
     given-names: Andreas
   - family-names: Weiler
     given-names: Markus
-cff-version: 0.1.0
+cff-version: 3.0.0
 message: "If you use this software, please cite the article from preferred-citation."
 title: Roger
 url: "https://github.com/Hydrology-IFH/roger"
 preferred-citation:
   type: article
-  title: "roger v0.1 – Runoff Generation Reasearch in pure Python"
+  title: "Roger v3.0 – Runoff Generation Reasearch in Python"
   authors:
   - family-names: Schwemmle
     given-names: Robin
