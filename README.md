@@ -13,8 +13,8 @@
   <a href="https://github.com/Hydrology-IFH/roger/actions/workflows/test-all.yml">
     <img src="https://github.com/Hydrology-IFH/roger/actions/workflows/test-all.yml/badge.svg" alt="Test status">
   </a>
-  <a href="https://codecov.io/gh/Hydrology-IFH/roger">
-    <img src="https://codecov.io/gh/Hydrology-IFH/roger/branch/master/graph/badge.svg" alt="Code Coverage">
+  <a href="https://codecov.io/gh/Hydrology-IFH/roger" > 
+  <img src="https://codecov.io/gh/Hydrology-IFH/roger/branch/main/graph/badge.svg?token=KXSVNGDDNH"/> 
   </a>
   <a href="https://zenodo.org/badge/latestdoi/536477819"><img src="https://zenodo.org/badge/536477819.svg" alt="DOI"></a>
 </p>
