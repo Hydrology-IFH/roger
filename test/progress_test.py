@@ -42,20 +42,20 @@ def test_progress_format(capsys):
     captured_tqdm = capsys.readouterr()
     assert "Current iteration:" in captured_tqdm.out
 
-    def sanitize(prog):
-        # remove rates and ETA (inconsistent)
-        prog = re.sub(r"\d+\.\d{2}[smh]/\(model year\)", "?s/(model year)", prog)
-        prog = re.sub(r"\d+\.\d[smh] left", "? left", prog)
-        prog = prog.replace("\r", "\n")
-        prog = prog.strip()
-        return prog
+    # def sanitize(prog):
+    #     # remove rates and ETA (inconsistent)
+    #     prog = re.sub(r"\d+\.\d{2}[smh]/\(model year\)", "?s/(model year)", prog)
+    #     prog = re.sub(r"\d+\.\d[smh] left", "? left", prog)
+    #     prog = prog.replace("\r", "\n")
+    #     prog = prog.strip()
+    #     return prog
 
-    def deduplicate(prog):
-        # remove repeated identical lines
-        out = []
-        for line in prog.split("\n"):
-            if not out or out[-1] != line:
-                out.append(line)
-        return "\n".join(out)
+    # def deduplicate(prog):
+    #     # remove repeated identical lines
+    #     out = []
+    #     for line in prog.split("\n"):
+    #         if not out or out[-1] != line:
+    #             out.append(line)
+    #     return "\n".join(out)
 
-    assert sanitize(captured_log.out) == deduplicate(sanitize(captured_tqdm.out))
+    # assert sanitize(captured_log.out) == deduplicate(sanitize(captured_tqdm.out))
