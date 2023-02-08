@@ -94,7 +94,7 @@ def test_setup_oneD_event_float_types(float_type):
 def test_setup_svat_bromide(float_type):
     from roger import runtime_settings
 
-    object.__setattr__(runtime_settings, "diskless_mode", True)
+    object.__setattr__(runtime_settings, "diskless_mode", False)
     object.__setattr__(runtime_settings, "force_overwrite", True)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
@@ -104,6 +104,8 @@ def test_setup_svat_bromide(float_type):
 
     make_data(float_type)
     sim = SVATTRANSPORTSetup()
+    sim._base_path = Path(__file__).parent
+    sim._input_dir = Path(__file__).parent / "input"
     make_toy_forcing_tracer(sim._base_path, tracer="Br", ndays=10,
                             float_type=float_type)
     shutil.move(BASE_PATH / "states_hm.nc", sim._base_path / "input" / "states_hm.nc")
@@ -119,7 +121,7 @@ def test_setup_svat_bromide(float_type):
 def test_setup_svat_oxygen18(float_type):
     from roger import runtime_settings
 
-    object.__setattr__(runtime_settings, "diskless_mode", True)
+    object.__setattr__(runtime_settings, "diskless_mode", False)
     object.__setattr__(runtime_settings, "force_overwrite", True)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
