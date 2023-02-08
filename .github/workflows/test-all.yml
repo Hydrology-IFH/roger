@@ -70,7 +70,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest . -v --backend ${{ matrix.backend }}
+          pytest . -v --cov --backend ${{ matrix.backend }}
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
