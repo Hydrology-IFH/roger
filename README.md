@@ -115,13 +115,13 @@ To run Roger, you need to set up a model --- i.e., specify which settings
 and model domain you want to use. This is done by subclassing the
 `RogerSetup` base class in a *setup script* that is written in Python. A good
 place to start is the
-[OneD Tutorial](https://github.com/Hydrology-IFH/roger/blob/master/roger/examples/plot_scale/oneD_tutorial):
+[SVAT Tutorial](https://github.com/Hydrology-IFH/roger/blob/master/roger/examples/plot_scale/svat_tutorial):
 
 
 After setting up your model, all you need to do is call the model setup:
 ```bash
 # move into the folder containing the model script
-python oneD.py
+python svat.py
 ```
 
 For more information on using Roger, have a look at [our
@@ -158,7 +158,7 @@ If you use Roger in scientific work, please consider citing [the following publi
 
 ```bibtex
 @article{...,
-	title = {Roger v0.1 – Runoff Generation Research in pure {Python}},
+	title = {Roger v3.0 – a hydrologic toolbox in {Python}},
 	volume = {...},
 	issn = {...},
 	url = {...},

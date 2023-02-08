@@ -12,7 +12,7 @@ class SVATTRANSPORTSetup(RogerSetup):
     # custom attributes required by helper functions
     _base_path = Path(__file__).parent
     _tm_structure = "complete-mixing"
-    _input_dir = _base_path / "input"
+    _input_dir = Path(__file__).parent / "input"
     _identifier = "SVATBROMIDE_complete-mixing"
     _sas_solver = "deterministic"
 

@@ -278,6 +278,7 @@ def make_data(float_type):
             diagnostics["rate"].output_variables = ["prec", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
+            diagnostics["rate"].base_output_path = self._base_path
 
             diagnostics["collect"].output_variables = ["S_rz", "S_ss",
                                                        "S_pwp_rz", "S_fc_rz",
@@ -287,10 +288,12 @@ def make_data(float_type):
                                                        "S_snow"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
+            diagnostics["collect"].base_output_path = self._base_path
 
             diagnostics["average"].output_variables = ["ta"]
             diagnostics["average"].output_frequency = 24 * 60 * 60
             diagnostics["average"].sampling_frequency = 1
+            diagnostics["average"].base_output_path = self._base_path
 
         @roger_routine
         def after_timestep(self, state):
@@ -500,6 +503,7 @@ def make_data(float_type):
     sim = SVATSetup()
     make_toy_forcing(sim._base_path, event_type='rain', ndays=10,
                      float_type=float_type)
+    print(sim._base_path)
     sim.setup()
     sim.run()
     # delete toy forcing
