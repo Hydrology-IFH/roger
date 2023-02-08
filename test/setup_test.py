@@ -10,6 +10,7 @@ def test_setup_svat_float_types(float_type):
     from roger import runtime_settings
 
     object.__setattr__(runtime_settings, "diskless_mode", True)
+    object.__setattr__(runtime_settings, "force_overwrite", True)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
     from roger.models.svat import SVATSetup
@@ -30,6 +31,7 @@ def test_setup_svat_crop_float_types(float_type):
     from roger import runtime_settings
 
     object.__setattr__(runtime_settings, "diskless_mode", True)
+    object.__setattr__(runtime_settings, "force_overwrite", True)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
     from roger.models.svat_crop import SVATCROPSetup
@@ -51,6 +53,7 @@ def test_setup_oneD_float_types(float_type):
     from roger import runtime_settings
 
     object.__setattr__(runtime_settings, "diskless_mode", True)
+    object.__setattr__(runtime_settings, "force_overwrite", True)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
     from roger.models.oneD import ONEDSetup
@@ -71,6 +74,7 @@ def test_setup_oneD_event_float_types(float_type):
     from roger import runtime_settings
 
     object.__setattr__(runtime_settings, "diskless_mode", True)
+    object.__setattr__(runtime_settings, "force_overwrite", True)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
     from roger.models.oneD_event import ONEDEVENTSetup
@@ -90,7 +94,8 @@ def test_setup_oneD_event_float_types(float_type):
 def test_setup_svat_bromide(float_type):
     from roger import runtime_settings
 
-    object.__setattr__(runtime_settings, "diskless_mode", False)
+    object.__setattr__(runtime_settings, "diskless_mode", True)
+    object.__setattr__(runtime_settings, "force_overwrite", True)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
     from roger.models.svat_bromide import SVATTRANSPORTSetup
@@ -114,7 +119,8 @@ def test_setup_svat_bromide(float_type):
 def test_setup_svat_oxygen18(float_type):
     from roger import runtime_settings
 
-    object.__setattr__(runtime_settings, "diskless_mode", False)
+    object.__setattr__(runtime_settings, "diskless_mode", True)
+    object.__setattr__(runtime_settings, "force_overwrite", True)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
     from roger.models.svat_oxygen18 import SVATTRANSPORTSetup

@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-<i>Runoff Generation Research in Pure Python</i>
+<i>Runoff Generation Research - a hydrologic toolbox in Python</i>
 </p>
 
 <p align="center">
