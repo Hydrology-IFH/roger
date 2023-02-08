@@ -10,4 +10,4 @@ pandas==1.5.0
 pyyaml==6.0
 matplotlib==3.6.1
 seaborn==0.11.2
-cftime==1.6.1
+cftime==1.6.2
