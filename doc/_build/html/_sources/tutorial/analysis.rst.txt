@@ -4,7 +4,7 @@ In this tutorial, we will use `xarray <http://xarray.pydata.org/en/stable/>`__ a
 
   $ pip install xarray matplotlib netcdf4 cftime
 
-The analysis below is conducted for a single year simulation of the :doc:`1D </reference/models/oneD>` setup from the :doc:`model gallery </reference/model-gallery>`.
+The analysis below is conducted for a single year simulation of the :doc:`SVAT </reference/models/svat>` setup from the :doc:`model gallery </reference/model-gallery>`.
 
 Let's start by importing some packages:
 
@@ -20,9 +20,9 @@ Set the paths to the example data:
 .. ipython:: python
 
     OUTPUT_FILES = {
-        "rate": Path().absolute() / "_data" / "ONED.rate.nc",
-        "collect": Path().absolute() / "_data" / "ONED.collect.nc",
-        "maximum": Path().absolute() / "_data" / "ONED.maximum.nc",
+        "rate": Path().absolute() / "_data" / "SVAT.rate.nc",
+        "collect": Path().absolute() / "_data" / "SVAT.collect.nc",
+        "maximum": Path().absolute() / "_data" / "SVAT.maximum.nc",
     }
 
 Most of the heavy lifting will be done by ``xarray``, which provides a data structure and API for working with labeled N-dimensional arrays. ``xarray`` datasets automatically keep track how the values of the underlying arrays map to locations in space and time, which makes them immensely useful for analyzing model output.
@@ -48,7 +48,7 @@ Now, we select the time series of ``inf_mat`` and plot the daily data:
     :okwarning:
 
     @savefig inf_mat_daily.png width=5in
-    ds_rate["inf_mat"].isel(x=0, y=0).plot()
+    ds_rate["inf_mat_rz"].isel(x=0, y=0).plot()
 
 To compute the monthly sums and plot the monthly data:
 
@@ -57,7 +57,7 @@ To compute the monthly sums and plot the monthly data:
 
     @savefig inf_mat_monthly.png width=5in
     (
-        ds_rate["inf_mat"]
+        ds_rate["inf_mat_rz"]
         .isel(x=0, y=0).resample(Time='1M')
         .sum()
         .plot()

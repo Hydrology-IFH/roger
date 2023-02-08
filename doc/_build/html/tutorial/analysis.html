@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Analysis of simulations with Roger &mdash; RoGeR 0.0.1+488.ge1b7b1c.dirty documentation</title>
+  <title>Analysis of simulations with Roger &mdash; RoGeR 0.0.1+507.gfc68f5f.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+488.ge1b7b1c.dirty
+                0.0.1+507.gfc68f5f.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -111,7 +111,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install xarray matplotlib netcdf4 cftime
 </pre></div>
 </div>
-<p>The analysis below is conducted for a single year simulation of the <a class="reference internal" href="../reference/models/oneD.html"><span class="doc">1D</span></a> setup from the <a class="reference internal" href="../reference/model-gallery.html"><span class="doc">model gallery</span></a>.</p>
+<p>The analysis below is conducted for a single year simulation of the <a class="reference internal" href="../reference/models/svat.html"><span class="doc">SVAT</span></a> setup from the <a class="reference internal" href="../reference/model-gallery.html"><span class="doc">model gallery</span></a>.</p>
 <p>Let’s start by importing some packages:</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 
@@ -124,9 +124,9 @@
 </div>
 <p>Set the paths to the example data:</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [5]: </span><span class="n">OUTPUT_FILES</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">   ...: </span>    <span class="s2">&quot;rate&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;_data&quot;</span> <span class="o">/</span> <span class="s2">&quot;ONED.rate.nc&quot;</span><span class="p">,</span>
-<span class="gp">   ...: </span>    <span class="s2">&quot;collect&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;_data&quot;</span> <span class="o">/</span> <span class="s2">&quot;ONED.collect.nc&quot;</span><span class="p">,</span>
-<span class="gp">   ...: </span>    <span class="s2">&quot;maximum&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;_data&quot;</span> <span class="o">/</span> <span class="s2">&quot;ONED.maximum.nc&quot;</span><span class="p">,</span>
+<span class="gp">   ...: </span>    <span class="s2">&quot;rate&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;_data&quot;</span> <span class="o">/</span> <span class="s2">&quot;SVAT.rate.nc&quot;</span><span class="p">,</span>
+<span class="gp">   ...: </span>    <span class="s2">&quot;collect&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;_data&quot;</span> <span class="o">/</span> <span class="s2">&quot;SVAT.collect.nc&quot;</span><span class="p">,</span>
+<span class="gp">   ...: </span>    <span class="s2">&quot;maximum&quot;</span><span class="p">:</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;_data&quot;</span> <span class="o">/</span> <span class="s2">&quot;SVAT.maximum.nc&quot;</span><span class="p">,</span>
 <span class="gp">   ...: </span><span class="p">}</span>
 <span class="gp">   ...: </span>
 </pre></div>
@@ -140,45 +140,47 @@
 <span class="gp">In [7]: </span><span class="n">ds_rate</span>
 <span class="gh">Out[7]: </span><span class="go"></span>
 <span class="go">&lt;xarray.Dataset&gt;</span>
-<span class="go">Dimensions:                (Time: 366, cr: 2, crops: 1, y: 1, x: 1,</span>
-<span class="go">                            events_ff: 1, n_crop_params: 23, n_crop_types: 76,</span>
-<span class="go">                            n_flowdir: 8, n_lu: 25, n_params13: 13,</span>
-<span class="go">                            n_params2: 2, n_params7: 7, n_params9: 9,</span>
-<span class="go">                            n_sas_params: 8, n_sealing: 101, n_slope: 10000,</span>
-<span class="go">                            t: 1, t_forc: 1, timesteps_day: 144,</span>
-<span class="go">                            timesteps_event_ff: 1, timesteps_event_ff_p1: 2,</span>
-<span class="go">                            z: 1)</span>
+<span class="go">Dimensions:                (x: 1, y: 1, z: 1, t: 1, t_forc: 1,</span>
+<span class="go">                            timesteps_day: 144, timesteps_event_ff: 1,</span>
+<span class="go">                            timesteps_event_ff_p1: 2, crops: 1, cr: 2,</span>
+<span class="go">                            events_ff: 1, n_sas_params: 8, n_crop_types: 76,</span>
+<span class="go">                            n_crop_params: 23, n_lu: 25, n_sealing: 101,</span>
+<span class="go">                            n_slope: 10000, n_params2: 2, n_params7: 7,</span>
+<span class="go">                            n_params9: 9, n_params13: 13, n_flowdir: 8,</span>
+<span class="go">                            Time: 366)</span>
 <span class="go">Coordinates: (12/23)</span>
-<span class="go">  * Time                   (Time) timedelta64[ns] 0 days 1 days ... 365 days</span>
-<span class="go">  * cr                     (cr) float64 0.0 1.0</span>
-<span class="go">  * crops                  (crops) float64 0.0</span>
-<span class="go">  * events_ff              (events_ff) float64 0.0</span>
-<span class="go">  * n_crop_params          (n_crop_params) float64 0.0 1.0 2.0 ... 21.0 22.0</span>
-<span class="go">  * n_crop_types           (n_crop_types) float64 0.0 1.0 2.0 ... 73.0 74.0 75.0</span>
-<span class="go">    ...                     ...</span>
-<span class="go">  * timesteps_day          (timesteps_day) float64 0.0 1.0 2.0 ... 142.0 143.0</span>
-<span class="go">  * timesteps_event_ff     (timesteps_event_ff) float64 0.0</span>
-<span class="go">  * timesteps_event_ff_p1  (timesteps_event_ff_p1) float64 0.0 1.0</span>
 <span class="go">  * x                      (x) float64 0.0</span>
 <span class="go">  * y                      (y) float64 0.0</span>
 <span class="go">  * z                      (z) float64 0.0</span>
-<span class="go">Data variables:</span>
-<span class="go">    evap_soil              (Time, y, x) float64 ...</span>
-<span class="go">    inf_mat                (Time, y, x) float64 ...</span>
-<span class="go">    inf_mp                 (Time, y, x) float64 ...</span>
-<span class="go">    inf_sc                 (Time, y, x) float64 ...</span>
-<span class="go">    q_hof                  (Time, y, x) float64 ...</span>
-<span class="go">    q_sof                  (Time, y, x) float64 ...</span>
-<span class="go">    q_ss                   (Time, y, x) float64 ...</span>
-<span class="go">    q_sub                  (Time, y, x) float64 ...</span>
-<span class="go">    q_sub_mat              (Time, y, x) float64 ...</span>
-<span class="go">    q_sub_mp               (Time, y, x) float64 ...</span>
+<span class="go">  * t                      (t) float64 0.0</span>
+<span class="go">  * t_forc                 (t_forc) float64 0.0</span>
+<span class="go">  * timesteps_day          (timesteps_day) float64 0.0 1.0 2.0 ... 142.0 143.0</span>
+<span class="go">    ...                     ...</span>
+<span class="go">  * n_params2              (n_params2) float64 0.0 1.0</span>
+<span class="go">  * n_params7              (n_params7) float64 0.0 1.0 2.0 3.0 4.0 5.0 6.0</span>
+<span class="go">  * n_params9              (n_params9) float64 0.0 1.0 2.0 3.0 ... 6.0 7.0 8.0</span>
+<span class="go">  * n_params13             (n_params13) float64 0.0 1.0 2.0 ... 10.0 11.0 12.0</span>
+<span class="go">  * n_flowdir              (n_flowdir) float64 0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0</span>
+<span class="go">  * Time                   (Time) timedelta64[ns] 0 days 1 days ... 365 days</span>
+<span class="go">Data variables: (12/13)</span>
+<span class="go">    prec                   (Time, y, x) float64 ...</span>
+<span class="go">    aet                    (Time, y, x) float64 ...</span>
 <span class="go">    transp                 (Time, y, x) float64 ...</span>
+<span class="go">    evap_soil              (Time, y, x) float64 ...</span>
+<span class="go">    inf_mat_rz             (Time, y, x) float64 ...</span>
+<span class="go">    inf_mp_rz              (Time, y, x) float64 ...</span>
+<span class="go">    ...                     ...</span>
+<span class="go">    inf_ss                 (Time, y, x) float64 ...</span>
+<span class="go">    q_rz                   (Time, y, x) float64 ...</span>
+<span class="go">    q_ss                   (Time, y, x) float64 ...</span>
+<span class="go">    cpr_rz                 (Time, y, x) float64 ...</span>
+<span class="go">    dS                     (Time, y, x) float64 ...</span>
+<span class="go">    q_snow                 (Time, y, x) float64 ...</span>
 <span class="go">Attributes:</span>
+<span class="go">    date_created:      2023-02-08T11:41:11.396808</span>
+<span class="go">    roger_version:     0.0.1+507.gfc68f5f.dirty</span>
 <span class="go">    comment:           First timestep (t=0) contains initial values. Simulati...</span>
-<span class="go">    date_created:      2022-11-24T19:10:07.461812</span>
-<span class="go">    roger_version:     0.0.1+333.ga951c01.dirty</span>
-<span class="go">    setup_identifier:  ONED</span>
+<span class="go">    setup_identifier:  SVAT</span>
 
 <span class="go"># convert to datetime</span>
 <span class="gp">In [8]: </span><span class="n">days</span> <span class="o">=</span> <span class="p">(</span><span class="n">ds_rate</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">))</span>
@@ -189,20 +191,20 @@
 </pre></div>
 </div>
 <p>Now, we select the time series of <code class="docutils literal notranslate"><span class="pre">inf_mat</span></code> and plot the daily data:</p>
-<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [11]: </span><span class="n">ds_rate</span><span class="p">[</span><span class="s2">&quot;inf_mat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-<span class="gh">Out[11]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x16a04b820&gt;]</span>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [11]: </span><span class="n">ds_rate</span><span class="p">[</span><span class="s2">&quot;inf_mat_rz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="gh">Out[11]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x125f75970&gt;]</span>
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/inf_mat_daily.png"><img alt="../_images/inf_mat_daily.png" src="../_images/inf_mat_daily.png" style="width: 5in;" /></a>
 <p>To compute the monthly sums and plot the monthly data:</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [12]: </span><span class="p">(</span>
-<span class="gp">   ....: </span>    <span class="n">ds_rate</span><span class="p">[</span><span class="s2">&quot;inf_mat&quot;</span><span class="p">]</span>
+<span class="gp">   ....: </span>    <span class="n">ds_rate</span><span class="p">[</span><span class="s2">&quot;inf_mat_rz&quot;</span><span class="p">]</span>
 <span class="gp">   ....: </span>    <span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">Time</span><span class="o">=</span><span class="s1">&#39;1M&#39;</span><span class="p">)</span>
 <span class="gp">   ....: </span>    <span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 <span class="gp">   ....: </span>    <span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 <span class="gp">   ....: </span><span class="p">)</span>
 <span class="gp">   ....: </span>
-<span class="gh">Out[12]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x16a041ca0&gt;]</span>
+<span class="gh">Out[12]: </span><span class="go">[&lt;matplotlib.lines.Line2D at 0x1262f0850&gt;]</span>
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/inf_mat_monthly.png"><img alt="../_images/inf_mat_monthly.png" src="../_images/inf_mat_monthly.png" style="width: 5in;" /></a>

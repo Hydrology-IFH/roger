@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Groundwater flow &mdash; RoGeR 0.0.1+488.ge1b7b1c.dirty documentation</title>
+  <title>Groundwater flow &mdash; RoGeR 0.0.1+507.gfc68f5f.dirty documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -33,7 +33,7 @@
             <a href="../../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+488.ge1b7b1c.dirty
+                0.0.1+507.gfc68f5f.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -124,19 +124,19 @@
              
   <section id="groundwater-flow">
 <h1>Groundwater flow<a class="headerlink" href="#groundwater-flow" title="Permalink to this heading">¶</a></h1>
-<p>Transmissivity of the aquifer <span class="math notranslate nohighlight">\(T_{gw}\)</span> (m) at time step t:</p>
+<p>Transmissivity of the aquifer <span class="math notranslate nohighlight">\(T_{gw}\)</span> (m) at time step <span class="math notranslate nohighlight">\(t\)</span>:</p>
 <div class="math notranslate nohighlight">
 \[T_{gw} =  \int_{z_{gw}}^{Z_{gw-tot}} k_f \cdot exp (-\frac{z_{gw}}{b})dz_{gw}\]</div>
-<p>where <span class="math notranslate nohighlight">\(z_{gw}\)</span> is the depth of the groundwater table at time step t (m),
+<p>where <span class="math notranslate nohighlight">\(z_{gw}\)</span> is the depth of the groundwater table at time step <span class="math notranslate nohighlight">\(t\)</span> (m),
 <span class="math notranslate nohighlight">\(Z_{gw-tot}\)</span> is the thickness of the aquifer (m), <span class="math notranslate nohighlight">\(k_f\)</span> is the
 hydraulic conductivity the aquifer at the soil surface (-) and <span class="math notranslate nohighlight">\(b\)</span> is the
 decay coeffcient.</p>
-<p>Lateral groundwater flow <span class="math notranslate nohighlight">\(q_{gw}\)</span> (m <span class="math notranslate nohighlight">\(\Delta t^{-1}\)</span>) at time step t:</p>
+<p>Lateral groundwater flow <span class="math notranslate nohighlight">\(q_{gw}\)</span> (m <span class="math notranslate nohighlight">\(\Delta t^{-1}\)</span>) at time step <span class="math notranslate nohighlight">\(t\)</span>:</p>
 <div class="math notranslate nohighlight">
 \[q_{gw} =  T_{gw} \cdot \i_{gw} \cdot w\]</div>
-<p>where <span class="math notranslate nohighlight">\(i_{gw}\)</span> is the slope of the groundwater table at time step t (-) and
+<p>where <span class="math notranslate nohighlight">\(i_{gw}\)</span> is the slope of the groundwater table at time step <span class="math notranslate nohighlight">\(t\)</span> (-) and
 <span class="math notranslate nohighlight">\(w\)</span> is the width of the flow (m)</p>
-<p>Baseflow <span class="math notranslate nohighlight">\(q_{bf}\)</span> (m <span class="math notranslate nohighlight">\(\Delta t^{-1}\)</span>) at time step t:</p>
+<p>Baseflow <span class="math notranslate nohighlight">\(q_{bf}\)</span> (m <span class="math notranslate nohighlight">\(\Delta t^{-1}\)</span>) at time step <span class="math notranslate nohighlight">\(t\)</span>:</p>
 <div class="math notranslate nohighlight">
 \[q_{bf} =  k_{f} \cdot \beta \cdot w \cdot z_{bf}\]</div>
 <p>where <span class="math notranslate nohighlight">\(z_{bf}\)</span> is the thickness of the baseflow (m).</p>

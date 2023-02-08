@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Solute transport &mdash; RoGeR 0.0.1+488.ge1b7b1c.dirty documentation</title>
+  <title>Solute transport &mdash; RoGeR 0.0.1+507.gfc68f5f.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -33,7 +33,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+488.ge1b7b1c.dirty
+                0.0.1+507.gfc68f5f.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -113,6 +113,11 @@
 <p>Solute transport is implemented with StorAge selection (SAS) functions:</p>
 <div class="math notranslate nohighlight">
 \[C_Q=\int_{T=0}^{\infty} C_S(T,t) \cdot \alpha_p \cdot \overleftarrow{p}_{Q}(T,t) dT\]</div>
+<p>where <span class="math notranslate nohighlight">\(C_{Q}\)</span> is the solute concentration of the considered flux at time step <span class="math notranslate nohighlight">\(t\)</span> (mg <span class="math notranslate nohighlight">\(l^{-1}\)</span> or ‰),
+<span class="math notranslate nohighlight">\(C_{S}\)</span> is the solute concentration of the considered StorAge at time step <span class="math notranslate nohighlight">\(t\)</span> (mg <span class="math notranslate nohighlight">\(l^{-1}\)</span> or ‰),
+<span class="math notranslate nohighlight">\(\alpha_{p}\)</span> is the partition coeffcient (-),
+<span class="math notranslate nohighlight">\(P_{Q}\)</span> is the travel time distribution of the considered flux at time step <span class="math notranslate nohighlight">\(t\)</span> (-)
+and <span class="math notranslate nohighlight">\(T\)</span> is the water age (days).</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="solute_transport/SAS_functions.html">StorAge selection (SAS) functions</a><ul>
@@ -129,7 +134,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="solute_transport/biogeochemical_processes.html">Biogeochemical processes</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="solute_transport/biogeochemical_processes.html#soil-temperature">Soil temperature</a></li>
-<li class="toctree-l2"><a class="reference internal" href="solute_transport/biogeochemical_processes.html#nitrogen-cycle">Nitrogen cycle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solute_transport/biogeochemical_processes.html#nitrogen-mass-balance">Nitrogen mass balance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="solute_transport/biogeochemical_processes.html#denitrification">Denitrification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="solute_transport/biogeochemical_processes.html#nitrification">Nitrification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="solute_transport/biogeochemical_processes.html#nitrogen-mineralization">Nitrogen mineralization</a></li>

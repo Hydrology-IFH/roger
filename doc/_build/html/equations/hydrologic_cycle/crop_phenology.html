@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Crop phenology &mdash; RoGeR 0.0.1+488.ge1b7b1c.dirty documentation</title>
+  <title>Crop phenology &mdash; RoGeR 0.0.1+507.gfc68f5f.dirty documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -33,7 +33,7 @@
             <a href="../../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+488.ge1b7b1c.dirty
+                0.0.1+507.gfc68f5f.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -128,7 +128,7 @@
              
   <section id="crop-phenology">
 <h1>Crop phenology<a class="headerlink" href="#crop-phenology" title="Permalink to this heading">¶</a></h1>
-<p>Growing degree day <span class="math notranslate nohighlight">\(GDD\)</span> at time step t (<span class="math notranslate nohighlight">\(°C day^{-1}\)</span>):</p>
+<p>Growing degree day <span class="math notranslate nohighlight">\(GDD\)</span> at time step <span class="math notranslate nohighlight">\(t\)</span> (<span class="math notranslate nohighlight">\(°C day^{-1}\)</span>):</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}GDD = \begin{cases}
 TA_{ceil} - TA_{base} &amp; \frac{(TA_{max}+TA_{min})}{2} &gt; TA_{ceil} \\
@@ -156,7 +156,7 @@ CC_0 \cdot e^{c_{ccg} \cdot c_{ws} \cdot t_{grow}} &amp; CC &lt; CC_{max} / 2  \
 CC_{max} - (CC_{max} - CC_0) \cdot e^{-(c_{ccg} \cdot c_{ws} \cdot  t_{grow})} &amp; CC \geq CC_{max} / 2 \\
 \end{cases}\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(CC\)</span> is the fraction of ground covered by crop canopy (-) at
-time step t, <span class="math notranslate nohighlight">\(CC_0\)</span> is the initial fraction of ground covered by crop
+time step <span class="math notranslate nohighlight">\(t\)</span>, <span class="math notranslate nohighlight">\(CC_0\)</span> is the initial fraction of ground covered by crop
 canopy (-), <span class="math notranslate nohighlight">\(CC_{max}\)</span> is the the maximum fraction of ground covered by
 crop canopy (-), <span class="math notranslate nohighlight">\(c_{ccg}\)</span> is the coefficient of crop canopy growth (-) and
 <span class="math notranslate nohighlight">\(t_{grow}\)</span> is the time since crop growth (<span class="math notranslate nohighlight">\(°C day^{-1}\)</span>).</p>
@@ -168,10 +168,10 @@ is the time since crop decay (<span class="math notranslate nohighlight">\(°C d
 <p>Crop root growth:</p>
 <div class="math notranslate nohighlight">
 \[z_{root}=z_{root-max}-(z_{root-max}-z_{root-0}) * e^{c_{crg} \cdot c_{ws} \cdot t_{grow}}\]</div>
-<p>where <span class="math notranslate nohighlight">\(z_{root}\)</span> is the crop root depth (m) at time step t, <span class="math notranslate nohighlight">\(z_{root-0}\)</span>
+<p>where <span class="math notranslate nohighlight">\(z_{root}\)</span> is the crop root depth (m) at time step <span class="math notranslate nohighlight">\(t\)</span>, <span class="math notranslate nohighlight">\(z_{root-0}\)</span>
 is the initial crop root depth (m), <span class="math notranslate nohighlight">\(z_{root-max}\)</span> is the the maximum crop
 root depth (m) and <span class="math notranslate nohighlight">\(c_{crg}\)</span> is the coefficient of crop root growth (-).</p>
-<p>Crop transpiration <span class="math notranslate nohighlight">\(TRANSP_{crop}\)</span> at time step t (<span class="math notranslate nohighlight">\(mm \Delta t^{-1}\)</span>):</p>
+<p>Crop transpiration <span class="math notranslate nohighlight">\(TRANSP_{crop}\)</span> at time step <span class="math notranslate nohighlight">\(t\)</span> (<span class="math notranslate nohighlight">\(mm \Delta t^{-1}\)</span>):</p>
 <div class="math notranslate nohighlight">
 \[TRANSP_{crop}=PET_{res} * k_{cb} * c_{ws}\]</div>
 <div class="math notranslate nohighlight">

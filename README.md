@@ -6,6 +6,21 @@
 <i>Runoff Generation Research in Pure Python</i>
 </p>
 
+<p align="center">
+  <a href="http://roger.readthedocs.io/?badge=latest">
+    <img src="https://readthedocs.org/projects/roger/badge/?version=latest" alt="Documentation status">
+  </a>
+  <a href="https://github.com/Hydrology-IFH/roger/actions/workflows/test-all.yml">
+    <img src="https://github.com/Hydrology-IFH/roger/actions/workflows/test-all.yml/badge.svg" alt="Test status">
+  </a>
+  <a href="https://codecov.io/gh/Hydrology-IFH/roger">
+    <img src="https://codecov.io/gh/Hydrology-IFH/roger/branch/master/graph/badge.svg" alt="Code Coverage">
+  </a>
+  <a href="https://zenodo.org/badge/latestdoi/xxx">
+    <img src="https://zenodo.org/badge/xxx.svg" alt="DOI">
+  </a>
+</p>
+
 Roger, *Runoff Generation Research*, is a process-based hydrologic model that can be applied from plot to catchment scale. Roger is written in pure Python, which facilitates model setup and model workflows. We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.
 
 Roger supports a NumPy backend for small-scale problems, and a
