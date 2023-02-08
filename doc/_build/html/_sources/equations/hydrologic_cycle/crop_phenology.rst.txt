@@ -1,7 +1,7 @@
 Crop phenology
 ==============
 
-Growing degree day :math:`GDD` at time step t (:math:`°C day^{-1}`):
+Growing degree day :math:`GDD` at time step :math:`t` (:math:`°C day^{-1}`):
 
 .. math::
   GDD = \begin{cases}
@@ -42,7 +42,7 @@ Growth of crop canopy:
   \end{cases}
 
 where :math:`CC` is the fraction of ground covered by crop canopy (-) at
-time step t, :math:`CC_0` is the initial fraction of ground covered by crop
+time step :math:`t`, :math:`CC_0` is the initial fraction of ground covered by crop
 canopy (-), :math:`CC_{max}` is the the maximum fraction of ground covered by
 crop canopy (-), :math:`c_{ccg}` is the coefficient of crop canopy growth (-) and
 :math:`t_{grow}` is the time since crop growth (:math:`°C day^{-1}`).
@@ -61,12 +61,12 @@ Crop root growth:
 .. math::
   z_{root}=z_{root-max}-(z_{root-max}-z_{root-0}) * e^{c_{crg} \cdot c_{ws} \cdot t_{grow}}
 
-where :math:`z_{root}` is the crop root depth (m) at time step t, :math:`z_{root-0}`
+where :math:`z_{root}` is the crop root depth (m) at time step :math:`t`, :math:`z_{root-0}`
 is the initial crop root depth (m), :math:`z_{root-max}` is the the maximum crop
 root depth (m) and :math:`c_{crg}` is the coefficient of crop root growth (-).
 
 
-Crop transpiration :math:`TRANSP_{crop}` at time step t (:math:`mm \Delta t^{-1}`):
+Crop transpiration :math:`TRANSP_{crop}` at time step :math:`t` (:math:`mm \Delta t^{-1}`):
 
 .. math::
   TRANSP_{crop}=PET_{res} * k_{cb} * c_{ws}

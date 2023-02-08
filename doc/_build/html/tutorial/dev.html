@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Making changes in Roger &mdash; RoGeR 0.0.1+488.ge1b7b1c.dirty documentation</title>
+  <title>Making changes in Roger &mdash; RoGeR 0.0.1+507.gfc68f5f.dirty documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="../index.html" class="icon icon-home"> RoGeR
           </a>
               <div class="version">
-                0.0.1+488.ge1b7b1c.dirty
+                0.0.1+507.gfc68f5f.dirty
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -137,7 +137,7 @@ After this, black and flake8 will run automatically on every commit.
 In this case, every processor only operates on a chunk of the total data.
 By using <code class="xref py py-func docutils literal notranslate"><span class="pre">roger.variables.allocate()</span></code>, you can make sure that allocated data always has the right shape.</p>
 <p>Since none of the processes have access to the global data, you need to take special care during reductions (e.g. <code class="docutils literal notranslate"><span class="pre">sum</span></code>) and accumulations (e.g. <code class="docutils literal notranslate"><span class="pre">cumsum</span></code>) along horizontal dimensions.
-Use functions from <a class="reference internal" href="../reference/api/distributed.html#module-roger.distributed" title="roger.distributed"><code class="xref py py-mod docutils literal notranslate"><span class="pre">roger.distributed</span></code></a> (e.g. <code class="xref py py-func docutils literal notranslate"><span class="pre">roger.distributed.global_max()</span></code>) where appropriate.</p>
+Use functions from <a class="reference internal" href="../reference/api/distributed.html#module-roger.distributed" title="roger.distributed"><code class="xref py py-mod docutils literal notranslate"><span class="pre">roger.distributed</span></code></a> (e.g. <a class="reference internal" href="../reference/api/distributed.html#roger.distributed.global_max" title="roger.distributed.global_max"><code class="xref py py-func docutils literal notranslate"><span class="pre">roger.distributed.global_max()</span></code></a>) where appropriate.</p>
 <section id="the-dist-safe-keyword">
 <h3>The dist_safe keyword<a class="headerlink" href="#the-dist-safe-keyword" title="Permalink to this heading">¶</a></h3>
 <p>If you are not comfortable writing code that is safe for distributed execution, you can use the <code class="docutils literal notranslate"><span class="pre">dist_safe</span></code> keyword to <code class="xref py py-func docutils literal notranslate"><span class="pre">roger.decorators.roger_routine()</span></code>::</p>
@@ -169,7 +169,7 @@ This ensures that you can write your code exactly as in the non-distributed case
 <p>If your changes to Roger turn out to have a negative effect on the runtime of the model, there several ways to investigate and solve performance problems:</p>
 <ul class="simple">
 <li><p>Run your model with the <code class="docutils literal notranslate"><span class="pre">-v</span> <span class="pre">debug</span></code>, <code class="docutils literal notranslate"><span class="pre">-v</span> <span class="pre">trace</span></code>, and / or <code class="docutils literal notranslate"><span class="pre">--profile-mode</span></code> options to get additional debugging output (such as timings for each time step, and a timing summary after the run has finished).</p></li>
-<li><p>You should try and avoid explicit loops over arrays at all cost (but if you have to, you can use <code class="xref py py-func docutils literal notranslate"><span class="pre">roger.core.operators.for_loop()</span></code>, which is reasonably efficient in JAX). You should always try to work on the whole array at once.</p></li>
+<li><p>You should try and avoid explicit loops over arrays at all cost (but if you have to, you can use <a class="reference internal" href="../reference/api/operators.html#roger.core.operators.for_loop" title="roger.core.operators.for_loop"><code class="xref py py-func docutils literal notranslate"><span class="pre">roger.core.operators.for_loop()</span></code></a>, which is reasonably efficient in JAX). You should always try to work on the whole array at once.</p></li>
 <li><p>If you are still having trouble, don’t hesitate to ask for help (e.g. <a class="reference external" href="https://github.com/schwemro/roger/issues">on GitHub</a>).</p></li>
 </ul>
 </section>

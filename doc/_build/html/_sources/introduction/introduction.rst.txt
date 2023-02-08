@@ -72,7 +72,7 @@ Here, we provide a brief overview for the available processes and their underlyi
 
 **Biogeochemical processes**:
 
-- Solute specific transformation processes (e.g. denitrification; [Kunkel2012]_)
+- Solute specific transformation processes, for example, denitrification ([Kunkel2012]_) or soil temperature ([Hillel1998]_)
 
 Available pre-defined model structures
 ++++++++++++++++++++++++++++++++++++++
@@ -136,6 +136,8 @@ References
 .. [Germann2018] Germann, P. F. and Prasuhn, V.: Viscous Flow Approach to Rapid Infiltration and Drainage in a Weighing Lysimeter, Vadose Zone Journal, 17, 170020, 2018.
 
 .. [Haefner2018] Häfner, D., Jacobsen, R. L., Eden, C., Kristensen, M. R. B., Jochum, M., Nuterman, R., and Vinter, B.: Veros v0.1 – a fast and versatile ocean simulator in pure Python, Geosci. Model Dev., 11, 3299-3312, 2018.
+
+.. [Hillel1998] Hillel, D.: Environmental soil physics, Academic Press, London, UK, 1998.
 
 .. [Kunkel2012] Kunkel, R., and Wendland, F.: Diffuse Nitrateinträge in die Grund- und Oberflächengewässer von Rhein und Ems - Ist-Zustands- und Maßnahmenanalysen, Forschungszentrum Jülich, Jülich, Germany, 143, 2012.
 

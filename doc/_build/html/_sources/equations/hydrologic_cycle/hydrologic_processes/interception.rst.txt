@@ -15,7 +15,7 @@ Interception by upper interception storage :math:`INT_{upper}` at time step :mat
   \end{array}\right.
 
 where :math:`PREC` is precipitation (mm :math:`\Delta t^{-1}`), :math:`c_{throughfall}` is the throughfall coeffcient of the canopy, :math:`S_{int-upper}` is the
-storage volume of the upper interception storage at time step t (mm) and :math:`S_{tot-int-upper}` is the  available storage volume of the upper interception storage (mm).
+storage volume of the upper interception storage at time step :math:`t` (mm) and :math:`S_{tot-int-upper}` is the  available storage volume of the upper interception storage (mm).
 
 
 Interception from lower interception storage
@@ -30,4 +30,4 @@ Interception by lower interception storage :math:`INT_{lower}` at time step :mat
   \end{array}\right.
 
 where :math:`PREC` is precipitation (mm :math:`\Delta t^{-1}`), :math:`S_{int-lower}` is the
-storage volume of the lower interception storage at time step t (mm) and :math:`S_{tot-int-lower}` is the available storage volume of the lower interception storage (mm).
+storage volume of the lower interception storage at time step :math:`t` (mm) and :math:`S_{tot-int-lower}` is the available storage volume of the lower interception storage (mm).

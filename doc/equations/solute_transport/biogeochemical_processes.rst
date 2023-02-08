@@ -4,7 +4,7 @@ Biogeochemical processes
 Soil temperature
 ----------------
 
-Soil temperature :math:`TA_{soil}` (°C) at time step t:
+Soil temperature :math:`TA_{soil}` (°C) at time step :math:`t`:
 
 .. math::
   TA_{soil}=TA_{year} + (TA - TA_{year}) \cdot \frac{sin(\omega t + \omega \Phi -\frac{0.5 \cdot z_{soil}}{D})}{e^\frac{-0.5 \cdot z_{soil}}{D}}
@@ -15,7 +15,7 @@ with
   \omega = \frac{2\pi}{365}
 
 where :math:`TA_{year}` is the annual average air temperature (°C),
-:math:`TA` is the daily air temperature (°C) at time step t, :math:`D`
+:math:`TA` is the daily air temperature (°C) at time step :math:`t`, :math:`D`
 is the dampening depth (mm), t is the day of year and :math:`\Phi` is a constant
 offset (days).
 
@@ -31,7 +31,7 @@ Nitrogen mass balance
 Denitrification
 ---------------
 
-Denitrification rate of the soil :math:`Denit_{soil}` (:math:`kg N ha^{-1} year^{-1}`) at time step t:
+Denitrification rate of the soil :math:`Denit_{soil}` (:math:`kg N ha^{-1} year^{-1}`) at time step :math:`t`:
 
 .. math::
   Denit_{soil}=\begin{cases}
@@ -50,10 +50,10 @@ with
 where :math:`Denit_{soil-max}` is the maximum dentrification rate (:math:`kg N ha^{-1} year^{-1}`),
 :math:`k_{denit-soil}` is the Michaelis constant (:math:`kg N ha^{-1} year^{-1}`),
 :math:`NO_{3-soil}` is the age-ranked nitrate nitrogen storage of the soil (:math:`kg NO_{3}-N`),
-:math:`S` is the storage volume (mm) at time step t and
+:math:`S` is the storage volume (mm) at time step :math:`t` and
 :math:`S_{sat}` is the storage volume at saturation (mm).
 
-Denitrification rate of the groundwater :math:`Denit_{gw}` (:math:`kg N ha^{-1} year^{-1}`) at time step t:
+Denitrification rate of the groundwater :math:`Denit_{gw}` (:math:`kg N ha^{-1} year^{-1}`) at time step :math:`t`:
 
 .. math::
   Denit_{gw}=Denit_{gw-max} \cdot \frac{NO_{3-gw}(T,t)}{k_{denit-gw} + NO_{3-gw}(T,t)}
@@ -65,7 +65,7 @@ where :math:`Denit_{gw-max}` is the maximum dentrification rate (:math:`kg N ha^
 Nitrification
 -------------
 
-Nitrification rate of the soil :math:`Denit_{soil}` (:math:`kg N ha^{-1} year^{-1}`) at time step t:
+Nitrification rate of the soil :math:`Denit_{soil}` (:math:`kg N ha^{-1} year^{-1}`) at time step :math:`t`:
 
 .. math::
   Nit_{soil}=\begin{cases}
@@ -88,7 +88,7 @@ where :math:`Nit_{soil-max}` is the maximum nitrification rate (:math:`kg N ha^{
 Nitrogen mineralization
 -----------------------
 
-Nitrogen mineralization rate of the soil :math:`Min_{soil}` (:math:`kg N ha^{-1} year^{-1}`) at time step t:
+Nitrogen mineralization rate of the soil :math:`Min_{soil}` (:math:`kg N ha^{-1} year^{-1}`) at time step :math:`t`:
 
 .. math::
   Min_{soil}=k_{min} \cdot c_{min}
@@ -107,7 +107,7 @@ where :math:`k_{min}` is the maximum nitrogen mineralization rate of the soil (:
 Nitrogen uptake by crops
 ------------------------
 
-Nitrogen uptake by crops :math:`N_{up}` (mg :math:`\Delta t^{-1}`) at time step t:
+Nitrogen uptake by crops :math:`N_{up}` (mg :math:`\Delta t^{-1}`) at time step :math:`t`:
 
 .. math::
   N_{up}= transp \cdot \int_{T=0}^{\infty} C_S(T,t) \cdot \alpha_p \cdot \overleftarrow{p}_{transp}(T,t) dT
