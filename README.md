@@ -16,9 +16,7 @@
   <a href="https://codecov.io/gh/Hydrology-IFH/roger">
     <img src="https://codecov.io/gh/Hydrology-IFH/roger/branch/master/graph/badge.svg" alt="Code Coverage">
   </a>
-  <a href="https://zenodo.org/badge/latestdoi/xxx">
-    <img src="https://zenodo.org/badge/xxx.svg" alt="DOI">
-  </a>
+  <a href="https://zenodo.org/badge/latestdoi/536477819"><img src="https://zenodo.org/badge/536477819.svg" alt="DOI"></a>
 </p>
 
 Roger, *Runoff Generation Research*, is a process-based hydrologic model that can be applied from plot to catchment scale. Roger is written in pure Python, which facilitates model setup and model workflows. We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.
