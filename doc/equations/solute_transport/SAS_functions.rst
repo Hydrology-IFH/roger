@@ -6,7 +6,7 @@ StorAge selection (SAS) functions
    :align: center
 
 Travel time distributions are calculated with fractional SAS functions
-(-; see van der Velde et al., 2012):
+(-; see [vanderVelde2012]_):
 
 .. math::
   \overleftarrow{p}_{Q}(T, t)=\frac{\partial}{\partial T} \Omega_Q(P_S(T, t), t)
@@ -74,7 +74,7 @@ Gamma
 
 where :math:`\gamma` is the regularized lower incomplete gamma function.
 Please note, that a closed form of :math:`P_Q` using the Gamma distribution
-function is not available (see Harman, 2015).
+function is not available (see [Harman2015]_).
 
 Exponential
 -----------
