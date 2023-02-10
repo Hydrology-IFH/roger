@@ -30,9 +30,24 @@ Inspired by [Veros](https://veros.readthedocs.io/en/latest/).
 
 ## Documentation
 
-[visit our documentation](https://roger.readthedocs.io/en/latest/).
+We strongly recommend to [visit our documentation](https://roger.readthedocs.io/en/latest/).
+
 
 ## Features
+
+<p align="center">
+  <a href="https://vimeo.com/797822875">
+      <img src="doc/_images/theta_and_tt.gif?raw=true" alt="25 m^2 resolved simulations 
+of a rectangular soil covered by grass">
+  </a>
+</p>
+
+<p align="center">
+(25 m^2 resolved simulations 
+of a rectangular soil covered 
+by grass, click for better
+quality)
+</p>
 
 Roger provides
 

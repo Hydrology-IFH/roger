@@ -142,7 +142,7 @@ setup(
     author="Robin Schwemmle (University of Freiburg)",
     author_email="robin.schwemmle@hydrology.uni-freiburg.de",
     keywords="hydrology python parallel numpy multi-core geophysics hydrologic-model gpu jax",
-    description="Runoff Generation Research in Pure Python",
+    description="Runoff Generation Research - a hydrologic toolbox in Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://roger.readthedocs.io",

@@ -5,6 +5,8 @@ from cftime import num2date
 import matplotlib.dates as mdates
 import numpy as onp
 import copy
+from PIL import Image
+import imageio
 import matplotlib as mpl
 import seaborn as sns
 mpl.use("agg")
@@ -353,5 +355,65 @@ cb1.set_label(r'$\theta_{pwp}$ [-]')
 fig.subplots_adjust(left=0.2, bottom=0.2, right=0.68)
 file = base_path_figs / "thetapwp_grid.png"
 fig.savefig(file, dpi=250)
+
+# make GIF for Online-Documentation
+frames = []
+# reading png image
+file = base_path_figs / "front_gif.png"
+front = Image.open(file)
+frames.append(front.resize((1000, 500)))
+for t in range(1, 730, 5):
+    fig, axes = plt.subplots(1, 2, figsize=(4, 2))
+    axes[0].imshow(ds_hm['theta'].isel(Time=t).values.T, origin="lower", cmap='Blues', vmin=0.2, vmax=0.4)
+    axes[0].set_xticks(onp.arange(-.5, 11, 5))
+    axes[0].set_yticks(onp.arange(-.5, 23, 5))
+    axes[0].set_xticklabels(onp.arange(0, 12, 5) * 5)
+    axes[0].set_yticklabels(onp.arange(0, 24, 5) * 5)
+    axes[0].set_xlabel('[m]')
+    axes[0].set_ylabel('[m]')
+    cmap = copy.copy(plt.cm.get_cmap('Blues'))
+    norm = mpl.colors.Normalize(vmin=0.2, vmax=0.4)
+    axl1 = fig.add_axes([0.31, 0.215, 0.02, 0.65])
+    cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
+                                    orientation='vertical',
+                                    ticks=[0.2, 0.3, 0.4])
+    cb1.ax.set_yticklabels(['<0.2', '0.3', '>0.4'])
+    cb1.set_label(r'Soil water content [-]')
+
+    axes[1].imshow(ds_tm['tt50_q_ss'].isel(Time=t).values.T, origin="lower", cmap='Purples_r', vmin=100, vmax=900)
+    axes[1].set_xticks(onp.arange(-.5, 11, 5))
+    axes[1].set_yticks(onp.arange(-.5, 23, 5))
+    axes[1].set_xticklabels(onp.arange(0, 12, 5) * 5)
+    axes[1].set_yticklabels(onp.arange(0, 24, 5) * 5)
+    axes[1].set_xlabel('[m]')
+    axes[1].set_ylabel('[m]')
+    cmap = copy.copy(plt.cm.get_cmap('Purples_r'))
+    norm = mpl.colors.Normalize(vmin=100, vmax=900)
+    axl2 = fig.add_axes([0.8, 0.215, 0.02, 0.65])
+    cb2 = mpl.colorbar.ColorbarBase(axl2, cmap=cmap, norm=norm,
+                                    orientation='vertical',
+                                    ticks=[100, 300, 600, 900])
+    cb2.ax.set_yticklabels(['<100', '300', '600', '>900'])
+    cb2.ax.invert_yaxis()
+    cb2.set_label('Median travel time\n of percolation [days]')
+    fig.suptitle(f't = {t}d', fontsize=8)
+    fig.subplots_adjust(wspace=0.2, left=0.0, bottom=0.2)
+    file = base_path_figs / f"t{t}.png"
+    fig.savefig(file, dpi=250)
+    plt.close('all')
+    img = imageio.v2.imread(file)
+    frames.append(img)
+    
+file = base_path_figs / "theta_and_tt.gif"
+imageio.mimsave(file,
+                frames,
+                fps = 5)
+
+
+file = base_path_figs / "theta_and_tt.mp4"
+writer = imageio.get_writer(file, fps=5)
+for frame in frames:
+    writer.append_data(frame)
+writer.close()
 
 plt.close('all')
