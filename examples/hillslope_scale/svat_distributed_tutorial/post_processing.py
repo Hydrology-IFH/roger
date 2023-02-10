@@ -362,7 +362,7 @@ frames = []
 file = base_path_figs / "front_gif.png"
 front = Image.open(file)
 frames.append(front.resize((1000, 500)))
-for t in range(1, 730, 5):
+for t in range(1, 1000):
     fig, axes = plt.subplots(1, 2, figsize=(4, 2))
     axes[0].imshow(ds_hm['theta'].isel(Time=t).values.T, origin="lower", cmap='Blues', vmin=0.2, vmax=0.4)
     axes[0].set_xticks(onp.arange(-.5, 11, 5))
@@ -407,13 +407,6 @@ for t in range(1, 730, 5):
 file = base_path_figs / "theta_and_tt.gif"
 imageio.mimsave(file,
                 frames,
-                fps = 5)
-
-
-file = base_path_figs / "theta_and_tt.mp4"
-writer = imageio.get_writer(file, fps=5)
-for frame in frames:
-    writer.append_data(frame)
-writer.close()
+                fps = 7)
 
 plt.close('all')
