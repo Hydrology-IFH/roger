@@ -2,6 +2,13 @@ include README.md
 include requirements.txt
 include requirements_jax.txt
 
+include look_up_tables/crop_parameters.csv
+include look_up_tables/intercept_land_use.csv
+include look_up_tables/intercept_sealing.csv
+include look_up_tables/mp_drain_area.csv
+include look_up_tables/mp_layer_manning_strickler.csv
+include look_up_tables/root_depth_land_use.csv
+
 include cuda_ext.py
 
 include versioneer.py
