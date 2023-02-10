@@ -37,7 +37,7 @@ We strongly recommend to [visit our documentation](https://roger.readthedocs.io/
 
 <p align="center">
   <a href="https://vimeo.com/797822875">
-      <img src="doc/_images/theta_and_tt.gif?raw=true" alt="25 m^2 resolved simulations 
+      <img src="doc/_images/theta_and_tt.gif?raw=true" alt="25 square meter resolved simulations 
 of a rectangular soil covered by grass">
   </a>
 </p>
