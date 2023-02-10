@@ -36,7 +36,7 @@ We strongly recommend to [visit our documentation](https://roger.readthedocs.io/
 ## Features
 
 <p align="center">
-  <a href="https://vimeo.com/797822875">
+  <a href="https://vimeo.com/797828563">
       <img src="doc/_images/theta_and_tt.gif?raw=true" alt="25 square meter resolved simulations 
 of a rectangular soil covered by grass">
   </a>
