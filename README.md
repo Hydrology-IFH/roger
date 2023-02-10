@@ -43,7 +43,7 @@ of a rectangular soil covered by grass">
 </p>
 
 <p align="center">
-(25 m^2 resolved simulations 
+(25 square meter resolved simulations 
 of a rectangular soil covered 
 by grass, click for better
 quality)
