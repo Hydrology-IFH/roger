@@ -108,3 +108,12 @@ to the flux e.g. transp.
 - `4`: Gamma SAS function
 - `5`: Exponential SAS function
 - `6`: Power SAS function
+
+The array of `sas_params_q` encompasses eight dimensions:
+- First array dimension of `sas_params_q` contains SAS function type (e.g. 1)
+- Second array dimension of `sas_params_q` contains first SAS parameter (only considered if SAS function type is Kumaraswamy, Gamma, Exponential or Power)
+- Third array dimension of `sas_params_q` contains second SAS parameter (only considered if SAS function type is Kumaraswamy or Gamma)
+- Fourth array dimension of `sas_params_q` contains lower boundary for temporal variation of SAS parameter (only considered if SAS function type is Kumaraswamy, Gamma, Exponential or Power)
+- Fifth array dimension of `sas_params_q` contains upper boundary for temporal variation of SAS parameter (only considered if SAS function type is Kumaraswamy, Gamma, Exponential or Power)
+- Sixth array dimension of `sas_params_q` contains lower boundary of storage used for temporal variation of SAS parameter (e.g. 200 mm; only considered if SAS function type is Kumaraswamy, Gamma, Exponential or Power)
+- Seventh array dimension of `sas_params_q` contains upper boundary of storage used for temporal variation of SAS parameter (e.g. 400 mm; only considered if SAS function type is Kumaraswamy, Gamma, Exponential or Power)

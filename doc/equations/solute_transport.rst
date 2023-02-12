@@ -12,6 +12,11 @@ where :math:`C_{Q}` is the solute concentration of the considered flux at time s
 :math:`P_{Q}` is the travel time distribution of the considered flux at time step :math:`t` (-)
 and :math:`T` is the water age (days).
 
+Currently, Roger can be used to simulate with the following solutes:
+- stable water isotopes
+- bromide
+- chloride
+- nitrate
 
 .. toctree::
    :maxdepth: 3
