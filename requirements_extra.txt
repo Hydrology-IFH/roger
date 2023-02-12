@@ -1,3 +1,2 @@
 xarray==2022.6.0
 salib==1.4.6
-diag-eff==1.1
