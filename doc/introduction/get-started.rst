@@ -120,7 +120,7 @@ Running Roger
 
 After adapting your setup script, you are ready to run your first simulation. Just execute the following::
 
-   $ roger run my_setup.py
+   $ python my_setup.py
 
 .. seealso::
 
@@ -173,7 +173,7 @@ Running Roger through MPI requires some additional dependencies. For optimal per
 
 After you have installed everything, you can start Roger on multiple processes like so:::
 
-   $ mpirun -np 4 roger run my_setup.py -n 2 2
+   $ mpirun -np 4 python my_setup.py -n 2 2
 
 In this case, Roger would run on 4 processes, each process computing one-quarter of the domain. The arguments of the `-n` flag specify the number of domain partitions in x and y-direction, respectively.
 
