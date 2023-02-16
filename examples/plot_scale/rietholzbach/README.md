@@ -1,6 +1,6 @@
 # Modelling oxygen-18 transport and bromide transport with Roger at Rietholzbach lysimeter site
 
-All results have been generated with Roger version 0.1.2
+All results have been generated with Roger version 3.0
 
 - `post_processing.py`: Produces figures and tables from data of the modelling experiment
 - `write_moab_jobs.py`: Generates job scripts for computation on BinAC cluster using the MOAB workload manager
