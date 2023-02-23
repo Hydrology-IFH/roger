@@ -174,11 +174,13 @@ for i, meteo_station in enumerate(meteo_stations):
 csv_file = base_path / "parameter_grid.csv"
 df_params = pd.read_csv(csv_file, sep=';', skiprows=1)
 params = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'kf']
+_bins = [10, 12, 15, 30, 25, 16, 10]
+_range = [(60, 160), (200, 800), (0.05, 0.2), (0.05, 0.35), (0.0, 0.25), (0, 80), (0, 5)]
 df_params = df_params.loc[:, params]
 fig, axs = plt.subplots(4, 2, figsize=(6, 6), sharey=True)
 labels = [labs._LABS[param] for param in params]
 for i, param in enumerate(params):
-    axs.flatten()[i].hist(df_params.loc[:, param], 10, color="grey")
+    axs.flatten()[i].hist(df_params.loc[:, param], bins=_bins[i], range=_range[i], color="grey")
     axs.flatten()[i].set_xlabel(labs._LABS[param])
 axs[0, 0].set_ylabel('# grid cells')
 axs[1, 0].set_ylabel('# grid cells')

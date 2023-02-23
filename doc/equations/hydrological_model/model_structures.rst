@@ -9,7 +9,7 @@ SVAT
    :align: center
 
 
-Long-term hydrologic modelling of vertical processes.
+Long-term hydrological modelling of vertical processes.
 
 .. toctree::
    :maxdepth: 3
@@ -31,7 +31,7 @@ SVAT-CROP
    :align: center
 
 
-Long-term hydrologic modelling of vertical processes including crop phenology/crop rotation.
+Long-term hydrological modelling of vertical processes including crop phenology/crop rotation.
 
 .. toctree::
   :maxdepth: 3
@@ -53,7 +53,7 @@ ONED
    :width: 400
    :align: center
 
-Long-term hydrologic modelling of vertical and lateral processes.
+Long-term hydrological modelling of vertical and lateral processes.
 
 .. toctree::
    :maxdepth: 3
@@ -72,7 +72,7 @@ Long-term hydrologic modelling of vertical and lateral processes.
 ONED-EVENT
 ----------
 
-Short-term hydrologic modelling of vertical and lateral processes.
+Short-term hydrological modelling of vertical and lateral processes.
 
 .. toctree::
   :maxdepth: 3

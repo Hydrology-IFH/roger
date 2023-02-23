@@ -1,12 +1,12 @@
 Command line tools
 ==================
 
-After installing Roger, you can call these scripts from the command line from any location on your system.
+After installing RoGeR, you can call these scripts from the command line from any location on your system.
 
 roger
 -----
 
-This is a wrapper script that provides easy access to all Roger command line tools.
+This is a wrapper script that provides easy access to all RoGeR command line tools.
 
 .. run-click:: roger.cli.roger:cli
 

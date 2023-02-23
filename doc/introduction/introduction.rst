@@ -1,4 +1,4 @@
-A short introduction to Roger
+A short introduction to RoGeR
 =============================
 
 The model architecture
@@ -7,8 +7,8 @@ The model architecture
 We adapted the model architecture from [Haefner2018]_.
 
 1. **Easy to access**: Python modules are simple to install, and projects like `Anaconda <https://www.continuum.io/anaconda-overview>`_ are doing a great job in creating platform-independent environments.
-2. **Easy to use**: Anyone with some experience can use their favourite Python tools to pre-process rquired data, set up, modify, and post-process simulations with Roger.
-3. **Easy to modify**: Due to Python's popularity, available abstractions, and dynamic nature, Roger can be extended and modified with relatively little effort.
+2. **Easy to use**: Anyone with some experience can use their favourite Python tools to pre-process rquired data, set up, modify, and post-process simulations with RoGeR.
+3. **Easy to modify**: Due to Python's popularity, available abstractions, and dynamic nature, RoGeR can be extended and modified with relatively little effort.
 
 However, choosing Python over a compiled language like Fortran or C usually comes at a high computational cost. We overcome this gap by using `JAX <https://github.com/google/jax>`_, a framework that can act as a high-performance replacement for NumPy. JAX takes care of all performance optimizations in the background, and runs on CPUs and GPUs.
 
@@ -115,13 +115,13 @@ For more information, see :doc:`/reference/diagnostics`.
 Pre-defined model setups
 ++++++++++++++++++++++++
 
-Roger supports a wide range of pre-configured models. Several setups are already implemented that highlight some of the capabilities of Roger, and that serve as a basis for users to set up their own configuration: :doc:`/reference/model-gallery`.
+RoGeR supports a wide range of pre-configured models. Several setups are already implemented that highlight some of the capabilities of RoGeR, and that serve as a basis for users to set up their own configuration: :doc:`/reference/model-gallery`.
 
 
 Current limitations
 +++++++++++++++++++
 
-Roger is still in development. There are many open issues that we would like to fix later on:
+RoGeR is still in development. There are many open issues that we would like to fix later on:
 
 - A routing scheme is not implemented, yet
 - Simulations with biogeochemical processes have not been compared to measured data

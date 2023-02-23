@@ -1,5 +1,5 @@
-Solute transport
-================
+Solute transport model
+======================
 
 Solute transport is implemented with StorAge selection (SAS) functions:
 
@@ -21,6 +21,6 @@ Currently, Roger can be used to simulate with the following solutes:
 .. toctree::
    :maxdepth: 3
 
-   solute_transport/SAS_functions
-   solute_transport/biogeochemical_processes
-   solute_transport/model_structures
+   solute_transport_model/SAS_functions
+   solute_transport_model/biogeochemical_processes
+   solute_transport_model/model_structures

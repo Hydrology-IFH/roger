@@ -6,11 +6,11 @@
 
 |
 
-Runoff Generation Research - a hydrologic toolbox in Python
-===========================================================
-Roger, *Runoff Generation Research*, is a process-based hydrologic model that can be applied from plot to catchment scale. Roger is written in pure Python, which facilitates model setup and model workflows. We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.
+Runoff Generation Research - a process-based hydrological toolbox model in Python
+=================================================================================
+RoGeR, *Runoff Generation Research*, is a process-based hydrological model that can be applied from plot to catchment scale. Roger is written in pure Python, which facilitates model setup and model workflows. We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.
 
-Roger supports a NumPy backend for small-scale problems, and a
+RoGeR supports a NumPy backend for small-scale problems, and a
 high-performance `JAX <https://github.com/google/jax>`_ backend
 with CPU and GPU support. Parallel computation is available via MPI and supports
 distributed execution on any number of nodes/CPU cores, including multi-GPU architectures.
@@ -18,9 +18,9 @@ distributed execution on any number of nodes/CPU cores, including multi-GPU arch
 Inspired by `Veros <https://veros.readthedocs.io/en/latest/>`_.
 
 
-Roger, *Runoff Generation Research*, is a process-based hydrologic model that supports anything between plot and catchment scale. Roger is written in pure Python, which facilitates model setup workflows.
+RoGeR, *Runoff Generation Research*, is a process-based hydrological model that supports anything between plot and catchment scale. Roger is written in pure Python, which facilitates model setup workflows.
 
-*We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.*
+*We want to enable high-performance hydrological modelling with a clear focus on flexibility and usability.*
 
 Roger supports a NumPy backend for small-scale problems, and a
 high-performance `JAX <https://github.com/google/jax>`_ backend
@@ -53,8 +53,8 @@ If you want to learn more about the background and capabilities of Roger, you sh
   :caption: Model equations
 
   equations/equations
-  equations/hydrologic_cycle
-  equations/solute_transport
+  equations/hydrological_model
+  equations/solute_transport_model
 
 .. toctree::
    :maxdepth: 2
