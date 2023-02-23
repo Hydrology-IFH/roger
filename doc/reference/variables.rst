@@ -20,7 +20,7 @@ Variable class
 Available variables
 -------------------
 
-There are two kinds of variables in Roger. Main variables are always present in a
+There are two kinds of variables in RoGeR. Main variables are always present in a
 simulation, while conditional variables are only available if their respective
 condition is :obj:`True` at the time of variable allocation.
 

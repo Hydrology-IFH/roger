@@ -9,11 +9,11 @@ authors:
     given-names: Markus
 cff-version: 3.0.0
 message: "If you use this software, please cite the article from preferred-citation."
-title: Roger
+title: RoGeR
 url: "https://github.com/Hydrology-IFH/roger"
 preferred-citation:
   type: article
-  title: "Roger v3.0 – Runoff Generation Reasearch in Python"
+  title: "Roger v3.0 – a process-based hydrologic toolbox model in Python"
   authors:
   - family-names: Schwemmle
     given-names: Robin

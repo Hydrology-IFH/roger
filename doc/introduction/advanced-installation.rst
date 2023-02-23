@@ -1,11 +1,11 @@
 Advanced installation
 =====================
 
-Because Roger should be usable by both beginners and experts, it has a number of *optional* dependencies that are not strictly required to run Roger, but highly recommended in high-performance contexts.
+Because RoGeR should be usable by both beginners and experts, it has a number of *optional* dependencies that are not strictly required to run RoGeR, but highly recommended in high-performance contexts.
 
 .. note::
 
-    Roger notifies you when a slower code path has to be taken due to a missing dependency. So unless you are getting a warning, there is usually no need to install optional dependencies (except JAX and MPI).
+    RoGeR notifies you when a slower code path has to be taken due to a missing dependency. So unless you are getting a warning, there is usually no need to install optional dependencies (except JAX and MPI).
 
 
 .. list-table:: Summary of optional dependencies
@@ -28,12 +28,12 @@ Because Roger should be usable by both beginners and experts, it has a number of
 
 .. note::
 
-    On this page, we give all installation instructions via ``pip install``. If you used conda to install Roger, consider replacing them with ``conda install``.
+    On this page, we give all installation instructions via ``pip install``. If you used conda to install RoGeR, consider replacing them with ``conda install``.
 
 Using JAX
 ---------
 
-Using the JAX backend, Roger is typically about 4x faster than with NumPy, so this should be the first thing to try if you want to get more performance.
+Using the JAX backend, RoGeR is typically about 4x faster than with NumPy, so this should be the first thing to try if you want to get more performance.
 
 JAX is available on all major platforms and can be installed via::
 
@@ -49,11 +49,11 @@ To use JAX on GPU, you have to install a CUDA-enabled version of jaxlib, e.g.::
 Using MPI
 ---------
 
-To run Roger on more than one process you need to use MPI. This requires that you install an MPI implementation (such as OpenMPI) on your system. Additionally, you have to install ``mpi4py`` to interface with it::
+To run RoGeR on more than one process you need to use MPI. This requires that you install an MPI implementation (such as OpenMPI) on your system. Additionally, you have to install ``mpi4py`` to interface with it::
 
    $ pip install mpi4py
 
-Then, you can :ref:`run Roger in parallel via MPI <mpi-exec>`.
+Then, you can :ref:`run RoGeR in parallel via MPI <mpi-exec>`.
 
 
 Using JAX + MPI

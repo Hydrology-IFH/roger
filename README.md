@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-<i>Runoff Generation Research - a hydrologic toolbox in Python</i>
+<i>Runoff Generation Research - a process-based hydrological toolbox model in Python</i>
 </p>
 
 <p align="center">
@@ -19,9 +19,9 @@
   <a href="https://zenodo.org/badge/latestdoi/536477819"><img src="https://zenodo.org/badge/536477819.svg" alt="DOI"></a>
 </p>
 
-Roger, *Runoff Generation Research*, is a process-based hydrologic model that can be applied from plot to catchment scale. Roger is written in pure Python, which facilitates model setup and model workflows. We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.
+RoGeR, *Runoff Generation Research*, is a process-based hydrological model that can be applied from plot to catchment scale. RoGeR is written in pure Python, which facilitates model setup and model workflows. We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.
 
-Roger supports a NumPy backend for small-scale problems, and a
+RoGeR supports a NumPy backend for small-scale problems, and a
 high-performance [JAX](https://github.com/google/jax) backend
 with CPU and GPU support. Parallel computation is available via MPI and supports
 distributed execution on any number of nodes/CPU cores.
@@ -112,7 +112,7 @@ If you use Roger in scientific work, please consider citing [the following publi
 
 ```bibtex
 @article{
-	title = {Roger v3.0 – a hydrologic toolbox in {Python}},
+	title = {Roger v3.0 – a process-based hydrologic toolbox model in {Python}},
 	volume = {...},
 	doi = {https://doi.org/10.5194/gmd-xxx},
 	journal = {Geosci. Model Dev.},

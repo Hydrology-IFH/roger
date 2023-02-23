@@ -1,13 +1,13 @@
-Running Roger on a cluster
+Running RoGeR on a cluster
 ==========================
 This tutorial walks you through some of the most common challenges that are specific to large, shared architectures like clusters and supercomputers.
 
-In case you having trouble setting up or running Roger on a cluster, you should first contact your cluster administrator. Otherwise, feel free to `open an issue <https://github.com/Hydrology-IFH/roger/issues>`__.
+In case you having trouble setting up or running RoGeR on a cluster, you should first contact your cluster administrator. Otherwise, feel free to `open an issue <https://github.com/Hydrology-IFH/roger/issues>`__.
 
 Installation for CPU computing
 ++++++++++++++++++++++++++++++
 
-Probably the easiest way to try out Roger on a cluster is to, once again, :doc:`use Anaconda </introduction/get-started>`. Since Anaconda is platform independent and does not require elevated permissions, it is the perfect way to try out Roger without too much effort.
+Probably the easiest way to try out RoGeR on a cluster is to, once again, :doc:`use Anaconda </introduction/get-started>`. Since Anaconda is platform independent and does not require elevated permissions, it is the perfect way to try out RoGeR without too much effort.
 
 However, **in high-performance contexts, we advise to use pip install within your anaconda environment**. Getting optimal performance requires a software stacked that is linked to the correct system libraries, in particular MPI (see also :doc:`/introduction/advanced-installation`). This requires that Python packages that depend on C libraries (such as ``mpi4py``, ``mpi4jax``) are built from source. For example, installation on `bwForCluster BinAC <https://www.binac.uni-tuebingen.de/>`_:
 
