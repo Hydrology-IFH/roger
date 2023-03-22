@@ -7,8 +7,8 @@ from roger.cli.roger_run_base import roger_base_cli
 
 @click.option("--location", type=click.Choice(['freiburg', 'altheim', 'kupferzell']), default='freiburg')
 @click.option("--land-cover-scenario", type=click.Choice(['grass', 'corn', 'corn_catch_crop', 'crop_rotation']), default='grass')
-@click.option("--climate-scenario", type=click.Choice(['observed', 'CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_CCLM4-8-17']), default='observed')
-@click.option("--period", type=click.Choice(['2015-2021', '1985-2005', '2040-2060', '2080-2100']), default='2015-2021')
+@click.option("--climate-scenario", type=click.Choice(['observed', 'CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_RCA4']), default='observed')
+@click.option("--period", type=click.Choice(['2016-2021', '1985-2005', '2040-2060', '2080-2100']), default='2016-2021')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):

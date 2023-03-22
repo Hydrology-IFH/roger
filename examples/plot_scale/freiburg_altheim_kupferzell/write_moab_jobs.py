@@ -13,8 +13,8 @@ def main():
     
     locations = ['freiburg', 'altheim', 'kupferzell']
     land_cover_scenarios = ['corn', 'corn_catch_crop', 'crop_rotation']
-    climate_scenarios = ['CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_CCLM4-8-17']
-    periods = ['2015-2021', '1985-2005', '2040-2060', '2080-2100']
+    climate_scenarios = ['CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_RCA4']
+    periods = ['2016-2021', '1985-2005', '2040-2060', '2080-2100']
     
     for location in locations:
         for land_cover_scenario in land_cover_scenarios:
@@ -46,7 +46,7 @@ def main():
                     file.close()
                     subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
-            script_name = f'svat_{location}_{land_cover_scenario}_observed_2015-2021'
+            script_name = f'svat_{location}_{land_cover_scenario}_observed_2016-2021'
             output_path_ws = base_path_ws / 'freiburg_altheim_kupferzell' / 'svat'
             lines = []
             lines.append('#!/bin/bash\n')
@@ -61,7 +61,7 @@ def main():
             lines.append('conda activate roger\n')
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
-            lines.append('python svat_crop.py -b jax -d cpu --land-cover-scenario %s --climate-scenario observed --period 2015-2021 -td "${TMPDIR}"\n' % (land_cover_scenario))
+            lines.append('python svat_crop.py -b jax -d cpu --land-cover-scenario %s --climate-scenario observed --period 2016-2021 -td "${TMPDIR}"\n' % (land_cover_scenario))
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
@@ -101,7 +101,7 @@ def main():
                 file.close()
                 subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
-            script_name = f'svat_{location}_grass_observed_2015-2021'
+            script_name = f'svat_{location}_grass_observed_2016-2021'
             output_path_ws = base_path_ws / 'freiburg_altheim_kupferzell' / 'svat'
             lines = []
             lines.append('#!/bin/bash\n')
@@ -116,7 +116,7 @@ def main():
             lines.append('conda activate roger\n')
             lines.append(f'cd {base_path_binac}\n')
             lines.append(' \n')
-            lines.append('python svat.py -b jax -d cpu --land-cover-scenario grass --climate-scenario observed --period 2015-2021 -td "${TMPDIR}"\n')
+            lines.append('python svat.py -b jax -d cpu --land-cover-scenario grass --climate-scenario observed --period 2016-2021 -td "${TMPDIR}"\n')
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
@@ -165,7 +165,7 @@ def main():
                             file.close()
                             subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
-                    script_name = f'svat_transport_{location}_{land_cover_scenario}_observed_2015-2021'
+                    script_name = f'svat_transport_{location}_{land_cover_scenario}_observed_2016-2021'
                     output_path_ws = base_path_ws / 'freiburg_altheim_kupferzell' / 'svat_transport'
                     tms = tm.replace(" ", "_")
                     lines = []
@@ -230,7 +230,7 @@ def main():
                         file.close()
                         subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
-                script_name = f'svat_transport_{location}_grass_observed_2015-2021'
+                script_name = f'svat_transport_{location}_grass_observed_2016-2021'
                 output_path_ws = base_path_ws / 'freiburg_altheim_kupferzell' / 'svat_transport'
                 tms = tm.replace(" ", "_")
                 lines = []
@@ -250,7 +250,7 @@ def main():
                 lines.append('conda activate roger-gpu\n')
                 lines.append(f'cd {base_path_binac}\n')
                 lines.append(' \n')
-                lines.append('python svat_crop_transport.py -b jax -d gpu --land-cover-scenario grass --climate-scenario observed --period 2015-2021 -td "${TMPDIR}"\n')
+                lines.append('python svat_crop_transport.py -b jax -d gpu --land-cover-scenario grass --climate-scenario observed --period 2016-2021 -td "${TMPDIR}"\n')
                 lines.append('# Move output from local SSD to global workspace\n')
                 lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                 lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))

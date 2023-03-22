@@ -404,7 +404,7 @@ def plot_obs_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'
         hue="type", col="hyd_year",
         kind="line", palette=palette,
         facet_kws=dict(sharex=False),
-        height=4, aspect=.7, col_wrap=4
+        height=1.5, aspect=1, col_wrap=4
     )
     g.set_ylabels(y_lab)
     g.set_xlabels(x_lab)
@@ -484,7 +484,7 @@ def plot_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
         hue="type", col="hyd_year",
         kind="line", palette=palette,
         facet_kws=dict(sharex=False),
-        height=4, aspect=.7, col_wrap=4
+        height=1.5, aspect=1, col_wrap=4
     )
     g.set_ylabels(y_lab)
     g.set_xlabels(x_lab)

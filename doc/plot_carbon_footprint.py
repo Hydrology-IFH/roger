@@ -50,7 +50,7 @@ def plot_benchmarks(name, file, xaxis, unit, nitt, rescale):
 
     components = pd.unique(data["backend"]).tolist()
 
-    fig, ax = plt.subplots(1, 1, figsize=(5.5, 4), dpi=150)
+    fig, ax = plt.subplots(1, 1, figsize=(4, 2.5), dpi=250)
     last_coords = {}
     for component in components:
         data_component = data.loc[data["backend"] == component, :]
