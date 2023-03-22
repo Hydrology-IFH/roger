@@ -5,11 +5,25 @@ import numpy as np
 import matplotlib as mpl
 import seaborn as sns
 
+mpl.rcParams['font.size'] = 8
+mpl.rcParams['axes.titlesize'] = 8
+mpl.rcParams['axes.labelsize'] = 9
+mpl.rcParams['xtick.labelsize'] = 8
+mpl.rcParams['ytick.labelsize'] = 8
+mpl.rcParams['legend.fontsize'] = 8
+mpl.rcParams['legend.title_fontsize'] = 9
 mpl.use("agg")
 
 import matplotlib.pyplot as plt  # noqa: E402
 
 sns.set_style("ticks")
+sns.plotting_context("paper", font_scale=1, rc={'font.size': 8.0,
+                                                'axes.labelsize': 9.0,
+                                                'axes.titlesize': 9.0,
+                                                'xtick.labelsize': 8.0,
+                                                'ytick.labelsize': 8.0,
+                                                'legend.fontsize': 8.0,
+                                                'legend.title_fontsize': 9.0})
 
 COMPONENT_COLORS = {
     "numpy": "orangered",
@@ -72,7 +86,7 @@ def plot_energy_footprint(infiles, xaxis, tdpc, tdpm, mem, ncores, nitt, unit):
                 component_data[benchmark][res["backend"]][x_idx] = time
 
     for benchmark in benchmarks:
-        fig, ax = plt.subplots(1, 1, figsize=(5.5, 4), dpi=150)
+        fig, ax = plt.subplots(1, 1, figsize=(4, 2.5), dpi=250)
 
         last_coords = {}
         for component in components:
@@ -102,10 +116,10 @@ def plot_energy_footprint(infiles, xaxis, tdpc, tdpm, mem, ncores, nitt, unit):
         elif xaxis == "size":
             nproc = list(nprocs)[0]
             plt.xlabel("Grid size [# grid cells]")
-            plt.title(f"Benchmark '{benchmark}' on {nproc} processes", **title_kwargs)
+            plt.title("Benchmark %s \non %s processes" % (benchmark, nproc), **title_kwargs)
 
         plt.ylabel(f"Energy footprint [{unit}/iteration]")
-        plt.text(0.05, 1.05, "Energy (lower is better)", transform=ax.transAxes, va="top", color="0.4")
+        plt.text(0.05, 1.0, "Energy (lower is better)", transform=ax.transAxes, va="top", color="0.4")
 
         plt.xscale("log")
 

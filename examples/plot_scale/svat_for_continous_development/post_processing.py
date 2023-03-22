@@ -13,21 +13,21 @@ import matplotlib as mpl
 import seaborn as sns
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
-mpl.rcParams['font.size'] = 6
-mpl.rcParams['axes.titlesize'] = 6
-mpl.rcParams['axes.labelsize'] = 7
-mpl.rcParams['xtick.labelsize'] = 6
-mpl.rcParams['ytick.labelsize'] = 6
-mpl.rcParams['legend.fontsize'] = 6
-mpl.rcParams['legend.title_fontsize'] = 7
+mpl.rcParams['font.size'] = 8
+mpl.rcParams['axes.titlesize'] = 8
+mpl.rcParams['axes.labelsize'] = 9
+mpl.rcParams['xtick.labelsize'] = 8
+mpl.rcParams['ytick.labelsize'] = 8
+mpl.rcParams['legend.fontsize'] = 8
+mpl.rcParams['legend.title_fontsize'] = 9
 sns.set_style("ticks")
-sns.plotting_context("paper", font_scale=1, rc={'font.size': 6.0,
-                                                'axes.labelsize': 7.0,
+sns.plotting_context("paper", font_scale=1, rc={'font.size': 8.0,
+                                                'axes.labelsize': 9.0,
                                                 'axes.titlesize': 8.0,
-                                                'xtick.labelsize': 6.0,
-                                                'ytick.labelsize': 6.0,
-                                                'legend.fontsize': 6.0,
-                                                'legend.title_fontsize': 7.0})
+                                                'xtick.labelsize': 8.0,
+                                                'ytick.labelsize': 8.0,
+                                                'legend.fontsize': 8.0,
+                                                'legend.title_fontsize': 9.0})
 
 base_path = Path(__file__).parent
 # directory of results
@@ -173,22 +173,50 @@ for i, meteo_station in enumerate(meteo_stations):
 # plot parameters
 csv_file = base_path / "parameter_grid.csv"
 df_params = pd.read_csv(csv_file, sep=';', skiprows=1)
-params = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'kf']
-_bins = [10, 12, 15, 30, 25, 16, 10]
-_range = [(60, 160), (200, 800), (0.05, 0.2), (0.05, 0.35), (0.0, 0.25), (0, 80), (0, 5)]
+df_lu_count = df_params.groupby('lu_id')['lu_id'].count()
+params = ['dmpv', 'lmpv', 'z_soil', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']
+_bins = [10, 12, 8, 15, 30, 25, 16]
+_range = [(60, 160), (200, 800), (200, 1000), (0.05, 0.2), (0.05, 0.35), (0.0, 0.25), (0, 80)]
 df_params = df_params.loc[:, params]
 fig, axs = plt.subplots(4, 2, figsize=(6, 6), sharey=True)
 labels = [labs._LABS[param] for param in params]
+axs.flatten()[0].bar(df_lu_count.index, df_lu_count.values, color='grey', width=0.6)
+axs.flatten()[0].set_xticks(df_lu_count.index, ('5', '6', '7', '8', '9', '10', '11', '12', '13'))
+axs.flatten()[0].set_xlabel('lu_id')
 for i, param in enumerate(params):
-    axs.flatten()[i].hist(df_params.loc[:, param], bins=_bins[i], range=_range[i], color="grey")
-    axs.flatten()[i].set_xlabel(labs._LABS[param])
+    if i == 2:
+        axs.flatten()[3].bar([1, 2, 3], [2000, 2000, 2000], color='grey', width=0.2)
+        axs.flatten()[3].set_xticks([1, 2, 3], ('300', '600', '900'))
+        axs.flatten()[3].set_xlabel(r'$z_{soil}$ [mm]')
+    else:
+        axs.flatten()[i+1].hist(df_params.loc[:, param], bins=_bins[i], range=_range[i], color="grey")
+        axs.flatten()[i+1].set_xlabel(labs._LABS[param])
 axs[0, 0].set_ylabel('# grid cells')
 axs[1, 0].set_ylabel('# grid cells')
 axs[2, 0].set_ylabel('# grid cells')
 axs[3, 0].set_ylabel('# grid cells')
-axs[-1, -1].axis('off')
 fig.tight_layout()
-file = base_path_figs / "parameter_grid_hist.png"
+file = base_path_figs / "parameter_grid_hist1.png"
+fig.savefig(file, dpi=250)
+file = base_path_figs / "parameter_grid_hist1.pdf"
+fig.savefig(file, dpi=250)
+
+csv_file = base_path / "parameter_grid.csv"
+df_params = pd.read_csv(csv_file, sep=';', skiprows=1)
+params = ['kf']
+_bins = [10]
+_range = [(0, 5)]
+df_params = df_params.loc[:, params]
+fig, axs = plt.subplots(1, 2, figsize=(6, 1.5), sharey=True)
+labels = [labs._LABS[param] for param in params]
+axs.flatten()[0].hist(df_params.loc[:, 'kf'], bins=_bins[0], range=_range[0], color="grey")
+axs.flatten()[0].set_xlabel(labs._LABS['kf'])
+axs.flatten()[0].set_ylabel('# grid cells')
+axs.flatten()[1].axis('off')
+fig.tight_layout()
+file = base_path_figs / "parameter_grid_hist2.png"
+fig.savefig(file, dpi=250)
+file = base_path_figs / "parameter_grid_hist2.pdf"
 fig.savefig(file, dpi=250)
 
 # plot simulations
@@ -267,7 +295,7 @@ for i, meteo_station in enumerate(meteo_stations):
         ax.fill_between(days_sim[1:], p5_vals[1:], p95_vals[1:], edgecolor=color, facecolor=color, alpha=.66, label='95% interval')
         ax.fill_between(days_sim[1:], p25_vals[1:], p75_vals[1:], edgecolor=color, facecolor=color, alpha=1, label='75% interval')
         ax.plot(days_sim[1:], median_vals[1:], color='black', label='Median', linewidth=1)
-        ax.legend(frameon=False, loc='upper right', ncol=4, bbox_to_anchor=(0.8, 1.12))
+        ax.legend(frameon=False, loc='upper right', ncol=4, bbox_to_anchor=(0.93, 1.19))
         ax.set_xlabel('Time [days]')
         ax.set_ylabel(labs._Y_LABS_DAILY[var_sim])
         ax.set_xlim(days_sim[1], days_sim[-1])

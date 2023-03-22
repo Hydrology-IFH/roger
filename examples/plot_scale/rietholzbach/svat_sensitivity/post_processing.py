@@ -18,21 +18,22 @@ import matplotlib as mpl
 import seaborn as sns
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
-mpl.rcParams['font.size'] = 6
-mpl.rcParams['axes.titlesize'] = 6
-mpl.rcParams['axes.labelsize'] = 7
-mpl.rcParams['xtick.labelsize'] = 6
-mpl.rcParams['ytick.labelsize'] = 6
-mpl.rcParams['legend.fontsize'] = 6
-mpl.rcParams['legend.title_fontsize'] = 7
+mpl.rcParams['font.size'] = 8
+mpl.rcParams['axes.titlesize'] = 8
+mpl.rcParams['axes.labelsize'] = 9
+mpl.rcParams['xtick.labelsize'] = 8
+mpl.rcParams['ytick.labelsize'] = 8
+mpl.rcParams['legend.fontsize'] = 8
+mpl.rcParams['legend.title_fontsize'] = 9
 sns.set_style("ticks")
-sns.plotting_context("paper", font_scale=1, rc={'font.size': 6.0,
-                                                'axes.labelsize': 7.0,
+sns.plotting_context("paper", font_scale=1, rc={'font.size': 8.0,
+                                                'axes.labelsize': 9.0,
                                                 'axes.titlesize': 8.0,
-                                                'xtick.labelsize': 6.0,
-                                                'ytick.labelsize': 6.0,
-                                                'legend.fontsize': 6.0,
-                                                'legend.title_fontsize': 7.0})
+                                                'xtick.labelsize': 8.0,
+                                                'ytick.labelsize': 8.0,
+                                                'legend.fontsize': 8.0,
+                                                'legend.title_fontsize': 9.0})
+
 onp.random.seed(42)
 
 
@@ -272,7 +273,7 @@ def main(tmp_dir):
                 for i, name in enumerate(df_metrics.columns):
                     indices = dict_si[name][['S1', 'ST']]
                     err = dict_si[name][['S1_conf', 'ST_conf']]
-                    indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
+                    indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors, width=1.0)
                     ax[i].set_xticklabels(xaxis_labels)
                     ax[i].set_title(_LABS[name])
                     ax[i].legend(["First-order", "Total"], frameon=False, loc='upper left')

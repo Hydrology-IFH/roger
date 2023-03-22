@@ -5,11 +5,25 @@ import pandas as pd
 import matplotlib as mpl
 import seaborn as sns
 
+mpl.rcParams['font.size'] = 8
+mpl.rcParams['axes.titlesize'] = 8
+mpl.rcParams['axes.labelsize'] = 9
+mpl.rcParams['xtick.labelsize'] = 8
+mpl.rcParams['ytick.labelsize'] = 8
+mpl.rcParams['legend.fontsize'] = 8
+mpl.rcParams['legend.title_fontsize'] = 9
 mpl.use("agg")
 
 import matplotlib.pyplot as plt  # noqa: E402
 
 sns.set_style("ticks")
+sns.plotting_context("paper", font_scale=1, rc={'font.size': 8.0,
+                                                'axes.labelsize': 9.0,
+                                                'axes.titlesize': 9.0,
+                                                'xtick.labelsize': 8.0,
+                                                'ytick.labelsize': 8.0,
+                                                'legend.fontsize': 8.0,
+                                                'legend.title_fontsize': 9.0})
 
 COMPONENT_COLORS = {
     "numpy": "orangered",
@@ -50,7 +64,7 @@ def plot_benchmarks(name, file, xaxis, unit, nitt, rescale):
 
     components = pd.unique(data["backend"]).tolist()
 
-    fig, ax = plt.subplots(1, 1, figsize=(5.5, 4), dpi=150)
+    fig, ax = plt.subplots(1, 1, figsize=(4, 2.5), dpi=250)
     last_coords = {}
     for component in components:
         data_component = data.loc[data["backend"] == component, :]
@@ -88,9 +102,9 @@ def plot_benchmarks(name, file, xaxis, unit, nitt, rescale):
             plt.xlabel("Grid size [# grid cells]")
 
         if rescale:
-            plt.ylabel(f"Energy footprint [{unit}]")
+            plt.ylabel(f"Energy usage [{unit}]")
         else:
-            plt.ylabel(f"Energy footprint [{unit}/iteration]")
+            plt.ylabel(f"Energy usage [{unit}/iteration]")
 
         fig.canvas.draw()
 

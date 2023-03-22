@@ -119,9 +119,9 @@ Short description of land use (lu_id)
 - `598`: no crop
 - `599`: bare
 - `6`: vineyard
-- `7`: fruits
+- `7`: orchard
 - `8`: grass
-- `9`: complex parcel
+- `9`: complex plot
 - `10`: deciduous forest
 - `11`: mixed forest
 - `12`: coniferous forest
