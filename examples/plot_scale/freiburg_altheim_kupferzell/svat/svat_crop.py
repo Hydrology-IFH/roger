@@ -319,18 +319,6 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             if base_path:
                 diagnostics["collect"].base_output_path = base_path
 
-            diagnostics["average"].output_variables = ["ta"]
-            diagnostics["average"].output_frequency = 24 * 60 * 60
-            diagnostics["average"].sampling_frequency = 1
-            if base_path:
-                diagnostics["average"].base_output_path = base_path
-
-            diagnostics["constant"].output_variables = ['dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'lut_crop_scale', 'theta_eff', 'frac_lp', 'frac_fp']
-            diagnostics["constant"].output_frequency = 0
-            diagnostics["constant"].sampling_frequency = 1
-            if base_path:
-                diagnostics["constant"].base_output_path = base_path
-
             # maximum bias of deterministic/numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
