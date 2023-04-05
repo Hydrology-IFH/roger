@@ -459,112 +459,112 @@ def main(tmp_dir):
     df_params_metrics100.loc[:, 'id'] = range(len(df_params_metrics100.index))
     df_params_metrics100 = df_params_metrics100.sort_values(by=[metric_for_opt], ascending=False)
     idx_best100 = df_params_metrics100.loc[:df_params_metrics100.index[99], 'id'].values.tolist()
-    dict_metrics_best = {}
-    for sc in ['', 'dry', 'normal', 'wet']:
-        dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best100)))
-    for sc, sc1 in enumerate(['', 'dry', 'normal', 'wet']):
-        for ps, ps1 in enumerate(ll_param_sets):
-            df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'KGE_dS{sc1}', f'KGE_q_ss{sc1}', f'KGE_multi{sc1}']]
-            df_params = df_params_metrics.loc[:, ps1]
-            nrow = len(df_metrics.columns)
-            ncol = len(df_params.columns)
-            fig, ax = plt.subplots(nrow, ncol, sharey='row', sharex='col', figsize=(6, 5))
-            for i, metric_var in enumerate(df_metrics.columns):
-                for j, param_var in enumerate(df_params.columns):
-                    y = df_metrics.iloc[:, i]
-                    x = df_params.iloc[:, j]
-                    ax[i, j].scatter(x, y, s=2, c='grey', alpha=0.5)
-                    ax[i, j].set_xlabel('')
-                    ax[i, j].set_ylabel('')
-                    ax[i, j].set_ylim((0, 1))
-                    # best parameter set for individual evaluation metric at specific storage conditions
-                    df_params_metrics_sc1 = df_params_metrics.copy()
-                    df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics100.index))
-                    df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
-                    idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[99], 'id'].values.tolist()
-                    for idx_best_sc in idx_best_sc1:
-                        y_best_sc = df_metrics.iloc[idx_best_sc, i]
-                        x_best_sc = df_params.iloc[idx_best_sc, j]
-                        ax[i, j].scatter(x_best_sc, y_best_sc, s=2, c='blue', alpha=0.8)
-                    # best parameter sets for multi-objective criteria
-                    for ii, idx_best in enumerate(idx_best100):
-                        y_best = df_metrics.iloc[idx_best, i]
-                        x_best = df_params.iloc[idx_best, j]
-                        ax[i, j].scatter(x_best, y_best, s=2, c='red', alpha=1)
-                        dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
+    # dict_metrics_best = {}
+    # for sc in ['', 'dry', 'normal', 'wet']:
+    #     dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best100)))
+    # for sc, sc1 in enumerate(['', 'dry', 'normal', 'wet']):
+    #     for ps, ps1 in enumerate(ll_param_sets):
+    #         df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'KGE_dS{sc1}', f'KGE_q_ss{sc1}', f'KGE_multi{sc1}']]
+    #         df_params = df_params_metrics.loc[:, ps1]
+    #         nrow = len(df_metrics.columns)
+    #         ncol = len(df_params.columns)
+    #         fig, ax = plt.subplots(nrow, ncol, sharey='row', sharex='col', figsize=(6, 5))
+    #         for i, metric_var in enumerate(df_metrics.columns):
+    #             for j, param_var in enumerate(df_params.columns):
+    #                 y = df_metrics.iloc[:, i]
+    #                 x = df_params.iloc[:, j]
+    #                 ax[i, j].scatter(x, y, s=2, c='grey', alpha=0.5)
+    #                 ax[i, j].set_xlabel('')
+    #                 ax[i, j].set_ylabel('')
+    #                 ax[i, j].set_ylim((0, 1))
+    #                 # best parameter set for individual evaluation metric at specific storage conditions
+    #                 df_params_metrics_sc1 = df_params_metrics.copy()
+    #                 df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics100.index))
+    #                 df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
+    #                 idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[99], 'id'].values.tolist()
+    #                 for idx_best_sc in idx_best_sc1:
+    #                     y_best_sc = df_metrics.iloc[idx_best_sc, i]
+    #                     x_best_sc = df_params.iloc[idx_best_sc, j]
+    #                     ax[i, j].scatter(x_best_sc, y_best_sc, s=2, c='blue', alpha=0.8)
+    #                 # best parameter sets for multi-objective criteria
+    #                 for ii, idx_best in enumerate(idx_best100):
+    #                     y_best = df_metrics.iloc[idx_best, i]
+    #                     x_best = df_params.iloc[idx_best, j]
+    #                     ax[i, j].scatter(x_best, y_best, s=2, c='red', alpha=1)
+    #                     dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
         
-            for j, param_var in enumerate(df_params.columns):
-                xlabel = labs._LABS[param_var]
-                ax[-1, j].set_xlabel(xlabel)
+    #         for j, param_var in enumerate(df_params.columns):
+    #             xlabel = labs._LABS[param_var]
+    #             ax[-1, j].set_xlabel(xlabel)
         
-            ax[0, 0].set_ylabel('$KGE_{ET}$ [-]')
-            ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
-            ax[2, 0].set_ylabel('$KGE_{PERC}$ [-]')
-            ax[3, 0].set_ylabel('$KGE_{multi}$ [-]')
+    #         ax[0, 0].set_ylabel('$KGE_{ET}$ [-]')
+    #         ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
+    #         ax[2, 0].set_ylabel('$KGE_{PERC}$ [-]')
+    #         ax[3, 0].set_ylabel('$KGE_{multi}$ [-]')
         
-            fig.subplots_adjust(bottom=0.1, top=0.98, right=0.98, wspace=0.1, hspace=0.2)
-            file = base_path_figs / f"dotty_plots{ps}_{sc1}_optimized_with_{metric_for_opt}.png"
-            fig.savefig(file, dpi=250)
+    #         fig.subplots_adjust(bottom=0.1, top=0.98, right=0.98, wspace=0.1, hspace=0.2)
+    #         file = base_path_figs / f"dotty_plots{ps}_{sc1}_optimized_with_{metric_for_opt}.png"
+    #         fig.savefig(file, dpi=250)
     
-            fig, ax = plt.subplots(nrow, ncol, sharey='row', sharex='col', figsize=(6, 5))
-            for i, metric_var in enumerate(df_metrics.columns):
-                for j, param_var in enumerate(df_params.columns):
-                    y = df_metrics.iloc[:, i]
-                    x = df_params.iloc[:, j]
-                    ax[i, j].scatter(x, y, s=2, c='grey', alpha=0.5)
-                    ax[i, j].set_xlabel('')
-                    ax[i, j].set_ylabel('')
-                    if metric_var in ['KGE_aet', 'KGE_aetwet', 'KGE_aetnormal', 'KGE_aetdry']:
-                        ax[i, j].set_ylim((0.6, 1.0))
-                    elif metric_var in ['KGE_dS', 'KGE_dSwet', 'KGE_dSnormal', 'KGE_dSdry']:
-                        ax[i, j].set_ylim((0.6, 1.0))
-                    elif metric_var in ['KGE_q_ss', 'KGE_q_sswet', 'KGE_q_ssnormal', 'KGE_q_ssdry']:
-                        ax[i, j].set_ylim((0.4, 0.8))
-                    elif metric_var in ['KGE_multi', 'KGE_multiwet', 'KGE_multinormal', 'KGE_multidry']:
-                        ax[i, j].set_ylim((0.4, 0.8))
-                    # best parameter set for individual evaluation metric at specific storage conditions
-                    df_params_metrics_sc1 = df_params_metrics.copy()
-                    df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics100.index))
-                    df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
-                    idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[99], 'id'].values.tolist()
-                    for idx_best_sc in idx_best_sc1:
-                        y_best_sc = df_metrics.iloc[idx_best_sc, i]
-                        x_best_sc = df_params.iloc[idx_best_sc, j]
-                        ax[i, j].scatter(x_best_sc, y_best_sc, s=2, c='blue', alpha=0.8)
-                    # best parameter sets for multi-objective criteria
-                    for ii, idx_best in enumerate(idx_best100):
-                        y_best = df_metrics.iloc[idx_best, i]
-                        x_best = df_params.iloc[idx_best, j]
-                        ax[i, j].scatter(x_best, y_best, s=2, c='red', alpha=1)
-                        dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
+    #         fig, ax = plt.subplots(nrow, ncol, sharey='row', sharex='col', figsize=(6, 5))
+    #         for i, metric_var in enumerate(df_metrics.columns):
+    #             for j, param_var in enumerate(df_params.columns):
+    #                 y = df_metrics.iloc[:, i]
+    #                 x = df_params.iloc[:, j]
+    #                 ax[i, j].scatter(x, y, s=2, c='grey', alpha=0.5)
+    #                 ax[i, j].set_xlabel('')
+    #                 ax[i, j].set_ylabel('')
+    #                 if metric_var in ['KGE_aet', 'KGE_aetwet', 'KGE_aetnormal', 'KGE_aetdry']:
+    #                     ax[i, j].set_ylim((0.6, 1.0))
+    #                 elif metric_var in ['KGE_dS', 'KGE_dSwet', 'KGE_dSnormal', 'KGE_dSdry']:
+    #                     ax[i, j].set_ylim((0.6, 1.0))
+    #                 elif metric_var in ['KGE_q_ss', 'KGE_q_sswet', 'KGE_q_ssnormal', 'KGE_q_ssdry']:
+    #                     ax[i, j].set_ylim((0.4, 0.8))
+    #                 elif metric_var in ['KGE_multi', 'KGE_multiwet', 'KGE_multinormal', 'KGE_multidry']:
+    #                     ax[i, j].set_ylim((0.4, 0.8))
+    #                 # best parameter set for individual evaluation metric at specific storage conditions
+    #                 df_params_metrics_sc1 = df_params_metrics.copy()
+    #                 df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics100.index))
+    #                 df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
+    #                 idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[99], 'id'].values.tolist()
+    #                 for idx_best_sc in idx_best_sc1:
+    #                     y_best_sc = df_metrics.iloc[idx_best_sc, i]
+    #                     x_best_sc = df_params.iloc[idx_best_sc, j]
+    #                     ax[i, j].scatter(x_best_sc, y_best_sc, s=2, c='blue', alpha=0.8)
+    #                 # best parameter sets for multi-objective criteria
+    #                 for ii, idx_best in enumerate(idx_best100):
+    #                     y_best = df_metrics.iloc[idx_best, i]
+    #                     x_best = df_params.iloc[idx_best, j]
+    #                     ax[i, j].scatter(x_best, y_best, s=2, c='red', alpha=1)
+    #                     dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
         
-            for j, param_var in enumerate(df_params.columns):
-                xlabel = labs._LABS[param_var]
-                ax[-1, j].set_xlabel(xlabel)
+    #         for j, param_var in enumerate(df_params.columns):
+    #             xlabel = labs._LABS[param_var]
+    #             ax[-1, j].set_xlabel(xlabel)
         
-            ax[0, 0].set_ylabel('$KGE_{ET}$ [-]')
-            ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
-            ax[2, 0].set_ylabel('$KGE_{PERC}$ [-]')
-            ax[3, 0].set_ylabel('$KGE_{multi}$ [-]')
+    #         ax[0, 0].set_ylabel('$KGE_{ET}$ [-]')
+    #         ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
+    #         ax[2, 0].set_ylabel('$KGE_{PERC}$ [-]')
+    #         ax[3, 0].set_ylabel('$KGE_{multi}$ [-]')
         
-            fig.subplots_adjust(bottom=0.1, top=0.98, right=0.98, wspace=0.1, hspace=0.2)
-            file = base_path_figs / f"dotty_plots{ps}_{sc1}inset_optimized_with_{metric_for_opt}.png"
-            fig.savefig(file, dpi=250)
+    #         fig.subplots_adjust(bottom=0.1, top=0.98, right=0.98, wspace=0.1, hspace=0.2)
+    #         file = base_path_figs / f"dotty_plots{ps}_{sc1}inset_optimized_with_{metric_for_opt}.png"
+    #         fig.savefig(file, dpi=250)
     
-    # write evaluation metrics for different storage condtions to .txt
-    df_avg_std = pd.DataFrame(columns=['KGE_aet', 'KGE_dS', 'KGE_q_ss', 'KGE_multi'])
-    for sc in ['', 'dry', 'normal', 'wet']:
-        df_avg_std.loc[f'avg{sc}', :] = onp.mean(dict_metrics_best[sc].values, axis=0)
-        df_avg_std.loc[f'std{sc}', :] = onp.std(dict_metrics_best[sc].values, axis=0)
-    file = base_path_figs / f"metrics_best_100_avg_std_optimized_with_{metric_for_opt}.txt"
-    df_avg_std.to_csv(file, header=True, index=True, sep="\t")
+    # # write evaluation metrics for different storage condtions to .txt
+    # df_avg_std = pd.DataFrame(columns=['KGE_aet', 'KGE_dS', 'KGE_q_ss', 'KGE_multi'])
+    # for sc in ['', 'dry', 'normal', 'wet']:
+    #     df_avg_std.loc[f'avg{sc}', :] = onp.mean(dict_metrics_best[sc].values, axis=0)
+    #     df_avg_std.loc[f'std{sc}', :] = onp.std(dict_metrics_best[sc].values, axis=0)
+    # file = base_path_figs / f"metrics_best_100_avg_std_optimized_with_{metric_for_opt}.txt"
+    # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
     
-    # write average and standard deviation of best parameters to .txt
-    df_avg_std = pd.DataFrame(index=['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
-    df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics100.loc[:df_params_metrics100.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
-    df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics100.loc[:df_params_metrics100.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
-    file = base_path_figs / f"params_best_100_avg_std_optimized_with_{metric_for_opt}.txt"
-    df_avg_std.to_csv(file, header=True, index=True, sep="\t")
+    # # write average and standard deviation of best parameters to .txt
+    # df_avg_std = pd.DataFrame(index=['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
+    # df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics100.loc[:df_params_metrics100.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
+    # df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics100.loc[:df_params_metrics100.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
+    # file = base_path_figs / f"params_best_100_avg_std_optimized_with_{metric_for_opt}.txt"
+    # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
     
     # diagnostic polar plots
     file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
@@ -631,6 +631,10 @@ def main(tmp_dir):
         path = base_path_figs / file
         # fig.tight_layout()
         fig.savefig(path, dpi=250)
+        file = f'diag_polar_plot_{var_sim}_10_optimized_with_{metric_for_opt}.pdf'
+        path = base_path_figs / file
+        # fig.tight_layout()
+        fig.savefig(path, dpi=250)
     
     var_sim = 'dS'
     fig = de.diag_polar_plot_multi(df_for_diag10.loc[:, f'brel_mean_{var_sim}'].values,
@@ -644,6 +648,10 @@ def main(tmp_dir):
                                     df_for_diag10.loc[:, f'err_hf_{var_sim}'].values,
                                     df_for_diag10.loc[:, f'err_lf_{var_sim}'].values)
     file = f'diag_polar_plot_{var_sim}_10_optimized_with_{metric_for_opt}.png'
+    path = base_path_figs / file
+    # fig.tight_layout()
+    fig.savefig(path, dpi=250)
+    file = f'diag_polar_plot_{var_sim}_10_optimized_with_{metric_for_opt}.pdf'
     path = base_path_figs / file
     # fig.tight_layout()
     fig.savefig(path, dpi=250)

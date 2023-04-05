@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import shutil
 import h5netcdf
 import numpy as onp
 import pandas as pd
@@ -8,10 +9,10 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("--location", type=click.Choice(['freiburg', 'altheim', 'kupferzell']), default='freiburg')
-@click.option("--land-cover-scenario", type=click.Choice(['grass', 'corn', 'corn_catch_crop', 'crop_rotation']), default='grass')
+@click.option("--land-cover-scenario", type=click.Choice(['corn', 'corn_catch_crop', 'crop_rotation']), default='corn')
 @click.option("--climate-scenario", type=click.Choice(['observed', 'CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_RCA4']), default='observed')
 @click.option("--period", type=click.Choice(['2016-2021', '1985-2005', '2040-2060', '2080-2100']), default='2016-2021')
-@click.option("-td", "--tmp-dir", type=str, default=None)
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
 @roger_base_cli
 def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -24,7 +25,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
     class SVATCROPSetup(RogerSetup):
         """A SVAT model including crop phenology/crop rotation.
         """
-        _base_path = Path(__file__).parent
+        _base_path = Path(__file__).parent.parent
         _input_dir = _base_path / "input" / f"{location}" / f"{climate_scenario}" / f"{period}"
         if location == 'freiburg':
             _elevation = 236
@@ -123,8 +124,8 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
 
             settings.nx, settings.ny = 675, 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
+            settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, 'forcing.nc'))
 
-            # lysimeter surface 1 square meter (1m diameter)
             settings.dx = 1
             settings.dy = 1
 
@@ -206,13 +207,13 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             vs = state.variables
 
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 599)
-            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path,  "parameter_grid.csv"))
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_csv("dmpv", self._base_path,  "parameter_grid.csv"))
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path,  "parameter_grid.csv"))
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_csv("theta_ac", self._base_path,  "parameter_grid.csv"))
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_csv("theta_ufc", self._base_path,  "parameter_grid.csv"))
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_csv("theta_pwp", self._base_path,  "parameter_grid.csv"))
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_csv("ks", self._base_path,  "parameter_grid.csv"))
+            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path,  "parameters.csv"))
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_csv("dmpv", self._base_path,  "parameters.csv"))
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path,  "parameters.csv"))
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_csv("theta_ac", self._base_path,  "parameters.csv"))
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_csv("theta_ufc", self._base_path,  "parameters.csv"))
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_csv("theta_pwp", self._base_path,  "parameters.csv"))
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_csv("ks", self._base_path,  "parameters.csv"))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
             vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 1])
@@ -259,6 +260,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 "PREC",
                 "TA",
                 "PET",
+                "RS"
             ],
         )
         def set_forcing_setup(self, state):
@@ -592,8 +594,9 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
 
     model = SVATCROPSetup()
     write_forcing(model._input_dir, enable_crop_phenology=True)
-    crop_rotation_dir = model._base_path / "input" / land_cover_scenario
+    crop_rotation_dir = model._base_path / "input" / "land_cover_scenario" / land_cover_scenario
     write_crop_rotation(crop_rotation_dir)
+    shutil.move(crop_rotation_dir / "crop_rotation.nc", model._input_dir / "crop_rotation.nc")
     model.setup()
     model.run()
     return

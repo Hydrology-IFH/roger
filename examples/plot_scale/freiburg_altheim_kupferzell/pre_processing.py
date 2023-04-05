@@ -79,6 +79,8 @@ idx_hourly_2040_2060 = pd.date_range(start='2040-01-01 00:00:00',
 idx_hourly_2080_2100 = pd.date_range(start='2080-01-01 00:00:00',
                                     end='2100-12-31 23:00:00', freq='h')
 
+idx_3hourly_1985_2100c = pd.date_range(start='1985-01-01 01:30:00',
+                                      end='2100-12-31 22:30:00', freq='3h')
 idx_3hourly_1985_2100 = pd.date_range(start='1985-01-01 00:00:00',
                                       end='2100-12-31 23:00:00', freq='3h')
 
@@ -327,6 +329,9 @@ for station_id in station_ids:
     # donwnscale hourly precipitation by linear interpolation
     data_10mins = data_10mins.join(data_hourly)
     data_10mins = data_10mins.ffill() / 6
+    # replace numerical artefacts
+    cond0 = (data_10mins['PREC'] < 0.001)
+    data_10mins.loc[cond0, 'PREC'] = 0
 
     data_1985_2005 = pd.DataFrame(index=idx_10mins_1985_2005)
     data_1985_2005 = data_1985_2005.join(data_10mins)
@@ -350,8 +355,9 @@ for station_id in station_ids:
     data_idx = pd.read_csv(file, sep=';')
     data.index = pd.to_datetime(data_idx.iloc[:, 0].astype(str).values, format='%Y-%m-%d %H:%M')
     data = data.loc['1985':'2100', :]
-    data_3hourly = pd.DataFrame(index=idx_3hourly_1985_2100)
+    data_3hourly = pd.DataFrame(index=idx_3hourly_1985_2100c)
     data_3hourly = data_3hourly.join(data.loc[:, 'Center'].to_frame())
+    data_3hourly.index = idx_3hourly_1985_2100
     data_3hourly.columns = ['PREC']
     # fill 29th February in leap years
     data_3hourly = data_3hourly.fillna(0)
@@ -363,6 +369,9 @@ for station_id in station_ids:
     data_10mins = pd.DataFrame(index=idx_10mins_1985_2100)
     data_10mins = data_10mins.join(data_hourly)
     data_10mins = data_10mins.ffill() / 6
+    # replace numerical artefacts
+    cond0 = (data_10mins['PREC'] < 0.001)
+    data_10mins.loc[cond0, 'PREC'] = 0
 
     data_1985_2005 = pd.DataFrame(index=idx_10mins_1985_2005)
     data_1985_2005 = data_1985_2005.join(data_10mins)
