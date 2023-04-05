@@ -8,7 +8,7 @@
  
 eval "$(conda shell.bash hook)"
 conda activate roger
-cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell
+cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/svat
  
 python svat.py -b numpy -d cpu --land-cover-scenario grass --climate-scenario observed --period 2016-2021 -td "${TMPDIR}"
 # Move output from local SSD to global workspace
