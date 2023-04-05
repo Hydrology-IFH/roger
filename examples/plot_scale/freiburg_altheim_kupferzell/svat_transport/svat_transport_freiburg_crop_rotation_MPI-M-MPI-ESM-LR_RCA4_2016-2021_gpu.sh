@@ -3,7 +3,7 @@
 #PBS -l walltime=6:00:00
 #PBS -l pmem=4000mb
 #PBS -N svat_transport_freiburg_crop_rotation_MPI-M-MPI-ESM-LR_RCA4_2016-2021
-#PBS -m bea
+#PBS -m a
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  
 # load module dependencies

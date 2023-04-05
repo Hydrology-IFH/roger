@@ -9,7 +9,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("--location", type=click.Choice(['freiburg', 'altheim', 'kupferzell']), default='freiburg')
-@click.option("--land-cover-scenario", type=click.Choice(['corn', 'corn_catch_crop', 'crop_rotation']), default='corn')
+@click.option("--land-cover-scenario", type=click.Choice(['corn', 'corn_catch_crop', 'crop_rotation']), default='crop_rotation')
 @click.option("--climate-scenario", type=click.Choice(['observed', 'CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_RCA4']), default='observed')
 @click.option("--period", type=click.Choice(['2016-2021', '1985-2005', '2040-2060', '2080-2100']), default='2016-2021')
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
@@ -141,7 +141,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
 
             if settings.enable_crop_rotation:
                 settings.ncrops = 3
-                settings.ncr = self._get_ncr(self._input_dir, 'crop_rotation.nc')
+                settings.ncr = self._get_ncr(self._input_dir, f'{land_cover_scenario}.nc')
 
         @roger_routine(
             dist_safe=False,
@@ -216,9 +216,9 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_csv("ks", self._base_path,  "parameters.csv"))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 1])
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 2])
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, 3])
+            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 1])
+            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 2])
+            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 3])
 
             vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :2], 300)
             vs.z_root_crop = update(
@@ -295,8 +295,8 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             if (vs.year[1] != vs.year[0]) & (vs.itt > 1):
                 vs.itt_cr = vs.itt_cr + 2
                 vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.crop_type[2:-2, 2:-2, 2])
-                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, vs.itt_cr])
-                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, 'crop_rotation.nc')[:, :, vs.itt_cr + 1])
+                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, vs.itt_cr])
+                vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, vs.itt_cr + 1])
 
         @roger_routine
         def set_diagnostics(self, state, base_path=tmp_dir):
@@ -584,7 +584,8 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
     write_forcing(model._input_dir, enable_crop_phenology=True)
     crop_rotation_dir = model._base_path / "input" / "land_cover_scenario" / land_cover_scenario
     write_crop_rotation(crop_rotation_dir)
-    shutil.move(crop_rotation_dir / "crop_rotation.nc", model._input_dir / "crop_rotation.nc")
+    if not os.path.exists(model._input_dir / f"{land_cover_scenario}.nc"):
+        shutil.move(crop_rotation_dir / "crop_rotation.nc", model._input_dir / f"{land_cover_scenario}.nc")
     model.setup()
     model.run()
     return

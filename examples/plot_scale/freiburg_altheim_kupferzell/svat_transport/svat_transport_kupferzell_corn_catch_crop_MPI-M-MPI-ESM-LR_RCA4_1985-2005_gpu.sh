@@ -3,7 +3,7 @@
 #PBS -l walltime=6:00:00
 #PBS -l pmem=4000mb
 #PBS -N svat_transport_kupferzell_corn_catch_crop_MPI-M-MPI-ESM-LR_RCA4_1985-2005
-#PBS -m bea
+#PBS -m a
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  
 # load module dependencies

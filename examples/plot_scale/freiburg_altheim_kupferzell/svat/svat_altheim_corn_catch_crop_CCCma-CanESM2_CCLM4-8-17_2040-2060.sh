@@ -3,7 +3,7 @@
 #PBS -l walltime=24:00:00
 #PBS -l pmem=80000mb
 #PBS -N svat_altheim_corn_catch_crop_CCCma-CanESM2_CCLM4-8-17_2040-2060
-#PBS -m bea
+#PBS -m a
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  
 eval "$(conda shell.bash hook)"
