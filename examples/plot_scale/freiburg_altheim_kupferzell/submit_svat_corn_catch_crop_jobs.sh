@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd ~/roger/examples/plot_scale/freiburg_altheim_kupferzell/svat
+
+FILES="$PWD/svat_*_corn_ctach_crop_*.sh"
+for f in $FILES
+do
+  qsub -q short $f
+done

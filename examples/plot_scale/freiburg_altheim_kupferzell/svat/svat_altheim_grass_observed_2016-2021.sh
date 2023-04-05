@@ -3,7 +3,7 @@
 #PBS -l walltime=24:00:00
 #PBS -l pmem=80000mb
 #PBS -N svat_altheim_grass_observed_2016-2021
-#PBS -m bea
+#PBS -m a
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  
 eval "$(conda shell.bash hook)"
