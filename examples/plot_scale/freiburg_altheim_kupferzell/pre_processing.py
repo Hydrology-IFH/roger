@@ -440,7 +440,7 @@ for station, station_id in zip(stations, station_ids):
             df_RS['DD'] = data_rs.index.day.values
             df_RS['hh'] = data_rs.index.hour.values
             df_RS['mm'] = data_rs.index.minute.values
-            df_RS['RS'] = data_rs['RS'].values
+            df_RS['RS'] = data_rs['RS'].values * 0.0864  # convert watt (i.e. J/s) to MJ/day
             path_txt = path_dir / "RS.txt"
             df_RS.to_csv(path_txt, header=True, index=False, sep="\t")
             nas = np.sum(np.isnan(data_rs['RS'].values))
