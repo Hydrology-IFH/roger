@@ -683,6 +683,20 @@ VARIABLES = {
         "air temperature",
         active=lambda settings: not settings.enable_offline_transport,
     ),
+    "TA_MIN": Variable(
+        "daily minimum air temperature",
+        TIME_FORCING,
+        "degC",
+        "daily minimum air temperature",
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
+    ),
+    "TA_MAX": Variable(
+        "daily maximum air temperature",
+        TIME_FORCING,
+        "degC",
+        "daily maximum air temperature",
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
+    ),
     "ta": Variable(
         "air temperature",
         CATCH_GRID + TIMESTEPS,

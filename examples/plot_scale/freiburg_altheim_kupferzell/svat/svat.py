@@ -7,7 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 @click.option("--location", type=click.Choice(['freiburg', 'altheim', 'kupferzell']), default='freiburg')
 @click.option("--land-cover-scenario", type=click.Choice(['grass']), default='grass')
-@click.option("--climate-scenario", type=click.Choice(['observed', 'CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_RCA4']), default='observed')
+@click.option("--climate-scenario", type=click.Choice(['observed', 'CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_RCA4']), default='CCCma-CanESM2_CCLM4-8-17')
 @click.option("--period", type=click.Choice(['2016-2021', '1985-2005', '2040-2060', '2080-2100']), default='2040-2060')
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
 @roger_base_cli
@@ -56,7 +56,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             Args
             ----------
             rs : np.ndarray
-                solar radiation (in MJ m-2)
+                solar radiation (in MJ m-2 day-1)
 
             ta : np.ndarray
                 air temperature (in celsius)

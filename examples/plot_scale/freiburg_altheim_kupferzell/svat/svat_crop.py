@@ -9,9 +9,9 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("--location", type=click.Choice(['freiburg', 'altheim', 'kupferzell']), default='freiburg')
-@click.option("--land-cover-scenario", type=click.Choice(['corn', 'corn_catch_crop', 'crop_rotation']), default='crop_rotation')
-@click.option("--climate-scenario", type=click.Choice(['observed', 'CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_RCA4']), default='observed')
-@click.option("--period", type=click.Choice(['2016-2021', '1985-2005', '2040-2060', '2080-2100']), default='2016-2021')
+@click.option("--land-cover-scenario", type=click.Choice(['corn', 'corn_catch_crop', 'crop_rotation']), default='corn')
+@click.option("--climate-scenario", type=click.Choice(['observed', 'CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_RCA4']), default='CCCma-CanESM2_CCLM4-8-17')
+@click.option("--period", type=click.Choice(['2016-2021', '1985-2005', '2040-2060', '2080-2100']), default='2040-2060')
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
 @roger_base_cli
 def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
@@ -76,7 +76,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             Args
             ----------
             rs : np.ndarray
-                solar radiation (in MJ m-2)
+                solar radiation (in MJ m-2 day-1)
 
             ta : np.ndarray
                 air temperature (in celsius)
@@ -259,6 +259,8 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             local_variables=[
                 "PREC",
                 "TA",
+                "TA_MIN",
+                "TA_MAX",
                 "PET",
                 "RS"
             ],
@@ -268,6 +270,8 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
 
             vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[0, 0, :])
             vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[0, 0, :])
+            vs.TA_MIN = update(vs.TA_MIN, at[:], self._read_var_from_nc("TA_min", self._input_dir, 'forcing.nc')[0, 0, :])
+            vs.TA_MAX = update(vs.TA_MAX, at[:], self._read_var_from_nc("TA_max", self._input_dir, 'forcing.nc')[0, 0, :])
             if climate_scenario == 'observed':
                 vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[0, 0, :])
             else:
@@ -285,6 +289,9 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, 'forcing.nc')[vs.itt_forc])
                 vs.prec_day = update(vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
                 vs.ta_day = update(vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
+                vs.ta_min = update(vs.ta_min, at[:, :], npx.min(vs.TA_MIN[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24], axis=-1))
+                vs.ta_max = update(vs.ta_max, at[:, :], npx.max(vs.TA_MAX[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24], axis=-1))
+
                 if climate_scenario == 'observed':
                     vs.pet_day = update(vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
                 else:
