@@ -20,6 +20,3 @@ dependencies:
     - matplotlib
     - seaborn
     - cftime
-    - pip:
-      - diag-eff
-      - -e .

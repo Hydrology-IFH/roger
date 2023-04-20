@@ -35,7 +35,7 @@ Checking out the repository and using Conda (multi-platform)
       if "+" in roger_version:
           roger_version, _ = roger_version.split("+")
       print(".. code-block::\n")
-      print(f"   $ git clone https://github.com/Hydrology-IFH/roger.git -b v{roger_version}")
+      print(f"   $ git clone https://github.com/Hydrology-IFH/roger.git")
 
    (or `any other version of RoGeR <https://github.com/Hydrology-IFH/roger/releases>`__).
 
@@ -65,7 +65,7 @@ Checking out the repository and using pip (Linux / OSX)
       if "+" in roger_version:
           roger_version, _ = roger_version.split("+")
       print(".. code-block::\n")
-      print(f"   $ git clone https://github.com/Hydrology-IFH/roger.git -b v{roger_version}")
+      print(f"   $ git clone https://github.com/Hydrology-IFH/roger.git")
 
    (or `any other version of RoGeR <https://github.com/Hydrology-IFH/roger/releases>`__), or use ::
 

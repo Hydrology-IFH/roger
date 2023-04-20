@@ -35,6 +35,7 @@ THETA_SS: 0.3
 # --- Diagnostics --------------------------------------------------------------
 # simulated hydrologic fluxes
 OUTPUT_RATE:
+- "aet"  # actual evapotranspiration (mm/day)
 - "transp"  # transpiration (mm/day)
 - "evap_soil"  # soil evaporation (mm/day)
 - "inf_mat"  # soil matrix infiltration (mm/day)
