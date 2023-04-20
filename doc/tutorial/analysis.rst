@@ -58,7 +58,6 @@ To compute the monthly sums and plot the monthly data:
     @savefig inf_mat_monthly.png width=5in
     (
         ds_rate["inf_mat_rz"]
-        .isel(x=0, y=0).resample(Time='1M')
-        .sum()
+        .isel(x=0, y=0).resample('M', dim='Time', how='sum')
         .plot()
     )
