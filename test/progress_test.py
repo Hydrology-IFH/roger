@@ -1,8 +1,6 @@
 import sys
-import re
 import time
 import platform
-
 import pytest
 
 
