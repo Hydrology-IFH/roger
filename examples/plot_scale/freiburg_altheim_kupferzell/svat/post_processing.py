@@ -7,7 +7,7 @@ import numpy as onp
 base_path = Path(__file__).parent
 
 locations = ['freiburg', 'altheim', 'kupferzell']
-land_cover_scenarios = ['corn', 'corn_catch_crop', 'crop_rotation']
+land_cover_scenarios = ['corn', 'corn_catch_crop', 'crop_rotation', 'grass']
 climate_scenarios = ['CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_CCLM4-8-17']
 periods = ['2015-2021', '1985-2005', '2040-2060', '2080-2100']
 
@@ -16,8 +16,8 @@ for location in locations:
     for land_cover_scenario in land_cover_scenarios:
         for climate_scenario in climate_scenarios:
             for period in periods:
-                path = str(base_path / f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.*.nc")
-                states_hm_file = base_path / "SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                path = str(base_path.parent / "output" / "svat" / f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.*.nc")
+                states_hm_file = base_path.parent / "output" / "svat" / f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
                 diag_files = glob.glob(path)
                 with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
                     f.attrs.update(
@@ -70,8 +70,8 @@ for location in locations:
                                     v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                 units=var_obj.attrs["units"])
 
-        path = str(base_path / f"SVAT_{location}_{land_cover_scenario}_observed_2015-2021.*.nc")
-        states_hm_file = base_path / "SVAT_{location}_{land_cover_scenario}_observed_2015-2021.nc"
+        path = str(base_path.parent / "output" / "svat" / f"SVAT_{location}_{land_cover_scenario}_observed_2015-2021.*.nc")
+        states_hm_file = base_path.parent / "output" / "svat" / f"SVAT_{location}_{land_cover_scenario}_observed_2015-2021.nc"
         diag_files = glob.glob(path)
         with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
@@ -127,8 +127,8 @@ for location in locations:
     for location in locations:
         for climate_scenario in climate_scenarios:
             for period in periods:
-                path = str(base_path / f"SVAT_{location}_grass_{climate_scenario}_{period}.*.nc")
-                states_hm_file = base_path / "SVAT_{location}_grass_{climate_scenario}_{period}.nc"
+                path = str(base_path.parent / "output" / "svat" / f"SVAT_{location}_grass_{climate_scenario}_{period}.*.nc")
+                states_hm_file = base_path.parent / "output" / "svat" / f"SVAT_{location}_grass_{climate_scenario}_{period}.nc"
                 diag_files = glob.glob(path)
                 with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
                     f.attrs.update(
@@ -181,8 +181,8 @@ for location in locations:
                                     v.attrs.update(long_name=var_obj.attrs["long_name"],
                                                 units=var_obj.attrs["units"])
 
-        path = str(base_path / f"SVAT_{location}_grass_observed_2015-2021.*.nc")
-        states_hm_file = base_path / "SVAT_{location}_grass_observed_2015-2021.nc"
+        path = str(base_path.parent / "output" / "svat" / f"SVAT_{location}_grass_observed_2015-2021.*.nc")
+        states_hm_file = base_path.parent / "output" / "svat" / f"SVAT_{location}_grass_observed_2015-2021.nc"
         diag_files = glob.glob(path)
         with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
