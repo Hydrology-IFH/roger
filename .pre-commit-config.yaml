@@ -9,7 +9,7 @@ repos:
     rev: 6.0.0
     hooks:
     - id: flake8
-      args: ['--config=setup.cfg --ignore=W503']
+      args: ['--config=setup.cfg']
 
 exclude: "
   ^$\
