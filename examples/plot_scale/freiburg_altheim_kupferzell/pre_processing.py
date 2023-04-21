@@ -99,12 +99,28 @@ idx_10mins_2040_2060 = pd.date_range(start='2040-01-01 00:00:00',
 idx_10mins_2080_2100 = pd.date_range(start='2080-01-01 00:00:00',
                                     end='2100-12-31 23:50:00', freq='10T')
 
-# --- load climate projections ---------------------------------------------------
-dict_meteo_daily = {}
+# --- load bias-corrected climate projections ---------------------------------------------------
+dict_bc_meteo_daily = {}
 for station_id in station_ids:
-    dict_meteo_daily[station_id] = {}
+    dict_bc_meteo_daily[station_id] = {}
     for cm in cms:
-        dict_meteo_daily[station_id][cm] = {}
+        dict_bc_meteo_daily[station_id][cm] = {}
+        file = base_path / 'climate_projections' / 'data' / 'daily' / f'BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_hist.csv'
+        data_hist = pd.read_csv(file, sep=',', index_col=0)
+        data_hist.index = pd.to_datetime(data_hist.index, format='%Y-%m-%d')
+        data_hist.columns = ['PREC', 'TA', 'TAD', 'RS']
+        file = base_path / 'climate_projections' / 'data' / 'daily' / f'BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_future.csv'
+        data_future = pd.read_csv(file, sep=',', index_col=0)
+        data_future.index = pd.to_datetime(data_future.index, format='%Y-%m-%d')
+        data_future.columns = ['PREC', 'TA', 'TAD', 'RS']
+        data_hist_future = pd.concat([data_hist, data_future])
+        data_1985_2100 = pd.DataFrame(index=idx_daily_1985_2100)
+        data_1985_2100 = data_1985_2100.join(data_hist_future)
+        # fill NaNs at 29th February  
+        data_1985_2100.loc[:, 'TA'] = data_1985_2100['TA'].interpolate()
+        data_1985_2100.loc[:, 'RS'] = data_1985_2100['RS'].interpolate()
+        dict_bc_meteo_daily[station_id][cm]['1985-2100'] = data_1985_2100
+
         for period in periods:
             file = base_path / 'climate_projections' / 'data' / 'daily' / f'BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_{period}.csv'
             data = pd.read_csv(file, sep=',', index_col=0)
@@ -116,7 +132,7 @@ for station_id in station_ids:
                 # fill NaNs at 29th February  
                 data_1985_2005.loc[:, 'TA'] = data_1985_2005['TA'].interpolate()
                 data_1985_2005.loc[:, 'RS'] = data_1985_2005['RS'].interpolate()
-                dict_meteo_daily[station_id][cm]['1985-2005'] = data_1985_2005
+                dict_bc_meteo_daily[station_id][cm]['1985-2005'] = data_1985_2005
             elif period == 'future':
                 data_2016_2021 = pd.DataFrame(index=idx_daily_2016_2021)
                 data_2016_2021 = data_2016_2021.join(data)
@@ -133,11 +149,11 @@ for station_id in station_ids:
                 # fill NaNs at 29th February 
                 data_2080_2100.loc[:, 'TA'] = data_2080_2100['TA'].interpolate()
                 data_2080_2100.loc[:, 'RS'] = data_2080_2100['RS'].interpolate()
-                dict_meteo_daily[station_id][cm]['2016-2021'] = data_2016_2021
-                dict_meteo_daily[station_id][cm]['2040-2060'] = data_2040_2060
-                dict_meteo_daily[station_id][cm]['2080-2100'] = data_2080_2100
+                dict_bc_meteo_daily[station_id][cm]['2016-2021'] = data_2016_2021
+                dict_bc_meteo_daily[station_id][cm]['2040-2060'] = data_2040_2060
+                dict_bc_meteo_daily[station_id][cm]['2080-2100'] = data_2080_2100
 
-    dict_meteo_daily[station_id]['observed'] = {}
+    dict_bc_meteo_daily[station_id]['observed'] = {}
     file = base_path / 'input' / f'{station_label1[station_id]}' / 'observed' / '2016-2021' / 'PREC.txt'
     data_prec = pd.read_csv(file, sep='\t')
     data_prec.index = idx_10mins_2016_2021
@@ -149,7 +165,7 @@ for station_id in station_ids:
     data_2016_2021.loc[:, 'PREC'] = data_prec.loc[:, 'PREC'].resample('1D').sum().values
     data_2016_2021.loc[:, 'TA'] = data_ta.loc[:, 'TA'].values
     data_2016_2021.loc[:, 'PET'] = data_pet.loc[:, 'PET'].values
-    dict_meteo_daily[station_id]['observed']['2016-2021'] = data_2016_2021
+    dict_bc_meteo_daily[station_id]['observed']['2016-2021'] = data_2016_2021
 
 # --- projected annual air temperature and precipitation --------------------------------
 dict_meteo_ann = {}
@@ -176,7 +192,7 @@ for station_id in station_ids:
         data_2016_2021 = data_2016_2021.join(data)
         data_ann = data_2016_2021.loc[:, 'PREC'].resample('1Y').sum().to_frame().join(data_2016_2021.loc[:, 'TA'].resample('1Y').mean().to_frame())
         dict_meteo_ann[station_id][cm]['2016-2021'] = data_ann
-    data_2016_2021 = dict_meteo_daily[station_id]['observed']['2016-2021']
+    data_2016_2021 = dict_bc_meteo_daily[station_id]['observed']['2016-2021']
     data_ann = data_2016_2021.loc[:, 'PREC'].resample('1Y').sum().to_frame().join(data_2016_2021.loc[:, 'TA'].resample('1Y').mean().to_frame())
     dict_meteo_ann[station_id]['observed'] = {}
     dict_meteo_ann[station_id]['observed']['2016-2021'] = data_ann
@@ -266,12 +282,13 @@ for station, station_id in zip(stations, station_ids):
     elif station == 'ingelfingen':
         df_TA_min_max.loc[:, 'TA_min'] = data_2016_2021[' TNK'].values + ((385 - 541) / 100) * 0.65
         df_TA_min_max.loc[:, 'TA_max'] = data_2016_2021[' TXK'].values + ((385 - 541) / 100) * 0.65
-    meteo_2016_2021 = dict_meteo_daily[station_id]['observed']['2016-2021']
-    meteo_2016_2021 = meteo_2016_2021.join(df_TA_min_max)
-    dict_meteo_daily[station_id]['observed']['2016-2021'] = meteo_2016_2021
+    meteo_2016_2021 = dict_bc_meteo_daily[station_id]['observed']['2016-2021']
+    meteo_2016_2021 = meteo_2016_2021.join(df_TA_min_max).astype('float64')
+    dict_bc_meteo_daily[station_id]['observed']['2016-2021'] = meteo_2016_2021
 
 for station_id in station_ids:
     for cm in ['MPI-M-MPI-ESM-LR_RCA4', 'CCCma-CanESM2_CCLM4-8-17']:
+        # uncorrected daily minimum and maximum air temperature
         file = base_path / 'climate_projections' / 'data' / 'daily' / f'tmin-max-daily_FullTs_{cm}_station-DWD_{station_id}.csv'
         data = pd.read_csv(file, sep=',', index_col=2)
         data.index = pd.to_datetime(data.index, format='%Y-%m-%d')
@@ -285,53 +302,85 @@ for station_id in station_ids:
         data1.loc[:, 'TA_max'] = data_ta_max.values
         data = pd.DataFrame(index=idx_daily_1985_2100)
         data = data.join(data1)
+        # uncorrected daily average air temperature
+        file = base_path / 'climate_projections' / 'data' / 'daily' / f'pcmgthr_{cm}_DWD_{station_id}_hist.csv'
+        data_hist = pd.read_csv(file, sep=',', index_col=0)
+        data_hist.index = pd.to_datetime(data_hist.index, format='%Y-%m-%d')
+        data_hist.columns = ['PREC', 'TA', 'TAD', 'RS']
+        file = base_path / 'climate_projections' / 'data' / 'daily' / f'pcmgthr_{cm}_DWD_{station_id}_future.csv'
+        data_future = pd.read_csv(file, sep=',', index_col=0)
+        data_future.index = pd.to_datetime(data_future.index, format='%Y-%m-%d')
+        data_future.columns = ['PREC', 'TA', 'TAD', 'RS']
+        data_hist_future = pd.concat([data_hist, data_future])
+        data_1985_2100 = pd.DataFrame(index=idx_daily_1985_2100)
+        data_1985_2100 = data_1985_2100.join(data_hist_future )
+        # fill NaNs at 29th February  
+        data_1985_2100.loc[:, 'TA'] = data_1985_2100['TA'].interpolate()
+        data_1985_2100.loc[:, 'RS'] = data_1985_2100['RS'].interpolate()
+        data1 = data1.join(data_1985_2100.loc[:, 'TA'].to_frame())
+        data = pd.DataFrame(index=idx_daily_1985_2100)
+        data = data.join(data1)
+        # bias correction daily minimum and maximum air temperature
+        # with difference between bias-corrected daily average air temperature and uncorrected air temperature
+        data.loc[:, 'scale'] = dict_bc_meteo_daily[station_id][cm]['1985-2100'].loc[:, 'TA'] - data_1985_2100.loc[:, 'TA']
+        data.loc[:, 'TA_min'] = data.loc[:, 'TA_min'] + data.loc[:, 'scale']
+        data.loc[:, 'TA_max'] = data.loc[:, 'TA_max'] + data.loc[:, 'scale']
+        data = data.loc[:, ['TA_min', 'TA_max']]
+        data = data.astype('float64')
 
-        data_1985_2005 = dict_meteo_daily[station_id][cm]['1985-2005']
+        data_1985_2005 = dict_bc_meteo_daily[station_id][cm]['1985-2005']
         data_1985_2005 = data_1985_2005.join(data)
         # fill NaNs at 29th February  
         data_1985_2005.loc[:, 'TA_min'] = data_1985_2005['TA_min'].interpolate()
         data_1985_2005.loc[:, 'TA_max'] = data_1985_2005['TA_max'].interpolate()
-        dict_meteo_daily[station_id][cm]['1985-2005'] = data_1985_2005
-        data_2016_2021 = dict_meteo_daily[station_id][cm]['2016-2021']
+        dict_bc_meteo_daily[station_id][cm]['1985-2005'] = data_1985_2005
+        data_2016_2021 = dict_bc_meteo_daily[station_id][cm]['2016-2021']
         data_2016_2021 = data_2016_2021.join(data)
         # fill NaNs at 29th February  
         data_2016_2021.loc[:, 'TA_min'] = data_2016_2021['TA_min'].interpolate()
         data_2016_2021.loc[:, 'TA_max'] = data_2016_2021['TA_max'].interpolate()
-        data_2040_2060 = dict_meteo_daily[station_id][cm]['2040-2060']
+        data_2040_2060 = dict_bc_meteo_daily[station_id][cm]['2040-2060']
         data_2040_2060 = data_2040_2060.join(data)
         # fill NaNs at 29th February  
         data_2040_2060.loc[:, 'TA_min'] = data_2040_2060['TA_min'].interpolate()
         data_2040_2060.loc[:, 'TA_max'] = data_2040_2060['TA_max'].interpolate()
-        data_2080_2100 = dict_meteo_daily[station_id][cm]['2080-2100']
+        data_2080_2100 = dict_bc_meteo_daily[station_id][cm]['2080-2100']
         data_2080_2100 = data_2080_2100.join(data)
         # fill NaNs at 29th February  
         data_2080_2100.loc[:, 'TA_min'] = data_2080_2100['TA_min'].interpolate()
         data_2080_2100.loc[:, 'TA_max'] = data_2080_2100['TA_max'].interpolate()
-        dict_meteo_daily[station_id][cm]['2016-2021'] = data_2016_2021
-        dict_meteo_daily[station_id][cm]['2040-2060'] = data_2040_2060
-        dict_meteo_daily[station_id][cm]['2080-2100'] = data_2080_2100
+        dict_bc_meteo_daily[station_id][cm]['2016-2021'] = data_2016_2021
+        dict_bc_meteo_daily[station_id][cm]['2040-2060'] = data_2040_2060
+        dict_bc_meteo_daily[station_id][cm]['2080-2100'] = data_2080_2100
+        dict_bc_meteo_daily[station_id][cm]['1985-2100'] = data_1985_2100
 
-# --- downscale precipitation to 10 minutes ------------------------
+# --- downscale uncorrected precipitation to 10 minutes ------------------------
 dict_precip_10mins = {}
 cm = 'MPI-M-MPI-ESM-LR_RCA4'
 for station_id in station_ids:
     dict_precip_10mins[station_id] = {}
     dict_precip_10mins[station_id][cm] = {}
-    file = base_path / 'climate_projections' / 'data' / 'subdaily' / f'pr_subdaily_FullTs_{cm}_station-DWD_{station_id}.csv'
+    file = base_path / 'climate_projections' / 'data' / 'subdaily' / f'pr_subdaily_FullTs_{cm}_station-DWD_{station_id}_new.csv'
     data = pd.read_csv(file, sep=',', index_col=0)
+
     file = base_path / 'climate_projections' / 'data' / 'subdaily' / 'datetime_MPI-RCA1hr.txt'
     data_idx = pd.read_csv(file, sep=';')
     data.index = pd.to_datetime(data_idx.iloc[:, 0].astype(str).values, format='%Y-%m-%d %H:%M')
     data = data.loc['1985':'2100', :]
     data_hourly = pd.DataFrame(index=idx_hourly_1985_2100)
-    data_hourly.loc[:, 'PREC'] = data.loc[:, 'Center'].values
+    data_hourly.loc[:, 'PREC_hourly'] = data.loc[:, 'Center'].values
+    # resample to daily precipitation
+    data_daily = data_hourly.resample('1D').sum()
+    data_daily.columns = ['PREC_daily']
+
     data_10mins = pd.DataFrame(index=idx_10mins_1985_2100)
+    data_10mins = data_10mins.join([data_daily, data_hourly])
+    data_10mins = data_10mins.ffill()
     # donwnscale hourly precipitation by linear interpolation
-    data_10mins = data_10mins.join(data_hourly)
-    data_10mins = data_10mins.ffill() / 6
-    # replace numerical artefacts
-    cond0 = (data_10mins['PREC'] < 0.001)
-    data_10mins.loc[cond0, 'PREC'] = 0
+    data_10mins.loc[:, 'PREC'] = data_10mins.loc[:, 'PREC_hourly'] / 6
+    # scaling factor derived from uncorrected precipitation for downscaling of daily bias-corrected precipitation
+    data_10mins.loc[:, 'scale'] = data_10mins.loc[:, 'PREC'] / data_10mins.loc[:, 'PREC_daily']
+    data_10mins = data_10mins.fillna(0)
 
     data_1985_2005 = pd.DataFrame(index=idx_10mins_1985_2005)
     data_1985_2005 = data_1985_2005.join(data_10mins)
@@ -345,12 +394,14 @@ for station_id in station_ids:
     dict_precip_10mins[station_id][cm]['2016-2021'] = data_2016_2021
     dict_precip_10mins[station_id][cm]['2040-2060'] = data_2040_2060
     dict_precip_10mins[station_id][cm]['2080-2100'] = data_2080_2100
+    dict_precip_10mins[station_id][cm]['1985-2100'] = data_10mins
 
 cm = 'CCCma-CanESM2_CCLM4-8-17'
 for station_id in station_ids:
     dict_precip_10mins[station_id][cm] = {}
-    file = base_path / 'climate_projections' / 'data' / 'subdaily' / f'pr_subdaily_FullTs_{cm}_station-DWD_{station_id}.csv'
+    file = base_path / 'climate_projections' / 'data' / 'subdaily' / f'pr_subdaily_FullTs_{cm}_station-DWD_{station_id}_new.csv'
     data = pd.read_csv(file, sep=',', index_col=0)
+
     file = base_path / 'climate_projections' / 'data' / 'subdaily' / 'datetime_CANESM-CLM3hr.txt'
     data_idx = pd.read_csv(file, sep=';')
     data.index = pd.to_datetime(data_idx.iloc[:, 0].astype(str).values, format='%Y-%m-%d %H:%M')
@@ -358,20 +409,22 @@ for station_id in station_ids:
     data_3hourly = pd.DataFrame(index=idx_3hourly_1985_2100c)
     data_3hourly = data_3hourly.join(data.loc[:, 'Center'].to_frame())
     data_3hourly.index = idx_3hourly_1985_2100
-    data_3hourly.columns = ['PREC']
+    data_3hourly.columns = ['PREC_3hourly']
+    data_3hourly.loc[:, 'PREC_3hourly'] = data_3hourly.loc[:, 'PREC_3hourly'].values
     # fill 29th February in leap years
     data_3hourly = data_3hourly.fillna(0)
+    # resample to daily precipitation
+    data_daily = data_3hourly.resample('1D').sum()
+    data_daily.columns = ['PREC_daily']
 
-    # donwnscale 3-hourly precipitation by linear interpolation
-    data_hourly = pd.DataFrame(index=idx_hourly_1985_2100)
-    data_hourly = data_hourly.join(data_3hourly)
-    data_hourly = data_hourly.ffill() / 3
     data_10mins = pd.DataFrame(index=idx_10mins_1985_2100)
-    data_10mins = data_10mins.join(data_hourly)
-    data_10mins = data_10mins.ffill() / 6
-    # replace numerical artefacts
-    cond0 = (data_10mins['PREC'] < 0.001)
-    data_10mins.loc[cond0, 'PREC'] = 0
+    data_10mins = data_10mins.join([data_daily, data_3hourly])
+    data_10mins = data_10mins.ffill()
+    # donwnscale 3-hourly precipitation by linear interpolation
+    data_10mins.loc[:, 'PREC'] = data_10mins.loc[:, 'PREC_3hourly'] / 18
+    # scaling factor derived from uncorrected precipitation for downscaling of daily bias-corrected precipitation
+    data_10mins.loc[:, 'scale'] = data_10mins.loc[:, 'PREC'] / data_10mins.loc[:, 'PREC_daily']
+    data_10mins = data_10mins.fillna(0)
 
     data_1985_2005 = pd.DataFrame(index=idx_10mins_1985_2005)
     data_1985_2005 = data_1985_2005.join(data_10mins)
@@ -385,14 +438,114 @@ for station_id in station_ids:
     dict_precip_10mins[station_id][cm]['2016-2021'] = data_2016_2021
     dict_precip_10mins[station_id][cm]['2040-2060'] = data_2040_2060
     dict_precip_10mins[station_id][cm]['2080-2100'] = data_2080_2100
+    dict_precip_10mins[station_id][cm]['1985-2100'] = data_10mins
+
+# --- downscale bias-corrected precipitation to 10 minutes ------------------------
+dict_bc_precip_10mins = {}
+for station_id in station_ids:
+    dict_bc_precip_10mins[station_id] = {}
+    for cm in ['MPI-M-MPI-ESM-LR_RCA4', 'CCCma-CanESM2_CCLM4-8-17']:
+        dict_bc_precip_10mins[station_id][cm] = {}
+        data_daily = dict_bc_meteo_daily[station_id][cm]['1985-2100'].loc[:, 'PREC'].to_frame()
+
+        data_10mins = pd.DataFrame(index=idx_10mins_1985_2100)
+        # donwnscale daily precipitation by subdaily scaling factors
+        data_10mins = data_10mins.join(data_daily)
+        data_10mins = data_10mins.ffill()
+        data_10mins.loc[:, 'PREC'] = data_10mins.loc[:, 'PREC'] * dict_precip_10mins[station_id][cm]['1985-2100'].loc[:, 'scale']
+        # replace numerical artefacts
+        cond0 = (data_10mins['PREC'] < 0.001)
+        data_10mins.loc[cond0, 'PREC'] = 0
+
+        data_1985_2005 = pd.DataFrame(index=idx_10mins_1985_2005)
+        data_1985_2005 = data_1985_2005.join(data_10mins)
+        dict_bc_precip_10mins[station_id][cm]['1985-2005'] = data_1985_2005
+        data_2016_2021 = pd.DataFrame(index=idx_10mins_2016_2021)
+        data_2016_2021 = data_2016_2021.join(data_10mins)
+        data_2040_2060 = pd.DataFrame(index=idx_10mins_2040_2060)
+        data_2040_2060 = data_2040_2060.join(data_10mins)
+        data_2080_2100 = pd.DataFrame(index=idx_10mins_2080_2100)
+        data_2080_2100 = data_2080_2100.join(data_10mins)
+        dict_bc_precip_10mins[station_id][cm]['2016-2021'] = data_2016_2021
+        dict_bc_precip_10mins[station_id][cm]['2040-2060'] = data_2040_2060
+        dict_bc_precip_10mins[station_id][cm]['2080-2100'] = data_2080_2100
+
+# --- plot time series -------------------------------------
+stations = ['freiburg', 'kupferzell', 'altheim']
+for station, station_id in zip(stations, station_ids):
+    for cm in ['MPI-M-MPI-ESM-LR_RCA4', 'CCCma-CanESM2_CCLM4-8-17']:
+        for period in ['1985-2005', '2016-2021', '2040-2060', '2080-2100']:
+            data_precip = dict_bc_precip_10mins[station_id][cm][period]
+            data_precip_uc = dict_precip_10mins[station_id][cm][period]
+            data_meteo = dict_bc_meteo_daily[station_id][cm][period]
+            data_ta = data_meteo.loc[:, ['TA', 'TA_min', 'TA_max']]
+
+            fig, axs = plt.subplots(1, 1, figsize=(6, 2))
+            axs.plot(data_precip_uc.index, data_precip_uc['scale'].values, color='black', lw=0.5)
+            axs.set_xlim(data_precip_uc.index[0], data_precip_uc.index[-1])
+            axs.set_ylim(0,)
+            axs.set_xlabel('Time [year]')
+            axs.set_ylabel('Scale [-]')
+            fig.tight_layout()
+            file = base_path_figs / f'precip_scale_{station}_{cm}_{period}.png'
+            fig.savefig(file, dpi=250)
+            plt.close(fig=fig)
+
+            fig, axs = plt.subplots(1, 1, figsize=(6, 2))
+            axs.plot(data_precip.index, data_precip['PREC'].values, color='blue', lw=1)
+            axs.plot(data_precip_uc.index, data_precip_uc['PREC'].values, ls='--', color='blue', lw=1, alpha=0.5)
+            axs.set_xlim(data_precip.index[0], data_precip.index[-1])
+            axs.set_ylim(0,)
+            axs.set_xlabel('Time [year]')
+            axs.set_ylabel('PRECIP [mm/10 minutes]')
+            fig.tight_layout()
+            file = base_path_figs / f'precip_{station}_{cm}_{period}.png'
+            fig.savefig(file, dpi=250)
+            plt.close(fig=fig)
+
+            fig, axs = plt.subplots(1, 1, figsize=(6, 2))
+            axs.plot(data_precip.index, data_precip['PREC'].cumsum().values, color='blue', lw=1)
+            axs.plot(data_precip_uc.index, data_precip_uc['PREC'].cumsum().values, ls='--', color='blue', lw=1, alpha=0.5)
+            axs.set_xlim(data_precip.index[0], data_precip.index[-1])
+            axs.set_ylim(0,)
+            axs.set_xlabel('Time [year]')
+            axs.set_ylabel('PRECIP [mm]')
+            fig.tight_layout()
+            file = base_path_figs / f'precip_{station}_{cm}_{period}_cumulated.png'
+            fig.savefig(file, dpi=250)
+            plt.close(fig=fig)
+
+            fig, axs = plt.subplots(1, 1, figsize=(6, 2))
+            axs.plot(data_ta.index, data_ta['TA'].values, color='red', lw=0.5)
+            axs.fill_between(data_ta.index, data_ta['TA_min'].values, data_ta['TA_max'].values, color='red',
+                                    edgecolor=None, alpha=0.3)
+
+            axs.set_xlim(data_ta.index[0], data_ta.index[-1])
+            axs.set_xlabel('Time [year]')
+            axs.set_ylabel('TA [degC]')
+            fig.tight_layout()
+            file = base_path_figs / f'ta_{station}_{cm}_{period}.png'
+            fig.savefig(file, dpi=250)
+            plt.close(fig=fig)
+
+            fig, axs = plt.subplots(1, 1, figsize=(6, 2))
+            axs.fill_between(data_ta.index, data_ta['TA_min'].values, data_ta['TA_max'].values, color='red',
+                        edgecolor=None, alpha=0.3)
+            axs.set_xlim(data_ta.index[0], data_ta.index[-1])
+            axs.set_xlabel('Time [year]')
+            axs.set_ylabel('TA [degC]')
+            fig.tight_layout()
+            file = base_path_figs / f'ta_min_max_{station}_{cm}_{period}.png'
+            fig.savefig(file, dpi=250)
+            plt.close(fig=fig)
 
 # --- write input data to .txt -------------------------------------
 stations = ['freiburg', 'kupferzell', 'altheim']
 for station, station_id in zip(stations, station_ids):
     for cm in ['MPI-M-MPI-ESM-LR_RCA4', 'CCCma-CanESM2_CCLM4-8-17']:
         for period in ['1985-2005', '2016-2021', '2040-2060', '2080-2100']:
-            data_precip = dict_precip_10mins[station_id][cm][period]
-            data_meteo = dict_meteo_daily[station_id][cm][period]
+            data_precip = dict_bc_precip_10mins[station_id][cm][period]
+            data_meteo = dict_bc_meteo_daily[station_id][cm][period]
             data_ta = data_meteo.loc[:, ['TA', 'TA_min', 'TA_max']]
             data_rs = data_meteo.loc[:, ['RS']]
 
@@ -448,7 +601,7 @@ for station, station_id in zip(stations, station_ids):
 
 stations = ['freiburg', 'kupferzell', 'altheim']
 for station, station_id in zip(stations, station_ids):
-    data_meteo = dict_meteo_daily[station_id]['observed']['2016-2021']
+    data_meteo = dict_bc_meteo_daily[station_id]['observed']['2016-2021']
     data_ta = data_meteo.loc[:, ['TA', 'TA_min', 'TA_max']]
 
     path_dir = base_path / "input" / station / 'observed' / '2016-2021'
