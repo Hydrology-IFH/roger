@@ -14,6 +14,16 @@ eval "$(conda shell.bash hook)"
 conda activate roger-gpu
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/svat_transport
  
+# Move fluxes and states from global workspace to local SSD
+mv /beegfs/work/workspace/ws/fr_rs1092-workspace-0/freiburg_altheim_kupferzell/svat_transport/freiburg_altheim_kupferzell/output/svat/SVAT_kupferzell_corn_catch_crop_CCCma-CanESM2_CCLM4-8-17_1985-2005.nc "${TMPDIR}"/SVAT_kupferzell_corn_catch_crop_CCCma-CanESM2_CCLM4-8-17_1985-2005.nc
+# Wait for files
+checksum_gws=$(shasum -a 256 /beegfs/work/workspace/ws/fr_rs1092-workspace-0/freiburg_altheim_kupferzell/svat_transport/freiburg_altheim_kupferzell/output/svat/SVAT_kupferzell_corn_catch_crop_CCCma-CanESM2_CCLM4-8-17_1985-2005.nc | cut -f 1 -d " ")
+checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVAT_kupferzell_corn_catch_crop_CCCma-CanESM2_CCLM4-8-17_1985-2005.nc | cut -f 1 -d " ")
+while [ ${checksum_gws} != ${checksum_ssd} ]; do
+    sleep 10
+    checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVAT_kupferzell_corn_catch_crop_CCCma-CanESM2_CCLM4-8-17_1985-2005.nc | cut -f 1 -d " ")
+done
+ 
 python svat_crop_transport.py -b jax -d gpu --location kupferzell --land-cover-scenario corn_catch_crop --climate-scenario CCCma-CanESM2_CCLM4-8-17 --period 1985-2005 -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /beegfs/work/workspace/ws/fr_rs1092-workspace-0/freiburg_altheim_kupferzell/svat_transport"

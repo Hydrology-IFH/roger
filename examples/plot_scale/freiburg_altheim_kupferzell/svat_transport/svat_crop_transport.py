@@ -20,10 +20,11 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         """A SVAT-CROP transport model for virtual tracer.
         """
         _base_path = Path(__file__).parent
-        if period == '2010-2020':
-            _input_dir = _base_path / "input" / f"{location}" / f"{period}"
+        if tmp_dir:
+            # read fluxes and states from local SSD on cluster node
+            _input_dir = tmp_dir
         else:
-            _input_dir = _base_path / "input" / f"{location}" / f"{period}" / f"{climate_scenario}"
+            _input_dir = _base_path.parent / "output" / "svat"
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -46,16 +47,16 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = 'SVATCROPTRANSPORT'
+            settings.identifier = f'SVATTRANSPORT_{location}_{land_cover_scenario}_{climate_scenario}_{period}'
             settings.sas_solver = 'deterministic'
             settings.sas_solver_substeps = 6
 
             settings.nx, settings.ny = 675, 1
-            settings.nitt = self._get_nitt(self._input_dir, 'states_hm.mc')
+            settings.nitt = self._get_nitt(self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')
             settings.ages = 1500
             settings.nages = settings.ages + 1
-            settings.runlen_warmup = 5 * 365 * 24 * 60 * 60
-            settings.runlen = self._get_runlen(self._input_dir, 'states_hm.mc')
+            settings.runlen_warmup = 3 * 365 * 24 * 60 * 60
+            settings.runlen = self._get_runlen(self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')
 
             settings.dx = 1
             settings.dy = 1
@@ -125,10 +126,10 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         def set_parameters_setup(self, state):
             vs = state.variables
 
-            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path, 'states_hm.mc')[:, :, 0])
-            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path, 'states_hm.mc')[:, :, 0])
-            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, 'states_hm.mc')[:, :, 0])
-            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, 'states_hm.mc')[:, :, 0])
+            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')[:, :, 0])
+            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')[:, :, 0])
+            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')[:, :, 0])
+            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')[:, :, 0])
 
             # SAS parameters
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 6)
@@ -138,18 +139,18 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 62)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 0.3)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 1)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], 0)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 61)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1.5)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 1.5)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], 0)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2] - vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 61)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 2)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 2)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], vs.S_pwp_ss[2:-2, 2:-2])
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2])
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], 0)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2] - vs.S_pwp_ss[2:-2, 2:-2])
             vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 6)
             vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 1], 0.1)
             vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 6)
@@ -174,8 +175,8 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path, 'states_hm.mc')[:, :, vs.itt, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path, 'states_hm.mc')[:, :, vs.itt, npx.newaxis])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')[:, :, vs.itt, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')[:, :, vs.itt, npx.newaxis])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
             vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
             vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
@@ -249,23 +250,23 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         def set_forcing_setup(self, state):
             vs = state.variables
 
-            vs.PREC_DIST_DAILY = update(vs.PREC_DIST_DAILY, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._base_path, 'states_hm.mc'))
-            vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", self._base_path, 'states_hm.mc'))
-            vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", self._base_path, 'states_hm.mc') + self._read_var_from_nc("inf_sc_rz", self._base_path, 'states_hm.mc'))
-            vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._base_path, 'states_hm.mc'))
-            vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._base_path, 'states_hm.mc'))
-            vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", self._base_path, 'states_hm.mc'))
-            vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._base_path, 'states_hm.mc'))
-            vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._base_path, 'states_hm.mc'))
-            vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, 'states_hm.mc'))
-            vs.RE_RG = update(vs.RE_RG, at[2:-2, 2:-2, :], self._read_var_from_nc("re_rg", self._base_path, 'states_hm.mc'))
-            vs.RE_RL = update(vs.RE_RL, at[2:-2, 2:-2, :], self._read_var_from_nc("re_rl", self._base_path, 'states_hm.mc'))
-            vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._base_path, self._states_hm_file))
-            vs.S_PWP_RZ = update(vs.S_PWP_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_rz", self._base_path, self._states_hm_file))
-            vs.S_SAT_RZ = update(vs.S_SAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_rz", self._base_path, self._states_hm_file))
-            vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._base_path, self._states_hm_file))
-            vs.S_PWP_SS = update(vs.S_PWP_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_ss", self._base_path, self._states_hm_file))
-            vs.S_SAT_SS = update(vs.S_SAT_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_ss", self._base_path, self._states_hm_file))
+            vs.PREC_DIST_DAILY = update(vs.PREC_DIST_DAILY, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc') + self._read_var_from_nc("inf_sc_rz", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.RE_RG = update(vs.RE_RG, at[2:-2, 2:-2, :], self._read_var_from_nc("re_rg", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.RE_RL = update(vs.RE_RL, at[2:-2, 2:-2, :], self._read_var_from_nc("re_rl", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.S_PWP_RZ = update(vs.S_PWP_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_rz", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.S_SAT_RZ = update(vs.S_SAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_rz", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.S_PWP_SS = update(vs.S_PWP_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_ss", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
+            vs.S_SAT_SS = update(vs.S_SAT_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_ss", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc'))
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
 
         @roger_routine

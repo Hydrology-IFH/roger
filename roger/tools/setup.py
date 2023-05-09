@@ -269,9 +269,9 @@ def write_crop_rotation(input_dir, nrows=1, ncols=1, float_type="float64"):
         v[:, :,  :] = arr
         v.attrs['long_name'] = 'crop'
         v.attrs['units'] = ''
-        v = f.create_variable('year_season', ('year_season',), 'S11')
+        v = f.create_variable('year_season', ('year_season',), 'U11')
         v.attrs['units'] = 'year_season'
-        v[:] = onp.array(crops.columns[1:].astype('S11').values, dtype='S11')
+        v[:] = onp.array(crops.columns[1:].astype('U11').values, dtype='U11')
         v = f.create_variable('x', ('x',), float_type)
         v.attrs['long_name'] = 'Zonal coordinate'
         v.attrs['units'] = 'meters'
