@@ -6,9 +6,9 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("--location", type=click.Choice(['freiburg', 'altheim', 'kupferzell']), default='freiburg')
-@click.option("--land-cover-scenario", type=click.Choice(['grass', 'corn', 'corn_catch_crop', 'crop_rotation']), default='grass')
-@click.option("--climate-scenario", type=click.Choice(['observed', 'CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_RCA4']), default='observed')
-@click.option("--period", type=click.Choice(['2016-2021', '1985-2005', '2040-2060', '2080-2100']), default='2016-2021')
+@click.option("--land-cover-scenario", type=click.Choice(['corn', 'corn_catch_crop', 'crop_rotation']), default='corn')
+@click.option("--climate-scenario", type=click.Choice(['observed', 'CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_RCA4']), default='MPI-M-MPI-ESM-LR_RCA4')
+@click.option("--period", type=click.Choice(['2016-2021', '1985-2005', '2040-2060', '2080-2100']), default='2040-2060')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
@@ -36,7 +36,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables['Time']
-                return len(onp.array(var_obj)) + 1
+                return len(onp.array(var_obj))
 
         def _get_runlen(self, path_dir, file):
             nc_file = path_dir / file
@@ -63,7 +63,8 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0
-            settings.time_origin = "2009-12-31 00:00:00"
+            year0 = int(period.split('-')[0]) - 1
+            settings.time_origin = f"{year0}-12-31 00:00:00"
 
             settings.enable_crop_phenology = True
             settings.enable_crop_rotation = True
@@ -285,11 +286,11 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             vs.re_rg = update(vs.re_rg, at[2:-2, 2:-2], vs.RE_RG[2:-2, 2:-2, vs.itt])
             vs.re_rl = update(vs.re_rl, at[2:-2, 2:-2], vs.RE_RL[2:-2, 2:-2, vs.itt])
             vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], vs.S_RZ[2:-2, 2:-2, vs.itt])
-            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2, vs.tau], vs.S_PWP_RZ[2:-2, 2:-2, vs.itt])
-            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2, vs.tau], vs.S_SAT_RZ[2:-2, 2:-2, vs.itt])
+            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], vs.S_PWP_RZ[2:-2, 2:-2, vs.itt])
+            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], vs.S_SAT_RZ[2:-2, 2:-2, vs.itt])
             vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], vs.S_SS[2:-2, 2:-2, vs.itt])
-            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2, vs.tau], vs.S_PWP_SS[2:-2, 2:-2, vs.itt])
-            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2, vs.tau], vs.S_SAT_SS[2:-2, 2:-2, vs.itt])
+            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], vs.S_PWP_SS[2:-2, 2:-2, vs.itt])
+            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], vs.S_SAT_SS[2:-2, 2:-2, vs.itt])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
 
             # apply virtual tracer
@@ -300,6 +301,9 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         @roger_routine
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
+
+            #TODO: remove line
+            base_path = Path(__file__).parent.parent / 'output' / 'svat_transport'
 
             diagnostics["rate"].output_variables = ["M_q_ss", "M_transp"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
