@@ -27,8 +27,8 @@ Set the paths to the example data:
 
 Most of the heavy lifting will be done by ``xarray``, which provides a data structure and API for working with labeled N-dimensional arrays. ``xarray`` datasets automatically keep track how the values of the underlying arrays map to locations in space and time, which makes them immensely useful for analyzing model output.
 
-Load and aggregate rate
-------------------------
+Load and plot fluxes
+--------------------
 
 In order to load our first output file and display its content execute the following two commands:
 
@@ -49,16 +49,3 @@ Now, we select the time series of ``inf_mat`` and plot the daily data:
 
     @savefig inf_mat_daily.png width=5in
     ds_rate["inf_mat_rz"].isel(x=0, y=0).plot()
-
-To compute the monthly sums and plot the monthly data:
-
-.. ipython:: python
-    :okwarning:
-
-    @savefig inf_mat_monthly.png width=5in
-    (
-        ds_rate["inf_mat_rz"]
-        .isel(x=0, y=0).resample(Time='M')
-        .sum()
-        .plot()
-    )
