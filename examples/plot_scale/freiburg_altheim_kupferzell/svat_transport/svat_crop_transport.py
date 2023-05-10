@@ -22,7 +22,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         _base_path = Path(__file__).parent
         if tmp_dir:
             # read fluxes and states from local SSD on cluster node
-            _input_dir = tmp_dir
+            _input_dir = Path(tmp_dir)
         else:
             _input_dir = _base_path.parent / "output" / "svat"
 
@@ -301,9 +301,6 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         @roger_routine
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
-
-            #TODO: remove line
-            base_path = Path(__file__).parent.parent / 'output' / 'svat_transport'
 
             diagnostics["rate"].output_variables = ["M_q_ss", "M_transp"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
