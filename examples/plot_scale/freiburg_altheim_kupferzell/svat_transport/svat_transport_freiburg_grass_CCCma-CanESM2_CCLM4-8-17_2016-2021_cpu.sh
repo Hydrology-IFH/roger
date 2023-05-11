@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=24:00:00
-#PBS -l pmem=4000mb
+#PBS -l pmem=8000mb
 #PBS -N svat_transport_freiburg_grass_CCCma-CanESM2_CCLM4-8-17_2016-2021
 #PBS -m a
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
