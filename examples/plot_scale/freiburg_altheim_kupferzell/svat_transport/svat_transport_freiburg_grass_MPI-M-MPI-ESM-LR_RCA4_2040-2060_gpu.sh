@@ -17,13 +17,13 @@ cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzel
 # Copy fluxes and states from global workspace to local SSD
 echo "Copy fluxes and states from global workspace to local SSD"
 # Compares hashes
-checksum_gws=$(shasum -a 256 /beegfs/work/workspace/ws/fr_rs1092-workspace-0/freiburg_altheim_kupferzell/svat/SVAT_freiburg_crop_rotation_MPI-M-MPI-ESM-LR_RCA4_2040-2060.nc | cut -f 1 -d " ")
+checksum_gws=$(shasum -a 256 /beegfs/work/workspace/ws/fr_rs1092-workspace-0/freiburg_altheim_kupferzell/svat/SVAT_freiburg_grass_MPI-M-MPI-ESM-LR_RCA4_2040-2060.nc | cut -f 1 -d " ")
 checksum_ssd=0a
-cp /beegfs/work/workspace/ws/fr_rs1092-workspace-0/freiburg_altheim_kupferzell/svat/SVAT_freiburg_crop_rotation_MPI-M-MPI-ESM-LR_RCA4_2040-2060.nc "${TMPDIR}"
+cp /beegfs/work/workspace/ws/fr_rs1092-workspace-0/freiburg_altheim_kupferzell/svat/SVAT_freiburg_grass_MPI-M-MPI-ESM-LR_RCA4_2040-2060.nc "${TMPDIR}"
 # Wait for termination of moving files
 while [ "${checksum_gws}" != "${checksum_ssd}" ]; do
     sleep 10
-    checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVAT_freiburg_crop_rotation_MPI-M-MPI-ESM-LR_RCA4_2040-2060.nc | cut -f 1 -d " ")
+    checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVAT_freiburg_grass_MPI-M-MPI-ESM-LR_RCA4_2040-2060.nc | cut -f 1 -d " ")
 done
 echo "Copying was successful"
  
