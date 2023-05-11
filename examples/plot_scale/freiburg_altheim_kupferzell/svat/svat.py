@@ -102,7 +102,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             settings = state.settings
             settings.identifier = f"SVAT_{location}_grass_{climate_scenario}_{period}"
 
-            settings.nx, settings.ny = 675, 1
+            settings.nx, settings.ny = 676, 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
             settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, 'forcing.nc'))
 

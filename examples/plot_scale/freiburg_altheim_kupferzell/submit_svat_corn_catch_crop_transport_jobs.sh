@@ -2,9 +2,9 @@
 
 cd ~/roger/examples/plot_scale/freiburg_altheim_kupferzell/svat_transport
 
-FILES="$PWD/svat_transport_*_corn_catch_crop_*.sh"
+FILES="$PWD/svat_transport_*_corn_catch_crop_*_cpumpi.sh"
 for f in $FILES
 do
-  qsub -q gpu $f
+  qsub -q short $f
 done
 
