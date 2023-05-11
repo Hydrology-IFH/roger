@@ -4,6 +4,6 @@ Sphinx==5.2.3
 sphinx-rtd-theme==1.0.0
 ipython==8.10.0
 netCDF4==1.6.3
-xarray==2023.2.0
+xarray==2023.4.2
 matplotlib==3.7.1
 seaborn==0.12.2
