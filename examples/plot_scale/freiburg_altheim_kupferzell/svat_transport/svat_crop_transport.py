@@ -176,8 +176,8 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-3, :vs.taup1], self._read_var_from_nc("S_rz", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')[:, :, vs.itt, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-3, :vs.taup1], self._read_var_from_nc("S_ss", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')[:, :, vs.itt, npx.newaxis])
+            vs.S_rz = update(vs.S_rz, at[2:-3, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')[:, :, vs.itt, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-3, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')[:, :, vs.itt, npx.newaxis])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
             vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
             vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
