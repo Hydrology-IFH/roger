@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1:gpus=1:default
 #PBS -l walltime=6:00:00
-#PBS -l pmem=4000mb
+#PBS -l pmem=12000mb
 #PBS -N svat_transport_altheim_corn_MPI-M-MPI-ESM-LR_RCA4_1985-2005
 #PBS -m a
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
