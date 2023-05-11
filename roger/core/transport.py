@@ -3131,7 +3131,7 @@ def calculate_storage_selection(state):
     vs = state.variables
     settings = state.settings
 
-    if settings.enable_offline_transport and not (settings.enable_groundwater_boundary & settings.enable_crop_phenology) and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
+    if settings.enable_offline_transport and not (settings.enable_groundwater_boundary & settings.enable_crop_phenology) and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate | settings.enable_virtualtracer):
         if settings.sas_solver == "Euler":
             # loop over substeps
             for i in range(settings.sas_solver_substeps):
@@ -3167,7 +3167,11 @@ def calculate_storage_selection(state):
                 vs.time = vs.time + int(vs.dt_secs / settings.sas_solver_substeps)
                 if settings.enable_age_statistics:
                     with state.timers["age-statistics"]:
-                        vs.update(calculate_age_statistics(state))
+                        vs.update(calculate_age_statistics_transp(state))
+                        vs.update(calculate_age_statistics_perc(state))
+                        vs.update(calculate_age_statistics_root_zone(state))
+                        vs.update(calculate_age_statistics_subsoil(state))
+                        vs.update(calculate_age_statistics_soil(state))
                 # collect data for output at end of substep
                 with state.timers["diagnostics"]:
                     write_output(state)
@@ -3181,7 +3185,7 @@ def calculate_storage_selection(state):
         else:
             vs.update(svat_transport_model_deterministic(state))
 
-    elif settings.enable_offline_transport and not (settings.enable_groundwater_boundary & settings.enable_crop_phenology) and (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
+    elif settings.enable_offline_transport and not (settings.enable_groundwater_boundary & settings.enable_crop_phenology) and (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate | settings.enable_virtualtracer):
         if settings.sas_solver == "Euler":
             # loop over substeps
             for i in range(settings.sas_solver_substeps):
@@ -3195,7 +3199,11 @@ def calculate_storage_selection(state):
                 vs.time = vs.time + int(vs.dt_secs / settings.sas_solver_substeps)
                 if settings.enable_age_statistics:
                     with state.timers["age-statistics"]:
-                        vs.update(calculate_age_statistics(state))
+                        vs.update(calculate_age_statistics_transp(state))
+                        vs.update(calculate_age_statistics_perc(state))
+                        vs.update(calculate_age_statistics_root_zone(state))
+                        vs.update(calculate_age_statistics_subsoil(state))
+                        vs.update(calculate_age_statistics_soil(state))
                 # collect data for output at end of substep
                 with state.timers["diagnostics"]:
                     write_output(state)
@@ -3225,7 +3233,11 @@ def calculate_storage_selection(state):
                 vs.time = vs.time + int(vs.dt_secs / settings.sas_solver_substeps)
                 if settings.enable_age_statistics:
                     with state.timers["age-statistics"]:
-                        vs.update(calculate_age_statistics(state))
+                        vs.update(calculate_age_statistics_transp(state))
+                        vs.update(calculate_age_statistics_perc(state))
+                        vs.update(calculate_age_statistics_root_zone(state))
+                        vs.update(calculate_age_statistics_subsoil(state))
+                        vs.update(calculate_age_statistics_soil(state))
                 # collect data for output at end of substep
                 with state.timers["diagnostics"]:
                     write_output(state)
@@ -3245,7 +3257,7 @@ def calculate_storage_selection(state):
         else:
             vs.update(svat_transport_model_deterministic(state))
 
-    elif settings.enable_offline_transport and settings.enable_groundwater_boundary and not settings.enable_crop_phenology and (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
+    elif settings.enable_offline_transport and settings.enable_groundwater_boundary and not settings.enable_crop_phenology and (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate | settings.enable_virtualtracer):
         if settings.sas_solver == "Euler":
             # loop over substeps
             for i in range(settings.sas_solver_substeps):
@@ -3259,7 +3271,11 @@ def calculate_storage_selection(state):
                 vs.time = vs.time + int(vs.dt_secs / settings.sas_solver_substeps)
                 if settings.enable_age_statistics:
                     with state.timers["age-statistics"]:
-                        vs.update(calculate_age_statistics(state))
+                        vs.update(calculate_age_statistics_transp(state))
+                        vs.update(calculate_age_statistics_perc(state))
+                        vs.update(calculate_age_statistics_root_zone(state))
+                        vs.update(calculate_age_statistics_subsoil(state))
+                        vs.update(calculate_age_statistics_soil(state))
                 # collect data for output at end of substep
                 with state.timers["diagnostics"]:
                     write_output(state)
@@ -3282,7 +3298,7 @@ def calculate_storage_selection(state):
         else:
             vs.update(svat_lbc_transport_model_deterministic(state))
 
-    elif settings.enable_offline_transport and not settings.enable_groundwater_boundary and settings.enable_crop_phenology and (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
+    elif settings.enable_offline_transport and not settings.enable_groundwater_boundary and settings.enable_crop_phenology and (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate | settings.enable_virtualtracer):
         if settings.sas_solver == "Euler":
             # loop over substeps
             for i in range(settings.sas_solver_substeps):
@@ -3296,7 +3312,11 @@ def calculate_storage_selection(state):
                 vs.time = vs.time + int(vs.dt_secs / settings.sas_solver_substeps)
                 if settings.enable_age_statistics:
                     with state.timers["age-statistics"]:
-                        vs.update(calculate_age_statistics(state))
+                        vs.update(calculate_age_statistics_transp(state))
+                        vs.update(calculate_age_statistics_perc(state))
+                        vs.update(calculate_age_statistics_root_zone(state))
+                        vs.update(calculate_age_statistics_subsoil(state))
+                        vs.update(calculate_age_statistics_soil(state))
                 # collect data for output at end of substep
                 with state.timers["diagnostics"]:
                     write_output(state)
