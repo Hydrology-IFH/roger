@@ -39,7 +39,7 @@ def main():
                     lines.append('# Move output from local SSD to global workspace\n')
                     lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                     lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-                    lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
+                    lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
                     file_path = base_path / 'svat' / f'{script_name}.sh'
                     file = open(file_path, "w")
                     file.writelines(lines)
@@ -67,7 +67,7 @@ def main():
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-            lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
+            lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
             file_path = base_path / 'svat' / f'{script_name}.sh'
             file = open(file_path, "w")
             file.writelines(lines)
@@ -96,7 +96,7 @@ def main():
                 lines.append('# Move output from local SSD to global workspace\n')
                 lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                 lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-                lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
+                lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
                 file_path = base_path / 'svat' / f'{script_name}.sh'
                 file = open(file_path, "w")
                 file.writelines(lines)
@@ -123,7 +123,7 @@ def main():
         lines.append('# Move output from local SSD to global workspace\n')
         lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
         lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-        lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
+        lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
         file_path = base_path / 'svat' / f'{script_name}.sh'
         file = open(file_path, "w")
         file.writelines(lines)
@@ -174,7 +174,7 @@ def main():
                     lines.append('# Move output from local SSD to global workspace\n')
                     lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                     lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-                    lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
+                    lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
                     file_path = base_path / 'svat_transport' / f'{script_name}_cpumpi.sh'
                     file = open(file_path, "w")
                     file.writelines(lines)
@@ -218,7 +218,7 @@ def main():
                     lines.append('# Move output from local SSD to global workspace\n')
                     lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                     lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-                    lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
+                    lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
                     file_path = base_path / 'svat_transport' / f'{script_name}_cpumpi.sh'
                     file = open(file_path, "w")
                     file.writelines(lines)
@@ -266,7 +266,7 @@ def main():
                 lines.append('# Move output from local SSD to global workspace\n')
                 lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                 lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-                lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
+                lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
                 file_path = base_path / 'svat_transport' / f'{script_name}_gpu.sh'
                 file = open(file_path, "w")
                 file.writelines(lines)
@@ -312,7 +312,7 @@ def main():
         lines.append('# Move output from local SSD to global workspace\n')
         lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
         lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-        lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
+        lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
         file_path = base_path / 'svat_transport' / f'{script_name}_gpu.sh'
         file = open(file_path, "w")
         file.writelines(lines)
@@ -359,7 +359,7 @@ def main():
                 lines.append('# Move output from local SSD to global workspace\n')
                 lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                 lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-                lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
+                lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
                 file_path = base_path / 'svat_transport' / f'{script_name}_cpu.sh'
                 file = open(file_path, "w")
                 file.writelines(lines)
@@ -406,7 +406,7 @@ def main():
                 lines.append('# Move output from local SSD to global workspace\n')
                 lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                 lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-                lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
+                lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
                 file_path = base_path / 'svat_transport' / f'{script_name}_cpumpi.sh'
                 file = open(file_path, "w")
                 file.writelines(lines)
