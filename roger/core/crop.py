@@ -1344,7 +1344,7 @@ def calc_redistribution_root_growth_transport_anion_kernel(state):
         at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_re_rg[2:-2, 2:-2, :], axis=2),
     )
 
-    # calculate isotope travel time distribution
+    # calculate anion travel time distribution
     alpha = allocate(state.dimensions, ("x", "y"), fill=1)
     vs.mtt_re_rg = update(
         vs.mtt_re_rg,
