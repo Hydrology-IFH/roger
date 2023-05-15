@@ -115,6 +115,8 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 "S_pwp_ss",
                 "S_sat_rz",
                 "S_sat_ss",
+                "alpha_transp",
+                "alpha_q",
                 "sas_params_evap_soil",
                 "sas_params_cpr_rz",
                 "sas_params_transp",
@@ -132,6 +134,10 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             vs.S_sat_rz = update(vs.S_sat_rz, at[2:-3, 2:-2], self._read_var_from_nc("S_sat_rz", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')[:, :, 0])
             vs.S_sat_ss = update(vs.S_sat_ss, at[2:-3, 2:-2], self._read_var_from_nc("S_sat_ss", self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')[:, :, 0])
 
+            # partition coefficients
+            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], 1)
+            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], 1)
+            
             # SAS parameters
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 6)
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 0.1)
@@ -295,8 +301,8 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
 
             # apply virtual tracer
             inf = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2]
-            vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(inf > 0, 1, 0))
-            vs.C_in = update(vs.C_in, at[2:-2, 2:-2], npx.where(inf > 0, vs.M_in[2:-2, 2:-2] / inf, 0))
+            vs.C_in = update(vs.C_in, at[2:-2, 2:-2], npx.where(inf > 0, 1, 0))
+            vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(inf > 0, vs.C_in[2:-2, 2:-2] * inf, 0))
 
         @roger_routine
         def set_diagnostics(self, state, base_path=tmp_dir):

@@ -1113,13 +1113,13 @@ def calculate_percolation_rz_transport(state):
     vs = state.variables
     settings = state.settings
 
-    if settings.enable_offline_transport and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
+    if settings.enable_offline_transport and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate | settings.enable_virtualtracer):
         vs.update(calc_percolation_rz_transport_kernel(state))
 
     if settings.enable_offline_transport and (settings.enable_oxygen18 | settings.enable_deuterium):
         vs.update(calc_percolation_rz_transport_iso_kernel(state))
 
-    if settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate):
+    if settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate | settings.enable_virtualtracer):
         vs.update(calc_percolation_rz_transport_anion_kernel(state))
 
 
@@ -1131,13 +1131,13 @@ def calculate_percolation_ss_transport(state):
     vs = state.variables
     settings = state.settings
 
-    if settings.enable_offline_transport and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
+    if settings.enable_offline_transport and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate | settings.enable_virtualtracer):
         vs.update(calc_percolation_ss_transport_kernel(state))
 
     if settings.enable_offline_transport and (settings.enable_oxygen18 | settings.enable_deuterium):
         vs.update(calc_percolation_ss_transport_iso_kernel(state))
 
-    if settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate):
+    if settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate | settings.enable_virtualtracer):
         vs.update(calc_percolation_ss_transport_anion_kernel(state))
 
 

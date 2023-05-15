@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1
-#PBS -l walltime=24:00:00
+#PBS -l walltime=48:00:00
 #PBS -l pmem=8000mb
 #PBS -N svat_transport_altheim_grass_MPI-M-MPI-ESM-LR_RCA4_2080-2100
 #PBS -m a
