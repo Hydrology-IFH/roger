@@ -548,7 +548,7 @@ def calculate_evaporation_transport_anion_kernel(state):
             at[2:-2, 2:-2, vs.tau, :], - vs.mtt_evap_soil[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
         )
 
-    return KernelOutput(sa_rz=vs.sa_rz, tt_evap_soil=vs.tt_evap_soil, TT_evap_soil=vs.TT_evap_soil, msa_rz=vs.msa_rz, mtt_evap_soil=vs.mtt_evap_soil, C_evap_soil=vs.C_evap_soil, M_transp=vs.M_evap_soil)
+    return KernelOutput(sa_rz=vs.sa_rz, tt_evap_soil=vs.tt_evap_soil, TT_evap_soil=vs.TT_evap_soil, msa_rz=vs.msa_rz, mtt_evap_soil=vs.mtt_evap_soil, C_evap_soil=vs.C_evap_soil, M_evap_soil=vs.M_evap_soil)
 
 
 @roger_kernel

@@ -578,7 +578,7 @@ def calc_mtt(state, sa, tt, flux, msa, alpha):
         )
 
     # solute travel time distribution at current time step
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         mtt = update(
             mtt,
             at[2:-2, 2:-2, :], npx.where(sa[2:-2, 2:-2, vs.tau, :] > 0, (msa[2:-2, 2:-2, vs.tau, :] / sa[2:-2, 2:-2, vs.tau, :]), 0) * alpha[2:-2, 2:-2, npx.newaxis] * tt[2:-2, 2:-2, :] * flux[2:-2, 2:-2, npx.newaxis],
@@ -836,7 +836,7 @@ def calculate_ageing(state):
     vs = state.variables
     settings = state.settings
 
-    if settings.enable_offline_transport and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
+    if settings.enable_offline_transport and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate | settings.enable_virtualtracer):
         vs.update(calc_ageing_sa_kernel(state))
         if settings.enable_groundwater:
             pass
@@ -846,7 +846,7 @@ def calculate_ageing(state):
         if settings.enable_groundwater:
             pass
 
-    elif settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide):
+    elif settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide | settings.enable_virtualtracer):
         vs.update(calc_ageing_sa_kernel(state))
         vs.update(calc_ageing_msa_kernel(state))
         if settings.enable_groundwater:
@@ -1214,7 +1214,7 @@ def svat_transport_model_rk4(state):
             vs.msa_ss,
             at[2:-2, 2:-2, 1, :], npx.where(vs.sa_ss[2:-2, 2:-2, 1, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, 1, :]),
         )
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         dsa_rz = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :]) * settings.h
         dsa_ss = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :]) * settings.h
         vs.sa_rz = update_add(
@@ -1421,7 +1421,7 @@ def svat_transport_model_rk4(state):
             at[2:-2, 2:-2, 1, :], npx.where(sarkn_ss[2:-2, 2:-2, 1, :] <= 0, 0, msarkn_ss[2:-2, 2:-2, 1, :]),
         )
 
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         # impose nonegative constrain to numerical solution
         dsarkn_rz = (vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttrkn_cpr_rz[2:-2, 2:-2, :, 0] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * ttrkn_evap_soil[2:-2, 2:-2, :, 0] - vs.transp[2:-2, 2:-2, npx.newaxis] * ttrkn_transp[2:-2, 2:-2, :, 0] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttrkn_q_rz[2:-2, 2:-2, :, 0]) * settings.h/2
         dsarkn_rz = npx.where(sarkn_rz[2:-2, 2:-2, 1, :] + dsarkn_rz < 0, -sarkn_rz[2:-2, 2:-2, 1, :], dsarkn_rz)
@@ -1570,7 +1570,7 @@ def svat_transport_model_rk4(state):
             msarkn_ss,
             at[2:-2, 2:-2, 1, :], dmsarkn_ss,
         )
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         # impose nonegative constrain to numerical solution
         dsarkn_rz = (vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * ttrkn_cpr_rz[2:-2, 2:-2, :, 1] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * ttrkn_evap_soil[2:-2, 2:-2, :, 1] - vs.transp[2:-2, 2:-2, npx.newaxis] * ttrkn_transp[2:-2, 2:-2, :, 1] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * ttrkn_q_rz[2:-2, 2:-2, :, 1]) * settings.h/2
         dsarkn_rz = npx.where(sarkn_rz[2:-2, 2:-2, 1, :] + dsarkn_rz < 0, -sarkn_rz[2:-2, 2:-2, 1, :], dsarkn_rz)
@@ -1718,7 +1718,7 @@ def svat_transport_model_rk4(state):
             msarkn_ss,
             at[2:-2, 2:-2, 1, :], dmsarkn_ss,
         )
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         # impose nonegative constrain to numerical solution
         dmsarkn_rz = (npx.where(npx.isnan(mttrkn_cpr_rz[2:-2, 2:-2, :, 2]), 0, mttrkn_cpr_rz[2:-2, 2:-2, :, 2]) - npx.where(npx.isnan(mttrkn_evap_soil[2:-2, 2:-2, :, 2]), 0, mttrkn_evap_soil[2:-2, 2:-2, :, 2]) - npx.where(npx.isnan(mttrkn_transp[2:-2, 2:-2, :, 2]), 0, mttrkn_transp[2:-2, 2:-2, :, 2]) - npx.where(npx.isnan(mttrkn_q_rz[2:-2, 2:-2, :, 2]), 0, mttrkn_q_rz[2:-2, 2:-2, :, 2]))
         dmsarkn_ss = (npx.where(npx.isnan(mttrkn_q_rz[2:-2, 2:-2, :, 1]), 0, mttrkn_q_rz[2:-2, 2:-2, :, 1]) - npx.where(npx.isnan(mttrkn_cpr_rz[2:-2, 2:-2, :, 1]), 0, mttrkn_cpr_rz[2:-2, 2:-2, :, 1]) - npx.where(npx.isnan(mttrkn_q_ss[2:-2, 2:-2, :, 1]), 0, mttrkn_q_ss[2:-2, 2:-2, :, 1]))
@@ -1930,7 +1930,7 @@ def svat_transport_model_rk4(state):
             vs.msa_ss,
             at[2:-2, 2:-2, 1, :], npx.where(vs.sa_ss[2:-2, 2:-2, 1, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, 1, :]),
         )
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         # impose nonegative constrain of numerical solution
         dsa_rz = (vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :]) * settings.h
         dsa_rz = npx.where(vs.sa_rz[2:-2, 2:-2, 1, :] + dsa_rz < 0, -vs.sa_rz[2:-2, 2:-2, 1, :], dsa_rz)
@@ -2001,7 +2001,7 @@ def svat_transport_model_rk4(state):
             at[2:-2, 2:-2], calc_conc_iso_flux(state, vs.mtt_q_ss, vs.tt_q_ss, vs.q_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         vs.C_inf_mat_rz = update(
             vs.C_inf_mat_rz,
             at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
@@ -2139,7 +2139,7 @@ def svat_transport_model_euler(state):
             vs.msa_ss,
             at[2:-2, 2:-2, 1, :], npx.where(vs.sa_ss[2:-2, 2:-2, 1, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, 1, :]),
         )
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         dsa_rz = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :]) * settings.h
         dsa_ss = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :]) * settings.h
         vs.sa_rz = update_add(
@@ -2297,7 +2297,7 @@ def svat_transport_model_euler(state):
             vs.msa_ss,
             at[2:-2, 2:-2, 1, :], npx.where(vs.sa_ss[2:-2, 2:-2, 1, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, 1, :]),
         )
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         # impose nonegative constrain of numerical solution
         dsa_rz = (vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :]) * settings.h
         dsa_rz = npx.where(vs.sa_rz[2:-2, 2:-2, 1, :] + dsa_rz < 0, -vs.sa_rz[2:-2, 2:-2, 1, :], dsa_rz)
@@ -2368,7 +2368,7 @@ def svat_transport_model_euler(state):
             at[2:-2, 2:-2], calc_conc_iso_flux(state, vs.mtt_q_ss, vs.tt_q_ss, vs.q_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         vs.C_inf_mat_rz = update(
             vs.C_inf_mat_rz,
             at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
@@ -2505,7 +2505,7 @@ def svat_lbc_transport_model_euler(state):
             vs.msa_ss,
             at[2:-2, 2:-2, 1, :], npx.where(vs.sa_ss[2:-2, 2:-2, 1, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, 1, :]),
         )
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         dsa_rz = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :]) * settings.h
         dsa_ss = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :]) * settings.h
         vs.sa_rz = update_add(
@@ -2643,7 +2643,7 @@ def svat_lbc_transport_model_euler(state):
             vs.msa_ss,
             at[2:-2, 2:-2, 1, :], npx.where(vs.sa_ss[2:-2, 2:-2, 1, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, 1, :]),
         )
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         # impose nonegative constrain of numerical solution
         dsa_rz = (vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :]) * settings.h
         dsa_rz = npx.where(vs.sa_rz[2:-2, 2:-2, 1, :] + dsa_rz < 0, -vs.sa_rz[2:-2, 2:-2, 1, :], dsa_rz)
@@ -2713,7 +2713,7 @@ def svat_lbc_transport_model_euler(state):
             at[2:-2, 2:-2], calc_conc_iso_flux(state, vs.mtt_q_ss, vs.tt_q_ss, vs.q_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         vs.C_inf_mat_rz = update(
             vs.C_inf_mat_rz,
             at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
@@ -2837,7 +2837,7 @@ def svat_crop_transport_model_euler(state):
             vs.msa_ss,
             at[2:-2, 2:-2, 1, :], npx.where(vs.sa_ss[2:-2, 2:-2, 1, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, 1, :]),
         )
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         dsa_rz = (vs.inf_mat_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_mat_rz[2:-2, 2:-2, :] + vs.inf_pf_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_rz[2:-2, 2:-2, :]) * settings.h
         dsa_ss = (vs.inf_pf_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_inf_pf_ss[2:-2, 2:-2, :]) * settings.h
         vs.sa_rz = update_add(
@@ -2999,7 +2999,7 @@ def svat_crop_transport_model_euler(state):
             vs.msa_ss,
             at[2:-2, 2:-2, 1, :], npx.where(vs.sa_ss[2:-2, 2:-2, 1, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, 1, :]),
         )
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         # impose nonegative constrain of numerical solution
         dsa_rz = (vs.cpr_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_cpr_rz[2:-2, 2:-2, :] + vs.q_re_rg[2:-2, 2:-2, npx.newaxis] * vs.tt_re_rg[2:-2, 2:-2, :] - vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :] - vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :] - vs.q_rz[2:-2, 2:-2, npx.newaxis] * vs.tt_q_rz[2:-2, 2:-2, :] - vs.q_re_rl[2:-2, 2:-2, npx.newaxis] * vs.tt_re_rl[2:-2, 2:-2, :]) * settings.h
         dsa_rz = npx.where(vs.sa_rz[2:-2, 2:-2, 1, :] + dsa_rz < 0, -vs.sa_rz[2:-2, 2:-2, 1, :], dsa_rz)
@@ -3079,7 +3079,7 @@ def svat_crop_transport_model_euler(state):
             at[2:-2, 2:-2], calc_conc_iso_flux(state, vs.mtt_re_rl, vs.tt_re_rl, vs.re_rl)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
-    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate:
+    elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         vs.C_inf_mat_rz = update(
             vs.C_inf_mat_rz,
             at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],

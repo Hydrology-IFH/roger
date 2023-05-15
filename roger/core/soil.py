@@ -917,7 +917,7 @@ def calculate_soil_transport(state):
     if settings.enable_offline_transport and (settings.enable_oxygen18 | settings.enable_deuterium):
         vs.update(calculate_soil_transport_iso_kernel(state))
 
-    if settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate):
+    if settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate | settings.enable_virtualtracer):
         vs.update(calculate_soil_transport_anion_kernel(state))
 
 
@@ -1181,7 +1181,7 @@ def rescale_sa_msa_anion_soil_kernel(state):
             at[2:-2, 2:-2, :2, 0], 0,
         )
 
-    elif (settings.enable_chloride | settings.enable_nitrate):
+    elif (settings.enable_chloride | settings.enable_nitrate | settings.enable_virtualtracer):
         vs.msa_rz = update_multiply(
             vs.msa_rz,
             at[2:-2, 2:-2, 0, :], vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
