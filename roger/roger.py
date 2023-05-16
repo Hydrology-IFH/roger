@@ -327,7 +327,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
             diagnostics.output(self.state)
 
         logger.success("Setup done\n")
-        if (self.state.settings.enable_chloride | self.state.settings.enable_bromide | self.state.settings.enable_oxygen18 | self.state.settings.enable_deuterium | self.state.settings.enable_nitrate):
+        if (self.state.settings.enable_chloride | self.state.settings.enable_bromide | self.state.settings.enable_oxygen18 | self.state.settings.enable_deuterium | self.state.settings.enable_nitrate | self.state.settings.enable_virtualtracer):
             logger.warning("IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require an post-evaluation of the accuracy of\n the numerical solution (e.g. calculate\n standard deviation of dS_num_error or dC_num_error).\n")
         else:
             logger.warning("IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require an post-evaluation of the accuracy of\n the numerical solution (e.g. calculate\n standard deviation of dS_num_error).\n")

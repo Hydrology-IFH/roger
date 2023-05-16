@@ -23,4 +23,4 @@ def format_time(time_value, in_unit="seconds"):
         best_unit = min(valid_units, key=valid_units.get)
     else:
         best_unit = "seconds"
-    return val_in_all_units[best_unit], best_unit
+    return round(val_in_all_units[best_unit], 2), best_unit

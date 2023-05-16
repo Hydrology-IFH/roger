@@ -1035,7 +1035,7 @@ def set_crop_params(state):
         )
         vs.root_growth_rate = update(
             vs.root_growth_rate,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 19], vs.root_growth_rate[2:-2, 2:-2, :]),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 19], vs.root_growth_rate[2:-2, 2:-2, :] * 0.5),
         )
         vs.water_stress_coeff_crop = update(
             vs.water_stress_coeff_crop,
@@ -1353,7 +1353,12 @@ def calc_redistribution_root_growth_transport_anion_kernel(state):
 
     vs.C_re_rg = update(
         vs.C_re_rg,
-        at[2:-2, 2:-2], npx.where(vs.re_rg > 0, npx.sum(vs.mtt_re_rg, axis=2) / vs.re_rg, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.re_rg[2:-2, 2:-2] > 0, npx.sum(vs.mtt_re_rg[2:-2, 2:-2, :], axis=-1) / vs.re_rg, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.M_re_rg = update(
+        vs.M_re_rg,
+        at[2:-2, 2:-2], npx.sum(vs.mtt_re_rg[2:-2, 2:-2, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update StorAge with flux
@@ -1378,7 +1383,7 @@ def calc_redistribution_root_growth_transport_anion_kernel(state):
         at[2:-2, 2:-2, vs.tau, :], -vs.mtt_re_rg[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rg=vs.tt_re_rg, TT_re_rg=vs.TT_re_rg, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, mtt_re_rg=vs.mtt_re_rg, C_re_rg=vs.C_re_rg, re_rg=vs.re_rg)
+    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rg=vs.tt_re_rg, TT_re_rg=vs.TT_re_rg, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, mtt_re_rg=vs.mtt_re_rg, M_re_rg=vs.M_re_rg, re_rg=vs.re_rg)
 
 
 @roger_kernel
@@ -1525,7 +1530,12 @@ def calc_redistribution_root_loss_transport_anion_kernel(state):
 
     vs.C_re_rl = update(
         vs.C_re_rl,
-        at[2:-2, 2:-2], npx.where(vs.re_rg > 0, npx.sum(vs.mtt_re_rl, axis=2) / vs.re_rg, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.re_rg[2:-2, 2:-2] > 0, npx.sum(vs.mtt_re_rl[2:-2, 2:-2, :], axis=-1) / vs.re_rg, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.M_re_rl = update(
+        vs.M_re_rl,
+        at[2:-2, 2:-2], npx.sum(vs.mtt_re_rl[2:-2, 2:-2, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # update StorAge with flux
@@ -1549,7 +1559,7 @@ def calc_redistribution_root_loss_transport_anion_kernel(state):
         at[2:-2, 2:-2, vs.tau, :], vs.mtt_re_rl[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rl=vs.tt_re_rl, TT_re_rl=vs.TT_re_rl, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, mtt_re_rl=vs.mtt_re_rl, C_re_rl=vs.C_re_rl, re_rl=vs.re_rl)
+    return KernelOutput(sa_rz=vs.sa_rz, sa_ss=vs.sa_ss, tt_re_rl=vs.tt_re_rl, TT_re_rl=vs.TT_re_rl, msa_rz=vs.msa_rz, msa_ss=vs.msa_ss, mtt_re_rl=vs.mtt_re_rl, C_re_rl=vs.C_re_rl, M_re_rl=vs.M_re_rl, re_rl=vs.re_rl)
 
 
 @roger_routine

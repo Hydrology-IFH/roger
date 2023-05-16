@@ -3347,11 +3347,13 @@ def write_output(state):
     vs = state.variables
     settings = state.settings
 
-    if not numerics.sanity_check(state):
+    if not numerics.sanity_check(state) and not settings.warmup_done:
+        logger.warning(f"Solution diverged at iteration {vs.itt} at substep {vs.itt_substep}.")
+    elif not numerics.sanity_check(state) and settings.warmup_done:
         logger.warning(f"Solution diverged at iteration {vs.itt} at substep {vs.itt_substep}.\n An evaluation of the bias of the deterministic/numerical\n solution is highly recommended. The bias is written to\n the model output.")
-    numerics.calculate_num_error(state)
 
     if settings.warmup_done:
+        numerics.calculate_num_error(state)
         diagnostics.diagnose(state)
         diagnostics.output(state)
 

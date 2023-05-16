@@ -1292,17 +1292,3 @@ def rescale_SA(state):
         vs.update(rescale_sa_msa_anion_soil_kernel(state))
     elif settings.enable_offline_transport and not (settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_bromide | settings.enable_chloride | settings.enable_nitrate | settings.enable_virtualtracer):
         vs.update(rescale_sa_soil_kernel(state))
-
-    if settings.enable_bromide:
-        vs.msa_rz = update(
-            vs.msa_rz,
-            at[2:-2, 2:-2, :2, :], 0,
-        )
-        vs.msa_ss = update(
-            vs.msa_ss,
-            at[2:-2, 2:-2, :2, :], 0,
-        )
-        vs.msa_s = update(
-            vs.msa_s,
-            at[2:-2, 2:-2, :2, :], 0,
-        )

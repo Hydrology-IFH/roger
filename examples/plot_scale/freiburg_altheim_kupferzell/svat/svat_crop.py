@@ -206,25 +206,19 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         def set_parameters_setup(self, state):
             vs = state.variables
 
-            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 599)
+            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 1])
+            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 2])
+            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 3])
+
+            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 0])
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path,  "parameters.csv"))
             vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_csv("dmpv", self._base_path,  "parameters.csv"))
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path,  "parameters.csv"))
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_csv("lmpv", self._base_path,  "parameters.csv"))
             vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_csv("theta_ac", self._base_path,  "parameters.csv"))
             vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_csv("theta_ufc", self._base_path,  "parameters.csv"))
             vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_csv("theta_pwp", self._base_path,  "parameters.csv"))
             vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_csv("ks", self._base_path,  "parameters.csv"))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
-
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 1])
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 2])
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 3])
-
-            vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :2], 300)
-            vs.z_root_crop = update(
-                vs.z_root_crop,
-                at[2:-2, 2:-2, :2, 0], 300
-            )
 
         @roger_routine
         def set_parameters(self, state):
@@ -233,9 +227,23 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             if (vs.month[vs.tau] != vs.month[vs.taum1]) & (vs.itt > 1):
                 vs.update(calc_parameters_surface_kernel(state))
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "lu_id",
+                "z_evap",
+                "z_root",
+                "z_root_crop",
+            ],
+        )
         def set_initial_conditions_setup(self, state):
-            pass
+            vs = state.variables
+
+            vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :2], npx.where(vs.lu_id[2:-2, 2:-2] == 599, vs.z_evap[2:-2, 2:-2], 270)[:, :, npx.newaxis])
+            vs.z_root_crop = update(
+                vs.z_root_crop,
+                at[2:-2, 2:-2, :2, 0], vs.z_root[2:-2, 2:-2, :2]
+            )
 
         @roger_routine
         def set_initial_conditions(self, state):
