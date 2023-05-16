@@ -498,7 +498,7 @@ def calc_evaporation_transport_iso_kernel(state):
 
 
 @roger_kernel
-def calculate_evaporation_transport_anion_kernel(state):
+def calc_evaporation_transport_virtualtracer_kernel(state):
     """
     Calculates transport of soil evaporation
     """
@@ -520,33 +520,31 @@ def calculate_evaporation_transport_anion_kernel(state):
         at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_evap_soil[2:-2, 2:-2, :], axis=-1),
     )
 
-    if settings.enable_virtualtracer:
-        # calculate solute travel time distribution
-        alpha = allocate(state.dimensions, ("x", "y"), fill=1)
-        vs.mtt_evap_soil = update(
-            vs.mtt_evap_soil,
-            at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil, vs.msa_rz, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-        )
-        vs.C_evap_soil = update(
-            vs.C_evap_soil,
-            at[2:-2, 2:-2], npx.where(vs.evap_soil > 0, npx.sum(vs.mtt_evap_soil, axis=2) / vs.evap_soil, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-        )
-        vs.M_evap_soil = update(
-            vs.M_evap_soil,
-            at[2:-2, 2:-2], npx.sum(vs.mtt_evap_soil[2:-2, 2:-2, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
-        )
+    # calculate solute travel time distribution
+    alpha = allocate(state.dimensions, ("x", "y"), fill=1)
+    vs.mtt_evap_soil = update(
+        vs.mtt_evap_soil,
+        at[2:-2, 2:-2, :], transport.calc_mtt(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil, vs.msa_rz, alpha)[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+    vs.C_evap_soil = update(
+        vs.C_evap_soil,
+        at[2:-2, 2:-2], npx.where(vs.evap_soil > 0, npx.sum(vs.mtt_evap_soil, axis=2) / vs.evap_soil, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.M_evap_soil = update(
+        vs.M_evap_soil,
+        at[2:-2, 2:-2], npx.sum(vs.mtt_evap_soil[2:-2, 2:-2, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
+    )
 
     vs.sa_rz = update(
         vs.sa_rz,
         at[2:-2, 2:-2, :, :], transport.update_sa(state, vs.sa_rz, vs.tt_evap_soil, vs.evap_soil)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
-    if settings.enable_virtualtracer:
-        # update solute StorAge of root zone
-        vs.msa_rz = update_add(
-            vs.msa_rz,
-            at[2:-2, 2:-2, vs.tau, :], - vs.mtt_evap_soil[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-        )
+    # update solute StorAge of root zone
+    vs.msa_rz = update_add(
+        vs.msa_rz,
+        at[2:-2, 2:-2, vs.tau, :], - vs.mtt_evap_soil[2:-2, 2:-2, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
 
     return KernelOutput(sa_rz=vs.sa_rz, tt_evap_soil=vs.tt_evap_soil, TT_evap_soil=vs.TT_evap_soil, msa_rz=vs.msa_rz, mtt_evap_soil=vs.mtt_evap_soil, C_evap_soil=vs.C_evap_soil, M_evap_soil=vs.M_evap_soil)
 
@@ -700,6 +698,10 @@ def calculate_evapotranspiration_transport(state):
         vs.update(calc_evaporation_transport_iso_kernel(state))
         vs.update(calc_transpiration_transport_iso_kernel(state))
 
-    if settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate | settings.enable_virtualtracer):
+    if settings.enable_offline_transport and (settings.enable_chloride | settings.enable_bromide | settings.enable_nitrate):
         vs.update(calc_evaporation_transport_kernel(state))
+        vs.update(calc_transpiration_transport_anion_kernel(state))
+
+    if settings.enable_offline_transport and settings.enable_virtualtracer:
+        vs.update(calc_evaporation_transport_virtualtracer_kernel(state))
         vs.update(calc_transpiration_transport_anion_kernel(state))
