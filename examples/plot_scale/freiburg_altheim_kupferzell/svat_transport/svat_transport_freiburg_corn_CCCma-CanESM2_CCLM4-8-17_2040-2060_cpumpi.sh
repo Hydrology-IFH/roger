@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=4
-#PBS -l walltime=12:00:00
+#PBS -l walltime=14:00:00
 #PBS -l pmem=4000mb
 #PBS -N svat_transport_freiburg_corn_CCCma-CanESM2_CCLM4-8-17_2040-2060
 #PBS -m a

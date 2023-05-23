@@ -55,7 +55,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             settings.nitt = self._get_nitt(self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')
             settings.ages = 1500
             settings.nages = settings.ages + 1
-            settings.runlen_warmup = 30 * 24 * 60 * 60
+            settings.runlen_warmup = 3 * 365 * 24 * 60 * 60
             settings.runlen = self._get_runlen(self._input_dir, f'SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc')
 
             settings.dx = 1
@@ -308,7 +308,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["rate"].output_variables = ["M_in", "M_q_ss", "M_transp", "M_evap_soil", "M_re_rg", "M_re_rl"]
+            diagnostics["rate"].output_variables = ["M_in", "M_q_ss", "M_transp", "M_evap_soil"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
@@ -316,13 +316,13 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
 
             diagnostics["average"].output_variables = ["tt10_q_ss", "tt50_q_ss", "tt90_q_ss",  "ttavg_q_ss",
                                                        "tt10_transp", "tt50_transp", "tt90_transp",  "ttavg_transp",
-                                                       "rt10_s", "rt50_s", "rt90_s",  "rtavg_s", "C_in", "C_re_rg", "C_re_rl"]
+                                                       "rt10_s", "rt50_s", "rt90_s",  "rtavg_s"]
             diagnostics["average"].output_frequency = 24 * 60 * 60
             diagnostics["average"].sampling_frequency = 1
             if base_path:
                 diagnostics["average"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["M_s", "M_rz", "M_ss"]
+            diagnostics["collect"].output_variables = ["M_s"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
