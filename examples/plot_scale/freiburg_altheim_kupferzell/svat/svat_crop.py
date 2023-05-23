@@ -600,7 +600,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
     crop_rotation_dir = model._base_path / "input" / "land_cover_scenario" / land_cover_scenario
     write_crop_rotation(crop_rotation_dir)
     if not os.path.exists(model._input_dir / f"{land_cover_scenario}.nc"):
-        shutil.move(crop_rotation_dir / "crop_rotation.nc", model._input_dir / f"{land_cover_scenario}.nc")
+        shutil.copy2(crop_rotation_dir / "crop_rotation.nc", model._input_dir / f"{land_cover_scenario}.nc")
     model.setup()
     model.run()
     return
