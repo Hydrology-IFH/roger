@@ -14,4 +14,4 @@ python svat.py -b numpy -d cpu --location freiburg --land-cover-scenario grass -
 # Move output from local SSD to global workspace
 echo "Move output to /beegfs/work/workspace/ws/fr_rs1092-workspace-0/freiburg_altheim_kupferzell/svat"
 mkdir -p /beegfs/work/workspace/ws/fr_rs1092-workspace-0/freiburg_altheim_kupferzell/svat
-mv "${TMPDIR}"/SVATTRANSPORT_*.nc /beegfs/work/workspace/ws/fr_rs1092-workspace-0/freiburg_altheim_kupferzell/svat
+mv "${TMPDIR}"/SVAT_*.nc /beegfs/work/workspace/ws/fr_rs1092-workspace-0/freiburg_altheim_kupferzell/svat

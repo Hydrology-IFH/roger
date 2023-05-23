@@ -16,6 +16,7 @@ def main():
     climate_scenarios = ['CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_RCA4']
     periods = ['2016-2021', '1985-2005', '2040-2060', '2080-2100']
     
+    #--- jobs to calculate fluxes and states -------------------------------------------------------- 
     for location in locations:
         for land_cover_scenario in land_cover_scenarios:
             for climate_scenario in climate_scenarios:
@@ -39,7 +40,7 @@ def main():
                     lines.append('# Move output from local SSD to global workspace\n')
                     lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                     lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-                    lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
+                    lines.append('mv "${TMPDIR}"/SVAT_*.nc %s\n' % (output_path_ws.as_posix()))
                     file_path = base_path / 'svat' / f'{script_name}.sh'
                     file = open(file_path, "w")
                     file.writelines(lines)
@@ -67,7 +68,7 @@ def main():
             lines.append('# Move output from local SSD to global workspace\n')
             lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
             lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-            lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
+            lines.append('mv "${TMPDIR}"/SVAT_*.nc %s\n' % (output_path_ws.as_posix()))
             file_path = base_path / 'svat' / f'{script_name}.sh'
             file = open(file_path, "w")
             file.writelines(lines)
@@ -96,7 +97,7 @@ def main():
                 lines.append('# Move output from local SSD to global workspace\n')
                 lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                 lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-                lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
+                lines.append('mv "${TMPDIR}"/SVAT_*.nc %s\n' % (output_path_ws.as_posix()))
                 file_path = base_path / 'svat' / f'{script_name}.sh'
                 file = open(file_path, "w")
                 file.writelines(lines)
@@ -123,13 +124,14 @@ def main():
         lines.append('# Move output from local SSD to global workspace\n')
         lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
         lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
-        lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
+        lines.append('mv "${TMPDIR}"/SVAT_*.nc %s\n' % (output_path_ws.as_posix()))
         file_path = base_path / 'svat' / f'{script_name}.sh'
         file = open(file_path, "w")
         file.writelines(lines)
         file.close()
         subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
+    #--- jobs to calculate concentrations and water ages --------------------------------------------
     tm = 'time-variant advection-dispersion-power'
     tm1 = transport_models_abrev[tm]
     tms = tm.replace(" ", "_")
