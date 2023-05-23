@@ -26,7 +26,7 @@ def main():
                     lines = []
                     lines.append('#!/bin/bash\n')
                     lines.append('#PBS -l nodes=1:ppn=1\n')
-                    lines.append('#PBS -l walltime=24:00:00\n')
+                    lines.append('#PBS -l walltime=6:00:00\n')
                     lines.append('#PBS -l pmem=80000mb\n')
                     lines.append(f'#PBS -N {script_name}\n')
                     lines.append('#PBS -m a\n')
@@ -54,7 +54,7 @@ def main():
             lines = []
             lines.append('#!/bin/bash\n')
             lines.append('#PBS -l nodes=1:ppn=1\n')
-            lines.append('#PBS -l walltime=24:00:00\n')
+            lines.append('#PBS -l walltime=4:00:00\n')
             lines.append('#PBS -l pmem=80000mb\n')
             lines.append(f'#PBS -N {script_name}\n')
             lines.append('#PBS -m a\n')
@@ -83,7 +83,7 @@ def main():
                 lines = []
                 lines.append('#!/bin/bash\n')
                 lines.append('#PBS -l nodes=1:ppn=1\n')
-                lines.append('#PBS -l walltime=24:00:00\n')
+                lines.append('#PBS -l walltime=4:00:00\n')
                 lines.append('#PBS -l pmem=80000mb\n')
                 lines.append(f'#PBS -N {script_name}\n')
                 lines.append('#PBS -m a\n')
@@ -110,7 +110,7 @@ def main():
         lines = []
         lines.append('#!/bin/bash\n')
         lines.append('#PBS -l nodes=1:ppn=1\n')
-        lines.append('#PBS -l walltime=24:00:00\n')
+        lines.append('#PBS -l walltime=2:00:00\n')
         lines.append('#PBS -l pmem=80000mb\n')
         lines.append(f'#PBS -N {script_name}\n')
         lines.append('#PBS -m a\n')

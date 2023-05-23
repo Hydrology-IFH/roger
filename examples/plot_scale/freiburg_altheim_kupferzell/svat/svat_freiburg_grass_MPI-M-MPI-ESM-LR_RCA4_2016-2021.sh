@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1
-#PBS -l walltime=24:00:00
+#PBS -l walltime=4:00:00
 #PBS -l pmem=80000mb
 #PBS -N svat_freiburg_grass_MPI-M-MPI-ESM-LR_RCA4_2016-2021
 #PBS -m a
