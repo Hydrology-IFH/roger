@@ -1023,7 +1023,7 @@ def set_crop_params(state):
         )
         vs.ccc_growth_rate = update(
             vs.ccc_growth_rate,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 18], vs.ccc_growth_rate[2:-2, 2:-2, :]),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 18] * vs.canopy_growth_scale[2:-2, 2:-2], vs.ccc_growth_rate[2:-2, 2:-2, :]),
         )
         vs.basal_crop_coeff_mid = update(
             vs.basal_crop_coeff_mid,
@@ -1035,7 +1035,7 @@ def set_crop_params(state):
         )
         vs.root_growth_rate = update(
             vs.root_growth_rate,
-            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 19], vs.root_growth_rate[2:-2, 2:-2, :] * 0.5),
+            at[2:-2, 2:-2, :], npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 19] * vs.root_growth_scale[2:-2, 2:-2], vs.root_growth_rate[2:-2, 2:-2, :]),
         )
         vs.water_stress_coeff_crop = update(
             vs.water_stress_coeff_crop,
