@@ -201,10 +201,15 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 "crop_type",
                 "z_root",
                 "z_root_crop",
+                "root_growth_scale",
+                "canopy_growth_scale",
             ],
         )
         def set_parameters_setup(self, state):
             vs = state.variables
+
+            vs.root_growth_scale = update(vs.root_growth_scale , at[2:-2, 2:-2], 0.5)
+            vs.canopy_growth_scale = update(vs.canopy_growth_scale , at[2:-2, 2:-2], 1)
 
             vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 1])
             vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 2])
