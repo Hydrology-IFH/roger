@@ -8,7 +8,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("--location", type=click.Choice(['freiburg', 'altheim', 'kupferzell']), default='freiburg')
+@click.option("--location", type=click.Choice(['freiburg', 'altheim', 'kupferzell']), default='altheim')
 @click.option("--land-cover-scenario", type=click.Choice(['corn', 'corn_catch_crop', 'crop_rotation']), default='corn')
 @click.option("--climate-scenario", type=click.Choice(['observed', 'CCCma-CanESM2_CCLM4-8-17', 'MPI-M-MPI-ESM-LR_RCA4']), default='CCCma-CanESM2_CCLM4-8-17')
 @click.option("--period", type=click.Choice(['2016-2021', '1985-2005', '2040-2060', '2080-2100']), default='2040-2060')

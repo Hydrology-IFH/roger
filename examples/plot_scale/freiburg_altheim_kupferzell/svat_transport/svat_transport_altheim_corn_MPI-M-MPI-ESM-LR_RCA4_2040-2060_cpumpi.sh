@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=4
 #PBS -l walltime=14:00:00
-#PBS -l pmem=4000mb
+#PBS -l pmem=8000mb
 #PBS -N svat_transport_altheim_corn_MPI-M-MPI-ESM-LR_RCA4_2040-2060
 #PBS -m a
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
