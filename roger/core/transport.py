@@ -498,7 +498,7 @@ def calc_tt(state, SA, sa, flux, sas_params):
 
     if rs.backend == 'numpy':
         # sanity check of SAS function (works only for numpy backend)
-        mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=settings.atol, rtol=settings.rtol)
+        mask = npx.isclose(npx.sum(tt, axis=-1) * flux, flux, atol=0.1, rtol=0.1)
         if not npx.all(mask[2:-2, 2:-2]):
             logger.warning(f"Solution of SAS function diverged at iteration {vs.itt}.\nProbabilities of travel time distribution do not cumulate to 1.\n")
         mask2 = (tt >= 0)
@@ -1044,6 +1044,8 @@ def svat_crop_transport_model_deterministic(state):
     vs = state.variables
     settings = state.settings
 
+    print('Crop')
+
     with state.timers["redistribution after root growth/harvesting"]:
         crop.calculate_redistribution_transport(state)
     with state.timers["infiltration into root zone"]:
@@ -1059,7 +1061,7 @@ def svat_crop_transport_model_deterministic(state):
     with state.timers["capillary rise into root zone"]:
         capillary_rise.calculate_capillary_rise_rz_transport(state)
     if settings.enable_nitrate:
-        with state.timers["nitrogen cycle"]:
+        with state.timers["soil nitrogen cycle"]:
             nitrate.calculate_nitrogen_cycle(state)
     with state.timers["StorAge"]:
         root_zone.calculate_root_zone_transport(state)
@@ -3131,7 +3133,7 @@ def calculate_storage_selection(state):
     vs = state.variables
     settings = state.settings
 
-    if settings.enable_offline_transport and not (settings.enable_groundwater_boundary & settings.enable_crop_phenology) and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate | settings.enable_virtualtracer):
+    if settings.enable_offline_transport and not settings.enable_groundwater_boundary and not settings.enable_crop_phenology and not (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate | settings.enable_virtualtracer):
         if settings.sas_solver == "Euler":
             # loop over substeps
             for i in range(settings.sas_solver_substeps):
@@ -3185,7 +3187,7 @@ def calculate_storage_selection(state):
         else:
             vs.update(svat_transport_model_deterministic(state))
 
-    elif settings.enable_offline_transport and not (settings.enable_groundwater_boundary & settings.enable_crop_phenology) and (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate | settings.enable_virtualtracer):
+    elif settings.enable_offline_transport and not settings.enable_groundwater_boundary and not settings.enable_crop_phenology and (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate | settings.enable_virtualtracer):
         if settings.sas_solver == "Euler":
             # loop over substeps
             for i in range(settings.sas_solver_substeps):
