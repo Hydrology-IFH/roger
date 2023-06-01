@@ -6,7 +6,7 @@ h5netcdf==1.1.0
 h5py==3.8.0
 loguru==0.7.0
 tqdm==4.65.0
-pandas==2.0.1
+pandas==2.0.2
 pyyaml==6.0
 matplotlib==3.7.1
 seaborn==0.12.2
