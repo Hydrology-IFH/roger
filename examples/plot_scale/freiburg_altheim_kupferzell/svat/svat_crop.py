@@ -208,9 +208,6 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         def set_parameters_setup(self, state):
             vs = state.variables
 
-            vs.root_growth_scale = update(vs.root_growth_scale , at[2:-2, 2:-2], 0.5)
-            vs.canopy_growth_scale = update(vs.canopy_growth_scale , at[2:-2, 2:-2], 1)
-
             vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 1])
             vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 2])
             vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 3])
@@ -224,6 +221,15 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_csv("theta_pwp", self._base_path,  "parameters.csv"))
             vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_csv("ks", self._base_path,  "parameters.csv"))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
+
+            # root growth rate icnreases with soil depth
+            vs.root_growth_scale = update(vs.root_growth_scale, at[2:-2, 2:-2], npx.where(vs.z_soil[2:-2, 2:-2] >= 300, 0.3, vs.root_growth_scale[2:-2, 2:-2]))
+            vs.root_growth_scale = update(vs.root_growth_scale, at[2:-2, 2:-2], npx.where(vs.z_soil[2:-2, 2:-2] >= 600, 0.5, vs.root_growth_scale[2:-2, 2:-2]))
+            vs.root_growth_scale = update(vs.root_growth_scale, at[2:-2, 2:-2], npx.where(vs.z_soil[2:-2, 2:-2] >= 900, 0.7, vs.root_growth_scale[2:-2, 2:-2]))
+            # canopy growth rate icnreases with soil depth
+            vs.canopy_growth_scale = update(vs.canopy_growth_scale, at[2:-2, 2:-2], npx.where(vs.z_soil[2:-2, 2:-2] >= 300, 0.7, vs.canopy_growth_scale[2:-2, 2:-2]))
+            vs.canopy_growth_scale = update(vs.canopy_growth_scale, at[2:-2, 2:-2], npx.where(vs.z_soil[2:-2, 2:-2] >= 600, 0.8, vs.canopy_growth_scale[2:-2, 2:-2]))
+            vs.canopy_growth_scale = update(vs.canopy_growth_scale, at[2:-2, 2:-2], npx.where(vs.z_soil[2:-2, 2:-2] >= 900, 0.9, vs.canopy_growth_scale[2:-2, 2:-2]))
 
         @roger_routine
         def set_parameters(self, state):
