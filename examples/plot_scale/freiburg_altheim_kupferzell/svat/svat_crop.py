@@ -244,7 +244,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :2], npx.where(vs.lu_id[2:-2, 2:-2] == 599, vs.z_evap[2:-2, 2:-2], 270)[:, :, npx.newaxis])
+            vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :2], npx.where(vs.lu_id[2:-2, 2:-2] == 599, 200, 270)[:, :, npx.newaxis])
             vs.z_root_crop = update(
                 vs.z_root_crop,
                 at[2:-2, 2:-2, :2, 0], vs.z_root[2:-2, 2:-2, :2]
