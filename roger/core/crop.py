@@ -775,8 +775,64 @@ def update_z_root(state):
         at[2:-2, 2:-2, vs.tau], npx.where(npx.any(vs.crop_type[2:-2, 2:-2, :] == 598, axis=-1), vs.z_root[2:-2, 2:-2, vs.tau], npx.nanmax(z_root_crop[2:-2, 2:-2, :], axis=-1))
     )
 
+    # set thickness of upper soil water storage to 20 cm for bare soils
+    vs.z_root = update(
+        vs.z_root,
+        at[2:-2, 2:-2, vs.tau], npx.where(vs.z_root[2:-2, 2:-2, vs.tau] < 200, 200, vs.z_root[2:-2, 2:-2, vs.tau])
+    )
+    vs.z_root = update(
+        vs.z_root,
+        at[2:-2, 2:-2, vs.tau], npx.where(vs.z_root[2:-2, 2:-2, vs.tau] < vs.z_soil[2:-2, 2:-2], vs.z_root[2:-2, 2:-2, vs.tau], vs.z_soil[2:-2, 2:-2] * 0.9)
+    )
+
     return KernelOutput(z_root=vs.z_root)
 
+
+@roger_kernel
+def redistribution_pwp(state):
+    """
+    Calculates redistribution between root zone and subsoil after
+    root growth/root loss for immobile soil water storage (i.e. soil water below permanent wilting point)
+    """
+    vs = state.variables
+
+    uplift_root_growth_pwp = allocate(state.dimensions, ("x", "y"))
+    drain_root_loss_pwp = allocate(state.dimensions, ("x", "y"))
+
+    mask_root_growth = (vs.z_root[:, :, vs.tau] > vs.z_root[:, :, vs.taum1])
+    mask_root_loss = (vs.z_root[:, :, vs.tau] < vs.z_root[:, :, vs.taum1])
+
+    uplift_root_growth_pwp = update(
+        uplift_root_growth_pwp,
+        at[2:-2, 2:-2], (vs.z_root[2:-2, 2:-2, vs.tau] - vs.z_root[2:-2, 2:-2, vs.taum1]) * vs.theta_pwp[2:-2, 2:-2] * mask_root_growth[2:-2, 2:-2]
+    )
+    uplift_root_growth_pwp = update(
+        uplift_root_growth_pwp,
+        at[2:-2, 2:-2], npx.where(uplift_root_growth_pwp[2:-2, 2:-2] <= 0, 0, uplift_root_growth_pwp[2:-2, 2:-2])
+    )
+    drain_root_loss_pwp = update(
+        drain_root_loss_pwp,
+        at[2:-2, 2:-2], npx.abs(vs.z_root[2:-2, 2:-2, vs.taum1] - vs.z_root[2:-2, 2:-2, vs.tau]) * vs.theta_pwp[2:-2, 2:-2] * mask_root_loss[2:-2, 2:-2]
+    )
+    drain_root_loss_pwp = update(
+        drain_root_loss_pwp,
+        at[2:-2, 2:-2], npx.where(drain_root_loss_pwp[2:-2, 2:-2] <= 0, 0, drain_root_loss_pwp[2:-2, 2:-2])
+    )
+
+    # add redistribution of immobile soil water storage (i.e. soil water below permanent wilting point)
+    vs.re_rg_pwp = update(
+        vs.re_rg_pwp,
+        at[2:-2, 2:-2], npx.where(mask_root_growth[2:-2, 2:-2], uplift_root_growth_pwp[2:-2, 2:-2], 0)
+    )
+    vs.re_rl_pwp = update(
+        vs.re_rl_pwp,
+        at[2:-2, 2:-2], npx.where(mask_root_loss[2:-2, 2:-2], drain_root_loss_pwp[2:-2, 2:-2], 0)
+    )
+
+    return KernelOutput(
+        re_rg_pwp=vs.re_rg_pwp,
+        re_rl_pwp=vs.re_rl_pwp,
+        )
 
 @roger_kernel
 def redistribution(state):
@@ -796,11 +852,11 @@ def redistribution(state):
 
     uplift_root_growth_lp = update(
         uplift_root_growth_lp,
-        at[2:-2, 2:-2], ((vs.z_root[2:-2, 2:-2, vs.tau] - vs.z_root[2:-2, 2:-2, vs.taum1]) / (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.taum1])) * vs.S_lp_ss[2:-2, 2:-2] * mask_root_growth[2:-2, 2:-2]
+        at[2:-2, 2:-2], npx.where(mask_root_growth[2:-2, 2:-2], ((vs.z_root[2:-2, 2:-2, vs.tau] - vs.z_root[2:-2, 2:-2, vs.taum1]) / (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.taum1])) * vs.S_lp_ss[2:-2, 2:-2], 0)
     )
     uplift_root_growth_fp = update(
         uplift_root_growth_fp,
-        at[2:-2, 2:-2], ((vs.z_root[2:-2, 2:-2, vs.tau] - vs.z_root[2:-2, 2:-2, vs.taum1]) / (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.taum1])) * vs.S_fp_ss[2:-2, 2:-2] * mask_root_growth[2:-2, 2:-2]
+        at[2:-2, 2:-2], npx.where(mask_root_growth[2:-2, 2:-2], ((vs.z_root[2:-2, 2:-2, vs.tau] - vs.z_root[2:-2, 2:-2, vs.taum1]) / (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.taum1])) * vs.S_fp_ss[2:-2, 2:-2], 0)
     )
     uplift_root_growth_lp = update(
         uplift_root_growth_lp,
@@ -813,11 +869,11 @@ def redistribution(state):
 
     drain_root_loss_lp = update(
         drain_root_loss_lp,
-        at[2:-2, 2:-2], ((vs.z_root[2:-2, 2:-2, vs.taum1] - vs.z_root[2:-2, 2:-2, vs.tau]) / vs.z_root[2:-2, 2:-2, vs.taum1]) * vs.S_lp_rz[2:-2, 2:-2] * mask_root_loss[2:-2, 2:-2]
+        at[2:-2, 2:-2], npx.where(mask_root_loss[2:-2, 2:-2], ((vs.z_root[2:-2, 2:-2, vs.taum1] - vs.z_root[2:-2, 2:-2, vs.tau]) / vs.z_root[2:-2, 2:-2, vs.taum1]) * vs.S_lp_rz[2:-2, 2:-2], 0)
     )
     drain_root_loss_fp = update(
         drain_root_loss_fp,
-        at[2:-2, 2:-2], ((vs.z_root[2:-2, 2:-2, vs.taum1] - vs.z_root[2:-2, 2:-2, vs.tau]) / vs.z_root[2:-2, 2:-2, vs.taum1]) * vs.S_fp_rz[2:-2, 2:-2] * mask_root_loss[2:-2, 2:-2]
+        at[2:-2, 2:-2], npx.where(mask_root_loss[2:-2, 2:-2], ((vs.z_root[2:-2, 2:-2, vs.taum1] - vs.z_root[2:-2, 2:-2, vs.tau]) / vs.z_root[2:-2, 2:-2, vs.taum1]) * vs.S_fp_rz[2:-2, 2:-2], 0)
     )
     drain_root_loss_lp = update(
         drain_root_loss_lp,
@@ -830,36 +886,35 @@ def redistribution(state):
 
     vs.re_rg = update(
         vs.re_rg,
-        at[2:-2, 2:-2], (uplift_root_growth_fp[2:-2, 2:-2] + uplift_root_growth_lp[2:-2, 2:-2]) * mask_root_growth[2:-2, 2:-2]
+        at[2:-2, 2:-2], npx.where(mask_root_growth[2:-2, 2:-2], uplift_root_growth_fp[2:-2, 2:-2] + uplift_root_growth_lp[2:-2, 2:-2], 0)
     )
-
     vs.re_rl = update(
         vs.re_rl,
-        at[2:-2, 2:-2], (drain_root_loss_fp[2:-2, 2:-2] + drain_root_loss_lp[2:-2, 2:-2]) * mask_root_loss[2:-2, 2:-2]
+        at[2:-2, 2:-2], npx.where(mask_root_loss[2:-2, 2:-2], drain_root_loss_fp[2:-2, 2:-2] + drain_root_loss_lp[2:-2, 2:-2], 0)
     )
 
     # uplift from subsoil large pores
     vs.S_lp_ss = update_add(
         vs.S_lp_ss,
-        at[2:-2, 2:-2], - uplift_root_growth_lp[2:-2, 2:-2] * mask_root_growth[2:-2, 2:-2]
+        at[2:-2, 2:-2], npx.where(mask_root_growth[2:-2, 2:-2], -uplift_root_growth_lp[2:-2, 2:-2], 0)
     )
     # uplift from subsoil fine pores
     vs.S_fp_ss = update_add(
         vs.S_fp_ss,
-        at[2:-2, 2:-2], - uplift_root_growth_fp[2:-2, 2:-2] * mask_root_growth[2:-2, 2:-2]
+        at[2:-2, 2:-2], npx.where(mask_root_growth[2:-2, 2:-2], -uplift_root_growth_fp[2:-2, 2:-2], 0)
     )
 
     # update root zone storage
     vs.S_fp_rz = update_add(
         vs.S_fp_rz,
-        at[2:-2, 2:-2], vs.re_rg[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], vs.re_rg[2:-2, 2:-2],
     )
 
     # fine pore excess fills large pores
     mask1 = (vs.S_fp_rz > vs.S_ufc_rz) & (vs.re_rg > 0)
     vs.S_lp_rz = update_add(
         vs.S_lp_rz,
-        at[2:-2, 2:-2], mask1[2:-2, 2:-2] * (vs.S_fp_rz[2:-2, 2:-2] - vs.S_ufc_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask1[2:-2, 2:-2], (vs.S_fp_rz[2:-2, 2:-2] - vs.S_ufc_rz[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.S_fp_rz = update(
         vs.S_fp_rz,
@@ -869,29 +924,39 @@ def redistribution(state):
     # drainage from root zone large pores
     vs.S_lp_rz = update_add(
         vs.S_lp_rz,
-        at[2:-2, 2:-2], - drain_root_loss_lp[2:-2, 2:-2] * mask_root_loss[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask_root_loss[2:-2, 2:-2], -drain_root_loss_lp[2:-2, 2:-2], 0),
     )
     # drainage from root zone fine pores
     vs.S_fp_rz = update_add(
         vs.S_fp_rz,
-        at[2:-2, 2:-2], - drain_root_loss_fp[2:-2, 2:-2] * mask_root_loss[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask_root_loss[2:-2, 2:-2], -drain_root_loss_fp[2:-2, 2:-2], 0),
     )
 
     # update subsoil storage
     vs.S_fp_ss = update_add(
         vs.S_fp_ss,
-        at[2:-2, 2:-2], vs.re_rl[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], vs.re_rl[2:-2, 2:-2],
     )
 
-    # fine pore excess fills large pores
+    # fine pore excess storage fills large pores
     mask2 = (vs.S_fp_ss > vs.S_ufc_ss) & (vs.re_rl > 0)
     vs.S_lp_ss = update_add(
         vs.S_lp_ss,
-        at[2:-2, 2:-2], mask2[2:-2, 2:-2] * (vs.S_fp_ss[2:-2, 2:-2] - vs.S_ufc_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], (vs.S_fp_ss[2:-2, 2:-2] - vs.S_ufc_ss[2:-2, 2:-2]), 0),
     )
     vs.S_fp_ss = update(
         vs.S_fp_ss,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]),
+    )
+
+    # add redistribution of immobile soil water storage (i.e. soil water below permanent wilting point)
+    vs.re_rg = update_add(
+        vs.re_rg,
+        at[2:-2, 2:-2], npx.where( mask_root_growth[2:-2, 2:-2], vs.re_rg_pwp[2:-2, 2:-2], 0)
+    )
+    vs.re_rl = update_add(
+        vs.re_rl,
+        at[2:-2, 2:-2], npx.where(mask_root_loss[2:-2, 2:-2], vs.re_rl_pwp[2:-2, 2:-2], 0)
     )
 
     return KernelOutput(
@@ -1188,8 +1253,8 @@ def calculate_crop_phenology(state):
             vs.update(update_S_int_ground_tot(state))
             vs.update(update_z_root(state))
             vs.update(recalc_soil_params(state))
+            vs.update(redistribution_pwp(state))
             vs.update(redistribution(state))
-
 
 @roger_kernel
 def update_alpha_transp(state):

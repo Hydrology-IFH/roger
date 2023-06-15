@@ -340,7 +340,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 diagnostics["collect"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
-            diagnostics["maximum"].output_variables = ["dS_num_error"]
+            diagnostics["maximum"].output_variables = ["dS_num_error", "dS_rz_num_error", "dS_ss_num_error"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1
             if base_path:
@@ -589,6 +589,10 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         vs.t_grow_root = update(vs.t_grow_root, at[2:-2, 2:-2, vs.taum1, :], vs.t_grow_root[2:-2, 2:-2, vs.tau, :])
         vs.ccc = update(vs.ccc, at[2:-2, 2:-2, vs.taum1, :], vs.ccc[2:-2, 2:-2, vs.tau, :])
         vs.z_root_crop = update(vs.z_root_crop, at[2:-2, 2:-2, vs.taum1, :], vs.z_root_crop[2:-2, 2:-2, vs.tau, :])
+        vs.re_rg_pwp = update(vs.re_rg_pwp, at[2:-2, 2:-2], 0)
+        vs.re_rg = update(vs.re_rg, at[2:-2, 2:-2], 0)
+        vs.re_rl_pwp = update(vs.re_rl_pwp, at[2:-2, 2:-2], 0)
+        vs.re_rl = update(vs.re_rl, at[2:-2, 2:-2], 0)
 
         return KernelOutput(
             ta_min=vs.ta_min,
@@ -598,6 +602,10 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             t_grow_root=vs.t_grow_root,
             ccc=vs.ccc,
             z_root_crop=vs.z_root_crop,
+            re_rg_pwp=vs.re_rg_pwp,
+            re_rg=vs.re_rg,
+            re_rl_pwp=vs.re_rl_pwp,
+            re_rl=vs.re_rl,
         )
 
     model = SVATCROPSetup()

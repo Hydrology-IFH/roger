@@ -359,6 +359,9 @@ class RogerSetup(metaclass=abc.ABCMeta):
                 if settings.enable_crop_phenology:
                     with state.timers["crops"]:
                         crop.calculate_crop_phenology(state)
+                        root_zone.calculate_root_zone(state)
+                        subsoil.calculate_subsoil(state)
+                        soil.calculate_soil(state)
                 with state.timers["interception"]:
                     interception.calculate_interception(state)
                 with state.timers["evapotranspiration"]:

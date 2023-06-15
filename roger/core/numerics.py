@@ -179,13 +179,44 @@ def calc_dS_num_error(state):
     elif settings.enable_lateral_flow and settings.enable_groundwater and not settings.enable_offline_transport:
         pass
 
-    elif not settings.enable_lateral_flow and not settings.enable_groundwater_boundary and not settings.enable_groundwater and not settings.enable_offline_transport:
+    elif not settings.enable_crop_phenology and not settings.enable_lateral_flow and not settings.enable_groundwater_boundary and not settings.enable_groundwater and not settings.enable_offline_transport:
         vs.dS_num_error = update(
             vs.dS_num_error,
             at[2:-2, 2:-2],
             npx.abs((vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1]) - (vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2]))
             )
-
+        
+        vs.dS_rz_num_error = update(
+            vs.dS_rz_num_error,
+            at[2:-2, 2:-2],
+            npx.abs((vs.S_rz[2:-2, 2:-2, vs.tau] - vs.S_rz[2:-2, 2:-2, vs.taum1]) - (vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_mp_rz[2:-2, 2:-2] + vs.inf_sc_rz[2:-2, 2:-2] + vs.cpr_rz[2:-2, 2:-2] - vs.transp[2:-2, 2:-2] - vs.evap_soil[2:-2, 2:-2] - vs.q_rz[2:-2, 2:-2]))
+            )
+        
+        vs.dS_ss_num_error = update(
+            vs.dS_ss_num_error,
+            at[2:-2, 2:-2],
+            npx.abs((vs.S_ss[2:-2, 2:-2, vs.tau] - vs.S_ss[2:-2, 2:-2, vs.taum1]) - (vs.inf_mp_ss[2:-2, 2:-2] + vs.q_rz[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.cpr_rz[2:-2, 2:-2]))
+            )
+                
+    elif settings.enable_crop_phenology and not settings.enable_lateral_flow and not settings.enable_groundwater_boundary and not settings.enable_groundwater and not settings.enable_offline_transport:
+        vs.dS_num_error = update(
+            vs.dS_num_error,
+            at[2:-2, 2:-2],
+            npx.abs((vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1]) - (vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2]))
+            )
+        
+        vs.dS_rz_num_error = update(
+            vs.dS_rz_num_error,
+            at[2:-2, 2:-2],
+            npx.abs((vs.S_rz[2:-2, 2:-2, vs.tau] - vs.S_rz[2:-2, 2:-2, vs.taum1]) - (vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_mp_rz[2:-2, 2:-2] + vs.inf_sc_rz[2:-2, 2:-2] + vs.cpr_rz[2:-2, 2:-2] + vs.re_rg[2:-2, 2:-2] - vs.transp[2:-2, 2:-2] - vs.evap_soil[2:-2, 2:-2] - vs.q_rz[2:-2, 2:-2] - vs.re_rl[2:-2, 2:-2]))
+            )
+        
+        vs.dS_ss_num_error = update(
+            vs.dS_ss_num_error,
+            at[2:-2, 2:-2],
+            npx.abs((vs.S_ss[2:-2, 2:-2, vs.tau] - vs.S_ss[2:-2, 2:-2, vs.taum1]) - (vs.inf_mp_ss[2:-2, 2:-2] + vs.q_rz[2:-2, 2:-2] + vs.re_rl[2:-2, 2:-2] - vs.re_rg[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2] - vs.cpr_rz[2:-2, 2:-2]))
+            )
+        
     elif not settings.enable_lateral_flow and settings.enable_groundwater_boundary and not settings.enable_groundwater and not settings.enable_offline_transport:
         vs.dS_num_error = update(
             vs.dS_num_error,
@@ -207,6 +238,8 @@ def calc_dS_num_error(state):
         )
     return KernelOutput(
         dS_num_error=vs.dS_num_error,
+        dS_rz_num_error=vs.dS_rz_num_error,
+        dS_ss_num_error=vs.dS_ss_num_error,
         )
 
 
