@@ -73,21 +73,21 @@ def calc_S(state):
     """
     vs = state.variables
 
-    # horizontal redistribution
-    mask = (vs.S_fp_rz < vs.S_ufc_rz) & (vs.S_fp_rz >= 0) & (vs.S_lp_rz < vs.S_ac_rz) & (vs.S_lp_rz > 0)
-    S_fp_rz = allocate(state.dimensions, ("x", "y"))
-    S_fp_rz = update(
-        S_fp_rz,
-        at[2:-2, 2:-2], vs.S_fp_rz[2:-2, 2:-2],
-    )
-    vs.S_fp_rz = update(
-        vs.S_fp_rz,
-        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], npx.where((vs.S_ufc_rz[2:-2, 2:-2] - vs.S_fp_rz[2:-2, 2:-2] > vs.S_lp_rz[2:-2, 2:-2]), vs.S_fp_rz[2:-2, 2:-2] + vs.S_lp_rz[2:-2, 2:-2], vs.S_ufc_rz[2:-2, 2:-2]), vs.S_fp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    vs.S_lp_rz = update(
-        vs.S_lp_rz,
-        at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], npx.where((vs.S_ufc_rz[2:-2, 2:-2] - S_fp_rz[2:-2, 2:-2] > vs.S_lp_rz[2:-2, 2:-2]), 0, vs.S_lp_rz[2:-2, 2:-2] - (vs.S_ufc_rz[2:-2, 2:-2] - S_fp_rz[2:-2, 2:-2])), vs.S_lp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
+    # # horizontal redistribution
+    # mask = (vs.S_fp_rz < vs.S_ufc_rz) & (vs.S_fp_rz >= 0) & (vs.S_lp_rz < vs.S_ac_rz) & (vs.S_lp_rz > 0)
+    # S_fp_rz = allocate(state.dimensions, ("x", "y"))
+    # S_fp_rz = update(
+    #     S_fp_rz,
+    #     at[2:-2, 2:-2], vs.S_fp_rz[2:-2, 2:-2],
+    # )
+    # vs.S_fp_rz = update(
+    #     vs.S_fp_rz,
+    #     at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], npx.where((vs.S_ufc_rz[2:-2, 2:-2] - vs.S_fp_rz[2:-2, 2:-2] > vs.S_lp_rz[2:-2, 2:-2]), vs.S_fp_rz[2:-2, 2:-2] + vs.S_lp_rz[2:-2, 2:-2], vs.S_ufc_rz[2:-2, 2:-2]), vs.S_fp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    # )
+    # vs.S_lp_rz = update(
+    #     vs.S_lp_rz,
+    #     at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], npx.where((vs.S_ufc_rz[2:-2, 2:-2] - S_fp_rz[2:-2, 2:-2] > vs.S_lp_rz[2:-2, 2:-2]), 0, vs.S_lp_rz[2:-2, 2:-2] - (vs.S_ufc_rz[2:-2, 2:-2] - S_fp_rz[2:-2, 2:-2])), vs.S_lp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    # )
 
     vs.S_rz = update(
         vs.S_rz,

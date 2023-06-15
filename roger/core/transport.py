@@ -1044,8 +1044,6 @@ def svat_crop_transport_model_deterministic(state):
     vs = state.variables
     settings = state.settings
 
-    print('Crop')
-
     with state.timers["redistribution after root growth/harvesting"]:
         crop.calculate_redistribution_transport(state)
     with state.timers["infiltration into root zone"]:

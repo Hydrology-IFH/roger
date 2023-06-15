@@ -474,7 +474,6 @@ def after_timestep_kernel(state):
         S_lp_ss=vs.S_lp_ss,
     )
 
-
 @roger_kernel
 def after_timestep_crops_kernel(state):
     vs = state.variables
@@ -486,6 +485,10 @@ def after_timestep_crops_kernel(state):
     vs.t_grow_root = update(vs.t_grow_root, at[2:-2, 2:-2, vs.taum1, :], vs.t_grow_root[2:-2, 2:-2, vs.tau, :])
     vs.ccc = update(vs.ccc, at[2:-2, 2:-2, vs.taum1, :], vs.ccc[2:-2, 2:-2, vs.tau, :])
     vs.z_root_crop = update(vs.z_root_crop, at[2:-2, 2:-2, vs.taum1, :], vs.z_root_crop[2:-2, 2:-2, vs.tau, :])
+    vs.re_rg_pwp = update(vs.re_rg_pwp, at[2:-2, 2:-2], 0)
+    vs.re_rg = update(vs.re_rg, at[2:-2, 2:-2], 0)
+    vs.re_rl_pwp = update(vs.re_rl_pwp, at[2:-2, 2:-2], 0)
+    vs.re_rl = update(vs.re_rl, at[2:-2, 2:-2], 0)
 
     return KernelOutput(
         ta_min=vs.ta_min,
@@ -495,4 +498,8 @@ def after_timestep_crops_kernel(state):
         t_grow_root=vs.t_grow_root,
         ccc=vs.ccc,
         z_root_crop=vs.z_root_crop,
+        re_rg_pwp=vs.re_rg_pwp,
+        re_rg=vs.re_rg,
+        re_rl_pwp=vs.re_rl_pwp,
+        re_rl=vs.re_rl,
     )
