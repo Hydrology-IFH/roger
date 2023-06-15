@@ -348,20 +348,15 @@ def calc_parameters_root_zone_kernel(state):
         at[2:-2, 2:-2], npx.where((z_root[2:-2, 2:-2] >= vs.z_soil[2:-2, 2:-2]), 0.9 * vs.z_soil[2:-2, 2:-2], z_root[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
-    mask_crops = npx.isin(vs.lu_id, npx.arange(500, 598, 1, dtype=npx.int64))
-    vs.z_root = update(
-        vs.z_root,
-        at[2:-2, 2:-2, 0], npx.where(mask_crops[2:-2, 2:-2], vs.z_evap[2:-2, 2:-2], vs.z_root[2:-2, 2:-2, 0]) * vs.maskCatch[2:-2, 2:-2]
-    )
-    vs.z_root = update(
-        vs.z_root,
-        at[2:-2, 2:-2, 1], npx.where(mask_crops[2:-2, 2:-2], vs.z_evap[2:-2, 2:-2], vs.z_root[2:-2, 2:-2, 1]) * vs.maskCatch[2:-2, 2:-2]
-    )
-
     # set thickness of upper soil water storage to 20 cm for bare soils
+    mask_crops = npx.isin(vs.lu_id, npx.arange(500, 600, 1, dtype=npx.int64))
     vs.z_root = update(
         vs.z_root,
-        at[2:-2, 2:-2, :], npx.where(vs.lu_id[2:-2, 2:-2, npx.newaxis] == 599, 200, vs.z_root[2:-2, 2:-2, :])
+        at[2:-2, 2:-2, 0], npx.where(mask_crops[2:-2, 2:-2], 200, vs.z_root[2:-2, 2:-2, 0]) * vs.maskCatch[2:-2, 2:-2]
+    )
+    vs.z_root = update(
+        vs.z_root,
+        at[2:-2, 2:-2, 1], npx.where(mask_crops[2:-2, 2:-2], 200, vs.z_root[2:-2, 2:-2, 1]) * vs.maskCatch[2:-2, 2:-2]
     )
     vs.z_root = update(
         vs.z_root,
