@@ -161,10 +161,10 @@ class SVATCROPSetup(RogerSetup):
         vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], 539)
         vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], 564)
 
-        vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :2], 400)
+        vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :2], 200)
         vs.z_root_crop = update(
             vs.z_root_crop,
-            at[2:-2, 2:-2, :2, 0], 400
+            at[2:-2, 2:-2, :2, 0], 200
         )
 
     @roger_routine

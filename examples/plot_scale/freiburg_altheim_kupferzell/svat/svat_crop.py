@@ -212,6 +212,12 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 2])
             vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], self._read_var_from_nc("crop", self._input_dir, f'{land_cover_scenario}.nc')[:, :, 3])
 
+            vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :2], 200)
+            vs.z_root_crop = update(
+                vs.z_root_crop,
+                at[2:-2, 2:-2, :2, 0], vs.z_root[2:-2, 2:-2, :2]
+            )
+
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 0])
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path,  "parameters.csv"))
             vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_csv("dmpv", self._base_path,  "parameters.csv"))
@@ -238,23 +244,9 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             if (vs.month[vs.tau] != vs.month[vs.taum1]) & (vs.itt > 1):
                 vs.update(calc_parameters_surface_kernel(state))
 
-        @roger_routine(
-            dist_safe=False,
-            local_variables=[
-                "lu_id",
-                "z_evap",
-                "z_root",
-                "z_root_crop",
-            ],
-        )
+        @roger_routine
         def set_initial_conditions_setup(self, state):
-            vs = state.variables
-
-            vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :2], npx.where(vs.lu_id[2:-2, 2:-2] == 599, 200, 270)[:, :, npx.newaxis])
-            vs.z_root_crop = update(
-                vs.z_root_crop,
-                at[2:-2, 2:-2, :2, 0], vs.z_root[2:-2, 2:-2, :2]
-            )
+            pass
 
         @roger_routine
         def set_initial_conditions(self, state):
