@@ -348,7 +348,7 @@ def calc_parameters_root_zone_kernel(state):
         at[2:-2, 2:-2], npx.where((z_root[2:-2, 2:-2] >= vs.z_soil[2:-2, 2:-2]), 0.9 * vs.z_soil[2:-2, 2:-2], z_root[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2]
     )
 
-    mask_crops = npx.isin(vs.lu_id, [npx.arange(500, 598, 1, dtype=int)])
+    mask_crops = npx.isin(vs.lu_id, npx.arange(500, 598, 1, dtype=npx.int64))
     vs.z_root = update(
         vs.z_root,
         at[2:-2, 2:-2, 0], npx.where(mask_crops[2:-2, 2:-2], vs.z_evap[2:-2, 2:-2], vs.z_root[2:-2, 2:-2, 0]) * vs.maskCatch[2:-2, 2:-2]
