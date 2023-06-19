@@ -5412,6 +5412,24 @@ VARIABLES = {
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport,
     ),
+    "dC_rz_num_error": Variable(
+        "numerical error of solute balance",
+        CATCH_GRID,
+        "M",
+        "numerical error of solute balance",
+        write_to_restart=False,
+        time_dependent=False,
+        active=lambda settings: settings.enable_offline_transport,
+    ),
+    "dC_ss_num_error": Variable(
+        "numerical error of solute balance",
+        CATCH_GRID,
+        "M",
+        "numerical error of solute balance",
+        write_to_restart=False,
+        time_dependent=False,
+        active=lambda settings: settings.enable_offline_transport,
+    ),
 }
 
 
