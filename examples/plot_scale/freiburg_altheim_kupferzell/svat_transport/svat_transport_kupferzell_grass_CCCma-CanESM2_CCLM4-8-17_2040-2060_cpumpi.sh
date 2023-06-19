@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=4
-#PBS -l walltime=24:00:00
+#PBS -l walltime=36:00:00
 #PBS -l pmem=4000mb
 #PBS -N svat_transport_kupferzell_grass_CCCma-CanESM2_CCLM4-8-17_2040-2060
 #PBS -m a
@@ -26,7 +26,7 @@ while [ "${checksum_gws}" != "${checksum_ssd}" ]; do
 done
 echo "Copying was successful"
  
-mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d jax -n 4 1 --location kupferzell --land-cover-scenario grass --climate-scenario CCCma-CanESM2_CCLM4-8-17 --period 2040-2060 -td "${TMPDIR}"
+mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 4 1 --location kupferzell --land-cover-scenario grass --climate-scenario CCCma-CanESM2_CCLM4-8-17 --period 2040-2060 -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /beegfs/work/workspace/ws/fr_rs1092-workspace-0/freiburg_altheim_kupferzell/svat_transport"
 mkdir -p /beegfs/work/workspace/ws/fr_rs1092-workspace-0/freiburg_altheim_kupferzell/svat_transport
