@@ -377,7 +377,7 @@ def main():
                 lines = []
                 lines.append('#!/bin/bash\n')
                 lines.append('#PBS -l nodes=1:ppn=4\n')
-                lines.append('#PBS -l walltime=24:00:00\n')
+                lines.append('#PBS -l walltime=36:00:00\n')
                 lines.append('#PBS -l pmem=4000mb\n')
                 lines.append(f'#PBS -N {script_name}\n')
                 lines.append('#PBS -m a\n')
@@ -404,7 +404,7 @@ def main():
                 lines.append('done\n')
                 lines.append(f'echo "Copying was successful"\n')
                 lines.append(' \n')
-                lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d jax -n 4 1 --location %s --land-cover-scenario grass --climate-scenario %s --period %s -td "${TMPDIR}"\n' % (location, climate_scenario, period))
+                lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 4 1 --location %s --land-cover-scenario grass --climate-scenario %s --period %s -td "${TMPDIR}"\n' % (location, climate_scenario, period))
                 lines.append('# Move output from local SSD to global workspace\n')
                 lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                 lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
