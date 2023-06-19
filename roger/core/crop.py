@@ -1418,7 +1418,7 @@ def calc_redistribution_root_growth_transport_anion_kernel(state):
 
     vs.C_re_rg = update(
         vs.C_re_rg,
-        at[2:-2, 2:-2], npx.where(vs.re_rg[2:-2, 2:-2] > 0, npx.sum(vs.mtt_re_rg[2:-2, 2:-2, :], axis=-1) / vs.re_rg, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.re_rg[2:-2, 2:-2] > 0, npx.sum(vs.mtt_re_rg[2:-2, 2:-2, :], axis=-1) / vs.re_rg[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.M_re_rg = update(
@@ -1586,7 +1586,7 @@ def calc_redistribution_root_loss_transport_anion_kernel(state):
         at[2:-2, 2:-2, 1:], npx.cumsum(vs.tt_re_rl[2:-2, 2:-2, :], axis=2),
     )
 
-    # calculate isotope travel time distribution
+    # calculate anion travel time distribution
     alpha = allocate(state.dimensions, ("x", "y"), fill=1)
     vs.mtt_re_rl = update(
         vs.mtt_re_rl,
@@ -1595,7 +1595,7 @@ def calc_redistribution_root_loss_transport_anion_kernel(state):
 
     vs.C_re_rl = update(
         vs.C_re_rl,
-        at[2:-2, 2:-2], npx.where(vs.re_rg[2:-2, 2:-2] > 0, npx.sum(vs.mtt_re_rl[2:-2, 2:-2, :], axis=-1) / vs.re_rg, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(vs.re_rl[2:-2, 2:-2] > 0, npx.sum(vs.mtt_re_rl[2:-2, 2:-2, :], axis=-1) / vs.re_rl[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.M_re_rl = update(
