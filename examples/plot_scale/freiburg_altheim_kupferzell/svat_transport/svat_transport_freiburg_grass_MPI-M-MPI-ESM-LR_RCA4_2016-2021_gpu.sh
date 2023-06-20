@@ -10,7 +10,8 @@
 module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4
 module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
 module load lib/cudnn/8.2-cuda-11.4
-export OMPI_MCA_btl="self,smcuda,vader,tcpeval "$(conda shell.bash hook)"
+export OMPI_MCA_btl="self,smcuda,vader,tcp"
+eval "$(conda shell.bash hook)"
 conda activate roger-gpu
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/svat_transport
  
