@@ -10,7 +10,6 @@
 module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4
 module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
 # prevent memory issues for Open MPI 4.1.x
-export OMPI_MCA_btl="self,vader,smcuda,tcp"
 eval "$(conda shell.bash hook)"
 conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/svat_transport
