@@ -7,13 +7,13 @@ authors:
     given-names: Andreas
   - family-names: Weiler
     given-names: Markus
-cff-version: 3.0.0
+cff-version: 3.0.3
 message: "If you use this software, please cite the article from preferred-citation."
 title: RoGeR
 url: "https://github.com/Hydrology-IFH/roger"
 preferred-citation:
   type: article
-  title: "Roger v3.0 – a process-based hydrologic toolbox model in Python"
+  title: "Roger v3.0.3 – a process-based hydrologic toolbox model in Python"
   authors:
   - family-names: Schwemmle
     given-names: Robin
@@ -24,4 +24,4 @@ preferred-citation:
   - family-names: Weiler
     given-names: Markus
   year: 2023
-  doi:
+  doi: https://doi.org/10.5194/gmd-2023-118

@@ -114,7 +114,7 @@ If you use Roger in scientific work, please consider citing [the following publi
 @article{
 	title = {Roger v3.0 – a process-based hydrologic toolbox model in {Python}},
 	volume = {...},
-	doi = {https://doi.org/10.5194/gmd-xxx},
+	doi = {https://doi.org/10.5194/gmd-2023-118},
 	journal = {Geosci. Model Dev.},
 	author = {Schwemmle, Robin, and Leistert, Hannes, and Weiler, Markus},
 	year = {2023},

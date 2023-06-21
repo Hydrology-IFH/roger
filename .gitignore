@@ -158,3 +158,8 @@ gpu_memory_profiling/
 *.e1*
 *.sh.o1*
 *.sh.e1*
+
+# Anaconda
+conda_build.sh
+build.sh
+meta.yaml
