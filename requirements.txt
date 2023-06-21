@@ -11,3 +11,4 @@ pyyaml==6.0
 matplotlib==3.7.1
 seaborn==0.12.2
 cftime==1.6.2
+cython==0.29.35
