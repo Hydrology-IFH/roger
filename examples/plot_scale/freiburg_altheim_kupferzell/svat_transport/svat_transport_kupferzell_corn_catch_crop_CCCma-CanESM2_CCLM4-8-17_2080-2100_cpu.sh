@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1
-#PBS -l walltime=24:00:00
+#PBS -l walltime=96:00:00
 #PBS -l pmem=12000mb
 #PBS -N svat_transport_kupferzell_corn_catch_crop_CCCma-CanESM2_CCLM4-8-17_2080-2100
 #PBS -m a
