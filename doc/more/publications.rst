@@ -11,10 +11,14 @@ Steinbrich, A., Leistert, H., and Weiler, M. (2016). Model-based quantification 
 
 Using RoGeR
 +++++++++++
-In preparation.
+Schwemmle, R., Leistert, H., Steinbrich, A., and Weiler, M. (2023). RoGeR v3.0.3 - a process-based hydrologic toolbox model in Python. Geosci. Model Dev. Discuss. [preprint], in review, `https://doi.org/10.5194/gmd-2023-118 <https://doi.org/10.5194/gmd-2023-118>`__
+
+Schwemmle, R. and Weiler, M. (2023). Consistent modelling of transport processes and travel times - coupling soil hydrologic processes with StorAge Selection functions (in review), submitted to Water Resources Research, `https://doi.org/10.22541/essoar.167751575.55537069/v1 <https://doi.org/10.22541/essoar.167751575.55537069/v1>`__
 
 Talks
 -----
+
+Schwemmle, R. and Weiler, M. (2023). Consistent modelling of transport processes and travel times - coupling soil hydrologic processes with StorAge Selection functions, EGU General Assembly, Vienna, Austria (talk)
 
 
 Theses
