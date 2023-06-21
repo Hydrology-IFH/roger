@@ -202,7 +202,7 @@ def main():
                     lines.append("#!/bin/bash\n")
                     lines.append("#PBS -l nodes=1:ppn=1\n")
                     lines.append("#PBS -l walltime=24:00:00\n")
-                    lines.append("#PBS -l pmem=8000mb\n")
+                    lines.append("#PBS -l pmem=12000mb\n")
                     lines.append(f"#PBS -N {script_name}\n")
                     lines.append("#PBS -m a\n")
                     lines.append("#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n")
