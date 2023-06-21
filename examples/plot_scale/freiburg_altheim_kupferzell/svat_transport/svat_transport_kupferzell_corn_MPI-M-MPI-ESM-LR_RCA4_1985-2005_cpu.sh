@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=24:00:00
-#PBS -l pmem=8000mb
+#PBS -l pmem=12000mb
 #PBS -N svat_transport_kupferzell_corn_MPI-M-MPI-ESM-LR_RCA4_1985-2005
 #PBS -m a
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
