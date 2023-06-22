@@ -7,6 +7,8 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_transport_kupferzell_corn_catch_crop_MPI-M-MPI-ESM-LR_RCA4_2080-2100
+#SBATCH --output=svat_transport_kupferzell_corn_catch_crop_MPI-M-MPI-ESM-LR_RCA4_2080-2100
+#SBATCH --error=svat_transport_kupferzell_corn_catch_crop_MPI-M-MPI-ESM-LR_RCA4_2080-2100
 #SBATCH --export=ALL
  
 # load module dependencies

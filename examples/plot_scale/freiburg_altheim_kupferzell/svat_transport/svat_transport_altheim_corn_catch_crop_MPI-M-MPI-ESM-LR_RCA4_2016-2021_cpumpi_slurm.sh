@@ -7,6 +7,8 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_transport_altheim_corn_catch_crop_MPI-M-MPI-ESM-LR_RCA4_2016-2021
+#SBATCH --output=svat_transport_altheim_corn_catch_crop_MPI-M-MPI-ESM-LR_RCA4_2016-2021
+#SBATCH --error=svat_transport_altheim_corn_catch_crop_MPI-M-MPI-ESM-LR_RCA4_2016-2021
 #SBATCH --export=ALL
  
 # load module dependencies
