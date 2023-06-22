@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=2:gpus=2
+#PBS -l nodes=1:ppn=2:gpus=2:default
 #PBS -l walltime=24:00:00
 #PBS -l pmem=8000mb
 #PBS -N svat_transport_freiburg_corn_CCCma-CanESM2_CCLM4-8-17_2080-2100
