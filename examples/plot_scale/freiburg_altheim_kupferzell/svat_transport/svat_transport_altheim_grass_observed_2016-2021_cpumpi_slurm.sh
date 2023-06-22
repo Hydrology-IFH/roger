@@ -34,7 +34,7 @@ while [ "${checksum_gws}" != "${checksum_ssd}" ]; do
 done
 echo "Copying was successful"
  
-mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d gpu --location altheim --land-cover-scenario grass --climate-scenario observed --period 2016-2021 -td "${TMPDIR}"
+mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 4 1 --location altheim --land-cover-scenario grass --climate-scenario observed --period 2016-2021 -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/output/svat_transport"
 mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/output/svat_transport
