@@ -7,6 +7,8 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_transport_altheim_grass_CCCma-CanESM2_CCLM4-8-17_1985-2005
+#SBATCH --output=svat_transport_altheim_grass_CCCma-CanESM2_CCLM4-8-17_1985-2005
+#SBATCH --error=svat_transport_altheim_grass_CCCma-CanESM2_CCLM4-8-17_1985-2005
 #SBATCH --export=ALL
  
 eval "$(conda shell.bash hook)"

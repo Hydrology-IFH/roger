@@ -7,6 +7,8 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_altheim_grass_MPI-M-MPI-ESM-LR_RCA4_2080-2100
+#SBATCH --output=svat_altheim_grass_MPI-M-MPI-ESM-LR_RCA4_2080-2100
+#SBATCH --error=svat_altheim_grass_MPI-M-MPI-ESM-LR_RCA4_2080-2100
 #SBATCH --export=ALL
 #PBS -m a
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de

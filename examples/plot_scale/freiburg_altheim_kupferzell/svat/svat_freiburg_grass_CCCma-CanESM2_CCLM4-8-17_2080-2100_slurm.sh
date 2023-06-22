@@ -7,6 +7,8 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_freiburg_grass_CCCma-CanESM2_CCLM4-8-17_2080-2100
+#SBATCH --output=svat_freiburg_grass_CCCma-CanESM2_CCLM4-8-17_2080-2100
+#SBATCH --error=svat_freiburg_grass_CCCma-CanESM2_CCLM4-8-17_2080-2100
 #SBATCH --export=ALL
 #PBS -m a
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
