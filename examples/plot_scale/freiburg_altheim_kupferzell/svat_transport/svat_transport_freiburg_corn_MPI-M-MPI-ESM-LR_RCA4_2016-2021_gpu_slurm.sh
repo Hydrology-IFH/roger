@@ -11,8 +11,15 @@
 #SBATCH --error=svat_transport_freiburg_corn_MPI-M-MPI-ESM-LR_RCA4_2016-2021_err.txt
 #SBATCH --export=ALL
  
+# load module dependencies
+module load devel/cudnn/10.2
+module load devel/cuda/12.0
+module load lib/hdf5/1.12.2-gnu-12.1-openmpi-4.1
+# prevent memory issues for Open MPI 4.1.x
+export OMPI_MCA_btl="self,smcuda,vader,tcp"
+export OMP_NUM_THREADS=1
 eval "$(conda shell.bash hook)"
-conda activate roger
+conda activate roger-gpu
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/svat_transport
  
 # Copy fluxes and states from global workspace to local SSD
