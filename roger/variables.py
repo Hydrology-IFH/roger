@@ -192,22 +192,22 @@ VARIABLES = {
         None,
         "",
         "Index of current time step",
-        dtype="int64",
+        dtype="int32",
         initial=1,
         write_to_restart=True,
     ),
     "taup1": Variable(
-        "Index of next time step", None, "", "Index of next time step", dtype="int64", initial=2, write_to_restart=True
+        "Index of next time step", None, "", "Index of next time step", dtype="int32", initial=2, write_to_restart=True
     ),
     "taum1": Variable(
-        "Index of last time step", None, "", "Index of last time step", dtype="int64", initial=0, write_to_restart=True
+        "Index of last time step", None, "", "Index of last time step", dtype="int32", initial=0, write_to_restart=True
     ),
     "tau_event": Variable(
         "Index of current time step within event",
         None,
         "",
         "Index of current time step within event",
-        dtype="int64",
+        dtype="int32",
         initial=0,
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport,
@@ -217,7 +217,7 @@ VARIABLES = {
         None,
         "seconds",
         "Current time",
-        dtype="int64",
+        dtype="int32",
         write_to_restart=True,
     ),
     "time_event0": Variable(
@@ -225,7 +225,7 @@ VARIABLES = {
         None,
         "seconds",
         "time since last rainfall/snow melt",
-        dtype="int64",
+        dtype="int32",
         initial=0,
         write_to_restart=True,
     ),
@@ -245,21 +245,82 @@ VARIABLES = {
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport,
     ),
-    "itt": Variable("Current iteration", None, "", "Current iteration", dtype="int64", initial=0, write_to_restart=True),
-    "itt_substep": Variable("Current iteration", None, "", "Current iteration of substep", dtype="int64", initial=0, write_to_restart=True),
-    "itt_day": Variable("Current iteration wthin day", None, "", "Current iteration within day", dtype="int64", initial=0, write_to_restart=True),
-    "itt_event": Variable("Current iteration wthin event", None, "", "Current iteration within event", dtype="int64", initial=0, write_to_restart=True, active=lambda settings: settings.enable_film_flow),
-    "itt_forc": Variable("Current iteration of forcing", None, "", "Current iteration of forcing", dtype="int64", initial=0, write_to_restart=True),
-    "itt_cr": Variable("Current iteration of crop rotation", None, "", "Current iteration of crop rotation", dtype="int64", initial=2, write_to_restart=True),
-    "year": Variable("Year at current iteration", TIMESTEPS, "", "Year at Current iteration", dtype="int64", initial=1900, write_to_restart=True),
-    "month": Variable("Month at current iteration", TIMESTEPS, "", "Month at Current iteration", dtype="int64", initial=1, write_to_restart=True),
-    "doy": Variable("Day of year at current iteration", TIMESTEPS, "", "Day of year at Current iteration", dtype="int64", initial=1, write_to_restart=True),
+    "itt": Variable(
+        "Current iteration", None, "", "Current iteration", dtype="int32", initial=0, write_to_restart=True
+    ),
+    "itt_substep": Variable(
+        "Current iteration", None, "", "Current iteration of substep", dtype="int32", initial=0, write_to_restart=True
+    ),
+    "itt_day": Variable(
+        "Current iteration wthin day",
+        None,
+        "",
+        "Current iteration within day",
+        dtype="int32",
+        initial=0,
+        write_to_restart=True,
+    ),
+    "itt_event": Variable(
+        "Current iteration wthin event",
+        None,
+        "",
+        "Current iteration within event",
+        dtype="int32",
+        initial=0,
+        write_to_restart=True,
+        active=lambda settings: settings.enable_film_flow,
+    ),
+    "itt_forc": Variable(
+        "Current iteration of forcing",
+        None,
+        "",
+        "Current iteration of forcing",
+        dtype="int32",
+        initial=0,
+        write_to_restart=True,
+    ),
+    "itt_cr": Variable(
+        "Current iteration of crop rotation",
+        None,
+        "",
+        "Current iteration of crop rotation",
+        dtype="int32",
+        initial=2,
+        write_to_restart=True,
+    ),
+    "year": Variable(
+        "Year at current iteration",
+        TIMESTEPS,
+        "",
+        "Year at Current iteration",
+        dtype="int32",
+        initial=1900,
+        write_to_restart=True,
+    ),
+    "month": Variable(
+        "Month at current iteration",
+        TIMESTEPS,
+        "",
+        "Month at Current iteration",
+        dtype="int32",
+        initial=1,
+        write_to_restart=True,
+    ),
+    "doy": Variable(
+        "Day of year at current iteration",
+        TIMESTEPS,
+        "",
+        "Day of year at Current iteration",
+        dtype="int32",
+        initial=1,
+        write_to_restart=True,
+    ),
     "dt": Variable(
         "time step",
         None,
         "hours",
         "time step",
-        dtype="float64",
+        dtype="float32",
         initial=1,
         write_to_restart=True,
     ),
@@ -268,7 +329,7 @@ VARIABLES = {
         None,
         "seconds",
         "time step",
-        dtype="int64",
+        dtype="int32",
         initial=3600,
         write_to_restart=True,
     ),
@@ -277,7 +338,7 @@ VARIABLES = {
         TIMESTEPS,
         "",
         "Event number",
-        dtype="int64",
+        dtype="int32",
         initial=0,
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport,
@@ -287,7 +348,7 @@ VARIABLES = {
         None,
         "",
         "Counter of event number",
-        dtype="int64",
+        dtype="int32",
         initial=1,
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport,
@@ -369,7 +430,7 @@ VARIABLES = {
         CATCH_GRID,
         "m",
         "Land use",
-        dtype="int64",
+        dtype="int32",
         time_dependent=False,
         write_to_restart=True,
     ),
@@ -468,7 +529,7 @@ VARIABLES = {
         CATCH_GRID,
         "%",
         "surface slope",
-        dtype="int64",
+        dtype="int32",
         time_dependent=False,
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport,
@@ -1117,7 +1178,7 @@ VARIABLES = {
         None,
         "",
         "Film flow event number",
-        dtype="int64",
+        dtype="int32",
         initial=0,
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
@@ -1127,7 +1188,7 @@ VARIABLES = {
         None,
         "",
         "Film flow event number",
-        dtype="int64",
+        dtype="int32",
         initial=0,
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
@@ -1137,7 +1198,7 @@ VARIABLES = {
         None,
         "",
         "counter of film flow event number",
-        dtype="int64",
+        dtype="int32",
         initial=0,
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
@@ -1147,7 +1208,7 @@ VARIABLES = {
         NEVENTS_FF,
         "",
         "iteration when new film flow event starts",
-        dtype="int64",
+        dtype="int32",
         initial=0,
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
@@ -1157,7 +1218,7 @@ VARIABLES = {
         NEVENTS_FF,
         "",
         "iteration when film flow event stops",
-        dtype="int64",
+        dtype="int32",
         initial=0,
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
@@ -1442,7 +1503,7 @@ VARIABLES = {
         NEVENTS_FF,
         "",
         "iteration within film flow event",
-        dtype="int64",
+        dtype="int32",
         time_dependent=True,
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_film_flow,
@@ -1861,7 +1922,8 @@ VARIABLES = {
         "isotope ratio of soil",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "mr_s": Variable(
         "mass removal from solute mass StorAge of soil",
@@ -2216,7 +2278,8 @@ VARIABLES = {
         "isotope ratio of root zone",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "rt10_rz": Variable(
         "10th percentile of root zone residence time",
@@ -2554,7 +2617,8 @@ VARIABLES = {
         "isotope ratio of subsoil",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "rt10_ss": Variable(
         "10th percentile of subsoil residence time",
@@ -3302,7 +3366,7 @@ VARIABLES = {
         CATCH_GRID,
         "",
         "number of wetting fronts",
-        dtype="int64",
+        dtype="int32",
         write_to_restart=True,
         time_dependent=True,
         active=lambda settings: not settings.enable_offline_transport,
@@ -3433,7 +3497,8 @@ VARIABLES = {
         "per mil",
         "isotope ratio of matrix infiltration into root zone",
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "M_inf_mat_rz": Variable(
         "solute mass of matrix infiltration into root zone",
@@ -3473,7 +3538,8 @@ VARIABLES = {
         "per mil",
         "isotope ratio of preferential infiltration into root zone",
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "M_inf_pf_rz": Variable(
         "solute mass of preferential infiltration into root zone",
@@ -3513,7 +3579,8 @@ VARIABLES = {
         "per mil",
         "isotope ratio of preferential infiltration into subsoil",
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "M_inf_pf_ss": Variable(
         "solute mass of preferential infiltration into subsoil",
@@ -3757,7 +3824,8 @@ VARIABLES = {
         "per mil",
         "isotope ratio of transpiration",
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "tt10_transp": Variable(
         "10th percentile of transpiration travel time ",
@@ -3878,7 +3946,8 @@ VARIABLES = {
         "per mil",
         "isotope ratio of soil evaporation",
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     # percolation variables
     "q_fp_rz": Variable(
@@ -4031,7 +4100,8 @@ VARIABLES = {
         "per mil",
         "isotope ratio of redistribution after root loss",
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "sas_params_q_rz": Variable(
         "SAS parameters of percolation from root zone",
@@ -4096,7 +4166,8 @@ VARIABLES = {
         "per mil",
         "isotope ratio of root zone percolation",
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "sas_params_q_ss": Variable(
         "SAS parameters of percolation from subsoil",
@@ -4169,7 +4240,8 @@ VARIABLES = {
         "per mil",
         "isotope ratio of subsoil percolation",
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "tt10_q_ss": Variable(
         "10th percentile of subsoil percolation travel time",
@@ -4225,7 +4297,7 @@ VARIABLES = {
         CATCH_GRID + TIME,
         "mm/dt",
         "capillary rise from subsoil into root zone",
-        active=lambda settings: settings.enable_offline_transport
+        active=lambda settings: settings.enable_offline_transport,
     ),
     "cpr_rz": Variable(
         "capillary rise from subsoil into root zone",
@@ -4335,7 +4407,8 @@ VARIABLES = {
         "per mil",
         "isotope ratio of redistribution after root growth",
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "sas_params_cpr_rz": Variable(
         "SAS parameters of capillary rise into root zone",
@@ -4408,7 +4481,8 @@ VARIABLES = {
         "per mil",
         "isotope ratio of capillary rise from subsoil into root zone",
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "sas_params_cpr_ss": Variable(
         "SAS parameters of capillary rise into subsoil",
@@ -4481,7 +4555,8 @@ VARIABLES = {
         "per mil",
         "isotope ratio of capillary rise from groundwater into subsoil",
         time_dependent=True,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     # surface runoff variables
     "q_sur": Variable(
@@ -4827,7 +4902,14 @@ VARIABLES = {
         "solute concentration of input",
         write_to_restart=True,
         time_dependent=False,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate),
+        active=lambda settings: settings.enable_offline_transport
+        & (
+            settings.enable_chloride
+            | settings.enable_bromide
+            | settings.enable_oxygen18
+            | settings.enable_deuterium
+            | settings.enable_nitrate
+        ),
     ),
     "C_ISO_IN": Variable(
         "isotope ratio of input",
@@ -4836,7 +4918,8 @@ VARIABLES = {
         "isotope ratio of input",
         write_to_restart=True,
         time_dependent=False,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "C_in": Variable(
         "solute concentration of input",
@@ -4845,7 +4928,15 @@ VARIABLES = {
         "solute concentration of input",
         write_to_restart=False,
         time_dependent=False,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate | settings.enable_virtualtracer),
+        active=lambda settings: settings.enable_offline_transport
+        & (
+            settings.enable_chloride
+            | settings.enable_bromide
+            | settings.enable_oxygen18
+            | settings.enable_deuterium
+            | settings.enable_nitrate
+            | settings.enable_virtualtracer
+        ),
     ),
     "C_iso_in": Variable(
         "isotope ratio of input",
@@ -4854,7 +4945,8 @@ VARIABLES = {
         "isotope ratio of input",
         write_to_restart=False,
         time_dependent=False,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "C_snow": Variable(
         "isotope concentration of snow cover",
@@ -4863,7 +4955,8 @@ VARIABLES = {
         "isotope concentration of snow cover",
         write_to_restart=False,
         time_dependent=False,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "C_iso_snow": Variable(
         "isotope ratio of snow cover",
@@ -4872,7 +4965,8 @@ VARIABLES = {
         "isotope ratio of snow cover",
         write_to_restart=False,
         time_dependent=False,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_oxygen18 | settings.enable_deuterium),
+        active=lambda settings: settings.enable_offline_transport
+        & (settings.enable_oxygen18 | settings.enable_deuterium),
     ),
     "M_snow": Variable(
         "solute mass of snow cover",
@@ -4881,7 +4975,14 @@ VARIABLES = {
         "solute mass of snow cover",
         write_to_restart=False,
         time_dependent=False,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate),
+        active=lambda settings: settings.enable_offline_transport
+        & (
+            settings.enable_chloride
+            | settings.enable_bromide
+            | settings.enable_oxygen18
+            | settings.enable_deuterium
+            | settings.enable_nitrate
+        ),
     ),
     "M_IN": Variable(
         "solute mass of input",
@@ -4890,7 +4991,14 @@ VARIABLES = {
         "solute mass of input",
         write_to_restart=True,
         time_dependent=False,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate),
+        active=lambda settings: settings.enable_offline_transport
+        & (
+            settings.enable_chloride
+            | settings.enable_bromide
+            | settings.enable_oxygen18
+            | settings.enable_deuterium
+            | settings.enable_nitrate
+        ),
     ),
     "M_in": Variable(
         "solute mass of input",
@@ -4899,7 +5007,15 @@ VARIABLES = {
         "solute mass of input",
         write_to_restart=False,
         time_dependent=False,
-        active=lambda settings: settings.enable_offline_transport & (settings.enable_chloride | settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate | settings.enable_virtualtracer),
+        active=lambda settings: settings.enable_offline_transport
+        & (
+            settings.enable_chloride
+            | settings.enable_bromide
+            | settings.enable_oxygen18
+            | settings.enable_deuterium
+            | settings.enable_nitrate
+            | settings.enable_virtualtracer
+        ),
     ),
     "NMIN_IN": Variable(
         "mineral nitrogen fertilizer",
@@ -4988,7 +5104,7 @@ VARIABLES = {
         "crop type",
         write_to_restart=True,
         time_dependent=True,
-        dtype="int64",
+        dtype="int32",
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "crop_height": Variable(
@@ -5032,7 +5148,7 @@ VARIABLES = {
         "",
         "day of year of sowing",
         write_to_restart=True,
-        dtype="int64",
+        dtype="int32",
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "doy_mid": Variable(
@@ -5041,7 +5157,7 @@ VARIABLES = {
         "",
         "day of year of full canopy",
         write_to_restart=True,
-        dtype="int64",
+        dtype="int32",
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "doy_dec": Variable(
@@ -5050,7 +5166,7 @@ VARIABLES = {
         "",
         "day of year of crop canopy decay",
         write_to_restart=True,
-        dtype="int64",
+        dtype="int32",
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "doy_end": Variable(
@@ -5059,7 +5175,7 @@ VARIABLES = {
         "",
         "day of year of harvesting",
         write_to_restart=True,
-        dtype="int64",
+        dtype="int32",
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "ta_base": Variable(

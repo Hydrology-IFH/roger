@@ -66,7 +66,9 @@ def set_loglevel(val):
     from roger import logs
 
     log_args.loglevel = parse_choice(LOGLEVELS)(val)
-    logs.setup_logging(loglevel=log_args.loglevel, log_all_processes=log_args.log_all_processes, log_to_file=log_args.log_to_file)
+    logs.setup_logging(
+        loglevel=log_args.loglevel, log_all_processes=log_args.log_all_processes, log_to_file=log_args.log_to_file
+    )
     return log_args.loglevel
 
 
@@ -74,7 +76,9 @@ def set_log_to_file(val):
     from roger import logs
 
     log_args.log_to_file = parse_bool(val)
-    logs.setup_logging(loglevel=log_args.loglevel, log_all_processes=log_args.log_all_processes, log_to_file=log_args.log_to_file)
+    logs.setup_logging(
+        loglevel=log_args.loglevel, log_all_processes=log_args.log_all_processes, log_to_file=log_args.log_to_file
+    )
     return log_args.log_to_file
 
 
@@ -98,7 +102,7 @@ RuntimeSetting.__new__.__defaults__ = (None, None, True)
 AVAILABLE_SETTINGS = {
     "backend": RuntimeSetting(parse_choice(BACKENDS), "numpy"),
     "device": RuntimeSetting(parse_choice(DEVICES), "cpu"),
-    "float_type": RuntimeSetting(parse_choice(FLOAT_TYPES), "float64"),
+    "float_type": RuntimeSetting(parse_choice(FLOAT_TYPES), "float32"),
     "petsc_options": RuntimeSetting(str, ""),
     "monitor_water_balance": RuntimeSetting(parse_bool, False),
     "monitor_tracer_balance": RuntimeSetting(parse_bool, False),
