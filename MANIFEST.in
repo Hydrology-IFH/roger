@@ -19,4 +19,6 @@ global-include *.pxd
 global-include *.h
 global-include *.cu
 
+exclude examples/
+
 global-exclude *.c
