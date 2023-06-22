@@ -47,7 +47,7 @@ def test_variables_repr(dummy_variables):
     from roger.core.operators import numpy as npx
 
     array_type = type(npx.array([]))
-    assert f"tau = {array_type} with shape (), dtype int64," in repr(dummy_variables)
+    assert f"tau = {array_type} with shape (), dtype int32," in repr(dummy_variables)
 
 
 def test_to_xarray(dummy_state):
