@@ -227,8 +227,54 @@ def main():
                     file.close()
                     subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
-                    script_name = f"svat_transport_{location}_{land_cover_scenario}_{climate_scenario}_{period}"
-                    output_path_ws = base_path_ws / "svat_transport"
+                    lines = []
+                    lines.append("#!/bin/bash\n")
+                    lines.append("#SBATCH --time=14:00:00\n")
+                    lines.append("#SBATCH --gres=gpu:1\n")
+                    lines.append("#SBATCH --ntasks=1\n")
+                    lines.append("#SBATCH --cpus-per-task=1\n")
+                    lines.append("#SBATCH --mem=12000\n")
+                    lines.append("#SBATCH --mail-type=FAIL\n")
+                    lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
+                    lines.append(f"#SBATCH --job-name={script_name}\n")
+                    lines.append(f"#SBATCH --output={script_name}.out\n")
+                    lines.append(f"#SBATCH --error={script_name}_err.txt\n")
+                    lines.append("#SBATCH --export=ALL\n")
+                    lines.append(" \n")
+                    lines.append('eval "$(conda shell.bash hook)"\n')
+                    lines.append("conda activate roger\n")
+                    lines.append(f"cd {base_path_bwuc}/svat_transport\n")
+                    lines.append(" \n")
+                    lines.append("# Copy fluxes and states from global workspace to local SSD\n")
+                    lines.append('echo "Copy fluxes and states from global workspace to local SSD"\n')
+                    lines.append("# Compares hashes\n")
+                    file_nc = "SVAT_%s_%s_%s_%s.nc" % (location, land_cover_scenario, climate_scenario, period)
+                    lines.append(
+                        f'checksum_gws=$(shasum -a 256 {output_path_ws.parent.as_posix()}/svat/{file_nc} | cut -f 1 -d " ")\n'
+                    )
+                    lines.append("checksum_ssd=0a\n")
+                    lines.append('cp %s/svat/%s "${TMPDIR}"\n' % (output_path_ws.parent.as_posix(), file_nc))
+                    lines.append("# Wait for termination of moving files\n")
+                    lines.append('while [ "${checksum_gws}" != "${checksum_ssd}" ]; do\n')
+                    lines.append("    sleep 10\n")
+                    lines.append('    checksum_ssd=$(shasum -a 256 "${TMPDIR}"/%s | cut -f 1 -d " ")\n' % (file_nc))
+                    lines.append("done\n")
+                    lines.append('echo "Copying was successful"\n')
+                    lines.append(" \n")
+                    lines.append(
+                        'python svat_crop_transport.py -b jax -d gpu --location %s --land-cover-scenario %s --climate-scenario %s --period %s -td "${TMPDIR}"\n'
+                        % (location, land_cover_scenario, climate_scenario, period)
+                    )
+                    lines.append("# Move output from local SSD to global workspace\n")
+                    lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
+                    lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
+                    lines.append('mv "${TMPDIR}"/SVATTRANSPORT_*.nc %s\n' % (output_path_ws.as_posix()))
+                    file_path = base_path / "svat_transport" / f"{script_name}_gpu_slurm.sh"
+                    file = open(file_path, "w")
+                    file.writelines(lines)
+                    file.close()
+                    subprocess.Popen(f"chmod +x {file_path}", shell=True)
+
                     lines = []
                     lines.append("#!/bin/bash\n")
                     lines.append("#SBATCH --time=48:00:00\n")

@@ -2,20 +2,20 @@
 
 cd ~/roger/examples/plot_scale/freiburg_altheim_kupferzell/svat_transport
 
-FILES="$PWD/svat_transport_*_corn_CCCma-CanESM2_CCLM4-8-17_*_cpu_slurm.sh"
+FILES="$PWD/svat_transport_*_corn_CCCma-CanESM2_CCLM4-8-17_*_cpumpi_slurm.sh"
 for f in $FILES
 do
-  qsub -q long $f
+  sbatch --partition=single $f
 done
 
-FILES="$PWD/svat_transport_*_corn_MPI-M-MPI-ESM-LR_RCA4_*_cpu_slurm.sh"
+FILES="$PWD/svat_transport_*_corn_MPI-M-MPI-ESM-LR_RCA4_*_cpumpi_slurm.sh"
 for f in $FILES
 do
-  qsub -q long $f
+  sbatch --partition=single $f
 done
 
-FILES="$PWD/svat_transport_*_corn_observed_*_cpu_slurm.sh"
+FILES="$PWD/svat_transport_*_corn_observed_*_cpumpi_slurm.sh"
 for f in $FILES
 do
-  qsub -q long $f
+  sbatch --partition=single $f
 done
