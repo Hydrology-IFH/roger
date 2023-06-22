@@ -149,7 +149,11 @@ setup(
     python_requires=">=3.7",
     version=versioneer.get_version(),
     cmdclass=cmdclass,
-    packages=find_packages(),
+    packages=find_packages(
+        exclude=[
+            "examples",
+        ]
+    ),
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRAS_REQUIRE,
     ext_modules=extensions,
