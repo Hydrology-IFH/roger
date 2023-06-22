@@ -26,44 +26,101 @@ ARR_CP = onp.asarray(df_cp.values)
 
 ARR_GC = onp.zeros((25, 13))
 ARR_GC[:, 0] = ARR_ILU[:, 0]
-ARR_GC[:, 1:] = 1 - 0.7**(ARR_ILU[:, 1:]/0.2)
+ARR_GC[:, 1:] = 1 - 0.7 ** (ARR_ILU[:, 1:] / 0.2)
 
 ARR_GCM = onp.zeros((25, 2))
 ARR_GCM[:, 0] = ARR_ILU[:, 0]
 
 ARR_GCM[:, 1] = onp.max(ARR_GC[:, 1:], axis=1)
 
-SUMMER_CROPS = onp.array([501, 502, 503, 504, 505, 506, 507, 508,
-                          509, 510, 511, 512, 513, 514, 515, 516,
-                          517, 518, 519, 520, 521, 522, 523, 524,
-                          525, 526, 527, 528, 529, 530, 531, 532,
-                          533, 534, 535, 536, 537, 538, 539, 540,
-                          541, 542, 543, 544, 545, 546, 547, 548,
-                          549, 550, 551, 552, 553, 554, 555, 561,
-                          562, 563, 565, 567], dtype=int)
-WINTER_CROPS = onp.array([556, 557, 558, 559, 560, 564], dtype=int)
-WINTER_CATCH_CROPS = onp.array([566, 568, 569, 570], dtype=int)
-MULTI_YEAR_CROPS_INIT = onp.array([571, 572], dtype=int)
-MULTI_YEAR_CROPS_CONT = onp.array([573, 574], dtype=int)
-WINTER_MULTI_YEAR_CROPS_INIT = onp.array([572], dtype=int)
-WINTER_MULTI_YEAR_CROPS_CONT = onp.array([574], dtype=int)
-SUMMER_MULTI_YEAR_CROPS_INIT = onp.array([571], dtype=int)
-SUMMER_MULTI_YEAR_CROPS_CONT = onp.array([573], dtype=int)
+SUMMER_CROPS = onp.array(
+    [
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519,
+        520,
+        521,
+        522,
+        523,
+        524,
+        525,
+        526,
+        527,
+        528,
+        529,
+        530,
+        531,
+        532,
+        533,
+        534,
+        535,
+        536,
+        537,
+        538,
+        539,
+        540,
+        541,
+        542,
+        543,
+        544,
+        545,
+        546,
+        547,
+        548,
+        549,
+        550,
+        551,
+        552,
+        553,
+        554,
+        555,
+        561,
+        562,
+        563,
+        565,
+        567,
+    ],
+    dtype=onp.int32,
+)
+WINTER_CROPS = onp.array([556, 557, 558, 559, 560, 564], dtype=onp.int32)
+WINTER_CATCH_CROPS = onp.array([566, 568, 569, 570], dtype=onp.int32)
+MULTI_YEAR_CROPS_INIT = onp.array([571, 572], dtype=onp.int32)
+MULTI_YEAR_CROPS_CONT = onp.array([573, 574], dtype=onp.int32)
+WINTER_MULTI_YEAR_CROPS_INIT = onp.array([572], dtype=onp.int32)
+WINTER_MULTI_YEAR_CROPS_CONT = onp.array([574], dtype=onp.int32)
+SUMMER_MULTI_YEAR_CROPS_INIT = onp.array([571], dtype=onp.int32)
+SUMMER_MULTI_YEAR_CROPS_CONT = onp.array([573], dtype=onp.int32)
 
 dict_crops = {
-              536: 'beetroot',
-              539: 'silage_corn',
-              556: 'winter barley',
-              557: 'winter wheat',
-              559: 'winter rape',
-              560: 'triticale',
-              563: 'sugar beets',
-              564: 'winter green manure',
-              565: 'grass',
-              566: 'grass',
-              571: 'grass',
-              572: 'grass',
-              573: 'grass',
-              574: 'grass',
-              599: 'bare',
-             }
+    536: "beetroot",
+    539: "silage_corn",
+    556: "winter barley",
+    557: "winter wheat",
+    559: "winter rape",
+    560: "triticale",
+    563: "sugar beets",
+    564: "winter green manure",
+    565: "grass",
+    566: "grass",
+    571: "grass",
+    572: "grass",
+    573: "grass",
+    574: "grass",
+    599: "bare",
+}
