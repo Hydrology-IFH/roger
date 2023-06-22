@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=1:gpus=1:default
+#PBS -l nodes=1:ppn=1:gpus=2:default
 #PBS -l walltime=24:00:00
 #PBS -l pmem=16000mb
 #PBS -N svat_transport_freiburg_corn_MPI-M-MPI-ESM-LR_RCA4_2080-2100
