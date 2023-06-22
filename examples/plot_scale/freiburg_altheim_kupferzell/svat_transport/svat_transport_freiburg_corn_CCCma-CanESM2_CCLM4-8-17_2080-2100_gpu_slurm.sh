@@ -1,14 +1,14 @@
 #!/bin/bash
-#SBATCH --time=12:00:00
+#SBATCH --time=14:00:00
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=16000
+#SBATCH --mem=12000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_transport_freiburg_corn_CCCma-CanESM2_CCLM4-8-17_2080-2100
-#SBATCH --output=svat_transport_freiburg_corn_CCCma-CanESM2_CCLM4-8-17_2080-2100
-#SBATCH --error=svat_transport_freiburg_corn_CCCma-CanESM2_CCLM4-8-17_2080-2100
+#SBATCH --output=svat_transport_freiburg_corn_CCCma-CanESM2_CCLM4-8-17_2080-2100.out
+#SBATCH --error=svat_transport_freiburg_corn_CCCma-CanESM2_CCLM4-8-17_2080-2100_err.txt
 #SBATCH --export=ALL
  
 # load module dependencies
