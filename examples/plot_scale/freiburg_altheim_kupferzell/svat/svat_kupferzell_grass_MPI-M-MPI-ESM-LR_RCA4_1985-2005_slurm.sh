@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH --time=6:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=8000
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
+#SBATCH --job-name=svat_kupferzell_grass_MPI-M-MPI-ESM-LR_RCA4_1985-2005
+#SBATCH --export=ALL
+#PBS -m a
+#PBS -M robin.schwemmle@hydrology.uni-freiburg.de
+ 
+eval "$(conda shell.bash hook)"
+conda activate roger
+cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/svat
+ 
+python svat.py -b numpy -d cpu --location kupferzell --land-cover-scenario grass --climate-scenario MPI-M-MPI-ESM-LR_RCA4 --period 1985-2005 -td "${TMPDIR}"
+# Move output from local SSD to global workspace
+echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/output/svat"
+mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/output/svat
+mv "${TMPDIR}"/SVAT_*.nc /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/output/svat
