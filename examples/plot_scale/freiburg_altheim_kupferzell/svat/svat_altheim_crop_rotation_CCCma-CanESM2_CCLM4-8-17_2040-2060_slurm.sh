@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=8000
+#SBATCH --mem=12000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_altheim_crop_rotation_CCCma-CanESM2_CCLM4-8-17_2040-2060

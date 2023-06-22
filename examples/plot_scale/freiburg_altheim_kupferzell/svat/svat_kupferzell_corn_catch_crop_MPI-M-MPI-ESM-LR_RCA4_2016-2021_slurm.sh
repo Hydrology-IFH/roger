@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=8000
+#SBATCH --mem=12000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_kupferzell_corn_catch_crop_MPI-M-MPI-ESM-LR_RCA4_2016-2021
