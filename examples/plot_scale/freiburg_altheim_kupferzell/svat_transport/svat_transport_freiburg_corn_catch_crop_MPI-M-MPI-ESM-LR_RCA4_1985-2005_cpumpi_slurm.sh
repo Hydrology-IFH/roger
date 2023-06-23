@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=18:00:00
+#SBATCH --time=15:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=4
 #SBATCH --cpus-per-task=1
@@ -8,7 +8,7 @@
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_transport_freiburg_corn_catch_crop_MPI-M-MPI-ESM-LR_RCA4_1985-2005
 #SBATCH --output=svat_transport_freiburg_corn_catch_crop_MPI-M-MPI-ESM-LR_RCA4_1985-2005.out
-#SBATCH --error=svat_transport_freiburg_corn_catch_crop_MPI-M-MPI-ESM-LR_RCA4_1985-2005_err.txt
+#SBATCH --error=svat_transport_freiburg_corn_catch_crop_MPI-M-MPI-ESM-LR_RCA4_1985-2005_err.out
 #SBATCH --export=ALL
  
 # load module dependencies

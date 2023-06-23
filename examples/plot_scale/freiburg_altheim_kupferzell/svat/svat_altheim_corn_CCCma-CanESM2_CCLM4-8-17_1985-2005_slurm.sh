@@ -8,7 +8,7 @@
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_altheim_corn_CCCma-CanESM2_CCLM4-8-17_1985-2005
 #SBATCH --output=svat_altheim_corn_CCCma-CanESM2_CCLM4-8-17_1985-2005.out
-#SBATCH --error=svat_altheim_corn_CCCma-CanESM2_CCLM4-8-17_1985-2005_err.txt
+#SBATCH --error=svat_altheim_corn_CCCma-CanESM2_CCLM4-8-17_1985-2005_err.out
 #SBATCH --export=ALL
  
 eval "$(conda shell.bash hook)"
