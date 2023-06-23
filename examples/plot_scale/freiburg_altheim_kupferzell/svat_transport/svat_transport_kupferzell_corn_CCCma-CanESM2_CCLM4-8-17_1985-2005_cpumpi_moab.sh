@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=4
 #PBS -l walltime=24:00:00
-#PBS -l pmem=12000mb
+#PBS -l pmem=4000mb
 #PBS -N svat_transport_kupferzell_corn_CCCma-CanESM2_CCLM4-8-17_1985-2005
 #PBS -m a
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
