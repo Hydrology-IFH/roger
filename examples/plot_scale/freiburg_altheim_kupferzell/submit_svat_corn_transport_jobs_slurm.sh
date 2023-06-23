@@ -13,9 +13,3 @@ for f in $FILES
 do
   sbatch --partition=single $f
 done
-
-FILES="$PWD/svat_transport_*_corn_observed_*_cpumpi_slurm.sh"
-for f in $FILES
-do
-  sbatch --partition=single $f
-done
