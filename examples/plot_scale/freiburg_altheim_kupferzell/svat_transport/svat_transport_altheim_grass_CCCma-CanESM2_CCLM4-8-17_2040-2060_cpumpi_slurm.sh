@@ -8,7 +8,7 @@
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_transport_altheim_grass_CCCma-CanESM2_CCLM4-8-17_2040-2060
 #SBATCH --output=svat_transport_altheim_grass_CCCma-CanESM2_CCLM4-8-17_2040-2060.out
-#SBATCH --error=svat_transport_altheim_grass_CCCma-CanESM2_CCLM4-8-17_2040-2060_err.txt
+#SBATCH --error=svat_transport_altheim_grass_CCCma-CanESM2_CCLM4-8-17_2040-2060_err.out
 #SBATCH --export=ALL
  
 # load module dependencies

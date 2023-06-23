@@ -8,7 +8,7 @@
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_kupferzell_corn_MPI-M-MPI-ESM-LR_RCA4_2080-2100
 #SBATCH --output=svat_kupferzell_corn_MPI-M-MPI-ESM-LR_RCA4_2080-2100.out
-#SBATCH --error=svat_kupferzell_corn_MPI-M-MPI-ESM-LR_RCA4_2080-2100_err.txt
+#SBATCH --error=svat_kupferzell_corn_MPI-M-MPI-ESM-LR_RCA4_2080-2100_err.out
 #SBATCH --export=ALL
  
 eval "$(conda shell.bash hook)"

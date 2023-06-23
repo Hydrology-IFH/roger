@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=18:00:00
+#SBATCH --time=15:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=4
 #SBATCH --cpus-per-task=1
@@ -8,7 +8,7 @@
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_transport_kupferzell_crop_rotation_MPI-M-MPI-ESM-LR_RCA4_2040-2060
 #SBATCH --output=svat_transport_kupferzell_crop_rotation_MPI-M-MPI-ESM-LR_RCA4_2040-2060.out
-#SBATCH --error=svat_transport_kupferzell_crop_rotation_MPI-M-MPI-ESM-LR_RCA4_2040-2060_err.txt
+#SBATCH --error=svat_transport_kupferzell_crop_rotation_MPI-M-MPI-ESM-LR_RCA4_2040-2060_err.out
 #SBATCH --export=ALL
  
 # load module dependencies
