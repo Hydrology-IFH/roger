@@ -142,6 +142,7 @@ examples/plot_scale/reckenholz_film/
 examples/plot_scale/stgallen/
 examples/plot_scale/freiburg_altheim_kupferzell/climate_projections
 gpu_memory_profiling/
+*_2016-*.sh
 
 # Slides or Word
 *.key
