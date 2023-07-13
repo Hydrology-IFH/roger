@@ -1122,62 +1122,71 @@ for location in locations:
                             # fig.savefig(file, dpi=250)
                             # plt.close('all')
 
-for var_sim in vars_sim:
-    for delta in deltas:
-        for soil_depth in soil_depths:
-            cond = _soil_depths[soil_depth]
-            for future in ["nf", "ff"]:
-                fig, axes = plt.subplots(
-                    len(locations), len(land_cover_scenarios), sharex="col", sharey="row", figsize=(6, 4.5)
-                )
-                for i, location in enumerate(locations):
-                    for j, land_cover_scenario in enumerate(land_cover_scenarios):
-                        values = dict_glm[location][land_cover_scenario]["CCCma-CanESM2_CCLM4-8-17"][var_sim][delta][
-                            soil_depth
-                        ][future]["params"][1:]
-                        df_params_canesm = pd.DataFrame(index=range(len(values)), columns=["value", "Parameter"])
-                        df_params_canesm.loc[:, "value"] = values
-                        df_params_canesm.loc[:, "Parameter"] = [
-                            r"$\theta_{pwp}$",
-                            r"$\theta_{ufc}$",
-                            r"$\theta_{ac}$",
-                            r"$k_s$",
-                        ]
-                        df_params_canesm.loc[:, "Climate model"] = "CCCma-CanESM2_CCLM4-8-17"
+import pickle
+# Store data (serialize)
+with open(base_path_figs / 'glm_results.pkl', 'wb') as handle:
+    pickle.dump(dict_glm, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-                        values = dict_glm[location][land_cover_scenario]["MPI-M-MPI-ESM-LR_RCA4"][var_sim][delta][
-                            soil_depth
-                        ][future]["params"][1:]
-                        df_params_mpiesm = pd.DataFrame(index=range(len(values)), columns=["value", "Parameter"])
-                        df_params_mpiesm.loc[:, "value"] = values
-                        df_params_mpiesm.loc[:, "Parameter"] = [
-                            r"$\theta_{pwp}$",
-                            r"$\theta_{ufc}$",
-                            r"$\theta_{ac}$",
-                            r"$k_s$",
-                        ]
-                        df_params_mpiesm.loc[:, "Climate model"] = "MPI-M-MPI-ESM-LR_RCA4"
+# # Load data (deserialize)
+# with open(base_path_figs / 'glm_results.pkl', 'rb') as handle:
+#     dict_glm = pickle.load(handle)
 
-                        df_params = pd.concat([df_params_canesm, df_params_mpiesm], ignore_index=True)
-                        sns.catplot(
-                            x="Parameter",
-                            y="value",
-                            hue="Climate model",
-                            palette=["red", "blue"],
-                            data=df_params,
-                            ax=axes[i, j],
-                            kind="bar",
-                        )
-                        axes[i, j].legend([], [], frameon=False)
-                        axes[0, j].set_title(f"{Land_cover_scenarios[j]}")
-                        axes[i, j].set_ylabel("")
-                        axes[i, j].set_xlabel("")
-                        axes[i, j].tick_params(axis="x", rotation=33)
-                    axes[i, 0].set_ylabel(f"{Locations[i]}\n{_lab[delta]} {_lab[var_sim]} [%]")
-                fig.tight_layout()
-                file = base_path_figs / f"{var_sim}_{delta}_{soil_depth}_{future}_barplot.png"
-                fig.savefig(file, dpi=250)
-                plt.close("all")
+# for var_sim in vars_sim:
+#     for delta in deltas:
+#         for soil_depth in soil_depths:
+#             cond = _soil_depths[soil_depth]
+#             for future in ["nf", "ff"]:
+#                 fig, axes = plt.subplots(
+#                     len(locations), len(land_cover_scenarios), sharex="col", sharey="row", figsize=(6, 4.5)
+#                 )
+#                 for i, location in enumerate(locations):
+#                     for j, land_cover_scenario in enumerate(land_cover_scenarios):
+#                         values = dict_glm[location][land_cover_scenario]["CCCma-CanESM2_CCLM4-8-17"][var_sim][delta][
+#                             soil_depth
+#                         ][future]["params"][1:]
+#                         df_params_canesm = pd.DataFrame(index=range(len(values)), columns=["value", "Parameter"])
+#                         df_params_canesm.loc[:, "value"] = values
+#                         df_params_canesm.loc[:, "Parameter"] = [
+#                             r"$\theta_{pwp}$",
+#                             r"$\theta_{ufc}$",
+#                             r"$\theta_{ac}$",
+#                             r"$k_s$",
+#                         ]
+#                         df_params_canesm.loc[:, "Climate model"] = "CCCma-CanESM2_CCLM4-8-17"
+
+#                         values = dict_glm[location][land_cover_scenario]["MPI-M-MPI-ESM-LR_RCA4"][var_sim][delta][
+#                             soil_depth
+#                         ][future]["params"][1:]
+#                         df_params_mpiesm = pd.DataFrame(index=range(len(values)), columns=["value", "Parameter"])
+#                         df_params_mpiesm.loc[:, "value"] = values
+#                         df_params_mpiesm.loc[:, "Parameter"] = [
+#                             r"$\theta_{pwp}$",
+#                             r"$\theta_{ufc}$",
+#                             r"$\theta_{ac}$",
+#                             r"$k_s$",
+#                         ]
+#                         df_params_mpiesm.loc[:, "Climate model"] = "MPI-M-MPI-ESM-LR_RCA4"
+
+#                         df_params = pd.concat([df_params_canesm, df_params_mpiesm], ignore_index=True)
+#                         sns.barplot(
+#                             x="Parameter",
+#                             y="value",
+#                             hue="Climate model",
+#                             palette=["red", "blue"],
+#                             data=df_params,
+#                             ax=axes[i, j],
+#                             errorbar=None
+#                         )
+#                         axes[i, j].legend([], [], frameon=False)
+#                         axes[0, j].set_title(f"{Land_cover_scenarios[j]}")
+#                         axes[i, j].set_ylabel("")
+#                         axes[i, j].set_xlabel("")
+#                         axes[i, j].tick_params(axis="x", rotation=33)
+#                     axes[i, 0].set_ylabel(f"{Locations[i]}\n{_lab[delta]} {_lab[var_sim]} [%]")
+#                 fig.tight_layout()
+#                 file = base_path_figs / f"{var_sim}_{delta}_{soil_depth}_{future}_barplot.png"
+#                 fig.savefig(file, dpi=250)
+#                 plt.close("all")
 
 
 # norm = mpl.colors.Normalize(vmin=-1, vmax=1)
