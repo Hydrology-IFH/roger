@@ -116,6 +116,11 @@ Short description of land use (lu_id)
 - `572`: winter grass (growing only)
 - `573`: summer grass (continued)
 - `574`: winter grass (continued)
+- `575`: summer faba bean
+- `576`: winter faba bean
+- `577`: summer grain pea
+- `578`: winter grain pea
+- `579`: winter rye
 - `598`: no crop
 - `599`: bare
 - `6`: vineyard

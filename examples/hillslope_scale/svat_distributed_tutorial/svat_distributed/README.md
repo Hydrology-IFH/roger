@@ -6,4 +6,13 @@ SVAT indicates that only vertical processes are considered.
 - `write_parameters.py`: Writes model parameters to netcdf
 - `svat.py`: SVAT-model setup
 - `svat.sh`: Executes `svat.py` on BinAC computing cluster
-- `post_processing.py`: Produces figures and tables from data of the modelling experiment
+- `merge_output.py`: Merges model output into a single file
+
+
+## Workflow
+```
+conda activate roger
+python write_parameters.py
+python svat.py
+python merge_output.py
+```

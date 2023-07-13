@@ -17,8 +17,8 @@ def main(tmp_dir):
     from roger.tools.setup import write_forcing
     import roger.lookuptables as lut
 
-    class SVATSetup(RogerSetup):
-        """A SVAT model."""
+    class ONEDSetup(RogerSetup):
+        """A 1D model."""
 
         # custom attributes required by helper functions
         _base_path = Path(__file__).parent
@@ -56,24 +56,25 @@ def main(tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = "SVAT"
+            settings.identifier = self._config["identifier"]
 
             # total grid numbers in x- and y-direction
-            settings.nx, settings.ny = 12, 24
+            settings.nx, settings.ny = self._config["nx"], self._config["ny"]
             # derive total number of time steps from forcing
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
 
             # spatial discretization (in meters)
-            settings.dx = 5
-            settings.dy = 5
+            settings.dx = self._config["dx"]
+            settings.dy = self._config["dy"]
 
             # origin of spatial grid
-            settings.x_origin = 0.0
-            settings.y_origin = 0.0
+            settings.x_origin = self._config["x_origin"]
+            settings.y_origin = self._config["y_origin"]
             # origin of time steps (e.g. 01-01-2023)
             settings.time_origin = self._get_time_origin(self._input_dir, "forcing.nc")
 
             # enable specific processes
+            settings.enable_lateral_flow = True
             settings.enable_macropore_lower_boundary_condition = False
             settings.enable_adaptive_time_stepping = True
 
@@ -111,6 +112,8 @@ def main(tmp_dir):
             vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
             # land use-dependent rooting depth
             vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
+            # macropore flow velocities
+            vs.lut_mlms = update(vs.lut_mlms, at[:, :], lut.ARR_MLMS)
 
         @roger_routine
         def set_topography(self, state):
@@ -119,37 +122,78 @@ def main(tmp_dir):
         @roger_routine
         def set_parameters_setup(self, state):
             vs = state.variables
+            settings = state.settings
 
             # land use ID (see README for description)
-            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
+            vs.lu_id = update(
+                vs.lu_id,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("lu_id", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            )
             # degree of sealing (-)
             vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
             # total surface depression storage (mm)
             vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
             # soil depth (mm)
             vs.z_soil = update(
-                vs.z_soil, at[2:-2, 2:-2], self._read_var_from_nc("z_soil", self._base_path, "parameters.nc")
+                vs.z_soil,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("z_soil", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
             )
             # density of vertical macropores (1/m2)
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_nc("dmpv", self._base_path, "parameters.nc"))
+            vs.dmpv = update(
+                vs.dmpv,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("dmpv", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            )
+            # density of vertical macropores (1/m2)
+            vs.dmph = update(
+                vs.dmph,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("dmph", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            )
             # total length of vertical macropores (mm)
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_nc("lmpv", self._base_path, "parameters.nc"))
+            vs.lmpv = update(
+                vs.lmpv,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("lmpv", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            )
             # air capacity (-)
             vs.theta_ac = update(
-                vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_nc("theta_ac", self._base_path, "parameters.nc")
+                vs.theta_ac,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("theta_ac", self._base_path, "parameters.csv").reshape(
+                    settings.nx, settings.ny
+                ),
             )
             # usable field capacity (-)
             vs.theta_ufc = update(
-                vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_nc("theta_ufc", self._base_path, "parameters.nc")
+                vs.theta_ufc,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("theta_ufc", self._base_path, "parameters.csv").reshape(
+                    settings.nx, settings.ny
+                ),
             )
             # permanent wilting point (-)
             vs.theta_pwp = update(
-                vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_nc("theta_pwp", self._base_path, "parameters.nc")
+                vs.theta_pwp,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("theta_pwp", self._base_path, "parameters.csv").reshape(
+                    settings.nx, settings.ny
+                ),
             )
             # saturated hydraulic conductivity (mm/h)
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path, "parameters.nc"))
+            vs.ks = update(
+                vs.ks,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("ks", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            )
             # hydraulic conductivity of bedrock/saturated zone (mm/h)
-            vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
+            vs.kf = update(
+                vs.kf,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("kf", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            )
 
         @roger_routine
         def set_parameters(self, state):
@@ -503,7 +547,7 @@ def main(tmp_dir):
         )
 
     # initializes the model structure
-    model = SVATSetup()
+    model = ONEDSetup()
     # writes the forcing data to netcdf
     write_forcing(model._input_dir)
     # runs the model setup
