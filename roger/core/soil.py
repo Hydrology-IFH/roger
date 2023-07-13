@@ -398,6 +398,18 @@ def calc_parameters_root_zone_kernel(state):
         * vs.maskCatch[2:-2, 2:-2],
     )
 
+    vs.z_root = update(
+        vs.z_root,
+        at[2:-2, 2:-2, 0],
+        z_root[2:-2, 2:-2],
+    )
+
+    vs.z_root = update(
+        vs.z_root,
+        at[2:-2, 2:-2, 1],
+        z_root[2:-2, 2:-2],
+    )
+
     # set thickness of upper soil water storage to 20 cm for bare soils
     mask_crops = npx.isin(vs.lu_id, npx.arange(500, 600, 1, dtype=npx.int32))
     vs.z_root = update(
