@@ -117,6 +117,7 @@ startup.py
 
 # VS Code
 .vscode/
+.vs/
 
 # EXCEL
 *.xlsx
