@@ -6,6 +6,10 @@ z_soil:
 dmpv:
 - 50
 - 100
+# density of horizontal macropores (1/m2)
+dmph:
+- 50
+- 100
 # total length of vertical macropores (mm)
 lmpv:
 - 200
@@ -26,3 +30,7 @@ theta_pwp:
 ks:
 - 5
 - 15
+# hydraulic conductivity of bedrock (mm/hour)
+kf:
+- 1
+- 10

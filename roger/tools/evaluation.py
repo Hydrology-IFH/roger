@@ -5,13 +5,15 @@ import scipy as sp
 import matplotlib.dates as mdates
 import matplotlib as mpl
 import seaborn as sns
+
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
+
 sns.set_style("ticks")
 
 
 def filter_headers(string, substr):
-    return [str for str in string if re.match(r'[^\d]+|^', str).group(0) in substr]
+    return [str for str in string if re.match(r"[^\d]+|^", str).group(0) in substr]
 
 
 def join_obs_on_sim(idx, sim_vals, df_obs, rm_na=False):
@@ -38,15 +40,15 @@ def join_obs_on_sim(idx, sim_vals, df_obs, rm_na=False):
     """
     # dataframe with simulated values
     if sim_vals.ndim <= 1:
-        df_sim = pd.DataFrame(data=sim_vals, index=idx, columns=['sim'])
+        df_sim = pd.DataFrame(data=sim_vals, index=idx, columns=["sim"])
     else:
-        sim_header = [f'sim{i}' for i in range(sim_vals.shape[-1])]
+        sim_header = [f"sim{i}" for i in range(sim_vals.shape[-1])]
         df_sim = pd.DataFrame(data=sim_vals, index=idx, columns=sim_header)
 
     # dataframe with observed values
     df = pd.DataFrame(index=idx)
     df_obs = df.join(df_obs)
-    df_obs.columns = ['obs']
+    df_obs.columns = ["obs"]
 
     df = df_sim.join(df_obs)
 
@@ -56,7 +58,7 @@ def join_obs_on_sim(idx, sim_vals, df_obs, rm_na=False):
     return df
 
 
-def plot_sim(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
+def plot_sim(df, y_lab="", ls_obs="line", x_lab="Time", ylim=None):
     """Plot simulated values.
 
     Args
@@ -83,7 +85,7 @@ def plot_sim(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
     """
     # plot observed and simulated values
     fig, axs = plt.subplots(figsize=(6, 2))
-    axs.plot(df.index, df.iloc[:, 0], lw=1, ls='-', color='black')
+    axs.plot(df.index, df.iloc[:, 0], lw=1, ls="-", color="black")
     axs.set_xlim((df.index[0], df.index[-1]))
     if ylim:
         axs.set_ylim(ylim)
@@ -94,7 +96,7 @@ def plot_sim(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
     return fig
 
 
-def plot_sim_cum(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
+def plot_sim_cum(df, y_lab="", ls_obs="line", x_lab="Time", ylim=None):
     """Plot simulated values.
 
     Args
@@ -121,7 +123,7 @@ def plot_sim_cum(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
     """
     # plot observed and simulated values
     fig, axs = plt.subplots(figsize=(6, 2))
-    axs.plot(df.index, df.iloc[:, 0].cumsum(), lw=1, ls='-', color='black')
+    axs.plot(df.index, df.iloc[:, 0].cumsum(), lw=1, ls="-", color="black")
     axs.set_xlim((df.index[0], df.index[-1]))
     if ylim:
         axs.set_ylim(ylim)
@@ -132,7 +134,7 @@ def plot_sim_cum(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
     return fig
 
 
-def plot_obs_sim(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
+def plot_obs_sim(df, y_lab="", ls_obs="line", x_lab="Time", ylim=None):
     """Plot observed and simulated values.
 
     Args
@@ -162,17 +164,17 @@ def plot_obs_sim(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
         Plot for observed and simulated values
     """
     # plot observed and simulated values
-    sim_headers = filter_headers(df.columns, ['sim'])
-    bench_headers = filter_headers(df.columns, ['bench'])
+    sim_headers = filter_headers(df.columns, ["sim"])
+    bench_headers = filter_headers(df.columns, ["bench"])
     fig, axs = plt.subplots(figsize=(6, 2))
     for sim_header in sim_headers:
-        axs.plot(df.index, df.loc[:, sim_header], lw=1, ls='-.', color='red')
+        axs.plot(df.index, df.loc[:, sim_header], lw=1, ls="-.", color="red")
     if bench_headers:
         for bench_header in bench_headers:
-            axs.plot(df.index, df.loc[:, bench_header], lw=1, ls='-.', color='grey')
-    if (ls_obs == 'line'):
-        axs.plot(df.index, df.loc[:, 'obs'], lw=1.2, color='blue', alpha=0.5)
-    axs.scatter(df.index, df.loc[:, 'obs'], color='blue', s=1, alpha=0.5)
+            axs.plot(df.index, df.loc[:, bench_header], lw=1, ls="-.", color="grey")
+    if ls_obs == "line":
+        axs.plot(df.index, df.loc[:, "obs"], lw=1.2, color="blue", alpha=0.5)
+    axs.scatter(df.index, df.loc[:, "obs"], color="blue", s=1, alpha=0.5)
     axs.set_xlim((df.index[0], df.index[-1]))
     if ylim:
         axs.set_ylim(ylim)
@@ -183,7 +185,7 @@ def plot_obs_sim(df, y_lab='', ls_obs='line', x_lab='Time', ylim=None):
     return fig
 
 
-def plot_obs_sim_year(df, y_lab, start_month_hyd_year=10, ls_obs='line', x_lab='Time', ylim=None):
+def plot_obs_sim_year(df, y_lab, start_month_hyd_year=10, ls_obs="line", x_lab="Time", ylim=None):
     """Plot observed and simulated values.
 
     Args
@@ -212,8 +214,8 @@ def plot_obs_sim_year(df, y_lab, start_month_hyd_year=10, ls_obs='line', x_lab='
         list with figures
     """
     figs = []
-    sim_headers = filter_headers(df.columns, ['sim'])
-    bench_headers = filter_headers(df.columns, ['bench'])
+    sim_headers = filter_headers(df.columns, ["sim"])
+    bench_headers = filter_headers(df.columns, ["bench"])
     df = assign_hyd_year(df.copy(), start_month_hyd_year=start_month_hyd_year)
     years = pd.unique(df.hyd_year)
     for year in years:
@@ -222,29 +224,29 @@ def plot_obs_sim_year(df, y_lab, start_month_hyd_year=10, ls_obs='line', x_lab='
         # plot observed and simulated values
         fig, axs = plt.subplots(figsize=(6, 2))
         for sim_header in sim_headers:
-            axs.plot(df.index, df.loc[:, sim_header], lw=1, ls='-.', color='red')
+            axs.plot(df.index, df.loc[:, sim_header], lw=1, ls="-.", color="red")
         if bench_headers:
             for bench_header in bench_headers:
-                axs.plot(df.index, df.loc[:, bench_header], lw=1, ls='-.', color='grey')
-        if (ls_obs == 'line'):
-            axs.plot(df_year.index, df_year.loc[:, 'obs'], lw=1.2, color='blue', alpha=0.5)
-        axs.scatter(df_year.index, df_year.iloc[:, 'obs'], color='blue', s=1, alpha=0.5)
+                axs.plot(df.index, df.loc[:, bench_header], lw=1, ls="-.", color="grey")
+        if ls_obs == "line":
+            axs.plot(df_year.index, df_year.loc[:, "obs"], lw=1.2, color="blue", alpha=0.5)
+        axs.scatter(df_year.index, df_year.iloc[:, "obs"], color="blue", s=1, alpha=0.5)
         axs.set_xlim((df_year.index[0], df_year.index[-1]))
         if ylim:
             axs.set_ylim(ylim)
         axs.set_ylabel(y_lab)
         axs.set_xlabel(str(year))
-        if (len(df_year.index) > 120):
-            axs.xaxis.set_major_formatter(mdates.DateFormatter('%m'))
-        elif (len(df_year.index) < 120):
-            axs.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m'))
+        if len(df_year.index) > 120:
+            axs.xaxis.set_major_formatter(mdates.DateFormatter("%m"))
+        elif len(df_year.index) < 120:
+            axs.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m"))
         fig.tight_layout()
         figs.append(fig)
 
     return figs
 
 
-def plot_obs_sim_cum(df, y_lab, x_lab='Time'):
+def plot_obs_sim_cum(df, y_lab, x_lab="Time"):
     """Plot cumulated observed and simulated values.
 
     Args
@@ -266,15 +268,15 @@ def plot_obs_sim_cum(df, y_lab, x_lab='Time'):
     df.loc[df.isna().any(axis=1)] = 0
 
     # plot observed and simulated values
-    sim_headers = filter_headers(df.columns, ['sim'])
-    bench_headers = filter_headers(df.columns, ['bench'])
+    sim_headers = filter_headers(df.columns, ["sim"])
+    bench_headers = filter_headers(df.columns, ["bench"])
     fig, axs = plt.subplots(figsize=(6, 2))
     for sim_header in sim_headers:
-        axs.plot(df.index, df.loc[:, sim_header].cumsum(), lw=1, ls='-.', color='red')
+        axs.plot(df.index, df.loc[:, sim_header].cumsum(), lw=1, ls="-.", color="red")
     if bench_headers:
         for bench_header in bench_headers:
-            axs.plot(df.index, df.loc[:, bench_header].cumsum(), lw=1, ls='-.', color='grey')
-    axs.plot(df.index, df.loc[:, 'obs'].cumsum(), lw=1.5, color='blue', alpha=0.5)
+            axs.plot(df.index, df.loc[:, bench_header].cumsum(), lw=1, ls="-.", color="grey")
+    axs.plot(df.index, df.loc[:, "obs"].cumsum(), lw=1.5, color="blue", alpha=0.5)
     axs.set_xlim((df.index[0], df.index[-1]))
     axs.set_ylabel(y_lab)
     axs.set_xlabel(x_lab)
@@ -283,7 +285,7 @@ def plot_obs_sim_cum(df, y_lab, x_lab='Time'):
     return fig
 
 
-def plot_obs_sim_cum_year(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
+def plot_obs_sim_cum_year(df, y_lab, start_month_hyd_year=10, x_lab="Time"):
     """Plot cumulated observed and simulated values for each hydrologic year.
 
     Args
@@ -306,8 +308,8 @@ def plot_obs_sim_cum_year(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
         list with figures
     """
     figs = []
-    sim_headers = filter_headers(df.columns, ['sim'])
-    bench_headers = filter_headers(df.columns, ['bench'])
+    sim_headers = filter_headers(df.columns, ["sim"])
+    bench_headers = filter_headers(df.columns, ["bench"])
     df = assign_hyd_year(df.copy(), start_month_hyd_year=start_month_hyd_year)
     years = pd.unique(df.hyd_year)
     for year in years:
@@ -316,25 +318,25 @@ def plot_obs_sim_cum_year(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
         # plot observed and simulated values
         fig, axs = plt.subplots(figsize=(6, 3))
         for sim_header in sim_headers:
-            axs.plot(df_year.index, df_year.loc[:, sim_header].cumsum(), lw=1, ls='-.', color='red')
+            axs.plot(df_year.index, df_year.loc[:, sim_header].cumsum(), lw=1, ls="-.", color="red")
         if bench_headers:
             for bench_header in bench_headers:
-                axs.plot(df.index, df.loc[:, bench_header].cumsum(), lw=1, ls='-.', color='grey')
-        axs.plot(df_year.index, df_year.loc[:, 'obs'].cumsum(), lw=1, color='blue')
+                axs.plot(df.index, df.loc[:, bench_header].cumsum(), lw=1, ls="-.", color="grey")
+        axs.plot(df_year.index, df_year.loc[:, "obs"].cumsum(), lw=1, color="blue")
         axs.set_xlim((df_year.index[0], df_year.index[-1]))
         axs.set_ylabel(y_lab)
         axs.set_xlabel(str(year))
-        if (len(df_year.index) > 120):
-            axs.xaxis.set_major_formatter(mdates.DateFormatter('%m'))
-        elif (len(df_year.index) < 120):
-            axs.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m'))
+        if len(df_year.index) > 120:
+            axs.xaxis.set_major_formatter(mdates.DateFormatter("%m"))
+        elif len(df_year.index) < 120:
+            axs.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m"))
         fig.tight_layout()
         figs.append(fig)
 
     return figs
 
 
-def plot_obs_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
+def plot_obs_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab="Time"):
     """Plot cumulated observed and simulated values for each hydrologic year.
 
     Args
@@ -356,8 +358,8 @@ def plot_obs_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'
     fig : Figure
     """
     headers = df.columns
-    sim_headers = filter_headers(df.columns, ['sim'])
-    bench_headers = filter_headers(df.columns, ['bench'])
+    sim_headers = filter_headers(df.columns, ["sim"])
+    bench_headers = filter_headers(df.columns, ["bench"])
     df_cs = pd.DataFrame(index=df.index, columns=headers)
     df = assign_hyd_year(df.copy(), start_month_hyd_year=start_month_hyd_year)
     years = pd.unique(df.hyd_year)
@@ -370,48 +372,52 @@ def plot_obs_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'
     palette = []
     for i, sim_header in enumerate(sim_headers):
         df_sim = df_cs.loc[:, sim_header].to_frame()
-        df_sim.columns = ['sim_obs']
-        df_sim['type'] = f'sim{i}'
+        df_sim.columns = ["sim_obs"]
+        df_sim["type"] = f"sim{i}"
         ll_dfs.append(df_sim)
-        palette.append('r')
+        palette.append("r")
     if bench_headers:
         for i, bench_header in enumerate(bench_headers):
             df_bench = df_cs.loc[:, bench_header].to_frame()
-            df_bench.columns = ['sim_obs']
-            df_bench['type'] = f'bench{i}'
+            df_bench.columns = ["sim_obs"]
+            df_bench["type"] = f"bench{i}"
             ll_dfs.append(df_bench)
-            palette.append('grey')
-    df_obs = df_cs.loc[:, 'obs'].to_frame()
-    df_obs.columns = ['sim_obs']
-    df_obs['type'] = 'obs'
+            palette.append("grey")
+    df_obs = df_cs.loc[:, "obs"].to_frame()
+    df_obs.columns = ["sim_obs"]
+    df_obs["type"] = "obs"
     ll_dfs.append(df_obs)
-    palette.append('b')
+    palette.append("b")
     df_sim_obs = pd.concat(ll_dfs)
-    df_sim_obs_long = pd.melt(df_sim_obs, id_vars=['type'], value_vars=['sim_obs'], ignore_index=False)
+    df_sim_obs_long = pd.melt(df_sim_obs, id_vars=["type"], value_vars=["sim_obs"], ignore_index=False)
     df_sim_obs_long = assign_hyd_year(df_sim_obs_long.copy(), start_month_hyd_year=start_month_hyd_year)
-    df_sim_obs_long['time'] = df_sim_obs_long.index
+    df_sim_obs_long["time"] = df_sim_obs_long.index
     df_sim_obs_long.loc[df_sim_obs_long.isnull().any(axis=1)] = 0
-    df_sim_obs_long = df_sim_obs_long.drop(columns=['variable'])
-    df_sim_obs_long = df_sim_obs_long.astype(dtype={"type" : str,
-                                                    "value" : onp.float64,
-                                                    "hyd_year" : onp.int64,
-                                                    "time" : onp.datetime64})
+    df_sim_obs_long = df_sim_obs_long.drop(columns=["variable"])
+    df_sim_obs_long = df_sim_obs_long.astype(
+        dtype={"type": str, "value": onp.float64, "hyd_year": onp.int64, "time": "datetime64[ns]"}
+    )
     df_sim_obs_long.index = range(len(df_sim_obs_long.index))
     # Plot the lines on facets
     g = sns.relplot(
         data=df_sim_obs_long,
-        x="time", y="value",
-        hue="type", col="hyd_year",
-        kind="line", palette=palette,
+        x="time",
+        y="value",
+        hue="type",
+        col="hyd_year",
+        kind="line",
+        palette=palette,
         facet_kws=dict(sharex=False),
-        height=1.5, aspect=1, col_wrap=4
+        height=1.5,
+        aspect=1,
+        col_wrap=4,
     )
     g.set_ylabels(y_lab)
     g.set_xlabels(x_lab)
     g.set_xticklabels(rotation=90)
     for axs in g.axes.flatten():
-        axs.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m'))
-    g.set_titles(template='{col_name}')
+        axs.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m"))
+    g.set_titles(template="{col_name}")
     g._legend.remove()
     g.tight_layout()
     fig = g.fig
@@ -419,7 +425,7 @@ def plot_obs_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'
     return fig
 
 
-def plot_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
+def plot_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab="Time"):
     """Plot cumulated observed and simulated values for each hydrologic year.
 
     Args
@@ -441,8 +447,8 @@ def plot_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
     fig : Figure
     """
     headers = df.columns
-    sim_headers = filter_headers(df.columns, ['sim'])
-    bench_headers = filter_headers(df.columns, ['bench'])
+    sim_headers = filter_headers(df.columns, ["sim"])
+    bench_headers = filter_headers(df.columns, ["bench"])
     df_cs = pd.DataFrame(index=df.index, columns=headers)
     df = assign_hyd_year(df.copy(), start_month_hyd_year=start_month_hyd_year)
     years = pd.unique(df.hyd_year)
@@ -455,43 +461,47 @@ def plot_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
     palette = []
     for i, sim_header in enumerate(sim_headers):
         df_sim = df_cs.loc[:, sim_header].to_frame()
-        df_sim.columns = ['sim_obs']
-        df_sim['type'] = f'sim{i}'
+        df_sim.columns = ["sim_obs"]
+        df_sim["type"] = f"sim{i}"
         ll_dfs.append(df_sim)
-        palette.append('r')
+        palette.append("r")
     if bench_headers:
         for i, bench_header in enumerate(bench_headers):
             df_bench = df_cs.loc[:, bench_header].to_frame()
-            df_bench.columns = ['sim_obs']
-            df_bench['type'] = f'bench{i}'
+            df_bench.columns = ["sim_obs"]
+            df_bench["type"] = f"bench{i}"
             ll_dfs.append(df_bench)
-            palette.append('grey')
+            palette.append("grey")
     df_sim_obs = pd.concat(ll_dfs)
-    df_sim_long = pd.melt(df_sim_obs, id_vars=['type'], value_vars=['sim_obs'], ignore_index=False)
+    df_sim_long = pd.melt(df_sim_obs, id_vars=["type"], value_vars=["sim_obs"], ignore_index=False)
     df_sim_long = assign_hyd_year(df_sim_long.copy(), start_month_hyd_year=start_month_hyd_year)
-    df_sim_long['time'] = df_sim_long.index
+    df_sim_long["time"] = df_sim_long.index
     df_sim_long.loc[df_sim_long.isnull().any(axis=1)] = 0
-    df_sim_long = df_sim_long.drop(columns=['variable'])
-    df_sim_long = df_sim_long.astype(dtype={"type" : str,
-                                            "value" : onp.float64,
-                                            "hyd_year" : onp.int64,
-                                            "time" : onp.datetime64})
+    df_sim_long = df_sim_long.drop(columns=["variable"])
+    df_sim_long = df_sim_long.astype(
+        dtype={"type": str, "value": onp.float64, "hyd_year": onp.int64, "time": "datetime64[ns]"}
+    )
     df_sim_long.index = range(len(df_sim_long.index))
     # Plot the lines on facets
     g = sns.relplot(
         data=df_sim_long,
-        x="time", y="value",
-        hue="type", col="hyd_year",
-        kind="line", palette=palette,
+        x="time",
+        y="value",
+        hue="type",
+        col="hyd_year",
+        kind="line",
+        palette=palette,
         facet_kws=dict(sharex=False),
-        height=1.5, aspect=1, col_wrap=4
+        height=1.5,
+        aspect=1,
+        col_wrap=4,
     )
     g.set_ylabels(y_lab)
     g.set_xlabels(x_lab)
     g.set_xticklabels(rotation=90)
     for axs in g.axes.flatten():
-        axs.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m'))
-    g.set_titles(template='{col_name}')
+        axs.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m"))
+    g.set_titles(template="{col_name}")
     g._legend.remove()
     g.tight_layout()
     fig = g.fig
@@ -499,7 +509,7 @@ def plot_sim_cum_year_facet(df, y_lab, start_month_hyd_year=10, x_lab='Time'):
     return fig
 
 
-def time_to_num(idx, time='days'):
+def time_to_num(idx, time="days"):
     """Convert DatetimeIndex to numeric range. Conversion is based either on
     days or hours.
 
@@ -516,13 +526,13 @@ def time_to_num(idx, time='days'):
     idx_num : onp.array
         numerical date range
     """
-    if time == 'days':
-        idx_num = idx.to_series().diff().astype('timedelta64[m]').cumsum()/1440
+    if time == "days":
+        idx_num = idx.to_series().diff().astype("timedelta64[m]").cumsum() / 1440
         idx_num.iloc[0] = 0
         idx_num = idx_num.values
 
-    elif time == 'hours':
-        idx_num = idx.to_series().diff().astype('timedelta64[m]').cumsum()/60
+    elif time == "hours":
+        idx_num = idx.to_series().diff().astype("timedelta64[m]").cumsum() / 60
         idx_num.iloc[0] = 0
         idx_num = idx_num.values
 
@@ -547,8 +557,8 @@ def assign_hyd_year(df, start_month_hyd_year=10):
         contains hydrologic values and a column with the assigned hydrologic
         year
     """
-    df.loc[:, 'hyd_year'] = df.index.year
-    df.loc[(df.index.month >= start_month_hyd_year), 'hyd_year'] += 1
+    df.loc[:, "hyd_year"] = df.index.year
+    df.loc[(df.index.month >= start_month_hyd_year), "hyd_year"] += 1
 
     return df
 
@@ -571,10 +581,10 @@ def assign_seasons(df):
     idx_spring = (df.index.month == 3) | (df.index.month == 4) | (df.index.month == 5)
     idx_summer = (df.index.month == 6) | (df.index.month == 7) | (df.index.month == 8)
     idx_autumn = (df.index.month == 9) | (df.index.month == 10) | (df.index.month == 11)
-    df.loc[idx_winter, 'seas'] = 'DJF'
-    df.loc[idx_spring, 'seas'] = 'MAM'
-    df.loc[idx_summer, 'seas'] = 'JJA'
-    df.loc[idx_autumn, 'seas'] = 'SON'
+    df.loc[idx_winter, "seas"] = "DJF"
+    df.loc[idx_spring, "seas"] = "MAM"
+    df.loc[idx_summer, "seas"] = "JJA"
+    df.loc[idx_autumn, "seas"] = "SON"
 
     return df
 
@@ -601,9 +611,9 @@ def calc_api(prec, w, k):
     """
     api = onp.empty(prec.shape)
     api.fill(onp.nan)
-    weights = k**onp.arange(1, w+1)[::-1]
-    for i in range(w+1, api.shape[0]):
-        api[i] = onp.sum(prec[(i-w):i] * weights)
+    weights = k ** onp.arange(1, w + 1)[::-1]
+    for i in range(w + 1, api.shape[0]):
+        api[i] = onp.sum(prec[(i - w) : i] * weights)
     return api
 
 
@@ -629,11 +639,11 @@ def calc_napi(prec, w, k):
     """
     napi = onp.empty(prec.shape)
     napi.fill(onp.nan)
-    weights = k**onp.arange(0, w+1)[::-1]
-    weights_sum = onp.sum(k**onp.arange(1, w+1)[::-1])
-    for i in range(w+1, napi.shape[0]):
-        api = onp.sum(prec[(i-w):i+1] * weights)
-        api_mean = onp.mean(prec[(i-w):i]) * weights_sum
+    weights = k ** onp.arange(0, w + 1)[::-1]
+    weights_sum = onp.sum(k ** onp.arange(1, w + 1)[::-1])
+    for i in range(w + 1, napi.shape[0]):
+        api = onp.sum(prec[(i - w) : i + 1] * weights)
+        api_mean = onp.mean(prec[(i - w) : i]) * weights_sum
         napi[i] = api / api_mean
     return napi
 
@@ -655,7 +665,7 @@ def calc_rmse(obs, sim):
     eff : float
         Root mean square error (RMSE)
     """
-    eff = onp.sqrt(onp.mean((sim - obs)**2))
+    eff = onp.sqrt(onp.mean((sim - obs) ** 2))
 
     return eff
 
@@ -724,7 +734,7 @@ def calc_mare(obs, sim):
         Mean absolute relative error (MARE)
     """
     abs_err = onp.abs(sim - obs)
-    rel_err = abs_err/obs
+    rel_err = abs_err / obs
     eff = onp.mean(rel_err)
 
     return eff
@@ -750,7 +760,7 @@ def calc_ve(obs, sim):
     abs_err = onp.abs(sim - obs)
     sum_abs_err = onp.sum(abs_err)
     sum_obs = onp.sum(obs)
-    eff = sum_abs_err/sum_obs
+    eff = sum_abs_err / sum_obs
 
     return eff
 
@@ -1092,18 +1102,14 @@ def calc_kge(obs, sim, r="pearson", var="std"):
         kge_gamma = calc_kge_gamma(obs, sim)
         temp_cor = calc_temp_cor(obs, sim, r=r)
 
-        eff = 1 - onp.sqrt(
-            (kge_beta - 1) ** 2 + (kge_gamma - 1) ** 2 + (temp_cor - 1) ** 2
-        )
+        eff = 1 - onp.sqrt((kge_beta - 1) ** 2 + (kge_gamma - 1) ** 2 + (temp_cor - 1) ** 2)
 
     # calculate KGE with beta term
     elif var == "std":
         kge_alpha = calc_kge_alpha(obs, sim)
         temp_cor = calc_temp_cor(obs, sim, r=r)
 
-        eff = 1 - onp.sqrt(
-            (kge_beta - 1) ** 2 + (kge_alpha - 1) ** 2 + (temp_cor - 1) ** 2
-        )
+        eff = 1 - onp.sqrt((kge_beta - 1) ** 2 + (kge_alpha - 1) ** 2 + (temp_cor - 1) ** 2)
 
     return eff
 
