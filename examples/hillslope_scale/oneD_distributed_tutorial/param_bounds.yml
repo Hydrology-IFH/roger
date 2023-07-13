@@ -2,6 +2,10 @@
 z_soil:
 - 1000  # lower boundary
 - 1200  # upper boundary
+# surface slope (-)
+slope:
+- 0  # lower boundary
+- 0.1  # upper boundary
 # density of vertical macropores (1/m2)
 dmpv:
 - 50

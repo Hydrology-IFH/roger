@@ -141,6 +141,12 @@ def main(tmp_dir):
                 at[2:-2, 2:-2],
                 self._read_var_from_csv("z_soil", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
             )
+            # surface slope (-)
+            vs.slope = update(
+                vs.slope,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("slope", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            )
             # density of vertical macropores (1/m2)
             vs.dmpv = update(
                 vs.dmpv,

@@ -10,6 +10,7 @@ import roger
 
 _UNITS = {
     "z_soil": "mm",
+    "slope": "-",
     "dmpv": "1/m2",
     "dmph": "1/m2",
     "lmpv": "mm",
@@ -78,8 +79,8 @@ def main(nrows, ncols):
 
     # write parameters to csv
     df_params.columns = [
-        ["", "[mm]", "[1/m2]", "[1/m2]", "[mm]", "[-]", "[-]", "[-]", "[mm/hour]", "[mm/hour]"],
-        ["lu_id", "z_soil", "dmpv", "dmph", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf"],
+        ["", "[mm]", "[-]", "[1/m2]", "[1/m2]", "[mm]", "[-]", "[-]", "[-]", "[mm/hour]", "[mm/hour]"],
+        ["lu_id", "z_soil", "slope", "dmpv", "dmph", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf"],
     ]
     df_params.to_csv(base_path / "parameters.csv", index=False, sep=";")
     return
