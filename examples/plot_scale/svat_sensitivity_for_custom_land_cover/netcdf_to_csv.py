@@ -41,8 +41,9 @@ def main():
     # write output to csv
     vars_sim = config["OUTPUT_RATE"] + config["OUTPUT_COLLECT"]
     for var_sim in vars_sim:
-        df_var_sim = pd.DataFrame(index=date_sim, columns=[f"sim_{x}" for x in range(config["nx"])])
-        df_var_sim.iloc[:, :] = ds_sim[var_sim].isel(y=0).values.T
+        values = ds_sim[var_sim].isel(y=0).values.T
+        df_var_sim = pd.DataFrame(index=date_sim, columns=[f"sim_{x}" for x in range(values.shape[-1])])
+        df_var_sim.iloc[:, :] = values
         df_var_sim.to_csv(base_path_output / f"{var_sim}.csv", sep=";", index=True, index_label="date")
 
     return

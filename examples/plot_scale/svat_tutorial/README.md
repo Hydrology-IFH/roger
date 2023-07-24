@@ -59,7 +59,7 @@ Name of model experiment and spatial discretization are defined in `config.yml`.
 ## Model output
 The variables written to the output files are defined in `config.yml`. Available variables
 are listed [here](https://roger.readthedocs.io/en/latest/reference/variables.html#available-variables). Generally, storage variables
-should be defined for `OUTPUT_COLLECT` and flux variables for `OUTPUT_RATE`.
+should be defined in `OUTPUT_COLLECT` and flux variables in `OUTPUT_RATE`.
 
 # Workflow
 
