@@ -3,11 +3,13 @@ import h5netcdf
 import pandas as pd
 import numpy as onp
 import yaml
+import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
 @roger_base_cli
-def main():
+def main(tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
@@ -53,7 +55,7 @@ def main():
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = "ONEDEVENT"
+            settings.identifier = self._config["identifier"]
 
             # total grid numbers in x- and y-direction
             settings.nx, settings.ny = 1, 1
@@ -62,12 +64,12 @@ def main():
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
             # spatial discretization (in meters)
-            settings.dx = 1
-            settings.dy = 1
+            settings.dx = self._config["dx"]
+            settings.dy = self._config["dy"]
 
             # origin of spatial grid
-            settings.x_origin = 0.0
-            settings.y_origin = 0.0
+            settings.x_origin = self._config["x_origin"]
+            settings.y_origin = self._config["y_origin"]
 
             # enable specific processes
             settings.enable_groundwater_boundary = False
@@ -126,7 +128,7 @@ def main():
             # land use ID (see README for description)
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], self._config["LU_ID"])
             # degree of sealing (-)
-            vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
+            vs.sealing = update(vs.sealing, at[2:-2, 2:-2], self._config["SEALING"])
             # surface slope (-)
             vs.slope = update(vs.slope, at[2:-2, 2:-2], self._config["SLOPE"])
             # convert slope to percentage
@@ -213,7 +215,7 @@ def main():
             vs.event_id = update(vs.event_id, at[vs.tau], 1)
 
         @roger_routine
-        def set_diagnostics(self, state):
+        def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
             # variables written to output files
@@ -221,11 +223,15 @@ def main():
             # required to be equal or greater than time increments of forcing
             diagnostics["rate"].output_frequency = 10 * 60  # in seconds
             diagnostics["rate"].sampling_frequency = 1
+            if base_path:
+                diagnostics["rate"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1
+            if base_path:
+                diagnostics["maximum"].base_output_path = base_path
 
         @roger_routine
         def after_timestep(self, state):

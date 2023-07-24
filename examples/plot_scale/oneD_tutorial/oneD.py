@@ -3,11 +3,13 @@ import h5netcdf
 import pandas as pd
 import numpy as onp
 import yaml
+import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
 @roger_base_cli
-def main():
+def main(tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
@@ -54,7 +56,7 @@ def main():
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = "ONED"
+            settings.identifier = self._config["identifier"]
 
             # total grid numbers in x- and y-direction
             settings.nx, settings.ny = 1, 1
@@ -63,12 +65,12 @@ def main():
             settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, 'forcing.nc'))
 
             # spatial discretization (in meters)
-            settings.dx = 1
-            settings.dy = 1
+            settings.dx = self._config["dx"]
+            settings.dy = self._config["dy"]
 
             # origin of spatial grid
-            settings.x_origin = 0.0
-            settings.y_origin = 0.0
+            settings.x_origin = self._config["x_origin"]
+            settings.y_origin = self._config["y_origin"]
             # origin of time steps (e.g. 01-01-2023)
             settings.time_origin = self._get_time_origin(self._input_dir, 'forcing.nc')
 
@@ -125,13 +127,11 @@ def main():
             # land use ID (see README for description)
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], self._config["LU_ID"])
             # degree of sealing (-)
-            vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
+            vs.sealing = update(vs.sealing, at[2:-2, 2:-2], self._config["SEALING"])
             # surface slope (-)
             vs.slope = update(vs.slope, at[2:-2, 2:-2], self._config["SLOPE"])
             # convert slope to percentage
             vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
-            # total surface depression storage (mm)
-            vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
             # soil depth (mm)
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._config["Z_SOIL"])
             # density of vertical macropores (1/m2)
@@ -224,7 +224,7 @@ def main():
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
         @roger_routine
-        def set_diagnostics(self, state):
+        def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
             # variables written to output files
@@ -232,16 +232,22 @@ def main():
             # values are aggregated to daily
             diagnostics["rate"].output_frequency = 24 * 60 * 60  # in seconds
             diagnostics["rate"].sampling_frequency = 1
+            if base_path:
+                diagnostics["rate"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = self._config["OUTPUT_COLLECT"]
             # values are aggregated to daily
             diagnostics["collect"].output_frequency = 24 * 60 * 60  # in seconds
             diagnostics["collect"].sampling_frequency = 1
+            if base_path:
+                diagnostics["collect"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error", "z_sat"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1
+            if base_path:
+                diagnostics["maximum"].base_output_path = base_path
 
         @roger_routine
         def after_timestep(self, state):

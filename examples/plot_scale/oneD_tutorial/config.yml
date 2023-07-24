@@ -1,3 +1,15 @@
+# --- Settings --------------------------------------------------------------
+# name of the model run; is used to name the output files
+identifier: ONED
+# spatial discretization in x-direction (in meters)
+dx: 1
+# spatial discretization in y-direction (in meters)
+dy: 1
+# origin of spatial grid
+x_origin: 0
+# origin of spatial grid
+y_origin: 0
+
 # --- Parameters ---------------------------------------------------------------
 # land use ID (see README for description)
 LU_ID: 8
