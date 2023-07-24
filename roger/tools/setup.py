@@ -468,7 +468,14 @@ def validate(data):
 
 @roger_sync
 def write_forcing(
-    input_dir, nrows=1, ncols=1, uniform=True, enable_crop_phenology=False, prec_correction=None, float_type="float32"
+    input_dir,
+    nrows=1,
+    ncols=1,
+    uniform=True,
+    enable_crop_phenology=False,
+    enable_lower_boundary_condition=False,
+    prec_correction=None,
+    float_type="float32",
 ):
     """Writes forcing data to NetCDF
 
@@ -487,6 +494,9 @@ def write_forcing(
         True if time series are used as input data
 
     enable_crop_phenology : bool, optional
+        if True daily minimum and maximum is required
+
+    enable_lower_boundary_condition : bool, optional
         if True daily minimum and maximum is required
 
     prec_correction : str, optional
@@ -602,3 +612,29 @@ def write_forcing(
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs["long_name"] = "maximum air temperature"
                 v.attrs["units"] = "degC"
+
+            if enable_lower_boundary_condition:
+                zgw_path = input_path / "ZGW.txt"
+                if not os.path.isdir(zgw_path):
+                    raise ValueError(zgw_path, "does not exist")
+                df_zgw_daily = pd.read_csv(
+                    zgw_path,
+                    sep=r"\s+",
+                    skiprows=0,
+                    header=0,
+                    parse_dates=[[0, 1, 2, 3, 4]],
+                    index_col=0,
+                    na_values=-9999,
+                    date_format="%Y %m %d %H %M",
+                )
+                df_zgw_daily.index = pd.to_datetime(df_zgw_daily.index, format="%Y %m %d %H %M")
+                df_zgw_daily.index = df_zgw_daily.index.rename("Index")
+                validate(df_zgw_daily)
+                df_zgw_10mins = pd.DataFrame(index=df_PREC.index)
+                df_zgw_10mins = df_zgw_10mins.join(df_zgw_daily)
+                df_zgw_10mins = df_zgw_10mins.ffill()
+                v = f.create_variable("Z_GW", ("x", "y", "Time"), float_type)
+                arr = df_zgw_10mins["Z_GW"].values
+                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+                v.attrs["long_name"] = "Groundwater level"
+                v.attrs["units"] = "m"

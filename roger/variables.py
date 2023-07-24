@@ -819,6 +819,16 @@ VARIABLES = {
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport,
     ),
+    "c_root": Variable(
+        "scale parameter of root depth",
+        CATCH_GRID,
+        "-",
+        "scale parameter of root depth",
+        time_dependent=False,
+        write_to_restart=True,
+        initial=1.0,
+        active=lambda settings: not settings.enable_offline_transport,
+    ),
     "clay": Variable(
         "fraction of clay content in soil",
         CATCH_GRID,
@@ -2829,6 +2839,13 @@ VARIABLES = {
         write_to_restart=True,
         time_dependent=True,
         initial=1000,
+    ),
+    "Z_GW": Variable(
+        "Groundwater table depth",
+        TIME_FORCING,
+        "m",
+        "Groundwater table depth",
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_groundwater_boundary,
     ),
     "dz_gw": Variable(
         "gradient of groundwater table depth",
@@ -5132,6 +5149,16 @@ VARIABLES = {
         time_dependent=True,
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
+    ),
+    "c_int": Variable(
+        "scale parameter of interception storage",
+        CATCH_GRID,
+        "-",
+        "scale parameter of interception storage",
+        time_dependent=False,
+        write_to_restart=True,
+        initial=1.0,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "S_int_tot_crop": Variable(
         "total interception storage of crop canopy",

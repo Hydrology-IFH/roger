@@ -345,7 +345,7 @@ def calc_parameters_root_zone_kernel(state):
     cc_cond = update(
         cc_cond,
         at[:, :],
-        npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 98, 31, 32, 33, 40, 41, 50, 98])),
+        npx.isin(vs.lu_id, npx.array([0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 98, 31, 32, 33, 40, 41, 50, 60, 98])),
     )
 
     # assign land use specific root depth
@@ -378,6 +378,7 @@ def calc_parameters_root_zone_kernel(state):
                 | (vs.lu_id[2:-2, 2:-2] == 12)
                 | (vs.lu_id[2:-2, 2:-2] == 15)
                 | (vs.lu_id[2:-2, 2:-2] == 16)
+                | (vs.lu_id[2:-2, 2:-2] == 17)
             ),
             1500,
             z_root[2:-2, 2:-2],
@@ -401,13 +402,13 @@ def calc_parameters_root_zone_kernel(state):
     vs.z_root = update(
         vs.z_root,
         at[2:-2, 2:-2, 0],
-        z_root[2:-2, 2:-2],
+        z_root[2:-2, 2:-2] * vs.c_root[2:-2, 2:-2],
     )
 
     vs.z_root = update(
         vs.z_root,
         at[2:-2, 2:-2, 1],
-        z_root[2:-2, 2:-2],
+        z_root[2:-2, 2:-2] * vs.c_root[2:-2, 2:-2],
     )
 
     # set thickness of upper soil water storage to 20 cm for bare soils

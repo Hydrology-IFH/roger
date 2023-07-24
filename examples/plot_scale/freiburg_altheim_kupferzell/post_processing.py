@@ -10,11 +10,14 @@ import h5netcdf
 import roger
 import roger.tools.labels as labs
 import matplotlib as mpl
+import matplotlib.dates as mdates
 import seaborn as sns
 import statsmodels.api as sm
+import statsmodels.formula.api as smf
 from statsmodels.graphics.api import abline_plot
 import statsmodels.tools.eval_measures as smem
 from scipy import stats
+import pickle
 
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -41,6 +44,17 @@ sns.plotting_context(
     },
 )
 
+
+def nanmeanweighted(y, w, axis=None):
+    w1 = w / onp.nansum(w, axis=axis)
+    w2 = onp.where(onp.isnan(w), 0, w1)
+    w3 = onp.where(onp.isnan(y), 0, w2)
+    y1 = onp.where(onp.isnan(y), 0, y)
+    wavg = onp.sum(y1 * w3, axis=axis) / onp.sum(w3, axis=axis)
+
+    return wavg
+
+
 base_path = Path(__file__).parent
 # directory of results
 base_path_results = base_path / "output"
@@ -51,11 +65,14 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
+glm_file = base_path_figs / "glm_results.pkl"
+mlm_file = base_path_figs / "mlm_results.pkl"
+
 # identifiers for simulations
 locations = ["freiburg", "altheim", "kupferzell"]
 Locations = ["Freiburg", "Altheim", "Kupferzell"]
 land_cover_scenarios = ["grass", "corn", "corn_catch_crop", "crop_rotation"]
-Land_cover_scenarios = ["Grass", "Corn", "Corn & catch crop", "Crop rotation"]
+Land_cover_scenarios = ["Grass", "Corn", "Corn & Catch crop", "Crop rotation"]
 climate_scenarios = ["CCCma-CanESM2_CCLM4-8-17", "MPI-M-MPI-ESM-LR_RCA4"]
 periods = ["1985-2005", "2040-2060", "2080-2100"]
 start_dates = [datetime.date(1985, 1, 1), datetime.date(2040, 1, 1), datetime.date(2080, 1, 1)]
@@ -80,6 +97,19 @@ _lab = {
     "dAvg": r"$\overline{\Delta}$",
     "dIPR": r"$\Delta IPR$",
     "dSum": r"$\Delta\sum$",
+    "CCCma-CanESM2_CCLM4-8-17": "CCC",
+    "MPI-M-MPI-ESM-LR_RCA4": "MPI",
+    "nf": "NF",
+    "ff": "FF",
+    "RMSE": "Root mean squared error",
+    "MAE": "Mean absolute error",
+    "MEAE": "Median absolute error",
+    "AIC": "AIC",
+    "AICC": "AICc",
+    "theta_pwp:theta_ufc": r"$\theta_{pwp}$ x $\theta_{ufc}$",
+    "theta_pwp:theta_ac": r"$\theta_{pwp}$ x $\theta_{ac}$",
+    "theta_ufc:theta_ac": r"$\theta_{ufc}$ x $\theta_{ac}$",
+    "theta_pwp:theta_ufc:theta_ac": r"$\theta_{pwp}$ x $\theta_{ufc}$ x $\theta_{ac}$",
 }
 
 _lab_unit1 = {
@@ -138,6 +168,10 @@ _soil_depths = {
     "deep": cond_soil_depth_900,
 }
 
+# Load delta changes of precipitation and air temperature
+with open(base_path_figs / "deltas_meteo.pkl", "rb") as handle:
+    deltas_meteo = pickle.load(handle)
+
 # load simulated fluxes and states
 dict_fluxes_states = {}
 for location in locations:
@@ -163,7 +197,22 @@ for location in locations:
                         only_use_cftime_datetimes=False,
                     )
                     ds_fluxes_states = ds_fluxes_states.assign_coords(Time=("Time", date))
-                    dict_fluxes_states[location][land_cover_scenario][period][climate_scenario] = ds_fluxes_states
+                    if period == "1985-2005":
+                        nn = len(pd.DataFrame(index=date).loc[:"2004", :].index)
+                        dict_fluxes_states[location][land_cover_scenario][period][
+                            climate_scenario
+                        ] = ds_fluxes_states.sel(Time=date[1:nn])
+                    elif period == "2040-2060":
+                        nn = len(pd.DataFrame(index=date).loc[:"2059", :].index)
+                        dict_fluxes_states[location][land_cover_scenario][period][
+                            climate_scenario
+                        ] = ds_fluxes_states.sel(Time=date[1:nn])
+                    elif period == "2080-2100":
+                        nn = len(pd.DataFrame(index=date).loc[:"2099", :].index)
+                        dict_fluxes_states[location][land_cover_scenario][period][
+                            climate_scenario
+                        ] = ds_fluxes_states.sel(Time=date[1:nn])
+
                 except KeyError:
                     print(f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc")
 
@@ -190,21 +239,41 @@ for location in locations:
                     only_use_cftime_datetimes=False,
                 )
                 ds_conc_ages = ds_conc_ages.assign_coords(Time=("Time", date))
-                dict_conc_ages[location][land_cover_scenario][period][climate_scenario] = ds_conc_ages
+                if period == "1985-2005":
+                    nn = len(pd.DataFrame(index=date).loc[:"2004", :].index)
+                    dict_conc_ages[location][land_cover_scenario][period][climate_scenario] = ds_conc_ages.sel(
+                        Time=date[1:nn]
+                    )
+                elif period == "2040-2060":
+                    nn = len(pd.DataFrame(index=date).loc[:"2059", :].index)
+                    dict_conc_ages[location][land_cover_scenario][period][climate_scenario] = ds_conc_ages.sel(
+                        Time=date[1:nn]
+                    )
+                elif period == "2080-2100":
+                    nn = len(pd.DataFrame(index=date).loc[:"2099", :].index)
+                    dict_conc_ages[location][land_cover_scenario][period][climate_scenario] = ds_conc_ages.sel(
+                        Time=date[1:nn]
+                    )
 
-# # plot time series
+# plot time series
 # vars_sim = ['theta']
-# for land_cover_scenario in land_cover_scenarios:
-#     for var_sim in vars_sim:
-#         fig, axes = plt.subplots(len(locations), len(periods), sharex='col', figsize=(6, 4.5))
-#         for i, location in enumerate(locations):
-#             for j, period in enumerate(periods):
+# for var_sim in vars_sim:
+#     fig, axes = plt.subplots(len(locations), len(land_cover_scenarios), sharex=True, figsize=(6, 4.5))
+#     for i, location in enumerate(locations):
+#         for j, land_cover_scenario in enumerate(land_cover_scenarios):
+#             dfs_CanESM = []
+#             dfs_MPIM = []
+#             for period in periods:
 #                 ds_CanESM = dict_fluxes_states[location][land_cover_scenario][period]['CCCma-CanESM2_CCLM4-8-17']
 #                 sim_vals_CanESM = ds_CanESM[var_sim].isel(y=0).values
 #                 sim_vals_avg_CanESM = onp.nanmean(sim_vals_CanESM, axis=0)
 #                 sim_vals_5_CanESM = onp.nanquantile(sim_vals_CanESM, 0.05, axis=0)
 #                 sim_vals_50_CanESM = onp.nanmedian(sim_vals_CanESM, axis=0)
 #                 sim_vals_95_CanESM = onp.nanquantile(sim_vals_CanESM, 0.95, axis=0)
+#                 df_CanESM = pd.DataFrame(index=ds_CanESM['Time'].values, columns=['avg', 'p5', 'p50', 'p95'], data=onp.stack([sim_vals_avg_CanESM, sim_vals_5_CanESM, sim_vals_50_CanESM, sim_vals_95_CanESM], axis=1))
+#                 df_CanESM.iloc[0, :] = onp.nan
+#                 df_CanESM.iloc[-1, :] = onp.nan
+#                 dfs_CanESM.append(df_CanESM)
 
 #                 ds_MPIM = dict_fluxes_states[location][land_cover_scenario][period]['MPI-M-MPI-ESM-LR_RCA4']
 #                 sim_vals_MPIM = ds_MPIM[var_sim].isel(y=0).values
@@ -212,22 +281,194 @@ for location in locations:
 #                 sim_vals_5_MPIM = onp.nanquantile(sim_vals_MPIM, 0.05, axis=0)
 #                 sim_vals_50_MPIM = onp.nanmedian(sim_vals_MPIM, axis=0)
 #                 sim_vals_95_MPIM = onp.nanquantile(sim_vals_MPIM, 0.95, axis=0)
+#                 df_MPIM = pd.DataFrame(index=ds_MPIM['Time'].values, columns=['avg', 'p5', 'p50', 'p95'], data=onp.stack([sim_vals_avg_MPIM, sim_vals_5_MPIM, sim_vals_50_MPIM, sim_vals_95_MPIM], axis=1))
+#                 df_MPIM.iloc[0, :] = onp.nan
+#                 df_MPIM.iloc[-1, :] = onp.nan
+#                 dfs_MPIM.append(df_MPIM)
 
-#                 axes[i, j].plot(ds_CanESM['Time'].values, sim_vals_avg_CanESM, ls='--', color='red', lw=1)
-#                 axes[i, j].plot(ds_CanESM['Time'].values, sim_vals_50_CanESM, ls='-', color='red', lw=1)
-#                 axes[i, j].fill_between(ds_CanESM['Time'].values, sim_vals_5_CanESM, sim_vals_95_CanESM, color='red',
+#             df_CanESM = pd.concat(dfs_CanESM)
+#             df_MPIM = pd.concat(dfs_MPIM)
+#             dates = df_CanESM.index
+#             x1 = len(df_CanESM.loc[:'1994', :].index) + 1
+#             x2 = len(df_CanESM.loc[:'2049', :].index) + 1
+#             x3 = len(df_CanESM.loc[:'2089', :].index) + 1
+#             x2040 = len(df_CanESM.loc[:'2039', :].index) + 1
+#             x2080 = len(df_CanESM.loc[:'2079', :].index) + 1
+#             df_CanESM.index = range(len(df_CanESM.index))
+#             df_MPIM.index = range(len(df_MPIM.index))
+
+#             axes[i, j].plot(df_CanESM.index, df_CanESM['avg'], ls='--', color='red', lw=1)
+#             axes[i, j].plot(df_CanESM.index, df_CanESM['p50'], ls='-', color='red', lw=1)
+#             axes[i, j].fill_between(df_CanESM.index, df_CanESM['p5'], df_CanESM['p95'], color='red',
+#                                     edgecolor=None, alpha=0.2)
+
+#             axes[i, j].plot(df_MPIM.index, df_MPIM['avg'], ls='--', color='blue', lw=1)
+#             axes[i, j].plot(df_MPIM.index, df_MPIM['p50'], ls='-', color='blue', lw=1)
+#             axes[i, j].fill_between(df_MPIM.index, df_MPIM['p5'], df_MPIM['p95'], color='blue',
+#                                     edgecolor=None, alpha=0.2)
+#             axes[i, j].axvline(x=x2040, color='grey')
+#             axes[i, j].axvline(x=x2080, color='grey')
+#             axes[i, j].set_xticks([x1, x2, x3], labels=['1985 - 2005', '2040 - 2060', '2080 - 2100'])
+#             axes[i, j].set_xlim(df_CanESM.index[0], df_CanESM.index[-1])
+#             axes[-1, j].set_xlabel('Time [year]')
+#             axes[0, j].set_title(f'{Land_cover_scenarios[j]}')
+#         axes[i, 0].set_ylabel('%s\n%s' % (Locations[i], labs._Y_LABS_DAILY[var_sim]))
+#     fig.autofmt_xdate()
+#     fig.tight_layout()
+#     file = base_path_figs / "time_series" / f"{var_sim}.png"
+#     fig.savefig(file, dpi=300)
+#     plt.close('all')
+
+#     for location in locations:
+#         for land_cover_scenario in land_cover_scenarios:
+#             fig, axes = plt.subplots(3, 1, sharex='row', sharey=True, figsize=(6, 4.5))
+#             for i, period in enumerate(periods):
+#                 ds_CanESM = dict_fluxes_states[location][land_cover_scenario][period]['CCCma-CanESM2_CCLM4-8-17']
+#                 sim_vals_CanESM = ds_CanESM[var_sim].isel(y=0).values
+#                 sim_vals_avg_CanESM = onp.nanmean(sim_vals_CanESM, axis=0)
+#                 sim_vals_5_CanESM = onp.nanquantile(sim_vals_CanESM, 0.05, axis=0)
+#                 sim_vals_50_CanESM = onp.nanmedian(sim_vals_CanESM, axis=0)
+#                 sim_vals_95_CanESM = onp.nanquantile(sim_vals_CanESM, 0.95, axis=0)
+#                 df_CanESM = pd.DataFrame(index=ds_CanESM['Time'].values, columns=['avg', 'p5', 'p50', 'p95'], data=onp.stack([sim_vals_avg_CanESM, sim_vals_5_CanESM, sim_vals_50_CanESM, sim_vals_95_CanESM], axis=1))
+
+#                 ds_MPIM = dict_fluxes_states[location][land_cover_scenario][period]['MPI-M-MPI-ESM-LR_RCA4']
+#                 sim_vals_MPIM = ds_MPIM[var_sim].isel(y=0).values
+#                 sim_vals_avg_MPIM = onp.nanmean(sim_vals_MPIM, axis=0)
+#                 sim_vals_5_MPIM = onp.nanquantile(sim_vals_MPIM, 0.05, axis=0)
+#                 sim_vals_50_MPIM = onp.nanmedian(sim_vals_MPIM, axis=0)
+#                 sim_vals_95_MPIM = onp.nanquantile(sim_vals_MPIM, 0.95, axis=0)
+#                 df_MPIM = pd.DataFrame(index=ds_MPIM['Time'].values, columns=['avg', 'p5', 'p50', 'p95'], data=onp.stack([sim_vals_avg_MPIM, sim_vals_5_MPIM, sim_vals_50_MPIM, sim_vals_95_MPIM], axis=1))
+
+#                 axes[i].plot(df_CanESM.index, df_CanESM['avg'], ls='--', color='red', lw=1)
+#                 axes[i].plot(df_CanESM.index, df_CanESM['p50'], ls='-', color='red', lw=1)
+#                 axes[i].fill_between(df_CanESM.index, df_CanESM['p5'], df_CanESM['p95'], color='red',
 #                                         edgecolor=None, alpha=0.2)
 
-#                 axes[i, j].plot(ds_MPIM['Time'].values, sim_vals_avg_MPIM, ls='--', color='blue', lw=1)
-#                 axes[i, j].plot(ds_MPIM['Time'].values, sim_vals_50_MPIM, ls='-', color='blue', lw=1)
-#                 axes[i, j].fill_between(ds_MPIM['Time'].values, sim_vals_5_MPIM, sim_vals_95_MPIM, color='blue',
+#                 axes[i].plot(df_MPIM.index, df_MPIM['avg'], ls='--', color='blue', lw=1)
+#                 axes[i].plot(df_MPIM.index, df_MPIM['p50'], ls='-', color='blue', lw=1)
+#                 axes[i].fill_between(df_MPIM.index, df_MPIM['p5'], df_MPIM['p95'], color='blue',
 #                                         edgecolor=None, alpha=0.2)
-#                 axes[i, j].set_xlim(ds_MPIM['Time'].values[0], ds_MPIM['Time'].values[-1])
-#                 axes[-1, j].set_xlabel('Time [year]')
-#             axes[i, 0].set_ylabel('%s\n%s' % (Locations[i], labs._Y_LABS_DAILY[var_sim]))
-#         fig.tight_layout()
-#         file = base_path_figs / f"{var_sim}_{land_cover_scenario}.png"
-#         fig.savefig(file, dpi=250)
+#                 axes[i].set_xlim(df_CanESM.index[0], df_CanESM.index[-1])
+#                 axes[i].xaxis.set_major_locator(mpl.dates.YearLocator(5, month=1, day=1))
+#                 axes[i].xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y'))
+#                 axes[i].set_ylabel('%s' % (labs._Y_LABS_DAILY[var_sim]))
+#             axes[-1].set_xlabel('Time [year]')
+#             fig.tight_layout()
+#             file = base_path_figs / "time_series" / f"{var_sim}_{location}_{land_cover_scenario}.png"
+#             fig.savefig(file, dpi=300)
+#             plt.close('all')
+
+vars_sim = ["rt50_s", "tt50_q_ss", "tt50_transp"]
+for var_sim in vars_sim:
+    for location in locations:
+        for land_cover_scenario in land_cover_scenarios:
+            fig, axes = plt.subplots(3, 1, sharex="row", sharey=True, figsize=(6, 4.5))
+            for i, period in enumerate(periods):
+                ds_CanESM = dict_conc_ages[location][land_cover_scenario][period]["CCCma-CanESM2_CCLM4-8-17"]
+                sim_vals_CanESM = ds_CanESM[var_sim].isel(y=0).values
+                sim_vals_avg_CanESM = onp.nanmean(sim_vals_CanESM, axis=0)
+                sim_vals_5_CanESM = onp.nanquantile(sim_vals_CanESM, 0.1, axis=0)
+                sim_vals_50_CanESM = onp.nanmedian(sim_vals_CanESM, axis=0)
+                sim_vals_95_CanESM = onp.nanquantile(sim_vals_CanESM, 0.9, axis=0)
+                df_CanESM = pd.DataFrame(
+                    index=ds_CanESM["Time"].values,
+                    columns=["avg", "p5", "p50", "p95"],
+                    data=onp.stack(
+                        [sim_vals_avg_CanESM, sim_vals_5_CanESM, sim_vals_50_CanESM, sim_vals_95_CanESM], axis=1
+                    ),
+                )
+
+                ds_MPIM = dict_conc_ages[location][land_cover_scenario][period]["MPI-M-MPI-ESM-LR_RCA4"]
+                sim_vals_MPIM = ds_MPIM[var_sim].isel(y=0).values
+                sim_vals_avg_MPIM = onp.nanmean(sim_vals_MPIM, axis=0)
+                sim_vals_5_MPIM = onp.nanquantile(sim_vals_MPIM, 0.1, axis=0)
+                sim_vals_50_MPIM = onp.nanmedian(sim_vals_MPIM, axis=0)
+                sim_vals_95_MPIM = onp.nanquantile(sim_vals_MPIM, 0.9, axis=0)
+                df_MPIM = pd.DataFrame(
+                    index=ds_MPIM["Time"].values,
+                    columns=["avg", "p5", "p50", "p95"],
+                    data=onp.stack([sim_vals_avg_MPIM, sim_vals_5_MPIM, sim_vals_50_MPIM, sim_vals_95_MPIM], axis=1),
+                )
+
+                axes[i].plot(df_CanESM.index, df_CanESM["avg"], ls="--", color="red", lw=1)
+                axes[i].plot(df_CanESM.index, df_CanESM["p50"], ls="-", color="red", lw=1)
+                axes[i].fill_between(
+                    df_CanESM.index, df_CanESM["p5"], df_CanESM["p95"], color="red", edgecolor=None, alpha=0.2
+                )
+
+                axes[i].plot(df_MPIM.index, df_MPIM["avg"], ls="--", color="blue", lw=1)
+                axes[i].plot(df_MPIM.index, df_MPIM["p50"], ls="-", color="blue", lw=1)
+                axes[i].fill_between(
+                    df_MPIM.index, df_MPIM["p5"], df_MPIM["p95"], color="blue", edgecolor=None, alpha=0.2
+                )
+                axes[i].set_xlim(df_CanESM.index[0], df_CanESM.index[-1])
+                axes[i].xaxis.set_major_locator(mpl.dates.YearLocator(5, month=1, day=1))
+                axes[i].xaxis.set_major_formatter(mpl.dates.DateFormatter("%Y"))
+                axes[i].set_ylim(
+                    0,
+                )
+                axes[i].set_ylabel("%s" % (_lab_unit1[var_sim]))
+            axes[-1].set_xlabel("Time [year]")
+            fig.tight_layout()
+            file = base_path_figs / "time_series" / f"{var_sim}_{location}_{land_cover_scenario}.png"
+            fig.savefig(file, dpi=300)
+            plt.close("all")
+
+vars_sim = ["transp", "evap_soil", "q_ss"]
+for var_sim in vars_sim:
+    for location in locations:
+        for land_cover_scenario in land_cover_scenarios:
+            fig, axes = plt.subplots(3, 1, sharex="row", sharey=True, figsize=(6, 4.5))
+            for i, period in enumerate(periods):
+                ds_CanESM = dict_fluxes_states[location][land_cover_scenario][period]["CCCma-CanESM2_CCLM4-8-17"]
+                sim_vals_CanESM = ds_CanESM[var_sim].isel(y=0).values
+                sim_vals_avg_CanESM = onp.nanmean(onp.cumsum(sim_vals_CanESM, axis=1), axis=0)
+                sim_vals_5_CanESM = onp.nanquantile(onp.cumsum(sim_vals_CanESM, axis=1), 0.05, axis=0)
+                sim_vals_50_CanESM = onp.nanmedian(onp.cumsum(sim_vals_CanESM, axis=1), axis=0)
+                sim_vals_95_CanESM = onp.nanquantile(onp.cumsum(sim_vals_CanESM, axis=1), 0.95, axis=0)
+                df_CanESM = pd.DataFrame(
+                    index=ds_CanESM["Time"].values,
+                    columns=["avg", "p5", "p50", "p95"],
+                    data=onp.stack(
+                        [sim_vals_avg_CanESM, sim_vals_5_CanESM, sim_vals_50_CanESM, sim_vals_95_CanESM], axis=1
+                    ),
+                )
+
+                ds_MPIM = dict_fluxes_states[location][land_cover_scenario][period]["MPI-M-MPI-ESM-LR_RCA4"]
+                sim_vals_MPIM = ds_MPIM[var_sim].isel(y=0).values
+                sim_vals_avg_MPIM = onp.nanmean(onp.cumsum(sim_vals_MPIM, axis=1), axis=0)
+                sim_vals_5_MPIM = onp.nanquantile(onp.cumsum(sim_vals_MPIM, axis=1), 0.05, axis=0)
+                sim_vals_50_MPIM = onp.nanmedian(onp.cumsum(sim_vals_MPIM, axis=1), axis=0)
+                sim_vals_95_MPIM = onp.nanquantile(onp.cumsum(sim_vals_MPIM, axis=1), 0.95, axis=0)
+                df_MPIM = pd.DataFrame(
+                    index=ds_MPIM["Time"].values,
+                    columns=["avg", "p5", "p50", "p95"],
+                    data=onp.stack([sim_vals_avg_MPIM, sim_vals_5_MPIM, sim_vals_50_MPIM, sim_vals_95_MPIM], axis=1),
+                )
+
+                axes[i].plot(df_CanESM.index, df_CanESM["avg"], ls="--", color="red", lw=1)
+                axes[i].plot(df_CanESM.index, df_CanESM["p50"], ls="-", color="red", lw=1)
+                axes[i].fill_between(
+                    df_CanESM.index, df_CanESM["p5"], df_CanESM["p95"], color="red", edgecolor=None, alpha=0.2
+                )
+
+                axes[i].plot(df_MPIM.index, df_MPIM["avg"], ls="--", color="blue", lw=1)
+                axes[i].plot(df_MPIM.index, df_MPIM["p50"], ls="-", color="blue", lw=1)
+                axes[i].fill_between(
+                    df_MPIM.index, df_MPIM["p5"], df_MPIM["p95"], color="blue", edgecolor=None, alpha=0.2
+                )
+                axes[i].set_xlim(df_CanESM.index[0], df_CanESM.index[-1])
+                axes[i].xaxis.set_major_locator(mpl.dates.YearLocator(5, month=1, day=1))
+                axes[i].xaxis.set_major_formatter(mpl.dates.DateFormatter("%Y"))
+                axes[i].set_ylim(
+                    0,
+                )
+                axes[i].set_ylabel("%s" % (_lab_unit1[var_sim]))
+            axes[-1].set_xlabel("Time [year]")
+            fig.tight_layout()
+            file = base_path_figs / "time_series" / f"{var_sim}_{location}_{land_cover_scenario}.png"
+            fig.savefig(file, dpi=300)
+            plt.close("all")
 
 # # plot cumulated time series of fluxes
 # vars_sim = ['transp', 'evap_soil', 'q_ss']
@@ -262,14 +503,13 @@ for location in locations:
 #                 axes[i, j].set_xlim(start_dates[j], end_dates[j])
 #                 axes[i, j].set_ylim(0,)
 #                 axes[-1, j].set_xlabel('Time [year]')
-#                 # axes[-1, j].tick_params(axis='x', rotation=33)
 #                 axes[-1, j].xaxis.set_major_locator(mpl.dates.YearLocator(5, month = 1, day = 1))
 #                 axes[-1, j].xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y'))
 
 #             axes[i, 0].set_ylabel('%s\n%s' % (Locations[i], labs._Y_LABS_CUM[var_sim]))
 #         fig.tight_layout()
-#         file = base_path_figs / f"{var_sim}_{land_cover_scenario}_cumulated.png"
-#         fig.savefig(file, dpi=250)
+#         file = base_path_figs / "time_series" / f"{var_sim}_{land_cover_scenario}_cumulated.png"
+#         fig.savefig(file, dpi=300)
 #         plt.close('all')
 
 # _LABS = {'evap_soil': r'$EVAP_{soil}$',
@@ -322,7 +562,7 @@ for location in locations:
 #         axes[i, 0].set_ylabel('%s\n%s' % (Locations[i], labs._Y_LABS_CUM[var_sim]))
 #     fig.tight_layout()
 #     file = base_path_figs / f"{var_sim}_boxplot.png"
-#     fig.savefig(file, dpi=250)
+#     fig.savefig(file, dpi=300)
 #     plt.close('all')
 
 
@@ -367,7 +607,7 @@ for location in locations:
 #         axes[i, 0].set_ylabel('%s\n%s' % (Locations[i], labs._Y_LABS_CUM[var_sim]))
 #     fig.tight_layout()
 #     file = base_path_figs / f"{var_sim}_boxplot.png"
-#     fig.savefig(file, dpi=250)
+#     fig.savefig(file, dpi=300)
 #     plt.close('all')
 
 # plot cumulated precipitation
@@ -392,7 +632,7 @@ for location in locations:
 #         axes[i, 0].set_ylabel('PRECIP [mm]')
 #     fig.tight_layout()
 #     file = base_path_figs / f"{var_sim}_cumulated.png"
-#     fig.savefig(file, dpi=250)
+#     fig.savefig(file, dpi=300)
 #     plt.close('all')
 
 
@@ -434,7 +674,7 @@ for location in locations:
 #             axes[i, 0].set_ylabel('%s\n%s' % (Locations[i], labs._Y_LABS_DAILY[var_sim]))
 #         fig.tight_layout()
 #         file = base_path_figs / f"{var_sim}_{land_cover_scenario}.png"
-#         fig.savefig(file, dpi=250)
+#         fig.savefig(file, dpi=300)
 #         plt.close('all')
 
 
@@ -459,7 +699,7 @@ for location in locations:
 #         axes[i, 0].set_ylabel('%s\nPRECIP [mm]' % (Locations[i]))
 #     fig.tight_layout()
 #     file = base_path_figs / f"{var_sim}_cumulated.png"
-#     fig.savefig(file, dpi=250)
+#     fig.savefig(file, dpi=300)
 #     plt.close('all')
 
 # vars_sim = ['transp', 'evap_soil', 'q_ss']
@@ -488,7 +728,7 @@ for location in locations:
 #             axes[i, 0].set_ylabel('%s\n%s' % (Locations[i], labs._Y_LABS_CUM[var_sim]))
 #         fig.tight_layout()
 #         file = base_path_figs / f"{var_sim}_{land_cover_scenario}_cumulated_trace.png"
-#         fig.savefig(file, dpi=250)
+#         fig.savefig(file, dpi=300)
 #         plt.close('all')
 
 # # plot water ages
@@ -545,7 +785,7 @@ for location in locations:
 #                 axes[i, 0].set_ylabel('%s\n[days]' % (Locations[i]))
 #             fig.tight_layout()
 #             file = base_path_figs / f"{var_sim.split('90')[0]}{''.join(var_sim.split('90')[1:])}_{land_cover_scenario}.png"
-#             fig.savefig(file, dpi=250)
+#             fig.savefig(file, dpi=300)
 #             plt.close('all')
 
 # _LABS = {'rt10': r'$RT_{10}$',
@@ -604,9 +844,8 @@ for location in locations:
 #                 axes[i, 0].set_ylabel('%s\nT [days]' % (Locations[i]))
 #             fig.tight_layout()
 #             file = base_path_figs / f"{var_sim.split('90')[0]}{''.join(var_sim.split('90')[1:])}_{land_cover_scenario}_boxplot.png"
-#             fig.savefig(file, dpi=250)
+#             fig.savefig(file, dpi=300)
 #             plt.close('all')
-
 
 # # plot tracer mass of fluxes
 # _Y_LABS = {'M_transp': r'$M_{TRANSP}$ [mg]',
@@ -651,7 +890,7 @@ for location in locations:
 #             axes[i, 0].set_ylabel('%s\n%s' % (Locations[i], _Y_LABS[var_sim]))
 #         fig.tight_layout()
 #         file = base_path_figs / f"{var_sim}_{land_cover_scenario}_cumulated.png"
-#         fig.savefig(file, dpi=250)
+#         fig.savefig(file, dpi=300)
 #         plt.close('all')
 
 # vars_sim = ['M_transp', 'M_q_ss']
@@ -680,179 +919,178 @@ for location in locations:
 #             axes[i, 0].set_ylabel('%s\n%s' % (Locations[i], _Y_LABS[var_sim]))
 #         fig.tight_layout()
 #         file = base_path_figs / f"{var_sim}_{land_cover_scenario}_cumulated_trace.png"
-#         fig.savefig(file, dpi=250)
+#         fig.savefig(file, dpi=300)
 #         plt.close('all')
 
-# calculate mean and percentiles
-dict_statistics = {}
-dict_deltas = {}
-vars_sim = ["transp", "q_ss"]
-for location in locations:
-    dict_statistics[location] = {}
-    for land_cover_scenario in land_cover_scenarios:
-        dict_statistics[location][land_cover_scenario] = {}
-        for climate_scenario in climate_scenarios:
-            dict_statistics[location][land_cover_scenario][climate_scenario] = {}
-            for period in periods:
-                dict_statistics[location][land_cover_scenario][climate_scenario][period] = {}
-                ds = dict_fluxes_states[location][land_cover_scenario][period][climate_scenario]
-                for var_sim in vars_sim:
-                    dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = {}
-                    sim_vals = ds[var_sim].isel(y=0).values
-                    df = pd.DataFrame(
-                        index=range(sim_vals.shape[0]), columns=["Avg", "Sum", "p10", "p50", "p90", "IPR"]
-                    )
-                    df.loc[:, "Avg"] = onp.nanmean(sim_vals, axis=-1)
-                    df.loc[:, "Sum"] = onp.nansum(sim_vals, axis=-1)
-                    # df.loc[:, 'p10'] = onp.quantile(onp.cumsum(sim_vals, axis=-1), 0.1, axis=-1)
-                    # df.loc[:, 'p50'] = onp.quantile(onp.cumsum(sim_vals, axis=-1), 0.5, axis=-1)
-                    # df.loc[:, 'p90'] = onp.quantile(onp.cumsum(sim_vals, axis=-1), 0.9, axis=-1)
-                    df.loc[:, "p10"] = onp.quantile(sim_vals, 0.1, axis=-1)
-                    df.loc[:, "p50"] = onp.quantile(sim_vals, 0.5, axis=-1)
-                    df.loc[:, "p90"] = onp.quantile(sim_vals, 0.9, axis=-1)
-                    df.loc[:, "IPR"] = df.loc[:, "p90"] - df.loc[:, "p10"]
-                    dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = df
+# # calculate mean and percentiles
+# if not os.path.exists(glm_file):
+#     dict_statistics = {}
+#     dict_deltas = {}
+#     vars_sim = ["transp", "q_ss"]
+#     for location in locations:
+#         dict_statistics[location] = {}
+#         for land_cover_scenario in land_cover_scenarios:
+#             dict_statistics[location][land_cover_scenario] = {}
+#             for climate_scenario in climate_scenarios:
+#                 dict_statistics[location][land_cover_scenario][climate_scenario] = {}
+#                 for period in periods:
+#                     dict_statistics[location][land_cover_scenario][climate_scenario][period] = {}
+#                     ds = dict_fluxes_states[location][land_cover_scenario][period][climate_scenario]
+#                     for var_sim in vars_sim:
+#                         dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = {}
+#                         sim_vals = ds[var_sim].isel(y=0).values
+#                         df = pd.DataFrame(
+#                             index=range(sim_vals.shape[0]), columns=["Avg", "Sum", "p10", "p50", "p90", "IPR"]
+#                         )
+#                         df.loc[:, "Avg"] = onp.nanmean(sim_vals, axis=-1)
+#                         df.loc[:, "Sum"] = onp.nansum(sim_vals, axis=-1)
+#                         # df.loc[:, 'p10'] = onp.quantile(onp.cumsum(sim_vals, axis=-1), 0.1, axis=-1)
+#                         # df.loc[:, 'p50'] = onp.quantile(onp.cumsum(sim_vals, axis=-1), 0.5, axis=-1)
+#                         # df.loc[:, 'p90'] = onp.quantile(onp.cumsum(sim_vals, axis=-1), 0.9, axis=-1)
+#                         df.loc[:, "p10"] = onp.quantile(sim_vals, 0.1, axis=-1)
+#                         df.loc[:, "p50"] = onp.quantile(sim_vals, 0.5, axis=-1)
+#                         df.loc[:, "p90"] = onp.quantile(sim_vals, 0.9, axis=-1)
+#                         df.loc[:, "IPR"] = df.loc[:, "p90"] - df.loc[:, "p10"]
+#                         dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = df
 
-vars_sim = ["theta"]
-for location in locations:
-    for land_cover_scenario in land_cover_scenarios:
-        for climate_scenario in climate_scenarios:
-            for period in periods:
-                ds = dict_fluxes_states[location][land_cover_scenario][period][climate_scenario]
-                for var_sim in vars_sim:
-                    dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = {}
-                    sim_vals = ds[var_sim].isel(y=0).values
-                    df = pd.DataFrame(index=range(sim_vals.shape[0]), columns=["Avg", "p10", "p50", "p90", "IPR"])
-                    df.loc[:, "Avg"] = onp.nanmean(sim_vals, axis=-1)
-                    df.loc[:, "p10"] = onp.quantile(sim_vals, 0.1, axis=-1)
-                    df.loc[:, "p50"] = onp.quantile(sim_vals, 0.5, axis=-1)
-                    df.loc[:, "p90"] = onp.quantile(sim_vals, 0.9, axis=-1)
-                    df.loc[:, "IPR"] = df.loc[:, "p90"] - df.loc[:, "p10"]
-                    dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = df
+#     vars_sim = ["theta"]
+#     for location in locations:
+#         for land_cover_scenario in land_cover_scenarios:
+#             for climate_scenario in climate_scenarios:
+#                 for period in periods:
+#                     ds = dict_fluxes_states[location][land_cover_scenario][period][climate_scenario]
+#                     for var_sim in vars_sim:
+#                         dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = {}
+#                         sim_vals = ds[var_sim].isel(y=0).values
+#                         df = pd.DataFrame(index=range(sim_vals.shape[0]), columns=["Avg", "p10", "p50", "p90", "IPR"])
+#                         df.loc[:, "Avg"] = onp.nanmean(sim_vals, axis=-1)
+#                         df.loc[:, "p10"] = onp.quantile(sim_vals, 0.1, axis=-1)
+#                         df.loc[:, "p50"] = onp.quantile(sim_vals, 0.5, axis=-1)
+#                         df.loc[:, "p90"] = onp.quantile(sim_vals, 0.9, axis=-1)
+#                         df.loc[:, "IPR"] = df.loc[:, "p90"] - df.loc[:, "p10"]
+#                         dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = df
 
-vars_sim = [
-    "rt10_s",
-    "rt50_s",
-    "rt90_s",
-    "tt10_transp",
-    "tt50_transp",
-    "tt90_transp",
-    "tt10_q_ss",
-    "tt50_q_ss",
-    "tt90_q_ss",
-]
-vars_sim = ["rt50_s", "tt50_q_ss", "tt50_transp"]
-for location in locations:
-    for land_cover_scenario in land_cover_scenarios:
-        for climate_scenario in climate_scenarios:
-            for period in periods:
-                ds = dict_conc_ages[location][land_cover_scenario][period][climate_scenario]
-                for var_sim in vars_sim:
-                    dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = {}
-                    sim_vals = ds[var_sim].isel(y=0).values
-                    df = pd.DataFrame(index=range(sim_vals.shape[0]), columns=["Avg", "p10", "p50", "p90", "IPR"])
-                    df.loc[:, "Avg"] = onp.nanmean(sim_vals, axis=-1)
-                    # TODO: calculate flux-weighted average
-                    df.loc[:, "p10"] = onp.nanquantile(sim_vals, 0.1, axis=-1)
-                    df.loc[:, "p50"] = onp.nanquantile(sim_vals, 0.5, axis=-1)
-                    df.loc[:, "p90"] = onp.nanquantile(sim_vals, 0.9, axis=-1)
-                    df.loc[:, "IPR"] = df.loc[:, "p90"] - df.loc[:, "p10"]
-                    dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = df
+#     vars_sim = [
+#         "rt10_s",
+#         "rt50_s",
+#         "rt90_s",
+#         "tt10_transp",
+#         "tt50_transp",
+#         "tt90_transp",
+#         "tt10_q_ss",
+#         "tt50_q_ss",
+#         "tt90_q_ss",
+#     ]
+#     for location in locations:
+#         for land_cover_scenario in land_cover_scenarios:
+#             for climate_scenario in climate_scenarios:
+#                 for period in periods:
+#                     ds = dict_conc_ages[location][land_cover_scenario][period][climate_scenario]
+#                     for var_sim in vars_sim:
+#                         dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = {}
+#                         sim_vals = ds[var_sim].isel(y=0).values
+#                         df = pd.DataFrame(index=range(sim_vals.shape[0]), columns=["Avg", "p10", "p50", "p90", "IPR"])
+#                         df.loc[:, "Avg"] = onp.nanmean(sim_vals, axis=-1)
+#                         df.loc[:, "p10"] = onp.nanquantile(sim_vals, 0.1, axis=-1)
+#                         df.loc[:, "p50"] = onp.nanquantile(sim_vals, 0.5, axis=-1)
+#                         df.loc[:, "p90"] = onp.nanquantile(sim_vals, 0.9, axis=-1)
+#                         df.loc[:, "IPR"] = df.loc[:, "p90"] - df.loc[:, "p10"]
+#                         dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = df
 
-vars_sim = ["M_q_ss", "M_transp"]
-for location in locations:
-    for land_cover_scenario in land_cover_scenarios:
-        for climate_scenario in climate_scenarios:
-            for period in periods:
-                ds = dict_conc_ages[location][land_cover_scenario][period][climate_scenario]
-                for var_sim in vars_sim:
-                    dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = {}
-                    sim_vals = ds[var_sim].isel(y=0).values
-                    df = pd.DataFrame(
-                        index=range(sim_vals.shape[0]), columns=["Avg", "Sum", "p10", "p50", "p90", "IPR"]
-                    )
-                    df.loc[:, "Avg"] = onp.nanmean(sim_vals, axis=-1)
-                    df.loc[:, "Sum"] = onp.nansum(sim_vals, axis=-1)
-                    df.loc[:, "p10"] = onp.quantile(onp.cumsum(sim_vals, axis=-1), 0.1, axis=-1)
-                    df.loc[:, "p50"] = onp.quantile(onp.cumsum(sim_vals, axis=-1), 0.5, axis=-1)
-                    df.loc[:, "p90"] = onp.quantile(onp.cumsum(sim_vals, axis=-1), 0.9, axis=-1)
-                    df.loc[:, "IPR"] = df.loc[:, "p90"] - df.loc[:, "p10"]
-                    dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = df
+#     vars_sim = ["M_q_ss", "M_transp"]
+#     for location in locations:
+#         for land_cover_scenario in land_cover_scenarios:
+#             for climate_scenario in climate_scenarios:
+#                 for period in periods:
+#                     ds = dict_conc_ages[location][land_cover_scenario][period][climate_scenario]
+#                     for var_sim in vars_sim:
+#                         dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = {}
+#                         sim_vals = ds[var_sim].isel(y=0).values
+#                         df = pd.DataFrame(
+#                             index=range(sim_vals.shape[0]), columns=["Avg", "Sum", "p10", "p50", "p90", "IPR"]
+#                         )
+#                         df.loc[:, "Avg"] = onp.nanmean(sim_vals, axis=-1)
+#                         df.loc[:, "Sum"] = onp.nansum(sim_vals, axis=-1)
+#                         df.loc[:, "p10"] = onp.quantile(onp.cumsum(sim_vals, axis=-1), 0.1, axis=-1)
+#                         df.loc[:, "p50"] = onp.quantile(onp.cumsum(sim_vals, axis=-1), 0.5, axis=-1)
+#                         df.loc[:, "p90"] = onp.quantile(onp.cumsum(sim_vals, axis=-1), 0.9, axis=-1)
+#                         df.loc[:, "IPR"] = df.loc[:, "p90"] - df.loc[:, "p10"]
+#                         dict_statistics[location][land_cover_scenario][climate_scenario][period][var_sim] = df
 
-# calculate deltas of mean and interpercentile range for near future and far future
-vars_sim = ["transp", "q_ss", "M_q_ss", "M_transp"]
-for location in locations:
-    dict_deltas[location] = {}
-    for land_cover_scenario in land_cover_scenarios:
-        dict_deltas[location][land_cover_scenario] = {}
-        for climate_scenario in climate_scenarios:
-            dict_deltas[location][land_cover_scenario][climate_scenario] = {}
-            for var_sim in vars_sim:
-                dict_deltas[location][land_cover_scenario][climate_scenario][var_sim] = {}
-                df_statistics_ref = dict_statistics[location][land_cover_scenario][climate_scenario]["1985-2005"][
-                    var_sim
-                ]
-                df_statistics_nf = dict_statistics[location][land_cover_scenario][climate_scenario]["2040-2060"][
-                    var_sim
-                ]
-                df_statistics_ff = dict_statistics[location][land_cover_scenario][climate_scenario]["2080-2100"][
-                    var_sim
-                ]
-                df_deltas = pd.DataFrame(
-                    index=df_statistics_ref.index,
-                    columns=["dAvg_nf", "dSum_nf", "dIPR_nf", "dAvg_ff", "dSum_ff", "dIPR_ff"],
-                )
-                df_deltas.loc[:, "dAvg_nf"] = (
-                    (df_statistics_nf["Avg"].values - df_statistics_ref["Avg"].values) / df_statistics_ref["Avg"].values
-                ) * 100
-                df_deltas.loc[:, "dAvg_ff"] = (
-                    (df_statistics_ff["Avg"].values - df_statistics_ref["Avg"].values) / df_statistics_ref["Avg"].values
-                ) * 100
-                df_deltas.loc[:, "dSum_nf"] = (
-                    (df_statistics_nf["Sum"].values - df_statistics_ref["Sum"].values) / df_statistics_ref["Sum"].values
-                ) * 100
-                df_deltas.loc[:, "dSum_ff"] = (
-                    (df_statistics_ff["Sum"].values - df_statistics_ref["Sum"].values) / df_statistics_ref["Sum"].values
-                ) * 100
-                df_deltas.loc[:, "dIPR_nf"] = (
-                    (df_statistics_nf["IPR"].values - df_statistics_ref["IPR"].values) / df_statistics_ref["IPR"].values
-                ) * 100
-                df_deltas.loc[:, "dIPR_ff"] = (
-                    (df_statistics_ff["IPR"].values - df_statistics_ref["IPR"].values) / df_statistics_ref["IPR"].values
-                ) * 100
-                dict_deltas[location][land_cover_scenario][climate_scenario][var_sim] = df_deltas
+#     # calculate deltas of mean and interpercentile range for near future and far future
+#     vars_sim = ["transp", "q_ss", "M_q_ss", "M_transp"]
+#     for location in locations:
+#         dict_deltas[location] = {}
+#         for land_cover_scenario in land_cover_scenarios:
+#             dict_deltas[location][land_cover_scenario] = {}
+#             for climate_scenario in climate_scenarios:
+#                 dict_deltas[location][land_cover_scenario][climate_scenario] = {}
+#                 for var_sim in vars_sim:
+#                     dict_deltas[location][land_cover_scenario][climate_scenario][var_sim] = {}
+#                     df_statistics_ref = dict_statistics[location][land_cover_scenario][climate_scenario]["1985-2005"][
+#                         var_sim
+#                     ]
+#                     df_statistics_nf = dict_statistics[location][land_cover_scenario][climate_scenario]["2040-2060"][
+#                         var_sim
+#                     ]
+#                     df_statistics_ff = dict_statistics[location][land_cover_scenario][climate_scenario]["2080-2100"][
+#                         var_sim
+#                     ]
+#                     df_deltas = pd.DataFrame(
+#                         index=df_statistics_ref.index,
+#                         columns=["dAvg_nf", "dSum_nf", "dIPR_nf", "dAvg_ff", "dSum_ff", "dIPR_ff"],
+#                     )
+#                     df_deltas.loc[:, "dAvg_nf"] = (
+#                         (df_statistics_nf["Avg"].values - df_statistics_ref["Avg"].values) / df_statistics_ref["Avg"].values
+#                     ) * 100
+#                     df_deltas.loc[:, "dAvg_ff"] = (
+#                         (df_statistics_ff["Avg"].values - df_statistics_ref["Avg"].values) / df_statistics_ref["Avg"].values
+#                     ) * 100
+#                     df_deltas.loc[:, "dSum_nf"] = (
+#                         (df_statistics_nf["Sum"].values - df_statistics_ref["Sum"].values) / df_statistics_ref["Sum"].values
+#                     ) * 100
+#                     df_deltas.loc[:, "dSum_ff"] = (
+#                         (df_statistics_ff["Sum"].values - df_statistics_ref["Sum"].values) / df_statistics_ref["Sum"].values
+#                     ) * 100
+#                     df_deltas.loc[:, "dIPR_nf"] = (
+#                         (df_statistics_nf["IPR"].values - df_statistics_ref["IPR"].values) / df_statistics_ref["IPR"].values
+#                     ) * 100
+#                     df_deltas.loc[:, "dIPR_ff"] = (
+#                         (df_statistics_ff["IPR"].values - df_statistics_ref["IPR"].values) / df_statistics_ref["IPR"].values
+#                     ) * 100
+#                     dict_deltas[location][land_cover_scenario][climate_scenario][var_sim] = df_deltas
 
-vars_sim = ["theta", "rt50_s", "tt50_q_ss", "tt50_transp"]
-for location in locations:
-    for land_cover_scenario in land_cover_scenarios:
-        for climate_scenario in climate_scenarios:
-            for var_sim in vars_sim:
-                dict_deltas[location][land_cover_scenario][climate_scenario][var_sim] = {}
-                df_statistics_ref = dict_statistics[location][land_cover_scenario][climate_scenario]["1985-2005"][
-                    var_sim
-                ]
-                df_statistics_nf = dict_statistics[location][land_cover_scenario][climate_scenario]["2040-2060"][
-                    var_sim
-                ]
-                df_statistics_ff = dict_statistics[location][land_cover_scenario][climate_scenario]["2080-2100"][
-                    var_sim
-                ]
-                df_deltas = pd.DataFrame(
-                    index=df_statistics_ref.index, columns=["dAvg_nf", "dIPR_nf", "dAvg_ff", "dIPR_ff"]
-                )
-                df_deltas.loc[:, "dAvg_nf"] = (
-                    (df_statistics_nf["Avg"].values - df_statistics_ref["Avg"].values) / df_statistics_ref["Avg"].values
-                ) * 100
-                df_deltas.loc[:, "dAvg_ff"] = (
-                    (df_statistics_ff["Avg"].values - df_statistics_ref["Avg"].values) / df_statistics_ref["Avg"].values
-                ) * 100
-                df_deltas.loc[:, "dIPR_nf"] = (
-                    (df_statistics_nf["IPR"].values - df_statistics_ref["IPR"].values) / df_statistics_ref["IPR"].values
-                ) * 100
-                df_deltas.loc[:, "dIPR_ff"] = (
-                    (df_statistics_ff["IPR"].values - df_statistics_ref["IPR"].values) / df_statistics_ref["IPR"].values
-                ) * 100
-                dict_deltas[location][land_cover_scenario][climate_scenario][var_sim] = df_deltas
+#     vars_sim = ["theta", "rt50_s", "tt50_q_ss", "tt50_transp"]
+#     for location in locations:
+#         for land_cover_scenario in land_cover_scenarios:
+#             for climate_scenario in climate_scenarios:
+#                 for var_sim in vars_sim:
+#                     dict_deltas[location][land_cover_scenario][climate_scenario][var_sim] = {}
+#                     df_statistics_ref = dict_statistics[location][land_cover_scenario][climate_scenario]["1985-2005"][
+#                         var_sim
+#                     ]
+#                     df_statistics_nf = dict_statistics[location][land_cover_scenario][climate_scenario]["2040-2060"][
+#                         var_sim
+#                     ]
+#                     df_statistics_ff = dict_statistics[location][land_cover_scenario][climate_scenario]["2080-2100"][
+#                         var_sim
+#                     ]
+#                     df_deltas = pd.DataFrame(
+#                         index=df_statistics_ref.index, columns=["dAvg_nf", "dIPR_nf", "dAvg_ff", "dIPR_ff"]
+#                     )
+#                     df_deltas.loc[:, "dAvg_nf"] = (
+#                         (df_statistics_nf["Avg"].values - df_statistics_ref["Avg"].values) / df_statistics_ref["Avg"].values
+#                     ) * 100
+#                     df_deltas.loc[:, "dAvg_ff"] = (
+#                         (df_statistics_ff["Avg"].values - df_statistics_ref["Avg"].values) / df_statistics_ref["Avg"].values
+#                     ) * 100
+#                     df_deltas.loc[:, "dIPR_nf"] = (
+#                         (df_statistics_nf["IPR"].values - df_statistics_ref["IPR"].values) / df_statistics_ref["IPR"].values
+#                     ) * 100
+#                     df_deltas.loc[:, "dIPR_ff"] = (
+#                         (df_statistics_ff["IPR"].values - df_statistics_ref["IPR"].values) / df_statistics_ref["IPR"].values
+#                     ) * 100
+#                     dict_deltas[location][land_cover_scenario][climate_scenario][var_sim] = df_deltas
 
 # vars_sim = ['transp', 'q_ss', 'M_q_ss', 'M_transp']
 # deltas = ['dSum', 'dIPR']
@@ -891,8 +1129,8 @@ for location in locations:
 #                     axes[i, j].tick_params(axis='x', rotation=33)
 #                 axes[i, 0].set_ylabel(f'{Locations[i]}\n{_lab[delta]} {_lab[var_sim]} [%]')
 #             fig.tight_layout()
-#             file = base_path_figs / f"{var_sim}_{delta}_{soil_depth}_boxplot.png"
-#             fig.savefig(file, dpi=250)
+#             file = base_path_figs / "distributions" / f"{var_sim}_{delta}_{soil_depth}_boxplot.png"
+#             fig.savefig(file, dpi=300)
 #             plt.close('all')
 
 # vars_sim = ['transp', 'q_ss', 'theta', 'rt50_s', 'tt50_q_ss', 'tt50_transp', 'M_q_ss', 'M_transp']
@@ -901,7 +1139,7 @@ for location in locations:
 #     for delta in deltas:
 #         for soil_depth in soil_depths:
 #             cond = _soil_depths[soil_depth]
-#             fig, axes = plt.subplots(len(locations), len(land_cover_scenarios), sharex='col', sharey='row', figsize=(6, 4.5))
+#             fig, axes = plt.subplots(len(locations), len(land_cover_scenarios), sharex='col', sharey=True, figsize=(6, 4.5))
 #             for i, location in enumerate(locations):
 #                 for j, land_cover_scenario in enumerate(land_cover_scenarios):
 #                     df_deltas_canesm_nf = dict_deltas[location][land_cover_scenario]['CCCma-CanESM2_CCLM4-8-17'][var_sim].loc[:, ['dAvg_nf', 'dIPR_nf']]
@@ -932,8 +1170,8 @@ for location in locations:
 #                     axes[i, j].tick_params(axis='x', rotation=33)
 #                 axes[i, 0].set_ylabel(f'{Locations[i]}\n{_lab[delta]} {_lab[var_sim]} [%]')
 #             fig.tight_layout()
-#             file = base_path_figs / f"{var_sim}_{delta}_{soil_depth}_boxplot.png"
-#             fig.savefig(file, dpi=250)
+#             file = base_path_figs / "distributions" / f"{var_sim}_{delta}_{soil_depth}_boxplot.png"
+#             fig.savefig(file, dpi=300)
 #             plt.close('all')
 
 # # plot distributions of single sites
@@ -961,8 +1199,8 @@ for location in locations:
 #                     axes[-1, j].set_xlabel(f'{_lab_unit2[var_sim]}')
 #                 axes[i, 0].set_ylabel('Density [-]')
 #             fig.tight_layout()
-#             file = base_path_figs / f"{var_sim}_kde_{climate_scenario}_{x}.png"
-#             fig.savefig(file, dpi=250)
+#             file = base_path_figs / "distributions" / f"{var_sim}_kde_{climate_scenario}_{x}.png"
+#             fig.savefig(file, dpi=300)
 #             plt.close('all')
 
 # vars_sim = ['theta']
@@ -988,238 +1226,610 @@ for location in locations:
 #                     axes[-1, j].set_xlabel(f'{_lab_unit2[var_sim]}')
 #                 axes[i, 0].set_ylabel('Density [-]')
 #             fig.tight_layout()
-#             file = base_path_figs / f"{var_sim}_kde_{climate_scenario}_{x}.png"
-#             fig.savefig(file, dpi=250)
+#             file = base_path_figs / "distributions" / f"{var_sim}_kde_{climate_scenario}_{x}.png"
+#             fig.savefig(file, dpi=300)
 #             plt.close('all')
 
-# identify impacted sites based on GLM
+# # identify impacted sites based on GLM
 # for param in ['theta_pwp', 'theta_ufc', 'theta_ac', 'ks']:
 #     vals = df_params.loc[:, param].values
 #     fig, ax = plt.subplots(figsize=(3, 3))
 #     ax.hist(vals, bins=25, color='black')
 #     ax.set_xlabel(f'{_lab_unit1[param]}')
 #     fig.tight_layout()
-#     file = base_path_figs / f"{param}_hist.png"
-#     fig.savefig(file, dpi=250)
+#     file = base_path_figs / "glm_parameters" / f"{param}_hist.png"
+#     fig.savefig(file, dpi=300)
 
-dict_glm = {}
-vars_sim = ["transp", "q_ss", "theta", "rt50_s", "tt50_q_ss", "tt50_transp"]
-deltas = ["dAvg", "dIPR"]
-vars_sim = ["q_ss"]
-deltas = ["dAvg"]
-for location in locations:
-    dict_glm[location] = {}
-    for land_cover_scenario in land_cover_scenarios:
-        dict_glm[location][land_cover_scenario] = {}
-        for climate_scenario in climate_scenarios:
-            dict_glm[location][land_cover_scenario][climate_scenario] = {}
-            for var_sim in vars_sim:
-                dict_glm[location][land_cover_scenario][climate_scenario][var_sim] = {}
-                for delta in deltas:
-                    dict_glm[location][land_cover_scenario][climate_scenario][var_sim][delta] = {}
-                    for soil_depth in soil_depths:
-                        dict_glm[location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth] = {}
-                        cond = _soil_depths[soil_depth]
-                        for future in ["nf", "ff"]:
-                            dict_glm[location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][
-                                future
-                            ] = {}
-                            y = (
-                                dict_deltas[location][land_cover_scenario][climate_scenario][var_sim]
-                                .loc[cond, f"{delta}_{future}"]
-                                .to_frame()
-                            )
-                            y = pd.DataFrame(data=y, dtype=onp.float64)
-                            x = df_params.loc[cond, "theta_pwp":]
-                            x = sm.add_constant(x)
-                            # standardize the parameters
-                            x_std = x.copy()
-                            for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
-                                x_std.loc[:, param] = (x_std.loc[:, param] - x_std.loc[:, param].mean()) / x_std.loc[
-                                    :, param
-                                ].std()
+# glm_formulas = {"interaction_theta": "y ~ theta_pwp * theta_ufc * theta_ac + ks",
+#                 "no_interaction": "y ~ theta_pwp + theta_ufc + theta_ac + ks",
+#                 "theta": "y ~ theta_pwp + theta_ufc + theta_ac",
+#                 "theta_pwp": "y ~ theta_pwp",
+#                 "theta_ufc": "y ~ theta_ufc",
+#                 "theta_ac": "y ~ theta_ac",
+#                 "ks": "y ~ ks"}
 
-                            # fit the GLM model
-                            glm = sm.GLM(y, x_std, family=sm.families.Gaussian())
-                            res = glm.fit()
-                            nobs = res.nobs
-                            yhat = res.mu
+# vars_sim = ["transp", "q_ss", "theta", "rt50_s", "tt50_q_ss", "tt50_transp"]
+# deltas = ["dAvg", "dIPR"]
+# if not os.path.exists(glm_file):
+#     dict_glm = {}
+#     for glm_key in glm_formulas.keys():
+#         dict_glm[glm_key] = {}
+#         for location in locations:
+#             dict_glm[glm_key][location] = {}
+#             for land_cover_scenario in land_cover_scenarios:
+#                 dict_glm[glm_key][location][land_cover_scenario] = {}
+#                 for climate_scenario in climate_scenarios:
+#                     dict_glm[glm_key][location][land_cover_scenario][climate_scenario] = {}
+#                     for var_sim in vars_sim:
+#                         dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim] = {}
+#                         for delta in deltas:
+#                             dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][delta] = {}
+#                             for soil_depth in soil_depths:
+#                                 dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth] = {}
+#                                 cond = _soil_depths[soil_depth]
+#                                 for future in ["nf", "ff"]:
+#                                     dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][
+#                                         future
+#                                     ] = {}
+#                                     y = (
+#                                         dict_deltas[location][land_cover_scenario][climate_scenario][var_sim]
+#                                         .loc[cond, f"{delta}_{future}"]
+#                                         .to_frame()
+#                                     )
+#                                     y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                     x = df_params.loc[cond, "theta_pwp":]
+#                                     x = sm.add_constant(x)
+#                                     # standardize the parameters
+#                                     x_std = x.copy()
+#                                     for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                         x_std.loc[:, param] = (x_std.loc[:, param] - x_std.loc[:, param].mean()) / x_std.loc[
+#                                             :, param
+#                                         ].std()
 
-                            dict_glm[location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][
-                                future
-                            ]["params"] = res.params
-                            dict_glm[location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][
-                                future
-                            ]["RMSE"] = smem.rmse(y, yhat)
-                            ll_values = glm.loglike(res.params, scale=res.scale)
-                            dict_glm[location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][
-                                future
-                            ]["AIC"] = smem.aic(ll_values, nobs, res.params.shape[0])
-                            dict_glm[location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][
-                                future
-                            ]["AICC"] = smem.aicc(ll_values, nobs, res.params.shape[0])
-                            dict_glm[location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][
-                                future
-                            ]["BIC"] = smem.bic(ll_values, nobs, res.params.shape[0])
+#                                     dta = x_std.copy()
+#                                     dta.loc[:, "y"] = y.values.flatten()
 
-                            # fig, ax = plt.subplots(figsize=(3, 3))
-                            # ax.scatter(yhat, y, color='black', s=4)
-                            # line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
-                            # abline_plot(model_results=line_fit, ax=ax, color='black')
-                            # ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]')
-                            # ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM) [%]')
-                            # fig.tight_layout()
-                            # file = base_path_figs / f"{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_line_fit.png"
-                            # fig.savefig(file, dpi=250)
+#                                     # fit the GLM model
+#                                     glm = smf.glm(formula=glm_formulas[glm_key], data=dta, family=sm.families.Gaussian())
+#                                     res = glm.fit()
+#                                     nobs = res.nobs
+#                                     yhat = res.mu
 
-                            # fig, ax = plt.subplots(figsize=(3, 3))
-                            # ax.scatter(yhat, res.resid_pearson, color='black', s=4)
-                            # ax.set_ylabel(f'{_lab_unit1[var_sim]} (RoGeR) [%]')
-                            # ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM)')
-                            # fig.tight_layout()
-                            # file = base_path_figs / f"{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_residuals.png"
-                            # fig.savefig(file, dpi=250)
+#                                     if glm_key == "interaction_theta":
+#                                         ll = ['theta_pwp', 'theta_ufc', 'theta_ac', 'theta_pwp:theta_ufc', 'theta_pwp:theta_ac', 'theta_ufc:theta_ac', 'theta_pwp:theta_ufc:theta_ac', 'ks']
+#                                         params = res.params.to_frame().T.loc[:, ll]
+#                                     else:
+#                                         params = res.params.to_frame().T
 
-                            # fig, ax = plt.subplots(figsize=(3, 3))
-                            # ax.scatter(x.loc[:, 'theta_ufc'].values, y, color='black', s=4)
-                            # ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} [%]')
-                            # ax.set_xlabel(f'{_lab_unit1["theta_ufc"]}')
-                            # fig.tight_layout()
-                            # file = base_path_figs / f"{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_theta_ufc.png"
-                            # fig.savefig(file, dpi=250)
+#                                     dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][
+#                                         future
+#                                     ]["params"] = params / onp.sum(onp.abs(params.values.flatten())
+#                                     y = y.values.flatten()
+#                                     dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][
+#                                         future
+#                                     ]["MAE"] = smem.meanabs(y, yhat)
+#                                     dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][
+#                                         future
+#                                     ]["MEAE"] = smem.medianabs(y, yhat)
+#                                     dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][
+#                                         future
+#                                     ]["RMSE"] = smem.rmse(y, yhat)
+#                                     ll_values = glm.loglike(res.params, scale=res.scale)
+#                                     dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][
+#                                         future
+#                                     ]["AIC"] = smem.aic(ll_values, nobs, res.params.shape[0])
+#                                     dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][
+#                                         future
+#                                     ]["AICC"] = smem.aicc(ll_values, nobs, res.params.shape[0])
+#                                     dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][
+#                                         future
+#                                     ]["VARE"] = smem.vare(y, yhat)
 
-                            # fig, ax = plt.subplots(figsize=(3, 3))
-                            # ax.scatter(x.loc[:, 'theta_ac'].values, y, color='black', s=4)
-                            # ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} [%]')
-                            # ax.set_xlabel(f'{_lab_unit1["theta_ac"]}')
-                            # fig.tight_layout()
-                            # file = base_path_figs / f"{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_theta_ac.png"
-                            # fig.savefig(file, dpi=250)
+#                                     fig, ax = plt.subplots(figsize=(3, 3))
+#                                     ax.scatter(yhat, y, color='black', s=4)
+#                                     line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
+#                                     abline_plot(model_results=line_fit, ax=ax, color='black')
+#                                     ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]')
+#                                     ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM) [%]')
+#                                     fig.tight_layout()
+#                                     file = base_path_figs / "residuals" / f"{glm_key}_{location}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_line_fit.png"
+#                                     fig.savefig(file, dpi=300)
 
-                            # fig, ax = plt.subplots(figsize=(3, 3))
-                            # ax.scatter(x.loc[:, 'theta_pwp'].values, y, color='black', s=4)
-                            # ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} [%]')
-                            # ax.set_xlabel(f'{_lab_unit1["theta_pwp"]}')
-                            # fig.tight_layout()
-                            # file = base_path_figs / f"{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_theta_pwp.png"
-                            # fig.savefig(file, dpi=250)
+#                                     fig, ax = plt.subplots(figsize=(3, 3))
+#                                     ax.scatter(yhat, res.resid_pearson, color='black', s=4)
+#                                     ax.set_ylabel(f'{_lab_unit1[var_sim]} (RoGeR) [%]')
+#                                     ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM)')
+#                                     fig.tight_layout()
+#                                     file = base_path_figs / "residuals" / f"{glm_key}_{location}_{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_residuals.png"
+#                                     fig.savefig(file, dpi=300)
 
-                            # fig, ax = plt.subplots(figsize=(3, 3))
-                            # ax.scatter(x.loc[:, 'ks'].values, y, color='black', s=4)
-                            # ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} [%]')
-                            # ax.set_xlabel(f'{_lab_unit1["ks"]}')
-                            # fig.tight_layout()
-                            # file = base_path_figs / f"{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_ks.png"
-                            # fig.savefig(file, dpi=250)
+#                                     fig, ax = plt.subplots(figsize=(3, 3))
+#                                     ax.scatter(x.loc[:, 'theta_ufc'].values, y, color='black', s=4)
+#                                     ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} [%]')
+#                                     ax.set_xlabel(f'{_lab_unit1["theta_ufc"]}')
+#                                     fig.tight_layout()
+#                                     file = base_path_figs / "residuals" / f"{glm_key}_{location}_{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_theta_ufc.png"
+#                                     fig.savefig(file, dpi=300)
 
-                            # fig, ax = plt.subplots(figsize=(3, 3))
-                            # resid = res.resid_deviance.copy()
-                            # resid_std = stats.zscore(resid)
-                            # ax.hist(resid_std, bins=25, color='black')
-                            # ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM)')
-                            # fig.tight_layout()
-                            # file = base_path_figs / f"{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_residuals_hist.png"
-                            # fig.savefig(file, dpi=250)
-                            # plt.close('all')
+#                                     fig, ax = plt.subplots(figsize=(3, 3))
+#                                     ax.scatter(x.loc[:, 'theta_ac'].values, y, color='black', s=4)
+#                                     ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} [%]')
+#                                     ax.set_xlabel(f'{_lab_unit1["theta_ac"]}')
+#                                     fig.tight_layout()
+#                                     file = base_path_figs / "residuals" / f"{glm_key}_{location}_{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_theta_ac.png"
+#                                     fig.savefig(file, dpi=300)
 
-import pickle
-# Store data (serialize)
-with open(base_path_figs / 'glm_results.pkl', 'wb') as handle:
-    pickle.dump(dict_glm, handle, protocol=pickle.HIGHEST_PROTOCOL)
+#                                     fig, ax = plt.subplots(figsize=(3, 3))
+#                                     ax.scatter(x.loc[:, 'theta_pwp'].values, y, color='black', s=4)
+#                                     ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} [%]')
+#                                     ax.set_xlabel(f'{_lab_unit1["theta_pwp"]}')
+#                                     fig.tight_layout()
+#                                     file = base_path_figs / "residuals" / f"{glm_key}_{location}_{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_theta_pwp.png"
+#                                     fig.savefig(file, dpi=300)
 
-# # Load data (deserialize)
-# with open(base_path_figs / 'glm_results.pkl', 'rb') as handle:
-#     dict_glm = pickle.load(handle)
+#                                     fig, ax = plt.subplots(figsize=(3, 3))
+#                                     ax.scatter(x.loc[:, 'ks'].values, y, color='black', s=4)
+#                                     ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} [%]')
+#                                     ax.set_xlabel(f'{_lab_unit1["ks"]}')
+#                                     fig.tight_layout()
+#                                     file = base_path_figs / "residuals" / f"{glm_key}_{location}_{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_ks.png"
+#                                     fig.savefig(file, dpi=300)
 
+#                                     fig, ax = plt.subplots(figsize=(3, 3))
+#                                     resid = res.resid_deviance.copy()
+#                                     resid_std = stats.zscore(resid)
+#                                     ax.hist(resid_std, bins=25, color='black')
+#                                     ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM)')
+#                                     fig.tight_layout()
+#                                     file = base_path_figs / "residuals" / f"{glm_key}_{location}_{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_residuals_hist.png"
+#                                     fig.savefig(file, dpi=300)
+#                                     plt.close('all')
+
+#     # Store data (serialize)
+#     with open(glm_file, 'wb') as handle:
+#         pickle.dump(dict_glm, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# else:
+#     # Load data (deserialize)
+#     with open(glm_file, 'rb') as handle:
+#         dict_glm = pickle.load(handle)
+
+# glm_key = "no_interaction"
+# vars_sim = ["transp", "q_ss", "theta", "rt50_s", "tt50_q_ss", "tt50_transp"]
+# deltas = ["dAvg"]
 # for var_sim in vars_sim:
 #     for delta in deltas:
 #         for soil_depth in soil_depths:
 #             cond = _soil_depths[soil_depth]
-#             for future in ["nf", "ff"]:
-#                 fig, axes = plt.subplots(
-#                     len(locations), len(land_cover_scenarios), sharex="col", sharey="row", figsize=(6, 4.5)
-#                 )
-#                 for i, location in enumerate(locations):
-#                     for j, land_cover_scenario in enumerate(land_cover_scenarios):
-#                         values = dict_glm[location][land_cover_scenario]["CCCma-CanESM2_CCLM4-8-17"][var_sim][delta][
-#                             soil_depth
-#                         ][future]["params"][1:]
-#                         df_params_canesm = pd.DataFrame(index=range(len(values)), columns=["value", "Parameter"])
-#                         df_params_canesm.loc[:, "value"] = values
-#                         df_params_canesm.loc[:, "Parameter"] = [
-#                             r"$\theta_{pwp}$",
-#                             r"$\theta_{ufc}$",
-#                             r"$\theta_{ac}$",
-#                             r"$k_s$",
-#                         ]
-#                         df_params_canesm.loc[:, "Climate model"] = "CCCma-CanESM2_CCLM4-8-17"
+#             fig, axes = plt.subplots(
+#                 len(locations), len(land_cover_scenarios), sharex=True, sharey=True, figsize=(6, 4.5)
+#             )
+#             for i, location in enumerate(locations):
+#                 for j, land_cover_scenario in enumerate(land_cover_scenarios):
+#                     values_nf = dict_glm[glm_key][location][land_cover_scenario]["CCCma-CanESM2_CCLM4-8-17"][var_sim][delta][
+#                         soil_depth
+#                     ]["nf"]["params"].values.flatten()[1:]
+#                     values_ff = dict_glm[glm_key][location][land_cover_scenario]["CCCma-CanESM2_CCLM4-8-17"][var_sim][delta][
+#                         soil_depth
+#                     ]["ff"]["params"].values.flatten()[1:]
+#                     df_params_canesm = pd.DataFrame(index=range(8), columns=["value", "Parameter"])
+#                     values = []
+#                     for ii in range(4):
+#                         values.append(values_nf[ii])
+#                         values.append(values_ff[ii])
+#                     df_params_canesm.loc[:, "value"] = values
+#                     df_params_canesm.loc[:, "Parameter"] = [
+#                         r"$\theta_{pwp}$ (NF)",
+#                         r"$\theta_{pwp}$ (FF)",
+#                         r"$\theta_{ufc}$ (NF)",
+#                         r"$\theta_{ufc}$ (FF)",
+#                         r"$\theta_{ac}$ (NF)",
+#                         r"$\theta_{ac}$ (FF)",
+#                         r"$k_s$ (NF)",
+#                         r"$k_s$ (FF)",
+#                     ]
+#                     df_params_canesm.loc[:, "Climate model"] = "CCCma-CanESM2_CCLM4-8-17"
 
-#                         values = dict_glm[location][land_cover_scenario]["MPI-M-MPI-ESM-LR_RCA4"][var_sim][delta][
-#                             soil_depth
-#                         ][future]["params"][1:]
-#                         df_params_mpiesm = pd.DataFrame(index=range(len(values)), columns=["value", "Parameter"])
-#                         df_params_mpiesm.loc[:, "value"] = values
-#                         df_params_mpiesm.loc[:, "Parameter"] = [
-#                             r"$\theta_{pwp}$",
-#                             r"$\theta_{ufc}$",
-#                             r"$\theta_{ac}$",
-#                             r"$k_s$",
-#                         ]
-#                         df_params_mpiesm.loc[:, "Climate model"] = "MPI-M-MPI-ESM-LR_RCA4"
+#                     values_nf = dict_glm[glm_key][location][land_cover_scenario]["MPI-M-MPI-ESM-LR_RCA4"][var_sim][delta][
+#                         soil_depth
+#                     ]["nf"]["params"].values.flatten()[1:]
+#                     values_ff = dict_glm[glm_key][location][land_cover_scenario]["MPI-M-MPI-ESM-LR_RCA4"][var_sim][delta][
+#                         soil_depth
+#                     ]["ff"]["params"].values.flatten()[1:]
+#                     df_params_mpiesm = pd.DataFrame(index=range(8), columns=["value", "Parameter"])
+#                     values = []
+#                     for ii in range(4):
+#                         values.append(values_nf[ii])
+#                         values.append(values_ff[ii])
+#                     df_params_mpiesm.loc[:, "value"] = values
+#                     df_params_mpiesm.loc[:, "Parameter"] = [
+#                         r"$\theta_{pwp}$ (NF)",
+#                         r"$\theta_{pwp}$ (FF)",
+#                         r"$\theta_{ufc}$ (NF)",
+#                         r"$\theta_{ufc}$ (FF)",
+#                         r"$\theta_{ac}$ (NF)",
+#                         r"$\theta_{ac}$ (FF)",
+#                         r"$k_s$ (NF)",
+#                         r"$k_s$ (FF)",
+#                     ]
+#                     df_params_mpiesm.loc[:, "Climate model"] = "MPI-M-MPI-ESM-LR_RCA4"
 
-#                         df_params = pd.concat([df_params_canesm, df_params_mpiesm], ignore_index=True)
-#                         sns.barplot(
-#                             x="Parameter",
-#                             y="value",
-#                             hue="Climate model",
-#                             palette=["red", "blue"],
-#                             data=df_params,
-#                             ax=axes[i, j],
-#                             errorbar=None
-#                         )
-#                         axes[i, j].legend([], [], frameon=False)
-#                         axes[0, j].set_title(f"{Land_cover_scenarios[j]}")
-#                         axes[i, j].set_ylabel("")
-#                         axes[i, j].set_xlabel("")
-#                         axes[i, j].tick_params(axis="x", rotation=33)
-#                     axes[i, 0].set_ylabel(f"{Locations[i]}\n{_lab[delta]} {_lab[var_sim]} [%]")
-#                 fig.tight_layout()
-#                 file = base_path_figs / f"{var_sim}_{delta}_{soil_depth}_{future}_barplot.png"
-#                 fig.savefig(file, dpi=250)
-#                 plt.close("all")
+#                     df_params = pd.concat([df_params_canesm, df_params_mpiesm], ignore_index=True)
+#                     sns.barplot(
+#                         x="Parameter",
+#                         y="value",
+#                         hue="Climate model",
+#                         palette=["red", "blue"],
+#                         data=df_params,
+#                         ax=axes[i, j],
+#                         errorbar=None
+#                     )
+#                     axes[i, j].legend([], [], frameon=False)
+#                     axes[0, j].set_title(f"{Land_cover_scenarios[j]}")
+#                     axes[i, j].set_ylabel("")
+#                     axes[i, j].set_xlabel("")
+#                     axes[i, j].tick_params(axis="x", rotation=90)
+#                 axes[i, 0].set_ylabel(f"{Locations[i]}\n{_lab[delta]} {_lab[var_sim]}")
+#             fig.tight_layout()
+#             file = base_path_figs / "glm_parameters" / f"{glm_key}_{var_sim}_{delta}_{soil_depth}_barplot.png"
+#             fig.savefig(file, dpi=300)
+#             plt.close("all")
 
-
-# norm = mpl.colors.Normalize(vmin=-1, vmax=1)
+# glm_key = "interaction_theta"
+# vars_sim = ["transp", "q_ss", "theta", "rt50_s", "tt50_q_ss", "tt50_transp"]
+# deltas = ["dAvg"]
 # for var_sim in vars_sim:
 #     for delta in deltas:
 #         for soil_depth in soil_depths:
 #             cond = _soil_depths[soil_depth]
-#             for future in ['nf', 'ff']:
+#             fig, axes = plt.subplots(
+#                 len(locations), len(land_cover_scenarios), sharex=True, sharey=True, figsize=(6, 4.5)
+#             )
+#             for i, location in enumerate(locations):
+#                 for j, land_cover_scenario in enumerate(land_cover_scenarios):
+#                     values_nf = dict_glm[glm_key][location][land_cover_scenario]["CCCma-CanESM2_CCLM4-8-17"][var_sim][delta][
+#                         soil_depth
+#                     ]["nf"]["params"].values.flatten()[1:]
+#                     values_ff = dict_glm[glm_key][location][land_cover_scenario]["CCCma-CanESM2_CCLM4-8-17"][var_sim][delta][
+#                         soil_depth
+#                     ]["ff"]["params"].values.flatten()[1:]
+#                     df_params_canesm = pd.DataFrame(index=range(8), columns=["value", "Parameter"])
+#                     values = []
+#                     for ii in range(8):
+#                         values.append(values_nf[ii])
+#                         values.append(values_ff[ii])
+#                     df_params_canesm.loc[:, "value"] = values
+#                     df_params_canesm.loc[:, "Parameter"] = [
+#                         r'$\theta_{pwp}$ (NF)',
+#                         r'$\theta_{pwp}$ (FF)',
+#                         r'$\theta_{ufc}$ (NF)',
+#                         r'$\theta_{ufc}$ (FF)',
+#                         r'$\theta_{ac}$ (NF)',
+#                         r'$\theta_{ac}$ (FF)',
+#                         r'$\theta_{pwp}$ x $\theta_{ufc}$ (NF)',
+#                         r'$\theta_{pwp}$ x $\theta_{ufc}$ (FF)',
+#                         r'$\theta_{pwp}$ x $\theta_{ac}$ (NF)',
+#                         r'$\theta_{pwp}$ x $\theta_{ac}$ (FF)',
+#                         r'$\theta_{ufc}$ x $\theta_{ac}$ (NF)',
+#                         r'$\theta_{ufc}$ x $\theta_{ac}$ (FF)',
+#                         r'$\theta_{pwp}$ x $\theta_{ufc}$ x $\theta_{ac}$ (NF)',
+#                         r'$\theta_{pwp}$ x $\theta_{ufc}$ x $\theta_{ac}$ (FF)',
+#                         r'$k_s$ (NF)',
+#                         r'$k_s$ (FF)',
+#                     ]
+#                     df_params_canesm.loc[:, "Climate model"] = "CCCma-CanESM2_CCLM4-8-17"
+
+#                     values_nf = dict_glm[glm_key][location][land_cover_scenario]["MPI-M-MPI-ESM-LR_RCA4"][var_sim][delta][
+#                         soil_depth
+#                     ]["nf"]["params"].values.flatten()[1:]
+#                     values_ff = dict_glm[glm_key][location][land_cover_scenario]["MPI-M-MPI-ESM-LR_RCA4"][var_sim][delta][
+#                         soil_depth
+#                     ]["ff"]["params"].values.flatten()[1:]
+#                     df_params_mpiesm = pd.DataFrame(index=range(4), columns=["value", "Parameter"])
+#                     values = []
+#                     for ii in range(2):
+#                         values.append(values_nf[ii])
+#                         values.append(values_ff[ii])
+#                     df_params_mpiesm.loc[:, "value"] = values
+#                     df_params_mpiesm.loc[:, "Parameter"] = [
+#                         r'$\theta_{pwp}$ (NF)',
+#                         r'$\theta_{pwp}$ (FF)',
+#                         r'$\theta_{ufc}$ (NF)',
+#                         r'$\theta_{ufc}$ (FF)',
+#                         r'$\theta_{ac}$ (NF)',
+#                         r'$\theta_{ac}$ (FF)',
+#                         r'$\theta_{pwp}$ x $\theta_{ufc}$ (NF)',
+#                         r'$\theta_{pwp}$ x $\theta_{ufc}$ (FF)',
+#                         r'$\theta_{pwp}$ x $\theta_{ac}$ (NF)',
+#                         r'$\theta_{pwp}$ x $\theta_{ac}$ (FF)',
+#                         r'$\theta_{ufc}$ x $\theta_{ac}$ (NF)',
+#                         r'$\theta_{ufc}$ x $\theta_{ac}$ (FF)',
+#                         r'$\theta_{pwp}$ x $\theta_{ufc}$ x $\theta_{ac}$ (NF)',
+#                         r'$\theta_{pwp}$ x $\theta_{ufc}$ x $\theta_{ac}$ (FF)',
+#                         r'$k_s$ (NF)',
+#                         r'$k_s$ (FF)',
+#                     ]
+
+#                     df_params_mpiesm.loc[:, "Climate model"] = "MPI-M-MPI-ESM-LR_RCA4"
+
+#                     df_params = pd.concat([df_params_canesm, df_params_mpiesm], ignore_index=True)
+#                     sns.barplot(
+#                         x="Parameter",
+#                         y="value",
+#                         hue="Climate model",
+#                         palette=["red", "blue"],
+#                         data=df_params,
+#                         ax=axes[i, j],
+#                         errorbar=None
+#                     )
+#                     axes[i, j].legend([], [], frameon=False)
+#                     axes[0, j].set_title(f"{Land_cover_scenarios[j]}")
+#                     axes[i, j].set_ylabel("")
+#                     axes[i, j].set_xlabel("")
+#                     axes[i, j].tick_params(axis="x", rotation=90)
+#                 axes[i, 0].set_ylabel(f"{Locations[i]}\n{_lab[delta]} {_lab[var_sim]}")
+#             fig.tight_layout()
+#             file = base_path_figs / "glm_parameters" / f"{glm_key}_{var_sim}_{delta}_{soil_depth}_barplot.png"
+#             fig.savefig(file, dpi=300)
+#             plt.close("all")
+
+# glm_key = "no_interaction"
+# vars_sim = ["transp", "q_ss", "theta", "rt50_s", "tt50_q_ss", "tt50_transp"]
+# deltas = ["dAvg"]
+# norm = mpl.colors.Normalize(vmin=0, vmax=1)
+# for delta in deltas:
+#     for soil_depth in soil_depths:
+#         cond = _soil_depths[soil_depth]
+#         for future in ['nf', 'ff']:
+#             fig, axes = plt.subplots(len(locations), len(land_cover_scenarios), sharex='col', sharey='row', figsize=(6, 4.5))
+#             # axes for colorbar
+#             axl = fig.add_axes([0.88, 0.3, 0.02, 0.5])
+#             cb1 = mpl.colorbar.ColorbarBase(axl, cmap='Oranges', norm=norm,
+#                                             orientation='vertical',
+#                                             ticks=[0, 1, 2])
+#             cb1.set_label(r'[-]')
+#             for i, location in enumerate(locations):
+#                 for j, land_cover_scenario in enumerate(land_cover_scenarios):
+#                     params_cm = [r'$\theta_{pwp}$ (CCC)', r'$\theta_{pwp}$ (MPI)', r'$\theta_{ufc}$ (CCC)', r'$\theta_{ufc}$ (MPI)', r'$\theta_{ac}$ (CCC)', r'$\theta_{ac}$ (MPI)', r'$k_s$ (CCC)', r'$k_s$ (MPI)']
+#                     params_canesm = [r'$\theta_{pwp}$ (CCC)', r'$\theta_{ufc}$ (CCC)', r'$\theta_{ac}$ (CCC)', r'$k_s$ (CCC)']
+#                     params_mpim = [r'$\theta_{pwp}$ (MPI)', r'$\theta_{ufc}$ (MPI)', r'$\theta_{ac}$ (MPI)', r'$k_s$ (MPI)']
+#                     df_params = pd.DataFrame(columns=params_cm)
+#                     for ii, var_sim in enumerate(vars_sim):
+#                         df_params.loc[f'{_lab[delta]}{_lab[var_sim]}', params_canesm] = dict_glm[glm_key][location][land_cover_scenario]['CCCma-CanESM2_CCLM4-8-17'][var_sim][delta][soil_depth][future]['params'].values.flatten()[1:]
+#                         df_params.loc[f'{_lab[delta]}{_lab[var_sim]}', params_mpim] = dict_glm[glm_key][location][land_cover_scenario]['MPI-M-MPI-ESM-LR_RCA4'][var_sim][delta][soil_depth][future]['params'].values.flatten()[1:]
+#                     df_params = df_params.astype('float32')
+#                     df_params.iloc[:, :] = onp.abs(df_params.values)
+#                     sns.heatmap(df_params, vmin=0, vmax=1, cmap='Oranges', cbar=False, ax=axes[i, j], square=True)
+#                     axes[0, j].set_title(f'{Land_cover_scenarios[j]}')
+#                     axes[-1, j].set_xticklabels(params_cm, rotation=90)
+#                     axes[i, j].set_ylabel('')
+#                     axes[i, j].set_xlabel('')
+#                 axes[i, 0].set_ylabel(f'{Locations[i]}')
+#                 axes[i, 0].set_yticklabels(df_params.index.tolist(), rotation=0)
+#             fig.subplots_adjust(bottom=0.2, left=0.2, right=0.85, top=0.9, hspace=-0.5, wspace=0.1)
+#             file = base_path_figs / "glm_parameters" / f"{glm_key}_{delta}_{soil_depth}_{future}_heatmap.png"
+#             fig.savefig(file, dpi=300)
+#             plt.close('all')
+
+# glm_key = "interaction_theta"
+# vars_sim = ["transp", "q_ss", "theta", "rt50_s", "tt50_q_ss", "tt50_transp"]
+# deltas = ["dAvg"]
+# norm = mpl.colors.Normalize(vmin=0, vmax=1)
+# for delta in deltas:
+#     for soil_depth in soil_depths:
+#         cond = _soil_depths[soil_depth]
+#         for future in ['nf', 'ff']:
+#             fig, axes = plt.subplots(len(locations), len(land_cover_scenarios), sharex='col', sharey='row', figsize=(6, 4.5))
+#             # axes for colorbar
+#             axl = fig.add_axes([0.88, 0.3, 0.02, 0.5])
+#             cb1 = mpl.colorbar.ColorbarBase(axl, cmap='Oranges', norm=norm,
+#                                             orientation='vertical',
+#                                             ticks=[0, 1, 2])
+#             cb1.set_label(r'[-]')
+#             for i, location in enumerate(locations):
+#                 for j, land_cover_scenario in enumerate(land_cover_scenarios):
+#                     params_cm = [r'$\theta_{pwp}$ (CCC)',
+#                                  r'$\theta_{pwp}$ (MPI)',
+#                                  r'$\theta_{ufc}$ (CCC)',
+#                                  r'$\theta_{ufc}$ (MPI)',
+#                                  r'$\theta_{ac}$ (CCC)',
+#                                  r'$\theta_{ac}$ (MPI)',
+#                                  r'$\theta_{pwp}$ x $\theta_{ufc}$ (CCC)',
+#                                  r'$\theta_{pwp}$ x $\theta_{ufc}$ (MPI)',
+#                                  r'$\theta_{pwp}$ x $\theta_{ac}$ (CCC)',
+#                                  r'$\theta_{pwp}$ x $\theta_{ac}$ (MPI)',
+#                                  r'$\theta_{ufc}$ x $\theta_{ac}$ (CCC)',
+#                                  r'$\theta_{ufc}$ x $\theta_{ac}$ (MPI)',
+#                                  r'$\theta_{pwp}$ x $\theta_{ufc}$ x $\theta_{ac}$ (CCC)',
+#                                  r'$\theta_{pwp}$ x $\theta_{ufc}$ x $\theta_{ac}$ (MPI)',
+#                                  r'$k_s$ (CCC)',
+#                                  r'$k_s$ (MPI)']
+#                     params_canesm = [r'$\theta_{pwp}$ (CCC)',
+#                                      r'$\theta_{ufc}$ (CCC)',
+#                                      r'$\theta_{ac}$ (CCC)',
+#                                      r'$\theta_{pwp}$ x $\theta_{ufc}$ (CCC)',
+#                                      r'$\theta_{pwp}$ x $\theta_{ac}$ (CCC)',
+#                                      r'$\theta_{ufc}$ x $\theta_{ac}$ (CCC)',
+#                                      r'$\theta_{pwp}$ x $\theta_{ufc}$ x $\theta_{ac}$ (CCC)',
+#                                      r'$k_s$ (CCC)']
+#                     params_mpim = [r'$\theta_{pwp}$ (MPI)',
+#                                    r'$\theta_{ufc}$ (MPI)',
+#                                    r'$\theta_{ac}$ (MPI)',
+#                                    r'$\theta_{pwp}$ x $\theta_{ufc}$ (MPI)',
+#                                    r'$\theta_{pwp}$ x $\theta_{ac}$ (MPI)',
+#                                    r'$\theta_{ufc}$ x $\theta_{ac}$ (MPI)',
+#                                    r'$\theta_{pwp}$ x $\theta_{ufc}$ x $\theta_{ac}$ (MPI)',
+#                                    r'$k_s$ (MPI)']
+#                     df_params = pd.DataFrame(columns=params_cm)
+#                     for ii, var_sim in enumerate(vars_sim):
+#                         print(dict_glm[glm_key][location][land_cover_scenario]['CCCma-CanESM2_CCLM4-8-17'][var_sim][delta][soil_depth][future]['params'].values[1:])
+#                         df_params.loc[f'{_lab[delta]}{_lab[var_sim]}', params_canesm] = dict_glm[glm_key][location][land_cover_scenario]['CCCma-CanESM2_CCLM4-8-17'][var_sim][delta][soil_depth][future]['params'].values.flatten()[1:]
+#                         df_params.loc[f'{_lab[delta]}{_lab[var_sim]}', params_mpim] = dict_glm[glm_key][location][land_cover_scenario]['MPI-M-MPI-ESM-LR_RCA4'][var_sim][delta][soil_depth][future]['params'].values.flatten()[1:]
+#                     df_params = df_params.astype('float32')
+#                     df_params.iloc[:, :] = onp.abs(df_params.values)
+#                     sns.heatmap(df_params, vmin=0, vmax=1, cmap='Oranges', cbar=False, ax=axes[i, j], square=True)
+#                     axes[0, j].set_title(f'{Land_cover_scenarios[j]}')
+#                     axes[-1, j].set_xticklabels(params_cm, rotation=90)
+#                     axes[i, j].set_ylabel('')
+#                     axes[i, j].set_xlabel('')
+#                 axes[i, 0].set_ylabel(f'{Locations[i]}')
+#                 axes[i, 0].set_yticklabels(df_params.index.tolist(), rotation=0)
+#             fig.subplots_adjust(bottom=0.2, left=0.2, right=0.85, top=0.9, hspace=-0.5, wspace=0.1)
+#             file = base_path_figs / "glm_parameters" / f"{glm_key}_{delta}_{soil_depth}_{future}_heatmap.png"
+#             fig.savefig(file, dpi=300)
+#             plt.close('all')
+
+# metrics = ["MAE"]
+# vars_sim = ["transp", "q_ss", "theta", "tt50_transp", "tt50_q_ss", "rt50_s"]
+# deltas = ["dAvg"]
+# norm = mpl.colors.Normalize(vmin=0, vmax=20)
+# for glm_key in glm_formulas.keys():
+#     for metric in metrics:
+#         for delta in deltas:
+#             for soil_depth in soil_depths:
+#                 cond = _soil_depths[soil_depth]
 #                 fig, axes = plt.subplots(len(locations), len(land_cover_scenarios), sharex='col', sharey='row', figsize=(6, 4.5))
 #                 # axes for colorbar
-#                 axl = fig.add_axes([0.88, 0.3, 0.02, 0.58])
-#                 cb1 = mpl.colorbar.ColorbarBase(axl, cmap='PuOr', norm=norm,
-#                                                 orientation='vertical',
-#                                                 ticks=[-1, -0.5, 0, 0.5, 1])
-#                 cb1.ax.invert_yaxis()
-#                 cb1.set_label(r'[-]')
+#                 axl = fig.add_axes([0.88, 0.32, 0.02, 0.46])
+#                 cb1 = mpl.colorbar.ColorbarBase(axl, cmap='Oranges', norm=norm,
+#                                                 orientation='vertical')
+#                 cb1.set_label(f'{_lab[metric]} [%]')
 #                 for i, location in enumerate(locations):
 #                     for j, land_cover_scenario in enumerate(land_cover_scenarios):
-#                         params_cm = [r'$\theta_{pwp}$ (CanESM)', r'$\theta_{pwp}$ (MPIM)', r'$\theta_{ufc}$ (CanESM)', r'$\theta_{ufc}$ (MPIM)', r'$\theta_{ac}$ (CanESM)', r'$\theta_{ac}$ (MPIM)', r'$k_s$ (CanESM)', r'$k_s$ (MPIM)']
-#                         params_canesm = [r'$\theta_{pwp}$ (CanESM)', r'$\theta_{ufc}$ (CanESM)', r'$\theta_{ac}$ (CanESM)', r'$k_s$ (CanESM)']
-#                         params_mpim = [r'$\theta_{pwp}$ (MPIM)', r'$\theta_{ufc}$ (MPIM)', r'$\theta_{ac}$ (MPIM)', r'$k_s$ (MPIM)']
-#                         df_params = pd.DataFrame(columns=params_cm)
-#                         for ii, var_sim in enumerate(vars_sim):
-#                             df_params.loc[f'{_lab[delta]}{_lab[var_sim]}', params_canesm] = dict_glm[location][land_cover_scenario]['CCCma-CanESM2_CCLM4-8-17'][var_sim][delta][soil_depth][future]['params'][1:]
-#                             df_params.loc[f'{_lab[delta]}{_lab[var_sim]}', params_mpim] = dict_glm[location][land_cover_scenario]['MPI-M-MPI-ESM-LR_RCA4'][var_sim][delta][soil_depth][future]['params'][1:]
-#                         sns.heatmap(df_params, ax=ax, vmin=-1, vmax=1, cmap='PuOr', cbar=False)
+#                         df_metric = pd.DataFrame()
+#                         for var_sim in vars_sim:
+#                             for climate_scenario in climate_scenarios:
+#                                 for future in ['nf', 'ff']:
+#                                     value = dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][future][metric]
+#                                     df_metric.loc[f'{_lab[climate_scenario]} ({_lab[future]})', f'{_lab[var_sim]}'] = value
+#                         sns.heatmap(df_metric, vmin=0, vmax=20, cmap='Oranges', cbar=False, ax=axes[i, j], square=True)
 #                         axes[0, j].set_title(f'{Land_cover_scenarios[j]}')
-#                         axes[-1, j].set_yticklabels(params_cm, rotation=33)
+#                         axes[-1, j].set_xticklabels(df_metric.columns, rotation=90)
 #                         axes[i, j].set_ylabel('')
 #                         axes[i, j].set_xlabel('')
 #                     axes[i, 0].set_ylabel(f'{Locations[i]}')
-#                     axes[i, 0].set_yticklabels(df_params.index.tolist(), rotation=0)
-#                 fig.tight_layout()
-#                 file = base_path_figs / f"{var_sim}_{delta}_{soil_depth}_{future}_heatmap.png"
-#                 fig.savefig(file, dpi=250)
+#                     axes[i, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#                 fig.subplots_adjust(bottom=0.2, left=0.2, right=0.85, top=0.9, hspace=-0.5, wspace=0.1)
+#                 file = base_path_figs / "glm_metrics" / f"{glm_key}_{metric}_{delta}_{soil_depth}_heatmap.png"
+#                 fig.savefig(file, dpi=300)
 #                 plt.close('all')
+
+
+# metrics = ["RMSE"]
+# vars_sim = ["transp", "q_ss", "theta", "tt50_transp", "tt50_q_ss", "rt50_s"]
+# deltas = ["dAvg"]
+# norm = mpl.colors.Normalize(vmin=0, vmax=30)
+# for glm_key in glm_formulas.keys():
+#     for metric in metrics:
+#         for delta in deltas:
+#             for soil_depth in soil_depths:
+#                 cond = _soil_depths[soil_depth]
+#                 fig, axes = plt.subplots(len(locations), len(land_cover_scenarios), sharex='col', sharey='row', figsize=(6, 4.5))
+#                 # axes for colorbar
+#                 axl = fig.add_axes([0.88, 0.32, 0.02, 0.46])
+#                 cb1 = mpl.colorbar.ColorbarBase(axl, cmap='Oranges', norm=norm,
+#                                                 orientation='vertical')
+#                 cb1.set_label(f'{metric} [-]')
+#                 for i, location in enumerate(locations):
+#                     for j, land_cover_scenario in enumerate(land_cover_scenarios):
+#                         df_metric = pd.DataFrame()
+#                         for var_sim in vars_sim:
+#                             for climate_scenario in climate_scenarios:
+#                                 for future in ['nf', 'ff']:
+#                                     value = dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][future][metric]
+#                                     df_metric.loc[f'{_lab[climate_scenario]} ({_lab[future]})', f'{_lab[var_sim]}'] = value
+#                         sns.heatmap(df_metric, vmin=0, vmax=30, cmap='Oranges', cbar=False, ax=axes[i, j], square=True)
+#                         axes[0, j].set_title(f'{Land_cover_scenarios[j]}')
+#                         axes[-1, j].set_xticklabels(df_metric.columns, rotation=90)
+#                         axes[i, j].set_ylabel('')
+#                         axes[i, j].set_xlabel('')
+#                     axes[i, 0].set_ylabel(f'{Locations[i]}')
+#                     axes[i, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#                 fig.subplots_adjust(bottom=0.2, left=0.2, right=0.85, top=0.9, hspace=-0.5, wspace=0.1)
+#                 file = base_path_figs / "glm_metrics" / f"{glm_key}_{metric}_{delta}_{soil_depth}_heatmap.png"
+#                 fig.savefig(file, dpi=300)
+#                 plt.close('all')
+
+# metrics = ["AIC", "AICC"]
+# vars_sim = ["transp", "q_ss", "theta", "tt50_transp", "tt50_q_ss", "rt50_s"]
+# deltas = ["dAvg"]
+# norm = mpl.colors.Normalize(vmin=0, vmax=1000)
+# for glm_key in glm_formulas.keys():
+#     for metric in metrics:
+#         for delta in deltas:
+#             for soil_depth in soil_depths:
+#                 cond = _soil_depths[soil_depth]
+#                 fig, axes = plt.subplots(len(locations), len(land_cover_scenarios), sharex='col', sharey='row', figsize=(6, 4.5))
+#                 # axes for colorbar
+#                 axl = fig.add_axes([0.88, 0.32, 0.02, 0.46])
+#                 cb1 = mpl.colorbar.ColorbarBase(axl, cmap='Oranges', norm=norm,
+#                                                 orientation='vertical')
+#                 cb1.set_label(f'{_lab[metric]} [-]')
+#                 for i, location in enumerate(locations):
+#                     for j, land_cover_scenario in enumerate(land_cover_scenarios):
+#                         df_metric = pd.DataFrame()
+#                         for var_sim in vars_sim:
+#                             for climate_scenario in climate_scenarios:
+#                                 for future in ['nf', 'ff']:
+#                                     value = dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][delta][soil_depth][future][metric]
+#                                     df_metric.loc[f'{_lab[climate_scenario]} ({_lab[future]})', f'{_lab[var_sim]}'] = value
+#                         sns.heatmap(df_metric, vmin=0, vmax=1000, cmap='Oranges', cbar=False, ax=axes[i, j], square=True)
+#                         axes[0, j].set_title(f'{Land_cover_scenarios[j]}')
+#                         axes[-1, j].set_xticklabels(df_metric.columns, rotation=90)
+#                         axes[i, j].set_ylabel('')
+#                         axes[i, j].set_xlabel('')
+#                     axes[i, 0].set_ylabel(f'{Locations[i]}')
+#                     axes[i, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#                 fig.subplots_adjust(bottom=0.2, left=0.2, right=0.85, top=0.9, hspace=-0.5, wspace=0.1)
+#                 file = base_path_figs / "glm_metrics" / f"{glm_key}_{metric}_{delta}_{soil_depth}_heatmap.png"
+#                 fig.savefig(file, dpi=300)
+#                 plt.close('all')
+
+# mlm_formulas = {"interaction_theta": "~ theta_pwp * theta_ufc * theta_ac + ks",
+#                 "no_interaction": "~ theta_pwp + theta_ufc + theta_ac + ks",
+#                 "theta": "~ theta_pwp + theta_ufc + theta_ac",
+#                 "theta_pwp": "~ theta_pwp",
+#                 "theta_ufc": "~ theta_ufc",
+#                 "theta_ac": "~ theta_ac",
+#                 "ks": "~ ks"}
+
+# vars_sim = ["transp", "q_ss", "theta", "rt50_s", "tt50_q_ss", "tt50_transp"]
+# deltas = ["dAvg", "dIPR"]
+# if not os.path.exists(mlm_file):
+#     dfs_mlms = []
+#     dict_mlm = {}
+#     for mlm_key in mlm_formulas.keys():
+#         dict_mlm[mlm_key] = {}
+#         for var_sim in vars_sim:
+#             dict_mlm[mlm_key][var_sim] = {}
+#             for delta in deltas:
+#                 dict_mlm[mlm_key][var_sim][delta] = {}
+#                 for land_cover_scenario in land_cover_scenarios:
+#                     dict_mlm[mlm_key][var_sim][land_cover_scenario] = {}
+#                     for location in locations:
+#                         for climate_scenario in climate_scenarios:
+#                             for future in ['nf', 'ff']:
+#                                 y = (
+#                                     dict_deltas[location][land_cover_scenario][climate_scenario][var_sim]
+#                                     .loc[:, f"{delta}_{future}"]
+#                                     .to_frame()
+#                                 )
+#                                 y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                 x = df_params.loc[:, "theta_pwp":]
+#                                 x = sm.add_constant(x)
+#                                 # standardize the parameters
+#                                 x_std = x.copy()
+#                                 for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                     x_std.loc[:, param] = (x_std.loc[:, param] - x_std.loc[:, param].mean()) / x_std.loc[
+#                                         :, param
+#                                     ].std()
+
+#                                 dta = x_std.copy()
+#                                 dta.loc[:, f"delta"] = y.values.flatten()
+#                                 dta.loc[:, "group"] = f"{location}_{climate_scenario}_{future}"
+#                                 dfs_mlms.append(dta)
+
+#                     df_mlm = pd.concat(dfs_mlms, ignore_index=True)
+#                     mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
+#                     res = mlm.fit()
+#                     print(res.summary())
+#                     dict_mlm[mlm_key][var_sim][delta][land_cover_scenario] = res.params

@@ -39,9 +39,9 @@ OUTPUT_RATE:
 - "inf_mp_rz"  # macropore infiltration into root zone (mm/day)
 - "inf_sc_rz"  # shrinkage crack infiltration into root zone (mm/day)
 - "inf_ss"  # infiltration into subsoil (mm/day)
-- "q_rz"  # percolation from root zone (mm/day)
-- "q_ss"  # percolation from subsoil (mm/day)
-- "cpr_rz" # capillary rise from subsoil into root zone (mm/day)
+- "q_rz"  # percolation of root zone (mm/day)
+- "q_ss"  # percolation of subsoil (mm/day)
+- "cpr_rz" # capillary rise of subsoil into root zone (mm/day)
 - "dS"  # change of storage volume (mm/day)
 - "q_snow"  # snow melt (mm/day)
 
