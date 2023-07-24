@@ -81,18 +81,18 @@ The following workflow briefly describes the model application:
 
 1. Prepare the meteorological input data (see Meteorological input data).
 
-2. Generate the model paramaters for the Monte-Carlo simulations:
+2. Generates the model parameters for the simulation:
 ```
 python write_parameters.py
 ```
 
-3. If required data is ready, the following script runs the simulations:
+3. If required data is ready, the following script runs the simulation:
 
 ```
 python oneD.py
 ```
 
-4. After calculation is done, the simulation results can be merged in a single NetCDF-file:
+4. After calculation is done, the simulation results can be merged into a single NetCDF-file:
 ```
 python merge_output.py
 ```
