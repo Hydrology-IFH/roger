@@ -1,7 +1,9 @@
 from pathlib import Path
 import h5netcdf
 import numpy as onp
+import pandas as pd
 import click
+import yaml
 from roger.cli.roger_run_base import roger_base_cli
 
 
@@ -20,6 +22,10 @@ def main(tmp_dir):
 
         _base_path = Path(__file__).parent
         _input_dir = _base_path / "input"
+        # load configuration file
+        _file_config = _base_path / "config.yml"
+        with open(_file_config, "r") as file:
+            _config = yaml.safe_load(file)
 
         def _read_var_from_nc(self, var, path_dir, file, group=None):
             nc_file = path_dir / file
@@ -31,6 +37,12 @@ def main(tmp_dir):
                 with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                     var_obj = infile.variables[var]
                     return npx.array(var_obj)
+                
+        def _read_var_from_csv(self, var, path_dir, file):
+            csv_file = path_dir / file
+            infile = pd.read_csv(csv_file, sep=";", skiprows=1)
+            var_obj = infile.loc[:, var]
+            return npx.array(var_obj)[:, npx.newaxis]
 
         def _get_runlen(self, path_dir, file):
             nc_file = path_dir / file
@@ -43,6 +55,12 @@ def main(tmp_dir):
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables["Time"].attrs["time_origin"]
                 return str(var_obj)
+            
+        def _get_nx(self, path_dir, file):
+            csv_file = path_dir / file
+            df = pd.read_csv(csv_file, sep=";", skiprows=1)
+            var_obj = df.shape[0]
+            return int(var_obj)
 
         @roger_routine
         def set_settings(self, state):
@@ -50,7 +68,7 @@ def main(tmp_dir):
             settings.identifier = self._config["identifier"]
 
             # total grid numbers in x- and y-direction
-            settings.nx, settings.ny = self._config["nx"], 1
+            settings.nx, settings.ny = self._get_nx(self._base_path, 'parameters.csv'), 1
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
             settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, "forcing.nc"))
 

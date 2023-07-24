@@ -115,7 +115,7 @@ def main(tmp_dir):
             vs.lut_gc = update(vs.lut_gc, at[-1, 1:], 1 - 0.7 ** (vs.lut_ilu[-1, 1:] / 0.2))
             # ground cover for custom land cover (-)
             vs.lut_gcm = update(vs.lut_gcm, at[-1, 0], 60)
-            vs.lut_gcm = update(vs.lut_gcm, at[-1, -1], onp.max(vs.lut_gc[-1, 1:], axis=1))
+            vs.lut_gcm = update(vs.lut_gcm, at[-1, -1], onp.max(vs.lut_gc[-1, 1:]))
 
         @roger_routine
         def set_topography(self, state):
