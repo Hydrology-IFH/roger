@@ -36,5 +36,5 @@ ks:
 - 15
 # hydraulic conductivity of bedrock (mm/hour)
 kf:
-- 1
+- 0.1
 - 10

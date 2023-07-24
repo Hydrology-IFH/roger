@@ -134,12 +134,14 @@ Short description of land use (lu_id)
 - `14`: lake
 - `15`: forest (unknown tree species)
 - `16`: urban tree
+- `17`: custom land cover including trees
 - `20`: river
 - `31`: gravel rooftop
 - `32`: grass rooftop extensive
 - `33`: grass rooftop intensive
 - `41`: gravel
 - `50`: percolation plant
+- `60`: custom land cover
 - `98`: grass intensive
 - `100`: urban
 - `999`: no value

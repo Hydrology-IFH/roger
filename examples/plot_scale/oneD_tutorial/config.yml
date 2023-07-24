@@ -41,7 +41,7 @@ OUTPUT_RATE:
 - "inf_mat"  # soil matrix infiltration (mm/day)
 - "inf_mp"  # macropore infiltration (mm/day)
 - "inf_sc"  # shrinkage crack infiltration (mm/day)
-- "q_ss"  # percolation from subsoil (mm/day)
+- "q_ss"  # percolation of subsoil (mm/day)
 - "q_sub"  # lateral subsurface runoff (mm/day)
 - "q_sub_mp"  # lateral macropore subsurface runoff (mm/day)
 - "q_sub_mat"  # lateral matrix subsurface runoff (mm/day)

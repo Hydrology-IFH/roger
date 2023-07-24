@@ -7,7 +7,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
 @roger_base_cli
 def main(tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -62,7 +62,7 @@ def main(tmp_dir):
             settings.nx, settings.ny = self._config["nx"], self._config["ny"]
             # derive total number of time steps from forcing
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
-            settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, 'forcing.nc'))
+            settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, "forcing.nc"))
 
             # spatial discretization (in meters)
             settings.dx = self._config["dx"]
@@ -147,6 +147,8 @@ def main(tmp_dir):
                 at[2:-2, 2:-2],
                 self._read_var_from_csv("slope", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
             )
+            # convert slope to percentage
+            vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
             # density of vertical macropores (1/m2)
             vs.dmpv = update(
                 vs.dmpv,
@@ -263,23 +265,35 @@ def main(tmp_dir):
         def set_forcing_setup(self, state):
             vs = state.variables
 
-            vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[0, 0, :])
-            vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[0, 0, :])
-            vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[0, 0, :])
+            vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, "forcing.nc")[0, 0, :])
+            vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, "forcing.nc")[0, 0, :])
+            vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[0, 0, :])
 
         @roger_routine
         def set_forcing(self, state):
             vs = state.variables
 
-            condt = (vs.time % (24 * 60 * 60) == 0)
+            condt = vs.time % (24 * 60 * 60) == 0
             if condt:
                 vs.itt_day = 0
-                vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, 'forcing.nc')[vs.itt_forc])
-                vs.month = update(vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, 'forcing.nc')[vs.itt_forc])
-                vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, 'forcing.nc')[vs.itt_forc])
-                vs.prec_day = update(vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
-                vs.ta_day = update(vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
-                vs.pet_day = update(vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
+                vs.year = update(
+                    vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, "forcing.nc")[vs.itt_forc]
+                )
+                vs.month = update(
+                    vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, "forcing.nc")[vs.itt_forc]
+                )
+                vs.doy = update(
+                    vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")[vs.itt_forc]
+                )
+                vs.prec_day = update(
+                    vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                )
+                vs.ta_day = update(
+                    vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                )
+                vs.pet_day = update(
+                    vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                )
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
         @roger_routine

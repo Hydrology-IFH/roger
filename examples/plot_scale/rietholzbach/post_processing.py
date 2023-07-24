@@ -226,9 +226,9 @@ def main(tmp_dir):
     axs.legend(frameon=False, loc="upper right", bbox_to_anchor=(1.57, 1.05))
     fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
     file = base_path_figs / "kumaraswamy_cdf.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     file = base_path_figs / "kumaraswamy_cdf.pdf"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     fig, axs = plt.subplots(1, 1, figsize=(3, 2))
@@ -248,9 +248,9 @@ def main(tmp_dir):
     axs.legend(frameon=False, loc="upper right", bbox_to_anchor=(1.57, 1.05))
     fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
     file = base_path_figs / "kumaraswamy_pdf.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     file = base_path_figs / "kumaraswamy_pdf.pdf"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     fig, axs = plt.subplots(1, 1, figsize=(3, 2))
@@ -268,9 +268,9 @@ def main(tmp_dir):
     axs.legend(frameon=False, loc="upper right", bbox_to_anchor=(1.43, 1.05))
     fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
     file = base_path_figs / "power_cdf.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     file = base_path_figs / "power_cdf.pdf"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     fig, axs = plt.subplots(1, 1, figsize=(3, 2))
@@ -288,9 +288,9 @@ def main(tmp_dir):
     axs.legend(frameon=False, loc="upper right", bbox_to_anchor=(1.43, 1.05))
     fig.subplots_adjust(left=0.15, bottom=0.2, right=0.7)
     file = base_path_figs / "power_pdf.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     file = base_path_figs / "power_pdf.pdf"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     # check water balance of lysimeter
@@ -369,7 +369,7 @@ def main(tmp_dir):
     axs.set_xlim(df_lys_obs.loc["2000":, :].index[0], df_lys_obs.loc["2000":, :].index[-1])
     fig.tight_layout()
     file = base_path_figs / "dS_weight_vs_dS_flux.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     fig, axs = plt.subplots(1, 1, figsize=(6, 1.2))
@@ -395,7 +395,7 @@ def main(tmp_dir):
     axs.set_xlim(df_lys_obs.loc["2000":, :].index[0], df_lys_obs.loc["2000":, :].index[-1])
     fig.tight_layout()
     file = base_path_figs / "dS_weight_vs_dS_flux_residuals.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     fig, axs = plt.subplots(1, 1, figsize=(6, 1.2))
@@ -429,7 +429,7 @@ def main(tmp_dir):
     axs.set_xlim(df_lys_obs.loc["2000":, :].index[0], df_lys_obs.loc["2000":, :].index[-1])
     fig.tight_layout()
     file = base_path_figs / "dS_weight_vs_dS_flux_cumulated.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     years = onp.arange(1997, 2008).tolist()
@@ -554,7 +554,7 @@ def main(tmp_dir):
     fig.legend(lines, labels, loc="lower right", fontsize=8, frameon=False, bbox_to_anchor=(1.0, 0.02))
     fig.tight_layout()
     file = base_path_figs / "lys_cumulated_annually.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     fig, axs = plt.subplots(1, 1, figsize=(6, 2))
@@ -613,7 +613,7 @@ def main(tmp_dir):
     axs.set_xlim(df_lys_obs_nonan.loc["2000":, :].index[0], df_lys_obs_nonan.loc["2000":, :].index[-1])
     fig.tight_layout()
     file = base_path_figs / "lys_cumulated.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     df_lys_obs_nonan.loc[:, "hyd_year"] = df_lys_obs_nonan.index.year
@@ -645,7 +645,7 @@ def main(tmp_dir):
     g.legend(frameon=False, loc="upper right", bbox_to_anchor=(1.5, 1.1))
     fig.subplots_adjust(bottom=0.3, right=0.68)
     file = base_path_figs / "lysimeter_balance_annual.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     # average observed soil water content of previous days
@@ -676,7 +676,7 @@ def main(tmp_dir):
     axs.set_xlim(df_thetap.index[0], df_thetap.index[-1])
     fig.tight_layout()
     file = base_path_figs / f"theta_previous_{window}_days.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     # measured oxygen-18 in precipitation and percolation
@@ -704,9 +704,9 @@ def main(tmp_dir):
     fig.text(0.19, 0.46, "(b)", ha="center", va="center")
     fig.tight_layout()
     file = base_path_figs / "observed_d18O_prec_perc.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     file = base_path_figs / "observed_d18O_prec_perc.pdf"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     # measured bromide in percolation
@@ -718,7 +718,7 @@ def main(tmp_dir):
     axs.set_xlabel("Time [days since injection]")
     file = base_path_figs / "observed_bromide_perc.png"
     fig.tight_layout()
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     # dotty plots
@@ -774,7 +774,7 @@ def main(tmp_dir):
 
     #         fig.subplots_adjust(bottom=0.1, top=0.98, right=0.98, wspace=0.1, hspace=0.2)
     #         file = base_path_figs / f"dotty_plots{ps}_{sc1}_optimized_with_{metric_for_opt}.png"
-    #         fig.savefig(file, dpi=250)
+    #         fig.savefig(file, dpi=300)
 
     #         fig, ax = plt.subplots(nrow, ncol, sharey='row', sharex='col', figsize=(6, 5))
     #         for i, metric_var in enumerate(df_metrics.columns):
@@ -819,7 +819,7 @@ def main(tmp_dir):
 
     #         fig.subplots_adjust(bottom=0.1, top=0.98, right=0.98, wspace=0.1, hspace=0.2)
     #         file = base_path_figs / f"dotty_plots{ps}_{sc1}inset_optimized_with_{metric_for_opt}.png"
-    #         fig.savefig(file, dpi=250)
+    #         fig.savefig(file, dpi=300)
 
     # # write evaluation metrics for different storage condtions to .txt
     # df_avg_std = pd.DataFrame(columns=['KGE_aet', 'KGE_dS', 'KGE_q_ss', 'KGE_multi'])
@@ -863,7 +863,7 @@ def main(tmp_dir):
         file = f"diag_polar_plot_{var_sim}_100_optimized_with_{metric_for_opt}.png"
         path = base_path_figs / file
         # fig.tight_layout()
-        fig.savefig(path, dpi=250)
+        fig.savefig(path, dpi=300)
 
     var_sim = "dS"
     fig = de.diag_polar_plot_multi(
@@ -881,7 +881,7 @@ def main(tmp_dir):
     file = f"diag_polar_plot_{var_sim}_100_optimized_with_{metric_for_opt}.png"
     path = base_path_figs / file
     # fig.tight_layout()
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     df_params_metrics10 = df_params_metrics.copy()
     df_params_metrics10.loc[:, "id"] = range(len(df_params_metrics10.index))
@@ -906,11 +906,11 @@ def main(tmp_dir):
         file = f"diag_polar_plot_{var_sim}_10_optimized_with_{metric_for_opt}.png"
         path = base_path_figs / file
         # fig.tight_layout()
-        fig.savefig(path, dpi=250)
+        fig.savefig(path, dpi=300)
         file = f"diag_polar_plot_{var_sim}_10_optimized_with_{metric_for_opt}.pdf"
         path = base_path_figs / file
         # fig.tight_layout()
-        fig.savefig(path, dpi=250)
+        fig.savefig(path, dpi=300)
 
     var_sim = "dS"
     fig = de.diag_polar_plot_multi(
@@ -928,11 +928,11 @@ def main(tmp_dir):
     file = f"diag_polar_plot_{var_sim}_10_optimized_with_{metric_for_opt}.png"
     path = base_path_figs / file
     # fig.tight_layout()
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
     file = f"diag_polar_plot_{var_sim}_10_optimized_with_{metric_for_opt}.pdf"
     path = base_path_figs / file
     # fig.tight_layout()
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     df_for_diag1 = df_params_metrics10.loc[: df_params_metrics10.index[0], :]
     vars_sim = ["aet", "q_ss"]
@@ -954,7 +954,7 @@ def main(tmp_dir):
         file = f"diag_polar_plot_{var_sim}_1_optimized_with_{metric_for_opt}.png"
         path = base_path_figs / file
         # fig.tight_layout()
-        fig.savefig(path, dpi=250)
+        fig.savefig(path, dpi=300)
 
     var_sim = "dS"
     fig = de.diag_polar_plot_multi(
@@ -972,7 +972,7 @@ def main(tmp_dir):
     file = f"diag_polar_plot_{var_sim}_1_optimized_with_{metric_for_opt}.png"
     path = base_path_figs / file
     # fig.tight_layout()
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     # compare best simulation with observations
     vars_obs = ["AET", "PERC", "dWEIGHT"]
@@ -998,18 +998,18 @@ def main(tmp_dir):
         fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
         file_str = "%s.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
         # plot cumulated observed and simulated time series
         fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab="Time [year]")
         file_str = "%s_cum.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
         fig = eval_utils.plot_obs_sim_cum_year_facet(
             df_eval, labs._Y_LABS_CUM[var_sim], x_lab="Time\n[day-month-hydyear]"
         )
         file_str = "%s_cum_year_facet.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
     plt.close("all")
 
     # compare best 10 simulations with observations
@@ -1036,18 +1036,18 @@ def main(tmp_dir):
         fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
         file_str = "%s_best_10.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
         # plot cumulated observed and simulated time series
         fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab="Time [year]")
         file_str = "%s_cum_best_10.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
         fig = eval_utils.plot_obs_sim_cum_year_facet(
             df_eval, labs._Y_LABS_CUM[var_sim], x_lab="Time\n[day-month-hydyear]"
         )
         file_str = "%s_cum_year_facet_best_10.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
     plt.close("all")
 
     # compare best 100 simulations with observations
@@ -1074,18 +1074,18 @@ def main(tmp_dir):
         fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
         file_str = "%s_best_100.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
         # plot cumulated observed and simulated time series
         fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab="Time [year]")
         file_str = "%s_cum_best_100.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
         fig = eval_utils.plot_obs_sim_cum_year_facet(
             df_eval, labs._Y_LABS_CUM[var_sim], x_lab="Time\n[day-month-hydyear]"
         )
         file_str = "%s_cum_year_facet_best_100.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
     plt.close("all")
 
     # compare best simulation corresponding to best transport model with observations
@@ -1112,18 +1112,18 @@ def main(tmp_dir):
         fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
         file_str = "%s_best_for_tm.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
         # plot cumulated observed and simulated time series
         fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab="Time [year]")
         file_str = "%s_cum_best_for_tm.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
         fig = eval_utils.plot_obs_sim_cum_year_facet(
             df_eval, labs._Y_LABS_CUM[var_sim], x_lab="Time\n[day-month-hydyear]"
         )
         file_str = "%s_cum_year_facet_best_for_tm.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
     plt.close("all")
 
     vars_obs = ["PREC", "PREC_corr"]
@@ -1141,18 +1141,18 @@ def main(tmp_dir):
         fig = eval_utils.plot_obs_sim(df_eval, labs._Y_LABS_DAILY[var_sim])
         file_str = "%s.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
         # plot cumulated observed and simulated time series
         fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab="Time [year]")
         file_str = "%s_cum.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
         fig = eval_utils.plot_obs_sim_cum_year_facet(
             df_eval, labs._Y_LABS_CUM[var_sim], x_lab="Time\n[day-month-hydyear]"
         )
         file_str = "%s_cum_year_facet.pdf" % (var_sim)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
     plt.close("all")
 
     fig, axs = plt.subplots(1, 1, figsize=(6, 1.2))
@@ -1162,7 +1162,7 @@ def main(tmp_dir):
     axs.set_xlim(df_eval.index[0], df_eval.index[-1])
     fig.tight_layout()
     file = base_path_figs / "prec_residuals.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     vars_obs = ["TA"]
@@ -1175,7 +1175,7 @@ def main(tmp_dir):
         fig = eval_utils.plot_sim(df_obs, labs._Y_LABS_DAILY[var_sim])
         file_str = "%s.pdf" % (var_obs)
         path_fig = base_path_figs / file_str
-        fig.savefig(path_fig, dpi=250)
+        fig.savefig(path_fig, dpi=300)
     plt.close("all")
 
     # compare HYDRUS-1D simulations with observations
@@ -1488,10 +1488,10 @@ def main(tmp_dir):
     fig.tight_layout()
     file = f"prec_et_dS_perc_obs_sim_cumulated_optimized_with_{metric_for_opt}.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
     file = f"prec_et_dS_perc_obs_sim_cumulated_optimized_with_{metric_for_opt}.pdf"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     # compare best 100 simulations with observations
     nx = ds_sim_hm100.dims["x"]
@@ -1770,10 +1770,10 @@ def main(tmp_dir):
     fig.tight_layout()
     file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
     file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}.pdf"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     # compare best 10 simulations with observations
     nx = ds_sim_hm10.dims["x"]
@@ -2047,10 +2047,10 @@ def main(tmp_dir):
     fig.tight_layout()
     file = f"prec_et_dS_perc_obs_sim_cumulated_best_10_optimized_with_{metric_for_opt}.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
     file = f"prec_et_dS_perc_obs_sim_cumulated_best_10_optimized_with_{metric_for_opt}.pdf"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     # plot evapotranspiration, soil storage change and percolation
     years = onp.arange(1997, 2008).tolist()
@@ -2157,10 +2157,10 @@ def main(tmp_dir):
         fig.tight_layout()
         file = f"prec_et_dS_perc_obs_sim_{year}_optimized_with_{metric_for_opt}.png"
         path = base_path_figs / file
-        fig.savefig(path, dpi=250)
+        fig.savefig(path, dpi=300)
         file = f"prec_et_dS_perc_obs_sim_{year}_optimized_with_{metric_for_opt}.pdf"
         path = base_path_figs / file
-        fig.savefig(path, dpi=250)
+        fig.savefig(path, dpi=300)
 
     # plot evapotranspiration, soil storage change and percolation corresponding to best transport model
     years = onp.arange(1997, 2008).tolist()
@@ -2243,10 +2243,10 @@ def main(tmp_dir):
         fig.tight_layout()
         file = f"prec_et_dS_perc_obs_sim_{year}_optimized_with_{metric_for_opt}_for_best_tm.png"
         path = base_path_figs / file
-        fig.savefig(path, dpi=250)
+        fig.savefig(path, dpi=300)
         file = f"prec_et_dS_perc_obs_sim_{year}_optimized_with_{metric_for_opt}_for_best_tm.pdf"
         path = base_path_figs / file
-        fig.savefig(path, dpi=250)
+        fig.savefig(path, dpi=300)
 
     # plot cumulated precipitation, evapotranspiration, soil storage change and percolation corresponding to best transport model
     fig, axes = plt.subplots(3, 2, sharex="col", figsize=(6, 3))
@@ -2512,10 +2512,10 @@ def main(tmp_dir):
     fig.tight_layout()
     file = f"prec_et_dS_perc_obs_sim_cumulated_optimized_with_{metric_for_opt}_for_best_tm.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
     file = f"prec_et_dS_perc_obs_sim_cumulated_optimized_with_{metric_for_opt}_for_best_tm.pdf"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     # plot macropore infiltration
     df_params_mp_100 = df_params_metrics100.loc[: df_params_metrics100.index[99], ["lmpv", "dmpv", "ks"]]
@@ -2549,7 +2549,7 @@ def main(tmp_dir):
     fig.tight_layout()
     file = "inf_mp_share_vs_mp_params1.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     res = sp.stats.linregress(df_params_mp_100["ks"].values, df_params_mp_100["inf_mp_share"].values)
     xpred = onp.arange(5, 150)
@@ -2603,7 +2603,7 @@ def main(tmp_dir):
     fig.subplots_adjust(bottom=0.15, right=0.75, left=0.12, top=0.98)
     file = "inf_mp_share_vs_mp_params.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     fig, axes = plt.subplots(1, 1, sharex="col", figsize=(6, 1.5))
     prec = ds_sim_hm100["prec"].isel(x=0, y=0).values
@@ -2627,10 +2627,10 @@ def main(tmp_dir):
     fig.tight_layout()
     file = f"inf_mp_best_100_optimized_with_{metric_for_opt}.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
     file = f"inf_mp_best_100_optimized_with_{metric_for_opt}.pdf"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     fig, axes = plt.subplots(1, 1, sharex="col", figsize=(6, 1.5))
     prec = ds_sim_hm100["prec"].isel(x=0, y=0).values
@@ -2663,10 +2663,10 @@ def main(tmp_dir):
     fig.tight_layout()
     file = f"inf_mp_cumulated_best_100_optimized_with_{metric_for_opt}.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
     file = f"inf_mp_cumulated_best_100_optimized_with_{metric_for_opt}.pdf"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     fig, axes = plt.subplots(1, 1, sharex="col", figsize=(6, 1.5))
     prec = ds_sim_hm100["prec"].isel(x=0, y=0).values
@@ -2699,10 +2699,10 @@ def main(tmp_dir):
     fig.tight_layout()
     file = f"inf_mp_conf_int_best_100_optimized_with_{metric_for_opt}.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
     file = f"inf_mp_conf_int_best_100_optimized_with_{metric_for_opt}.pdf"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     fig, axes = plt.subplots(1, 1, sharex="col", figsize=(6, 1.5))
     prec = ds_sim_hm100["prec"].isel(x=0, y=0).values
@@ -2743,10 +2743,10 @@ def main(tmp_dir):
     fig.tight_layout()
     file = f"inf_mp_cumulated_conf_int_best_100_optimized_with_{metric_for_opt}.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
     file = f"inf_mp_cumulated_conf_int_best_100_optimized_with_{metric_for_opt}.pdf"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     fig, axes = plt.subplots(1, 1, sharex="col", figsize=(6, 1.5))
     prec = ds_sim_hm100["prec"].isel(x=0, y=0).values
@@ -2787,10 +2787,10 @@ def main(tmp_dir):
     fig.tight_layout()
     file = f"inf_mp_ss_cumulated_conf_int_best_100_optimized_with_{metric_for_opt}.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
     file = f"inf_mp_ss_cumulated_conf_int_best_100_optimized_with_{metric_for_opt}.pdf"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     # load metrics of transport simulations
     dict_params_metrics_tm_mc = {}
@@ -2849,7 +2849,7 @@ def main(tmp_dir):
 
     fig.tight_layout()
     file = base_path_figs / f"dotty_plots_hm_params_kge_d18O_perc_optimized_with_{metric_for_opt}.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close("all")
 
     fig, axes = plt.subplots(2, 4, sharey=True, figsize=(6, 3))
@@ -2880,7 +2880,7 @@ def main(tmp_dir):
 
     fig.tight_layout()
     file = base_path_figs / f"dotty_plots1_hm_params_kge_d18O_perc_optimized_with_{metric_for_opt}.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close("all")
 
     fig, axes = plt.subplots(3, 4, sharey=True, figsize=(6, 5))
@@ -2911,7 +2911,7 @@ def main(tmp_dir):
 
     fig.tight_layout()
     file = base_path_figs / f"dotty_plots2_hm_params_kge_d18O_perc_optimized_with_{metric_for_opt}.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close("all")
 
     fig, axes = plt.subplots(3, 4, sharey=True, figsize=(6, 5))
@@ -2942,7 +2942,7 @@ def main(tmp_dir):
 
     fig.tight_layout()
     file = base_path_figs / f"dotty_plots3_hm_params_kge_d18O_perc_optimized_with_{metric_for_opt}.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close("all")
 
     fig, axes = plt.subplots(6, 2, figsize=(4, 8))
@@ -2982,7 +2982,7 @@ def main(tmp_dir):
 
     fig.tight_layout()
     file = base_path_figs / f"dotty_plots_sas_params_kge_d18O_perc_optimized_with_{metric_for_opt}.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close("all")
 
     # write evaluation metrics for different storage condtions to .txt
@@ -3043,9 +3043,9 @@ def main(tmp_dir):
     ax[-1].set_xlabel("Time [year]")
     fig.tight_layout()
     file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.pdf"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
 
     # insets for 3 years
     years = onp.arange(1997, 2006).tolist()
@@ -3106,7 +3106,7 @@ def main(tmp_dir):
         ax[-1].set_xlabel("Time [year]")
         fig.tight_layout()
         file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}_{year}_{year+2}.png"
-        fig.savefig(file, dpi=250)
+        fig.savefig(file, dpi=300)
 
     fig, ax = plt.subplots(5, 1, sharex=True, figsize=(6, 6))
     tm_structures_extra = [
@@ -3158,7 +3158,7 @@ def main(tmp_dir):
     ax[-1].set_xlabel("Time [year]")
     fig.tight_layout()
     file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_extra1_optimized_with_{metric_for_opt}.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
 
     fig, ax = plt.subplots(3, 1, sharex=True, figsize=(6, 3))
     tm_structures_extra = ["advection-dispersion-kumaraswamy", "time-variant advection-dispersion-kumaraswamy"]
@@ -3205,7 +3205,7 @@ def main(tmp_dir):
     ax[-1].set_xlabel("Time [year]")
     fig.tight_layout()
     file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_extra2_optimized_with_{metric_for_opt}.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
 
     fig, ax = plt.subplots(4, 1, sharey=False, figsize=(6, 5))
     for i, tm_structure in enumerate(tm_structures):
@@ -3249,7 +3249,7 @@ def main(tmp_dir):
     ax[-1].set_xlabel("Time [year]")
     fig.tight_layout()
     file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_conf_int_optimized_with_{metric_for_opt}.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
 
     fig, ax = plt.subplots(4, 1, sharey=False, figsize=(6, 5))
     tm_structures_extra = [
@@ -3301,7 +3301,7 @@ def main(tmp_dir):
     ax[-1].set_xlabel("Time [year]")
     fig.tight_layout()
     file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_conf_int_optimized_with_{metric_for_opt}_extra.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
 
     # compare duration curve of 18O in percolation
     fig, ax = plt.subplots(1, 4, sharey=True, figsize=(6, 1.8))
@@ -3368,7 +3368,7 @@ def main(tmp_dir):
     ax[3].set_xlabel("Exceedence probabilty [-]", fontsize=8)
     fig.tight_layout()
     file = base_path_figs / f"fdc_d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
 
     # plot evapotranspiration, soil storage change, percolation and 18O in percolation
     years = onp.arange(1997, 2008).tolist()
@@ -3472,10 +3472,10 @@ def main(tmp_dir):
         fig.tight_layout()
         file = f"prec_et_dS_perc_d18O_obs_sim_{year}.png"
         path = base_path_figs / file
-        fig.savefig(path, dpi=250)
+        fig.savefig(path, dpi=300)
         file = f"prec_et_dS_perc_d18O_obs_sim_{year}.pdf"
         path = base_path_figs / file
-        fig.savefig(path, dpi=250)
+        fig.savefig(path, dpi=300)
 
     # bromide benchmark
     years = onp.arange(1997, 2007).tolist()
@@ -3589,9 +3589,9 @@ def main(tmp_dir):
         fig.legend(lines2, labels2, loc="lower right", fontsize=8, frameon=False, bbox_to_anchor=(0.97, 0.07))
         fig.subplots_adjust(bottom=0.1, right=0.8, top=1.0, hspace=0.2)
         file = base_path_figs / f"bromide_benchmark_alpha_{alpha}.png"
-        fig.savefig(file, dpi=250)
+        fig.savefig(file, dpi=300)
         file = base_path_figs / f"bromide_benchmark_alpha_{alpha}.pdf"
-        fig.savefig(file, dpi=250)
+        fig.savefig(file, dpi=300)
 
     # travel time benchmark
     # compare backward travel time distributions
@@ -3674,10 +3674,10 @@ def main(tmp_dir):
     fig.tight_layout()
     file_str = "bTTD_benchmark.png"
     path_fig = base_path_figs / file_str
-    fig.savefig(path_fig, dpi=250)
+    fig.savefig(path_fig, dpi=300)
     file_str = "bTTD_benchmark.pdf"
     path_fig = base_path_figs / file_str
-    fig.savefig(path_fig, dpi=250)
+    fig.savefig(path_fig, dpi=300)
 
     # plot cumulative backward travel time distributions
     skipt = 1000
@@ -3692,7 +3692,7 @@ def main(tmp_dir):
     fig.tight_layout()
     file_str = "bTTD_hydrus.png"
     path_fig = base_path_figs / file_str
-    fig.savefig(path_fig, dpi=250)
+    fig.savefig(path_fig, dpi=300)
 
     # plot cumulative forward travel time distributions
     skipt = 1000
@@ -3707,7 +3707,7 @@ def main(tmp_dir):
     fig.tight_layout()
     file_str = "fTTD_hydrus.png"
     path_fig = base_path_figs / file_str
-    fig.savefig(path_fig, dpi=250)
+    fig.savefig(path_fig, dpi=300)
 
     # compare age statistics
     df_age = pd.DataFrame(index=["MTT_transp", "MTT_perc"], columns=["CM", "PI", "AD", "AD-TV", "HYDRUS-1D"])
@@ -3767,7 +3767,7 @@ def main(tmp_dir):
         file = f"diag_polar_plot_{var_sim}_{tms}.pdf"
         path = base_path_figs / file
         # fig.tight_layout()
-        fig.savefig(path, dpi=250)
+        fig.savefig(path, dpi=300)
 
     # perform sensitivity analysis
     dict_params_metrics_tm_sa = {}
@@ -3845,7 +3845,7 @@ def main(tmp_dir):
         # fig.subplots_adjust(bottom=0.1, right=0.95, hspace=0.65)
         fig.tight_layout()
         file = base_path_figs / f"sobol_indices_{metric_tt}_hm.png"
-        fig.savefig(file, dpi=250)
+        fig.savefig(file, dpi=300)
 
         metrics_sa = [f"{metric_tt}_transp", f"{metric_tt}_q_ss", "KGE_C_iso_q_ss"]
         ncol = len(metrics_sa)
@@ -3882,7 +3882,7 @@ def main(tmp_dir):
         ax[1, 0].set_ylabel("AD-TV\nSobol index [-]")
         fig.tight_layout()
         file = base_path_figs / f"sobol_indices_{metric_tt}_tm.png"
-        fig.savefig(file, dpi=250)
+        fig.savefig(file, dpi=300)
 
     metrics_sa = ["rtavg_s", "rt25_s", "rt50_s", "rt75_s"]
     ncol = len(metrics_sa)
@@ -3920,7 +3920,7 @@ def main(tmp_dir):
     ax[3, 0].set_ylabel("AD-TV\nSobol index [-]")
     fig.subplots_adjust(bottom=0.2, right=0.85, hspace=0.65)
     file = base_path_figs / "sobol_indices_rt_hm.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
 
     ncol = len(metrics_sa)
     nrow = 2
@@ -3956,7 +3956,7 @@ def main(tmp_dir):
     ax[1, 0].set_ylabel("AD-TV\nSobol index [-]")
     fig.subplots_adjust(bottom=0.2, right=0.85, hspace=0.65)
     file = base_path_figs / "sobol_indices_rt_tm.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
 
     metrics_sa = ["KGE_C_iso_q_ss"]
     nrow = len(metrics_sa)
@@ -3995,7 +3995,7 @@ def main(tmp_dir):
     ax[0].set_ylabel("Sobol index [-]")
     fig.tight_layout()
     file = base_path_figs / "sobol_indices_kge_18O_perc_hm.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
 
     nrow = len(metrics_sa)
     ncol = 2
@@ -4031,7 +4031,7 @@ def main(tmp_dir):
     ax[0].set_ylabel("Sobol index [-]")
     fig.tight_layout()
     file = base_path_figs / "sobol_indices_kge_18O_perc_tm.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
 
     # dotty plots of HYDRUS-1D monte carlo simulations
     file = base_path / "hydrus_benchmark" / "params_metrics.txt"
@@ -4074,9 +4074,9 @@ def main(tmp_dir):
 
     fig.subplots_adjust(bottom=0.15, left=0.1, top=0.98, right=0.98, wspace=0.2, hspace=0.3)
     file = base_path_figs / "dotty_plots_hydrus.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     file = base_path_figs / "dotty_plots_hydrus.pdf"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
 
     # plot mean residence time along soil depth
     cmap = copy.copy(plt.cm.get_cmap("Blues_r"))
@@ -4108,7 +4108,7 @@ def main(tmp_dir):
     fig.subplots_adjust(bottom=0.3, right=0.85)
     file = "mean_residence_time_soil.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     # plot soil bromide concentrations
     years = onp.arange(1997, 2007).tolist()
@@ -4146,7 +4146,7 @@ def main(tmp_dir):
     fig.subplots_adjust(left=0.1, bottom=0.05, top=0.98, right=0.85, hspace=0.7)
     file = "bromide_conc_soil.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     # plot soil bromide mass
     years = onp.arange(1997, 2007).tolist()
@@ -4184,7 +4184,7 @@ def main(tmp_dir):
     fig.subplots_adjust(left=0.1, bottom=0.05, top=0.98, right=0.85, hspace=0.7)
     file = "bromide_mass_soil.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     # plot isotope ratios of precipitation, soil and percolation
     cmap = copy.copy(plt.cm.get_cmap("YlGnBu_r"))
@@ -4237,7 +4237,7 @@ def main(tmp_dir):
     fig.subplots_adjust(bottom=0.15, right=0.85)
     file = "hydrus_d18O_prec_soil_perc.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     # plot precipitation, soil water content and percolation
     cmap = copy.copy(plt.cm.get_cmap("YlGnBu"))
@@ -4278,7 +4278,7 @@ def main(tmp_dir):
     fig.subplots_adjust(bottom=0.15, right=0.85)
     file = "hydrus_prec_theta_perc.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
     plt.close("all")
 
     # figures for talk
@@ -4331,7 +4331,7 @@ def main(tmp_dir):
     )
     fig.text(0.15, 0.46, "(b)", ha="center", va="center", fontsize=8)
     file = base_path_figs / "observed_d18O_prec_perc_for_talk.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
     # compare best 100 simulations with observations
@@ -4557,10 +4557,10 @@ def main(tmp_dir):
     fig.tight_layout()
     file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}_for_talk.png"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
     file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}_for_talk.pdf"
     path = base_path_figs / file
-    fig.savefig(path, dpi=250)
+    fig.savefig(path, dpi=300)
 
     # simulated oxygen-18 in percolation
     fig, ax = plt.subplots(3, 1, sharex=True, figsize=(6, 4))
@@ -4610,7 +4610,7 @@ def main(tmp_dir):
     ax[-1].set_xlabel("Time [year]")
     fig.tight_layout()
     file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
 
     # virtual bromide experiment
     years = onp.arange(1997, 2007).tolist()
@@ -4717,7 +4717,7 @@ def main(tmp_dir):
         fig.legend(lines2, labels2, loc="lower right", fontsize=6, frameon=False, bbox_to_anchor=(0.97, 0.07))
         fig.subplots_adjust(bottom=0.1, right=0.85, hspace=0.2)
         file = base_path_figs / f"bromide_benchmark_alpha_{alpha}_for_talk.png"
-        fig.savefig(file, dpi=250)
+        fig.savefig(file, dpi=300)
 
     # backward travel time distributions of transpiration and percolation
     fig, axes = plt.subplots(2, 3, sharey=True, figsize=(4, 3))
@@ -4799,7 +4799,7 @@ def main(tmp_dir):
     fig.tight_layout()
     file_str = "bTTD_benchmark_for_talk.png"
     path_fig = base_path_figs / file_str
-    fig.savefig(path_fig, dpi=250)
+    fig.savefig(path_fig, dpi=300)
 
     plt.close("all")
     return
