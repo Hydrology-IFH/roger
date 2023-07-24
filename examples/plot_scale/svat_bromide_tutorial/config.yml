@@ -1,3 +1,17 @@
+# --- Settings --------------------------------------------------------------
+# name of the model run; is used to name the output files
+identifier: SVATBROMIDE
+# spatial discretization in x-direction (in meters)
+dx: 1
+# spatial discretization in y-direction (in meters)
+dy: 1
+# origin of spatial grid
+x_origin: 0
+# origin of spatial grid
+y_origin: 0
+# number of substeps per timestep
+SAS_SOLVER_SUBSTEPS: 6
+
 # --- Parameters ---------------------------------------------------------------
 SAS_SOLVER: 'RK4'
 TRANSPORT_MODEL_STRUCTURE: 'power'
@@ -11,6 +25,6 @@ OUTPUT_COLLECT:
 - "M_s"
 
 OUTPUT_AVERAGE:
-- "TT_transp"
-- "SA_s"
-- "TT_q_ss"
+- "tt50_transp"
+- "rt50_s"
+- "tt50_q_ss"

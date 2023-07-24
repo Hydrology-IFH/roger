@@ -2,11 +2,13 @@ from pathlib import Path
 import h5netcdf
 import numpy as onp
 import yaml
+import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
 @roger_base_cli
-def main():
+def main(tmp_dir):
     from roger import RogerSetup, roger_routine
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, where
@@ -90,7 +92,7 @@ def main():
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f'SVATOXYGEN18_{self._config["TRANSPORT_MODEL_STRUCTURE"]}_{self._config["SAS_SOLVER"]}'
+            settings.identifier = self._config["identifier"]
             settings.sas_solver = self._config["SAS_SOLVER"]
             # number of substeps
             settings.sas_solver_substeps = 6
@@ -373,25 +375,33 @@ def main():
             )
 
         @roger_routine
-        def set_diagnostics(self, state):
+        def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
             diagnostics["rate"].output_variables = self._config["OUTPUT_RATE"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
+            if base_path:
+                diagnostics["rate"].base_output_path = base_path
 
             diagnostics["average"].output_variables = self._config["OUTPUT_AVERAGE"]
             diagnostics["average"].output_frequency = 24 * 60 * 60
             diagnostics["average"].sampling_frequency = 1
+            if base_path:
+                diagnostics["average"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = self._config["OUTPUT_COLLECT"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
+            if base_path:
+                diagnostics["collect"].base_output_path = base_path
 
             # maximum bias of numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error", "dC_num_error"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1
+            if base_path:
+                diagnostics["maximum"].base_output_path = base_path
 
         @roger_routine
         def after_timestep(self, state):

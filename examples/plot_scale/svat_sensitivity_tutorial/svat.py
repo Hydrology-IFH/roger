@@ -5,17 +5,9 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option(
-    "-tms",
-    "--transport-model-structure",
-    type=click.Choice(
-        ["complete-mixing", "piston", "advection-dispersion-power", "time-variant_advection-dispersion-power"]
-    ),
-    default="advection-dispersion-power",
-)
-@click.option("-td", "--tmp-dir", type=str, default=None)
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
 @roger_base_cli
-def main(transport_model_structure, tmp_dir):
+def main(tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at

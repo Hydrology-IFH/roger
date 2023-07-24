@@ -2,7 +2,7 @@
 
 All results have been generated with Roger version 3.0.
 
-- `post_processing.py`: Produces figures and tables from data of the modelling experiment
+- `make_figures_and_tables.py`: Produces figures and tables from data of the modelling experiment
 - `write_moab_jobs.py`: Generates job scripts for computation on BinAC cluster using the MOAB workload manager
 
 ## climate_projections
