@@ -5,6 +5,7 @@ from cftime import num2date
 import matplotlib.dates as mdates
 import numpy as onp
 import click
+import yaml
 import matplotlib as mpl
 import seaborn as sns
 
@@ -51,8 +52,13 @@ def main(tmp_dir):
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
+    # load configuration file
+    file_config = base_path / "config.yml"
+    with open(file_config, "r") as file:
+        config = yaml.safe_load(file)
+
     # load hydrologic simulations
-    states_hm_file = base_path_output / "states_hm.nc"
+    states_hm_file = base_path_output / f"{config['identifier']}.nc"
     ds_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
     # assign date
     days_hm = ds_hm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
