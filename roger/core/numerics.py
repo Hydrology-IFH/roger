@@ -125,6 +125,27 @@ def calc_storage_kernel(state):
         dS=vs.dS,
     )
 
+@roger_kernel
+def calc_storage_with_gwr_kernel(state):
+    vs = state.variables
+
+    vs.S = update(
+        vs.S,
+        at[2:-2, 2:-2, vs.tau],
+        vs.S_sur[2:-2, 2:-2, vs.tau]
+        + vs.S_s[2:-2, 2:-2, vs.tau]
+        + vs.S_vad[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.dS = update(
+        vs.dS, at[2:-2, 2:-2], vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1] * vs.maskCatch[2:-2, 2:-2]
+    )
+
+    return KernelOutput(
+        S=vs.S,
+        dS=vs.dS,
+    )
+
 
 @roger_kernel
 def calc_storage_with_gw_kernel(state):
@@ -159,6 +180,8 @@ def calc_storage(state):
 
     if not settings.enable_groundwater:
         vs.update(calc_storage_kernel(state))
+    elif settings.enable_groundwater_boundary:
+        vs.update(calc_storage_with_gwr_kernel(state))
     elif settings.enable_groundwater:
         vs.update(calc_storage_with_gw_kernel(state))
 
@@ -203,7 +226,7 @@ def calc_dS_num_error(state):
                     vs.prec[2:-2, 2:-2, vs.tau]
                     - vs.q_sur[2:-2, 2:-2]
                     - vs.aet[2:-2, 2:-2]
-                    - vs.q_ss[2:-2, 2:-2]
+                    - vs.q_re[2:-2, 2:-2]
                     - vs.q_sub[2:-2, 2:-2]
                     + vs.cpr_ss[2:-2, 2:-2]
                 )

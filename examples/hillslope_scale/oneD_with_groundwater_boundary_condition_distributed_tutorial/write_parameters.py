@@ -19,6 +19,7 @@ _UNITS = {
     "theta_pwp": "-",
     "ks": "mm/hour",
     "kf": "mm/hour",
+    "n0": "-",
 }
 
 
@@ -85,10 +86,14 @@ def main(nrows, ncols):
             # write parameters to dataframe
             df_params.loc[:, param] = values.flatten()
 
+    df_params.loc[:, 'prec_weight'] = 1
+    df_params.loc[:, 'ta_weight'] = 1
+    df_params.loc[:, 'pet_weight'] = 1
+
     # write parameters to csv
     df_params.columns = [
-        ["", "[mm]", "[-]", "[1/m2]", "[1/m2]", "[mm]", "[-]", "[-]", "[-]", "[mm/hour]", "[mm/hour]"],
-        ["lu_id", "z_soil", "slope", "dmpv", "dmph", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf"],
+        ["", "[mm]", "[-]", "[1/m2]", "[1/m2]", "[mm]", "[-]", "[-]", "[-]", "[mm/hour]", "[mm/hour]", "[-]", "[-]", "[-]", "[-]"],
+        ["lu_id", "z_soil", "slope", "dmph", "dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "n0", "prec_weight", "ta_weight", "pet_weight"],
     ]
     df_params.to_csv(base_path / "parameters.csv", index=False, sep=";")
     return

@@ -169,7 +169,6 @@ class RogerSetup(metaclass=abc.ABCMeta):
           >>>     vs.x_origin, vs.y_origin = 0, 0
           >>>     vs.x = 1.
           >>>     vs.y = 1.
-          >>>     vs.z = 1.
         """
         pass
 
@@ -385,6 +384,10 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     subsoil.calculate_subsoil(state)
                 with state.timers["storage"]:
                     soil.calculate_soil(state)
+
+                if settings.enable_groundwater_boundary:
+                    with state.timers["groundwater recharge"]:
+                        groundwater_flow.calculate_groundwater_recharge(state)
 
                 if settings.enable_groundwater:
                     with state.timers["groundwater flow"]:

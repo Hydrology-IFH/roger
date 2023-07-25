@@ -765,6 +765,14 @@ VARIABLES = {
         "air temperature",
         time_dependent=True,
     ),
+    "ta_weight": Variable(
+        "weight factor of air temperature",
+        CATCH_GRID,
+        "-",
+        "weight factor of air temperature",
+        initial=1.0,
+        active=lambda settings: not settings.enable_offline_transport,
+    ),
     "ta_day": Variable(
         "air temperature",
         CATCH_GRID + TIMESTEPS_DAY,
@@ -2888,7 +2896,7 @@ VARIABLES = {
         "Total vadose zone storage",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_groundwater,
+        active=lambda settings: settings.enable_groundwater or settings.enable_groundwater_boundary,
     ),
     "S_vad": Variable(
         "Vadose zone storage",
@@ -2897,7 +2905,7 @@ VARIABLES = {
         "Vadose zone storage",
         write_to_restart=True,
         time_dependent=True,
-        active=lambda settings: settings.enable_groundwater,
+        active=lambda settings: settings.enable_groundwater or settings.enable_groundwater_boundary,
     ),
     "S_vad_res": Variable(
         "Residual vadose zone storage",
@@ -2906,7 +2914,7 @@ VARIABLES = {
         "Residual vadose zone storage",
         time_dependent=True,
         write_to_restart=True,
-        active=lambda settings: settings.enable_groundwater & settings.enable_groundwater,
+        active=lambda settings: settings.enable_groundwater,
     ),
     "dS_vad": Variable(
         "change of vadose zone storage",
@@ -3021,7 +3029,7 @@ VARIABLES = {
         "mm/dt",
         "groundwater recharge",
         time_dependent=True,
-        active=lambda settings: settings.enable_groundwater,
+        active=lambda settings: settings.enable_groundwater or settings.enable_groundwater_boundary,
     ),
     "q_gw": Variable(
         "lateral groundwater flow",
@@ -3116,6 +3124,14 @@ VARIABLES = {
         CATCH_GRID + TIMESTEPS,
         "mm/dt",
         "precipitation",
+    ),
+    "prec_weight": Variable(
+        "weight factor of precipitation",
+        CATCH_GRID,
+        "-",
+        "weight factor of precipitation",
+        initial=1.0,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "prec_day": Variable(
         "precipitation",
@@ -3669,6 +3685,14 @@ VARIABLES = {
         "mm/dt",
         "potential evapotranspiration",
         time_dependent=True,
+    ),
+    "pet_weight": Variable(
+        "weight factor of potential evapotranspiration",
+        CATCH_GRID,
+        "-",
+        "weight factor of potential evapotranspiration",
+        initial=1.0,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "pet_day": Variable(
         "potential evapotranspiration",

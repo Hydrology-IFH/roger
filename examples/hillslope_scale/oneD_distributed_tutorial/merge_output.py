@@ -23,11 +23,11 @@ with open(file_config, "r") as file:
     config = yaml.safe_load(file)
 
 # merge model output into single file
-path = str(base_path / f"{config['identifier']}.*.nc")
+path = str(base_path_output / f"{config['identifier']}.*.nc")
 diag_files = glob.glob(path)
-states_hm_file = base_path / f"{config['identifier']}.nc"
-if not os.path.exists(states_hm_file):
-    with h5netcdf.File(states_hm_file, "w", decode_vlen_strings=False) as f:
+output_file = base_path_output / f"{config['identifier']}.nc"
+if not os.path.exists(output_file):
+    with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title="RoGeR simulations (Tutorial)",

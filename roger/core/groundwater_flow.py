@@ -61,7 +61,7 @@ def calc_q_bf(state):
     vs = state.variables
     settings = state.settings
 
-    # TODO: update groundwater tabel
+    # TODO: update groundwater table
 
     mask1 = (vs.z_gw > vs.z_stream_tot)
     vs.q_bf = update(
@@ -83,18 +83,52 @@ def calc_q_re(state):
     Calculates groundwater recharge
     """
     vs = state.variables
+    settings = state.settings
 
+
+    mask1 = (vs.z_gw[:, :, vs.tau] > vs.z_soil)
+    vs.S_vad_tot = update(
+        vs.S_vad_tot,
+        at[2:-2, 2:-2, vs.tau], npx.where(mask1[2:-2, 2:-2], (vs.z_gw[2:-2, 2:-2, vs.tau] - vs.z_soil[2:-2, 2:-2]) * vs.n0[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.S_vad = update_add(
+        vs.S_vad,
+        at[2:-2, 2:-2, vs.tau], vs.q_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # linear reservoir
+    k = allocate(state.dimensions, ("x", "y"))
+    k = update(
+        k,
+        at[2:-2, 2:-2], (vs.kf[2:-2, 2:-2] / settings.kf_max) * vs.maskCatch[2:-2, 2:-2],
+    )
     vs.q_re = update(
         vs.q_re,
-        at[2:-2, 2:-2], vs.q_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], k[2:-2, 2:-2, npx.newaxis] * vs.S_vad[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.S_vad = update_add(
+        vs.S_vad,
+        at[2:-2, 2:-2, vs.tau], -vs.q_re[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    vs.S_gw = update_add(
-        vs.S_gw,
-        at[2:-2, 2:-2, vs.tau], vs.q_re[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    # spill over of linear reservoir
+    mask2 = (vs.S_vad[:, :, vs.tau] > vs.S_vad_tot[:, :, vs.tau])
+    spillover = allocate(state.dimensions, ("x", "y"))
+    spillover = update(
+        spillover,
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], (vs.S_vad[2:-2, 2:-2, vs.tau] - vs.S_vad_tot[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.q_re = update_add(
+        vs.q_re,
+        at[2:-2, 2:-2], spillover[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.S_vad = update_add(
+        vs.S_vad,
+        at[2:-2, 2:-2, vs.tau], -vs.spillover[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    return KernelOutput(q_re=vs.q_re, S_gw=vs.S_gw)
+    return KernelOutput(q_re=vs.q_re, S_vad=vs.S_vad, S_vad_tot=vs.S_vad_tot)
 
 
 @roger_kernel
@@ -135,9 +169,18 @@ def calc_groundwater_runoff_routing(state):
 
 
 @roger_routine
+def calculate_groundwater_recharge(state):
+    """
+    Calculates groundwater recharge
+    """
+    vs = state.variables
+
+    vs.update(calc_q_re(state))
+
+@roger_routine
 def calculate_groundwater_flow(state):
     """
-    Calculates groundwater
+    Calculates groundwater recharge and lateral flow
     """
     vs = state.variables
 
