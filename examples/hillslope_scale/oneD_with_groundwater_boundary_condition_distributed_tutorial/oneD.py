@@ -204,6 +204,30 @@ def main(tmp_dir):
                 at[2:-2, 2:-2],
                 self._read_var_from_csv("kf", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
             )
+            # specific yield at the soil surface (-)
+            vs.n0 = update(
+                vs.n0,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("n0", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            )
+            # weight factor of precipitation (-)
+            vs.prec_weight = update(
+                vs.prec_weight,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("prec_weight", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            )
+            # weight factor of air temperature (-)
+            vs.ta_weight = update(
+                vs.ta_weight,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("ta_weight", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            )
+            # weight factor of potential evapotranspiration (-)
+            vs.pet_weight = update(
+                vs.pet_weight,
+                at[2:-2, 2:-2],
+                self._read_var_from_csv("pet_weight", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            )
 
         @roger_routine
         def set_parameters(self, state):
@@ -212,9 +236,24 @@ def main(tmp_dir):
             if (vs.month[vs.tau] != vs.month[vs.taum1]) & (vs.itt > 1):
                 vs.update(calc_parameters_surface_kernel(state))
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=["S_vad"],
+        )
         def set_initial_conditions_setup(self, state):
-            pass
+            vs = state.variables
+
+            # storage of vadose zone (mm)
+            vs.S_vad = update(
+                vs.S_vad,
+                at[2:-2, 2:-2, :vs.taup1],
+                0.5 * vs.n0[2:-2, 2:-2, npx.newaxis] * (self._read_var_from_nc("Z_GW", self._input_dir, "forcing.nc")[0, 0, 0] - vs.z_soil[2:-2, 2:-2, npx.newaxis])
+            )
+            vs.S_vad = update(
+                vs.S_vad,
+                at[:, :, :],
+                npx.where(vs.S_vad < 0, 0, vs.S_vad),
+            )
 
         @roger_routine
         def set_initial_conditions(self, state):
@@ -284,13 +323,13 @@ def main(tmp_dir):
                     vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")[vs.itt_forc]
                 )
                 vs.prec_day = update(
-                    vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                    vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.prec_weight[:, :, npx.newaxis]
                 )
                 vs.ta_day = update(
-                    vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                    vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.ta_weight[:, :, npx.newaxis]
                 )
                 vs.pet_day = update(
-                    vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                    vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.pet_weight[:, :, npx.newaxis]
                 )
                 vs.z_gw = update(vs.z_gw, at[2:-2, 2:-2, vs.tau], vs.Z_GW[npx.newaxis, npx.newaxis, vs.itt_forc])
                 vs.itt_forc = vs.itt_forc + 6 * 24
@@ -390,6 +429,11 @@ def main(tmp_dir):
             vs.S_s,
             at[2:-2, 2:-2, vs.taum1],
             vs.S_s[2:-2, 2:-2, vs.tau],
+        )
+        vs.S_vad = update(
+            vs.S_vad,
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_vad[2:-2, 2:-2, vs.tau],
         )
         vs.S = update(
             vs.S,
@@ -515,6 +559,7 @@ def main(tmp_dir):
             S_rz=vs.S_rz,
             S_ss=vs.S_ss,
             S_s=vs.S_s,
+            S_vad=vs.S_vad,
             S=vs.S,
             z_sat=vs.z_sat,
             z_wf=vs.z_wf,

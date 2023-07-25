@@ -4,6 +4,7 @@ import h5netcdf
 import datetime
 from pathlib import Path
 import numpy as onp
+import yaml
 import roger
 
 base_path = Path(__file__).parent
@@ -16,19 +17,24 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
+# load configuration file
+file_config = base_path / "config.yml"
+with open(file_config, "r") as file:
+    config = yaml.safe_load(file)
+
 # merge model output into single file
-path = str(base_path / "SVAT.*.nc")
+path = str(base_path_output / f"{config['identifier']}.*.nc")
 diag_files = glob.glob(path)
-states_hm_file = base_path / "states_hm.nc"
-if not os.path.exists(states_hm_file):
-    with h5netcdf.File(states_hm_file, "w", decode_vlen_strings=False) as f:
+output_file = base_path_output / f"{config['identifier']}.nc"
+if not os.path.exists(output_file):
+    with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title="RoGeR simulations (Tutorial)",
             institution="University of Freiburg, Chair of Hydrology",
             references="",
             comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-            model_structure="SVAT model with free drainage",
+            model_structure="1D model with groundwater boundary condition",
             roger_version=f"{roger.__version__}",
         )
         # collect dimensions

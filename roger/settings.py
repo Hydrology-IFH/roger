@@ -64,6 +64,7 @@ SETTINGS = {
     "rew_min": Setting(2, float, "minimum readily evaporable water in mm"),
     "rew_max": Setting(12, float, "maximum readily evaporable water in mm"),
     "z_evap_max": Setting(150, float, "maximum soil evaporation depth in mm"),
+    "kf_max": Setting(3600, float, "maximum hydraulic conductivity of becrock in mm/hour"),
     "transp_water_stress": Setting(0.75, float, "fraction of fine pore storage in -"),
     "ccc_decay_rate": Setting(0.005, float, "decay rate of crop canopy cover in -"),
     "basal_crop_coeff_min": Setting(0.15, float, "minimum basal crop coeffcient in -"),

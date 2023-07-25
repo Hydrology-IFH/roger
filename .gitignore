@@ -123,8 +123,10 @@ startup.py
 *.xlsx
 
 # Examples
+examples/*/*/output/*
 examples/*/*/results/
 examples/*/*/figures/
+examples/*/*/*/output/*
 examples/*/*/*/results/
 examples/*/*/*/figures/
 examples/*/*/test_*
