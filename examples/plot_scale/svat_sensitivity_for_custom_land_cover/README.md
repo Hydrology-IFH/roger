@@ -12,6 +12,16 @@ SVAT indicates that only vertical processes are considered.
 - `netcdf_to_csv.py`: Writes output to csv files
 - `make_figures_and_tables.py`: Produces figures and tables
 
+# Custom land cover
+The custom land cover class is implemented by `lu_id` = 60. The seasonal variation of the interception storage capacity (`S_int_ground_tot` in mm) is implmented as:
+
+| Jan   | Feb   | Mar   | Apr   | May   | Jun   | Jul   | Aug   | Sep   | Oct   | Nov   | Dec   | 
+| ------| ------| ------| ------| ------| ------| ------| ------| ------| ------| ------| ------|
+| 1     | 1     | 1     | 0.8   | 0.6   | 0.4   | 0.2   | 0.4   | 0.6   | 0.7   | 0.8   | 1     |
+
+`c_int` scales the interception storage capacity. Similarly, `c_root` scales the default root depth of `lu_id` = 60 is 400 mm.
+`S_int_ground_tot_sum`= 8.5 mm (i.e. sum of rows in Table above)
+
 # Date requirements
 
 The following information is required to run the model. 
@@ -58,13 +68,13 @@ python write_parameters.py
 ```
 
 Format of `parameters.csv` for which each row contains the parameters for a grid cell:
-| lu_id | z_soil   | dmpv  | lmpv  | theta_pwp | theta_ufc | theta_ac | ks  | kf   | c_int | c_root |
-| ------| ---------| ------| ------| ----------| ----------| ---------| ----| -----| ------| -------|
-| 8     | 1000     | 25    | 200   | 0.2       | 0.11      | 0.09     | 5   | 2500 | 0.8   | 0.8    |  
-| 8     | 1000     | 30    | 300   | 0.18      | 0.1       | 0.08     | 6   | 2500 | 1.2   | 1.2    |
-| ...   | ...      | ...   | ...   | ...       | ...       | ...      | ... | ...  | ...   | ...    |
+| lu_id | z_soil   | dmpv  | lmpv  | theta_pwp | theta_ufc | theta_ac | ks  | kf   | z_root| c_root | c_int | S_int_ground_tot_sum |
+| ------| ---------| ------| ------| ----------| ----------| ---------| ----| -----| ------| -------| ------| ------|
+| 8     | 1000     | 25    | 200   | 0.2       | 0.11      | 0.09     | 5   | 2500 | 320   | 0.8    | 0.8   | 6.8   |  
+| 8     | 1000     | 30    | 300   | 0.18      | 0.1       | 0.08     | 6   | 2500 | 480   | 1.2    | 1.2   | 10.2  |
+| ...   | ...      | ...   | ...   | ...       | ...       | ...      | ... | ...  | ...   | ...    | ...   | ...   |
 
-where *lu_id* is the land cover, *z_soil* is the soil depth (mm), *dmpv* is the density of vertical macropores (1/$m^2$), *lmpv* is the length of vertical macropores (mm), *theta_pwp* is soil water content of the permanent wilting point (-), *theta_ufc* is soil water content of the usable field capacity (-), *theta_ac* is soil water content of the air capacity (-), *ks* is the saturated hydraulic conductivity (mm/hour), *kf* is the hydraulic conductivity of the bedrock (mm/hour), *c_int* is the scale parameter for the interception storage capacity (-) and *c_root* is the scale parameter for the root depth (-).
+where *lu_id* is the land cover, *z_soil* is the soil depth (mm), *dmpv* is the density of vertical macropores (1/$m^2$), *lmpv* is the length of vertical macropores (mm), *theta_pwp* is soil water content of the permanent wilting point (-), *theta_ufc* is soil water content of the usable field capacity (-), *theta_ac* is soil water content of the air capacity (-), *ks* is the saturated hydraulic conductivity (mm/hour), *kf* is the hydraulic conductivity of the bedrock (mm/hour), *z_root* is the scaled root depth (mm; $400 mm \cdot c_{root}$), *c_root* is the scale parameter for the root depth (-), *c_int* is the scale parameter for the interception storage capacity (-) and *S_int_ground_tot_sum* is the scaled sum of the interception storage capacity (mm).
 
 ## Model settings
 Name of model experiment and spatial discretization are defined in `config.yml`.

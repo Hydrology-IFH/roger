@@ -104,9 +104,8 @@ def main(tmp_dir):
 
             # custom land cover
             # interception storage capacity of lower interception storage for custom land cover (mm)
-            sit = self._config["S_int_tot"]
             vs.lut_ilu = update(
-                vs.lut_ilu, at[-1, :], npx.array([60, sit, sit, sit, sit, sit, sit, sit, sit, sit, sit, sit, sit])
+                vs.lut_ilu, at[-1, :], npx.array([60, 1, 1, 1, 0.8, 0.6, 0.4, 0.2, 0.4, 0.6, 0.7, 0.8, 1])
             )
             # root depth for custom land cover (mm)
             vs.lut_rdlu = update(vs.lut_rdlu, at[-1, :], npx.array([60, 400, 400, 0, 0, 0, 0]))
