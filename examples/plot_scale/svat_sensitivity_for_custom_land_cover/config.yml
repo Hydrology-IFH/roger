@@ -15,8 +15,6 @@ y_origin: 0
 # --- Constant parameters -----------------------------------------------------
 # land cover
 lu_id: 60
-# capacity of interception storage (in mm)
-S_int_tot: 1
 # root depth (in mm)
 z_root: 400
 # soil depth (in mm)

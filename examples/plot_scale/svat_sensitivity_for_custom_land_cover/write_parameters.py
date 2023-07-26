@@ -60,7 +60,7 @@ def main():
     df_params.loc[:, "theta_ufc"] = (1 - df_params.loc[:, "frac_lp"]) * df_params.loc[:, "theta_eff"]
     df_params.loc[:, "z_root"] = df_params.loc[:, "c_root"] * config["z_root"]
     # set storaga capacity of lower interception storage (mm)
-    df_params.loc[:, "S_int_ground_tot"] = df_params.loc[:, "c_int"] * config["z_root"]
+    df_params.loc[:, "S_int_ground_tot_sum"] = df_params.loc[:, "c_int"] * 8.5
 
     df_params = df_params.loc[
         :,
@@ -78,7 +78,7 @@ def main():
             "frac_lp",
             "z_root",
             "c_root",
-            "S_int_ground_tot",
+            "S_int_ground_tot_sum",
             "c_int",
         ],
     ]
@@ -116,7 +116,7 @@ def main():
             "frac_lp",
             "z_root",
             "c_root",
-            "S_int_ground_tot",
+            "S_int_ground_tot_sum",
             "c_int",
         ],
     ]

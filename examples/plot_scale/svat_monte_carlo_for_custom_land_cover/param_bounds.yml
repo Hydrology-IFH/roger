@@ -1,7 +1,7 @@
 # Scale parameter for intereption storage capacity (-)
 c_int:
-- 0.5
-- 1.5
+- 0.5  # lower boundary
+- 1.5  # upper boundary
 # Scale parameter for root depth (-)
 c_root:
 - 0.5

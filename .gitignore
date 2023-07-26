@@ -130,6 +130,7 @@ examples/*/*/*/output/*
 examples/*/*/*/results/
 examples/*/*/*/figures/
 examples/*/*/test_*
+examples/*/*/jordan_*
 EVENTS.txt
 examples/*/*/deterministic/
 examples/*/*/*/deterministic/
