@@ -142,6 +142,10 @@ examples/*/*/hydrus_benchmark/*.txt
 examples/*/*/hydrus_benchmark/*.py
 input_examples/
 examples/plot_scale/reckenholz/
+examples/plot_scale/reckenholz/input
+examples/plot_scale/reckenholz/output
+examples/plot_scale/reckenholz/observations
+examples/plot_scale/reckenholz/README.md
 examples/plot_scale/reckenholz_film/
 examples/plot_scale/stgallen/
 examples/plot_scale/freiburg_altheim_kupferzell/climate_projections

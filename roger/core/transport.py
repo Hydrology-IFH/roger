@@ -988,6 +988,9 @@ def svat_transport_model_deterministic(state):
         calculate_ageing(state)
     if settings.enable_oxygen18 or settings.enable_deuterium:
         vs.update(after_substep_iso(state))
+    elif settings.enable_nitrate:
+        vs.update(after_substep_anion(state))
+        vs.update(after_substep_nitrate(state))
     else:
         vs.update(after_substep_anion(state))
 
@@ -1033,6 +1036,9 @@ def svat_lbc_transport_model_deterministic(state):
         calculate_ageing(state)
     if settings.enable_oxygen18 or settings.enable_deuterium:
         vs.update(after_substep_iso(state))
+    elif settings.enable_nitrate:
+        vs.update(after_substep_anion(state))
+        vs.update(after_substep_nitrate(state))
     else:
         vs.update(after_substep_anion(state))
 
@@ -1078,6 +1084,9 @@ def svat_crop_transport_model_deterministic(state):
         calculate_ageing(state)
     if settings.enable_oxygen18 or settings.enable_deuterium:
         vs.update(after_substep_iso(state))
+    elif settings.enable_nitrate:
+        vs.update(after_substep_anion(state))
+        vs.update(after_substep_nitrate(state))
     else:
         vs.update(after_substep_anion(state))
 
@@ -1123,6 +1132,9 @@ def oneD_transport_model_deterministic(state):
         calculate_ageing(state)
     if settings.enable_oxygen18 or settings.enable_deuterium:
         vs.update(after_substep_iso(state))
+    elif settings.enable_nitrate:
+        vs.update(after_substep_anion(state))
+        vs.update(after_substep_nitrate(state))
     else:
         vs.update(after_substep_anion(state))
 
@@ -3152,9 +3164,21 @@ def calculate_storage_selection(state):
                     write_output(state)
                 if (vs.time % (24 * 60 * 60) == 0):
                     calculate_ageing(state)
-                    vs.update(after_substep_anion(state))
+                    if (settings.enable_oxygen18 | settings.enable_deuterium):
+                        vs.update(after_substep_iso(state))
+                    elif settings.enable_nitrate:
+                        vs.update(after_substep_anion(state))
+                        vs.update(after_substep_nitrate(state))
+                    else:
+                        vs.update(after_substep_anion(state))
                 else:
-                    vs.update(after_substep_anion(state))
+                    if (settings.enable_oxygen18 | settings.enable_deuterium):
+                        vs.update(after_substep_iso(state))
+                    elif settings.enable_nitrate:
+                        vs.update(after_substep_anion(state))
+                        vs.update(after_substep_nitrate(state))
+                    else:
+                        vs.update(after_substep_anion(state))
                 vs.itt_substep = i
 
         elif settings.sas_solver == "RK4":
@@ -3177,9 +3201,21 @@ def calculate_storage_selection(state):
                     write_output(state)
                 if (vs.time % (24 * 60 * 60) == 0):
                     calculate_ageing(state)
-                    vs.update(after_substep_anion(state))
+                    if (settings.enable_oxygen18 | settings.enable_deuterium):
+                        vs.update(after_substep_iso(state))
+                    elif settings.enable_nitrate:
+                        vs.update(after_substep_anion(state))
+                        vs.update(after_substep_nitrate(state))
+                    else:
+                        vs.update(after_substep_anion(state))
                 else:
-                    vs.update(after_substep_anion(state))
+                    if (settings.enable_oxygen18 | settings.enable_deuterium):
+                        vs.update(after_substep_iso(state))
+                    elif settings.enable_nitrate:
+                        vs.update(after_substep_anion(state))
+                        vs.update(after_substep_nitrate(state))
+                    else:
+                        vs.update(after_substep_anion(state))
                 vs.itt_substep = i
 
         else:
@@ -3211,11 +3247,17 @@ def calculate_storage_selection(state):
                     calculate_ageing(state)
                     if (settings.enable_oxygen18 | settings.enable_deuterium):
                         vs.update(after_substep_iso(state))
+                    elif settings.enable_nitrate:
+                        vs.update(after_substep_anion(state))
+                        vs.update(after_substep_nitrate(state))
                     else:
                         vs.update(after_substep_anion(state))
                 else:
                     if (settings.enable_oxygen18 | settings.enable_deuterium):
                         vs.update(after_substep_iso(state))
+                    elif settings.enable_nitrate:
+                        vs.update(after_substep_anion(state))
+                        vs.update(after_substep_nitrate(state))
                     else:
                         vs.update(after_substep_anion(state))
                 vs.itt_substep = i
@@ -3245,11 +3287,17 @@ def calculate_storage_selection(state):
                     calculate_ageing(state)
                     if (settings.enable_oxygen18 | settings.enable_deuterium):
                         vs.update(after_substep_iso(state))
+                    elif settings.enable_nitrate:
+                        vs.update(after_substep_anion(state))
+                        vs.update(after_substep_nitrate(state))
                     else:
                         vs.update(after_substep_anion(state))
                 else:
                     if (settings.enable_oxygen18 | settings.enable_deuterium):
                         vs.update(after_substep_iso(state))
+                    elif settings.enable_nitrate:
+                        vs.update(after_substep_anion(state))
+                        vs.update(after_substep_nitrate(state))
                     else:
                         vs.update(after_substep_anion(state))
                 vs.itt_substep = i
@@ -3283,17 +3331,23 @@ def calculate_storage_selection(state):
                     calculate_ageing(state)
                     if (settings.enable_oxygen18 | settings.enable_deuterium):
                         vs.update(after_substep_iso(state))
+                    elif settings.enable_nitrate:
+                        vs.update(after_substep_anion(state))
+                        vs.update(after_substep_nitrate(state))
                     else:
                         vs.update(after_substep_anion(state))
                 else:
                     if (settings.enable_oxygen18 | settings.enable_deuterium):
                         vs.update(after_substep_iso(state))
+                    elif settings.enable_nitrate:
+                        vs.update(after_substep_anion(state))
+                        vs.update(after_substep_nitrate(state))
                     else:
                         vs.update(after_substep_anion(state))
                 vs.itt_substep = i
 
         elif settings.sas_solver == "RK4":
-            pass
+            logger.warning("Runge-Kutta 4th order scheme has not been implemented yet.")
 
         else:
             vs.update(svat_lbc_transport_model_deterministic(state))
@@ -3324,17 +3378,23 @@ def calculate_storage_selection(state):
                     calculate_ageing(state)
                     if (settings.enable_oxygen18 | settings.enable_deuterium):
                         vs.update(after_substep_iso(state))
+                    elif settings.enable_nitrate:
+                        vs.update(after_substep_anion(state))
+                        vs.update(after_substep_nitrate(state))
                     else:
                         vs.update(after_substep_anion(state))
                 else:
                     if (settings.enable_oxygen18 | settings.enable_deuterium):
                         vs.update(after_substep_iso(state))
+                    elif settings.enable_nitrate:
+                        vs.update(after_substep_anion(state))
+                        vs.update(after_substep_nitrate(state))
                     else:
                         vs.update(after_substep_anion(state))
                 vs.itt_substep = i
 
         elif settings.sas_solver == "RK4":
-            pass
+            logger.warning("Runge-Kutta 4th order scheme has not been implemented yet.")
 
         else:
             vs.update(svat_crop_transport_model_deterministic(state))
@@ -3559,6 +3619,30 @@ def after_substep_anion(state):
         csa_ss=vs.csa_ss,
         )
 
+@roger_kernel
+def after_substep_nitrate(state):
+        vs = state.variables
+
+        vs.Nmin_rz = update(
+            vs.Nmin_rz,
+            at[2:-2, 2:-2, vs.taum1, :], vs.Nmin_rz[2:-2, 2:-2, vs.tau, :],
+            )
+
+        vs.Nmin_ss = update(
+            vs.Nmin_ss,
+            at[2:-2, 2:-2, vs.taum1, :], vs.Nmin_ss[2:-2, 2:-2, vs.tau, :],
+            )
+
+        vs.Nmin_s = update(
+            vs.Nmin_s,
+            at[2:-2, 2:-2, vs.taum1, :], vs.Nmin_s[2:-2, 2:-2, vs.tau, :],
+            )
+
+        return KernelOutput(
+            Nmin_rz=vs.Nmin_rz,
+            Nmin_ss=vs.Nmin_ss,
+            Nmin_s=vs.Nmin_s
+            )
 
 @roger_kernel
 def delta_fluxes_svat(state):

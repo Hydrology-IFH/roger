@@ -649,7 +649,7 @@ for var_sim in vars_sim:
             plt.close("all")
 
 # plot distributions of land cover scenarios
-vars_sim = ["transp", "q_ss", "theta"]
+vars_sim = ["transp", "theta", "q_ss"]
 deltas = ["dAvg", "dIPR"]
 for delta in deltas:
     for soil_depth in soil_depths:
@@ -698,6 +698,7 @@ for delta in deltas:
                     )
                     ll_dfs.append(df_deltas_long)
                 df_deltas = pd.concat(ll_dfs, ignore_index=True)
+                df_deltas.astype({"value": "float64"}).dtypes
                 sns.boxplot(
                     x="Period",
                     y="value",
@@ -713,6 +714,7 @@ for delta in deltas:
                 axes[i, j].set_xlabel("")
                 axes[i, j].tick_params(axis="x", rotation=33)
             axes[i, 0].set_ylabel(f"{_lab[delta]} {_lab[var_sim]} [%]")
+        # axes[-1, -1].legend(frameon=False)
         fig.tight_layout()
         file = base_path_figs / "distributions" / f"transp_theta_perc_{delta}_{soil_depth}_boxplot.png"
         fig.savefig(file, dpi=300)
@@ -767,6 +769,7 @@ for delta in deltas:
                     )
                     ll_dfs.append(df_deltas_long)
                 df_deltas = pd.concat(ll_dfs, ignore_index=True)
+                df_deltas.astype({"value": "float64"}).dtypes
                 sns.boxplot(
                     x="Period",
                     y="value",
@@ -782,6 +785,7 @@ for delta in deltas:
                 axes[i, j].set_xlabel("")
                 axes[i, j].tick_params(axis="x", rotation=33)
             axes[i, 0].set_ylabel(f"{_lab[delta]} {_lab[var_sim]} [%]")
+        # axes[-1, -1].legend(frameon=False)
         fig.tight_layout()
         file = base_path_figs / "distributions" / f"tt_rt_{delta}_{soil_depth}_boxplot.png"
         fig.savefig(file, dpi=300)
