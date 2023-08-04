@@ -1,0 +1,147 @@
+complete-mixing:
+  alpha_transp:
+  - 0.2
+  - 1
+  alpha_q:
+  - 0.2
+  - 1
+  km_denit_rz:
+  - 1
+  - 20
+  km_denit_ss:
+  - 1
+  - 20
+  dmax_denit_rz:
+  - 1
+  - 100
+  dmax_denit_ss:
+  - 1
+  - 100
+  km_nit_rz:
+  - 1
+  - 20
+  km_nit_ss:
+  - 1
+  - 20
+  dmax_nit_rz:
+  - 1
+  - 100
+  dmax_nit_ss:
+  - 1
+  - 100
+  kmin_rz:
+  - 1
+  - 100
+  kmin_ss:
+  - 1
+  - 100
+
+
+advection-dispersion-power:
+  alpha_transp:
+  - 0.2
+  - 1
+  alpha_q:
+  - 0.2
+  - 1
+  km_denit_rz:
+  - 1
+  - 20
+  km_denit_ss:
+  - 1
+  - 20
+  dmax_denit_rz:
+  - 1
+  - 100
+  dmax_denit_ss:
+  - 1
+  - 100
+  km_nit_rz:
+  - 1
+  - 20
+  km_nit_ss:
+  - 1
+  - 20
+  dmax_nit_rz:
+  - 1
+  - 100
+  dmax_nit_ss:
+  - 1
+  - 100
+  kmin_rz:
+  - 1
+  - 100
+  kmin_ss:
+  - 1
+  - 100
+  # SAS parameter of transpiration
+  k_transp:
+  - 0.2
+  - 1
+  # SAS parameter of percolation from root zone
+  k_q_rz:
+  - 1
+  - 5
+  # SAS parameter of percolation from subsoil
+  k_q_ss:
+  - 1
+  - 5
+
+time-variant_advection-dispersion-power:
+  alpha_transp:
+  - 0.2
+  - 1
+  alpha_q:
+  - 0.2
+  - 1
+  km_denit_rz:
+  - 1
+  - 20
+  km_denit_ss:
+  - 1
+  - 20
+  dmax_denit_rz:
+  - 1
+  - 100
+  dmax_denit_ss:
+  - 1
+  - 100
+  km_nit_rz:
+  - 1
+  - 20
+  km_nit_ss:
+  - 1
+  - 20
+  dmax_nit_rz:
+  - 1
+  - 100
+  dmax_nit_ss:
+  - 1
+  - 100
+  kmin_rz:
+  - 1
+  - 100
+  kmin_ss:
+  - 1
+  - 100
+  # SAS parameter of transpiration
+  c1_transp:
+  - 0.1
+  - 0.5
+  c2_transp:
+  - 0.1
+  - 2
+  # SAS parameter of percolation from root zone
+  c1_q_rz:
+  - 1
+  - 2
+  c2_q_rz:
+  - 0.1
+  - 3
+  # SAS parameter of percolation from subsoil
+  c1_q_ss:
+  - 1
+  - 2
+  c2_q_ss:
+  - 0.1
+  - 5

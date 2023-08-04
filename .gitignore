@@ -141,7 +141,6 @@ examples/*/*/*/RK4/
 examples/*/*/hydrus_benchmark/*.txt
 examples/*/*/hydrus_benchmark/*.py
 input_examples/
-examples/plot_scale/reckenholz/
 examples/plot_scale/reckenholz/input
 examples/plot_scale/reckenholz/output
 examples/plot_scale/reckenholz/observations
