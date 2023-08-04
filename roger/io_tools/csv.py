@@ -43,7 +43,6 @@ def read_meteo(path_to_dir: Path):
         parse_dates=[[0, 1, 2, 3, 4]],
         index_col=0,
         na_values=-9999,
-        date_format="%Y %m %d %H %M",
     )
     df_PREC.index = pd.to_datetime(df_PREC.index, format="%Y %m %d %H %M")
     df_PREC.index = df_PREC.index.rename("Index")
@@ -57,7 +56,6 @@ def read_meteo(path_to_dir: Path):
             parse_dates=[[0, 1, 2, 3, 4]],
             index_col=0,
             na_values=-9999,
-            date_format="%Y %m %d %H %M",
         )
         df_pet.index = pd.to_datetime(df_pet.index, format="%Y %m %d %H %M")
         df_pet.index = df_pet.index.rename("Index")
@@ -73,7 +71,6 @@ def read_meteo(path_to_dir: Path):
             parse_dates=[[0, 1, 2, 3, 4]],
             index_col=0,
             na_values=-9999,
-            date_format="%Y %m %d %H %M",
         )
         df_rs.index = pd.to_datetime(df_rs.index, format="%Y %m %d %H %M")
         df_rs.index = df_rs.index.rename("Index")
@@ -88,7 +85,6 @@ def read_meteo(path_to_dir: Path):
         parse_dates=[[0, 1, 2, 3, 4]],
         index_col=0,
         na_values=-9999,
-        date_format="%Y %m %d %H %M",
     )
     df_ta.index = pd.to_datetime(df_ta.index, format="%Y %m %d %H %M")
     df_ta.index = df_ta.index.rename("Index")
