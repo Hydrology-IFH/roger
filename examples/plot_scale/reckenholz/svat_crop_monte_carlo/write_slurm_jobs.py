@@ -32,7 +32,7 @@ def main():
         lines.append(f"cd {base_path_bwuc}/svat\n")
         lines.append(" \n")
         lines.append(
-            'python svat.py -b numpy -d cpu --lys-experiment %s -td "${TMPDIR}"\n'
+            'python svat_crop.py -b numpy -d cpu --lys-experiment %s -td "${TMPDIR}"\n'
             % (lys)
         )
         lines.append("# Move output from local SSD to global workspace\n")
