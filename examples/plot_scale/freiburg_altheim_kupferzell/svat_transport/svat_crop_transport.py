@@ -134,6 +134,8 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 "sas_params_q_ss",
                 "sas_params_re_rg",
                 "sas_params_re_rl",
+                "alpha_transp",
+                "alpha_q",
             ],
         )
         def set_parameters_setup(self, state):
