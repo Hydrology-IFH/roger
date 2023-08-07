@@ -12,7 +12,7 @@ def main():
     lysimeters = ['lys1', 'lys2', 'lys3', 'lys4', 'lys8', 'lys9', 'lys2_bromide',
                 'lys8_bromide', 'lys9_bromide']
     for lys in lysimeters:
-        script_name = f'svat_{lys}_mc'
+        script_name = f'svat_crop_{lys}_mc'
         lines = []
         lines.append("#!/bin/bash\n")
         lines.append("#SBATCH --time=6:00:00\n")
