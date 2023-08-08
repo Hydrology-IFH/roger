@@ -51,9 +51,9 @@ def nanmeanweighted(y, w, axis=None):
 
 base_path = Path(__file__).parent
 # directory of results
-base_path_results = base_path / "output"
-if not os.path.exists(base_path_results):
-    os.mkdir(base_path_results)
+base_path_output = base_path / "output"
+if not os.path.exists(base_path_output):
+    os.mkdir(base_path_output)
 # directory of figures
 base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
@@ -189,11 +189,11 @@ for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
 glm_location_formulas = {
     "interaction_theta": "y ~ theta_pwp * theta_ufc * theta_ac + ks",
     "no_interaction": "y ~ theta_pwp + theta_ufc + theta_ac + ks",
-    "theta": "y ~ theta_pwp + theta_ufc + theta_ac",
-    "theta_pwp": "y ~ theta_pwp",
-    "theta_ufc": "y ~ theta_ufc",
-    "theta_ac": "y ~ theta_ac",
-    "ks": "y ~ ks",
+    # "theta": "y ~ theta_pwp + theta_ufc + theta_ac",
+    # "theta_pwp": "y ~ theta_pwp",
+    # "theta_ufc": "y ~ theta_ufc",
+    # "theta_ac": "y ~ theta_ac",
+    # "ks": "y ~ ks",
 }
 
 vars_sim = ["transp", "q_ss", "theta", "rt50_s", "tt50_q_ss", "tt50_transp"]
@@ -295,25 +295,25 @@ if not os.path.exists(glm_location_file):
                                         soil_depth
                                     ][future]["AICC"] = smem.aicc(ll_values, nobs, res.params.shape[0])
 
-                                    # # plot the line fit
-                                    # fig, ax = plt.subplots(figsize=(3, 3))
-                                    # ax.scatter(yhat, y, color='black', s=4)
-                                    # line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
-                                    # abline_plot(model_results=line_fit, ax=ax, color='black')
-                                    # ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]')
-                                    # ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM) [%]')
-                                    # fig.tight_layout()
-                                    # file = base_path_figs / "residuals" / f"{glm_key}_{location}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_line_fit.png"
-                                    # fig.savefig(file, dpi=300)
+                                    # plot the line fit
+                                    fig, ax = plt.subplots(figsize=(3, 3))
+                                    ax.scatter(yhat, y, color='black', s=4)
+                                    line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
+                                    abline_plot(model_results=line_fit, ax=ax, color='black')
+                                    ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]')
+                                    ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM) [%]')
+                                    fig.tight_layout()
+                                    file = base_path_figs / "residuals" / "GLM" / f"{glm_key}_{location}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_line_fit.png"
+                                    fig.savefig(file, dpi=300)
 
-                                    # # plot the residuals
-                                    # fig, ax = plt.subplots(figsize=(3, 3))
-                                    # ax.scatter(yhat, res.resid_pearson, color='black', s=4)
-                                    # ax.set_ylabel(f'{_lab_unit1[var_sim]} (RoGeR) [%]')
-                                    # ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM)')
-                                    # fig.tight_layout()
-                                    # file = base_path_figs / "residuals" / f"{glm_key}_{location}_{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_residuals.png"
-                                    # fig.savefig(file, dpi=300)
+                                    # plot the residuals
+                                    fig, ax = plt.subplots(figsize=(3, 3))
+                                    ax.scatter(yhat, res.resid_pearson, color='black', s=4)
+                                    ax.set_ylabel(f'{_lab_unit1[var_sim]} (RoGeR) [%]')
+                                    ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM)')
+                                    fig.tight_layout()
+                                    file = base_path_figs / "residuals" / "GLM" / f"{glm_key}_{location}_{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_residuals.png"
+                                    fig.savefig(file, dpi=300)
 
                                     # fig, ax = plt.subplots(figsize=(3, 3))
                                     # ax.scatter(x.loc[:, 'theta_ufc'].values, y, color='black', s=4)
@@ -347,16 +347,16 @@ if not os.path.exists(glm_location_file):
                                     # file = base_path_figs / "residuals" / f"{glm_key}_{location}_{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_ks.png"
                                     # fig.savefig(file, dpi=300)
 
-                                    # # plot the distribution of residuals
-                                    # fig, ax = plt.subplots(figsize=(3, 3))
-                                    # resid = res.resid_deviance.copy()
-                                    # resid_std = stats.zscore(resid)
-                                    # ax.hist(resid_std, bins=25, color='black')
-                                    # ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM)')
-                                    # fig.tight_layout()
-                                    # file = base_path_figs / "residuals" / f"{glm_key}_{location}_{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_residuals_hist.png"
-                                    # fig.savefig(file, dpi=300)
-                                    # plt.close('all')
+                                    # plot the distribution of residuals
+                                    fig, ax = plt.subplots(figsize=(3, 3))
+                                    resid = res.resid_deviance.copy()
+                                    resid_std = stats.zscore(resid)
+                                    ax.hist(resid_std, bins=25, color='black')
+                                    ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM)')
+                                    fig.tight_layout()
+                                    file = base_path_figs / "residuals" / "GLM" / f"{glm_key}_{location}_{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_residuals_hist.png"
+                                    fig.savefig(file, dpi=300)
+                                    plt.close('all')
 
     # Store data (serialize)
     with open(glm_location_file, "wb") as handle:
@@ -371,11 +371,11 @@ else:
 mlm_soil_formulas = {
     "interaction_theta": "~ theta_pwp * theta_ufc * theta_ac + ks",
     "no_interaction": "~ theta_pwp + theta_ufc + theta_ac + ks",
-    "theta": "~ theta_pwp + theta_ufc + theta_ac",
-    "theta_pwp": "~ theta_pwp",
-    "theta_ufc": "~ theta_ufc",
-    "theta_ac": "~ theta_ac",
-    "ks": "~ ks",
+    # "theta": "~ theta_pwp + theta_ufc + theta_ac",
+    # "theta_pwp": "~ theta_pwp",
+    # "theta_ufc": "~ theta_ufc",
+    # "theta_ac": "~ theta_ac",
+    # "ks": "~ ks",
 }
 
 vars_sim = ["transp", "q_ss", "theta", "rt50_s", "tt50_q_ss", "tt50_transp"]
@@ -469,6 +469,38 @@ if not os.path.exists(mlm_soil_file):
                             y, yhat
                         )
 
+                        # plot the line fit
+                        fig, ax = plt.subplots(figsize=(3, 3))
+                        ax.scatter(yhat, y, color='black', s=4)
+                        line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
+                        abline_plot(model_results=line_fit, ax=ax, color='black')
+                        ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]')
+                        ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]')
+                        fig.tight_layout()
+                        file = base_path_figs / "residuals" / "MLM" / f"{mlm_key}_{var_sim}_{delta}_{land_cover_scenario}_{soil_depth}_line_fit_for_soil.png"
+                        fig.savefig(file, dpi=300)
+
+                        # plot the residuals
+                        resid = yhat - y
+                        fig, ax = plt.subplots(figsize=(3, 3))
+                        ax.scatter(yhat, resid, color='black', s=4)
+                        ax.set_ylabel(f'{_lab_unit1[var_sim]} (RoGeR) [%]')
+                        ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (MLM)')
+                        fig.tight_layout()
+                        file = base_path_figs / "residuals" / "MLM" / f"{mlm_key}_{var_sim}_{delta}_{land_cover_scenario}_{soil_depth}_residuals_for_soil.png"
+                        fig.savefig(file, dpi=300)
+
+                        # plot the distribution of residuals
+                        fig, ax = plt.subplots(figsize=(3, 3))
+                        resid_std = stats.zscore(resid)
+                        ax.hist(resid_std, bins=25, color='black')
+                        ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (MLM)')
+                        fig.tight_layout()
+                        file = base_path_figs / "residuals" / "MLM" / f"{mlm_key}_{var_sim}_{delta}_{land_cover_scenario}_{soil_depth}_residuals_hist_for_soil.png"
+                        fig.savefig(file, dpi=300)
+                        plt.close('all')
+
+
     # Store the data (serialize)
     with open(mlm_soil_file, "wb") as handle:
         pickle.dump(dict_mlm_soil, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -482,10 +514,10 @@ mlm_climate_formulas = {
     "avg_ipr": "~ dPREC_avg + dPREC_ipr + dTA_avg + dTA_ipr",
     "avg": "~ dPREC_avg + dTA_avg",
     "ipr": "~ dPREC_ipr + dTA_ipr",
-    "dPREC_avg": "~ dPREC_avg",
-    "dPREC": "~ dPREC_avg + dPREC_ipr",
-    "dTA_avg": "~ dTA_avg",
-    "dTA": "~ dTA_avg + dTA_ipr",
+    # "dPREC_avg": "~ dPREC_avg",
+    # "dPREC": "~ dPREC_avg + dPREC_ipr",
+    # "dTA_avg": "~ dTA_avg",
+    # "dTA": "~ dTA_avg + dTA_ipr",
 }
 
 vars_sim = ["transp", "q_ss", "theta", "rt50_s", "tt50_q_ss", "tt50_transp"]
@@ -608,6 +640,36 @@ if not os.path.exists(mlm_climate_file):
                         dict_mlm_climate[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["R2"] = r2_score(
                             y, yhat
                         )
+                        # plot the line fit
+                        fig, ax = plt.subplots(figsize=(3, 3))
+                        ax.scatter(yhat, y, color='black', s=4)
+                        line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
+                        abline_plot(model_results=line_fit, ax=ax, color='black')
+                        ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]')
+                        ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]')
+                        fig.tight_layout()
+                        file = base_path_figs / "residuals" / "MLM" / f"{mlm_key}_{var_sim}_{delta}_{land_cover_scenario}_{soil_depth}_line_fit_for_climate.png"
+                        fig.savefig(file, dpi=300)
+
+                        # plot the residuals
+                        resid = yhat - y
+                        fig, ax = plt.subplots(figsize=(3, 3))
+                        ax.scatter(yhat, resid, color='black', s=4)
+                        ax.set_ylabel(f'{_lab_unit1[var_sim]} (RoGeR) [%]')
+                        ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (MLM)')
+                        fig.tight_layout()
+                        file = base_path_figs / "residuals" / "MLM" / f"{mlm_key}_{var_sim}_{delta}_{land_cover_scenario}_{soil_depth}_residuals_for_climate.png"
+                        fig.savefig(file, dpi=300)
+
+                        # plot the distribution of residuals
+                        fig, ax = plt.subplots(figsize=(3, 3))
+                        resid_std = stats.zscore(resid)
+                        ax.hist(resid_std, bins=25, color='black')
+                        ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (MLM)')
+                        fig.tight_layout()
+                        file = base_path_figs / "residuals" / "MLM" / f"{mlm_key}_{var_sim}_{delta}_{land_cover_scenario}_{soil_depth}_residuals_hist_for_climate.png"
+                        fig.savefig(file, dpi=300)
+                        plt.close('all')
 
     # Store the data (serialize)
     with open(mlm_climate_file, "wb") as handle:
@@ -622,10 +684,10 @@ glm_climate_formulas = {
     "avg_ipr": "~ dPREC_avg + dPREC_ipr + dTA_avg + dTA_ipr",
     "avg": "~ dPREC_avg + dTA_avg",
     "ipr": "~ dPREC_ipr + dTA_ipr",
-    "dPREC_avg": "~ dPREC_avg",
-    "dPREC": "~ dPREC_avg + dPREC_ipr",
-    "dTA_avg": "~ dTA_avg",
-    "dTA": "~ dTA_avg + dTA_ipr",
+    # "dPREC_avg": "~ dPREC_avg",
+    # "dPREC": "~ dPREC_avg + dPREC_ipr",
+    # "dTA_avg": "~ dTA_avg",
+    # "dTA": "~ dTA_avg + dTA_ipr",
 }
 
 vars_sim = ["transp", "q_ss", "theta", "rt50_s", "tt50_q_ss", "tt50_transp"]

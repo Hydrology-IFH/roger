@@ -29,7 +29,7 @@ def main():
         lines.append(" \n")
         lines.append('eval "$(conda shell.bash hook)"\n')
         lines.append("conda activate roger\n")
-        lines.append(f"cd {base_path_bwuc}/svat\n")
+        lines.append(f"cd {base_path_bwuc}\n")
         lines.append(" \n")
         lines.append(
             'python svat.py -b numpy -d cpu --lys-experiment %s -td "${TMPDIR}"\n'
@@ -44,8 +44,6 @@ def main():
         file.writelines(lines)
         file.close()
         subprocess.Popen(f"chmod +x {file_path}", shell=True)
-
-    subprocess.Popen("chmod +x submit_slurm_jobs.sh", shell=True)
     return
 
 
