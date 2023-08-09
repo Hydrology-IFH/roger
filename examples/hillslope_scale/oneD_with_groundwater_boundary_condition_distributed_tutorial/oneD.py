@@ -18,7 +18,7 @@ def main(tmp_dir):
     import roger.lookuptables as lut
 
     class ONEDSetup(RogerSetup):
-        """A 1D model."""
+        """A 1D model with a lower boundary condition."""
 
         # custom attributes required by helper functions
         _base_path = Path(__file__).parent
@@ -238,7 +238,9 @@ def main(tmp_dir):
 
         @roger_routine(
             dist_safe=False,
-            local_variables=["S_vad"],
+            local_variables=["S_vad",
+                             "n0",
+                             "z_soil"],
         )
         def set_initial_conditions_setup(self, state):
             vs = state.variables
@@ -246,7 +248,7 @@ def main(tmp_dir):
             # storage of vadose zone (mm)
             vs.S_vad = update(
                 vs.S_vad,
-                at[2:-2, 2:-2, :vs.taup1],
+                at[2:-2, 2:-2, :],
                 0.5 * vs.n0[2:-2, 2:-2, npx.newaxis] * (self._read_var_from_nc("Z_GW", self._input_dir, "forcing.nc")[0, 0, 0] - vs.z_soil[2:-2, 2:-2, npx.newaxis])
             )
             vs.S_vad = update(
@@ -435,6 +437,11 @@ def main(tmp_dir):
             at[2:-2, 2:-2, vs.taum1],
             vs.S_vad[2:-2, 2:-2, vs.tau],
         )
+        vs.S_vad_tot = update(
+            vs.S_vad_tot,
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_vad_tot[2:-2, 2:-2, vs.tau],
+        )
         vs.S = update(
             vs.S,
             at[2:-2, 2:-2, vs.taum1],
@@ -459,6 +466,11 @@ def main(tmp_dir):
             vs.z_wf_t1,
             at[2:-2, 2:-2, vs.taum1],
             vs.z_wf_t1[2:-2, 2:-2, vs.tau],
+        )
+        vs.z_gw = update(
+            vs.z_gw,
+            at[2:-2, 2:-2, vs.taum1],
+            vs.z_gw[2:-2, 2:-2, vs.tau],
         )
         vs.y_mp = update(
             vs.y_mp,
@@ -565,6 +577,7 @@ def main(tmp_dir):
             z_wf=vs.z_wf,
             z_wf_t0=vs.z_wf_t0,
             z_wf_t1=vs.z_wf_t1,
+            z_gw=vs.z_gw,
             y_mp=vs.y_mp,
             y_sc=vs.y_sc,
             theta_rz=vs.theta_rz,
@@ -587,7 +600,7 @@ def main(tmp_dir):
     # initializes the model structure
     model = ONEDSetup()
     # writes the forcing data to netcdf
-    write_forcing(model._input_dir, enable_lower_boundary_condition=True)
+    write_forcing(model._input_dir, enable_groundwater_boundary=True)
     # runs the model setup
     model.setup()
     # iterate over time steps

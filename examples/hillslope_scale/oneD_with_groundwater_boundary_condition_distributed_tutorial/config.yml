@@ -42,3 +42,5 @@ OUTPUT_COLLECT:
 - "theta_ss"  # soil water content of subsoil (-)
 - "theta"  # soil water content (-)
 - "S_snow"  # storage volume snow cover (mm)
+- "z_gw"
+- "S_vad"

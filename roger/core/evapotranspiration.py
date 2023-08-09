@@ -121,7 +121,7 @@ def calc_evap_int_ground(state):
         -vs.evap_int_ground[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
-    vs.evap_int = update_add(
+    vs.evap_int = update(
         vs.evap_int,
         at[2:-2, 2:-2],
         vs.evap_int_ground[2:-2, 2:-2] + vs.evap_int_top[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],

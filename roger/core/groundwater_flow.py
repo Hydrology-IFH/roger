@@ -105,7 +105,7 @@ def calc_q_re(state):
     )
     vs.q_re = update(
         vs.q_re,
-        at[2:-2, 2:-2], k[2:-2, 2:-2, npx.newaxis] * vs.S_vad[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], k[2:-2, 2:-2] * vs.S_vad[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2],
     )
     vs.S_vad = update_add(
         vs.S_vad,
@@ -117,7 +117,7 @@ def calc_q_re(state):
     spillover = allocate(state.dimensions, ("x", "y"))
     spillover = update(
         spillover,
-        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], (vs.S_vad[2:-2, 2:-2, vs.tau] - vs.S_vad_tot[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], (vs.S_vad[2:-2, 2:-2, vs.tau] - vs.S_vad_tot[2:-2, 2:-2, vs.tau]), 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.q_re = update_add(
         vs.q_re,
@@ -125,7 +125,7 @@ def calc_q_re(state):
     )
     vs.S_vad = update_add(
         vs.S_vad,
-        at[2:-2, 2:-2, vs.tau], -vs.spillover[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        at[2:-2, 2:-2, vs.tau], -spillover[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(q_re=vs.q_re, S_vad=vs.S_vad, S_vad_tot=vs.S_vad_tot)

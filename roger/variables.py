@@ -2800,7 +2800,7 @@ VARIABLES = {
         "specific yield at the soil/bedrock interface",
         time_dependent=False,
         write_to_restart=True,
-        active=lambda settings: not settings.enable_offline_transport and settings.enable_groundwater,
+        active=lambda settings: not settings.enable_offline_transport and (settings.enable_groundwater or settings.enable_groundwater_boundary),
     ),
     "k_gw": Variable(
         "hydraulic conductivity of aquifer layer",

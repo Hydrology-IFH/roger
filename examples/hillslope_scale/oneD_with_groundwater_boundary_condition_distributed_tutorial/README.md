@@ -1,4 +1,4 @@
-# Tutorial for the spatially-distributed 1D-model
+# Tutorial for the spatially-distributed 1D-model including a lower boundary condition
 
 Brief overview of the files:
 
@@ -7,6 +7,7 @@ Brief overview of the files:
 - `figures`: Contains figures
 - `config.yml`: File to set settings and output variables
 - `parameters.csv`: File that contains the model parameters
+- `generate_groundwater_boundary_condition.py`: Generates an artificial time series of the groundwater level
 - `write_parameters.py`: Generates model parameters and writes model parameter file
 - `oneD.py`: 1D-model setup
 - `merge_output.py`: Merges output into a single NetCDF file
@@ -96,28 +97,30 @@ The following workflow briefly describes the model application:
 
 1. Prepare the meteorological input data (see Meteorological input data).
 
-2. Generates the model paramaters for the simulation:
+3. Prepare the groundwater level data, for example, generate an artificial time series of the groundwater level (see `generate_groundwater_boundary_condition.py`).
+
+3. Generates the model paramaters for the simulation:
 ```
 python write_parameters.py
 ```
 
-3. If required data is ready, the following script runs the simulation:
+4. If required data is ready, the following script runs the simulation:
 
 ```
 python oneD.py
 ```
 
-4. After calculation is done, the simulation results can be merged into a single NetCDF-file:
+5. After calculation is done, the simulation results can be merged into a single NetCDF-file:
 ```
 python merge_output.py
 ```
 
-5. (Optional) The following script converts the model output from NetCDF to csv.
+6. (Optional) The following script converts the model output from NetCDF to csv.
 ```
 python netcdf_to_csv.py
 ```
 
-6. Figures and tables can be produced with the following script:
+7. Figures and tables can be produced with the following script:
 ```
 python make_figures_and_tables.py
 ``````

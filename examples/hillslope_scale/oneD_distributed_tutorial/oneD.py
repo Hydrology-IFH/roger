@@ -18,7 +18,7 @@ def main(tmp_dir):
     import roger.lookuptables as lut
 
     class ONEDSetup(RogerSetup):
-        """A 1D model."""
+        """A 1D model with free drainage."""
 
         # custom attributes required by helper functions
         _base_path = Path(__file__).parent
