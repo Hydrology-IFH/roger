@@ -473,7 +473,7 @@ def write_forcing(
     ncols=1,
     uniform=True,
     enable_crop_phenology=False,
-    enable_lower_boundary_condition=False,
+    enable_groundwater_boundary=False,
     prec_correction=None,
     float_type="float32",
 ):
@@ -496,8 +496,8 @@ def write_forcing(
     enable_crop_phenology : bool, optional
         if True daily minimum and maximum is required
 
-    enable_lower_boundary_condition : bool, optional
-        if True daily minimum and maximum is required
+    enable_groundwater_boundary : bool, optional
+        if True groundwater head is required
 
     prec_correction : str, optional
         if True precipitation is corrected according to Richter (1995)
@@ -543,13 +543,22 @@ def write_forcing(
 
         nc_file = input_dir / "forcing.nc"
         with h5netcdf.File(nc_file, "w", decode_vlen_strings=False) as f:
-            f.attrs.update(
-                date_created=datetime.datetime.today().isoformat(),
-                title="Meteorological forcing",
-                institution="University of Freiburg, Chair of Hydrology",
-                references="",
-                comment="",
-            )
+            if enable_groundwater_boundary:
+                f.attrs.update(
+                    date_created=datetime.datetime.today().isoformat(),
+                    title="Meteorological forcing and groundwater level",
+                    institution="University of Freiburg, Chair of Hydrology",
+                    references="",
+                    comment="",
+                )
+            else:
+                f.attrs.update(
+                    date_created=datetime.datetime.today().isoformat(),
+                    title="Meteorological forcing",
+                    institution="University of Freiburg, Chair of Hydrology",
+                    references="",
+                    comment="",
+                )
             # set dimensions with a dictionary
             dict_dim = {"x": nrows, "y": ncols, "Time": len(df_meteo.index), "scalar": 1}
             f.dimensions = dict_dim
@@ -613,14 +622,14 @@ def write_forcing(
                 v.attrs["long_name"] = "maximum air temperature"
                 v.attrs["units"] = "degC"
 
-            if enable_lower_boundary_condition:
-                zgw_path = input_path / "ZGW.txt"
-                if not os.path.isdir(zgw_path):
+            if enable_groundwater_boundary:
+                zgw_path = input_dir / "ZGW.txt"
+                if not os.path.exists(zgw_path):
                     raise ValueError(zgw_path, "does not exist")
                 df_zgw_daily = pd.read_csv(
                     zgw_path,
                     sep=r"\s+",
-                    skiprows=0,
+                    skiprows=1,
                     header=0,
                     parse_dates=[[0, 1, 2, 3, 4]],
                     index_col=0,

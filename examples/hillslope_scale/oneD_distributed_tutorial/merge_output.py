@@ -12,10 +12,6 @@ base_path = Path(__file__).parent
 base_path_output = base_path / "output"
 if not os.path.exists(base_path_output):
     os.mkdir(base_path_output)
-# directory of figures
-base_path_figs = base_path / "figures"
-if not os.path.exists(base_path_figs):
-    os.mkdir(base_path_figs)
 
 # load configuration file
 file_config = base_path / "config.yml"

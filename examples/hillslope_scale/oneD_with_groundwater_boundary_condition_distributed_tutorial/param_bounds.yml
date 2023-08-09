@@ -32,12 +32,12 @@ theta_pwp:
 - 0.22
 # saturated hydraulic conductivity (mm/hour)
 ks:
-- 5
-- 15
+- 1
+- 100
 # hydraulic conductivity of bedrock (mm/hour)
 kf:
-- 0.1
-- 1000
+- 0.01
+- 100
 # specific yield at the soil surface (-)
 n0:
 - 0.1

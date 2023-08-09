@@ -9,8 +9,8 @@ def sin_func(t, amp, phase, off):
     return amp * onp.sin(2 * onp.pi * t - phase) + off
 
 
-@click.option("--head-type", type=click.Choice(["shallow", "deep"]), default="shallow")
-@click.option("--time-variant", is_flag=True)
+@click.option("--head-type", type=click.Choice(["shallow", "deep"]), default="shallow", help="shallow: groundwater level may reach into the soil, deep: groundwater level does not reach the soil")
+@click.option("--time-variant", is_flag=True, help="Time series of groundwater level is temporally variant using a sine function.")
 @click.command("main")
 def main(head_type, time_variant):
     base_path = Path(__file__).parent
@@ -71,7 +71,7 @@ def main(head_type, time_variant):
         ["", "", "", "", "", "[m]"],
         ["YYYY", "MM", "DD", "hh", "mm", "Z_GW"],
     ]
-    df_zgw.to_csv(base_path / "input" / "ZGW.txt", index=False, sep=";")
+    df_zgw.to_csv(base_path / "input" / "ZGW.txt", index=False, sep="\t")
 
     return
 

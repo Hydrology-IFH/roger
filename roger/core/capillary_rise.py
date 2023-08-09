@@ -259,23 +259,23 @@ def calc_cpr_ss(state):
         gw_rise = update(
             gw_rise,
             at[2:-2, 2:-2],
-            -(vs.z_gw[2:-2, 2:-2, vs.tau] - zgw_soil) * vs.theta_ac[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            -(vs.z_gw[2:-2, 2:-2, vs.tau] - zgw_soil[2:-2, 2:-2]) * vs.theta_ac[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         gw_rise = update(
             gw_rise,
             at[2:-2, 2:-2],
-            npx.where(gw_rise < 0, 0, gw_rise) * vs.maskCatch[2:-2, 2:-2],
+            npx.where(gw_rise < 0, 0, gw_rise)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         gw_rise = update(
             gw_rise,
             at[2:-2, 2:-2],
-            npx.where(mask2, gw_rise, 0) * vs.maskCatch[2:-2, 2:-2],
+            npx.where(mask2, gw_rise, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
         vs.cpr_ss = update_add(
             vs.cpr_ss,
             at[2:-2, 2:-2],
-            gw_rise * vs.maskCatch[2:-2, 2:-2],
+            gw_rise[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
         if settings.enable_film_flow:
