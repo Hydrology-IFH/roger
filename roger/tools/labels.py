@@ -29,7 +29,7 @@ _Y_LABS_DAILY = {'prec': r'$PREC$ [mm $day^{-1}$]',
                  'theta_ss': r'$\theta_{subsoil}$ [-]',
                  'S_snow': r'$S_{snow}$ [mm]',
                  'S_s': r'$S_s$ [mm]',
-                 'S_vad': r'$S_vad$ [mm]',
+                 'S_vad': r'$S_{vad}$ [mm]',
                  'ta': r'$TA$ [degC]',
                  }
 

@@ -122,32 +122,32 @@ def calc_cpr_rz(state):
     vs.S_fp_rz = update_add(
         vs.S_fp_rz,
         at[2:-2, 2:-2],
-        mask1[2:-2, 2:-2] * vs.cpr_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        npx.where(mask1[2:-2, 2:-2], vs.cpr_rz[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.S_fp_ss = update_add(
         vs.S_fp_ss,
         at[2:-2, 2:-2],
-        mask1[2:-2, 2:-2] * -vs.cpr_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        npx.where(mask1[2:-2, 2:-2], -vs.cpr_rz[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.S_fp_rz = update_add(
         vs.S_fp_rz,
         at[2:-2, 2:-2],
-        mask2[2:-2, 2:-2] * vs.cpr_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        npx.where(mask2[2:-2, 2:-2], vs.cpr_rz[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.S_lp_ss = update_add(
         vs.S_lp_ss,
         at[2:-2, 2:-2],
-        mask2[2:-2, 2:-2] * -vs.cpr_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        npx.where(mask2[2:-2, 2:-2], -vs.cpr_rz[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.S_fp_rz = update_add(
         vs.S_fp_rz,
         at[2:-2, 2:-2],
-        mask3[2:-2, 2:-2] * vs.cpr_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        npx.where(mask3[2:-2, 2:-2], vs.cpr_rz[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.S_fp_ss = update_add(
         vs.S_fp_ss,
         at[2:-2, 2:-2],
-        mask3[2:-2, 2:-2] * -(vs.cpr_rz[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        npx.where(mask3[2:-2, 2:-2], -(vs.cpr_rz[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.S_lp_ss = update(
         vs.S_lp_ss,
@@ -185,7 +185,7 @@ def calc_cpr_ss(state):
 
     # subsoil is saturated
     mask1 = vs.z_sat[:, :, vs.tau] > 0
-    mask2 = vs.z_gw[:, :, vs.tau] < vs.z_soil[:, :]
+    mask2 = vs.z_gw[:, :, vs.tau] * 1000 < vs.z_soil[:, :]
     # capillary rise from groundwater table towards subsoil
     if settings.enable_groundwater_boundary | settings.enable_groundwater:
         z = allocate(state.dimensions, ("x", "y"))
@@ -249,17 +249,17 @@ def calc_cpr_ss(state):
             zgw_soil,
             at[2:-2, 2:-2],
             npx.where(
-                (vs.z_gw[2:-2, 2:-2, vs.tau] < vs.z_soil[2:-2, 2:-2])
-                & (vs.z_gw[2:-2, 2:-2, vs.taum1] >= vs.z_soil[2:-2, 2:-2]),
+                (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 < vs.z_soil[2:-2, 2:-2])
+                & (vs.z_gw[2:-2, 2:-2, vs.taum1] * 1000 >= vs.z_soil[2:-2, 2:-2]),
                 vs.z_soil[2:-2, 2:-2],
-                vs.z_gw[2:-2, 2:-2, vs.taum1],
+                vs.z_gw[2:-2, 2:-2, vs.taum1] * 1000,
             )
             * vs.maskCatch[2:-2, 2:-2],
         )
         gw_rise = update(
             gw_rise,
             at[2:-2, 2:-2],
-            -(vs.z_gw[2:-2, 2:-2, vs.tau] - zgw_soil[2:-2, 2:-2]) * vs.theta_ac[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            -(vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 - zgw_soil[2:-2, 2:-2]) * vs.theta_ac[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         gw_rise = update(
             gw_rise,
@@ -298,7 +298,7 @@ def calc_cpr_ss(state):
         vs.S_lp_ss = update_add(
             vs.S_lp_ss,
             at[2:-2, 2:-2],
-            mask3[2:-2, 2:-2] * (vs.S_fp_ss[2:-2, 2:-2] - vs.S_ufc_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+            npx.where(mask3[2:-2, 2:-2], (vs.S_fp_ss[2:-2, 2:-2] - vs.S_ufc_ss[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.S_fp_ss = update(
             vs.S_fp_ss,

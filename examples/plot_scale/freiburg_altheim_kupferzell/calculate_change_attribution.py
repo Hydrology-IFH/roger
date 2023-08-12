@@ -300,17 +300,19 @@ if not os.path.exists(glm_location_file):
                                     ax.scatter(yhat, y, color='black', s=4)
                                     line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
                                     abline_plot(model_results=line_fit, ax=ax, color='black')
-                                    ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]')
-                                    ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM) [%]')
+                                    ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]')
+                                    ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM) [%]')
+                                    ax.set_xlim(-100, 100)
+                                    ax.set_ylim(-100, 100)
                                     fig.tight_layout()
                                     file = base_path_figs / "residuals" / "GLM" / f"{glm_key}_{location}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_line_fit.png"
                                     fig.savefig(file, dpi=300)
 
                                     # plot the residuals
                                     fig, ax = plt.subplots(figsize=(3, 3))
-                                    ax.scatter(yhat, res.resid_pearson, color='black', s=4)
-                                    ax.set_ylabel(f'{_lab_unit1[var_sim]} (RoGeR) [%]')
-                                    ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (GLM)')
+                                    ax.scatter(y, res.resid_pearson, color='black', s=4)
+                                    ax.set_ylabel('Residuals [%]')
+                                    ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]}')
                                     fig.tight_layout()
                                     file = base_path_figs / "residuals" / "GLM" / f"{glm_key}_{location}_{var_sim}_{delta}_{land_cover_scenario}_{climate_scenario}_{soil_depth}_{future}_residuals.png"
                                     fig.savefig(file, dpi=300)
@@ -420,19 +422,22 @@ if not os.path.exists(mlm_soil_file):
 
                         df_mlm = pd.concat(dfs_mlms, ignore_index=True)
                         df_mlm = sm.add_constant(df_mlm)
-                        # fit a mixed linear model with random effects (random intercepts and random slopes)
-                        # mlm = smf.mixedlm(f'{delta} {mlm_soil_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_soil_formulas[mlm_key])
                         # fit a mixed linear model with random effects (random intercepts)
                         mlm = smf.mixedlm(f"{delta} {mlm_soil_formulas[mlm_key]}", df_mlm, groups=df_mlm["group"])
                         res = mlm.fit()
                         print(res.summary())
+                        # fit a mixed linear model with random effects (random intercepts and random slopes)
+                        # mlm = smf.mixedlm(f'{delta} {mlm_soil_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_soil_formulas[mlm_key])
+                        # res = mlm.fit()
+                        # print(res.summary())
 
                         # response variable
                         y = df_mlm.loc[:, f"{delta}"].values
                         # number of data points
                         nobs = res.nobs
                         # predicted values
-                        yhat = res.predict()
+                        # yhat = res.predict()
+                        yhat = res.fittedvalues
                         # fixed effect parameters and random effect parameters
                         params = res.params.to_frame().T
                         # number of fixed effect parameters
@@ -471,11 +476,13 @@ if not os.path.exists(mlm_soil_file):
 
                         # plot the line fit
                         fig, ax = plt.subplots(figsize=(3, 3))
-                        ax.scatter(yhat, y, color='black', s=4)
+                        ax.scatter(y, yhat, color='black', s=4)
                         line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
                         abline_plot(model_results=line_fit, ax=ax, color='black')
-                        ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]')
-                        ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]')
+                        ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]')
+                        ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]')
+                        ax.set_xlim(-100, 100)
+                        ax.set_ylim(-100, 100)
                         fig.tight_layout()
                         file = base_path_figs / "residuals" / "MLM" / f"{mlm_key}_{var_sim}_{delta}_{land_cover_scenario}_{soil_depth}_line_fit_for_soil.png"
                         fig.savefig(file, dpi=300)
@@ -483,9 +490,9 @@ if not os.path.exists(mlm_soil_file):
                         # plot the residuals
                         resid = yhat - y
                         fig, ax = plt.subplots(figsize=(3, 3))
-                        ax.scatter(yhat, resid, color='black', s=4)
-                        ax.set_ylabel(f'{_lab_unit1[var_sim]} (RoGeR) [%]')
-                        ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (MLM)')
+                        ax.scatter(y, resid, color='black', s=4)
+                        ax.set_ylabel('Residuals [%]')
+                        ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]}')
                         fig.tight_layout()
                         file = base_path_figs / "residuals" / "MLM" / f"{mlm_key}_{var_sim}_{delta}_{land_cover_scenario}_{soil_depth}_residuals_for_soil.png"
                         fig.savefig(file, dpi=300)
@@ -605,7 +612,8 @@ if not os.path.exists(mlm_climate_file):
                         # number of data points
                         nobs = res.nobs
                         # predicted values
-                        yhat = res.predict()
+                        # yhat = res.predict()
+                        yhat = res.fittedvalues
                         # fixed effect parameters and random effect parameters
                         params = res.params.to_frame().T
                         # number of fixed effect parameters
@@ -642,11 +650,13 @@ if not os.path.exists(mlm_climate_file):
                         )
                         # plot the line fit
                         fig, ax = plt.subplots(figsize=(3, 3))
-                        ax.scatter(yhat, y, color='black', s=4)
+                        ax.scatter(y, yhat, color='black', s=4)
                         line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
                         abline_plot(model_results=line_fit, ax=ax, color='black')
-                        ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]')
-                        ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]')
+                        ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]')
+                        ax.set_ylabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]')
+                        ax.set_xlim(-100, 100)
+                        ax.set_ylim(-100, 100)
                         fig.tight_layout()
                         file = base_path_figs / "residuals" / "MLM" / f"{mlm_key}_{var_sim}_{delta}_{land_cover_scenario}_{soil_depth}_line_fit_for_climate.png"
                         fig.savefig(file, dpi=300)
@@ -654,9 +664,9 @@ if not os.path.exists(mlm_climate_file):
                         # plot the residuals
                         resid = yhat - y
                         fig, ax = plt.subplots(figsize=(3, 3))
-                        ax.scatter(yhat, resid, color='black', s=4)
-                        ax.set_ylabel(f'{_lab_unit1[var_sim]} (RoGeR) [%]')
-                        ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]} (MLM)')
+                        ax.scatter(y, resid, color='black', s=4)
+                        ax.set_ylabel(f'Residuals [%]')
+                        ax.set_xlabel(f'{_lab[delta]}{_lab_unit1[var_sim]}')
                         fig.tight_layout()
                         file = base_path_figs / "residuals" / "MLM" / f"{mlm_key}_{var_sim}_{delta}_{land_cover_scenario}_{soil_depth}_residuals_for_climate.png"
                         fig.savefig(file, dpi=300)
@@ -1134,87 +1144,87 @@ else:
 #             fig.savefig(file, dpi=300)
 #             plt.close("all")
 
-# # heatmap the root mean absolute error of GLMs
-# metrics = ["MAE"]
-# vars_sim = ["transp", "q_ss", "theta", "tt50_transp", "tt50_q_ss", "rt50_s"]
-# deltas = ["dAvg", "dIPR"]
-# norm = mpl.colors.Normalize(vmin=0, vmax=20)
-# for glm_key in glm_location_formulas.keys():
-#     for metric in metrics:
-#         for delta in deltas:
-#             for soil_depth in soil_depths:
-#                 cond = _soil_depths[soil_depth]
-#                 fig, axes = plt.subplots(
-#                     len(locations), len(land_cover_scenarios), sharex="col", sharey="row", figsize=(6, 4.5)
-#                 )
-#                 # axes for colorbar
-#                 axl = fig.add_axes([0.88, 0.32, 0.02, 0.46])
-#                 cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
-#                 cb1.set_label(f"{_lab[metric]} [%]")
-#                 for i, location in enumerate(locations):
-#                     for j, land_cover_scenario in enumerate(land_cover_scenarios):
-#                         df_metric = pd.DataFrame()
-#                         for var_sim in vars_sim:
-#                             for climate_scenario in climate_scenarios:
-#                                 for future in ["nf", "ff"]:
-#                                     value = dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][
-#                                         delta
-#                                     ][soil_depth][future][metric]
-#                                     df_metric.loc[
-#                                         f"{_lab[climate_scenario]} ({_lab[future]})", f"{_lab[var_sim]}"
-#                                     ] = value
-#                         sns.heatmap(df_metric, vmin=0, vmax=20, cmap="Oranges", cbar=False, ax=axes[i, j], square=True)
-#                         axes[0, j].set_title(f"{Land_cover_scenarios[j]}")
-#                         axes[-1, j].set_xticklabels(df_metric.columns, rotation=90)
-#                         axes[i, j].set_ylabel("")
-#                         axes[i, j].set_xlabel("")
-#                     axes[i, 0].set_ylabel(f"{Locations[i]}")
-#                     axes[i, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-#                 fig.subplots_adjust(bottom=0.2, left=0.2, right=0.85, top=0.9, hspace=-0.5, wspace=0.1)
-#                 file = base_path_figs / "glm_metrics" / f"{glm_key}_{metric}_{delta}_{soil_depth}_heatmap.png"
-#                 fig.savefig(file, dpi=300)
-#                 plt.close("all")
+# heatmap the root mean absolute error of GLMs
+metrics = ["MAE"]
+vars_sim = ["transp", "q_ss", "theta", "tt50_transp", "tt50_q_ss", "rt50_s"]
+deltas = ["dAvg", "dIPR"]
+norm = mpl.colors.Normalize(vmin=0, vmax=30)
+for glm_key in glm_location_formulas.keys():
+    for metric in metrics:
+        for delta in deltas:
+            for soil_depth in soil_depths:
+                cond = _soil_depths[soil_depth]
+                fig, axes = plt.subplots(
+                    len(locations), len(land_cover_scenarios), sharex="col", sharey="row", figsize=(6, 4.5)
+                )
+                # axes for colorbar
+                axl = fig.add_axes([0.88, 0.32, 0.02, 0.46])
+                cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
+                cb1.set_label(f"{_lab[metric]} [%]")
+                for i, location in enumerate(locations):
+                    for j, land_cover_scenario in enumerate(land_cover_scenarios):
+                        df_metric = pd.DataFrame()
+                        for var_sim in vars_sim:
+                            for climate_scenario in climate_scenarios:
+                                for future in ["nf", "ff"]:
+                                    value = dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][
+                                        delta
+                                    ][soil_depth][future][metric]
+                                    df_metric.loc[
+                                        f"{_lab[climate_scenario]} ({_lab[future]})", f"{_lab[var_sim]}"
+                                    ] = value
+                        sns.heatmap(df_metric, vmin=0, vmax=30, cmap="Oranges", cbar=False, ax=axes[i, j], square=True)
+                        axes[0, j].set_title(f"{Land_cover_scenarios[j]}")
+                        axes[-1, j].set_xticklabels(df_metric.columns, rotation=90)
+                        axes[i, j].set_ylabel("")
+                        axes[i, j].set_xlabel("")
+                    axes[i, 0].set_ylabel(f"{Locations[i]}")
+                    axes[i, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+                fig.subplots_adjust(bottom=0.2, left=0.2, right=0.85, top=0.9, hspace=-0.5, wspace=0.1)
+                file = base_path_figs / "glm_metrics" / f"{glm_key}_{metric}_{delta}_{soil_depth}_heatmap.png"
+                fig.savefig(file, dpi=300)
+                plt.close("all")
 
-# # heatmap the variance of error of GLMs
-# metrics = ["R2"]
-# vars_sim = ["transp", "q_ss", "theta", "tt50_transp", "tt50_q_ss", "rt50_s"]
-# deltas = ["dAvg", "dIPR"]
-# norm = mpl.colors.Normalize(vmin=0, vmax=100)
-# for glm_key in glm_location_formulas.keys():
-#     for metric in metrics:
-#         for delta in deltas:
-#             for soil_depth in soil_depths:
-#                 cond = _soil_depths[soil_depth]
-#                 fig, axes = plt.subplots(
-#                     len(locations), len(land_cover_scenarios), sharex="col", sharey="row", figsize=(6, 4.5)
-#                 )
-#                 # axes for colorbar
-#                 axl = fig.add_axes([0.88, 0.32, 0.02, 0.46])
-#                 cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
-#                 cb1.set_label(f"{metric} [-]")
-#                 for i, location in enumerate(locations):
-#                     for j, land_cover_scenario in enumerate(land_cover_scenarios):
-#                         df_metric = pd.DataFrame()
-#                         for var_sim in vars_sim:
-#                             for climate_scenario in climate_scenarios:
-#                                 for future in ["nf", "ff"]:
-#                                     value = dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][
-#                                         delta
-#                                     ][soil_depth][future][metric]
-#                                     df_metric.loc[
-#                                         f"{_lab[climate_scenario]} ({_lab[future]})", f"{_lab[var_sim]}"
-#                                     ] = value
-#                         sns.heatmap(df_metric, vmin=0, vmax=100, cmap="Oranges", cbar=False, ax=axes[i, j], square=True)
-#                         axes[0, j].set_title(f"{Land_cover_scenarios[j]}")
-#                         axes[-1, j].set_xticklabels(df_metric.columns, rotation=90)
-#                         axes[i, j].set_ylabel("")
-#                         axes[i, j].set_xlabel("")
-#                     axes[i, 0].set_ylabel(f"{Locations[i]}")
-#                     axes[i, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-#                 fig.subplots_adjust(bottom=0.2, left=0.2, right=0.85, top=0.9, hspace=-0.5, wspace=0.1)
-#                 file = base_path_figs / "glm_metrics" / f"{glm_key}_{metric}_{delta}_{soil_depth}_heatmap.png"
-#                 fig.savefig(file, dpi=300)
-#                 plt.close("all")
+# heatmap the variance of error of GLMs
+metrics = ["R2"]
+vars_sim = ["transp", "q_ss", "theta", "tt50_transp", "tt50_q_ss", "rt50_s"]
+deltas = ["dAvg", "dIPR"]
+norm = mpl.colors.Normalize(vmin=0, vmax=1)
+for glm_key in glm_location_formulas.keys():
+    for metric in metrics:
+        for delta in deltas:
+            for soil_depth in soil_depths:
+                cond = _soil_depths[soil_depth]
+                fig, axes = plt.subplots(
+                    len(locations), len(land_cover_scenarios), sharex="col", sharey="row", figsize=(6, 4.5)
+                )
+                # axes for colorbar
+                axl = fig.add_axes([0.88, 0.32, 0.02, 0.46])
+                cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
+                cb1.set_label(f"{metric} [-]")
+                for i, location in enumerate(locations):
+                    for j, land_cover_scenario in enumerate(land_cover_scenarios):
+                        df_metric = pd.DataFrame()
+                        for var_sim in vars_sim:
+                            for climate_scenario in climate_scenarios:
+                                for future in ["nf", "ff"]:
+                                    value = dict_glm[glm_key][location][land_cover_scenario][climate_scenario][var_sim][
+                                        delta
+                                    ][soil_depth][future][metric]
+                                    df_metric.loc[
+                                        f"{_lab[climate_scenario]} ({_lab[future]})", f"{_lab[var_sim]}"
+                                    ] = value
+                        sns.heatmap(df_metric, vmin=0, vmax=1, cmap="Oranges", cbar=False, ax=axes[i, j], square=True)
+                        axes[0, j].set_title(f"{Land_cover_scenarios[j]}")
+                        axes[-1, j].set_xticklabels(df_metric.columns, rotation=90)
+                        axes[i, j].set_ylabel("")
+                        axes[i, j].set_xlabel("")
+                    axes[i, 0].set_ylabel(f"{Locations[i]}")
+                    axes[i, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+                fig.subplots_adjust(bottom=0.2, left=0.2, right=0.85, top=0.9, hspace=-0.5, wspace=0.1)
+                file = base_path_figs / "glm_metrics" / f"{glm_key}_{metric}_{delta}_{soil_depth}_heatmap.png"
+                fig.savefig(file, dpi=300)
+                plt.close("all")
 
 # heatmap the root mean absolute error of MLMs
 metrics = ["MAE"]
@@ -1279,7 +1289,7 @@ for metric in metrics:
 metrics = ["R2"]
 vars_sim = ["transp", "q_ss", "theta", "tt50_transp", "tt50_q_ss", "rt50_s"]
 deltas = ["dAvg", "dIPR"]
-norm = mpl.colors.Normalize(vmin=0, vmax=0.6)
+norm = mpl.colors.Normalize(vmin=0, vmax=1)
 for metric in metrics:
     for delta in deltas:
         for soil_depth in soil_depths:
@@ -1294,7 +1304,7 @@ for metric in metrics:
                     for mlm_key in mlm_soil_formulas.keys():
                         value = dict_mlm_soil[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][metric]
                         df_metric.loc[f"{mlm_key}", f"{_lab[var_sim]}"] = value
-                sns.heatmap(df_metric, vmin=0, vmax=0.6, cmap="Oranges", cbar=False, ax=axes.flatten()[j], square=True)
+                sns.heatmap(df_metric, vmin=0, vmax=1, cmap="Oranges", cbar=False, ax=axes.flatten()[j], square=True)
                 axes.flatten()[j].set_title(f"{Land_cover_scenarios[j]}")
                 axes.flatten()[j].set_ylabel("")
                 axes.flatten()[j].set_xlabel("")
@@ -1344,7 +1354,7 @@ for delta in deltas:
         # axes for colorbar
         axl = fig.add_axes([0.9, 0.335, 0.02, 0.43])
         cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
-        cb1.set_label(f"{_lab[metric]} [-]")
+        cb1.set_label(f"{_lab[metric]} [%]")
         df_metric_climate = pd.DataFrame()
         df_metric_soil = pd.DataFrame()
         for var_sim in vars_sim:
@@ -1368,7 +1378,7 @@ for delta in deltas:
         fig.savefig(file, dpi=300)
         plt.close("all")
 
-norm = mpl.colors.Normalize(vmin=0, vmax=0.3)
+norm = mpl.colors.Normalize(vmin=0, vmax=1)
 mlm_climate_key = "avg_ipr"
 mlm_soil_key = "no_interaction"
 metric = "R2"
@@ -1387,8 +1397,8 @@ for delta in deltas:
                 df_metric_climate.loc[f"{_lab[land_cover_scenario]}", f"{_lab[var_sim]}"] = value
                 value = dict_mlm_soil[mlm_soil_key][var_sim][delta][land_cover_scenario][soil_depth][metric]
                 df_metric_soil.loc[f"{_lab[land_cover_scenario]}", f"{_lab[var_sim]}"] = value
-        sns.heatmap(df_metric_climate, vmin=0, vmax=0.3, cmap="Oranges", cbar=False, ax=axes.flatten()[0], square=True)
-        sns.heatmap(df_metric_soil, vmin=0, vmax=0.3, cmap="Oranges", cbar=False, ax=axes.flatten()[1], square=True)
+        sns.heatmap(df_metric_climate, vmin=0, vmax=1, cmap="Oranges", cbar=False, ax=axes.flatten()[0], square=True)
+        sns.heatmap(df_metric_soil, vmin=0, vmax=1, cmap="Oranges", cbar=False, ax=axes.flatten()[1], square=True)
         axes.flatten()[0].set_title("(a)", loc="left", fontsize=9)
         axes.flatten()[1].set_title("(b)", loc="left", fontsize=9)
         axes.flatten()[0].set_ylabel("")

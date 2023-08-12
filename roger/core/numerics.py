@@ -196,6 +196,8 @@ def calc_dS_num_error(state):
 
     if (
         settings.enable_lateral_flow
+        and not settings.enable_routing_1D 
+        and not settings.enable_routing_2D
         and not settings.enable_groundwater_boundary
         and not settings.enable_groundwater
         and not settings.enable_offline_transport
@@ -215,7 +217,28 @@ def calc_dS_num_error(state):
             ),
         )
     elif (
-        settings.enable_lateral_flow and settings.enable_groundwater_boundary and not settings.enable_offline_transport
+        settings.enable_lateral_flow
+        and settings.enable_routing_1D and not settings.enable_routing_2D
+        and not settings.enable_groundwater_boundary
+        and not settings.enable_groundwater
+        and not settings.enable_offline_transport
+    ):
+        vs.dS_num_error = update(
+            vs.dS_num_error,
+            at[2:-2, 2:-2],
+            npx.abs(
+                (vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1])
+                - (
+                    vs.prec[2:-2, 2:-2, vs.tau]
+                    - vs.q_sur[2:-2, 2:-2]
+                    - vs.aet[2:-2, 2:-2]
+                    - vs.q_ss[2:-2, 2:-2]
+                    - vs.q_sub_out[2:-2, 2:-2] + vs.q_sub_in[2:-2, 2:-2]
+                )
+            ),
+        )
+    elif (
+        settings.enable_lateral_flow and settings.enable_groundwater_boundary and not settings.enable_routing_1D and not settings.enable_routing_2D and not settings.enable_offline_transport
     ):
         vs.dS_num_error = update(
             vs.dS_num_error,
@@ -233,11 +256,13 @@ def calc_dS_num_error(state):
             ),
         )
 
-    elif settings.enable_lateral_flow and settings.enable_groundwater and not settings.enable_offline_transport:
+    elif settings.enable_lateral_flow and settings.enable_groundwater and not settings.enable_routing_1D and not settings.enable_routing_2D and not settings.enable_offline_transport:
         pass
 
     elif (
         not settings.enable_crop_phenology
+        and not settings.enable_routing_1D 
+        and not settings.enable_routing_2D
         and not settings.enable_lateral_flow
         and not settings.enable_groundwater_boundary
         and not settings.enable_groundwater
@@ -280,6 +305,8 @@ def calc_dS_num_error(state):
 
     elif (
         settings.enable_crop_phenology
+        and not settings.enable_routing_1D 
+        and not settings.enable_routing_2D
         and not settings.enable_lateral_flow
         and not settings.enable_groundwater_boundary
         and not settings.enable_groundwater
@@ -332,6 +359,8 @@ def calc_dS_num_error(state):
     elif (
         not settings.enable_lateral_flow
         and settings.enable_groundwater_boundary
+        and not settings.enable_routing_1D 
+        and not settings.enable_routing_2D
         and not settings.enable_groundwater
         and not settings.enable_offline_transport
     ):
@@ -350,7 +379,7 @@ def calc_dS_num_error(state):
             ),
         )
 
-    elif settings.enable_offline_transport and not (
+    elif settings.enable_offline_transport and not settings.enable_routing_1D and not settings.enable_routing_2D and not (
         settings.enable_groundwater_boundary | settings.enable_crop_phenology
     ):
         vs.dS_num_error = update(
@@ -372,6 +401,7 @@ def calc_dS_num_error(state):
     elif (
         settings.enable_offline_transport
         and settings.enable_crop_phenology
+        and not settings.enable_routing_1D and not settings.enable_routing_2D
         and not settings.enable_groundwater_boundary
     ):
         vs.dS_num_error = update(
@@ -407,6 +437,7 @@ def calc_dC_num_error(state):
 
     if (
         settings.enable_offline_transport
+        and not settings.enable_routing_1D and not settings.enable_routing_2D
         and not settings.enable_lateral_flow
         and not settings.enable_groundwater_boundary
         and (settings.enable_deuterium or settings.enable_oxygen18)
@@ -439,6 +470,7 @@ def calc_dC_num_error(state):
 
     elif (
         settings.enable_offline_transport
+        and not settings.enable_routing_1D and not settings.enable_routing_2D
         and not settings.enable_lateral_flow
         and not settings.enable_groundwater_boundary
         and settings.enable_virtualtracer
@@ -471,6 +503,7 @@ def calc_dC_num_error(state):
 
     elif (
         settings.enable_offline_transport
+        and not settings.enable_routing_1D and not settings.enable_routing_2D
         and settings.enable_crop_phenology
         and not settings.enable_lateral_flow
         and not settings.enable_groundwater_boundary
@@ -560,6 +593,7 @@ def calc_dC_num_error(state):
 
     elif (
         settings.enable_offline_transport
+        and not settings.enable_routing_1D and not settings.enable_routing_2D
         and not settings.enable_lateral_flow
         and not settings.enable_groundwater_boundary
         and (settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate)
@@ -619,6 +653,8 @@ def sanity_check(state):
 
     if (
         settings.enable_lateral_flow
+        and not settings.enable_routing_1D
+        and not settings.enable_routing_2D
         and not settings.enable_groundwater_boundary
         and not settings.enable_groundwater
         and not settings.enable_offline_transport
@@ -659,7 +695,51 @@ def sanity_check(state):
         check = check1 & check2 & check3
 
     elif (
-        settings.enable_lateral_flow and settings.enable_groundwater_boundary and not settings.enable_offline_transport
+        settings.enable_lateral_flow
+        and settings.enable_routing_1D
+        and not settings.enable_routing_2D
+        and not settings.enable_groundwater_boundary
+        and not settings.enable_groundwater
+        and not settings.enable_offline_transport
+    ):
+        check1 = global_and(
+            npx.all(
+                npx.isclose(
+                    vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1],
+                    vs.prec[2:-2, 2:-2, vs.tau]
+                    - vs.q_sur[2:-2, 2:-2]
+                    - vs.aet[2:-2, 2:-2]
+                    - vs.q_ss[2:-2, 2:-2]
+                    - vs.q_sub_out[2:-2, 2:-2] + vs.q_sub_in[2:-2, 2:-2],
+                    atol=settings.atol,
+                    rtol=settings.rtol,
+                )
+            )
+        )
+        check2 = global_and(
+            npx.all(
+                (vs.S_fp_rz[2:-2, 2:-2] > -settings.atol)
+                & (vs.S_lp_rz[2:-2, 2:-2] > -settings.atol)
+                & (vs.S_fp_ss[2:-2, 2:-2] > -settings.atol)
+                & (vs.S_lp_ss[2:-2, 2:-2] > -settings.atol)
+            )
+        )
+        check3 = global_and(
+            npx.all(
+                (vs.S_fp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ufc_rz[2:-2, 2:-2])
+                & (vs.S_lp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ac_rz[2:-2, 2:-2])
+                & (vs.S_fp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ufc_ss[2:-2, 2:-2])
+                & (vs.S_lp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ac_ss[2:-2, 2:-2])
+            )
+        )
+        # dS = vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1]
+        # dF = vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2]
+        # print(vs.S[2:-2, 2:-2, vs.tau])
+        check = check1 & check2 & check3
+
+
+    elif (
+        settings.enable_lateral_flow and settings.enable_groundwater_boundary and not settings.enable_routing_1D and not settings.enable_routing_2D and not settings.enable_offline_transport
     ):
         check1 = global_and(
             npx.all(
@@ -694,7 +774,7 @@ def sanity_check(state):
         )
         check = check1 & check2 & check3
 
-    elif settings.enable_lateral_flow and settings.enable_groundwater and not settings.enable_offline_transport:
+    elif settings.enable_lateral_flow and settings.enable_groundwater and not settings.enable_routing_1D and not settings.enable_routing_2D and not settings.enable_offline_transport:
         check1 = global_and(
             npx.all(
                 npx.isclose(
@@ -730,6 +810,8 @@ def sanity_check(state):
 
     elif (
         settings.enable_groundwater_boundary
+        and not settings.enable_routing_1D 
+        and not settings.enable_routing_2D
         and not settings.enable_lateral_flow
         and not settings.enable_offline_transport
     ):
@@ -765,7 +847,7 @@ def sanity_check(state):
         )
         check = check1 & check2 & check3
 
-    elif settings.enable_film_flow and not settings.enable_offline_transport:
+    elif settings.enable_film_flow and not settings.enable_routing_1D and not settings.enable_routing_2D and not settings.enable_offline_transport:
         check1 = global_and(
             npx.all(
                 npx.isclose(
@@ -800,6 +882,8 @@ def sanity_check(state):
 
     elif (
         not settings.enable_lateral_flow
+        and not settings.enable_routing_1D 
+        and not settings.enable_routing_2D
         and not settings.enable_groundwater_boundary
         and not settings.enable_groundwater
         and not settings.enable_offline_transport
@@ -834,6 +918,8 @@ def sanity_check(state):
 
     elif (
         settings.enable_offline_transport
+        and not settings.enable_routing_1D 
+        and not settings.enable_routing_2D
         and not settings.enable_groundwater_boundary
         and not (
             settings.enable_deuterium
@@ -866,6 +952,8 @@ def sanity_check(state):
 
     elif (
         settings.enable_offline_transport
+        and not settings.enable_routing_1D 
+        and not settings.enable_routing_2D
         and not settings.enable_groundwater_boundary
         and (settings.enable_deuterium or settings.enable_oxygen18)
     ):
@@ -1016,6 +1104,8 @@ def sanity_check(state):
 
     elif (
         settings.enable_offline_transport
+        and not settings.enable_routing_1D 
+        and not settings.enable_routing_2D
         and not settings.enable_groundwater_boundary
         and (settings.enable_bromide or settings.enable_chloride)
     ):
@@ -1056,7 +1146,7 @@ def sanity_check(state):
         check = check1 & check2
 
     elif (
-        settings.enable_offline_transport and not settings.enable_groundwater_boundary and settings.enable_virtualtracer
+        settings.enable_offline_transport and not settings.enable_routing_1D and not settings.enable_routing_2D and not settings.enable_groundwater_boundary and settings.enable_virtualtracer
     ):
         check1 = global_and(
             npx.all(
@@ -1096,7 +1186,7 @@ def sanity_check(state):
 
         check = check1 & check2
 
-    elif settings.enable_offline_transport and not settings.enable_groundwater_boundary and settings.enable_nitrate:
+    elif settings.enable_offline_transport and not settings.enable_routing_1D and not settings.enable_routing_2D and not settings.enable_groundwater_boundary and settings.enable_nitrate:
         check1 = global_and(
             npx.all(
                 npx.isclose(
@@ -1135,7 +1225,7 @@ def sanity_check(state):
 
         check = check1 & check2
 
-    elif settings.enable_offline_transport and settings.enable_groundwater_boundary:
+    elif settings.enable_offline_transport and settings.enable_groundwater_boundary and not settings.enable_routing_1D and not settings.enable_routing_2D:
         pass
 
     return check

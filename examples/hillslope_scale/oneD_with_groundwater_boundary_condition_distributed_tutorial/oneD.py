@@ -214,19 +214,25 @@ def main(tmp_dir):
             vs.prec_weight = update(
                 vs.prec_weight,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("prec_weight", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+                self._read_var_from_csv("prec_weight", self._base_path, "parameters.csv").reshape(
+                    settings.nx, settings.ny
+                ),
             )
             # weight factor of air temperature (-)
             vs.ta_weight = update(
                 vs.ta_weight,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("ta_weight", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+                self._read_var_from_csv("ta_weight", self._base_path, "parameters.csv").reshape(
+                    settings.nx, settings.ny
+                ),
             )
             # weight factor of potential evapotranspiration (-)
             vs.pet_weight = update(
                 vs.pet_weight,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("pet_weight", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+                self._read_var_from_csv("pet_weight", self._base_path, "parameters.csv").reshape(
+                    settings.nx, settings.ny
+                ),
             )
 
         @roger_routine
@@ -238,9 +244,7 @@ def main(tmp_dir):
 
         @roger_routine(
             dist_safe=False,
-            local_variables=["S_vad",
-                             "n0",
-                             "z_soil"],
+            local_variables=["S_vad", "n0", "z_soil"],
         )
         def set_initial_conditions_setup(self, state):
             vs = state.variables
@@ -249,7 +253,12 @@ def main(tmp_dir):
             vs.S_vad = update(
                 vs.S_vad,
                 at[2:-2, 2:-2, :],
-                0.5 * vs.n0[2:-2, 2:-2, npx.newaxis] * (self._read_var_from_nc("Z_GW", self._input_dir, "forcing.nc")[0, 0, 0] - vs.z_soil[2:-2, 2:-2, npx.newaxis])
+                0.01
+                * vs.n0[2:-2, 2:-2, npx.newaxis]
+                * (
+                    self._read_var_from_nc("Z_GW", self._input_dir, "forcing.nc")[0, 0, 0] * 1000
+                    - vs.z_soil[2:-2, 2:-2, npx.newaxis]
+                ),
             )
             vs.S_vad = update(
                 vs.S_vad,
@@ -325,13 +334,22 @@ def main(tmp_dir):
                     vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")[vs.itt_forc]
                 )
                 vs.prec_day = update(
-                    vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.prec_weight[:, :, npx.newaxis]
+                    vs.prec_day,
+                    at[:, :, :],
+                    vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                    * vs.prec_weight[:, :, npx.newaxis],
                 )
                 vs.ta_day = update(
-                    vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.ta_weight[:, :, npx.newaxis]
+                    vs.ta_day,
+                    at[:, :, :],
+                    vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                    * vs.ta_weight[:, :, npx.newaxis],
                 )
                 vs.pet_day = update(
-                    vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.pet_weight[:, :, npx.newaxis]
+                    vs.pet_day,
+                    at[:, :, :],
+                    vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                    * vs.pet_weight[:, :, npx.newaxis],
                 )
                 vs.z_gw = update(vs.z_gw, at[2:-2, 2:-2, vs.tau], vs.Z_GW[npx.newaxis, npx.newaxis, vs.itt_forc])
                 vs.itt_forc = vs.itt_forc + 6 * 24

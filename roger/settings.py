@@ -44,6 +44,7 @@ SETTINGS = {
     "time_origin": Setting("1900-01-01 00:00:00", str, "time origin"),
     "AB_eps": Setting(0.1, float, "Deviation from Adam-Bashforth weighting"),
     "nsas": Setting(8, int, "Number of entries per grid cell containing SAS parameters"),
+    "nflowdirs": Setting(8, int, "Number of flow directions per grid cell"),
     # Physical constants
     "pi": Setting(PI, float, "Pi"),
     "r_mp": Setting(2.5, float, "Macropore radius in mm"),
@@ -93,7 +94,8 @@ SETTINGS = {
     "enable_deuterium": Setting(False, bool, "enable deuterium"),
     "enable_nitrate": Setting(False, bool, "enable nitrate"),
     "enable_virtualtracer": Setting(False, bool, "enable virtual tracer"),
-    "enable_routing": Setting(False, bool, "enable routing"),
+    "enable_routing_1D": Setting(False, bool, "enable unidirectional routing"),
+    "enable_routing_2D": Setting(False, bool, "enable bidirectional routing"),
     "enable_runon_infiltration": Setting(False, bool, "enable run-on infiltration"),
     "enable_urban": Setting(False, bool, "enable urban"),
     "enable_macropore_lower_boundary_condition": Setting(False, bool, "enable lower boundary condition of macropores"),

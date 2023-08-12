@@ -238,7 +238,7 @@ def calc_inf_mat(state):
     dz_wf = update(
         dz_wf,
         at[2:-2, 2:-2],
-        (vs.inf_mat[2:-2, 2:-2] / vs.theta_d_t0[2:-2, 2:-2]) * mask11[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        npx.where(mask11[2:-2, 2:-2], (vs.inf_mat[2:-2, 2:-2] / vs.theta_d_t0[2:-2, 2:-2]), dz_wf[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     dz_wf = update(
         dz_wf,
@@ -944,11 +944,11 @@ def calc_inf_mp(state):
     )
 
     # subsoil fine pore excess fills subsoil large pores
-    mask = vs.S_fp_ss > vs.S_ufc_ss
+    mask = (vs.S_fp_ss > vs.S_ufc_ss)
     vs.S_lp_ss = update_add(
         vs.S_lp_ss,
         at[2:-2, 2:-2],
-        (vs.S_fp_ss[2:-2, 2:-2] - vs.S_ufc_ss[2:-2, 2:-2]) * mask[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        npx.where(mask[2:-2, 2:-2], (vs.S_fp_ss[2:-2, 2:-2] - vs.S_ufc_ss[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.S_fp_ss = update(
         vs.S_fp_ss,
@@ -1329,7 +1329,7 @@ def calc_inf_rz(state):
     vs.S_lp_rz = update_add(
         vs.S_lp_rz,
         at[2:-2, 2:-2],
-        (vs.S_fp_rz[2:-2, 2:-2] - vs.S_ufc_rz[2:-2, 2:-2]) * mask[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        npx.where(mask[2:-2, 2:-2], (vs.S_fp_rz[2:-2, 2:-2] - vs.S_ufc_rz[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.S_fp_rz = update(
         vs.S_fp_rz,
@@ -1460,9 +1460,8 @@ def calc_theta_d(state):
     theta_d = update(
         theta_d,
         at[2:-2, 2:-2],
-        (vs.theta_sat[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau])
-        * (1 - vs.sealing[2:-2, 2:-2] / 100)
-        * mask1[2:-2, 2:-2]
+        npx.where(mask1[2:-2, 2:-2], (vs.theta_sat[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau])
+        * (1 - vs.sealing[2:-2, 2:-2] / 100), theta_d[2:-2, 2:-2])
         * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d = update(
@@ -1492,12 +1491,11 @@ def calc_theta_d_rel(state):
     theta_d_rel = update(
         theta_d_rel,
         at[2:-2, 2:-2],
-        (
+        npx.where(mask1[2:-2, 2:-2],(
             (vs.theta_sat[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau])
             / (vs.theta_sat[2:-2, 2:-2] - vs.theta_pwp[2:-2, 2:-2])
         )
-        * (1 - vs.sealing[2:-2, 2:-2] / 100)
-        * mask1[2:-2, 2:-2]
+        * (1 - vs.sealing[2:-2, 2:-2] / 100), theta_d_rel[2:-2, 2:-2])
         * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d_rel = update(
@@ -1512,38 +1510,6 @@ def calc_theta_d_rel(state):
     )
 
     return theta_d_rel
-
-
-def _calc_theta_d_rel(state):
-    """
-    Calculates relative soil moisture deficit.
-    """
-    vs = state.variables
-
-    theta_d_rel = allocate(state.dimensions, ("x", "y"))
-
-    mask1 = vs.z_soil > 0
-    theta_d_rel = update(
-        theta_d_rel,
-        at[2:-2, 2:-2],
-        (vs.theta_d[2:-2, 2:-2] / (vs.theta_sat[2:-2, 2:-2] - vs.theta_pwp[2:-2, 2:-2]))
-        * (1 - vs.sealing[2:-2, 2:-2] / 100)
-        * mask1[2:-2, 2:-2]
-        * vs.maskCatch[2:-2, 2:-2],
-    )
-    theta_d_rel = update(
-        theta_d_rel,
-        at[2:-2, 2:-2],
-        npx.where(vs.z_soil[2:-2, 2:-2] <= 0, 0.01, theta_d_rel[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-    theta_d_rel = update(
-        theta_d_rel,
-        at[2:-2, 2:-2],
-        npx.where(theta_d_rel[2:-2, 2:-2] <= 0, 0.01, theta_d_rel[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    return theta_d_rel
-
 
 @roger_kernel
 def calc_theta_d_fp(state):
@@ -1558,9 +1524,8 @@ def calc_theta_d_fp(state):
     theta_d_fp = update(
         theta_d_fp,
         at[2:-2, 2:-2],
-        (vs.theta_fc[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau])
-        * (1 - vs.sealing[2:-2, 2:-2] / 100)
-        * mask1[2:-2, 2:-2]
+        npx.where(mask1[2:-2, 2:-2], (vs.theta_fc[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau])
+        * (1 - vs.sealing[2:-2, 2:-2] / 100), theta_d_fp[2:-2, 2:-2])
         * vs.maskCatch[2:-2, 2:-2],
     )
     theta_d_fp = update(
