@@ -36,8 +36,8 @@ ks:
 - 100
 # hydraulic conductivity of bedrock (mm/hour)
 kf:
-- 0.01
-- 100
+- 0.001
+- 1
 # specific yield at the soil surface (-)
 n0:
 - 0.1

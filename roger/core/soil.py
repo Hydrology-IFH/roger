@@ -360,7 +360,7 @@ def calc_parameters_root_zone_kernel(state):
 
         return z_root
 
-    z_root = for_loop(0, 51, loop_body, z_root)
+    z_root = for_loop(0, 61, loop_body, z_root)
 
     z_root = update(
         z_root,

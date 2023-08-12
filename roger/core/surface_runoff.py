@@ -10,8 +10,16 @@ def calc_channel_routing(state):
 
 
 @roger_kernel
-def calc_surface_runoff_routing(state):
+def calc_surface_runoff_routing_1D(state):
     """
-    Calculates subsurface runoff routing
+    Calculates surface runoff routing
+    """
+    pass
+
+
+@roger_kernel
+def calc_surface_runoff_routing_2D(state):
+    """
+    Calculates surface runoff routing
     """
     pass

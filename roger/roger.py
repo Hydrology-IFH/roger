@@ -326,15 +326,44 @@ class RogerSetup(metaclass=abc.ABCMeta):
             diagnostics.output(self.state)
 
         logger.success("Setup done\n")
-        if (self.state.settings.enable_chloride | self.state.settings.enable_bromide | self.state.settings.enable_oxygen18 | self.state.settings.enable_deuterium | self.state.settings.enable_nitrate | self.state.settings.enable_virtualtracer):
-            logger.warning("IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require an post-evaluation of the accuracy of\n the numerical solution (e.g. calculate\n standard deviation of dS_num_error or dC_num_error).\n")
+        if (
+            self.state.settings.enable_chloride
+            | self.state.settings.enable_bromide
+            | self.state.settings.enable_oxygen18
+            | self.state.settings.enable_deuterium
+            | self.state.settings.enable_nitrate
+            | self.state.settings.enable_virtualtracer
+        ):
+            logger.warning(
+                "IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require an post-evaluation of the accuracy of\n the numerical solution (e.g. calculate\n standard deviation of dS_num_error or dC_num_error).\n"
+            )
         else:
-            logger.warning("IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require an post-evaluation of the accuracy of\n the numerical solution (e.g. calculate\n standard deviation of dS_num_error).\n")
+            logger.warning(
+                "IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require an post-evaluation of the accuracy of\n the numerical solution (e.g. calculate\n standard deviation of dS_num_error).\n"
+            )
 
     @roger_routine
     def step(self, state):
         from roger import diagnostics, restart
-        from roger.core import surface, soil, root_zone, subsoil, groundwater, interception, snow, evapotranspiration, infiltration, film_flow, subsurface_runoff, capillary_rise, crop, groundwater_flow, numerics, transport, adaptive_time_stepping
+        from roger.core import (
+            surface,
+            soil,
+            root_zone,
+            subsoil,
+            groundwater,
+            interception,
+            snow,
+            evapotranspiration,
+            infiltration,
+            film_flow,
+            subsurface_runoff,
+            capillary_rise,
+            crop,
+            groundwater_flow,
+            numerics,
+            transport,
+            adaptive_time_stepping,
+        )
 
         self._ensure_setup_done()
 
@@ -395,10 +424,6 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     with state.timers["storage"]:
                         groundwater.calculate_groundwater(state)
 
-                if settings.enable_routing:
-                    with state.timers["routing"]:
-                        pass
-
                 with state.timers["storage"]:
                     numerics.calc_storage(state)
 
@@ -407,7 +432,9 @@ class RogerSetup(metaclass=abc.ABCMeta):
                 # write output at end of time step
                 with state.timers["diagnostics"]:
                     if not numerics.sanity_check(state):
-                        logger.warning(f"Solution diverged at iteration {vs.itt}.\n Please evaluate bias of deterministic/numerical solution.\n The bias is written to the model output.")
+                        logger.warning(
+                            f"Solution diverged at iteration {vs.itt}.\n Please evaluate bias of deterministic/numerical solution.\n The bias is written to the model output."
+                        )
                     numerics.calculate_num_error(state)
 
                     if settings.warmup_done:
@@ -417,7 +444,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
             elif settings.enable_offline_transport:
                 # skip first iteration which contains initial values
                 vs.itt = vs.itt + 1
-                if settings.sas_solver == 'deterministic':
+                if settings.sas_solver == "deterministic":
                     vs.time = vs.time + vs.dt_secs
 
                 with state.timers["main transport"]:
@@ -482,6 +509,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
         prior to this function.
         """
         from roger import restart
+
         self._ensure_setup_done()
 
         vs = self.state.variables
@@ -542,7 +570,9 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     " main loop time             = {:.2f}s".format(self.state.timers["main"].total_time),
                     "   boundary conditions      = {:.2f}s".format(self.state.timers["boundary conditions"].total_time),
                     "   forcing                  = {:.2f}s".format(self.state.timers["forcing"].total_time),
-                    "   time-variant parameters  = {:.2f}s".format(self.state.timers["time-variant parameters"].total_time),
+                    "   time-variant parameters  = {:.2f}s".format(
+                        self.state.timers["time-variant parameters"].total_time
+                    ),
                     "   interception             = {:.2f}s".format(self.state.timers["interception"].total_time),
                     "   evapotranspiration       = {:.2f}s".format(self.state.timers["evapotranspiration"].total_time),
                     "   snow                     = {:.2f}s".format(self.state.timers["snow"].total_time),
@@ -563,23 +593,57 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     "Timing summary:",
                     "(excluding first iteration)",
                     "---",
-                    " setup time                                      = {:.2f}s".format(self.state.timers["setup"].total_time),
-                    " warmup time                                     = {:.2f}s".format(self.state.timers["warmup"].total_time),
-                    " main loop time                                  = {:.2f}s".format(self.state.timers["main transport"].total_time),
-                    "   boundary conditions                           = {:.2f}s".format(self.state.timers["boundary conditions"].total_time),
-                    "   forcing                                       = {:.2f}s".format(self.state.timers["forcing"].total_time),
-                    "   redistribution after root growth/harvesting   = {:.2f}s".format(self.state.timers["redistribution after root growth/harvesting"].total_time),
-                    "   infiltration into root zone                   = {:.2f}s".format(self.state.timers["infiltration into root zone"].total_time),
-                    "   evapotranspiration                            = {:.2f}s".format(self.state.timers["evapotranspiration"].total_time),
-                    "   infiltration into subsoil                     = {:.2f}s".format(self.state.timers["infiltration into subsoil"].total_time),
-                    "   subsurface runoff of root zone                = {:.2f}s".format(self.state.timers["subsurface runoff of root zone"].total_time),
-                    "   subsurface runoff of subsoil                  = {:.2f}s".format(self.state.timers["subsurface runoff of subsoil"].total_time),
-                    "   capillary rise into root zone                 = {:.2f}s".format(self.state.timers["capillary rise into root zone"].total_time),
-                    "   capillary rise into subsoil                   = {:.2f}s".format(self.state.timers["capillary rise into subsoil"].total_time),
-                    "   ageing                                        = {:.2f}s".format(self.state.timers["ageing"].total_time),
-                    "   storage                                       = {:.2f}s".format(self.state.timers["storage"].total_time),
-                    "   nitrogen cycle                                = {:.2f}s".format(self.state.timers["nitrogen cycle"].total_time),
-                    "   routing                                       = {:.2f}s".format(self.state.timers["routing"].total_time),
+                    " setup time                                      = {:.2f}s".format(
+                        self.state.timers["setup"].total_time
+                    ),
+                    " warmup time                                     = {:.2f}s".format(
+                        self.state.timers["warmup"].total_time
+                    ),
+                    " main loop time                                  = {:.2f}s".format(
+                        self.state.timers["main transport"].total_time
+                    ),
+                    "   boundary conditions                           = {:.2f}s".format(
+                        self.state.timers["boundary conditions"].total_time
+                    ),
+                    "   forcing                                       = {:.2f}s".format(
+                        self.state.timers["forcing"].total_time
+                    ),
+                    "   redistribution after root growth/harvesting   = {:.2f}s".format(
+                        self.state.timers["redistribution after root growth/harvesting"].total_time
+                    ),
+                    "   infiltration into root zone                   = {:.2f}s".format(
+                        self.state.timers["infiltration into root zone"].total_time
+                    ),
+                    "   evapotranspiration                            = {:.2f}s".format(
+                        self.state.timers["evapotranspiration"].total_time
+                    ),
+                    "   infiltration into subsoil                     = {:.2f}s".format(
+                        self.state.timers["infiltration into subsoil"].total_time
+                    ),
+                    "   subsurface runoff of root zone                = {:.2f}s".format(
+                        self.state.timers["subsurface runoff of root zone"].total_time
+                    ),
+                    "   subsurface runoff of subsoil                  = {:.2f}s".format(
+                        self.state.timers["subsurface runoff of subsoil"].total_time
+                    ),
+                    "   capillary rise into root zone                 = {:.2f}s".format(
+                        self.state.timers["capillary rise into root zone"].total_time
+                    ),
+                    "   capillary rise into subsoil                   = {:.2f}s".format(
+                        self.state.timers["capillary rise into subsoil"].total_time
+                    ),
+                    "   ageing                                        = {:.2f}s".format(
+                        self.state.timers["ageing"].total_time
+                    ),
+                    "   storage                                       = {:.2f}s".format(
+                        self.state.timers["storage"].total_time
+                    ),
+                    "   nitrogen cycle                                = {:.2f}s".format(
+                        self.state.timers["nitrogen cycle"].total_time
+                    ),
+                    "   routing                                       = {:.2f}s".format(
+                        self.state.timers["routing"].total_time
+                    ),
                 ]
             )
 
