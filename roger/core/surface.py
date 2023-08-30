@@ -55,7 +55,7 @@ def calc_topo_kernel(state):
     """
     Catchment mask
     """
-    catch_mask = (vs.lu_id != 14) & (vs.lu_id != 20) & (vs.lu_id != 999)
+    catch_mask = (vs.lu_id != 14) & (vs.lu_id != 20) & (vs.lu_id != 999) & vs.maskCatch
     vs.maskCatch = update(vs.maskCatch, at[...], catch_mask)
     """
     Urban mask
