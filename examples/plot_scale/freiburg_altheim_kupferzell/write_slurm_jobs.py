@@ -115,7 +115,7 @@ def main():
                 lines.append(f"cd {base_path_bwuc}/svat\n")
                 lines.append(" \n")
                 lines.append(
-                    'python svat.py -b numpy -d cpu --location %s --land-cover-scenario grass --climate-scenario %s --period %s -td "${TMPDIR}"\n'
+                    'python svat.py -b numpy -d cpu --location %s --climate-scenario %s --period %s -td "${TMPDIR}"\n'
                     % (location, climate_scenario, period)
                 )
                 lines.append("# Move output from local SSD to global workspace\n")
@@ -152,7 +152,7 @@ def main():
         lines.append(f"cd {base_path_bwuc}/svat\n")
         lines.append(" \n")
         lines.append(
-            'python svat.py -b numpy -d cpu --location %s --land-cover-scenario grass --climate-scenario observed --period 2016-2021 -td "${TMPDIR}"\n'
+            'python svat.py -b numpy -d cpu --location %s --climate-scenario observed --period 2016-2021 -td "${TMPDIR}"\n'
             % (location)
         )
         lines.append("# Move output from local SSD to global workspace\n")

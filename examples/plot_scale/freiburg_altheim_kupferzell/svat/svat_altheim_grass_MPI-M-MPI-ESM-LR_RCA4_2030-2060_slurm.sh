@@ -17,7 +17,7 @@ eval "$(conda shell.bash hook)"
 conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/svat
  
-python svat.py -b numpy -d cpu --location altheim --land-cover-scenario grass --climate-scenario MPI-M-MPI-ESM-LR_RCA4 --period 2030-2060 -td "${TMPDIR}"
+python svat.py -b numpy -d cpu --location altheim --climate-scenario MPI-M-MPI-ESM-LR_RCA4 --period 2030-2060 -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/output/svat"
 mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/output/svat
