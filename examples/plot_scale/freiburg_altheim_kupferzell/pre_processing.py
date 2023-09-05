@@ -14,31 +14,31 @@ import pickle
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-mpl.rcParams["font.size"] = 6
-mpl.rcParams["axes.titlesize"] = 7
-mpl.rcParams["axes.labelsize"] = 7
-mpl.rcParams["xtick.labelsize"] = 6
-mpl.rcParams["ytick.labelsize"] = 6
-mpl.rcParams["legend.fontsize"] = 6
-mpl.rcParams["legend.title_fontsize"] = 7
+mpl.rcParams["font.size"] = 7
+mpl.rcParams["axes.titlesize"] = 8
+mpl.rcParams["axes.labelsize"] = 9
+mpl.rcParams["xtick.labelsize"] = 7
+mpl.rcParams["ytick.labelsize"] = 7
+mpl.rcParams["legend.fontsize"] = 7
+mpl.rcParams["legend.title_fontsize"] = 8
 sns.set_style("ticks")
 sns.plotting_context(
     "paper",
     font_scale=1,
     rc={
-        "font.size": 6.0,
-        "axes.labelsize": 7.0,
-        "axes.titlesize": 8.0,
-        "xtick.labelsize": 6.0,
-        "ytick.labelsize": 6.0,
-        "legend.fontsize": 6.0,
-        "legend.title_fontsize": 7.0,
+        "font.size": 7.0,
+        "axes.labelsize": 8.0,
+        "axes.titlesize": 9.0,
+        "xtick.labelsize": 7.0,
+        "ytick.labelsize": 7.0,
+        "legend.fontsize": 7.0,
+        "legend.title_fontsize": 8.0,
     },
 )
 
 base_path = Path(__file__).parent
 # directory of figures
-base_path_figs = base_path / "figures"
+base_path_figs = base_path / "figures" / "climate_projections"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
@@ -64,197 +64,6 @@ station_label1 = {
     4189: "altheim",
 }
 
-# --- time index to join data --------------------------------------------------
-idx_annually_1985_2100 = pd.date_range(start="1985-01-01", end="2099-12-31", freq="y")
-idx_annually_2003_2005 = pd.date_range(start="2003-01-01", end="2005-12-31", freq="y")
-idx_annually_2016_2021 = pd.date_range(start="2016-01-01", end="2021-12-31", freq="y")
-idx_annually_1994_2005 = pd.date_range(start="1994-01-01", end="2005-12-31", freq="y")
-idx_annually_1985_2005 = pd.date_range(start="1985-01-01", end="2005-12-31", freq="y")
-idx_annually_2040_2060 = pd.date_range(start="2040-01-01", end="2059-12-31", freq="y")
-idx_annually_2080_2100 = pd.date_range(start="2080-01-01", end="2099-12-31", freq="y")
-
-idx_daily_1985_2100 = pd.date_range(start="1985-01-01", end="2099-12-31", freq="d")
-idx_daily_2003_2005 = pd.date_range(start="2003-01-01", end="2005-12-31", freq="d")
-idx_daily_2016_2021 = pd.date_range(start="2016-01-01", end="2021-12-31", freq="d")
-idx_daily_1994_2005 = pd.date_range(start="1994-01-01", end="2005-12-31", freq="d")
-idx_daily_1985_2005 = pd.date_range(start="1985-01-01", end="2005-12-31", freq="d")
-idx_daily_2040_2060 = pd.date_range(start="2040-01-01", end="2059-12-31", freq="d")
-idx_daily_2080_2100 = pd.date_range(start="2080-01-01", end="2099-12-31", freq="d")
-
-idx_hourly_1985_2100 = pd.date_range(start="1985-01-01 00:00:00", end="2099-12-31 23:00:00", freq="h")
-idx_hourly_2003_2005 = pd.date_range(start="2003-01-01 00:00:00", end="2004-12-31 23:00:00", freq="h")
-idx_hourly_2016_2021 = pd.date_range(start="2016-01-01 00:00:00", end="2021-12-31 23:00:00", freq="h")
-idx_hourly_1994_2005 = pd.date_range(start="1994-01-01 00:00:00", end="2004-12-31 23:00:00", freq="h")
-idx_hourly_1985_2005 = pd.date_range(start="1985-01-01 00:00:00", end="2004-12-31 23:00:00", freq="h")
-idx_hourly_2040_2060 = pd.date_range(start="2040-01-01 00:00:00", end="2059-12-31 23:00:00", freq="h")
-idx_hourly_2080_2100 = pd.date_range(start="2080-01-01 00:00:00", end="2099-12-31 23:00:00", freq="h")
-
-idx_3hourly_1985_2100c = pd.date_range(start="1985-01-01 01:30:00", end="2099-12-31 22:30:00", freq="3h")
-idx_3hourly_1985_2100 = pd.date_range(start="1985-01-01 00:00:00", end="2099-12-31 23:00:00", freq="3h")
-
-idx_10mins_1985_2100 = pd.date_range(start="1985-01-01 00:00:00", end="2100-12-31 23:50:00", freq="10T")
-idx_10mins_2003_2005 = pd.date_range(start="2003-01-01 00:00:00", end="2004-12-31 23:50:00", freq="10T")
-idx_10mins_2016_2021 = pd.date_range(start="2016-01-01 00:00:00", end="2021-12-31 23:50:00", freq="10T")
-idx_10mins_1994_2005 = pd.date_range(start="1994-01-01 00:00:00", end="2004-12-31 23:50:00", freq="10T")
-idx_10mins_1985_2005 = pd.date_range(start="1985-01-01 00:00:00", end="2004-12-31 23:50:00", freq="10T")
-idx_10mins_2040_2060 = pd.date_range(start="2040-01-01 00:00:00", end="2059-12-31 23:50:00", freq="10T")
-idx_10mins_2080_2100 = pd.date_range(start="2080-01-01 00:00:00", end="2099-12-31 23:50:00", freq="10T")
-
-# --- load bias-corrected climate projections ---------------------------------------------------
-dict_bc_meteo_daily = {}
-for station_id in station_ids:
-    dict_bc_meteo_daily[station_id] = {}
-    for cm in cms:
-        dict_bc_meteo_daily[station_id][cm] = {}
-        file = (
-            base_path / "climate_projections" / "data" / "daily" / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_hist.csv"
-        )
-        data_hist = pd.read_csv(file, sep=",", index_col=0)
-        data_hist.index = pd.to_datetime(data_hist.index, format="%Y-%m-%d")
-        data_hist.columns = ["PREC", "TA", "TAD", "RS"]
-        file = (
-            base_path
-            / "climate_projections"
-            / "data"
-            / "daily"
-            / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_future.csv"
-        )
-        data_future = pd.read_csv(file, sep=",", index_col=0)
-        data_future.index = pd.to_datetime(data_future.index, format="%Y-%m-%d")
-        data_future.columns = ["PREC", "TA", "TAD", "RS"]
-        data_hist_future = pd.concat([data_hist, data_future])
-        data_1985_2100 = pd.DataFrame(index=idx_daily_1985_2100)
-        data_1985_2100 = data_1985_2100.join(data_hist_future)
-        # fill NaNs at 29th February
-        data_1985_2100.loc[:, "TA"] = data_1985_2100["TA"].interpolate()
-        data_1985_2100.loc[:, "RS"] = data_1985_2100["RS"].interpolate()
-        dict_bc_meteo_daily[station_id][cm]["1985-2100"] = data_1985_2100
-
-        for period in periods:
-            file = (
-                base_path
-                / "climate_projections"
-                / "data"
-                / "daily"
-                / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_{period}.csv"
-            )
-            data = pd.read_csv(file, sep=",", index_col=0)
-            data.index = pd.to_datetime(data.index, format="%Y-%m-%d")
-            data.columns = ["PREC", "TA", "TAD", "RS"]
-            if period == "hist":
-                data_1985_2005 = pd.DataFrame(index=idx_daily_1985_2005)
-                data_1985_2005 = data_1985_2005.join(data)
-                # fill NaNs at 29th February
-                data_1985_2005.loc[:, "TA"] = data_1985_2005["TA"].interpolate()
-                data_1985_2005.loc[:, "RS"] = data_1985_2005["RS"].interpolate()
-                dict_bc_meteo_daily[station_id][cm]["1985-2005"] = data_1985_2005
-            elif period == "future":
-                data_2016_2021 = pd.DataFrame(index=idx_daily_2016_2021)
-                data_2016_2021 = data_2016_2021.join(data)
-                # fill NaNs at 29th February
-                data_2016_2021.loc[:, "TA"] = data_2016_2021["TA"].interpolate()
-                data_2016_2021.loc[:, "RS"] = data_2016_2021["RS"].interpolate()
-                data_2040_2060 = pd.DataFrame(index=idx_daily_2040_2060)
-                data_2040_2060 = data_2040_2060.join(data)
-                # fill NaNs at 29th February
-                data_2040_2060.loc[:, "TA"] = data_2040_2060["TA"].interpolate()
-                data_2040_2060.loc[:, "RS"] = data_2040_2060["RS"].interpolate()
-                data_2080_2100 = pd.DataFrame(index=idx_daily_2080_2100)
-                data_2080_2100 = data_2080_2100.join(data)
-                # fill NaNs at 29th February
-                data_2080_2100.loc[:, "TA"] = data_2080_2100["TA"].interpolate()
-                data_2080_2100.loc[:, "RS"] = data_2080_2100["RS"].interpolate()
-                dict_bc_meteo_daily[station_id][cm]["2016-2021"] = data_2016_2021
-                dict_bc_meteo_daily[station_id][cm]["2040-2060"] = data_2040_2060
-                dict_bc_meteo_daily[station_id][cm]["2080-2100"] = data_2080_2100
-
-    dict_bc_meteo_daily[station_id]["observed"] = {}
-    file = base_path / "input" / f"{station_label1[station_id]}" / "observed" / "2016-2021" / "PREC.txt"
-    data_prec = pd.read_csv(file, sep="\t")
-    data_prec.index = idx_10mins_2016_2021
-    file = base_path / "input" / f"{station_label1[station_id]}" / "observed" / "2016-2021" / "TA.txt"
-    data_ta = pd.read_csv(file, sep="\t")
-    file = base_path / "input" / f"{station_label1[station_id]}" / "observed" / "2016-2021" / "PET.txt"
-    data_pet = pd.read_csv(file, sep="\t")
-    data_2016_2021 = pd.DataFrame(index=idx_daily_2016_2021, columns=["PREC", "TA", "PET"])
-    data_2016_2021.loc[:, "PREC"] = data_prec.loc[:, "PREC"].resample("1D").sum().values
-    data_2016_2021.loc[:, "TA"] = data_ta.loc[:, "TA"].values
-    data_2016_2021.loc[:, "PET"] = data_pet.loc[:, "PET"].values
-    dict_bc_meteo_daily[station_id]["observed"]["2016-2021"] = data_2016_2021
-
-# --- projected annual air temperature and precipitation --------------------------------
-dict_meteo_ann = {}
-for station_id in station_ids:
-    dict_meteo_ann[station_id] = {}
-    for cm in cms:
-        dict_meteo_ann[station_id][cm] = {}
-        for period in periods:
-            file = file = (
-                base_path
-                / "climate_projections"
-                / "data"
-                / "daily"
-                / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_{period}.csv"
-            )
-            data = pd.read_csv(file, sep=",", index_col=0)
-            data.index = pd.to_datetime(data.index, format="%Y-%m-%d")
-            data.columns = ["PREC", "TA", "TAD", "RS"]
-            data_ann = (
-                data.loc[:, "PREC"]
-                .resample("1Y")
-                .sum()
-                .to_frame()
-                .join(data.loc[:, "TA"].resample("1Y").mean().to_frame())
-            )
-            dict_meteo_ann[station_id][cm][period] = data_ann
-            if period == "hist":
-                data_ann_1985_2005 = pd.DataFrame(index=idx_annually_1985_2005)
-                data_ann_1985_2005 = data_ann_1985_2005.join(data_ann)
-                dict_meteo_ann[station_id][cm]["1985-2005"] = data_ann_1985_2005
-
-            elif period == "future":
-                data_ann_2040_2060 = pd.DataFrame(index=idx_annually_2040_2060)
-                data_ann_2040_2060 = data_ann_2040_2060.join(data_ann)
-                data_ann_2080_2100 = pd.DataFrame(index=idx_daily_2080_2100)
-                data_ann_2080_2100 = data_ann_2080_2100.join(data_ann)
-                dict_meteo_ann[station_id][cm]["2040-2060"] = data_ann_2040_2060
-                dict_meteo_ann[station_id][cm]["2080-2100"] = data_ann_2080_2100
-
-# --- observed annual air temperature and precipitation --------------------------------
-for station_id in station_ids:
-    for cm in cms:
-        file = file = (
-            base_path
-            / "climate_projections"
-            / "data"
-            / "daily"
-            / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_future.csv"
-        )
-        data = pd.read_csv(file, sep=",", index_col=0)
-        data.index = pd.to_datetime(data.index, format="%Y-%m-%d")
-        data.columns = ["PREC", "TA", "TAD", "RS"]
-        data_2016_2021 = pd.DataFrame(index=idx_daily_2016_2021)
-        data_2016_2021 = data_2016_2021.join(data)
-        data_ann = (
-            data_2016_2021.loc[:, "PREC"]
-            .resample("1Y")
-            .sum()
-            .to_frame()
-            .join(data_2016_2021.loc[:, "TA"].resample("1Y").mean().to_frame())
-        )
-        dict_meteo_ann[station_id][cm]["2016-2021"] = data_ann
-    data_2016_2021 = dict_bc_meteo_daily[station_id]["observed"]["2016-2021"]
-    data_ann = (
-        data_2016_2021.loc[:, "PREC"]
-        .resample("1Y")
-        .sum()
-        .to_frame()
-        .join(data_2016_2021.loc[:, "TA"].resample("1Y").mean().to_frame())
-    )
-    dict_meteo_ann[station_id]["observed"] = {}
-    dict_meteo_ann[station_id]["observed"]["2016-2021"] = data_ann
-
-# --- compare projected annual air temperature and precipitation ------------------------
 color = {
     "CCCma-CanESM2_CCLM4-8-17_hist": "#eff3ff",
     "ICHEC-EC-EARTH_CCLM4-8-17_hist": "#c6dbef",
@@ -282,6 +91,332 @@ label = {
     "MPI-M-MPI-ESM-LR_RCA4": "MPI-M-MPI-ESM-LR RCA4",
 }
 
+
+def _calc_pet_with_makkink(rs, ta, z, c1=0.63, c2=-0.05):
+    """Calculate potential evapotranspiration according to Makkink.
+
+    Args
+    ----------
+    rs : np.ndarray
+        solar radiation (in MJ m-2 day-1)
+
+    ta : np.ndarray
+        air temperature (in celsius)
+
+    z : float
+        elevation above sea level (in m)
+
+    c1 : float, optional
+        Makkink coefficient (-)
+
+    c2 : float, optional
+        Makkink coefficient (-)
+
+    Reference
+    ----------
+    Makkink, G. F., Testing the Penman formula by means of lysimeters,
+    J. Inst. Wat. Engrs, 11, 277-288, 1957.
+
+    Returns
+    ----------
+    pet : np.ndarray
+        potential evapotranspiration
+    """
+    # slope of saturation vapour pressure curve (in kPa celsius-1)
+    svpc = 4098 * (0.6108 * np.exp((17.27 * ta) / (ta + 237.3))) / (ta + 237.3) ** 2
+
+    # atmospheric pressure (in kPa)
+    p = 101.3 * ((293 - 0.0065 * z) / 293) ** 5.26
+
+    # psychometric constant (in kPa celsius-1)
+    gam = 0.665 * 1e-3 * p
+
+    # special heat of evaporation (in MJ m-2 mm-1)
+    lam = 0.0864 * (28.4 - 0.028 * ta)
+
+    # potential evapotranspiration (in mm)
+    pet = (svpc / (svpc + gam)) * ((c1 * rs / lam) + c2)
+
+    return np.where(pet < 0, 0, pet)
+
+
+# --- time index to join data --------------------------------------------------
+idx_annually_1985_2100 = pd.date_range(start="1985-01-01", end="2099-12-31", freq="y")
+idx_annually_2003_2005 = pd.date_range(start="2003-01-01", end="2005-12-31", freq="y")
+idx_annually_2016_2021 = pd.date_range(start="2016-01-01", end="2021-12-31", freq="y")
+idx_annually_1994_2005 = pd.date_range(start="1994-01-01", end="2005-12-31", freq="y")
+idx_annually_1985_2015 = pd.date_range(start="1985-01-01", end="2014-12-31", freq="y")
+idx_annually_2030_2060 = pd.date_range(start="2030-01-01", end="2059-12-31", freq="y")
+idx_annually_2070_2100 = pd.date_range(start="2070-01-01", end="2099-12-31", freq="y")
+
+idx_seasonally_1985_2100 = pd.date_range(start="1985-03-01", end="2099-09-01", freq="3MS")
+idx_seasonally_2003_2005 = pd.date_range(start="2003-03-01", end="2005-09-01", freq="3MS")
+idx_seasonally_2016_2021 = pd.date_range(start="2016-03-01", end="2021-09-01", freq="3MS")
+idx_seasonally_1994_2005 = pd.date_range(start="1994-03-01", end="2005-09-01", freq="3MS")
+idx_seasonally_1985_2015 = pd.date_range(start="1985-03-01", end="2015-09-01", freq="3MS")
+idx_seasonally_2030_2060 = pd.date_range(start="2030-03-01", end="2059-09-01", freq="3MS")
+idx_seasonally_2070_2100 = pd.date_range(start="2070-03-01", end="2099-09-01", freq="3MS")
+
+idx_daily_1985_2100 = pd.date_range(start="1985-01-01", end="2099-12-31", freq="d")
+idx_daily_2003_2005 = pd.date_range(start="2003-01-01", end="2005-12-31", freq="d")
+idx_daily_2016_2021 = pd.date_range(start="2016-01-01", end="2021-12-31", freq="d")
+idx_daily_1994_2005 = pd.date_range(start="1994-01-01", end="2005-12-31", freq="d")
+idx_daily_1985_2015 = pd.date_range(start="1985-01-01", end="2014-12-31", freq="d")
+idx_daily_2030_2060 = pd.date_range(start="2030-01-01", end="2059-12-31", freq="d")
+idx_daily_2070_2100 = pd.date_range(start="2070-01-01", end="2099-12-31", freq="d")
+
+idx_hourly_1985_2100 = pd.date_range(start="1985-01-01 00:00:00", end="2099-12-31 23:00:00", freq="h")
+idx_hourly_2003_2005 = pd.date_range(start="2003-01-01 00:00:00", end="2004-12-31 23:00:00", freq="h")
+idx_hourly_2016_2021 = pd.date_range(start="2016-01-01 00:00:00", end="2021-12-31 23:00:00", freq="h")
+idx_hourly_1994_2005 = pd.date_range(start="1994-01-01 00:00:00", end="2004-12-31 23:00:00", freq="h")
+idx_hourly_1985_2015 = pd.date_range(start="1985-01-01 00:00:00", end="2014-12-31 23:00:00", freq="h")
+idx_hourly_2030_2060 = pd.date_range(start="2030-01-01 00:00:00", end="2059-12-31 23:00:00", freq="h")
+idx_hourly_2070_2100 = pd.date_range(start="2070-01-01 00:00:00", end="2099-12-31 23:00:00", freq="h")
+
+idx_3hourly_1985_2100c = pd.date_range(start="1985-01-01 01:30:00", end="2099-12-31 22:30:00", freq="3h")
+idx_3hourly_1985_2100 = pd.date_range(start="1985-01-01 00:00:00", end="2099-12-31 23:00:00", freq="3h")
+
+idx_10mins_1985_2100 = pd.date_range(start="1985-01-01 00:00:00", end="2100-12-31 23:50:00", freq="10T")
+idx_10mins_2003_2005 = pd.date_range(start="2003-01-01 00:00:00", end="2004-12-31 23:50:00", freq="10T")
+idx_10mins_2016_2021 = pd.date_range(start="2016-01-01 00:00:00", end="2021-12-31 23:50:00", freq="10T")
+idx_10mins_1994_2005 = pd.date_range(start="1994-01-01 00:00:00", end="2004-12-31 23:50:00", freq="10T")
+idx_10mins_1985_2015 = pd.date_range(start="1985-01-01 00:00:00", end="2004-12-31 23:50:00", freq="10T")
+idx_10mins_2030_2060 = pd.date_range(start="2030-01-01 00:00:00", end="2059-12-31 23:50:00", freq="10T")
+idx_10mins_2070_2100 = pd.date_range(start="2070-01-01 00:00:00", end="2099-12-31 23:50:00", freq="10T")
+
+# --- load bias-corrected climate projections ---------------------------------------------------
+dict_bc_meteo_daily = {}
+for station_id in station_ids:
+    if station_id == 1443:
+        elevation = 236
+    elif station_id == 2787:
+        elevation = 340
+    elif station_id == 4189:
+        elevation = 541
+    dict_bc_meteo_daily[station_id] = {}
+    for cm in cms:
+        dict_bc_meteo_daily[station_id][cm] = {}
+        file = (
+            base_path / "climate_projections" / "data" / "daily" / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_hist.csv"
+        )
+        data_hist = pd.read_csv(file, sep=",", index_col=0)
+        data_hist.index = pd.to_datetime(data_hist.index, format="%Y-%m-%d")
+        data_hist.columns = ["PREC", "TA", "TAD", "RS"]
+        file = (
+            base_path
+            / "climate_projections"
+            / "data"
+            / "daily"
+            / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_future.csv"
+        )
+        data_future = pd.read_csv(file, sep=",", index_col=0)
+        data_future.index = pd.to_datetime(data_future.index, format="%Y-%m-%d")
+        data_future.columns = ["PREC", "TA", "TAD", "RS"]
+        data_hist_future = pd.concat([data_hist, data_future])
+        data_1985_2100 = pd.DataFrame(index=idx_daily_1985_2100)
+        data_1985_2100 = data_1985_2100.join(data_hist_future)
+        # fill NaNs at 29th February
+        data_1985_2100.loc[:, "TA"] = data_1985_2100["TA"].interpolate()
+        data_1985_2100.loc[:, "RS"] = data_1985_2100["RS"].interpolate()
+        data_1985_2100.loc[:, "PET"] = _calc_pet_with_makkink(
+            data_1985_2100.loc[:, "RS"].values, data_1985_2100.loc[:, "TA"].values, elevation
+        )
+        dict_bc_meteo_daily[station_id][cm]["1985-2100"] = data_1985_2100
+
+        for period in periods:
+            file = (
+                base_path
+                / "climate_projections"
+                / "data"
+                / "daily"
+                / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_{period}.csv"
+            )
+            data = pd.read_csv(file, sep=",", index_col=0)
+            data.index = pd.to_datetime(data.index, format="%Y-%m-%d")
+            data.columns = ["PREC", "TA", "TAD", "RS"]
+            if period == "hist":
+                data_1985_2015 = pd.DataFrame(index=idx_daily_1985_2015)
+                data_1985_2015 = data_1985_2015.join(data)
+                # fill NaNs at 29th February
+                data_1985_2015.loc[:, "TA"] = data_1985_2015["TA"].interpolate()
+                data_1985_2015.loc[:, "RS"] = data_1985_2015["RS"].interpolate()
+                data_1985_2015.loc[:, "PET"] = _calc_pet_with_makkink(
+                    data_1985_2015.loc[:, "RS"].values, data_1985_2015.loc[:, "TA"].values, elevation
+                )
+                dict_bc_meteo_daily[station_id][cm]["1985-2015"] = data_1985_2015
+            elif period == "future":
+                data_2016_2021 = pd.DataFrame(index=idx_daily_2016_2021)
+                data_2016_2021 = data_2016_2021.join(data)
+                # fill NaNs at 29th February
+                data_2016_2021.loc[:, "TA"] = data_2016_2021["TA"].interpolate()
+                data_2016_2021.loc[:, "RS"] = data_2016_2021["RS"].interpolate()
+                data_2016_2021.loc[:, "PET"] = _calc_pet_with_makkink(
+                    data_2016_2021.loc[:, "RS"].values, data_2016_2021.loc[:, "TA"].values, elevation
+                )
+                data_2030_2060 = pd.DataFrame(index=idx_daily_2030_2060)
+                data_2030_2060 = data_2030_2060.join(data)
+                # fill NaNs at 29th February
+                data_2030_2060.loc[:, "TA"] = data_2030_2060["TA"].interpolate()
+                data_2030_2060.loc[:, "RS"] = data_2030_2060["RS"].interpolate()
+                data_2030_2060.loc[:, "PET"] = _calc_pet_with_makkink(
+                    data_2030_2060.loc[:, "RS"].values, data_2030_2060.loc[:, "TA"].values, elevation
+                )
+                data_2070_2100 = pd.DataFrame(index=idx_daily_2070_2100)
+                data_2070_2100 = data_2070_2100.join(data)
+                # fill NaNs at 29th February
+                data_2070_2100.loc[:, "TA"] = data_2070_2100["TA"].interpolate()
+                data_2070_2100.loc[:, "RS"] = data_2070_2100["RS"].interpolate()
+                data_2070_2100.loc[:, "PET"] = _calc_pet_with_makkink(
+                    data_2070_2100.loc[:, "RS"].values, data_2070_2100.loc[:, "TA"].values, elevation
+                )
+                dict_bc_meteo_daily[station_id][cm]["2016-2021"] = data_2016_2021
+                dict_bc_meteo_daily[station_id][cm]["2030-2060"] = data_2030_2060
+                dict_bc_meteo_daily[station_id][cm]["2070-2100"] = data_2070_2100
+
+    dict_bc_meteo_daily[station_id]["observed"] = {}
+    file = base_path / "input" / f"{station_label1[station_id]}" / "observed" / "2016-2021" / "PREC.txt"
+    data_prec = pd.read_csv(file, sep="\t")
+    data_prec.index = idx_10mins_2016_2021
+    file = base_path / "input" / f"{station_label1[station_id]}" / "observed" / "2016-2021" / "TA.txt"
+    data_ta = pd.read_csv(file, sep="\t")
+    file = base_path / "input" / f"{station_label1[station_id]}" / "observed" / "2016-2021" / "PET.txt"
+    data_pet = pd.read_csv(file, sep="\t")
+    data_2016_2021 = pd.DataFrame(index=idx_daily_2016_2021, columns=["PREC", "TA", "PET"])
+    data_2016_2021.loc[:, "PREC"] = data_prec.loc[:, "PREC"].resample("1D").sum().values
+    data_2016_2021.loc[:, "TA"] = data_ta.loc[:, "TA"].values
+    data_2016_2021.loc[:, "PET"] = data_pet.loc[:, "PET"].values
+    dict_bc_meteo_daily[station_id]["observed"]["2016-2021"] = data_2016_2021
+
+# --- projected annual air temperature, potential evapotranspiration and precipitation -----------
+dict_meteo_ann = {}
+for station_id in station_ids:
+    if station_id == 1443:
+        elevation = 236
+    elif station_id == 2787:
+        elevation = 340
+    elif station_id == 4189:
+        elevation = 541
+    dict_meteo_ann[station_id] = {}
+    for cm in cms:
+        dict_meteo_ann[station_id][cm] = {}
+        for period in periods:
+            file = file = (
+                base_path
+                / "climate_projections"
+                / "data"
+                / "daily"
+                / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_{period}.csv"
+            )
+            data = pd.read_csv(file, sep=",", index_col=0)
+            data.index = pd.to_datetime(data.index, format="%Y-%m-%d")
+            data.columns = ["PREC", "TA", "TAD", "RS"]
+            data.loc[:, "PET"] = _calc_pet_with_makkink(data.loc[:, "RS"].values, data.loc[:, "TA"].values, elevation)
+            data_ann = (
+                data.loc[:, "PREC"]
+                .resample("1Y")
+                .sum()
+                .to_frame()
+                .join(data.loc[:, "TA"].resample("1Y").mean().to_frame())
+                .join(data.loc[:, "PET"].resample("1Y").sum().to_frame())
+            )
+            dict_meteo_ann[station_id][cm][period] = data_ann
+            if period == "hist":
+                data_ann_1985_2015 = pd.DataFrame(index=idx_annually_1985_2015)
+                data_ann_1985_2015 = data_ann_1985_2015.join(data_ann)
+                dict_meteo_ann[station_id][cm]["1985-2015"] = data_ann_1985_2015
+
+            elif period == "future":
+                data_ann_2030_2060 = pd.DataFrame(index=idx_annually_2030_2060)
+                data_ann_2030_2060 = data_ann_2030_2060.join(data_ann)
+                data_ann_2070_2100 = pd.DataFrame(index=idx_annually_2070_2100)
+                data_ann_2070_2100 = data_ann_2070_2100.join(data_ann)
+                dict_meteo_ann[station_id][cm]["2030-2060"] = data_ann_2030_2060
+                dict_meteo_ann[station_id][cm]["2070-2100"] = data_ann_2070_2100
+
+# --- projected seasonal air temperature, potential evapotranspiration and precipitation ---------------
+dict_meteo_seas = {}
+for station_id in station_ids:
+    if station_id == 1443:
+        elevation = 236
+    elif station_id == 2787:
+        elevation = 340
+    elif station_id == 4189:
+        elevation = 541
+    dict_meteo_seas[station_id] = {}
+    for cm in cms:
+        dict_meteo_seas[station_id][cm] = {}
+        for period in periods:
+            file = file = (
+                base_path
+                / "climate_projections"
+                / "data"
+                / "daily"
+                / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_{period}.csv"
+            )
+            data = pd.read_csv(file, sep=",", index_col=0)
+            data.index = pd.to_datetime(data.index, format="%Y-%m-%d")
+            data.columns = ["PREC", "TA", "TAD", "RS"]
+            data.loc[:, "PET"] = _calc_pet_with_makkink(data.loc[:, "RS"].values, data.loc[:, "TA"].values, elevation)
+            data_seas = (
+                data.loc[:, "PREC"]
+                .groupby(pd.Grouper(freq="QS-DEC"))
+                .sum()
+                .to_frame()
+                .join(data.loc[:, "TA"].groupby(pd.Grouper(freq="QS-DEC")).mean().to_frame())
+                .join(data.loc[:, "PET"].groupby(pd.Grouper(freq="QS-DEC")).mean().to_frame())
+            )
+
+            dict_meteo_seas[station_id][cm][period] = data_seas
+            if period == "hist":
+                data_seas_1985_2015 = pd.DataFrame(index=idx_seasonally_1985_2015)
+                data_seas_1985_2015 = data_seas_1985_2015.join(data_seas)
+                dict_meteo_seas[station_id][cm]["1985-2015"] = data_seas_1985_2015
+
+            elif period == "future":
+                data_seas_2030_2060 = pd.DataFrame(index=idx_seasonally_2030_2060)
+                data_seas_2030_2060 = data_seas_2030_2060.join(data_seas)
+                data_seas_2070_2100 = pd.DataFrame(index=idx_seasonally_2070_2100)
+                data_seas_2070_2100 = data_seas_2070_2100.join(data_seas)
+                dict_meteo_seas[station_id][cm]["2030-2060"] = data_seas_2030_2060
+                dict_meteo_seas[station_id][cm]["2070-2100"] = data_seas_2070_2100
+
+# --- observed annual air temperature, potential evapotranspiration and precipitation --------------
+for station_id in station_ids:
+    for cm in cms:
+        file = file = (
+            base_path
+            / "climate_projections"
+            / "data"
+            / "daily"
+            / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_future.csv"
+        )
+        data = pd.read_csv(file, sep=",", index_col=0)
+        data.index = pd.to_datetime(data.index, format="%Y-%m-%d")
+        data.columns = ["PREC", "TA", "TAD", "RS"]
+        data.loc[:, "PET"] = _calc_pet_with_makkink(data.loc[:, "RS"].values, data.loc[:, "TA"].values, elevation)
+        data_2016_2021 = pd.DataFrame(index=idx_daily_2016_2021)
+        data_2016_2021 = data_2016_2021.join(data)
+        data_ann = (
+            data_2016_2021.loc[:, "PREC"]
+            .resample("1Y")
+            .sum()
+            .to_frame()
+            .join(data_2016_2021.loc[:, "TA"].resample("1Y").mean().to_frame())
+            .join(data_2016_2021.loc[:, "PET"].resample("1Y").sum().to_frame())
+        )
+        dict_meteo_ann[station_id][cm]["2016-2021"] = data_ann
+    data_2016_2021 = dict_bc_meteo_daily[station_id]["observed"]["2016-2021"]
+    data_ann = (
+        data_2016_2021.loc[:, "PREC"]
+        .resample("1Y")
+        .sum()
+        .to_frame()
+        .join(data_2016_2021.loc[:, "TA"].resample("1Y").mean().to_frame())
+    )
+    dict_meteo_ann[station_id]["observed"] = {}
+    dict_meteo_ann[station_id]["observed"]["2016-2021"] = data_ann
+
+# --- compare projected annual air temperature and precipitation ------------------------
 for station_id in station_ids:
     fig, axs = plt.subplots(1, 1, figsize=(5, 3))
     for period in periods:
@@ -314,7 +449,7 @@ for station_id in station_ids:
         fontsize=6,
         frameon=False,
         bbox_to_anchor=(1.01, 0.9),
-        title="1985-2005",
+        title="1985-2015",
     )
     fig.legend(
         lines[7:],
@@ -327,7 +462,7 @@ for station_id in station_ids:
     )
     fig.subplots_adjust(right=0.68)
     file = base_path_figs / f"projected_annual_prec_and_ta_{station_label[station_id]}.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
 for station_id in station_ids:
@@ -350,7 +485,7 @@ for station_id in station_ids:
     )
     fig.subplots_adjust(right=0.68)
     file = base_path_figs / f"annual_prec_and_ta_{station_label[station_id]}_obs_and_proj.png"
-    fig.savefig(file, dpi=250)
+    fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
 # --- add minimum TA and maximum TA --------------------------------
@@ -426,30 +561,30 @@ for station_id in station_ids:
         data = data.loc[:, ["TA_min", "TA_max"]]
         data = data.astype("float64")
 
-        data_1985_2005 = dict_bc_meteo_daily[station_id][cm]["1985-2005"]
-        data_1985_2005 = data_1985_2005.join(data)
+        data_1985_2015 = dict_bc_meteo_daily[station_id][cm]["1985-2015"]
+        data_1985_2015 = data_1985_2015.join(data)
         # fill NaNs at 29th February
-        data_1985_2005.loc[:, "TA_min"] = data_1985_2005["TA_min"].interpolate()
-        data_1985_2005.loc[:, "TA_max"] = data_1985_2005["TA_max"].interpolate()
-        dict_bc_meteo_daily[station_id][cm]["1985-2005"] = data_1985_2005
+        data_1985_2015.loc[:, "TA_min"] = data_1985_2015["TA_min"].interpolate()
+        data_1985_2015.loc[:, "TA_max"] = data_1985_2015["TA_max"].interpolate()
+        dict_bc_meteo_daily[station_id][cm]["1985-2015"] = data_1985_2015
         data_2016_2021 = dict_bc_meteo_daily[station_id][cm]["2016-2021"]
         data_2016_2021 = data_2016_2021.join(data)
         # fill NaNs at 29th February
         data_2016_2021.loc[:, "TA_min"] = data_2016_2021["TA_min"].interpolate()
         data_2016_2021.loc[:, "TA_max"] = data_2016_2021["TA_max"].interpolate()
-        data_2040_2060 = dict_bc_meteo_daily[station_id][cm]["2040-2060"]
-        data_2040_2060 = data_2040_2060.join(data)
+        data_2030_2060 = dict_bc_meteo_daily[station_id][cm]["2030-2060"]
+        data_2030_2060 = data_2030_2060.join(data)
         # fill NaNs at 29th February
-        data_2040_2060.loc[:, "TA_min"] = data_2040_2060["TA_min"].interpolate()
-        data_2040_2060.loc[:, "TA_max"] = data_2040_2060["TA_max"].interpolate()
-        data_2080_2100 = dict_bc_meteo_daily[station_id][cm]["2080-2100"]
-        data_2080_2100 = data_2080_2100.join(data)
+        data_2030_2060.loc[:, "TA_min"] = data_2030_2060["TA_min"].interpolate()
+        data_2030_2060.loc[:, "TA_max"] = data_2030_2060["TA_max"].interpolate()
+        data_2070_2100 = dict_bc_meteo_daily[station_id][cm]["2070-2100"]
+        data_2070_2100 = data_2070_2100.join(data)
         # fill NaNs at 29th February
-        data_2080_2100.loc[:, "TA_min"] = data_2080_2100["TA_min"].interpolate()
-        data_2080_2100.loc[:, "TA_max"] = data_2080_2100["TA_max"].interpolate()
+        data_2070_2100.loc[:, "TA_min"] = data_2070_2100["TA_min"].interpolate()
+        data_2070_2100.loc[:, "TA_max"] = data_2070_2100["TA_max"].interpolate()
         dict_bc_meteo_daily[station_id][cm]["2016-2021"] = data_2016_2021
-        dict_bc_meteo_daily[station_id][cm]["2040-2060"] = data_2040_2060
-        dict_bc_meteo_daily[station_id][cm]["2080-2100"] = data_2080_2100
+        dict_bc_meteo_daily[station_id][cm]["2030-2060"] = data_2030_2060
+        dict_bc_meteo_daily[station_id][cm]["2070-2100"] = data_2070_2100
         dict_bc_meteo_daily[station_id][cm]["1985-2100"] = data_1985_2100
 
 # --- downscale uncorrected precipitation to 10 minutes ------------------------
@@ -486,18 +621,18 @@ for station_id in station_ids:
     data_10mins.loc[:, "scale"] = data_10mins.loc[:, "PREC"] / data_10mins.loc[:, "PREC_daily"]
     data_10mins = data_10mins.fillna(0)
 
-    data_1985_2005 = pd.DataFrame(index=idx_10mins_1985_2005)
-    data_1985_2005 = data_1985_2005.join(data_10mins)
-    dict_precip_10mins[station_id][cm]["1985-2005"] = data_1985_2005
+    data_1985_2015 = pd.DataFrame(index=idx_10mins_1985_2015)
+    data_1985_2015 = data_1985_2015.join(data_10mins)
+    dict_precip_10mins[station_id][cm]["1985-2015"] = data_1985_2015
     data_2016_2021 = pd.DataFrame(index=idx_10mins_2016_2021)
     data_2016_2021 = data_2016_2021.join(data_10mins)
-    data_2040_2060 = pd.DataFrame(index=idx_10mins_2040_2060)
-    data_2040_2060 = data_2040_2060.join(data_10mins)
-    data_2080_2100 = pd.DataFrame(index=idx_10mins_2080_2100)
-    data_2080_2100 = data_2080_2100.join(data_10mins)
+    data_2030_2060 = pd.DataFrame(index=idx_10mins_2030_2060)
+    data_2030_2060 = data_2030_2060.join(data_10mins)
+    data_2070_2100 = pd.DataFrame(index=idx_10mins_2070_2100)
+    data_2070_2100 = data_2070_2100.join(data_10mins)
     dict_precip_10mins[station_id][cm]["2016-2021"] = data_2016_2021
-    dict_precip_10mins[station_id][cm]["2040-2060"] = data_2040_2060
-    dict_precip_10mins[station_id][cm]["2080-2100"] = data_2080_2100
+    dict_precip_10mins[station_id][cm]["2030-2060"] = data_2030_2060
+    dict_precip_10mins[station_id][cm]["2070-2100"] = data_2070_2100
     dict_precip_10mins[station_id][cm]["1985-2100"] = data_10mins
 
 cm = "CCCma-CanESM2_CCLM4-8-17"
@@ -536,18 +671,18 @@ for station_id in station_ids:
     data_10mins.loc[:, "scale"] = data_10mins.loc[:, "PREC"] / data_10mins.loc[:, "PREC_daily"]
     data_10mins = data_10mins.fillna(0)
 
-    data_1985_2005 = pd.DataFrame(index=idx_10mins_1985_2005)
-    data_1985_2005 = data_1985_2005.join(data_10mins)
-    dict_precip_10mins[station_id][cm]["1985-2005"] = data_1985_2005
+    data_1985_2015 = pd.DataFrame(index=idx_10mins_1985_2015)
+    data_1985_2015 = data_1985_2015.join(data_10mins)
+    dict_precip_10mins[station_id][cm]["1985-2015"] = data_1985_2015
     data_2016_2021 = pd.DataFrame(index=idx_10mins_2016_2021)
     data_2016_2021 = data_2016_2021.join(data_10mins)
-    data_2040_2060 = pd.DataFrame(index=idx_10mins_2040_2060)
-    data_2040_2060 = data_2040_2060.join(data_10mins)
-    data_2080_2100 = pd.DataFrame(index=idx_10mins_2080_2100)
-    data_2080_2100 = data_2080_2100.join(data_10mins)
+    data_2030_2060 = pd.DataFrame(index=idx_10mins_2030_2060)
+    data_2030_2060 = data_2030_2060.join(data_10mins)
+    data_2070_2100 = pd.DataFrame(index=idx_10mins_2070_2100)
+    data_2070_2100 = data_2070_2100.join(data_10mins)
     dict_precip_10mins[station_id][cm]["2016-2021"] = data_2016_2021
-    dict_precip_10mins[station_id][cm]["2040-2060"] = data_2040_2060
-    dict_precip_10mins[station_id][cm]["2080-2100"] = data_2080_2100
+    dict_precip_10mins[station_id][cm]["2030-2060"] = data_2030_2060
+    dict_precip_10mins[station_id][cm]["2070-2100"] = data_2070_2100
     dict_precip_10mins[station_id][cm]["1985-2100"] = data_10mins
 
 # --- downscale bias-corrected precipitation to 10 minutes ------------------------
@@ -569,24 +704,24 @@ for station_id in station_ids:
         cond0 = data_10mins["PREC"] < 0.001
         data_10mins.loc[cond0, "PREC"] = 0
 
-        data_1985_2005 = pd.DataFrame(index=idx_10mins_1985_2005)
-        data_1985_2005 = data_1985_2005.join(data_10mins)
-        dict_bc_precip_10mins[station_id][cm]["1985-2005"] = data_1985_2005
+        data_1985_2015 = pd.DataFrame(index=idx_10mins_1985_2015)
+        data_1985_2015 = data_1985_2015.join(data_10mins)
+        dict_bc_precip_10mins[station_id][cm]["1985-2015"] = data_1985_2015
         data_2016_2021 = pd.DataFrame(index=idx_10mins_2016_2021)
         data_2016_2021 = data_2016_2021.join(data_10mins)
-        data_2040_2060 = pd.DataFrame(index=idx_10mins_2040_2060)
-        data_2040_2060 = data_2040_2060.join(data_10mins)
-        data_2080_2100 = pd.DataFrame(index=idx_10mins_2080_2100)
-        data_2080_2100 = data_2080_2100.join(data_10mins)
+        data_2030_2060 = pd.DataFrame(index=idx_10mins_2030_2060)
+        data_2030_2060 = data_2030_2060.join(data_10mins)
+        data_2070_2100 = pd.DataFrame(index=idx_10mins_2070_2100)
+        data_2070_2100 = data_2070_2100.join(data_10mins)
         dict_bc_precip_10mins[station_id][cm]["2016-2021"] = data_2016_2021
-        dict_bc_precip_10mins[station_id][cm]["2040-2060"] = data_2040_2060
-        dict_bc_precip_10mins[station_id][cm]["2080-2100"] = data_2080_2100
+        dict_bc_precip_10mins[station_id][cm]["2030-2060"] = data_2030_2060
+        dict_bc_precip_10mins[station_id][cm]["2070-2100"] = data_2070_2100
 
 # --- plot time series -------------------------------------
 stations = ["freiburg", "kupferzell", "altheim"]
 for station, station_id in zip(stations, station_ids):
     for cm in ["MPI-M-MPI-ESM-LR_RCA4", "CCCma-CanESM2_CCLM4-8-17"]:
-        for period in ["1985-2005", "2016-2021", "2040-2060", "2080-2100"]:
+        for period in ["1985-2015", "2016-2021", "2030-2060", "2070-2100"]:
             data_precip = dict_bc_precip_10mins[station_id][cm][period]
             data_precip_uc = dict_precip_10mins[station_id][cm][period]
             data_meteo = dict_bc_meteo_daily[station_id][cm][period]
@@ -602,7 +737,7 @@ for station, station_id in zip(stations, station_ids):
             axs.set_ylabel("Scale [-]")
             fig.tight_layout()
             file = base_path_figs / f"precip_scale_{station}_{cm}_{period}.png"
-            fig.savefig(file, dpi=250)
+            fig.savefig(file, dpi=300)
             plt.close(fig=fig)
 
             fig, axs = plt.subplots(1, 1, figsize=(6, 2))
@@ -616,7 +751,7 @@ for station, station_id in zip(stations, station_ids):
             axs.set_ylabel("PRECIP [mm/10 minutes]")
             fig.tight_layout()
             file = base_path_figs / f"precip_{station}_{cm}_{period}.png"
-            fig.savefig(file, dpi=250)
+            fig.savefig(file, dpi=300)
             plt.close(fig=fig)
 
             fig, axs = plt.subplots(1, 1, figsize=(6, 2))
@@ -632,7 +767,7 @@ for station, station_id in zip(stations, station_ids):
             axs.set_ylabel("PRECIP [mm]")
             fig.tight_layout()
             file = base_path_figs / f"precip_{station}_{cm}_{period}_cumulated.png"
-            fig.savefig(file, dpi=250)
+            fig.savefig(file, dpi=300)
             plt.close(fig=fig)
 
             fig, axs = plt.subplots(1, 1, figsize=(6, 2))
@@ -651,7 +786,7 @@ for station, station_id in zip(stations, station_ids):
             axs.set_ylabel("TA [degC]")
             fig.tight_layout()
             file = base_path_figs / f"ta_{station}_{cm}_{period}.png"
-            fig.savefig(file, dpi=250)
+            fig.savefig(file, dpi=300)
             plt.close(fig=fig)
 
             fig, axs = plt.subplots(1, 1, figsize=(6, 2))
@@ -668,14 +803,14 @@ for station, station_id in zip(stations, station_ids):
             axs.set_ylabel("TA [degC]")
             fig.tight_layout()
             file = base_path_figs / f"ta_min_max_{station}_{cm}_{period}.png"
-            fig.savefig(file, dpi=250)
+            fig.savefig(file, dpi=300)
             plt.close(fig=fig)
 
 # --- write input data to .txt -------------------------------------
 stations = ["freiburg", "kupferzell", "altheim"]
 for station, station_id in zip(stations, station_ids):
     for cm in ["MPI-M-MPI-ESM-LR_RCA4", "CCCma-CanESM2_CCLM4-8-17"]:
-        for period in ["1985-2005", "2016-2021", "2040-2060", "2080-2100"]:
+        for period in ["1985-2015", "2016-2021", "2030-2060", "2070-2100"]:
             data_precip = dict_bc_precip_10mins[station_id][cm][period]
             data_meteo = dict_bc_meteo_daily[station_id][cm][period]
             data_ta = data_meteo.loc[:, ["TA", "TA_min", "TA_max"]]
@@ -766,30 +901,35 @@ for station, station_id in zip(stations, station_ids):
     nas = np.sum(np.isnan(data_pet["PET"].values))
     print(f"{station}-observed-{period}-PET: {nas} NaN values")
 
-# calculate deltas
-climate_scenarios = ["CCCma-CanESM2_CCLM4-8-17", "MPI-M-MPI-ESM-LR_RCA4"]
+# calculate total deltas
 dict_deltas_climate = {}
 for station_id in station_ids:
     dict_deltas_climate[station_label1[station_id]] = {}
-    for cm in climate_scenarios:
+    for cm in cms:
         dict_deltas_climate[station_label1[station_id]][cm] = {}
-        data_ref = dict_meteo_ann[station_id][cm]["1985-2005"]
-        data_nf = dict_meteo_ann[station_id][cm]["2040-2060"]
-        data_ff = dict_meteo_ann[station_id][cm]["2080-2100"]
+        data_ref = dict_meteo_ann[station_id][cm]["1985-2015"]
+        data_nf = dict_meteo_ann[station_id][cm]["2030-2060"]
+        data_ff = dict_meteo_ann[station_id][cm]["2070-2100"]
         prec_avg_ref = data_ref.loc[:, "PREC"].mean()
         prec_ipr_ref = np.nanpercentile(data_ref.loc[:, "PREC"], 90) - np.nanpercentile(data_ref.loc[:, "PREC"], 10)
         ta_avg_ref = data_ref.loc[:, "TA"].mean()
         ta_ipr_ref = np.nanpercentile(data_ref.loc[:, "TA"], 90) - np.nanpercentile(data_ref.loc[:, "TA"], 10)
+        pet_avg_ref = data_ref.loc[:, "PET"].mean()
+        pet_ipr_ref = np.nanpercentile(data_ref.loc[:, "PET"], 90) - np.nanpercentile(data_ref.loc[:, "PET"], 10)
 
         prec_avg_nf = data_nf.loc[:, "PREC"].mean()
         prec_ipr_nf = np.nanpercentile(data_nf.loc[:, "PREC"], 90) - np.nanpercentile(data_nf.loc[:, "PREC"], 10)
         ta_avg_nf = data_nf.loc[:, "TA"].mean()
         ta_ipr_nf = np.nanpercentile(data_nf.loc[:, "TA"], 90) - np.nanpercentile(data_nf.loc[:, "TA"], 10)
+        pet_avg_nf = data_nf.loc[:, "PET"].mean()
+        pet_ipr_nf = np.nanpercentile(data_nf.loc[:, "PET"], 90) - np.nanpercentile(data_nf.loc[:, "PET"], 10)
 
         prec_avg_ff = data_ff.loc[:, "PREC"].mean()
         prec_ipr_ff = np.nanpercentile(data_ff.loc[:, "PREC"], 90) - np.nanpercentile(data_ff.loc[:, "PREC"], 10)
         ta_avg_ff = data_ff.loc[:, "TA"].mean()
         ta_ipr_ff = np.nanpercentile(data_ff.loc[:, "TA"], 90) - np.nanpercentile(data_ff.loc[:, "TA"], 10)
+        pet_avg_ff = data_ff.loc[:, "PET"].mean()
+        pet_ipr_ff = np.nanpercentile(data_ff.loc[:, "PET"], 90) - np.nanpercentile(data_ff.loc[:, "PET"], 10)
 
         df_prec = pd.DataFrame(index=[0], columns=["dAvg_nf", "dIPR_nf", "dAvg_ff", "dIPR_ff"])
         df_prec.loc[0, "dAvg_nf"] = (prec_avg_nf - prec_avg_ref) / prec_avg_ref
@@ -801,13 +941,731 @@ for station_id in station_ids:
         df_ta.loc[0, "dAvg_ff"] = (ta_avg_ff - ta_avg_ref) / ta_avg_ref
         df_ta.loc[0, "dIPR_nf"] = (ta_ipr_nf - ta_ipr_ref) / ta_ipr_ref
         df_ta.loc[0, "dIPR_ff"] = (ta_ipr_ff - ta_ipr_ref) / ta_ipr_ref
+        df_pet = pd.DataFrame(index=[0], columns=["dAvg_nf", "dIPR_nf", "dAvg_ff", "dIPR_ff"])
+        df_pet.loc[0, "dAvg_nf"] = (pet_avg_nf - pet_avg_ref) / pet_avg_ref
+        df_pet.loc[0, "dAvg_ff"] = (pet_avg_ff - pet_avg_ref) / pet_avg_ref
+        df_pet.loc[0, "dIPR_nf"] = (pet_ipr_nf - pet_ipr_ref) / pet_ipr_ref
+        df_pet.loc[0, "dIPR_ff"] = (pet_ipr_ff - pet_ipr_ref) / pet_ipr_ref
 
         dict_deltas_climate[station_label1[station_id]][cm]["prec"] = {}
         dict_deltas_climate[station_label1[station_id]][cm]["prec"] = df_prec
         dict_deltas_climate[station_label1[station_id]][cm]["ta"] = {}
         dict_deltas_climate[station_label1[station_id]][cm]["ta"] = df_ta
+        dict_deltas_climate[station_label1[station_id]][cm]["pet"] = {}
+        dict_deltas_climate[station_label1[station_id]][cm]["pet"] = df_pet
+
+# calculate seasonal deltas
+dict_deltas_climate_seas = {}
+for station_id in station_ids:
+    dict_deltas_climate_seas[station_label1[station_id]] = {}
+    for cm in cms:
+        dict_deltas_climate_seas[station_label1[station_id]][cm] = {}
+        data_ref = dict_meteo_seas[station_id][cm]["1985-2015"]
+        data_nf = dict_meteo_seas[station_id][cm]["2030-2060"]
+        data_ff = dict_meteo_seas[station_id][cm]["2070-2100"]
+        df_prec = pd.DataFrame(
+            index=["winter", "spring", "summer", "autumn"], columns=["dAvg_nf", "dIPR_nf", "dAvg_ff", "dIPR_ff"]
+        )
+        df_ta = pd.DataFrame(
+            index=["winter", "spring", "summer", "autumn"], columns=["dAvg_nf", "dIPR_nf", "dAvg_ff", "dIPR_ff"]
+        )
+        for seas, seas_id in zip(["winter", "spring", "summer", "autumn"], [12, 3, 6, 9]):
+            prec_avg_ref = data_ref.loc[data_ref.index.month == seas_id, "PREC"].mean()
+            prec_ipr_ref = np.nanpercentile(
+                data_ref.loc[data_ref.index.month == seas_id, "PREC"], 90
+            ) - np.nanpercentile(data_ref.loc[data_ref.index.month == seas_id, "PREC"], 10)
+            ta_avg_ref = data_ref.loc[data_ref.index.month == seas_id, "TA"].mean()
+            ta_ipr_ref = np.nanpercentile(data_ref.loc[data_ref.index.month == seas_id, "TA"], 90) - np.nanpercentile(
+                data_ref.loc[data_ref.index.month == seas_id, "TA"], 10
+            )
+            pet_avg_ref = data_ref.loc[data_ref.index.month == seas_id, "PET"].mean()
+            pet_ipr_ref = np.nanpercentile(data_ref.loc[data_ref.index.month == seas_id, "PET"], 90) - np.nanpercentile(
+                data_ref.loc[data_ref.index.month == seas_id, "PET"], 10
+            )
+
+            prec_avg_nf = data_nf.loc[data_nf.index.month == seas_id, "PREC"].mean()
+            prec_ipr_nf = np.nanpercentile(data_nf.loc[data_nf.index.month == seas_id, "PREC"], 90) - np.nanpercentile(
+                data_nf.loc[data_nf.index.month == seas_id, "PREC"], 10
+            )
+            ta_avg_nf = data_nf.loc[data_nf.index.month == seas_id, "TA"].mean()
+            ta_ipr_nf = np.nanpercentile(data_nf.loc[data_nf.index.month == seas_id, "TA"], 90) - np.nanpercentile(
+                data_nf.loc[data_nf.index.month == seas_id, "TA"], 10
+            )
+            pet_avg_nf = data_nf.loc[data_nf.index.month == seas_id, "PET"].mean()
+            pet_ipr_nf = np.nanpercentile(data_nf.loc[data_nf.index.month == seas_id, "PET"], 90) - np.nanpercentile(
+                data_nf.loc[data_nf.index.month == seas_id, "PET"], 10
+            )
+
+            prec_avg_ff = data_ff.loc[data_ff.index.month == seas_id, "PREC"].mean()
+            prec_ipr_ff = np.nanpercentile(data_ff.loc[data_ff.index.month == seas_id, "PREC"], 90) - np.nanpercentile(
+                data_ff.loc[data_ff.index.month == seas_id, "PREC"], 10
+            )
+            ta_avg_ff = data_ff.loc[data_ff.index.month == seas_id, "TA"].mean()
+            ta_ipr_ff = np.nanpercentile(data_ff.loc[data_ff.index.month == seas_id, "TA"], 90) - np.nanpercentile(
+                data_ff.loc[data_ff.index.month == seas_id, "TA"], 10
+            )
+            pet_avg_ff = data_ff.loc[data_ff.index.month == seas_id, "PET"].mean()
+            pet_ipr_ff = np.nanpercentile(data_ff.loc[data_ff.index.month == seas_id, "PET"], 90) - np.nanpercentile(
+                data_ff.loc[data_ff.index.month == seas_id, "PET"], 10
+            )
+
+            df_prec.loc[seas, "dAvg_nf"] = (prec_avg_nf - prec_avg_ref) / prec_avg_ref
+            df_prec.loc[seas, "dAvg_ff"] = (prec_avg_ff - prec_avg_ref) / prec_avg_ref
+            df_prec.loc[seas, "dIPR_nf"] = (prec_ipr_nf - prec_ipr_ref) / prec_ipr_ref
+            df_prec.loc[seas, "dIPR_ff"] = (prec_ipr_ff - prec_ipr_ref) / prec_ipr_ref
+            df_ta.loc[seas, "dAvg_nf"] = (ta_avg_nf - ta_avg_ref) / ta_avg_ref
+            df_ta.loc[seas, "dAvg_ff"] = (ta_avg_ff - ta_avg_ref) / ta_avg_ref
+            df_ta.loc[seas, "dIPR_nf"] = (ta_ipr_nf - ta_ipr_ref) / ta_ipr_ref
+            df_ta.loc[seas, "dIPR_ff"] = (ta_ipr_ff - ta_ipr_ref) / ta_ipr_ref
+            df_pet.loc[seas, "dAvg_nf"] = (pet_avg_nf - pet_avg_ref) / pet_avg_ref
+            df_pet.loc[seas, "dAvg_ff"] = (pet_avg_ff - pet_avg_ref) / pet_avg_ref
+            df_pet.loc[seas, "dIPR_nf"] = (pet_ipr_nf - pet_ipr_ref) / pet_ipr_ref
+            df_pet.loc[seas, "dIPR_ff"] = (pet_ipr_ff - pet_ipr_ref) / pet_ipr_ref
+
+        dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"] = {}
+        dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"] = df_prec
+        dict_deltas_climate_seas[station_label1[station_id]][cm]["ta"] = {}
+        dict_deltas_climate_seas[station_label1[station_id]][cm]["ta"] = df_ta
+        dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"] = {}
+        dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"] = df_pet
 
 # Store data (serialize)
 file = base_path / "figures" / "delta_changes_climate.pkl"
 with open(file, "wb") as handle:
     pickle.dump(dict_deltas_climate, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+# plot delta changes of precipitation and temperature
+fig, axs = plt.subplots(1, 3, figsize=(6, 1.8), sharex=True, sharey=True)
+for i, station_id in enumerate(station_ids):
+    for cm in cms:
+        dta_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_nf"] * 100
+        dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
+        axs[i].scatter(dta_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+    for cm in cms:
+        dta_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_ff"] * 100
+        dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
+        axs[i].scatter(dta_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+    axs[i].set_ylabel("")
+    axs[i].set_xlabel(r"$\overline{\Delta}$ TA [%]")
+axs[0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+axs[0].text(
+    0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0].transAxes
+)
+axs[1].text(
+    0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1].transAxes
+)
+axs[2].text(
+    0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2].transAxes
+)
+lines, labels = axs[-1].get_legend_handles_labels()
+fig.legend(
+    lines[:7],
+    labels[:7],
+    loc="upper right",
+    fontsize=6,
+    frameon=False,
+    bbox_to_anchor=(1.0, 1.01),
+)
+fig.legend(
+    lines[7:],
+    labels[7:],
+    loc="upper right",
+    fontsize=6,
+    frameon=False,
+    bbox_to_anchor=(1.0, 0.53),
+)
+fig.subplots_adjust(left=0.08, right=0.72, bottom=0.2)
+file = base_path_figs / f"projected_annual_dprec_and_dta_avg.png"
+fig.savefig(file, dpi=300)
+file = base_path_figs / f"projected_annual_dprec_and_dta_avg.pdf"
+fig.savefig(file, dpi=300)
+plt.close(fig=fig)
+
+fig, axs = plt.subplots(2, 3, figsize=(6, 4), sharex="row", sharey="row")
+for i, station_id in enumerate(station_ids):
+    for cm in cms:
+        dta_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_nf"] * 100
+        dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
+        axs[0, i].scatter(dta_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+        dta_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dIPR_nf"] * 100
+        dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
+        axs[1, i].scatter(dta_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+    for cm in cms:
+        dta_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_ff"] * 100
+        dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
+        axs[0, i].scatter(dta_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+        dta_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dIPR_ff"] * 100
+        dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
+        axs[1, i].scatter(dta_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+    axs[0, i].set_ylabel("")
+    axs[0, i].set_xlabel(r"$\overline{\Delta}$ TA [%]")
+    axs[1, i].set_xlabel(r"$\Delta$$IPR$ TA [%]")
+axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+axs[1, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
+axs[0, 0].text(
+    0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
+)
+axs[0, 1].text(
+    0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
+)
+axs[0, 2].text(
+    0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
+)
+axs[1, 0].text(
+    0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
+)
+axs[1, 1].text(
+    0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
+)
+axs[1, 2].text(
+    0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
+)
+lines, labels = axs[0, 0].get_legend_handles_labels()
+fig.legend(
+    lines[:7],
+    labels[:7],
+    loc="upper right",
+    fontsize=6,
+    frameon=False,
+    bbox_to_anchor=(1.0, 0.9),
+    title="2030-2060",
+)
+fig.legend(
+    lines[7:],
+    labels[7:],
+    loc="upper right",
+    fontsize=6,
+    frameon=False,
+    bbox_to_anchor=(1.0, 0.64),
+    title="2070-2100",
+)
+fig.subplots_adjust(left=0.08, right=0.72, bottom=0.15, wspace=0.1, hspace=0.35)
+file = base_path_figs / f"projected_annual_dprec_and_dta.png"
+fig.savefig(file, dpi=300)
+file = base_path_figs / f"projected_annual_dprec_and_dta.pdf"
+fig.savefig(file, dpi=300)
+plt.close(fig=fig)
+
+# plot delta changes of precipitation and potential evapotranspiration
+fig, axs = plt.subplots(2, 3, figsize=(6, 4), sharex="row", sharey="row")
+for i, station_id in enumerate(station_ids):
+    for cm in cms:
+        dpet_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_nf"] * 100
+        dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
+        axs[0, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+        dpet_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_nf"] * 100
+        dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
+        axs[1, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+    for cm in cms:
+        dpet_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_ff"] * 100
+        dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
+        axs[0, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+        dpet_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_ff"] * 100
+        dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
+        axs[1, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+    axs[0, i].set_ylabel("")
+    axs[0, i].set_xlabel(r"$\overline{\Delta}$ PET [%]")
+    axs[1, i].set_xlabel(r"$\Delta$$IPR$ PET [%]")
+axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+axs[1, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
+axs[0, 0].text(
+    0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
+)
+axs[0, 1].text(
+    0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
+)
+axs[0, 2].text(
+    0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
+)
+axs[1, 0].text(
+    0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
+)
+axs[1, 1].text(
+    0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
+)
+axs[1, 2].text(
+    0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
+)
+lines, labels = axs[0, 0].get_legend_handles_labels()
+fig.legend(
+    lines[:7],
+    labels[:7],
+    loc="upper right",
+    fontsize=6,
+    frameon=False,
+    bbox_to_anchor=(1.0, 0.9),
+    title="2030-2060",
+)
+fig.legend(
+    lines[7:],
+    labels[7:],
+    loc="upper right",
+    fontsize=6,
+    frameon=False,
+    bbox_to_anchor=(1.0, 0.64),
+    title="2070-2100",
+)
+fig.subplots_adjust(left=0.08, right=0.72, bottom=0.15, wspace=0.1, hspace=0.35)
+file = base_path_figs / f"projected_annual_dprec_and_dpet.png"
+fig.savefig(file, dpi=300)
+file = base_path_figs / f"projected_annual_dprec_and_dpet.pdf"
+fig.savefig(file, dpi=300)
+plt.close(fig=fig)
+
+for j, seas in enumerate(["winter", "spring", "summer", "autumn"]):
+    fig, axs = plt.subplots(2, 3, figsize=(6, 4), sharex=True, sharey=True)
+    for i, station_id in enumerate(station_ids):
+        for cm in cms:
+            dpet_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_nf"] * 100
+            dprec_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_nf"] * 100
+            axs[0, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+            dpet_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_nf"] * 100
+            dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
+            axs[1, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+        for cm in cms:
+            dpet_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_ff"] * 100
+            dprec_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_ff"] * 100
+            axs[0, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+            dpet_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_ff"] * 100
+            dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
+            axs[1, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+        axs[0, i].set_ylabel("")
+        axs[1, i].set_ylabel("")
+        axs[0, i].set_xlabel(r"$\overline{\Delta}$ PET [%]")
+        axs[1, i].set_xlabel(r"$\Delta$$IPR$ PET [%]")
+    axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+    axs[1, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
+    axs[0, 0].text(
+        0.9,
+        0.9,
+        "(a)",
+        fontsize=9,
+        verticalalignment="center",
+        horizontalalignment="center",
+        transform=axs[0, 0].transAxes,
+    )
+    axs[0, 1].text(
+        0.9,
+        0.9,
+        "(b)",
+        fontsize=9,
+        verticalalignment="center",
+        horizontalalignment="center",
+        transform=axs[0, 1].transAxes,
+    )
+    axs[0, 2].text(
+        0.9,
+        0.9,
+        "(c)",
+        fontsize=9,
+        verticalalignment="center",
+        horizontalalignment="center",
+        transform=axs[0, 2].transAxes,
+    )
+    axs[1, 0].text(
+        0.9,
+        0.9,
+        "(d)",
+        fontsize=9,
+        verticalalignment="center",
+        horizontalalignment="center",
+        transform=axs[1, 0].transAxes,
+    )
+    axs[1, 1].text(
+        0.9,
+        0.9,
+        "(e)",
+        fontsize=9,
+        verticalalignment="center",
+        horizontalalignment="center",
+        transform=axs[1, 1].transAxes,
+    )
+    axs[1, 2].text(
+        0.9,
+        0.9,
+        "(f)",
+        fontsize=9,
+        verticalalignment="center",
+        horizontalalignment="center",
+        transform=axs[1, 2].transAxes,
+    )
+    lines, labels = axs[0, 0].get_legend_handles_labels()
+    fig.legend(
+        lines[:7],
+        labels[:7],
+        loc="upper right",
+        fontsize=6,
+        frameon=False,
+        bbox_to_anchor=(1.0, 0.9),
+        title="2030-2060",
+    )
+    fig.legend(
+        lines[7:],
+        labels[7:],
+        loc="upper right",
+        fontsize=6,
+        frameon=False,
+        bbox_to_anchor=(1.0, 0.64),
+        title="2070-2100",
+    )
+    fig.subplots_adjust(left=0.08, right=0.72, bottom=0.15, wspace=0.1, hspace=0.25)
+    file = base_path_figs / f"projected_{seas}_dprec_and_dpet.png"
+    fig.savefig(file, dpi=300)
+    file = base_path_figs / f"projected_{seas}_dprec_and_dpet.pdf"
+    fig.savefig(file, dpi=300)
+    plt.close(fig=fig)
+
+fig, axs = plt.subplots(5, 3, figsize=(6, 6), sharex=True, sharey=True)
+for i, station_id in enumerate(station_ids):
+    for cm in cms:
+        dpet_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_nf"] * 100
+        dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
+        axs[0, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+    for cm in cms:
+        dpet_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_ff"] * 100
+        dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
+        axs[0, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+    axs[0, i].set_ylabel("")
+axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+axs[0, 0].text(
+    0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
+)
+axs[0, 1].text(
+    0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
+)
+axs[0, 2].text(
+    0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
+)
+lines, labels = axs[0, 0].get_legend_handles_labels()
+fig.legend(
+    lines[:7],
+    labels[:7],
+    loc="upper right",
+    fontsize=6,
+    frameon=False,
+    bbox_to_anchor=(1.0, 0.88),
+    title="2030-2060",
+)
+fig.legend(
+    lines[7:],
+    labels[7:],
+    loc="upper right",
+    fontsize=6,
+    frameon=False,
+    bbox_to_anchor=(1.0, 0.7),
+    title="2070-2100",
+)
+
+for i, station_id in enumerate(station_ids):
+    for j, seas in enumerate(["winter", "spring", "summer", "autumn"]):
+        j = j + 1
+        for cm in cms:
+            dpet_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_nf"] * 100
+            dprec_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_nf"] * 100
+            axs[j, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+        for cm in cms:
+            dpet_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_ff"] * 100
+            dprec_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_ff"] * 100
+            axs[j, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+        axs[j, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+    axs[-1, i].set_ylabel(r"$\overline{\Delta}$ PET [%]")
+axs[1, 0].text(
+    0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
+)
+axs[1, 1].text(
+    0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
+)
+axs[1, 2].text(
+    0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
+)
+axs[2, 0].text(
+    0.9, 0.9, "(g)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 0].transAxes
+)
+axs[2, 1].text(
+    0.9, 0.9, "(h)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 1].transAxes
+)
+axs[2, 2].text(
+    0.9, 0.9, "(i)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 2].transAxes
+)
+axs[3, 0].text(
+    0.9, 0.9, "(j)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 0].transAxes
+)
+axs[3, 1].text(
+    0.9, 0.9, "(k)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 1].transAxes
+)
+axs[3, 2].text(
+    0.9, 0.9, "(l)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 2].transAxes
+)
+axs[4, 0].text(
+    0.9, 0.9, "(m)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 0].transAxes
+)
+axs[4, 1].text(
+    0.9, 0.9, "(n)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 1].transAxes
+)
+axs[4, 2].text(
+    0.9, 0.9, "(o)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 2].transAxes
+)
+
+fig.subplots_adjust(left=0.08, right=0.72, bottom=0.2, wspace=0.1, hspace=0.1)
+file = base_path_figs / f"projected_annual_seasonal_dprec_and_dpet_avg.png"
+fig.savefig(file, dpi=300)
+file = base_path_figs / f"projected_annual_seasonal_dprec_and_dpet_avg.pdf"
+fig.savefig(file, dpi=300)
+plt.close(fig=fig)
+
+fig, axs = plt.subplots(3, 3, figsize=(6, 5), sharex=True, sharey=True)
+for i, station_id in enumerate(station_ids):
+    for cm in cms:
+        dpet_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_nf"] * 100
+        dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
+        axs[0, i].scatter(dta_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+    for cm in cms:
+        dpet_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_ff"] * 100
+        dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
+        axs[0, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+    axs[0, i].set_ylabel("")
+axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+axs[0, 0].text(
+    0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
+)
+axs[0, 1].text(
+    0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
+)
+axs[0, 2].text(
+    0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
+)
+lines, labels = axs[0, 0].get_legend_handles_labels()
+fig.legend(
+    lines[:7],
+    labels[:7],
+    loc="upper right",
+    fontsize=6,
+    frameon=False,
+    bbox_to_anchor=(1.0, 0.88),
+    title="2030-2060",
+)
+fig.legend(
+    lines[7:],
+    labels[7:],
+    loc="upper right",
+    fontsize=6,
+    frameon=False,
+    bbox_to_anchor=(1.0, 0.68),
+    title="2070-2100",
+)
+
+for i, station_id in enumerate(station_ids):
+    for j, seas in enumerate(["winter", "summer"]):
+        j = j + 1
+        for cm in cms:
+            dpet_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_nf"] * 100
+            dprec_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_nf"] * 100
+            axs[j, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+        for cm in cms:
+            dpet_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_ff"] * 100
+            dprec_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_ff"] * 100
+            axs[j, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+        axs[j, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+    axs[-1, i].set_xlabel(r"$\overline{\Delta}$ PET [%]")
+axs[1, 0].text(
+    0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
+)
+axs[1, 1].text(
+    0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
+)
+axs[1, 2].text(
+    0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
+)
+axs[2, 0].text(
+    0.9, 0.9, "(g)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 0].transAxes
+)
+axs[2, 1].text(
+    0.9, 0.9, "(h)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 1].transAxes
+)
+axs[2, 2].text(
+    0.9, 0.9, "(i)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 2].transAxes
+)
+
+fig.subplots_adjust(left=0.08, right=0.72, bottom=0.2, wspace=0.1, hspace=0.1)
+file = base_path_figs / f"projected_annual_winter_summer_dprec_and_dpet_avg.png"
+fig.savefig(file, dpi=300)
+file = base_path_figs / f"projected_annual_winter_summer_dprec_and_dpet_avg.pdf"
+fig.savefig(file, dpi=300)
+plt.close(fig=fig)
+
+fig, axs = plt.subplots(5, 3, figsize=(6, 6), sharex=True, sharey=True)
+for i, station_id in enumerate(station_ids):
+    for cm in cms:
+        dpet_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_nf"] * 100
+        dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
+        axs[0, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+    for cm in cms:
+        dpet_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_ff"] * 100
+        dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
+        axs[0, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+    axs[0, i].set_ylabel("")
+axs[0, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
+axs[0, 0].text(
+    0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
+)
+axs[0, 1].text(
+    0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
+)
+axs[0, 2].text(
+    0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
+)
+lines, labels = axs[0, 0].get_legend_handles_labels()
+fig.legend(
+    lines[:7],
+    labels[:7],
+    loc="upper right",
+    fontsize=6,
+    frameon=False,
+    bbox_to_anchor=(1.0, 0.88),
+    title="2030-2060",
+)
+fig.legend(
+    lines[7:],
+    labels[7:],
+    loc="upper right",
+    fontsize=6,
+    frameon=False,
+    bbox_to_anchor=(1.0, 0.7),
+    title="2070-2100",
+)
+
+for i, station_id in enumerate(station_ids):
+    for j, seas in enumerate(["winter", "spring", "summer", "autumn"]):
+        j = j + 1
+        for cm in cms:
+            dpet_ipr_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dIPR_nf"] * 100
+            dprec_ipr_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dIPR_nf"] * 100
+            axs[j, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+        for cm in cms:
+            dpet_ipr_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dIPR_ff"] * 100
+            dprec_ipr_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dIPR_ff"] * 100
+            axs[j, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+        axs[j, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
+    axs[-1, i].set_xlabel(r"$\Delta$$IPR$ PET [%]")
+axs[1, 0].text(
+    0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
+)
+axs[1, 1].text(
+    0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
+)
+axs[1, 2].text(
+    0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
+)
+axs[2, 0].text(
+    0.9, 0.9, "(g)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 0].transAxes
+)
+axs[2, 1].text(
+    0.9, 0.9, "(h)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 1].transAxes
+)
+axs[2, 2].text(
+    0.9, 0.9, "(i)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 2].transAxes
+)
+axs[3, 0].text(
+    0.9, 0.9, "(j)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 0].transAxes
+)
+axs[3, 1].text(
+    0.9, 0.9, "(k)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 1].transAxes
+)
+axs[3, 2].text(
+    0.9, 0.9, "(l)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 2].transAxes
+)
+axs[4, 0].text(
+    0.9, 0.9, "(m)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 0].transAxes
+)
+axs[4, 1].text(
+    0.9, 0.9, "(n)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 1].transAxes
+)
+axs[4, 2].text(
+    0.9, 0.9, "(o)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 2].transAxes
+)
+
+fig.subplots_adjust(left=0.08, right=0.72, bottom=0.2, wspace=0.1, hspace=0.1)
+file = base_path_figs / f"projected_annual_seasonal_dprec_and_dpet_ipr.png"
+fig.savefig(file, dpi=300)
+file = base_path_figs / f"projected_annual_seasonal_dprec_and_dpet_ipr.pdf"
+fig.savefig(file, dpi=300)
+plt.close(fig=fig)
+
+fig, axs = plt.subplots(3, 3, figsize=(6, 5), sharex=True, sharey=True)
+for i, station_id in enumerate(station_ids):
+    for cm in cms:
+        dpet_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_nf"] * 100
+        dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
+        axs[0, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+    for cm in cms:
+        dpet_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_ff"] * 100
+        dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
+        axs[0, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+axs[0, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
+axs[0, 0].text(
+    0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
+)
+axs[0, 1].text(
+    0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
+)
+axs[0, 2].text(
+    0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
+)
+lines, labels = axs[0, 0].get_legend_handles_labels()
+fig.legend(
+    lines[:7],
+    labels[:7],
+    loc="upper right",
+    fontsize=6,
+    frameon=False,
+    bbox_to_anchor=(1.0, 0.88),
+    title="2030-2060",
+)
+fig.legend(
+    lines[7:],
+    labels[7:],
+    loc="upper right",
+    fontsize=6,
+    frameon=False,
+    bbox_to_anchor=(1.0, 0.68),
+    title="2070-2100",
+)
+
+for i, station_id in enumerate(station_ids):
+    for j, seas in enumerate(["winter", "summer"]):
+        j = j + 1
+        for cm in cms:
+            dpet_ipr_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dIPR_nf"] * 100
+            dprec_ipr_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dIPR_nf"] * 100
+            axs[j, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+        for cm in cms:
+            dpet_ipr_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dIPR_ff"] * 100
+            dprec_ipr_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dIPR_ff"] * 100
+            axs[j, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+        axs[j, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
+    axs[-1, i].set_xlabel(r"$\Delta$$IPR$ PET [%]")
+axs[1, 0].text(
+    0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
+)
+axs[1, 1].text(
+    0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
+)
+axs[1, 2].text(
+    0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
+)
+axs[2, 0].text(
+    0.9, 0.9, "(g)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 0].transAxes
+)
+axs[2, 1].text(
+    0.9, 0.9, "(h)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 1].transAxes
+)
+axs[2, 2].text(
+    0.9, 0.9, "(i)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 2].transAxes
+)
+
+fig.subplots_adjust(left=0.08, right=0.72, bottom=0.15, wspace=0.1, hspace=0.1)
+file = base_path_figs / f"projected_annual_winter_summer_dprec_and_dpet_ipr.png"
+fig.savefig(file, dpi=300)
+file = base_path_figs / f"projected_annual_winter_summer_dprec_and_dpet_ipr.pdf"
+fig.savefig(file, dpi=300)
+plt.close(fig=fig)
