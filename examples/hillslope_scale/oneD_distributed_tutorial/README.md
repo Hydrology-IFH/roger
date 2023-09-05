@@ -15,7 +15,7 @@ Brief overview of the files:
 
 # Date requirements
 
-The following information is required to run the model. 
+The following information is required to run the model.
 
 ## Meteorological input data
 The required meteorological input data is loaded from the input folder. The input folder should contain a tab-delimited text file
@@ -25,26 +25,26 @@ Format of `PREC.txt` (PREC in mm/10 minutes):
 | YYYY  | MM    | DD    | hh    | mm    | PREC  |
 | ------| ------| ------| ------| ------| ------|
 | 2023  | 1     | 1     | 0     | 0     | 0     |
-| 2023  | 1     | 1     | 0     | 10    | 0.3   |        
+| 2023  | 1     | 1     | 0     | 10    | 0.3   |
 | 2023  | 1     | 1     | 0     | 20    | 1.0   |
-| 2023  | 1     | 1     | 0     | 30    | 0.5   |        
+| 2023  | 1     | 1     | 0     | 30    | 0.5   |
 | 2023  | 1     | 1     | 0     | 40    | 0.4   |
-| 2023  | 1     | 1     | 0     | 50    | 0.7   |        
+| 2023  | 1     | 1     | 0     | 50    | 0.7   |
 | 2023  | 1     | 1     | 1     | 0     | 0.6   |
 | ...   | ...   | ...   | ...   | ...   | ...   |
 
-Format of`TA.txt` (TA in degC):
+Format of `TA.txt` (TA in degC):
 | YYYY  | MM    | DD    | hh    | mm    | TA    |
 | ------| ------| ------| ------| ------| ------|
 | 2023  | 1     | 1     | 0     | 0     | 2     |
-| 2023  | 1     | 1     | 0     | 0     | 3     |        
+| 2023  | 1     | 1     | 0     | 0     | 3     |
 | ...   | ...   | ...   | ...   | ...   | ...   |
 
 Format of `PET.txt` (PET in mm/day):
 | YYYY  | MM    | DD    | hh    | mm    | PET   |
 | ------| ------| ------| ------| ------| ------|
 | 2023  | 1     | 1     | 0     | 0     | 2     |
-| 2023  | 1     | 1     | 0     | 0     | 2.1   |        
+| 2023  | 1     | 1     | 0     | 0     | 2.1   |
 | ...   | ...   | ...   | ...   | ...   | ...   |
 
 
@@ -61,7 +61,7 @@ python write_parameters.py
 Format of `parameters.csv`:
 | lu_id | z_soil   | slope  | dmph | dmpv  | lmpv  | theta_pwp | theta_ufc | theta_ac | ks  | kf   |
 | ------| ---------| -------| -----| ------| ------| ----------| ----------| ---------| ----| -----|
-| 8     | 1000     | 0.05   | 25   | 25    | 200   | 0.2       | 0.11      | 0.09     | 5   | 2500 |  
+| 8     | 1000     | 0.05   | 25   | 25    | 200   | 0.2       | 0.11      | 0.09     | 5   | 2500 |
 | 8     | 1000     | 0.06   | 20   | 30    | 300   | 0.18      | 0.1       | 0.08     | 6   | 2500 |
 | ...   | ...      | ...    | ...  | ...   | ...   | ...       | ...       | ...      | ... | ...  |
 
