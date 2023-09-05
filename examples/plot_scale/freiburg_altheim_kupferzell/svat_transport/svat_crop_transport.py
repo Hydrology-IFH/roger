@@ -12,7 +12,7 @@ from roger.cli.roger_run_base import roger_base_cli
     type=click.Choice(["observed", "CCCma-CanESM2_CCLM4-8-17", "MPI-M-MPI-ESM-LR_RCA4"]),
     default="MPI-M-MPI-ESM-LR_RCA4",
 )
-@click.option("--period", type=click.Choice(["2016-2021", "1985-2005", "2040-2060", "2080-2100"]), default="2040-2060")
+@click.option("--period", type=click.Choice(["2016-2021", "1985-2015", "2030-2060", "2070-2100"]), default="2030-2060")
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):

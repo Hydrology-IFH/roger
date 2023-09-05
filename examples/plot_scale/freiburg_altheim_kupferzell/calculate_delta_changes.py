@@ -61,9 +61,9 @@ Locations = ["Freiburg", "Altheim", "Kupferzell"]
 land_cover_scenarios = ["grass", "corn", "corn_catch_crop", "crop_rotation"]
 Land_cover_scenarios = ["Grass", "Corn", "Corn & Catch crop", "Crop rotation"]
 climate_scenarios = ["CCCma-CanESM2_CCLM4-8-17", "MPI-M-MPI-ESM-LR_RCA4"]
-periods = ["1985-2005", "2040-2060", "2080-2100"]
-start_dates = [datetime.date(1985, 1, 1), datetime.date(2040, 1, 1), datetime.date(2080, 1, 1)]
-end_dates = [datetime.date(2004, 12, 31), datetime.date(2059, 12, 31), datetime.date(2099, 12, 31)]
+periods = ["1985-2015", "2030-2060", "2070-2100"]
+start_dates = [datetime.date(1985, 1, 1), datetime.date(2030, 1, 1), datetime.date(2070, 1, 1)]
+end_dates = [datetime.date(2014, 12, 31), datetime.date(2059, 12, 31), datetime.date(2099, 12, 31)]
 
 _lab = {
     "q_ss": "PERC",

@@ -359,6 +359,7 @@ VARIABLES = {
         CATCH_GRID,
         "",
         "Mask in physical space for catchment",
+        initial=True,
         write_to_restart=True,
         time_dependent=False,
         dtype="bool",

@@ -12,7 +12,7 @@ def main():
     locations = ["freiburg", "altheim", "kupferzell"]
     land_cover_scenarios = ["corn", "corn_catch_crop", "crop_rotation"]
     climate_scenarios = ["CCCma-CanESM2_CCLM4-8-17", "MPI-M-MPI-ESM-LR_RCA4"]
-    periods = ["1985-2005", "2040-2060", "2080-2100"]
+    periods = ["1985-2015", "2030-2060", "2070-2100"]
 
     # --- jobs to calculate fluxes and states --------------------------------------------------------
     for location in locations:
@@ -23,7 +23,7 @@ def main():
                     output_path_ws = base_path_ws / "svat"
                     lines = []
                     lines.append("#!/bin/bash\n")
-                    lines.append("#SBATCH --time=6:00:00\n")
+                    lines.append("#SBATCH --time=9:00:00\n")
                     lines.append("#SBATCH --nodes=1\n")
                     lines.append("#SBATCH --ntasks=1\n")
                     lines.append("#SBATCH --cpus-per-task=1\n")
@@ -59,7 +59,7 @@ def main():
             output_path_ws = base_path_ws / "svat"
             lines = []
             lines.append("#!/bin/bash\n")
-            lines.append("#SBATCH --time=6:00:00\n")
+            lines.append("#SBATCH --time=2:00:00\n")
             lines.append("#SBATCH --nodes=1\n")
             lines.append("#SBATCH --ntasks=1\n")
             lines.append("#SBATCH --cpus-per-task=1\n")
@@ -96,7 +96,7 @@ def main():
                 output_path_ws = base_path_ws / "svat"
                 lines = []
                 lines.append("#!/bin/bash\n")
-                lines.append("#SBATCH --time=6:00:00\n")
+                lines.append("#SBATCH --time=9:00:00\n")
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=1\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")
@@ -174,11 +174,11 @@ def main():
                     output_path_ws = base_path_ws / "svat_transport"
                     lines = []
                     lines.append("#!/bin/bash\n")
-                    lines.append("#SBATCH --time=18:00:00\n")
+                    lines.append("#SBATCH --time=27:00:00\n")
                     lines.append("#SBATCH --nodes=1\n")
                     lines.append("#SBATCH --ntasks=4\n")
                     lines.append("#SBATCH --cpus-per-task=1\n")
-                    lines.append("#SBATCH --mem=16000\n")
+                    lines.append("#SBATCH --mem=14000\n")
                     lines.append("#SBATCH --mail-type=FAIL\n")
                     lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
                     lines.append(f"#SBATCH --job-name={script_name}\n")
@@ -229,7 +229,7 @@ def main():
 
                     lines = []
                     lines.append("#!/bin/bash\n")
-                    lines.append("#SBATCH --time=14:00:00\n")
+                    lines.append("#SBATCH --time=21:00:00\n")
                     lines.append("#SBATCH --gres=gpu:1\n")
                     lines.append("#SBATCH --ntasks=1\n")
                     lines.append("#SBATCH --cpus-per-task=1\n")
@@ -288,7 +288,7 @@ def main():
                     lines.append("#SBATCH --nodes=1\n")
                     lines.append("#SBATCH --ntasks=1\n")
                     lines.append("#SBATCH --cpus-per-task=1\n")
-                    lines.append("#SBATCH --mem=12000\n")
+                    lines.append("#SBATCH --mem=16000\n")
                     lines.append("#SBATCH --mail-type=FAIL\n")
                     lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
                     lines.append(f"#SBATCH --job-name={script_name}\n")
@@ -387,11 +387,11 @@ def main():
                 output_path_ws = base_path_ws / "svat_transport"
                 lines = []
                 lines.append("#!/bin/bash\n")
-                lines.append("#SBATCH --time=12:00:00\n")
+                lines.append("#SBATCH --time=18:00:00\n")
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=4\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")
-                lines.append("#SBATCH --mem=12000\n")
+                lines.append("#SBATCH --mem=18000\n")
                 lines.append("#SBATCH --mail-type=FAIL\n")
                 lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
                 lines.append(f"#SBATCH --job-name={script_name}\n")
@@ -509,7 +509,7 @@ def main():
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=1\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")
-                lines.append("#SBATCH --mem=12000\n")
+                lines.append("#SBATCH --mem=18000\n")
                 lines.append("#SBATCH --mail-type=FAIL\n")
                 lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
                 lines.append(f"#SBATCH --job-name={script_name}\n")

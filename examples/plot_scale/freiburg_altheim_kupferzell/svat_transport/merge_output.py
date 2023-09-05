@@ -11,7 +11,7 @@ base_path = Path(__file__).parent
 locations = ["freiburg", "altheim", "kupferzell"]
 land_cover_scenarios = ["corn", "corn_catch_crop", "crop_rotation"]
 climate_scenarios = ["CCCma-CanESM2_CCLM4-8-17", "MPI-M-MPI-ESM-LR_RCA4"]
-periods = ["1985-2005", "2040-2060", "2080-2100"]
+periods = ["1985-2015", "2030-2060", "2070-2100"]
 
 # merge model output into single file
 for location in locations:
