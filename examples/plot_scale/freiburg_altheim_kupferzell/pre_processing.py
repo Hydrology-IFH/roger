@@ -4,7 +4,6 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 
 from pathlib import Path
 import os
-from cftime import date2num
 import pandas as pd
 import numpy as np
 import matplotlib as mpl
