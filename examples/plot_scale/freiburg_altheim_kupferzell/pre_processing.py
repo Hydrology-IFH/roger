@@ -179,7 +179,7 @@ idx_10mins_1985_2100 = pd.date_range(start="1985-01-01 00:00:00", end="2100-12-3
 idx_10mins_2003_2005 = pd.date_range(start="2003-01-01 00:00:00", end="2004-12-31 23:50:00", freq="10T")
 idx_10mins_2016_2021 = pd.date_range(start="2016-01-01 00:00:00", end="2021-12-31 23:50:00", freq="10T")
 idx_10mins_1994_2005 = pd.date_range(start="1994-01-01 00:00:00", end="2004-12-31 23:50:00", freq="10T")
-idx_10mins_1985_2015 = pd.date_range(start="1985-01-01 00:00:00", end="2004-12-31 23:50:00", freq="10T")
+idx_10mins_1985_2015 = pd.date_range(start="1985-01-01 00:00:00", end="2014-12-31 23:50:00", freq="10T")
 idx_10mins_2030_2060 = pd.date_range(start="2030-01-01 00:00:00", end="2059-12-31 23:50:00", freq="10T")
 idx_10mins_2070_2100 = pd.date_range(start="2070-01-01 00:00:00", end="2099-12-31 23:50:00", freq="10T")
 
