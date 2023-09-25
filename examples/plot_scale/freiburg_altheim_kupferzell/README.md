@@ -36,7 +36,7 @@ job scripts contains `_gpu` computations run on GPU.
 - `svat_crop.py`: SVAT-CROP-model setup
 - `svat_*.sh`: Job scripts to run the SVAT-model
 - `svat_crop_*.sh`: Job scripts to run the SVAT-CROP-model
-- `merge_output.py`: Merges model output into a single file
+- `merge_output.py`: Merges the model output into a single file
 
 ## Transport simulations
 ### svat_transport

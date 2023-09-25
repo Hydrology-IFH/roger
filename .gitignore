@@ -160,6 +160,7 @@ examples/plot_scale/stgallen/
 examples/plot_scale/freiburg_altheim_kupferzell/climate_projections
 gpu_memory_profiling/
 *_2016-*.sh
+examples/plot_scale/freiburg_altheim_kupferzell/rename_output.py
 
 # Slides or Word
 *.key
@@ -181,3 +182,7 @@ gpu_memory_profiling/
 conda_build.sh
 build.sh
 meta.yaml
+
+# Docker
+/tmp
+Dockerfile

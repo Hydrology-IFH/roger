@@ -1,10 +1,10 @@
 # --- Settings --------------------------------------------------------------
 # name of the model run; is used to name the output files
 identifier: ONED
-# total grid numbers in y-direction
-nx: 20
 # total grid numbers in x-direction
-ny: 1
+nx: 1
+# total grid numbers in y-direction
+ny: 20
 # spatial discretization in x-direction (in meters)
 dx: 1
 # spatial discretization in y-direction (in meters)
@@ -31,6 +31,20 @@ OUTPUT_RATE:
 - "cpr_rz" # capillary rise from subsoil into root zone (mm/day)
 - "dS"  # change of storage volume (mm/day)
 - "q_snow"  # snow melt (mm/day)
+- "q_sub_out"
+- "q_sub_in"
+- "q_sur_out"
+- "q_sur_in"
+- "q_sur"
+- "inf_mat_pot"
+- "inf_rz"
+- "inf_mp"
+- "q_sof"
+- "q_hof"
+- "q_sub"
+- "q_sub_rz"
+- "q_sub_ss"
+- "q_pot_rz"
 
 # simulated hydrologic storages
 OUTPUT_COLLECT:
@@ -40,3 +54,17 @@ OUTPUT_COLLECT:
 - "theta_ss"  # soil water content of subsoil (-)
 - "theta"  # soil water content (-)
 - "S_snow"  # storage volume snow cover (mm)
+- "S_s"
+- "S"
+- "z_sat"
+- "z_wf"
+- "z0"
+- "S_fp_rz"
+- "S_fp_ss"
+- "S_lp_rz"
+- "S_lp_ss"
+- "S_ac_rz"
+- "S_ac_ss"
+- "S_ufc_rz"
+- "S_ufc_ss"
+- "S_zsat_rz"

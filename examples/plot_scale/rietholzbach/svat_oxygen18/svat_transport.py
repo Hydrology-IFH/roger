@@ -23,6 +23,10 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         _tm_structure = transport_model_structure.replace("_", " ")
         _input_dir = _base_path / "input"
         _states_hm_file = f'states_hm_best_for_{transport_model_structure}.nc'
+        if tmp_dir:
+            _tmp_dir = tmp_dir / "output"
+        else:
+            _tmp_dir = tmp_dir
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -117,10 +121,10 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             vs = state.variables
             settings = state.settings
 
-            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, 0])
-            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, 0])
-            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, 0])
-            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, 0])
+            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, 0])
+            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, 0])
+            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, 0])
+            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, 0])
 
             if settings.tm_structure == "complete-mixing":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 1)
@@ -191,9 +195,9 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_snow", self._base_path, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis])
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis])
+            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_snow", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, vs.itt, npx.newaxis])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
             vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
             vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
@@ -329,19 +333,19 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             vs = state.variables
             settings = state.settings
 
-            vs.PREC_DIST_DAILY = update(vs.PREC_DIST_DAILY, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
-            vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
-            vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, :] + self._read_var_from_nc("inf_sc_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
-            vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
-            vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
-            vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
-            vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
-            vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
-            vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
-            vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
-            vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
+            vs.PREC_DIST_DAILY = update(vs.PREC_DIST_DAILY, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, :])
+            vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, :])
+            vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, :] + self._read_var_from_nc("inf_sc_rz", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, :])
+            vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, :])
+            vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, :])
+            vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, :])
+            vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, :])
+            vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, :])
+            vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, :])
+            vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, :])
+            vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, :])
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
-            vs.S_SNOW = update(vs.S_SNOW, at[2:-2, 2:-2, :], self._read_var_from_nc("S_snow", self._base_path, self._states_hm_file)[npx.newaxis, :, :])
+            vs.S_SNOW = update(vs.S_SNOW, at[2:-2, 2:-2, :], self._read_var_from_nc("S_snow", self._base_path / 'input', self._states_hm_file)[npx.newaxis, :, :])
 
             if settings.enable_oxygen18:
                 vs.C_ISO_IN = update(vs.C_ISO_IN, at[2:-2, 2:-2, 0], npx.nan)
@@ -389,7 +393,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             vs.C_iso_in = update(vs.C_iso_in, at[2:-2, 2:-2], conc_to_delta(state, vs.C_in[2:-2, 2:-2]))
 
         @roger_routine
-        def set_diagnostics(self, state, base_path=tmp_dir):
+        def set_diagnostics(self, state, base_path=_tmp_dir):
             diagnostics = state.diagnostics
 
             diagnostics["average"].output_variables = ["C_iso_transp", "C_iso_q_ss", "C_iso_s", "TT_transp", "TT_q_ss",
