@@ -12,7 +12,7 @@ def main():
     locations = ["freiburg", "altheim", "kupferzell"]
     land_cover_scenarios = ["corn", "corn_catch_crop", "crop_rotation"]
     climate_scenarios = ["CCCma-CanESM2_CCLM4-8-17", "MPI-M-MPI-ESM-LR_RCA4"]
-    periods = ["2016-2021", "1985-2015", "2030-2060", "2070-2100"]
+    periods = ["1985-2014", "2030-2059", "2070-2099"]
 
     # --- jobs to calculate fluxes and states --------------------------------------------------------
     for location in locations:

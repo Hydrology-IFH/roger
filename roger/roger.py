@@ -356,6 +356,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
             evapotranspiration,
             infiltration,
             film_flow,
+            surface_runoff,
             subsurface_runoff,
             capillary_rise,
             crop,
@@ -401,6 +402,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
                 if settings.enable_film_flow:
                     with state.timers["film flow"]:
                         film_flow.calculate_film_flow(state)
+                with state.timers["surface runoff"]:
+                    surface_runoff.calculate_surface_runoff(state)
                 with state.timers["subsurface runoff"]:
                     subsurface_runoff.calculate_subsurface_runoff(state)
                 with state.timers["capillary rise"]:

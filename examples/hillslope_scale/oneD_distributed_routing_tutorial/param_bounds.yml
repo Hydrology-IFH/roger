@@ -36,5 +36,17 @@ ks:
 - 100
 # hydraulic conductivity of bedrock (mm/hour)
 kf:
-- 0.001
 - 0.1
+- 1
+# scale factor for precipitation (-)
+prec_weight:
+- 0.5
+- 1.5
+# scale factor for potential evapotranspiration (-)
+pet_weight:
+- 0.5
+- 1.5
+# Strickler coeffcient (m^1/3 s^-1)
+k_st:
+- 0.1
+- 1

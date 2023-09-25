@@ -19,11 +19,15 @@ _UNITS = {
     "theta_pwp": "-",
     "ks": "mm/hour",
     "kf": "mm/hour",
+    "prec_weight": "-",
+    "ta_weight": "-",
+    "pet_weight": "-",
+    "k_st": "m^1/3 s^-1",
 }
 
 
-@click.option("-nx", "--nrows", type=int, default=20)
-@click.option("-ny", "--ncols", type=int, default=1)
+@click.option("-nx", "--nrows", type=int, default=1)
+@click.option("-ny", "--ncols", type=int, default=20)
 @click.command("main")
 def main(nrows, ncols):
     base_path = Path(__file__).parent
@@ -85,9 +89,7 @@ def main(nrows, ncols):
             # write parameters to dataframe
             df_params.loc[:, param] = values.flatten()
 
-    df_params.loc[:, "prec_weight"] = 1
     df_params.loc[:, "ta_weight"] = 1
-    df_params.loc[:, "pet_weight"] = 1
 
     # write parameters to csv
     df_params.columns = [
@@ -106,6 +108,7 @@ def main(nrows, ncols):
             "[-]",
             "[-]",
             "[-]",
+            "[m^1/3 s^-1]",
         ],
         [
             "lu_id",
@@ -122,6 +125,7 @@ def main(nrows, ncols):
             "prec_weight",
             "ta_weight",
             "pet_weight",
+            "k_st",
         ],
     ]
     df_params.to_csv(base_path / "parameters.csv", index=False, sep=";")

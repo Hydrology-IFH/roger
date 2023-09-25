@@ -87,3 +87,25 @@ python netcdf_to_csv.py
 ```
 python make_figures_and_tables.py
 ```
+
+# Dockerize svat
+
+We differ between:
+
+- Dockerfile: Blueprint for building images
+- Image: Template for running containers
+- Container: Running process with the packaged project
+
+## 1. Build the Docker image
+
+```console
+$ docker build -t svat-tutorial . 
+```
+
+## 2. Run the Docker image (starts the container)
+
+Without user input:
+
+```console
+$ docker run svat-tutorial
+```
