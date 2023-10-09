@@ -7,25 +7,25 @@ from roger import runtime_settings as rs, logger
 def validate_parameters_surface(state):
     vs = state.variables
 
-    mask1 = (vs.slope > 1) | (vs.slope < 0)
+    mask1 = ((vs.slope > 1) | (vs.slope < 0)) & vs.maskCatch
     if global_and(npx.any(mask1)):
         raise ValueError("slope-parameter is out of range.")
 
-    mask2 = (vs.sealing > 1) | (vs.sealing < 0)
+    mask2 = ((vs.sealing> 1) | (vs.sealing < 0)) & vs.maskCatch
     if global_and(npx.any(mask2)):
         raise ValueError("sealing-parameter is out of range.")
 
-    mask3 = (vs.lu_id > 1000) | (vs.lu_id < 0)
+    mask3 = ((vs.lu_id > 1000) | (vs.lu_id < 0)) & vs.maskCatch
     if global_and(npx.any(mask3)):
         raise ValueError("lu_id-parameter is out of range.")
 
-    if global_and(npx.any(npx.isnan(vs.slope))):
+    if global_and(npx.any(npx.isnan(vs.slope) & vs.maskCatch)):
         raise ValueError("slope-parameter contains non-numeric values.")
 
-    if global_and(npx.any(npx.isnan(vs.sealing))):
+    if global_and(npx.any(npx.isnan(vs.sealing) & vs.maskCatch)):
         raise ValueError("sealing-parameter contains non-numeric values.")
 
-    if global_and(npx.any(npx.isnan(vs.lu_id))):
+    if global_and(npx.any(npx.isnan(vs.lu_id) & vs.maskCatch)):
         raise ValueError("lu_id-parameter contains non-numeric values.")
 
 
@@ -33,46 +33,49 @@ def validate_parameters_soil(state):
     vs = state.variables
     settings = state.settings
 
-    mask1 = (vs.z_soil > 0) & (
-        (vs.theta_pwp + vs.theta_ufc + vs.theta_ac > 0.99) | (vs.theta_pwp + vs.theta_ufc + vs.theta_ac < 0.01)
-    )
+    mask1 = (vs.z_soil > 0) \
+        & ((vs.theta_pwp + vs.theta_ufc + vs.theta_ac > 0.99) \
+           | (vs.theta_pwp + vs.theta_ufc + vs.theta_ac < 0.01)) \
+        & vs.maskCatch
     if global_and(npx.any(mask1[2:-2, 2:-2])):
         raise ValueError("theta-parameters are out of range.")
 
-    mask2 = (vs.z_soil > 0) & ((vs.ks > 10000) | (vs.ks < 0))
+    mask2 = (vs.z_soil > 0) & ((vs.ks > 10000) | (vs.ks < 0)) \
+        & vs.maskCatch
     if global_and(npx.any(mask2[2:-2, 2:-2])):
         raise ValueError("ks-parameter is out of range.")
 
-    mask3 = (vs.z_soil > 0) & ((vs.lmpv > vs.z_soil) | (vs.lmpv < 0))
+    mask3 = (vs.z_soil > 0) & ((vs.lmpv > vs.z_soil) | (vs.lmpv < 0))\
+        & vs.maskCatch
     if global_and(npx.any(mask3[2:-2, 2:-2])):
         raise ValueError("lmpv-parameter is out of range.")
 
-    if global_and(npx.any(npx.isnan(vs.z_soil[2:-2, 2:-2]))):
+    if global_and(npx.any((npx.isnan(vs.z_soil) & vs.maskCatch)[2:-2, 2:-2])):
         raise ValueError("z_soil-parameter contains non-numeric values.")
 
-    if global_and(npx.any(npx.isnan(vs.dmpv[2:-2, 2:-2]))):
+    if global_and(npx.any((npx.isnan(vs.dmpv) & vs.maskCatch)[2:-2, 2:-2])):
         raise ValueError("dmpv-parameter contains non-numeric values.")
 
-    if global_and(npx.any(npx.isnan(vs.lmpv[2:-2, 2:-2]))):
+    if global_and(npx.any((npx.isnan(vs.lmpv) & vs.maskCatch)[2:-2, 2:-2])):
         raise ValueError("lmpv-parameter contains non-numeric values.")
 
-    if global_and(npx.any(npx.isnan(vs.theta_pwp[2:-2, 2:-2]))):
+    if global_and(npx.any((npx.isnan(vs.theta_pwp) & vs.maskCatch)[2:-2, 2:-2])):
         raise ValueError("theta_pwp-parameter contains non-numeric values.")
 
-    if global_and(npx.any(npx.isnan(vs.theta_ufc[2:-2, 2:-2]))):
+    if global_and(npx.any((npx.isnan(vs.theta_ufc) & vs.maskCatch)[2:-2, 2:-2])):
         raise ValueError("theta_ufc-parameter contains non-numeric values.")
 
-    if global_and(npx.any(npx.isnan(vs.theta_ac[2:-2, 2:-2]))):
+    if global_and(npx.any((npx.isnan(vs.theta_ac) & vs.maskCatch)[2:-2, 2:-2])):
         raise ValueError("theta_ac-parameter contains non-numeric values.")
 
-    if global_and(npx.any(npx.isnan(vs.ks[2:-2, 2:-2]))):
+    if global_and(npx.any((npx.isnan(vs.ks) & vs.maskCatch)[2:-2, 2:-2])):
         raise ValueError("ks-parameter contains non-numeric values.")
 
-    if global_and(npx.any(npx.isnan(vs.kf[2:-2, 2:-2]))):
+    if global_and(npx.any((npx.isnan(vs.kf) & vs.maskCatch)[2:-2, 2:-2])):
         raise ValueError("kf-parameter contains non-numeric values.")
 
     if settings.enable_lateral_flow:
-        if global_and(npx.any(npx.isnan(vs.dmph[2:-2, 2:-2]))):
+        if global_and(npx.any((npx.isnan(vs.dmph) & vs.maskCatch)[2:-2, 2:-2])):
             raise ValueError("dmph-parameter contains non-numeric values.")
 
 
@@ -82,11 +85,11 @@ def validate_initial_conditions_surface(state):
 
 def validate_initial_conditions_soil(state):
     vs = state.variables
-    mask1 = vs.theta_rz[:, :, vs.taum1] > vs.theta_sat
+    mask1 = (vs.theta_rz[:, :, vs.taum1] > vs.theta_sat) & vs.maskCatch
     if global_and(npx.any(mask1[2:-2, 2:-2])):
         raise ValueError("theta_rz is too high.")
 
-    mask2 = vs.theta_ss[:, :, vs.taum1] > vs.theta_sat
+    mask2 = (vs.theta_ss[:, :, vs.taum1] > vs.theta_sat) & vs.maskCatch
     if global_and(npx.any(mask2[2:-2, 2:-2])):
         raise ValueError("theta_ss is too high.")
 
