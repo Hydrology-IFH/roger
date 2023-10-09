@@ -162,6 +162,7 @@ gpu_memory_profiling/
 *_2016-*.sh
 debug_setup/
 examples/catchment_scale/StressRes/Moehlin/input/
+examples/plot_scale/freiburg_altheim_kupferzell/rename_output.py
 
 # Slides or Word
 *.key
@@ -183,3 +184,8 @@ examples/catchment_scale/StressRes/Moehlin/input/
 conda_build.sh
 build.sh
 meta.yaml
+
+# local development
+/bmiroger
+roger/bmimodels/
+examples/plot_scale/boadkh/

@@ -56,6 +56,9 @@ def main(tmp_dir):
             settings = state.settings
             settings.identifier = self._config["identifier"]
 
+            # output frequency (in seconds)
+            settings.output_frequency = self._config["OUTPUT_FREQUENCY"]
+
             # total grid numbers in x- and y-direction
             settings.nx, settings.ny = self._config["nx"], 1
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
@@ -260,20 +263,20 @@ def main(tmp_dir):
             diagnostics = state.diagnostics
 
             diagnostics["rate"].output_variables = self._config["OUTPUT_RATE"]
-            diagnostics["rate"].output_frequency = 24 * 60 * 60
+            diagnostics["rate"].output_frequency = self._config["OUTPUT_FREQUENCY"]
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
                 diagnostics["rate"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = self._config["OUTPUT_COLLECT"]
-            diagnostics["collect"].output_frequency = 24 * 60 * 60
+            diagnostics["collect"].output_frequency = self._config["OUTPUT_FREQUENCY"]
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
                 diagnostics["collect"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error"]
-            diagnostics["maximum"].output_frequency = 24 * 60 * 60
+            diagnostics["maximum"].output_frequency = self._config["OUTPUT_FREQUENCY"]
             diagnostics["maximum"].sampling_frequency = 1
             if base_path:
                 diagnostics["maximum"].base_output_path = base_path

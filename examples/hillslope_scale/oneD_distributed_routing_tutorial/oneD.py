@@ -58,10 +58,14 @@ def main(tmp_dir):
             settings = state.settings
             settings.identifier = self._config["identifier"]
 
+            # output frequency (in seconds)
+            settings.output_frequency = self._config["OUTPUT_FREQUENCY"]
+
             # total grid numbers in x- and y-direction
             settings.nx, settings.ny = self._config["nx"], self._config["ny"]
             # derive total number of time steps from forcing
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
+            # settings.runlen = 30 * 24 * 60 * 60
             settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, "forcing.nc"))
 
             # spatial discretization (in meters)
@@ -125,12 +129,12 @@ def main(tmp_dir):
             vs.flow_dir_topo = update(
                 vs.flow_dir_topo,
                 at[2:-2, 2:-2],
-                16,
+                4,
             )
             # catchment boundary
             vs.inner_boundary = update(
                 vs.inner_boundary,
-                at[2:-2, 2],
+                at[2:-2, 2:-2],
                 1,
             )
             vs.outer_boundary = update(
@@ -189,6 +193,11 @@ def main(tmp_dir):
                     vs.inner_boundary[2:-2, 2:-2] - vs.inner_boundary[1:-3, 3:-1] > 0, 1, vs.inner_boundary[1:-3, 3:-1]
                 ),
             )
+            vs.outer_boundary = update(
+                vs.outer_boundary,
+                at[:, :],
+                vs.outer_boundary - vs.inner_boundary,
+            )
             # catchment mask
             vs.maskCatch = update(
                 vs.maskCatch,
@@ -205,7 +214,7 @@ def main(tmp_dir):
             vs.lu_id = update(
                 vs.lu_id,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("lu_id", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+                8,
             )
             # degree of sealing (-)
             vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
@@ -215,94 +224,217 @@ def main(tmp_dir):
             vs.z_soil = update(
                 vs.z_soil,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("z_soil", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+                900,
             )
             # surface slope (-)
             vs.slope = update(
                 vs.slope,
                 at[2:-2, 2:-2],
-                0.1,
+                0.05,
             )
+            # vs.slope = update(
+            #     vs.slope,
+            #     at[2:-2, -6],
+            #     0.08,
+            # )
+            # vs.slope = update(
+            #     vs.slope,
+            #     at[2:-2, -5],
+            #     0.06,
+            # )
+            # vs.slope = update(
+            #     vs.slope,
+            #     at[2:-2, -4],
+            #     0.04,
+            # )
+            # vs.slope = update(
+            #     vs.slope,
+            #     at[2:-2, -3],
+            #     0.02,
+            # )
             # convert slope to percentage
             vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
             # density of vertical macropores (1/m2)
             vs.dmpv = update(
                 vs.dmpv,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("dmpv", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+                50,
             )
             # density of vertical macropores (1/m2)
             vs.dmph = update(
                 vs.dmph,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("dmph", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+                50,
             )
             # total length of vertical macropores (mm)
             vs.lmpv = update(
                 vs.lmpv,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("lmpv", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+                600,
             )
             # air capacity (-)
             vs.theta_ac = update(
                 vs.theta_ac,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("theta_ac", self._base_path, "parameters.csv").reshape(
-                    settings.nx, settings.ny
-                ),
+                0.1,
             )
             # usable field capacity (-)
             vs.theta_ufc = update(
                 vs.theta_ufc,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("theta_ufc", self._base_path, "parameters.csv").reshape(
-                    settings.nx, settings.ny
-                ),
+                0.1,
             )
             # permanent wilting point (-)
             vs.theta_pwp = update(
                 vs.theta_pwp,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("theta_pwp", self._base_path, "parameters.csv").reshape(
-                    settings.nx, settings.ny
-                ),
+                0.2,
             )
             # saturated hydraulic conductivity (mm/h)
             vs.ks = update(
                 vs.ks,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("ks", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+                20,
             )
             # hydraulic conductivity of bedrock/saturated zone (mm/h)
             vs.kf = update(
                 vs.kf,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("kf", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+                1,
             )
             # weight factor of precipitation (-)
             vs.prec_weight = update(
                 vs.prec_weight,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("prec_weight", self._base_path, "parameters.csv").reshape(
-                    settings.nx, settings.ny
-                ),
+                1,
             )
             # weight factor of air temperature (-)
             vs.ta_weight = update(
                 vs.ta_weight,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("ta_weight", self._base_path, "parameters.csv").reshape(
-                    settings.nx, settings.ny
-                ),
+                1,
             )
             # weight factor of potential evapotranspiration (-)
             vs.pet_weight = update(
                 vs.pet_weight,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("pet_weight", self._base_path, "parameters.csv").reshape(
-                    settings.nx, settings.ny
-                ),
+                1,
             )
+            # strickler_coefficient
+            vs.k_st = update(
+                vs.k_st,
+                at[2:-2, 2:-2],
+                50,
+            )
+
+            # # land use ID (see README for description)
+            # vs.lu_id = update(
+            #     vs.lu_id,
+            #     at[2:-2, 2:-2],
+            #     self._read_var_from_csv("lu_id", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            # )
+            # # degree of sealing (-)
+            # vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
+            # # total surface depression storage (mm)
+            # vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], 0)
+            # # soil depth (mm)
+            # vs.z_soil = update(
+            #     vs.z_soil,
+            #     at[2:-2, 2:-2],
+            #     self._read_var_from_csv("z_soil", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            # )
+            # # surface slope (-)
+            # vs.slope = update(
+            #     vs.slope,
+            #     at[2:-2, 2:-2],
+            #     0.1,
+            # )
+            # # convert slope to percentage
+            # vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
+            # # density of vertical macropores (1/m2)
+            # vs.dmpv = update(
+            #     vs.dmpv,
+            #     at[2:-2, 2:-2],
+            #     self._read_var_from_csv("dmpv", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            # )
+            # # density of vertical macropores (1/m2)
+            # vs.dmph = update(
+            #     vs.dmph,
+            #     at[2:-2, 2:-2],
+            #     self._read_var_from_csv("dmph", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            # )
+            # # total length of vertical macropores (mm)
+            # vs.lmpv = update(
+            #     vs.lmpv,
+            #     at[2:-2, 2:-2],
+            #     self._read_var_from_csv("lmpv", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            # )
+            # # air capacity (-)
+            # vs.theta_ac = update(
+            #     vs.theta_ac,
+            #     at[2:-2, 2:-2],
+            #     self._read_var_from_csv("theta_ac", self._base_path, "parameters.csv").reshape(
+            #         settings.nx, settings.ny
+            #     ),
+            # )
+            # # usable field capacity (-)
+            # vs.theta_ufc = update(
+            #     vs.theta_ufc,
+            #     at[2:-2, 2:-2],
+            #     self._read_var_from_csv("theta_ufc", self._base_path, "parameters.csv").reshape(
+            #         settings.nx, settings.ny
+            #     ),
+            # )
+            # # permanent wilting point (-)
+            # vs.theta_pwp = update(
+            #     vs.theta_pwp,
+            #     at[2:-2, 2:-2],
+            #     self._read_var_from_csv("theta_pwp", self._base_path, "parameters.csv").reshape(
+            #         settings.nx, settings.ny
+            #     ),
+            # )
+            # # saturated hydraulic conductivity (mm/h)
+            # vs.ks = update(
+            #     vs.ks,
+            #     at[2:-2, 2:-2],
+            #     self._read_var_from_csv("ks", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            # )
+            # # hydraulic conductivity of bedrock/saturated zone (mm/h)
+            # vs.kf = update(
+            #     vs.kf,
+            #     at[2:-2, 2:-2],
+            #     self._read_var_from_csv("kf", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            # )
+            # # weight factor of precipitation (-)
+            # vs.prec_weight = update(
+            #     vs.prec_weight,
+            #     at[2:-2, 2:-2],
+            #     self._read_var_from_csv("prec_weight", self._base_path, "parameters.csv").reshape(
+            #         settings.nx, settings.ny
+            #     ),
+            # )
+            # # weight factor of air temperature (-)
+            # vs.ta_weight = update(
+            #     vs.ta_weight,
+            #     at[2:-2, 2:-2],
+            #     self._read_var_from_csv("ta_weight", self._base_path, "parameters.csv").reshape(
+            #         settings.nx, settings.ny
+            #     ),
+            # )
+            # # weight factor of potential evapotranspiration (-)
+            # vs.pet_weight = update(
+            #     vs.pet_weight,
+            #     at[2:-2, 2:-2],
+            #     self._read_var_from_csv("pet_weight", self._base_path, "parameters.csv").reshape(
+            #         settings.nx, settings.ny
+            #     ),
+            # )
+            # # strickler_coefficient
+            # vs.k_st = update(
+            #     vs.k_st,
+            #     at[2:-2, 2:-2],
+            #     100,
+            # )
 
         @roger_routine
         def set_parameters(self, state):
@@ -368,6 +500,11 @@ def main(tmp_dir):
             vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, "forcing.nc")[0, 0, :])
             vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, "forcing.nc")[0, 0, :])
             vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[0, 0, :])
+            # vs.PREC = update(vs.PREC, at[:], 0)
+            # vs.PREC = update(vs.PREC, at[18:24], 1)
+            # vs.PREC = update(vs.PREC, at[24:30], 20)
+            # vs.PREC = update(vs.PREC, at[30:512], 0.01)
+            # vs.PET = update(vs.PET, at[:], 0.05)
 
         @roger_routine
         def set_forcing(self, state):
@@ -411,20 +548,20 @@ def main(tmp_dir):
 
             diagnostics["rate"].output_variables = self._config["OUTPUT_RATE"]
             # values are aggregated to daily
-            diagnostics["rate"].output_frequency = 24 * 60 * 60  # in seconds
+            diagnostics["rate"].output_frequency = self._config["OUTPUT_FREQUENCY"]  # in seconds
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
                 diagnostics["rate"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = self._config["OUTPUT_COLLECT"]
             # values are aggregated to daily
-            diagnostics["collect"].output_frequency = 24 * 60 * 60  # in seconds
+            diagnostics["collect"].output_frequency = self._config["OUTPUT_FREQUENCY"]  # in seconds
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
                 diagnostics["collect"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
-            diagnostics["maximum"].output_variables = ["dS_num_error"]
+            diagnostics["maximum"].output_variables = ["dS_num_error", "z0", "z_sat"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1
             if base_path:
@@ -581,6 +718,12 @@ def main(tmp_dir):
             at[2:-2, 2:-2, vs.taum1],
             vs.h[2:-2, 2:-2, vs.tau],
         )
+        # set to 0 to avoid numerical errors
+        vs.z0 = update(
+            vs.z0,
+            at[2:-2, 2:-2, vs.tau],
+            npx.where((vs.z0[:, :, vs.tau] > -1e-6) & (vs.z0[:, :, vs.tau] < 0), 0, vs.z0[:, :, vs.tau])[2:-2, 2:-2],
+        )
         vs.z0 = update(
             vs.z0,
             at[2:-2, 2:-2, vs.taum1],
@@ -610,6 +753,30 @@ def main(tmp_dir):
             vs.doy,
             at[vs.taum1],
             vs.doy[vs.tau],
+        )
+        # set to 0 to avoid numerical errors
+        vs.S_fp_rz = update(
+            vs.S_fp_rz,
+            at[2:-2, 2:-2],
+            npx.where((vs.S_fp_rz > -1e-6) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz)[2:-2, 2:-2],
+        )
+        # set to 0 to avoid numerical errors
+        vs.S_lp_rz = update(
+            vs.S_lp_rz,
+            at[2:-2, 2:-2],
+            npx.where((vs.S_lp_rz > -1e-6) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz)[2:-2, 2:-2],
+        )
+        # set to 0 to avoid numerical errors
+        vs.S_fp_ss = update(
+            vs.S_fp_ss,
+            at[2:-2, 2:-2],
+            npx.where((vs.S_fp_ss > -1e-6) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss)[2:-2, 2:-2],
+        )
+        # set to 0 to avoid numerical errors
+        vs.S_lp_ss = update(
+            vs.S_lp_ss,
+            at[2:-2, 2:-2],
+            npx.where((vs.S_lp_ss > -1e-6) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss)[2:-2, 2:-2],
         )
 
         return KernelOutput(
@@ -647,6 +814,10 @@ def main(tmp_dir):
             k_rz=vs.k_rz,
             k_ss=vs.k_ss,
             k=vs.k,
+            S_fp_rz=vs.S_fp_rz,
+            S_lp_rz=vs.S_lp_rz,
+            S_fp_ss=vs.S_fp_ss,
+            S_lp_ss=vs.S_lp_ss,
         )
 
     # initializes the model structure

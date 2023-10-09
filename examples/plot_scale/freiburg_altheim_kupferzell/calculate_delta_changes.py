@@ -61,9 +61,9 @@ Locations = ["Freiburg", "Altheim", "Kupferzell"]
 land_cover_scenarios = ["grass", "corn", "corn_catch_crop", "crop_rotation"]
 Land_cover_scenarios = ["Grass", "Corn", "Corn & Catch crop", "Crop rotation"]
 climate_scenarios = ["CCCma-CanESM2_CCLM4-8-17", "MPI-M-MPI-ESM-LR_RCA4"]
-periods = ["1985-2005", "2040-2060", "2080-2100"]
-start_dates = [datetime.date(1985, 1, 1), datetime.date(2040, 1, 1), datetime.date(2080, 1, 1)]
-end_dates = [datetime.date(2004, 12, 31), datetime.date(2059, 12, 31), datetime.date(2099, 12, 31)]
+periods = ["1985-2014", "2030-2059", "2070-2099"]
+start_dates = [datetime.date(1985, 1, 1), datetime.date(2030, 1, 1), datetime.date(2070, 1, 1)]
+end_dates = [datetime.date(2014, 12, 31), datetime.date(2059, 12, 31), datetime.date(2099, 12, 31)]
 
 _lab = {
     "q_ss": "PERC",
@@ -184,17 +184,17 @@ for location in locations:
                         only_use_cftime_datetimes=False,
                     )
                     ds_fluxes_states = ds_fluxes_states.assign_coords(Time=("Time", date))
-                    if period == "1985-2005":
+                    if period == "1985-2014":
                         nn = len(pd.DataFrame(index=date).loc[:"2004", :].index)
                         dict_fluxes_states[location][land_cover_scenario][period][
                             climate_scenario
                         ] = ds_fluxes_states.sel(Time=date[1:nn])
-                    elif period == "2040-2060":
+                    elif period == "2030-2059":
                         nn = len(pd.DataFrame(index=date).loc[:"2059", :].index)
                         dict_fluxes_states[location][land_cover_scenario][period][
                             climate_scenario
                         ] = ds_fluxes_states.sel(Time=date[1:nn])
-                    elif period == "2080-2100":
+                    elif period == "2070-2099":
                         nn = len(pd.DataFrame(index=date).loc[:"2099", :].index)
                         dict_fluxes_states[location][land_cover_scenario][period][
                             climate_scenario
@@ -226,17 +226,17 @@ for location in locations:
                     only_use_cftime_datetimes=False,
                 )
                 ds_conc_ages = ds_conc_ages.assign_coords(Time=("Time", date))
-                if period == "1985-2005":
+                if period == "1985-2014":
                     nn = len(pd.DataFrame(index=date).loc[:"2004", :].index)
                     dict_conc_ages[location][land_cover_scenario][period][climate_scenario] = ds_conc_ages.sel(
                         Time=date[1:nn]
                     )
-                elif period == "2040-2060":
+                elif period == "2030-2059":
                     nn = len(pd.DataFrame(index=date).loc[:"2059", :].index)
                     dict_conc_ages[location][land_cover_scenario][period][climate_scenario] = ds_conc_ages.sel(
                         Time=date[1:nn]
                     )
-                elif period == "2080-2100":
+                elif period == "2070-2099":
                     nn = len(pd.DataFrame(index=date).loc[:"2099", :].index)
                     dict_conc_ages[location][land_cover_scenario][period][climate_scenario] = ds_conc_ages.sel(
                         Time=date[1:nn]
@@ -347,13 +347,13 @@ if not os.path.exists(base_path_figs / "delta_changes.pkl"):
                 dict_deltas[location][land_cover_scenario][climate_scenario] = {}
                 for var_sim in vars_sim:
                     dict_deltas[location][land_cover_scenario][climate_scenario][var_sim] = {}
-                    df_statistics_ref = dict_statistics[location][land_cover_scenario][climate_scenario]["1985-2005"][
+                    df_statistics_ref = dict_statistics[location][land_cover_scenario][climate_scenario]["1985-2014"][
                         var_sim
                     ]
-                    df_statistics_nf = dict_statistics[location][land_cover_scenario][climate_scenario]["2040-2060"][
+                    df_statistics_nf = dict_statistics[location][land_cover_scenario][climate_scenario]["2030-2059"][
                         var_sim
                     ]
-                    df_statistics_ff = dict_statistics[location][land_cover_scenario][climate_scenario]["2080-2100"][
+                    df_statistics_ff = dict_statistics[location][land_cover_scenario][climate_scenario]["2070-2099"][
                         var_sim
                     ]
                     df_deltas = pd.DataFrame(
@@ -392,13 +392,13 @@ if not os.path.exists(base_path_figs / "delta_changes.pkl"):
             for climate_scenario in climate_scenarios:
                 for var_sim in vars_sim:
                     dict_deltas[location][land_cover_scenario][climate_scenario][var_sim] = {}
-                    df_statistics_ref = dict_statistics[location][land_cover_scenario][climate_scenario]["1985-2005"][
+                    df_statistics_ref = dict_statistics[location][land_cover_scenario][climate_scenario]["1985-2014"][
                         var_sim
                     ]
-                    df_statistics_nf = dict_statistics[location][land_cover_scenario][climate_scenario]["2040-2060"][
+                    df_statistics_nf = dict_statistics[location][land_cover_scenario][climate_scenario]["2030-2059"][
                         var_sim
                     ]
-                    df_statistics_ff = dict_statistics[location][land_cover_scenario][climate_scenario]["2080-2100"][
+                    df_statistics_ff = dict_statistics[location][land_cover_scenario][climate_scenario]["2070-2099"][
                         var_sim
                     ]
                     df_deltas = pd.DataFrame(
@@ -588,9 +588,9 @@ for var_sim in vars_sim:
             )
             for i, location in enumerate(locations):
                 for j, land_cover_scenario in enumerate(land_cover_scenarios):
-                    ds_ref = dict_fluxes_states[location][land_cover_scenario]["1985-2005"][climate_scenario]
-                    ds_nf = dict_fluxes_states[location][land_cover_scenario]["2040-2060"][climate_scenario]
-                    ds_ff = dict_fluxes_states[location][land_cover_scenario]["2080-2100"][climate_scenario]
+                    ds_ref = dict_fluxes_states[location][land_cover_scenario]["1985-2014"][climate_scenario]
+                    ds_nf = dict_fluxes_states[location][land_cover_scenario]["2030-2059"][climate_scenario]
+                    ds_ff = dict_fluxes_states[location][land_cover_scenario]["2070-2099"][climate_scenario]
                     sim_vals_ref = ds_ref[var_sim].isel(x=x, y=0).values.flatten()
                     sim_vals_nf = ds_nf[var_sim].isel(x=x, y=0).values.flatten()
                     sim_vals_ff = ds_ff[var_sim].isel(x=x, y=0).values.flatten()
@@ -624,9 +624,9 @@ for var_sim in vars_sim:
             )
             for i, location in enumerate(locations):
                 for j, land_cover_scenario in enumerate(land_cover_scenarios):
-                    ds_ref = dict_fluxes_states[location][land_cover_scenario]["1985-2005"][climate_scenario]
-                    ds_nf = dict_fluxes_states[location][land_cover_scenario]["2040-2060"][climate_scenario]
-                    ds_ff = dict_fluxes_states[location][land_cover_scenario]["2080-2100"][climate_scenario]
+                    ds_ref = dict_fluxes_states[location][land_cover_scenario]["1985-2014"][climate_scenario]
+                    ds_nf = dict_fluxes_states[location][land_cover_scenario]["2030-2059"][climate_scenario]
+                    ds_ff = dict_fluxes_states[location][land_cover_scenario]["2070-2099"][climate_scenario]
                     sim_vals_ref = ds_ref[var_sim].isel(x=x, y=0).values.flatten()
                     sim_vals_nf = ds_nf[var_sim].isel(x=x, y=0).values.flatten()
                     sim_vals_ff = ds_ff[var_sim].isel(x=x, y=0).values.flatten()

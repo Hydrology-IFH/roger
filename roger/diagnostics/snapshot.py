@@ -41,6 +41,9 @@ class Snapshot(RogerDiagnostic):
         self.variables = vs
         self.initialize_output(state)
 
+    def reset(self):
+        pass
+
     def diagnose(self, state):
         pass
 

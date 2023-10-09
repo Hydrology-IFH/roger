@@ -190,6 +190,10 @@ class RogerVariables(Lockable, StrictContainer):
     def __init__(self, var_meta, dimensions):
         self.__metadata__ = var_meta
         self.__dimensions__ = dimensions
+        self.__active_vars__ = {}
+        for key, val in var_meta.items():
+            if val.active:
+                self.__active_vars__[key] = val
 
         active_vars = [key for key, val in var_meta.items() if val.active]
         super().__init__(fields=active_vars)
@@ -248,6 +252,9 @@ class RogerVariables(Lockable, StrictContainer):
 
     def _get_expected_shape(self, dims):
         return var_mod.get_shape(self.__dimensions__, dims)
+
+    def active_vars(self):
+        return self.__active_vars__
 
 
 class DistSafeVariableWrapper(RogerVariables):

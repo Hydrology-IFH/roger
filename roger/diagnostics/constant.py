@@ -56,6 +56,9 @@ class Constant(RogerDiagnostic):
 
         return state.var_meta[var].dims[-2] == TIMESTEPS[0]
 
+    def reset(self):
+        pass
+
     def diagnose(self, state):
         vs = state.variables
         clc_vs = self.variables

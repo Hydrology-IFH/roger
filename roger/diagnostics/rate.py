@@ -13,7 +13,9 @@ class Rate(RogerDiagnostic):
     """
 
     name = "rate"  #:
-    output_path = "{identifier}.rate.nc"  #: File to write to. May contain format strings that are replaced with Roger attributes.
+    output_path = (
+        "{identifier}.rate.nc"  #: File to write to. May contain format strings that are replaced with Roger attributes.
+    )
     output_variables = None  #: Iterable containing all variables to be averaged. Changes have no effect after ``initialize`` has been called.
     output_frequency = None  #: Frequency (in hours) in which output is written.
     sampling_frequency = None  #: Frequency (in hours) in which variables are accumulated.
@@ -59,6 +61,14 @@ class Rate(RogerDiagnostic):
 
         return state.var_meta[var].dims[-1] == AGES[0]
 
+    def reset(self):
+        """Reset values to zero"""
+        rate_vs = self.variables
+
+        for key in self.output_variables:
+            val = getattr(rate_vs, key)
+            setattr(rate_vs, key, 0 * val)
+
     def diagnose(self, state):
         vs = state.variables
         rate_vs = self.variables
@@ -82,7 +92,3 @@ class Rate(RogerDiagnostic):
             setattr(rate_vs, key, val)
 
         self.write_output(state)
-
-        for key in self.output_variables:
-            val = getattr(rate_vs, key)
-            setattr(rate_vs, key, 0 * val)

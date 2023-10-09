@@ -1,6 +1,5 @@
 from pathlib import Path
 import os
-import h5netcdf
 import scipy as sp
 from SALib.analyze import sobol
 from matplotlib.colors import Normalize
@@ -100,7 +99,6 @@ def main(tmp_dir):
         "advection-dispersion-power",
         "time-variant advection-dispersion-power",
     ]
-    metric_for_opt = "KGE_multi"
 
     # load observations (measured data)
     path_obs = Path(__file__).parent / "observations" / "rietholzbach_lysimeter.nc"
@@ -123,7 +121,7 @@ def main(tmp_dir):
     df_obs_br = pd.read_csv(path_obs_br, skiprows=1, sep=";", na_values="")
 
     # load best monte carlo simulations
-    states_hm1_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm1.nc"
+    states_hm1_file = base_path / "svat_monte_carlo" / "output" / "states_hm1.nc"
     ds_sim_hm1 = xr.open_dataset(states_hm1_file, engine="h5netcdf")
     # assign date
     days_sim_hm1 = ds_sim_hm1["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
@@ -135,7 +133,7 @@ def main(tmp_dir):
     )
     ds_sim_hm1 = ds_sim_hm1.assign_coords(Time=("Time", date_sim_hm1))
     # load best 10 monte carlo simulations
-    states_hm10_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm10.nc"
+    states_hm10_file = base_path / "svat_monte_carlo" / "output" / "states_hm10.nc"
     ds_sim_hm10 = xr.open_dataset(states_hm10_file, engine="h5netcdf")
     # assign date
     days_sim_hm10 = ds_sim_hm10["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
@@ -148,7 +146,7 @@ def main(tmp_dir):
     ds_sim_hm10 = ds_sim_hm10.assign_coords(Time=("Time", date_sim_hm10))
 
     # load best 100 monte carlo simulations
-    states_hm100_file = base_path / "svat_monte_carlo" / f"optimized_with_{metric_for_opt}" / "states_hm100.nc"
+    states_hm100_file = base_path / "svat_monte_carlo" / "output" / "states_hm100.nc"
     ds_sim_hm100 = xr.open_dataset(states_hm100_file, engine="h5netcdf")
     # assign date
     days_sim_hm100 = ds_sim_hm100["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
@@ -163,9 +161,7 @@ def main(tmp_dir):
     states_hm_for_tm_file = (
         base_path
         / "svat_oxygen18_monte_carlo"
-        / "deterministic"
-        / "age_max_1500_days"
-        / f"optimized_with_{metric_for_opt}_hm100"
+        / "output"
         / "states_hm_best_for_advection-dispersion-power.nc"
     )
     ds_sim_hm_for_tm = xr.open_dataset(states_hm_for_tm_file, engine="h5netcdf")
@@ -729,112 +725,112 @@ def main(tmp_dir):
     df_params_metrics100.loc[:, "id"] = range(len(df_params_metrics100.index))
     df_params_metrics100 = df_params_metrics100.sort_values(by=[metric_for_opt], ascending=False)
     idx_best100 = df_params_metrics100.loc[: df_params_metrics100.index[99], "id"].values.tolist()
-    # dict_metrics_best = {}
-    # for sc in ['', 'dry', 'normal', 'wet']:
-    #     dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best100)))
-    # for sc, sc1 in enumerate(['', 'dry', 'normal', 'wet']):
-    #     for ps, ps1 in enumerate(ll_param_sets):
-    #         df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'KGE_dS{sc1}', f'KGE_q_ss{sc1}', f'KGE_multi{sc1}']]
-    #         df_params = df_params_metrics.loc[:, ps1]
-    #         nrow = len(df_metrics.columns)
-    #         ncol = len(df_params.columns)
-    #         fig, ax = plt.subplots(nrow, ncol, sharey='row', sharex='col', figsize=(6, 5))
-    #         for i, metric_var in enumerate(df_metrics.columns):
-    #             for j, param_var in enumerate(df_params.columns):
-    #                 y = df_metrics.iloc[:, i]
-    #                 x = df_params.iloc[:, j]
-    #                 ax[i, j].scatter(x, y, s=2, c='grey', alpha=0.5)
-    #                 ax[i, j].set_xlabel('')
-    #                 ax[i, j].set_ylabel('')
-    #                 ax[i, j].set_ylim((0, 1))
-    #                 # best parameter set for individual evaluation metric at specific storage conditions
-    #                 df_params_metrics_sc1 = df_params_metrics.copy()
-    #                 df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics100.index))
-    #                 df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
-    #                 idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[99], 'id'].values.tolist()
-    #                 for idx_best_sc in idx_best_sc1:
-    #                     y_best_sc = df_metrics.iloc[idx_best_sc, i]
-    #                     x_best_sc = df_params.iloc[idx_best_sc, j]
-    #                     ax[i, j].scatter(x_best_sc, y_best_sc, s=2, c='blue', alpha=0.8)
-    #                 # best parameter sets for multi-objective criteria
-    #                 for ii, idx_best in enumerate(idx_best100):
-    #                     y_best = df_metrics.iloc[idx_best, i]
-    #                     x_best = df_params.iloc[idx_best, j]
-    #                     ax[i, j].scatter(x_best, y_best, s=2, c='red', alpha=1)
-    #                     dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
+    dict_metrics_best = {}
+    for sc in ['', 'dry', 'normal', 'wet']:
+        dict_metrics_best[sc] = pd.DataFrame(index=range(len(idx_best100)))
+    for sc, sc1 in enumerate(['', 'dry', 'normal', 'wet']):
+        for ps, ps1 in enumerate(ll_param_sets):
+            df_metrics = df_params_metrics.loc[:, [f'KGE_aet{sc1}', f'KGE_dS{sc1}', f'KGE_q_ss{sc1}', f'KGE_multi{sc1}']]
+            df_params = df_params_metrics.loc[:, ps1]
+            nrow = len(df_metrics.columns)
+            ncol = len(df_params.columns)
+            fig, ax = plt.subplots(nrow, ncol, sharey='row', sharex='col', figsize=(6, 5))
+            for i, metric_var in enumerate(df_metrics.columns):
+                for j, param_var in enumerate(df_params.columns):
+                    y = df_metrics.iloc[:, i]
+                    x = df_params.iloc[:, j]
+                    ax[i, j].scatter(x, y, s=2, c='grey', alpha=0.5)
+                    ax[i, j].set_xlabel('')
+                    ax[i, j].set_ylabel('')
+                    ax[i, j].set_ylim((0, 1))
+                    # best parameter set for individual evaluation metric at specific storage conditions
+                    df_params_metrics_sc1 = df_params_metrics.copy()
+                    df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics100.index))
+                    df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
+                    idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[99], 'id'].values.tolist()
+                    for idx_best_sc in idx_best_sc1:
+                        y_best_sc = df_metrics.iloc[idx_best_sc, i]
+                        x_best_sc = df_params.iloc[idx_best_sc, j]
+                        ax[i, j].scatter(x_best_sc, y_best_sc, s=2, c='blue', alpha=0.8)
+                    # best parameter sets for multi-objective criteria
+                    for ii, idx_best in enumerate(idx_best100):
+                        y_best = df_metrics.iloc[idx_best, i]
+                        x_best = df_params.iloc[idx_best, j]
+                        ax[i, j].scatter(x_best, y_best, s=2, c='red', alpha=1)
+                        dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
 
-    #         for j, param_var in enumerate(df_params.columns):
-    #             xlabel = labs._LABS[param_var]
-    #             ax[-1, j].set_xlabel(xlabel)
+            for j, param_var in enumerate(df_params.columns):
+                xlabel = labs._LABS[param_var]
+                ax[-1, j].set_xlabel(xlabel)
 
-    #         ax[0, 0].set_ylabel('$KGE_{ET}$ [-]')
-    #         ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
-    #         ax[2, 0].set_ylabel('$KGE_{PERC}$ [-]')
-    #         ax[3, 0].set_ylabel('$KGE_{multi}$ [-]')
+            ax[0, 0].set_ylabel('$KGE_{ET}$ [-]')
+            ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
+            ax[2, 0].set_ylabel('$KGE_{PERC}$ [-]')
+            ax[3, 0].set_ylabel('$KGE_{multi}$ [-]')
 
-    #         fig.subplots_adjust(bottom=0.1, top=0.98, right=0.98, wspace=0.1, hspace=0.2)
-    #         file = base_path_figs / f"dotty_plots{ps}_{sc1}_optimized_with_{metric_for_opt}.png"
-    #         fig.savefig(file, dpi=300)
+            fig.subplots_adjust(bottom=0.1, top=0.98, right=0.98, wspace=0.1, hspace=0.2)
+            file = base_path_figs / f"dotty_plots{ps}_{sc1}_optimized_with_KGE_multi.png"
+            fig.savefig(file, dpi=300)
 
-    #         fig, ax = plt.subplots(nrow, ncol, sharey='row', sharex='col', figsize=(6, 5))
-    #         for i, metric_var in enumerate(df_metrics.columns):
-    #             for j, param_var in enumerate(df_params.columns):
-    #                 y = df_metrics.iloc[:, i]
-    #                 x = df_params.iloc[:, j]
-    #                 ax[i, j].scatter(x, y, s=2, c='grey', alpha=0.5)
-    #                 ax[i, j].set_xlabel('')
-    #                 ax[i, j].set_ylabel('')
-    #                 if metric_var in ['KGE_aet', 'KGE_aetwet', 'KGE_aetnormal', 'KGE_aetdry']:
-    #                     ax[i, j].set_ylim((0.6, 1.0))
-    #                 elif metric_var in ['KGE_dS', 'KGE_dSwet', 'KGE_dSnormal', 'KGE_dSdry']:
-    #                     ax[i, j].set_ylim((0.6, 1.0))
-    #                 elif metric_var in ['KGE_q_ss', 'KGE_q_sswet', 'KGE_q_ssnormal', 'KGE_q_ssdry']:
-    #                     ax[i, j].set_ylim((0.4, 0.8))
-    #                 elif metric_var in ['KGE_multi', 'KGE_multiwet', 'KGE_multinormal', 'KGE_multidry']:
-    #                     ax[i, j].set_ylim((0.4, 0.8))
-    #                 # best parameter set for individual evaluation metric at specific storage conditions
-    #                 df_params_metrics_sc1 = df_params_metrics.copy()
-    #                 df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics100.index))
-    #                 df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
-    #                 idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[99], 'id'].values.tolist()
-    #                 for idx_best_sc in idx_best_sc1:
-    #                     y_best_sc = df_metrics.iloc[idx_best_sc, i]
-    #                     x_best_sc = df_params.iloc[idx_best_sc, j]
-    #                     ax[i, j].scatter(x_best_sc, y_best_sc, s=2, c='blue', alpha=0.8)
-    #                 # best parameter sets for multi-objective criteria
-    #                 for ii, idx_best in enumerate(idx_best100):
-    #                     y_best = df_metrics.iloc[idx_best, i]
-    #                     x_best = df_params.iloc[idx_best, j]
-    #                     ax[i, j].scatter(x_best, y_best, s=2, c='red', alpha=1)
-    #                     dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
+            fig, ax = plt.subplots(nrow, ncol, sharey='row', sharex='col', figsize=(6, 5))
+            for i, metric_var in enumerate(df_metrics.columns):
+                for j, param_var in enumerate(df_params.columns):
+                    y = df_metrics.iloc[:, i]
+                    x = df_params.iloc[:, j]
+                    ax[i, j].scatter(x, y, s=2, c='grey', alpha=0.5)
+                    ax[i, j].set_xlabel('')
+                    ax[i, j].set_ylabel('')
+                    if metric_var in ['KGE_aet', 'KGE_aetwet', 'KGE_aetnormal', 'KGE_aetdry']:
+                        ax[i, j].set_ylim((0.6, 1.0))
+                    elif metric_var in ['KGE_dS', 'KGE_dSwet', 'KGE_dSnormal', 'KGE_dSdry']:
+                        ax[i, j].set_ylim((0.6, 1.0))
+                    elif metric_var in ['KGE_q_ss', 'KGE_q_sswet', 'KGE_q_ssnormal', 'KGE_q_ssdry']:
+                        ax[i, j].set_ylim((0.4, 0.8))
+                    elif metric_var in ['KGE_multi', 'KGE_multiwet', 'KGE_multinormal', 'KGE_multidry']:
+                        ax[i, j].set_ylim((0.4, 0.8))
+                    # best parameter set for individual evaluation metric at specific storage conditions
+                    df_params_metrics_sc1 = df_params_metrics.copy()
+                    df_params_metrics_sc1.loc[:, 'id'] = range(len(df_params_metrics100.index))
+                    df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
+                    idx_best_sc1 = df_params_metrics_sc1.loc[:df_params_metrics_sc1.index[99], 'id'].values.tolist()
+                    for idx_best_sc in idx_best_sc1:
+                        y_best_sc = df_metrics.iloc[idx_best_sc, i]
+                        x_best_sc = df_params.iloc[idx_best_sc, j]
+                        ax[i, j].scatter(x_best_sc, y_best_sc, s=2, c='blue', alpha=0.8)
+                    # best parameter sets for multi-objective criteria
+                    for ii, idx_best in enumerate(idx_best100):
+                        y_best = df_metrics.iloc[idx_best, i]
+                        x_best = df_params.iloc[idx_best, j]
+                        ax[i, j].scatter(x_best, y_best, s=2, c='red', alpha=1)
+                        dict_metrics_best[sc1].loc[dict_metrics_best[sc1].index[ii], df_metrics.columns[i]] = df_params_metrics.loc[idx_best, df_metrics.columns[i]]
 
-    #         for j, param_var in enumerate(df_params.columns):
-    #             xlabel = labs._LABS[param_var]
-    #             ax[-1, j].set_xlabel(xlabel)
+            for j, param_var in enumerate(df_params.columns):
+                xlabel = labs._LABS[param_var]
+                ax[-1, j].set_xlabel(xlabel)
 
-    #         ax[0, 0].set_ylabel('$KGE_{ET}$ [-]')
-    #         ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
-    #         ax[2, 0].set_ylabel('$KGE_{PERC}$ [-]')
-    #         ax[3, 0].set_ylabel('$KGE_{multi}$ [-]')
+            ax[0, 0].set_ylabel('$KGE_{ET}$ [-]')
+            ax[1, 0].set_ylabel(r'$KGE_{\Delta S}$ [-]')
+            ax[2, 0].set_ylabel('$KGE_{PERC}$ [-]')
+            ax[3, 0].set_ylabel('$KGE_{multi}$ [-]')
 
-    #         fig.subplots_adjust(bottom=0.1, top=0.98, right=0.98, wspace=0.1, hspace=0.2)
-    #         file = base_path_figs / f"dotty_plots{ps}_{sc1}inset_optimized_with_{metric_for_opt}.png"
-    #         fig.savefig(file, dpi=300)
+            fig.subplots_adjust(bottom=0.1, top=0.98, right=0.98, wspace=0.1, hspace=0.2)
+            file = base_path_figs / f"dotty_plots{ps}_{sc1}inset_optimized_with_KGE_multi.png"
+            fig.savefig(file, dpi=300)
 
-    # # write evaluation metrics for different storage condtions to .txt
-    # df_avg_std = pd.DataFrame(columns=['KGE_aet', 'KGE_dS', 'KGE_q_ss', 'KGE_multi'])
-    # for sc in ['', 'dry', 'normal', 'wet']:
-    #     df_avg_std.loc[f'avg{sc}', :] = onp.mean(dict_metrics_best[sc].values, axis=0)
-    #     df_avg_std.loc[f'std{sc}', :] = onp.std(dict_metrics_best[sc].values, axis=0)
-    # file = base_path_figs / f"metrics_best_100_avg_std_optimized_with_{metric_for_opt}.txt"
-    # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
+    # write evaluation metrics for different storage condtions to .txt
+    df_avg_std = pd.DataFrame(columns=['KGE_aet', 'KGE_dS', 'KGE_q_ss', 'KGE_multi'])
+    for sc in ['', 'dry', 'normal', 'wet']:
+        df_avg_std.loc[f'avg{sc}', :] = onp.mean(dict_metrics_best[sc].values, axis=0)
+        df_avg_std.loc[f'std{sc}', :] = onp.std(dict_metrics_best[sc].values, axis=0)
+    file = base_path_figs / f"metrics_best_100_avg_std_optimized_with_KGE_multi.txt"
+    df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
-    # # write average and standard deviation of best parameters to .txt
-    # df_avg_std = pd.DataFrame(index=['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
-    # df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics100.loc[:df_params_metrics100.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
-    # df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics100.loc[:df_params_metrics100.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
-    # file = base_path_figs / f"params_best_100_avg_std_optimized_with_{metric_for_opt}.txt"
-    # df_avg_std.to_csv(file, header=True, index=True, sep="\t")
+    # write average and standard deviation of best parameters to .txt
+    df_avg_std = pd.DataFrame(index=['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks'], columns=['avg', 'std'])
+    df_avg_std.loc[:, 'avg'] = onp.mean(df_params_metrics100.loc[:df_params_metrics100.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
+    df_avg_std.loc[:, 'std'] = onp.std(df_params_metrics100.loc[:df_params_metrics100.index[99], ['c1_mak', 'c2_mak', 'dmpv', 'lmpv', 'theta_eff', 'frac_lp', 'frac_fp', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks']].values, axis=0)
+    file = base_path_figs / f"params_best_100_avg_std_optimized_with_KGE_multi.txt"
+    df_avg_std.to_csv(file, header=True, index=True, sep="\t")
 
     # diagnostic polar plots
     file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
@@ -860,7 +856,7 @@ def main(tmp_dir):
             a0=df_for_diag100.loc[:, f"ioa0_{var_sim}"].values,
             share0=onp.round(onp.max(df_for_diag100.loc[:, f"p0_{var_sim}"]), 2),
         )
-        file = f"diag_polar_plot_{var_sim}_100_optimized_with_{metric_for_opt}.png"
+        file = f"diag_polar_plot_{var_sim}_100_optimized_with_KGE_multi.png"
         path = base_path_figs / file
         # fig.tight_layout()
         fig.savefig(path, dpi=300)
@@ -878,7 +874,7 @@ def main(tmp_dir):
         df_for_diag100.loc[:, f"err_hf_{var_sim}"].values,
         df_for_diag100.loc[:, f"err_lf_{var_sim}"].values,
     )
-    file = f"diag_polar_plot_{var_sim}_100_optimized_with_{metric_for_opt}.png"
+    file = f"diag_polar_plot_{var_sim}_100_optimized_with_KGE_multi.png"
     path = base_path_figs / file
     # fig.tight_layout()
     fig.savefig(path, dpi=300)
@@ -903,11 +899,11 @@ def main(tmp_dir):
             a0=df_for_diag10.loc[:, f"ioa0_{var_sim}"].values,
             share0=onp.round(onp.max(df_for_diag10.loc[:, f"p0_{var_sim}"]), 2),
         )
-        file = f"diag_polar_plot_{var_sim}_10_optimized_with_{metric_for_opt}.png"
+        file = f"diag_polar_plot_{var_sim}_10_optimized_with_KGE_multi.png"
         path = base_path_figs / file
         # fig.tight_layout()
         fig.savefig(path, dpi=300)
-        file = f"diag_polar_plot_{var_sim}_10_optimized_with_{metric_for_opt}.pdf"
+        file = f"diag_polar_plot_{var_sim}_10_optimized_with_KGE_multi.pdf"
         path = base_path_figs / file
         # fig.tight_layout()
         fig.savefig(path, dpi=300)
@@ -925,11 +921,11 @@ def main(tmp_dir):
         df_for_diag10.loc[:, f"err_hf_{var_sim}"].values,
         df_for_diag10.loc[:, f"err_lf_{var_sim}"].values,
     )
-    file = f"diag_polar_plot_{var_sim}_10_optimized_with_{metric_for_opt}.png"
+    file = f"diag_polar_plot_{var_sim}_10_optimized_with_KGE_multi.png"
     path = base_path_figs / file
     # fig.tight_layout()
     fig.savefig(path, dpi=300)
-    file = f"diag_polar_plot_{var_sim}_10_optimized_with_{metric_for_opt}.pdf"
+    file = f"diag_polar_plot_{var_sim}_10_optimized_with_KGE_multi.pdf"
     path = base_path_figs / file
     # fig.tight_layout()
     fig.savefig(path, dpi=300)
@@ -951,7 +947,7 @@ def main(tmp_dir):
             a0=df_for_diag1.loc[:, f"ioa0_{var_sim}"].values,
             share0=onp.round(onp.max(df_for_diag1.loc[:, f"p0_{var_sim}"]), 2),
         )
-        file = f"diag_polar_plot_{var_sim}_1_optimized_with_{metric_for_opt}.png"
+        file = f"diag_polar_plot_{var_sim}_1_optimized_with_KGE_multi.png"
         path = base_path_figs / file
         # fig.tight_layout()
         fig.savefig(path, dpi=300)
@@ -969,7 +965,7 @@ def main(tmp_dir):
         df_for_diag1.loc[:, f"err_hf_{var_sim}"].values,
         df_for_diag1.loc[:, f"err_lf_{var_sim}"].values,
     )
-    file = f"diag_polar_plot_{var_sim}_1_optimized_with_{metric_for_opt}.png"
+    file = f"diag_polar_plot_{var_sim}_1_optimized_with_KGE_multi.png"
     path = base_path_figs / file
     # fig.tight_layout()
     fig.savefig(path, dpi=300)
@@ -1486,10 +1482,10 @@ def main(tmp_dir):
         transform=axes[2, 1].transAxes,
     )
     fig.tight_layout()
-    file = f"prec_et_dS_perc_obs_sim_cumulated_optimized_with_{metric_for_opt}.png"
+    file = f"prec_et_dS_perc_obs_sim_cumulated_optimized_with_KGE_multi.png"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
-    file = f"prec_et_dS_perc_obs_sim_cumulated_optimized_with_{metric_for_opt}.pdf"
+    file = f"prec_et_dS_perc_obs_sim_cumulated_optimized_with_KGE_multi.pdf"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
 
@@ -1768,10 +1764,10 @@ def main(tmp_dir):
         transform=axes[2, 1].transAxes,
     )
     fig.tight_layout()
-    file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}.png"
+    file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_KGE_multi.png"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
-    file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}.pdf"
+    file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_KGE_multi.pdf"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
 
@@ -2045,10 +2041,10 @@ def main(tmp_dir):
         transform=axes[2, 1].transAxes,
     )
     fig.tight_layout()
-    file = f"prec_et_dS_perc_obs_sim_cumulated_best_10_optimized_with_{metric_for_opt}.png"
+    file = f"prec_et_dS_perc_obs_sim_cumulated_best_10_optimized_with_KGE_multi.png"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
-    file = f"prec_et_dS_perc_obs_sim_cumulated_best_10_optimized_with_{metric_for_opt}.pdf"
+    file = f"prec_et_dS_perc_obs_sim_cumulated_best_10_optimized_with_KGE_multi.pdf"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
 
@@ -2155,10 +2151,10 @@ def main(tmp_dir):
         )
         axes[3].set_xlabel(r"Time [year-month]")
         fig.tight_layout()
-        file = f"prec_et_dS_perc_obs_sim_{year}_optimized_with_{metric_for_opt}.png"
+        file = f"prec_et_dS_perc_obs_sim_{year}_optimized_with_KGE_multi.png"
         path = base_path_figs / file
         fig.savefig(path, dpi=300)
-        file = f"prec_et_dS_perc_obs_sim_{year}_optimized_with_{metric_for_opt}.pdf"
+        file = f"prec_et_dS_perc_obs_sim_{year}_optimized_with_KGE_multi.pdf"
         path = base_path_figs / file
         fig.savefig(path, dpi=300)
 
@@ -2241,10 +2237,10 @@ def main(tmp_dir):
         )
         axes[3].set_xlabel(r"Time [year-month]")
         fig.tight_layout()
-        file = f"prec_et_dS_perc_obs_sim_{year}_optimized_with_{metric_for_opt}_for_best_tm.png"
+        file = f"prec_et_dS_perc_obs_sim_{year}_optimized_with_KGE_multi_for_best_tm.png"
         path = base_path_figs / file
         fig.savefig(path, dpi=300)
-        file = f"prec_et_dS_perc_obs_sim_{year}_optimized_with_{metric_for_opt}_for_best_tm.pdf"
+        file = f"prec_et_dS_perc_obs_sim_{year}_optimized_with_KGE_multi_for_best_tm.pdf"
         path = base_path_figs / file
         fig.savefig(path, dpi=300)
 
@@ -2510,10 +2506,10 @@ def main(tmp_dir):
         transform=axes[2, 1].transAxes,
     )
     fig.tight_layout()
-    file = f"prec_et_dS_perc_obs_sim_cumulated_optimized_with_{metric_for_opt}_for_best_tm.png"
+    file = f"prec_et_dS_perc_obs_sim_cumulated_optimized_with_KGE_multi_for_best_tm.png"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
-    file = f"prec_et_dS_perc_obs_sim_cumulated_optimized_with_{metric_for_opt}_for_best_tm.pdf"
+    file = f"prec_et_dS_perc_obs_sim_cumulated_optimized_with_KGE_multi_for_best_tm.pdf"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
 
@@ -2625,10 +2621,10 @@ def main(tmp_dir):
     )
     axes.set_xlabel(r"Time [year]")
     fig.tight_layout()
-    file = f"inf_mp_best_100_optimized_with_{metric_for_opt}.png"
+    file = f"inf_mp_best_100_optimized_with_KGE_multi.png"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
-    file = f"inf_mp_best_100_optimized_with_{metric_for_opt}.pdf"
+    file = f"inf_mp_best_100_optimized_with_KGE_multi.pdf"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
 
@@ -2661,10 +2657,10 @@ def main(tmp_dir):
     axes.set_xlabel(r"Time [year]")
     axes.legend(frameon=False, loc="upper left", fontsize=8)
     fig.tight_layout()
-    file = f"inf_mp_cumulated_best_100_optimized_with_{metric_for_opt}.png"
+    file = f"inf_mp_cumulated_best_100_optimized_with_KGE_multi.png"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
-    file = f"inf_mp_cumulated_best_100_optimized_with_{metric_for_opt}.pdf"
+    file = f"inf_mp_cumulated_best_100_optimized_with_KGE_multi.pdf"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
 
@@ -2697,10 +2693,10 @@ def main(tmp_dir):
     axes.set_xlabel(r"Time [year]")
     axes.legend(frameon=False, loc="upper left", fontsize=8)
     fig.tight_layout()
-    file = f"inf_mp_conf_int_best_100_optimized_with_{metric_for_opt}.png"
+    file = f"inf_mp_conf_int_best_100_optimized_with_KGE_multi.png"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
-    file = f"inf_mp_conf_int_best_100_optimized_with_{metric_for_opt}.pdf"
+    file = f"inf_mp_conf_int_best_100_optimized_with_KGE_multi.pdf"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
 
@@ -2741,10 +2737,10 @@ def main(tmp_dir):
     axes.set_xlabel(r"Time [year]")
     axes.legend(frameon=False, loc="upper left", fontsize=8)
     fig.tight_layout()
-    file = f"inf_mp_cumulated_conf_int_best_100_optimized_with_{metric_for_opt}.png"
+    file = f"inf_mp_cumulated_conf_int_best_100_optimized_with_KGE_multi.png"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
-    file = f"inf_mp_cumulated_conf_int_best_100_optimized_with_{metric_for_opt}.pdf"
+    file = f"inf_mp_cumulated_conf_int_best_100_optimized_with_KGE_multi.pdf"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
 
@@ -2785,10 +2781,10 @@ def main(tmp_dir):
     axes.set_xlabel(r"Time [year]")
     axes.legend(frameon=False, loc="upper left", fontsize=8)
     fig.tight_layout()
-    file = f"inf_mp_ss_cumulated_conf_int_best_100_optimized_with_{metric_for_opt}.png"
+    file = f"inf_mp_ss_cumulated_conf_int_best_100_optimized_with_KGE_multi.png"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
-    file = f"inf_mp_ss_cumulated_conf_int_best_100_optimized_with_{metric_for_opt}.pdf"
+    file = f"inf_mp_ss_cumulated_conf_int_best_100_optimized_with_KGE_multi.pdf"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
 
@@ -2848,7 +2844,7 @@ def main(tmp_dir):
         axes[j, 0].set_ylabel(r"$KGE_{\delta^{18}O}$ [-]")
 
     fig.tight_layout()
-    file = base_path_figs / f"dotty_plots_hm_params_kge_d18O_perc_optimized_with_{metric_for_opt}.png"
+    file = base_path_figs / f"dotty_plots_hm_params_kge_d18O_perc_optimized_with_KGE_multi.png"
     fig.savefig(file, dpi=300)
     plt.close("all")
 
@@ -2879,7 +2875,7 @@ def main(tmp_dir):
         axes[j, 0].set_ylabel(r"$KGE_{\delta^{18}O}$ [-]")
 
     fig.tight_layout()
-    file = base_path_figs / f"dotty_plots1_hm_params_kge_d18O_perc_optimized_with_{metric_for_opt}.png"
+    file = base_path_figs / f"dotty_plots1_hm_params_kge_d18O_perc_optimized_with_KGE_multi.png"
     fig.savefig(file, dpi=300)
     plt.close("all")
 
@@ -2910,7 +2906,7 @@ def main(tmp_dir):
         axes[j, 0].set_ylabel(r"$KGE_{\delta^{18}O}$ [-]")
 
     fig.tight_layout()
-    file = base_path_figs / f"dotty_plots2_hm_params_kge_d18O_perc_optimized_with_{metric_for_opt}.png"
+    file = base_path_figs / f"dotty_plots2_hm_params_kge_d18O_perc_optimized_with_KGE_multi.png"
     fig.savefig(file, dpi=300)
     plt.close("all")
 
@@ -2941,7 +2937,7 @@ def main(tmp_dir):
         axes[j, 0].set_ylabel(r"$KGE_{\delta^{18}O}$ [-]")
 
     fig.tight_layout()
-    file = base_path_figs / f"dotty_plots3_hm_params_kge_d18O_perc_optimized_with_{metric_for_opt}.png"
+    file = base_path_figs / f"dotty_plots3_hm_params_kge_d18O_perc_optimized_with_KGE_multi.png"
     fig.savefig(file, dpi=300)
     plt.close("all")
 
@@ -2981,7 +2977,7 @@ def main(tmp_dir):
         axes[j, 1].set_ylabel(r"$KGE_{\delta^{18}O}$ [-]")
 
     fig.tight_layout()
-    file = base_path_figs / f"dotty_plots_sas_params_kge_d18O_perc_optimized_with_{metric_for_opt}.png"
+    file = base_path_figs / f"dotty_plots_sas_params_kge_d18O_perc_optimized_with_KGE_multi.png"
     fig.savefig(file, dpi=300)
     plt.close("all")
 
@@ -2992,7 +2988,7 @@ def main(tmp_dir):
             df_kge_d18O_perc.loc[f"{sc}", df_kge_d18O_perc.columns[ncol]] = onp.max(
                 dict_params_metrics_tm_mc[tm_structure]["params_metrics"][f"KGE_C_iso_q_ss{sc}"]
             )
-    file = base_path_figs / f"kge_d18O_perc_optimized_with_{metric_for_opt}.txt"
+    file = base_path_figs / f"kge_d18O_perc_optimized_with_KGE_multi.txt"
     df_kge_d18O_perc.to_csv(file, header=True, index=True, sep="\t")
 
     # compare best model runs
@@ -3042,9 +3038,9 @@ def main(tmp_dir):
         ax.flatten()[i + 1].set_xlim(ds_sim_tm["Time"].values[0], ds_sim_tm["Time"].values[-1])
     ax[-1].set_xlabel("Time [year]")
     fig.tight_layout()
-    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"
+    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_KGE_multi.png"
     fig.savefig(file, dpi=300)
-    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.pdf"
+    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_KGE_multi.pdf"
     fig.savefig(file, dpi=300)
 
     # insets for 3 years
@@ -3105,7 +3101,7 @@ def main(tmp_dir):
             ax.flatten()[i + 1].set_xlim(ds_sim_tm_year["Time"].values[0], ds_sim_tm_year["Time"].values[-1])
         ax[-1].set_xlabel("Time [year]")
         fig.tight_layout()
-        file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}_{year}_{year+2}.png"
+        file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_KGE_multi_{year}_{year+2}.png"
         fig.savefig(file, dpi=300)
 
     fig, ax = plt.subplots(5, 1, sharex=True, figsize=(6, 6))
@@ -3157,7 +3153,7 @@ def main(tmp_dir):
         ax.flatten()[i + 1].set_xlim(ds_sim_tm["Time"].values[0], ds_sim_tm["Time"].values[-1])
     ax[-1].set_xlabel("Time [year]")
     fig.tight_layout()
-    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_extra1_optimized_with_{metric_for_opt}.png"
+    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_extra1_optimized_with_KGE_multi.png"
     fig.savefig(file, dpi=300)
 
     fig, ax = plt.subplots(3, 1, sharex=True, figsize=(6, 3))
@@ -3204,7 +3200,7 @@ def main(tmp_dir):
         ax.flatten()[i + 1].set_xlim(ds_sim_tm["Time"].values[0], ds_sim_tm["Time"].values[-1])
     ax[-1].set_xlabel("Time [year]")
     fig.tight_layout()
-    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_extra2_optimized_with_{metric_for_opt}.png"
+    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_extra2_optimized_with_KGE_multi.png"
     fig.savefig(file, dpi=300)
 
     fig, ax = plt.subplots(4, 1, sharey=False, figsize=(6, 5))
@@ -3248,7 +3244,7 @@ def main(tmp_dir):
         ax.flatten()[i].set_xlim(ds_sim_tm["Time"].values[0], ds_sim_tm["Time"].values[-1])
     ax[-1].set_xlabel("Time [year]")
     fig.tight_layout()
-    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_conf_int_optimized_with_{metric_for_opt}.png"
+    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_conf_int_optimized_with_KGE_multi.png"
     fig.savefig(file, dpi=300)
 
     fig, ax = plt.subplots(4, 1, sharey=False, figsize=(6, 5))
@@ -3300,7 +3296,7 @@ def main(tmp_dir):
         ax.flatten()[i].set_xlim(ds_sim_tm["Time"].values[0], ds_sim_tm["Time"].values[-1])
     ax[-1].set_xlabel("Time [year]")
     fig.tight_layout()
-    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_conf_int_optimized_with_{metric_for_opt}_extra.png"
+    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_conf_int_optimized_with_KGE_multi_extra.png"
     fig.savefig(file, dpi=300)
 
     # compare duration curve of 18O in percolation
@@ -3367,7 +3363,7 @@ def main(tmp_dir):
     ax[2].set_xlabel("Exceedence probabilty [-]", fontsize=8)
     ax[3].set_xlabel("Exceedence probabilty [-]", fontsize=8)
     fig.tight_layout()
-    file = base_path_figs / f"fdc_d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"
+    file = base_path_figs / f"fdc_d18O_perc_sim_obs_tm_structures_optimized_with_KGE_multi.png"
     fig.savefig(file, dpi=300)
 
     # plot evapotranspiration, soil storage change, percolation and 18O in percolation
@@ -4555,10 +4551,10 @@ def main(tmp_dir):
     axes[2, 1].xaxis.set_major_formatter(mdates.DateFormatter("%y-%m"))
     axes[2, 1].tick_params(axis="x", rotation=33)
     fig.tight_layout()
-    file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}_for_talk.png"
+    file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_KGE_multi_for_talk.png"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
-    file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}_for_talk.pdf"
+    file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_KGE_multi_for_talk.pdf"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
 
@@ -4609,7 +4605,7 @@ def main(tmp_dir):
         ax.flatten()[i + 1].set_xlim(ds_sim_tm["Time"].values[0], ds_sim_tm["Time"].values[-1])
     ax[-1].set_xlabel("Time [year]")
     fig.tight_layout()
-    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"
+    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_KGE_multi.png"
     fig.savefig(file, dpi=300)
 
     # virtual bromide experiment

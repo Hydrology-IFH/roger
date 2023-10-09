@@ -5,7 +5,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-ns", "--nsamples", type=int, default=30000)
+@click.option("-ns", "--nsamples", type=int, default=1000)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(nsamples, tmp_dir):
@@ -22,6 +22,10 @@ def main(nsamples, tmp_dir):
         """
         _base_path = Path(__file__).parent
         _input_dir = _base_path / "input"
+        if tmp_dir:
+            _tmp_dir = tmp_dir / "output"
+        else:
+            _tmp_dir = tmp_dir
         # load parameter boundaries
         _file_params = _base_path / "param_bounds.yml"
         with open(_file_params, 'r') as file:
@@ -232,7 +236,7 @@ def main(nsamples, tmp_dir):
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
         @roger_routine
-        def set_diagnostics(self, state, base_path=tmp_dir):
+        def set_diagnostics(self, state, base_path=_tmp_dir):
             diagnostics = state.diagnostics
 
             diagnostics["rate"].output_variables = ["prec", "pet", "aet", "transp", "evap_soil", "inf_mat_rz", "inf_mp_rz", "inf_sc_rz", "inf_ss", "q_rz", "q_ss", "cpr_rz", "dS_s", "dS", "q_snow", "int_ground"]
