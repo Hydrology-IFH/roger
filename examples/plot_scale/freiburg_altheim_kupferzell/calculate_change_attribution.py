@@ -541,9 +541,9 @@ if not os.path.exists(mlm_random_slopes_file):
                                             x_std.loc[:, param] - x_std.loc[:, param].mean()
                                         ) / x_std.loc[:, param].std()
 
-                                    dfs_mlm = x_std.copy()
-                                    dfs_mlm.loc[:, f"{delta}"] = y.values.flatten()
-                                    dfs_mlm.loc[:, "group"] = range(len(y.values.flatten()))
+                                    df_mlm = x_std.copy()
+                                    df_mlm.loc[:, f"{delta}"] = y.values.flatten()
+                                    df_mlm.loc[:, "group"] = range(len(y.values.flatten()))
 
                                     df_mlm = sm.add_constant(df_mlm)
                                     # fit a mixed linear model with random effects (random intercepts and random slopes)

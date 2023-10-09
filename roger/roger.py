@@ -241,10 +241,6 @@ class RogerSetup(metaclass=abc.ABCMeta):
         if not self._setup_done:
             raise RuntimeError("setup() method has to be called before running the model")
 
-    def _ensure_warmup_done(self):
-        if not self.state.settings.warmup_done:
-            raise RuntimeError("warmup() method has to be called before running the model")
-
     def setup(self):
         from roger import diagnostics, restart
         from roger.core import surface, soil
@@ -516,8 +512,6 @@ class RogerSetup(metaclass=abc.ABCMeta):
         prior to this function.
         """
         from roger import restart
-
-        self._ensure_warmup_done()
 
         vs = self.state.variables
         settings = self.state.settings
