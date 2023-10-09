@@ -186,6 +186,4 @@ build.sh
 meta.yaml
 
 # local development
-/bmiroger
-roger/bmimodels/
 examples/plot_scale/boadkh/

@@ -1,6 +1,10 @@
 # --- Settings --------------------------------------------------------------
 # name of the model run; is used to name the output files
 identifier: ONED
+# number of grid cells in x-direction
+nx: 1
+# number of grid cells in y-direction
+ny: 1
 # spatial discretization in x-direction (in meters)
 dx: 1
 # spatial discretization in y-direction (in meters)

@@ -87,3 +87,35 @@ python netcdf_to_csv.py
 ```
 python make_figures_and_tables.py
 ```
+
+# Dockerize ONED
+
+## 1. Download the image or build the Docker image
+We recommend to download the image from Docker Hub
+```console
+$ docker pull roger-oneD-tutorial:latest
+```
+
+Alternatively, the image can be locally build:
+```console
+$ dockerize_oneD_tutorial.sh
+```
+
+## 2. Run the Docker image (starts the container)
+
+Move to the `oneD_tutorial` folder using the `cd` command and run the container:
+
+```console
+$ docker run --rm -it --mount=type=bind,source="$(pwd)",target=/roger/examples/plot_scale/oneD_tutorial roger-oneD-tutorial
+```
+
+or set the path to the project folder manually using `SRC_PATH`:
+```console
+$ SRC_PATH=path_to_folder docker run --rm -it --mount=type=bind,source=SRC_PATH,target=/roger/examples/plot_scale/oneD_tutorial roger-oneD-tutorial
+```
+
+# Basic model interface (BMI)
+Runs the simulation using the Basic model interface (BMI):
+```
+python bmiroger_oneD.py
+```
