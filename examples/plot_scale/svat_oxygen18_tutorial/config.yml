@@ -23,6 +23,7 @@ d18O_RZ: -10
 d18O_SS: -10
 
 # --- Diagnostics --------------------------------------------------------------
+OUTPUT_FREQUENCY: 86400  # output frequency in seconds
 OUTPUT_AVERAGE:
 - "C_iso_transp"
 - "C_iso_s"

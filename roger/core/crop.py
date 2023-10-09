@@ -192,7 +192,7 @@ def calc_t_grow(state):
     vs.t_grow_root = update_add(
         vs.t_grow_root,
         at[2:-2, 2:-2, vs.tau, :],
-        vs.gdd[2:-2, 2:-2, :] * vs.k_stress_root_growth[2:-2, 2:-2, :] * mask5[2:-2, 2:-2, :],
+        npx.where(mask5[2:-2, 2:-2, :], vs.gdd[2:-2, 2:-2, :] * vs.k_stress_root_growth[2:-2, 2:-2, :], 0),
     )
     vs.t_grow_root = update(
         vs.t_grow_root,
@@ -293,8 +293,8 @@ def calc_canopy_cover(state):
     mask_summer = npx.isin(vs.crop_type, lut.SUMMER_CROPS)
     mask_winter = npx.isin(vs.crop_type, lut.WINTER_CROPS)
     mask_winter_catch = npx.isin(vs.crop_type, lut.WINTER_CATCH_CROPS)
-    mask_571 = npx.isin(vs.crop_type, npx.array([571], dtype=int))
-    mask_572 = npx.isin(vs.crop_type, npx.array([572], dtype=int))
+    mask_growing_summer = npx.isin(vs.crop_type, npx.array([571], dtype=int))
+    mask_growing_winter = npx.isin(vs.crop_type, npx.array([572], dtype=int))
     mask_bare = vs.crop_type == 599
 
     mask1 = mask_summer & (vs.doy[vs.tau] > vs.doy_mid) & (vs.doy[vs.tau] < vs.doy_dec)
@@ -535,9 +535,9 @@ def calc_canopy_cover(state):
         npx.where(mask15[2:-2, 2:-2, :], 0, vs.ccc[2:-2, 2:-2, vs.tau, :]),
     )
 
-    mask16 = mask_571 & (vs.doy[vs.tau] < vs.doy_start)
+    mask16 = mask_growing_summer & (vs.doy[vs.tau] < vs.doy_start)
     mask17 = (
-        mask_571
+        mask_growing_summer
         & (vs.doy[vs.tau] >= vs.doy_start)
         & (vs.ccc[:, :, vs.tau, :] < vs.ccc_max)
         & (vs.doy[vs.tau] <= vs.doy_end)
@@ -571,9 +571,9 @@ def calc_canopy_cover(state):
         ),
     )
 
-    mask18 = mask_572 & (vs.t_grow_cc[:, :, vs.tau, :] <= 0)
+    mask18 = mask_growing_winter & (vs.t_grow_cc[:, :, vs.tau, :] <= 0)
     mask19 = (
-        mask_572
+        mask_growing_winter
         & (vs.ccc[:, :, vs.tau, :] < vs.ccc_mid)
         & (
             (vs.doy[vs.tau] >= vs.doy_start)
@@ -765,8 +765,8 @@ def calc_root_growth(state):
     mask_summer = npx.isin(vs.crop_type, lut.SUMMER_CROPS)
     mask_winter = npx.isin(vs.crop_type, lut.WINTER_CROPS)
     mask_winter_catch = npx.isin(vs.crop_type, lut.WINTER_CATCH_CROPS)
-    mask_571 = npx.isin(vs.crop_type, npx.array([571], dtype=int))
-    mask_572 = npx.isin(vs.crop_type, npx.array([572], dtype=int))
+    mask_growing_summer = npx.isin(vs.crop_type, npx.array([571], dtype=int))
+    mask_growing_winter = npx.isin(vs.crop_type, npx.array([572], dtype=int))
     mask_bare = vs.crop_type == 599
 
     mask1 = mask_summer & (vs.doy[vs.tau] < vs.doy_start)
@@ -866,8 +866,8 @@ def calc_root_growth(state):
         npx.where(mask9[2:-2, 2:-2, :], vs.z_evap[2:-2, 2:-2, npx.newaxis], vs.z_root_crop[2:-2, 2:-2, vs.tau, :]),
     )
 
-    mask10 = mask_571 & (vs.doy[vs.tau] < vs.doy_start)
-    mask11 = mask_571 & (vs.doy[vs.tau] >= vs.doy_start) & (vs.doy[vs.tau] <= vs.doy_mid)
+    mask10 = mask_growing_summer & (vs.doy[vs.tau] < vs.doy_start)
+    mask11 = mask_growing_summer & (vs.doy[vs.tau] >= vs.doy_start) & (vs.doy[vs.tau] <= vs.doy_mid)
     # before growing period
     vs.z_root_crop = update(
         vs.z_root_crop,
@@ -890,8 +890,8 @@ def calc_root_growth(state):
         ),
     )
 
-    mask12 = mask_572 & (vs.t_grow_root[:, :, vs.tau, :] <= 0)
-    mask13 = mask_572 & (vs.doy[vs.tau] >= vs.doy_start) & (vs.doy[vs.tau] <= vs.doy_mid)
+    mask12 = mask_growing_winter & (vs.t_grow_root[:, :, vs.tau, :] <= 0)
+    mask13 = mask_growing_winter & (vs.doy[vs.tau] >= vs.doy_start) & (vs.doy[vs.tau] <= vs.doy_mid)
     # before growing period
     vs.z_root_crop = update(
         vs.z_root_crop,
@@ -914,8 +914,8 @@ def calc_root_growth(state):
         ),
     )
 
-    # root growth stops if 95 % of total soil depth is reached
-    mask_stop_growth = vs.z_root_crop[:, :, vs.tau, :] >= 0.9 * vs.z_soil[:, :, npx.newaxis]
+    # root growth stops if 70 % of total soil depth is reached
+    mask_stop_growth = vs.z_root_crop[:, :, vs.tau, :] >= 0.7 * vs.z_soil[:, :, npx.newaxis]
     vs.z_root_crop = update(
         vs.z_root_crop,
         at[2:-2, 2:-2, vs.tau, :],

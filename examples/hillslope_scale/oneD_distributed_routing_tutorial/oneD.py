@@ -58,6 +58,9 @@ def main(tmp_dir):
             settings = state.settings
             settings.identifier = self._config["identifier"]
 
+            # output frequency (in seconds)
+            settings.output_frequency = self._config["OUTPUT_FREQUENCY"]
+
             # total grid numbers in x- and y-direction
             settings.nx, settings.ny = self._config["nx"], self._config["ny"]
             # derive total number of time steps from forcing
@@ -545,14 +548,14 @@ def main(tmp_dir):
 
             diagnostics["rate"].output_variables = self._config["OUTPUT_RATE"]
             # values are aggregated to daily
-            diagnostics["rate"].output_frequency = 24 * 60 * 60  # in seconds
+            diagnostics["rate"].output_frequency = self._config["OUTPUT_FREQUENCY"]  # in seconds
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
                 diagnostics["rate"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = self._config["OUTPUT_COLLECT"]
             # values are aggregated to daily
-            diagnostics["collect"].output_frequency = 24 * 60 * 60  # in seconds
+            diagnostics["collect"].output_frequency = self._config["OUTPUT_FREQUENCY"]  # in seconds
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
                 diagnostics["collect"].base_output_path = base_path
@@ -715,7 +718,7 @@ def main(tmp_dir):
             at[2:-2, 2:-2, vs.taum1],
             vs.h[2:-2, 2:-2, vs.tau],
         )
-        # set to 0 for numerical errors
+        # set to 0 to avoid numerical errors
         vs.z0 = update(
             vs.z0,
             at[2:-2, 2:-2, vs.tau],
@@ -751,22 +754,25 @@ def main(tmp_dir):
             at[vs.taum1],
             vs.doy[vs.tau],
         )
-        # set to 0 for numerical errors
+        # set to 0 to avoid numerical errors
         vs.S_fp_rz = update(
             vs.S_fp_rz,
             at[2:-2, 2:-2],
             npx.where((vs.S_fp_rz > -1e-6) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz)[2:-2, 2:-2],
         )
+        # set to 0 to avoid numerical errors
         vs.S_lp_rz = update(
             vs.S_lp_rz,
             at[2:-2, 2:-2],
             npx.where((vs.S_lp_rz > -1e-6) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz)[2:-2, 2:-2],
         )
+        # set to 0 to avoid numerical errors
         vs.S_fp_ss = update(
             vs.S_fp_ss,
             at[2:-2, 2:-2],
             npx.where((vs.S_fp_ss > -1e-6) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss)[2:-2, 2:-2],
         )
+        # set to 0 to avoid numerical errors
         vs.S_lp_ss = update(
             vs.S_lp_ss,
             at[2:-2, 2:-2],

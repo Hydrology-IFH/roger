@@ -58,6 +58,16 @@ class Average(RogerDiagnostic):
 
         return state.var_meta[var].dims[-2] == TIMESTEPS[0]
 
+    def reset(self):
+        """Reset values to zero"""
+        avg_vs = self.variables
+
+        for key in self.output_variables:
+            val = getattr(avg_vs, key)
+            setattr(avg_vs, key, 0 * val)
+
+        avg_vs.average_nitts = 0
+
     def diagnose(self, state):
         vs = state.variables
         avg_vs = self.variables
@@ -86,9 +96,3 @@ class Average(RogerDiagnostic):
                 setattr(avg_vs, key, val / avg_vs.average_nitts)
 
         self.write_output(state)
-
-        for key in self.output_variables:
-            val = getattr(avg_vs, key)
-            setattr(avg_vs, key, 0 * val)
-
-        avg_vs.average_nitts = 0

@@ -24,6 +24,9 @@ class WaterMonitor(RogerDiagnostic):
     def initialize(self, state):
         self.initialize_variables(state)
 
+    def reset(self):
+        pass
+
     def diagnose(self, state):
         pass
 
@@ -37,12 +40,8 @@ class WaterMonitor(RogerDiagnostic):
         S_sur = global_sum(npx.sum(vs.S_sur[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2, npx.newaxis]))
         S_s = global_sum(npx.sum(vs.S_s[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2, npx.newaxis]))
 
-        logger.diagnostic(
-            f" Surface storage {S_sur} change to last {(S_sur - storage_vs.S_sur)}"
-        )
-        logger.diagnostic(
-            f" Soil storage {S_s} change to last {(S_s - storage_vs.S_s)}"
-        )
+        logger.diagnostic(f" Surface storage {S_sur} change to last {(S_sur - storage_vs.S_sur)}")
+        logger.diagnostic(f" Soil storage {S_s} change to last {(S_s - storage_vs.S_s)}")
 
         storage_vs.S_sur = S_sur
         storage_vs.S_s = S_s

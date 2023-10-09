@@ -183,6 +183,7 @@ conda_build.sh
 build.sh
 meta.yaml
 
-# Docker
-/tmp
-Dockerfile
+# local development
+/bmiroger
+roger/bmimodels/
+examples/plot_scale/boadkh/

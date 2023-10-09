@@ -28,6 +28,9 @@ class LoggingProgressBar:
         self._start_time = start_time
         self._start_iteration = start_iteration
         self._total = total
+        self._start = 0
+        self._iteration = 0
+        self._time = 0
 
         _, self._time_unit = time.format_time(total)
 
@@ -40,6 +43,10 @@ class LoggingProgressBar:
 
     def __exit__(self, *args, **kwargs):
         pass
+
+    def start_time(self):
+        self._start = perf_counter()
+        self._start_time = self._time
 
     def advance_time(self, amount, *args, **kwargs):
         self._iteration += 1
@@ -60,7 +67,7 @@ class LoggingProgressBar:
         eta, eta_unit = time.format_time((self._total - self._time) * rate_in_seconds)
 
         if self._start_time < self._total:
-            percentage = 100 * (self._time - self._start_time) / (self._total - self._start_time)
+            percentage = 100 * (self._time / self._total)
         else:
             percentage = 100
 

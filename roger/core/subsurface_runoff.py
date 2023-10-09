@@ -1090,8 +1090,8 @@ def calc_percolation_ss(state):
     )
 
     # update subsoil storage after vertical subsoil drainage
-    mask1 = vs.S_lp_ss < vs.q_pot_ss
-    mask2 = vs.S_lp_ss >= vs.q_pot_ss
+    mask1 = (vs.S_lp_ss < vs.q_pot_ss)
+    mask2 = (vs.S_lp_ss >= vs.q_pot_ss)
     vs.S_fp_ss = update_add(
         vs.S_fp_ss,
         at[2:-2, 2:-2],
@@ -1117,6 +1117,20 @@ def calc_subsurface_runoff_routing_1D(state):
     Calculates unidirectional subsurface runoff routing
     """
     vs = state.variables
+
+    # soil water storage before adding lateral subsurface inflow
+    S1_rz = allocate(state.dimensions, ("x", "y"))
+    S1_rz = update(
+        S1_rz,
+        at[2:-2, 2:-2],
+        vs.S_fp_rz[2:-2, 2:-2] + vs.S_lp_rz[2:-2, 2:-2],
+    )
+    S1_ss = allocate(state.dimensions, ("x", "y"))
+    S1_ss = update(
+        S1_ss,
+        at[2:-2, 2:-2],
+        vs.S_fp_ss[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2],
+    )
 
     mask_north = vs.flow_dir_topo == 64
     mask_northeast = vs.flow_dir_topo == 128
@@ -1331,6 +1345,31 @@ def calc_subsurface_runoff_routing_1D(state):
         npx.where(mask[2:-2, 2:-2], vs.S_ac_rz[2:-2, 2:-2], vs.S_lp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
+    # soil water storage after adding lateral subsurface inflow
+    S2_rz = allocate(state.dimensions, ("x", "y"))
+    S2_rz = update(
+        S2_rz,
+        at[2:-2, 2:-2],
+        vs.S_fp_rz[2:-2, 2:-2] + vs.S_lp_rz[2:-2, 2:-2],
+    )
+    S2_ss = allocate(state.dimensions, ("x", "y"))
+    S2_ss = update(
+        S2_ss,
+        at[2:-2, 2:-2],
+        vs.S_fp_ss[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2],
+    )
+    # soil water storage change due to lateral subsurface inflow
+    vs.q_sub_in_rz = update(
+        vs.q_sub_in_rz,
+        at[2:-2, 2:-2],
+        S2_rz[2:-2, 2:-2] - S1_rz[2:-2, 2:-2],
+    )
+    vs.q_sub_in_ss = update(
+        vs.q_sub_in_ss,
+        at[2:-2, 2:-2],
+        S2_ss[2:-2, 2:-2] - S1_ss[2:-2, 2:-2],
+    )
+
     return KernelOutput(
         q_sub_out_d8=vs.q_sub_out_d8,
         q_sub_in_d8=vs.q_sub_in_d8,
@@ -1344,6 +1383,8 @@ def calc_subsurface_runoff_routing_1D(state):
         S_lp_ss=vs.S_lp_ss,
         q_sof=vs.q_sof,
         z0=vs.z0,
+        q_sub_in_rz=vs.q_sub_in_rz,
+        q_sub_in_ss=vs.q_sub_in_ss,
     )
 
 

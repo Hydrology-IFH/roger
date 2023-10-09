@@ -15,6 +15,7 @@ x_origin: 0
 y_origin: 0
 
 # --- Diagnostics --------------------------------------------------------------
+OUTPUT_FREQUENCY: 86400  # output frequency in seconds
 # simulated hydrologic fluxes
 OUTPUT_RATE:
 - "prec"

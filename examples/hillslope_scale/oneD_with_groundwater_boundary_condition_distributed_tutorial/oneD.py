@@ -58,6 +58,9 @@ def main(tmp_dir):
             settings = state.settings
             settings.identifier = self._config["identifier"]
 
+            # output frequency (in seconds)
+            settings.output_frequency = self._config["OUTPUT_FREQUENCY"]
+
             # total grid numbers in x- and y-direction
             settings.nx, settings.ny = self._config["nx"], self._config["ny"]
             # derive total number of time steps from forcing
@@ -360,14 +363,14 @@ def main(tmp_dir):
 
             diagnostics["rate"].output_variables = self._config["OUTPUT_RATE"]
             # values are aggregated to daily
-            diagnostics["rate"].output_frequency = 24 * 60 * 60  # in seconds
+            diagnostics["rate"].output_frequency = self._config["OUTPUT_FREQUENCY"]  # in seconds
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
                 diagnostics["rate"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = self._config["OUTPUT_COLLECT"]
             # values are aggregated to daily
-            diagnostics["collect"].output_frequency = 24 * 60 * 60  # in seconds
+            diagnostics["collect"].output_frequency = self._config["OUTPUT_FREQUENCY"]  # in seconds
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
                 diagnostics["collect"].base_output_path = base_path
