@@ -161,6 +161,7 @@ examples/plot_scale/freiburg_altheim_kupferzell/climate_projections
 gpu_memory_profiling/
 *_2016-*.sh
 debug_setup/
+examples/catchment_scale/StressRes/Moehlin/input/
 
 # Slides or Word
 *.key
