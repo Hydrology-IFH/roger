@@ -1,6 +1,5 @@
 from pathlib import Path
 import os
-import h5netcdf
 import scipy as sp
 from SALib.analyze import sobol
 from matplotlib.colors import Normalize

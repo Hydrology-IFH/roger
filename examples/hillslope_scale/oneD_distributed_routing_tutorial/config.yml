@@ -15,9 +15,9 @@ x_origin: 0
 y_origin: 0
 
 # --- Diagnostics --------------------------------------------------------------
+OUTPUT_FREQUENCY: 86400  # output frequency in seconds
 # simulated hydrologic fluxes
 OUTPUT_RATE:
-- "prec"
 - "aet"  # actual evapotranspiration (mm/day)
 - "transp"  # transpiration (mm/day)
 - "evap_soil"  # soil evaporation (mm/day)
@@ -27,24 +27,11 @@ OUTPUT_RATE:
 - "inf_ss"  # infiltration into subsoil (mm/day)
 - "q_rz"  # percolation from root zone (mm/day)
 - "q_ss"  # percolation from subsoil (mm/day)
-- "q_sub"  # lateral subsurface runoff (mm/day)
 - "cpr_rz" # capillary rise from subsoil into root zone (mm/day)
 - "dS"  # change of storage volume (mm/day)
 - "q_snow"  # snow melt (mm/day)
-- "q_sub_out"
-- "q_sub_in"
-- "q_sur_out"
-- "q_sur_in"
-- "q_sur"
-- "inf_mat_pot"
-- "inf_rz"
-- "inf_mp"
-- "q_sof"
-- "q_hof"
-- "q_sub"
-- "q_sub_rz"
-- "q_sub_ss"
-- "q_pot_rz"
+- "q_sur_out" # lateral surface outflow (mm/day)
+- "q_sub_out"  # lateral subsurface outflow (mm/day)
 
 # simulated hydrologic storages
 OUTPUT_COLLECT:
@@ -54,17 +41,5 @@ OUTPUT_COLLECT:
 - "theta_ss"  # soil water content of subsoil (-)
 - "theta"  # soil water content (-)
 - "S_snow"  # storage volume snow cover (mm)
-- "S_s"
-- "S"
-- "z_sat"
-- "z_wf"
-- "z0"
-- "S_fp_rz"
-- "S_fp_ss"
-- "S_lp_rz"
-- "S_lp_ss"
-- "S_ac_rz"
-- "S_ac_ss"
-- "S_ufc_rz"
-- "S_ufc_ss"
-- "S_zsat_rz"
+- "z_sat"  # saturation water level (mm)
+- "z0"  # surface water level (mm)

@@ -102,6 +102,8 @@ class SVATTRANSPORTSetup(RogerSetup):
             # time increment of substep (in days)
             settings.h = 1 / settings.sas_solver_substeps
 
+        # output frequency (in seconds)
+        settings.output_frequency = 86400
         # total grid numbers in x- and y-direction
         settings.nx, settings.ny = 1, 1
         # number of iterations (i.e. number of days)

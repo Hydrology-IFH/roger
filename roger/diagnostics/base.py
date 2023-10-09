@@ -35,6 +35,11 @@ class RogerDiagnostic(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def reset(self):
+        """Called at beginning of diagnostic period."""
+        pass
+
+    @abc.abstractmethod
     def diagnose(self, state):
         """Called with frequency ``sampling_frequency``."""
         pass
@@ -84,7 +89,8 @@ class RogerDiagnostic(metaclass=abc.ABCMeta):
         if os.path.isfile(output_path) and not runtime_settings.force_overwrite:
             raise IOError(
                 f'output file {output_path} for diagnostic "{self.name}" exists '
-                "(change output path or enable force_overwrite runtime setting)"
+                "(change output path or enable force_overwrite runtime setting "
+                "or delete existing files in the output directory)"
             )
 
         # possible race condition ahead!

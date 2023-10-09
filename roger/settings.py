@@ -34,7 +34,7 @@ SETTINGS = {
     "ncrops": Setting(1, int, "Number of crops per year"),
     "ncr": Setting(2, int, "Number of crop rotations"),
     "dt_mom": Setting(1.0, float, "Time step in hours for momentum"),
-    "dt_ff": Setting(1/6, float, "Time step in hours for film flow"),
+    "dt_ff": Setting(1 / 6, float, "Time step in hours for film flow"),
     "dt_gw": Setting(24.0, float, "Time step in hours for groundwater"),
     "dt_tracer": Setting(24.0, float, "Time step for tracers, can be larger than dt"),
     "runlen": Setting(0.0, float, "Length of simulation in seconds"),
@@ -120,6 +120,8 @@ SETTINGS = {
         "File name of restart output. May contain Python format syntax that is substituted with roger attributes.",
     ),
     "restart_frequency": Setting(0, float, "Frequency (in seconds) to write restart data"),
+    # Output
+    "output_frequency": Setting(86400, float, "Frequency (in seconds) to write output data"),
 }
 
 
@@ -129,32 +131,30 @@ def check_setting_conflicts(settings):
             "use either the groundwater module or groundwater boundary condition (e.g. fixed groundwater head, time-variant groundwater head)"
         )
 
-    if settings.enable_bromide and (settings.enable_chloride | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
-        raise RuntimeError(
-            "use single tracer"
-        )
+    if settings.enable_bromide and (
+        settings.enable_chloride | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate
+    ):
+        raise RuntimeError("use single tracer")
 
-    if settings.enable_chloride and (settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate):
-        raise RuntimeError(
-            "use single tracer"
-        )
+    if settings.enable_chloride and (
+        settings.enable_bromide | settings.enable_oxygen18 | settings.enable_deuterium | settings.enable_nitrate
+    ):
+        raise RuntimeError("use single tracer")
 
-    if settings.enable_oxygen18 and (settings.enable_bromide | settings.enable_chloride | settings.enable_deuterium | settings.enable_nitrate):
-        raise RuntimeError(
-            "use single tracer"
-        )
+    if settings.enable_oxygen18 and (
+        settings.enable_bromide | settings.enable_chloride | settings.enable_deuterium | settings.enable_nitrate
+    ):
+        raise RuntimeError("use single tracer")
 
-    if settings.enable_deuterium and (settings.enable_bromide | settings.enable_chloride | settings.enable_oxygen18 | settings.enable_nitrate):
-        raise RuntimeError(
-            "use single tracer"
-        )
+    if settings.enable_deuterium and (
+        settings.enable_bromide | settings.enable_chloride | settings.enable_oxygen18 | settings.enable_nitrate
+    ):
+        raise RuntimeError("use single tracer")
 
-    if settings.enable_nitrate and (settings.enable_bromide | settings.enable_chloride | settings.enable_oxygen18 | settings.enable_deuterium):
-        raise RuntimeError(
-            "use single tracer"
-        )
+    if settings.enable_nitrate and (
+        settings.enable_bromide | settings.enable_chloride | settings.enable_oxygen18 | settings.enable_deuterium
+    ):
+        raise RuntimeError("use single tracer")
 
     if settings.enable_crop_rotation and not settings.enable_crop_phenology:
-        raise RuntimeError(
-            "use crop rotation in combination with crop phenology"
-        )
+        raise RuntimeError("use crop rotation in combination with crop phenology")

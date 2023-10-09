@@ -121,6 +121,8 @@ Short description of land use (lu_id)
 - `577`: summer grain pea
 - `578`: winter grain pea
 - `579`: winter rye
+- `580`: clover (growing only)
+- `581`: clover (continued)
 - `598`: no crop
 - `599`: bare
 - `6`: vineyard

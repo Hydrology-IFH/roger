@@ -101,11 +101,11 @@ SUMMER_CROPS = onp.array(
 WINTER_CROPS = onp.array([556, 557, 558, 559, 560, 564], dtype=onp.int32)
 WINTER_CATCH_CROPS = onp.array([566, 568, 569, 570], dtype=onp.int32)
 MULTI_YEAR_CROPS_INIT = onp.array([571, 572], dtype=onp.int32)
-MULTI_YEAR_CROPS_CONT = onp.array([573, 574], dtype=onp.int32)
+MULTI_YEAR_CROPS_CONT = onp.array([573, 574, 581, 582], dtype=onp.int32)
 WINTER_MULTI_YEAR_CROPS_INIT = onp.array([572], dtype=onp.int32)
 WINTER_MULTI_YEAR_CROPS_CONT = onp.array([574], dtype=onp.int32)
-SUMMER_MULTI_YEAR_CROPS_INIT = onp.array([571], dtype=onp.int32)
-SUMMER_MULTI_YEAR_CROPS_CONT = onp.array([573], dtype=onp.int32)
+SUMMER_MULTI_YEAR_CROPS_INIT = onp.array([571, 580], dtype=onp.int32)
+SUMMER_MULTI_YEAR_CROPS_CONT = onp.array([573, 581, 582], dtype=onp.int32)
 
 dict_crops = {
     536: "beetroot",

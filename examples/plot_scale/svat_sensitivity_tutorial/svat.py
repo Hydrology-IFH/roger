@@ -37,7 +37,7 @@ def main(tmp_dir):
                 with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                     var_obj = infile.variables[var]
                     return npx.array(var_obj)
-                
+
         def _read_var_from_csv(self, var, path_dir, file):
             csv_file = path_dir / file
             infile = pd.read_csv(csv_file, sep=";", skiprows=1)
@@ -55,7 +55,7 @@ def main(tmp_dir):
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables["Time"].attrs["time_origin"]
                 return str(var_obj)
-            
+
         def _get_nx(self, path_dir, file):
             csv_file = path_dir / file
             df = pd.read_csv(csv_file, sep=";", skiprows=1)
@@ -67,8 +67,11 @@ def main(tmp_dir):
             settings = state.settings
             settings.identifier = self._config["identifier"]
 
+            # output frequency (in seconds)
+            settings.output_frequency = self._config["OUTPUT_FREQUENCY"]
+
             # total grid numbers in x- and y-direction
-            settings.nx, settings.ny = self._get_nx(self._base_path, 'parameters.csv'), 1
+            settings.nx, settings.ny = self._get_nx(self._base_path, "parameters.csv"), 1
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
             settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, "forcing.nc"))
 
@@ -272,20 +275,20 @@ def main(tmp_dir):
             settings = state.settings
 
             diagnostics["rate"].output_variables = self._config["OUTPUT_RATE"]
-            diagnostics["rate"].output_frequency = 24 * 60 * 60
+            diagnostics["rate"].output_frequency = self._config["OUTPUT_FREQUENCY"]
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
                 diagnostics["rate"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = self._config["OUTPUT_COLLECT"]
-            diagnostics["collect"].output_frequency = 24 * 60 * 60
+            diagnostics["collect"].output_frequency = self._config["OUTPUT_FREQUENCY"]
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
                 diagnostics["collect"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error"]
-            diagnostics["maximum"].output_frequency = 24 * 60 * 60
+            diagnostics["maximum"].output_frequency = self._config["OUTPUT_FREQUENCY"]
             diagnostics["maximum"].sampling_frequency = 1
             if base_path:
                 diagnostics["maximum"].base_output_path = base_path

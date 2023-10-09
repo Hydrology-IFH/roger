@@ -1,13 +1,16 @@
 # Tutorial for the spatially-distributed 1D-model
 
+Lateral transfer between grid cells occurs with a single flow direction. The flow direction is based on the topography
+
 Brief overview of the files:
 
 - `input`: Contains input data
 - `output`: Contains output data
 - `figures`: Contains figures
 - `config.yml`: File to set settings and output variables
+- `param_bounds.yml`: File to set settings and output variables
+- `write_parameters.py`: Generates random model parameters based on given parameter boundaries (`param_bounds.yml`) and writes model parameter file
 - `parameters.csv`: File that contains the model parameters
-- `write_parameters.py`: Generates model parameters and writes model parameter file
 - `oneD.py`: 1D-model setup
 - `merge_output.py`: Merges output into a single NetCDF file
 - `netcdf_to_csv.py`: Writes output to csv files
