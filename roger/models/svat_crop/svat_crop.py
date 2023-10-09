@@ -55,6 +55,8 @@ class SVATCROPSetup(RogerSetup):
         settings = state.settings
         settings.identifier = "SVATCROP"
 
+        # output frequency (in seconds)
+        settings.output_frequency = 86400
         # total grid numbers in x- and y-direction
         settings.nx, settings.ny = 1, 1
         # length of simulation (in seconds)

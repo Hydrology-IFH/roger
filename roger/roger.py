@@ -242,7 +242,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
             raise RuntimeError("setup() method has to be called before running the model")
 
     def _ensure_warmup_done(self):
-        if not settings.warmup_done:
+        if not self.state.settings.warmup_done:
             raise RuntimeError("warmup() method has to be called before running the model")
 
     def setup(self):
@@ -356,6 +356,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
             evapotranspiration,
             infiltration,
             film_flow,
+            surface_runoff,
             subsurface_runoff,
             capillary_rise,
             crop,
@@ -401,6 +402,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
                 if settings.enable_film_flow:
                     with state.timers["film flow"]:
                         film_flow.calculate_film_flow(state)
+                with state.timers["surface runoff"]:
+                    surface_runoff.calculate_surface_runoff(state)
                 with state.timers["subsurface runoff"]:
                     subsurface_runoff.calculate_subsurface_runoff(state)
                 with state.timers["capillary rise"]:
@@ -438,6 +441,10 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     numerics.calculate_num_error(state)
 
                     if settings.warmup_done:
+                        if vs.time_for_diag >= settings.output_frequency:
+                            vs.time_for_diag = 0
+                        diagnostics.reset(self.state)
+                        vs.time_for_diag = vs.time_for_diag + vs.dt_secs
                         diagnostics.diagnose(state)
                         diagnostics.output(state)
 
@@ -510,7 +517,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
         """
         from roger import restart
 
-        self._ensure_setup_done()
+        self._ensure_warmup_done()
 
         vs = self.state.variables
         settings = self.state.settings

@@ -21,6 +21,7 @@ z_soil: 1000
 kf: 2500
 
 # --- Diagnostics --------------------------------------------------------------
+OUTPUT_FREQUENCY: 86400  # output frequency in seconds
 # simulated hydrologic fluxes
 OUTPUT_RATE:
 - "aet"  # actual evapotranspiration (mm/day)

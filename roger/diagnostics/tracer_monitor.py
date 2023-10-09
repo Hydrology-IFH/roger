@@ -24,6 +24,9 @@ class TracerMonitor(RogerDiagnostic):
     def initialize(self, state):
         self.initialize_variables(state)
 
+    def reset(self):
+        pass
+
     def diagnose(self, state):
         pass
 
@@ -37,12 +40,8 @@ class TracerMonitor(RogerDiagnostic):
         conc = global_sum(npx.sum(vs.C_s[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2, npx.newaxis]))
         mass = global_sum(npx.sum(vs.M_s[2:-2, 2:-2, vs.tau] * vs.maskCatch[2:-2, 2:-2, npx.newaxis]))
 
-        logger.diagnostic(
-            f" Concentration {conc} change to last {(conc - tracer_vs.C_s)}"
-        )
-        logger.diagnostic(
-            f" Mass {mass} change to last {(mass - tracer_vs.M_s)}"
-        )
+        logger.diagnostic(f" Concentration {conc} change to last {(conc - tracer_vs.C_s)}")
+        logger.diagnostic(f" Mass {mass} change to last {(mass - tracer_vs.M_s)}")
 
         tracer_vs.M = mass
         tracer_vs.C = conc

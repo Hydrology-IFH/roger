@@ -46,6 +46,9 @@ class Minimum(RogerDiagnostic):
 
         return state.var_meta[var].dims[-1] == TIMESTEPS[0]
 
+    def reset(self):
+        pass
+
     def diagnose(self, state):
         vs = state.variables
         min_vs = self.variables
@@ -56,29 +59,35 @@ class Minimum(RogerDiagnostic):
             if self._has_timestep_dim(state, key):
                 var_data = update(
                     var_data,
-                    at[:, :, 0], getattr(vs, key)[..., vs.taum1],
+                    at[:, :, 0],
+                    getattr(vs, key)[..., vs.taum1],
                 )
                 var_data = update(
                     var_data,
-                    at[:, :, 1], getattr(vs, key)[..., vs.tau],
+                    at[:, :, 1],
+                    getattr(vs, key)[..., vs.tau],
                 )
                 var_data = update(
                     var_data,
-                    at[:, :, 0], npx.where((var_data[:, :, 0] == 0) & (var_data[:, :, 1] > 0), npx.nan, var_data[:, :, 0]),
+                    at[:, :, 0],
+                    npx.where((var_data[:, :, 0] == 0) & (var_data[:, :, 1] > 0), npx.nan, var_data[:, :, 0]),
                 )
                 setattr(min_vs, key, npx.nanmin(var_data, axis=-1))
             else:
                 var_data = update(
                     var_data,
-                    at[:, :, 0], getattr(min_vs, key),
+                    at[:, :, 0],
+                    getattr(min_vs, key),
                 )
                 var_data = update(
                     var_data,
-                    at[:, :, 1], getattr(vs, key),
+                    at[:, :, 1],
+                    getattr(vs, key),
                 )
                 var_data = update(
                     var_data,
-                    at[:, :, 0], npx.where((var_data[:, :, 0] == 0) & (var_data[:, :, 1] > 0), npx.nan, var_data[:, :, 0]),
+                    at[:, :, 0],
+                    npx.where((var_data[:, :, 0] == 0) & (var_data[:, :, 1] > 0), npx.nan, var_data[:, :, 0]),
                 )
                 setattr(min_vs, key, npx.nanmin(var_data, axis=-1))
 

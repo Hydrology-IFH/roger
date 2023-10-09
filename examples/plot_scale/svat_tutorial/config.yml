@@ -1,6 +1,10 @@
 # --- Settings --------------------------------------------------------------
 # name of the model run; is used to name the output files
 identifier: SVAT
+# number of grid cells in x-direction (in meters)
+nx: 1
+# number of grid cells in y-direction (in meters)
+ny: 1
 # spatial discretization in x-direction (in meters)
 dx: 1
 # spatial discretization in y-direction (in meters)
@@ -39,6 +43,7 @@ THETA_RZ: 0.3
 THETA_SS: 0.3
 
 # --- Diagnostics --------------------------------------------------------------
+OUTPUT_FREQUENCY: 86400  # output frequency in seconds
 # simulated hydrologic fluxes
 OUTPUT_RATE:
 - "prec"

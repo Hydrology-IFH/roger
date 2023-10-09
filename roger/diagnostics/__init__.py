@@ -1,1 +1,1 @@
-from roger.diagnostics.api import create_default_diagnostics, initialize, diagnose, output  # noqa: F401
+from roger.diagnostics.api import create_default_diagnostics, reset, initialize, diagnose, output  # noqa: F401

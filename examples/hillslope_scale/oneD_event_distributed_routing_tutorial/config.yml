@@ -1,0 +1,40 @@
+# --- Settings --------------------------------------------------------------
+# name of the model run; is used to name the output files
+identifier: ONED-event
+# total grid numbers in x-direction
+nx: 1
+# total grid numbers in y-direction
+ny: 20
+# spatial discretization in x-direction (in meters)
+dx: 1
+# spatial discretization in y-direction (in meters)
+dy: 1
+# origin of spatial grid
+x_origin: 0
+# origin of spatial grid
+y_origin: 0
+
+# --- Diagnostics --------------------------------------------------------------
+OUTPUT_FREQUENCY: 600  # output frequency in seconds
+# simulated hydrologic fluxes
+OUTPUT_RATE:
+- "inf_mat_rz"  # soil matrix infiltration into root zone (mm/10 mins)
+- "inf_mp_rz"  # macropore infiltration into root zone (mm/10 mins)
+- "inf_sc_rz"  # shrinkage crack infiltration into root zone (mm/10 mins)
+- "inf_ss"  # infiltration into subsoil (mm/10 mins)
+- "q_rz"  # percolation from root zone (mm/10 mins)
+- "q_ss"  # percolation from subsoil (mm/10 mins)
+- "dS"  # change of storage volume (mm/10 mins)
+- "q_sur_out" # lateral surface outflow (mm/10 mins)
+- "q_sub_out"  # lateral subsurface outflow (mm/10 mins)
+
+# simulated hydrologic storages
+OUTPUT_COLLECT:
+- "S_rz"  # storage volume of root zone (mm)
+- "S_ss"  # storage volume of subsoil (mm)
+- "theta_rz"  # soil water content of root zone (-)
+- "theta_ss"  # soil water content of subsoil (-)
+- "theta"  # soil water content (-)
+- "S_snow"  # storage volume snow cover (mm)
+- "z_sat"  # saturation water level (mm)
+- "z0"  # surface water level (mm)

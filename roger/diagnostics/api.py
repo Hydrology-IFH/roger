@@ -13,7 +13,10 @@ def create_default_diagnostics(state):
     from roger.diagnostics.tracer_monitor import TracerMonitor
     from roger.diagnostics.water_monitor import WaterMonitor
 
-    return {Diag.name: Diag(state) for Diag in (Average, Snapshot, Collect, Constant, Rate, Minimum, Maximum, TracerMonitor, WaterMonitor)}
+    return {
+        Diag.name: Diag(state)
+        for Diag in (Average, Snapshot, Collect, Constant, Rate, Minimum, Maximum, TracerMonitor, WaterMonitor)
+    }
 
 
 def initialize(state):
@@ -23,6 +26,14 @@ def initialize(state):
         if diagnostic.output_frequency:
             t, unit = time.format_time(diagnostic.output_frequency)
             logger.info(f' Writing output for diagnostic "{name}" every {t:.1f} {unit}')
+
+
+def reset(state):
+    vs = state.variables
+
+    for diagnostic in state.diagnostics.values():
+        if vs.time_for_diag <= 0:
+            diagnostic.reset()
 
 
 def diagnose(state):
@@ -42,8 +53,12 @@ def output(state):
         elif diagnostic.output_frequency == 60 * 60 and ((vs.time % (60 * 60) == 0) or (vs.time % (24 * 60 * 60) == 0)):
             diagnostic.output(state)
         # 10 minutes
-        elif diagnostic.output_frequency == 10 * 60 and ((vs.time % (10 * 60) == 0) or (vs.time % (60 * 60) == 0) or (vs.time % (24 * 60 * 60) == 0)):
+        elif diagnostic.output_frequency == 10 * 60 and (
+            (vs.time % (10 * 60) == 0) or (vs.time % (60 * 60) == 0) or (vs.time % (24 * 60 * 60) == 0)
+        ):
             diagnostic.output(state)
         # sampling of constant values
-        elif diagnostic.output_frequency == 0 and ((vs.time == 10 * 60) or (vs.time == 60 * 60) or (vs.time == 24 * 60 * 60)):
+        elif diagnostic.output_frequency == 0 and (
+            (vs.time == 10 * 60) or (vs.time == 60 * 60) or (vs.time == 24 * 60 * 60)
+        ):
             diagnostic.output(state)

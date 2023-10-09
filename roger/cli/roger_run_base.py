@@ -6,7 +6,7 @@ def roger_base_cli(func):
     @click.option("-b", "--backend", type=click.Choice(["numpy", "jax"]), default="numpy")
     @click.option("-d", "--device", type=click.Choice(["cpu", "gpu"]), default="cpu")
     @click.option("-n", "--nproc", type=int, nargs=2, default=(1, 1))
-    @click.option("--float-type", type=click.Choice(["float64", "float32"]), default="float64")
+    @click.option("--float-type", type=click.Choice(["float32", "float64"]), default="float32")
     @click.option("-v", "--loglevel", type=click.Choice(["trace", "debug", "info", "warning"]), default="info")
     @click.option("--log-to-file", is_flag=True)
     @click.option("--log-all-processes", is_flag=True)

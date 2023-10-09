@@ -1,10 +1,10 @@
 # --- Settings --------------------------------------------------------------
 # name of the model run; is used to name the output files
 identifier: ONED
-# total grid numbers in y-direction
-nx: 20
 # total grid numbers in x-direction
-ny: 1
+nx: 1
+# total grid numbers in y-direction
+ny: 20
 # spatial discretization in x-direction (in meters)
 dx: 1
 # spatial discretization in y-direction (in meters)
@@ -15,9 +15,9 @@ x_origin: 0
 y_origin: 0
 
 # --- Diagnostics --------------------------------------------------------------
+OUTPUT_FREQUENCY: 86400  # output frequency in seconds
 # simulated hydrologic fluxes
 OUTPUT_RATE:
-- "prec"
 - "aet"  # actual evapotranspiration (mm/day)
 - "transp"  # transpiration (mm/day)
 - "evap_soil"  # soil evaporation (mm/day)
@@ -27,10 +27,11 @@ OUTPUT_RATE:
 - "inf_ss"  # infiltration into subsoil (mm/day)
 - "q_rz"  # percolation from root zone (mm/day)
 - "q_ss"  # percolation from subsoil (mm/day)
-- "q_sub"  # lateral subsurface runoff (mm/day)
 - "cpr_rz" # capillary rise from subsoil into root zone (mm/day)
 - "dS"  # change of storage volume (mm/day)
 - "q_snow"  # snow melt (mm/day)
+- "q_sur_out" # lateral surface outflow (mm/day)
+- "q_sub_out"  # lateral subsurface outflow (mm/day)
 
 # simulated hydrologic storages
 OUTPUT_COLLECT:
@@ -40,3 +41,5 @@ OUTPUT_COLLECT:
 - "theta_ss"  # soil water content of subsoil (-)
 - "theta"  # soil water content (-)
 - "S_snow"  # storage volume snow cover (mm)
+- "z_sat"  # saturation water level (mm)
+- "z0"  # surface water level (mm)
