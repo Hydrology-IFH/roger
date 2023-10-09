@@ -42,6 +42,16 @@ class ONEDSetup(RogerSetup):
             var_obj = infile.variables['Time'].attrs['time_origin']
             return str(var_obj)
 
+    def _get_mask_from_nc(self, path_dir, file):
+        nc_file = path_dir / file
+        with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+            for key in list(infile.variables):
+                var_obj = infile.variables[key]
+                if "_FillValue" in var_obj.attrs:
+                    return npx.array(var_obj) != var_obj.attrs["_FillValue"]
+
+            return npx.ones(var_obj.shape).astype(bool)
+
     @roger_routine
     def set_settings(self, state):
         settings = state.settings
