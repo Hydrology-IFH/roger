@@ -7,18 +7,16 @@ import pandas as pd
 import click
 from roger.cli.roger_run_base import roger_base_cli
 
-
-@click.option("--location", type=click.Choice(["freiburg", "altheim", "kupferzell"]), default="altheim")
-@click.option("--land-cover-scenario", type=click.Choice(["corn", "corn_catch_crop", "crop_rotation"]), default="corn")
-@click.option(
-    "--climate-scenario",
-    type=click.Choice(["observed", "CCCma-CanESM2_CCLM4-8-17", "MPI-M-MPI-ESM-LR_RCA4"]),
-    default="CCCma-CanESM2_CCLM4-8-17",
-)
-@click.option("--period", type=click.Choice(["1985-2014", "2030-2059", "2070-2099"]), default="2030-2059")
+@click.option("--location", type=click.Choice(["singen", "azenweiler", "unterraderach", "muellheim", "freiburg", "ihringen", "altheim", "kirchen", "maehringen", "heidelsheim", "elsenz", "zaberfeld", "kupferzell", "stachenhausen", "oehringen"]
+), default="freiburg")
+@click.option("--crop-rotation-scenario", type=click.Choice(["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
+                                                             "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_corn", 
+                                                             "summer-wheat_winter-wheat_winter-rape", "winter-wheat_clover",
+                                                             "winter-wheat_clover_corn", "winter-wheat_corn", 
+                                                             "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape"]), default="winter-wheat_corn")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
 @roger_base_cli
-def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
+def main(location, crop_rotation_scenario, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
@@ -30,13 +28,37 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         """A SVAT model including crop phenology/crop rotation."""
 
         _base_path = Path(__file__).parent.parent
-        _input_dir = _base_path / "input" / f"{location}" / f"{climate_scenario}" / f"{period}"
+        _input_dir = _base_path / "input" / f"{location}"
         if location == "freiburg":
             _elevation = 236
-        elif location == "kupferzell":
-            _elevation = 340
+        elif location == "singen":
+            _elevation = 445
+        elif location == "azenweiler":
+            _elevation = 712
+        elif location == "unterraderach":
+            _elevation = 461
+        elif location == "muellheim":
+            _elevation = 275
+        elif location == "ihringen":
+            _elevation = 193
         elif location == "altheim":
-            _elevation = 541
+            _elevation = 534
+        elif location == "kirchen":
+            _elevation = 594
+        elif location == "maehringen":
+            _elevation = 593
+        elif location == "heidelsheim":
+            _elevation = 130
+        elif location == "elsenz":
+            _elevation = 226
+        elif location == "zaberfeld":
+            _elevation = 249
+        elif location == "kupferzell":
+            _elevation = 355
+        elif location == "stachenhausen":
+            _elevation = 385
+        elif location == "oehringen":
+            _elevation = 276
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -74,57 +96,10 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 var_obj = infile.variables["year_season"]
                 return len(onp.array(var_obj))
 
-        def _calc_pet_with_makkink(self, rs, ta, z, c1=0.63, c2=-0.05):
-            """Calculate potential evapotranspiration according to Makkink.
-
-            Args
-            ----------
-            rs : np.ndarray
-                solar radiation (in MJ m-2 day-1)
-
-            ta : np.ndarray
-                air temperature (in celsius)
-
-            z : float
-                elevation above sea level (in m)
-
-            c1 : float, optional
-                Makkink coefficient (-)
-
-            c2 : float, optional
-                Makkink coefficient (-)
-
-            Reference
-            ----------
-            Makkink, G. F., Testing the Penman formula by means of lysimeters,
-            J. Inst. Wat. Engrs, 11, 277-288, 1957.
-
-            Returns
-            ----------
-            pet : np.ndarray
-                potential evapotranspiration
-            """
-            # slope of saturation vapour pressure curve (in kPa celsius-1)
-            svpc = 4098 * (0.6108 * npx.exp((17.27 * ta) / (ta + 237.3))) / (ta + 237.3) ** 2
-
-            # atmospheric pressure (in kPa)
-            p = 101.3 * ((293 - 0.0065 * z) / 293) ** 5.26
-
-            # psychometric constant (in kPa celsius-1)
-            gam = 0.665 * 1e-3 * p
-
-            # special heat of evaporation (in MJ m-2 mm-1)
-            lam = 0.0864 * (28.4 - 0.028 * ta)
-
-            # potential evapotranspiration (in mm)
-            pet = (svpc / (svpc + gam)) * ((c1 * rs / lam) + c2)
-
-            return npx.where(pet < 0, 0, pet)
-
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}"
+            settings.identifier = f"SVAT_{location}_{crop_rotation_scenario}"
 
             settings.nx, settings.ny = 676, 1
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
@@ -145,7 +120,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
 
             if settings.enable_crop_rotation:
                 settings.ncrops = 3
-                settings.ncr = self._get_ncr(self._input_dir, f"{land_cover_scenario}.nc")
+                settings.ncr = self._get_ncr(self._input_dir, f"{crop_rotation_scenario}.nc")
 
         @roger_routine(
             dist_safe=False,
@@ -215,17 +190,17 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             vs.crop_type = update(
                 vs.crop_type,
                 at[2:-2, 2:-2, 0],
-                self._read_var_from_nc("crop", self._input_dir, f"{land_cover_scenario}.nc")[:, :, 1],
+                self._read_var_from_nc("crop", self._input_dir, f"{crop_rotation_scenario}.nc")[:, :, 1],
             )
             vs.crop_type = update(
                 vs.crop_type,
                 at[2:-2, 2:-2, 1],
-                self._read_var_from_nc("crop", self._input_dir, f"{land_cover_scenario}.nc")[:, :, 2],
+                self._read_var_from_nc("crop", self._input_dir, f"{crop_rotation_scenario}.nc")[:, :, 2],
             )
             vs.crop_type = update(
                 vs.crop_type,
                 at[2:-2, 2:-2, 2],
-                self._read_var_from_nc("crop", self._input_dir, f"{land_cover_scenario}.nc")[:, :, 3],
+                self._read_var_from_nc("crop", self._input_dir, f"{crop_rotation_scenario}.nc")[:, :, 3],
             )
 
             vs.z_root = update(vs.z_root, at[2:-2, 2:-2, :2], 200)
@@ -337,10 +312,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             vs.TA_MAX = update(
                 vs.TA_MAX, at[:], self._read_var_from_nc("TA_max", self._input_dir, "forcing.nc")[0, 0, :]
             )
-            if climate_scenario == "observed":
-                vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[0, 0, :])
-            else:
-                vs.RS = update(vs.RS, at[:], self._read_var_from_nc("RS", self._input_dir, "forcing.nc")[0, 0, :])
+            vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[0, 0, :])
 
         @roger_routine
         def set_forcing(self, state):
@@ -374,25 +346,9 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                     at[:, :],
                     npx.max(vs.TA_MAX[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24], axis=-1),
                 )
-
-                if climate_scenario == "observed":
-                    vs.pet_day = update(
-                        vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
-                    )
-                else:
-                    vs.rs_day = update(
-                        vs.rs_day, at[:, :, :], vs.RS[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
-                    )
-                    vs.pet_day = update(
-                        vs.pet_day,
-                        at[2:-2, 2:-2, :],
-                        self._calc_pet_with_makkink(
-                            npx.mean(vs.rs_day[2:-2, 2:-2, :], axis=-1),
-                            npx.mean(vs.ta_day[2:-2, 2:-2, :], axis=-1),
-                            self._elevation,
-                        )[:, :, npx.newaxis]
-                        / (6 * 24),
-                    )
+                vs.pet_day = update(
+                    vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                )
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
             if (vs.year[1] != vs.year[0]) & (vs.itt > 1):
@@ -401,12 +357,12 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 vs.crop_type = update(
                     vs.crop_type,
                     at[2:-2, 2:-2, 1],
-                    self._read_var_from_nc("crop", self._input_dir, f"{land_cover_scenario}.nc")[:, :, vs.itt_cr],
+                    self._read_var_from_nc("crop", self._input_dir, f"{crop_rotation_scenario}.nc")[:, :, vs.itt_cr],
                 )
                 vs.crop_type = update(
                     vs.crop_type,
                     at[2:-2, 2:-2, 2],
-                    self._read_var_from_nc("crop", self._input_dir, f"{land_cover_scenario}.nc")[:, :, vs.itt_cr + 1],
+                    self._read_var_from_nc("crop", self._input_dir, f"{crop_rotation_scenario}.nc")[:, :, vs.itt_cr + 1],
                 )
 
         @roger_routine
@@ -769,10 +725,10 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
 
     model = SVATCROPSetup()
     write_forcing(model._input_dir, enable_crop_phenology=True)
-    crop_rotation_dir = model._base_path / "input" / "land_cover_scenario" / land_cover_scenario
+    crop_rotation_dir = model._base_path / "input" / "crop_rotation_scenario" / crop_rotation_scenario
     write_crop_rotation(crop_rotation_dir)
-    if not os.path.exists(model._input_dir / f"{land_cover_scenario}.nc"):
-        shutil.copy2(crop_rotation_dir / "crop_rotation.nc", model._input_dir / f"{land_cover_scenario}.nc")
+    if not os.path.exists(model._input_dir / f"{crop_rotation_scenario}.nc"):
+        shutil.copy2(crop_rotation_dir / "crop_rotation.nc", model._input_dir / f"{crop_rotation_scenario}.nc")
     model.setup()
     model.run()
     return

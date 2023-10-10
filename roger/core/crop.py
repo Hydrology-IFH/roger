@@ -921,7 +921,7 @@ def calc_root_growth(state):
         at[2:-2, 2:-2, vs.tau, :],
         npx.where(
             mask_stop_growth[2:-2, 2:-2, :],
-            0.9 * vs.z_soil[2:-2, 2:-2, npx.newaxis],
+            0.7 * vs.z_soil[2:-2, 2:-2, npx.newaxis],
             vs.z_root_crop[2:-2, 2:-2, vs.tau, :],
         ),
     )
