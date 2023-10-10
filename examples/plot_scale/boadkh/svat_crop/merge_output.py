@@ -15,23 +15,25 @@ locations = [
     "muellheim",
     "freiburg",
     "ihringen",
-    "riedlingen",
+    "altheim",
     "kirchen",
     "maehringen",
     "heidelsheim",
     "elsenz",
     "zaberfeld",
-    "rechbach",
+    "kupferzell",
     "stachenhausen",
     "oehringen",
 ]
-crop_rotation_scenarios = ["corn", "corn_catch_crop", "crop_rotation"]
+crop_rotation_scenarios = ["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", "summer-wheat_winter-wheat_corn", 
+                           "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", "winter-wheat_clover",
+                           "winter-wheat_clover_corn", "winter-wheat_corn", "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape"]
 
 # merge model output into single file
 for location in locations:
     for crop_rotation_scenario in crop_rotation_scenarios:
-        path = str(base_path.parent / "output" / "svat" / f"SVATCROP_{location}_{crop_rotation_scenario}.*.nc")
-        output_hm_file = base_path.parent / "output" / "svat" / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+        path = str(base_path.parent / "output" / "svat_crop" / f"SVATCROP_{location}_{crop_rotation_scenario}.*.nc")
+        output_hm_file = base_path.parent / "output" / "svat_crop" / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
         if not os.path.exists(output_hm_file):
             diag_files = glob.glob(path)
             with h5netcdf.File(output_hm_file, "w", decode_vlen_strings=False) as f:
@@ -41,7 +43,7 @@ for location in locations:
                     institution="University of Freiburg, Chair of Hydrology",
                     references="",
                     comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-                    model_structure="SVAT model with free drainage",
+                    model_structure="SVAT model with free drainage and crop phenology",
                 )
                 # collect dimensions
                 for dfs in diag_files:

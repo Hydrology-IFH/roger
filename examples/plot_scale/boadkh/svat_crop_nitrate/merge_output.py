@@ -8,38 +8,52 @@ import numpy as onp
 base_path = Path(__file__).parent
 
 # identifiers for simulations
-locations = ["freiburg", "altheim", "kupferzell"]
-land_cover_scenarios = ["corn", "corn_catch_crop", "crop_rotation"]
-climate_scenarios = ["CCCma-CanESM2_CCLM4-8-17", "MPI-M-MPI-ESM-LR_RCA4"]
-periods = ["1985-2014", "2030-2059", "2070-2099"]
+locations = [
+    "singen",
+    "azenweiler",
+    "unterraderach",
+    "muellheim",
+    "freiburg",
+    "ihringen",
+    "altheim",
+    "kirchen",
+    "maehringen",
+    "heidelsheim",
+    "elsenz",
+    "zaberfeld",
+    "kupferzell",
+    "stachenhausen",
+    "oehringen",
+]
+crop_rotation_scenarios = ["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", "summer-wheat_winter-wheat_corn", 
+                           "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", "winter-wheat_clover",
+                           "winter-wheat_clover_corn", "winter-wheat_corn", "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape"]
 
 # merge model output into single file
 for location in locations:
-    for land_cover_scenario in land_cover_scenarios:
-        for climate_scenario in climate_scenarios:
-            for period in periods:
+    for crop_rotation_scenario in crop_rotation_scenarios:
                 path = str(
                     base_path.parent
                     / "output"
-                    / "svat_transport"
-                    / f"SVATTRANSPORT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.*.nc"
+                    / "svat_crop_nitrate"
+                    / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}.*.nc"
                 )
                 output_tm_file = (
                     base_path.parent
                     / "output"
-                    / "svat_transport"
-                    / f"SVATTRANSPORT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    / "svat_crop_nitrate"
+                    / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}.nc"
                 )
                 if not os.path.exists(output_tm_file):
                     diag_files = glob.glob(path)
                     with h5netcdf.File(output_tm_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
                             date_created=datetime.datetime.today().isoformat(),
-                            title=f"RoGeR transport simulations at {location}",
+                            title=f"RoGeR nitrate transport simulations at {location}",
                             institution="University of Freiburg, Chair of Hydrology",
                             references="",
                             comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-                            model_structure="SVAT model with free drainage and time-variant power law distribution as SAS function with advective-dispersive parameters",
+                            model_structure="SVAT model with free drainage, crop phenology and time-variant power law distribution as SAS function with advective-dispersive parameters",
                         )
                         # collect dimensions
                         for dfs in diag_files:

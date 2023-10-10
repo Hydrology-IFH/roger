@@ -462,23 +462,25 @@ if not os.path.exists(mlm_random_intercepts_file):
                                     # yhat = res.predict()
                                     yhat = res.fittedvalues
                                     # fixed effect parameters and random effect parameters
-                                    params = res.params.to_frame().T
-                                    # number of fixed effect parameters
-                                    n_fe_params = len(res.fe_params.to_frame().T.values.flatten())
+                                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+                                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+                                    params = onp.concatenate((fe_params, re_params), axis=None)
+                                    dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                                        "fixed_effects"
+                                    ] = res.params.to_frame()
+                                    dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                                        "random_effects"
+                                    ] = pd.DataFrame(res.random_effects).var(axis=1)
 
                                     # relative importance of parameters
                                     dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
                                         "params"
-                                    ] = params / onp.sum(onp.abs(params.values.flatten()))
+                                    ] = params / onp.sum(params)
 
                                     # contribution of the fixed effect parameters and random effect parameters
-                                    dfa = pd.DataFrame(index=[0], columns=["soil", "random_climate"], dtype=onp.float64)
-                                    dfa.iloc[0, 0] = onp.sum(onp.abs(res.fe_params.to_frame().T.values.flatten())) / onp.sum(
-                                        onp.abs(params.values.flatten())
-                                    )
-                                    dfa.iloc[0, 1] = onp.sum(onp.abs(params.values.flatten()[n_fe_params:])) / onp.sum(
-                                        onp.abs(params.values.flatten())
-                                    )
+                                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+                                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+                                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
                                     dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["attribution"] = dfa
                                     # evaluation metrics
                                     dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["MAE"] = smem.meanabs(
@@ -559,23 +561,26 @@ if not os.path.exists(mlm_random_slopes_file):
                                     # yhat = res.predict()
                                     yhat = res.fittedvalues
                                     # fixed effect parameters and random effect parameters
-                                    params = res.params.to_frame().T
-                                    # number of fixed effect parameters
-                                    n_fe_params = len(res.fe_params.to_frame().T.values.flatten())
+                                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+                                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+                                    params = onp.concatenate((fe_params, re_params), axis=None)
+                                    dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                                        "fixed_effects"
+                                    ] = res.params.to_frame()
+                                    dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                                        "random_effects"
+                                    ] = pd.DataFrame(res.random_effects).var(axis=1)
 
                                     # relative importance of parameters
                                     dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
                                         "params"
-                                    ] = params / onp.sum(onp.abs(params.values.flatten()))
+                                    ] = params / onp.sum(params)
 
                                     # contribution of the fixed effect parameters and random effect parameters
-                                    dfa = pd.DataFrame(index=[0], columns=["soil", "random_climate"], dtype=onp.float64)
-                                    dfa.iloc[0, 0] = onp.sum(onp.abs(res.fe_params.to_frame().T.values.flatten())) / onp.sum(
-                                        onp.abs(params.values.flatten())
-                                    )
-                                    dfa.iloc[0, 1] = onp.sum(onp.abs(params.values.flatten()[n_fe_params:])) / onp.sum(
-                                        onp.abs(params.values.flatten())
-                                    )
+                                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+                                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+                                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+
                                     dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["attribution"] = dfa
                                     # evaluation metrics
                                     dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["MAE"] = smem.meanabs(
@@ -654,23 +659,26 @@ if not os.path.exists(mlm_random_intercepts_llcp_file):
                     # yhat = res.predict()
                     yhat = res.fittedvalues
                     # fixed effect parameters and random effect parameters
-                    params = res.params.to_frame().T
-                    # number of fixed effect parameters
-                    n_fe_params = len(res.fe_params.to_frame().T.values.flatten())
+                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+                    params = onp.concatenate((fe_params, re_params), axis=None)
+                    dict_mlm_random_intercepts_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        "fixed_effects"
+                    ] = res.params.to_frame()
+                    dict_mlm_random_intercepts_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        "random_effects"
+                    ] = pd.DataFrame(res.random_effects).var(axis=1)
 
                     # relative importance of parameters
-                    dict_mlm_random_intercepts_llcp[mlm_key][var_sim][delta][soil_depth][
+                    dict_mlm_random_intercepts_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
                         "params"
-                    ] = params / onp.sum(onp.abs(params.values.flatten()))
+                    ] = params / onp.sum(params)
 
                     # contribution of the fixed effect parameters and random effect parameters
-                    dfa = pd.DataFrame(index=[0], columns=["soil", "random_climate"], dtype=onp.float64)
-                    dfa.iloc[0, 0] = onp.sum(onp.abs(res.fe_params.to_frame().T.values.flatten())) / onp.sum(
-                        onp.abs(params.values.flatten())
-                    )
-                    dfa.iloc[0, 1] = onp.sum(onp.abs(params.values.flatten()[n_fe_params:])) / onp.sum(
-                        onp.abs(params.values.flatten())
-                    )
+                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+
                     dict_mlm_random_intercepts_llcp[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
                     # evaluation metrics
                     dict_mlm_random_intercepts_llcp[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
@@ -797,23 +805,23 @@ if not os.path.exists(mlm_random_slopes_llcp_file):
                     # yhat = res.predict()
                     yhat = res.fittedvalues
                     # fixed effect parameters and random effect parameters
-                    params = res.params.to_frame().T
-                    # number of fixed effect parameters
-                    n_fe_params = len(res.fe_params.to_frame().T.values.flatten())
-
+                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+                    params = onp.concatenate((fe_params, re_params), axis=None)
+                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        "fixed_effects"
+                    ] = res.params.to_frame()
+                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        "random_effects"
+                    ] = pd.DataFrame(res.random_effects).var(axis=1)
                     # relative importance of parameters
-                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth][
+                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
                         "params"
-                    ] = params / onp.sum(onp.abs(params.values.flatten()))
-
+                    ] = params / onp.sum(params)
                     # contribution of the fixed effect parameters and random effect parameters
-                    dfa = pd.DataFrame(index=[0], columns=["soil", "random_climate"], dtype=onp.float64)
-                    dfa.iloc[0, 0] = onp.sum(onp.abs(res.fe_params.to_frame().T.values.flatten())) / onp.sum(
-                        onp.abs(params.values.flatten())
-                    )
-                    dfa.iloc[0, 1] = onp.sum(onp.abs(params.values.flatten()[n_fe_params:])) / onp.sum(
-                        onp.abs(params.values.flatten())
-                    )
+                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
                     dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
                     # evaluation metrics
                     dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
@@ -892,23 +900,23 @@ if not os.path.exists(mlm_random_intercepts_soil_llcp_file):
                     # yhat = res.predict()
                     yhat = res.fittedvalues
                     # fixed effect parameters and random effect parameters
-                    params = res.params.to_frame().T
-                    # number of fixed effect parameters
-                    n_fe_params = len(res.fe_params.to_frame().T.values.flatten())
-
+                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+                    params = onp.concatenate((fe_params, re_params), axis=None)
+                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        "fixed_effects"
+                    ] = res.params.to_frame()
+                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        "random_effects"
+                    ] = pd.DataFrame(res.random_effects).var(axis=1)
                     # relative importance of parameters
-                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][
+                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
                         "params"
-                    ] = params / onp.sum(onp.abs(params.values.flatten()))
-
+                    ] = params / onp.sum(params)
                     # contribution of the fixed effect parameters and random effect parameters
-                    dfa = pd.DataFrame(index=[0], columns=["soil", "random_climate"], dtype=onp.float64)
-                    dfa.iloc[0, 0] = onp.sum(onp.abs(res.fe_params.to_frame().T.values.flatten())) / onp.sum(
-                        onp.abs(params.values.flatten())
-                    )
-                    dfa.iloc[0, 1] = onp.sum(onp.abs(params.values.flatten()[n_fe_params:])) / onp.sum(
-                        onp.abs(params.values.flatten())
-                    )
+                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
                     dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
                     # evaluation metrics
                     dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
@@ -1035,23 +1043,23 @@ if not os.path.exists(mlm_random_slopes_soil_llcp_file):
                     # yhat = res.predict()
                     yhat = res.fittedvalues
                     # fixed effect parameters and random effect parameters
-                    params = res.params.to_frame().T
-                    # number of fixed effect parameters
-                    n_fe_params = len(res.fe_params.to_frame().T.values.flatten())
-
+                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+                    params = onp.concatenate((fe_params, re_params), axis=None)
+                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        "fixed_effects"
+                    ] = res.params.to_frame()
+                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        "random_effects"
+                    ] = pd.DataFrame(res.random_effects).var(axis=1)
                     # relative importance of parameters
-                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][
+                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
                         "params"
-                    ] = params / onp.sum(onp.abs(params.values.flatten()))
-
+                    ] = params / onp.sum(params)
                     # contribution of the fixed effect parameters and random effect parameters
-                    dfa = pd.DataFrame(index=[0], columns=["soil", "random_climate"], dtype=onp.float64)
-                    dfa.iloc[0, 0] = onp.sum(onp.abs(res.fe_params.to_frame().T.values.flatten())) / onp.sum(
-                        onp.abs(params.values.flatten())
-                    )
-                    dfa.iloc[0, 1] = onp.sum(onp.abs(params.values.flatten()[n_fe_params:])) / onp.sum(
-                        onp.abs(params.values.flatten())
-                    )
+                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
                     dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
                     # evaluation metrics
                     dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
@@ -1131,24 +1139,24 @@ if not os.path.exists(mlm_random_intercepts_location_file):
                     # yhat = res.predict()
                     yhat = res.fittedvalues
                     # fixed effect parameters and random effect parameters
-                    params = res.params.to_frame().T
-                    # number of fixed effect parameters
-                    n_fe_params = len(res.fe_params.to_frame().T.values.flatten())
-
+                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+                    params = onp.concatenate((fe_params, re_params), axis=None)
+                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        "fixed_effects"
+                    ] = res.params.to_frame()
+                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        "random_effects"
+                    ] = pd.DataFrame(res.random_effects).var(axis=1)
                     # relative importance of parameters
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth][
+                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
                         "params"
-                    ] = params / onp.sum(onp.abs(params.values.flatten()))
-
+                    ] = params / onp.sum(params)
                     # contribution of the fixed effect parameters and random effect parameters
-                    dfa = pd.DataFrame(index=[0], columns=["soil", "random_climate"], dtype=onp.float64)
-                    dfa.iloc[0, 0] = onp.sum(onp.abs(res.fe_params.to_frame().T.values.flatten())) / onp.sum(
-                        onp.abs(params.values.flatten())
-                    )
-                    dfa.iloc[0, 1] = onp.sum(onp.abs(params.values.flatten()[n_fe_params:])) / onp.sum(
-                        onp.abs(params.values.flatten())
-                    )
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
+                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa                    
                     # evaluation metrics
                     dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
                         y, yhat
@@ -1226,23 +1234,23 @@ if not os.path.exists(mlm_random_slopes_location_file):
                         # yhat = res.predict()
                         yhat = res.fittedvalues
                         # fixed effect parameters and random effect parameters
-                        params = res.params.to_frame().T
-                        # number of fixed effect parameters
-                        n_fe_params = len(res.fe_params.to_frame().T.values.flatten())
-
+                        fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+                        re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+                        params = onp.concatenate((fe_params, re_params), axis=None)
+                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                            "fixed_effects"
+                        ] = res.params.to_frame()
+                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                            "random_effects"
+                        ] = pd.DataFrame(res.random_effects).var(axis=1)
                         # relative importance of parameters
-                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth][
+                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
                             "params"
-                        ] = params / onp.sum(onp.abs(params.values.flatten()))
-
+                        ] = params / onp.sum(params)
                         # contribution of the fixed effect parameters and random effect parameters
-                        dfa = pd.DataFrame(index=[0], columns=["soil", "random_climate"], dtype=onp.float64)
-                        dfa.iloc[0, 0] = onp.sum(onp.abs(res.fe_params.to_frame().T.values.flatten())) / onp.sum(
-                            onp.abs(params.values.flatten())
-                        )
-                        dfa.iloc[0, 1] = onp.sum(onp.abs(params.values.flatten()[n_fe_params:])) / onp.sum(
-                            onp.abs(params.values.flatten())
-                        )
+                        dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+                        dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+                        dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
                         dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
                         # evaluation metrics
                         dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
@@ -1322,23 +1330,23 @@ if not os.path.exists(mlm_random_intercepts_soil_location_file):
                         # yhat = res.predict()
                         yhat = res.fittedvalues
                         # fixed effect parameters and random effect parameters
-                        params = res.params.to_frame().T
-                        # number of fixed effect parameters
-                        n_fe_params = len(res.fe_params.to_frame().T.values.flatten())
-
+                        fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+                        re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+                        params = onp.concatenate((fe_params, re_params), axis=None)
+                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                            "fixed_effects"
+                        ] = res.params.to_frame()
+                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                            "random_effects"
+                        ] = pd.DataFrame(res.random_effects).var(axis=1)
                         # relative importance of parameters
-                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth][
+                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
                             "params"
-                        ] = params / onp.sum(onp.abs(params.values.flatten()))
-
+                        ] = params / onp.sum(params)
                         # contribution of the fixed effect parameters and random effect parameters
-                        dfa = pd.DataFrame(index=[0], columns=["soil", "random_climate"], dtype=onp.float64)
-                        dfa.iloc[0, 0] = onp.sum(onp.abs(res.fe_params.to_frame().T.values.flatten())) / onp.sum(
-                            onp.abs(params.values.flatten())
-                        )
-                        dfa.iloc[0, 1] = onp.sum(onp.abs(params.values.flatten()[n_fe_params:])) / onp.sum(
-                            onp.abs(params.values.flatten())
-                        )
+                        dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+                        dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+                        dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
                         dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth]["attribution"] = dfa
                         # evaluation metrics
                         dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth]["MAE"] = smem.meanabs(
@@ -1418,23 +1426,23 @@ if not os.path.exists(mlm_random_slopes_soil_location_file):
                         # yhat = res.predict()
                         yhat = res.fittedvalues
                         # fixed effect parameters and random effect parameters
-                        params = res.params.to_frame().T
-                        # number of fixed effect parameters
-                        n_fe_params = len(res.fe_params.to_frame().T.values.flatten())
-
+                        fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+                        re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+                        params = onp.concatenate((fe_params, re_params), axis=None)
+                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                            "fixed_effects"
+                        ] = res.params.to_frame()
+                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                            "random_effects"
+                        ] = pd.DataFrame(res.random_effects).var(axis=1)
                         # relative importance of parameters
-                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth][
+                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
                             "params"
-                        ] = params / onp.sum(onp.abs(params.values.flatten()))
-
+                        ] = params / onp.sum(params)
                         # contribution of the fixed effect parameters and random effect parameters
-                        dfa = pd.DataFrame(index=[0], columns=["soil", "random_climate"], dtype=onp.float64)
-                        dfa.iloc[0, 0] = onp.sum(onp.abs(res.fe_params.to_frame().T.values.flatten())) / onp.sum(
-                            onp.abs(params.values.flatten())
-                        )
-                        dfa.iloc[0, 1] = onp.sum(onp.abs(params.values.flatten()[n_fe_params:])) / onp.sum(
-                            onp.abs(params.values.flatten())
-                        )
+                        dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+                        dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+                        dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
                         dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth]["attribution"] = dfa
                         # evaluation metrics
                         dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth]["MAE"] = smem.meanabs(
@@ -1514,23 +1522,23 @@ if not os.path.exists(mlm_random_intercepts_land_cover_scenario_file):
                     # yhat = res.predict()
                     yhat = res.fittedvalues
                     # fixed effect parameters and random effect parameters
-                    params = res.params.to_frame().T
-                    # number of fixed effect parameters
-                    n_fe_params = len(res.fe_params.to_frame().T.values.flatten())
-
+                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+                    params = onp.concatenate((fe_params, re_params), axis=None)
+                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        "fixed_effects"
+                    ] = res.params.to_frame()
+                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        "random_effects"
+                    ] = pd.DataFrame(res.random_effects).var(axis=1)
                     # relative importance of parameters
-                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
+                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
                         "params"
-                    ] = params / onp.sum(onp.abs(params.values.flatten()))
-
+                    ] = params / onp.sum(params)
                     # contribution of the fixed effect parameters and random effect parameters
-                    dfa = pd.DataFrame(index=[0], columns=["soil", "random_climate"], dtype=onp.float64)
-                    dfa.iloc[0, 0] = onp.sum(onp.abs(res.fe_params.to_frame().T.values.flatten())) / onp.sum(
-                        onp.abs(params.values.flatten())
-                    )
-                    dfa.iloc[0, 1] = onp.sum(onp.abs(params.values.flatten()[n_fe_params:])) / onp.sum(
-                        onp.abs(params.values.flatten())
-                    )
+                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
                     dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
                     # evaluation metrics
                     dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
@@ -1609,23 +1617,23 @@ if not os.path.exists(mlm_random_slopes_land_cover_scenario_file):
                     # yhat = res.predict()
                     yhat = res.fittedvalues
                     # fixed effect parameters and random effect parameters
-                    params = res.params.to_frame().T
-                    # number of fixed effect parameters
-                    n_fe_params = len(res.fe_params.to_frame().T.values.flatten())
-
+                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+                    params = onp.concatenate((fe_params, re_params), axis=None)
+                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        "fixed_effects"
+                    ] = res.params.to_frame()
+                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        "random_effects"
+                    ] = pd.DataFrame(res.random_effects).var(axis=1)
                     # relative importance of parameters
-                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
+                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
                         "params"
-                    ] = params / onp.sum(onp.abs(params.values.flatten()))
-
+                    ] = params / onp.sum(params)
                     # contribution of the fixed effect parameters and random effect parameters
-                    dfa = pd.DataFrame(index=[0], columns=["soil", "random_climate"], dtype=onp.float64)
-                    dfa.iloc[0, 0] = onp.sum(onp.abs(res.fe_params.to_frame().T.values.flatten())) / onp.sum(
-                        onp.abs(params.values.flatten())
-                    )
-                    dfa.iloc[0, 1] = onp.sum(onp.abs(params.values.flatten()[n_fe_params:])) / onp.sum(
-                        onp.abs(params.values.flatten())
-                    )
+                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
                     dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
                     # evaluation metrics
                     dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
@@ -1706,23 +1714,23 @@ if not os.path.exists(mlm_random_intercepts_soil_land_cover_scenario_file):
                         # yhat = res.predict()
                         yhat = res.fittedvalues
                         # fixed effect parameters and random effect parameters
-                        params = res.params.to_frame().T
-                        # number of fixed effect parameters
-                        n_fe_params = len(res.fe_params.to_frame().T.values.flatten())
-
+                        fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+                        re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+                        params = onp.concatenate((fe_params, re_params), axis=None)
+                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                            "fixed_effects"
+                        ] = res.params.to_frame()
+                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                            "random_effects"
+                        ] = pd.DataFrame(res.random_effects).var(axis=1)
                         # relative importance of parameters
-                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
+                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
                             "params"
-                        ] = params / onp.sum(onp.abs(params.values.flatten()))
-
+                        ] = params / onp.sum(params)
                         # contribution of the fixed effect parameters and random effect parameters
-                        dfa = pd.DataFrame(index=[0], columns=["soil", "random_climate"], dtype=onp.float64)
-                        dfa.iloc[0, 0] = onp.sum(onp.abs(res.fe_params.to_frame().T.values.flatten())) / onp.sum(
-                            onp.abs(params.values.flatten())
-                        )
-                        dfa.iloc[0, 1] = onp.sum(onp.abs(params.values.flatten()[n_fe_params:])) / onp.sum(
-                            onp.abs(params.values.flatten())
-                        )
+                        dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+                        dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+                        dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
                         dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["attribution"] = dfa
                         # evaluation metrics
                         dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["MAE"] = smem.meanabs(
@@ -1802,23 +1810,23 @@ if not os.path.exists(mlm_random_slopes_soil_land_cover_scenario_file):
                         # yhat = res.predict()
                         yhat = res.fittedvalues
                         # fixed effect parameters and random effect parameters
-                        params = res.params.to_frame().T
-                        # number of fixed effect parameters
-                        n_fe_params = len(res.fe_params.to_frame().T.values.flatten())
-
+                        fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+                        re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+                        params = onp.concatenate((fe_params, re_params), axis=None)
+                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                            "fixed_effects"
+                        ] = res.params.to_frame()
+                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                            "random_effects"
+                        ] = pd.DataFrame(res.random_effects).var(axis=1)
                         # relative importance of parameters
-                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
+                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
                             "params"
-                        ] = params / onp.sum(onp.abs(params.values.flatten()))
-
+                        ] = params / onp.sum(params)
                         # contribution of the fixed effect parameters and random effect parameters
-                        dfa = pd.DataFrame(index=[0], columns=["soil", "random_climate"], dtype=onp.float64)
-                        dfa.iloc[0, 0] = onp.sum(onp.abs(res.fe_params.to_frame().T.values.flatten())) / onp.sum(
-                            onp.abs(params.values.flatten())
-                        )
-                        dfa.iloc[0, 1] = onp.sum(onp.abs(params.values.flatten()[n_fe_params:])) / onp.sum(
-                            onp.abs(params.values.flatten())
-                        )
+                        dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+                        dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+                        dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
                         dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["attribution"] = dfa
                         # evaluation metrics
                         dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["MAE"] = smem.meanabs(
