@@ -241,7 +241,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], 1)
             vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], 1)
             vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], 1)
-            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], 1)
+            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], 100)
             # nitrification parameters
             vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], 1)
             vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], 1)
