@@ -26,6 +26,9 @@ The following crop combinations are rotated:
 - Winter wheat and clover
 - Winter wheat and corn
 - Winter wheat and winter rape
+- Winter wheat, clover and corn
+- Winter wheat, sugar beet and corn
+- Winter wheat, winter grain pea and winter rape
 - Summer wheat and winter wheat
 - Summer wheat, clover and winter wheat
 - Summer wheat, winter wheat and corn

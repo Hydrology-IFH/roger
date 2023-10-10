@@ -898,7 +898,7 @@ def calc_root_growth(state):
         at[2:-2, 2:-2, vs.tau, :],
         npx.where(mask12[2:-2, 2:-2, :], vs.z_evap[2:-2, 2:-2, npx.newaxis], vs.z_root_crop[2:-2, 2:-2, vs.tau, :]),
     )
-    # root growth
+    # crop root growth
     vs.z_root_crop = update(
         vs.z_root_crop,
         at[2:-2, 2:-2, vs.tau, :],
@@ -914,7 +914,7 @@ def calc_root_growth(state):
         ),
     )
 
-    # root growth stops if 70 % of total soil depth is reached
+    # crop root growth stops if 70 % of total soil depth is reached
     mask_stop_growth = vs.z_root_crop[:, :, vs.tau, :] >= 0.7 * vs.z_soil[:, :, npx.newaxis]
     vs.z_root_crop = update(
         vs.z_root_crop,

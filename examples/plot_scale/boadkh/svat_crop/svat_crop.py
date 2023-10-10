@@ -10,10 +10,11 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("--location", type=click.Choice(["singen", "azenweiler", "unterraderach", "muellheim", "freiburg", "ihringen", "altheim", "kirchen", "maehringen", "heidelsheim", "elsenz", "zaberfeld", "kupferzell", "stachenhausen", "oehringen"]
 ), default="freiburg")
 @click.option("--crop-rotation-scenario", type=click.Choice(["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
-                                                             "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_corn", 
+                                                             "summer-wheat_winter-wheat_corn", 
                                                              "summer-wheat_winter-wheat_winter-rape", "winter-wheat_clover",
                                                              "winter-wheat_clover_corn", "winter-wheat_corn", 
-                                                             "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape"]), default="winter-wheat_corn")
+                                                             "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
+                                                             "winter-wheat_winter-grain-pea_winter-rape"]), default="winter-wheat_corn")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
 @roger_base_cli
 def main(location, crop_rotation_scenario, tmp_dir):
@@ -99,7 +100,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"SVAT_{location}_{crop_rotation_scenario}"
+            settings.identifier = f"SVATCROP_{location}_{crop_rotation_scenario}"
 
             settings.nx, settings.ny = 676, 1
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
@@ -725,7 +726,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
 
     model = SVATCROPSetup()
     write_forcing(model._input_dir, enable_crop_phenology=True)
-    crop_rotation_dir = model._base_path / "input" / "crop_rotation_scenario" / crop_rotation_scenario
+    crop_rotation_dir = model._base_path / "input" / "crop_rotation_scenarios" / crop_rotation_scenario
     write_crop_rotation(crop_rotation_dir)
     if not os.path.exists(model._input_dir / f"{crop_rotation_scenario}.nc"):
         shutil.copy2(crop_rotation_dir / "crop_rotation.nc", model._input_dir / f"{crop_rotation_scenario}.nc")

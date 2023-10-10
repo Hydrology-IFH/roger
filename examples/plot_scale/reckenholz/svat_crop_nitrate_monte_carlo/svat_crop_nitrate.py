@@ -15,7 +15,7 @@ from roger.cli.roger_run_base import roger_base_cli
 def main(lys_experiment, transport_model_structure, sas_solver, crop_partitioning, tmp_dir):
     from roger import RogerSetup, roger_routine
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, at, where, random_uniform, scipy_stats as sstx
+    from roger.core.operators import numpy as npx, update, at, where, scipy_stats as sstx
     from roger.tools.setup import write_forcing_tracer
     import roger.lookuptables as lut
     from roger.core.crop import update_alpha_transp
