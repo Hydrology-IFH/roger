@@ -100,16 +100,17 @@ SUMMER_CROPS = onp.array(
 )
 WINTER_CROPS = onp.array([556, 557, 558, 559, 560, 564], dtype=onp.int32)
 WINTER_CATCH_CROPS = onp.array([566, 568, 569, 570], dtype=onp.int32)
-MULTI_YEAR_CROPS_INIT = onp.array([571, 572], dtype=onp.int32)
-MULTI_YEAR_CROPS_CONT = onp.array([573, 574, 581, 582], dtype=onp.int32)
-WINTER_MULTI_YEAR_CROPS_INIT = onp.array([572], dtype=onp.int32)
-WINTER_MULTI_YEAR_CROPS_CONT = onp.array([574], dtype=onp.int32)
+MULTI_YEAR_CROPS_INIT = onp.array([571, 572, 580, 583], dtype=onp.int32)
+MULTI_YEAR_CROPS_CONT = onp.array([573, 574, 581, 582, 584, 585], dtype=onp.int32)
+WINTER_MULTI_YEAR_CROPS_INIT = onp.array([572, 583], dtype=onp.int32)
+WINTER_MULTI_YEAR_CROPS_CONT = onp.array([574, 581, 585], dtype=onp.int32)
 SUMMER_MULTI_YEAR_CROPS_INIT = onp.array([571, 580], dtype=onp.int32)
-SUMMER_MULTI_YEAR_CROPS_CONT = onp.array([573, 581, 582], dtype=onp.int32)
+SUMMER_MULTI_YEAR_CROPS_CONT = onp.array([573, 582, 584], dtype=onp.int32)
 
 dict_crops = {
     536: "beetroot",
     539: "silage_corn",
+    543: "summer wheat",
     556: "winter barley",
     557: "winter wheat",
     559: "winter rape",
@@ -122,5 +123,9 @@ dict_crops = {
     572: "grass",
     573: "grass",
     574: "grass",
+    580: "clover",
+    581: "clover",
+    582: "clover",
+    583: "clover",
     599: "bare",
 }

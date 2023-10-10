@@ -5,30 +5,30 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("--location", type=click.Choice(["freiburg", "altheim", "kupferzell"]), default="freiburg")
-@click.option("--land-cover-scenario", type=click.Choice(["corn", "corn_catch_crop", "crop_rotation"]), default="corn")
-@click.option(
-    "--climate-scenario",
-    type=click.Choice(["observed", "CCCma-CanESM2_CCLM4-8-17", "MPI-M-MPI-ESM-LR_RCA4"]),
-    default="MPI-M-MPI-ESM-LR_RCA4",
-)
-@click.option("--period", type=click.Choice(["1985-2014", "2030-2059", "2070-2099"]), default="2030-2059")
+@click.option("--location", type=click.Choice(["singen", "azenweiler", "unterraderach", "muellheim", "freiburg", "ihringen", "altheim", "kirchen", "maehringen", "heidelsheim", "elsenz", "zaberfeld", "kupferzell", "stachenhausen", "oehringen"]
+), default="freiburg")
+@click.option("--crop-rotation-scenario", type=click.Choice(["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
+                                                             "summer-wheat_winter-wheat_corn", 
+                                                             "summer-wheat_winter-wheat_winter-rape", "winter-wheat_clover",
+                                                             "winter-wheat_clover_corn", "winter-wheat_corn", 
+                                                             "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
+                                                             "winter-wheat_winter-grain-pea_winter-rape"]), default="winter-wheat_corn")
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
-def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
+def main(location, crop_rotation_scenario, tmp_dir):
     from roger import RogerSetup, roger_routine
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, at
+    from roger.core.operators import numpy as npx, update, at, scipy_stats as sstx
 
-    class SVATCROPTRANSPORTSetup(RogerSetup):
-        """A SVAT-CROP transport model for virtual tracer."""
+    class SVATCROPNITRATESetup(RogerSetup):
+        """A SVAT-CROP transport model for nitrate."""
 
         _base_path = Path(__file__).parent
         if tmp_dir:
             # read fluxes and states from local SSD on cluster node
             _input_dir = Path(tmp_dir)
         else:
-            _input_dir = _base_path.parent / "output" / "svat"
+            _input_dir = _base_path.parent / "output" / "svat_crop_nitrate"
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -51,19 +51,19 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"SVATTRANSPORT_{location}_{land_cover_scenario}_{climate_scenario}_{period}"
+            settings.identifier = f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}"
             settings.sas_solver = "deterministic"
             settings.sas_solver_substeps = 8
 
             settings.nx, settings.ny = 676, 1
             settings.nitt = self._get_nitt(
-                self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
             )
             settings.ages = 1500
             settings.nages = settings.ages + 1
             settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
             settings.runlen = self._get_runlen(
-                self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
             )
 
             settings.dx = 1
@@ -71,13 +71,12 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0
-            year0 = int(period.split("-")[0]) - 1
-            settings.time_origin = f"{year0}-12-31 00:00:00"
+            settings.time_origin = "2013-12-31 00:00:00"
 
             settings.enable_crop_phenology = True
             settings.enable_crop_rotation = True
             settings.enable_offline_transport = True
-            settings.enable_virtualtracer = True
+            settings.enable_nitrate = True
             settings.enable_age_statistics = True
 
         @roger_routine(
@@ -136,6 +135,16 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 "sas_params_re_rl",
                 "alpha_transp",
                 "alpha_q",
+                "km_denit_rz",
+                "km_denit_ss",
+                "dmax_denit_rz",
+                "dmax_denit_ss",
+                "km_nit_rz",
+                "km_nit_ss",
+                "dmax_nit_rz",
+                "dmax_nit_ss",
+                "kmin_rz",
+                "kmin_ss",
             ],
         )
         def set_parameters_setup(self, state):
@@ -145,28 +154,28 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 vs.S_PWP_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_pwp_rz", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "S_pwp_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.S_SAT_RZ = update(
                 vs.S_SAT_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_sat_rz", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "S_sat_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.S_PWP_SS = update(
                 vs.S_PWP_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_pwp_ss", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "S_pwp_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.S_SAT_SS = update(
                 vs.S_SAT_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_sat_ss", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "S_sat_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
 
@@ -174,28 +183,28 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 vs.S_pwp_rz,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_pwp_rz", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "S_pwp_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 )[:, :, 0],
             )
             vs.S_pwp_ss = update(
                 vs.S_pwp_ss,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_pwp_ss", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "S_pwp_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 )[:, :, 0],
             )
             vs.S_sat_rz = update(
                 vs.S_sat_rz,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_sat_rz", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "S_sat_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 )[:, :, 0],
             )
             vs.S_sat_ss = update(
                 vs.S_sat_ss,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_sat_ss", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "S_sat_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 )[:, :, 0],
             )
 
@@ -228,6 +237,21 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 6)
             vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 1], 10)
 
+            # denitrification parameters
+            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], 1)
+            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], 1)
+            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], 1)
+            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], 1)
+            # nitrification parameters
+            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], 1)
+            vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], 1)
+            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], 1)
+            vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], 1)
+            # soil nitrogen mineralization parameters
+            vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], 1)
+            vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], 1)
+            # soil nitrogen fixation parameters
+
         @roger_routine
         def set_parameters(self, state):
             vs = state.variables
@@ -255,14 +279,14 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 vs.S_rz,
                 at[2:-2, 2:-2, : vs.taup1],
                 self._read_var_from_nc(
-                    "S_rz", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "S_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 )[:, :, vs.itt, npx.newaxis],
             )
             vs.S_ss = update(
                 vs.S_ss,
                 at[2:-2, 2:-2, : vs.taup1],
                 self._read_var_from_nc(
-                    "S_ss", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "S_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 )[:, :, vs.itt, npx.newaxis],
             )
             vs.S_s = update(
@@ -316,6 +340,41 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 npx.cumsum(vs.sa_s[2:-2, 2:-2, :, :], axis=-1),
             )
 
+            # initial nitrate concentration (in mg/l)
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], 30)
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 30)
+            # exponential distribution of mineral soil nitrogen
+            # mineral soil nitrogen is decreasing with increasing age
+            p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
+            p_dec = update(p_dec, at[:, :, :vs.taup1, :], sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))[npx.newaxis, npx.newaxis, npx.newaxis, :])
+            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
+            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
+            vs.msa_rz = update(
+                vs.msa_rz,
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :vs.taup1, :],
+            )
+            vs.msa_ss = update(
+                vs.msa_ss,
+                at[2:-2, 2:-2, :vs.taup1, :], vs.C_ss[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_ss[2:-2, 2:-2, :vs.taup1, :],
+            )
+            vs.msa_s = update(
+                vs.msa_s,
+                at[2:-2, 2:-2, :, :], vs.msa_rz[2:-2, 2:-2, :, :] + vs.msa_ss[2:-2, 2:-2, :, :],
+            )
+            vs.M_rz = update(
+                vs.M_rz,
+                at[2:-2, 2:-2, :], npx.sum(vs.msa_rz[2:-2, 2:-2, :, :], axis=-1),
+            )
+            vs.M_ss = update(
+                vs.M_ss,
+                at[2:-2, 2:-2, :], npx.sum(vs.msa_ss[2:-2, 2:-2, :, :], axis=-1),
+            )
+            vs.M_s = update(
+                vs.M_s,
+                at[2:-2, 2:-2, :], npx.sum(vs.msa_s[2:-2, 2:-2, :, :], axis=-1),
+                )
+
+
         @roger_routine
         def set_boundary_conditions_setup(self, state):
             pass
@@ -350,7 +409,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 vs.PREC_DIST_DAILY,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "prec", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "prec", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.INF_MAT_RZ = update(
@@ -359,7 +418,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 self._read_var_from_nc(
                     "inf_mat_rz",
                     self._input_dir,
-                    f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc",
+                    f"SVATCROP_{location}_{crop_rotation_scenario}.nc",
                 ),
             )
             vs.INF_PF_RZ = update(
@@ -368,26 +427,26 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 self._read_var_from_nc(
                     "inf_mp_rz",
                     self._input_dir,
-                    f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc",
+                    f"SVATCROP_{location}_{crop_rotation_scenario}.nc",
                 )
                 + self._read_var_from_nc(
                     "inf_sc_rz",
                     self._input_dir,
-                    f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc",
+                    f"SVATCROP_{location}_{crop_rotation_scenario}.nc",
                 ),
             )
             vs.INF_PF_SS = update(
                 vs.INF_PF_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "inf_ss", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "inf_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.TRANSP = update(
                 vs.TRANSP,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "transp", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "transp", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.EVAP_SOIL = update(
@@ -396,56 +455,56 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 self._read_var_from_nc(
                     "evap_soil",
                     self._input_dir,
-                    f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc",
+                    f"SVATCROP_{location}_{crop_rotation_scenario}.nc",
                 ),
             )
             vs.CPR_RZ = update(
                 vs.CPR_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "cpr_rz", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "cpr_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.Q_RZ = update(
                 vs.Q_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "q_rz", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "q_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.Q_SS = update(
                 vs.Q_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "q_ss", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "q_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.RE_RG = update(
                 vs.RE_RG,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "re_rg", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "re_rg", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.RE_RL = update(
                 vs.RE_RL,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "re_rl", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "re_rl", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.S_RZ = update(
                 vs.S_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_rz", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "S_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.S_SS = update(
                 vs.S_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_ss", self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
+                    "S_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
@@ -478,7 +537,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["rate"].output_variables = ["M_in", "M_q_ss", "M_transp", "M_evap_soil"]
+            diagnostics["rate"].output_variables = ["M_in", "M_q_ss", "M_transp"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
@@ -520,7 +579,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
         def after_timestep(self, state):
             pass
 
-    model = SVATCROPTRANSPORTSetup()
+    model = SVATCROPNITRATESetup()
     model.setup()
     model.warmup()
     model.run()
