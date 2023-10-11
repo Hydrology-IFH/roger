@@ -8,7 +8,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 @click.option("--location", type=click.Choice(["singen", "azenweiler", "unterraderach", "muellheim", "freiburg", "ihringen", "altheim", "kirchen", "maehringen", "heidelsheim", "elsenz", "zaberfeld", "kupferzell", "stachenhausen", "oehringen"]
-), default="freiburg")
+), default="ihringen")
 @click.option("--crop-rotation-scenario", type=click.Choice(["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
                                                              "summer-wheat_winter-wheat_corn", 
                                                              "summer-wheat_winter-wheat_winter-rape", "winter-wheat_clover",

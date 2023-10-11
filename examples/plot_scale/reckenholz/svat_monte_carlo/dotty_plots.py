@@ -47,11 +47,11 @@ def main(tmp_dir):
                 ax[i, j].set_xlabel("")
                 ax[i, j].set_ylabel("")
                 if metric_var in ["KGE_q_ss"]:
-                    ax[i, j].set_ylim((0.0, 0.3))
+                    ax[i, j].set_ylim((0.1, 0.5))
                 elif metric_var in ["r_theta"]:
-                    ax[i, j].set_ylim((0.5, 1.0))
-                elif metric_var in ["E_multi"]:
                     ax[i, j].set_ylim((0.5, 0.8))
+                elif metric_var in ["E_multi"]:
+                    ax[i, j].set_ylim((0.4, 0.6))
 
                 # best parameter set for individual evaluation metric at specific storage conditions
                 df_params_metrics_sc1 = df_params_metrics.copy()
@@ -89,11 +89,11 @@ def main(tmp_dir):
                 ax[i, j].set_xlabel("")
                 ax[i, j].set_ylabel("")
                 if metric_var in ["KGE_q_ss"]:
-                    ax[i, j].set_ylim((0.0, 0.3))
+                    ax[i, j].set_ylim((0.1, 0.5))
                 elif metric_var in ["r_theta"]:
-                    ax[i, j].set_ylim((0.5, 1.0))
-                elif metric_var in ["E_multi"]:
                     ax[i, j].set_ylim((0.5, 0.8))
+                elif metric_var in ["E_multi"]:
+                    ax[i, j].set_ylim((0.4, 0.6))
 
                 # best parameter set for individual evaluation metric at specific storage conditions
                 df_params_metrics_sc1 = df_params_metrics.copy()
