@@ -293,8 +293,8 @@ def calc_canopy_cover(state):
     mask_summer = npx.isin(vs.crop_type, lut.SUMMER_CROPS)
     mask_winter = npx.isin(vs.crop_type, lut.WINTER_CROPS)
     mask_winter_catch = npx.isin(vs.crop_type, lut.WINTER_CATCH_CROPS)
-    mask_growing_summer = npx.isin(vs.crop_type, npx.array([571], dtype=int))
-    mask_growing_winter = npx.isin(vs.crop_type, npx.array([572], dtype=int))
+    mask_growing_summer = npx.isin(vs.crop_type, npx.array([571, 580], dtype=int))
+    mask_growing_winter = npx.isin(vs.crop_type, npx.array([572, 583], dtype=int))
     mask_bare = vs.crop_type == 599
 
     mask1 = mask_summer & (vs.doy[vs.tau] > vs.doy_mid) & (vs.doy[vs.tau] < vs.doy_dec)
@@ -765,8 +765,8 @@ def calc_root_growth(state):
     mask_summer = npx.isin(vs.crop_type, lut.SUMMER_CROPS)
     mask_winter = npx.isin(vs.crop_type, lut.WINTER_CROPS)
     mask_winter_catch = npx.isin(vs.crop_type, lut.WINTER_CATCH_CROPS)
-    mask_growing_summer = npx.isin(vs.crop_type, npx.array([571], dtype=int))
-    mask_growing_winter = npx.isin(vs.crop_type, npx.array([572], dtype=int))
+    mask_growing_summer = npx.isin(vs.crop_type, npx.array([571, 580], dtype=int))
+    mask_growing_winter = npx.isin(vs.crop_type, npx.array([572, 583], dtype=int))
     mask_bare = vs.crop_type == 599
 
     mask1 = mask_summer & (vs.doy[vs.tau] < vs.doy_start)

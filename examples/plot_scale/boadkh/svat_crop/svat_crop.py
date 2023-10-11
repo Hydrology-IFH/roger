@@ -14,7 +14,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "summer-wheat_winter-wheat_winter-rape", "winter-wheat_clover",
                                                              "winter-wheat_clover_corn", "winter-wheat_corn", 
                                                              "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
-                                                             "winter-wheat_winter-grain-pea_winter-rape"]), default="winter-wheat_corn")
+                                                             "winter-wheat_winter-grain-pea_winter-rape", "clover"]), default="clover")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
 @roger_base_cli
 def main(location, crop_rotation_scenario, tmp_dir):
