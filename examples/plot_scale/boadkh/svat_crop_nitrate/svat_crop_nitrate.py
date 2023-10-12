@@ -59,6 +59,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
             settings.nitt = self._get_nitt(
                 self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
             )
+            settings.nitt_forc = settings.nitt
             settings.ages = 1500
             settings.nages = settings.ages + 1
             settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
@@ -238,19 +239,23 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 1], 10)
 
             # denitrification parameters
-            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], 1)
-            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], 1)
-            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], 1)
+            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], 10)
+            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], 10)
+            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], 100)
             vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], 100)
             # nitrification parameters
-            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], 1)
-            vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], 1)
-            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], 1)
-            vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], 1)
+            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], 10)
+            vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], 10)
+            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], 100)
+            vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], 100)
             # soil nitrogen mineralization parameters
-            vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], 1)
-            vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], 1)
+            vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], 20)
+            vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], 20)
             # soil nitrogen fixation parameters
+
+            # soil temperature parameters
+            vs.phi_soil = update(vs.phi_soil, at[2:-2, 2:-2], 1)
+            vs.damp_soil = update(vs.damp_soil, at[2:-2, 2:-2], 1)
 
         @roger_routine
         def set_parameters(self, state):
@@ -400,6 +405,10 @@ def main(location, crop_rotation_scenario, tmp_dir):
                 "S_RZ",
                 "S_SS",
                 "S_S",
+                "TA",
+                "YEAR",
+                "DOY",
+                "ta_year"
             ],
         )
         def set_forcing_setup(self, state):
@@ -508,6 +517,32 @@ def main(location, crop_rotation_scenario, tmp_dir):
                 ),
             )
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
+            vs.TA = update(
+                vs.TA,
+                at[:],
+                self._read_var_from_nc(
+                    "TA", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                ),
+            )
+            vs.YEAR = update(
+                vs.YEAR,
+                at[:],
+                self._read_var_from_nc(
+                    "YEAR", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                ),
+            )
+            vs.DOY = update(
+                vs.DOY,
+                at[:],
+                self._read_var_from_nc(
+                    "DOY", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                ),
+            )
+            vs.ta_year = update(
+                vs.ta_year,
+                at[2:-2, 2:-2],
+                npx.mean(vs.TA[:365])[npx.newaxis, npx.newaxis],
+            )
 
         @roger_routine
         def set_forcing(self, state):
@@ -527,11 +562,22 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], vs.S_RZ[2:-2, 2:-2, vs.itt])
             vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], vs.S_SS[2:-2, 2:-2, vs.itt])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
+            vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[vs.itt])
+            vs.doy = update(vs.doy, at[1], vs.DOY[vs.itt])
+            vs.year = update(vs.year, at[1], vs.YEAR[vs.itt])
 
-            # apply virtual tracer
+            # apply nitrate tracer
             inf = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2]
-            vs.C_in = update(vs.C_in, at[2:-2, 2:-2], npx.where(inf > 0, 1, 0))
-            vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(inf > 0, vs.C_in[2:-2, 2:-2] * inf, 0))
+            vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where(inf > 10000, 10000, 0))
+            vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(inf > 10, 10 * 0.3, 0))
+            vs.C_in = update(vs.C_in, at[2:-2, 2:-2], npx.where(inf > 10, vs.M_in[2:-2, 2:-2]/inf, 0))
+
+            if (vs.year[1] != vs.year[0]) & (vs.itt > 1):
+                vs.ta_year = update(
+                vs.ta_year,
+                at[2:-2, 2:-2],
+                npx.mean(vs.TA[vs.itt:vs.itt+364])[npx.newaxis, npx.newaxis],
+            )
 
         @roger_routine
         def set_diagnostics(self, state, base_path=tmp_dir):

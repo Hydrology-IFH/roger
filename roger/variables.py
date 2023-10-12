@@ -297,6 +297,15 @@ VARIABLES = {
         initial=1900,
         write_to_restart=True,
     ),
+    "YEAR": Variable(
+        "Year",
+        TIME_FORCING,
+        "",
+        "Year",
+        dtype="int32",
+        write_to_restart=True,
+        active=lambda settings: settings.enable_nitrate,
+    ),
     "month": Variable(
         "Month at current iteration",
         TIMESTEPS,
@@ -314,6 +323,15 @@ VARIABLES = {
         dtype="int32",
         initial=1,
         write_to_restart=True,
+    ),
+    "DOY": Variable(
+        "Day of year",
+        TIME_FORCING,
+        "",
+        "Day of year",
+        dtype="int32",
+        write_to_restart=True,
+        active=lambda settings: settings.enable_nitrate,
     ),
     "dt": Variable(
         "time step",
@@ -770,7 +788,6 @@ VARIABLES = {
         TIME_FORCING,
         "degC",
         "air temperature",
-        active=lambda settings: not settings.enable_offline_transport,
     ),
     "TA_MIN": Variable(
         "daily minimum air temperature",
