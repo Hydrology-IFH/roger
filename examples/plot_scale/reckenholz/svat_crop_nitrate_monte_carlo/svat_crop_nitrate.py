@@ -111,7 +111,7 @@ def main(lys_experiment, transport_model_structure, sas_solver, crop_partitionin
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"SVATCROPBR_{transport_model_structure}_{lys_experiment}"
+            settings.identifier = f"SVATCROPNITRATE_{transport_model_structure}_{lys_experiment}"
             settings.sas_solver = sas_solver
             settings.sas_solver_substeps = 8
 
