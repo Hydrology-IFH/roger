@@ -47,23 +47,6 @@ _LABS_TM = {
     "time-variant advection-dispersion-kumaraswamy": "ADK-TV",
 }
 
-
-def kumaraswamy_cdf(x, a, b):
-    return 1 - (1 - (x) ** a) ** b
-
-
-def kumaraswamy_pdf(x, a, b):
-    return a * b * x ** (a - 1) * (1 - x**a) ** (b - 1)
-
-
-def power_cdf(x, k):
-    return x**k
-
-
-def power_pdf(x, k):
-    return k**k * x ** (k - 1)
-
-
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir):

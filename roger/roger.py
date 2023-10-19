@@ -439,7 +439,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     if settings.warmup_done:
                         if vs.time_for_diag >= settings.output_frequency:
                             vs.time_for_diag = 0
-                        diagnostics.reset(self.state)
+                        diagnostics.reset(state)
                         vs.time_for_diag = vs.time_for_diag + vs.dt_secs
                         diagnostics.diagnose(state)
                         diagnostics.output(state)

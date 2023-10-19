@@ -227,7 +227,7 @@ def calc_parameters_surface_kernel(state):
     basal_evap_coeff = update(
         basal_evap_coeff,
         at[2:-2, 2:-2],
-        npx.where(vs.maskRiver[2:-2, 2:-2] | vs.maskLake[2:-2, 2:-2], 1, basal_evap_coeff[2:-2, 2:-2]),
+        npx.where(vs.maskRiver[2:-2, 2:-2] | vs.maskLake[2:-2, 2:-2] | vs.lu_id[2:-2, 2:-2] == 0, 1, basal_evap_coeff[2:-2, 2:-2]),
     )
 
     vs.basal_evap_coeff = update(

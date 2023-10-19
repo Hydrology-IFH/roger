@@ -8,15 +8,15 @@ def validate_parameters_surface(state):
     vs = state.variables
 
     mask1 = ((vs.slope > 1) | (vs.slope < 0)) & vs.maskCatch
-    if global_and(npx.any(mask1)):
+    if global_and(npx.any(mask1[2:-2, 2:-2])):
         raise ValueError("slope-parameter is out of range.")
 
-    mask2 = ((vs.sealing> 1) | (vs.sealing < 0)) & vs.maskCatch
-    if global_and(npx.any(mask2)):
+    mask2 = ((vs.sealing > 1) | (vs.sealing < 0)) & vs.maskCatch
+    if global_and(npx.any(mask2[2:-2, 2:-2])):
         raise ValueError("sealing-parameter is out of range.")
 
     mask3 = ((vs.lu_id > 1000) | (vs.lu_id < 0)) & vs.maskCatch
-    if global_and(npx.any(mask3)):
+    if global_and(npx.any(mask3[2:-2, 2:-2])):
         raise ValueError("lu_id-parameter is out of range.")
 
     if global_and(npx.any(npx.isnan(vs.slope) & vs.maskCatch)):
@@ -621,7 +621,7 @@ def calc_dC_num_error(state):
         and not settings.enable_routing_2D
         and not settings.enable_lateral_flow
         and not settings.enable_groundwater_boundary
-        and (settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate)
+        and (settings.enable_bromide or settings.enable_chloride)
     ):
         vs.dC_num_error = update(
             vs.dC_num_error,
@@ -646,6 +646,40 @@ def calc_dC_num_error(state):
                 * settings.h
             ),
         )
+    elif (
+        settings.enable_offline_transport
+        and not settings.enable_routing_1D
+        and not settings.enable_routing_2D
+        and not settings.enable_lateral_flow
+        and not settings.enable_groundwater_boundary
+        and settings.enable_nitrate
+    ):
+        vs.dC_num_error = update(
+            vs.dC_num_error,
+            at[2:-2, 2:-2],
+            npx.abs(
+                (
+                    npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.tau]
+                    - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.taum1]
+                )
+                - (
+                    vs.inf_mat_rz[2:-2, 2:-2]
+                    * npx.where(npx.isnan(vs.C_inf_mat_rz[2:-2, 2:-2]), 0, vs.C_inf_mat_rz[2:-2, 2:-2])
+                    + vs.inf_pf_rz[2:-2, 2:-2]
+                    * npx.where(npx.isnan(vs.C_inf_pf_rz[2:-2, 2:-2]), 0, vs.C_inf_pf_rz[2:-2, 2:-2])
+                    + vs.inf_pf_ss[2:-2, 2:-2]
+                    * npx.where(npx.isnan(vs.C_inf_pf_ss[2:-2, 2:-2]), 0, vs.C_inf_pf_ss[2:-2, 2:-2])
+                    - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2)
+                    * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2])
+                    - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2)
+                    * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2])
+                    - npx.sum(vs.mr_s[2:-2, 2:-2, :])
+                    + npx.sum(vs.ma_s[2:-2, 2:-2, :])
+                )
+                * settings.h
+            ),
+        )
+
 
     return KernelOutput(
         dC_num_error=vs.dC_num_error,
@@ -700,18 +734,18 @@ def sanity_check(state):
         )
         check2 = global_and(
             npx.all(
-                (vs.S_fp_rz[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_lp_rz[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_fp_ss[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_lp_ss[2:-2, 2:-2] > -settings.atol)
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]) , 0,  vs.S_fp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]) , 0,  vs.S_lp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]) , 0,  vs.S_fp_ss[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]) , 0,  vs.S_lp_ss[2:-2, 2:-2]) > -settings.atol)
             )
         )
         check3 = global_and(
             npx.all(
-                (vs.S_fp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ufc_rz[2:-2, 2:-2])
-                & (vs.S_lp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ac_rz[2:-2, 2:-2])
-                & (vs.S_fp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ufc_ss[2:-2, 2:-2])
-                & (vs.S_lp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ac_ss[2:-2, 2:-2])
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]), 0,  vs.S_fp_rz[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ufc_rz[2:-2, 2:-2]), 0,  vs.S_ufc_rz[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]), 0,  vs.S_lp_rz[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_rz[2:-2, 2:-2]), 0,  vs.S_ac_rz[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]), 0,  vs.S_fp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ufc_ss[2:-2, 2:-2]), 0,  vs.S_ufc_ss[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]), 0,  vs.S_lp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_ss[2:-2, 2:-2]), 0,  vs.S_ac_ss[2:-2, 2:-2]))
             )
         )
         # dS = vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1]
@@ -745,18 +779,18 @@ def sanity_check(state):
         )
         check2 = global_and(
             npx.all(
-                (vs.S_fp_rz[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_lp_rz[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_fp_ss[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_lp_ss[2:-2, 2:-2] > -settings.atol)
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]) , 0,  vs.S_fp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]) , 0,  vs.S_lp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]) , 0,  vs.S_fp_ss[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]) , 0,  vs.S_lp_ss[2:-2, 2:-2]) > -settings.atol)
             )
         )
         check3 = global_and(
             npx.all(
-                (vs.S_fp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ufc_rz[2:-2, 2:-2])
-                & (vs.S_lp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ac_rz[2:-2, 2:-2])
-                & (vs.S_fp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ufc_ss[2:-2, 2:-2])
-                & (vs.S_lp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ac_ss[2:-2, 2:-2])
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]), 0,  vs.S_fp_rz[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ufc_rz[2:-2, 2:-2]), 0,  vs.S_ufc_rz[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]), 0,  vs.S_lp_rz[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_rz[2:-2, 2:-2]), 0,  vs.S_ac_rz[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]), 0,  vs.S_fp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ufc_ss[2:-2, 2:-2]), 0,  vs.S_ufc_ss[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]), 0,  vs.S_lp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_ss[2:-2, 2:-2]), 0,  vs.S_ac_ss[2:-2, 2:-2]))
             )
         )
         # dS = vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1]
@@ -788,18 +822,18 @@ def sanity_check(state):
         )
         check2 = global_and(
             npx.all(
-                (vs.S_fp_rz[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_lp_rz[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_fp_ss[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_lp_ss[2:-2, 2:-2] > -settings.atol)
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]) , 0,  vs.S_fp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]) , 0,  vs.S_lp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]) , 0,  vs.S_fp_ss[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]) , 0,  vs.S_lp_ss[2:-2, 2:-2]) > -settings.atol)
             )
         )
         check3 = global_and(
             npx.all(
-                (vs.S_fp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ufc_rz[2:-2, 2:-2])
-                & (vs.S_lp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ac_rz[2:-2, 2:-2])
-                & (vs.S_fp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ufc_ss[2:-2, 2:-2])
-                & (vs.S_lp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ac_ss[2:-2, 2:-2])
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]), 0,  vs.S_fp_rz[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ufc_rz[2:-2, 2:-2]), 0,  vs.S_ufc_rz[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]), 0,  vs.S_lp_rz[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_rz[2:-2, 2:-2]), 0,  vs.S_ac_rz[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]), 0,  vs.S_fp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ufc_ss[2:-2, 2:-2]), 0,  vs.S_ufc_ss[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]), 0,  vs.S_lp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_ss[2:-2, 2:-2]), 0,  vs.S_ac_ss[2:-2, 2:-2]))
             )
         )
         check = check1 & check2 & check3
@@ -828,18 +862,18 @@ def sanity_check(state):
         )
         check2 = global_and(
             npx.all(
-                (vs.S_fp_rz[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_lp_rz[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_fp_ss[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_lp_ss[2:-2, 2:-2] > -settings.atol)
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]) , 0,  vs.S_fp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]) , 0,  vs.S_lp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]) , 0,  vs.S_fp_ss[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]) , 0,  vs.S_lp_ss[2:-2, 2:-2]) > -settings.atol)
             )
         )
         check3 = global_and(
             npx.all(
-                (vs.S_fp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ufc_rz[2:-2, 2:-2])
-                & (vs.S_lp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ac_rz[2:-2, 2:-2])
-                & (vs.S_fp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ufc_ss[2:-2, 2:-2])
-                & (vs.S_lp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ac_ss[2:-2, 2:-2])
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]), 0,  vs.S_fp_rz[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ufc_rz[2:-2, 2:-2]), 0,  vs.S_ufc_rz[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]), 0,  vs.S_lp_rz[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_rz[2:-2, 2:-2]), 0,  vs.S_ac_rz[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]), 0,  vs.S_fp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ufc_ss[2:-2, 2:-2]), 0,  vs.S_ufc_ss[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]), 0,  vs.S_lp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_ss[2:-2, 2:-2]), 0,  vs.S_ac_ss[2:-2, 2:-2]))
             )
         )
         check = check1 & check2 & check3
@@ -867,18 +901,18 @@ def sanity_check(state):
         )
         check2 = global_and(
             npx.all(
-                (vs.S_fp_rz[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_lp_rz[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_fp_ss[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_lp_ss[2:-2, 2:-2] > -settings.atol)
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]) , 0,  vs.S_fp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]) , 0,  vs.S_lp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]) , 0,  vs.S_fp_ss[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]) , 0,  vs.S_lp_ss[2:-2, 2:-2]) > -settings.atol)
             )
         )
         check3 = global_and(
             npx.all(
-                (vs.S_fp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ufc_rz[2:-2, 2:-2])
-                & (vs.S_lp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ac_rz[2:-2, 2:-2])
-                & (vs.S_fp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ufc_ss[2:-2, 2:-2])
-                & (vs.S_lp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ac_ss[2:-2, 2:-2])
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]), 0,  vs.S_fp_rz[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ufc_rz[2:-2, 2:-2]), 0,  vs.S_ufc_rz[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]), 0,  vs.S_lp_rz[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_rz[2:-2, 2:-2]), 0,  vs.S_ac_rz[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]), 0,  vs.S_fp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ufc_ss[2:-2, 2:-2]), 0,  vs.S_ufc_ss[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]), 0,  vs.S_lp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_ss[2:-2, 2:-2]), 0,  vs.S_ac_ss[2:-2, 2:-2]))
             )
         )
         check = check1 & check2 & check3
@@ -905,18 +939,18 @@ def sanity_check(state):
         )
         check2 = global_and(
             npx.all(
-                (vs.S_fp_rz[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_lp_rz[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_fp_ss[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_lp_ss[2:-2, 2:-2] > -settings.atol)
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]) , 0,  vs.S_fp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]) , 0,  vs.S_lp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]) , 0,  vs.S_fp_ss[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]) , 0,  vs.S_lp_ss[2:-2, 2:-2]) > -settings.atol)
             )
         )
         check3 = global_and(
             npx.all(
-                (vs.S_fp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ufc_rz[2:-2, 2:-2])
-                & (vs.S_lp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ac_rz[2:-2, 2:-2])
-                & (vs.S_fp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ufc_ss[2:-2, 2:-2])
-                & (vs.S_lp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ac_ss[2:-2, 2:-2])
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]), 0,  vs.S_fp_rz[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ufc_rz[2:-2, 2:-2]), 0,  vs.S_ufc_rz[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]), 0,  vs.S_lp_rz[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_rz[2:-2, 2:-2]), 0,  vs.S_ac_rz[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]), 0,  vs.S_fp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ufc_ss[2:-2, 2:-2]), 0,  vs.S_ufc_ss[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]), 0,  vs.S_lp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_ss[2:-2, 2:-2]), 0,  vs.S_ac_ss[2:-2, 2:-2]))
             )
         )
         check = check1 & check2 & check3
@@ -930,29 +964,30 @@ def sanity_check(state):
         and not settings.enable_offline_transport
     ):
         check1 = global_and(
-            npx.all(
+            npx.all(npx.where(vs.maskCatch[2:-2, 2:-2],
                 npx.isclose(
                     vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1],
                     vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2],
                     atol=settings.atol,
                     rtol=settings.rtol,
-                )
+                ), True)
             )
         )
         check2 = global_and(
             npx.all(
-                (vs.S_fp_rz[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_lp_rz[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_fp_ss[2:-2, 2:-2] > -settings.atol)
-                & (vs.S_lp_ss[2:-2, 2:-2] > -settings.atol)
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]) , 0,  vs.S_fp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]) , 0,  vs.S_lp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]) , 0,  vs.S_fp_ss[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]) , 0,  vs.S_lp_ss[2:-2, 2:-2]) > -settings.atol)
             )
         )
+
         check3 = global_and(
             npx.all(
-                (vs.S_fp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ufc_rz[2:-2, 2:-2])
-                & (vs.S_lp_rz[2:-2, 2:-2] - settings.atol <= vs.S_ac_rz[2:-2, 2:-2])
-                & (vs.S_fp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ufc_ss[2:-2, 2:-2])
-                & (vs.S_lp_ss[2:-2, 2:-2] - settings.atol <= vs.S_ac_ss[2:-2, 2:-2])
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]), 0,  vs.S_fp_rz[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ufc_rz[2:-2, 2:-2]), 0,  vs.S_ufc_rz[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]), 0,  vs.S_lp_rz[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_rz[2:-2, 2:-2]), 0,  vs.S_ac_rz[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]), 0,  vs.S_fp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ufc_ss[2:-2, 2:-2]), 0,  vs.S_ufc_ss[2:-2, 2:-2]))
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]), 0,  vs.S_lp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_ss[2:-2, 2:-2]), 0,  vs.S_ac_ss[2:-2, 2:-2]))
             )
         )
         check = check1 & check2 & check3
@@ -972,7 +1007,7 @@ def sanity_check(state):
         )
     ):
         check = global_and(
-            npx.all(
+            npx.all(npx.where(vs.maskCatch[2:-2, 2:-2],
                 npx.isclose(
                     npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1)
                     - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
@@ -987,7 +1022,7 @@ def sanity_check(state):
                     * settings.h,
                     atol=settings.atol,
                     rtol=settings.rtol,
-                )
+                ), True)
             )
         )
 
@@ -999,7 +1034,7 @@ def sanity_check(state):
         and (settings.enable_deuterium or settings.enable_oxygen18)
     ):
         check1 = global_and(
-            npx.all(
+            npx.all(npx.where(vs.maskCatch[2:-2, 2:-2],
                 npx.isclose(
                     npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1)
                     - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
@@ -1014,11 +1049,11 @@ def sanity_check(state):
                     * settings.h,
                     atol=settings.atol,
                     rtol=settings.rtol,
-                )
+                ), True)
             )
         )
         check2 = global_and(
-            npx.all(
+            npx.all(npx.where(vs.maskCatch[2:-2, 2:-2],
                 npx.isclose(
                     npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.tau]
                     - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1) * vs.C_s[2:-2, 2:-2, vs.taum1],
@@ -1039,7 +1074,7 @@ def sanity_check(state):
                     * settings.h,
                     atol=settings.atol,
                     rtol=settings.rtol,
-                )
+                ), True)
             )
         )
         check = check1 & check2
@@ -1194,6 +1229,52 @@ def sanity_check(state):
         and settings.enable_virtualtracer
     ):
         check1 = global_and(
+            npx.all(npx.where(vs.maskCatch[2:-2, 2:-2],
+                npx.isclose(
+                    npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1)
+                    - npx.sum(vs.sa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
+                    vs.inf_mat_rz[2:-2, 2:-2]
+                    + vs.inf_pf_rz[2:-2, 2:-2]
+                    + vs.inf_pf_ss[2:-2, 2:-2]
+                    - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2)
+                    - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2)
+                    - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2),
+                    atol=settings.atol,
+                    rtol=settings.rtol,
+                ), True)
+            )
+        )
+        check2 = global_and(
+            npx.all(npx.where(vs.maskCatch[2:-2, 2:-2],
+                npx.isclose(
+                    npx.sum(vs.msa_s[2:-2, 2:-2, vs.tau, :], axis=-1)
+                    - npx.sum(vs.msa_s[2:-2, 2:-2, vs.taum1, :], axis=-1),
+                    vs.inf_mat_rz[2:-2, 2:-2] * vs.C_inf_mat_rz[2:-2, 2:-2]
+                    + vs.inf_pf_rz[2:-2, 2:-2] * vs.C_inf_pf_rz[2:-2, 2:-2]
+                    + vs.inf_pf_ss[2:-2, 2:-2] * vs.C_inf_pf_ss[2:-2, 2:-2]
+                    - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2)
+                    * vs.C_transp[2:-2, 2:-2]
+                    - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2)
+                    * vs.C_evap_soil[2:-2, 2:-2]
+                    - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2)
+                    * vs.C_q_ss[2:-2, 2:-2],
+                    atol=settings.atol,
+                    rtol=settings.rtol,
+                ), True)
+            )
+        )
+
+        check = check1 & check2
+
+    elif (
+        settings.enable_offline_transport
+        and not settings.enable_routing_1D
+        and not settings.enable_routing_2D
+        and not settings.enable_groundwater_boundary
+        and not settings.enable_crop_phenology
+        and settings.enable_nitrate
+    ):
+        check1 = global_and(
             npx.all(
                 npx.isclose(
                     npx.sum(vs.sa_s[2:-2, 2:-2, vs.tau, :], axis=-1)
@@ -1217,12 +1298,12 @@ def sanity_check(state):
                     vs.inf_mat_rz[2:-2, 2:-2] * vs.C_inf_mat_rz[2:-2, 2:-2]
                     + vs.inf_pf_rz[2:-2, 2:-2] * vs.C_inf_pf_rz[2:-2, 2:-2]
                     + vs.inf_pf_ss[2:-2, 2:-2] * vs.C_inf_pf_ss[2:-2, 2:-2]
+                    + npx.sum(vs.ma_s[2:-2, 2:-2, :], axis=2)
                     - npx.sum(vs.transp[2:-2, 2:-2, npx.newaxis] * vs.tt_transp[2:-2, 2:-2, :], axis=2)
                     * vs.C_transp[2:-2, 2:-2]
-                    - npx.sum(vs.evap_soil[2:-2, 2:-2, npx.newaxis] * vs.tt_evap_soil[2:-2, 2:-2, :], axis=2)
-                    * vs.C_evap_soil[2:-2, 2:-2]
                     - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2)
-                    * vs.C_q_ss[2:-2, 2:-2],
+                    * vs.C_q_ss[2:-2, 2:-2]
+                    - npx.sum(vs.mr_s[2:-2, 2:-2, :], axis=2),
                     atol=settings.atol,
                     rtol=settings.rtol,
                 )
@@ -1236,6 +1317,7 @@ def sanity_check(state):
         and not settings.enable_routing_1D
         and not settings.enable_routing_2D
         and not settings.enable_groundwater_boundary
+        and not settings.enable_crop_phenology
         and settings.enable_nitrate
     ):
         check1 = global_and(

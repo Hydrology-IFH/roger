@@ -662,15 +662,15 @@ if not os.path.exists(mlm_random_intercepts_llcp_file):
                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
                     params = onp.concatenate((fe_params, re_params), axis=None)
-                    dict_mlm_random_intercepts_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_intercepts_llcp[mlm_key][var_sim][delta][soil_depth][
                         "fixed_effects"
                     ] = res.params.to_frame()
-                    dict_mlm_random_intercepts_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_intercepts_llcp[mlm_key][var_sim][delta][soil_depth][
                         "random_effects"
                     ] = pd.DataFrame(res.random_effects).var(axis=1)
 
                     # relative importance of parameters
-                    dict_mlm_random_intercepts_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_intercepts_llcp[mlm_key][var_sim][delta][soil_depth][
                         "params"
                     ] = params / onp.sum(params)
 
@@ -697,53 +697,53 @@ if not os.path.exists(mlm_random_intercepts_llcp_file):
                         y, yhat
                     )
 
-                    # plot the line fit
-                    fig, ax = plt.subplots(figsize=(3, 3))
-                    ax.scatter(y, yhat, color="black", s=4)
-                    line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
-                    abline_plot(model_results=line_fit, ax=ax, color="black")
-                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]")
-                    ax.set_ylabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]")
-                    ax.set_xlim(-100, 100)
-                    ax.set_ylim(-100, 100)
-                    fig.tight_layout()
-                    file = (
-                        base_path_figs
-                        / "residuals"
-                        / "MLM"
-                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_line_fit_for_random_intercepts.png"
-                    )
-                    fig.savefig(file, dpi=300)
+                    # # plot the line fit
+                    # fig, ax = plt.subplots(figsize=(3, 3))
+                    # ax.scatter(y, yhat, color="black", s=4)
+                    # line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
+                    # abline_plot(model_results=line_fit, ax=ax, color="black")
+                    # ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]")
+                    # ax.set_ylabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]")
+                    # ax.set_xlim(-100, 100)
+                    # ax.set_ylim(-100, 100)
+                    # fig.tight_layout()
+                    # file = (
+                    #     base_path_figs
+                    #     / "residuals"
+                    #     / "MLM"
+                    #     / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_line_fit_for_random_intercepts.png"
+                    # )
+                    # fig.savefig(file, dpi=300)
 
-                    # plot the residuals
-                    resid = yhat - y
-                    fig, ax = plt.subplots(figsize=(3, 3))
-                    ax.scatter(y, resid, color="black", s=4)
-                    ax.set_ylabel("Residuals [%]")
-                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]}")
-                    fig.tight_layout()
-                    file = (
-                        base_path_figs
-                        / "residuals"
-                        / "MLM"
-                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_for_random_intercepts.png"
-                    )
-                    fig.savefig(file, dpi=300)
+                    # # plot the residuals
+                    # resid = yhat - y
+                    # fig, ax = plt.subplots(figsize=(3, 3))
+                    # ax.scatter(y, resid, color="black", s=4)
+                    # ax.set_ylabel("Residuals [%]")
+                    # ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]}")
+                    # fig.tight_layout()
+                    # file = (
+                    #     base_path_figs
+                    #     / "residuals"
+                    #     / "MLM"
+                    #     / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_for_random_intercepts.png"
+                    # )
+                    # fig.savefig(file, dpi=300)
 
-                    # plot the distribution of residuals
-                    fig, ax = plt.subplots(figsize=(3, 3))
-                    resid_std = stats.zscore(resid)
-                    ax.hist(resid_std, bins=25, color="black")
-                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM)")
-                    fig.tight_layout()
-                    file = (
-                        base_path_figs
-                        / "residuals"
-                        / "MLM"
-                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_hist_for_random_intercepts.png"
-                    )
-                    fig.savefig(file, dpi=300)
-                    plt.close("all")
+                    # # plot the distribution of residuals
+                    # fig, ax = plt.subplots(figsize=(3, 3))
+                    # resid_std = stats.zscore(resid)
+                    # ax.hist(resid_std, bins=25, color="black")
+                    # ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM)")
+                    # fig.tight_layout()
+                    # file = (
+                    #     base_path_figs
+                    #     / "residuals"
+                    #     / "MLM"
+                    #     / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_hist_for_random_intercepts.png"
+                    # )
+                    # fig.savefig(file, dpi=300)
+                    # plt.close("all")
 
     # Store the data (serialize)
     with open(mlm_random_intercepts_llcp_file, "wb") as handle:
@@ -808,14 +808,14 @@ if not os.path.exists(mlm_random_slopes_llcp_file):
                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
                     params = onp.concatenate((fe_params, re_params), axis=None)
-                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth][
                         "fixed_effects"
                     ] = res.params.to_frame()
-                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth][
                         "random_effects"
                     ] = pd.DataFrame(res.random_effects).var(axis=1)
                     # relative importance of parameters
-                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth][
                         "params"
                     ] = params / onp.sum(params)
                     # contribution of the fixed effect parameters and random effect parameters
@@ -841,7 +841,7 @@ if not os.path.exists(mlm_random_slopes_llcp_file):
                     )
 
     # Store the data (serialize)
-    with open(mlm_random_slopes_file, "wb") as handle:
+    with open(mlm_random_slopes_llcp_file, "wb") as handle:
         pickle.dump(dict_mlm_random_slopes_llcp, handle, protocol=pickle.HIGHEST_PROTOCOL)
 else:
     # Load the data (deserialize)
@@ -903,14 +903,14 @@ if not os.path.exists(mlm_random_intercepts_soil_llcp_file):
                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
                     params = onp.concatenate((fe_params, re_params), axis=None)
-                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][
                         "fixed_effects"
                     ] = res.params.to_frame()
-                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][
                         "random_effects"
                     ] = pd.DataFrame(res.random_effects).var(axis=1)
                     # relative importance of parameters
-                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][
                         "params"
                     ] = params / onp.sum(params)
                     # contribution of the fixed effect parameters and random effect parameters
@@ -935,53 +935,53 @@ if not os.path.exists(mlm_random_intercepts_soil_llcp_file):
                         y, yhat
                     )
 
-                    # plot the line fit
-                    fig, ax = plt.subplots(figsize=(3, 3))
-                    ax.scatter(y, yhat, color="black", s=4)
-                    line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
-                    abline_plot(model_results=line_fit, ax=ax, color="black")
-                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]")
-                    ax.set_ylabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]")
-                    ax.set_xlim(-100, 100)
-                    ax.set_ylim(-100, 100)
-                    fig.tight_layout()
-                    file = (
-                        base_path_figs
-                        / "residuals"
-                        / "MLM"
-                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_line_fit_for_random_intercepts.png"
-                    )
-                    fig.savefig(file, dpi=300)
+                    # # plot the line fit
+                    # fig, ax = plt.subplots(figsize=(3, 3))
+                    # ax.scatter(y, yhat, color="black", s=4)
+                    # line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
+                    # abline_plot(model_results=line_fit, ax=ax, color="black")
+                    # ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]")
+                    # ax.set_ylabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]")
+                    # ax.set_xlim(-100, 100)
+                    # ax.set_ylim(-100, 100)
+                    # fig.tight_layout()
+                    # file = (
+                    #     base_path_figs
+                    #     / "residuals"
+                    #     / "MLM"
+                    #     / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_line_fit_for_random_intercepts.png"
+                    # )
+                    # fig.savefig(file, dpi=300)
 
-                    # plot the residuals
-                    resid = yhat - y
-                    fig, ax = plt.subplots(figsize=(3, 3))
-                    ax.scatter(y, resid, color="black", s=4)
-                    ax.set_ylabel("Residuals [%]")
-                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]}")
-                    fig.tight_layout()
-                    file = (
-                        base_path_figs
-                        / "residuals"
-                        / "MLM"
-                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_for_random_intercepts.png"
-                    )
-                    fig.savefig(file, dpi=300)
+                    # # plot the residuals
+                    # resid = yhat - y
+                    # fig, ax = plt.subplots(figsize=(3, 3))
+                    # ax.scatter(y, resid, color="black", s=4)
+                    # ax.set_ylabel("Residuals [%]")
+                    # ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]}")
+                    # fig.tight_layout()
+                    # file = (
+                    #     base_path_figs
+                    #     / "residuals"
+                    #     / "MLM"
+                    #     / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_for_random_intercepts.png"
+                    # )
+                    # fig.savefig(file, dpi=300)
 
-                    # plot the distribution of residuals
-                    fig, ax = plt.subplots(figsize=(3, 3))
-                    resid_std = stats.zscore(resid)
-                    ax.hist(resid_std, bins=25, color="black")
-                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM)")
-                    fig.tight_layout()
-                    file = (
-                        base_path_figs
-                        / "residuals"
-                        / "MLM"
-                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_hist_for_random_intercepts.png"
-                    )
-                    fig.savefig(file, dpi=300)
-                    plt.close("all")
+                    # # plot the distribution of residuals
+                    # fig, ax = plt.subplots(figsize=(3, 3))
+                    # resid_std = stats.zscore(resid)
+                    # ax.hist(resid_std, bins=25, color="black")
+                    # ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM)")
+                    # fig.tight_layout()
+                    # file = (
+                    #     base_path_figs
+                    #     / "residuals"
+                    #     / "MLM"
+                    #     / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_hist_for_random_intercepts.png"
+                    # )
+                    # fig.savefig(file, dpi=300)
+                    # plt.close("all")
 
     # Store the data (serialize)
     with open(mlm_random_intercepts_soil_llcp_file, "wb") as handle:
@@ -1046,14 +1046,14 @@ if not os.path.exists(mlm_random_slopes_soil_llcp_file):
                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
                     params = onp.concatenate((fe_params, re_params), axis=None)
-                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][
                         "fixed_effects"
                     ] = res.params.to_frame()
-                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][
                         "random_effects"
                     ] = pd.DataFrame(res.random_effects).var(axis=1)
                     # relative importance of parameters
-                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][
                         "params"
                     ] = params / onp.sum(params)
                     # contribution of the fixed effect parameters and random effect parameters
@@ -1079,7 +1079,7 @@ if not os.path.exists(mlm_random_slopes_soil_llcp_file):
                     )
 
     # Store the data (serialize)
-    with open(mlm_random_slopes_file, "wb") as handle:
+    with open(mlm_random_slopes_soil_llcp_file, "wb") as handle:
         pickle.dump(dict_mlm_random_slopes_soil_llcp, handle, protocol=pickle.HIGHEST_PROTOCOL)
 else:
     # Load the data (deserialize)
@@ -1142,14 +1142,14 @@ if not os.path.exists(mlm_random_intercepts_location_file):
                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
                     params = onp.concatenate((fe_params, re_params), axis=None)
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth][
                         "fixed_effects"
                     ] = res.params.to_frame()
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth][
                         "random_effects"
                     ] = pd.DataFrame(res.random_effects).var(axis=1)
                     # relative importance of parameters
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth][
                         "params"
                     ] = params / onp.sum(params)
                     # contribution of the fixed effect parameters and random effect parameters
@@ -1237,14 +1237,14 @@ if not os.path.exists(mlm_random_slopes_location_file):
                         fe_params = onp.abs(res.params.to_frame().T.values.flatten())
                         re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
                         params = onp.concatenate((fe_params, re_params), axis=None)
-                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth][
                             "fixed_effects"
                         ] = res.params.to_frame()
-                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth][
                             "random_effects"
                         ] = pd.DataFrame(res.random_effects).var(axis=1)
                         # relative importance of parameters
-                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth][
                             "params"
                         ] = params / onp.sum(params)
                         # contribution of the fixed effect parameters and random effect parameters
@@ -1333,14 +1333,14 @@ if not os.path.exists(mlm_random_intercepts_soil_location_file):
                         fe_params = onp.abs(res.params.to_frame().T.values.flatten())
                         re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
                         params = onp.concatenate((fe_params, re_params), axis=None)
-                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth][
                             "fixed_effects"
                         ] = res.params.to_frame()
-                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth][
                             "random_effects"
                         ] = pd.DataFrame(res.random_effects).var(axis=1)
                         # relative importance of parameters
-                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth][
                             "params"
                         ] = params / onp.sum(params)
                         # contribution of the fixed effect parameters and random effect parameters
@@ -1429,14 +1429,14 @@ if not os.path.exists(mlm_random_slopes_soil_location_file):
                         fe_params = onp.abs(res.params.to_frame().T.values.flatten())
                         re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
                         params = onp.concatenate((fe_params, re_params), axis=None)
-                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth][
                             "fixed_effects"
                         ] = res.params.to_frame()
-                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth][
                             "random_effects"
                         ] = pd.DataFrame(res.random_effects).var(axis=1)
                         # relative importance of parameters
-                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth][
                             "params"
                         ] = params / onp.sum(params)
                         # contribution of the fixed effect parameters and random effect parameters
@@ -1525,14 +1525,14 @@ if not os.path.exists(mlm_random_intercepts_land_cover_scenario_file):
                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
                     params = onp.concatenate((fe_params, re_params), axis=None)
-                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
                         "fixed_effects"
                     ] = res.params.to_frame()
-                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
                         "random_effects"
                     ] = pd.DataFrame(res.random_effects).var(axis=1)
                     # relative importance of parameters
-                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
                         "params"
                     ] = params / onp.sum(params)
                     # contribution of the fixed effect parameters and random effect parameters
@@ -1620,14 +1620,14 @@ if not os.path.exists(mlm_random_slopes_land_cover_scenario_file):
                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
                     params = onp.concatenate((fe_params, re_params), axis=None)
-                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
                         "fixed_effects"
                     ] = res.params.to_frame()
-                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
                         "random_effects"
                     ] = pd.DataFrame(res.random_effects).var(axis=1)
                     # relative importance of parameters
-                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
                         "params"
                     ] = params / onp.sum(params)
                     # contribution of the fixed effect parameters and random effect parameters
@@ -1717,14 +1717,14 @@ if not os.path.exists(mlm_random_intercepts_soil_land_cover_scenario_file):
                         fe_params = onp.abs(res.params.to_frame().T.values.flatten())
                         re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
                         params = onp.concatenate((fe_params, re_params), axis=None)
-                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
                             "fixed_effects"
                         ] = res.params.to_frame()
-                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
                             "random_effects"
                         ] = pd.DataFrame(res.random_effects).var(axis=1)
                         # relative importance of parameters
-                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
                             "params"
                         ] = params / onp.sum(params)
                         # contribution of the fixed effect parameters and random effect parameters
@@ -1767,7 +1767,7 @@ if not os.path.exists(mlm_random_slopes_soil_land_cover_scenario_file):
             for delta in deltas:
                 dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta] = {}
                 for land_cover_scenario in land_cover_scenarios:
-                    dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][land_cover_scenario][delta] = {}
+                    dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario] = {}
                     for soil_depth in soil_depths:
                         dfs_mlms = []
                         dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth] = {}
@@ -1813,14 +1813,14 @@ if not os.path.exists(mlm_random_slopes_soil_land_cover_scenario_file):
                         fe_params = onp.abs(res.params.to_frame().T.values.flatten())
                         re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
                         params = onp.concatenate((fe_params, re_params), axis=None)
-                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
                             "fixed_effects"
                         ] = res.params.to_frame()
-                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
                             "random_effects"
                         ] = pd.DataFrame(res.random_effects).var(axis=1)
                         # relative importance of parameters
-                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
                             "params"
                         ] = params / onp.sum(params)
                         # contribution of the fixed effect parameters and random effect parameters

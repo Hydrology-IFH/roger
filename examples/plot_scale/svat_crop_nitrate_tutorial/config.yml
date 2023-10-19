@@ -1,0 +1,81 @@
+# --- Settings --------------------------------------------------------------
+# name of the model run; is used to name the output files
+identifier: SVATCROPNITRATE
+# spatial discretization in x-direction (in meters)
+dx: 1
+# spatial discretization in y-direction (in meters)
+dy: 1
+# origin of spatial grid
+x_origin: 0
+# origin of spatial grid
+y_origin: 0
+# number of substeps per timestep
+SAS_SOLVER_SUBSTEPS: 6
+
+# --- Parameters ---------------------------------------------------------------
+# solver type of SAS
+SAS_SOLVER: 'deterministic'
+
+# SAS parameters of transpiration
+C1_TRANSP: 0.3
+C2_TRANSP: 1.0
+# SAS parameters of percolation
+C1_Q_RZ: 1.0
+C2_Q_RZ: 2.0
+# SAS parameters of percolation
+C1_Q_SS: 2.0
+C2_Q_SS: 2.0
+# Michaelis constant of denitrification in root zone (kg N ha-1 a-1)
+KM_DENIT_RZ: 10
+# Michaelis constant of denitrification in subsoil (kg N ha-1 a-1)
+KM_DENIT_SS: 10
+# Denitrification rate of root zone (kg N ha-1 a-1)
+DMAX_DENIT_RZ: 40
+# Denitrification rate of subsoil (kg N ha-1 a-1)
+DMAX_DENIT_SS: 40
+# Michaelis constant of nitrification in root zone (kg N ha-1 a-1)
+KM_NIT_RZ: 40
+# Michaelis constant of nitrification in subsoil (kg N ha-1 a-1)
+KM_NIT_SS: 40
+# Nitrification rate of root zone (kg N ha-1 a-1)
+DMAX_NIT_RZ: 1
+# Nitrification rate of subsoil (kg N ha-1 a-1)
+DMAX_NIT_SS: 1
+# Soil nitrogen mineralization rate of root zone (kg N ha-1 a-1)
+KMIN_RZ: 1
+# Soil nitrogen mineralization rate of subsoil (kg N ha-1 a-1)
+KMIN_SS: 1
+# Soil depth (mm)
+Z_SOIL: 1200
+# Clay content (-)
+CLAY: 0.3
+
+# --- Initial conditions -------------------------------------------------------
+# nitrate concentration in root zone (mg/l)
+C_RZ: 30
+# nitrate concentration in subsoil (mg/l)
+C_SS: 30
+# nitrate concentration in root zone (kg N ha-1)
+NMIN_RZ: 100
+# nitrate concentration in subsoil (kg N ha-1)
+NMIN_SS: 100
+
+# --- Diagnostics --------------------------------------------------------------
+OUTPUT_FREQUENCY: 86400  # output frequency in seconds
+OUTPUT_RATE:
+- "M_in"
+- "M_transp"
+- "M_q_ss"
+- "nit_s"
+- "denit_s"
+
+OUTPUT_COLLECT:
+- "M_s"
+- "C_s"
+- "Nmin_s"
+- "temp_soil"
+
+OUTPUT_AVERAGE:
+- "tt50_transp"
+- "rt50_s"
+- "tt50_q_ss"

@@ -107,7 +107,7 @@ def calc_inf_mat(state):
                 / (1 + (4 * b[2:-2, 2:-2] / a[2:-2, 2:-2]) + (4 * vs.Fs_t0[2:-2, 2:-2] ** 2 / a[2:-2, 2:-2] ** 2))
                 ** 0.5
             )
-            * ((100 - vs.sealing[2:-2, 2:-2]) / 100),
+            * ((1 - vs.sealing[2:-2, 2:-2]) / 1),
             vs.inf_mat_pot[2:-2, 2:-2],
         )
         * vs.maskCatch[2:-2, 2:-2],
@@ -121,7 +121,7 @@ def calc_inf_mat(state):
             vs.ks[2:-2, 2:-2]
             * vs.dt
             * (1 + ((vs.wfs[2:-2, 2:-2] * vs.theta_d[2:-2, 2:-2]) / l1[2:-2, 2:-2]))
-            * ((100 - vs.sealing[2:-2, 2:-2]) / 100),
+            * ((1 - vs.sealing[2:-2, 2:-2]) / 1),
             vs.inf_mat_pot[2:-2, 2:-2],
         )
         * vs.maskCatch[2:-2, 2:-2],
@@ -159,7 +159,7 @@ def calc_inf_mat(state):
         at[2:-2, 2:-2],
         npx.where(
             mask3[2:-2, 2:-2],
-            inf_mat_pot_sat[2:-2, 2:-2] + inf_mat_pot_rec[2:-2, 2:-2] * ((100 - vs.sealing[2:-2, 2:-2]) / 100),
+            inf_mat_pot_sat[2:-2, 2:-2] + inf_mat_pot_rec[2:-2, 2:-2] * ((1 - vs.sealing[2:-2, 2:-2]) / 1),
             vs.inf_mat_pot[2:-2, 2:-2],
         )
         * vs.maskCatch[2:-2, 2:-2],
@@ -169,7 +169,7 @@ def calc_inf_mat(state):
         vs.inf_mat_pot,
         at[2:-2, 2:-2],
         npx.where(
-            mask4[2:-2, 2:-2], vs.pi_gr[2:-2, 2:-2] * ((100 - vs.sealing[2:-2, 2:-2]) / 100), vs.inf_mat_pot[2:-2, 2:-2]
+            mask4[2:-2, 2:-2], vs.pi_gr[2:-2, 2:-2] * ((1 - vs.sealing[2:-2, 2:-2]) / 1), vs.inf_mat_pot[2:-2, 2:-2]
         )
         * vs.maskCatch[2:-2, 2:-2],
     )
@@ -1440,6 +1440,12 @@ def calc_surface_runoff(state):
         vs.q_hof[2:-2, 2:-2] + vs.q_sof[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
+    vs.q_sur = update_add(
+        vs.q_sur,
+        at[2:-2, 2:-2],
+        npx.where(vs.maskRiver[2:-2, 2:-2] | vs.maskLake[2:-2, 2:-2], vs.prec[2:-2, 2:-2, vs.tau], 0),
+    )
+
     return KernelOutput(q_sur=vs.q_sur, z0=vs.z0)
 
 
@@ -1502,7 +1508,7 @@ def calc_theta_d(state):
         at[2:-2, 2:-2],
         npx.where(
             mask1[2:-2, 2:-2],
-            (vs.theta_sat[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau]) * (1 - vs.sealing[2:-2, 2:-2] / 100),
+            (vs.theta_sat[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau]) * (1 - vs.sealing[2:-2, 2:-2] / 1),
             theta_d[2:-2, 2:-2],
         )
         * vs.maskCatch[2:-2, 2:-2],
@@ -1540,7 +1546,7 @@ def calc_theta_d_rel(state):
                 (vs.theta_sat[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau])
                 / (vs.theta_sat[2:-2, 2:-2] - vs.theta_pwp[2:-2, 2:-2])
             )
-            * (1 - vs.sealing[2:-2, 2:-2] / 100),
+            * (1 - vs.sealing[2:-2, 2:-2] / 1),
             theta_d_rel[2:-2, 2:-2],
         )
         * vs.maskCatch[2:-2, 2:-2],
@@ -1574,7 +1580,7 @@ def calc_theta_d_fp(state):
         at[2:-2, 2:-2],
         npx.where(
             mask1[2:-2, 2:-2],
-            (vs.theta_fc[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau]) * (1 - vs.sealing[2:-2, 2:-2] / 100),
+            (vs.theta_fc[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau]) * (1 - vs.sealing[2:-2, 2:-2] / 1),
             theta_d_fp[2:-2, 2:-2],
         )
         * vs.maskCatch[2:-2, 2:-2],
@@ -1732,7 +1738,7 @@ def calc_depth_shrinkage_cracks(state):
     vs.z_sc = update(
         vs.z_sc,
         at[2:-2, 2:-2],
-        ((1.0 - vs.sealing[2:-2, 2:-2] / 100.0) * vs.z_sc[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        ((1 - vs.sealing[2:-2, 2:-2] / 1) * vs.z_sc[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.z_sc = update(
