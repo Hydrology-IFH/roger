@@ -150,6 +150,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
         )
         def set_parameters_setup(self, state):
             vs = state.variables
+            settings = state.settings
 
             vs.S_PWP_RZ = update(
                 vs.S_PWP_RZ,
@@ -239,23 +240,29 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 1], 10)
 
             # denitrification parameters
-            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], 10)
-            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], 10)
-            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], 100)
-            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], 100)
+            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], 2.5)
+            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], 2.5)
+            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], 10)
+            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], 10)
             # nitrification parameters
-            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], 10)
-            vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], 10)
-            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], 100)
-            vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], 100)
+            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], 2.5)
+            vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], 2.5)
+            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], 10)
+            vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], 10)
             # soil nitrogen mineralization parameters
             vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], 20)
             vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], 20)
             # soil nitrogen fixation parameters
 
             # soil temperature parameters
-            vs.phi_soil = update(vs.phi_soil, at[2:-2, 2:-2], 1)
-            vs.damp_soil = update(vs.damp_soil, at[2:-2, 2:-2], 1)
+            vs.z_soil = update(
+                vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path, "parameters.csv")
+            )
+            vs.phi_soil_temp = update(vs.phi_soil_temp, at[2:-2, 2:-2], 91)
+            # dampening depth of soil temperature depends on clay content
+            # clay = self._read_var_from_csv("clay", self._base_path, "parameters.csv")
+            clay = 0.3
+            vs.damp_soil_temp = update(vs.damp_soil_temp, at[2:-2, 2:-2], 12 + 4 * (1 - (clay / settings.clay_max)))
 
         @roger_routine
         def set_parameters(self, state):
@@ -282,20 +289,20 @@ def main(location, crop_rotation_scenario, tmp_dir):
 
             vs.S_rz = update(
                 vs.S_rz,
-                at[2:-2, 2:-2, : vs.taup1],
+                at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc(
                     "S_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 )[:, :, vs.itt, npx.newaxis],
             )
             vs.S_ss = update(
                 vs.S_ss,
-                at[2:-2, 2:-2, : vs.taup1],
+                at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc(
                     "S_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 )[:, :, vs.itt, npx.newaxis],
             )
             vs.S_s = update(
-                vs.S_s, at[2:-2, 2:-2, : vs.taup1], vs.S_rz[2:-2, 2:-2, : vs.taup1] + vs.S_ss[2:-2, 2:-2, : vs.taup1]
+                vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1]
             )
             vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
             vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
@@ -309,14 +316,14 @@ def main(location, crop_rotation_scenario, tmp_dir):
             arr0 = allocate(state.dimensions, ("x", "y"))
             vs.sa_rz = update(
                 vs.sa_rz,
-                at[2:-2, 2:-2, : vs.taup1, 1:],
+                at[2:-2, 2:-2, :vs.taup1, 1:],
                 npx.diff(npx.linspace(arr0[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[
                     :, :, npx.newaxis, :
                 ],
             )
             vs.sa_ss = update(
                 vs.sa_ss,
-                at[2:-2, 2:-2, : vs.taup1, 1:],
+                at[2:-2, 2:-2, :vs.taup1, 1:],
                 npx.diff(npx.linspace(arr0[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[
                     :, :, npx.newaxis, :
                 ],
@@ -408,7 +415,9 @@ def main(location, crop_rotation_scenario, tmp_dir):
                 "TA",
                 "YEAR",
                 "DOY",
-                "ta_year"
+                "ta_year",
+                "LU_ID",
+                "Z_ROOT",
             ],
         )
         def set_forcing_setup(self, state):
@@ -521,27 +530,41 @@ def main(location, crop_rotation_scenario, tmp_dir):
                 vs.TA,
                 at[:],
                 self._read_var_from_nc(
-                    "TA", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "ta", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.YEAR = update(
                 vs.YEAR,
                 at[:],
                 self._read_var_from_nc(
-                    "YEAR", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "year", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.DOY = update(
                 vs.DOY,
                 at[:],
                 self._read_var_from_nc(
-                    "DOY", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "doy", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.ta_year = update(
                 vs.ta_year,
                 at[2:-2, 2:-2],
                 npx.mean(vs.TA[:365])[npx.newaxis, npx.newaxis],
+            )
+            vs.LU_ID = update(
+                vs.LU_ID,
+                at[2:-2, 2:-2, :],
+                self._read_var_from_nc(
+                    "lu_id", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                ),
+            )
+            vs.Z_ROOT = update(
+                vs.Z_ROOT,
+                at[2:-2, 2:-2, :],
+                self._read_var_from_nc(
+                    "z_root", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                ),
             )
 
         @roger_routine
@@ -565,19 +588,13 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[vs.itt])
             vs.doy = update(vs.doy, at[1], vs.DOY[vs.itt])
             vs.year = update(vs.year, at[1], vs.YEAR[vs.itt])
+            vs.z_root = update(vs.z_root, at[2:-2, 2:-2, vs.tau], vs.Z_ROOT[2:-2, 2:-2, vs.itt])
 
             # apply nitrate tracer
             inf = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2]
-            vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where(inf > 10000, 10000, 0))
-            vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(inf > 10, 10 * 0.3, 0))
+            vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where(inf > 20, 1000, 0))
+            vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(inf > 10, 1000 * 0.3, 0))
             vs.C_in = update(vs.C_in, at[2:-2, 2:-2], npx.where(inf > 10, vs.M_in[2:-2, 2:-2]/inf, 0))
-
-            if (vs.year[1] != vs.year[0]) & (vs.itt > 1):
-                vs.ta_year = update(
-                vs.ta_year,
-                at[2:-2, 2:-2],
-                npx.mean(vs.TA[vs.itt:vs.itt+364])[npx.newaxis, npx.newaxis],
-            )
 
         @roger_routine
         def set_diagnostics(self, state, base_path=tmp_dir):
@@ -608,7 +625,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
             if base_path:
                 diagnostics["average"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["M_s"]
+            diagnostics["collect"].output_variables = ["M_s", "Nmin_s"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:

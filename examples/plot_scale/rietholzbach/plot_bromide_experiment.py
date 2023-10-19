@@ -208,6 +208,105 @@ def main(tmp_dir):
         file = base_path_figs / f"bromide_benchmark_alpha_{alpha}.pdf"
         fig.savefig(file, dpi=300)
 
+
+    # plot a dry year (2002) and a wet year (2006)
+    years = [2002, 2006]
+    cmap = cm.get_cmap("Reds")
+    cmap_hydrus = cm.get_cmap("Greys")
+    norm = Normalize(vmin=onp.min(years) - 2, vmax=onp.max(years))
+    alphas = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+    alphas = [0.8]
+    for alpha in alphas:
+        fig, axes = plt.subplots(5, 1, figsize=(6, 5), sharex=True)
+        for i, tm_structure in enumerate(tm_structures):
+            tms = tm_structure.replace(" ", "_")
+            # add St. Gallen
+            if alpha in [0.8]:
+                if tm_structure in [
+                    "complete-mixing",
+                    "advection-dispersion-power",
+                    "time-variant advection-dispersion-power",
+                ]:
+                    df_sim_br_conc = pd.DataFrame(index=df_obs_br.index)
+                    states_br_file = (
+                        base_path / "svat_bromide_benchmark" / "output" / f"states_{tms}_bromide_benchmark_stgallen.nc"
+                    )
+                    with xr.open_dataset(states_br_file, engine="h5netcdf", decode_times=False, group=f"1991") as ds:
+                        sim_vals = ds["C_q_ss_mmol_bs"].isel(x=0, y=0).values[315:716]
+                        sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
+                        df_sim_br_conc.loc[:, f"1991"] = sim_vals
+                    axes.flatten()[i].plot(
+                        df_sim_br_conc.dropna().index,
+                        df_sim_br_conc.dropna()[f"1991"],
+                        ls=":",
+                        color="red",
+                        lw=1,
+                        alpha=0.8,
+                        label=f"1991",
+                    )
+            df_sim_br_conc = pd.DataFrame(index=df_obs_br.index)
+            df_sim_br_mass = pd.DataFrame(index=df_obs_br.index)
+            for year in years:
+                states_br_file = base_path / "svat_bromide_benchmark" / "output" / f"states_{tms}_bromide_benchmark.nc"
+                with xr.open_dataset(states_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
+                    x = onp.where(
+                        (onp.round(ds["alpha_transp"].isel(Time=0).values, 1) == alpha)
+                        & (onp.round(ds["alpha_q"].isel(Time=0).values, 1) == alpha)
+                    )[0][0]
+                    sim_vals = ds["C_q_ss_mmol_bs"].isel(x=x, y=0).values[315:716]
+                    sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
+                    df_sim_br_conc.loc[:, f"{year}"] = sim_vals
+                    sim_vals = ds["M_q_ss"].isel(x=x, y=0).values[315:716]
+                    sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
+                    df_sim_br_mass.loc[:, f"{year}"] = sim_vals
+                axes.flatten()[i].plot(
+                    df_sim_br_conc.dropna().index,
+                    df_sim_br_conc.dropna()[f"{year}"],
+                    ls="--",
+                    color=cmap(norm(year)),
+                    lw=0.8,
+                    alpha=0.5,
+                    label=f"{year}",
+                )
+            axes.flatten()[i].plot(df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1)
+            axes.flatten()[i].set_xlim([0, 400])
+            axes.flatten()[i].set_ylabel("%s\nBr [mmol/l]" % (_LABS_TM[tm_structure]))
+        df_sim_br = pd.DataFrame(index=df_obs_br.index)
+        for year in years:
+            states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
+            with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
+                df_sim_br = pd.DataFrame(index=df_obs_br.index)
+                df_sim_br.loc[:, f"{year}"] = ds["Br_perc_mmol"].values
+            axes.flatten()[-1].plot(
+                df_sim_br.dropna().index,
+                df_sim_br.dropna()[f"{year}"],
+                ls="--",
+                color=cmap_hydrus(norm(year)),
+                lw=0.8,
+                alpha=0.5,
+                label=f"{year}",
+            )
+        axes.flatten()[-1].plot(
+            df_obs_br.dropna().index, df_obs_br.dropna()["Br"], color="blue", lw=1, label="observed"
+        )
+        axes.flatten()[-1].set_xlim([0, 400])
+        axes.flatten()[-1].set_ylabel("HYDRUS-1D\nBr [mmol/l]")
+        axes.flatten()[-1].set_xlabel(r"Time [days since injection]")
+        axes.flatten()[0].text(0.025, 0.89, "(a)", ha="center", va="center", transform=axes.flatten()[0].transAxes)
+        axes.flatten()[1].text(0.025, 0.89, "(b)", ha="center", va="center", transform=axes.flatten()[1].transAxes)
+        axes.flatten()[2].text(0.025, 0.89, "(c)", ha="center", va="center", transform=axes.flatten()[2].transAxes)
+        axes.flatten()[3].text(0.025, 0.89, "(d)", ha="center", va="center", transform=axes.flatten()[3].transAxes)
+        axes.flatten()[4].text(0.025, 0.89, "(e)", ha="center", va="center", transform=axes.flatten()[4].transAxes)
+        lines1, labels1 = axes.flatten()[-2].get_legend_handles_labels()
+        lines2, labels2 = axes.flatten()[-1].get_legend_handles_labels()
+        fig.legend(lines1, labels1, loc="upper right", fontsize=8, frameon=False, bbox_to_anchor=(0.93, 0.29))
+        fig.legend(lines2, labels2, loc="lower right", fontsize=8, frameon=False, bbox_to_anchor=(0.965, 0.07))
+        fig.subplots_adjust(bottom=0.1, right=0.8, top=1.0, hspace=0.2)
+        file = base_path_figs / f"bromide_benchmark_alpha_{alpha}_2002_2006.png"
+        fig.savefig(file, dpi=300)
+        file = base_path_figs / f"bromide_benchmark_alpha_{alpha}_2002_2006.pdf"
+        fig.savefig(file, dpi=300)
+
     # plot soil bromide concentrations simulated with HYDRUS-1D
     years = onp.arange(1997, 2007).tolist()
     cmap = copy.copy(plt.cm.get_cmap("Oranges"))

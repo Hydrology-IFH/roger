@@ -820,12 +820,7 @@ def calc_ageing_Nmin_kernel(state):
         at[2:-2, 2:-2, :, :], calc_ageing_msa(state, vs.Nmin_ss)[2:-2, 2:-2, :, :],
     )
 
-    vs.Nmin_s = update(
-        vs.Nmin_s,
-        at[2:-2, 2:-2, :, :], calc_ageing_msa(state, vs.Nmin_s)[2:-2, 2:-2, :, :],
-    )
-
-    return KernelOutput(Nmin_rz=vs.Nmin_rz, Nmin_ss=vs.Nmin_ss, Nmin_s=vs.Nmin_s)
+    return KernelOutput(Nmin_rz=vs.Nmin_rz, Nmin_ss=vs.Nmin_ss)
 
 
 @roger_routine
@@ -3414,6 +3409,10 @@ def write_output(state):
 
     if settings.warmup_done:
         numerics.calculate_num_error(state)
+        if vs.time_for_diag >= settings.output_frequency:
+            vs.time_for_diag = 0
+        diagnostics.reset(state)
+        vs.time_for_diag = vs.time_for_diag + vs.dt_secs
         diagnostics.diagnose(state)
         diagnostics.output(state)
 
@@ -3635,13 +3634,25 @@ def after_substep_nitrate(state):
 
         vs.Nmin_s = update(
             vs.Nmin_s,
-            at[2:-2, 2:-2, vs.taum1, :], vs.Nmin_s[2:-2, 2:-2, vs.tau, :],
+            at[2:-2, 2:-2, vs.taum1], vs.Nmin_s[2:-2, 2:-2, vs.tau],
             )
+        
+        vs.temp_soil = update(
+            vs.temp_soil,
+            at[2:-2, 2:-2, vs.taum1], vs.temp_soil[2:-2, 2:-2, vs.tau],
+            )
+        vs.doy = update(
+            vs.doy,
+            at[vs.taum1],
+            vs.doy[vs.tau],
+        )
 
         return KernelOutput(
             Nmin_rz=vs.Nmin_rz,
             Nmin_ss=vs.Nmin_ss,
-            Nmin_s=vs.Nmin_s
+            Nmin_s=vs.Nmin_s,
+            temp_soil=vs.temp_soil,
+            doy=vs.doy,
             )
 
 @roger_kernel

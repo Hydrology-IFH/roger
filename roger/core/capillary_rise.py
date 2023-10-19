@@ -160,7 +160,7 @@ def calc_cpr_rz(state):
     vs.S_lp_rz = update_add(
         vs.S_lp_rz,
         at[2:-2, 2:-2],
-        mask4[2:-2, 2:-2] * (vs.S_fp_rz[2:-2, 2:-2] - vs.S_ufc_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        npx.where(mask4[2:-2, 2:-2], (vs.S_fp_rz[2:-2, 2:-2] - vs.S_ufc_rz[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.S_fp_rz = update(
         vs.S_fp_rz,

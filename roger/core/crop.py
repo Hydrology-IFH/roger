@@ -1710,6 +1710,9 @@ def calculate_crop_phenology(state):
 
             vs.update(set_crop_params(state))
 
+        if vs.itt <= 0:
+            vs.update(set_crop_params(state))
+
         if vs.time % (24 * 60 * 60) == 0:
             if settings.enable_crop_water_stress:
                 vs.update(calc_k_stress_transp_crop(state))
