@@ -26,12 +26,12 @@ cd /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_oxyg
 echo "Copy fluxes and states from global workspace to local SSD"
 # Compares hashes
 checksum_gws=$(shasum -a 256 /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_distributed/output/SVAT.nc | cut -f 1 -d " ")
-checksum_ssd=0a
+checksum_ssd=0
 cp /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_distributed/output/SVAT.nc "${TMPDIR}"
 # Wait for termination of moving files
 while [ "${checksum_gws}" != "${checksum_ssd}" ]; do
     sleep 10
-    checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVAT18O.nc | cut -f 1 -d " ")
+    checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVAT.nc | cut -f 1 -d " ")
 done
 echo "Copying was successful"
  

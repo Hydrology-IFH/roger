@@ -697,53 +697,54 @@ if not os.path.exists(mlm_random_intercepts_llcp_file):
                         y, yhat
                     )
 
-                    # # plot the line fit
-                    # fig, ax = plt.subplots(figsize=(3, 3))
-                    # ax.scatter(y, yhat, color="black", s=4)
-                    # line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
-                    # abline_plot(model_results=line_fit, ax=ax, color="black")
-                    # ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]")
-                    # ax.set_ylabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]")
-                    # ax.set_xlim(-100, 100)
-                    # ax.set_ylim(-100, 100)
-                    # fig.tight_layout()
-                    # file = (
-                    #     base_path_figs
-                    #     / "residuals"
-                    #     / "MLM"
-                    #     / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_line_fit_for_random_intercepts.png"
-                    # )
-                    # fig.savefig(file, dpi=300)
+                    # plot the line fit
+                    fig, ax = plt.subplots(figsize=(3, 3))
+                    ax.scatter(y, yhat, color="black", s=4)
+                    line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
+                    abline_plot(model_results=line_fit, ax=ax, color="black")
+                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]")
+                    ax.set_ylabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]")
+                    ax.text(-90, 90, f"R2 = {r2_score(y, yhat):.2f}")
+                    ax.set_xlim(-100, 100)
+                    ax.set_ylim(-100, 100)
+                    fig.tight_layout()
+                    file = (
+                        base_path_figs
+                        / "residuals"
+                        / "MLM"
+                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_line_fit_for_random_intercepts.png"
+                    )
+                    fig.savefig(file, dpi=300)
 
-                    # # plot the residuals
-                    # resid = yhat - y
-                    # fig, ax = plt.subplots(figsize=(3, 3))
-                    # ax.scatter(y, resid, color="black", s=4)
-                    # ax.set_ylabel("Residuals [%]")
-                    # ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]}")
-                    # fig.tight_layout()
-                    # file = (
-                    #     base_path_figs
-                    #     / "residuals"
-                    #     / "MLM"
-                    #     / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_for_random_intercepts.png"
-                    # )
-                    # fig.savefig(file, dpi=300)
+                    # plot the residuals
+                    resid = yhat - y
+                    fig, ax = plt.subplots(figsize=(3, 3))
+                    ax.scatter(y, resid, color="black", s=4)
+                    ax.set_ylabel("Residuals [%]")
+                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]}")
+                    fig.tight_layout()
+                    file = (
+                        base_path_figs
+                        / "residuals"
+                        / "MLM"
+                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_for_random_intercepts.png"
+                    )
+                    fig.savefig(file, dpi=300)
 
-                    # # plot the distribution of residuals
-                    # fig, ax = plt.subplots(figsize=(3, 3))
-                    # resid_std = stats.zscore(resid)
-                    # ax.hist(resid_std, bins=25, color="black")
-                    # ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM)")
-                    # fig.tight_layout()
-                    # file = (
-                    #     base_path_figs
-                    #     / "residuals"
-                    #     / "MLM"
-                    #     / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_hist_for_random_intercepts.png"
-                    # )
-                    # fig.savefig(file, dpi=300)
-                    # plt.close("all")
+                    # plot the distribution of residuals
+                    fig, ax = plt.subplots(figsize=(3, 3))
+                    resid_std = stats.zscore(resid)
+                    ax.hist(resid_std, bins=25, color="black")
+                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM)")
+                    fig.tight_layout()
+                    file = (
+                        base_path_figs
+                        / "residuals"
+                        / "MLM"
+                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_hist_for_random_intercepts.png"
+                    )
+                    fig.savefig(file, dpi=300)
+                    plt.close("all")
 
     # Store the data (serialize)
     with open(mlm_random_intercepts_llcp_file, "wb") as handle:
@@ -935,53 +936,53 @@ if not os.path.exists(mlm_random_intercepts_soil_llcp_file):
                         y, yhat
                     )
 
-                    # # plot the line fit
-                    # fig, ax = plt.subplots(figsize=(3, 3))
-                    # ax.scatter(y, yhat, color="black", s=4)
-                    # line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
-                    # abline_plot(model_results=line_fit, ax=ax, color="black")
-                    # ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]")
-                    # ax.set_ylabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]")
-                    # ax.set_xlim(-100, 100)
-                    # ax.set_ylim(-100, 100)
-                    # fig.tight_layout()
-                    # file = (
-                    #     base_path_figs
-                    #     / "residuals"
-                    #     / "MLM"
-                    #     / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_line_fit_for_random_intercepts.png"
-                    # )
-                    # fig.savefig(file, dpi=300)
+                    # plot the line fit
+                    fig, ax = plt.subplots(figsize=(3, 3))
+                    ax.scatter(y, yhat, color="black", s=4)
+                    line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
+                    abline_plot(model_results=line_fit, ax=ax, color="black")
+                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]")
+                    ax.set_ylabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]")
+                    ax.set_xlim(-100, 100)
+                    ax.set_ylim(-100, 100)
+                    fig.tight_layout()
+                    file = (
+                        base_path_figs
+                        / "residuals"
+                        / "MLM"
+                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_line_fit_for_random_intercepts.png"
+                    )
+                    fig.savefig(file, dpi=300)
 
-                    # # plot the residuals
-                    # resid = yhat - y
-                    # fig, ax = plt.subplots(figsize=(3, 3))
-                    # ax.scatter(y, resid, color="black", s=4)
-                    # ax.set_ylabel("Residuals [%]")
-                    # ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]}")
-                    # fig.tight_layout()
-                    # file = (
-                    #     base_path_figs
-                    #     / "residuals"
-                    #     / "MLM"
-                    #     / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_for_random_intercepts.png"
-                    # )
-                    # fig.savefig(file, dpi=300)
+                    # plot the residuals
+                    resid = yhat - y
+                    fig, ax = plt.subplots(figsize=(3, 3))
+                    ax.scatter(y, resid, color="black", s=4)
+                    ax.set_ylabel("Residuals [%]")
+                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]}")
+                    fig.tight_layout()
+                    file = (
+                        base_path_figs
+                        / "residuals"
+                        / "MLM"
+                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_for_random_intercepts.png"
+                    )
+                    fig.savefig(file, dpi=300)
 
-                    # # plot the distribution of residuals
-                    # fig, ax = plt.subplots(figsize=(3, 3))
-                    # resid_std = stats.zscore(resid)
-                    # ax.hist(resid_std, bins=25, color="black")
-                    # ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM)")
-                    # fig.tight_layout()
-                    # file = (
-                    #     base_path_figs
-                    #     / "residuals"
-                    #     / "MLM"
-                    #     / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_hist_for_random_intercepts.png"
-                    # )
-                    # fig.savefig(file, dpi=300)
-                    # plt.close("all")
+                    # plot the distribution of residuals
+                    fig, ax = plt.subplots(figsize=(3, 3))
+                    resid_std = stats.zscore(resid)
+                    ax.hist(resid_std, bins=25, color="black")
+                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM)")
+                    fig.tight_layout()
+                    file = (
+                        base_path_figs
+                        / "residuals"
+                        / "MLM"
+                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_hist_for_random_intercepts.png"
+                    )
+                    fig.savefig(file, dpi=300)
+                    plt.close("all")
 
     # Store the data (serialize)
     with open(mlm_random_intercepts_soil_llcp_file, "wb") as handle:
@@ -2264,75 +2265,75 @@ vars_sim = ["transp", "q_ss", "theta", "tt50_transp", "tt50_q_ss", "rt50_s"]
 deltas = ["dAvg", "dIPR"]
 soil_depths = ["shallow", "medium", "deep"]
 norm = mpl.colors.Normalize(vmin=0, vmax=50)
-for mlm_key in mlm_formulas.keys():
-    for metric in metrics:
-        fig, axes = plt.subplots(3, 2, sharex="col", sharey="row", figsize=(6, 4.5))
-        for ii, delta in enumerate(deltas):
-            for jj, soil_depth in enumerate(soil_depths):
-                # axes for colorbar
-                axl = fig.add_axes([0.84, 0.32, 0.02, 0.46])
-                cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
-                cb1.set_label(f"{_lab[metric]} [-]")
-                df_metric = pd.DataFrame()
-                for var_sim in vars_sim:
-                    for iloc, location in enumerate(locations):
-                        for ilsc, land_cover_scenario in enumerate(land_cover_scenarios):
-                            for ics, climate_scenario in enumerate(climate_scenarios):
-                                value = dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][metric]
-                                df_metric.loc[f"{iloc}{ilsc}{ics}", f"{_lab[var_sim]}"] = value
-                sns.heatmap(df_metric, vmin=0, vmax=50, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
-                axes[jj, ii].set_ylabel("")
-                axes[jj, ii].set_xlabel("")
-        axes[-1, 0].set_xticklabels(df_metric.columns, rotation=90)
-        axes[-1, 1].set_xticklabels(df_metric.columns, rotation=90)
-        axes[0, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[1, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[2, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[0, 0].set_title("(a)", loc="left", fontsize=9)
-        axes[1, 0].set_title("(b)", loc="left", fontsize=9)
-        axes[2, 0].set_title("(c)", loc="left", fontsize=9)
-        axes[0, 1].set_title("(d)", loc="left", fontsize=9)
-        axes[1, 1].set_title("(e)", loc="left", fontsize=9)
-        axes[2, 1].set_title("(f)", loc="left", fontsize=9)
-        fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
-        file = base_path_figs / "mlm_metrics" / f"mlms_random_intercepts_{mlm_key}_{metric}_heatmap.png"
-        fig.savefig(file, dpi=300)
-        plt.close("all")
+# for mlm_key in mlm_formulas.keys():
+#     for metric in metrics:
+#         fig, axes = plt.subplots(3, 2, sharex="col", sharey="row", figsize=(6, 4.5))
+#         for ii, delta in enumerate(deltas):
+#             for jj, soil_depth in enumerate(soil_depths):
+#                 # axes for colorbar
+#                 axl = fig.add_axes([0.84, 0.32, 0.02, 0.46])
+#                 cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
+#                 cb1.set_label(f"{_lab[metric]} [-]")
+#                 df_metric = pd.DataFrame()
+#                 for var_sim in vars_sim:
+#                     for iloc, location in enumerate(locations):
+#                         for ilsc, land_cover_scenario in enumerate(land_cover_scenarios):
+#                             for ics, climate_scenario in enumerate(climate_scenarios):
+#                                 value = dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][metric]
+#                                 df_metric.loc[f"{iloc}{ilsc}{ics}", f"{_lab[var_sim]}"] = value
+#                 sns.heatmap(df_metric, vmin=0, vmax=50, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
+#                 axes[jj, ii].set_ylabel("")
+#                 axes[jj, ii].set_xlabel("")
+#         axes[-1, 0].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[-1, 1].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[0, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[1, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[2, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[0, 0].set_title("(a)", loc="left", fontsize=9)
+#         axes[1, 0].set_title("(b)", loc="left", fontsize=9)
+#         axes[2, 0].set_title("(c)", loc="left", fontsize=9)
+#         axes[0, 1].set_title("(d)", loc="left", fontsize=9)
+#         axes[1, 1].set_title("(e)", loc="left", fontsize=9)
+#         axes[2, 1].set_title("(f)", loc="left", fontsize=9)
+#         fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
+#         file = base_path_figs / "mlm_metrics" / f"mlms_random_intercepts_{mlm_key}_{metric}_heatmap.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close("all")
 
-for mlm_key in mlm_formulas.keys():
-    for metric in metrics:
-        fig, axes = plt.subplots(3, 2, sharex="col", sharey="row", figsize=(6, 4.5))
-        for ii, delta in enumerate(deltas):
-            for jj, soil_depth in enumerate(soil_depths):
-                # axes for colorbar
-                axl = fig.add_axes([0.84, 0.32, 0.02, 0.46])
-                cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
-                cb1.set_label(f"{_lab[metric]} [-]")
-                df_metric = pd.DataFrame()
-                for var_sim in vars_sim:
-                    for iloc, location in enumerate(locations):
-                        for ilsc, land_cover_scenario in enumerate(land_cover_scenarios):
-                            for ics, climate_scenario in enumerate(climate_scenarios):
-                                value = dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][metric]
-                                df_metric.loc[f"{iloc}{ilsc}{ics}", f"{_lab[var_sim]}"] = value
-                sns.heatmap(df_metric, vmin=0, vmax=50, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
-                axes[jj, ii].set_ylabel("")
-                axes[jj, ii].set_xlabel("")
-        axes[-1, 0].set_xticklabels(df_metric.columns, rotation=90)
-        axes[-1, 1].set_xticklabels(df_metric.columns, rotation=90)
-        axes[0, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[1, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[2, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[0, 0].set_title("(a)", loc="left", fontsize=9)
-        axes[1, 0].set_title("(b)", loc="left", fontsize=9)
-        axes[2, 0].set_title("(c)", loc="left", fontsize=9)
-        axes[0, 1].set_title("(d)", loc="left", fontsize=9)
-        axes[1, 1].set_title("(e)", loc="left", fontsize=9)
-        axes[2, 1].set_title("(f)", loc="left", fontsize=9)
-        fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
-        file = base_path_figs / "mlm_metrics" / f"mlms_random_slopes_{mlm_key}_{metric}_heatmap.png"
-        fig.savefig(file, dpi=300)
-        plt.close("all")
+# for mlm_key in mlm_formulas.keys():
+#     for metric in metrics:
+#         fig, axes = plt.subplots(3, 2, sharex="col", sharey="row", figsize=(6, 4.5))
+#         for ii, delta in enumerate(deltas):
+#             for jj, soil_depth in enumerate(soil_depths):
+#                 # axes for colorbar
+#                 axl = fig.add_axes([0.84, 0.32, 0.02, 0.46])
+#                 cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
+#                 cb1.set_label(f"{_lab[metric]} [-]")
+#                 df_metric = pd.DataFrame()
+#                 for var_sim in vars_sim:
+#                     for iloc, location in enumerate(locations):
+#                         for ilsc, land_cover_scenario in enumerate(land_cover_scenarios):
+#                             for ics, climate_scenario in enumerate(climate_scenarios):
+#                                 value = dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][metric]
+#                                 df_metric.loc[f"{iloc}{ilsc}{ics}", f"{_lab[var_sim]}"] = value
+#                 sns.heatmap(df_metric, vmin=0, vmax=50, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
+#                 axes[jj, ii].set_ylabel("")
+#                 axes[jj, ii].set_xlabel("")
+#         axes[-1, 0].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[-1, 1].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[0, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[1, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[2, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[0, 0].set_title("(a)", loc="left", fontsize=9)
+#         axes[1, 0].set_title("(b)", loc="left", fontsize=9)
+#         axes[2, 0].set_title("(c)", loc="left", fontsize=9)
+#         axes[0, 1].set_title("(d)", loc="left", fontsize=9)
+#         axes[1, 1].set_title("(e)", loc="left", fontsize=9)
+#         axes[2, 1].set_title("(f)", loc="left", fontsize=9)
+#         fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
+#         file = base_path_figs / "mlm_metrics" / f"mlms_random_slopes_{mlm_key}_{metric}_heatmap.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close("all")
 
 for mlm_key in mlm_formulas.keys():
     for metric in metrics:
@@ -2427,7 +2428,6 @@ for mlm_key in mlm_formulas.keys():
         plt.close("all")
 
 
-
 # for metric in metrics:
 #     for delta in deltas:
 #         for soil_depth in soil_depths:
@@ -2461,75 +2461,75 @@ vars_sim = ["transp", "q_ss", "theta", "tt50_transp", "tt50_q_ss", "rt50_s"]
 deltas = ["dAvg", "dIPR"]
 soil_depths = ["shallow", "medium", "deep"]
 norm = mpl.colors.Normalize(vmin=0, vmax=1)
-for mlm_key in mlm_formulas.keys():
-    for metric in metrics:
-        fig, axes = plt.subplots(3, 2, sharex="col", sharey="row", figsize=(6, 4.5))
-        for ii, delta in enumerate(deltas):
-            for jj, soil_depth in enumerate(soil_depths):
-                # axes for colorbar
-                axl = fig.add_axes([0.84, 0.32, 0.02, 0.46])
-                cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
-                cb1.set_label(f"{_lab[metric]} [-]")
-                df_metric = pd.DataFrame()
-                for var_sim in vars_sim:
-                    for iloc, location in enumerate(locations):
-                        for ilsc, land_cover_scenario in enumerate(land_cover_scenarios):
-                            for ics, climate_scenario in enumerate(climate_scenarios):
-                                value = dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][metric]
-                                df_metric.loc[f"{iloc}{ilsc}{ics}", f"{_lab[var_sim]}"] = value
-                sns.heatmap(df_metric, vmin=0, vmax=1, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
-                axes[jj, ii].set_ylabel("")
-                axes[jj, ii].set_xlabel("")
-        axes[-1, 0].set_xticklabels(df_metric.columns, rotation=90)
-        axes[-1, 1].set_xticklabels(df_metric.columns, rotation=90)
-        axes[0, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[1, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[2, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[0, 0].set_title("(a)", loc="left", fontsize=9)
-        axes[1, 0].set_title("(b)", loc="left", fontsize=9)
-        axes[2, 0].set_title("(c)", loc="left", fontsize=9)
-        axes[0, 1].set_title("(d)", loc="left", fontsize=9)
-        axes[1, 1].set_title("(e)", loc="left", fontsize=9)
-        axes[2, 1].set_title("(f)", loc="left", fontsize=9)
-        fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
-        file = base_path_figs / "mlm_metrics" / f"mlms_random_intercepts_{mlm_key}_{metric}_heatmap.png"
-        fig.savefig(file, dpi=300)
-        plt.close("all")
+# for mlm_key in mlm_formulas.keys():
+#     for metric in metrics:
+#         fig, axes = plt.subplots(3, 2, sharex="col", sharey="row", figsize=(6, 4.5))
+#         for ii, delta in enumerate(deltas):
+#             for jj, soil_depth in enumerate(soil_depths):
+#                 # axes for colorbar
+#                 axl = fig.add_axes([0.84, 0.32, 0.02, 0.46])
+#                 cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
+#                 cb1.set_label(f"{_lab[metric]} [-]")
+#                 df_metric = pd.DataFrame()
+#                 for var_sim in vars_sim:
+#                     for iloc, location in enumerate(locations):
+#                         for ilsc, land_cover_scenario in enumerate(land_cover_scenarios):
+#                             for ics, climate_scenario in enumerate(climate_scenarios):
+#                                 value = dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][metric]
+#                                 df_metric.loc[f"{iloc}{ilsc}{ics}", f"{_lab[var_sim]}"] = value
+#                 sns.heatmap(df_metric, vmin=0, vmax=1, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
+#                 axes[jj, ii].set_ylabel("")
+#                 axes[jj, ii].set_xlabel("")
+#         axes[-1, 0].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[-1, 1].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[0, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[1, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[2, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[0, 0].set_title("(a)", loc="left", fontsize=9)
+#         axes[1, 0].set_title("(b)", loc="left", fontsize=9)
+#         axes[2, 0].set_title("(c)", loc="left", fontsize=9)
+#         axes[0, 1].set_title("(d)", loc="left", fontsize=9)
+#         axes[1, 1].set_title("(e)", loc="left", fontsize=9)
+#         axes[2, 1].set_title("(f)", loc="left", fontsize=9)
+#         fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
+#         file = base_path_figs / "mlm_metrics" / f"mlms_random_intercepts_{mlm_key}_{metric}_heatmap.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close("all")
 
-for mlm_key in mlm_formulas.keys():
-    for metric in metrics:
-        fig, axes = plt.subplots(3, 2, sharex="col", sharey="row", figsize=(6, 4.5))
-        for ii, delta in enumerate(deltas):
-            for jj, soil_depth in enumerate(soil_depths):
-                # axes for colorbar
-                axl = fig.add_axes([0.84, 0.32, 0.02, 0.46])
-                cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
-                cb1.set_label(f"{_lab[metric]} [-]")
-                df_metric = pd.DataFrame()
-                for var_sim in vars_sim:
-                    for iloc, location in enumerate(locations):
-                        for ilsc, land_cover_scenario in enumerate(land_cover_scenarios):
-                            for ics, climate_scenario in enumerate(climate_scenarios):
-                                value = dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][metric]
-                                df_metric.loc[f"{iloc}{ilsc}{ics}", f"{_lab[var_sim]}"] = value
-                sns.heatmap(df_metric, vmin=0, vmax=1, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
-                axes[jj, ii].set_ylabel("")
-                axes[jj, ii].set_xlabel("")
-        axes[-1, 0].set_xticklabels(df_metric.columns, rotation=90)
-        axes[-1, 1].set_xticklabels(df_metric.columns, rotation=90)
-        axes[0, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[1, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[2, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[0, 0].set_title("(a)", loc="left", fontsize=9)
-        axes[1, 0].set_title("(b)", loc="left", fontsize=9)
-        axes[2, 0].set_title("(c)", loc="left", fontsize=9)
-        axes[0, 1].set_title("(d)", loc="left", fontsize=9)
-        axes[1, 1].set_title("(e)", loc="left", fontsize=9)
-        axes[2, 1].set_title("(f)", loc="left", fontsize=9)
-        fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
-        file = base_path_figs / "mlm_metrics" / f"mlms_random_slopes_{mlm_key}_{metric}_heatmap.png"
-        fig.savefig(file, dpi=300)
-        plt.close("all")
+# for mlm_key in mlm_formulas.keys():
+#     for metric in metrics:
+#         fig, axes = plt.subplots(3, 2, sharex="col", sharey="row", figsize=(6, 4.5))
+#         for ii, delta in enumerate(deltas):
+#             for jj, soil_depth in enumerate(soil_depths):
+#                 # axes for colorbar
+#                 axl = fig.add_axes([0.84, 0.32, 0.02, 0.46])
+#                 cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
+#                 cb1.set_label(f"{_lab[metric]} [-]")
+#                 df_metric = pd.DataFrame()
+#                 for var_sim in vars_sim:
+#                     for iloc, location in enumerate(locations):
+#                         for ilsc, land_cover_scenario in enumerate(land_cover_scenarios):
+#                             for ics, climate_scenario in enumerate(climate_scenarios):
+#                                 value = dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][metric]
+#                                 df_metric.loc[f"{iloc}{ilsc}{ics}", f"{_lab[var_sim]}"] = value
+#                 sns.heatmap(df_metric, vmin=0, vmax=1, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
+#                 axes[jj, ii].set_ylabel("")
+#                 axes[jj, ii].set_xlabel("")
+#         axes[-1, 0].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[-1, 1].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[0, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[1, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[2, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[0, 0].set_title("(a)", loc="left", fontsize=9)
+#         axes[1, 0].set_title("(b)", loc="left", fontsize=9)
+#         axes[2, 0].set_title("(c)", loc="left", fontsize=9)
+#         axes[0, 1].set_title("(d)", loc="left", fontsize=9)
+#         axes[1, 1].set_title("(e)", loc="left", fontsize=9)
+#         axes[2, 1].set_title("(f)", loc="left", fontsize=9)
+#         fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
+#         file = base_path_figs / "mlm_metrics" / f"mlms_random_slopes_{mlm_key}_{metric}_heatmap.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close("all")
 
 for mlm_key in mlm_formulas.keys():
     for metric in metrics:
