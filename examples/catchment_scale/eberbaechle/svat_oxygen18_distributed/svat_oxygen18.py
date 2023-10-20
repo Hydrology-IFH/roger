@@ -65,7 +65,7 @@ def main(tmp_dir):
             # length of simulation (in seconds)
             settings.runlen = self._get_runlen(self._input_dir, "forcing_tracer.nc")
             # length of warmup simulation (in seconds)
-            settings.runlen_warmup = settings.runlen
+            settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
             # total number of iterations
             settings.nitt = self._get_nitt(self._input_dir, "forcing_tracer.nc")
             # maximum water age (in days)
@@ -77,8 +77,8 @@ def main(tmp_dir):
             settings.dy = self._config["dy"]
 
             # origin of spatial grid
-            settings.x_origin = 0.0
-            settings.y_origin = 0.0
+            settings.x_origin = self._config["x_origin"]
+            settings.y_origin = self._config["y_origin"]
             # origin of time steps (e.g. 01-01-2023)
             settings.time_origin = "31-10-2019"
 
