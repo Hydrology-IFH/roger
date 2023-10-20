@@ -820,12 +820,12 @@ VARIABLES = {
         "air temperature",
         time_dependent=True,
     ),
-    "ta_weight": Variable(
-        "weight factor of air temperature",
+    "ta_offset": Variable(
+        "offset of air temperature",
         CATCH_GRID,
-        "-",
-        "weight factor of air temperature",
-        initial=1.0,
+        "degC",
+        "offset of air temperature",
+        initial=0,
         active=lambda settings: not settings.enable_offline_transport,
     ),
     "ta_day": Variable(

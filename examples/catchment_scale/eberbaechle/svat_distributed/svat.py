@@ -159,6 +159,24 @@ def main(tmp_dir):
             vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path, "parameters.nc"))
             # hydraulic conductivity of bedrock/saturated zone (mm/h)
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
+            # weight factor of precipitation (-)
+            vs.prec_weight = update(
+                vs.prec_weight,
+                at[2:-2, 2:-2],
+                self._read_var_from_nc("prec_weight", self._base_path, "parameters.nc"),
+            )
+            # offset of air temperature (degC)
+            vs.ta_offset = update(
+                vs.ta_offset,
+                at[2:-2, 2:-2],
+                self._read_var_from_nc("ta_offset", self._base_path, "parameters.nc"),
+            )
+            # weight factor of potential evapotranspiration (-)
+            vs.pet_weight = update(
+                vs.pet_weight,
+                at[2:-2, 2:-2],
+                self._read_var_from_nc("pet_weight", self._base_path, "parameters.nc"),
+            )
 
         @roger_routine
         def set_parameters(self, state):
@@ -226,6 +244,9 @@ def main(tmp_dir):
                 "year",
                 "month",
                 "doy",
+                "prec_weight",
+                "pet_weight",
+                "ta_offset",
             ],
         )
         def set_forcing(self, state):
@@ -248,21 +269,21 @@ def main(tmp_dir):
                     at[2:-2, 2:-2, :],
                     self._read_var_from_nc("PREC", self._input_dir, "forcing.nc")[
                         :, :, vs.itt_forc : vs.itt_forc + 6 * 24
-                    ],
+                    ] * vs.prec_weight[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.ta_day = update(
                     vs.ta_day,
                     at[2:-2, 2:-2, :],
                     self._read_var_from_nc("TA", self._input_dir, "forcing.nc")[
                         :, :, vs.itt_forc : vs.itt_forc + 6 * 24
-                    ],
+                    ] + vs.ta_offset[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.pet_day = update(
                     vs.pet_day,
                     at[2:-2, 2:-2, :],
                     self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[
                         :, :, vs.itt_forc : vs.itt_forc + 6 * 24
-                    ],
+                    ] * vs.pet_weight[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.itt_forc = vs.itt_forc + 6 * 24
 

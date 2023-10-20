@@ -217,6 +217,9 @@ def main(tmp_dir):
                 "year",
                 "month",
                 "doy",
+                "prec_weight",
+                "pet_weight",
+                "ta_offset",
             ],
         )
         def set_forcing(self, state):
@@ -239,21 +242,21 @@ def main(tmp_dir):
                     at[2:-2, 2:-2, :],
                     self._read_var_from_nc("PREC", self._input_dir, "forcing.nc")[
                         :, :, vs.itt_forc : vs.itt_forc + 6 * 24
-                    ],
+                    ] * vs.prec_weight[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.ta_day = update(
                     vs.ta_day,
                     at[2:-2, 2:-2, :],
                     self._read_var_from_nc("TA", self._input_dir, "forcing.nc")[
                         :, :, vs.itt_forc : vs.itt_forc + 6 * 24
-                    ],
+                    ] + vs.ta_offset[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.pet_day = update(
                     vs.pet_day,
                     at[2:-2, 2:-2, :],
                     self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[
                         :, :, vs.itt_forc : vs.itt_forc + 6 * 24
-                    ],
+                    ] * vs.pet_weight[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.itt_forc = vs.itt_forc + 6 * 24
 

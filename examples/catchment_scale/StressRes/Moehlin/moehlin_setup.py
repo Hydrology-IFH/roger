@@ -216,8 +216,8 @@ def main(out_dir):
                 self._read_var_from_nc("F_n_h_y", input_dir, para_fn)/100
             )
             # weight factor of air temperature (-)
-            vs.ta_weight = update(
-                vs.ta_weight,
+            vs.ta_offset = update(
+                vs.ta_offset,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc("F_t", input_dir, para_fn)
             )
@@ -313,7 +313,7 @@ def main(out_dir):
                     vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.prec_weight[:, :, npx.newaxis]
                 )
                 vs.ta_day = update(
-                    vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.ta_weight[:, :, npx.newaxis]
+                    vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] + vs.ta_offset[:, :, npx.newaxis]
                 )
                 vs.pet_day = update(
                     vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.pet_weight[:, :, npx.newaxis]
