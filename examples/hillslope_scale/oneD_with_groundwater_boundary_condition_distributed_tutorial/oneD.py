@@ -221,11 +221,11 @@ def main(tmp_dir):
                     settings.nx, settings.ny
                 ),
             )
-            # weight factor of air temperature (-)
-            vs.ta_weight = update(
-                vs.ta_weight,
+            # offset of air temperature (degC)
+            vs.ta_offset = update(
+                vs.ta_offset,
                 at[2:-2, 2:-2],
-                self._read_var_from_csv("ta_weight", self._base_path, "parameters.csv").reshape(
+                self._read_var_from_csv("ta_offset", self._base_path, "parameters.csv").reshape(
                     settings.nx, settings.ny
                 ),
             )
@@ -340,19 +340,19 @@ def main(tmp_dir):
                     vs.prec_day,
                     at[:, :, :],
                     vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
-                    * vs.prec_weight[:, :, npx.newaxis],
+                    * vs.prec_weight[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.ta_day = update(
                     vs.ta_day,
                     at[:, :, :],
                     vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
-                    * vs.ta_weight[:, :, npx.newaxis],
+                    + vs.ta_offset[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.pet_day = update(
                     vs.pet_day,
                     at[:, :, :],
                     vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
-                    * vs.pet_weight[:, :, npx.newaxis],
+                    * vs.pet_weight[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.z_gw = update(vs.z_gw, at[2:-2, 2:-2, vs.tau], vs.Z_GW[npx.newaxis, npx.newaxis, vs.itt_forc])
                 vs.itt_forc = vs.itt_forc + 6 * 24

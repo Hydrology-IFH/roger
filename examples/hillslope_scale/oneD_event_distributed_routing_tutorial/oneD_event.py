@@ -286,8 +286,8 @@ def main(tmp_dir):
                 1,
             )
             # weight factor of air temperature (-)
-            vs.ta_weight = update(
-                vs.ta_weight,
+            vs.ta_offset = update(
+                vs.ta_offset,
                 at[2:-2, 2:-2],
                 1,
             )
@@ -385,10 +385,10 @@ def main(tmp_dir):
             #     ),
             # )
             # # weight factor of air temperature (-)
-            # vs.ta_weight = update(
-            #     vs.ta_weight,
+            # vs.ta_offset = update(
+            #     vs.ta_offset,
             #     at[2:-2, 2:-2],
-            #     self._read_var_from_csv("ta_weight", self._base_path, "parameters.csv").reshape(
+            #     self._read_var_from_csv("ta_offset", self._base_path, "parameters.csv").reshape(
             #         settings.nx, settings.ny
             #     ),
             # )
@@ -478,7 +478,7 @@ def main(tmp_dir):
             vs.prec = update(
                 vs.prec, at[2:-2, 2:-2, vs.tau], vs.PREC[npx.newaxis, npx.newaxis, vs.itt] * vs.prec_weight[2:-2, 2:-2]
             )
-            vs.ta = update(vs.ta, at[2:-2, 2:-2], vs.TA[npx.newaxis, npx.newaxis, vs.itt])
+            vs.ta = update(vs.ta, at[2:-2, 2:-2], vs.TA[npx.newaxis, npx.newaxis, vs.itt] * vs.ta_offset[2:-2, 2:-2])
             vs.event_id = update(vs.event_id, at[vs.tau], 1)
 
         @roger_routine

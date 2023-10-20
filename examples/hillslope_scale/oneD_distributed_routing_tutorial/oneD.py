@@ -309,8 +309,8 @@ def main(tmp_dir):
                 1,
             )
             # weight factor of air temperature (-)
-            vs.ta_weight = update(
-                vs.ta_weight,
+            vs.ta_offset = update(
+                vs.ta_offset,
                 at[2:-2, 2:-2],
                 1,
             )
@@ -414,10 +414,10 @@ def main(tmp_dir):
             #     ),
             # )
             # # weight factor of air temperature (-)
-            # vs.ta_weight = update(
-            #     vs.ta_weight,
+            # vs.ta_offset = update(
+            #     vs.ta_offset,
             #     at[2:-2, 2:-2],
-            #     self._read_var_from_csv("ta_weight", self._base_path, "parameters.csv").reshape(
+            #     self._read_var_from_csv("ta_offset", self._base_path, "parameters.csv").reshape(
             #         settings.nx, settings.ny
             #     ),
             # )
@@ -500,11 +500,6 @@ def main(tmp_dir):
             vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, "forcing.nc")[0, 0, :])
             vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, "forcing.nc")[0, 0, :])
             vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[0, 0, :])
-            # vs.PREC = update(vs.PREC, at[:], 0)
-            # vs.PREC = update(vs.PREC, at[18:24], 1)
-            # vs.PREC = update(vs.PREC, at[24:30], 20)
-            # vs.PREC = update(vs.PREC, at[30:512], 0.01)
-            # vs.PET = update(vs.PET, at[:], 0.05)
 
         @roger_routine
         def set_forcing(self, state):
@@ -526,19 +521,19 @@ def main(tmp_dir):
                     vs.prec_day,
                     at[:, :, :],
                     vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
-                    * vs.prec_weight[:, :, npx.newaxis],
+                    * vs.prec_weight[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.ta_day = update(
                     vs.ta_day,
                     at[:, :, :],
                     vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
-                    * vs.ta_weight[:, :, npx.newaxis],
+                    + vs.ta_offset[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.pet_day = update(
                     vs.pet_day,
                     at[:, :, :],
                     vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
-                    * vs.pet_weight[:, :, npx.newaxis],
+                    * vs.pet_weight[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.itt_forc = vs.itt_forc + 6 * 24
 

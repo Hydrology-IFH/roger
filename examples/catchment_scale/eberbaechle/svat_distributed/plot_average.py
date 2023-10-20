@@ -26,10 +26,7 @@ sns.plotting_context("paper", font_scale=1, rc={'font.size': 8.0,
                                                 'legend.title_fontsize': 9.0})
 
 _lab_unit2 = {
-    "q_ss": "PERC [mm]",
-    "aet": "AET [mm]",
-    "transp": "TRANSP [mm]",
-    "evap_soil": "$EVAP_{soil}$ [mm]",
+    "theta": r"$\theta$ [-]",
 }
 
 
@@ -61,9 +58,9 @@ def main():
     days_sim = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
     ds_sim = ds_sim.assign_coords(date=("Time", days_sim))
 
-    vars_sim = ["transp", "evap_soil", "aet", "q_ss"]
+    vars_sim = ["theta"]
     for var_sim in vars_sim:
-        vals1 = onp.where(mask == 1, onp.sum(ds_sim[var_sim].values, axis=-1).T, onp.nan) / 3
+        vals1 = onp.where(mask == 1, onp.mean(ds_sim[var_sim].values, axis=-1).T, onp.nan)
         vals = onp.where(vals1 < 0, onp.nan, vals1)
         fig, ax = plt.subplots(figsize=(6,4))
         grid_extent = (0, 80*25, 0, 53*25)
@@ -73,9 +70,9 @@ def main():
         plt.ylabel('Distance in y-direction [m]')
         plt.grid(zorder=-1)
         plt.tight_layout()
-        file = base_path_figs / f"{var_sim}_sum.png"
+        file = base_path_figs / f"{var_sim}_avg.png"
         fig.savefig(file, dpi=300)
-        plt.close(fig) 
+        plt.close(fig)
 
     return
 
