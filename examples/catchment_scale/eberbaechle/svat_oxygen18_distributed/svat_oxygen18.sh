@@ -20,14 +20,14 @@ export OMPI_MCA_btl="self,smcuda,vader,tcp"
 export OMP_NUM_THREADS=1
 eval "$(conda shell.bash hook)"
 conda activate roger-mpi
-cd /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_oxygen18
+cd /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_oxygen18_distributed
  
 # Copy fluxes and states from global workspace to local SSD
 echo "Copy fluxes and states from global workspace to local SSD"
 # Compares hashes
-checksum_gws=$(shasum -a 256 /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat/output/SVAT.nc | cut -f 1 -d " ")
+checksum_gws=$(shasum -a 256 /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_distributed/output/SVAT.nc | cut -f 1 -d " ")
 checksum_ssd=0a
-cp /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat/output/SVAT.nc "${TMPDIR}"
+cp /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_distributed/output/SVAT.nc "${TMPDIR}"
 # Wait for termination of moving files
 while [ "${checksum_gws}" != "${checksum_ssd}" ]; do
     sleep 10
@@ -37,6 +37,6 @@ echo "Copying was successful"
  
 mpirun --bind-to core --map-by core -report-bindings python svat_oxygen18.py -b jax -d cpu -n 10 1 -td "${TMPDIR}"
 # Move output from local SSD to global workspace
-echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_oxygen18/output"
-mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_oxygen18/output
-mv "${TMPDIR}"/SVAT18O.*.nc /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_oxygen18/output
+echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_oxygen18_distributed/output"
+mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_oxygen18_distributed/output
+mv "${TMPDIR}"/SVAT18O.*.nc /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_oxygen18_distributed/output
