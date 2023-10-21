@@ -18,15 +18,14 @@ def main(tmp_dir):
         """A SVAT oxygen18 transport model."""
 
         # custom attributes required by helper functions
-        _base_path = Path(__file__).parent
         if tmp_dir:
             _base_path = tmp_dir
         else:
             _base_path = Path(__file__).parent
 
-        _input_dir = _base_path / "input"
+        _input_dir = Path(__file__).parent / "input"
         # load configuration file
-        _file_config = _base_path / "config.yml"
+        _file_config = Path(__file__).parent / "config.yml"
         with open(_file_config, "r") as file:
             _config = yaml.safe_load(file)
 
