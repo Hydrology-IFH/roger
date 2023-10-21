@@ -19,7 +19,7 @@ def main(tmp_dir):
 
         # custom attributes required by helper functions
         if tmp_dir:
-            _base_path = tmp_dir
+            _base_path = Path(tmp_dir)
         else:
             _base_path = Path(__file__).parent
 
