@@ -68,6 +68,7 @@ glm_location_file = base_path_figs / "glm_location_results.pkl"
 mlm_random_intercepts_file = base_path_figs / "mlm_random_intercepts_results.pkl"
 mlm_random_slopes_file = base_path_figs / "mlm_random_slopes_results.pkl"
 mlm_random_intercepts_llcp_file = base_path_figs / "mlm_random_intercepts_llcp_results.pkl"
+mlm_random_intercepts_lc_file = base_path_figs / "mlm_random_intercepts_lc_results.pkl"
 mlm_random_slopes_llcp_file = base_path_figs / "mlm_random_slopes_llcp_results.pkl"
 mlm_random_intercepts_soil_llcp_file = base_path_figs / "mlm_random_intercepts_soil_llcp_results.pkl"
 mlm_random_slopes_soil_llcp_file = base_path_figs / "mlm_random_slopes_soil_llcp_results.pkl"
@@ -409,203 +410,203 @@ mlm_formulas = {
 vars_sim = ["transp", "q_ss", "theta", "rt50_s", "tt50_q_ss", "tt50_transp"]
 deltas = ["dAvg", "dIPR"]
 
-# group by soil properties
-if not os.path.exists(mlm_random_intercepts_file):
-    dict_mlm_random_intercepts = {}
-    for mlm_key in mlm_formulas.keys():
-        dict_mlm_random_intercepts[mlm_key] = {}
-        for var_sim in vars_sim:
-            dict_mlm_random_intercepts[mlm_key][var_sim] = {}
-            for delta in deltas:
-                dict_mlm_random_intercepts[mlm_key][var_sim][delta] = {}
-                for location in locations:
-                    dict_mlm_random_intercepts[mlm_key][var_sim][delta][location] = {}
-                    for land_cover_scenario in land_cover_scenarios:
-                        dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario] = {}
-                        for climate_scenario in climate_scenarios:
-                            dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario] = {}
-                            for future in ["nf", "ff"]:
-                                dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future] = {}
-                                for soil_depth in soil_depths:
-                                    dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth] = {}
-                                    cond = _soil_depths[soil_depth]
-                                    # merge the data for each land cover senario into a single dataframe
-                                    y = (
-                                        dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
-                                        .loc[cond, f"{delta}_{future}"]
-                                        .to_frame()
-                                    )
-                                    y = pd.DataFrame(data=y, dtype=onp.float64)
-                                    x = df_params.loc[cond, "theta_pwp":]
-                                    # standardize the parameters
-                                    x_std = x.copy()
-                                    for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
-                                        x_std.loc[:, param] = (
-                                            x_std.loc[:, param] - x_std.loc[:, param].mean()
-                                        ) / x_std.loc[:, param].std()
+# # group by soil properties
+# if not os.path.exists(mlm_random_intercepts_file):
+#     dict_mlm_random_intercepts = {}
+#     for mlm_key in mlm_formulas.keys():
+#         dict_mlm_random_intercepts[mlm_key] = {}
+#         for var_sim in vars_sim:
+#             dict_mlm_random_intercepts[mlm_key][var_sim] = {}
+#             for delta in deltas:
+#                 dict_mlm_random_intercepts[mlm_key][var_sim][delta] = {}
+#                 for location in locations:
+#                     dict_mlm_random_intercepts[mlm_key][var_sim][delta][location] = {}
+#                     for land_cover_scenario in land_cover_scenarios:
+#                         dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario] = {}
+#                         for climate_scenario in climate_scenarios:
+#                             dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario] = {}
+#                             for future in ["nf", "ff"]:
+#                                 dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future] = {}
+#                                 for soil_depth in soil_depths:
+#                                     dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth] = {}
+#                                     cond = _soil_depths[soil_depth]
+#                                     # merge the data for each land cover senario into a single dataframe
+#                                     y = (
+#                                         dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
+#                                         .loc[cond, f"{delta}_{future}"]
+#                                         .to_frame()
+#                                     )
+#                                     y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                     x = df_params.loc[cond, "theta_pwp":]
+#                                     # standardize the parameters
+#                                     x_std = x.copy()
+#                                     for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                         x_std.loc[:, param] = (
+#                                             x_std.loc[:, param] - x_std.loc[:, param].mean()
+#                                         ) / x_std.loc[:, param].std()
 
-                                    df_mlm = x_std.copy()
-                                    df_mlm.loc[:, f"{delta}"] = y.values.flatten()
-                                    df_mlm.loc[:, "group"] = range(len(y.values.flatten()))
+#                                     df_mlm = x_std.copy()
+#                                     df_mlm.loc[:, f"{delta}"] = y.values.flatten()
+#                                     df_mlm.loc[:, "group"] = range(len(y.values.flatten()))
 
-                                    df_mlm = sm.add_constant(df_mlm)
-                                    # fit a mixed linear model with random effects (random intercepts)
-                                    mlm = smf.mixedlm(f"{delta} {mlm_formulas[mlm_key]}", df_mlm, groups=df_mlm["group"])
-                                    res = mlm.fit()
-                                    print(res.summary())
+#                                     df_mlm = sm.add_constant(df_mlm)
+#                                     # fit a mixed linear model with random effects (random intercepts)
+#                                     mlm = smf.mixedlm(f"{delta} {mlm_formulas[mlm_key]}", df_mlm, groups=df_mlm["group"])
+#                                     res = mlm.fit()
+#                                     print(res.summary())
 
-                                    # response variable
-                                    y = df_mlm.loc[:, f"{delta}"].values
-                                    # number of data points
-                                    nobs = res.nobs
-                                    # predicted values
-                                    # yhat = res.predict()
-                                    yhat = res.fittedvalues
-                                    # fixed effect parameters and random effect parameters
-                                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
-                                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
-                                    params = onp.concatenate((fe_params, re_params), axis=None)
-                                    dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
-                                        "fixed_effects"
-                                    ] = res.params.to_frame()
-                                    dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
-                                        "random_effects"
-                                    ] = pd.DataFrame(res.random_effects).var(axis=1)
+#                                     # response variable
+#                                     y = df_mlm.loc[:, f"{delta}"].values
+#                                     # number of data points
+#                                     nobs = res.nobs
+#                                     # predicted values
+#                                     # yhat = res.predict()
+#                                     yhat = res.fittedvalues
+#                                     # fixed effect parameters and random effect parameters
+#                                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+#                                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+#                                     params = onp.concatenate((fe_params, re_params), axis=None)
+#                                     dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+#                                         "fixed_effects"
+#                                     ] = res.params.to_frame()
+#                                     dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+#                                         "random_effects"
+#                                     ] = pd.DataFrame(res.random_effects).var(axis=1)
 
-                                    # relative importance of parameters
-                                    dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
-                                        "params"
-                                    ] = params / onp.sum(params)
+#                                     # relative importance of parameters
+#                                     dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+#                                         "params"
+#                                     ] = params / onp.sum(params)
 
-                                    # contribution of the fixed effect parameters and random effect parameters
-                                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
-                                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
-                                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
-                                    dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["attribution"] = dfa
-                                    # evaluation metrics
-                                    dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["MAE"] = smem.meanabs(
-                                        y, yhat
-                                    )
-                                    dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
-                                        "MEAE"
-                                    ] = smem.medianabs(y, yhat)
-                                    dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["RMSE"] = smem.rmse(
-                                        y, yhat
-                                    )
-                                    dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["VARE"] = smem.vare(
-                                        y, yhat
-                                    )
-                                    dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["R2"] = r2_score(
-                                        y, yhat
-                                    )
-
-
-    # Store the data (serialize)
-    with open(mlm_random_intercepts_file, "wb") as handle:
-        pickle.dump(dict_mlm_random_intercepts, handle, protocol=pickle.HIGHEST_PROTOCOL)
-else:
-    # Load the data (deserialize)
-    with open(mlm_random_intercepts_file, "rb") as handle:
-        dict_mlm_random_intercepts = pickle.load(handle)
+#                                     # contribution of the fixed effect parameters and random effect parameters
+#                                     dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+#                                     dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+#                                     dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+#                                     dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["attribution"] = dfa
+#                                     # evaluation metrics
+#                                     dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["MAE"] = smem.meanabs(
+#                                         y, yhat
+#                                     )
+#                                     dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+#                                         "MEAE"
+#                                     ] = smem.medianabs(y, yhat)
+#                                     dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["RMSE"] = smem.rmse(
+#                                         y, yhat
+#                                     )
+#                                     dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["VARE"] = smem.vare(
+#                                         y, yhat
+#                                     )
+#                                     dict_mlm_random_intercepts[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["R2"] = r2_score(
+#                                         y, yhat
+#                                     )
 
 
-if not os.path.exists(mlm_random_slopes_file):
-    dict_mlm_random_slopes = {}
-    for mlm_key in mlm_formulas.keys():
-        dict_mlm_random_slopes[mlm_key] = {}
-        for var_sim in vars_sim:
-            dict_mlm_random_slopes[mlm_key][var_sim] = {}
-            for delta in deltas:
-                dict_mlm_random_slopes[mlm_key][var_sim][delta] = {}
-                for location in locations:
-                    dict_mlm_random_slopes[mlm_key][var_sim][delta][location] = {}
-                    for land_cover_scenario in land_cover_scenarios:
-                        dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario] = {}
-                        for climate_scenario in climate_scenarios:
-                            dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario] = {}
-                            for future in ["nf", "ff"]:
-                                dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future] = {}
-                                for soil_depth in soil_depths:
-                                    dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth] = {}
-                                    cond = _soil_depths[soil_depth]
-                                    # merge the data for each land cover senario into a single dataframe
-                                    y = (
-                                        dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
-                                        .loc[cond, f"{delta}_{future}"]
-                                        .to_frame()
-                                    )
-                                    y = pd.DataFrame(data=y, dtype=onp.float64)
-                                    x = df_params.loc[cond, "theta_pwp":]
-                                    # standardize the parameters
-                                    x_std = x.copy()
-                                    for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
-                                        x_std.loc[:, param] = (
-                                            x_std.loc[:, param] - x_std.loc[:, param].mean()
-                                        ) / x_std.loc[:, param].std()
+#     # Store the data (serialize)
+#     with open(mlm_random_intercepts_file, "wb") as handle:
+#         pickle.dump(dict_mlm_random_intercepts, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# else:
+#     # Load the data (deserialize)
+#     with open(mlm_random_intercepts_file, "rb") as handle:
+#         dict_mlm_random_intercepts = pickle.load(handle)
 
-                                    df_mlm = x_std.copy()
-                                    df_mlm.loc[:, f"{delta}"] = y.values.flatten()
-                                    df_mlm.loc[:, "group"] = range(len(y.values.flatten()))
 
-                                    df_mlm = sm.add_constant(df_mlm)
-                                    # fit a mixed linear model with random effects (random intercepts and random slopes)
-                                    mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
-                                    res = mlm.fit()
-                                    print(res.summary())
+# if not os.path.exists(mlm_random_slopes_file):
+#     dict_mlm_random_slopes = {}
+#     for mlm_key in mlm_formulas.keys():
+#         dict_mlm_random_slopes[mlm_key] = {}
+#         for var_sim in vars_sim:
+#             dict_mlm_random_slopes[mlm_key][var_sim] = {}
+#             for delta in deltas:
+#                 dict_mlm_random_slopes[mlm_key][var_sim][delta] = {}
+#                 for location in locations:
+#                     dict_mlm_random_slopes[mlm_key][var_sim][delta][location] = {}
+#                     for land_cover_scenario in land_cover_scenarios:
+#                         dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario] = {}
+#                         for climate_scenario in climate_scenarios:
+#                             dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario] = {}
+#                             for future in ["nf", "ff"]:
+#                                 dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future] = {}
+#                                 for soil_depth in soil_depths:
+#                                     dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth] = {}
+#                                     cond = _soil_depths[soil_depth]
+#                                     # merge the data for each land cover senario into a single dataframe
+#                                     y = (
+#                                         dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
+#                                         .loc[cond, f"{delta}_{future}"]
+#                                         .to_frame()
+#                                     )
+#                                     y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                     x = df_params.loc[cond, "theta_pwp":]
+#                                     # standardize the parameters
+#                                     x_std = x.copy()
+#                                     for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                         x_std.loc[:, param] = (
+#                                             x_std.loc[:, param] - x_std.loc[:, param].mean()
+#                                         ) / x_std.loc[:, param].std()
 
-                                    # response variable
-                                    y = df_mlm.loc[:, f"{delta}"].values
-                                    # number of data points
-                                    nobs = res.nobs
-                                    # predicted values
-                                    # yhat = res.predict()
-                                    yhat = res.fittedvalues
-                                    # fixed effect parameters and random effect parameters
-                                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
-                                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
-                                    params = onp.concatenate((fe_params, re_params), axis=None)
-                                    dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
-                                        "fixed_effects"
-                                    ] = res.params.to_frame()
-                                    dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
-                                        "random_effects"
-                                    ] = pd.DataFrame(res.random_effects).var(axis=1)
+#                                     df_mlm = x_std.copy()
+#                                     df_mlm.loc[:, f"{delta}"] = y.values.flatten()
+#                                     df_mlm.loc[:, "group"] = range(len(y.values.flatten()))
 
-                                    # relative importance of parameters
-                                    dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
-                                        "params"
-                                    ] = params / onp.sum(params)
+#                                     df_mlm = sm.add_constant(df_mlm)
+#                                     # fit a mixed linear model with random effects (random intercepts and random slopes)
+#                                     mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
+#                                     res = mlm.fit()
+#                                     print(res.summary())
 
-                                    # contribution of the fixed effect parameters and random effect parameters
-                                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
-                                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
-                                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+#                                     # response variable
+#                                     y = df_mlm.loc[:, f"{delta}"].values
+#                                     # number of data points
+#                                     nobs = res.nobs
+#                                     # predicted values
+#                                     # yhat = res.predict()
+#                                     yhat = res.fittedvalues
+#                                     # fixed effect parameters and random effect parameters
+#                                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+#                                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+#                                     params = onp.concatenate((fe_params, re_params), axis=None)
+#                                     dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+#                                         "fixed_effects"
+#                                     ] = res.params.to_frame()
+#                                     dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+#                                         "random_effects"
+#                                     ] = pd.DataFrame(res.random_effects).var(axis=1)
 
-                                    dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["attribution"] = dfa
-                                    # evaluation metrics
-                                    dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["MAE"] = smem.meanabs(
-                                        y, yhat
-                                    )
-                                    dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
-                                        "MEAE"
-                                    ] = smem.medianabs(y, yhat)
-                                    dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["RMSE"] = smem.rmse(
-                                        y, yhat
-                                    )
-                                    dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["VARE"] = smem.vare(
-                                        y, yhat
-                                    )
-                                    dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["R2"] = r2_score(
-                                        y, yhat
-                                    )
+#                                     # relative importance of parameters
+#                                     dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+#                                         "params"
+#                                     ] = params / onp.sum(params)
 
-    # Store the data (serialize)
-    with open(mlm_random_slopes_file, "wb") as handle:
-        pickle.dump(dict_mlm_random_slopes, handle, protocol=pickle.HIGHEST_PROTOCOL)
-else:
-    # Load the data (deserialize)
-    with open(mlm_random_slopes_file, "rb") as handle:
-        dict_mlm_random_slopes = pickle.load(handle)
+#                                     # contribution of the fixed effect parameters and random effect parameters
+#                                     dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+#                                     dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+#                                     dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+
+#                                     dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["attribution"] = dfa
+#                                     # evaluation metrics
+#                                     dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["MAE"] = smem.meanabs(
+#                                         y, yhat
+#                                     )
+#                                     dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth][
+#                                         "MEAE"
+#                                     ] = smem.medianabs(y, yhat)
+#                                     dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["RMSE"] = smem.rmse(
+#                                         y, yhat
+#                                     )
+#                                     dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["VARE"] = smem.vare(
+#                                         y, yhat
+#                                     )
+#                                     dict_mlm_random_slopes[mlm_key][var_sim][delta][location][land_cover_scenario][climate_scenario][future][soil_depth]["R2"] = r2_score(
+#                                         y, yhat
+#                                     )
+
+#     # Store the data (serialize)
+#     with open(mlm_random_slopes_file, "wb") as handle:
+#         pickle.dump(dict_mlm_random_slopes, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# else:
+#     # Load the data (deserialize)
+#     with open(mlm_random_slopes_file, "rb") as handle:
+#         dict_mlm_random_slopes = pickle.load(handle)
 
 # group by location, land cover scenario, climate model and future
 if not os.path.exists(mlm_random_intercepts_llcp_file):
@@ -755,927 +756,20 @@ else:
         dict_mlm_random_intercepts_llcp = pickle.load(handle)
 
 
-if not os.path.exists(mlm_random_slopes_llcp_file):
-    dict_mlm_random_slopes_llcp = {}
-    for mlm_key in mlm_formulas.keys():
-        dict_mlm_random_slopes_llcp[mlm_key] = {}
-        for var_sim in vars_sim:
-            dict_mlm_random_slopes_llcp[mlm_key][var_sim] = {}
-            for delta in deltas:
-                dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta] = {}
-                for soil_depth in soil_depths:
-                    dfs_mlms = []
-                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth] = {}
-                    cond = _soil_depths[soil_depth]
-                    # merge the data for each land cover senario into a single dataframe
-                    for land_cover_scenario in land_cover_scenarios:
-                        for location in locations:
-                            for climate_scenario in climate_scenarios:
-                                for future in ["nf", "ff"]:
-                                    y = (
-                                        dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
-                                        .loc[cond, f"{delta}_{future}"]
-                                        .to_frame()
-                                    )
-                                    y = pd.DataFrame(data=y, dtype=onp.float64)
-                                    x = df_params.loc[cond, "theta_pwp":]
-                                    # standardize the parameters
-                                    x_std = x.copy()
-                                    for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
-                                        x_std.loc[:, param] = (
-                                            x_std.loc[:, param] - x_std.loc[:, param].mean()
-                                        ) / x_std.loc[:, param].std()
-
-                                    dta = x_std.copy()
-                                    dta.loc[:, f"{delta}"] = y.values.flatten()
-                                    dta.loc[:, "group"] = f"{location}_{land_cover_scenario}_{climate_scenario}_{future}"
-                                    dfs_mlms.append(dta)
-
-                    df_mlm = pd.concat(dfs_mlms, ignore_index=True)
-                    df_mlm = sm.add_constant(df_mlm)
-                    # fit a mixed linear model with random effects (random intercepts and random slopes)
-                    mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
-                    res = mlm.fit()
-                    print(res.summary())
-
-                    # response variable
-                    y = df_mlm.loc[:, f"{delta}"].values
-                    # number of data points
-                    nobs = res.nobs
-                    # predicted values
-                    # yhat = res.predict()
-                    yhat = res.fittedvalues
-                    # fixed effect parameters and random effect parameters
-                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
-                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
-                    params = onp.concatenate((fe_params, re_params), axis=None)
-                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth][
-                        "fixed_effects"
-                    ] = res.params.to_frame()
-                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth][
-                        "random_effects"
-                    ] = pd.DataFrame(res.random_effects).var(axis=1)
-                    # relative importance of parameters
-                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth][
-                        "params"
-                    ] = params / onp.sum(params)
-                    # contribution of the fixed effect parameters and random effect parameters
-                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
-                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
-                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
-                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
-                    # evaluation metrics
-                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
-                        y, yhat
-                    )
-                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth][
-                        "MEAE"
-                    ] = smem.medianabs(y, yhat)
-                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth]["RMSE"] = smem.rmse(
-                        y, yhat
-                    )
-                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth]["VARE"] = smem.vare(
-                        y, yhat
-                    )
-                    dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth]["R2"] = r2_score(
-                        y, yhat
-                    )
-
-    # Store the data (serialize)
-    with open(mlm_random_slopes_llcp_file, "wb") as handle:
-        pickle.dump(dict_mlm_random_slopes_llcp, handle, protocol=pickle.HIGHEST_PROTOCOL)
-else:
-    # Load the data (deserialize)
-    with open(mlm_random_slopes_llcp_file, "rb") as handle:
-        dict_mlm_random_slopes_llcp = pickle.load(handle)
-
-# group by soil properties within location, land cover scenario, climate model and future
-if not os.path.exists(mlm_random_intercepts_soil_llcp_file):
-    dict_mlm_random_intercepts_soil_llcp = {}
-    for mlm_key in mlm_formulas.keys():
-        dict_mlm_random_intercepts_soil_llcp[mlm_key] = {}
-        for var_sim in vars_sim:
-            dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim] = {}
-            for delta in deltas:
-                dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta] = {}
-                for soil_depth in soil_depths:
-                    dfs_mlms = []
-                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth] = {}
-                    cond = _soil_depths[soil_depth]
-                    # merge the data for each land cover senario into a single dataframe
-                    for location in locations:
-                        for land_cover_scenario in land_cover_scenarios:
-                            for climate_scenario in climate_scenarios:
-                                for future in ["nf", "ff"]:
-                                    y = (
-                                        dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
-                                        .loc[cond, f"{delta}_{future}"]
-                                        .to_frame()
-                                    )
-                                    y = pd.DataFrame(data=y, dtype=onp.float64)
-                                    x = df_params.loc[cond, "theta_pwp":]
-                                    # standardize the parameters
-                                    x_std = x.copy()
-                                    for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
-                                        x_std.loc[:, param] = (
-                                            x_std.loc[:, param] - x_std.loc[:, param].mean()
-                                        ) / x_std.loc[:, param].std()
-
-                                    dta = x_std.copy()
-                                    dta.loc[:, f"{delta}"] = y.values.flatten()
-                                    dta.loc[:, "group"] = range(len(y.values.flatten()))
-                                    dfs_mlms.append(dta)
-
-                    df_mlm = pd.concat(dfs_mlms, ignore_index=True)
-                    df_mlm = sm.add_constant(df_mlm)
-                    # fit a mixed linear model with random effects (random intercepts)
-                    mlm = smf.mixedlm(f"{delta} {mlm_formulas[mlm_key]}", df_mlm, groups=df_mlm["group"])
-                    res = mlm.fit()
-                    print(res.summary())
-
-                    # response variable
-                    y = df_mlm.loc[:, f"{delta}"].values
-                    # number of data points
-                    nobs = res.nobs
-                    # predicted values
-                    # yhat = res.predict()
-                    yhat = res.fittedvalues
-                    # fixed effect parameters and random effect parameters
-                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
-                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
-                    params = onp.concatenate((fe_params, re_params), axis=None)
-                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][
-                        "fixed_effects"
-                    ] = res.params.to_frame()
-                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][
-                        "random_effects"
-                    ] = pd.DataFrame(res.random_effects).var(axis=1)
-                    # relative importance of parameters
-                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][
-                        "params"
-                    ] = params / onp.sum(params)
-                    # contribution of the fixed effect parameters and random effect parameters
-                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
-                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
-                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
-                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
-                    # evaluation metrics
-                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
-                        y, yhat
-                    )
-                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][
-                        "MEAE"
-                    ] = smem.medianabs(y, yhat)
-                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth]["RMSE"] = smem.rmse(
-                        y, yhat
-                    )
-                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth]["VARE"] = smem.vare(
-                        y, yhat
-                    )
-                    dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth]["R2"] = r2_score(
-                        y, yhat
-                    )
-
-                    # plot the line fit
-                    fig, ax = plt.subplots(figsize=(3, 3))
-                    ax.scatter(y, yhat, color="black", s=4)
-                    line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
-                    abline_plot(model_results=line_fit, ax=ax, color="black")
-                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]")
-                    ax.set_ylabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]")
-                    ax.set_xlim(-100, 100)
-                    ax.set_ylim(-100, 100)
-                    fig.tight_layout()
-                    file = (
-                        base_path_figs
-                        / "residuals"
-                        / "MLM"
-                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_line_fit_for_random_intercepts.png"
-                    )
-                    fig.savefig(file, dpi=300)
-
-                    # plot the residuals
-                    resid = yhat - y
-                    fig, ax = plt.subplots(figsize=(3, 3))
-                    ax.scatter(y, resid, color="black", s=4)
-                    ax.set_ylabel("Residuals [%]")
-                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]}")
-                    fig.tight_layout()
-                    file = (
-                        base_path_figs
-                        / "residuals"
-                        / "MLM"
-                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_for_random_intercepts.png"
-                    )
-                    fig.savefig(file, dpi=300)
-
-                    # plot the distribution of residuals
-                    fig, ax = plt.subplots(figsize=(3, 3))
-                    resid_std = stats.zscore(resid)
-                    ax.hist(resid_std, bins=25, color="black")
-                    ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM)")
-                    fig.tight_layout()
-                    file = (
-                        base_path_figs
-                        / "residuals"
-                        / "MLM"
-                        / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_hist_for_random_intercepts.png"
-                    )
-                    fig.savefig(file, dpi=300)
-                    plt.close("all")
-
-    # Store the data (serialize)
-    with open(mlm_random_intercepts_soil_llcp_file, "wb") as handle:
-        pickle.dump(dict_mlm_random_intercepts_soil_llcp, handle, protocol=pickle.HIGHEST_PROTOCOL)
-else:
-    # Load the data (deserialize)
-    with open(mlm_random_intercepts_soil_llcp_file, "rb") as handle:
-        dict_mlm_random_intercepts_soil_llcp = pickle.load(handle)
-
-
-if not os.path.exists(mlm_random_slopes_soil_llcp_file):
-    dict_mlm_random_slopes_soil_llcp = {}
-    for mlm_key in mlm_formulas.keys():
-        dict_mlm_random_slopes_soil_llcp[mlm_key] = {}
-        for var_sim in vars_sim:
-            dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim] = {}
-            for delta in deltas:
-                dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta] = {}
-                for soil_depth in soil_depths:
-                    dfs_mlms = []
-                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth] = {}
-                    cond = _soil_depths[soil_depth]
-                    # merge the data for each land cover senario into a single dataframe
-                    for land_cover_scenario in land_cover_scenarios:
-                        for location in locations:
-                            for climate_scenario in climate_scenarios:
-                                for future in ["nf", "ff"]:
-                                    y = (
-                                        dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
-                                        .loc[cond, f"{delta}_{future}"]
-                                        .to_frame()
-                                    )
-                                    y = pd.DataFrame(data=y, dtype=onp.float64)
-                                    x = df_params.loc[cond, "theta_pwp":]
-                                    # standardize the parameters
-                                    x_std = x.copy()
-                                    for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
-                                        x_std.loc[:, param] = (
-                                            x_std.loc[:, param] - x_std.loc[:, param].mean()
-                                        ) / x_std.loc[:, param].std()
-
-                                    dta = x_std.copy()
-                                    dta.loc[:, f"{delta}"] = y.values.flatten()
-                                    dta.loc[:, "group"] = range(len(y.values.flatten()))
-                                    dfs_mlms.append(dta)
-
-                    df_mlm = pd.concat(dfs_mlms, ignore_index=True)
-                    df_mlm = sm.add_constant(df_mlm)
-                    # fit a mixed linear model with random effects (random intercepts and random slopes)
-                    mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
-                    res = mlm.fit()
-                    print(res.summary())
-
-                    # response variable
-                    y = df_mlm.loc[:, f"{delta}"].values
-                    # number of data points
-                    nobs = res.nobs
-                    # predicted values
-                    # yhat = res.predict()
-                    yhat = res.fittedvalues
-                    # fixed effect parameters and random effect parameters
-                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
-                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
-                    params = onp.concatenate((fe_params, re_params), axis=None)
-                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][
-                        "fixed_effects"
-                    ] = res.params.to_frame()
-                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][
-                        "random_effects"
-                    ] = pd.DataFrame(res.random_effects).var(axis=1)
-                    # relative importance of parameters
-                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][
-                        "params"
-                    ] = params / onp.sum(params)
-                    # contribution of the fixed effect parameters and random effect parameters
-                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
-                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
-                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
-                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
-                    # evaluation metrics
-                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
-                        y, yhat
-                    )
-                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][
-                        "MEAE"
-                    ] = smem.medianabs(y, yhat)
-                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth]["RMSE"] = smem.rmse(
-                        y, yhat
-                    )
-                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth]["VARE"] = smem.vare(
-                        y, yhat
-                    )
-                    dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth]["R2"] = r2_score(
-                        y, yhat
-                    )
-
-    # Store the data (serialize)
-    with open(mlm_random_slopes_soil_llcp_file, "wb") as handle:
-        pickle.dump(dict_mlm_random_slopes_soil_llcp, handle, protocol=pickle.HIGHEST_PROTOCOL)
-else:
-    # Load the data (deserialize)
-    with open(mlm_random_slopes_soil_llcp_file, "rb") as handle:
-        dict_mlm_random_slopes_soil_llcp = pickle.load(handle)
-
-
-# group by location
-if not os.path.exists(mlm_random_intercepts_location_file):
-    dict_mlm_random_intercepts_location = {}
-    for mlm_key in mlm_formulas.keys():
-        dict_mlm_random_intercepts_location[mlm_key] = {}
-        for var_sim in vars_sim:
-            dict_mlm_random_intercepts_location[mlm_key][var_sim] = {}
-            for delta in deltas:
-                dict_mlm_random_intercepts_location[mlm_key][var_sim][delta] = {}
-                for soil_depth in soil_depths:
-                    dfs_mlms = []
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth] = {}
-                    cond = _soil_depths[soil_depth]
-                    # merge the data for each land cover senario into a single dataframe
-                    for location in locations:
-                        for land_cover_scenario in land_cover_scenarios:
-                            for climate_scenario in climate_scenarios:
-                                for future in ["nf", "ff"]:
-                                    y = (
-                                        dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
-                                        .loc[cond, f"{delta}_{future}"]
-                                        .to_frame()
-                                    )
-                                    y = pd.DataFrame(data=y, dtype=onp.float64)
-                                    x = df_params.loc[cond, "theta_pwp":]
-                                    # standardize the parameters
-                                    x_std = x.copy()
-                                    for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
-                                        x_std.loc[:, param] = (
-                                            x_std.loc[:, param] - x_std.loc[:, param].mean()
-                                        ) / x_std.loc[:, param].std()
-
-                                    dta = x_std.copy()
-                                    dta.loc[:, f"{delta}"] = y.values.flatten()
-                                    dta.loc[:, "group"] = f"{location}"
-                                    dfs_mlms.append(dta)
-
-                    df_mlm = pd.concat(dfs_mlms, ignore_index=True)
-                    df_mlm = sm.add_constant(df_mlm)
-                    # fit a mixed linear model with random effects (random intercepts)
-                    mlm = smf.mixedlm(f"{delta} {mlm_formulas[mlm_key]}", df_mlm, groups=df_mlm["group"])
-                    res = mlm.fit()
-                    print(res.summary())
-
-                    # response variable
-                    y = df_mlm.loc[:, f"{delta}"].values
-                    # number of data points
-                    nobs = res.nobs
-                    # predicted values
-                    # yhat = res.predict()
-                    yhat = res.fittedvalues
-                    # fixed effect parameters and random effect parameters
-                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
-                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
-                    params = onp.concatenate((fe_params, re_params), axis=None)
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth][
-                        "fixed_effects"
-                    ] = res.params.to_frame()
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth][
-                        "random_effects"
-                    ] = pd.DataFrame(res.random_effects).var(axis=1)
-                    # relative importance of parameters
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth][
-                        "params"
-                    ] = params / onp.sum(params)
-                    # contribution of the fixed effect parameters and random effect parameters
-                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
-                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
-                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa                    
-                    # evaluation metrics
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
-                        y, yhat
-                    )
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth][
-                        "MEAE"
-                    ] = smem.medianabs(y, yhat)
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth]["RMSE"] = smem.rmse(
-                        y, yhat
-                    )
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth]["VARE"] = smem.vare(
-                        y, yhat
-                    )
-                    dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth]["R2"] = r2_score(
-                        y, yhat
-                    )
-
-    # Store the data (serialize)
-    with open(mlm_random_intercepts_location_file, "wb") as handle:
-        pickle.dump(dict_mlm_random_intercepts_location, handle, protocol=pickle.HIGHEST_PROTOCOL)
-else:
-    # Load the data (deserialize)
-    with open(mlm_random_intercepts_location_file, "rb") as handle:
-        dict_mlm_random_intercepts_location = pickle.load(handle)
-
-
-if not os.path.exists(mlm_random_slopes_location_file):
-    dict_mlm_random_slopes_location = {}
-    for mlm_key in mlm_formulas.keys():
-        dict_mlm_random_slopes_location[mlm_key] = {}
-        for var_sim in vars_sim:
-            dict_mlm_random_slopes_location[mlm_key][var_sim] = {}
-            for delta in deltas:
-                dict_mlm_random_slopes_location[mlm_key][var_sim][delta] = {}
-                for soil_depth in soil_depths:
-                    dfs_mlms = []
-                    dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth] = {}
-                    cond = _soil_depths[soil_depth]
-                    # merge the data for each land cover senario into a single dataframe
-                    for location in locations:
-                        for land_cover_scenario in land_cover_scenarios:
-                            for climate_scenario in climate_scenarios:
-                                for future in ["nf", "ff"]:
-                                    y = (
-                                        dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
-                                        .loc[cond, f"{delta}_{future}"]
-                                        .to_frame()
-                                    )
-                                    y = pd.DataFrame(data=y, dtype=onp.float64)
-                                    x = df_params.loc[cond, "theta_pwp":]
-                                    # standardize the parameters
-                                    x_std = x.copy()
-                                    for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
-                                        x_std.loc[:, param] = (
-                                            x_std.loc[:, param] - x_std.loc[:, param].mean()
-                                        ) / x_std.loc[:, param].std()
-
-                                    dta = x_std.copy()
-                                    dta.loc[:, f"{delta}"] = y.values.flatten()
-                                    dta.loc[:, "group"] = f"{location}"
-                                    dfs_mlms.append(dta)
-
-                        df_mlm = pd.concat(dfs_mlms, ignore_index=True)
-                        df_mlm = sm.add_constant(df_mlm)
-                        # fit a mixed linear model with random effects (random intercepts and random slopes)
-                        mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
-                        res = mlm.fit()
-                        print(res.summary())
-
-                        # response variable
-                        y = df_mlm.loc[:, f"{delta}"].values
-                        # number of data points
-                        nobs = res.nobs
-                        # predicted values
-                        # yhat = res.predict()
-                        yhat = res.fittedvalues
-                        # fixed effect parameters and random effect parameters
-                        fe_params = onp.abs(res.params.to_frame().T.values.flatten())
-                        re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
-                        params = onp.concatenate((fe_params, re_params), axis=None)
-                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth][
-                            "fixed_effects"
-                        ] = res.params.to_frame()
-                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth][
-                            "random_effects"
-                        ] = pd.DataFrame(res.random_effects).var(axis=1)
-                        # relative importance of parameters
-                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth][
-                            "params"
-                        ] = params / onp.sum(params)
-                        # contribution of the fixed effect parameters and random effect parameters
-                        dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
-                        dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
-                        dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
-                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
-                        # evaluation metrics
-                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
-                            y, yhat
-                        )
-                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth][
-                            "MEAE"
-                        ] = smem.medianabs(y, yhat)
-                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth]["RMSE"] = smem.rmse(
-                            y, yhat
-                        )
-                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth]["VARE"] = smem.vare(
-                            y, yhat
-                        )
-                        dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth]["R2"] = r2_score(
-                            y, yhat
-                        )
-
-    # Store the data (serialize)
-    with open(mlm_random_slopes_location_file, "wb") as handle:
-        pickle.dump(dict_mlm_random_slopes_location, handle, protocol=pickle.HIGHEST_PROTOCOL)
-else:
-    # Load the data (deserialize)
-    with open(mlm_random_slopes_location_file, "rb") as handle:
-        dict_mlm_random_slopes_location = pickle.load(handle)
-
-# group by soil properties within location
-if not os.path.exists(mlm_random_intercepts_soil_location_file):
-    dict_mlm_random_intercepts_soil_location = {}
-    for mlm_key in mlm_formulas.keys():
-        dict_mlm_random_intercepts_soil_location[mlm_key] = {}
-        for var_sim in vars_sim:
-            dict_mlm_random_intercepts_soil_location[mlm_key][var_sim] = {}
-            for delta in deltas:
-                dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta] = {}
-                for location in locations:
-                    dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location] = {}
-                    for soil_depth in soil_depths:
-                        dfs_mlms = []
-                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth] = {}
-                        cond = _soil_depths[soil_depth]
-                        # merge the data for each land cover senario into a single dataframe
-                        for land_cover_scenario in land_cover_scenarios:
-                            for climate_scenario in climate_scenarios:
-                                for future in ["nf", "ff"]:
-                                    y = (
-                                        dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
-                                        .loc[cond, f"{delta}_{future}"]
-                                        .to_frame()
-                                    )
-                                    y = pd.DataFrame(data=y, dtype=onp.float64)
-                                    x = df_params.loc[cond, "theta_pwp":]
-                                    # standardize the parameters
-                                    x_std = x.copy()
-                                    for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
-                                        x_std.loc[:, param] = (
-                                            x_std.loc[:, param] - x_std.loc[:, param].mean()
-                                        ) / x_std.loc[:, param].std()
-
-                                    dta = x_std.copy()
-                                    dta.loc[:, f"{delta}"] = y.values.flatten()
-                                    dta.loc[:, "group"] = range(len(y.values.flatten()))
-                                    dfs_mlms.append(dta)
-
-                        df_mlm = pd.concat(dfs_mlms, ignore_index=True)
-                        df_mlm = sm.add_constant(df_mlm)
-                        # fit a mixed linear model with random effects (random intercepts)
-                        mlm = smf.mixedlm(f"{delta} {mlm_formulas[mlm_key]}", df_mlm, groups=df_mlm["group"])
-                        res = mlm.fit()
-                        print(res.summary())
-
-                        # response variable
-                        y = df_mlm.loc[:, f"{delta}"].values
-                        # number of data points
-                        nobs = res.nobs
-                        # predicted values
-                        # yhat = res.predict()
-                        yhat = res.fittedvalues
-                        # fixed effect parameters and random effect parameters
-                        fe_params = onp.abs(res.params.to_frame().T.values.flatten())
-                        re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
-                        params = onp.concatenate((fe_params, re_params), axis=None)
-                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth][
-                            "fixed_effects"
-                        ] = res.params.to_frame()
-                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth][
-                            "random_effects"
-                        ] = pd.DataFrame(res.random_effects).var(axis=1)
-                        # relative importance of parameters
-                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth][
-                            "params"
-                        ] = params / onp.sum(params)
-                        # contribution of the fixed effect parameters and random effect parameters
-                        dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
-                        dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
-                        dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
-                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth]["attribution"] = dfa
-                        # evaluation metrics
-                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth]["MAE"] = smem.meanabs(
-                            y, yhat
-                        )
-                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth][
-                            "MEAE"
-                        ] = smem.medianabs(y, yhat)
-                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth]["RMSE"] = smem.rmse(
-                            y, yhat
-                        )
-                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth]["VARE"] = smem.vare(
-                            y, yhat
-                        )
-                        dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth]["R2"] = r2_score(
-                            y, yhat
-                        )
-
-    # Store the data (serialize)
-    with open(mlm_random_intercepts_soil_location_file, "wb") as handle:
-        pickle.dump(dict_mlm_random_intercepts_soil_location, handle, protocol=pickle.HIGHEST_PROTOCOL)
-else:
-    # Load the data (deserialize)
-    with open(mlm_random_intercepts_soil_location_file, "rb") as handle:
-        dict_mlm_random_intercepts_soil_location = pickle.load(handle)
-
-
-if not os.path.exists(mlm_random_slopes_soil_location_file):
-    dict_mlm_random_slopes_soil_location = {}
-    for mlm_key in mlm_formulas.keys():
-        dict_mlm_random_slopes_soil_location[mlm_key] = {}
-        for var_sim in vars_sim:
-            dict_mlm_random_slopes_soil_location[mlm_key][var_sim] = {}
-            for delta in deltas:
-                dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta] = {}
-                for location in locations:
-                    dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location] = {}
-                    for soil_depth in soil_depths:
-                        dfs_mlms = []
-                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth] = {}
-                        cond = _soil_depths[soil_depth]
-                        # merge the data for each land cover senario into a single dataframe
-                        for land_cover_scenario in land_cover_scenarios:
-                            for climate_scenario in climate_scenarios:
-                                for future in ["nf", "ff"]:
-                                    y = (
-                                        dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
-                                        .loc[cond, f"{delta}_{future}"]
-                                        .to_frame()
-                                    )
-                                    y = pd.DataFrame(data=y, dtype=onp.float64)
-                                    x = df_params.loc[cond, "theta_pwp":]
-                                    # standardize the parameters
-                                    x_std = x.copy()
-                                    for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
-                                        x_std.loc[:, param] = (
-                                            x_std.loc[:, param] - x_std.loc[:, param].mean()
-                                        ) / x_std.loc[:, param].std()
-
-                                    dta = x_std.copy()
-                                    dta.loc[:, f"{delta}"] = y.values.flatten()
-                                    dta.loc[:, "group"] = range(len(y.values.flatten()))
-                                    dfs_mlms.append(dta)
-
-                        df_mlm = pd.concat(dfs_mlms, ignore_index=True)
-                        df_mlm = sm.add_constant(df_mlm)
-                        # fit a mixed linear model with random effects (random intercepts and random slopes)
-                        mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
-                        res = mlm.fit()
-                        print(res.summary())
-
-                        # response variable
-                        y = df_mlm.loc[:, f"{delta}"].values
-                        # number of data points
-                        nobs = res.nobs
-                        # predicted values
-                        # yhat = res.predict()
-                        yhat = res.fittedvalues
-                        # fixed effect parameters and random effect parameters
-                        fe_params = onp.abs(res.params.to_frame().T.values.flatten())
-                        re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
-                        params = onp.concatenate((fe_params, re_params), axis=None)
-                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth][
-                            "fixed_effects"
-                        ] = res.params.to_frame()
-                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth][
-                            "random_effects"
-                        ] = pd.DataFrame(res.random_effects).var(axis=1)
-                        # relative importance of parameters
-                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth][
-                            "params"
-                        ] = params / onp.sum(params)
-                        # contribution of the fixed effect parameters and random effect parameters
-                        dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
-                        dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
-                        dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
-                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth]["attribution"] = dfa
-                        # evaluation metrics
-                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth]["MAE"] = smem.meanabs(
-                            y, yhat
-                        )
-                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth][
-                            "MEAE"
-                        ] = smem.medianabs(y, yhat)
-                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth]["RMSE"] = smem.rmse(
-                            y, yhat
-                        )
-                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth]["VARE"] = smem.vare(
-                            y, yhat
-                        )
-                        dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth]["R2"] = r2_score(
-                            y, yhat
-                        )
-
-    # Store the data (serialize)
-    with open(mlm_random_slopes_soil_location_file, "wb") as handle:
-        pickle.dump(dict_mlm_random_slopes_soil_location, handle, protocol=pickle.HIGHEST_PROTOCOL)
-else:
-    # Load the data (deserialize)
-    with open(mlm_random_slopes_soil_location_file, "rb") as handle:
-        dict_mlm_random_slopes_soil_location = pickle.load(handle)
-
-
 # group by land cover scenario
-if not os.path.exists(mlm_random_intercepts_land_cover_scenario_file):
-    dict_mlm_random_intercepts_land_cover_scenario = {}
+if not os.path.exists(mlm_random_intercepts_lc_file):
+    dict_mlm_random_intercepts_lc = {}
     for mlm_key in mlm_formulas.keys():
-        dict_mlm_random_intercepts_land_cover_scenario[mlm_key] = {}
+        dict_mlm_random_intercepts_lc[mlm_key] = {}
         for var_sim in vars_sim:
-            dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim] = {}
+            dict_mlm_random_intercepts_lc[mlm_key][var_sim] = {}
             for delta in deltas:
-                dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta] = {}
-                for soil_depth in soil_depths:
-                    dfs_mlms = []
-                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth] = {}
-                    cond = _soil_depths[soil_depth]
-                    # merge the data for each land cover senario into a single dataframe
-                    for land_cover_scenario in land_cover_scenarios:
-                        for location in locations:
-                            for climate_scenario in climate_scenarios:
-                                for future in ["nf", "ff"]:
-                                    y = (
-                                        dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
-                                        .loc[cond, f"{delta}_{future}"]
-                                        .to_frame()
-                                    )
-                                    y = pd.DataFrame(data=y, dtype=onp.float64)
-                                    x = df_params.loc[cond, "theta_pwp":]
-                                    # standardize the parameters
-                                    x_std = x.copy()
-                                    for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
-                                        x_std.loc[:, param] = (
-                                            x_std.loc[:, param] - x_std.loc[:, param].mean()
-                                        ) / x_std.loc[:, param].std()
-
-                                    dta = x_std.copy()
-                                    dta.loc[:, f"{delta}"] = y.values.flatten()
-                                    dta.loc[:, "group"] = f"{land_cover_scenario}"
-                                    dfs_mlms.append(dta)
-
-                    df_mlm = pd.concat(dfs_mlms, ignore_index=True)
-                    df_mlm = sm.add_constant(df_mlm)
-                    # fit a mixed linear model with random effects (random intercepts)
-                    mlm = smf.mixedlm(f"{delta} {mlm_formulas[mlm_key]}", df_mlm, groups=df_mlm["group"])
-                    res = mlm.fit()
-                    print(res.summary())
-
-                    # response variable
-                    y = df_mlm.loc[:, f"{delta}"].values
-                    # number of data points
-                    nobs = res.nobs
-                    # predicted values
-                    # yhat = res.predict()
-                    yhat = res.fittedvalues
-                    # fixed effect parameters and random effect parameters
-                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
-                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
-                    params = onp.concatenate((fe_params, re_params), axis=None)
-                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
-                        "fixed_effects"
-                    ] = res.params.to_frame()
-                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
-                        "random_effects"
-                    ] = pd.DataFrame(res.random_effects).var(axis=1)
-                    # relative importance of parameters
-                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
-                        "params"
-                    ] = params / onp.sum(params)
-                    # contribution of the fixed effect parameters and random effect parameters
-                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
-                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
-                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
-                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
-                    # evaluation metrics
-                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
-                        y, yhat
-                    )
-                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
-                        "MEAE"
-                    ] = smem.medianabs(y, yhat)
-                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["RMSE"] = smem.rmse(
-                        y, yhat
-                    )
-                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["VARE"] = smem.vare(
-                        y, yhat
-                    )
-                    dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["R2"] = r2_score(
-                        y, yhat
-                    )
-
-    # Store the data (serialize)
-    with open(mlm_random_intercepts_land_cover_scenario_file, "wb") as handle:
-        pickle.dump(dict_mlm_random_intercepts_land_cover_scenario, handle, protocol=pickle.HIGHEST_PROTOCOL)
-else:
-    # Load the data (deserialize)
-    with open(mlm_random_intercepts_land_cover_scenario_file, "rb") as handle:
-        dict_mlm_random_intercepts_land_cover_scenario = pickle.load(handle)
-
-
-if not os.path.exists(mlm_random_slopes_land_cover_scenario_file):
-    dict_mlm_random_slopes_land_cover_scenario = {}
-    for mlm_key in mlm_formulas.keys():
-        dict_mlm_random_slopes_land_cover_scenario[mlm_key] = {}
-        for var_sim in vars_sim:
-            dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim] = {}
-            for delta in deltas:
-                dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta] = {}
-                for soil_depth in soil_depths:
-                    dfs_mlms = []
-                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth] = {}
-                    cond = _soil_depths[soil_depth]
-                    # merge the data for each land cover senario into a single dataframe
-                    for land_cover_scenario in land_cover_scenarios:
-                        for location in locations:
-                            for climate_scenario in climate_scenarios:
-                                for future in ["nf", "ff"]:
-                                    y = (
-                                        dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
-                                        .loc[cond, f"{delta}_{future}"]
-                                        .to_frame()
-                                    )
-                                    y = pd.DataFrame(data=y, dtype=onp.float64)
-                                    x = df_params.loc[cond, "theta_pwp":]
-                                    # standardize the parameters
-                                    x_std = x.copy()
-                                    for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
-                                        x_std.loc[:, param] = (
-                                            x_std.loc[:, param] - x_std.loc[:, param].mean()
-                                        ) / x_std.loc[:, param].std()
-
-                                    dta = x_std.copy()
-                                    dta.loc[:, f"{delta}"] = y.values.flatten()
-                                    dta.loc[:, "group"] = f"{land_cover_scenario}"
-                                    dfs_mlms.append(dta)
-
-                    df_mlm = pd.concat(dfs_mlms, ignore_index=True)
-                    df_mlm = sm.add_constant(df_mlm)
-                    # fit a mixed linear model with random effects (random intercepts and random slopes)
-                    mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
-                    res = mlm.fit()
-                    print(res.summary())
-
-                    # response variable
-                    y = df_mlm.loc[:, f"{delta}"].values
-                    # number of data points
-                    nobs = res.nobs
-                    # predicted values
-                    # yhat = res.predict()
-                    yhat = res.fittedvalues
-                    # fixed effect parameters and random effect parameters
-                    fe_params = onp.abs(res.params.to_frame().T.values.flatten())
-                    re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
-                    params = onp.concatenate((fe_params, re_params), axis=None)
-                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
-                        "fixed_effects"
-                    ] = res.params.to_frame()
-                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
-                        "random_effects"
-                    ] = pd.DataFrame(res.random_effects).var(axis=1)
-                    # relative importance of parameters
-                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
-                        "params"
-                    ] = params / onp.sum(params)
-                    # contribution of the fixed effect parameters and random effect parameters
-                    dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
-                    dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
-                    dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
-                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
-                    # evaluation metrics
-                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
-                        y, yhat
-                    )
-                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
-                        "MEAE"
-                    ] = smem.medianabs(y, yhat)
-                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["RMSE"] = smem.rmse(
-                        y, yhat
-                    )
-                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["VARE"] = smem.vare(
-                        y, yhat
-                    )
-                    dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["R2"] = r2_score(
-                        y, yhat
-                    )
-
-    # Store the data (serialize)
-    with open(mlm_random_slopes_land_cover_scenario_file, "wb") as handle:
-        pickle.dump(dict_mlm_random_slopes_land_cover_scenario, handle, protocol=pickle.HIGHEST_PROTOCOL)
-else:
-    # Load the data (deserialize)
-    with open(mlm_random_slopes_land_cover_scenario_file, "rb") as handle:
-        dict_mlm_random_slopes_land_cover_scenario = pickle.load(handle)
-
-
-# group by soil properties within land cover scenarios
-if not os.path.exists(mlm_random_intercepts_soil_land_cover_scenario_file):
-    dict_mlm_random_intercepts_soil_land_cover_scenario = {}
-    for mlm_key in mlm_formulas.keys():
-        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key] = {}
-        for var_sim in vars_sim:
-            dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim] = {}
-            for delta in deltas:
-                dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta] = {}
+                dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta] = {}
                 for land_cover_scenario in land_cover_scenarios:
-                    dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario] = {}
+                    dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta][land_cover_scenario] = {}
                     for soil_depth in soil_depths:
                         dfs_mlms = []
-                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth] = {}
+                        dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta][land_cover_scenario][soil_depth] = {}
                         cond = _soil_depths[soil_depth]
                         # merge the data for each land cover senario into a single dataframe
                         for location in locations:
@@ -1697,7 +791,7 @@ if not os.path.exists(mlm_random_intercepts_soil_land_cover_scenario_file):
 
                                     dta = x_std.copy()
                                     dta.loc[:, f"{delta}"] = y.values.flatten()
-                                    dta.loc[:, "group"] = range(len(y.values.flatten()))
+                                    dta.loc[:, "group"] = f"{location}_{climate_scenario}_{future}"
                                     dfs_mlms.append(dta)
 
                         df_mlm = pd.concat(dfs_mlms, ignore_index=True)
@@ -1718,141 +812,1197 @@ if not os.path.exists(mlm_random_intercepts_soil_land_cover_scenario_file):
                         fe_params = onp.abs(res.params.to_frame().T.values.flatten())
                         re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
                         params = onp.concatenate((fe_params, re_params), axis=None)
-                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
+                        dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
                             "fixed_effects"
                         ] = res.params.to_frame()
-                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
+                        dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
                             "random_effects"
                         ] = pd.DataFrame(res.random_effects).var(axis=1)
+
                         # relative importance of parameters
-                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
+                        dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
                             "params"
                         ] = params / onp.sum(params)
+
                         # contribution of the fixed effect parameters and random effect parameters
                         dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
                         dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
                         dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
-                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["attribution"] = dfa
+
+                        dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["attribution"] = dfa
                         # evaluation metrics
-                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["MAE"] = smem.meanabs(
+                        dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["MAE"] = smem.meanabs(
                             y, yhat
                         )
-                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
+                        dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
                             "MEAE"
                         ] = smem.medianabs(y, yhat)
-                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["RMSE"] = smem.rmse(
+                        dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["RMSE"] = smem.rmse(
                             y, yhat
                         )
-                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["VARE"] = smem.vare(
+                        dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["VARE"] = smem.vare(
                             y, yhat
                         )
-                        dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["R2"] = r2_score(
+                        dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["R2"] = r2_score(
                             y, yhat
                         )
+
+                        # plot the line fit
+                        fig, ax = plt.subplots(figsize=(3, 3))
+                        ax.scatter(y, yhat, color="black", s=4)
+                        line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
+                        abline_plot(model_results=line_fit, ax=ax, color="black")
+                        ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]")
+                        ax.set_ylabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]")
+                        ax.text(-90, 90, f"R2 = {r2_score(y, yhat):.2f}")
+                        ax.set_xlim(-100, 100)
+                        ax.set_ylim(-100, 100)
+                        fig.tight_layout()
+                        file = (
+                            base_path_figs
+                            / "residuals"
+                            / "MLM"
+                            / f"{mlm_key}_{land_cover_scenario}_{var_sim}_{delta}_{soil_depth}_line_fit_for_random_intercepts.png"
+                        )
+                        fig.savefig(file, dpi=300)
+
+                        # plot the residuals
+                        resid = yhat - y
+                        fig, ax = plt.subplots(figsize=(3, 3))
+                        ax.scatter(y, resid, color="black", s=4)
+                        ax.set_ylabel("Residuals [%]")
+                        ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]}")
+                        fig.tight_layout()
+                        file = (
+                            base_path_figs
+                            / "residuals"
+                            / "MLM"
+                            / f"{mlm_key}_{land_cover_scenario}_{var_sim}_{delta}_{soil_depth}_residuals_for_random_intercepts.png"
+                        )
+                        fig.savefig(file, dpi=300)
+
+                        # plot the distribution of residuals
+                        fig, ax = plt.subplots(figsize=(3, 3))
+                        resid_std = stats.zscore(resid)
+                        ax.hist(resid_std, bins=25, color="black")
+                        ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM)")
+                        fig.tight_layout()
+                        file = (
+                            base_path_figs
+                            / "residuals"
+                            / "MLM"
+                            / f"{mlm_key}_{land_cover_scenario}_{var_sim}_{delta}_{soil_depth}_residuals_hist_for_random_intercepts.png"
+                        )
+                        fig.savefig(file, dpi=300)
+                        plt.close("all")
 
     # Store the data (serialize)
-    with open(mlm_random_intercepts_soil_land_cover_scenario_file, "wb") as handle:
-        pickle.dump(dict_mlm_random_intercepts_soil_land_cover_scenario, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(mlm_random_intercepts_lc_file, "wb") as handle:
+        pickle.dump(dict_mlm_random_intercepts_lc, handle, protocol=pickle.HIGHEST_PROTOCOL)
 else:
     # Load the data (deserialize)
-    with open(mlm_random_intercepts_soil_land_cover_scenario_file, "rb") as handle:
-        dict_mlm_random_intercepts_soil_land_cover_scenario = pickle.load(handle)
+    with open(mlm_random_intercepts_lc_file, "rb") as handle:
+        dict_mlm_random_intercepts_lc = pickle.load(handle)
 
 
-if not os.path.exists(mlm_random_slopes_soil_land_cover_scenario_file):
-    dict_mlm_random_slopes_soil_land_cover_scenario = {}
-    for mlm_key in mlm_formulas.keys():
-        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key] = {}
-        for var_sim in vars_sim:
-            dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim] = {}
-            for delta in deltas:
-                dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta] = {}
-                for land_cover_scenario in land_cover_scenarios:
-                    dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario] = {}
-                    for soil_depth in soil_depths:
-                        dfs_mlms = []
-                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth] = {}
-                        cond = _soil_depths[soil_depth]
-                        # merge the data for each land cover senario into a single dataframe
-                        for location in locations:
-                            for climate_scenario in climate_scenarios:
-                                for future in ["nf", "ff"]:
-                                    y = (
-                                        dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
-                                        .loc[cond, f"{delta}_{future}"]
-                                        .to_frame()
-                                    )
-                                    y = pd.DataFrame(data=y, dtype=onp.float64)
-                                    x = df_params.loc[cond, "theta_pwp":]
-                                    # standardize the parameters
-                                    x_std = x.copy()
-                                    for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
-                                        x_std.loc[:, param] = (
-                                            x_std.loc[:, param] - x_std.loc[:, param].mean()
-                                        ) / x_std.loc[:, param].std()
+# if not os.path.exists(mlm_random_slopes_llcp_file):
+#     dict_mlm_random_slopes_llcp = {}
+#     for mlm_key in mlm_formulas.keys():
+#         dict_mlm_random_slopes_llcp[mlm_key] = {}
+#         for var_sim in vars_sim:
+#             dict_mlm_random_slopes_llcp[mlm_key][var_sim] = {}
+#             for delta in deltas:
+#                 dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta] = {}
+#                 for soil_depth in soil_depths:
+#                     dfs_mlms = []
+#                     dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth] = {}
+#                     cond = _soil_depths[soil_depth]
+#                     # merge the data for each land cover senario into a single dataframe
+#                     for land_cover_scenario in land_cover_scenarios:
+#                         for location in locations:
+#                             for climate_scenario in climate_scenarios:
+#                                 for future in ["nf", "ff"]:
+#                                     y = (
+#                                         dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
+#                                         .loc[cond, f"{delta}_{future}"]
+#                                         .to_frame()
+#                                     )
+#                                     y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                     x = df_params.loc[cond, "theta_pwp":]
+#                                     # standardize the parameters
+#                                     x_std = x.copy()
+#                                     for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                         x_std.loc[:, param] = (
+#                                             x_std.loc[:, param] - x_std.loc[:, param].mean()
+#                                         ) / x_std.loc[:, param].std()
 
-                                    dta = x_std.copy()
-                                    dta.loc[:, f"{delta}"] = y.values.flatten()
-                                    dta.loc[:, "group"] = range(len(y.values.flatten()))
-                                    dfs_mlms.append(dta)
+#                                     dta = x_std.copy()
+#                                     dta.loc[:, f"{delta}"] = y.values.flatten()
+#                                     dta.loc[:, "group"] = f"{location}_{land_cover_scenario}_{climate_scenario}_{future}"
+#                                     dfs_mlms.append(dta)
 
-                        df_mlm = pd.concat(dfs_mlms, ignore_index=True)
-                        df_mlm = sm.add_constant(df_mlm)
-                        # fit a mixed linear model with random effects (random intercepts and random slopes)
-                        mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
-                        res = mlm.fit()
-                        print(res.summary())
+#                     df_mlm = pd.concat(dfs_mlms, ignore_index=True)
+#                     df_mlm = sm.add_constant(df_mlm)
+#                     # fit a mixed linear model with random effects (random intercepts and random slopes)
+#                     mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
+#                     res = mlm.fit()
+#                     print(res.summary())
 
-                        # response variable
-                        y = df_mlm.loc[:, f"{delta}"].values
-                        # number of data points
-                        nobs = res.nobs
-                        # predicted values
-                        # yhat = res.predict()
-                        yhat = res.fittedvalues
-                        # fixed effect parameters and random effect parameters
-                        fe_params = onp.abs(res.params.to_frame().T.values.flatten())
-                        re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
-                        params = onp.concatenate((fe_params, re_params), axis=None)
-                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
-                            "fixed_effects"
-                        ] = res.params.to_frame()
-                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
-                            "random_effects"
-                        ] = pd.DataFrame(res.random_effects).var(axis=1)
-                        # relative importance of parameters
-                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
-                            "params"
-                        ] = params / onp.sum(params)
-                        # contribution of the fixed effect parameters and random effect parameters
-                        dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
-                        dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
-                        dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
-                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["attribution"] = dfa
-                        # evaluation metrics
-                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["MAE"] = smem.meanabs(
-                            y, yhat
-                        )
-                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
-                            "MEAE"
-                        ] = smem.medianabs(y, yhat)
-                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["RMSE"] = smem.rmse(
-                            y, yhat
-                        )
-                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["VARE"] = smem.vare(
-                            y, yhat
-                        )
-                        dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["R2"] = r2_score(
-                            y, yhat
-                        )
+#                     # response variable
+#                     y = df_mlm.loc[:, f"{delta}"].values
+#                     # number of data points
+#                     nobs = res.nobs
+#                     # predicted values
+#                     # yhat = res.predict()
+#                     yhat = res.fittedvalues
+#                     # fixed effect parameters and random effect parameters
+#                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+#                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+#                     params = onp.concatenate((fe_params, re_params), axis=None)
+#                     dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth][
+#                         "fixed_effects"
+#                     ] = res.params.to_frame()
+#                     dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth][
+#                         "random_effects"
+#                     ] = pd.DataFrame(res.random_effects).var(axis=1)
+#                     # relative importance of parameters
+#                     dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth][
+#                         "params"
+#                     ] = params / onp.sum(params)
+#                     # contribution of the fixed effect parameters and random effect parameters
+#                     dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+#                     dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+#                     dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+#                     dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
+#                     # evaluation metrics
+#                     dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth][
+#                         "MEAE"
+#                     ] = smem.medianabs(y, yhat)
+#                     dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth]["RMSE"] = smem.rmse(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth]["VARE"] = smem.vare(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_slopes_llcp[mlm_key][var_sim][delta][soil_depth]["R2"] = r2_score(
+#                         y, yhat
+#                     )
 
-    # Store the data (serialize)
-    with open(mlm_random_slopes_soil_land_cover_scenario_file, "wb") as handle:
-        pickle.dump(dict_mlm_random_slopes_soil_land_cover_scenario, handle, protocol=pickle.HIGHEST_PROTOCOL)
-else:
-    # Load the data (deserialize)
-    with open(mlm_random_slopes_soil_land_cover_scenario_file, "rb") as handle:
-        dict_mlm_random_slopes_soil_land_cover_scenario = pickle.load(handle)
+#     # Store the data (serialize)
+#     with open(mlm_random_slopes_llcp_file, "wb") as handle:
+#         pickle.dump(dict_mlm_random_slopes_llcp, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# else:
+#     # Load the data (deserialize)
+#     with open(mlm_random_slopes_llcp_file, "rb") as handle:
+#         dict_mlm_random_slopes_llcp = pickle.load(handle)
+
+# # group by soil properties within location, land cover scenario, climate model and future
+# if not os.path.exists(mlm_random_intercepts_soil_llcp_file):
+#     dict_mlm_random_intercepts_soil_llcp = {}
+#     for mlm_key in mlm_formulas.keys():
+#         dict_mlm_random_intercepts_soil_llcp[mlm_key] = {}
+#         for var_sim in vars_sim:
+#             dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim] = {}
+#             for delta in deltas:
+#                 dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta] = {}
+#                 for soil_depth in soil_depths:
+#                     dfs_mlms = []
+#                     dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth] = {}
+#                     cond = _soil_depths[soil_depth]
+#                     # merge the data for each land cover senario into a single dataframe
+#                     for location in locations:
+#                         for land_cover_scenario in land_cover_scenarios:
+#                             for climate_scenario in climate_scenarios:
+#                                 for future in ["nf", "ff"]:
+#                                     y = (
+#                                         dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
+#                                         .loc[cond, f"{delta}_{future}"]
+#                                         .to_frame()
+#                                     )
+#                                     y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                     x = df_params.loc[cond, "theta_pwp":]
+#                                     # standardize the parameters
+#                                     x_std = x.copy()
+#                                     for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                         x_std.loc[:, param] = (
+#                                             x_std.loc[:, param] - x_std.loc[:, param].mean()
+#                                         ) / x_std.loc[:, param].std()
+
+#                                     dta = x_std.copy()
+#                                     dta.loc[:, f"{delta}"] = y.values.flatten()
+#                                     dta.loc[:, "group"] = range(len(y.values.flatten()))
+#                                     dfs_mlms.append(dta)
+
+#                     df_mlm = pd.concat(dfs_mlms, ignore_index=True)
+#                     df_mlm = sm.add_constant(df_mlm)
+#                     # fit a mixed linear model with random effects (random intercepts)
+#                     mlm = smf.mixedlm(f"{delta} {mlm_formulas[mlm_key]}", df_mlm, groups=df_mlm["group"])
+#                     res = mlm.fit()
+#                     print(res.summary())
+
+#                     # response variable
+#                     y = df_mlm.loc[:, f"{delta}"].values
+#                     # number of data points
+#                     nobs = res.nobs
+#                     # predicted values
+#                     # yhat = res.predict()
+#                     yhat = res.fittedvalues
+#                     # fixed effect parameters and random effect parameters
+#                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+#                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+#                     params = onp.concatenate((fe_params, re_params), axis=None)
+#                     dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][
+#                         "fixed_effects"
+#                     ] = res.params.to_frame()
+#                     dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][
+#                         "random_effects"
+#                     ] = pd.DataFrame(res.random_effects).var(axis=1)
+#                     # relative importance of parameters
+#                     dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][
+#                         "params"
+#                     ] = params / onp.sum(params)
+#                     # contribution of the fixed effect parameters and random effect parameters
+#                     dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+#                     dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+#                     dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+#                     dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
+#                     # evaluation metrics
+#                     dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][
+#                         "MEAE"
+#                     ] = smem.medianabs(y, yhat)
+#                     dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth]["RMSE"] = smem.rmse(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth]["VARE"] = smem.vare(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth]["R2"] = r2_score(
+#                         y, yhat
+#                     )
+
+#                     # plot the line fit
+#                     fig, ax = plt.subplots(figsize=(3, 3))
+#                     ax.scatter(y, yhat, color="black", s=4)
+#                     line_fit = sm.OLS(y, sm.add_constant(yhat, prepend=True)).fit()
+#                     abline_plot(model_results=line_fit, ax=ax, color="black")
+#                     ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (RoGeR) [%]")
+#                     ax.set_ylabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM) [%]")
+#                     ax.set_xlim(-100, 100)
+#                     ax.set_ylim(-100, 100)
+#                     fig.tight_layout()
+#                     file = (
+#                         base_path_figs
+#                         / "residuals"
+#                         / "MLM"
+#                         / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_line_fit_for_random_intercepts.png"
+#                     )
+#                     fig.savefig(file, dpi=300)
+
+#                     # plot the residuals
+#                     resid = yhat - y
+#                     fig, ax = plt.subplots(figsize=(3, 3))
+#                     ax.scatter(y, resid, color="black", s=4)
+#                     ax.set_ylabel("Residuals [%]")
+#                     ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]}")
+#                     fig.tight_layout()
+#                     file = (
+#                         base_path_figs
+#                         / "residuals"
+#                         / "MLM"
+#                         / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_for_random_intercepts.png"
+#                     )
+#                     fig.savefig(file, dpi=300)
+
+#                     # plot the distribution of residuals
+#                     fig, ax = plt.subplots(figsize=(3, 3))
+#                     resid_std = stats.zscore(resid)
+#                     ax.hist(resid_std, bins=25, color="black")
+#                     ax.set_xlabel(f"{_lab[delta]}{_lab_unit1[var_sim]} (MLM)")
+#                     fig.tight_layout()
+#                     file = (
+#                         base_path_figs
+#                         / "residuals"
+#                         / "MLM"
+#                         / f"{mlm_key}_{var_sim}_{delta}_{soil_depth}_residuals_hist_for_random_intercepts.png"
+#                     )
+#                     fig.savefig(file, dpi=300)
+#                     plt.close("all")
+
+#     # Store the data (serialize)
+#     with open(mlm_random_intercepts_soil_llcp_file, "wb") as handle:
+#         pickle.dump(dict_mlm_random_intercepts_soil_llcp, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# else:
+#     # Load the data (deserialize)
+#     with open(mlm_random_intercepts_soil_llcp_file, "rb") as handle:
+#         dict_mlm_random_intercepts_soil_llcp = pickle.load(handle)
+
+
+# if not os.path.exists(mlm_random_slopes_soil_llcp_file):
+#     dict_mlm_random_slopes_soil_llcp = {}
+#     for mlm_key in mlm_formulas.keys():
+#         dict_mlm_random_slopes_soil_llcp[mlm_key] = {}
+#         for var_sim in vars_sim:
+#             dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim] = {}
+#             for delta in deltas:
+#                 dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta] = {}
+#                 for soil_depth in soil_depths:
+#                     dfs_mlms = []
+#                     dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth] = {}
+#                     cond = _soil_depths[soil_depth]
+#                     # merge the data for each land cover senario into a single dataframe
+#                     for land_cover_scenario in land_cover_scenarios:
+#                         for location in locations:
+#                             for climate_scenario in climate_scenarios:
+#                                 for future in ["nf", "ff"]:
+#                                     y = (
+#                                         dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
+#                                         .loc[cond, f"{delta}_{future}"]
+#                                         .to_frame()
+#                                     )
+#                                     y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                     x = df_params.loc[cond, "theta_pwp":]
+#                                     # standardize the parameters
+#                                     x_std = x.copy()
+#                                     for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                         x_std.loc[:, param] = (
+#                                             x_std.loc[:, param] - x_std.loc[:, param].mean()
+#                                         ) / x_std.loc[:, param].std()
+
+#                                     dta = x_std.copy()
+#                                     dta.loc[:, f"{delta}"] = y.values.flatten()
+#                                     dta.loc[:, "group"] = range(len(y.values.flatten()))
+#                                     dfs_mlms.append(dta)
+
+#                     df_mlm = pd.concat(dfs_mlms, ignore_index=True)
+#                     df_mlm = sm.add_constant(df_mlm)
+#                     # fit a mixed linear model with random effects (random intercepts and random slopes)
+#                     mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
+#                     res = mlm.fit()
+#                     print(res.summary())
+
+#                     # response variable
+#                     y = df_mlm.loc[:, f"{delta}"].values
+#                     # number of data points
+#                     nobs = res.nobs
+#                     # predicted values
+#                     # yhat = res.predict()
+#                     yhat = res.fittedvalues
+#                     # fixed effect parameters and random effect parameters
+#                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+#                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+#                     params = onp.concatenate((fe_params, re_params), axis=None)
+#                     dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][
+#                         "fixed_effects"
+#                     ] = res.params.to_frame()
+#                     dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][
+#                         "random_effects"
+#                     ] = pd.DataFrame(res.random_effects).var(axis=1)
+#                     # relative importance of parameters
+#                     dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][
+#                         "params"
+#                     ] = params / onp.sum(params)
+#                     # contribution of the fixed effect parameters and random effect parameters
+#                     dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+#                     dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+#                     dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+#                     dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
+#                     # evaluation metrics
+#                     dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][
+#                         "MEAE"
+#                     ] = smem.medianabs(y, yhat)
+#                     dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth]["RMSE"] = smem.rmse(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth]["VARE"] = smem.vare(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth]["R2"] = r2_score(
+#                         y, yhat
+#                     )
+
+#     # Store the data (serialize)
+#     with open(mlm_random_slopes_soil_llcp_file, "wb") as handle:
+#         pickle.dump(dict_mlm_random_slopes_soil_llcp, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# else:
+#     # Load the data (deserialize)
+#     with open(mlm_random_slopes_soil_llcp_file, "rb") as handle:
+#         dict_mlm_random_slopes_soil_llcp = pickle.load(handle)
+
+
+# # group by location
+# if not os.path.exists(mlm_random_intercepts_location_file):
+#     dict_mlm_random_intercepts_location = {}
+#     for mlm_key in mlm_formulas.keys():
+#         dict_mlm_random_intercepts_location[mlm_key] = {}
+#         for var_sim in vars_sim:
+#             dict_mlm_random_intercepts_location[mlm_key][var_sim] = {}
+#             for delta in deltas:
+#                 dict_mlm_random_intercepts_location[mlm_key][var_sim][delta] = {}
+#                 for soil_depth in soil_depths:
+#                     dfs_mlms = []
+#                     dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth] = {}
+#                     cond = _soil_depths[soil_depth]
+#                     # merge the data for each land cover senario into a single dataframe
+#                     for location in locations:
+#                         for land_cover_scenario in land_cover_scenarios:
+#                             for climate_scenario in climate_scenarios:
+#                                 for future in ["nf", "ff"]:
+#                                     y = (
+#                                         dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
+#                                         .loc[cond, f"{delta}_{future}"]
+#                                         .to_frame()
+#                                     )
+#                                     y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                     x = df_params.loc[cond, "theta_pwp":]
+#                                     # standardize the parameters
+#                                     x_std = x.copy()
+#                                     for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                         x_std.loc[:, param] = (
+#                                             x_std.loc[:, param] - x_std.loc[:, param].mean()
+#                                         ) / x_std.loc[:, param].std()
+
+#                                     dta = x_std.copy()
+#                                     dta.loc[:, f"{delta}"] = y.values.flatten()
+#                                     dta.loc[:, "group"] = f"{location}"
+#                                     dfs_mlms.append(dta)
+
+#                     df_mlm = pd.concat(dfs_mlms, ignore_index=True)
+#                     df_mlm = sm.add_constant(df_mlm)
+#                     # fit a mixed linear model with random effects (random intercepts)dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][metric]
+#                     mlm = smf.mixedlm(f"{delta} {mlm_formulas[mlm_key]}", df_mlm, groups=df_mlm["group"])
+#                     res = mlm.fit()
+#                     print(res.summary())
+
+#                     # response variable
+#                     y = df_mlm.loc[:, f"{delta}"].values
+#                     # number of data points
+#                     nobs = res.nobs
+#                     # predicted values
+#                     # yhat = res.predict()
+#                     yhat = res.fittedvalues
+#                     # fixed effect parameters and random effect parameters
+#                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+#                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+#                     params = onp.concatenate((fe_params, re_params), axis=None)
+#                     dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth][
+#                         "fixed_effects"
+#                     ] = res.params.to_frame()
+#                     dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth][
+#                         "random_effects"
+#                     ] = pd.DataFrame(res.random_effects).var(axis=1)
+#                     # relative importance of parameters
+#                     dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth][
+#                         "params"
+#                     ] = params / onp.sum(params)
+#                     # contribution of the fixed effect parameters and random effect parameters
+#                     dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+#                     dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+#                     dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+#                     dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa                    
+#                     # evaluation metrics
+#                     dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth][
+#                         "MEAE"
+#                     ] = smem.medianabs(y, yhat)
+#                     dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth]["RMSE"] = smem.rmse(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth]["VARE"] = smem.vare(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_intercepts_location[mlm_key][var_sim][delta][soil_depth]["R2"] = r2_score(
+#                         y, yhat
+#                     )
+
+#     # Store the data (serialize)
+#     with open(mlm_random_intercepts_location_file, "wb") as handle:
+#         pickle.dump(dict_mlm_random_intercepts_location, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# else:
+#     # Load the data (deserialize)
+#     with open(mlm_random_intercepts_location_file, "rb") as handle:
+#         dict_mlm_random_intercepts_location = pickle.load(handle)
+
+
+# if not os.path.exists(mlm_random_slopes_location_file):
+#     dict_mlm_random_slopes_location = {}
+#     for mlm_key in mlm_formulas.keys():
+#         dict_mlm_random_slopes_location[mlm_key] = {}
+#         for var_sim in vars_sim:
+#             dict_mlm_random_slopes_location[mlm_key][var_sim] = {}
+#             for delta in deltas:
+#                 dict_mlm_random_slopes_location[mlm_key][var_sim][delta] = {}
+#                 for soil_depth in soil_depths:
+#                     dfs_mlms = []
+#                     dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth] = {}
+#                     cond = _soil_depths[soil_depth]
+#                     # merge the data for each land cover senario into a single dataframe
+#                     for location in locations:
+#                         for land_cover_scenario in land_cover_scenarios:
+#                             for climate_scenario in climate_scenarios:
+#                                 for future in ["nf", "ff"]:
+#                                     y = (
+#                                         dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
+#                                         .loc[cond, f"{delta}_{future}"]
+#                                         .to_frame()
+#                                     )
+#                                     y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                     x = df_params.loc[cond, "theta_pwp":]
+#                                     # standardize the parameters
+#                                     x_std = x.copy()
+#                                     for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                         x_std.loc[:, param] = (
+#                                             x_std.loc[:, param] - x_std.loc[:, param].mean()
+#                                         ) / x_std.loc[:, param].std()
+
+#                                     dta = x_std.copy()
+#                                     dta.loc[:, f"{delta}"] = y.values.flatten()
+#                                     dta.loc[:, "group"] = f"{location}"
+#                                     dfs_mlms.append(dta)
+
+#                         df_mlm = pd.concat(dfs_mlms, ignore_index=True)
+#                         df_mlm = sm.add_constant(df_mlm)
+#                         # fit a mixed linear model with random effects (random intercepts and random slopes)
+#                         mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
+#                         res = mlm.fit()
+#                         print(res.summary())
+
+#                         # response variable
+#                         y = df_mlm.loc[:, f"{delta}"].values
+#                         # number of data points
+#                         nobs = res.nobs
+#                         # predicted values
+#                         # yhat = res.predict()
+#                         yhat = res.fittedvalues
+#                         # fixed effect parameters and random effect parameters
+#                         fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+#                         re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+#                         params = onp.concatenate((fe_params, re_params), axis=None)
+#                         dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth][
+#                             "fixed_effects"
+#                         ] = res.params.to_frame()
+#                         dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth][
+#                             "random_effects"
+#                         ] = pd.DataFrame(res.random_effects).var(axis=1)
+#                         # relative importance of parameters
+#                         dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth][
+#                             "params"
+#                         ] = params / onp.sum(params)
+#                         # contribution of the fixed effect parameters and random effect parameters
+#                         dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+#                         dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+#                         dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+#                         dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
+#                         # evaluation metrics
+#                         dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth][
+#                             "MEAE"
+#                         ] = smem.medianabs(y, yhat)
+#                         dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth]["RMSE"] = smem.rmse(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth]["VARE"] = smem.vare(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_slopes_location[mlm_key][var_sim][delta][soil_depth]["R2"] = r2_score(
+#                             y, yhat
+#                         )
+
+#     # Store the data (serialize)
+#     with open(mlm_random_slopes_location_file, "wb") as handle:
+#         pickle.dump(dict_mlm_random_slopes_location, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# else:
+#     # Load the data (deserialize)
+#     with open(mlm_random_slopes_location_file, "rb") as handle:
+#         dict_mlm_random_slopes_location = pickle.load(handle)
+
+# # group by soil properties within location
+# if not os.path.exists(mlm_random_intercepts_soil_location_file):
+#     dict_mlm_random_intercepts_soil_location = {}
+#     for mlm_key in mlm_formulas.keys():
+#         dict_mlm_random_intercepts_soil_location[mlm_key] = {}
+#         for var_sim in vars_sim:
+#             dict_mlm_random_intercepts_soil_location[mlm_key][var_sim] = {}
+#             for delta in deltas:
+#                 dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta] = {}
+#                 for location in locations:
+#                     dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location] = {}
+#                     for soil_depth in soil_depths:
+#                         dfs_mlms = []
+#                         dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth] = {}
+#                         cond = _soil_depths[soil_depth]
+#                         # merge the data for each land cover senario into a single dataframe
+#                         for land_cover_scenario in land_cover_scenarios:
+#                             for climate_scenario in climate_scenarios:
+#                                 for future in ["nf", "ff"]:
+#                                     y = (
+#                                         dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
+#                                         .loc[cond, f"{delta}_{future}"]
+#                                         .to_frame()
+#                                     )
+#                                     y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                     x = df_params.loc[cond, "theta_pwp":]
+#                                     # standardize the parameters
+#                                     x_std = x.copy()
+#                                     for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                         x_std.loc[:, param] = (
+#                                             x_std.loc[:, param] - x_std.loc[:, param].mean()
+#                                         ) / x_std.loc[:, param].std()
+
+#                                     dta = x_std.copy()
+#                                     dta.loc[:, f"{delta}"] = y.values.flatten()
+#                                     dta.loc[:, "group"] = range(len(y.values.flatten()))
+#                                     dfs_mlms.append(dta)
+
+#                         df_mlm = pd.concat(dfs_mlms, ignore_index=True)
+#                         df_mlm = sm.add_constant(df_mlm)
+#                         # fit a mixed linear model with random effects (random intercepts)
+#                         mlm = smf.mixedlm(f"{delta} {mlm_formulas[mlm_key]}", df_mlm, groups=df_mlm["group"])
+#                         res = mlm.fit()
+#                         print(res.summary())
+
+#                         # response variable
+#                         y = df_mlm.loc[:, f"{delta}"].values
+#                         # number of data points
+#                         nobs = res.nobs
+#                         # predicted values
+#                         # yhat = res.predict()
+#                         yhat = res.fittedvalues
+#                         # fixed effect parameters and random effect parameters
+#                         fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+#                         re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+#                         params = onp.concatenate((fe_params, re_params), axis=None)
+#                         dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth][
+#                             "fixed_effects"
+#                         ] = res.params.to_frame()
+#                         dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth][
+#                             "random_effects"
+#                         ] = pd.DataFrame(res.random_effects).var(axis=1)
+#                         # relative importance of parameters
+#                         dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth][
+#                             "params"
+#                         ] = params / onp.sum(params)
+#                         # contribution of the fixed effect parameters and random effect parameters
+#                         dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+#                         dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+#                         dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+#                         dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth]["attribution"] = dfa
+#                         # evaluation metrics
+#                         dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth]["MAE"] = smem.meanabs(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth][
+#                             "MEAE"
+#                         ] = smem.medianabs(y, yhat)
+#                         dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth]["RMSE"] = smem.rmse(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth]["VARE"] = smem.vare(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta][location][soil_depth]["R2"] = r2_score(
+#                             y, yhat
+#                         )
+
+#     # Store the data (serialize)
+#     with open(mlm_random_intercepts_soil_location_file, "wb") as handle:
+#         pickle.dump(dict_mlm_random_intercepts_soil_location, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# else:
+#     # Load the data (deserialize)
+#     with open(mlm_random_intercepts_soil_location_file, "rb") as handle:
+#         dict_mlm_random_intercepts_soil_location = pickle.load(handle)
+
+
+# if not os.path.exists(mlm_random_slopes_soil_location_file):
+#     dict_mlm_random_slopes_soil_location = {}
+#     for mlm_key in mlm_formulas.keys():
+#         dict_mlm_random_slopes_soil_location[mlm_key] = {}
+#         for var_sim in vars_sim:
+#             dict_mlm_random_slopes_soil_location[mlm_key][var_sim] = {}
+#             for delta in deltas:
+#                 dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta] = {}
+#                 for location in locations:
+#                     dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location] = {}
+#                     for soil_depth in soil_depths:
+#                         dfs_mlms = []
+#                         dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth] = {}
+#                         cond = _soil_depths[soil_depth]
+#                         # merge the data for each land cover senario into a single dataframe
+#                         for land_cover_scenario in land_cover_scenarios:
+#                             for climate_scenario in climate_scenarios:
+#                                 for future in ["nf", "ff"]:
+#                                     y = (
+#                                         dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
+#                                         .loc[cond, f"{delta}_{future}"]
+#                                         .to_frame()
+#                                     )
+#                                     y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                     x = df_params.loc[cond, "theta_pwp":]
+#                                     # standardize the parameters
+#                                     x_std = x.copy()
+#                                     for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                         x_std.loc[:, param] = (
+#                                             x_std.loc[:, param] - x_std.loc[:, param].mean()
+#                                         ) / x_std.loc[:, param].std()
+
+#                                     dta = x_std.copy()
+#                                     dta.loc[:, f"{delta}"] = y.values.flatten()
+#                                     dta.loc[:, "group"] = range(len(y.values.flatten()))
+#                                     dfs_mlms.append(dta)
+
+#                         df_mlm = pd.concat(dfs_mlms, ignore_index=True)
+#                         df_mlm = sm.add_constant(df_mlm)
+#                         # fit a mixed linear model with random effects (random intercepts and random slopes)
+#                         mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
+#                         res = mlm.fit()
+#                         print(res.summary())
+
+#                         # response variable
+#                         y = df_mlm.loc[:, f"{delta}"].values
+#                         # number of data points
+#                         nobs = res.nobs
+#                         # predicted values
+#                         # yhat = res.predict()
+#                         yhat = res.fittedvalues
+#                         # fixed effect parameters and random effect parameters
+#                         fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+#                         re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+#                         params = onp.concatenate((fe_params, re_params), axis=None)
+#                         dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth][
+#                             "fixed_effects"
+#                         ] = res.params.to_frame()
+#                         dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth][
+#                             "random_effects"
+#                         ] = pd.DataFrame(res.random_effects).var(axis=1)
+#                         # relative importance of parameters
+#                         dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth][
+#                             "params"
+#                         ] = params / onp.sum(params)
+#                         # contribution of the fixed effect parameters and random effect parameters
+#                         dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+#                         dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+#                         dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+#                         dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth]["attribution"] = dfa
+#                         # evaluation metrics
+#                         dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth]["MAE"] = smem.meanabs(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth][
+#                             "MEAE"
+#                         ] = smem.medianabs(y, yhat)
+#                         dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth]["RMSE"] = smem.rmse(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth]["VARE"] = smem.vare(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta][location][soil_depth]["R2"] = r2_score(
+#                             y, yhat
+#                         )
+
+#     # Store the data (serialize)
+#     with open(mlm_random_slopes_soil_location_file, "wb") as handle:
+#         pickle.dump(dict_mlm_random_slopes_soil_location, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# else:
+#     # Load the data (deserialize)
+#     with open(mlm_random_slopes_soil_location_file, "rb") as handle:
+#         dict_mlm_random_slopes_soil_location = pickle.load(handle)
+
+
+# # group by land cover scenario
+# if not os.path.exists(mlm_random_intercepts_land_cover_scenario_file):
+#     dict_mlm_random_intercepts_land_cover_scenario = {}
+#     for mlm_key in mlm_formulas.keys():
+#         dict_mlm_random_intercepts_land_cover_scenario[mlm_key] = {}
+#         for var_sim in vars_sim:
+#             dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim] = {}
+#             for delta in deltas:
+#                 dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta] = {}
+#                 for soil_depth in soil_depths:
+#                     dfs_mlms = []
+#                     dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth] = {}
+#                     cond = _soil_depths[soil_depth]
+#                     # merge the data for each land cover senario into a single dataframe
+#                     for land_cover_scenario in land_cover_scenarios:
+#                         for location in locations:
+#                             for climate_scenario in climate_scenarios:
+#                                 for future in ["nf", "ff"]:
+#                                     y = (
+#                                         dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
+#                                         .loc[cond, f"{delta}_{future}"]
+#                                         .to_frame()
+#                                     )
+#                                     y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                     x = df_params.loc[cond, "theta_pwp":]
+#                                     # standardize the parameters
+#                                     x_std = x.copy()
+#                                     for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                         x_std.loc[:, param] = (
+#                                             x_std.loc[:, param] - x_std.loc[:, param].mean()
+#                                         ) / x_std.loc[:, param].std()
+
+#                                     dta = x_std.copy()
+#                                     dta.loc[:, f"{delta}"] = y.values.flatten()
+#                                     dta.loc[:, "group"] = f"{land_cover_scenario}"
+#                                     dfs_mlms.append(dta)
+
+#                     df_mlm = pd.concat(dfs_mlms, ignore_index=True)
+#                     df_mlm = sm.add_constant(df_mlm)
+#                     # fit a mixed linear model with random effects (random intercepts)
+#                     mlm = smf.mixedlm(f"{delta} {mlm_formulas[mlm_key]}", df_mlm, groups=df_mlm["group"])
+#                     res = mlm.fit()
+#                     print(res.summary())
+
+#                     # response variable
+#                     y = df_mlm.loc[:, f"{delta}"].values
+#                     # number of data points
+#                     nobs = res.nobs
+#                     # predicted values
+#                     # yhat = res.predict()
+#                     yhat = res.fittedvalues
+#                     # fixed effect parameters and random effect parameters
+#                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+#                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+#                     params = onp.concatenate((fe_params, re_params), axis=None)
+#                     dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
+#                         "fixed_effects"
+#                     ] = res.params.to_frame()
+#                     dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
+#                         "random_effects"
+#                     ] = pd.DataFrame(res.random_effects).var(axis=1)
+#                     # relative importance of parameters
+#                     dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
+#                         "params"
+#                     ] = params / onp.sum(params)
+#                     # contribution of the fixed effect parameters and random effect parameters
+#                     dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+#                     dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+#                     dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+#                     dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
+#                     # evaluation metrics
+#                     dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
+#                         "MEAE"
+#                     ] = smem.medianabs(y, yhat)
+#                     dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["RMSE"] = smem.rmse(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["VARE"] = smem.vare(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_intercepts_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["R2"] = r2_score(
+#                         y, yhat
+#                     )
+
+#     # Store the data (serialize)
+#     with open(mlm_random_intercepts_land_cover_scenario_file, "wb") as handle:
+#         pickle.dump(dict_mlm_random_intercepts_land_cover_scenario, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# else:
+#     # Load the data (deserialize)
+#     with open(mlm_random_intercepts_land_cover_scenario_file, "rb") as handle:
+#         dict_mlm_random_intercepts_land_cover_scenario = pickle.load(handle)
+
+
+# if not os.path.exists(mlm_random_slopes_land_cover_scenario_file):
+#     dict_mlm_random_slopes_land_cover_scenario = {}
+#     for mlm_key in mlm_formulas.keys():
+#         dict_mlm_random_slopes_land_cover_scenario[mlm_key] = {}
+#         for var_sim in vars_sim:
+#             dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim] = {}
+#             for delta in deltas:
+#                 dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta] = {}
+#                 for soil_depth in soil_depths:
+#                     dfs_mlms = []
+#                     dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth] = {}
+#                     cond = _soil_depths[soil_depth]
+#                     # merge the data for each land cover senario into a single dataframe
+#                     for land_cover_scenario in land_cover_scenarios:
+#                         for location in locations:
+#                             for climate_scenario in climate_scenarios:
+#                                 for future in ["nf", "ff"]:
+#                                     y = (
+#                                         dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
+#                                         .loc[cond, f"{delta}_{future}"]
+#                                         .to_frame()
+#                                     )
+#                                     y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                     x = df_params.loc[cond, "theta_pwp":]
+#                                     # standardize the parameters
+#                                     x_std = x.copy()
+#                                     for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                         x_std.loc[:, param] = (
+#                                             x_std.loc[:, param] - x_std.loc[:, param].mean()
+#                                         ) / x_std.loc[:, param].std()
+
+#                                     dta = x_std.copy()
+#                                     dta.loc[:, f"{delta}"] = y.values.flatten()
+#                                     dta.loc[:, "group"] = f"{land_cover_scenario}"
+#                                     dfs_mlms.append(dta)
+
+#                     df_mlm = pd.concat(dfs_mlms, ignore_index=True)
+#                     df_mlm = sm.add_constant(df_mlm)
+#                     # fit a mixed linear model with random effects (random intercepts and random slopes)
+#                     mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
+#                     res = mlm.fit()
+#                     print(res.summary())
+
+#                     # response variable
+#                     y = df_mlm.loc[:, f"{delta}"].values
+#                     # number of data points
+#                     nobs = res.nobs
+#                     # predicted values
+#                     # yhat = res.predict()
+#                     yhat = res.fittedvalues
+#                     # fixed effect parameters and random effect parameters
+#                     fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+#                     re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+#                     params = onp.concatenate((fe_params, re_params), axis=None)
+#                     dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
+#                         "fixed_effects"
+#                     ] = res.params.to_frame()
+#                     dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
+#                         "random_effects"
+#                     ] = pd.DataFrame(res.random_effects).var(axis=1)
+#                     # relative importance of parameters
+#                     dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
+#                         "params"
+#                     ] = params / onp.sum(params)
+#                     # contribution of the fixed effect parameters and random effect parameters
+#                     dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+#                     dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+#                     dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+#                     dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["attribution"] = dfa
+#                     # evaluation metrics
+#                     dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["MAE"] = smem.meanabs(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth][
+#                         "MEAE"
+#                     ] = smem.medianabs(y, yhat)
+#                     dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["RMSE"] = smem.rmse(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["VARE"] = smem.vare(
+#                         y, yhat
+#                     )
+#                     dict_mlm_random_slopes_land_cover_scenario[mlm_key][var_sim][delta][soil_depth]["R2"] = r2_score(
+#                         y, yhat
+#                     )
+
+#     # Store the data (serialize)
+#     with open(mlm_random_slopes_land_cover_scenario_file, "wb") as handle:
+#         pickle.dump(dict_mlm_random_slopes_land_cover_scenario, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# else:
+#     # Load the data (deserialize)
+#     with open(mlm_random_slopes_land_cover_scenario_file, "rb") as handle:
+#         dict_mlm_random_slopes_land_cover_scenario = pickle.load(handle)
+
+
+# # group by soil properties within land cover scenarios
+# if not os.path.exists(mlm_random_intercepts_soil_land_cover_scenario_file):
+#     dict_mlm_random_intercepts_soil_land_cover_scenario = {}
+#     for mlm_key in mlm_formulas.keys():
+#         dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key] = {}
+#         for var_sim in vars_sim:
+#             dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim] = {}
+#             for delta in deltas:
+#                 dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta] = {}
+#                 for land_cover_scenario in land_cover_scenarios:
+#                     dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario] = {}
+#                     for soil_depth in soil_depths:
+#                         dfs_mlms = []
+#                         dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth] = {}
+#                         cond = _soil_depths[soil_depth]
+#                         # merge the data for each land cover senario into a single dataframe
+#                         for location in locations:
+#                             for climate_scenario in climate_scenarios:
+#                                 for future in ["nf", "ff"]:
+#                                     y = (
+#                                         dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
+#                                         .loc[cond, f"{delta}_{future}"]
+#                                         .to_frame()
+#                                     )
+#                                     y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                     x = df_params.loc[cond, "theta_pwp":]
+#                                     # standardize the parameters
+#                                     x_std = x.copy()
+#                                     for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                         x_std.loc[:, param] = (
+#                                             x_std.loc[:, param] - x_std.loc[:, param].mean()
+#                                         ) / x_std.loc[:, param].std()
+
+#                                     dta = x_std.copy()
+#                                     dta.loc[:, f"{delta}"] = y.values.flatten()
+#                                     dta.loc[:, "group"] = range(len(y.values.flatten()))
+#                                     dfs_mlms.append(dta)
+
+#                         df_mlm = pd.concat(dfs_mlms, ignore_index=True)
+#                         df_mlm = sm.add_constant(df_mlm)
+#                         # fit a mixed linear model with random effects (random intercepts)
+#                         mlm = smf.mixedlm(f"{delta} {mlm_formulas[mlm_key]}", df_mlm, groups=df_mlm["group"])
+#                         res = mlm.fit()
+#                         print(res.summary())
+
+#                         # response variable
+#                         y = df_mlm.loc[:, f"{delta}"].values
+#                         # number of data points
+#                         nobs = res.nobs
+#                         # predicted values
+#                         # yhat = res.predict()
+#                         yhat = res.fittedvalues
+#                         # fixed effect parameters and random effect parameters
+#                         fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+#                         re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+#                         params = onp.concatenate((fe_params, re_params), axis=None)
+#                         dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
+#                             "fixed_effects"
+#                         ] = res.params.to_frame()
+#                         dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
+#                             "random_effects"
+#                         ] = pd.DataFrame(res.random_effects).var(axis=1)
+#                         # relative importance of parameters
+#                         dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
+#                             "params"
+#                         ] = params / onp.sum(params)
+#                         # contribution of the fixed effect parameters and random effect parameters
+#                         dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+#                         dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+#                         dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+#                         dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["attribution"] = dfa
+#                         # evaluation metrics
+#                         dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["MAE"] = smem.meanabs(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
+#                             "MEAE"
+#                         ] = smem.medianabs(y, yhat)
+#                         dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["RMSE"] = smem.rmse(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["VARE"] = smem.vare(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["R2"] = r2_score(
+#                             y, yhat
+#                         )
+
+#     # Store the data (serialize)
+#     with open(mlm_random_intercepts_soil_land_cover_scenario_file, "wb") as handle:
+#         pickle.dump(dict_mlm_random_intercepts_soil_land_cover_scenario, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# else:
+#     # Load the data (deserialize)
+#     with open(mlm_random_intercepts_soil_land_cover_scenario_file, "rb") as handle:
+#         dict_mlm_random_intercepts_soil_land_cover_scenario = pickle.load(handle)
+
+
+# if not os.path.exists(mlm_random_slopes_soil_land_cover_scenario_file):
+#     dict_mlm_random_slopes_soil_land_cover_scenario = {}
+#     for mlm_key in mlm_formulas.keys():
+#         dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key] = {}
+#         for var_sim in vars_sim:
+#             dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim] = {}
+#             for delta in deltas:
+#                 dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta] = {}
+#                 for land_cover_scenario in land_cover_scenarios:
+#                     dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario] = {}
+#                     for soil_depth in soil_depths:
+#                         dfs_mlms = []
+#                         dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth] = {}
+#                         cond = _soil_depths[soil_depth]
+#                         # merge the data for each land cover senario into a single dataframe
+#                         for location in locations:
+#                             for climate_scenario in climate_scenarios:
+#                                 for future in ["nf", "ff"]:
+#                                     y = (
+#                                         dict_delta_changes[location][land_cover_scenario][climate_scenario][var_sim]
+#                                         .loc[cond, f"{delta}_{future}"]
+#                                         .to_frame()
+#                                     )
+#                                     y = pd.DataFrame(data=y, dtype=onp.float64)
+#                                     x = df_params.loc[cond, "theta_pwp":]
+#                                     # standardize the parameters
+#                                     x_std = x.copy()
+#                                     for param in ["theta_pwp", "theta_ufc", "theta_ac", "ks"]:
+#                                         x_std.loc[:, param] = (
+#                                             x_std.loc[:, param] - x_std.loc[:, param].mean()
+#                                         ) / x_std.loc[:, param].std()
+
+#                                     dta = x_std.copy()
+#                                     dta.loc[:, f"{delta}"] = y.values.flatten()
+#                                     dta.loc[:, "group"] = range(len(y.values.flatten()))
+#                                     dfs_mlms.append(dta)
+
+#                         df_mlm = pd.concat(dfs_mlms, ignore_index=True)
+#                         df_mlm = sm.add_constant(df_mlm)
+#                         # fit a mixed linear model with random effects (random intercepts and random slopes)
+#                         mlm = smf.mixedlm(f'{delta} {mlm_formulas[mlm_key]}', df_mlm, groups=df_mlm["group"], re_formula=mlm_formulas[mlm_key])
+#                         res = mlm.fit()
+#                         print(res.summary())
+
+#                         # response variable
+#                         y = df_mlm.loc[:, f"{delta}"].values
+#                         # number of data points
+#                         nobs = res.nobs
+#                         # predicted values
+#                         # yhat = res.predict()
+#                         yhat = res.fittedvalues
+#                         # fixed effect parameters and random effect parameters
+#                         fe_params = onp.abs(res.params.to_frame().T.values.flatten())
+#                         re_params = onp.abs(pd.DataFrame(res.random_effects).var(axis=1).T.values.flatten())
+#                         params = onp.concatenate((fe_params, re_params), axis=None)
+#                         dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
+#                             "fixed_effects"
+#                         ] = res.params.to_frame()
+#                         dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
+#                             "random_effects"
+#                         ] = pd.DataFrame(res.random_effects).var(axis=1)
+#                         # relative importance of parameters
+#                         dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
+#                             "params"
+#                         ] = params / onp.sum(params)
+#                         # contribution of the fixed effect parameters and random effect parameters
+#                         dfa = pd.DataFrame(index=[0], columns=["fixed_effects", "random_effects"], dtype=onp.float64)
+#                         dfa.iloc[0, 0] = onp.sum(fe_params) / onp.sum(params)
+#                         dfa.iloc[0, 1] = onp.sum(re_params) / onp.sum(params)
+#                         dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["attribution"] = dfa
+#                         # evaluation metrics
+#                         dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["MAE"] = smem.meanabs(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth][
+#                             "MEAE"
+#                         ] = smem.medianabs(y, yhat)
+#                         dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["RMSE"] = smem.rmse(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["VARE"] = smem.vare(
+#                             y, yhat
+#                         )
+#                         dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta][land_cover_scenario][soil_depth]["R2"] = r2_score(
+#                             y, yhat
+#                         )
+
+#     # Store the data (serialize)
+#     with open(mlm_random_slopes_soil_land_cover_scenario_file, "wb") as handle:
+#         pickle.dump(dict_mlm_random_slopes_soil_land_cover_scenario, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# else:
+#     # Load the data (deserialize)
+#     with open(mlm_random_slopes_soil_land_cover_scenario_file, "rb") as handle:
+#         dict_mlm_random_slopes_soil_land_cover_scenario = pickle.load(handle)
 
 # # bar plot of GLM parameters
 # glm_key = "no_interaction"
@@ -2337,7 +2487,7 @@ norm = mpl.colors.Normalize(vmin=0, vmax=50)
 
 for mlm_key in mlm_formulas.keys():
     for metric in metrics:
-        fig, axes = plt.subplots(3, 2, sharex="col", sharey="row", figsize=(6, 4.5))
+        fig, axes = plt.subplots(1, 2, sharex="col", sharey="row", figsize=(6, 2))
         for ii, delta in enumerate(deltas):
             for jj, soil_depth in enumerate(soil_depths):
                 # axes for colorbar
@@ -2346,38 +2496,19 @@ for mlm_key in mlm_formulas.keys():
                 cb1.set_label(f"{_lab[metric]} [-]")
                 df_metric = pd.DataFrame()
                 for var_sim in vars_sim:
-                    value = dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][metric]
-                    df_metric.loc["Random intercepts", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["grass"][soil_depth][metric]
-                    df_metric.loc["Random intercepts (Grass)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn"][soil_depth][metric]
-                    df_metric.loc["Random intercepts (Corn)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn_catch_crop"][soil_depth][metric]
-                    df_metric.loc["Random intercepts (Corn & Catch crop)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["crop_rotation"][soil_depth][metric]
-                    df_metric.loc["Random intercepts (Crop rotation)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta]["freiburg"][soil_depth][metric]
-                    df_metric.loc["Random intercepts (Freiburg)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta]["altheim"][soil_depth][metric]
-                    df_metric.loc["Random intercepts (Altheim)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta]["kupferzell"][soil_depth][metric]
-                    df_metric.loc["Random intercepts (Kupferzell)", f"{_lab[var_sim]}"] = value
-                sns.heatmap(df_metric, vmin=0, vmax=50, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
-                axes[jj, ii].set_ylabel("")
-                axes[jj, ii].set_xlabel("")
-        axes[-1, 0].set_xticklabels(df_metric.columns, rotation=90)
-        axes[-1, 1].set_xticklabels(df_metric.columns, rotation=90)
-        axes[0, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[1, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[2, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[0, 0].set_title("(a)", loc="left", fontsize=9)
-        axes[1, 0].set_title("(b)", loc="left", fontsize=9)
-        axes[2, 0].set_title("(c)", loc="left", fontsize=9)
-        axes[0, 1].set_title("(d)", loc="left", fontsize=9)
-        axes[1, 1].set_title("(e)", loc="left", fontsize=9)
-        axes[2, 1].set_title("(f)", loc="left", fontsize=9)
-        fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
-        file = base_path_figs / "mlm_metrics" / f"mlms_random_intercept_{mlm_key}_{metric}_soil_heatmap.png"
+                    for jj, soil_depth in enumerate(soil_depths):
+                        value = dict_mlm_random_intercepts_llcp[mlm_key][var_sim][delta][soil_depth][metric]
+                        df_metric.loc[f"{soil_depth}", f"{_lab[var_sim]}"] = value
+                sns.heatmap(df_metric, vmin=0, vmax=50, cmap="Oranges", cbar=False, ax=axes[ii], square=True)
+                axes[ii].set_ylabel("")
+                axes[ii].set_xlabel("")
+        axes[0].set_xticklabels(df_metric.columns, rotation=90)
+        axes[1].set_xticklabels(df_metric.columns, rotation=90)
+        axes[0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+        axes[0].set_title("(a)", loc="left", fontsize=9)
+        axes[1].set_title("(b)", loc="left", fontsize=9)
+        fig.subplots_adjust(bottom=0.3, left=0.2, right=0.8, top=0.95, hspace=0.1, wspace=0.1)
+        file = base_path_figs / "mlm_metrics" / f"mlms_random_intercepts_{mlm_key}_{metric}_heatmap.png"
         fig.savefig(file, dpi=300)
         plt.close("all")
 
@@ -2392,22 +2523,14 @@ for mlm_key in mlm_formulas.keys():
                 cb1.set_label(f"{_lab[metric]} [-]")
                 df_metric = pd.DataFrame()
                 for var_sim in vars_sim:
-                    value = dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][metric]
-                    df_metric.loc["Random slopes", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["grass"][soil_depth][metric]
-                    df_metric.loc["Random slopes (Grass)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn"][soil_depth][metric]
-                    df_metric.loc["Random slopes (Corn)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn_catch_crop"][soil_depth][metric]
-                    df_metric.loc["Random slopes (Corn & Catch crop)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["crop_rotation"][soil_depth][metric]
-                    df_metric.loc["Random slopes (Crop rotation)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta]["freiburg"][soil_depth][metric]
-                    df_metric.loc["Random slopes (Freiburg)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta]["altheim"][soil_depth][metric]
-                    df_metric.loc["Random slopes (Altheim)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta]["kupferzell"][soil_depth][metric]
-                    df_metric.loc["Random slopes (Kupferzell)", f"{_lab[var_sim]}"] = value
+                    value = dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta]["grass"][soil_depth][metric]
+                    df_metric.loc["Grass", f"{_lab[var_sim]}"] = value
+                    value = dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta]["corn"][soil_depth][metric]
+                    df_metric.loc["Corn", f"{_lab[var_sim]}"] = value
+                    value = dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta]["corn_catch_crop"][soil_depth][metric]
+                    df_metric.loc["Corn & Catch crop", f"{_lab[var_sim]}"] = value
+                    value = dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta]["crop_rotation"][soil_depth][metric]
+                    df_metric.loc["Crop rotation", f"{_lab[var_sim]}"] = value
                 sns.heatmap(df_metric, vmin=0, vmax=50, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
                 axes[jj, ii].set_ylabel("")
                 axes[jj, ii].set_xlabel("")
@@ -2423,9 +2546,101 @@ for mlm_key in mlm_formulas.keys():
         axes[1, 1].set_title("(e)", loc="left", fontsize=9)
         axes[2, 1].set_title("(f)", loc="left", fontsize=9)
         fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
-        file = base_path_figs / "mlm_metrics" / f"mlms_random_slopes_{mlm_key}_{metric}_soil_heatmap.png"
+        file = base_path_figs / "mlm_metrics" / f"mlms_random_intercepts_{mlm_key}_{metric}_land_cover_heatmap.png"
         fig.savefig(file, dpi=300)
         plt.close("all")
+
+# for mlm_key in mlm_formulas.keys():
+#     for metric in metrics:
+#         fig, axes = plt.subplots(3, 2, sharex="col", sharey="row", figsize=(6, 4.5))
+#         for ii, delta in enumerate(deltas):
+#             for jj, soil_depth in enumerate(soil_depths):
+#                 # axes for colorbar
+#                 axl = fig.add_axes([0.84, 0.32, 0.02, 0.46])
+#                 cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
+#                 cb1.set_label(f"{_lab[metric]} [-]")
+#                 df_metric = pd.DataFrame()
+#                 for var_sim in vars_sim:
+#                     value = dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][metric]
+#                     df_metric.loc["Random intercepts", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["grass"][soil_depth][metric]
+#                     df_metric.loc["Random intercepts (Grass)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn"][soil_depth][metric]
+#                     df_metric.loc["Random intercepts (Corn)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn_catch_crop"][soil_depth][metric]
+#                     df_metric.loc["Random intercepts (Corn & Catch crop)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["crop_rotation"][soil_depth][metric]
+#                     df_metric.loc["Random intercepts (Crop rotation)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta]["freiburg"][soil_depth][metric]
+#                     df_metric.loc["Random intercepts (Freiburg)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta]["altheim"][soil_depth][metric]
+#                     df_metric.loc["Random intercepts (Altheim)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta]["kupferzell"][soil_depth][metric]
+#                     df_metric.loc["Random intercepts (Kupferzell)", f"{_lab[var_sim]}"] = value
+#                 sns.heatmap(df_metric, vmin=0, vmax=50, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
+#                 axes[jj, ii].set_ylabel("")
+#                 axes[jj, ii].set_xlabel("")
+#         axes[-1, 0].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[-1, 1].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[0, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[1, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[2, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[0, 0].set_title("(a)", loc="left", fontsize=9)
+#         axes[1, 0].set_title("(b)", loc="left", fontsize=9)
+#         axes[2, 0].set_title("(c)", loc="left", fontsize=9)
+#         axes[0, 1].set_title("(d)", loc="left", fontsize=9)
+#         axes[1, 1].set_title("(e)", loc="left", fontsize=9)
+#         axes[2, 1].set_title("(f)", loc="left", fontsize=9)
+#         fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
+#         file = base_path_figs / "mlm_metrics" / f"mlms_random_intercept_{mlm_key}_{metric}_soil_heatmap.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close("all")
+
+# for mlm_key in mlm_formulas.keys():
+#     for metric in metrics:
+#         fig, axes = plt.subplots(3, 2, sharex="col", sharey="row", figsize=(6, 4.5))
+#         for ii, delta in enumerate(deltas):
+#             for jj, soil_depth in enumerate(soil_depths):
+#                 # axes for colorbar
+#                 axl = fig.add_axes([0.84, 0.32, 0.02, 0.46])
+#                 cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
+#                 cb1.set_label(f"{_lab[metric]} [-]")
+#                 df_metric = pd.DataFrame()
+#                 for var_sim in vars_sim:
+#                     value = dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][metric]
+#                     df_metric.loc["Random slopes", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["grass"][soil_depth][metric]
+#                     df_metric.loc["Random slopes (Grass)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn"][soil_depth][metric]
+#                     df_metric.loc["Random slopes (Corn)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn_catch_crop"][soil_depth][metric]
+#                     df_metric.loc["Random slopes (Corn & Catch crop)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["crop_rotation"][soil_depth][metric]
+#                     df_metric.loc["Random slopes (Crop rotation)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta]["freiburg"][soil_depth][metric]
+#                     df_metric.loc["Random slopes (Freiburg)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta]["altheim"][soil_depth][metric]
+#                     df_metric.loc["Random slopes (Altheim)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta]["kupferzell"][soil_depth][metric]
+#                     df_metric.loc["Random slopes (Kupferzell)", f"{_lab[var_sim]}"] = value
+#                 sns.heatmap(df_metric, vmin=0, vmax=50, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
+#                 axes[jj, ii].set_ylabel("")
+#                 axes[jj, ii].set_xlabel("")
+#         axes[-1, 0].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[-1, 1].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[0, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[1, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[2, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[0, 0].set_title("(a)", loc="left", fontsize=9)
+#         axes[1, 0].set_title("(b)", loc="left", fontsize=9)
+#         axes[2, 0].set_title("(c)", loc="left", fontsize=9)
+#         axes[0, 1].set_title("(d)", loc="left", fontsize=9)
+#         axes[1, 1].set_title("(e)", loc="left", fontsize=9)
+#         axes[2, 1].set_title("(f)", loc="left", fontsize=9)
+#         fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
+#         file = base_path_figs / "mlm_metrics" / f"mlms_random_slopes_{mlm_key}_{metric}_soil_heatmap.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close("all")
 
 
 # for metric in metrics:
@@ -2533,7 +2748,7 @@ norm = mpl.colors.Normalize(vmin=0, vmax=1)
 
 for mlm_key in mlm_formulas.keys():
     for metric in metrics:
-        fig, axes = plt.subplots(3, 2, sharex="col", sharey="row", figsize=(6, 4.5))
+        fig, axes = plt.subplots(1, 2, sharex="col", sharey="row", figsize=(6, 2))
         for ii, delta in enumerate(deltas):
             for jj, soil_depth in enumerate(soil_depths):
                 # axes for colorbar
@@ -2542,38 +2757,19 @@ for mlm_key in mlm_formulas.keys():
                 cb1.set_label(f"{_lab[metric]} [-]")
                 df_metric = pd.DataFrame()
                 for var_sim in vars_sim:
-                    value = dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][metric]
-                    df_metric.loc["Random intercepts", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["grass"][soil_depth][metric]
-                    df_metric.loc["Random intercepts (Grass)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn"][soil_depth][metric]
-                    df_metric.loc["Random intercepts (Corn)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn_catch_crop"][soil_depth][metric]
-                    df_metric.loc["Random intercepts (Corn & Catch crop)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["crop_rotation"][soil_depth][metric]
-                    df_metric.loc["Random intercepts (Crop rotation)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta]["freiburg"][soil_depth][metric]
-                    df_metric.loc["Random intercepts (Freiburg)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta]["altheim"][soil_depth][metric]
-                    df_metric.loc["Random intercepts (Altheim)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta]["kupferzell"][soil_depth][metric]
-                    df_metric.loc["Random intercepts (Kupferzell)", f"{_lab[var_sim]}"] = value
-                sns.heatmap(df_metric, vmin=0, vmax=1, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
-                axes[jj, ii].set_ylabel("")
-                axes[jj, ii].set_xlabel("")
-        axes[-1, 0].set_xticklabels(df_metric.columns, rotation=90)
-        axes[-1, 1].set_xticklabels(df_metric.columns, rotation=90)
-        axes[0, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[1, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[2, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
-        axes[0, 0].set_title("(a)", loc="left", fontsize=9)
-        axes[1, 0].set_title("(b)", loc="left", fontsize=9)
-        axes[2, 0].set_title("(c)", loc="left", fontsize=9)
-        axes[0, 1].set_title("(d)", loc="left", fontsize=9)
-        axes[1, 1].set_title("(e)", loc="left", fontsize=9)
-        axes[2, 1].set_title("(f)", loc="left", fontsize=9)
-        fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
-        file = base_path_figs / "mlm_metrics" / f"mlms_random_intercepts_{mlm_key}_{metric}_soil_heatmap.png"
+                    for jj, soil_depth in enumerate(soil_depths):
+                        value = dict_mlm_random_intercepts_llcp[mlm_key][var_sim][delta][soil_depth][metric]
+                        df_metric.loc[f"{soil_depth}", f"{_lab[var_sim]}"] = value
+                sns.heatmap(df_metric, vmin=0, vmax=1, cmap="Oranges", cbar=False, ax=axes[ii], square=True)
+                axes[ii].set_ylabel("")
+                axes[ii].set_xlabel("")
+        axes[0].set_xticklabels(df_metric.columns, rotation=90)
+        axes[1].set_xticklabels(df_metric.columns, rotation=90)
+        axes[0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+        axes[0].set_title("(a)", loc="left", fontsize=9)
+        axes[1].set_title("(b)", loc="left", fontsize=9)
+        fig.subplots_adjust(bottom=0.3, left=0.15, right=0.8, top=0.95, hspace=0.1, wspace=0.1)
+        file = base_path_figs / "mlm_metrics" / f"mlms_random_intercepts_{mlm_key}_{metric}_heatmap.png"
         fig.savefig(file, dpi=300)
         plt.close("all")
 
@@ -2588,22 +2784,14 @@ for mlm_key in mlm_formulas.keys():
                 cb1.set_label(f"{_lab[metric]} [-]")
                 df_metric = pd.DataFrame()
                 for var_sim in vars_sim:
-                    value = dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][metric]
-                    df_metric.loc["Random slopes", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["grass"][soil_depth][metric]
-                    df_metric.loc["Random slopes (Grass)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn"][soil_depth][metric]
-                    df_metric.loc["Random slopes (Corn)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn_catch_crop"][soil_depth][metric]
-                    df_metric.loc["Random slopes (Corn & Catch crop)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["crop_rotation"][soil_depth][metric]
-                    df_metric.loc["Random slopes (Crop rotation)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta]["freiburg"][soil_depth][metric]
-                    df_metric.loc["Random slopes (Freiburg)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta]["altheim"][soil_depth][metric]
-                    df_metric.loc["Random slopes (Altheim)", f"{_lab[var_sim]}"] = value
-                    value = dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta]["kupferzell"][soil_depth][metric]
-                    df_metric.loc["Random slopes (Kupferzell)", f"{_lab[var_sim]}"] = value
+                    value = dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta]["grass"][soil_depth][metric]
+                    df_metric.loc["Grass", f"{_lab[var_sim]}"] = value
+                    value = dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta]["corn"][soil_depth][metric]
+                    df_metric.loc["Corn", f"{_lab[var_sim]}"] = value
+                    value = dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta]["corn_catch_crop"][soil_depth][metric]
+                    df_metric.loc["Corn & Catch crop", f"{_lab[var_sim]}"] = value
+                    value = dict_mlm_random_intercepts_lc[mlm_key][var_sim][delta]["crop_rotation"][soil_depth][metric]
+                    df_metric.loc["Crop rotation", f"{_lab[var_sim]}"] = value
                 sns.heatmap(df_metric, vmin=0, vmax=1, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
                 axes[jj, ii].set_ylabel("")
                 axes[jj, ii].set_xlabel("")
@@ -2619,13 +2807,106 @@ for mlm_key in mlm_formulas.keys():
         axes[1, 1].set_title("(e)", loc="left", fontsize=9)
         axes[2, 1].set_title("(f)", loc="left", fontsize=9)
         fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
-        file = base_path_figs / "mlm_metrics" / f"mlms_random_slopes_{mlm_key}_{metric}_soil_heatmap.png"
+        file = base_path_figs / "mlm_metrics" / f"mlms_random_intercepts_{mlm_key}_{metric}_land_cover_heatmap.png"
         fig.savefig(file, dpi=300)
         plt.close("all")
 
 
+# for mlm_key in mlm_formulas.keys():
+#     for metric in metrics:
+#         fig, axes = plt.subplots(3, 2, sharex="col", sharey="row", figsize=(6, 4.5))
+#         for ii, delta in enumerate(deltas):
+#             for jj, soil_depth in enumerate(soil_depths):
+#                 # axes for colorbar
+#                 axl = fig.add_axes([0.84, 0.32, 0.02, 0.46])
+#                 cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
+#                 cb1.set_label(f"{_lab[metric]} [-]")
+#                 df_metric = pd.DataFrame()
+#                 for var_sim in vars_sim:
+#                     value = dict_mlm_random_intercepts_soil_llcp[mlm_key][var_sim][delta][soil_depth][metric]
+#                     df_metric.loc["Random intercepts", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["grass"][soil_depth][metric]
+#                     df_metric.loc["Random intercepts (Grass)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn"][soil_depth][metric]
+#                     df_metric.loc["Random intercepts (Corn)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn_catch_crop"][soil_depth][metric]
+#                     df_metric.loc["Random intercepts (Corn & Catch crop)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_intercepts_soil_land_cover_scenario[mlm_key][var_sim][delta]["crop_rotation"][soil_depth][metric]
+#                     df_metric.loc["Random intercepts (Crop rotation)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta]["freiburg"][soil_depth][metric]
+#                     df_metric.loc["Random intercepts (Freiburg)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta]["altheim"][soil_depth][metric]
+#                     df_metric.loc["Random intercepts (Altheim)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_intercepts_soil_location[mlm_key][var_sim][delta]["kupferzell"][soil_depth][metric]
+#                     df_metric.loc["Random intercepts (Kupferzell)", f"{_lab[var_sim]}"] = value
+#                 sns.heatmap(df_metric, vmin=0, vmax=1, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
+#                 axes[jj, ii].set_ylabel("")
+#                 axes[jj, ii].set_xlabel("")
+#         axes[-1, 0].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[-1, 1].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[0, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[1, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[2, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[0, 0].set_title("(a)", loc="left", fontsize=9)
+#         axes[1, 0].set_title("(b)", loc="left", fontsize=9)
+#         axes[2, 0].set_title("(c)", loc="left", fontsize=9)
+#         axes[0, 1].set_title("(d)", loc="left", fontsize=9)
+#         axes[1, 1].set_title("(e)", loc="left", fontsize=9)
+#         axes[2, 1].set_title("(f)", loc="left", fontsize=9)
+#         fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
+#         file = base_path_figs / "mlm_metrics" / f"mlms_random_intercepts_{mlm_key}_{metric}_soil_heatmap.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close("all")
+
+# for mlm_key in mlm_formulas.keys():
+#     for metric in metrics:
+#         fig, axes = plt.subplots(3, 2, sharex="col", sharey="row", figsize=(6, 4.5))
+#         for ii, delta in enumerate(deltas):
+#             for jj, soil_depth in enumerate(soil_depths):
+#                 # axes for colorbar
+#                 axl = fig.add_axes([0.84, 0.32, 0.02, 0.46])
+#                 cb1 = mpl.colorbar.ColorbarBase(axl, cmap="Oranges", norm=norm, orientation="vertical")
+#                 cb1.set_label(f"{_lab[metric]} [-]")
+#                 df_metric = pd.DataFrame()
+#                 for var_sim in vars_sim:
+#                     value = dict_mlm_random_slopes_soil_llcp[mlm_key][var_sim][delta][soil_depth][metric]
+#                     df_metric.loc["Random slopes", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["grass"][soil_depth][metric]
+#                     df_metric.loc["Random slopes (Grass)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn"][soil_depth][metric]
+#                     df_metric.loc["Random slopes (Corn)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["corn_catch_crop"][soil_depth][metric]
+#                     df_metric.loc["Random slopes (Corn & Catch crop)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_slopes_soil_land_cover_scenario[mlm_key][var_sim][delta]["crop_rotation"][soil_depth][metric]
+#                     df_metric.loc["Random slopes (Crop rotation)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta]["freiburg"][soil_depth][metric]
+#                     df_metric.loc["Random slopes (Freiburg)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta]["altheim"][soil_depth][metric]
+#                     df_metric.loc["Random slopes (Altheim)", f"{_lab[var_sim]}"] = value
+#                     value = dict_mlm_random_slopes_soil_location[mlm_key][var_sim][delta]["kupferzell"][soil_depth][metric]
+#                     df_metric.loc["Random slopes (Kupferzell)", f"{_lab[var_sim]}"] = value
+#                 sns.heatmap(df_metric, vmin=0, vmax=1, cmap="Oranges", cbar=False, ax=axes[jj, ii], square=True)
+#                 axes[jj, ii].set_ylabel("")
+#                 axes[jj, ii].set_xlabel("")
+#         axes[-1, 0].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[-1, 1].set_xticklabels(df_metric.columns, rotation=90)
+#         axes[0, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[1, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[2, 0].set_yticklabels(df_metric.index.tolist(), rotation=0)
+#         axes[0, 0].set_title("(a)", loc="left", fontsize=9)
+#         axes[1, 0].set_title("(b)", loc="left", fontsize=9)
+#         axes[2, 0].set_title("(c)", loc="left", fontsize=9)
+#         axes[0, 1].set_title("(d)", loc="left", fontsize=9)
+#         axes[1, 1].set_title("(e)", loc="left", fontsize=9)
+#         axes[2, 1].set_title("(f)", loc="left", fontsize=9)
+#         fig.subplots_adjust(bottom=0.2, left=0.0, right=1.15, top=0.9, hspace=0.3, wspace=-0.7)
+#         file = base_path_figs / "mlm_metrics" / f"mlms_random_slopes_{mlm_key}_{metric}_soil_heatmap.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close("all")
+
+
 # # bar plot of fixed effects and random effects
-# selected_mlms = [dict_mlm_random_intercepts_soil_llcp, dict_mlm_random_intercepts_soil_location, dict_mlm_random_intercepts_soil_land_cover_scenario]
+# selected_mlms = [dict_mlm_random_intercepts_lc, dict_mlm_random_intercepts_llcp]
 # vars_sim = ["transp", "q_ss", "theta", "tt50_transp", "tt50_q_ss", "rt50_s"]
 # deltas = ["dAvg", "dIPR"]
 # mlm_key = "no_interaction"

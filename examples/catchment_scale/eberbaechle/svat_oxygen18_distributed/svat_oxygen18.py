@@ -19,6 +19,11 @@ def main(tmp_dir):
 
         # custom attributes required by helper functions
         _base_path = Path(__file__).parent
+        if tmp_dir:
+            _base_path = tmp_dir
+        else:
+            _base_path = Path(__file__).parent
+
         _input_dir = _base_path / "input"
         # load configuration file
         _file_config = _base_path / "config.yml"
@@ -133,7 +138,6 @@ def main(tmp_dir):
         )
         def set_parameters_setup(self, state):
             vs = state.variables
-            settings = state.settings
 
             # storage volumes at permanent wilting point and at saturation
             vs.S_pwp_rz = update(
