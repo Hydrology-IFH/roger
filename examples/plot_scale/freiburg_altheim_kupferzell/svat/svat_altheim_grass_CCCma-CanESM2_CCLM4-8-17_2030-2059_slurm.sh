@@ -10,8 +10,6 @@
 #SBATCH --output=svat_altheim_grass_CCCma-CanESM2_CCLM4-8-17_2030-2059.out
 #SBATCH --error=svat_altheim_grass_CCCma-CanESM2_CCLM4-8-17_2030-2059_err.out
 #SBATCH --export=ALL
-#PBS -m a
-#PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  
 eval "$(conda shell.bash hook)"
 conda activate roger

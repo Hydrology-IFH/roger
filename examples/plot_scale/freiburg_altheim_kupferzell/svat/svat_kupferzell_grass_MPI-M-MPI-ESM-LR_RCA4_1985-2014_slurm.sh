@@ -10,8 +10,6 @@
 #SBATCH --output=svat_kupferzell_grass_MPI-M-MPI-ESM-LR_RCA4_1985-2014.out
 #SBATCH --error=svat_kupferzell_grass_MPI-M-MPI-ESM-LR_RCA4_1985-2014_err.out
 #SBATCH --export=ALL
-#PBS -m a
-#PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  
 eval "$(conda shell.bash hook)"
 conda activate roger
