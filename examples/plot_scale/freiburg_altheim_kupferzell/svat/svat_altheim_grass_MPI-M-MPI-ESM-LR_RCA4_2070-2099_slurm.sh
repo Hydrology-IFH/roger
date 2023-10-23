@@ -10,8 +10,6 @@
 #SBATCH --output=svat_altheim_grass_MPI-M-MPI-ESM-LR_RCA4_2070-2099.out
 #SBATCH --error=svat_altheim_grass_MPI-M-MPI-ESM-LR_RCA4_2070-2099_err.out
 #SBATCH --export=ALL
-#PBS -m a
-#PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  
 eval "$(conda shell.bash hook)"
 conda activate roger
