@@ -5,8 +5,8 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-ns", "--nsamples", type=int, default=1000)
-@click.option("-td", "--tmp-dir", type=str, default=None)
+@click.option("-ns", "--nsamples", type=int, default=10000)
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
 @roger_base_cli
 def main(nsamples, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput

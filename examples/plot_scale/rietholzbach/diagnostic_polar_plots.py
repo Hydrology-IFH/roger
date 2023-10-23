@@ -233,6 +233,63 @@ def main(tmp_dir):
         # fig.tight_layout()
         fig.savefig(path, dpi=300)
 
+
+    file = base_path / "hydrus_benchmark" / "params_metrics.txt"
+    df_params_metrics = pd.read_csv(file, sep="\t")
+
+    df_params_metrics10 = df_params_metrics.copy()
+    df_params_metrics10.loc[:, "id"] = range(len(df_params_metrics10.index))
+    df_params_metrics10 = df_params_metrics10.sort_values(by="KGE_multi", ascending=False)
+    df_for_diag10 = df_params_metrics10.loc[: df_params_metrics10.index[9], :]
+    vars_sim = ["aet", "q_ss"]
+    for var_sim in vars_sim:
+        fig = de.diag_polar_plot_multi(
+            df_for_diag10.loc[:, f"brel_mean_{var_sim}"].values,
+            df_for_diag10.loc[:, f"temp_cor_{var_sim}"].values,
+            df_for_diag10.loc[:, f"DE_{var_sim}"].values,
+            df_for_diag10.loc[:, f"b_dir_{var_sim}"].values,
+            df_for_diag10.loc[:, f"phi_{var_sim}"].values,
+            df_for_diag10.loc[:, f"b_hf_{var_sim}"].values,
+            df_for_diag10.loc[:, f"b_lf_{var_sim}"].values,
+            df_for_diag10.loc[:, f"b_tot_{var_sim}"].values,
+            df_for_diag10.loc[:, f"err_hf_{var_sim}"].values,
+            df_for_diag10.loc[:, f"err_lf_{var_sim}"].values,
+            a0=df_for_diag10.loc[:, f"ioa0_{var_sim}"].values,
+            share0=onp.round(onp.max(df_for_diag10.loc[:, f"p0_{var_sim}"]), 2),
+        )
+        file = f"diag_polar_plot_{var_sim}_10_optimized_with_KGE_multi.png"
+        path = base_path_figs / file
+        # fig.tight_layout()
+        fig.savefig(path, dpi=300)
+        file = f"diag_polar_plot_{var_sim}_10_optimized_with_KGE_multi.pdf"
+        path = base_path_figs / file
+        # fig.tight_layout()
+        fig.savefig(path, dpi=300)
+
+    var_sim = "d18O_perc_bs"
+    fig = de.diag_polar_plot_multi(
+        df_for_diag10.loc[:, f"brel_mean_{var_sim}"].values,
+        df_for_diag10.loc[:, f"temp_cor_{var_sim}"].values,
+        df_for_diag10.loc[:, f"DE_{var_sim}"].values,
+        df_for_diag10.loc[:, f"b_dir_{var_sim}"].values,
+        df_for_diag10.loc[:, f"phi_{var_sim}"].values,
+        df_for_diag10.loc[:, f"b_hf_{var_sim}"].values,
+        df_for_diag10.loc[:, f"b_lf_{var_sim}"].values,
+        df_for_diag10.loc[:, f"b_tot_{var_sim}"].values,
+        df_for_diag10.loc[:, f"err_hf_{var_sim}"].values,
+        df_for_diag10.loc[:, f"err_lf_{var_sim}"].values,
+    )
+    file = f"diag_polar_plot_{var_sim}_{tms}_10_optimized_with_KGE_multi.png"
+    path = base_path_figs / file
+    # fig.tight_layout()
+    fig.savefig(path, dpi=300)
+    file = f"diag_polar_plot_{var_sim}_{tms}_10_optimized_with_KGE_multi.pdf"
+    path = base_path_figs / file
+    # fig.tight_layout()
+    fig.savefig(path, dpi=300)
+
+
+
     plt.close("all")
     return
 

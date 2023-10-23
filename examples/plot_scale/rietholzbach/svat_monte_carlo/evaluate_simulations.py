@@ -109,8 +109,8 @@ def main(tmp_dir):
                     if var_sim in ["dS"]:
                         df_eval.loc["2000-01":"2000-06", :] = onp.nan
                         df_eval = df_eval.dropna()
-                        obs_vals = df_eval.loc[:, "obs"].values
-                        sim_vals = df_eval.loc[:, "sim"].values
+                        obs_vals = df_eval.loc[:, "obs"].values.astype(float)
+                        sim_vals = df_eval.loc[:, "sim"].values.astype(float)
                         key_kge = "KGE_" + var_sim + f"{sc1}"
                         df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
                         key_kge_alpha = "KGE_alpha_" + var_sim + f"{sc1}"
@@ -184,8 +184,8 @@ def main(tmp_dir):
                         # skip first seven days for warmup
                         df_eval.loc[:"1997-01-07", :] = onp.nan
                         df_eval = df_eval.dropna()
-                        obs_vals = df_eval.loc[:, "obs"].values
-                        sim_vals = df_eval.loc[:, "sim"].values
+                        obs_vals = df_eval.loc[:, "obs"].values.astype(float)
+                        sim_vals = df_eval.loc[:, "sim"].values.astype(float)
                         key_kge = "KGE_" + var_sim + f"{sc1}"
                         df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
                         key_kge_alpha = "KGE_alpha_" + var_sim + f"{sc1}"
@@ -215,8 +215,8 @@ def main(tmp_dir):
                             key_ioa0 = "ioa0_" + var_sim + f"{sc1}"
                             df_params_metrics.loc[nrow, key_ioa0] = ioa0
                             # mean absolute error from observations with zero values
-                            obs0_vals = df_obs0_sim.loc[:, "obs"].values
-                            sim0_vals = df_obs0_sim.loc[:, "sim"].values
+                            obs0_vals = df_obs0_sim.loc[:, "obs"].values.astype(float)
+                            sim0_vals = df_obs0_sim.loc[:, "sim"].values.astype(float)
                             key_mae0 = "MAE0_" + var_sim + f"{sc1}"
                             df_params_metrics.loc[nrow, key_mae0] = eval_utils.calc_mae(obs0_vals, sim0_vals)
                             # peak difference from observations with zero values
@@ -225,8 +225,8 @@ def main(tmp_dir):
                             # simulations and observations with non-zero values
                             cond_no0 = df_eval["obs"] > 0
                             df_obs_sim_no0 = df_eval.loc[cond_no0, :]
-                            obs_vals_no0 = df_obs_sim_no0.loc[:, "obs"].values
-                            sim_vals_no0 = df_obs_sim_no0.loc[:, "sim"].values
+                            obs_vals_no0 = df_obs_sim_no0.loc[:, "obs"].values.astype(float)
+                            sim_vals_no0 = df_obs_sim_no0.loc[:, "sim"].values.astype(float)
                             # number of data with non-zero observations
                             N_no0 = len(df_obs_sim_no0.index)
                             # mean absolute relative error
