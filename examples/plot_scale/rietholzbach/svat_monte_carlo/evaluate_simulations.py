@@ -111,6 +111,10 @@ def main(tmp_dir):
                         df_eval = df_eval.dropna()
                         obs_vals = df_eval.loc[:, "obs"].values.astype(float)
                         sim_vals = df_eval.loc[:, "sim"].values.astype(float)
+                        # add offset since diagnostic efficiency requires positive values
+                        offset = onp.nanmin(df_eval.values) * (-1) + 1
+                        obs_vals = df_eval.loc[:, "obs"].values.astype(float) + offset
+                        sim_vals = df_eval.loc[:, "sim"].values.astype(float) + offset
                         key_kge = "KGE_" + var_sim + f"{sc1}"
                         df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
                         key_kge_alpha = "KGE_alpha_" + var_sim + f"{sc1}"
@@ -119,10 +123,6 @@ def main(tmp_dir):
                         df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
                         key_r = "r_" + var_sim + f"{sc1}"
                         df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
-                        # add offset since diagnostic efficiency requires positive values
-                        offset = onp.nanmin(df_eval.values) * (-1) + 1
-                        obs_vals = df_eval.loc[:, "obs"].values + offset
-                        sim_vals = df_eval.loc[:, "sim"].values + offset
                         # share of observations with zero values
                         key_p0 = "p0_" + var_sim + f"{sc1}"
                         df_params_metrics.loc[nrow, key_p0] = 0

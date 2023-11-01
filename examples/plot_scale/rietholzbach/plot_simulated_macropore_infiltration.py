@@ -36,28 +36,6 @@ sns.plotting_context(
     },
 )
 
-_LABS_HYDRUS = {
-    "n": r"$n$ [-]",
-    "alpha": r"$alfa$ [-]",
-    "theta_sat_m": r"$\theta_{s}^{m}$ [-]",
-    "theta_sat_im": r"$\theta_{s}^{im}$ [-]",
-    "ks": r"$k_{s}$ [-]",
-    "omega": r"$\omega$ [-]",
-    "D_l": r"$D_l$ [-]",
-}
-
-_LABS_TM = {
-    "complete-mixing": "CM",
-    "piston": "PI",
-    "advection-dispersion-power": "AD",
-    "time-variant advection-dispersion-power": "AD-TV",
-    "preferential-power": "PF",
-    "older-preference-power": "OP",
-    "advection-dispersion-kumaraswamy": "ADK",
-    "time-variant advection-dispersion-kumaraswamy": "ADK-TV",
-}
-
-
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir):
@@ -69,13 +47,6 @@ def main(tmp_dir):
     base_path_figs = base_path / "figures"
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
-
-    tm_structures = [
-        "complete-mixing",
-        "piston",
-        "advection-dispersion-power",
-        "time-variant advection-dispersion-power",
-    ]
 
     # load observations (measured data)
     path_obs = Path(__file__).parent / "observations" / "rietholzbach_lysimeter.nc"
@@ -131,23 +102,9 @@ def main(tmp_dir):
     )
     ds_sim_hm100 = ds_sim_hm100.assign_coords(Time=("Time", date_sim_hm100))
 
-    states_hm_for_tm_file = (
-        base_path / "svat_oxygen18_monte_carlo" / "output" / "states_hm_best_for_advection-dispersion-power.nc"
-    )
-    ds_sim_hm_for_tm = xr.open_dataset(states_hm_for_tm_file, engine="h5netcdf")
-    # assign date
-    days_sim_hm_for_tm = ds_sim_hm_for_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
-    date_sim_hm_for_tm = num2date(
-        days_sim_hm_for_tm,
-        units=f"days since {ds_sim_hm_for_tm['Time'].attrs['time_origin']}",
-        calendar="standard",
-        only_use_cftime_datetimes=False,
-    )
-    ds_sim_hm_for_tm = ds_sim_hm_for_tm.assign_coords(Time=("Time", date_sim_hm_for_tm))
-
-    data = pd.DataFrame(index=date_sim_hm_for_tm, columns=["PERC_obs [mm/day]", "PERC_sim [mm/day]"])
+    data = pd.DataFrame(index=date_sim_hm100, columns=["PERC_obs [mm/day]", "PERC_sim [mm/day]"])
     data.iloc[1:, 0] = ds_obs["PERC"].isel(x=0, y=0).values
-    data.iloc[:, 1] = ds_sim_hm_for_tm["q_ss"].isel(y=0).values
+    data.iloc[:, 1] = ds_sim_hm100["q_ss"].isel(y=0).values
     file = base_path_figs / f"PERC.txt"
     data.iloc[1:, :].to_csv(file, header=True, index=True, sep="\t")
 

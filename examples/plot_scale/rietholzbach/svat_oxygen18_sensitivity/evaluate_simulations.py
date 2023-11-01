@@ -1,19 +1,21 @@
 from pathlib import Path
 import os
-import glob
 import h5netcdf
 import xarray as xr
-import datetime
 from cftime import num2date
 import pandas as pd
 import numpy as onp
 import click
-import roger
 import roger.tools.evaluation as eval_utils
 import matplotlib as mpl
 import seaborn as sns
 mpl.use("agg")
 sns.set_style("ticks")
+
+def delta_to_conc(delta_iso):
+    """Calculate isotope concentration from isotope ratio
+    """
+    return 2005.2e-6*(delta_iso/1000.+1.)/(1.+(delta_iso/1000.+1.)*2005.2e-6)
 
 
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'advection-dispersion-power', 'time-variant_advection-dispersion-power']), default='advection-dispersion-power')
@@ -144,11 +146,11 @@ def main(transport_model_structure, tmp_dir):
     # compare observations and simulations
     ncol = 0
     idx = ds_sim_tm.Time.values  # time index
-    d18O_perc_bs = onp.zeros((nx, 1, len(idx)))
+    d18O_perc_bs = onp.zeros((ds_sim_tm.dims['x'], 1, len(idx)))
     df_idx_bs = pd.DataFrame(index=date_obs, columns=['sol'])
     df_idx_bs.loc[:, 'sol'] = ds_obs['d18O_PERC'].isel(x=0, y=0).values
     idx_bs = df_idx_bs['sol'].dropna().index
-    for nrow in range(nx):
+    for nrow in range(ds_sim_tm.dims['x']):
         # calculate simulated oxygen-18 bulk sample
         df_perc_18O_obs = pd.DataFrame(index=date_obs, columns=['perc_obs', 'd18O_perc_obs'])
         df_perc_18O_obs.loc[:, 'perc_obs'] = ds_obs['PERC'].isel(x=0, y=0).values
@@ -158,7 +160,8 @@ def main(transport_model_structure, tmp_dir):
         sample_no['sample_no'] = range(len(sample_no.index))
         df_perc_18O_sim = pd.DataFrame(index=date_sim_tm, columns=['perc_sim', 'd18O_perc_sim'])
         df_perc_18O_sim['perc_sim'] = ds_sim_hm['q_ss'].isel(x=nrow, y=0).values
-        df_perc_18O_sim['d18O_perc_sim'] = ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=ncol).values
+        C_iso_q_ss = ds_sim_tm['C_iso_q_ss'].isel(x=nrow, y=0).values
+        df_perc_18O_sim['d18O_perc_sim'] = onp.where(C_iso_q_ss < -20, onp.nan, C_iso_q_ss)
         df_perc_18O_sim = df_perc_18O_sim.join(sample_no)
         df_perc_18O_sim.loc[:, 'sample_no'] = df_perc_18O_sim.loc[:, 'sample_no'].fillna(method='bfill', limit=14)
         perc_sum = df_perc_18O_sim.groupby(['sample_no']).sum().loc[:, 'perc_sim']
@@ -172,32 +175,34 @@ def main(transport_model_structure, tmp_dir):
         df_perc_18O_sim = df_perc_18O_sim.join(sample_no['d18O_sample'])
         cond = (df_perc_18O_sim['d18O_sample'] == 0)
         df_perc_18O_sim.loc[cond, 'd18O_sample'] = onp.NaN
-        d18O_perc_bs[nrow, ncol, :] = df_perc_18O_sim.loc[:, 'd18O_sample'].values
+        d18O_perc_bs[nrow, 0, :] = df_perc_18O_sim.loc[:, 'd18O_sample'].values
         # calculate observed oxygen-18 bulk sample
         df_perc_18O_obs.loc[:, 'd18O_perc_bs'] = df_perc_18O_obs['d18O_perc_obs'].fillna(method='bfill', limit=14)
+        df_perc_18O_obs.loc[:, 'd18O_perc_mass'] = df_perc_18O_obs['perc_obs'].values * delta_to_conc(df_perc_18O_obs['d18O_perc_bs'].values)
 
         perc_sample_sum_obs = df_perc_18O_sim.join(df_perc_18O_obs).groupby(['sample_no']).sum().loc[:, 'perc_obs']
         sample_no['perc_obs_sum'] = perc_sample_sum_obs.values
         df_perc_18O_sim = df_perc_18O_sim.join(sample_no['perc_obs_sum'])
         df_perc_18O_sim.loc[:, 'perc_obs_sum'] = df_perc_18O_sim.loc[:, 'perc_obs_sum'].fillna(method='bfill', limit=14)
+        df_perc_18O_sim.loc[:, 'd18O_perc_mass'] = df_perc_18O_sim['perc_sim'].values * delta_to_conc(df_perc_18O_sim.loc[:, 'd18O_sample'].fillna(method='bfill', limit=14).values)
 
         # join observations on simulations
         for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
-            obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-            sim_vals = d18O_perc_bs[nrow, ncol, :]
-            sim_vals = onp.where((sim_vals < -20) & (sim_vals > 0), onp.nan, sim_vals)
+            obs_vals = df_perc_18O_obs.loc[:, 'd18O_perc_mass'].values
+            sim_vals = df_perc_18O_sim.loc[:, 'd18O_perc_mass'].values
             df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
             df_obs.loc[:, 'obs'] = obs_vals
             df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
+
             if sc > 0:
-                df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
+                df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap.loc["2006":"2007", :])
                 rows = (df_rows['sc'].values == sc)
                 df_eval = df_eval.loc[rows, :]
             df_eval = df_eval.dropna()
 
             # calculate metrics
             if len(df_eval.index) > 10:
-                var_sim = 'C_iso_q_ss'
+                var_sim = 'M_iso_q_ss'
                 obs_vals = df_eval.loc[:, 'obs'].values
                 sim_vals = df_eval.loc[:, 'sim'].values
                 key_kge = f'KGE_{var_sim}{sc1}'
@@ -212,9 +217,9 @@ def main(transport_model_structure, tmp_dir):
                 key_r = f'r_{var_sim}{sc1}'
                 df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
             # average age metrics
-            vars_sim = ['tt25_transp', 'tt50_transp', 'tt75_transp', 'ttavg_transp',
-                        'tt25_q_ss', 'tt50_q_ss', 'tt75_q_ss', 'ttavg_q_ss',
-                        'rt25_s', 'rt50_s', 'rt75_s',  'rtavg_s']
+            vars_sim = ['tt50_transp', 'ttavg_transp',
+                        'tt50_q_ss', 'ttavg_q_ss',
+                        'rt50_s', 'rtavg_s']
             for var_sim in vars_sim:
                 df_eval = pd.DataFrame(index=idx)
                 df_eval.loc[:, 'sim'] = ds_sim_tm[var_sim].isel(x=nrow, y=ncol).values

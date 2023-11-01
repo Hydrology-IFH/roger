@@ -257,11 +257,11 @@ def main(tmp_dir):
             a0=df_for_diag10.loc[:, f"ioa0_{var_sim}"].values,
             share0=onp.round(onp.max(df_for_diag10.loc[:, f"p0_{var_sim}"]), 2),
         )
-        file = f"diag_polar_plot_{var_sim}_10_optimized_with_KGE_multi.png"
+        file = f"diag_polar_plot_{var_sim}_10_optimized_with_KGE_multi_hydrus.png"
         path = base_path_figs / file
         # fig.tight_layout()
         fig.savefig(path, dpi=300)
-        file = f"diag_polar_plot_{var_sim}_10_optimized_with_KGE_multi.pdf"
+        file = f"diag_polar_plot_{var_sim}_10_optimized_with_KGE_multi_hydrus.pdf"
         path = base_path_figs / file
         # fig.tight_layout()
         fig.savefig(path, dpi=300)
@@ -279,15 +279,14 @@ def main(tmp_dir):
         df_for_diag10.loc[:, f"err_hf_{var_sim}"].values,
         df_for_diag10.loc[:, f"err_lf_{var_sim}"].values,
     )
-    file = f"diag_polar_plot_{var_sim}_{tms}_10_optimized_with_KGE_multi.png"
+    file = f"diag_polar_plot_{var_sim}_{tms}_10_optimized_with_KGE_multi_hydrus.png"
     path = base_path_figs / file
     # fig.tight_layout()
     fig.savefig(path, dpi=300)
-    file = f"diag_polar_plot_{var_sim}_{tms}_10_optimized_with_KGE_multi.pdf"
+    file = f"diag_polar_plot_{var_sim}_{tms}_10_optimized_with_KGE_multi_hydrus.pdf"
     path = base_path_figs / file
     # fig.tight_layout()
     fig.savefig(path, dpi=300)
-
 
 
     plt.close("all")

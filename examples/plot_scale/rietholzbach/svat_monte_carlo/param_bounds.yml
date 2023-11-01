@@ -21,11 +21,11 @@ theta_eff:
 # fraction of large pores (-)
 frac_lp:
 - 0.1
-- 0.7
+- 0.6
 # permanent wilting point of soil (-)
 theta_pwp:
 - 0.15
-- 0.25
+- 0.35
 # saturated hydraulic conductivity (mm/h)
 ks:
 - 5

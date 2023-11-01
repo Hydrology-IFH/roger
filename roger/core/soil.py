@@ -395,7 +395,7 @@ def calc_parameters_root_zone_kernel(state):
     z_root = update(
         z_root,
         at[2:-2, 2:-2],
-        npx.where((z_root[2:-2, 2:-2] >= vs.z_soil[2:-2, 2:-2]), 0.9 * vs.z_soil[2:-2, 2:-2], z_root[2:-2, 2:-2])
+        npx.where((z_root[2:-2, 2:-2] >= vs.z_soil[2:-2, 2:-2]), 0.7 * vs.z_soil[2:-2, 2:-2], z_root[2:-2, 2:-2])
         * vs.maskCatch[2:-2, 2:-2],
     )
 

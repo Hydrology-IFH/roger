@@ -16,18 +16,18 @@ def main(tmp_dir, resample_size, nruns):
     else:
         base_path = Path(__file__).parent
     metric_name = "KGE_multi"
-    # bootstrap best 1% simulations
+    # bootstrap best simulations
     onp.random.seed(42)
     idx_boot = onp.arange(resample_size)
     onp.random.shuffle(idx_boot)
     idx_boot = idx_boot.tolist()
-    states_hm1_file = base_path.parent / "input" / f"states_hm{nruns}.nc"
+    states_hm1_file = base_path.parent / "svat_monte_carlo" / "output" / f"states_hm{nruns}.nc"
     with h5netcdf.File(states_hm1_file, "r", decode_vlen_strings=False) as df:
         n_repeat = int(resample_size / df.dims["x"].size)
     if n_repeat <= 1:
         n_repeat = 1
     # write states of best model run
-    states_hmb_file = base_path / "input" / f"states_hm{nruns}_bootstrap.nc"
+    states_hmb_file = base_path.parent / "svat_monte_carlo" / "output" / f"states_hm{nruns}_bootstrap.nc"
     with h5netcdf.File(states_hmb_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
@@ -69,6 +69,12 @@ def main(tmp_dir, resample_size, nruns):
                     vals_rep = onp.repeat(vals, n_repeat, axis=0)[:resample_size, :]
                     v[:, :] = vals_rep[idx_boot, :]
                     v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
+
+            var_obj = df.variables.get('id')
+            vals = onp.array(var_obj)
+            vals_rep = onp.repeat(vals, n_repeat, axis=0)[:resample_size, :]
+            v[:, :] = vals_rep[idx_boot, :]
+            v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
     return
 
 

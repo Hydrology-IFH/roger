@@ -2,15 +2,10 @@ import glob
 import os
 from pathlib import Path
 import datetime
-from cftime import num2date
 import h5netcdf
-import xarray as xr
 import pandas as pd
-from de import de
 import numpy as onp
 import click
-import roger.tools.evaluation as eval_utils
-import roger.tools.labels as labs
 import matplotlib as mpl
 import seaborn as sns
 
@@ -41,11 +36,14 @@ def main(tmp_dir):
 
     # select best model run
     idx_best1 = df_params_metrics["KGE_multi"].idxmax()
+    # write .txt-file
+    file = base_path_figs / "params_metrics_1.txt"
+    df_params_metrics.iloc[idx_best1, :].to_frame().to_csv(file, header=True, index=False, sep="\t")
 
     # write states of best simulation
     click.echo("Write best simulation ...")
-    states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"
-    states_hm_file = base_path / "states_hm1.nc"
+    states_hm_mc_file = base_path / "output" / "states_hm_monte_carlo.nc"
+    states_hm_file = base_path / "output" / "states_hm1.nc"
     with h5netcdf.File(states_hm_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
@@ -92,9 +90,12 @@ def main(tmp_dir):
     df_params_metrics10.loc[:, "id"] = range(len(df_params_metrics10.index))
     df_params_metrics10 = df_params_metrics10.sort_values(by=["KGE_multi"], ascending=False)
     idx_best10 = df_params_metrics10.loc[: df_params_metrics10.index[9], "id"].values.tolist()
+    # write .txt-file
+    file = base_path_figs / "params_metrics_10.txt"
+    df_params_metrics10.iloc[:10, :].to_csv(file, header=True, index=False, sep="\t")
     # write states of best model run
-    states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"
-    states_hm_file = base_path / "states_hm10.nc"
+    states_hm_mc_file = base_path / "output" / "states_hm_monte_carlo.nc"
+    states_hm_file = base_path / "output" / "states_hm10.nc"
     with h5netcdf.File(states_hm_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
@@ -135,15 +136,22 @@ def main(tmp_dir):
                     v[:, :] = vals[idx_best10, :]
                     v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
 
+            v = f.create_variable('id', ("x", "y"), float, compression="gzip", compression_opts=1)
+            v[:, 0] = onp.arange(0, 10)
+            v.attrs.update(long_name='id', units="")
+
     # select best 100 simulations
     click.echo("Write best 100 simulations ...")
     df_params_metrics100 = df_params_metrics.copy()
     df_params_metrics100.loc[:, "id"] = range(len(df_params_metrics100.index))
     df_params_metrics100 = df_params_metrics100.sort_values(by=["KGE_multi"], ascending=False)
     idx_best100 = df_params_metrics100.loc[: df_params_metrics100.index[99], "id"].values.tolist()
+    # write .txt-file
+    file = base_path_figs / "params_metrics_100.txt"
+    df_params_metrics100.iloc[:100, :].to_csv(file, header=True, index=False, sep="\t")
     # write states of best model run
-    states_hm_mc_file = base_path / "states_hm_monte_carlo.nc"
-    states_hm_file = base_path / "states_hm100.nc"
+    states_hm_mc_file = base_path / "output" / "states_hm_monte_carlo.nc"
+    states_hm_file = base_path / "output" / "states_hm100.nc"
     with h5netcdf.File(states_hm_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
@@ -183,6 +191,10 @@ def main(tmp_dir):
                     vals = onp.array(var_obj)
                     v[:, :] = vals[idx_best100, :]
                     v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
+
+            v = f.create_variable('id', ("x", "y"), float, compression="gzip", compression_opts=1)
+            v[:, 0] = onp.arange(0, 100)
+            v.attrs.update(long_name='id', units="")
     return
 
 

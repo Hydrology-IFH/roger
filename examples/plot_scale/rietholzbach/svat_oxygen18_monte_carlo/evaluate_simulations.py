@@ -15,6 +15,10 @@ mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
 sns.set_style("ticks")
 
+def delta_to_conc(delta_iso):
+    """Calculate isotope concentration from isotope ratio
+    """
+    return 2005.2e-6*(delta_iso/1000.+1.)/(1.+(delta_iso/1000.+1.)*2005.2e-6)
 
 @click.option("-ns", "--nsamples", type=int, default=10000)
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'piston', 'preferential-power', 'advection-dispersion-kumaraswamy', 'time-variant_advection-dispersion-kumaraswamy', 'advection-dispersion-power', 'time-variant_advection-dispersion-power', 'older-preference-power']), default='advection-dispersion-power')
@@ -163,30 +167,32 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             d18O_perc_bs[nrow, 0, :] = df_perc_18O_sim.loc[:, 'd18O_sample'].values
             # calculate observed oxygen-18 bulk sample
             df_perc_18O_obs.loc[:, 'd18O_perc_bs'] = df_perc_18O_obs['d18O_perc_obs'].fillna(method='bfill', limit=14)
+            df_perc_18O_obs.loc[:, 'd18O_perc_mass'] = df_perc_18O_obs['perc_obs'].values * delta_to_conc(df_perc_18O_obs['d18O_perc_bs'].values)
 
             perc_sample_sum_obs = df_perc_18O_sim.join(df_perc_18O_obs).groupby(['sample_no']).sum().loc[:, 'perc_obs']
             sample_no['perc_obs_sum'] = perc_sample_sum_obs.values
             df_perc_18O_sim = df_perc_18O_sim.join(sample_no['perc_obs_sum'])
             df_perc_18O_sim.loc[:, 'perc_obs_sum'] = df_perc_18O_sim.loc[:, 'perc_obs_sum'].fillna(method='bfill', limit=14)
+            df_perc_18O_sim.loc[:, 'd18O_perc_mass'] = df_perc_18O_sim['perc_sim'].values * delta_to_conc(df_perc_18O_sim.loc[:, 'd18O_sample'].fillna(method='bfill', limit=14).values)
 
             # join observations on simulations
-            for sc, sc1 in zip([0, 1, 2, 3], ['', 'dry', 'normal', 'wet']):
-                obs_vals = ds_obs['d18O_PERC'].isel(x=0, y=0).values
-                sim_vals = d18O_perc_bs[nrow, 0, :]
+            for sc, sc1 in zip([0], ['']):
+                obs_vals = df_perc_18O_obs.loc[:, 'd18O_perc_mass'].values
+                sim_vals = df_perc_18O_sim.loc[:, 'd18O_perc_mass'].values
                 df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
                 df_obs.loc[:, 'obs'] = obs_vals
                 df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
 
                 if sc > 0:
-                    df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap)
+                    df_rows = pd.DataFrame(index=df_eval.index).join(df_thetap.loc["2006":"2007", :])
                     rows = (df_rows['sc'].values == sc)
                     df_eval = df_eval.loc[rows, :]
                 df_eval = df_eval.dropna()
                 # calculate metrics
                 if len(df_eval.index) > 10:
-                    var_sim = 'C_iso_q_ss'
-                    obs_vals = df_eval.loc[:, 'obs'].values
-                    sim_vals = df_eval.loc[:, 'sim'].values
+                    var_sim = 'M_iso_q_ss'
+                    obs_vals = df_eval.loc[:, 'obs'].values.astype(float)
+                    sim_vals = df_eval.loc[:, 'sim'].values.astype(float)
                     key_kge = f'KGE_{var_sim}{sc1}'
                     df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
                     key_kge_alpha = f'KGE_alpha_{var_sim}{sc1}'
@@ -196,9 +202,9 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                     key_r = f'r_{var_sim}{sc1}'
                     df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
                     # add offset since diagnostic efficiency requires positive values
-                    offset = onp.nanmin(df_eval.values) * (-1) + 1
-                    obs_vals = df_eval.loc[:, 'obs'].values + offset
-                    sim_vals = df_eval.loc[:, 'sim'].values + offset
+                    offset = onp.nanmin(df_eval.values.astype(float)) * (-1) + 1
+                    obs_vals = df_eval.loc[:, 'obs'].values.astype(float) + offset
+                    sim_vals = df_eval.loc[:, 'sim'].values.astype(float) + offset
                     # share of observations with zero values
                     key_p0 = 'p0_' + var_sim + f'{sc1}'
                     df_params_metrics.loc[nrow, key_p0] = 0
@@ -257,7 +263,7 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                     df_params_metrics.loc[nrow, key_phi] = de.calc_phi(brel_mean, b_slope)
 
                 else:
-                    var_sim = 'C_iso_q_ss'
+                    var_sim = 'M_iso_q_ss'
                     key_kge = f'KGE_{var_sim}{sc1}'
                     df_params_metrics.loc[nrow, key_kge] = onp.nan
                     key_kge_alpha = f'KGE_alpha_{var_sim}{sc1}'

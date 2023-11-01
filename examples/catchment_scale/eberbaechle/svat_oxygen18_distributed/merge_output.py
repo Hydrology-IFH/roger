@@ -17,9 +17,9 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 # merge results into single file
-path = str(base_path_output / "SVATOXYGEN18_power_deterministic.*.nc")
+path = str(base_path_output / "SVAT18O.*.nc")
 diag_files = glob.glob(path)
-states_tm_file = base_path_output / "SVATOXYGEN18_power_deterministic.nc"
+states_tm_file = base_path_output / "SVAT18O.nc"
 if not os.path.exists(states_tm_file):
     with h5netcdf.File(states_tm_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
