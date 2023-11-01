@@ -6,7 +6,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-ns", "--nsamples", type=int, default=10000)
-@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
 @roger_base_cli
 def main(nsamples, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -23,9 +23,9 @@ def main(nsamples, tmp_dir):
         _base_path = Path(__file__).parent
         _input_dir = _base_path / "input"
         if tmp_dir:
-            _tmp_dir = tmp_dir / "output"
+            _tmp_dir = Path(tmp_dir) / "output"
         else:
-            _tmp_dir = tmp_dir
+            _tmp_dir = Path(tmp_dir)
         # load parameter boundaries
         _file_params = _base_path / "param_bounds.yml"
         with open(_file_params, 'r') as file:

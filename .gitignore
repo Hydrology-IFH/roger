@@ -163,6 +163,10 @@ gpu_memory_profiling/
 debug_setup/
 examples/catchment_scale/StressRes/Moehlin/input/
 examples/plot_scale/freiburg_altheim_kupferzell/rename_output.py
+*_per_year.py
+*_2006_2007.py
+*_new.py
+*_new/
 
 # Slides or Word
 *.key
