@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --time=6:00:00
+#SBATCH --time=2:30:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=10
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=20000
+#SBATCH --mem=14000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat18O
