@@ -102,12 +102,6 @@ def main(tmp_dir):
     )
     ds_sim_hm100 = ds_sim_hm100.assign_coords(Time=("Time", date_sim_hm100))
 
-    data = pd.DataFrame(index=date_sim_hm100, columns=["PERC_obs [mm/day]", "PERC_sim [mm/day]"])
-    data.iloc[1:, 0] = ds_obs["PERC"].isel(x=0, y=0).values
-    data.iloc[:, 1] = ds_sim_hm100["q_ss"].isel(y=0).values
-    file = base_path_figs / f"PERC.txt"
-    data.iloc[1:, :].to_csv(file, header=True, index=True, sep="\t")
-
     file = base_path / "svat_monte_carlo" / "figures" / "params_metrics.txt"
     df_params_metrics = pd.read_csv(file, sep="\t")
     df_params_metrics100 = df_params_metrics.copy()
