@@ -35,9 +35,9 @@ def main(transport_model_structure, sas_solver, x1, x2, data_dir, tmp_dir):
             _base_path = Path(__file__).parent
         _input_dir = _base_path / "input"
         if tmp_dir:
-            _tmp_dir = tmp_dir / "output"
+            _tmp_dir = Path(tmp_dir) / "output"
         else:
-            _tmp_dir = tmp_dir
+            _tmp_dir = Path(tmp_dir)
         _nrows = x2 - x1
         _tm_structure = transport_model_structure.replace("_", " ")
 

@@ -69,11 +69,11 @@ def main(tmp_dir):
             # length of simulation (in seconds)
             settings.runlen = self._get_runlen(self._input_dir, "forcing_tracer.nc")
             # length of warmup simulation (in seconds)
-            settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
+            settings.runlen_warmup = 1 * 365 * 24 * 60 * 60
             # total number of iterations
             settings.nitt = self._get_nitt(self._input_dir, "forcing_tracer.nc")
             # maximum water age (in days)
-            settings.ages = 1500
+            settings.ages = 1000
             settings.nages = settings.ages + 1
 
             # spatial discretization (in meters)
