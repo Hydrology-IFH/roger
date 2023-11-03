@@ -26,9 +26,9 @@ def main(id, nsamples, transport_model_structure, sas_solver, tmp_dir):
         _tm_structure = transport_model_structure.replace("_", " ")
         _input_dir = _base_path / "input"
         if tmp_dir:
-            _tmp_dir = tmp_dir / "output"
+            _tmp_dir = Path(tmp_dir) / "output"
         else:
-            _tmp_dir = tmp_dir
+            _tmp_dir = Path(tmp_dir)
         if transport_model_structure in ['complete-mixing', 'piston']:
             _states_hm_file = 'states_hm10.nc'
         else:
