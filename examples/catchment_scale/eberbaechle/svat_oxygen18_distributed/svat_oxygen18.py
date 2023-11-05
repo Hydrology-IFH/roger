@@ -168,9 +168,9 @@ def main(tmp_dir):
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 6)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 0.5)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 6)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 1.2)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 0.65)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 6)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 1.5)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 0.8)
 
         @roger_routine
         def set_parameters(self, state):

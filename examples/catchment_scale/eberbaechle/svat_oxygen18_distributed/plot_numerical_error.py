@@ -36,7 +36,7 @@ def main():
     ds_sim = ds_sim.assign_coords(date=("Time", days_sim))
 
     # calculate the total sum of the numerical error
-    num_error = ds_sim["dC_num_error"].values
+    num_error = ds_sim["dS_num_error"].values
     num_error_sum = onp.nansum(num_error, axis=-1)
     num_error_sum1 = onp.where(num_error_sum <= 0, onp.nan, num_error_sum)
 
@@ -54,7 +54,7 @@ def main():
     plt.close(fig)
 
     # load the model parameters
-    params_file = base_path / "parameters.nc"
+    params_file = base_path.parent / "svat_distributed" / "parameters.nc"
     ds_params = xr.open_dataset(params_file, engine="h5netcdf")
 
     # numerical error and model parameters

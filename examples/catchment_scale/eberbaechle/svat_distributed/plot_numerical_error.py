@@ -41,9 +41,9 @@ def main():
     num_error_sum1 = onp.where(num_error_sum <= 0, onp.nan, num_error_sum)
 
     # plot the numerical error
-    fig, ax = plt.subplots(figsize=(6,4))
+    fig, ax = plt.subplots(figsize=(6,3.5))
     grid_extent = (0, 80*25, 0, 53*25)
-    im = ax.imshow(num_error_sum1, extent=grid_extent, cmap='viridis', zorder=2)
+    im = ax.imshow(num_error_sum1, extent=grid_extent, cmap='viridis', zorder=2, aspect=80/53)
     plt.colorbar(im, ax=ax, shrink=0.7, label="Total numerical error [mm]")
     plt.xlabel('Distance in x-direction [m]')
     plt.ylabel('Distance in y-direction [m]')
