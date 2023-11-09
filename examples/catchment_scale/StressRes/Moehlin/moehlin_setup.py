@@ -161,6 +161,12 @@ def main(out_dir):
                 at[2:-2, 2:-2],
                 self._read_var_from_nc("GRUND", input_dir, para_fn),
             )
+            # groundwater table depth
+            vs.z_gw = update(
+                vs.z_gw,
+                at[2:-2, 2:-2],
+                self._read_var_from_nc("gwfa_gew", input_dir, para_fn)
+            )
             # density of vertical macropores (1/m2)
             vs.dmpv = update(
                 vs.dmpv,
