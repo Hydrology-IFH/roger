@@ -301,10 +301,8 @@ def main(location, climate_scenario, period, tmp_dir):
                 "q_rz",
                 "q_ss",
                 "cpr_rz",
-                "dS_s",
-                "dS",
-                "q_snow",
-                "int_ground",
+                "q_sur",
+                "q_hof"
             ]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
@@ -320,10 +318,7 @@ def main(location, climate_scenario, period, tmp_dir):
                 "S_pwp_ss",
                 "S_fc_ss",
                 "S_sat_ss",
-                "theta_rz",
-                "theta_ss",
                 "theta",
-                "S_snow",
             ]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
