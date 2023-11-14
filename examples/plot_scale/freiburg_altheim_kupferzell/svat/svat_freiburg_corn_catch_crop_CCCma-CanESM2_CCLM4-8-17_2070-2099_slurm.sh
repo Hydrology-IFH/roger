@@ -11,8 +11,15 @@
 #SBATCH --error=svat_freiburg_corn_catch_crop_CCCma-CanESM2_CCLM4-8-17_2070-2099_err.out
 #SBATCH --export=ALL
  
+# load module dependencies
+module load devel/cuda/10.2
+module load devel/cudnn/10.2
+module load lib/hdf5/1.12.2-gnu-12.1-openmpi-4.1
+# prevent memory issues for Open MPI 4.1.x
+export OMPI_MCA_btl="self,smcuda,vader,tcp"
+export OMP_NUM_THREADS=1
 eval "$(conda shell.bash hook)"
-conda activate roger
+conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/svat
  
 python svat_crop.py -b numpy -d cpu --location freiburg --land-cover-scenario corn_catch_crop --climate-scenario CCCma-CanESM2_CCLM4-8-17 --period 2070-2099 -td "${TMPDIR}"
