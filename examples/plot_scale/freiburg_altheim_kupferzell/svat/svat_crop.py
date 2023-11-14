@@ -427,6 +427,8 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
                 "cpr_rz",
                 "re_rg",
                 "re_rl",
+                "q_sur",
+                "q_hof"
             ]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
