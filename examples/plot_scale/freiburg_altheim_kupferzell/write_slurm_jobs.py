@@ -35,8 +35,15 @@ def main():
                     lines.append(f"#SBATCH --error={script_name}_err.out\n")
                     lines.append("#SBATCH --export=ALL\n")
                     lines.append(" \n")
+                    lines.append("# load module dependencies\n")
+                    lines.append("module load devel/cuda/10.2\n")
+                    lines.append("module load devel/cudnn/10.2\n")
+                    lines.append("module load lib/hdf5/1.12.2-gnu-12.1-openmpi-4.1\n")
+                    lines.append("# prevent memory issues for Open MPI 4.1.x\n")
+                    lines.append('export OMPI_MCA_btl="self,smcuda,vader,tcp"\n')
+                    lines.append("export OMP_NUM_THREADS=1\n")
                     lines.append('eval "$(conda shell.bash hook)"\n')
-                    lines.append("conda activate roger\n")
+                    lines.append("conda activate roger-mpi\n")
                     lines.append(f"cd {base_path_bwuc}/svat\n")
                     lines.append(" \n")
                     lines.append(
@@ -53,41 +60,41 @@ def main():
                     file.close()
                     subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
-    for location in locations:
-        for land_cover_scenario in land_cover_scenarios:
-            script_name = f"svat_{location}_{land_cover_scenario}_observed_2016-2021"
-            output_path_ws = base_path_ws / "svat"
-            lines = []
-            lines.append("#!/bin/bash\n")
-            lines.append("#SBATCH --time=2:00:00\n")
-            lines.append("#SBATCH --nodes=1\n")
-            lines.append("#SBATCH --ntasks=1\n")
-            lines.append("#SBATCH --cpus-per-task=1\n")
-            lines.append("#SBATCH --mem=12000\n")
-            lines.append("#SBATCH --mail-type=FAIL\n")
-            lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
-            lines.append(f"#SBATCH --job-name={script_name}\n")
-            lines.append(f"#SBATCH --output={script_name}.out\n")
-            lines.append(f"#SBATCH --error={script_name}_err.out\n")
-            lines.append("#SBATCH --export=ALL\n")
-            lines.append(" \n")
-            lines.append('eval "$(conda shell.bash hook)"\n')
-            lines.append("conda activate roger\n")
-            lines.append(f"cd {base_path_bwuc}/svat\n")
-            lines.append(" \n")
-            lines.append(
-                'python svat_crop.py -b numpy -d cpu --location %s --land-cover-scenario %s --climate-scenario observed --period 2016-2021 -td "${TMPDIR}"\n'
-                % (location, land_cover_scenario)
-            )
-            lines.append("# Move output from local SSD to global workspace\n")
-            lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
-            lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
-            lines.append('mv "${TMPDIR}"/SVAT_*.nc %s\n' % (output_path_ws.as_posix()))
-            file_path = base_path / "svat" / f"{script_name}_slurm.sh"
-            file = open(file_path, "w")
-            file.writelines(lines)
-            file.close()
-            subprocess.Popen(f"chmod +x {file_path}", shell=True)
+    # for location in locations:
+    #     for land_cover_scenario in land_cover_scenarios:
+    #         script_name = f"svat_{location}_{land_cover_scenario}_observed_2016-2021"
+    #         output_path_ws = base_path_ws / "svat"
+    #         lines = []
+    #         lines.append("#!/bin/bash\n")
+    #         lines.append("#SBATCH --time=2:00:00\n")
+    #         lines.append("#SBATCH --nodes=1\n")
+    #         lines.append("#SBATCH --ntasks=1\n")
+    #         lines.append("#SBATCH --cpus-per-task=1\n")
+    #         lines.append("#SBATCH --mem=12000\n")
+    #         lines.append("#SBATCH --mail-type=FAIL\n")
+    #         lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
+    #         lines.append(f"#SBATCH --job-name={script_name}\n")
+    #         lines.append(f"#SBATCH --output={script_name}.out\n")
+    #         lines.append(f"#SBATCH --error={script_name}_err.out\n")
+    #         lines.append("#SBATCH --export=ALL\n")
+    #         lines.append(" \n")
+    #         lines.append('eval "$(conda shell.bash hook)"\n')
+    #         lines.append("conda activate roger-mpi\n")
+    #         lines.append(f"cd {base_path_bwuc}/svat\n")
+    #         lines.append(" \n")
+    #         lines.append(
+    #             'python svat_crop.py -b numpy -d cpu --location %s --land-cover-scenario %s --climate-scenario observed --period 2016-2021 -td "${TMPDIR}"\n'
+    #             % (location, land_cover_scenario)
+    #         )
+    #         lines.append("# Move output from local SSD to global workspace\n")
+    #         lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
+    #         lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
+    #         lines.append('mv "${TMPDIR}"/SVAT_*.nc %s\n' % (output_path_ws.as_posix()))
+    #         file_path = base_path / "svat" / f"{script_name}_slurm.sh"
+    #         file = open(file_path, "w")
+    #         file.writelines(lines)
+    #         file.close()
+    #         subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
     for location in locations:
         for climate_scenario in climate_scenarios:
@@ -108,8 +115,15 @@ def main():
                 lines.append(f"#SBATCH --error={script_name}_err.out\n")
                 lines.append("#SBATCH --export=ALL\n")
                 lines.append(" \n")
+                lines.append("# load module dependencies\n")
+                lines.append("module load devel/cuda/10.2\n")
+                lines.append("module load devel/cudnn/10.2\n")
+                lines.append("module load lib/hdf5/1.12.2-gnu-12.1-openmpi-4.1\n")
+                lines.append("# prevent memory issues for Open MPI 4.1.x\n")
+                lines.append('export OMPI_MCA_btl="self,smcuda,vader,tcp"\n')
+                lines.append("export OMP_NUM_THREADS=1\n")
                 lines.append('eval "$(conda shell.bash hook)"\n')
-                lines.append("conda activate roger\n")
+                lines.append("conda activate roger-mpi\n")
                 lines.append(f"cd {base_path_bwuc}/svat\n")
                 lines.append(" \n")
                 lines.append(
@@ -126,40 +140,40 @@ def main():
                 file.close()
                 subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
-    for location in locations:
-        script_name = f"svat_{location}_grass_observed_2016-2021"
-        output_path_ws = base_path_ws / "svat"
-        lines = []
-        lines.append("#!/bin/bash\n")
-        lines.append("#SBATCH --time=2:00:00\n")
-        lines.append("#SBATCH --nodes=1\n")
-        lines.append("#SBATCH --ntasks=1\n")
-        lines.append("#SBATCH --cpus-per-task=1\n")
-        lines.append("#SBATCH --mem=12000\n")
-        lines.append("#SBATCH --mail-type=FAIL\n")
-        lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
-        lines.append(f"#SBATCH --job-name={script_name}\n")
-        lines.append(f"#SBATCH --output={script_name}.out\n")
-        lines.append(f"#SBATCH --error={script_name}_err.out\n")
-        lines.append("#SBATCH --export=ALL\n")
-        lines.append(" \n")
-        lines.append('eval "$(conda shell.bash hook)"\n')
-        lines.append("conda activate roger\n")
-        lines.append(f"cd {base_path_bwuc}/svat\n")
-        lines.append(" \n")
-        lines.append(
-            'python svat.py -b numpy -d cpu --location %s --climate-scenario observed --period 2016-2021 -td "${TMPDIR}"\n'
-            % (location)
-        )
-        lines.append("# Move output from local SSD to global workspace\n")
-        lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
-        lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
-        lines.append('mv "${TMPDIR}"/SVAT_*.nc %s\n' % (output_path_ws.as_posix()))
-        file_path = base_path / "svat" / f"{script_name}_slurm.sh"
-        file = open(file_path, "w")
-        file.writelines(lines)
-        file.close()
-        subprocess.Popen(f"chmod +x {file_path}", shell=True)
+    # for location in locations:
+    #     script_name = f"svat_{location}_grass_observed_2016-2021"
+    #     output_path_ws = base_path_ws / "svat"
+    #     lines = []
+    #     lines.append("#!/bin/bash\n")
+    #     lines.append("#SBATCH --time=2:00:00\n")
+    #     lines.append("#SBATCH --nodes=1\n")
+    #     lines.append("#SBATCH --ntasks=1\n")
+    #     lines.append("#SBATCH --cpus-per-task=1\n")
+    #     lines.append("#SBATCH --mem=12000\n")
+    #     lines.append("#SBATCH --mail-type=FAIL\n")
+    #     lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
+    #     lines.append(f"#SBATCH --job-name={script_name}\n")
+    #     lines.append(f"#SBATCH --output={script_name}.out\n")
+    #     lines.append(f"#SBATCH --error={script_name}_err.out\n")
+    #     lines.append("#SBATCH --export=ALL\n")
+    #     lines.append(" \n")
+    #     lines.append('eval "$(conda shell.bash hook)"\n')
+    #     lines.append("conda activate roger\n")
+    #     lines.append(f"cd {base_path_bwuc}/svat\n")
+    #     lines.append(" \n")
+    #     lines.append(
+    #         'python svat.py -b numpy -d cpu --location %s --climate-scenario observed --period 2016-2021 -td "${TMPDIR}"\n'
+    #         % (location)
+    #     )
+    #     lines.append("# Move output from local SSD to global workspace\n")
+    #     lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
+    #     lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
+    #     lines.append('mv "${TMPDIR}"/SVAT_*.nc %s\n' % (output_path_ws.as_posix()))
+    #     file_path = base_path / "svat" / f"{script_name}_slurm.sh"
+    #     file = open(file_path, "w")
+    #     file.writelines(lines)
+    #     file.close()
+    #     subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
     # --- jobs to calculate concentrations and water ages --------------------------------------------
     for location in locations:
