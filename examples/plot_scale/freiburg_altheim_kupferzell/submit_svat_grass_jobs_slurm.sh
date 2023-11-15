@@ -6,5 +6,6 @@ FILES="$PWD/svat_*_grass_*_slurm.sh"
 for f in $FILES
 do
   sbatch --partition=single $f
+  sleep 5
 done
 
