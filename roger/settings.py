@@ -62,6 +62,7 @@ SETTINGS = {
     "theta_ac_max": Setting(0.71, float, "maximum air capacity to calculate sand content of soil"),
     "theta_rew_min": Setting(0.02, float, "minimum soil water content at permanent wilting point in -"),
     "theta_rew_max": Setting(0.24, float, "maximum soil water content at permanent wilting point in -"),
+    "zroot_to_zsoil_max": Setting(0.7, float, "maximum ratio of root zone depth to soil depth in -"),
     "rew_min": Setting(2, float, "minimum readily evaporable water in mm"),
     "rew_max": Setting(12, float, "maximum readily evaporable water in mm"),
     "z_evap_max": Setting(150, float, "maximum soil evaporation depth in mm"),

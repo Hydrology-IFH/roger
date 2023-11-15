@@ -760,6 +760,7 @@ def calc_root_growth(state):
     Calculates root growth of crops
     """
     vs = state.variables
+    settings = state.settings
 
     arr0 = allocate(state.dimensions, ("x", "y", "crops"))
     mask_summer = npx.isin(vs.crop_type, lut.SUMMER_CROPS)
@@ -915,13 +916,13 @@ def calc_root_growth(state):
     )
 
     # crop root growth stops if 70 % of total soil depth is reached
-    mask_stop_growth = vs.z_root_crop[:, :, vs.tau, :] >= 0.7 * vs.z_soil[:, :, npx.newaxis]
+    mask_stop_growth = vs.z_root_crop[:, :, vs.tau, :] >= settings.zroot_to_zsoil_max * vs.z_soil[:, :, npx.newaxis]
     vs.z_root_crop = update(
         vs.z_root_crop,
         at[2:-2, 2:-2, vs.tau, :],
         npx.where(
             mask_stop_growth[2:-2, 2:-2, :],
-            0.7 * vs.z_soil[2:-2, 2:-2, npx.newaxis],
+            settings.zroot_to_zsoil_max * vs.z_soil[2:-2, 2:-2, npx.newaxis],
             vs.z_root_crop[2:-2, 2:-2, vs.tau, :],
         ),
     )
@@ -1119,6 +1120,7 @@ def update_z_root(state):
     Updates root depth
     """
     vs = state.variables
+    settings = state.settings
 
     mask = vs.lu_id[:, :, npx.newaxis] == vs.crop_type
 
@@ -1150,7 +1152,7 @@ def update_z_root(state):
         npx.where(
             vs.z_root[2:-2, 2:-2, vs.tau] < vs.z_soil[2:-2, 2:-2],
             vs.z_root[2:-2, 2:-2, vs.tau],
-            vs.z_soil[2:-2, 2:-2] * 0.7,
+            vs.z_soil[2:-2, 2:-2] * settings.zroot_to_zsoil_max,
         ),
     )
 
