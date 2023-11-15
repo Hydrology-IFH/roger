@@ -191,4 +191,7 @@ conda_build.sh
 build.sh
 meta.yaml
 
+# FreeFileSync Caching files
+sync.ffs_db
+
 # local development
