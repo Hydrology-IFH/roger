@@ -71,14 +71,14 @@ ds_params_hm = xr.open_dataset(params_hm_file, engine="h5netcdf")
 # ds_params_hm["theta_pwp"].isel(x=x1, y=y1)
 # ds_params_hm["z_soil"].isel(x=x1, y=y1)
 
-import pandas as pd
-df = pd.DataFrame(index=date_hm, columns=["theta", "transp"])
-for t in range(len(date_hm)):
-    vals = onp.where(ds_hm["theta"].isel(Time=t).values <= -9999, onp.nan, ds_hm["theta"].isel(Time=t).values)
-    df.iloc[t, 0] = onp.nanmean(vals)
-    vals = onp.where(ds_hm["transp"].isel(Time=t).values <= -9999, onp.nan, ds_hm["transp"].isel(Time=t).values)
-    df.iloc[t, 1] = onp.nanmax(vals)
-df.to_csv(base_path_figs / "theta_transp.csv", sep=";", index=True)
+# import pandas as pd
+# df = pd.DataFrame(index=date_hm, columns=["theta", "transp"])
+# for t in range(len(date_hm)):
+#     vals = onp.where(ds_hm["theta"].isel(Time=t).values <= -9999, onp.nan, ds_hm["theta"].isel(Time=t).values)
+#     df.iloc[t, 0] = onp.nanmean(vals)
+#     vals = onp.where(ds_hm["transp"].isel(Time=t).values <= -9999, onp.nan, ds_hm["transp"].isel(Time=t).values)
+#     df.iloc[t, 1] = onp.nanmax(vals)
+# df.to_csv(base_path_figs / "theta_transp.csv", sep=";", index=True)
 
 # load transport simulations
 states_tm_file = base_path / "svat_oxygen18_distributed" / "output" / "SVAT18O.nc"
@@ -610,12 +610,12 @@ file = base_path_figs / "dist_states_wet_dry.pdf"
 fig.savefig(file, dpi=300)
 
 # plot cumulated distributions of fluxes, isotopic signal and median age of all grid cells at dry, normal and wet conditions
-fig, axes = plt.subplots(4, 3, figsize=(6, 5))
+fig, axes = plt.subplots(4, 3, figsize=(6, 5), sharey=True)
 axes[0, 0].hist(
     ds_hm["evap_soil"].isel(Time=t_drywet).values.flatten(),
     color="#253494",
     bins=50,
-    range=(0, 1),
+    range=(0, 2),
     histtype="step",
     cumulative=True,
     lw=2.0,
@@ -624,7 +624,7 @@ axes[0, 0].hist(
     ds_hm["evap_soil"].isel(Time=t_wetdry).values.flatten(),
     color="#41b6c4",
     bins=50,
-    range=(0, 1),
+    range=(0, 2),
     histtype="step",
     cumulative=True,
     lw=1.5,
@@ -634,13 +634,13 @@ axes[0, 0].hist(
     ds_hm["evap_soil"].isel(Time=t_wet).values.flatten(),
     color="#fd8d3c",
     bins=50,
-    range=(0, 1),
+    range=(0, 2),
     histtype="step",
     cumulative=True,
     lw=1.0,
     ls="--",
 )
-axes[0, 0].set_xlim(0, 1)
+axes[0, 0].set_xlim(0, 2)
 axes[0, 0].set_xlabel(r"$EVAP_{soil}$ [mm/day]")
 axes[0, 0].set_ylabel("# grid cells")
 axes[0, 0].text(
@@ -707,8 +707,8 @@ axes[1, 0].text(
 axes[2, 0].hist(
     ds_hm["theta"].isel(Time=t_drywet).values.flatten(),
     color="#253494",
-    bins=40,
-    range=(0.2, 0.4),
+    bins=50,
+    range=(0.1, 0.5),
     histtype="step",
     cumulative=True,
     lw=2.0,
@@ -716,8 +716,8 @@ axes[2, 0].hist(
 axes[2, 0].hist(
     ds_hm["theta"].isel(Time=t_wetdry).values.flatten(),
     color="#41b6c4",
-    bins=40,
-    range=(0.2, 0.4),
+    bins=50,
+    range=(0.1, 0.5),
     histtype="step",
     cumulative=True,
     lw=1.5,
@@ -726,8 +726,8 @@ axes[2, 0].hist(
 axes[2, 0].hist(
     ds_hm["theta"].isel(Time=t_dry).values.flatten(),
     color="#fed976",
-    bins=40,
-    range=(0.2, 0.4),
+    bins=50,
+    range=(0.1, 0.5),
     histtype="step",
     cumulative=True,
     lw=1.0,
@@ -736,13 +736,13 @@ axes[2, 0].hist(
 axes[2, 0].hist(
     ds_hm["theta"].isel(Time=t_wet).values.flatten(),
     color="#fd8d3c",
-    bins=40,
-    range=(0.2, 0.4),
+    bins=50,
+    range=(0.1, 0.5),
     histtype="step",
     cumulative=True,
     lw=0.5,
 )
-axes[2, 0].set_xlim(0.2, 0.4)
+axes[2, 0].set_xlim(0.15, 0.45)
 axes[2, 0].set_xlabel(r"$\theta$ [-]")
 axes[2, 0].set_ylabel("# grid cells")
 axes[2, 0].text(
@@ -758,8 +758,8 @@ axes[2, 0].text(
 axes[3, 0].hist(
     ds_hm["q_ss"].isel(Time=t_drywet).values.flatten(),
     color="#253494",
-    bins=60,
-    range=(0, 15),
+    bins=50,
+    range=(0, 10),
     histtype="step",
     cumulative=True,
     lw=2.0,
@@ -767,8 +767,8 @@ axes[3, 0].hist(
 axes[3, 0].hist(
     ds_hm["q_ss"].isel(Time=t_wetdry).values.flatten(),
     color="#41b6c4",
-    bins=60,
-    range=(0, 15),
+    bins=50,
+    range=(0, 10),
     histtype="step",
     cumulative=True,
     lw=1.5,
@@ -777,8 +777,8 @@ axes[3, 0].hist(
 axes[3, 0].hist(
     ds_hm["q_ss"].isel(Time=t_dry).values.flatten(),
     color="#fed976",
-    bins=60,
-    range=(0, 15),
+    bins=50,
+    range=(0, 10),
     histtype="step",
     cumulative=True,
     lw=1.0,
@@ -787,8 +787,8 @@ axes[3, 0].hist(
 axes[3, 0].hist(
     ds_hm["q_ss"].isel(Time=t_wet).values.flatten(),
     color="#fd8d3c",
-    bins=60,
-    range=(0, 15),
+    bins=50,
+    range=(0, 10),
     histtype="step",
     cumulative=True,
     lw=0.5,
@@ -811,8 +811,8 @@ axes[3, 0].fill([0, 0.4, 0.4, 0], [0, 0, 288, 288], color="grey", alpha=0.5)
 axes[0, 1].hist(
     ds_tm["C_iso_evap_soil"].isel(Time=t_drywet).values.flatten(),
     color="#253494",
-    bins=60,
-    range=(-12, -6),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=2.0,
@@ -820,8 +820,8 @@ axes[0, 1].hist(
 axes[0, 1].hist(
     ds_tm["C_iso_evap_soil"].isel(Time=t_wetdry).values.flatten(),
     color="#41b6c4",
-    bins=60,
-    range=(-12, -6),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=1.5,
@@ -830,14 +830,14 @@ axes[0, 1].hist(
 axes[0, 1].hist(
     ds_tm["C_iso_evap_soil"].isel(Time=t_wet).values.flatten(),
     color="#fd8d3c",
-    bins=60,
-    range=(-12, -6),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=1.0,
     ls="--",
 )
-axes[0, 1].set_xlim(-12, -6)
+axes[0, 1].set_xlim(-15, -5)
 axes[0, 1].set_xlabel(r"$\delta^{18}$$O_{EVAP_{soil}}$ [‰]")
 axes[0, 1].text(
     0.95,
@@ -852,8 +852,8 @@ axes[0, 1].text(
 axes[1, 1].hist(
     ds_tm["C_iso_transp"].isel(Time=t_wetdry).values.flatten(),
     color="#41b6c4",
-    bins=70,
-    range=(-14, -7),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=2.0,
@@ -862,8 +862,8 @@ axes[1, 1].hist(
 axes[1, 1].hist(
     ds_tm["C_iso_transp"].isel(Time=t_drywet).values.flatten(),
     color="#253494",
-    bins=70,
-    range=(-14, -7),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=1.5,
@@ -871,8 +871,8 @@ axes[1, 1].hist(
 axes[1, 1].hist(
     ds_tm["C_iso_transp"].isel(Time=t_dry).values.flatten(),
     color="#fed976",
-    bins=70,
-    range=(-14, -7),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=1.0,
@@ -881,13 +881,13 @@ axes[1, 1].hist(
 axes[1, 1].hist(
     ds_tm["C_iso_transp"].isel(Time=t_wet).values.flatten(),
     color="#fd8d3c",
-    bins=70,
-    range=(-14, -7),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=0.5,
 )
-axes[1, 1].set_xlim(-14, -7)
+axes[1, 1].set_xlim(-15, -5)
 axes[1, 1].set_xlabel(r"$\delta^{18}$$O_{TRANSP}$ [‰]")
 axes[1, 1].text(
     0.95,
@@ -902,8 +902,8 @@ axes[1, 1].text(
 axes[2, 1].hist(
     ds_tm["C_iso_s"].isel(Time=t_drywet).values.flatten(),
     color="#253494",
-    bins=40,
-    range=(-12, -8),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=2.0,
@@ -911,8 +911,8 @@ axes[2, 1].hist(
 axes[2, 1].hist(
     ds_tm["C_iso_s"].isel(Time=t_wetdry).values.flatten(),
     color="#41b6c4",
-    bins=40,
-    range=(-12, -8),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=1.5,
@@ -921,8 +921,8 @@ axes[2, 1].hist(
 axes[2, 1].hist(
     ds_tm["C_iso_s"].isel(Time=t_dry).values.flatten(),
     color="#fed976",
-    bins=40,
-    range=(-12, -8),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=1.0,
@@ -931,13 +931,13 @@ axes[2, 1].hist(
 axes[2, 1].hist(
     ds_tm["C_iso_s"].isel(Time=t_wet).values.flatten(),
     color="#fd8d3c",
-    bins=40,
-    range=(-12, -8),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=0.5,
 )
-axes[2, 1].set_xlim(-12, -8)
+axes[2, 1].set_xlim(-15, -5)
 axes[2, 1].set_xlabel(r"$\delta^{18}$$O_{\theta}$ [‰]")
 axes[2, 1].text(
     0.95,
@@ -952,8 +952,8 @@ axes[2, 1].text(
 axes[3, 1].hist(
     ds_tm["C_iso_q_ss"].isel(Time=t_drywet).values.flatten(),
     color="#253494",
-    bins=60,
-    range=(-12, -6),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=2.0,
@@ -961,8 +961,8 @@ axes[3, 1].hist(
 axes[3, 1].hist(
     ds_tm["C_iso_q_ss"].isel(Time=t_wetdry).values.flatten(),
     color="#41b6c4",
-    bins=60,
-    range=(-12, -6),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=1.5,
@@ -971,8 +971,8 @@ axes[3, 1].hist(
 axes[3, 1].hist(
     ds_tm["C_iso_q_ss"].isel(Time=t_dry).values.flatten(),
     color="#fed976",
-    bins=60,
-    range=(-12, -6),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=1.0,
@@ -981,13 +981,13 @@ axes[3, 1].hist(
 axes[3, 1].hist(
     ds_tm["C_iso_q_ss"].isel(Time=t_wet).values.flatten(),
     color="#fd8d3c",
-    bins=60,
-    range=(-12, -6),
+    bins=50,
+    range=(-15, -5),
     histtype="step",
     cumulative=True,
     lw=0.5,
 )
-axes[3, 1].set_xlim(-12, -8)
+axes[3, 1].set_xlim(-15, -5)
 axes[3, 1].set_xlabel(r"$\delta^{18}$$O_{PERC}$ [‰]")
 axes[3, 1].text(
     0.95,
@@ -1004,8 +1004,8 @@ axes[0, 2].set_axis_off()
 axes[1, 2].hist(
     ds_tm["ttavg_transp"].isel(Time=t_drywet).values.flatten(),
     color="#253494",
-    bins=50,
-    range=(0, 50),
+    bins=1000,
+    range=(0, 1000),
     histtype="step",
     cumulative=True,
     lw=2.0,
@@ -1013,8 +1013,8 @@ axes[1, 2].hist(
 axes[1, 2].hist(
     ds_tm["ttavg_transp"].isel(Time=t_wetdry).values.flatten(),
     color="#41b6c4",
-    bins=50,
-    range=(0, 50),
+    bins=1000,
+    range=(0, 1000),
     histtype="step",
     cumulative=True,
     lw=1.5,
@@ -1023,8 +1023,8 @@ axes[1, 2].hist(
 axes[1, 2].hist(
     ds_tm["ttavg_transp"].isel(Time=t_dry).values.flatten(),
     color="#fed976",
-    bins=50,
-    range=(0, 50),
+    bins=1000,
+    range=(0, 1000),
     histtype="step",
     cumulative=True,
     lw=1.0,
@@ -1033,13 +1033,13 @@ axes[1, 2].hist(
 axes[1, 2].hist(
     ds_tm["ttavg_transp"].isel(Time=t_wet).values.flatten(),
     color="#fd8d3c",
-    bins=50,
-    range=(0, 50),
+    bins=1000,
+    range=(0, 1000),
     histtype="step",
     cumulative=True,
     lw=0.5,
 )
-axes[1, 2].set_xlim(0, 50)
+axes[1, 2].set_xlim(0, 1000)
 axes[1, 2].set_xlabel(r"$\overline{TT_{TRANSP}}$ [days]")
 axes[1, 2].text(
     0.95,
@@ -1053,15 +1053,15 @@ axes[1, 2].text(
 axes[1, 2].plot([], [], color="#fed976", label="dry condtions", lw=0.5, ls="--")
 axes[1, 2].plot([], [], color="#41b6c4", label="transition to dry condtions", lw=1.0, ls="-.")
 axes[1, 2].plot([], [], color="#253494", label="transition to wet condtions", lw=2.5)
-axes[1, 2].plot([], [], color="#fd8d3c", label="wet condtions)", lw=2.0)
+axes[1, 2].plot([], [], color="#fd8d3c", label="wet condtions", lw=2.0)
 lines, labels = axes[1, 2].get_legend_handles_labels()
 fig.legend(lines, labels, loc="upper right", frameon=False, bbox_to_anchor=(0.98, 1.005))
 
 axes[2, 2].hist(
     ds_tm["rtavg_s"].isel(Time=t_drywet).values.flatten(),
     color="#253494",
-    bins=600,
-    range=(0, 600),
+    bins=1000,
+    range=(0, 1000),
     histtype="step",
     cumulative=True,
     lw=2.0,
@@ -1069,8 +1069,8 @@ axes[2, 2].hist(
 axes[2, 2].hist(
     ds_tm["rtavg_s"].isel(Time=t_wetdry).values.flatten(),
     color="#41b6c4",
-    bins=600,
-    range=(0, 600),
+    bins=1000,
+    range=(0, 1000),
     histtype="step",
     cumulative=True,
     lw=1.5,
@@ -1079,8 +1079,8 @@ axes[2, 2].hist(
 axes[2, 2].hist(
     ds_tm["rtavg_s"].isel(Time=t_dry).values.flatten(),
     color="#fed976",
-    bins=600,
-    range=(0, 600),
+    bins=1000,
+    range=(0, 1000),
     histtype="step",
     cumulative=True,
     lw=1.0,
@@ -1089,13 +1089,13 @@ axes[2, 2].hist(
 axes[2, 2].hist(
     ds_tm["rtavg_s"].isel(Time=t_wet).values.flatten(),
     color="#fd8d3c",
-    bins=600,
-    range=(0, 600),
+    bins=1000,
+    range=(0, 1000),
     histtype="step",
     cumulative=True,
     lw=0.5,
 )
-axes[2, 2].set_xlim(100, 600)
+axes[2, 2].set_xlim(0, 1000)
 axes[2, 2].set_xlabel(r"$\overline{RT}$ [days]")
 axes[2, 2].text(
     0.95,
@@ -1110,8 +1110,8 @@ axes[2, 2].text(
 axes[3, 2].hist(
     ds_tm["ttavg_q_ss"].isel(Time=t_drywet).values.flatten(),
     color="#253494",
-    bins=800,
-    range=(0, 800),
+    bins=1000,
+    range=(0, 1000),
     histtype="step",
     cumulative=True,
     lw=2.0,
@@ -1119,8 +1119,8 @@ axes[3, 2].hist(
 axes[3, 2].hist(
     ds_tm["ttavg_q_ss"].isel(Time=t_wetdry).values.flatten(),
     color="#41b6c4",
-    bins=800,
-    range=(0, 800),
+    bins=1000,
+    range=(0, 1000),
     histtype="step",
     cumulative=True,
     lw=1.5,
@@ -1129,8 +1129,8 @@ axes[3, 2].hist(
 axes[3, 2].hist(
     ds_tm["ttavg_q_ss"].isel(Time=t_dry).values.flatten(),
     color="#fed976",
-    bins=800,
-    range=(0, 800),
+    bins=1000,
+    range=(0, 1000),
     histtype="step",
     cumulative=True,
     lw=1.0,
@@ -1139,13 +1139,13 @@ axes[3, 2].hist(
 axes[3, 2].hist(
     ds_tm["ttavg_q_ss"].isel(Time=t_wet).values.flatten(),
     color="#fd8d3c",
-    bins=800,
-    range=(0, 800),
+    bins=1000,
+    range=(0, 1000),
     histtype="step",
     cumulative=True,
     lw=0.5,
 )
-axes[3, 2].set_xlim(200, 800)
+axes[3, 2].set_xlim(0, 1000)
 axes[3, 2].set_xlabel(r"$\overline{TT_{PERC}}$ [days]")
 axes[3, 2].text(
     0.95,
