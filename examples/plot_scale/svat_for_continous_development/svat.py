@@ -7,9 +7,10 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-ms", "--meteo-station", type=click.Choice(['breitnau', 'ihringen']), default='ihringen')
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
+@click.option("-ms", "--meteo-station", type=click.Choice(["breitnau", "ihringen"]), default="ihringen")
 @roger_base_cli
-def main(meteo_station):
+def main(tmp_dir, meteo_station):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
@@ -19,8 +20,8 @@ def main(meteo_station):
     from roger.io_tools.csv import write_meteo_csv_from_dwd
 
     class SVATSetup(RogerSetup):
-        """A SVAT model.
-        """
+        """A SVAT model."""
+
         _base_path = Path(__file__).parent
         _input_dir = None
         _identifier = None
@@ -34,32 +35,32 @@ def main(meteo_station):
                     os.mkdir(self._input_dir)
 
         def _read_var_from_nc(self, var, path_dir, file):
-            nc_file = self._input_dir / file
+            nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables[var]
                 return npx.array(var_obj)
 
         def _read_var_from_csv(self, var, path_dir, file):
             csv_file = path_dir / file
-            infile = pd.read_csv(csv_file, sep=';', skiprows=1)
+            infile = pd.read_csv(csv_file, sep=";", skiprows=1)
             var_obj = infile.loc[:, var]
             return npx.array(var_obj)[:, npx.newaxis]
 
         def _get_nx(self, path_dir, file):
             csv_file = path_dir / file
-            infile = pd.read_csv(csv_file, sep=';', skiprows=1)
+            infile = pd.read_csv(csv_file, sep=";", skiprows=1)
             return len(infile.index)
 
         def _get_nitt(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['Time']
+                var_obj = infile.variables["Time"]
                 return len(onp.array(var_obj))
 
         def _get_runlen(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['dt']
+                var_obj = infile.variables["dt"]
                 return onp.sum(onp.array(var_obj))
 
         def _set_identifier(self, identifier):
@@ -70,8 +71,8 @@ def main(meteo_station):
             settings = state.settings
             settings.identifier = self._identifier
 
-            settings.nx, settings.ny = self._get_nx(self._base_path, 'parameter_grid.csv'), 1
-            settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
+            settings.nx, settings.ny = self._get_nx(self._base_path, "parameters.csv"), 1
+            settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
 
             settings.dx = 1
             settings.dy = 1
@@ -119,17 +120,33 @@ def main(meteo_station):
         def set_parameters_setup(self, state):
             vs = state.variables
 
-            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], self._read_var_from_csv("lu_id", self._base_path,  "parameter_grid.csv"))
+            vs.lu_id = update(
+                vs.lu_id, at[2:-2, 2:-2], self._read_var_from_csv("lu_id", self._base_path, "parameters.csv")
+            )
             vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
-            vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], self._read_var_from_csv("S_dep_tot", self._base_path,  "parameter_grid.csv"))
-            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path,  "parameter_grid.csv"))
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_csv("dmpv", self._base_path,  "parameter_grid.csv"))
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_csv("lmpv", self._base_path,  "parameter_grid.csv"))
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_csv("theta_ac", self._base_path,  "parameter_grid.csv"))
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_csv("theta_ufc", self._base_path,  "parameter_grid.csv"))
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_csv("theta_pwp", self._base_path,  "parameter_grid.csv"))
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_csv("ks", self._base_path,  "parameter_grid.csv"))
-            vs.kf = update(vs.kf, at[2:-2, 2:-2], self._read_var_from_csv("kf", self._base_path,  "parameter_grid.csv"))
+            vs.S_dep_tot = update(
+                vs.S_dep_tot, at[2:-2, 2:-2], self._read_var_from_csv("S_dep_tot", self._base_path, "parameters.csv")
+            )
+            vs.z_soil = update(
+                vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path, "parameters.csv")
+            )
+            vs.dmpv = update(
+                vs.dmpv, at[2:-2, 2:-2], self._read_var_from_csv("dmpv", self._base_path, "parameters.csv")
+            )
+            vs.lmpv = update(
+                vs.lmpv, at[2:-2, 2:-2], self._read_var_from_csv("lmpv", self._base_path, "parameters.csv")
+            )
+            vs.theta_ac = update(
+                vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_csv("theta_ac", self._base_path, "parameters.csv")
+            )
+            vs.theta_ufc = update(
+                vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_csv("theta_ufc", self._base_path, "parameters.csv")
+            )
+            vs.theta_pwp = update(
+                vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_csv("theta_pwp", self._base_path, "parameters.csv")
+            )
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_csv("ks", self._base_path, "parameters.csv"))
+            vs.kf = update(vs.kf, at[2:-2, 2:-2], self._read_var_from_csv("kf", self._base_path, "parameters.csv"))
 
         @roger_routine
         def set_parameters(self, state):
@@ -146,16 +163,24 @@ def main(meteo_station):
         def set_initial_conditions(self, state):
             vs = state.variables
 
-            vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, :vs.taup1], 0)
-            vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, :vs.taup1], 0)
-            vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, :vs.taup1], 0)
-            vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, :vs.taup1], 0)
-            vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
-            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
-            vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
-            vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 0)
-            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
-            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
+            vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.swe = update(vs.swe, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.theta_rz = update(
+                vs.theta_rz,
+                at[2:-2, 2:-2, : vs.taup1],
+                self._read_var_from_csv("theta", self._base_path, "parameters.csv")[:, :, npx.newaxis],
+            )
+            vs.theta_ss = update(
+                vs.theta_ss,
+                at[2:-2, 2:-2, : vs.taup1],
+                self._read_var_from_csv("theta", self._base_path, "parameters.csv")[:, :, npx.newaxis],
+            )
 
         @roger_routine
         def set_boundary_conditions_setup(self, state):
@@ -186,42 +211,98 @@ def main(meteo_station):
         def set_forcing(self, state):
             vs = state.variables
 
-            condt = (vs.time % (24 * 60 * 60) == 0)
+            condt = vs.time % (24 * 60 * 60) == 0
             if condt:
                 vs.itt_day = 0
-                vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, 'forcing.nc')[vs.itt_forc])
-                vs.month = update(vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, 'forcing.nc')[vs.itt_forc])
-                vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, 'forcing.nc')[vs.itt_forc])
-                vs.prec_day = update(vs.prec_day, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
-                vs.ta_day = update(vs.ta_day, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
-                vs.pet_day = update(vs.pet_day, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
+                vs.year = update(
+                    vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, "forcing.nc")[vs.itt_forc]
+                )
+                vs.month = update(
+                    vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, "forcing.nc")[vs.itt_forc]
+                )
+                vs.doy = update(
+                    vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")[vs.itt_forc]
+                )
+                vs.prec_day = update(
+                    vs.prec_day,
+                    at[2:-2, 2:-2, :],
+                    self._read_var_from_nc("PREC", self._input_dir, "forcing.nc")[
+                        :, :, vs.itt_forc : vs.itt_forc + 6 * 24
+                    ],
+                )
+                vs.ta_day = update(
+                    vs.ta_day,
+                    at[2:-2, 2:-2, :],
+                    self._read_var_from_nc("TA", self._input_dir, "forcing.nc")[
+                        :, :, vs.itt_forc : vs.itt_forc + 6 * 24
+                    ],
+                )
+                vs.pet_day = update(
+                    vs.pet_day,
+                    at[2:-2, 2:-2, :],
+                    self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[
+                        :, :, vs.itt_forc : vs.itt_forc + 6 * 24
+                    ],
+                )
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
         @roger_routine
-        def set_diagnostics(self, state):
+        def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["rate"].output_variables = ["aet", "pet", "transp",
-                                                    "evap_soil", "inf_mat",
-                                                    "inf_mp", "inf_sc", "q_ss",
-                                                    "q_hof", "q_sof",
-                                                    "prec", "rain", "snow",
-                                                    "int_prec", "int_rain_top",
-                                                    "int_rain_ground", "int_snow_top",
-                                                    "int_snow_ground", "q_snow",
-                                                    "evap_sur", "snow_top",
-                                                    "snow_ground"]
+            diagnostics["rate"].output_variables = [
+                "aet",
+                "pet",
+                "transp",
+                "evap_soil",
+                "inf_mat",
+                "inf_mp",
+                "inf_sc",
+                "q_ss",
+                "q_hof",
+                "q_sof",
+                "prec",
+                "rain",
+                "snow",
+                "int_prec",
+                "int_rain_top",
+                "int_rain_ground",
+                "int_snow_top",
+                "int_snow_ground",
+                "q_snow",
+                "evap_sur",
+                "snow_top",
+                "snow_ground",
+            ]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
+            if base_path:
+                diagnostics["rate"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["theta", "S_s", "S_int_top", "S_int_ground", "S_int_top_tot", "S_int_ground_tot", "S_snow", "swe", "swe_top", "swe_ground", "swe_top_tot"]
+            diagnostics["collect"].output_variables = [
+                "theta",
+                "S_s",
+                "S_int_top",
+                "S_int_ground",
+                "S_int_top_tot",
+                "S_int_ground_tot",
+                "S_snow",
+                "swe",
+                "swe_top",
+                "swe_ground",
+                "swe_top_tot",
+            ]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
+            if base_path:
+                diagnostics["collect"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error", "z_sat", "z_wf"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1
+            if base_path:
+                diagnostics["maximum"].base_output_path = base_path
 
         @roger_routine
         def after_timestep(self, state):
@@ -235,156 +316,173 @@ def main(meteo_station):
 
         vs.ta = update(
             vs.ta,
-            at[2:-2, 2:-2, vs.taum1], vs.ta[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.ta[2:-2, 2:-2, vs.tau],
         )
         vs.z_root = update(
             vs.z_root,
-            at[2:-2, 2:-2, vs.taum1], vs.z_root[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.z_root[2:-2, 2:-2, vs.tau],
         )
         vs.ground_cover = update(
             vs.ground_cover,
-            at[2:-2, 2:-2, vs.taum1], vs.ground_cover[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.ground_cover[2:-2, 2:-2, vs.tau],
         )
         vs.S_sur = update(
             vs.S_sur,
-            at[2:-2, 2:-2, vs.taum1], vs.S_sur[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_sur[2:-2, 2:-2, vs.tau],
         )
         vs.S_int_top = update(
             vs.S_int_top,
-            at[2:-2, 2:-2, vs.taum1], vs.S_int_top[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_int_top[2:-2, 2:-2, vs.tau],
         )
         vs.S_int_ground = update(
             vs.S_int_ground,
-            at[2:-2, 2:-2, vs.taum1], vs.S_int_ground[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_int_ground[2:-2, 2:-2, vs.tau],
         )
         vs.S_dep = update(
             vs.S_dep,
-            at[2:-2, 2:-2, vs.taum1], vs.S_dep[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_dep[2:-2, 2:-2, vs.tau],
         )
         vs.S_snow = update(
             vs.S_snow,
-            at[2:-2, 2:-2, vs.taum1], vs.S_snow[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_snow[2:-2, 2:-2, vs.tau],
         )
         vs.swe = update(
             vs.swe,
-            at[2:-2, 2:-2, vs.taum1], vs.swe[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.swe[2:-2, 2:-2, vs.tau],
         )
         vs.S_rz = update(
             vs.S_rz,
-            at[2:-2, 2:-2, vs.taum1], vs.S_rz[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_rz[2:-2, 2:-2, vs.tau],
         )
         vs.S_ss = update(
             vs.S_ss,
-            at[2:-2, 2:-2, vs.taum1], vs.S_ss[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_ss[2:-2, 2:-2, vs.tau],
         )
         vs.S_s = update(
             vs.S_s,
-            at[2:-2, 2:-2, vs.taum1], vs.S_s[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_s[2:-2, 2:-2, vs.tau],
         )
         vs.S = update(
             vs.S,
-            at[2:-2, 2:-2, vs.taum1], vs.S[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S[2:-2, 2:-2, vs.tau],
         )
         vs.z_sat = update(
             vs.z_sat,
-            at[2:-2, 2:-2, vs.taum1], vs.z_sat[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.z_sat[2:-2, 2:-2, vs.tau],
         )
         vs.z_wf = update(
             vs.z_wf,
-            at[2:-2, 2:-2, vs.taum1], vs.z_wf[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.z_wf[2:-2, 2:-2, vs.tau],
         )
         vs.z_wf_t0 = update(
             vs.z_wf_t0,
-            at[2:-2, 2:-2, vs.taum1], vs.z_wf_t0[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.z_wf_t0[2:-2, 2:-2, vs.tau],
         )
         vs.z_wf_t1 = update(
             vs.z_wf_t1,
-            at[2:-2, 2:-2, vs.taum1], vs.z_wf_t1[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.z_wf_t1[2:-2, 2:-2, vs.tau],
         )
         vs.y_mp = update(
             vs.y_mp,
-            at[2:-2, 2:-2, vs.taum1], vs.y_mp[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.y_mp[2:-2, 2:-2, vs.tau],
         )
         vs.y_sc = update(
             vs.y_sc,
-            at[2:-2, 2:-2, vs.taum1], vs.y_sc[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.y_sc[2:-2, 2:-2, vs.tau],
         )
         vs.theta_rz = update(
             vs.theta_rz,
-            at[2:-2, 2:-2, vs.taum1], vs.theta_rz[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.theta_rz[2:-2, 2:-2, vs.tau],
         )
         vs.theta_ss = update(
             vs.theta_ss,
-            at[2:-2, 2:-2, vs.taum1], vs.theta_ss[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.theta_ss[2:-2, 2:-2, vs.tau],
         )
         vs.theta = update(
             vs.theta,
-            at[2:-2, 2:-2, vs.taum1], vs.theta[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.theta[2:-2, 2:-2, vs.tau],
         )
         vs.k_rz = update(
             vs.k_rz,
-            at[2:-2, 2:-2, vs.taum1], vs.k_rz[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.k_rz[2:-2, 2:-2, vs.tau],
         )
         vs.k_ss = update(
             vs.k_ss,
-            at[2:-2, 2:-2, vs.taum1], vs.k_ss[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.k_ss[2:-2, 2:-2, vs.tau],
         )
         vs.k = update(
             vs.k,
-            at[2:-2, 2:-2, vs.taum1], vs.k[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.k[2:-2, 2:-2, vs.tau],
         )
         vs.h_rz = update(
             vs.h_rz,
-            at[2:-2, 2:-2, vs.taum1], vs.h_rz[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.h_rz[2:-2, 2:-2, vs.tau],
         )
         vs.h_ss = update(
             vs.h_ss,
-            at[2:-2, 2:-2, vs.taum1], vs.h_ss[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.h_ss[2:-2, 2:-2, vs.tau],
         )
         vs.h = update(
             vs.h,
-            at[2:-2, 2:-2, vs.taum1], vs.h[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.h[2:-2, 2:-2, vs.tau],
         )
         vs.z0 = update(
             vs.z0,
-            at[2:-2, 2:-2, vs.taum1], vs.z0[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.z0[2:-2, 2:-2, vs.tau],
         )
         vs.prec = update(
             vs.prec,
-            at[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.prec[2:-2, 2:-2, vs.tau],
         )
         vs.event_id = update(
             vs.event_id,
-            at[vs.taum1], vs.event_id[vs.tau],
+            at[vs.taum1],
+            vs.event_id[vs.tau],
         )
         vs.year = update(
             vs.year,
-            at[vs.taum1], vs.year[vs.tau],
+            at[vs.taum1],
+            vs.year[vs.tau],
         )
         vs.month = update(
             vs.month,
-            at[vs.taum1], vs.month[vs.tau],
+            at[vs.taum1],
+            vs.month[vs.tau],
         )
         vs.doy = update(
             vs.doy,
-            at[vs.taum1], vs.doy[vs.tau],
-        )
-        # set to 0 for numerical errors
-        vs.S_fp_rz = update(
-            vs.S_fp_rz,
-            at[2:-2, 2:-2], npx.where((vs.S_fp_rz > -1e-9) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz)[2:-2, 2:-2],
-        )
-        vs.S_lp_rz = update(
-            vs.S_lp_rz,
-            at[2:-2, 2:-2], npx.where((vs.S_lp_rz > -1e-9) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz)[2:-2, 2:-2],
-        )
-        vs.S_fp_ss = update(
-            vs.S_fp_ss,
-            at[2:-2, 2:-2], npx.where((vs.S_fp_ss > -1e-9) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss)[2:-2, 2:-2],
-        )
-        vs.S_lp_ss = update(
-            vs.S_lp_ss,
-            at[2:-2, 2:-2], npx.where((vs.S_lp_ss > -1e-9) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss)[2:-2, 2:-2],
+            at[vs.taum1],
+            vs.doy[vs.tau],
         )
 
         return KernelOutput(
@@ -422,14 +520,10 @@ def main(meteo_station):
             k_rz=vs.k_rz,
             k_ss=vs.k_ss,
             k=vs.k,
-            S_fp_rz=vs.S_fp_rz,
-            S_lp_rz=vs.S_lp_rz,
-            S_fp_ss=vs.S_fp_ss,
-            S_lp_ss=vs.S_lp_ss,
         )
 
     model = SVATSetup()
-    identifier = f'SVAT_{meteo_station}'
+    identifier = f"SVAT_{meteo_station}"
     model._set_identifier(identifier)
     path_meteo_station = model._base_path / "input" / meteo_station
     model._set_input_dir(path_meteo_station)
