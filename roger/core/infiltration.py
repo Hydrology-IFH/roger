@@ -960,6 +960,22 @@ def calc_inf_mp(state):
         at[2:-2, 2:-2],
         npx.where(mask[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
+    mask = vs.S_lp_ss > vs.S_ac_ss
+    vs.inf_ss = update(
+        vs.inf_ss,
+        at[2:-2, 2:-2],
+        npx.where(mask[2:-2, 2:-2], vs.inf_ss[2:-2, 2:-2] - (vs.S_lp_ss[2:-2, 2:-2] - vs.S_ac_ss[2:-2, 2:-2]), vs.inf_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.inf_mp_ss = update(
+        vs.inf_mp_ss,
+        at[2:-2, 2:-2],
+        npx.where(mask[2:-2, 2:-2], vs.inf_mp_ss[2:-2, 2:-2] - (vs.S_lp_ss[2:-2, 2:-2] - vs.S_ac_ss[2:-2, 2:-2]), vs.inf_mp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.S_lp_ss = update(
+        vs.S_lp_ss,
+        at[2:-2, 2:-2],
+        npx.where(mask[2:-2, 2:-2], vs.S_ac_ss[2:-2, 2:-2], vs.S_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
 
     vs.inf_mp = update(
         vs.inf_mp,

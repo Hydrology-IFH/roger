@@ -17,9 +17,9 @@ import numpy as np
 Runs selected Roger benchmarks on bwForCluster BinAC back to back and writes timing results to a JSON file.
 """
 
-TESTDIR = Path(os.path.join(os.path.dirname(__file__), os.path.relpath("benchmarks")))
+TESTDIR = Path(os.path.join(os.path.dirname(__file__)))
 
-BACKENDS = ["numpy", "numpy-mpi", "jax", "jax-gpu", "jax-mpi", "jax-gpu-mpi"]
+BACKENDS = ["numpy", "numpy-mpi", "jax", "jax-gpu", "jax-mpi"]
 
 STATIC_SETTINGS = " --size {nx} {ny} --timesteps {timesteps} --float-type {float_type}"
 
@@ -29,7 +29,6 @@ BENCHMARK_COMMANDS = {
     "jax": "{python} {filename} --backend jax --device cpu" + STATIC_SETTINGS,
     "jax-gpu": "{python} {filename} --backend jax --device gpu" + STATIC_SETTINGS,
     "jax-mpi": "{python} {filename} --backend jax --device cpu -n {decomp}" + STATIC_SETTINGS,
-    "jax-gpu-mpi": "{python} {filename} --backend jax --device gpu -n {decomp}" + STATIC_SETTINGS,
 }
 
 AVAILABLE_BENCHMARKS = [f for f in os.listdir(TESTDIR.as_posix()) if f.endswith("_benchmark.py")]
@@ -101,7 +100,7 @@ def _round_to_multiple(num, divisor):
     default="benchmark_{}.json".format(time.time()),
     help="JSON file to write timings to",
 )
-@click.option("-t", "--timesteps", default=5, type=int, help="Number of days that each benchmark is run for")
+@click.option("-t", "--timesteps", default=30, type=int, help="Number of days that each benchmark is run for")
 @click.option(
     "--only",
     multiple=True,
@@ -114,7 +113,7 @@ def _round_to_multiple(num, divisor):
 @click.option("--mpiexec", default="mpirun", help="Executable used for calling MPI (e.g. mpirun, mpiexec)")
 @click.option("--debug", is_flag=True, help="Prints each command that is executed")
 @click.option("--local", is_flag=True, help="Run benchmark on local computer")
-@click.option("--float-type", default="float64", help="Data type for floating point arrays in Roger components")
+@click.option("--float-type", default="float32", help="Data type for floating point arrays in Roger components")
 @click.option("--burnin", default=3, type=int, help="Number of iterations to exclude in performance statistic")
 def run(**kwargs):
     proc_decom = _decompose_num(kwargs["nproc"], 2)
@@ -156,90 +155,76 @@ def run(**kwargs):
                 for backend in kwargs["backends"]:
                     cmd_sh = BENCHMARK_COMMANDS[backend].format(**cmd_args)
                     if kwargs["local"]:
-                        # write shell script to run job on local computer
+                        # write shell script to run job on a local computer (e.g. notebook)
                         lines = []
-                        lines.append('#!/bin/bash\n')
-                        lines.append(' \n')
-                        if backend in ['numpy']:
+                        lines.append("#!/bin/bash\n")
+                        lines.append(" \n")
+                        if backend in ["numpy"]:
                             lines.append('eval "$(conda shell.bash hook)"\n')
-                            lines.append('conda activate roger\n')
+                            lines.append("conda activate roger\n")
                             lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'{cmd_sh}\n')
-                        elif backend in ['jax']:
+                            lines.append(f"{cmd_sh}\n")
+                        elif backend in ["jax"]:
                             lines.append('eval "$(conda shell.bash hook)"\n')
-                            lines.append('conda activate roger\n')
+                            lines.append("conda activate roger\n")
                             lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'{cmd_sh}\n')
-                        elif backend in ['jax-gpu']:
+                            lines.append(f"{cmd_sh}\n")
+                        elif backend in ["jax-gpu"]:
                             lines.append('eval "$(conda shell.bash hook)"\n')
-                            lines.append('conda activate roger-gpu\n')
+                            lines.append("conda activate roger-gpu\n")
                             lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'{cmd_sh}\n')
-                        elif backend in ['numpy-mpi']:
+                            lines.append(f"{cmd_sh}\n")
+                        elif backend in ["numpy-mpi"]:
                             lines.append('eval "$(conda shell.bash hook)"\n')
-                            lines.append('conda activate roger-mpi\n')
+                            lines.append("conda activate roger-mpi\n")
                             lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'mpirun -n {nproc} {cmd_sh}\n')
-                        elif backend in ['jax-mpi']:
+                            lines.append(f"mpirun -n {nproc} {cmd_sh}\n")
+                        elif backend in ["jax-mpi"]:
                             lines.append('eval "$(conda shell.bash hook)"\n')
-                            lines.append('conda activate roger-mpi\n')
+                            lines.append("conda activate roger-mpi\n")
                             lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'mpirun -n {nproc} {cmd_sh}\n')
-                        elif backend in ['jax-gpu-mpi']:
-                            lines.append('eval "$(conda shell.bash hook)"\n')
-                            lines.append('conda activate roger-gpu\n')
-                            lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'MPI4JAX_USE_CUDA_MPI=1 mpirun -n {nproc} {cmd_sh}\n')
+                            lines.append(f"mpirun -n {nproc} {cmd_sh}\n")
                     else:
                         # write shell script to submit job to cluster
                         lines = []
-                        lines.append('#!/bin/bash\n')
-                        lines.append(' \n')
-                        if backend in ['numpy-mpi', 'jax-mpi']:
-                            lines.append('# load module dependencies\n')
-                            lines.append('module purge\n')
-                            lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
-                            lines.append('export OMP_NUM_THREADS=1\n')
-                            lines.append(' \n')
-                        elif backend in ['jax-gpu', 'jax-gpu-mpi']:
-                            lines.append('# load module dependencies\n')
-                            lines.append('module purge\n')
-                            lines.append('module load mpi/openmpi/4.1-gnu-9.2-cuda-11.4\n')
-                            lines.append('module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2\n')
-                            lines.append('module load lib/cudnn/8.2-cuda-11.4\n')
-                            lines.append('export OMP_NUM_THREADS=1\n')
-                            lines.append(' \n')
-                        if backend in ['numpy']:
+                        lines.append("#!/bin/bash\n")
+                        lines.append(" \n")
+                        if backend in ["numpy-mpi", "jax-mpi", "jax-gpu"]:
+                            lines.append("# load module dependencies\n")
+                            lines.append("module purge\n")
+                            lines.append("module load devel/cuda/10.2\n")
+                            lines.append("module load devel/cudnn/10.2\n")
+                            lines.append("module load lib/hdf5/1.12.2-gnu-12.1-openmpi-4.1\n")
+                            lines.append('export OMPI_MCA_btl="self,smcuda,vader,tcp"\n')
+                            lines.append("export OMP_NUM_THREADS=1\n")
+                            lines.append(" \n")
+
+                        if backend in ["numpy"]:
                             lines.append('eval "$(conda shell.bash hook)"\n')
-                            lines.append('conda activate roger\n')
+                            lines.append("conda activate roger\n")
                             lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'{cmd_sh}\n')
-                        elif backend in ['jax']:
+                            lines.append(f"{cmd_sh}\n")
+                        elif backend in ["jax"]:
                             lines.append('eval "$(conda shell.bash hook)"\n')
-                            lines.append('conda activate roger\n')
+                            lines.append("conda activate roger\n")
                             lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'{cmd_sh}\n')
-                        elif backend in ['jax-gpu']:
+                            lines.append(f"{cmd_sh}\n")
+                        elif backend in ["jax-gpu"]:
                             lines.append('eval "$(conda shell.bash hook)"\n')
-                            lines.append('conda activate roger-gpu\n')
+                            lines.append("conda activate roger-gpu\n")
                             lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'{cmd_sh}\n')
-                        elif backend in ['numpy-mpi']:
+                            lines.append(f"{cmd_sh}\n")
+                        elif backend in ["numpy-mpi"]:
                             lines.append('eval "$(conda shell.bash hook)"\n')
-                            lines.append('conda activate roger-mpi\n')
+                            lines.append("conda activate roger-mpi\n")
                             lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
-                        elif backend in ['jax-mpi']:
+                            lines.append(f"mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n")
+                        elif backend in ["jax-mpi"]:
                             lines.append('eval "$(conda shell.bash hook)"\n')
-                            lines.append('conda activate roger-mpi\n')
+                            lines.append("conda activate roger-mpi\n")
                             lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
-                        elif backend in ['jax-gpu-mpi']:
-                            lines.append('eval "$(conda shell.bash hook)"\n')
-                            lines.append('conda activate roger-gpu\n')
-                            lines.append(f'cd {cmd_args["dir"]}\n')
-                            lines.append(f'MPI4JAX_USE_CUDA_MPI=1 mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n')
-                    file_path = TESTDIR / 'job.sh'
+                            lines.append(f"mpirun --bind-to core --map-by core -report-bindings {cmd_sh}\n")
+                    file_path = TESTDIR / "job.sh"
                     file = open(file_path, "w")
                     file.writelines(lines)
                     file.close()
@@ -250,23 +235,18 @@ def run(**kwargs):
                         cmd = "./job.sh"
                     else:
                         # submit job to queue
-                        if backend in ['numpy', 'jax']:
-                            pmem_serial = int(4000 * (size / 100))
-                            if pmem_serial > 128000:
-                                pmem_serial = 128000
-                            cmd = f"qsub -q short -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=1,walltime=0:30:00,pmem={pmem_serial}mb job.sh"
-                        elif backend in ['numpy-mpi', 'jax-mpi']:
-                            if nproc <= 28:
+                        if backend in ["numpy", "jax"]:
+                            cmd = f"sbatch -p single --name={f.split('.')[0]}_{backend}_{real_size} --nodes=1 --ntasks=1 --time=01:00:00 --mem=180000 job.sh"
+                        elif backend in ["numpy-mpi", "jax-mpi"]:
+                            if nproc <= 40:
                                 nnodes = 1
                                 ppn = nproc
                             else:
-                                nnodes = int(np.ceil(nproc/28))
-                                ppn = 28
-                            cmd = f"qsub -q short -N {f.split('.')[0]}_{backend}_{real_size} -l nodes={nnodes}:ppn={ppn},walltime=0:30:00,pmem={pmem}mb job.sh"
-                        elif backend in ['jax-gpu']:
-                            cmd = f"qsub -q gpu -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=1:gpus=1:default,walltime=0:30:00,pmem=24000mb job.sh"
-                        elif backend in ['jax-gpu-mpi']:
-                            cmd = f"qsub -q gpu -N {f.split('.')[0]}_{backend}_{real_size} -l nodes=1:ppn=2:gpus=2:default,walltime=0:30:00,pmem=24000mb job.sh"
+                                nnodes = int(np.ceil(nproc / 40))
+                                ppn = 40
+                            cmd = f"sbatch -p single --name={f.split('.')[0]}_{backend}_{real_size} --nodes={nnodes} --ntasks={ppn} --time=01:00:00 --mem-per-cpu={pmem} job.sh"
+                        elif backend in ["jax-gpu"]:
+                            cmd = f"sbatch -p gpu_4_h100 --name={f.split('.')[0]}_{backend}_{real_size} --nodes=1 --ntasks=1 --gres=gpu:1 --time=01:00:00 --mem=127500 job.sh"
 
                     if kwargs["debug"]:
                         click.echo(f"  $ {cmd}")
@@ -310,7 +290,7 @@ def run(**kwargs):
                             # submit job
                             job_id1 = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
                             job_id1 = job_id1.decode("utf-8")
-                            job_id = re.sub(r'[\n]', '', job_id1)
+                            job_id = re.sub(r"[\n]", "", job_id1)
                         except subprocess.CalledProcessError as e:
                             click.echo("failed")
                             click.echo(e.output.decode("utf-8"))

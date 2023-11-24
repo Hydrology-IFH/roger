@@ -304,7 +304,6 @@ VARIABLES = {
         "Year",
         dtype="int32",
         write_to_restart=True,
-        active=lambda settings: settings.enable_nitrate,
     ),
     "month": Variable(
         "Month at current iteration",
@@ -313,6 +312,14 @@ VARIABLES = {
         "Month at Current iteration",
         dtype="int32",
         initial=1,
+        write_to_restart=True,
+    ),
+    "MONTH": Variable(
+        "Month",
+        TIME_FORCING,
+        "",
+        "Month",
+        dtype="int32",
         write_to_restart=True,
     ),
     "doy": Variable(
@@ -331,7 +338,6 @@ VARIABLES = {
         "Day of year",
         dtype="int32",
         write_to_restart=True,
-        active=lambda settings: settings.enable_nitrate,
     ),
     "dt": Variable(
         "time step",

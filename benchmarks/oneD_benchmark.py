@@ -15,7 +15,7 @@ def main(size, timesteps):
 
     class ONED2Benchmark(ONEDSetup):
         _base_path = Path(__file__).parent
-        _input_dir = _base_path / 'input' / 'oneD_benchmark'
+        _input_dir = _base_path / "input" / "oneD_benchmark"
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = self._input_dir / file
@@ -26,13 +26,13 @@ def main(size, timesteps):
         def _get_nitt(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['Time']
+                var_obj = infile.variables["Time"]
                 return len(onp.array(var_obj))
 
         def _get_time_origin(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
-                var_obj = infile.variables['Time'].attrs['time_origin']
+                var_obj = infile.variables["Time"].attrs["time_origin"]
                 return str(var_obj)
 
         @roger_routine
@@ -43,7 +43,7 @@ def main(size, timesteps):
             # total grid numbers in x- and y-direction
             settings.nx, settings.ny = size
             settings.runlen = 24 * 60 * 60 * timesteps
-            settings.nitt_forc = self._get_nitt(self._input_dir, 'forcing.nc')
+            settings.nitt_forc = self._get_nitt(self._input_dir, "forcing.nc")
 
             # spatial discretization (in meters)
             settings.dx = 1
@@ -51,7 +51,7 @@ def main(size, timesteps):
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0
-            settings.time_origin = self._get_time_origin(self._input_dir, 'forcing.nc')
+            settings.time_origin = self._get_time_origin(self._input_dir, "forcing.nc")
 
             # enable specific processes
             settings.enable_lateral_flow = True
@@ -144,23 +144,23 @@ def main(size, timesteps):
             vs = state.variables
 
             # interception storage of upper surface layer (mm)
-            vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, :vs.taup1], 0)
+            vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, : vs.taup1], 0)
             # snow water equivalent stored in upper surface layer (mm)
-            vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, :vs.taup1], 0)
+            vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, : vs.taup1], 0)
             # interception storage of lower surface layer (mm)
-            vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, :vs.taup1], 0)
+            vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, : vs.taup1], 0)
             # snow water equivalent stored in lower surface layer (mm)
-            vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, :vs.taup1], 0)
+            vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, : vs.taup1], 0)
             # surface depression storage (mm)
-            vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
+            vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, : vs.taup1], 0)
             # snow cover storage (mm)
-            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
+            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, : vs.taup1], 0)
             # snow water equivalent of snow cover (mm)
-            vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
+            vs.swe = update(vs.swe, at[2:-2, 2:-2, : vs.taup1], 0)
             # soil water content of root zone/upper soil layer (-)
-            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], 0.3)
+            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, : vs.taup1], 0.3)
             # soil water content of subsoil/lower soil layer (-)
-            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], 0.3)
+            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, : vs.taup1], 0.3)
 
         @roger_routine
         def set_boundary_conditions_setup(self, state):
@@ -176,28 +176,40 @@ def main(size, timesteps):
                 "PREC",
                 "TA",
                 "PET",
+                "YEAR",
+                "MONTH",
+                "DOY",
             ],
         )
         def set_forcing_setup(self, state):
             vs = state.variables
 
-            vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[0, 0, :])
-            vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[0, 0, :])
-            vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[0, 0, :])
+            vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, "forcing.nc")[0, 0, :])
+            vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, "forcing.nc")[0, 0, :])
+            vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[0, 0, :])
+            vs.YEAR = update(vs.YEAR, at[:], self._read_var_from_nc("YEAR", self._input_dir, "forcing.nc"))
+            vs.MONTH = update(vs.MONTH, at[:], self._read_var_from_nc("MONTH", self._input_dir, "forcing.nc"))
+            vs.DOY = update(vs.DOY, at[:], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc"))
 
         @roger_routine
         def set_forcing(self, state):
             vs = state.variables
 
-            condt = (vs.time % (24 * 60 * 60) == 0)
+            condt = vs.time % (24 * 60 * 60) == 0
             if condt:
                 vs.itt_day = 0
-                vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, 'forcing.nc')[vs.itt_forc])
-                vs.month = update(vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, 'forcing.nc')[vs.itt_forc])
-                vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, 'forcing.nc')[vs.itt_forc])
-                vs.prec_day = update(vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
-                vs.ta_day = update(vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
-                vs.pet_day = update(vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
+                vs.year = update(vs.year, at[1], vs.YEAR[vs.itt_forc])
+                vs.month = update(vs.month, at[1], vs.MONTH[vs.itt_forc])
+                vs.doy = update(vs.doy, at[1], vs.DOY[vs.itt_forc])
+                vs.prec_day = update(
+                    vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                )
+                vs.ta_day = update(
+                    vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                )
+                vs.pet_day = update(
+                    vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                )
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
         @roger_routine
@@ -217,139 +229,173 @@ def main(size, timesteps):
 
         vs.ta = update(
             vs.ta,
-            at[2:-2, 2:-2, vs.taum1], vs.ta[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.ta[2:-2, 2:-2, vs.tau],
         )
         vs.z_root = update(
             vs.z_root,
-            at[2:-2, 2:-2, vs.taum1], vs.z_root[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.z_root[2:-2, 2:-2, vs.tau],
         )
         vs.ground_cover = update(
             vs.ground_cover,
-            at[2:-2, 2:-2, vs.taum1], vs.ground_cover[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.ground_cover[2:-2, 2:-2, vs.tau],
         )
         vs.S_sur = update(
             vs.S_sur,
-            at[2:-2, 2:-2, vs.taum1], vs.S_sur[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_sur[2:-2, 2:-2, vs.tau],
         )
         vs.S_int_top = update(
             vs.S_int_top,
-            at[2:-2, 2:-2, vs.taum1], vs.S_int_top[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_int_top[2:-2, 2:-2, vs.tau],
         )
         vs.S_int_ground = update(
             vs.S_int_ground,
-            at[2:-2, 2:-2, vs.taum1], vs.S_int_ground[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_int_ground[2:-2, 2:-2, vs.tau],
         )
         vs.S_dep = update(
             vs.S_dep,
-            at[2:-2, 2:-2, vs.taum1], vs.S_dep[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_dep[2:-2, 2:-2, vs.tau],
         )
         vs.S_snow = update(
             vs.S_snow,
-            at[2:-2, 2:-2, vs.taum1], vs.S_snow[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_snow[2:-2, 2:-2, vs.tau],
         )
         vs.swe = update(
             vs.swe,
-            at[2:-2, 2:-2, vs.taum1], vs.swe[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.swe[2:-2, 2:-2, vs.tau],
         )
         vs.S_rz = update(
             vs.S_rz,
-            at[2:-2, 2:-2, vs.taum1], vs.S_rz[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_rz[2:-2, 2:-2, vs.tau],
         )
         vs.S_ss = update(
             vs.S_ss,
-            at[2:-2, 2:-2, vs.taum1], vs.S_ss[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_ss[2:-2, 2:-2, vs.tau],
         )
         vs.S_s = update(
             vs.S_s,
-            at[2:-2, 2:-2, vs.taum1], vs.S_s[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S_s[2:-2, 2:-2, vs.tau],
         )
         vs.S = update(
             vs.S,
-            at[2:-2, 2:-2, vs.taum1], vs.S[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.S[2:-2, 2:-2, vs.tau],
         )
         vs.z_sat = update(
             vs.z_sat,
-            at[2:-2, 2:-2, vs.taum1], vs.z_sat[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.z_sat[2:-2, 2:-2, vs.tau],
         )
         vs.z_wf = update(
             vs.z_wf,
-            at[2:-2, 2:-2, vs.taum1], vs.z_wf[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.z_wf[2:-2, 2:-2, vs.tau],
         )
         vs.z_wf_t0 = update(
             vs.z_wf_t0,
-            at[2:-2, 2:-2, vs.taum1], vs.z_wf_t0[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.z_wf_t0[2:-2, 2:-2, vs.tau],
         )
         vs.z_wf_t1 = update(
             vs.z_wf_t1,
-            at[2:-2, 2:-2, vs.taum1], vs.z_wf_t1[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.z_wf_t1[2:-2, 2:-2, vs.tau],
         )
         vs.y_mp = update(
             vs.y_mp,
-            at[2:-2, 2:-2, vs.taum1], vs.y_mp[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.y_mp[2:-2, 2:-2, vs.tau],
         )
         vs.y_sc = update(
             vs.y_sc,
-            at[2:-2, 2:-2, vs.taum1], vs.y_sc[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.y_sc[2:-2, 2:-2, vs.tau],
         )
         vs.theta_rz = update(
             vs.theta_rz,
-            at[2:-2, 2:-2, vs.taum1], vs.theta_rz[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.theta_rz[2:-2, 2:-2, vs.tau],
         )
         vs.theta_ss = update(
             vs.theta_ss,
-            at[2:-2, 2:-2, vs.taum1], vs.theta_ss[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.theta_ss[2:-2, 2:-2, vs.tau],
         )
         vs.theta = update(
             vs.theta,
-            at[2:-2, 2:-2, vs.taum1], vs.theta[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.theta[2:-2, 2:-2, vs.tau],
         )
         vs.k_rz = update(
             vs.k_rz,
-            at[2:-2, 2:-2, vs.taum1], vs.k_rz[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.k_rz[2:-2, 2:-2, vs.tau],
         )
         vs.k_ss = update(
             vs.k_ss,
-            at[2:-2, 2:-2, vs.taum1], vs.k_ss[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.k_ss[2:-2, 2:-2, vs.tau],
         )
         vs.k = update(
             vs.k,
-            at[2:-2, 2:-2, vs.taum1], vs.k[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.k[2:-2, 2:-2, vs.tau],
         )
         vs.h_rz = update(
             vs.h_rz,
-            at[2:-2, 2:-2, vs.taum1], vs.h_rz[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.h_rz[2:-2, 2:-2, vs.tau],
         )
         vs.h_ss = update(
             vs.h_ss,
-            at[2:-2, 2:-2, vs.taum1], vs.h_ss[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.h_ss[2:-2, 2:-2, vs.tau],
         )
         vs.h = update(
             vs.h,
-            at[2:-2, 2:-2, vs.taum1], vs.h[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.h[2:-2, 2:-2, vs.tau],
         )
         vs.z0 = update(
             vs.z0,
-            at[2:-2, 2:-2, vs.taum1], vs.z0[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.z0[2:-2, 2:-2, vs.tau],
         )
         vs.prec = update(
             vs.prec,
-            at[2:-2, 2:-2, vs.taum1], vs.prec[2:-2, 2:-2, vs.tau],
+            at[2:-2, 2:-2, vs.taum1],
+            vs.prec[2:-2, 2:-2, vs.tau],
         )
         vs.event_id = update(
             vs.event_id,
-            at[vs.taum1], vs.event_id[vs.tau],
+            at[vs.taum1],
+            vs.event_id[vs.tau],
         )
         vs.year = update(
             vs.year,
-            at[vs.taum1], vs.year[vs.tau],
+            at[vs.taum1],
+            vs.year[vs.tau],
         )
         vs.month = update(
             vs.month,
-            at[vs.taum1], vs.month[vs.tau],
+            at[vs.taum1],
+            vs.month[vs.tau],
         )
         vs.doy = update(
             vs.doy,
-            at[vs.taum1], vs.doy[vs.tau],
+            at[vs.taum1],
+            vs.doy[vs.tau],
         )
 
         return KernelOutput(
