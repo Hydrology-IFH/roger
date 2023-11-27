@@ -6,9 +6,9 @@
 #SBATCH --mem=4000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
-#SBATCH --job-name=svat18O
-#SBATCH --output=svat18O.out
-#SBATCH --error=svat18O_err.out
+#SBATCH --job-name=svat
+#SBATCH --output=svat.out
+#SBATCH --error=svat_err.out
 #SBATCH --export=ALL
  
 eval "$(conda shell.bash hook)"

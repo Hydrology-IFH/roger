@@ -107,13 +107,9 @@ def main(tmp_dir):
         "piston",
         "advection-dispersion-power",
         "time-variant advection-dispersion-power",
-        "preferential-power",
-        "older-preference-power",
-        "advection-dispersion-kumaraswamy",
-        "time-variant advection-dispersion-kumaraswamy",
     ]:
         tms = tm_structure.replace(" ", "_")
-        file = base_path / "svat_oxygen18_monte_carlo" / "figures" / f"params_metrics_{tms}.txt"
+        file = base_path / "svat_oxygen18_monte_carlo" / "output" / f"params_metrics_{tms}.txt"
         df_params_metrics = pd.read_csv(file, sep="\t")
         dict_params_metrics_tm_mc[tm_structure] = {}
         dict_params_metrics_tm_mc[tm_structure]["params_metrics"] = df_params_metrics
@@ -230,17 +226,16 @@ def main(tmp_dir):
     # compare age statistics
     df_age = pd.DataFrame(index=["MTT_transp", "MTT_perc"], columns=["CM", "PI", "AD", "AD-TV", "HYDRUS-1D"])
     for i, tm_structure in enumerate(tm_structures):
-        idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
         tms = tm_structure.replace(" ", "_")
         # load transport simulation
         states_tm_file = base_path / "svat_oxygen18" / "output" / f"states_{tms}.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
-        for j, age_metric in enumerate("ttavg_transp", "ttavg_q_ss"):
-            df_age.iloc[j, i] = onp.nanmean(ds_sim_tm[age_metric].isel(x=idx_best, y=0).values)
+        for j, age_metric in enumerate(["ttavg_transp", "ttavg_q_ss"]):
+            df_age.iloc[j, i] = onp.nanmean(ds_sim_tm[age_metric].values)
 
     TT = onp.where(ds_hydrus_tt["bTT_perc"].values <= 0, onp.nan, ds_hydrus_tt["bTT_perc"].values)
     skipt = 1000
-    df_age.iloc["MTT", "HYDRUS-1D"] = onp.nanmean(TT[skipt:, :], axis=0)
+    df_age.loc["MTT_perc", "HYDRUS-1D"] = int(onp.nansum(onp.diff(onp.nanmean(TT, axis=0)) * onp.arange(1, 4018)))
 
     plt.close("all")
     return

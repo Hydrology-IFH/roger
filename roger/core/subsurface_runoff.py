@@ -940,6 +940,23 @@ def calc_percolation_rz(state):
         npx.where(mask[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
+    mask = vs.S_lp_ss > vs.S_ac_ss
+    vs.q_rz = update_add(
+        vs.q_rz,
+        at[2:-2, 2:-2],
+        npx.where(mask[2:-2, 2:-2], -(vs.S_lp_ss[2:-2, 2:-2] - vs.S_ac_ss[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.S_lp_rz = update_add(
+        vs.S_lp_rz,
+        at[2:-2, 2:-2],
+        npx.where(mask[2:-2, 2:-2], vs.S_lp_ss[2:-2, 2:-2] - vs.S_ac_ss[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.S_lp_ss = update(
+        vs.S_lp_ss,
+        at[2:-2, 2:-2],
+        npx.where(mask[2:-2, 2:-2], vs.S_ac_ss[2:-2, 2:-2], vs.S_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     return KernelOutput(q_rz=vs.q_rz, S_fp_rz=vs.S_fp_rz, S_lp_rz=vs.S_lp_rz, S_fp_ss=vs.S_fp_ss, S_lp_ss=vs.S_lp_ss)
 
 
@@ -1324,6 +1341,12 @@ def calc_subsurface_runoff_routing_1D(state):
             0,
         )
         * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.q_sur = update_add(
+        vs.q_sur,
+        at[2:-2, 2:-2],
+        vs.q_sof[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     # add saturation overland flow to surface ponding

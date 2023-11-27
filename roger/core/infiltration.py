@@ -960,21 +960,28 @@ def calc_inf_mp(state):
         at[2:-2, 2:-2],
         npx.where(mask[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
+
     mask = vs.S_lp_ss > vs.S_ac_ss
-    vs.inf_ss = update(
-        vs.inf_ss,
+    vs.inf_mp_ss = update_add(
+        vs.inf_mp_ss,
         at[2:-2, 2:-2],
-        npx.where(mask[2:-2, 2:-2], vs.inf_ss[2:-2, 2:-2] - (vs.S_lp_ss[2:-2, 2:-2] - vs.S_ac_ss[2:-2, 2:-2]), vs.inf_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        npx.where(mask[2:-2, 2:-2], -(vs.S_lp_ss[2:-2, 2:-2] - vs.S_ac_ss[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.inf_mp_ss = update(
         vs.inf_mp_ss,
         at[2:-2, 2:-2],
-        npx.where(mask[2:-2, 2:-2], vs.inf_mp_ss[2:-2, 2:-2] - (vs.S_lp_ss[2:-2, 2:-2] - vs.S_ac_ss[2:-2, 2:-2]), vs.inf_mp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        npx.where(vs.inf_mp_ss[2:-2, 2:-2] < 0, 0, vs.inf_mp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.S_lp_ss = update(
         vs.S_lp_ss,
         at[2:-2, 2:-2],
         npx.where(mask[2:-2, 2:-2], vs.S_ac_ss[2:-2, 2:-2], vs.S_lp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.inf_mp = update(
+        vs.inf_mp,
+        at[2:-2, 2:-2],
+        0,
     )
 
     vs.inf_mp = update(
@@ -1358,13 +1365,55 @@ def calc_inf_rz(state):
         npx.where(mask[2:-2, 2:-2], vs.S_ufc_rz[2:-2, 2:-2], vs.S_fp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
+    mask = vs.S_lp_rz > vs.S_ac_rz
+    vs.inf_mp_rz = update_add(
+        vs.inf_mp_rz,
+        at[2:-2, 2:-2],
+        npx.where(mask[2:-2, 2:-2], -(vs.S_lp_rz[2:-2, 2:-2] - vs.S_ac_rz[2:-2, 2:-2]), 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.inf_mp_rz = update(
+        vs.inf_mp_rz,
+        at[2:-2, 2:-2],
+        npx.where(vs.inf_mp_rz[2:-2, 2:-2] < 0, 0, vs.inf_mp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.z0 = update_add(
+        vs.z0,
+        at[2:-2, 2:-2, vs.tau],
+        npx.where(mask[2:-2, 2:-2], vs.S_lp_rz[2:-2, 2:-2] - vs.S_ac_rz[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.S_lp_rz = update(
+        vs.S_lp_rz,
+        at[2:-2, 2:-2],
+        npx.where(mask[2:-2, 2:-2], vs.S_ac_rz[2:-2, 2:-2], vs.S_lp_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.inf_mp = update(
+        vs.inf_mp,
+        at[2:-2, 2:-2],
+        0,
+    )
+
+    vs.inf_mp = update(
+        vs.inf_mp,
+        at[2:-2, 2:-2],
+        vs.inf_mp_rz[2:-2, 2:-2] + vs.inf_mp_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.inf_rz = update(
+        vs.inf_rz,
+        at[2:-2, 2:-2],
+        (vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_mp_rz[2:-2, 2:-2] + vs.inf_sc_rz[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     return KernelOutput(
         inf_mat_rz=vs.inf_mat_rz,
         inf_mp_rz=vs.inf_mp_rz,
         inf_sc_rz=vs.inf_sc_rz,
         inf_rz=vs.inf_rz,
+        inf_mp=vs.inf_mp,
         S_fp_rz=vs.S_fp_rz,
         S_lp_rz=vs.S_lp_rz,
+        z0=vs.z0,
     )
 
 
@@ -1385,7 +1434,7 @@ def calc_hof_and_sof(state):
         vs.q_hof,
         at[2:-2, 2:-2],
         npx.where(
-            (vs.S_rz[2:-2, 2:-2, vs.tau] < vs.S_sat_rz[2:-2, 2:-2]),
+            (vs.S_rz[2:-2, 2:-2, vs.tau] <= vs.S_sat_rz[2:-2, 2:-2]),
             vs.z0[2:-2, 2:-2, vs.tau],
             0,
         )
@@ -1409,7 +1458,7 @@ def calc_hof_and_sof(state):
         at[2:-2, 2:-2],
         npx.where(
             ((vs.S_lp_rz[2:-2, 2:-2] + vs.S_fp_rz[2:-2, 2:-2]) > (vs.S_ac_rz[2:-2, 2:-2] + vs.S_ufc_rz[2:-2, 2:-2]))
-            & ((vs.S_lp_ss[2:-2, 2:-2] + vs.S_fp_ss[2:-2, 2:-2]) > (vs.S_ac_ss[2:-2, 2:-2] + vs.S_ufc_ss[2:-2, 2:-2])),
+            & ((vs.S_lp_ss[2:-2, 2:-2] + vs.S_fp_ss[2:-2, 2:-2]) >= (vs.S_ac_ss[2:-2, 2:-2] + vs.S_ufc_ss[2:-2, 2:-2])),
             (vs.S_lp_rz[2:-2, 2:-2] + vs.S_fp_rz[2:-2, 2:-2]) - (vs.S_ac_rz[2:-2, 2:-2] + vs.S_ufc_rz[2:-2, 2:-2]),
             0,
         )
@@ -1453,7 +1502,13 @@ def calc_surface_runoff(state):
     vs.q_sur = update(
         vs.q_sur,
         at[2:-2, 2:-2],
-        vs.q_hof[2:-2, 2:-2] + vs.q_sof[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        0,
+    )
+
+    vs.q_sur = update_add(
+        vs.q_sur,
+        at[2:-2, 2:-2],
+        vs.q_hof[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.q_sur = update_add(

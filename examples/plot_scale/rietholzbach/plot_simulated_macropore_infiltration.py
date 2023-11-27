@@ -36,6 +36,7 @@ sns.plotting_context(
     },
 )
 
+
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir):
@@ -225,7 +226,8 @@ def main(tmp_dir):
 
     fig, axes = plt.subplots(1, 1, sharex="col", figsize=(6, 1.5))
     prec = ds_sim_hm100["prec"].isel(x=0, y=0).values
-    axes.plot(ds_sim_hm100["Time"].values, prec, lw=1, color="blue", ls="-", label="Precipitation")
+    prec_cum = onp.cumsum(prec)
+    axes.plot(ds_sim_hm100["Time"].values, prec_cum, lw=1, color="blue", ls="-", label="Precipitation")
     for x in range(100):
         sim_vals = (
             ds_sim_hm100["inf_mat_rz"].isel(x=x, y=0).values
@@ -237,7 +239,7 @@ def main(tmp_dir):
         axes.plot(ds_sim_hm100["Time"].values, sim_vals_cum, lw=1, color="red", ls="-", alpha=0.8)
         sim_vals = ds_sim_hm100["inf_mp_rz"].isel(x=x, y=0).values + ds_sim_hm100["inf_ss"].isel(x=x, y=0).values
         sim_vals_cum = onp.cumsum(sim_vals)
-        axes.plot(ds_sim_hm100["Time"].values, sim_vals_cum, lw=1, color="red", ls=":", alpha=1)
+        axes.plot(ds_sim_hm100["Time"].values, sim_vals_cum, lw=1, color="orange", ls=":", alpha=1)
     axes.plot(
         ds_sim_hm100["Time"].values, sim_vals_cum, lw=1, color="red", ls="-", alpha=0.8, label="Total infiltration"
     )
@@ -274,7 +276,6 @@ def main(tmp_dir):
     axes.plot(ds_sim_hm100["Time"].values, sim_vals_50, lw=1, color="red", ls="-", label="Total infiltration")
     axes.fill_between(ds_sim_hm100["Time"].values, sim_vals_5, sim_vals_95, color="red", edgecolor=None, alpha=0.2)
     sim_vals = ds_sim_hm100["inf_mp_rz"].isel(y=0).values + ds_sim_hm100["inf_ss"].isel(y=0).values
-    sim_vals = onp.cumsum(sim_vals, axis=1)
     sim_vals_5 = onp.nanquantile(sim_vals, 0.05, axis=0)
     sim_vals_50 = onp.nanmedian(sim_vals, axis=0)
     sim_vals_95 = onp.nanquantile(sim_vals, 0.95, axis=0)
@@ -345,9 +346,9 @@ def main(tmp_dir):
     axes.plot(ds_sim_hm100["Time"].values, prec_cum, lw=1, color="blue", ls="-", label="Precipitation")
     sim_vals = (
         ds_sim_hm100["inf_mat_rz"].isel(y=0).values
-        + ds_sim_hm100["inf_mp_rz"].isel(x=0, y=0).values
-        + ds_sim_hm100["inf_sc_rz"].isel(x=0, y=0).values
-        + ds_sim_hm100["inf_ss"].isel(x=0, y=0).values
+        + ds_sim_hm100["inf_mp_rz"].isel(y=0).values
+        + ds_sim_hm100["inf_sc_rz"].isel(y=0).values
+        + ds_sim_hm100["inf_ss"].isel(y=0).values
     )
     sim_vals_cum = onp.cumsum(sim_vals, axis=1)
     sim_vals_cum_5 = onp.nanquantile(sim_vals_cum, 0.05, axis=0)

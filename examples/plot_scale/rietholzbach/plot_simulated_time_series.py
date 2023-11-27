@@ -434,7 +434,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["AET"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["AET"].loc["1997-01-07":"1999", "sim"],
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     ax2.set_ylim(
@@ -470,7 +470,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["AET"].loc["2006":, :].index,
         dict_obs_sim_hydrus["AET"].loc["2006":, "sim"],
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     ax2.set_ylim(
@@ -481,7 +481,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["dWEIGHT"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["dWEIGHT"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[1, 0].set_ylabel("cum. $\Delta$S\n[mm]")
@@ -503,7 +503,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["dWEIGHT"].loc["2006":, :].index,
         dict_obs_sim_hydrus["dWEIGHT"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[1, 1].set_ylabel("cum. $\Delta$S\n[mm]")
@@ -522,7 +522,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["PERC"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["PERC"].loc["1997-01-07":"1999", "sim"],
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[2, 0].set_ylim(
@@ -551,7 +551,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["PERC"].loc["2006":, :].index,
         dict_obs_sim_hydrus["PERC"].loc["2006":, "sim"],
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[2, 1].set_ylim(
@@ -641,7 +641,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["PERC"].loc["2006":, :].index,
         dict_obs_sim_hydrus["PERC"].loc["2006":, "sim"],
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes.set_ylim(
@@ -769,7 +769,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["AET"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["AET"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     ax2.set_ylim(
@@ -812,7 +812,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["AET"].loc["2006":, :].index,
         dict_obs_sim_hydrus["AET"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     ax2.set_ylim(
@@ -830,7 +830,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["dWEIGHT"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["dWEIGHT"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[1, 0].set_ylabel("cum. $\Delta$S\n[mm]")
@@ -859,7 +859,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["dWEIGHT"].loc["2006":, :].index,
         dict_obs_sim_hydrus["dWEIGHT"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[1, 1].set_ylabel("cum. $\Delta$S\n[mm]")
@@ -885,7 +885,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["PERC"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["PERC"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[2, 0].set_ylim(
@@ -921,7 +921,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["PERC"].loc["2006":, :].index,
         dict_obs_sim_hydrus["PERC"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[2, 1].set_ylim(
@@ -1039,7 +1039,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["AET"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["AET"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     ax2.set_ylim(
@@ -1082,7 +1082,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["AET"].loc["2006":, :].index,
         dict_obs_sim_hydrus["AET"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     ax2.set_ylim(
@@ -1100,7 +1100,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["dWEIGHT"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["dWEIGHT"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[1, 0].set_ylabel("cum. $\Delta$S\n[mm]")
@@ -1129,7 +1129,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["dWEIGHT"].loc["2006":, :].index,
         dict_obs_sim_hydrus["dWEIGHT"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[1, 1].set_ylabel("cum. $\Delta$S\n[mm]")
@@ -1155,7 +1155,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["PERC"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["PERC"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[2, 0].set_ylim(
@@ -1191,7 +1191,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["PERC"].loc["2006":, :].index,
         dict_obs_sim_hydrus["PERC"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[2, 1].set_ylim(
@@ -1313,7 +1313,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["AET"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["AET"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     ax2.set_ylim(
@@ -1358,7 +1358,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["AET"].loc["2006":, :].index,
         dict_obs_sim_hydrus["AET"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     ax2.set_ylim(
@@ -1377,7 +1377,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["dWEIGHT"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["dWEIGHT"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
         alpha=0.8,
     )
@@ -1408,7 +1408,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["dWEIGHT"].loc["2006":, :].index,
         dict_obs_sim_hydrus["dWEIGHT"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
         alpha=0.8,
     )
@@ -1437,7 +1437,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["PERC"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["PERC"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[2, 0].set_ylim(
@@ -1475,7 +1475,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["PERC"].loc["2006":, :].index,
         dict_obs_sim_hydrus["PERC"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[2, 1].set_ylim(
@@ -1595,7 +1595,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["AET"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["AET"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     ax2.set_ylim(
@@ -1640,7 +1640,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["AET"].loc["2006":, :].index,
         dict_obs_sim_hydrus["AET"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     ax2.set_ylim(
@@ -1659,7 +1659,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["dWEIGHT"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["dWEIGHT"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
         alpha=0.8,
     )
@@ -1690,7 +1690,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["dWEIGHT"].loc["2006":, :].index,
         dict_obs_sim_hydrus["dWEIGHT"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
         alpha=0.8,
     )
@@ -1719,7 +1719,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["PERC"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["PERC"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[2, 0].set_ylim(
@@ -1857,7 +1857,7 @@ def main(tmp_dir):
             dict_obs_sim_hydrus["AET"].loc[f"{year}", :].index,
             dict_obs_sim_hydrus["AET"].loc[f"{year}", "sim"],
             lw=1,
-            color="grey",
+            color="black",
             ls="-.",
             alpha=1,
         )
@@ -1886,7 +1886,7 @@ def main(tmp_dir):
             dict_obs_sim_hydrus["dWEIGHT"].loc[f"{year}", :].index,
             dict_obs_sim_hydrus["dWEIGHT"].loc[f"{year}", "sim"],
             lw=1,
-            color="grey",
+            color="black",
             ls="-.",
             alpha=1,
         )
@@ -1912,7 +1912,7 @@ def main(tmp_dir):
             dict_obs_sim_hydrus["PERC"].loc[f"{year}", :].index,
             dict_obs_sim_hydrus["PERC"].loc[f"{year}", "sim"],
             lw=1,
-            color="grey",
+            color="black",
             ls="-.",
             alpha=1,
         )
@@ -2065,7 +2065,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["AET"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["AET"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     ax2.set_ylim(
@@ -2108,7 +2108,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["AET"].loc["2006":, :].index,
         dict_obs_sim_hydrus["AET"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     ax2.set_ylim(
@@ -2126,7 +2126,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["dWEIGHT"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["dWEIGHT"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[1, 0].set_ylabel("cum. $\Delta$S\n[mm]")
@@ -2155,7 +2155,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["dWEIGHT"].loc["2006":, :].index,
         dict_obs_sim_hydrus["dWEIGHT"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[1, 1].set_ylabel("cum. $\Delta$S\n[mm]")
@@ -2181,7 +2181,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["PERC"].loc["1997-01-07":"1999", :].index,
         dict_obs_sim_hydrus["PERC"].loc["1997-01-07":"1999", "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[2, 0].set_ylim(
@@ -2217,7 +2217,7 @@ def main(tmp_dir):
         dict_obs_sim_hydrus["PERC"].loc["2006":, :].index,
         dict_obs_sim_hydrus["PERC"].loc["2006":, "sim"].cumsum(),
         lw=1,
-        color="gray",
+        color="black",
         ls="-.",
     )
     axes[2, 1].set_ylim(
@@ -2309,7 +2309,7 @@ def main(tmp_dir):
         file = (
             base_path
             / "svat_oxygen18_monte_carlo"
-            / "figures"
+            / "output"
             / f"params_metrics_{tms}.txt"
         )
         df_params_metrics = pd.read_csv(file, sep="\t")
@@ -2320,13 +2320,16 @@ def main(tmp_dir):
     fig, ax = plt.subplots(5, 1, sharex=True, figsize=(6, 6), gridspec_kw = {'height_ratios':[2.5,1,2,1,1]})
     df_obs = pd.DataFrame(index=date_obs)
     df_obs.loc[:, "d18O_prec"] = ds_obs["d18O_PREC"].isel(x=0, y=0).values
-    ax.flatten()[0].plot(df_obs.index, df_obs.loc[:, "d18O_prec"].fillna(method="bfill"), "-", color="blue")
+    ax.flatten()[0].plot(df_obs.index, df_obs.loc[:, "d18O_prec"].bfill(), "-", color="blue")
     ax.flatten()[0].scatter(df_obs.index, df_obs.loc[:, "d18O_prec"], color="blue", s=1)
     ax.flatten()[0].set_ylabel(r"$\delta^{18}$$O_{PRECIP}$ [‰]")
     ax.flatten()[0].set_ylim([-20, 0])
     ax.flatten()[0].set_xlim(df_obs.index[0], df_obs.index[-1])
     for i, tm_structure in enumerate(tm_structures):
-        idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
+        if tm_structure == "complete-mixing":
+            idx_best = 66
+        else:
+            idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
         tms = tm_structure.replace(" ", "_")
         # load transport simulation
         states_tm_file = (
@@ -2351,7 +2354,7 @@ def main(tmp_dir):
         ax.flatten()[i + 1].plot(
             ds_sim_tm["Time"].values, ds_sim_tm["C_iso_q_ss"].isel(x=idx_best, y=0).values, color="red", lw=1
         )
-        ax.flatten()[i + 1].plot(ds_hydrus_18O["Time"].values, ds_hydrus_18O["d18O_perc"].values, color="grey", lw=1)
+        ax.flatten()[i + 1].plot(ds_hydrus_18O["Time"].values, ds_hydrus_18O["d18O_perc"].values, color="black", lw=1)
         ax.flatten()[i + 1].scatter(df_obs.index, df_obs.iloc[:, 0], color="blue", s=1)
         ax[i + 1].set_ylabel("%s\n$\delta^{18}$$O_{PERC}$ [‰]" % (_LABS_TM[tm_structure]))
         if tm_structure in ["piston"]:
@@ -2373,13 +2376,16 @@ def main(tmp_dir):
         df_obs = pd.DataFrame(index=date_obs)
         df_obs.loc[:, "d18O_prec"] = ds_obs["d18O_PREC"].isel(x=0, y=0).values
         df_obs = df_obs.loc[f"{year}":f"{year+2}", "d18O_prec"].to_frame()
-        ax.flatten()[0].plot(df_obs.index, df_obs.loc[:, "d18O_prec"].fillna(method="bfill"), "-", color="blue")
+        ax.flatten()[0].plot(df_obs.index, df_obs.loc[:, "d18O_prec"].bfill(), "-", color="blue")
         ax.flatten()[0].scatter(df_obs.index, df_obs.loc[:, "d18O_prec"], color="blue", s=1)
         ax.flatten()[0].set_ylabel(r"$\delta^{18}$$O_{PRECIP}$ [‰]")
         ax.flatten()[0].set_ylim(-20, 0)
         ax.flatten()[0].set_xlim(df_obs.index[0], df_obs.index[-1])
         for i, tm_structure in enumerate(tm_structures):
-            idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
+            if tm_structure == "complete-mixing":
+                idx_best = 66
+            else:
+                idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
             tms = tm_structure.replace(" ", "_")
             # load transport simulation
             states_tm_file = (
@@ -2411,7 +2417,7 @@ def main(tmp_dir):
                 lw=1,
             )
             ax.flatten()[i + 1].plot(
-                ds_hydrus_18O_year["Time"].values, ds_hydrus_18O_year["d18O_perc"].values, color="grey", lw=1
+                ds_hydrus_18O_year["Time"].values, ds_hydrus_18O_year["d18O_perc"].values, color="black", lw=1
             )
             ax.flatten()[i + 1].scatter(df_obs.index, df_obs.iloc[:, 0], color="blue", s=1)
             ax[i + 1].set_ylabel("%s\n$\delta^{18}$$O_{PERC}$ [‰]" % (_LABS_TM[tm_structure]))
@@ -2434,13 +2440,16 @@ def main(tmp_dir):
     ]
     df_obs = pd.DataFrame(index=date_obs)
     df_obs.loc[:, "d18O_prec"] = ds_obs["d18O_PREC"].isel(x=0, y=0).values
-    ax.flatten()[0].plot(df_obs.index, df_obs.loc[:, "d18O_prec"].fillna(method="bfill"), "-", color="blue")
+    ax.flatten()[0].plot(df_obs.index, df_obs.loc[:, "d18O_prec"].bfill(), "-", color="blue")
     ax.flatten()[0].scatter(df_obs.index, df_obs.loc[:, "d18O_prec"], color="blue", s=1)
     ax.flatten()[0].set_ylabel(r"$\delta^{18}$$O_{PRECIP}$ [‰]")
     ax.flatten()[0].set_ylim([-20, 0])
     ax.flatten()[0].set_xlim(df_obs.index[0], df_obs.index[-1])
     for i, tm_structure in enumerate(tm_structures_extra):
-        idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
+        if tm_structure == "preferential-power":
+            idx_best = 8413
+        else:
+            idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
         tms = tm_structure.replace(" ", "_")
         # load transport simulation
         states_tm_file = (
@@ -2465,7 +2474,7 @@ def main(tmp_dir):
         ax.flatten()[i + 1].plot(
             ds_sim_tm["Time"].values, ds_sim_tm["C_iso_q_ss"].isel(x=idx_best, y=0).values, color="red", lw=1
         )
-        ax.flatten()[i + 1].plot(ds_hydrus_18O["Time"].values, ds_hydrus_18O["d18O_perc"].values, color="grey", lw=1)
+        ax.flatten()[i + 1].plot(ds_hydrus_18O["Time"].values, ds_hydrus_18O["d18O_perc"].values, color="black", lw=1)
         ax.flatten()[i + 1].scatter(df_obs.index, df_obs.iloc[:, 0], color="blue", s=1)
         ax[i + 1].set_ylabel("%s\n$\delta^{18}$$O_{PERC}$ [‰]" % (_LABS_TM[tm_structure]))
         ax.flatten()[i + 1].set_ylim((-15, -7))
@@ -2479,7 +2488,7 @@ def main(tmp_dir):
     tm_structures_extra = ["advection-dispersion-kumaraswamy", "time-variant advection-dispersion-kumaraswamy"]
     df_obs = pd.DataFrame(index=date_obs)
     df_obs.loc[:, "d18O_prec"] = ds_obs["d18O_PREC"].isel(x=0, y=0).values
-    ax.flatten()[0].plot(df_obs.index, df_obs.loc[:, "d18O_prec"].fillna(method="bfill"), "-", color="blue")
+    ax.flatten()[0].plot(df_obs.index, df_obs.loc[:, "d18O_prec"].bfill(), "-", color="blue")
     ax.flatten()[0].scatter(df_obs.index, df_obs.loc[:, "d18O_prec"], color="blue", s=1)
     ax.flatten()[0].set_ylabel(r"$\delta^{18}$$O_{PRECIP}$ [‰]")
     ax.flatten()[0].set_ylim([-20, 0])
@@ -2510,7 +2519,7 @@ def main(tmp_dir):
         ax.flatten()[i + 1].plot(
             ds_sim_tm["Time"].values, ds_sim_tm["C_iso_q_ss"].isel(x=idx_best, y=0).values, color="red", lw=1
         )
-        ax.flatten()[i + 1].plot(ds_hydrus_18O["Time"].values, ds_hydrus_18O["d18O_perc"].values, color="grey", lw=1)
+        ax.flatten()[i + 1].plot(ds_hydrus_18O["Time"].values, ds_hydrus_18O["d18O_perc"].values, color="black", lw=1)
         ax.flatten()[i + 1].scatter(df_obs.index, df_obs.iloc[:, 0], color="blue", s=1)
         ax[i + 1].set_ylabel("%s\n$\delta^{18}$$O_{PERC}$ [‰]" % (_LABS_TM[tm_structure]))
         ax.flatten()[i + 1].set_ylim((-15, -7))
@@ -2575,7 +2584,7 @@ def main(tmp_dir):
         states_tm_file = (
             base_path
             / "svat_oxygen18_monte_carlo"
-            / "figures"
+            / "output"
             / f"states_{tms}_monte_carlo.nc"
         )
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
@@ -2601,7 +2610,7 @@ def main(tmp_dir):
         ax.flatten()[i].fill_between(
             ds_sim_tm["Time"].values, sim_vals_5, sim_vals_95, color="red", edgecolor=None, alpha=0.2
         )
-        ax.flatten()[i].plot(ds_hydrus_18O["Time"].values, sim_vals_hydrus, color="grey", lw=1)
+        ax.flatten()[i].plot(ds_hydrus_18O["Time"].values, sim_vals_hydrus, color="black", lw=1)
         ax.flatten()[i].scatter(date_obs, obs_vals, color="blue", s=1)
         ax.flatten()[i].set_title(_LABS_TM[tm_structure])
         ax[i].set_ylabel(r"$\delta^{18}$$O_{PERC}$ [‰]")

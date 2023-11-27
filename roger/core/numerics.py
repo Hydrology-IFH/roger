@@ -973,6 +973,11 @@ def sanity_check(state):
                 ), True)
             )
         )
+        # if not check1:
+        #     print("check1", vs.S[2, 2, vs.tau] - vs.S[2, 2, vs.taum1], vs.prec[2, 2, vs.tau] - vs.q_sur[2, 2] - vs.aet[2, 2] - vs.q_ss[2, 2], vs.prec[2, 2, vs.tau], vs.q_sur[2, 2], vs.aet[2, 2], vs.q_ss[2, 2])
+        #     print("check1", vs.S_lp_ss[2, 2], vs.S_fp_ss[2, 2], vs.inf_mp_ss[2, 2])
+        #     print("check1", vs.S_ac_ss[2, 2], vs.S_ufc_ss[2, 2], vs.inf_ss[2, 2])
+
         check2 = global_and(
             npx.all(
                 (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]) , 0,  vs.S_fp_rz[2:-2, 2:-2]) > -settings.atol)
@@ -990,6 +995,26 @@ def sanity_check(state):
                 & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]), 0,  vs.S_lp_ss[2:-2, 2:-2]) - settings.atol <= npx.where(npx.isnan(vs.S_ac_ss[2:-2, 2:-2]), 0,  vs.S_ac_ss[2:-2, 2:-2]))
             )
         )
+
+        # check4 = global_and(
+        #     npx.all(
+        #         (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]), 0,  vs.S_lp_rz[2:-2, 2:-2]) - 0.1 <= npx.where(npx.isnan(vs.S_ac_rz[2:-2, 2:-2]), 0,  vs.S_ac_rz[2:-2, 2:-2]))
+        #     )
+        # )
+        # if not check4:
+        #     print("check4")
+
+        # check5 = global_and(
+        #     npx.all(
+        #         (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]), 0,  vs.S_lp_ss[2:-2, 2:-2]) - 0.1 <= npx.where(npx.isnan(vs.S_ac_ss[2:-2, 2:-2]), 0,  vs.S_ac_ss[2:-2, 2:-2]))
+        #     )
+        # )
+        # if not check5:
+        #     print("check5", vs.S_fp_rz[2, 2] - vs.S_ufc_rz[2, 2])
+        #     print("check5", vs.S_fp_ss[2, 2] - vs.S_ufc_ss[2, 2])
+        #     print("check5", vs.S_lp_rz[2, 2] - vs.S_ac_rz[2, 2])
+        #     print("check5", vs.S_lp_ss[2, 2] - vs.S_ac_ss[2, 2])
+
         check = check1 & check2 & check3
 
     elif (

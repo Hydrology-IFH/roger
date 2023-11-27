@@ -1,18 +1,11 @@
-import glob
 import os
 from pathlib import Path
-import datetime
 from cftime import num2date
-import h5netcdf
 import xarray as xr
 import pandas as pd
-from SALib.analyze import sobol
-import matplotlib.cm as cm
-from matplotlib.colors import Normalize
 import yaml
 import numpy as onp
 import roger.tools.evaluation as eval_utils
-import roger.tools.labels as labs
 import click
 import matplotlib as mpl
 import seaborn as sns
@@ -76,7 +69,7 @@ def main(tmp_dir):
     ]
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        states_hm_si_file = base_path / f"states_hm_saltelli_for_{tms}.nc"
+        states_hm_si_file = base_path_output / f"states_hm_saltelli_for_{tms}.nc"
         ds_sim = xr.open_dataset(states_hm_si_file, engine="h5netcdf")
 
         # load observations (measured data)
@@ -174,8 +167,8 @@ def main(tmp_dir):
                             key_r = "r_" + var_sim + f"{sc1}"
                             df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
                         else:
-                            # skip first seven days for warmup
-                            df_eval.loc[:"1998-01-01", :] = onp.nan
+                            # skip first 14 days for warmup
+                            df_eval.loc[:"1997-01-14", :] = onp.nan
                             df_eval = df_eval.dropna()
                             obs_vals = df_eval.loc[:, "obs"].values
                             sim_vals = df_eval.loc[:, "sim"].values

@@ -6,7 +6,6 @@ from cftime import num2date
 import pandas as pd
 import numpy as onp
 import matplotlib.cm as cm
-import yaml
 import click
 import copy
 import matplotlib as mpl
@@ -102,7 +101,6 @@ def main(tmp_dir):
     cmap = cm.get_cmap("Reds")
     cmap_hydrus = cm.get_cmap("Greys")
     norm = Normalize(vmin=onp.min(years) - 2, vmax=onp.max(years))
-    alphas = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     alphas = [0.8]
     for alpha in alphas:
         fig, axes = plt.subplots(5, 1, figsize=(6, 5), sharex=True)
@@ -208,13 +206,11 @@ def main(tmp_dir):
         file = base_path_figs / f"bromide_benchmark_alpha_{alpha}.pdf"
         fig.savefig(file, dpi=300)
 
-
     # plot a dry year (2002) and a wet year (2006)
     years = [2002, 2006]
     cmap = cm.get_cmap("Reds")
     cmap_hydrus = cm.get_cmap("Greys")
     norm = Normalize(vmin=onp.min(years) - 2, vmax=onp.max(years))
-    alphas = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     alphas = [0.8]
     for alpha in alphas:
         fig, axes = plt.subplots(5, 1, figsize=(6, 5), sharex=True)

@@ -459,6 +459,27 @@ def main(tmp_dir, meteo_station):
             at[2:-2, 2:-2, vs.taum1],
             vs.z0[2:-2, 2:-2, vs.tau],
         )
+        # set to 0 for numerical errors
+        vs.S_fp_rz = update(
+            vs.S_fp_rz,
+            at[2:-2, 2:-2],
+            npx.where((vs.S_fp_rz > -1e-6) & (vs.S_fp_rz < 0), 0, vs.S_fp_rz)[2:-2, 2:-2],
+        )
+        vs.S_lp_rz = update(
+            vs.S_lp_rz,
+            at[2:-2, 2:-2],
+            npx.where((vs.S_lp_rz > -1e-6) & (vs.S_lp_rz < 0), 0, vs.S_lp_rz)[2:-2, 2:-2],
+        )
+        vs.S_fp_ss = update(
+            vs.S_fp_ss,
+            at[2:-2, 2:-2],
+            npx.where((vs.S_fp_ss > -1e-6) & (vs.S_fp_ss < 0), 0, vs.S_fp_ss)[2:-2, 2:-2],
+        )
+        vs.S_lp_ss = update(
+            vs.S_lp_ss,
+            at[2:-2, 2:-2],
+            npx.where((vs.S_lp_ss > -1e-6) & (vs.S_lp_ss < 0), 0, vs.S_lp_ss)[2:-2, 2:-2],
+        )
         vs.prec = update(
             vs.prec,
             at[2:-2, 2:-2, vs.taum1],
@@ -520,6 +541,10 @@ def main(tmp_dir, meteo_station):
             k_rz=vs.k_rz,
             k_ss=vs.k_ss,
             k=vs.k,
+            S_fp_rz=vs.S_fp_rz,
+            S_lp_rz=vs.S_lp_rz,
+            S_fp_ss=vs.S_fp_ss,
+            S_lp_ss=vs.S_lp_ss,
         )
 
     model = SVATSetup()
