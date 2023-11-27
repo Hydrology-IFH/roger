@@ -11,7 +11,7 @@ from roger.cli.roger_run_base import roger_base_cli
     type=click.Choice(
         ["complete-mixing", "piston", "advection-dispersion-power", "time-variant_advection-dispersion-power"]
     ),
-    default="advection-dispersion-power",
+    default="complete-mixing",
 )
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
@@ -31,7 +31,7 @@ def main(transport_model_structure, tmp_dir):
         if tmp_dir:
             _tmp_dir = tmp_dir / "output"
         else:
-            _tmp_dir = tmp_dir
+            _tmp_dir = _base_path / "output"
 
         def _read_var_from_nc(self, var, path_dir, file, group=None):
             nc_file = path_dir / file

@@ -128,19 +128,19 @@ def main(tmp_dir):
     _LABS_TITLE = {
         "KGE_C_iso_q_ss": "$KGE_{\delta^{18}O}$",
         "ttavg_transp": r"$\overline{TT_{transp}}$",
-        "tt25_transp": r"$TT_{25-transp}$",
+        "tt10_transp": r"$TT_{10-transp}$",
         "tt50_transp": r"$TT_{50-transp}$",
-        "tt75_transp": r"$TT_{75-transp}$",
+        "tt90_transp": r"$TT_{90-transp}$",
         "ttavg_q_ss": r"$\overline{TT_{perc_{ss}}}$",
-        "tt25_q_ss": r"$TT_{25-perc_{ss}}$",
+        "tt10_q_ss": r"$TT_{10-perc_{ss}}$",
         "tt50_q_ss": r"$TT_{50-perc_{ss}}$",
-        "tt75_q_ss": r"$TT_{75-perc_{ss}}$",
+        "tt90_q_ss": r"$TT_{90-perc_{ss}}$",
         "rtavg_s": r"$\overline{RT}$",
-        "rt25_s": r"$RT_{25}$",
+        "rt10_s": r"$RT_{10}$",
         "rt50_s": r"$RT_{50}$",
-        "rt75_s": r"$RT_{75}$",
+        "rt90_s": r"$RT_{90}$",
     }
-    metrics_tt = ["ttavg", "tt25", "tt50", "tt75"]
+    metrics_tt = ["ttavg", "tt10", "tt50", "tt90"]
     for metric_tt in metrics_tt:
         metrics_sa = [f"{metric_tt}_transp", f"{metric_tt}_q_ss", "KGE_C_iso_q_ss"]
         ncol = len(metrics_sa)
@@ -219,7 +219,7 @@ def main(tmp_dir):
         file = base_path_figs / f"sobol_indices_{metric_tt}_tm.png"
         fig.savefig(file, dpi=300)
 
-    metrics_sa = ["rtavg_s", "rt25_s", "rt50_s", "rt75_s"]
+    metrics_sa = ["rtavg_s", "rt10_s", "rt50_s", "rt90_s"]
     ncol = len(metrics_sa)
     nrow = len(tm_structures)
     cmap = cm.get_cmap("Reds")

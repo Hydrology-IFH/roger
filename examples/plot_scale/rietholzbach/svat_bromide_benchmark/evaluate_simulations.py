@@ -44,7 +44,7 @@ sns.plotting_context(
     type=click.Choice(
         ["complete-mixing", "piston", "advection-dispersion-power", "time-variant_advection-dispersion-power"]
     ),
-    default="advection-dispersion-power",
+    default="piston",
 )
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
@@ -55,12 +55,12 @@ def main(tmp_dir, transport_model_structure):
         base_path = Path(__file__).parent
     tms = transport_model_structure.replace("_", " ")
     # directory of results
-    output = base_path / "output"
-    if not os.path.exists(base_path_results):
-        os.mkdir(base_path_results)
-    base_path_results = base_path / "output"
-    if not os.path.exists(base_path_results):
-        os.mkdir(base_path_results)
+    base_path_output = base_path / "output"
+    if not os.path.exists(base_path_output):
+        os.mkdir(base_path_output)
+    base_path_output = base_path / "output"
+    if not os.path.exists(base_path_output):
+        os.mkdir(base_path_output)
     # directory of figures
     base_path_figs = base_path / "figures"
     if not os.path.exists(base_path_figs):
@@ -94,7 +94,7 @@ def main(tmp_dir, transport_model_structure):
         fig, axes = plt.subplots(1, 1, figsize=(6, 2))
         for year in years:
             # load simulation
-            states_tm_file = base_path / f"states_{transport_model_structure}_bromide_benchmark.nc"
+            states_tm_file = base_path_output / f"states_{transport_model_structure}_bromide_benchmark.nc"
             ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{year}", engine="h5netcdf")
             # assign date
             days_sim_tm = ds_sim_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
@@ -171,35 +171,35 @@ def main(tmp_dir, transport_model_structure):
             ds_sim_tm = ds_sim_tm.load()  # required to release file lock
             ds_sim_tm = ds_sim_tm.close()
             del ds_sim_tm
-            states_tm_file = base_path / f"states_{transport_model_structure}_bromide_benchmark.nc"
+            states_tm_file = base_path_output / f"states_{transport_model_structure}_bromide_benchmark.nc"
             with h5netcdf.File(states_tm_file, "a", decode_vlen_strings=False) as f:
                 try:
                     v = f.groups[f"{year}"].create_variable(
                         "C_q_ss_mmol_bs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1
                     )
-                    v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, "Br_conc_mmol"].values
+                    v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, "Br_conc_mmol"].values.astype(float)
                     v.attrs.update(long_name="bulk sample of bromide in percolation", units="mmol/l")
                 except ValueError:
                     v = f.groups[f"{year}"].get("C_q_ss_mmol_bs")
-                    v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, "Br_conc_mmol"].values
+                    v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, "Br_conc_mmol"].values.astype(float)
                 try:
                     v = f.groups[f"{year}"].create_variable(
                         "q_ss_bs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1
                     )
-                    v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, "perc"].values
+                    v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, "perc"].values.astype(float)
                     v.attrs.update(long_name="bulk sample of percolation", units="mm/dt")
                 except ValueError:
                     v = f.groups[f"{year}"].get("M_q_ss_bs")
-                    v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, "perc"].values
+                    v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, "perc"].values.astype(float)
                 try:
                     v = f.groups[f"{year}"].create_variable(
                         "M_q_ss_bs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1
                     )
-                    v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, "Br_mg"].values
+                    v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, "Br_mg"].values.astype(float)
                     v.attrs.update(long_name="bulk sample bromide mass in percolation", units="mg")
                 except ValueError:
                     v = f.groups[f"{year}"].get("M_q_ss_bs")
-                    v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, "Br_mg"].values
+                    v[nrow, 0, 315:716] = df_perc_br_sim.loc[:, "Br_mg"].values.astype(float)
 
         axes.set_ylabel("Br [mmol $l^{-1}$]")
         axes.set_xlabel("Time [days since injection]")
@@ -215,7 +215,7 @@ def main(tmp_dir, transport_model_structure):
 
         # write evaluation metrics to .csv
         path_csv = (
-            base_path_results
+            base_path_output
             / f"bromide_metrics_{transport_model_structure}_alpha_transp_{alpha_transp}_alpha_q_{alpha_q}.csv"
         )
         df_metrics_year.to_csv(path_csv, header=True, index=True, sep=";")

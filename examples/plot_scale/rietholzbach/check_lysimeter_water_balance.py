@@ -168,49 +168,7 @@ def main(tmp_dir):
     fig.savefig(file, dpi=300)
     plt.close(fig=fig)
 
-    fig, axs = plt.subplots(1, 1, figsize=(6, 2))
-    axs.plot(
-        df_lys_obs_nonan.loc["2006":, :].index,
-        df_lys_obs_nonan.loc["2006":, "dS_flux_corr"] - df_lys_obs_nonan.loc["2006":, "dS_weight"],
-        "-",
-        color="black",
-        lw=0.8,
-    )
-    axs.set_ylabel(r"[mm]")
-    axs.set_xlabel("Time [year]")
-    axs.set_xlim(df_lys_obs.loc["2006":, :].index[0], df_lys_obs.loc["2006":, :].index[-1])
-    fig.tight_layout()
-    file = base_path_figs / "dS_weight_vs_dS_flux_residuals_2006_2007.png"
-    fig.savefig(file, dpi=300)
-    plt.close(fig=fig)
-
-    fig, axs = plt.subplots(1, 1, figsize=(6, 2))
-    axs.plot(
-        df_lys_obs_nonan.loc["2006":, :].index,
-        df_lys_obs_nonan.loc["2006":, "dS_flux_corr"],
-        "-",
-        color="blue",
-        lw=1,
-        label=r"dS from fluxes",
-    )
-    axs.plot(
-        df_lys_obs_nonan.loc["2006":, :].index,
-        df_lys_obs_nonan.loc["2006":, "dS_weight"],
-        "-",
-        color="red",
-        lw=0.8,
-        label="dS from lysimeter weight",
-    )
-    axs.set_ylabel(r"[mm]")
-    axs.set_xlabel("Time [year]")
-    axs.legend(frameon=False, loc="upper right", fontsize=6)
-    axs.set_xlim(df_lys_obs.loc["2006":, :].index[0], df_lys_obs.loc["2006":, :].index[-1])
-    fig.tight_layout()
-    file = base_path_figs / "dS_weight_vs_dS_flux_2006_2007.png"
-    fig.savefig(file, dpi=300)
-    plt.close(fig=fig)
-
-    fig, axs = plt.subplots(1, 1, figsize=(6, 2))
+    fig, axs = plt.subplots(1, 1, figsize=(6, 1.2))
     axs.plot(
         df_lys_obs_nonan.loc["2000":, :].index,
         df_lys_obs_nonan.loc["2000":, "dS_weight"].cumsum(),

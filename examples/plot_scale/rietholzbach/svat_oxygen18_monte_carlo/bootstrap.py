@@ -7,7 +7,7 @@ import roger
 
 
 @click.option("--nruns", type=int, default=100)
-@click.option("-rs", "--resample-size", type=int, default=1000)
+@click.option("-rs", "--resample-size", type=int, default=10000)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
 def main(tmp_dir, resample_size, nruns):
@@ -70,7 +70,7 @@ def main(tmp_dir, resample_size, nruns):
                     v[:, :] = vals_rep[idx_boot, :]
                     v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
 
-            var_obj = df.variables.get('id')
+            var_obj = df.variables.get("id")
             vals = onp.array(var_obj)
             vals_rep = onp.repeat(vals, n_repeat, axis=0)[:resample_size, :]
             v[:, :] = vals_rep[idx_boot, :]

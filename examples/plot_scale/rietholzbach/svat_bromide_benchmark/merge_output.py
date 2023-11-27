@@ -36,10 +36,12 @@ def main(tmp_dir, transport_model_structure):
         "advection-dispersion-power",
         "time-variant_advection-dispersion-power",
     ]:
-        states_tm_file = base_path / f"states_{transport_model_structure}_bromide_benchmark.nc"
+        states_tm_file = base_path / "output" / f"states_{transport_model_structure}_bromide_benchmark.nc"
         if not os.path.exists(states_tm_file):
             for year in years:
-                path = str(base_path / f"SVATTRANSPORT_{transport_model_structure}_{year}_deterministic.*.nc")
+                path = str(
+                    base_path / "output" / f"SVATTRANSPORT_{transport_model_structure}_{year}_deterministic.*.nc"
+                )
                 diag_files = glob.glob(path)
                 with h5netcdf.File(states_tm_file, "a", decode_vlen_strings=False) as f:
                     click.echo(f"Merge output files of {tms}-{year} into {states_tm_file.as_posix()}")

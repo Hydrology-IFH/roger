@@ -1,7 +1,6 @@
 from pathlib import Path
 import os
 import scipy as sp
-from matplotlib.colors import Normalize
 import xarray as xr
 from cftime import num2date
 import pandas as pd
@@ -127,7 +126,7 @@ def main(tmp_dir):
     # compare duration curve of 18O in percolation
     fig, ax = plt.subplots(1, 4, sharey=True, figsize=(6, 1.8))
     for i, tm_structure in enumerate(tm_structures):
-        idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
+        idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_M_iso_q_ss"].idxmax()
         tms = tm_structure.replace(" ", "_")
         # load transport simulation
         states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "output" / f"states_{tms}_monte_carlo.nc"

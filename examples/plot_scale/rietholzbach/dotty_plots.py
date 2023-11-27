@@ -64,7 +64,7 @@ def main(tmp_dir):
 
     # dotty plots
     ll_param_sets = [["c1_mak", "c2_mak"], ["dmpv", "lmpv", "ks"], ["theta_ac", "theta_ufc", "theta_pwp"]]
-    file = base_path / "svat_monte_carlo" / "results" / "params_metrics.txt"
+    file = base_path / "svat_monte_carlo" / "figures" / "params_metrics.txt"
     df_params_metrics = pd.read_csv(file, sep="\t")
     df_params_metrics100 = df_params_metrics.copy()
     df_params_metrics100.loc[:, "id"] = range(len(df_params_metrics100.index))
@@ -122,6 +122,7 @@ def main(tmp_dir):
             fig.subplots_adjust(bottom=0.1, top=0.98, right=0.98, wspace=0.1, hspace=0.2)
             file = base_path_figs / f"dotty_plots{ps}_{sc1}_optimized_with_KGE_multi.png"
             fig.savefig(file, dpi=300)
+            plt.close("all")
 
             # dotty plots for different antecedent moisture conditions
             fig, ax = plt.subplots(nrow, ncol, sharey="row", sharex="col", figsize=(6, 5))
@@ -137,9 +138,9 @@ def main(tmp_dir):
                     elif metric_var in ["KGE_dS", "KGE_dSwet", "KGE_dSnormal", "KGE_dSdry"]:
                         ax[i, j].set_ylim((0.6, 1.0))
                     elif metric_var in ["KGE_q_ss", "KGE_q_sswet", "KGE_q_ssnormal", "KGE_q_ssdry"]:
-                        ax[i, j].set_ylim((0.4, 0.8))
+                        ax[i, j].set_ylim((0.3, 0.6))
                     elif metric_var in ["KGE_multi", "KGE_multiwet", "KGE_multinormal", "KGE_multidry"]:
-                        ax[i, j].set_ylim((0.4, 0.8))
+                        ax[i, j].set_ylim((0.5, 0.8))
                     # best parameter set for individual evaluation metric at specific storage conditions
                     df_params_metrics_sc1 = df_params_metrics.copy()
                     df_params_metrics_sc1.loc[:, "id"] = range(len(df_params_metrics100.index))
@@ -172,6 +173,7 @@ def main(tmp_dir):
             fig.subplots_adjust(bottom=0.1, top=0.98, right=0.98, wspace=0.1, hspace=0.2)
             file = base_path_figs / f"dotty_plots{ps}_{sc1}inset_optimized_with_KGE_multi.png"
             fig.savefig(file, dpi=300)
+            plt.close("all")
 
     # load metrics of transport simulations
     dict_params_metrics_tm_mc = {}
@@ -186,7 +188,7 @@ def main(tmp_dir):
         "time-variant advection-dispersion-kumaraswamy",
     ]:
         tms = tm_structure.replace(" ", "_")
-        file = base_path / "svat_oxygen18_monte_carlo" / "figures" / f"params_metrics_{tms}.txt"
+        file = base_path / "svat_oxygen18_monte_carlo" / "output" / f"params_metrics_{tms}.txt"
         df_params_metrics = pd.read_csv(file, sep="\t")
         dict_params_metrics_tm_mc[tm_structure] = {}
         dict_params_metrics_tm_mc[tm_structure]["params_metrics"] = df_params_metrics

@@ -1,4 +1,3 @@
-import glob
 import os
 from pathlib import Path
 import datetime
@@ -22,10 +21,6 @@ def main(tmp_dir):
         base_path = Path(tmp_dir)
     else:
         base_path = Path(__file__).parent
-    # directory of results
-    base_path_results = base_path / "results"
-    if not os.path.exists(base_path_results):
-        os.mkdir(base_path_results)
     # directory of figures
     base_path_figs = base_path / "figures"
     if not os.path.exists(base_path_figs):
@@ -136,9 +131,9 @@ def main(tmp_dir):
                     v[:, :] = vals[idx_best10, :]
                     v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
 
-            v = f.create_variable('id', ("x", "y"), float, compression="gzip", compression_opts=1)
+            v = f.create_variable("id", ("x", "y"), float, compression="gzip", compression_opts=1)
             v[:, 0] = onp.arange(0, 10)
-            v.attrs.update(long_name='id', units="")
+            v.attrs.update(long_name="id", units="")
 
     # select best 100 simulations
     click.echo("Write best 100 simulations ...")
@@ -192,9 +187,9 @@ def main(tmp_dir):
                     v[:, :] = vals[idx_best100, :]
                     v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
 
-            v = f.create_variable('id', ("x", "y"), float, compression="gzip", compression_opts=1)
+            v = f.create_variable("id", ("x", "y"), float, compression="gzip", compression_opts=1)
             v[:, 0] = onp.arange(0, 100)
-            v.attrs.update(long_name='id', units="")
+            v.attrs.update(long_name="id", units="")
     return
 
 
