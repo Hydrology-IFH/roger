@@ -19,7 +19,7 @@
   <a href="https://zenodo.org/badge/latestdoi/536477819"><img src="https://zenodo.org/badge/536477819.svg" alt="DOI"></a>
 </p>
 
-RoGeR, *Runoff Generation Research*, is a process-based hydrological model that can be applied from plot to catchment scale. RoGeR is written in pure Python, which facilitates model setup and model workflows. We want to enable high-performance hydrologic modelling with a clear focus on flexibility and usability.
+RoGeR, *Runoff Generation Research*, is a process-based hydrological model that can be applied from plot to catchment scale. RoGeR is written in pure Python, which facilitates model setup and model workflows. We want to enable high-performance hydrological modelling with a clear focus on flexibility and usability.
 
 RoGeR supports a NumPy backend for small-scale problems, and a
 high-performance [JAX](https://github.com/google/jax) backend
@@ -36,16 +36,15 @@ We strongly recommend to [visit our documentation](https://roger.readthedocs.io/
 ## Features
 
 <p align="center">
-  <a href="https://vimeo.com/797828563">
-      <img src="doc/_images/theta_and_tt.gif?raw=true" alt="25 square meter resolved simulations 
-of a rectangular soil covered by grass">
+  <a href="https://vimeo.com/889894624">
+      <img src="doc/_images/fluxes_theta_and_tt_rt.gif?raw=true" alt="RoGeR - 25 square meter resolved simulations of the Eberbaechle catchment, Germany (2019-2022)">
   </a>
 </p>
 
 <p align="center">
 (25 square meter resolved simulations 
-of a rectangular soil covered 
-by grass, click for better
+of the Eberbaechle catchment, 
+Germany (2019-2022), click for better
 quality)
 </p>
 
@@ -112,7 +111,7 @@ If you use Roger in scientific work, please consider citing [the following publi
 
 ```bibtex
 @article{
-	title = {Roger v3.0 – a process-based hydrologic toolbox model in {Python}},
+	title = {Roger v3.0.3 – a process-based hydrologic toolbox model in {Python}},
 	volume = {...},
 	doi = {https://doi.org/10.5194/gmd-2023-118},
 	journal = {Geosci. Model Dev.},

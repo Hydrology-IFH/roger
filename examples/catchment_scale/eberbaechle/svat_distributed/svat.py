@@ -36,7 +36,7 @@ def main(tmp_dir):
                 if var in ["lu_id"]:
                     vals = npx.array(var_obj)
                     vals1 = npx.where(vals <= -9999, 999, vals)
-                elif var in ["dmph", "dmpv", "lmpv", "z_soil", "sealing"]:
+                elif var in ["dmph", "dmpv", "lmpv", "z_soil", "sealing", "prec_weight", "pet_weight", "ta_offset"]:
                     vals = npx.array(var_obj)
                     vals1 = npx.where(vals <= -9999, 0, vals)
                 else:
@@ -130,7 +130,9 @@ def main(tmp_dir):
             vs = state.variables
 
             # land use ID (see README for description)
-            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], self._read_var_from_nc("lu_id", self._base_path, "parameters.nc"))
+            vs.lu_id = update(
+                vs.lu_id, at[2:-2, 2:-2], self._read_var_from_nc("lu_id", self._base_path, "parameters.nc")
+            )
             # degree of surface sealing (-)
             vs.sealing = update(
                 vs.sealing, at[2:-2, 2:-2], self._read_var_from_nc("sealing", self._base_path, "parameters.nc")
@@ -269,21 +271,24 @@ def main(tmp_dir):
                     at[2:-2, 2:-2, :],
                     self._read_var_from_nc("PREC", self._input_dir, "forcing.nc")[
                         :, :, vs.itt_forc : vs.itt_forc + 6 * 24
-                    ] * vs.prec_weight[2:-2, 2:-2, npx.newaxis],
+                    ]
+                    * vs.prec_weight[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.ta_day = update(
                     vs.ta_day,
                     at[2:-2, 2:-2, :],
                     self._read_var_from_nc("TA", self._input_dir, "forcing.nc")[
                         :, :, vs.itt_forc : vs.itt_forc + 6 * 24
-                    ] + vs.ta_offset[2:-2, 2:-2, npx.newaxis],
+                    ]
+                    + vs.ta_offset[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.pet_day = update(
                     vs.pet_day,
                     at[2:-2, 2:-2, :],
                     self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[
                         :, :, vs.itt_forc : vs.itt_forc + 6 * 24
-                    ] * vs.pet_weight[2:-2, 2:-2, npx.newaxis],
+                    ]
+                    * vs.pet_weight[2:-2, 2:-2, npx.newaxis],
                 )
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
