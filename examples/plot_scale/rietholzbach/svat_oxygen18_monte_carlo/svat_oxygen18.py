@@ -524,27 +524,27 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
 
             vs.S_snow = update(
                 vs.S_snow,
-                at[2:-2, 2:-2, : vs.taup1],
+                at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc("S_snow", self._base_path / "input", self._states_hm_file)[
                     :, :, vs.itt, npx.newaxis
                 ],
             )
             vs.S_rz = update(
                 vs.S_rz,
-                at[2:-2, 2:-2, : vs.taup1],
+                at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc("S_rz", self._base_path / "input", self._states_hm_file)[
                     :, :, vs.itt, npx.newaxis
                 ],
             )
             vs.S_ss = update(
                 vs.S_ss,
-                at[2:-2, 2:-2, : vs.taup1],
+                at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc("S_ss", self._base_path / "input", self._states_hm_file)[
                     :, :, vs.itt, npx.newaxis
                 ],
             )
             vs.S_s = update(
-                vs.S_s, at[2:-2, 2:-2, : vs.taup1], vs.S_rz[2:-2, 2:-2, : vs.taup1] + vs.S_ss[2:-2, 2:-2, : vs.taup1]
+                vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1]
             )
             vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
             vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
@@ -558,14 +558,14 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             arr0 = allocate(state.dimensions, ("x", "y"))
             vs.sa_rz = update(
                 vs.sa_rz,
-                at[2:-2, 2:-2, : vs.taup1, 1:],
+                at[2:-2, 2:-2, :vs.taup1, 1:],
                 npx.diff(npx.linspace(arr0[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[
                     :, :, npx.newaxis, :
                 ],
             )
             vs.sa_ss = update(
                 vs.sa_ss,
-                at[2:-2, 2:-2, : vs.taup1, 1:],
+                at[2:-2, 2:-2, :vs.taup1, 1:],
                 npx.diff(npx.linspace(arr0[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, vs.tau], settings.ages, axis=-1), axis=-1)[
                     :, :, npx.newaxis, :
                 ],
@@ -595,37 +595,38 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             )
 
             if settings.enable_oxygen18:
-                vs.C_iso_snow = update(vs.C_iso_snow, at[2:-2, 2:-2, : vs.taup1], npx.nan)
-                vs.C_iso_rz = update(vs.C_iso_rz, at[2:-2, 2:-2, : vs.taup1], -10.5)
-                vs.C_iso_ss = update(vs.C_iso_ss, at[2:-2, 2:-2, : vs.taup1], -10.5)
+                vs.C_snow = update(vs.C_snow, at[2:-2, 2:-2, :vs.taup1], npx.nan)
+                vs.C_iso_snow = update(vs.C_iso_snow, at[2:-2, 2:-2, :vs.taup1], npx.nan)
+                vs.C_iso_rz = update(vs.C_iso_rz, at[2:-2, 2:-2, :vs.taup1], -10.5)
+                vs.C_iso_ss = update(vs.C_iso_ss, at[2:-2, 2:-2, :vs.taup1], -10.5)
                 vs.C_rz = update(
                     vs.C_rz,
-                    at[2:-2, 2:-2, : vs.taup1],
+                    at[2:-2, 2:-2, :vs.taup1],
                     delta_to_conc(state, vs.C_iso_rz[2:-2, 2:-2, vs.tau, npx.newaxis]),
                 )
                 vs.msa_rz = update(
                     vs.msa_rz,
-                    at[2:-2, 2:-2, : vs.taup1, :],
-                    vs.C_rz[2:-2, 2:-2, : vs.taup1, npx.newaxis],
+                    at[2:-2, 2:-2, :vs.taup1, :],
+                    vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis],
                 )
                 vs.msa_rz = update(
                     vs.msa_rz,
-                    at[2:-2, 2:-2, : vs.taup1, 0],
+                    at[2:-2, 2:-2, :vs.taup1, 0],
                     0,
                 )
                 vs.C_ss = update(
                     vs.C_ss,
-                    at[2:-2, 2:-2, : vs.taup1],
+                    at[2:-2, 2:-2, :vs.taup1],
                     delta_to_conc(state, vs.C_iso_ss[2:-2, 2:-2, vs.tau, npx.newaxis]),
                 )
                 vs.msa_ss = update(
                     vs.msa_ss,
-                    at[2:-2, 2:-2, : vs.taup1, :],
-                    vs.C_ss[2:-2, 2:-2, : vs.taup1, npx.newaxis],
+                    at[2:-2, 2:-2, :vs.taup1, :],
+                    vs.C_ss[2:-2, 2:-2, :vs.taup1, npx.newaxis],
                 )
                 vs.msa_ss = update(
                     vs.msa_ss,
-                    at[2:-2, 2:-2, : vs.taup1, 0],
+                    at[2:-2, 2:-2, :vs.taup1, 0],
                     0,
                 )
                 vs.msa_s = update(
@@ -642,7 +643,7 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
                 )
                 vs.msa_s = update(
                     vs.msa_s,
-                    at[2:-2, 2:-2, : vs.taup1, 0],
+                    at[2:-2, 2:-2, :vs.taup1, 0],
                     0,
                 )
                 vs.C_s = update(

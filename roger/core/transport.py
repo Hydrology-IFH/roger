@@ -946,7 +946,7 @@ def calc_TT_num_nonneg(state, SA, TTq, flux):
 
 @roger_routine
 def svat_transport_model_deterministic(state):
-    """Calculates water transport model with deterministic method
+    """Calculates solute transport model with deterministic method
     """
     vs = state.variables
     settings = state.settings

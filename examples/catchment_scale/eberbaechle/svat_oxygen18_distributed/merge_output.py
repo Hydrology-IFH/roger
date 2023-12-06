@@ -51,12 +51,12 @@ if not os.path.exists(states_tm_file):
                 if not f.dimensions:
                     f.dimensions = dict_dim
                     v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
-                    v.attrs["long_name"] = "model run"
-                    v.attrs["units"] = ""
+                    v.attrs["long_name"] = "x"
+                    v.attrs["units"] = "m"
                     v[:] = onp.arange(dict_dim["x"])
                     v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
-                    v.attrs["long_name"] = ""
-                    v.attrs["units"] = ""
+                    v.attrs["long_name"] = "y"
+                    v.attrs["units"] = "m"
                     v[:] = onp.arange(dict_dim["y"])
                     v = f.create_variable("ages", ("ages",), float, compression="gzip", compression_opts=1)
                     v.attrs["long_name"] = "Water ages"
