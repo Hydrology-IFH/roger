@@ -281,6 +281,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             )
 
             if settings.enable_oxygen18:
+                vs.C_snow = update(vs.C_snow, at[2:-2, 2:-2, :vs.taup1], npx.nan)
                 vs.C_iso_snow = update(vs.C_iso_snow, at[2:-2, 2:-2, : vs.taup1], npx.nan)
                 vs.C_iso_rz = update(vs.C_iso_rz, at[2:-2, 2:-2, : vs.taup1], -10.5)
                 vs.C_iso_ss = update(vs.C_iso_ss, at[2:-2, 2:-2, : vs.taup1], -10.5)

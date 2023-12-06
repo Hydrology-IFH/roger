@@ -36,12 +36,12 @@ sns.plotting_context(
 
 nrows = 53
 ncols = 80
-x1 = 76
-y1 = 43
-t_dry = 300
+x1 = 12
+y1 = 7
+t_dry = 1017
 t_wet = 468
 t_drywet = 338
-t_wetdry = 480
+t_wetdry = 896
 
 base_path = Path(__file__).parent
 # directory of figures
@@ -108,7 +108,7 @@ df = df.sort_values(by=["day"])
 df.to_csv(base_path_figs / f"theta_et_perc.csv", sep=";", index=True)
 
 # load transport simulations
-states_tm_file = base_path / "svat_oxygen18_distributed" / "output" / "SVAT18O.nc"
+states_tm_file = base_path / "svat_oxygen18_distributed" / "output" / "SVAT18O.average.nc"
 ds_tm = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
 # assign date
 days_tm = ds_tm["Time"].values
@@ -403,20 +403,22 @@ axes[2, 2].tick_params(axis="x", labelrotation=60)
 axes[2, 2].set_ylim(
     0,
 )
-
+vals1 = onp.where(ds_tm["tt10_q_ss"].isel(x=x1, y=y1).values >= 1000, onp.nan, ds_tm["tt10_q_ss"].isel(x=x1, y=y1).values)
+vals2 = onp.where(ds_tm["tt90_q_ss"].isel(x=x1, y=y1).values >= 1000, onp.nan, ds_tm["tt90_q_ss"].isel(x=x1, y=y1).values)
+vals3 = onp.where(ds_tm["tt50_q_ss"].isel(x=x1, y=y1).values >= 1000, onp.nan, ds_tm["tt50_q_ss"].isel(x=x1, y=y1).values)
 axes[3, 2].axvline(date_hm[t_dry], color="red", alpha=0.5)
 axes[3, 2].axvline(date_hm[t_wetdry], color="red", alpha=0.5)
 axes[3, 2].axvline(date_hm[t_drywet], color="red", alpha=0.5)
 axes[3, 2].axvline(date_hm[t_wet], color="red", alpha=0.5)
 axes[3, 2].fill_between(
     date_tm,
-    ds_tm["tt10_q_ss"].isel(x=x1, y=y1).values,
-    ds_tm["tt90_q_ss"].isel(x=x1, y=y1).values,
+    vals1,
+    vals2,
     color="grey",
     edgecolor=None,
     alpha=0.2,
 )
-axes[3, 2].plot(date_tm, ds_tm["tt50_q_ss"].isel(x=x1, y=y1).values, "-", color="grey", lw=1)
+axes[3, 2].plot(date_tm, vals3, "-", color="grey", lw=1)
 axes[3, 2].set_xlim(date_tm[0], date_tm[-1])
 axes[3, 2].set_ylabel(r"age [days]")
 axes[3, 2].set_xlabel(r"Time [year-month]")

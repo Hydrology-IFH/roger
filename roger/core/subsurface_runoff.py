@@ -2296,7 +2296,7 @@ def calculate_lateral_subsurface_runoff_rz_transport(state):
 
 
 @roger_routine
-def calculate_lateral_subsurface_runoffn_ss_transport(state):
+def calculate_lateral_subsurface_runoff_ss_transport(state):
     """
     Calculates transport lateral subsurface runoff in subsoil
     """
