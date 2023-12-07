@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --time=4:00:00
+#SBATCH --time=24:00:00
 #SBATCH --nodes=1
-#SBATCH --ntasks=10
+#SBATCH --ntasks=20
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=14000
+#SBATCH --mem=8000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat18O
@@ -35,7 +35,7 @@ while [ "${checksum_gws}" != "${checksum_ssd}" ]; do
 done
 echo "Copying was successful"
  
-mpirun --bind-to core --map-by core -report-bindings python svat_oxygen18.py -b numpy -d cpu -n 10 1 -td "${TMPDIR}"
+mpirun --bind-to core --map-by core -report-bindings python svat_oxygen18.py -b numpy -d cpu -n 20 1 -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_oxygen18_distributed/output"
 mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/eberbaechle/svat_oxygen18_distributed/output

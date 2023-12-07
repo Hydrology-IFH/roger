@@ -224,7 +224,7 @@ def main():
                     lines.append('echo "Copying was successful"\n')
                     lines.append(" \n")
                     lines.append(
-                        'mpirun --bind-to core --map-by core -report-bindings python svat_crop_transport.py -b jax -d cpu -n 4 1 --location %s --land-cover-scenario %s --climate-scenario %s --period %s -td "${TMPDIR}"\n'
+                        'mpirun --bind-to core --map-by core -report-bindings python svat_crop_transport.py -b numpy -d cpu -n 4 1 --location %s --land-cover-scenario %s --climate-scenario %s --period %s -td "${TMPDIR}"\n'
                         % (location, land_cover_scenario, climate_scenario, period)
                     )
                     lines.append("# Move output from local SSD to global workspace\n")
@@ -279,7 +279,7 @@ def main():
                     lines.append('echo "Copying was successful"\n')
                     lines.append(" \n")
                     lines.append(
-                        'python svat_crop_transport.py -b jax -d gpu --location %s --land-cover-scenario %s --climate-scenario %s --period %s -td "${TMPDIR}"\n'
+                        'python svat_crop_transport.py -b numpy -d gpu --location %s --land-cover-scenario %s --climate-scenario %s --period %s -td "${TMPDIR}"\n'
                         % (location, land_cover_scenario, climate_scenario, period)
                     )
                     lines.append("# Move output from local SSD to global workspace\n")
@@ -327,7 +327,7 @@ def main():
                     lines.append('echo "Copying was successful"\n')
                     lines.append(" \n")
                     lines.append(
-                        'python svat_crop_transport.py -b jax -d cpu --location %s --land-cover-scenario %s --climate-scenario %s --period %s -td "${TMPDIR}"\n'
+                        'python svat_crop_transport.py -b numpy -d cpu --location %s --land-cover-scenario %s --climate-scenario %s --period %s -td "${TMPDIR}"\n'
                         % (location, land_cover_scenario, climate_scenario, period)
                     )
                     lines.append("# Move output from local SSD to global workspace\n")
@@ -377,7 +377,7 @@ def main():
                     lines.append('echo "Copying was successful"\n')
                     lines.append(" \n")
                     lines.append(
-                        'python svat_crop_transport.py -b jax -d cpu -n 4 1 --location %s --land-cover-scenario %s --climate-scenario %s --period %s -td "${TMPDIR}"\n'
+                        'python svat_crop_transport.py -b numpy -d cpu -n 4 1 --location %s --land-cover-scenario %s --climate-scenario %s --period %s -td "${TMPDIR}"\n'
                         % (location, land_cover_scenario, climate_scenario, period)
                     )
                     lines.append("# Move output from local SSD to global workspace\n")
@@ -437,7 +437,7 @@ def main():
                 lines.append('echo "Copying was successful"\n')
                 lines.append(" \n")
                 lines.append(
-                    'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 4 1 --location %s --land-cover-scenario grass --climate-scenario %s --period %s -td "${TMPDIR}"\n'
+                    'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 4 1 --location %s --land-cover-scenario grass --climate-scenario %s --period %s -td "${TMPDIR}"\n'
                     % (location, climate_scenario, period)
                 )
                 lines.append("# Move output from local SSD to global workspace\n")
@@ -495,7 +495,7 @@ def main():
         lines.append('echo "Copying was successful"\n')
         lines.append(" \n")
         lines.append(
-            'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 4 1 --location %s --land-cover-scenario grass --climate-scenario observed --period 2016-2021 -td "${TMPDIR}"\n'
+            'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 4 1 --location %s --land-cover-scenario grass --climate-scenario observed --period 2016-2021 -td "${TMPDIR}"\n'
             % (location)
         )
         lines.append("# Move output from local SSD to global workspace\n")
@@ -548,7 +548,7 @@ def main():
                 lines.append('echo "Copying was successful"\n')
                 lines.append(" \n")
                 lines.append(
-                    'python svat_transport.py -b jax -d cpu --location %s --land-cover-scenario grass --climate-scenario %s --period %s -td "${TMPDIR}"\n'
+                    'python svat_transport.py -b numpy -d cpu --location %s --land-cover-scenario grass --climate-scenario %s --period %s -td "${TMPDIR}"\n'
                     % (location, climate_scenario, period)
                 )
                 lines.append("# Move output from local SSD to global workspace\n")

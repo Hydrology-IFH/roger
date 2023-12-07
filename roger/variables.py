@@ -54,7 +54,7 @@ class Variable:
 
 
 # fill value for netCDF output (invalid floating data is replaced by this value)
-FLOAT_FILL_VALUE = -1e18
+FLOAT_FILL_VALUE = -9999
 
 #
 X = ("x",)
