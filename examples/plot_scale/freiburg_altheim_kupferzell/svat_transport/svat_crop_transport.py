@@ -61,7 +61,7 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             )
             settings.ages = 1000
             settings.nages = settings.ages + 1
-            settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
+            settings.runlen_warmup = 1 * 365 * 24 * 60 * 60
             settings.runlen = self._get_runlen(
                 self._input_dir, f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
             )
