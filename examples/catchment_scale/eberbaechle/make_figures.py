@@ -36,8 +36,8 @@ sns.plotting_context(
 
 nrows = 53
 ncols = 80
-x1 = 12
-y1 = 7
+x1 = 7
+y1 = 12
 t_dry = 1017
 t_wet = 468
 t_drywet = 338
@@ -403,9 +403,15 @@ axes[2, 2].tick_params(axis="x", labelrotation=60)
 axes[2, 2].set_ylim(
     0,
 )
-vals1 = onp.where(ds_tm["tt10_q_ss"].isel(x=x1, y=y1).values >= 1000, onp.nan, ds_tm["tt10_q_ss"].isel(x=x1, y=y1).values)
-vals2 = onp.where(ds_tm["tt90_q_ss"].isel(x=x1, y=y1).values >= 1000, onp.nan, ds_tm["tt90_q_ss"].isel(x=x1, y=y1).values)
-vals3 = onp.where(ds_tm["tt50_q_ss"].isel(x=x1, y=y1).values >= 1000, onp.nan, ds_tm["tt50_q_ss"].isel(x=x1, y=y1).values)
+vals1 = onp.where(
+    ds_tm["tt10_q_ss"].isel(x=x1, y=y1).values >= 1000, onp.nan, ds_tm["tt10_q_ss"].isel(x=x1, y=y1).values
+)
+vals2 = onp.where(
+    ds_tm["tt90_q_ss"].isel(x=x1, y=y1).values >= 1000, onp.nan, ds_tm["tt90_q_ss"].isel(x=x1, y=y1).values
+)
+vals3 = onp.where(
+    ds_tm["tt50_q_ss"].isel(x=x1, y=y1).values >= 1000, onp.nan, ds_tm["tt50_q_ss"].isel(x=x1, y=y1).values
+)
 axes[3, 2].axvline(date_hm[t_dry], color="red", alpha=0.5)
 axes[3, 2].axvline(date_hm[t_wetdry], color="red", alpha=0.5)
 axes[3, 2].axvline(date_hm[t_drywet], color="red", alpha=0.5)
