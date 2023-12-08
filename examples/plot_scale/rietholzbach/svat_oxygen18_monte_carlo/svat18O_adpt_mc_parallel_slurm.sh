@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=25
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=40000
+#SBATCH --mem=80000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat18O_adpt_mc
@@ -22,7 +22,7 @@ eval "$(conda shell.bash hook)"
 conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo
  
-mpirun --bind-to core --map-by core -report-bindings python svat_oxygen18.py -b jax -d cpu -n 25 1 -ns 10000 -tms time-variant_advection-dispersion-power -td "${TMPDIR}"
+mpirun --bind-to core --map-by core -report-bindings python svat_oxygen18.py -b jax -d cpu -n 25 1 --float-type float64 -ns 10000 -tms time-variant_advection-dispersion-power -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo/output"
 mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo/output

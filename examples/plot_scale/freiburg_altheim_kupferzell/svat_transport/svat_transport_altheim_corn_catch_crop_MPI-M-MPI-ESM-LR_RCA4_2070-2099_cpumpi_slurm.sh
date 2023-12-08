@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --time=27:00:00
+#SBATCH --time=10:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=4
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=32000
+#SBATCH --mem=20000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_transport_altheim_corn_catch_crop_MPI-M-MPI-ESM-LR_RCA4_2070-2099
@@ -35,7 +35,7 @@ while [ "${checksum_gws}" != "${checksum_ssd}" ]; do
 done
 echo "Copying was successful"
  
-mpirun --bind-to core --map-by core -report-bindings python svat_crop_transport.py -b jax -d cpu -n 4 1 --location altheim --land-cover-scenario corn_catch_crop --climate-scenario MPI-M-MPI-ESM-LR_RCA4 --period 2070-2099 -td "${TMPDIR}"
+mpirun --bind-to core --map-by core -report-bindings python svat_crop_transport.py -b jax -d cpu -n 4 1 --float-type float64 --location altheim --land-cover-scenario corn_catch_crop --climate-scenario MPI-M-MPI-ESM-LR_RCA4 --period 2070-2099 -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/output/svat_transport"
 mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/output/svat_transport

@@ -31,10 +31,10 @@ def main(job_type):
     }
 
     transport_models_mem = {
-        "complete-mixing": 40000,
-        "piston": 40000,
-        "advection-dispersion-power": 50000,
-        "time-variant advection-dispersion-power": 60000,
+        "complete-mixing": 80000,
+        "piston": 80000,
+        "advection-dispersion-power": 100000,
+        "time-variant advection-dispersion-power": 120000,
     }
 
     transport_models_time = {
@@ -82,7 +82,7 @@ def main(job_type):
             lines.append(f"cd {base_path_bwuc}/svat_oxygen18_sensitivity\n")
             lines.append(" \n")
             lines.append(
-                'mpirun --bind-to core --map-by core -report-bindings python svat_oxygen18.py -b jax -d cpu -n %s 1 -ns %s -tms %s -td "${TMPDIR}"\n'
+                'mpirun --bind-to core --map-by core -report-bindings python svat_oxygen18.py -b jax -d cpu -n %s 1 --float-type float64 -ns %s -tms %s -td "${TMPDIR}"\n'
                 % (transport_models_ntasks[tm], transport_models_nsamples[tm], tms)
             )
             lines.append("# Move output from local SSD to global workspace\n")
