@@ -1,9 +1,8 @@
-import warnings
 from contextlib import contextmanager
 from time import time_ns
 import os
 
-from roger import runtime_settings, runtime_state, roger_kernel
+from roger import runtime_settings, runtime_state
 
 
 class Index:
@@ -116,49 +115,6 @@ def scan_numpy(f, init, xs, length=None):
     return carry, np.stack(ys)
 
 
-@roger_kernel(static_args=("use_ext",))
-def solve_tridiagonal_jax(a, b, c, d, water_mask, edge_mask, use_ext=None):
-    import jax.lax
-    import jax.numpy as jnp
-
-    from roger.core.special.tdma_ import tdma, HAS_CPU_EXT, HAS_GPU_EXT
-
-    if use_ext is None:
-        use_ext = (HAS_CPU_EXT and runtime_settings.device == "cpu") or (
-            HAS_GPU_EXT and runtime_settings.device == "gpu"
-        )
-
-    if use_ext:
-        return tdma(a, b, c, d, water_mask, edge_mask)
-
-    warnings.warn("Could not use custom TDMA implementation, falling back to pure JAX")
-
-    a = water_mask * a * jnp.logical_not(edge_mask)
-    b = jnp.where(water_mask, b, 1.0)
-    c = water_mask * c
-    d = water_mask * d
-
-    def compute_primes(last_primes, x):
-        last_cp, last_dp = last_primes
-        a, b, c, d = x
-        cp = c / (b - a * last_cp)
-        dp = (d - a * last_dp) / (b - a * last_cp)
-        new_primes = (cp, dp)
-        return new_primes, new_primes
-
-    diags_transposed = [jnp.moveaxis(arr, 2, 0) for arr in (a, b, c, d)]
-    init = jnp.zeros(a.shape[:-1], dtype=a.dtype)
-    _, primes = jax.lax.scan(compute_primes, (init, init), diags_transposed)
-
-    def backsubstitution(last_x, x):
-        cp, dp = x
-        new_x = dp - cp * last_x
-        return new_x, new_x
-
-    _, sol = jax.lax.scan(backsubstitution, init, primes, reverse=True)
-    return jnp.moveaxis(sol, 0, 2)
-
-
 def update_jax(arr, at, to):
     return arr.at[at].set(to)
 
@@ -199,7 +155,6 @@ if runtime_settings.backend == "numpy":
     update_add = update_add_numpy
     update_multiply = update_multiply_numpy
     at = Index()
-    solve_tridiagonal = solve_tridiagonal_numpy
     for_loop = fori_numpy
     scan = scan_numpy
     flush = noop
@@ -219,7 +174,6 @@ elif runtime_settings.backend == "jax":
     update_add = update_add_jax
     update_multiply = update_multiply_jax
     at = Index()
-    solve_tridiagonal = solve_tridiagonal_jax
     for_loop = jax.lax.fori_loop
     scan = jax.lax.scan
     flush = flush_jax

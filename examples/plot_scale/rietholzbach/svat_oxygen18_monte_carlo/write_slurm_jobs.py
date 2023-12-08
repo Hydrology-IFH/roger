@@ -38,7 +38,7 @@ def main(job_type):
             lines.append("#SBATCH --nodes=1\n")
             lines.append("#SBATCH --ntasks=25\n")
             lines.append("#SBATCH --cpus-per-task=1\n")
-            lines.append("#SBATCH --mem=40000\n")
+            lines.append("#SBATCH --mem=80000\n")
             lines.append("#SBATCH --mail-type=FAIL\n")
             lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
             lines.append(f"#SBATCH --job-name={script_name}\n")
@@ -58,7 +58,7 @@ def main(job_type):
             lines.append(f"cd {base_path_bwuc}/svat_oxygen18_monte_carlo\n")
             lines.append(" \n")
             lines.append(
-                'mpirun --bind-to core --map-by core -report-bindings python svat_oxygen18.py -b jax -d cpu -n 25 1 -ns 10000 -tms %s -td "${TMPDIR}"\n'
+                'mpirun --bind-to core --map-by core -report-bindings python svat_oxygen18.py -b jax -d cpu -n 25 1 --float-type float64 -ns 10000 -tms %s -td "${TMPDIR}"\n'
                 % (tms)
             )
             lines.append("# Move output from local SSD to global workspace\n")

@@ -384,11 +384,12 @@ def calc_tt(state, SA, sa, flux, sas_params):
         at[2:-2, 2:-2, :, :], sa[2:-2, 2:-2, :, :],
     )
 
-    h = 1/settings.sas_solver_substeps
-
     # loop over substeps
     def loop_body(i, carry):
         state, TTn, ttn, SAn, san, flux, sas_params, TTi, tti, ttqi = carry
+
+        h = 1/settings.sas_solver_substeps
+
         TTi = update(
             TTi,
             at[2:-2, 2:-2, :], 0,
