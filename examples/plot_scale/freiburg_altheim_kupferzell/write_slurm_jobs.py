@@ -149,7 +149,7 @@ def main():
                     output_path_ws = base_path_ws / "svat_transport"
                     lines = []
                     lines.append("#!/bin/bash\n")
-                    lines.append("#SBATCH --time=10:00:00\n")
+                    lines.append("#SBATCH --time=20:00:00\n")
                     lines.append("#SBATCH --nodes=1\n")
                     lines.append("#SBATCH --ntasks=4\n")
                     lines.append("#SBATCH --cpus-per-task=1\n")
@@ -312,7 +312,7 @@ def main():
                 output_path_ws = base_path_ws / "svat_transport"
                 lines = []
                 lines.append("#!/bin/bash\n")
-                lines.append("#SBATCH --time=8:00:00\n")
+                lines.append("#SBATCH --time=16:00:00\n")
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=4\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")
@@ -352,7 +352,7 @@ def main():
                 lines.append('echo "Copying was successful"\n')
                 lines.append(" \n")
                 lines.append(
-                    'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b numpy -d cpu -n 4 1 --float-type float64 --location %s --land-cover-scenario grass --climate-scenario %s --period %s -td "${TMPDIR}"\n'
+                    'mpirun --bind-to core --map-by core -report-bindings python svat_transport.py -b jax -d cpu -n 4 1 --float-type float64 --location %s --land-cover-scenario grass --climate-scenario %s --period %s -td "${TMPDIR}"\n'
                     % (location, climate_scenario, period)
                 )
                 lines.append("# Move output from local SSD to global workspace\n")
