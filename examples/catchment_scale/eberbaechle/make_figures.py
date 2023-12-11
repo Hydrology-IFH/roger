@@ -5,7 +5,6 @@ from cftime import num2date
 import matplotlib.dates as mdates
 import numpy as onp
 import copy
-import imageio
 import matplotlib as mpl
 import seaborn as sns
 
@@ -64,7 +63,6 @@ ds_hm = ds_hm.assign_coords(Time=("Time", date_hm))
 
 # load hydrologic model parameters
 params_hm_file = base_path / "svat_distributed" / "parameters.nc"
-
 ds_params_hm = xr.open_dataset(params_hm_file, engine="h5netcdf")
 
 import pandas as pd
@@ -403,34 +401,25 @@ axes[2, 2].tick_params(axis="x", labelrotation=60)
 axes[2, 2].set_ylim(
     0,
 )
-vals1 = onp.where(
-    ds_tm["tt10_q_ss"].isel(x=x1, y=y1).values >= 1000, onp.nan, ds_tm["tt10_q_ss"].isel(x=x1, y=y1).values
-)
-vals2 = onp.where(
-    ds_tm["tt90_q_ss"].isel(x=x1, y=y1).values >= 1000, onp.nan, ds_tm["tt90_q_ss"].isel(x=x1, y=y1).values
-)
-vals3 = onp.where(
-    ds_tm["tt50_q_ss"].isel(x=x1, y=y1).values >= 1000, onp.nan, ds_tm["tt50_q_ss"].isel(x=x1, y=y1).values
-)
 axes[3, 2].axvline(date_hm[t_dry], color="red", alpha=0.5)
 axes[3, 2].axvline(date_hm[t_wetdry], color="red", alpha=0.5)
 axes[3, 2].axvline(date_hm[t_drywet], color="red", alpha=0.5)
 axes[3, 2].axvline(date_hm[t_wet], color="red", alpha=0.5)
 axes[3, 2].fill_between(
     date_tm,
-    vals1,
-    vals2,
+    ds_tm["tt10_q_ss"].isel(x=x1, y=y1).values,
+    ds_tm["tt90_q_ss"].isel(x=x1, y=y1).values,
     color="grey",
     edgecolor=None,
     alpha=0.2,
 )
-axes[3, 2].plot(date_tm, vals3, "-", color="grey", lw=1)
+axes[3, 2].plot(date_tm, ds_tm["tt50_q_ss"].isel(x=x1, y=y1).values, "-", color="grey", lw=1)
 axes[3, 2].set_xlim(date_tm[0], date_tm[-1])
 axes[3, 2].set_ylabel(r"age [days]")
 axes[3, 2].set_xlabel(r"Time [year-month]")
 axes[3, 2].xaxis.set_major_formatter(mdates.DateFormatter("%y-%m"))
 axes[3, 2].tick_params(axis="x", labelrotation=60)
-axes[3, 2].set_ylim(0, 500)
+axes[3, 2].set_ylim(0, 600)
 
 fig.subplots_adjust(left=0.1, bottom=0.13, top=0.95, right=0.98, hspace=0.6, wspace=0.42)
 file = base_path_figs / "ts_single_grid_cell.png"
@@ -1467,109 +1456,5 @@ axes.set_ylabel("# grid cells")
 fig.tight_layout()
 file = base_path_figs / "cumulated_dist_perc_inset.png"
 fig.savefig(file, dpi=300)
-
-
-# make GIF for Online-Documentation
-for t in range(1, 1097):
-    fig, axes = plt.subplots(3, 3, figsize=(6, 6))
-
-    axes[0, 0].set_axis_off()
-    axes[0, 2].set_axis_off()
-
-    axes[0, 1].imshow(onp.where(ds_hm["prec"].isel(Time=t).values <= -9999, onp.nan, ds_hm["prec"].isel(Time=t).values), extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=0, vmax=20)
-    axes[0, 1].grid(zorder=0)
-    axes[0, 1].set_xlabel("")
-    axes[0, 1].set_ylabel("[m]")
-    axes[0, 1].set_title(str(ds_hm["Time"].values[t]).split("T")[0], weight='bold')
-    cmap = copy.copy(mpl.colormaps.get_cmap("viridis_r"))
-    norm = mpl.colors.Normalize(vmin=0, vmax=20)
-    axl1 = fig.add_axes([0.62, 0.73, 0.01, 0.15])
-    cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm, orientation="vertical", ticks=[0, 10, 20])
-    cb1.ax.set_yticklabels(["0", "10", ">20"])
-    cb1.set_label("PRECIP [mm/day]")
-
-    axes[1, 0].imshow(onp.where(ds_hm["transp"].isel(Time=t).values <= -9999, onp.nan, ds_hm["transp"].isel(Time=t).values), extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=0, vmax=5)
-    axes[1, 0].grid(zorder=0)
-    axes[1, 0].set_xlabel("")
-    axes[1, 0].set_ylabel("[m]")
-    cmap = copy.copy(mpl.colormaps.get_cmap("viridis_r"))
-    norm = mpl.colors.Normalize(vmin=0, vmax=5)
-    axl1 = fig.add_axes([0.1, 0.66, 0.2, 0.01])
-    cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm, orientation="horizontal", ticks=[0, 2.5, 5])
-    cb1.ax.set_xticklabels(["0", "2.5", ">5"])
-    cb1.set_label("TRANSP [mm/day]")
-
-    axes[1, 1].imshow(onp.where(ds_hm["theta"].isel(Time=t).values <= -9999, onp.nan, ds_hm["theta"].isel(Time=t).values), extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=0.1, vmax=0.3)
-    axes[1, 1].grid(zorder=0)
-    axes[1, 1].set_xlabel("")
-    axes[1, 1].set_ylabel("")
-    axes[1, 1].set_yticklabels([])
-    cmap = copy.copy(mpl.colormaps.get_cmap("viridis_r"))
-    norm = mpl.colors.Normalize(vmin=0.1, vmax=0.4)
-    axl1 = fig.add_axes([0.38, 0.66, 0.2, 0.01])
-    cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm, orientation="horizontal", ticks=[0.1, 0.2, 0.3, 0.4])
-    cb1.ax.set_xticklabels(["<0.1", "0.2", "0.3", ">0.4"])
-    cb1.set_label(r"$\theta$ [-]")
-
-    axes[1, 2].imshow(onp.where(ds_hm["q_ss"].isel(Time=t).values <= -9999, onp.nan, ds_hm["q_ss"].isel(Time=t).values), extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=0, vmax=20)
-    axes[1, 2].grid(zorder=0)
-    axes[1, 2].set_xlabel("")
-    axes[1, 2].set_ylabel("")
-    axes[1, 2].set_yticklabels([])
-    cmap = copy.copy(mpl.colormaps.get_cmap("viridis_r"))
-    norm = mpl.colors.Normalize(vmin=0, vmax=20)
-    axl1 = fig.add_axes([0.65, 0.66, 0.2, 0.01])
-    cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm, orientation="horizontal", ticks=[0, 10, 20])
-    cb1.ax.set_xticklabels(["0", "10", ">20"])
-    cb1.set_label("PERC [mm/day]")
-
-    axes[2, 0].imshow(ds_tm["ttavg_transp"].isel(Time=t).values, extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=1, vmax=200)
-    axes[2, 0].grid(zorder=0)
-    axes[2, 0].set_xlabel("[m]")
-    axes[2, 0].set_ylabel("[m]")
-    cmap = copy.copy(mpl.colormaps.get_cmap("viridis"))
-    norm = mpl.colors.Normalize(vmin=1, vmax=200)
-    axl2 = fig.add_axes([0.1, 0.38, 0.2, 0.01])
-    cb2 = mpl.colorbar.ColorbarBase(axl2, cmap=cmap, norm=norm, orientation="horizontal", ticks=[1, 100, 200])
-    cb2.ax.set_xticklabels(["1", "100", ">200"])
-    cb2.ax.invert_yaxis()
-    cb2.set_label(r"$\overline{TT}_{TRANSP}$ [days]")
-
-    axes[2, 1].imshow(ds_tm["rtavg_s"].isel(Time=t).values, extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=1, vmax=200)
-    axes[2, 1].grid(zorder=0)
-    axes[2, 1].set_xlabel("[m]")
-    axes[2, 1].set_yticklabels([])
-    cmap = copy.copy(mpl.colormaps.get_cmap("viridis"))
-    norm = mpl.colors.Normalize(vmin=1, vmax=200)
-    axl2 = fig.add_axes([0.38, 0.38, 0.2, 0.01])
-    cb2 = mpl.colorbar.ColorbarBase(axl2, cmap=cmap, norm=norm, orientation="horizontal", ticks=[1, 100, 200])
-    cb2.ax.set_xticklabels(["1", "100", ">200"])
-    cb2.ax.invert_yaxis()
-    cb2.set_label(r"$\overline{RT}_{\theta}$ [days]")
-
-    axes[2, 2].imshow(ds_tm["ttavg_q_ss"].isel(Time=t).values, extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=1, vmax=200)
-    axes[2, 2].grid(zorder=0)
-    axes[2, 2].set_xlabel("[m]")
-    axes[2, 2].set_yticklabels([])
-    cmap = copy.copy(mpl.colormaps.get_cmap("viridis"))
-    norm = mpl.colors.Normalize(vmin=1, vmax=200)
-    axl2 = fig.add_axes([0.65, 0.38, 0.2, 0.01])
-    cb2 = mpl.colorbar.ColorbarBase(axl2, cmap=cmap, norm=norm, orientation="horizontal", ticks=[1, 100, 200])
-    cb2.ax.set_xticklabels(["1", "100", ">200"])
-    cb2.ax.invert_yaxis()
-    cb2.set_label(r"$\overline{TT}_{PERC}$ [days]")
-    fig.subplots_adjust(left=0.1, bottom=0.1, top=0.94, right=0.85, wspace=0.35, hspace=0.1)
-    file = base_path_figs / f"fluxes_theta_and_tt_rt_{t}.png"
-    fig.savefig(file, dpi=300)
-    plt.close("all")
-
-images_data = []
-#load images
-for t in range(1, 1097):
-    data = imageio.v2.imread(base_path_figs / f"fluxes_theta_and_tt_rt_{t}.png")
-    images_data.append(data)
-
-file = base_path_figs / "fluxes_theta_and_tt_rt.gif"
-imageio.mimwrite(file, images_data, format='.gif', fps=14)
 
 plt.close("all")
