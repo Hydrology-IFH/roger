@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --time=20:00:00
+#SBATCH --time=24:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=4
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=20000
+#SBATCH --mem=16000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_transport_freiburg_crop_rotation_MPI-M-MPI-ESM-LR_RCA4_1985-2014

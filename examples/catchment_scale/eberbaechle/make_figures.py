@@ -116,52 +116,52 @@ ds_tm = ds_tm.assign_coords(Time=("Time", date_tm))
 # plot spatially distributed soil moisture and average travel time of percolation at different dates
 fig, axes = plt.subplots(2, 2, figsize=(6, 4))
 axes[0, 0].imshow(
-    onp.where(ds_hm["theta"].isel(Time=t_dry).values <= -9999, onp.nan, ds_hm["theta"].isel(Time=t_dry).values),
+    onp.where(ds_hm["theta"].isel(Time=t_dry).values <= -9999, onp.nan, ds_hm["theta"].isel(Time=t_dry).values).T,
     extent=(0, 80 * 25, 0, 53 * 25),
     cmap="viridis_r",
     vmin=0.1,
-    vmax=0.35,
+    vmax=0.4,
 )
 axes[0, 0].grid(zorder=0)
 axes[0, 0].set_xlabel("[m]")
 axes[0, 0].set_ylabel("[m]")
 axes[0, 0].set_title(str(ds_hm["Time"].values[t_dry]).split("T")[0])
 axes[0, 1].imshow(
-    onp.where(ds_hm["theta"].isel(Time=t_wet).values <= -9999, onp.nan, ds_hm["theta"].isel(Time=t_wet).values),
+    onp.where(ds_hm["theta"].isel(Time=t_wet).values <= -9999, onp.nan, ds_hm["theta"].isel(Time=t_wet).values).T,
     extent=(0, 80 * 25, 0, 53 * 25),
     cmap="viridis_r",
     vmin=0.1,
-    vmax=0.35,
+    vmax=0.4,
 )
 axes[0, 1].grid(zorder=0)
 axes[0, 1].set_xlabel("[m]")
 axes[0, 1].set_xlabel("[m]")
 axes[0, 1].set_title(str(ds_hm["Time"].values[t_wet]).split("T")[0])
 cmap = copy.copy(mpl.colormaps.get_cmap("viridis_r"))
-norm = mpl.colors.Normalize(vmin=0.1, vmax=0.35)
+norm = mpl.colors.Normalize(vmin=0.1, vmax=0.4)
 axl1 = fig.add_axes([0.85, 0.6, 0.02, 0.3])
-cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm, orientation="vertical", ticks=[0.1, 0.2, 0.3, 0.35])
-cb1.ax.set_yticklabels(["<0.1", "0.2", "0.3", ">0.35"])
+cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm, orientation="vertical", ticks=[0.1, 0.2, 0.3, 0.4])
+cb1.ax.set_yticklabels(["<0.1", "0.2", "0.3", ">0.4"])
 cb1.set_label(r"$\theta$ [-]")
 
 axes[1, 0].imshow(
-    ds_tm["ttavg_q_ss"].isel(Time=t_dry).values, extent=(0, 80 * 25, 0, 53 * 25), cmap="viridis", vmin=1, vmax=200
+    ds_tm["ttavg_q_ss"].isel(Time=t_dry).values, extent=(0, 80 * 25, 0, 53 * 25), cmap="viridis", vmin=1, vmax=400
 )
 axes[1, 0].grid(zorder=0)
 axes[1, 0].set_xlabel("[m]")
 axes[1, 0].set_ylabel("[m]")
 axes[1, 0].set_title(str(ds_tm["Time"].values[t_dry]).split("T")[0])
 axes[1, 1].imshow(
-    ds_tm["ttavg_q_ss"].isel(Time=t_wet).values, extent=(0, 80 * 25, 0, 53 * 25), cmap="viridis", vmin=1, vmax=200
+    ds_tm["ttavg_q_ss"].isel(Time=t_wet).values, extent=(0, 80 * 25, 0, 53 * 25), cmap="viridis", vmin=1, vmax=400
 )
 axes[1, 1].grid(zorder=0)
 axes[1, 1].set_xlabel("[m]")
 axes[1, 1].set_title(str(ds_tm["Time"].values[t_wet]).split("T")[0])
 cmap = copy.copy(mpl.colormaps.get_cmap("viridis"))
-norm = mpl.colors.Normalize(vmin=1, vmax=200)
+norm = mpl.colors.Normalize(vmin=1, vmax=400)
 axl2 = fig.add_axes([0.85, 0.13, 0.02, 0.3])
-cb2 = mpl.colorbar.ColorbarBase(axl2, cmap=cmap, norm=norm, orientation="vertical", ticks=[1, 100, 200])
-cb2.ax.set_yticklabels(["1", "100", ">200"])
+cb2 = mpl.colorbar.ColorbarBase(axl2, cmap=cmap, norm=norm, orientation="vertical", ticks=[1, 100, 200, 300, 400])
+cb2.ax.set_yticklabels(["1", "100", "200", "300", ">400"])
 cb2.ax.invert_yaxis()
 cb2.set_label(r"$\overline{TT}_{PERC}$ [days]")
 fig.subplots_adjust(left=0.1, bottom=0.1, top=0.94, right=0.8, wspace=0.3, hspace=0.3)
@@ -287,6 +287,7 @@ fig.savefig(file, dpi=300)
 # plot fluxes and isotopic signals of a single grid cell
 fig, axes = plt.subplots(4, 3, figsize=(6, 5))
 axes[0, 0].bar(date_hm, ds_hm["prec"].isel(x=x1, y=y1).values, width=0.1, color="blue", align="edge", edgecolor="blue")
+axes[0, 0].set_xlim(date_hm[0], date_hm[-1])
 axes[0, 0].set_ylabel(r"PRECIP [mm/day]")
 axes[0, 0].xaxis.set_major_formatter(mdates.DateFormatter("%y-%m"))
 axes[0, 0].tick_params(axis="x", labelrotation=60)
@@ -426,6 +427,26 @@ file = base_path_figs / "ts_single_grid_cell.png"
 fig.savefig(file, dpi=300)
 file = base_path_figs / "ts_single_grid_cell.pdf"
 fig.savefig(file, dpi=300)
+
+
+# plot percolation of a single grid cell
+fig, axes = plt.subplots(1, 1, figsize=(6, 2))
+axes.plot(date_hm, ds_hm["q_ss"].isel(x=x1, y=y1).values, "-", color="grey", lw=1)
+axes.set_xlim(date_hm[0], date_hm[-1])
+axes.set_ylim(
+    0, 1
+)
+axes.set_ylabel(r"PERC [mm/day]")
+axes.xaxis.set_major_formatter(mdates.DateFormatter("%y-%m"))
+axes.set_xlabel(r"Time [year-month]")
+axes.tick_params(axis="x", labelrotation=60)
+
+fig.tight_layout()
+file = base_path_figs / "ts_perc_single_grid_cell.png"
+fig.savefig(file, dpi=300)
+file = base_path_figs / "ts_perc_single_grid_cell.pdf"
+fig.savefig(file, dpi=300)
+
 
 # plot flux distributions, isotopic distributions and age distributions of all grid cells at wet and dry conditions
 fig, axes = plt.subplots(4, 3, figsize=(6, 5))
@@ -827,8 +848,8 @@ fig, axes = plt.subplots(4, 3, figsize=(6, 5), sharey=True)
 axes[0, 0].hist(
     ds_hm["evap_soil"].isel(Time=t_wet).values.flatten(),
     color="#08306b",
-    bins=50,
-    range=(0, 2.1),
+    bins=55,
+    range=(0, 1.1),
     histtype="step",
     cumulative=True,
     lw=2.0,
@@ -837,8 +858,8 @@ axes[0, 0].hist(
 axes[0, 0].hist(
     ds_hm["evap_soil"].isel(Time=t_drywet).values.flatten(),
     color="#6baed6",
-    bins=50,
-    range=(0, 2.1),
+    bins=55,
+    range=(0, 1.1),
     histtype="step",
     cumulative=True,
     lw=1.5,
@@ -846,14 +867,14 @@ axes[0, 0].hist(
 axes[0, 0].hist(
     ds_hm["evap_soil"].isel(Time=t_wetdry).values.flatten(),
     color="#feb24c",
-    bins=50,
-    range=(0, 2.1),
+    bins=55,
+    range=(0, 1.1),
     histtype="step",
     cumulative=True,
     lw=1.0,
     ls="-.",
 )
-axes[0, 0].set_xlim(0, 2.1)
+axes[0, 0].set_xlim(0, 1.0)
 axes[0, 0].set_xlabel(r"$EVAP_{soil}$ [mm/day]")
 axes[0, 0].set_ylabel("# grid cells")
 axes[0, 0].text(
@@ -869,8 +890,8 @@ axes[0, 0].text(
 axes[1, 0].hist(
     ds_hm["transp"].isel(Time=t_wet).values.flatten(),
     color="#08306b",
-    bins=40,
-    range=(0, 4),
+    bins=41,
+    range=(0, 4.1),
     histtype="step",
     cumulative=True,
     lw=2.0,
@@ -878,8 +899,8 @@ axes[1, 0].hist(
 axes[1, 0].hist(
     ds_hm["transp"].isel(Time=t_drywet).values.flatten(),
     color="#6baed6",
-    bins=40,
-    range=(0, 4),
+    bins=41,
+    range=(0, 4.1),
     histtype="step",
     cumulative=True,
     lw=1.5,
@@ -887,8 +908,8 @@ axes[1, 0].hist(
 axes[1, 0].hist(
     ds_hm["transp"].isel(Time=t_wetdry).values.flatten(),
     color="#feb24c",
-    bins=40,
-    range=(0, 4),
+    bins=41,
+    range=(0, 4.1),
     histtype="step",
     cumulative=True,
     lw=1.0,
@@ -897,8 +918,8 @@ axes[1, 0].hist(
 axes[1, 0].hist(
     ds_hm["transp"].isel(Time=t_dry).values.flatten(),
     color="#fed976",
-    bins=40,
-    range=(0, 4),
+    bins=41,
+    range=(0, 4.1),
     histtype="step",
     cumulative=True,
     lw=0.5,
@@ -969,8 +990,8 @@ axes[2, 0].text(
 axes[3, 0].hist(
     ds_hm["q_ss"].isel(Time=t_wet).values.flatten(),
     color="#08306b",
-    bins=100,
-    range=(0, 100),
+    bins=101,
+    range=(0, 101),
     histtype="step",
     cumulative=True,
     lw=2.0,
@@ -978,8 +999,8 @@ axes[3, 0].hist(
 axes[3, 0].hist(
     ds_hm["q_ss"].isel(Time=t_drywet).values.flatten(),
     color="#6baed6",
-    bins=100,
-    range=(0, 100),
+    bins=101,
+    range=(0, 101),
     histtype="step",
     cumulative=True,
     lw=1.5,
@@ -987,8 +1008,8 @@ axes[3, 0].hist(
 axes[3, 0].hist(
     ds_hm["q_ss"].isel(Time=t_wetdry).values.flatten(),
     color="#feb24c",
-    bins=100,
-    range=(0, 100),
+    bins=101,
+    range=(0, 101),
     histtype="step",
     cumulative=True,
     lw=1.0,
@@ -997,8 +1018,8 @@ axes[3, 0].hist(
 axes[3, 0].hist(
     ds_hm["q_ss"].isel(Time=t_dry).values.flatten(),
     color="#fed976",
-    bins=100,
-    range=(0, 100),
+    bins=101,
+    range=(0, 101),
     histtype="step",
     cumulative=True,
     lw=0.5,
@@ -1258,12 +1279,12 @@ axes[1, 2].text(
     verticalalignment="center",
     transform=axes[1, 2].transAxes,
 )
-axes[1, 2].plot([], [], color="#fed976", label="dry condtions", lw=0.5, ls="--")
-axes[1, 2].plot([], [], color="#feb24c", label="transition to dry condtions", lw=1.0, ls="-.")
-axes[1, 2].plot([], [], color="#6baed6", label="transition to wet condtions", lw=1.5)
-axes[1, 2].plot([], [], color="#08306b", label="wet condtions", lw=2.0)
+axes[1, 2].plot([], [], color="#fed976", label="dry condtions\n ($13^{th}$ Aug 2022)", lw=0.5, ls="--")
+axes[1, 2].plot([], [], color="#feb24c", label="transition to dry condtions\n ($14^{th}$ Apr 2022)", lw=1.0, ls="-.")
+axes[1, 2].plot([], [], color="#6baed6", label="transition to wet condtions\n ($3^{rd}$ Oct 2020)", lw=1.5)
+axes[1, 2].plot([], [], color="#08306b", label="wet condtions\n ($10^{th}$ Feb 2021)", lw=2.0)
 lines, labels = axes[1, 2].get_legend_handles_labels()
-fig.legend(lines, labels, loc="upper right", frameon=False, bbox_to_anchor=(1.01, 0.96))
+fig.legend(lines, labels, loc="upper right", frameon=False, bbox_to_anchor=(1.01, 1.01))
 
 axes[2, 2].hist(
     ds_tm["rtavg_s"].isel(Time=t_wet).values.flatten(),
@@ -1403,7 +1424,7 @@ inset.hist(
     lw=0.5,
     ls="--",
 )
-inset.set_xlim(0, 0.2)
+inset.set_xlim(0, 0.4)
 
 fig.subplots_adjust(left=0.1, bottom=0.1, top=0.95, right=0.98, hspace=0.6, wspace=0.25)
 file = base_path_figs / "cumulated_dist_states_dry_normal_wet.png"

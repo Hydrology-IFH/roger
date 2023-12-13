@@ -331,6 +331,15 @@ VARIABLES = {
         initial=1,
         write_to_restart=True,
     ),
+    "doy_dist": Variable(
+        "Day of year at current iteration",
+        CATCH_GRID,
+        "",
+        "Day of year at Current iteration",
+        dtype="int32",
+        initial=1,
+        active=lambda settings: settings.enable_nitrate,
+    ),
     "DOY": Variable(
         "Day of year",
         TIME_FORCING,
@@ -825,6 +834,14 @@ VARIABLES = {
         "degC",
         "air temperature",
         time_dependent=True,
+    ),
+    "ta_year": Variable(
+        "average annual air temperature",
+        CATCH_GRID,
+        "degC",
+        "average annual air temperature",
+        time_dependent=True,
+        active=lambda settings: settings.enable_nitrate,
     ),
     "ta_offset": Variable(
         "offset of air temperature",
@@ -3220,6 +3237,14 @@ VARIABLES = {
         initial=1.0,
         active=lambda settings: not settings.enable_offline_transport,
     ),
+    "fert_weight": Variable(
+        "weight factor of fertilization",
+        CATCH_GRID,
+        "-",
+        "weight factor of fertilization",
+        initial=1.0,
+        active=lambda settings: settings.enable_nitrate,
+    ),
     "prec_day": Variable(
         "precipitation",
         CATCH_GRID + TIMESTEPS_DAY,
@@ -3480,6 +3505,14 @@ VARIABLES = {
         "mm/dt",
         "total infiltration into subsoil",
         time_dependent=True,
+    ),
+    "inf_in_tracer": Variable(
+        "cumulated infiltration for tracer input",
+        CATCH_GRID,
+        "mm",
+        "cumulated infiltration for tracer input",
+        time_dependent=True,
+        active=lambda settings: settings.enable_nitrate,
     ),
     "no_wf": Variable(
         "number of wetting fronts",

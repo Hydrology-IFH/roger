@@ -74,7 +74,7 @@ for t in range(1, 1097):
     axes[0, 0].set_axis_off()
     axes[0, 2].set_axis_off()
 
-    axes[0, 1].imshow(onp.where(ds_hm["prec"].isel(Time=t).values <= -9999, onp.nan, ds_hm["prec"].isel(Time=t).values), extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=0, vmax=20)
+    axes[0, 1].imshow(onp.where(ds_hm["prec"].isel(Time=t).values <= -9999, onp.nan, ds_hm["prec"].isel(Time=t).values).T, extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=0, vmax=20)
     axes[0, 1].grid(zorder=0)
     axes[0, 1].set_xlabel("")
     axes[0, 1].set_ylabel("[m]")
@@ -86,7 +86,7 @@ for t in range(1, 1097):
     cb1.ax.set_yticklabels(["0", "10", ">20"])
     cb1.set_label("PRECIP [mm/day]")
 
-    axes[1, 0].imshow(onp.where(ds_hm["transp"].isel(Time=t).values <= -9999, onp.nan, ds_hm["transp"].isel(Time=t).values), extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=0, vmax=5)
+    axes[1, 0].imshow(onp.where(ds_hm["transp"].isel(Time=t).values <= -9999, onp.nan, ds_hm["transp"].isel(Time=t).values).T, extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=0, vmax=5)
     axes[1, 0].grid(zorder=0)
     axes[1, 0].set_xlabel("")
     axes[1, 0].set_ylabel("[m]")
@@ -97,7 +97,7 @@ for t in range(1, 1097):
     cb1.ax.set_xticklabels(["0", "2.5", ">5"])
     cb1.set_label("TRANSP [mm/day]")
 
-    axes[1, 1].imshow(onp.where(ds_hm["theta"].isel(Time=t).values <= -9999, onp.nan, ds_hm["theta"].isel(Time=t).values), extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=0.1, vmax=0.3)
+    axes[1, 1].imshow(onp.where(ds_hm["theta"].isel(Time=t).values <= -9999, onp.nan, ds_hm["theta"].isel(Time=t).values).T, extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=0.1, vmax=0.3)
     axes[1, 1].grid(zorder=0)
     axes[1, 1].set_xlabel("")
     axes[1, 1].set_ylabel("")
@@ -109,7 +109,7 @@ for t in range(1, 1097):
     cb1.ax.set_xticklabels(["<0.1", "0.2", "0.3", ">0.4"])
     cb1.set_label(r"$\theta$ [-]")
 
-    axes[1, 2].imshow(onp.where(ds_hm["q_ss"].isel(Time=t).values <= -9999, onp.nan, ds_hm["q_ss"].isel(Time=t).values), extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=0, vmax=20)
+    axes[1, 2].imshow(onp.where(ds_hm["q_ss"].isel(Time=t).values <= -9999, onp.nan, ds_hm["q_ss"].isel(Time=t).values).T, extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=0, vmax=20)
     axes[1, 2].grid(zorder=0)
     axes[1, 2].set_xlabel("")
     axes[1, 2].set_ylabel("")
@@ -138,10 +138,10 @@ for t in range(1, 1097):
     axes[2, 1].set_xlabel("[m]")
     axes[2, 1].set_yticklabels([])
     cmap = copy.copy(mpl.colormaps.get_cmap("viridis"))
-    norm = mpl.colors.Normalize(vmin=1, vmax=200)
+    norm = mpl.colors.Normalize(vmin=1, vmax=300)
     axl2 = fig.add_axes([0.38, 0.38, 0.2, 0.01])
-    cb2 = mpl.colorbar.ColorbarBase(axl2, cmap=cmap, norm=norm, orientation="horizontal", ticks=[1, 100, 200])
-    cb2.ax.set_xticklabels(["1", "100", ">200"])
+    cb2 = mpl.colorbar.ColorbarBase(axl2, cmap=cmap, norm=norm, orientation="horizontal", ticks=[1, 100, 200, 300])
+    cb2.ax.set_xticklabels(["1", "100", "200", ">300"])
     cb2.ax.invert_yaxis()
     cb2.set_label(r"$\overline{RT}_{\theta}$ [days]")
 
@@ -150,15 +150,15 @@ for t in range(1, 1097):
     axes[2, 2].set_xlabel("[m]")
     axes[2, 2].set_yticklabels([])
     cmap = copy.copy(mpl.colormaps.get_cmap("viridis"))
-    norm = mpl.colors.Normalize(vmin=1, vmax=200)
+    norm = mpl.colors.Normalize(vmin=1, vmax=400)
     axl2 = fig.add_axes([0.65, 0.38, 0.2, 0.01])
-    cb2 = mpl.colorbar.ColorbarBase(axl2, cmap=cmap, norm=norm, orientation="horizontal", ticks=[1, 100, 200])
-    cb2.ax.set_xticklabels(["1", "100", ">200"])
+    cb2 = mpl.colorbar.ColorbarBase(axl2, cmap=cmap, norm=norm, orientation="horizontal", ticks=[1, 100, 200, 300, 400])
+    cb2.ax.set_xticklabels(["1", "100", "200", "300", ">400"])
     cb2.ax.invert_yaxis()
     cb2.set_label(r"$\overline{TT}_{PERC}$ [days]")
     fig.subplots_adjust(left=0.1, bottom=0.1, top=0.94, right=0.85, wspace=0.35, hspace=0.1)
     file = base_path_figs / f"fluxes_theta_and_tt_rt_{t}.png"
-    fig.savefig(file, dpi=300)
+    fig.savefig(file, dpi=250)
     plt.close("all")
 
 images_data = []
@@ -168,6 +168,6 @@ for t in range(1, 1097):
     images_data.append(data)
 
 file = base_path_figs / "fluxes_theta_and_tt_rt.gif"
-imageio.mimwrite(file, images_data, format='.gif', fps=14)
+imageio.mimwrite(file, images_data, format='.gif', fps=15)
 
 plt.close("all")
