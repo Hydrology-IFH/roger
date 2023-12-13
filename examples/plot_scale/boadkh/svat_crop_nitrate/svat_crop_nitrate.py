@@ -55,7 +55,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
             settings.sas_solver = "deterministic"
             settings.sas_solver_substeps = 8
 
-            settings.nx, settings.ny = 676, 1
+            settings.nx, settings.ny = 80, 1
             settings.nitt = self._get_nitt(
                 self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
             )
@@ -72,7 +72,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0
-            settings.time_origin = "2013-12-31 00:00:00"
+            settings.time_origin = "2012-12-31 00:00:00"
 
             settings.enable_crop_phenology = True
             settings.enable_crop_rotation = True
