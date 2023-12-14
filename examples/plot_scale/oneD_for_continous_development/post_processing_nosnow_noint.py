@@ -11,9 +11,9 @@ import roger
 
 base_path = Path(__file__).parent
 # directory of results
-base_path_results = base_path / "results"
-if not os.path.exists(base_path_results):
-    os.mkdir(base_path_results)
+base_path_output = base_path / "output"
+if not os.path.exists(base_path_output):
+    os.mkdir(base_path_output)
 # directory of figures
 base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
@@ -24,8 +24,8 @@ meteo_stations = ["ihringen"]
 for meteo_station in meteo_stations:
     path = str(base_path / f"ONED_nosnow_noint_{meteo_station}.*.nc")
     diag_files = glob.glob(path)
-    states_hm_file = base_path / "states_hm_nosnow_noint.nc"
-    with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
+    ONED_file = base_path / "ONED_nosnow_noint.nc"
+    with h5netcdf.File(ONED_file, 'a', decode_vlen_strings=False) as f:
         if meteo_station not in list(f.groups.keys()):
             f.create_group(meteo_station)
         f.attrs.update(
@@ -70,7 +70,7 @@ for meteo_station in meteo_stations:
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
 
-with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
+with h5netcdf.File(ONED_file, 'a', decode_vlen_strings=False) as f:
     for meteo_station in meteo_stations:
         # water for infiltration
         try:
@@ -118,12 +118,12 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
                        units='mm')
 
 
-ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf", group="ihringen")
+ds_sim = xr.open_dataset(ONED_file, engine="h5netcdf", group="ihringen")
 days_sim = ds_sim.Time.values + 1
 grid0 = pd.DataFrame(index=range(len(days_sim[1:])))
 for var_sim in ['inf_in', 'inf_mat', 'inf_mp', 'inf_sc', 'q_sub_mat', 'q_sub_mp', 'z_sat']:
     grid0.loc[:, var_sim] = ds_sim[var_sim].isel(x=0, y=0).values[1:]
 grid0.loc[:, 'perc'] = ds_sim['q_ss'].isel(x=0, y=0).values[1:]
-file = base_path_results / "grid0_nosnow_noint.csv"
+file = base_path_output / "grid0_nosnow_noint.csv"
 grid0.to_csv(file, header=True, index=True, sep=";")
 ds_sim.close()

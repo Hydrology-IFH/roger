@@ -127,6 +127,8 @@ Short description of land use (lu_id)
 - `583`: winter clover (growing only)
 - `584`: winter clover (continued summer)
 - `585`: winter clover (continued winter)
+- `586`: yellow mustard (after wheat)
+- `587`: yellow mustard (after cor)
 - `598`: no crop
 - `599`: bare
 - `6`: vineyard

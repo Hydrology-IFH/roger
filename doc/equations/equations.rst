@@ -5,6 +5,13 @@ combination of equations. We refer to :doc:`/reference/settings` and
 :doc:`/reference/variables` representing the described parameters
 and variables as objects (e.g. float, array).
 
+While using ``jax``, ``jax-mpi`` or ``jax-gpu`` (-b) to compute the solute transport, the default float type of ``float32`` needs to be changed to ``float64`` (--float-type). Currently,
+using ``float32`` leads to numerical instabilities.
+
+```
+python svat_transport.py -b jax --float-type float64
+```
+
 Time-stepping
 -------------
 Three different time-stepping schemes are available to solve the equations. The

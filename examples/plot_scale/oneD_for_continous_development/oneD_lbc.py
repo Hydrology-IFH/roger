@@ -7,9 +7,10 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
 @click.option("-ms", "--meteo-station", type=click.Choice(['breitnau', 'ihringen']), default='ihringen')
 @roger_base_cli
-def main():
+def main(tmp_dir, meteo_station):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
@@ -64,7 +65,7 @@ def main():
             settings = state.settings
             settings.identifier = self._identifier
 
-            settings.nx, settings.ny = self._get_nx(self._base_path, 'parameter_grid.csv'), 1
+            settings.nx, settings.ny = self._get_nx(self._base_path, 'parameters.csv'), 1
             settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
 
             settings.dx = 1
@@ -76,7 +77,6 @@ def main():
 
             settings.enable_groundwater_boundary = True
             settings.enable_lateral_flow = True
-            settings.enable_routing = False
             settings.enable_adaptive_time_stepping = True
 
         @roger_routine(
@@ -116,20 +116,20 @@ def main():
         def set_parameters_setup(self, state):
             vs = state.variables
 
-            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], self._read_var_from_csv("lu_id", self._base_path,  "parameter_grid.csv"))
+            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], self._read_var_from_csv("lu_id", self._base_path,  "parameters.csv"))
             vs.sealing = update(vs.sealing, at[2:-2, 2:-2], 0)
-            vs.slope = update(vs.slope, at[2:-2, 2:-2], self._read_var_from_csv("slope", self._base_path,  "parameter_grid.csv"))
+            vs.slope = update(vs.slope, at[2:-2, 2:-2], self._read_var_from_csv("slope", self._base_path,  "parameters.csv"))
             vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
-            vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], self._read_var_from_csv("S_dep_tot", self._base_path,  "parameter_grid.csv"))
-            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path,  "parameter_grid.csv"))
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_csv("dmpv", self._base_path,  "parameter_grid.csv"))
-            vs.dmph = update(vs.dmph, at[2:-2, 2:-2], self._read_var_from_csv("dmph", self._base_path,  "parameter_grid.csv"))
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_csv("lmpv", self._base_path,  "parameter_grid.csv"))
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_csv("theta_ac", self._base_path,  "parameter_grid.csv"))
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_csv("theta_ufc", self._base_path,  "parameter_grid.csv"))
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_csv("theta_pwp", self._base_path,  "parameter_grid.csv"))
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_csv("ks", self._base_path,  "parameter_grid.csv"))
-            vs.kf = update(vs.kf, at[2:-2, 2:-2], self._read_var_from_csv("kf", self._base_path,  "parameter_grid.csv"))
+            vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], self._read_var_from_csv("S_dep_tot", self._base_path,  "parameters.csv"))
+            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path,  "parameters.csv"))
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_csv("dmpv", self._base_path,  "parameters.csv"))
+            vs.dmph = update(vs.dmph, at[2:-2, 2:-2], self._read_var_from_csv("dmph", self._base_path,  "parameters.csv"))
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_csv("lmpv", self._base_path,  "parameters.csv"))
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_csv("theta_ac", self._base_path,  "parameters.csv"))
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_csv("theta_ufc", self._base_path,  "parameters.csv"))
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_csv("theta_pwp", self._base_path,  "parameters.csv"))
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_csv("ks", self._base_path,  "parameters.csv"))
+            vs.kf = update(vs.kf, at[2:-2, 2:-2], self._read_var_from_csv("kf", self._base_path,  "parameters.csv"))
 
         @roger_routine
         def set_parameters(self, state):
@@ -154,8 +154,8 @@ def main():
             vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
             vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
             vs.z_sat = update(vs.z_sat, at[2:-2, 2:-2, :vs.taup1], 0)
-            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
-            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameter_grid.csv")[:, :, npx.newaxis])
+            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameters.csv")[:, :, npx.newaxis])
+            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_csv("theta", self._base_path,  "parameters.csv")[:, :, npx.newaxis])
 
         @roger_routine
         def set_boundary_conditions_setup(self, state):
@@ -200,30 +200,38 @@ def main():
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
         @roger_routine
-        def set_diagnostics(self, state):
+        def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
             diagnostics["rate"].output_variables = ["aet", "pet", "transp",
-                                                    "evap_soil", "inf_mat",
-                                                    "inf_mp", "inf_sc", "q_ss",
-                                                    "q_sub", "q_sub_mp",
-                                                    "q_sub_mat", "q_hof", "q_sof",
-                                                    "prec", "rain", "snow",
-                                                    "int_prec", "int_rain_top",
-                                                    "int_rain_ground", "int_snow_top",
-                                                    "int_snow_ground", "q_snow",
-                                                    "evap_sur", "cpr_ss"]
+                                                     "evap_soil", "inf_mat",
+                                                     "inf_mp", "inf_sc", "q_ss",
+                                                     "q_sub", "q_sub_mp",
+                                                     "q_sub_mat", "q_hof", "q_sof",
+                                                     "prec", "rain", "snow",
+                                                     "int_prec", "int_rain_top",
+                                                     "int_rain_ground", "int_snow_top",
+                                                     "int_snow_ground", "q_snow",
+                                                     "evap_sur", "snow_top",
+                                                     "snow_ground", "snow_melt_drip", "cpr_ss"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
+            if base_path:
+                diagnostics["rate"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["z_sat", "theta", "S_s"]
+
+            diagnostics["collect"].output_variables = ["theta", "S_s", "S_int_top", "S_int_ground", "S_int_top_tot", "S_int_ground_tot", "S_snow", "swe", "swe_top", "swe_ground", "swe_top_tot"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
+            if base_path:
+                diagnostics["collect"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
-            diagnostics["maximum"].output_variables = ["dS_num_error", "z_sat"]
+            diagnostics["maximum"].output_variables = ["dS_num_error", "z_sat", "z_wf"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1
+            if base_path:
+                diagnostics["maximum"].base_output_path = base_path
 
         @roger_routine
         def after_timestep(self, state):
