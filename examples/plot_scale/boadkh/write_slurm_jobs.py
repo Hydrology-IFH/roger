@@ -30,7 +30,10 @@ def main():
                                "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
                                "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
                                "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
-                               "winter-wheat_winter-grain-pea_winter-rape"]
+                               "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
+                               "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
+                               "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
+                               "winter-wheat_winter-rape_yellow-mustard"]
 
     # --- jobs to calculate fluxes and states --------------------------------------------------------
     for location in locations:
@@ -64,6 +67,43 @@ def main():
             lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
             lines.append('mv "${TMPDIR}"/SVATCROP_*.nc %s\n' % (output_path_ws.as_posix()))
             file_path = base_path / "svat_crop" / f"{script_name}_slurm.sh"
+            file = open(file_path, "w")
+            file.writelines(lines)
+            file.close()
+            subprocess.Popen(f"chmod +x {file_path}", shell=True)
+
+    # --- jobs to calculate sensitivities of fluxes and states ---------------------------------------
+    for location in locations:
+        for crop_rotation_scenario in crop_rotation_scenarios:
+            script_name = f"svat_crop_{location}_{crop_rotation_scenario}_sa"
+            output_path_ws = base_path_ws / "svat_crop_sobol"
+            lines = []
+            lines.append("#!/bin/bash\n")
+            lines.append("#SBATCH --time=8:00:00\n")
+            lines.append("#SBATCH --nodes=1\n")
+            lines.append("#SBATCH --ntasks=1\n")
+            lines.append("#SBATCH --cpus-per-task=1\n")
+            lines.append("#SBATCH --mem=16000\n")
+            lines.append("#SBATCH --mail-type=FAIL\n")
+            lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
+            lines.append(f"#SBATCH --job-name={script_name}\n")
+            lines.append(f"#SBATCH --output={script_name}.out\n")
+            lines.append(f"#SBATCH --error={script_name}_err.out\n")
+            lines.append("#SBATCH --export=ALL\n")
+            lines.append(" \n")
+            lines.append('eval "$(conda shell.bash hook)"\n')
+            lines.append("conda activate roger\n")
+            lines.append(f"cd {base_path_bwuc}/svat_crop_sobol\n")
+            lines.append(" \n")
+            lines.append(
+                'python svat_crop.py -b numpy -d cpu --location %s --crop-rotation-scenario %s -td "${TMPDIR}"\n'
+                % (location, crop_rotation_scenario)
+            )
+            lines.append("# Move output from local SSD to global workspace\n")
+            lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
+            lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
+            lines.append('mv "${TMPDIR}"/SVATCROP_*.nc %s\n' % (output_path_ws.as_posix()))
+            file_path = base_path / "svat_crop_sobol" / f"{script_name}_slurm.sh"
             file = open(file_path, "w")
             file.writelines(lines)
             file.close()

@@ -20,5 +20,5 @@ theta_pwp:
 - 0.25
 # saturated hydraulic conductivity (mm/h)
 ks:
-- 5
-- 150
+- 0.1
+- 100
