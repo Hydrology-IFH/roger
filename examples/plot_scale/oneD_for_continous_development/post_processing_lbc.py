@@ -13,9 +13,9 @@ import roger.tools.labels as labs
 
 base_path = Path(__file__).parent
 # directory of results
-base_path_results = base_path / "results"
-if not os.path.exists(base_path_results):
-    os.mkdir(base_path_results)
+base_path_output = base_path / "output"
+if not os.path.exists(base_path_output):
+    os.mkdir(base_path_output)
 # directory of figures
 base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
@@ -26,8 +26,8 @@ meteo_stations = ["breitnau", "ihringen"]
 for meteo_station in meteo_stations:
     path = str(base_path / f"ONED_lbc_{meteo_station}.*.nc")
     diag_files = glob.glob(path)
-    states_hm_file = base_path / "states_hm.nc"
-    with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
+    ONED_file = base_path / "ONED.nc"
+    with h5netcdf.File(ONED_file, 'a', decode_vlen_strings=False) as f:
         if meteo_station not in list(f.groups.keys()):
             f.create_group(meteo_station)
         f.attrs.update(
@@ -72,7 +72,7 @@ for meteo_station in meteo_stations:
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
 
-with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
+with h5netcdf.File(ONED_file, 'a', decode_vlen_strings=False) as f:
     for meteo_station in meteo_stations:
         # water for infiltration
         try:
@@ -129,8 +129,8 @@ ll_df_sim_sum = []
 ll_df_sim_sum_tot = []
 for i, meteo_station in enumerate(meteo_stations):
     # load simulation
-    states_hm_file = base_path / "states_hm.nc"
-    ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf", group=meteo_station)
+    ONED_file = base_path / "ONED.nc"
+    ds_sim = xr.open_dataset(ONED_file, engine="h5netcdf", group=meteo_station)
 
     # assign date
     days_sim = ds_sim.Time.values + 1
@@ -151,10 +151,10 @@ for i, meteo_station in enumerate(meteo_stations):
         df_percentiles.loc["mean", var_sim] = df.loc[:, var_sim].mean()
         df_percentiles.loc["q75", var_sim] = df.loc[:, var_sim].quantile(0.75)
         df_percentiles.loc["max", var_sim] = df.loc[:, var_sim].max()
-    file = base_path_results / f"percentiles_{meteo_station}.csv"
+    file = base_path_output / f"percentiles_{meteo_station}.csv"
     df_percentiles.to_csv(file, header=True, index=True, sep=";")
 
-    file = base_path_results / f"summary_{meteo_station}.txt"
+    file = base_path_output / f"summary_{meteo_station}.txt"
     df.to_csv(file, header=True, index=False, sep="\t")
     df.loc[:, 'meteo_station'] = meteo_station
     df.loc[:, 'idx'] = df.index

@@ -10,9 +10,9 @@ import roger
 
 base_path = Path(__file__).parent
 # directory of results
-base_path_results = base_path / "results"
-if not os.path.exists(base_path_results):
-    os.mkdir(base_path_results)
+base_path_output = base_path / "output"
+if not os.path.exists(base_path_output):
+    os.mkdir(base_path_output)
 # directory of figures
 base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
@@ -23,8 +23,8 @@ meteo_stations = ["ihringen"]
 for meteo_station in meteo_stations:
     path = str(base_path / f"ONED_{meteo_station}.*.nc")
     diag_files = glob.glob(path)
-    states_hm_file = base_path / "states_hm.nc"
-    with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
+    ONED_file = base_path / "ONED.nc"
+    with h5netcdf.File(ONED_file, 'a', decode_vlen_strings=False) as f:
         if meteo_station not in list(f.groups.keys()):
             f.create_group(meteo_station)
         f.attrs.update(
@@ -69,7 +69,7 @@ for meteo_station in meteo_stations:
                         v.attrs.update(long_name=var_obj.attrs["long_name"],
                                        units=var_obj.attrs["units"])
 
-with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
+with h5netcdf.File(ONED_file, 'a', decode_vlen_strings=False) as f:
     for meteo_station in meteo_stations:
         # water for infiltration
         try:
@@ -126,8 +126,8 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
 # ll_df_sim_sum_tot = []
 # for i, meteo_station in enumerate(meteo_stations):
 #     # load simulation
-#     states_hm_file = base_path / "states_hm.nc"
-#     ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf", group=meteo_station)
+#     ONED_file = base_path / "ONED.nc"
+#     ds_sim = xr.open_dataset(ONED_file, engine="h5netcdf", group=meteo_station)
 #
 #     # assign date
 #     days_sim = ds_sim.Time.values + 1
@@ -148,10 +148,10 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
 #         df_percentiles.loc["mean", var_sim] = df.loc[:, var_sim].mean()
 #         df_percentiles.loc["q75", var_sim] = df.loc[:, var_sim].quantile(0.75)
 #         df_percentiles.loc["max", var_sim] = df.loc[:, var_sim].max()
-#     file = base_path_results / f"percentiles_{meteo_station}.csv"
+#     file = base_path_output / f"percentiles_{meteo_station}.csv"
 #     df_percentiles.to_csv(file, header=True, index=True, sep=";")
 #
-#     file = base_path_results / f"summary_{meteo_station}.txt"
+#     file = base_path_output / f"summary_{meteo_station}.txt"
 #     df.to_csv(file, header=True, index=False, sep="\t")
 #     df.loc[:, 'meteo_station'] = meteo_station
 #     df.loc[:, 'idx'] = df.index
@@ -183,13 +183,13 @@ with h5netcdf.File(states_hm_file, 'a', decode_vlen_strings=False) as f:
 #         fig.savefig(file, dpi=250)
 #         plt.close(fig)
 
-ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf", group="ihringen")
+ds_sim = xr.open_dataset(ONED_file, engine="h5netcdf", group="ihringen")
 days_sim = ds_sim.Time.values + 1
 grid0 = pd.DataFrame(index=range(len(days_sim[1:])))
 for var_sim in ['inf_in', 'inf_mat', 'inf_mp', 'inf_sc', 'q_sub_mat', 'q_sub_mp', 'z_sat']:
     grid0.loc[:, var_sim] = ds_sim[var_sim].isel(x=0, y=0).values[1:]
 grid0.loc[:, 'perc'] = ds_sim['q_ss'].isel(x=0, y=0).values[1:]
-file = base_path_results / "grid0_nosnow_noint.csv"
+file = base_path_output / "grid0_nosnow_noint.csv"
 grid0.to_csv(file, header=True, index=True, sep=";")
 ds_sim.close()
 
@@ -279,8 +279,8 @@ ds_sim.close()
 #     df_perc = pd.read_csv(file, sep=" ", header=None)
 #
 #     # load simulation
-#     states_hm_file = base_path / "states_hm.nc"
-#     ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf", group=meteo_station)
+#     ONED_file = base_path / "ONED.nc"
+#     ds_sim = xr.open_dataset(ONED_file, engine="h5netcdf", group=meteo_station)
 #
 #     # assign date
 #     days_sim = ds_sim.Time.values + 1
