@@ -10,11 +10,13 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("--location", type=click.Choice(["singen", "azenweiler", "unterraderach", "muellheim", "freiburg", "ihringen", "altheim", "kirchen", "maehringen", "heidelsheim", "elsenz", "zaberfeld", "kupferzell", "stachenhausen", "oehringen"]
 ), default="ihringen")
 @click.option("--crop-rotation-scenario", type=click.Choice(["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
-                                                             "summer-wheat_winter-wheat_corn", 
-                                                             "summer-wheat_winter-wheat_winter-rape", "winter-wheat_clover",
-                                                             "winter-wheat_clover_corn", "winter-wheat_corn", 
+                                                             "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
+                                                             "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
                                                              "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
-                                                             "winter-wheat_winter-grain-pea_winter-rape", "clover"]), default="summer-wheat_winter-wheat_corn")
+                                                             "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
+                                                             "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
+                                                             "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
+                                                             "winter-wheat_winter-rape_yellow-mustard"]), default="summer-wheat_winter-wheat_corn")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
 @roger_base_cli
 def main(location, crop_rotation_scenario, tmp_dir):

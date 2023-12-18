@@ -181,7 +181,7 @@ for station_id in station_ids:
     for cm in cms:
         dict_bc_meteo_daily[station_id][cm] = {}
         file = (
-            base_path / "climate_projections" / "data" / "daily" / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_hist.csv"
+            base_path / "climate_projections" / "daily" / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_hist.csv"
         )
         data_hist = pd.read_csv(file, sep=",", index_col=0)
         data_hist.index = pd.to_datetime(data_hist.index, format="%Y-%m-%d")
@@ -189,7 +189,6 @@ for station_id in station_ids:
         file = (
             base_path
             / "climate_projections"
-            / "data"
             / "daily"
             / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_future.csv"
         )
@@ -211,7 +210,6 @@ for station_id in station_ids:
             file = (
                 base_path
                 / "climate_projections"
-                / "data"
                 / "daily"
                 / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_{period}.csv"
             )
@@ -264,7 +262,6 @@ for station_id in station_ids:
             file = file = (
                 base_path
                 / "climate_projections"
-                / "data"
                 / "daily"
                 / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_{period}.csv"
             )
@@ -310,7 +307,6 @@ for station_id in station_ids:
             file = file = (
                 base_path
                 / "climate_projections"
-                / "data"
                 / "daily"
                 / f"BC-Neu-pcmgthr-MBCn_{cm}_DWD_{station_id}_{period}.csv"
             )
@@ -324,7 +320,7 @@ for station_id in station_ids:
                 .sum()
                 .to_frame()
                 .join(data.loc[:, "TA"].groupby(pd.Grouper(freq="QS-DEC")).mean().to_frame())
-                .join(data.loc[:, "PET"].groupby(pd.Grouper(freq="QS-DEC")).mean().to_frame())
+                .join(data.loc[:, "PET"].groupby(pd.Grouper(freq="QS-DEC")).sum().to_frame())
             )
 
             dict_meteo_seas[station_id][cm][period] = data_seas
@@ -348,7 +344,6 @@ for station_id in station_ids:
         file = (
             base_path
             / "climate_projections"
-            / "data"
             / "daily"
             / f"tmin-max-daily_FullTs_{cm}_station-DWD_{station_id}.csv"
         )
@@ -365,11 +360,11 @@ for station_id in station_ids:
         data = pd.DataFrame(index=idx_daily_1985_2099)
         data = data.join(data1)
         # uncorrected daily average air temperature
-        file = base_path / "climate_projections" / "data" / "daily" / f"pcmgthr_{cm}_DWD_{station_id}_hist.csv"
+        file = base_path / "climate_projections" / "daily" / f"pcmgthr_{cm}_DWD_{station_id}_hist.csv"
         data_hist = pd.read_csv(file, sep=",", index_col=0)
         data_hist.index = pd.to_datetime(data_hist.index, format="%Y-%m-%d")
         data_hist.columns = ["PREC", "TA", "TAD", "RS"]
-        file = base_path / "climate_projections" / "data" / "daily" / f"pcmgthr_{cm}_DWD_{station_id}_future.csv"
+        file = base_path / "climate_projections" / "daily" / f"pcmgthr_{cm}_DWD_{station_id}_future.csv"
         data_future = pd.read_csv(file, sep=",", index_col=0)
         data_future.index = pd.to_datetime(data_future.index, format="%Y-%m-%d")
         data_future.columns = ["PREC", "TA", "TAD", "RS"]
@@ -421,13 +416,12 @@ for station_id in station_ids:
     file = (
         base_path
         / "climate_projections"
-        / "data"
         / "subdaily"
         / f"pr_subdaily_FullTs_{cm}_station-DWD_{station_id}_new.csv"
     )
     data = pd.read_csv(file, sep=",", index_col=0)
 
-    file = base_path / "climate_projections" / "data" / "subdaily" / "datetime_MPI-RCA1hr.txt"
+    file = base_path / "climate_projections" / "subdaily" / "datetime_MPI-RCA1hr.txt"
     data_idx = pd.read_csv(file, sep=";")
     data.index = pd.to_datetime(data_idx.iloc[:, 0].astype(str).values, format="%Y-%m-%d %H:%M")
     data = data.loc["1985":"2100", :]
@@ -463,13 +457,12 @@ for station_id in station_ids:
     file = (
         base_path
         / "climate_projections"
-        / "data"
         / "subdaily"
         / f"pr_subdaily_FullTs_{cm}_station-DWD_{station_id}_new.csv"
     )
     data = pd.read_csv(file, sep=",", index_col=0)
 
-    file = base_path / "climate_projections" / "data" / "subdaily" / "datetime_CANESM-CLM3hr.txt"
+    file = base_path / "climate_projections" / "subdaily" / "datetime_CANESM-CLM3hr.txt"
     data_idx = pd.read_csv(file, sep=";")
     data.index = pd.to_datetime(data_idx.iloc[:, 0].astype(str).values, format="%Y-%m-%d %H:%M")
     data = data.loc["1985":"2100", :]
