@@ -8,11 +8,13 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("--location", type=click.Choice(["singen", "azenweiler", "unterraderach", "muellheim", "freiburg", "ihringen", "altheim", "kirchen", "maehringen", "heidelsheim", "elsenz", "zaberfeld", "kupferzell", "stachenhausen", "oehringen"]
 ), default="freiburg")
 @click.option("--crop-rotation-scenario", type=click.Choice(["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
-                                                             "summer-wheat_winter-wheat_corn", 
-                                                             "summer-wheat_winter-wheat_winter-rape", "winter-wheat_clover",
-                                                             "winter-wheat_clover_corn", "winter-wheat_corn", 
+                                                             "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
+                                                             "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
                                                              "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
-                                                             "winter-wheat_winter-grain-pea_winter-rape"]), default="winter-wheat_corn")
+                                                             "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
+                                                             "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
+                                                             "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
+                                                             "winter-wheat_winter-rape_yellow-mustard"]), default="winter-wheat_corn")
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(location, crop_rotation_scenario, tmp_dir):
@@ -60,9 +62,9 @@ def main(location, crop_rotation_scenario, tmp_dir):
                 self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
             )
             settings.nitt_forc = settings.nitt
-            settings.ages = 1500
+            settings.ages = 1000
             settings.nages = settings.ages + 1
-            settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
+            settings.runlen_warmup = 1 * 365 * 24 * 60 * 60
             settings.runlen = self._get_runlen(
                 self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
             )
@@ -221,17 +223,17 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 0.25)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 62)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 0.3)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 1.2)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 0.6)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 61)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1.5)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 3.5)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 1.5)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 61)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 2)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 2)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1.5)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 1.5)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], vs.S_pwp_ss[2:-2, 2:-2])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2])
             vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 6)
@@ -256,12 +258,11 @@ def main(location, crop_rotation_scenario, tmp_dir):
 
             # soil temperature parameters
             vs.z_soil = update(
-                vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path, "parameters.csv")
+                vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path, "z_soil.csv")
             )
             vs.phi_soil_temp = update(vs.phi_soil_temp, at[2:-2, 2:-2], 91)
             # dampening depth of soil temperature depends on clay content
-            # clay = self._read_var_from_csv("clay", self._base_path, "parameters.csv")
-            clay = 0.3
+            clay = self._read_var_from_csv("clay", self._base_path, "clay.csv")
             vs.damp_soil_temp = update(vs.damp_soil_temp, at[2:-2, 2:-2], 12 + 4 * (1 - (clay / settings.clay_max)))
 
         @roger_routine

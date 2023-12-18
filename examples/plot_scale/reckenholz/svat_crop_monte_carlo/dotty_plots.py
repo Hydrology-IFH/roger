@@ -47,7 +47,7 @@ def main(tmp_dir):
                 ax[i, j].set_xlabel("")
                 ax[i, j].set_ylabel("")
                 if metric_var in ["KGE_q_ss"]:
-                    ax[i, j].set_ylim((0.1, 0.5))
+                    ax[i, j].set_ylim((0.0, 0.5))
                 elif metric_var in ["r_theta"]:
                     ax[i, j].set_ylim((0.6, 0.9))
                 elif metric_var in ["E_multi"]:
@@ -89,7 +89,7 @@ def main(tmp_dir):
                 ax[i, j].set_xlabel("")
                 ax[i, j].set_ylabel("")
                 if metric_var in ["KGE_q_ss"]:
-                    ax[i, j].set_ylim((0.1, 0.5))
+                    ax[i, j].set_ylim((0.0, 0.5))
                 elif metric_var in ["r_theta"]:
                     ax[i, j].set_ylim((0.5, 0.8))
                 elif metric_var in ["E_multi"]:
