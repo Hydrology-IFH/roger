@@ -7,7 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-lys", "--lys-experiment", type=click.Choice(["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys8")
-@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_crop_monte_carlo")
 @roger_base_cli
 def main(lys_experiment, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -150,6 +150,8 @@ def main(lys_experiment, tmp_dir):
                 "z_root_crop",
                 "root_growth_scale",
                 "canopy_growth_scale",
+                "basal_crop_coeff_scale",
+                "zroot_to_zsoil_max"
             ],
         )
         def set_parameters_setup(self, state):
@@ -166,16 +168,18 @@ def main(lys_experiment, tmp_dir):
             )
 
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 0])
-            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path,  "parameters.csv"))
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_csv("dmpv", self._base_path,  "parameters.csv"))
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_csv("lmpv", self._base_path,  "parameters.csv"))
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_csv("theta_ac", self._base_path,  "parameters.csv"))
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_csv("theta_ufc", self._base_path,  "parameters.csv"))
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_csv("theta_pwp", self._base_path,  "parameters.csv"))
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_csv("ks", self._base_path,  "parameters.csv"))
+            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path, "parameters.csv"))
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_csv("dmpv", self._base_path, "parameters.csv"))
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_csv("lmpv", self._base_path, "parameters.csv"))
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_csv("theta_ac", self._base_path, "parameters.csv"))
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_csv("theta_ufc", self._base_path, "parameters.csv"))
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_csv("theta_pwp", self._base_path, "parameters.csv"))
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_csv("ks", self._base_path, "parameters.csv"))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
-            vs.root_growth_scale = update(vs.root_growth_scale, at[2:-2, 2:-2], self._read_var_from_csv("c_root_growth", self._base_path,  "parameters.csv"))
-            vs.canopy_growth_scale = update(vs.canopy_growth_scale, at[2:-2, 2:-2], self._read_var_from_csv("c_canopy_growth", self._base_path,  "parameters.csv"))
+            vs.root_growth_scale = update(vs.root_growth_scale, at[2:-2, 2:-2], self._read_var_from_csv("c_root_growth", self._base_path, "parameters.csv"))
+            vs.canopy_growth_scale = update(vs.canopy_growth_scale, at[2:-2, 2:-2], self._read_var_from_csv("c_canopy_growth", self._base_path, "parameters.csv"))
+            vs.basal_crop_coeff_scale = update(vs.basal_crop_coeff_scale, at[2:-2, 2:-2], self._read_var_from_csv("c_basal_crop_coeff", self._base_path, "parameters.csv"))
+            vs.zroot_to_zsoil_max = update(vs.zroot_to_zsoil_max, at[2:-2, 2:-2], self._read_var_from_csv("zroot_to_zsoil_max", self._base_path, "parameters.csv"))
 
 
         @roger_routine

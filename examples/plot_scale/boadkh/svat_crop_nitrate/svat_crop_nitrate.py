@@ -18,9 +18,10 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(location, crop_rotation_scenario, tmp_dir):
-    from roger import RogerSetup, roger_routine
+    from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at, scipy_stats as sstx
+    import roger.lookuptables as lut
 
     class SVATCROPNITRATESetup(RogerSetup):
         """A SVAT-CROP transport model for nitrate."""
@@ -110,9 +111,20 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
             vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "lut_fert1",
+                "lut_fert2",
+                "lut_fert3",
+            ],
+        )
         def set_look_up_tables(self, state):
-            pass
+            vs = state.variables
+
+            vs.lut_fert1 = update(vs.lut_fert1, at[:, :], lut.ARR_FERT1)
+            vs.lut_fert2 = update(vs.lut_fert2, at[:, :], lut.ARR_FERT2)
+            vs.lut_fert3 = update(vs.lut_fert3, at[:, :], lut.ARR_FERT3)
 
         @roger_routine
         def set_topography(self, state):
@@ -255,6 +267,11 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], 20)
             vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], 20)
             # soil nitrogen fixation parameters
+
+            # soil temperature parameters
+            vs.soil_fertility = update(
+                vs.soil_fertility, at[2:-2, 2:-2], self._read_var_from_csv("soil_fertility", self._base_path, "soil_fertility.csv")
+            )
 
             # soil temperature parameters
             vs.z_soil = update(
@@ -591,11 +608,8 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.year = update(vs.year, at[1], vs.YEAR[vs.itt])
             vs.z_root = update(vs.z_root, at[2:-2, 2:-2, vs.tau], vs.Z_ROOT[2:-2, 2:-2, vs.itt])
 
-            # apply nitrate tracer
-            inf = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2]
-            vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where(inf > 20, 1000, 0))
-            vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(inf > 10, 1000 * 0.3, 0))
-            vs.C_in = update(vs.C_in, at[2:-2, 2:-2], npx.where(inf > 10, vs.M_in[2:-2, 2:-2]/inf, 0))
+            # apply nitrogen fertilizer
+            vs.update(apply_fertilizer_kernel(state))
 
         @roger_routine
         def set_diagnostics(self, state, base_path=tmp_dir):
@@ -642,6 +656,34 @@ def main(location, crop_rotation_scenario, tmp_dir):
         @roger_routine
         def after_timestep(self, state):
             pass
+
+    @roger_kernel
+    def apply_fertilizer_kernel(state):
+        vs = state.variables
+        settings = state.settings
+
+        # apply nitrogen fertilizer
+        inf_thresh = 30
+        vs.doy_dist = update(vs.doy_dist, at[2:-2, 2:-2], vs.DOY[vs.itt])
+        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_dist[2:-2, 2:-2] == 90) | (vs.doy_dist[2:-2, 2:-2] == 280), 80 * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
+        inf = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2]
+        vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.doy_dist[2:-2, 2:-2] == 90) | (vs.doy_dist[2:-2, 2:-2] == 280), 0, vs.inf_in_tracer[2:-2, 2:-2]))
+        vs.inf_in_tracer = update_add(vs.inf_in_tracer, at[2:-2, 2:-2], inf)
+        inf_ratio = npx.where((inf/inf_thresh) < 1, inf/inf_thresh, 1)
+        vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.Nmin_in[2:-2, 2:-2] * inf_ratio * 0.3, 0))
+        vs.C_in = update(vs.C_in, at[2:-2, 2:-2], npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.M_in[2:-2, 2:-2]/inf, 0))
+        vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], -vs.Nmin_in[2:-2, 2:-2] * inf_ratio)
+        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.Nmin_in[2:-2, 2:-2] < 0), 0, vs.Nmin_in[2:-2, 2:-2]))
+        vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.inf_in_tracer[2:-2, 2:-2] > inf_thresh), 0, vs.inf_in_tracer[2:-2, 2:-2]))
+
+        return KernelOutput(
+            doy_dist=vs.doy_dist,
+            Nmin_in=vs.Nmin_in,
+            inf_in_tracer=vs.inf_in_tracer,
+            M_in=vs.M_in,
+            C_in=vs.C_in,
+        )
+
 
     model = SVATCROPNITRATESetup()
     model.setup()

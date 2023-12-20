@@ -71,6 +71,7 @@ LUT_IS_GRID = ("n_sealing", "n_params2")
 LUT_MLMS_GRID = ("n_slope", "n_params9")
 LUT_RDLU_GRID = ("n_lu", "n_params7")
 LUT_CROPS_GRID = ("n_crop_types", "n_crop_params")
+LUT_FERT_GRID = ("n_crop_types", "n_params9")
 LUT_GCM_GRID = ("n_lu", "n_params2")
 TIMESTEPS = ("timesteps",)
 TIMESTEPS_DAY = ("timesteps_day",)
@@ -108,8 +109,8 @@ DIM_TO_SHAPE_VAR = {
     "cr": "ncr",
     "events_ff": "nevent_ff",
     "n_sas_params": "nsas",
-    "n_crop_types": 76,
-    "n_crop_params": 23,
+    "n_crop_types": 88,
+    "n_crop_params": 24,
     "n_lu": 25,
     "n_sealing": 101,
     "n_slope": 10000,
@@ -2110,6 +2111,15 @@ VARIABLES = {
         time_dependent=True,
         active=lambda settings: not settings.enable_offline_transport or settings.enable_nitrate,
     ),
+    "zroot_to_zsoil_max": Variable(
+        "maximum ratio of root zone depth to soil depth",
+        CATCH_GRID,
+        "-",
+        "maximum ratio of root zone depth to soil depth",
+        initial=0.75,
+        write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
+    ),
     "Z_ROOT": Variable(
         "Root depth",
         CATCH_GRID + TIME,
@@ -3236,6 +3246,14 @@ VARIABLES = {
         "weight factor of precipitation",
         initial=1.0,
         active=lambda settings: not settings.enable_offline_transport,
+    ),
+    "soil_fertility": Variable(
+        "soil fertility class",
+        CATCH_GRID,
+        "",
+        "soil fertility class",
+        initial=1.0,
+        active=lambda settings: settings.enable_nitrate,
     ),
     "fert_weight": Variable(
         "weight factor of fertilization",
@@ -5641,6 +5659,16 @@ VARIABLES = {
         time_dependent=False,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
+    "basal_crop_coeff_scale": Variable(
+        "scaling factor of basal crop coefficient",
+        CATCH_GRID,
+        "-",
+        "scaling factor of basal crop coefficient",
+        write_to_restart=True,
+        initial=1,
+        time_dependent=False,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
+    ),
     "lut_crop_scale": Variable(
         "scaling factor of crop parameters",
         CATCH_GRID + N_CROP_TYPES,
@@ -5773,6 +5801,33 @@ VARIABLES = {
         write_to_restart=False,
         time_dependent=False,
         active=lambda settings: settings.enable_crop_phenology,
+    ),
+    "lut_fert1": Variable(
+        "Look-up-table of nitrogen fertilization",
+        LUT_FERT_GRID,
+        "",
+        "Look-up-table of nitrogen fertilization",
+        write_to_restart=False,
+        time_dependent=False,
+        active=lambda settings: settings.enable_crop_phenology & settings.enable_nitrate,
+    ),
+    "lut_fert2": Variable(
+        "Look-up-table of nitrogen fertilization",
+        LUT_FERT_GRID,
+        "",
+        "Look-up-table of nitrogen fertilization",
+        write_to_restart=False,
+        time_dependent=False,
+        active=lambda settings: settings.enable_crop_phenology & settings.enable_nitrate,
+    ),
+    "lut_fert3": Variable(
+        "Look-up-table of nitrogen fertilization",
+        LUT_FERT_GRID,
+        "",
+        "Look-up-table of nitrogen fertilization",
+        write_to_restart=False,
+        time_dependent=False,
+        active=lambda settings: settings.enable_crop_phenology & settings.enable_nitrate,
     ),
     "dS_num_error": Variable(
         "numerical error of water balance",

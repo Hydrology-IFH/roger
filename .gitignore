@@ -158,6 +158,7 @@ examples/plot_scale/reckenholz/README.md
 examples/plot_scale/reckenholz_film/
 examples/plot_scale/stgallen/
 examples/plot_scale/freiburg_altheim_kupferzell/climate_projections
+examples/plot_scale/boadkh/climate_projections
 gpu_memory_profiling/
 *_2016-*.sh
 debug_setup/
