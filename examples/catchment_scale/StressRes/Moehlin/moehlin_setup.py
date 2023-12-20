@@ -7,10 +7,10 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-od", "--out-dir", type=str, default=Path(__file__).parent / "output")
+@click.option("-td", "--temp-dir", type=str, default=Path(__file__).parent / "output")
 @roger_base_cli
-def main(out_dir):
-    from roger import roger_routine, roger_kernel, KernelOutput, runtime_settings
+def main(temp_dir):
+    from roger import roger_routine, roger_kernel, KernelOutput
     from roger.models.oneD import ONEDSetup
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
@@ -26,45 +26,52 @@ def main(out_dir):
         _input_dir = _base_path / "input"
         # load configuration file
         _file_config = _base_path / "config.yml"
-        # soil parameter file
-        _para_fn = "BK50_BW_ROGER_Moehlin_test.nc"
-        _para_fp = _input_dir/_para_fn
+        with open(_file_config, "r") as file:
+            _config = yaml.safe_load(file)
+
+        # custom helper functions
+        def _read_var_from_nc(self, var, path_dir, file):
+            nc_file = path_dir / file
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables[var]
+                if var in ["lu_id"]:
+                    vals = npx.array(var_obj)
+                    vals1 = npx.where(vals <= -9999, 999, vals)
+                elif var in ["dmph", "dmpv", "lmpv", "z_soil", "sealing", "prec_weight", "pet_weight", "ta_offset"]:
+                    vals = npx.array(var_obj)
+                    vals1 = npx.where(vals <= -9999, 0, vals)
+                else:
+                    vals = npx.array(var_obj)
+                    vals1 = npx.where(vals <= -9999, npx.nan, vals)
+                return vals1
 
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = "ONED_Moehlin"
-
-            # load configuration file
-            self._config = {}
-            if hasattr(self, "_file_config"):
-                if self._file_config.exists() and self._file_config.suffix == ".yml":
-                    with open(self._file_config, "r") as file:
-                        self._config = yaml.safe_load(file)
+            settings.identifier = self._config["identifier"]
 
             # total grid numbers in x- and y-direction
-            # derive total number of time steps from forcing
-            settings.runlen = self._get_runlen(self._input_dir, "weather/forcing.nc")
-            settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, "weather/forcing.nc"))
+            settings.nx, settings.ny = self._config["nx"], self._config["ny"]
 
-            # spatial grid (in meters)
-            with h5netcdf.File(self._para_fp, "r", decode_vlen_strings=False) as infile:
-                settings.nx = infile.dimensions["y"].size
-                settings.ny = infile.dimensions["x"].size
-                settings.dx = infile.variables["y"][1] - infile.variables["y"][0]
-                settings.dy = infile.variables["x"][1] - infile.variables["x"][0]
-                settings.x_origin = infile.variables["y"][0]
-                settings.y_origin = infile.variables["x"][0]
+            # spatial discretization (in meters)
+            settings.dx = self._config["dx"]
+            settings.dy = self._config["dy"]
+
+            # origin of spatial grid
+            settings.x_origin = self._config["x_origin"]
+            settings.y_origin = self._config["y_origin"]
+
+            # derive total number of time steps from forcing
+            settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
+            settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, "forcing.nc"))
 
             # origin of time steps (e.g. 01-01-2023)
-            settings.time_origin = self._get_time_origin(self._input_dir, "weather/forcing.nc")
+            settings.time_origin = self._get_time_origin(self._input_dir, "forcing.nc")
 
             # enable specific processes
             settings.enable_lateral_flow = True
             settings.enable_macropore_lower_boundary_condition = False
             settings.enable_adaptive_time_stepping = True
-
-            object.__setattr__(runtime_settings, "force_overwrite", True)
 
         @roger_routine(
             dist_safe=False,
@@ -108,130 +115,128 @@ def main(out_dir):
             vs = state.variables
 
             # catchment mask (bool)
+            dgm = self._read_var_from_nc("dgm", self._input_dir, "parameters.nc")
             vs.maskCatch = update(
                 vs.maskCatch,
                 at[2:-2, 2:-2],
-                self._get_mask_from_nc(self._para_fp)
+                onp.isfinite(dgm),
             )
             # surface slope (-)
             vs.slope = update(
                 vs.slope_per,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("slope", self._input_dir, "")/100,
+                self._read_var_from_nc("slope", self._input_dir, "parameters.nc")/100,
             )
             # slope in percentage
             vs.slope_per = update(
                 vs.slope_per,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("slope", self._input_dir, self._para_fn),
+                self._read_var_from_nc("slope", self._base_path, "parameters.nc"),
             )
             # surface elevation (m)
             vs.elev = update(
                 vs.dgm,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("dgm", self._input_dir, self._para_fn),
+                self._read_var_from_nc("dgm", self._base_path, "parameters.nc"),
             )
 
         @roger_routine
         def set_parameters_setup(self, state):
             vs = state.variables
-            settings = state.settings
-            input_dir = self._input_dir
-            para_fn = self._para_fn
 
             # land use ID (see README for description)
             vs.lu_id = update(
                 vs.lu_id,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("lanu", input_dir, para_fn)
+                self._read_var_from_nc("lanu", self._base_path, "parameters.nc")
             )
             # degree of sealing (-)
             vs.sealing = update(
                 vs.sealing,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("vers", input_dir, para_fn)/100) # % to -
+                self._read_var_from_nc("vers", self._base_path, "parameters.nc")/100) # % to -
             # total surface depression storage (mm)
             vs.S_dep_tot = update(
                 vs.S_dep_tot,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("MULDE", input_dir, para_fn))
+                self._read_var_from_nc("MULDE", self._base_path, "parameters.nc"))
             # soil depth (mm)
             vs.z_soil = update(
                 vs.z_soil,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("GRUND", input_dir, para_fn),
+                self._read_var_from_nc("GRUND", self._base_path, "parameters.nc"),
             )
             # groundwater table depth
             vs.z_gw = update(
                 vs.z_gw,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("gwfa_gew", input_dir, para_fn)
+                self._read_var_from_nc("gwfa_gew", self._base_path, "parameters.nc")
             )
             # density of vertical macropores (1/m2)
             vs.dmpv = update(
                 vs.dmpv,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("MPD_V", input_dir, para_fn),
+                self._read_var_from_nc("MPD_V", self._base_path, "parameters.nc"),
             )
             # length of vertical macropores (1/m2)
             vs.lmpv = update(
                 vs.lmpv,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("MPL_V", input_dir, para_fn),
+                self._read_var_from_nc("MPL_V", self._base_path, "parameters.nc"),
             )
             # density of horizontal macropores (1/m2)
             vs.dmph = update(
                 vs.dmph,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("MPD_H", input_dir, para_fn),
+                self._read_var_from_nc("MPD_H", self._base_path, "parameters.nc"),
             )
             # air capacity (-)
             vs.theta_ac = update(
                 vs.theta_ac,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("LK", input_dir, para_fn)/100,
+                self._read_var_from_nc("LK", self._base_path, "parameters.nc")/100,
             )
             # usable field capacity (-)
             vs.theta_ufc = update(
                 vs.theta_ufc,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("NFK", input_dir, para_fn)/100
+                self._read_var_from_nc("NFK", self._base_path, "parameters.nc")/100
             )
             # permanent wilting point (-)
             vs.theta_pwp = update(
                 vs.theta_pwp,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("PWP", input_dir, para_fn)/100
+                self._read_var_from_nc("PWP", self._base_path, "parameters.nc")/100
             )
             # saturated hydraulic conductivity (mm/h)
             vs.ks = update(
                 vs.ks,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("KS", input_dir, para_fn)
+                self._read_var_from_nc("KS", self._base_path, "parameters.nc")
             )
             # hydraulic conductivity of bedrock/saturated zone (mm/h)
             vs.kf = update(
                 vs.kf,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("TP", input_dir, para_fn)
+                self._read_var_from_nc("TP", self._base_path, "parameters.nc")
             )
             # weight factor of precipitation (-)
             vs.prec_weight = update(
                 vs.prec_weight,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("F_n_h_y", input_dir, para_fn)/100
+                self._read_var_from_nc("F_n_h_y", self._base_path, "parameters.nc")/100
             )
             # weight factor of air temperature (-)
             vs.ta_offset = update(
                 vs.ta_offset,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("F_t", input_dir, para_fn)
+                self._read_var_from_nc("F_t", self._base_path, "parameters.nc")
             )
             # weight factor of potential evapotranspiration (-)
             vs.pet_weight = update(
                 vs.pet_weight,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("F_et", input_dir, para_fn)/100
+                self._read_var_from_nc("F_et", self._base_path, "parameters.nc")/100
             )
 
         @roger_routine
@@ -295,9 +300,9 @@ def main(out_dir):
         def set_forcing_setup(self, state):
             vs = state.variables
 
-            vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, "weather/forcing.nc")[0, 0, :])
-            vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, "weather/forcing.nc")[0, 0, :])
-            vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, "weather/forcing.nc")[0, 0, :])
+            vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, "forcing.nc")[0, 0, :])
+            vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, "forcing.nc")[0, 0, :])
+            vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[0, 0, :])
 
         @roger_routine
         def set_forcing(self, state):
@@ -307,13 +312,13 @@ def main(out_dir):
             if condt:
                 vs.itt_day = 0
                 vs.year = update(
-                    vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, "weather/forcing.nc")[vs.itt_forc]
+                    vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, "forcing.nc")[vs.itt_forc]
                 )
                 vs.month = update(
-                    vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, "weather/forcing.nc")[vs.itt_forc]
+                    vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, "forcing.nc")[vs.itt_forc]
                 )
                 vs.doy = update(
-                    vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, "weather/forcing.nc")[vs.itt_forc]
+                    vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")[vs.itt_forc]
                 )
                 vs.prec_day = update(
                     vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.prec_weight[:, :, npx.newaxis]
@@ -327,26 +332,26 @@ def main(out_dir):
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
         @roger_routine
-        def set_diagnostics(self, state, base_path=out_dir):
+        def set_diagnostics(self, state, base_path=temp_dir):
             diagnostics = state.diagnostics
 
             diagnostics["rate"].output_variables = self._config["OUTPUT_RATE"]
             # values are aggregated to daily
-            diagnostics["rate"].output_frequency = 24 * 60 * 60  # in seconds
+            diagnostics["rate"].output_frequency = self._config["OUTPUT_FREQUENCY"] # in seconds
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
                 diagnostics["rate"].base_output_path = base_path
 
             diagnostics["collect"].output_variables = self._config["OUTPUT_COLLECT"]
             # values are aggregated to daily
-            diagnostics["collect"].output_frequency = 24 * 60 * 60  # in seconds
+            diagnostics["collect"].output_frequency = self._config["OUTPUT_FREQUENCY"] # in seconds
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
                 diagnostics["collect"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error"]
-            diagnostics["maximum"].output_frequency = 24 * 60 * 60
+            diagnostics["maximum"].output_frequency = self._config["OUTPUT_FREQUENCY"]
             diagnostics["maximum"].sampling_frequency = 1
             if base_path:
                 diagnostics["maximum"].base_output_path = base_path
@@ -571,9 +576,9 @@ def main(out_dir):
         )
 
     # initializes the model structure
-    model = ONEDSetup()
+    model = MoehlinSetup()
     # writes the forcing data to netcdf
-    write_forcing(model._input_dir/"weather")
+    write_forcing(model._input_dir)
     # runs the model setup
     model.setup()
     # iterate over time steps

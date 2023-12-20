@@ -65,7 +65,7 @@ def main(tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = "SVAT"
+            settings.identifier = self._config["identifier"]
 
             # total grid numbers in x- and y-direction
             settings.nx, settings.ny = self._config["nx"], self._config["ny"]

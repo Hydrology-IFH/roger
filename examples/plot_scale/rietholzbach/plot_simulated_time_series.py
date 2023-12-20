@@ -2326,10 +2326,7 @@ def main(tmp_dir):
     ax.flatten()[0].set_ylim([-20, 0])
     ax.flatten()[0].set_xlim(df_obs.index[0], df_obs.index[-1])
     for i, tm_structure in enumerate(tm_structures):
-        if tm_structure == "complete-mixing":
-            idx_best = 66
-        else:
-            idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
+        idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
         tms = tm_structure.replace(" ", "_")
         # load transport simulation
         states_tm_file = (
@@ -2382,10 +2379,7 @@ def main(tmp_dir):
         ax.flatten()[0].set_ylim(-20, 0)
         ax.flatten()[0].set_xlim(df_obs.index[0], df_obs.index[-1])
         for i, tm_structure in enumerate(tm_structures):
-            if tm_structure == "complete-mixing":
-                idx_best = 66
-            else:
-                idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
+            idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
             tms = tm_structure.replace(" ", "_")
             # load transport simulation
             states_tm_file = (
@@ -2446,10 +2440,7 @@ def main(tmp_dir):
     ax.flatten()[0].set_ylim([-20, 0])
     ax.flatten()[0].set_xlim(df_obs.index[0], df_obs.index[-1])
     for i, tm_structure in enumerate(tm_structures_extra):
-        if tm_structure == "preferential-power":
-            idx_best = 8413
-        else:
-            idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
+        idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
         tms = tm_structure.replace(" ", "_")
         # load transport simulation
         states_tm_file = (

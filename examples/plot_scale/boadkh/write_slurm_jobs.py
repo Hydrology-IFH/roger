@@ -10,23 +10,11 @@ def main():
     base_path_bwuc = "/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh"
     base_path_ws = Path("/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh/output")
 
-    locations = [
-        "singen",
-        "azenweiler",
-        "unterraderach",
-        "muellheim",
-        "freiburg",
-        "ihringen",
-        "altheim",
-        "kirchen",
-        "maehringen",
-        "heidelsheim",
-        "elsenz",
-        "zaberfeld",
-        "kupferzell",
-        "stachenhausen",
-        "oehringen",
-    ]
+    locations = ["freiburg", "lahr", "muellheim", 
+                 "stockach", "gottmadingen", "weingarten",
+                 "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
+                 "ehingen-kirchen", "merklingen", "hayingen",
+                 "kupferzell", "oehringen", "neunkirchen"]
     crop_rotation_scenarios = ["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
                                "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
                                "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 

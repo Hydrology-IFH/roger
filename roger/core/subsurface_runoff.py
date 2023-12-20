@@ -981,11 +981,7 @@ def calc_potential_percolation_ss(state):
         at[2:-2, 2:-2],
         npx.where(
             (vs.z_gw[2:-2, 2:-2, vs.tau] > 10) & (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 > vs.z_soil[2:-2, 2:-2]),
-            npx.where(
-                vs.z_sat[2:-2, 2:-2, vs.tau] > 0,
-                npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, vs.ks[2:-2, 2:-2] * vs.dt),
-                npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, vs.k_ss[2:-2, 2:-2, vs.tau] * vs.dt),
-            ),
+            npx.fmin(npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, vs.ks[2:-2, 2:-2] * vs.dt), vs.k_ss[2:-2, 2:-2, vs.tau] * vs.dt),
             npx.where(
                 vs.z_sat[2:-2, 2:-2, vs.tau] > 0,
                 npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, vs.ks[2:-2, 2:-2] * vs.dt),
