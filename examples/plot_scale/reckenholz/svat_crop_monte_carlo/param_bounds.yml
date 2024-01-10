@@ -24,8 +24,8 @@ theta_pwp:
 - 0.3
 # saturated hydraulic conductivity (mm/h)
 ks:
-- 0.01
-- 10
+- 0.1
+- 5
 # scale parameter of crop root growth (-)
 c_root_growth:
 - 0.5

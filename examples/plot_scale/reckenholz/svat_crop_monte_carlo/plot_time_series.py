@@ -106,12 +106,12 @@ def main(tmp_dir):
             fig.savefig(path_fig, dpi=300)
             if var_sim == "q_ss":
                 # plot cumulated observed and simulated time series
-                fig = eval_utils.plot_obs_sim_cum(df_eval, labs._Y_LABS_CUM[var_sim], x_lab="Time [year]")
+                fig = eval_utils.plot_obs_sim_cum(df_eval.dropna(), labs._Y_LABS_CUM[var_sim], x_lab="Time [year]")
                 file_str = "%s_cum_%s.pdf" % (var_sim, lys_experiment)
                 path_fig = base_path_figs / file_str
                 fig.savefig(path_fig, dpi=300)
                 fig = eval_utils.plot_obs_sim_cum_year_facet(
-                    df_eval, labs._Y_LABS_CUM[var_sim], x_lab="Time\n[day-month-hydyear]"
+                    df_eval.dropna(), labs._Y_LABS_CUM[var_sim], x_lab="Time\n[day-month-hydyear]"
                 )
                 file_str = "%s_cum_year_facet_%s.pdf" % (var_sim, lys_experiment)
                 path_fig = base_path_figs / file_str

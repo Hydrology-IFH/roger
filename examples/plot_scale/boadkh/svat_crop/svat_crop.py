@@ -7,8 +7,12 @@ import pandas as pd
 import click
 from roger.cli.roger_run_base import roger_base_cli
 
-@click.option("--location", type=click.Choice(["singen", "azenweiler", "unterraderach", "muellheim", "freiburg", "ihringen", "altheim", "kirchen", "maehringen", "heidelsheim", "elsenz", "zaberfeld", "kupferzell", "stachenhausen", "oehringen"]
-), default="ihringen")
+@click.option("--location", type=click.Choice(["freiburg", "lahr", "muellheim", 
+                                               "stockach", "gottmadingen", "weingarten", 
+                                               "eppingen-elsenz", "bruchsal-heidelsheim", "bretten", 
+                                               "ehingen-kirchen", "merklingen", "hayingen", 
+                                               "kupferzell", "oehringen", "vellberg-kleinaltdorf"]), 
+                                               default="freiburg")
 @click.option("--crop-rotation-scenario", type=click.Choice(["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
                                                              "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
                                                              "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
