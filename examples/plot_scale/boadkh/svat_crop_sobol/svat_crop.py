@@ -11,7 +11,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                "stockach", "gottmadingen", "weingarten", 
                                                "eppingen-elsenz", "bruchsal-heidelsheim", "bretten", 
                                                "ehingen-kirchen", "merklingen", "hayingen", 
-                                               "kupferzell", "oehringen", "neunkirchen"]), 
+                                               "kupferzell", "oehringen", "vellberg-kleinaltdorf"]), 
                                                default="freiburg")
 @click.option("--crop-rotation-scenario", type=click.Choice(["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
                                                              "summer-wheat_winter-wheat_corn", 

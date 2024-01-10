@@ -5,8 +5,12 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("--location", type=click.Choice(["singen", "azenweiler", "unterraderach", "muellheim", "freiburg", "ihringen", "altheim", "kirchen", "maehringen", "heidelsheim", "elsenz", "zaberfeld", "kupferzell", "stachenhausen", "oehringen"]
-), default="freiburg")
+@click.option("--location", type=click.Choice(["freiburg", "lahr", "muellheim", 
+                                               "stockach", "gottmadingen", "weingarten", 
+                                               "eppingen-elsenz", "bruchsal-heidelsheim", "bretten", 
+                                               "ehingen-kirchen", "merklingen", "hayingen", 
+                                               "kupferzell", "oehringen", "vellberg-kleinaltdorf"]), 
+                                               default="freiburg")
 @click.option("--crop-rotation-scenario", type=click.Choice(["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
                                                              "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
                                                              "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
@@ -20,8 +24,9 @@ from roger.cli.roger_run_base import roger_base_cli
 def main(location, crop_rotation_scenario, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, at, scipy_stats as sstx
+    from roger.core.operators import numpy as npx, update, update_add, at, scipy_stats as sstx
     import roger.lookuptables as lut
+    from roger.core.utilities import _get_row_no
 
     class SVATCROPNITRATESetup(RogerSetup):
         """A SVAT-CROP transport model for nitrate."""
@@ -266,7 +271,6 @@ def main(location, crop_rotation_scenario, tmp_dir):
             # soil nitrogen mineralization parameters
             vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], 20)
             vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], 20)
-            # soil nitrogen fixation parameters
 
             # soil temperature parameters
             vs.soil_fertility = update(
@@ -609,6 +613,8 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.z_root = update(vs.z_root, at[2:-2, 2:-2, vs.tau], vs.Z_ROOT[2:-2, 2:-2, vs.itt])
 
             # apply nitrogen fertilizer
+            if vs.year[vs.tau] > vs.year[vs.taum1]:
+                vs.update(set_fertilizer_kernel(state))
             vs.update(apply_fertilizer_kernel(state))
 
         @roger_routine
@@ -655,7 +661,100 @@ def main(location, crop_rotation_scenario, tmp_dir):
 
         @roger_routine
         def after_timestep(self, state):
-            pass
+            vs = state.variables
+
+            vs.year = update(
+                vs.year,
+                at[vs.taum1],
+                vs.year[vs.tau],
+            )
+            return KernelOutput(
+                year=vs.year,
+            )
+
+    @roger_kernel
+    def set_fertilizer_kernel(state):
+        vs = state.variables
+
+        for i in range(500, 600):
+            mask = vs.lu_id == i 
+            mask1 = vs.lu_id == i & vs.soil_fertility >= 1 & vs.soil_fertility < 2
+            mask2 = vs.lu_id == i & vs.soil_fertility >= 1 & vs.soil_fertility < 2
+            mask3 = vs.lu_id == i & vs.soil_fertility >= 1 & vs.soil_fertility < 2
+            row_no = _get_row_no(vs.lut_fert1[:, 0], i)
+            vs.doy_fert1 = update(
+                vs.doy_fert1,
+                at[2:-2, 2:-2, :],
+                npx.where(mask[2:-2, 2:-2, :], vs.vs.lut_fert3[row_no, 1], vs.doy_fert1[2:-2, 2:-2, :]),
+            )
+            vs.doy_fert2 = update(
+                vs.doy_fert2,
+                at[2:-2, 2:-2, :],
+                npx.where(mask[2:-2, 2:-2, :], vs.vs.lut_fert3[row_no, 2], vs.doy_fert2[2:-2, 2:-2, :]),
+            )
+            vs.doy_fert3 = update(
+                vs.doy_fert3,
+                at[2:-2, 2:-2, :],
+                npx.where(mask[2:-2, 2:-2, :], vs.vs.lut_fert3[row_no, 3], vs.doy_fert3[2:-2, 2:-2, :]),
+            )
+
+            vs.N_fert1 = update(
+                vs.N_fert1,
+                at[2:-2, 2:-2, :],
+                npx.where(mask1[2:-2, 2:-2, :], vs.vs.lut_fert3[row_no, 4], vs.N_fert1[2:-2, 2:-2, :]),
+            )
+            vs.N_fert2 = update(
+                vs.N_fert2,
+                at[2:-2, 2:-2, :],
+                npx.where(mask1[2:-2, 2:-2, :], vs.vs.lut_fert3[row_no, 5], vs.N_fert2[2:-2, 2:-2, :]),
+            )
+            vs.N_fert3 = update(
+                vs.N_fert3,
+                at[2:-2, 2:-2, :],
+                npx.where(mask1[2:-2, 2:-2, :], vs.vs.lut_fert3[row_no, 6], vs.N_fert3[2:-2, 2:-2, :]),
+            )
+
+            vs.N_fert1 = update(
+                vs.N_fert1,
+                at[2:-2, 2:-2, :],
+                npx.where(mask2[2:-2, 2:-2, :], vs.vs.lut_fert3[row_no, 4], vs.N_fert1[2:-2, 2:-2, :]),
+            )
+            vs.N_fert2 = update(
+                vs.N_fert2,
+                at[2:-2, 2:-2, :],
+                npx.where(mask2[2:-2, 2:-2, :], vs.vs.lut_fert3[row_no, 5], vs.N_fert2[2:-2, 2:-2, :]),
+            )
+            vs.N_fert3 = update(
+                vs.N_fert3,
+                at[2:-2, 2:-2, :],
+                npx.where(mask2[2:-2, 2:-2, :], vs.vs.lut_fert3[row_no, 6], vs.N_fert3[2:-2, 2:-2, :]),
+            )
+    
+            vs.N_fert1 = update(
+                vs.N_fert1,
+                at[2:-2, 2:-2, :],
+                npx.where(mask3[2:-2, 2:-2, :], vs.vs.lut_fert3[row_no, 4], vs.N_fert1[2:-2, 2:-2, :]),
+            )
+            vs.N_fert2 = update(
+                vs.N_fert2,
+                at[2:-2, 2:-2, :],
+                npx.where(mask3[2:-2, 2:-2, :], vs.vs.lut_fert3[row_no, 5], vs.N_fert2[2:-2, 2:-2, :]),
+            )
+            vs.N_fert3 = update(
+                vs.N_fert3,
+                at[2:-2, 2:-2, :],
+                npx.where(mask3[2:-2, 2:-2, :], vs.vs.lut_fert3[row_no, 6], vs.N_fert3[2:-2, 2:-2, :]),
+            )
+
+        return KernelOutput(
+            doy_fert1=vs.doy_fert1,
+            doy_fert2=vs.doy_fert2,
+            doy_fert3=vs.doy_fert3,
+            N_fert1=vs.N_fert1,
+            N_fert2=vs.N_fert2,
+            N_fert3=vs.N_fert3,
+        )
+
 
     @roger_kernel
     def apply_fertilizer_kernel(state):
@@ -664,8 +763,9 @@ def main(location, crop_rotation_scenario, tmp_dir):
 
         # apply nitrogen fertilizer
         inf_thresh = 30
-        vs.doy_dist = update(vs.doy_dist, at[2:-2, 2:-2], vs.DOY[vs.itt])
-        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_dist[2:-2, 2:-2] == 90) | (vs.doy_dist[2:-2, 2:-2] == 280), 80 * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
+        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert1[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
+        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
+        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))       
         inf = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2]
         vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.doy_dist[2:-2, 2:-2] == 90) | (vs.doy_dist[2:-2, 2:-2] == 280), 0, vs.inf_in_tracer[2:-2, 2:-2]))
         vs.inf_in_tracer = update_add(vs.inf_in_tracer, at[2:-2, 2:-2], inf)
@@ -677,7 +777,6 @@ def main(location, crop_rotation_scenario, tmp_dir):
         vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.inf_in_tracer[2:-2, 2:-2] > inf_thresh), 0, vs.inf_in_tracer[2:-2, 2:-2]))
 
         return KernelOutput(
-            doy_dist=vs.doy_dist,
             Nmin_in=vs.Nmin_in,
             inf_in_tracer=vs.inf_in_tracer,
             M_in=vs.M_in,
