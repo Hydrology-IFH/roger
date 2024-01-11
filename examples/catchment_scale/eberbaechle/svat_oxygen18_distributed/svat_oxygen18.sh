@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --time=24:00:00
 #SBATCH --nodes=1
-#SBATCH --ntasks=10
+#SBATCH --ntasks=20
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=8000
 #SBATCH --mail-type=FAIL
