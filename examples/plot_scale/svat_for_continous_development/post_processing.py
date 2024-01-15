@@ -344,6 +344,7 @@ def main():
             color = "#b83889"
 
         vars_sim_trace = [
+            "z0",
             "S_s",
             "theta",
             "int_prec",

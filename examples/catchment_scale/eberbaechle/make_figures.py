@@ -37,10 +37,15 @@ nrows = 53
 ncols = 80
 x1 = 12
 y1 = 7
-t_dry = 1017
-t_wet = 468
-t_drywet = 338
-t_wetdry = 896
+t_dry = 298 # 24.08.2020
+t_wet = 133 # 12.03.2020
+t_drywet = 352 # 11.03.2021
+t_wetdry = 1050 # 15.09.2022
+
+date_dry = "$24^{th}$ Aug 2020"
+date_wet = "$12^{th}$ Mar 2020"
+date_drywet = "$11^{th}$ Mar 2021"
+date_wetdry = "$15^{th}$ Sep 2022"
 
 base_path = Path(__file__).parent
 # directory of figures
@@ -434,7 +439,7 @@ fig, axes = plt.subplots(1, 1, figsize=(6, 2))
 axes.plot(date_hm, ds_hm["q_ss"].isel(x=x1, y=y1).values, "-", color="grey", lw=1)
 axes.set_xlim(date_hm[0], date_hm[-1])
 axes.set_ylim(
-    0, 1
+    0, 5
 )
 axes.set_ylabel(r"PERC [mm/day]")
 axes.xaxis.set_major_formatter(mdates.DateFormatter("%y-%m"))
@@ -1279,10 +1284,10 @@ axes[1, 2].text(
     verticalalignment="center",
     transform=axes[1, 2].transAxes,
 )
-axes[1, 2].plot([], [], color="#fed976", label="dry condtions\n ($13^{th}$ Aug 2022)", lw=0.5, ls="--")
-axes[1, 2].plot([], [], color="#feb24c", label="transition to dry condtions\n ($14^{th}$ Apr 2022)", lw=1.0, ls="-.")
-axes[1, 2].plot([], [], color="#6baed6", label="transition to wet condtions\n ($3^{rd}$ Oct 2020)", lw=1.5)
-axes[1, 2].plot([], [], color="#08306b", label="wet condtions\n ($10^{th}$ Feb 2021)", lw=2.0)
+axes[1, 2].plot([], [], color="#fed976", label="dry condtions\n (%s)" % (date_dry), lw=0.5, ls="--")
+axes[1, 2].plot([], [], color="#feb24c", label="transition to dry condtions\n (%s)" % (date_wetdry), lw=1.0, ls="-.")
+axes[1, 2].plot([], [], color="#6baed6", label="transition to wet condtions\n (%s)" % (date_drywet), lw=1.5)
+axes[1, 2].plot([], [], color="#08306b", label="wet condtions\n (%s)" % (date_wet), lw=2.0)
 lines, labels = axes[1, 2].get_legend_handles_labels()
 fig.legend(lines, labels, loc="upper right", frameon=False, bbox_to_anchor=(1.01, 1.01))
 
