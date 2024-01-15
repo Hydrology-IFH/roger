@@ -34,6 +34,7 @@ _Y_LABS_DAILY = {
     "ta": r"$TA$ [degC]",
     "z_root": r"$z_{root}$ [mm]",
     "ground_cover": r"GC [-]",
+    "z0": r"z0 [mm]",
 }
 
 _Y_LABS_HOURLY = {

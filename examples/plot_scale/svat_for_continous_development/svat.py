@@ -291,6 +291,7 @@ def main(tmp_dir, meteo_station):
                 "swe_top",
                 "swe_ground",
                 "swe_top_tot",
+                "z0"
             ]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
