@@ -7,7 +7,7 @@ from roger import runtime_settings as rs, logger
 def validate_parameters_surface(state):
     vs = state.variables
 
-    mask1 = ((vs.slope > 1) | (vs.slope < 0)) & vs.maskCatch
+    mask1 = (vs.slope < 0) & vs.maskCatch
     if global_and(npx.any(mask1[2:-2, 2:-2])):
         raise ValueError("slope-parameter is out of range.")
 
@@ -752,6 +752,8 @@ def sanity_check(state):
         # dF = vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2]
         # print(vs.S[2:-2, 2:-2, vs.tau])
         check = check1 & check2 & check3
+        if not check:
+            print("Mass balance error")
 
     elif (
         settings.enable_lateral_flow

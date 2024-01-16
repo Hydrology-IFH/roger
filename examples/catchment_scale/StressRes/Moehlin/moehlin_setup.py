@@ -115,7 +115,7 @@ def main(temp_dir):
             vs = state.variables
 
             # catchment mask (bool)
-            dgm = self._read_var_from_nc("dgm", self._input_dir, "parameters.nc")
+            dgm = self._read_var_from_nc("dgm", self._base_path, "parameters.nc")
             vs.maskCatch = update(
                 vs.maskCatch,
                 at[2:-2, 2:-2],
@@ -125,19 +125,13 @@ def main(temp_dir):
             vs.slope = update(
                 vs.slope_per,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("slope", self._input_dir, "parameters.nc")/100,
+                self._read_var_from_nc("slope", self._base_path, "parameters.nc")/100,
             )
             # slope in percentage
             vs.slope_per = update(
                 vs.slope_per,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc("slope", self._base_path, "parameters.nc"),
-            )
-            # surface elevation (m)
-            vs.elev = update(
-                vs.dgm,
-                at[2:-2, 2:-2],
-                self._read_var_from_nc("dgm", self._base_path, "parameters.nc"),
             )
 
         @roger_routine
@@ -148,13 +142,13 @@ def main(temp_dir):
             vs.lu_id = update(
                 vs.lu_id,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("lanu", self._base_path, "parameters.nc")
+                npx.where(vs.maskCatch[2:-2, 2:-2], 8, npx.nan),
             )
             # degree of sealing (-)
             vs.sealing = update(
                 vs.sealing,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("vers", self._base_path, "parameters.nc")/100) # % to -
+                self._read_var_from_nc("vers", self._base_path, "parameters.nc")/100) # convert percentage to fraction
             # total surface depression storage (mm)
             vs.S_dep_tot = update(
                 vs.S_dep_tot,
@@ -166,11 +160,11 @@ def main(temp_dir):
                 at[2:-2, 2:-2],
                 self._read_var_from_nc("GRUND", self._base_path, "parameters.nc"),
             )
-            # groundwater table depth
+            # groundwater table depth (m)
             vs.z_gw = update(
                 vs.z_gw,
-                at[2:-2, 2:-2],
-                self._read_var_from_nc("gwfa_gew", self._base_path, "parameters.nc")
+                at[2:-2, 2:-2, :],
+                self._read_var_from_nc("gwfa_gew", self._base_path, "parameters.nc")[:, :, npx.newaxis]
             )
             # density of vertical macropores (1/m2)
             vs.dmpv = update(

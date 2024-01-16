@@ -14,7 +14,7 @@ _UNITS = {
     "ks": "mm/hour",
     "c_canopy_growth": "-",
     "c_root_growth": "-",
-    "c_root_growth": "-",
+    "c_basal_crop_coeff": "-",
     "zroot_to_zsoil_max": "-",
 }
 
