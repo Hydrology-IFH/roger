@@ -92,18 +92,21 @@ def main(tmp_dir):
 
     lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9"]
     for lys_experiment in lys_experiments:
+        # load parameters and metrics
+        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+        idx_best = df_params_metrics["KGE_q_ss"].idxmax()
         # load simulation
-        sim_hm1_file = base_path_output / f"SVATCROP_{lys_experiment}_best_simulation.nc"
-        ds_sim_hm1 = xr.open_dataset(sim_hm1_file, engine="h5netcdf")
+        sim_hm_file = base_path_output / f"SVATCROP_{lys_experiment}.nc"
+        ds_sim_hm = xr.open_dataset(sim_hm_file, engine="h5netcdf")
         # assign date
-        days_sim_hm1 = ds_sim_hm1["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
-        date_sim_hm1 = num2date(
-            days_sim_hm1,
-            units=f"days since {ds_sim_hm1['Time'].attrs['time_origin']}",
+        days_sim_hm = ds_sim_hm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+        date_sim_hm = num2date(
+            days_sim_hm,
+            units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}",
             calendar="standard",
             only_use_cftime_datetimes=False,
         )
-        ds_sim_hm1 = ds_sim_hm1.assign_coords(Time=("Time", date_sim_hm1))
+        ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
 
         # load observations (measured data)
         path_obs = Path(__file__).parent.parent / "observations" / "reckenholz_lysimeter.nc"
@@ -129,9 +132,9 @@ def main(tmp_dir):
                 obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
             df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
             df_obs.loc[:, "obs"] = obs_vals
-            sim_vals = ds_sim_hm1[var_sim].isel(x=0, y=0).values
+            sim_vals = ds_sim_hm[var_sim].isel(x=idx_best, y=0).values
             # join observations on simulations
-            df_eval = eval_utils.join_obs_on_sim(date_sim_hm1, sim_vals, df_obs)
+            df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
             # skip first seven days for warmup
             df_eval.loc[:f"{df_obs.index.year[1]}-01-07", :] = onp.nan
             dict_obs_sim[var_obs] = df_eval
@@ -166,9 +169,9 @@ def main(tmp_dir):
                     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
                 df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
                 df_obs.loc[:, "obs"] = obs_vals
-                sim_vals = ds_sim_hm1[var_sim].isel(x=0, y=0).values
+                sim_vals = ds_sim_hm[var_sim].isel(x=idx_best, y=0).values
                 # join observations on simulations
-                df_eval = eval_utils.join_obs_on_sim(date_sim_hm1, sim_vals, df_obs)
+                df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
                 # skip first seven days for warmup
                 df_eval.loc[f"{year}-01-01":f"{year}-01-07", :] = onp.nan
                 df_eval = df_eval.loc[f"{year}-01-01":f"{year}-12-31", :]
@@ -188,18 +191,24 @@ def main(tmp_dir):
 
     lys_experiments = ["lys2", "lys3", "lys8"]
     for lys_experiment in lys_experiments:
+        # load parameters and metrics
+        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+        for year in [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017]:
+            df_params_metrics.loc[:, f"RBS_r_{year}"] = 0.5 * df_params_metrics.loc[:, f"RBS_q_ss_{year}"].abs() + 0.5 * (1 - df_params_metrics.loc[:, f"r_q_ss_{year}"])
+        df_params_metrics.loc[:, "RBS_r"] = 0.5 * df_params_metrics.loc[:, "RBS_q_ss_2011":"RBS_q_ss_2017"].abs().mean(axis=1) + 0.5 * (1 - df_params_metrics.loc[:, "r_q_ss_2011":"r_q_ss_2017"].mean(axis=1))
+        idx_best = df_params_metrics["RBS_r"].idxmin()
         # load simulation
-        sim_hm1_file = base_path_output / f"SVATCROP_{lys_experiment}_best_simulation.nc"
-        ds_sim_hm1 = xr.open_dataset(sim_hm1_file, engine="h5netcdf")
+        sim_hm_file = base_path_output / f"SVATCROP_{lys_experiment}.nc"
+        ds_sim_hm = xr.open_dataset(sim_hm_file, engine="h5netcdf")
         # assign date
-        days_sim_hm1 = ds_sim_hm1["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
-        date_sim_hm1 = num2date(
-            days_sim_hm1,
-            units=f"days since {ds_sim_hm1['Time'].attrs['time_origin']}",
+        days_sim_hm = ds_sim_hm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+        date_sim_hm = num2date(
+            days_sim_hm,
+            units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}",
             calendar="standard",
             only_use_cftime_datetimes=False,
         )
-        ds_sim_hm1 = ds_sim_hm1.assign_coords(Time=("Time", date_sim_hm1))
+        ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
 
         # load observations (measured data)
         path_obs = Path(__file__).parent.parent / "observations" / "reckenholz_lysimeter.nc"
@@ -227,21 +236,30 @@ def main(tmp_dir):
                     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
                 df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
                 df_obs.loc[:, "obs"] = obs_vals
-                sim_vals = ds_sim_hm1[var_sim].isel(x=0, y=0).values
+                sim_vals = ds_sim_hm[var_sim].isel(x=idx_best, y=0).values
                 # join observations on simulations
-                df_eval = eval_utils.join_obs_on_sim(date_sim_hm1, sim_vals, df_obs)
+                df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
                 # skip first seven days for warmup
                 df_eval = df_eval.loc[f"{year}-01-01":f"{year}-12-31", :]
                 # plot observed and simulated time series
                 axs[i].plot(df_eval.index, df_eval["sim"], color="red")
-                axs[i].plot(df_eval.index, df_eval["obs"], color="blue")
+                axs[i].plot(df_eval.index, df_eval["obs"], color="blue", ls="--")
                 axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
                 axs[i].set_ylabel('')
                 axs[i].set_xlabel('')
                 if var_sim == "q_ss":
                     axs[i].set_ylim(0)
+                    metric_total = onp.round(df_params_metrics.loc[idx_best, "RBS_r"], 2)
+                    metric_year = onp.round(df_params_metrics.loc[idx_best, f"RBS_r_{year}"], 2)
+                    axs[i].text(0.9,
+                                1.11,
+                                f"RBSr: {metric_year} ({metric_total})",
+                                fontsize=8,
+                                horizontalalignment="center",
+                                verticalalignment="center",
+                                transform=axs[i].transAxes)
                 axs[i].text(0.5,
-                            1.1,
+                            1.11,
                             f"{year}: {crops_lys2_lys3_lys8[year]} ({fert_lys2_lys3_lys8[lys_experiment]})",
                             fontsize=8,
                             horizontalalignment="center",
@@ -270,9 +288,9 @@ def main(tmp_dir):
                     obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
                 df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
                 df_obs.loc[:, "obs"] = obs_vals
-                sim_vals = ds_sim_hm1[var_sim].isel(x=0, y=0).values
+                sim_vals = ds_sim_hm[var_sim].isel(x=idx_best, y=0).values
                 # join observations on simulations
-                df_eval = eval_utils.join_obs_on_sim(date_sim_hm1, sim_vals, df_obs)
+                df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
                 # skip first seven days for warmup
                 df_eval = df_eval.loc[f"{year}-01-01":f"{year}-12-31", :]
                 # plot observed and simulated time series
@@ -289,6 +307,25 @@ def main(tmp_dir):
                             verticalalignment="center",
                             transform=axs[i].transAxes)
                 axs[i].xaxis.set_major_formatter(mpl.dates.DateFormatter('%d-%m'))
+                axs[i].set_ylim(0)
+                metric_total = onp.round(df_params_metrics.loc[idx_best, "RBS_r"], 2)
+                metric_year = onp.round(df_params_metrics.loc[idx_best, f"RBS_r_{year}"], 2)
+                axs[i].text(0.9,
+                            1.11,
+                            f"RBSr: {metric_year} ({metric_total})",
+                            fontsize=8,
+                            horizontalalignment="center",
+                            verticalalignment="center",
+                            transform=axs[i].transAxes)
+                rbs = onp.round(df_params_metrics.loc[idx_best, f"RBS_q_ss"], 2)
+                rbs_year = onp.round(df_params_metrics.loc[idx_best, f"RBS_q_ss_{year}"], 2)
+                axs[i].text(0.02,
+                            0.85,
+                            f"RBS: {rbs_year} ({rbs})",
+                            fontsize=8,
+                            horizontalalignment="left",
+                            verticalalignment="center",
+                            transform=axs[i].transAxes)
             axs[1].set_ylabel(labs._Y_LABS_DAILY[var_sim])
             axs[-2].set_ylabel(labs._Y_LABS_DAILY[var_sim])
             axs[-1].set_xlabel('Time [day-month]')
@@ -297,6 +334,42 @@ def main(tmp_dir):
             path_fig = base_path_figs / file_str
             fig.savefig(path_fig, dpi=300)
             plt.close("all")
+
+        # plot simulated variables of best simulation
+        years = [2011, 2012, 2013, 2014, 2015, 2016]
+        vars_sim = ["ground_cover", "z_root"]
+        for var_sim in vars_sim:
+            fig, axs = plt.subplots(6, 1, sharey=False, sharex=False, figsize=(6, 6))
+            for i, year in enumerate(years):
+                sim_vals = ds_sim_hm[var_sim].isel(x=idx_best, y=0).values
+                # join observations on simulations
+                df_eval = pd.DataFrame(index=date_sim_hm)
+                df_eval.loc[:, "sim"] = sim_vals
+                df_eval = df_eval.loc[f"{year}-01-01":f"{year}-12-31", :]
+                # plot observed and simulated time series
+                axs[i].plot(df_eval.index, df_eval["sim"], color="red")
+                axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
+                axs[i].set_ylabel('')
+                axs[i].set_xlabel('')
+                axs[i].text(0.5,
+                            1.1,
+                            f"{year}: {crops_lys2_lys3_lys8[year]} ({fert_lys2_lys3_lys8[lys_experiment]})",
+                            fontsize=8,
+                            horizontalalignment="center",
+                            verticalalignment="center",
+                            transform=axs[i].transAxes)
+                axs[i].set_ylim(0,)
+                axs[i].xaxis.set_major_formatter(mpl.dates.DateFormatter('%d-%m'))
+            axs[1].set_ylabel(labs._Y_LABS_DAILY[var_sim])
+            axs[-2].set_ylabel(labs._Y_LABS_DAILY[var_sim])
+            axs[-1].set_xlabel('Time [day-month]')
+            fig.tight_layout()
+            file_str = "%s_%s_%s_%s.pdf" % (var_sim, lys_experiment, years[0], years[-1])
+            path_fig = base_path_figs / file_str
+            fig.savefig(path_fig, dpi=300)
+            plt.close("all")
+
+
     return
 
 

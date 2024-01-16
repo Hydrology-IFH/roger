@@ -99,7 +99,7 @@ def read_meteo(path_to_dir: Path):
     )
     prec_10mins = pd.DataFrame(index=new_prec_ind)
     prec_10mins["PREC"] = 0
-    prec_10mins.loc[df_PREC.index, "PREC"] = df_PREC["PREC"].values
+    prec_10mins.loc[df_PREC.index, "PREC"] = df_PREC["PREC"].values.astype(float)
 
     return prec_10mins, df_pet, df_ta, df_rs
 
