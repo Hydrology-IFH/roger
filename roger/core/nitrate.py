@@ -95,8 +95,8 @@ def calc_denit_soil(state, msa, km, Dmax, sa, S_sat):
     mr = update(
         mr,
         at[2:-2, 2:-2, :],
-        (Dmax[2:-2, 2:-2, npx.newaxis] * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100
-        * (msa[2:-2, 2:-2, vs.tau, :] / (km[2:-2, 2:-2, npx.newaxis] * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100 + msa[2:-2, 2:-2, vs.tau, :])))
+        ((Dmax[2:-2, 2:-2, npx.newaxis]/settings.ages) * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100
+        * (msa[2:-2, 2:-2, vs.tau, :] / ((km[2:-2, 2:-2, npx.newaxis]/settings.ages) * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100 + msa[2:-2, 2:-2, vs.tau, :])))
         * soil_temp_coeff[2:-2, 2:-2, npx.newaxis]
         * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
@@ -163,8 +163,8 @@ def calc_nit_soil(state, Nmin, knit, Dnit, sa, S_sat):
     ma = update(
         ma,
         at[2:-2, 2:-2, :],
-        (Dnit[2:-2, 2:-2, npx.newaxis] * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100
-        * (Nmin[2:-2, 2:-2, vs.tau, :] / (knit[2:-2, 2:-2, npx.newaxis] * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100 + Nmin[2:-2, 2:-2, vs.tau, :])))
+        ((Dnit[2:-2, 2:-2, npx.newaxis]/settings.ages) * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100
+        * (Nmin[2:-2, 2:-2, vs.tau, :] / ((knit[2:-2, 2:-2, npx.newaxis]/settings.ages) * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100 + Nmin[2:-2, 2:-2, vs.tau, :])))
         * soil_temp_coeff[2:-2, 2:-2, npx.newaxis]
         * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )

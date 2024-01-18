@@ -719,7 +719,7 @@ def sanity_check(state):
         and not settings.enable_offline_transport
     ):
         check1 = global_and(
-            npx.all(
+            npx.all(npx.where(vs.maskCatch[2:-2, 2:-2],
                 npx.isclose(
                     vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1],
                     vs.prec[2:-2, 2:-2, vs.tau]
@@ -729,7 +729,7 @@ def sanity_check(state):
                     - vs.q_sub[2:-2, 2:-2],
                     atol=settings.atol,
                     rtol=settings.rtol,
-                )
+                ), True)
             )
         )
         check2 = global_and(
@@ -752,8 +752,6 @@ def sanity_check(state):
         # dF = vs.prec[2:-2, 2:-2, vs.tau] - vs.q_sur[2:-2, 2:-2] - vs.aet[2:-2, 2:-2] - vs.q_ss[2:-2, 2:-2]
         # print(vs.S[2:-2, 2:-2, vs.tau])
         check = check1 & check2 & check3
-        if not check:
-            print("Mass balance error")
 
     elif (
         settings.enable_lateral_flow
@@ -764,7 +762,7 @@ def sanity_check(state):
         and not settings.enable_offline_transport
     ):
         check1 = global_and(
-            npx.all(
+            npx.all(npx.where(vs.maskCatch[2:-2, 2:-2],
                 npx.isclose(
                     vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1],
                     vs.prec[2:-2, 2:-2, vs.tau]
@@ -776,7 +774,7 @@ def sanity_check(state):
                     + vs.q_sub_in[2:-2, 2:-2],
                     atol=settings.atol,
                     rtol=settings.rtol,
-                )
+                ), True)
             )
         )
         check2 = global_and(
@@ -808,7 +806,7 @@ def sanity_check(state):
         and not settings.enable_offline_transport
     ):
         check1 = global_and(
-            npx.all(
+            npx.all(npx.where(vs.maskCatch[2:-2, 2:-2],
                 npx.isclose(
                     vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1],
                     vs.prec[2:-2, 2:-2, vs.tau]
@@ -819,7 +817,7 @@ def sanity_check(state):
                     + vs.cpr_ss[2:-2, 2:-2],
                     atol=settings.atol,
                     rtol=settings.rtol,
-                )
+                ), True)
             )
         )
         check2 = global_and(
@@ -848,7 +846,7 @@ def sanity_check(state):
         and not settings.enable_offline_transport
     ):
         check1 = global_and(
-            npx.all(
+            npx.all(npx.where(vs.maskCatch[2:-2, 2:-2],
                 npx.isclose(
                     vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1],
                     vs.prec[2:-2, 2:-2, vs.tau]
@@ -859,7 +857,7 @@ def sanity_check(state):
                     - vs.q_leak[2:-2, 2:-2],
                     atol=settings.atol,
                     rtol=settings.rtol,
-                )
+                ), True)
             )
         )
         check2 = global_and(
@@ -888,7 +886,7 @@ def sanity_check(state):
         and not settings.enable_offline_transport
     ):
         check1 = global_and(
-            npx.all(
+            npx.all(npx.where(vs.maskCatch[2:-2, 2:-2],
                 npx.isclose(
                     vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1],
                     vs.prec[2:-2, 2:-2, vs.tau]
@@ -898,7 +896,7 @@ def sanity_check(state):
                     + vs.cpr_ss[2:-2, 2:-2],
                     atol=settings.atol,
                     rtol=settings.rtol,
-                )
+                ), True)
             )
         )
         check2 = global_and(
@@ -926,7 +924,7 @@ def sanity_check(state):
         and not settings.enable_offline_transport
     ):
         check1 = global_and(
-            npx.all(
+            npx.all(npx.where(vs.maskCatch[2:-2, 2:-2],
                 npx.isclose(
                     vs.S[2:-2, 2:-2, vs.tau] - vs.S[2:-2, 2:-2, vs.taum1],
                     vs.prec[2:-2, 2:-2, vs.tau]
@@ -936,7 +934,7 @@ def sanity_check(state):
                     - vs.ff_drain[2:-2, 2:-2],
                     atol=settings.atol,
                     rtol=settings.rtol,
-                )
+                ), True)
             )
         )
         check2 = global_and(

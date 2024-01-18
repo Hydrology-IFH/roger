@@ -142,7 +142,7 @@ def main(temp_dir):
             vs.lu_id = update(
                 vs.lu_id,
                 at[2:-2, 2:-2],
-                npx.where(vs.maskCatch[2:-2, 2:-2], 8, npx.nan),
+                self._read_var_from_nc("lanu", self._base_path, "parameters.nc"),
             )
             # degree of sealing (-)
             vs.sealing = update(

@@ -34,6 +34,9 @@ _Y_LABS_DAILY = {
     "ta": r"$TA$ [degC]",
     "z_root": r"$z_{root}$ [mm]",
     "ground_cover": r"GC [-]",
+    "transp_coeff": r"c_{TRANSP} [-]",
+    "basal_transp_coeff": r"bc_{TRANSP} [-]",
+    "k_stress_transp": r"k_{TS} [-]",
     "z0": r"z0 [mm]",
 }
 

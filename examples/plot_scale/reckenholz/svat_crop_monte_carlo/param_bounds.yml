@@ -38,6 +38,10 @@ c_canopy_growth:
 c_basal_crop_coeff:
 - 0.5
 - 2.0
+# scale parameter of potential evapotranspiration (-)
+c_pet:
+- 1.0
+- 1.5
 # maximum ratio of root zone depth to soil depth (-)
 zroot_to_zsoil_max:
 - 0.4
