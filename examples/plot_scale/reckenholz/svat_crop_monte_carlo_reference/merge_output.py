@@ -4,58 +4,32 @@ import glob
 import h5netcdf
 import datetime
 import numpy as onp
-from cftime import num2date
-import pandas as pd
+import click
+import roger
 
-base_path = Path(__file__).parent
 
-# identifiers for simulations
-locations = [
-    "freiburg",
-    "altheim",
-    "stockach",
-    "eppingen-elsenz",
-    "bruchsal-heidelsheim",
-    "lahr",
-    "ehingen-kirchen",
-    "merklingen",
-    "muellheim",
-    "oehringen",
-    "gottmadingen",
-    "kupferzell",
-    "weingarten",
-    "bretten",
-    "hayingen",
-    "vellberg-kleinaltdorf",
-]
-locations = [
-    "freiburg"
-]
-crop_rotation_scenarios = ["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
-                           "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
-                           "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
-                           "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
-                           "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
-                           "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
-                           "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
-                           "winter-wheat_winter-rape_yellow-mustard"]
-crop_rotation_scenarios = ["summer-wheat_winter-wheat_corn"]
+@click.command("main")
+def main():
+    base_path = Path(__file__).parent
 
-# merge model output into single file
-for location in locations:
-    for crop_rotation_scenario in crop_rotation_scenarios:
-        path = str(base_path.parent / "output" / "svat_crop" / f"SVATCROP_{location}_{crop_rotation_scenario}.*.nc")
-        output_hm_file = base_path.parent / "output" / "svat_crop" / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+    # identifiers for simulations
+    lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
+
+    # merge model output into single file
+    for lys_experiment in lys_experiments:
+        path = str(base_path.parent / "output" / "svat_crop_monte_carlo_reference" / f"SVATCROP_{lys_experiment}.*.nc")
+        output_hm_file = base_path.parent / "output" / "svat_crop_monte_carlo_reference" / f"SVATCROP_{lys_experiment}.nc"
         if not os.path.exists(output_hm_file):
             diag_files = glob.glob(path)
             with h5netcdf.File(output_hm_file, "w", decode_vlen_strings=False) as f:
                 f.attrs.update(
                     date_created=datetime.datetime.today().isoformat(),
-                    title=f"RoGeR simulations at {location}",
+                    title=f"RoGeR Monte Carlo simulations at Reckenholz lysimeter {lys_experiment}",
                     institution="University of Freiburg, Chair of Hydrology",
                     references="",
                     comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-                    model_structure="SVAT model with free drainage and crop phenology",
+                    model_structure="SVAT-CROP model with free drainage",
+                    roger_version=f"{roger.__version__}",
                 )
                 # collect dimensions
                 for dfs in diag_files:
@@ -69,7 +43,6 @@ for location in locations:
                                 "Time": len(df.variables["Time"]),
                             }
                             time = onp.array(df.variables.get("Time"))
-                            time_origin = df.variables['Time'].attrs['time_origin']
                 for dfs in diag_files:
                     with h5netcdf.File(dfs, "r", decode_vlen_strings=False) as df:
                         if not f.dimensions:
@@ -104,23 +77,8 @@ for location in locations:
                                 vals = onp.array(var_obj)
                                 v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
                                 v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
-                # add year and day of year for nitrate transport model
-                dates1 = num2date(
-                    time,
-                    units=f"days since {time_origin}",
-                    calendar="standard",
-                    only_use_cftime_datetimes=False,
-                )
-                dates = pd.to_datetime(dates1)
-                vals = onp.array(dates.year)
-                v = f.create_variable(
-                    "year", ("Time",), float, compression="gzip", compression_opts=1
-                )
-                v[:] = onp.array(dates.year)
-                v.attrs.update(long_name="Year", units="")
-                vals = onp.array(dates.year)
-                v = f.create_variable(
-                    "doy", ("Time",), float, compression="gzip", compression_opts=1
-                )
-                v[:] = onp.array(dates.day_of_year)
-                v.attrs.update(long_name="Day of year", units="")
+    return
+
+
+if __name__ == "__main__":
+    main()

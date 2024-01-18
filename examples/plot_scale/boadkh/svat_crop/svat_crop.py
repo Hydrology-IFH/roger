@@ -21,7 +21,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                                              "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
                                                              "winter-wheat_winter-rape_yellow-mustard"]), default="summer-wheat_winter-wheat_corn")
-@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_crop")
 @roger_base_cli
 def main(location, crop_rotation_scenario, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -34,8 +34,8 @@ def main(location, crop_rotation_scenario, tmp_dir):
     class SVATCROPSetup(RogerSetup):
         """A SVAT model including crop phenology/crop rotation."""
 
-        _base_path = Path(__file__).parent.parent
-        _input_dir = _base_path / "input" / f"{location}"
+        _base_path = Path(__file__).parent
+        _input_dir = _base_path.parent / "input" / f"{location}"
         if location == "freiburg":
             _elevation = 236
         elif location == "singen":
@@ -733,7 +733,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
 
     model = SVATCROPSetup()
     write_forcing(model._input_dir, enable_crop_phenology=True)
-    crop_rotation_dir = model._base_path / "input" / "crop_rotation_scenarios" / crop_rotation_scenario
+    crop_rotation_dir = model._base_path.parent / "input" / "crop_rotation_scenarios" / crop_rotation_scenario
     write_crop_rotation(crop_rotation_dir)
     if not os.path.exists(model._input_dir / f"{crop_rotation_scenario}.nc"):
         shutil.copy2(crop_rotation_dir / "crop_rotation.nc", model._input_dir / f"{crop_rotation_scenario}.nc")

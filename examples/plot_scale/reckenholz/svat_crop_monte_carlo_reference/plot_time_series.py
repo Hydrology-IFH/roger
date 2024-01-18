@@ -46,11 +46,11 @@ def main(tmp_dir):
         base_path = Path(__file__).parent
 
     # directory of results
-    base_path_output = base_path.parent / "output" / "svat_monte_carlo"
+    base_path_output = base_path.parent / "output" / "svat_crop_monte_carlo_reference"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
     # directory of figures
-    base_path_figs = base_path.parent / "figures" / "svat_monte_carlo"
+    base_path_figs = base_path.parent / "figures" / "svat_crop_monte_carlo_reference"
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
@@ -96,7 +96,7 @@ def main(tmp_dir):
         df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
         idx_best = df_params_metrics["KGE_q_ss"].idxmax()
         # load simulation
-        sim_hm_file = base_path_output / f"SVAT_{lys_experiment}.nc"
+        sim_hm_file = base_path_output / f"SVATCROP_{lys_experiment}.nc"
         ds_sim_hm = xr.open_dataset(sim_hm_file, engine="h5netcdf")
         # assign date
         days_sim_hm = ds_sim_hm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
@@ -198,7 +198,7 @@ def main(tmp_dir):
         df_params_metrics.loc[:, "RBS_r"] = 0.5 * df_params_metrics.loc[:, "RBS_q_ss_2011":"RBS_q_ss_2017"].abs().mean(axis=1) + 0.5 * (1 - df_params_metrics.loc[:, "r_q_ss_2011":"r_q_ss_2017"].mean(axis=1))
         idx_best = df_params_metrics["KGE_q_ss"].idxmax()
         # load simulation
-        sim_hm_file = base_path_output / f"SVAT_{lys_experiment}.nc"
+        sim_hm_file = base_path_output / f"SVATCROP_{lys_experiment}.nc"
         ds_sim_hm = xr.open_dataset(sim_hm_file, engine="h5netcdf")
         # assign date
         days_sim_hm = ds_sim_hm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
@@ -334,6 +334,42 @@ def main(tmp_dir):
             path_fig = base_path_figs / file_str
             fig.savefig(path_fig, dpi=300)
             plt.close("all")
+
+        # plot simulated variables of best simulation
+        years = [2011, 2012, 2013, 2014, 2015, 2016]
+        vars_sim = ["ground_cover", "z_root"]
+        for var_sim in vars_sim:
+            fig, axs = plt.subplots(6, 1, sharey=False, sharex=False, figsize=(6, 6))
+            for i, year in enumerate(years):
+                sim_vals = ds_sim_hm[var_sim].isel(x=idx_best, y=0).values
+                # join observations on simulations
+                df_eval = pd.DataFrame(index=date_sim_hm)
+                df_eval.loc[:, "sim"] = sim_vals
+                df_eval = df_eval.loc[f"{year}-01-01":f"{year}-12-31", :]
+                # plot observed and simulated time series
+                axs[i].plot(df_eval.index, df_eval["sim"], color="red")
+                axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
+                axs[i].set_ylabel('')
+                axs[i].set_xlabel('')
+                axs[i].text(0.5,
+                            1.1,
+                            f"{year}: {crops_lys2_lys3_lys8[year]} ({fert_lys2_lys3_lys8[lys_experiment]})",
+                            fontsize=8,
+                            horizontalalignment="center",
+                            verticalalignment="center",
+                            transform=axs[i].transAxes)
+                axs[i].set_ylim(0,)
+                axs[i].xaxis.set_major_formatter(mpl.dates.DateFormatter('%d-%m'))
+            axs[1].set_ylabel(labs._Y_LABS_DAILY[var_sim])
+            axs[-2].set_ylabel(labs._Y_LABS_DAILY[var_sim])
+            axs[-1].set_xlabel('Time [day-month]')
+            fig.tight_layout()
+            file_str = "%s_%s_%s_%s.pdf" % (var_sim, lys_experiment, years[0], years[-1])
+            path_fig = base_path_figs / file_str
+            fig.savefig(path_fig, dpi=300)
+            plt.close("all")
+
+
     return
 
 

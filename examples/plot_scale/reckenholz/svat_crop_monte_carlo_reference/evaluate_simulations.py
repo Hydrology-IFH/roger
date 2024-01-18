@@ -32,18 +32,19 @@ def main(tmp_dir):
         os.mkdir(base_path_figs)
 
     lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
+    lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9"]
     for lys_experiment in lys_experiments:
         # directory of results
-        base_path_output = base_path.parent / "output" / "svat_monte_carlo"
+        base_path_output = base_path.parent / "output" / "svat_crop_monte_carlo_reference"
         if not os.path.exists(base_path_output):
             os.mkdir(base_path_output)
         # directory of figures
-        base_path_figs = base_path.parent / "figures" / "svat_monte_carlo"
+        base_path_figs = base_path.parent / "figures" / "svat_crop_monte_carlo_reference"
         if not os.path.exists(base_path_figs):
             os.mkdir(base_path_figs)
 
         # load simulation
-        states_hm_mc_file = base_path_output / f"SVAT_{lys_experiment}.nc"
+        states_hm_mc_file = base_path_output / f"SVATCROP_{lys_experiment}.nc"
         ds_sim = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
 
         # load observations (measured data)
@@ -184,6 +185,12 @@ def main(tmp_dir):
                             sim_vals_no0 = df_obs_sim_no0.loc[:, "sim"].values.astype(float)
                             # number of data with non-zero observations
                             N_no0 = len(df_obs_sim_no0.index)
+                            key_kge = "KGE_no0_" + var_sim
+                            df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals_no0, sim_vals_no0)
+                            key_kge_alpha = "KGE_alpha_no0_" + var_sim
+                            df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_no0, sim_vals_no0)
+                            key_kge_beta = "KGE_beta_no0_" + var_sim
+                            df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_no0, sim_vals_no0)
                             # mean absolute relative error
                             key_mare = "MARE_" + var_sim
                             df_params_metrics.loc[nrow, key_mare] = eval_utils.calc_mare(obs_vals_no0, sim_vals_no0)
@@ -310,117 +317,117 @@ def main(tmp_dir):
         file = base_path_output / f"params_eff_{lys_experiment}.txt"
         df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
 
-        # select best model run
-        if lys_experiment in ["lys2", "lys3", "lys4", "lys8", "lys9"]:
-            idx_best = df_params_metrics["E_multi"].idxmax()
-        else:
-            idx_best = df_params_metrics["KGE_q_ss"].idxmax()
+        # # select best model run
+        # if lys_experiment in ["lys2", "lys3", "lys4", "lys8", "lys9"]:
+        #     idx_best = df_params_metrics["E_multi"].idxmax()
+        # else:
+        #     idx_best = df_params_metrics["KGE_q_ss"].idxmax()
 
-        ds_sim = ds_sim.close()
-        del ds_sim
-        # write states of best model run
-        states_hm_mc_file = base_path_output / f"SVAT_{lys_experiment}.nc"
-        states_hm_file = base_path_output / f"SVAT_{lys_experiment}_best_simulation.nc"
-        with h5netcdf.File(states_hm_file, "a", decode_vlen_strings=False) as f:
-            if lys_experiment not in list(f.keys()):
-                f.create_group(lys_experiment)
-            f.attrs.update(
-                date_created=datetime.datetime.today().isoformat(),
-                title="RoGeR best Monte Carlo simulation at Reckenholz Lysimeter site",
-                institution="University of Freiburg, Chair of Hydrology",
-                references="",
-                comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-                model_structure="SVAT model with free drainage",
-                roger_version=f"{roger.__version__}",
-            )
-            with h5netcdf.File(states_hm_mc_file, "r", decode_vlen_strings=False) as df:
-                # set dimensions with a dictionary
-                dict_dim = {"x": 1, "y": 1, "Time": len(df.variables["Time"])}
-                if not f.dimensions:
-                    f.dimensions = dict_dim
-                    v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
-                    v.attrs["long_name"] = "Number of model run"
-                    v.attrs["units"] = ""
-                    v[:] = onp.arange(dict_dim["x"])
-                    v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
-                    v.attrs["long_name"] = ""
-                    v.attrs["units"] = ""
-                    v[:] = onp.arange(dict_dim["y"])
-                    v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
-                    var_obj = df.variables.get("Time")
-                    v.attrs.update(time_origin=var_obj.attrs["time_origin"], units=var_obj.attrs["units"])
-                    v[:] = onp.array(var_obj)
-                for var_sim in list(df.variables.keys()):
-                    var_obj = df.variables.get(var_sim)
-                    if var_sim not in list(f.dimensions.keys()) and ("x", "y", "Time") == var_obj.dimensions:
-                        v = f.create_variable(
-                            var_sim, ("x", "y", "Time"), float, compression="gzip", compression_opts=1
-                        )
-                        vals = onp.array(var_obj)
-                        v[:, :, :] = vals[idx_best, :, :]
-                        v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
-                    elif var_sim not in list(f.dimensions.keys()) and ("x", "y") == var_obj.dimensions:
-                        v = f.create_variable(var_sim, ("x", "y"), float, compression="gzip", compression_opts=1)
-                        vals = onp.array(var_obj)
-                        v[:, :] = vals[idx_best, :]
-                        v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
+        # ds_sim = ds_sim.close()
+        # del ds_sim
+        # # write states of best model run
+        # states_hm_mc_file = base_path_output / f"SVATCROP_{lys_experiment}.nc"
+        # states_hm_file = base_path_output / f"SVATCROP_{lys_experiment}_best_simulation.nc"
+        # with h5netcdf.File(states_hm_file, "a", decode_vlen_strings=False) as f:
+        #     if lys_experiment not in list(f.keys()):
+        #         f.create_group(lys_experiment)
+        #     f.attrs.update(
+        #         date_created=datetime.datetime.today().isoformat(),
+        #         title="RoGeR best Monte Carlo simulation at Reckenholz Lysimeter site",
+        #         institution="University of Freiburg, Chair of Hydrology",
+        #         references="",
+        #         comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
+        #         model_structure="SVAT model with free drainage and crop phenology/crop rotation",
+        #         roger_version=f"{roger.__version__}",
+        #     )
+        #     with h5netcdf.File(states_hm_mc_file, "r", decode_vlen_strings=False) as df:
+        #         # set dimensions with a dictionary
+        #         dict_dim = {"x": 1, "y": 1, "Time": len(df.variables["Time"])}
+        #         if not f.dimensions:
+        #             f.dimensions = dict_dim
+        #             v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
+        #             v.attrs["long_name"] = "Number of model run"
+        #             v.attrs["units"] = ""
+        #             v[:] = onp.arange(dict_dim["x"])
+        #             v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
+        #             v.attrs["long_name"] = ""
+        #             v.attrs["units"] = ""
+        #             v[:] = onp.arange(dict_dim["y"])
+        #             v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
+        #             var_obj = df.variables.get("Time")
+        #             v.attrs.update(time_origin=var_obj.attrs["time_origin"], units=var_obj.attrs["units"])
+        #             v[:] = onp.array(var_obj)
+        #         for var_sim in list(df.variables.keys()):
+        #             var_obj = df.variables.get(var_sim)
+        #             if var_sim not in list(f.dimensions.keys()) and ("x", "y", "Time") == var_obj.dimensions:
+        #                 v = f.create_variable(
+        #                     var_sim, ("x", "y", "Time"), float, compression="gzip", compression_opts=1
+        #                 )
+        #                 vals = onp.array(var_obj)
+        #                 v[:, :, :] = vals[idx_best, :, :]
+        #                 v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
+        #             elif var_sim not in list(f.dimensions.keys()) and ("x", "y") == var_obj.dimensions:
+        #                 v = f.create_variable(var_sim, ("x", "y"), float, compression="gzip", compression_opts=1)
+        #                 vals = onp.array(var_obj)
+        #                 v[:, :] = vals[idx_best, :]
+        #                 v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
 
-        # select best 100 model runs
-        if lys_experiment in ["lys2", "lys3", "lys4", "lys8", "lys9"]:
-            df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
-        else:
-            df_params_metrics = df_params_metrics.sort_values(by=["KGE_q_ss"], ascending=False)
-        df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
-        idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
+        # # select best 100 model runs
+        # if lys_experiment in ["lys2", "lys3", "lys4", "lys8", "lys9"]:
+        #     df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
+        # else:
+        #     df_params_metrics = df_params_metrics.sort_values(by=["KGE_q_ss"], ascending=False)
+        # df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
+        # idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
 
-        # write states of best model run
-        states_hm_mc_file = base_path_output / f"SVAT_{lys_experiment}.nc"
-        states_hm_file = base_path_output / f"SVAT_{lys_experiment}_best_100_simulations.nc"
-        with h5netcdf.File(states_hm_file, "a", decode_vlen_strings=False) as f:
-            if lys_experiment not in list(f.keys()):
-                f.create_group(lys_experiment)
-            f.attrs.update(
-                date_created=datetime.datetime.today().isoformat(),
-                title=f"RoGeR best Monte Carlo simulation at Reckenholz Lysimeter ({lys_experiment})",
-                institution="University of Freiburg, Chair of Hydrology",
-                references="",
-                comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-                model_structure="SVAT model with free drainage",
-                roger_version=f"{roger.__version__}",
-            )
-            with h5netcdf.File(states_hm_mc_file, "r", decode_vlen_strings=False) as df:
-                # set dimensions with a dictionary
-                dict_dim = {"x": 100, "y": 1, "Time": len(df.variables["Time"])}
-                if not f.dimensions:
-                    f.dimensions = dict_dim
-                    v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
-                    v.attrs["long_name"] = "Number of model run"
-                    v.attrs["units"] = ""
-                    v[:] = onp.arange(dict_dim["x"])
-                    v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
-                    v.attrs["long_name"] = ""
-                    v.attrs["units"] = ""
-                    v[:] = onp.arange(dict_dim["y"])
-                    v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
-                    var_obj = df.variables.get("Time")
-                    v.attrs.update(time_origin=var_obj.attrs["time_origin"], units=var_obj.attrs["units"])
-                    v[:] = onp.array(var_obj)
-                for var_sim in list(df.variables.keys()):
-                    var_obj = df.variables.get(var_sim)
-                    if var_sim not in list(f.dimensions.keys()) and ("x", "y", "Time") == var_obj.dimensions:
-                        v = f.create_variable(
-                            var_sim, ("x", "y", "Time"), float, compression="gzip", compression_opts=1
-                        )
-                        vals = onp.array(var_obj)
-                        for i, x in enumerate(idx_best100):
-                            v[i, :, :] = vals[x, :, :]
-                        v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
-                    elif var_sim not in list(f.dimensions.keys()) and ("x", "y") == var_obj.dimensions:
-                        v = f.create_variable(var_sim, ("x", "y"), float, compression="gzip", compression_opts=1)
-                        vals = onp.array(var_obj)
-                        for i, x in enumerate(idx_best100):
-                            v[i, :, :] = vals[x, :, :]
-                        v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
+        # # write states of best model run
+        # states_hm_mc_file = base_path_output / f"SVATCROP_{lys_experiment}.nc"
+        # states_hm_file = base_path_output / f"SVATCROP_{lys_experiment}_best_100_simulations.nc"
+        # with h5netcdf.File(states_hm_file, "a", decode_vlen_strings=False) as f:
+        #     if lys_experiment not in list(f.keys()):
+        #         f.create_group(lys_experiment)
+        #     f.attrs.update(
+        #         date_created=datetime.datetime.today().isoformat(),
+        #         title=f"RoGeR best Monte Carlo simulation at Reckenholz Lysimeter ({lys_experiment})",
+        #         institution="University of Freiburg, Chair of Hydrology",
+        #         references="",
+        #         comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
+        #         model_structure="SVAT model with free drainage and crop phenology/crop rotation",
+        #         roger_version=f"{roger.__version__}",
+        #     )
+        #     with h5netcdf.File(states_hm_mc_file, "r", decode_vlen_strings=False) as df:
+        #         # set dimensions with a dictionary
+        #         dict_dim = {"x": 100, "y": 1, "Time": len(df.variables["Time"])}
+        #         if not f.dimensions:
+        #             f.dimensions = dict_dim
+        #             v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
+        #             v.attrs["long_name"] = "Number of model run"
+        #             v.attrs["units"] = ""
+        #             v[:] = onp.arange(dict_dim["x"])
+        #             v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
+        #             v.attrs["long_name"] = ""
+        #             v.attrs["units"] = ""
+        #             v[:] = onp.arange(dict_dim["y"])
+        #             v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
+        #             var_obj = df.variables.get("Time")
+        #             v.attrs.update(time_origin=var_obj.attrs["time_origin"], units=var_obj.attrs["units"])
+        #             v[:] = onp.array(var_obj)
+        #         for var_sim in list(df.variables.keys()):
+        #             var_obj = df.variables.get(var_sim)
+        #             if var_sim not in list(f.dimensions.keys()) and ("x", "y", "Time") == var_obj.dimensions:
+        #                 v = f.create_variable(
+        #                     var_sim, ("x", "y", "Time"), float, compression="gzip", compression_opts=1
+        #                 )
+        #                 vals = onp.array(var_obj)
+        #                 for i, x in enumerate(idx_best100):
+        #                     v[i, :, :] = vals[x, :, :]
+        #                 v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
+        #             elif var_sim not in list(f.dimensions.keys()) and ("x", "y") == var_obj.dimensions:
+        #                 v = f.create_variable(var_sim, ("x", "y"), float, compression="gzip", compression_opts=1)
+        #                 vals = onp.array(var_obj)
+        #                 for i, x in enumerate(idx_best100):
+        #                     v[i, :, :] = vals[x, :, :]
+        #                 v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
     return
 
 

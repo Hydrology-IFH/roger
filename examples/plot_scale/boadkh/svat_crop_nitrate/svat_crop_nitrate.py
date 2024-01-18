@@ -18,8 +18,8 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
                                                              "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                                              "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
-                                                             "winter-wheat_winter-rape_yellow-mustard"]), default="winter-wheat_corn")
-@click.option("-td", "--tmp-dir", type=str, default=None)
+                                                             "winter-wheat_winter-rape_yellow-mustard"]), default="summer-wheat_winter-wheat_corn")
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_crop_nitrate")
 @roger_base_cli
 def main(location, crop_rotation_scenario, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -36,7 +36,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
             # read fluxes and states from local SSD on cluster node
             _input_dir = Path(tmp_dir)
         else:
-            _input_dir = _base_path.parent / "output" / "svat_crop_nitrate"
+            _input_dir = _base_path.parent / "output" / "svat_crop"
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
