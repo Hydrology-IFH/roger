@@ -245,7 +245,7 @@ def main(lys_experiment, tmp_dir):
                 vs.ta_day = update(vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
                 vs.ta_min = update(vs.ta_min, at[:, :], npx.min(vs.TA_MIN[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24], axis=-1))
                 vs.ta_max = update(vs.ta_max, at[:, :], npx.max(vs.TA_MAX[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24], axis=-1))
-                vs.pet_day = update(vs.pet_day, at[2:-2, 2:-2, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24]) * vs.pet_weight[2:-2, 2:-2, npx.newaxis]
+                vs.pet_day = update(vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24]) * vs.pet_weight[:, :, npx.newaxis]
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
             if (vs.year[1] != vs.year[0]) & (vs.itt > 1):
