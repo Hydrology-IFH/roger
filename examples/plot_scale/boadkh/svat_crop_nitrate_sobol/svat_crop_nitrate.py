@@ -19,7 +19,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
                                                              "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                                              "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
-                                                             "winter-wheat_winter-rape_yellow-mustard"]), default="winter-wheat_corn")
+                                                             "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]), default="winter-wheat_corn")
 @click.option("-id", "--id", type=str, default="5-8_2090295_1")
 @click.option("-x", "--row", type=int, default=0)
 @click.option("-td", "--tmp-dir", type=str, default=None)

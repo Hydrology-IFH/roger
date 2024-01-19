@@ -22,7 +22,8 @@ def main():
                                "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
                                "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
-                               "winter-wheat_winter-rape_yellow-mustard"]
+                               "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]
+
     
     csv_file = base_path / "clust-id_shp-id_clust-flag.csv"
     df = pd.read_csv(csv_file, sep=";", skiprows=0)

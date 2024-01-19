@@ -18,7 +18,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
                                                              "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                                              "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
-                                                             "winter-wheat_winter-rape_yellow-mustard"]), default="summer-wheat_winter-wheat_corn")
+                                                             "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]), default="summer-wheat_winter-wheat_corn")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_crop_nitrate")
 @roger_base_cli
 def main(location, crop_rotation_scenario, tmp_dir):
