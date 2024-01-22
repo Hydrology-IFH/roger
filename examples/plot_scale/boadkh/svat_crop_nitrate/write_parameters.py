@@ -18,6 +18,8 @@ _UNITS = {
     "dmax_denit": "kg N/ha/year",
     "dmax_nit": "kg N/ha/year",
     "phi_soil_temp": "day of year",
+    "clay": "-",
+    "soil_fertility": "",
 }
 
 _VALS = {
@@ -41,6 +43,12 @@ _X2 = [80, 160, 240]
 def main():
     base_path = Path(__file__).parent
 
+    csv_file = base_path / "soil_fertility.csv"
+    df_soil_fertility = pd.read_csv(csv_file, sep=";", skiprows=1)
+
+    csv_file = base_path / "clay.csv"
+    df_clay = pd.read_csv(csv_file, sep=";", skiprows=1)
+
     # write parameters to csv
     df_params = pd.DataFrame(index=range(_X2[-1]))
     for param in _VALS.keys():
@@ -52,13 +60,26 @@ def main():
             # write parameters to dataframe
         df_params.loc[:, param] = values.flatten()
 
+    values = onp.zeros(_X2[-1])
+    for i in range(len(_X2)):
+        x1 = _X1[i]
+        x2 = _X2[i]
+        values[x1:x2] = df_clay.loc[:, "clay"].values.astype(float)
+    df_params.loc[:, "clay"] = values.flatten()
 
-    param_names = ["alpha_transp", "alpha_q", "c2_transp", "c2_q_rz", "c2_q_ss", "km_denit", "km_nit", "kmin", "dmax_denit", "dmax_nit", "phi_soil_temp"]
+    values = onp.zeros(_X2[-1])
+    for i in range(len(_X2)):
+        x1 = _X1[i]
+        x2 = _X2[i]
+        values[x1:x2] = df_soil_fertility.loc[:, "soil_fertility"].values.astype(float)
+    df_params.loc[:, "soil_fertility"] = values.flatten()
+
+    param_names = ["alpha_transp", "alpha_q", "c2_transp", "c2_q_rz", "c2_q_ss", "km_denit", "km_nit", "kmin", "dmax_denit", "dmax_nit", "phi_soil_temp", "clay", "soil_fertility"]
     df_params = df_params.loc[:, param_names]
 
     # write parameters to csv
     df_params.columns = [
-        ["[-]", "[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[day of year]"],
+        ["[-]", "[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[day of year]", "[-]", ""], 
         param_names,
     ]
     df_params.to_csv(base_path / "parameters.csv", index=False, sep=";")

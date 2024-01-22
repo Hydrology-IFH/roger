@@ -43,10 +43,16 @@ def main():
                                "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
                                "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]
+    
+    crop_rotation_scenarios = ["summer-wheat_winter-wheat_corn", 
+                               "summer-wheat_winter-wheat_corn_yellow-mustard"]
+    
+    crop_rotation_scenarios = ["summer-wheat_winter-wheat_corn_yellow-mustard"]
 
     # merge model output into single file
     for location in locations:
         for crop_rotation_scenario in crop_rotation_scenarios:
+            crop_rotation_scenario1 = crop_rotation_scenario.replace("-", " ").replace("_", ", ")
             path = str(base_path.parent / "output" / "svat_crop" / f"SVATCROP_{location}_{crop_rotation_scenario}.*.nc")
             output_hm_file = base_path.parent / "output" / "svat_crop" / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
             if not os.path.exists(output_hm_file):
@@ -54,7 +60,7 @@ def main():
                 with h5netcdf.File(output_hm_file, "w", decode_vlen_strings=False) as f:
                     f.attrs.update(
                         date_created=datetime.datetime.today().isoformat(),
-                        title=f"RoGeR simulations at {location}",
+                        title=f"RoGeR simulations at {location} with {crop_rotation_scenario1} for crop rotation",
                         institution="University of Freiburg, Chair of Hydrology",
                         references="",
                         comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",

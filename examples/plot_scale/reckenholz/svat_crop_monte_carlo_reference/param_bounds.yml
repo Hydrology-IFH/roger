@@ -8,7 +8,7 @@ lmpv:
 - 600
 # scale parameter of crop root growth (-)
 c_root_growth:
-- 0.5
+- 0.1
 - 1.5
 # scale parameter of crop canopy growth (-)
 c_canopy_growth:

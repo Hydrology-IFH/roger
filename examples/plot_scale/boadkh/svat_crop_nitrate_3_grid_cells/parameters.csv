@@ -1,0 +1,5 @@
+[-];[-];[-];[-];[-];[kg N/ha/year];[kg N/ha/year];[kg N/ha/year];[kg N/ha/year];[kg N/ha/year];[day of year]
+alpha_transp;alpha_q;c2_transp;c2_q_rz;c2_q_ss;km_denit;km_nit;kmin;dmax_denit;dmax_nit;phi_soil_temp
+0.95;0.7;0.6;1.5;1.5;2.5;0.25;0.25;10.0;1.0;91.0
+0.95;0.7;0.6;1.5;1.5;9.0;0.9;0.9;40.0;4.0;91.0
+0.95;0.7;0.6;1.5;1.5;18.7;1.87;1.87;100.0;10.0;91.0

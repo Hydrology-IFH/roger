@@ -308,11 +308,11 @@ def main(tmp_dir):
                             transform=axs[i].transAxes)
                 axs[i].xaxis.set_major_formatter(mpl.dates.DateFormatter('%d-%m'))
                 axs[i].set_ylim(0)
-                metric_total = onp.round(df_params_metrics.loc[idx_best, "RBS_r"], 2)
-                metric_year = onp.round(df_params_metrics.loc[idx_best, f"RBS_r_{year}"], 2)
+                metric_total = onp.round(df_params_metrics.loc[idx_best, "KGE_q_ss"], 2)
+                metric_year = onp.round(df_params_metrics.loc[idx_best, f"KGE_q_ss_{year}"], 2)
                 axs[i].text(0.9,
                             1.11,
-                            f"RBSr: {metric_year} ({metric_total})",
+                            f"KGE: {metric_year} ({metric_total})",
                             fontsize=8,
                             horizontalalignment="center",
                             verticalalignment="center",
@@ -326,8 +326,8 @@ def main(tmp_dir):
                             horizontalalignment="left",
                             verticalalignment="center",
                             transform=axs[i].transAxes)
-            axs[1].set_ylabel(labs._Y_LABS_DAILY[var_sim])
-            axs[-2].set_ylabel(labs._Y_LABS_DAILY[var_sim])
+            axs[1].set_ylabel(labs._Y_LABS_CUM[var_sim])
+            axs[-2].set_ylabel(labs._Y_LABS_CUM[var_sim])
             axs[-1].set_xlabel('Time [day-month]')
             fig.tight_layout()
             file_str = "%s_%s_%s_%s_cumulated.pdf" % (var_sim, lys_experiment, years[0], years[-1])

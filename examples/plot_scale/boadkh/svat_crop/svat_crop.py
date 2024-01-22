@@ -20,7 +20,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
                                                              "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                                              "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
-                                                             "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]), default="summer-wheat_winter-wheat_corn")
+                                                             "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]), default="summer-wheat_winter-wheat_corn_yellow-mustard")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_crop")
 @roger_base_cli
 def main(location, crop_rotation_scenario, tmp_dir):
@@ -378,6 +378,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
 
             diagnostics["rate"].output_variables = [
                 "prec",
+                "pet",
                 "aet",
                 "transp",
                 "evap_soil",
@@ -390,6 +391,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
                 "cpr_rz",
                 "re_rg",
                 "re_rl",
+                "q_hof"
             ]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
