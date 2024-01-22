@@ -26,14 +26,17 @@ ARR_CP = onp.asarray(df_cp.values)
 
 path_fert1 = CSV_DIR / "fertilization1.csv"
 df_fert1 = pd.read_csv(path_fert1, sep=";", na_values=-9999, skiprows=1)
+df_fert1.fillna(0, inplace=True)
 ARR_FERT1 = onp.asarray(df_fert1.values)
 
 path_fert2 = CSV_DIR / "fertilization2.csv"
 df_fert2 = pd.read_csv(path_fert2, sep=";", na_values=-9999, skiprows=1)
+df_fert2.fillna(0, inplace=True)
 ARR_FERT2 = onp.asarray(df_fert2.values)
 
 path_fert3 = CSV_DIR / "fertilization3.csv"
 df_fert3 = pd.read_csv(path_fert3, sep=";", na_values=-9999, skiprows=1)
+df_fert3.fillna(0, inplace=True)
 ARR_FERT3 = onp.asarray(df_fert3.values)
 
 ARR_GC = onp.zeros((25, 13))

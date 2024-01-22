@@ -13,53 +13,57 @@ def main():
 
     # identifiers for simulations
     locations = [
-        "freiburg",
-        "altheim",
-        "stockach",
-        "eppingen-elsenz",
-        "bruchsal-heidelsheim",
-        "lahr",
-        "ehingen-kirchen",
-        "merklingen",
+        "singen",
+        "azenweiler",
+        "unterraderach",
         "muellheim",
-        "oehringen",
-        "gottmadingen",
+        "freiburg",
+        "ihringen",
+        "altheim",
+        "kirchen",
+        "maehringen",
+        "heidelsheim",
+        "elsenz",
+        "zaberfeld",
         "kupferzell",
-        "weingarten",
-        "bretten",
-        "hayingen",
-        "vellberg-kleinaltdorf",
+        "stachenhausen",
+        "oehringen",
+    ]
+    locations = [
+        "freiburg"
     ]
     crop_rotation_scenarios = ["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
-                                "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
-                                "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
-                                "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
-                                "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
-                                "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
-                                "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
-                                "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]
-
+                               "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
+                               "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
+                               "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
+                               "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
+                               "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
+                               "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
+                               "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]
+    crop_rotation_scenarios = ["summer-wheat_winter-wheat_corn"]
+    id = "5-8_2090295_1"
     # merge model output into single file
     for location in locations:
         for crop_rotation_scenario in crop_rotation_scenarios:
+            crop_rotation_scenario1 = crop_rotation_scenario.replace("-", " ").replace("_", ", ")
             path = str(
                 base_path.parent
                 / "output"
-                / "svat_crop_nitrate"
-                / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}.*.nc"
+                / "svat_crop_nitrate_3_grid_cells"
+                / f"SVATCROPNITRATE_{id}_{location}_{crop_rotation_scenario}.*.nc"
             )
             output_tm_file = (
                 base_path.parent
                 / "output"
-                / "svat_crop_nitrate"
-                / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}.nc"
+                / "svat_crop_nitrate_3_grid_cells"
+                / f"SVATCROPNITRATE_{id}_{location}_{crop_rotation_scenario}.nc"
             )
             if not os.path.exists(output_tm_file):
                 diag_files = glob.glob(path)
                 with h5netcdf.File(output_tm_file, "w", decode_vlen_strings=False) as f:
                     f.attrs.update(
                         date_created=datetime.datetime.today().isoformat(),
-                        title=f"RoGeR nitrate transport simulations at {location}",
+                        title=f"RoGeR nitrate transport simulations at {location} with {crop_rotation_scenario1} for crop rotation ({id})",
                         institution="University of Freiburg, Chair of Hydrology",
                         references="",
                         comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
@@ -185,7 +189,7 @@ def main():
                                     v[:, :, :, :] = vals
                                     v.attrs.update(
                                         long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"]
-                                    )
+                                            )
     return
 
 

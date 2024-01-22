@@ -35,13 +35,13 @@ def main(nrepeat):
         "freiburg"
     ]
     crop_rotation_scenarios = ["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
-                            "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
-                            "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
-                            "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
-                            "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
-                            "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
-                            "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
-                            "winter-wheat_winter-rape_yellow-mustard"]
+                               "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
+                               "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
+                               "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
+                               "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
+                               "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
+                               "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
+                               "winter-wheat_winter-rape_yellow-mustard"]
     crop_rotation_scenarios = ["summer-wheat_winter-wheat_corn"]
 
 
@@ -93,7 +93,7 @@ def main(nrepeat):
                                     var_sim, ("x", "y", "Time"), float, compression="gzip", compression_opts=1
                                 )
                                 vals = onp.array(var_obj)
-                                ll_vals = [vals.swapaxes(0, 2) for i in range(nrepeat)]
+                                ll_vals = [vals for i in range(nrepeat)]
                                 v[:, :, :] = onp.concatenate(ll_vals, axis=0)
                                 v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
                             elif (
@@ -103,8 +103,18 @@ def main(nrepeat):
                                     var_sim, ("x", "y"), float, compression="gzip", compression_opts=1
                                 )
                                 vals = onp.array(var_obj)
-                                ll_vals = [vals.swapaxes(0, 2)[:, :, 0] for i in range(nrepeat)]
+                                ll_vals = [vals[:, :, 0] for i in range(nrepeat)]
                                 v[:, :, :] = onp.concatenate(ll_vals, axis=0)
+                                v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
+                            elif (
+                                var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 2
+                            ):
+                                v = f.create_variable(
+                                    var_sim, ("x", "y"), float, compression="gzip", compression_opts=1
+                                )
+                                vals = onp.array(var_obj)
+                                ll_vals = [vals[:, :] for i in range(nrepeat)]
+                                v[:, :] = onp.concatenate(ll_vals, axis=0)
                                 v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
                     # add year and day of year for nitrate transport model
                     dates1 = num2date(
