@@ -77,6 +77,7 @@ SETTINGS = {
     "VSMOW_conc2H": Setting(155.76e-6, float, "deuterium abundancy ratios according to VSMOW in -"),
     "d2H_min": Setting(-160, float, "potentially lowest deuterium value in per mille"),
     "d2H_max": Setting(0, float, "potentially greatest deuterium value in per mille"),
+    "cum_inf_for_N_input": Setting(20, float, "cumulated infiltration required for nitrogen input in mm"),
     # Logical switches for general model setup
     "coord_degree": Setting(False, bool, "either spherical (True) or cartesian (False) coordinates"),
     "enable_distributed_input": Setting(False, bool, "enable distributed input"),

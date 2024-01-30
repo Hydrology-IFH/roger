@@ -287,6 +287,7 @@ def calc_evap_soil(state):
         at[2:-2, 2:-2],
         -pevap_soil[2:-2, 2:-2] * mask1[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
+
     vs.pet_res = update(
         vs.pet_res,
         at[2:-2, 2:-2],
@@ -306,6 +307,7 @@ def calc_evap_soil(state):
         at[2:-2, 2:-2],
         -vs.S_fp_rz[2:-2, 2:-2] * mask2[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
+
     vs.pet_res = update(
         vs.pet_res,
         at[2:-2, 2:-2],

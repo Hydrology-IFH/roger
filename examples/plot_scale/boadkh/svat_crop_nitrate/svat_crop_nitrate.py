@@ -19,9 +19,10 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                                              "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
                                                              "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]), default="summer-wheat_winter-wheat_corn")
+@click.option("-ft", "--fertilization-intensity", type=click.Choice(["low", "medium", "high"]), default="medium")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_crop_nitrate")
 @roger_base_cli
-def main(location, crop_rotation_scenario, tmp_dir):
+def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, update_add, at, scipy_stats as sstx
@@ -166,7 +167,6 @@ def main(location, crop_rotation_scenario, tmp_dir):
                 "dmax_nit_ss",
                 "kmin_rz",
                 "kmin_ss",
-                "soil_fertility",
                 "z_soil",
                 "phi_soil_temp",
                 "damp_soil_temp",
@@ -239,8 +239,8 @@ def main(location, crop_rotation_scenario, tmp_dir):
             )
 
             # partition coefficients
-            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], 1)
-            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], 1)
+            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], self._read_var_from_nc("alpha_transp", self._base_path, "parameters.nc"))
+            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], self._read_var_from_nc("alpha_q", self._base_path, "parameters.nc"))
 
             # SAS parameters
             vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 6)
@@ -249,17 +249,17 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 0.25)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 62)
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 0.3)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 0.6)
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], self._read_var_from_nc("c2_transp", self._base_path, "parameters.nc"))
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 61)
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1.5)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 1.5)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._read_var_from_nc("c2_q_rz", self._base_path, "parameters.nc"))
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
             vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 61)
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1.5)
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 1.5)
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._read_var_from_nc("c2_q_ss", self._base_path, "parameters.nc"))
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], vs.S_pwp_ss[2:-2, 2:-2])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2])
             vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 6)
@@ -268,31 +268,29 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 1], 10)
 
             # denitrification parameters
-            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], 2.5)
-            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], 0.1 * 2.5)
-            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], 10)
-            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], 0.1 * 10)
+            _c = 0.1
+            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_denit", self._base_path, "parameters.nc"))
+            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], _c * self._read_var_from_nc("km_denit", self._base_path, "parameters.nc"))
+            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit", self._base_path, "parameters.nc"))
+            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], _c * self._read_var_from_nc("dmax_denit", self._base_path, "parameters.nc"))
             # nitrification parameters
-            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], 2.5)
-            vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], 0.1 * 2.5)
-            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], 10)
-            vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], 0.1 * 10)
+            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_nit", self._base_path, "parameters.nc"))
+            vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], _c * self._read_var_from_nc("km_nit", self._base_path, "parameters.nc"))
+            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_nit", self._base_path, "parameters.nc"))
+            vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], _c * self._read_var_from_nc("dmax_nit", self._base_path, "parameters.nc"))
             # soil nitrogen mineralization parameters
-            vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], 20)
-            vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], 0.1 * 20)
-
-            # soil fertility
-            vs.soil_fertility = update(
-                vs.soil_fertility, at[2:-2, 2:-2], 2
-            )
+            vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], self._read_var_from_nc("kmin", self._base_path, "parameters.nc"))
+            vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], _c * self._read_var_from_nc("kmin", self._base_path, "parameters.nc"))
+            # soil nitrogen fixation parameter
+            vs.kfix_rz = update(vs.kfix_rz, at[2:-2, 2:-2], self._read_var_from_nc("kfix", self._base_path, "parameters.nc"))
 
             # soil temperature parameters
             vs.z_soil = update(
-                vs.z_soil, at[2:-2, 2:-2], 1400
+                vs.z_soil, at[2:-2, 2:-2], self._read_var_from_nc("z_soil", self._base_path, "parameters.nc")
             )
-            vs.phi_soil_temp = update(vs.phi_soil_temp, at[2:-2, 2:-2], 91)
+            vs.phi_soil_temp = update(vs.phi_soil_temp, at[2:-2, 2:-2],self._read_var_from_nc("phi_soil_temp", self._base_path, "parameters.nc"))
             # dampening depth of soil temperature depends on clay content
-            clay = 0.05
+            clay = self._read_var_from_nc("clay", self._base_path, "parameters.nc")
             vs.damp_soil_temp = update(vs.damp_soil_temp, at[2:-2, 2:-2], 12 + 4 * (1 - (clay / settings.clay_max)))
 
             vs.YEAR = update(
@@ -340,7 +338,6 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], vs.S_pwp_ss[2:-2, 2:-2])
             vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2])
 
-            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], vs.LU_ID[2:-2, 2:-2, vs.itt])
             vs.doy = update(vs.doy, at[1], vs.DOY[vs.itt])
             vs.year = update(vs.year, at[1], vs.YEAR[vs.itt])
             vs.z_root = update(vs.z_root, at[2:-2, 2:-2, vs.tau], vs.Z_ROOT[2:-2, 2:-2, vs.itt])
@@ -423,7 +420,10 @@ def main(location, crop_rotation_scenario, tmp_dir):
             # exponential distribution of mineral soil nitrogen
             # mineral soil nitrogen is decreasing with increasing age
             p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
-            p_dec = update(p_dec, at[:, :, :vs.taup1, :], sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))[npx.newaxis, npx.newaxis, npx.newaxis, :])
+            p_dec1 = sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))
+            p_dec2 = npx.sum(p_dec1)
+            p_dec3 = p_dec1 / p_dec2
+            p_dec = update(p_dec, at[:, :, :vs.taup1, :], p_dec3[npx.newaxis, npx.newaxis, npx.newaxis, :])
             vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
             vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
             vs.msa_rz = update(
@@ -689,71 +689,45 @@ def main(location, crop_rotation_scenario, tmp_dir):
     def set_fertilizer_kernel(state):
         vs = state.variables
 
+        if fertilization_intensity == "low":
+            lut_fert = vs.lut_fert1
+        elif fertilization_intensity == "medium":
+            lut_fert = vs.lut_fert2
+        elif fertilization_intensity == "high":
+            lut_fert = vs.lut_fert3
+
         for i in range(500, 600):
             mask = vs.lu_id == i 
-            mask1 = (vs.lu_id == i) & (vs.soil_fertility >= 1) & (vs.soil_fertility < 2)
-            mask2 = (vs.lu_id == i) & (vs.soil_fertility >= 2) & (vs.soil_fertility < 3)
-            mask3 = (vs.lu_id == i) & (vs.soil_fertility >= 3) & (vs.soil_fertility < 4)
             row_no = _get_row_no(vs.lut_fert1[:, 0], i)
             vs.doy_fert1 = update(
                 vs.doy_fert1,
                 at[2:-2, 2:-2],
-                npx.where(mask[2:-2, 2:-2], vs.lut_fert1[row_no, 1], vs.doy_fert1[2:-2, 2:-2]),
+                npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 1], vs.doy_fert1[2:-2, 2:-2]),
             )
             vs.doy_fert2 = update(
                 vs.doy_fert2,
                 at[2:-2, 2:-2],
-                npx.where(mask[2:-2, 2:-2], vs.lut_fert1[row_no, 2], vs.doy_fert2[2:-2, 2:-2]),
+                npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 2], vs.doy_fert2[2:-2, 2:-2]),
             )
             vs.doy_fert3 = update(
                 vs.doy_fert3,
                 at[2:-2, 2:-2],
-                npx.where(mask[2:-2, 2:-2], vs.lut_fert1[row_no, 3], vs.doy_fert3[2:-2, 2:-2]),
+                npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 3], vs.doy_fert3[2:-2, 2:-2]),
             )
             vs.N_fert1 = update(
                 vs.N_fert1,
                 at[2:-2, 2:-2],
-                npx.where(mask1[2:-2, 2:-2], vs.lut_fert1[row_no, 4], vs.N_fert1[2:-2, 2:-2]),
+                npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 4], vs.N_fert1[2:-2, 2:-2]),
             )
             vs.N_fert2 = update(
                 vs.N_fert2,
                 at[2:-2, 2:-2],
-                npx.where(mask1[2:-2, 2:-2], vs.lut_fert1[row_no, 5], vs.N_fert2[2:-2, 2:-2]),
+                npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 5], vs.N_fert2[2:-2, 2:-2]),
             )
             vs.N_fert3 = update(
                 vs.N_fert3,
                 at[2:-2, 2:-2],
-                npx.where(mask1[2:-2, 2:-2], vs.lut_fert1[row_no, 6], vs.N_fert3[2:-2, 2:-2]),
-            )
-            vs.N_fert1 = update(
-                vs.N_fert1,
-                at[2:-2, 2:-2],
-                npx.where(mask2[2:-2, 2:-2], vs.lut_fert2[row_no, 4], vs.N_fert1[2:-2, 2:-2]),
-            )
-            vs.N_fert2 = update(
-                vs.N_fert2,
-                at[2:-2, 2:-2],
-                npx.where(mask2[2:-2, 2:-2], vs.lut_fert2[row_no, 5], vs.N_fert2[2:-2, 2:-2]),
-            )
-            vs.N_fert3 = update(
-                vs.N_fert3,
-                at[2:-2, 2:-2],
-                npx.where(mask2[2:-2, 2:-2], vs.lut_fert2[row_no, 6], vs.N_fert3[2:-2, 2:-2]),
-            )
-            vs.N_fert1 = update(
-                vs.N_fert1,
-                at[2:-2, 2:-2],
-                npx.where(mask3[2:-2, 2:-2], vs.lut_fert3[row_no, 4], vs.N_fert1[2:-2, 2:-2]),
-            )
-            vs.N_fert2 = update(
-                vs.N_fert2,
-                at[2:-2, 2:-2],
-                npx.where(mask3[2:-2, 2:-2], vs.lut_fert3[row_no, 5], vs.N_fert2[2:-2, 2:-2]),
-            )
-            vs.N_fert3 = update(
-                vs.N_fert3,
-                at[2:-2, 2:-2],
-                npx.where(mask3[2:-2, 2:-2], vs.lut_fert3[row_no, 6], vs.N_fert3[2:-2, 2:-2]),
+                npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 6], vs.N_fert3[2:-2, 2:-2]),
             )
 
         return KernelOutput(
@@ -772,25 +746,34 @@ def main(location, crop_rotation_scenario, tmp_dir):
         settings = state.settings
 
         # apply nitrogen fertilizer
-        inf_thresh = 20
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert1[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
-        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))       
+        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
+        # nitrogen deposition (10 kg N/ha/yr)
+        vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], (10/365) * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2])              
         inf = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2]
         vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.doy_dist[2:-2, 2:-2] == vs.doy_fert1[2:-2, 2:-2]) | (vs.doy_dist[2:-2, 2:-2] == vs.doy_fert2[2:-2, 2:-2]) | (vs.doy_dist[2:-2, 2:-2] == vs.doy_fert3[2:-2, 2:-2]), 0, vs.inf_in_tracer[2:-2, 2:-2]))
         vs.inf_in_tracer = update_add(vs.inf_in_tracer, at[2:-2, 2:-2], inf)
-        inf_ratio = npx.where((inf/inf_thresh) < 1, inf/inf_thresh, 1)
+        inf_ratio = npx.where((inf/settings.cum_inf_for_N_input) < 1, inf/settings.cum_inf_for_N_input, 1)
+        # dissolved nitrogen input
         vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.Nmin_in[2:-2, 2:-2] * inf_ratio * 0.3, 0))
         vs.C_in = update(vs.C_in, at[2:-2, 2:-2], npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.M_in[2:-2, 2:-2]/inf, 0))
+        # undissolved nitrogen input
+        vs.Nmin_rz = update_add(
+            vs.Nmin_rz,
+            at[2:-2, 2:-2, vs.tau, 0],
+            npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.Nmin_in[2:-2, 2:-2] * inf_ratio * 0.7, 0),
+        )
         vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], -vs.Nmin_in[2:-2, 2:-2] * inf_ratio)
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.Nmin_in[2:-2, 2:-2] < 0), 0, vs.Nmin_in[2:-2, 2:-2]))
-        vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.inf_in_tracer[2:-2, 2:-2] > inf_thresh), 0, vs.inf_in_tracer[2:-2, 2:-2]))
+        vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.inf_in_tracer[2:-2, 2:-2] > settings.cum_inf_for_N_input), 0, vs.inf_in_tracer[2:-2, 2:-2]))
 
         return KernelOutput(
             Nmin_in=vs.Nmin_in,
             inf_in_tracer=vs.inf_in_tracer,
             M_in=vs.M_in,
             C_in=vs.C_in,
+            Nmin_rz=vs.Nmin_rz,
         )
     
     @roger_kernel

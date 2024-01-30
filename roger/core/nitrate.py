@@ -245,8 +245,13 @@ def calc_n_fixation(state, kfix):
     nfix = update(
         nfix,
         at[2:-2, 2:-2],
-        kfix[2:-2, 2:-2] * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100 * (vs.z_root[2:-2, 2:-2, vs.tau]/(0.7 * vs.z_soil[2:-2, 2:-2])) * vs.maskCatch[2:-2, 2:-2],
+        kfix[2:-2, 2:-2] * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100 * (vs.z_root[2:-2, 2:-2, vs.tau]/(settings.zroot_to_zsoil_max * vs.z_soil[2:-2, 2:-2])) * vs.maskCatch[2:-2, 2:-2],
     )
+
+    # nitrogen fixation of yellow mustard and clover
+    lu_id = vs.LU_ID[2:-2, 2:-2, vs.itt]
+    mask = npx.isin(lu_id, npx.array([580, 581, 583, 584, 586, 587]))
+    nfix = update(nfix, at[2:-2, 2:-2], npx.where(mask, nfix, 0))
 
     return nfix
 

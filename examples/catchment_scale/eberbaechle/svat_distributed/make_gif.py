@@ -73,7 +73,7 @@ def main():
         axes[0].set_yticklabels(onp.arange(0, 53, 25) * 25)
         axes[0].set_xlabel('')
         axes[0].set_ylabel('Distance in y-direction [m]')
-        cmap = copy.copy(plt.cm.get_cmap('viridis_r'))
+        cmap = copy.copy(mpl.colormaps.get_cmap('viridis_r'))
         norm = mpl.colors.Normalize(vmin=0, vmax=50)
         axl1 = fig.add_axes([0.81, 0.68, 0.02, 0.2])
         cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
@@ -89,7 +89,7 @@ def main():
         axes[1].set_yticklabels(onp.arange(0, 53, 25) * 25)
         axes[1].set_xlabel('')
         axes[1].set_ylabel('Distance in y-direction [m]')
-        cmap = copy.copy(plt.cm.get_cmap('viridis_r'))
+        cmap = copy.copy(mpl.colormaps.get_cmap('viridis_r'))
         norm = mpl.colors.Normalize(vmin=0.15, vmax=0.35)
         axl1 = fig.add_axes([0.81, 0.4, 0.02, 0.2])
         cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
@@ -105,7 +105,7 @@ def main():
         axes[2].set_yticklabels(onp.arange(0, 53, 25) * 25)
         axes[2].set_xlabel('Distance in x-direction [m]')
         axes[2].set_ylabel('Distance in y-direction [m]')
-        cmap = copy.copy(plt.cm.get_cmap('viridis_r'))
+        cmap = copy.copy(mpl.colormaps.get_cmap('viridis_r'))
         norm = mpl.colors.Normalize(vmin=0, vmax=10)
         axl1 = fig.add_axes([0.81, 0.12, 0.02, 0.2])
         cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,

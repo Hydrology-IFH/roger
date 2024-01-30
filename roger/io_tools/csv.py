@@ -3,6 +3,8 @@ import os
 import glob
 import pandas as pd
 from datetime import datetime
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 def read_meteo(path_to_dir: Path):
@@ -98,7 +100,7 @@ def read_meteo(path_to_dir: Path):
         freq="10T",
     )
     prec_10mins = pd.DataFrame(index=new_prec_ind)
-    prec_10mins["PREC"] = 0
+    prec_10mins["PREC"] = 0.
     prec_10mins.loc[df_PREC.index, "PREC"] = df_PREC["PREC"].values.astype(float)
 
     return prec_10mins, df_pet, df_ta, df_rs
