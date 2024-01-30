@@ -100,6 +100,11 @@ def calc_snow_melt_int_top(state):
         at[2:-2, 2:-2, vs.tau], npx.where(mask5[2:-2, 2:-2], 0, -vs.swe_top[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
     )
 
+    vs.pet_res = update(
+        vs.pet_res,
+        at[2:-2, 2:-2], npx.where(vs.pet_res[2:-2, 2:-2] < 0, 0, vs.pet_res[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     # snow layer retention storage
     wtmx = allocate(state.dimensions, ("x", "y"))
     wtmx = (10000. / (100 - settings.rmax) / 100.) * vs.swe_top[:, :, vs.tau]
@@ -243,6 +248,10 @@ def calc_snow_melt(state):
     vs.swe = update(
         vs.swe,
         at[2:-2, 2:-2, vs.tau], npx.where(mask6[2:-2, 2:-2], 0, vs.swe[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+    )
+    vs.pet_res = update(
+        vs.pet_res,
+        at[2:-2, 2:-2], npx.where(vs.pet_res[2:-2, 2:-2] < 0, 0, vs.pet_res[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     # snow layer retention storage
