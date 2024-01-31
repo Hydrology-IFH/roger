@@ -4,7 +4,7 @@ from roger.core.operators import numpy as npx, update, update_add, at
 
 
 @roger_kernel
-def calc_soil_temperature_kernel(state):
+def calc_soil_temperature_kernel1(state):
     """Calculates soil temperature."""
     vs = state.variables
     settings = state.settings
@@ -13,28 +13,54 @@ def calc_soil_temperature_kernel(state):
     a_year = allocate(state.dimensions, ("x", "y"))
 
     # calculate annual average air temperature and annual average amplitude of air temperature
-    if vs.itt + 364 < settings.nitt:
-        ta_year = update(
-            ta_year,
-            at[2:-2, 2:-2],
-            npx.mean(vs.TA[vs.itt:vs.itt+364]),
+    ta_year = update(
+        ta_year,
+        at[2:-2, 2:-2],
+        npx.mean(vs.TA[vs.itt:vs.itt+364]),
+    )
+    a_year = update(
+        a_year,
+        at[2:-2, 2:-2],
+        2 * npx.mean(npx.abs(vs.TA[npx.newaxis, npx.newaxis, vs.itt:vs.itt+364] - ta_year[2:-2, 2:-2, npx.newaxis]), axis=-1),
+    )
+
+    vs.temp_soil = update(
+        vs.temp_soil,
+        at[2:-2, 2:-2, vs.tau],
+        ta_year[2:-2, 2:-2]
+        + a_year[2:-2, 2:-2]
+        * npx.sin(
+            (2 * settings.pi) * (vs.doy[1]/365)
+            - (2 * settings.pi) * (vs.phi_soil_temp[2:-2, 2:-2]/365)/2
+            - ((0.5 * (vs.z_soil[2:-2, 2:-2]/1000)) / (vs.damp_soil_temp[2:-2, 2:-2] * (vs.S_s[2:-2, 2:-2, vs.tau]/(vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2])))))
+        * npx.exp((-0.5 * (vs.z_soil[2:-2, 2:-2]/1000)) / (vs.damp_soil_temp[2:-2, 2:-2] * (vs.S_s[2:-2, 2:-2, vs.tau]/(vs.S_sat_rz[2:-2, 2:-2] + vs.S_sat_ss[2:-2, 2:-2]))))
+        * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    return KernelOutput(
+        temp_soil=vs.temp_soil,
         )
-        a_year = update(
-            a_year,
-            at[2:-2, 2:-2],
-            2 * npx.mean(npx.abs(vs.TA[npx.newaxis, npx.newaxis, vs.itt:vs.itt+364] - ta_year[2:-2, 2:-2, npx.newaxis]), axis=-1),
-        )
-    else:
-        ta_year = update(
-            ta_year,
-            at[2:-2, 2:-2],
-            npx.mean(vs.TA[settings.nitt-364:]),
-        )
-        a_year = update(
-            a_year,
-            at[2:-2, 2:-2],
-            2 * npx.mean(npx.abs(vs.TA[npx.newaxis, npx.newaxis, settings.nitt-364:] - ta_year[2:-2, 2:-2, npx.newaxis]), axis=-1),
-        )
+
+@roger_kernel
+def calc_soil_temperature_kernel2(state):
+    """Calculates soil temperature."""
+    vs = state.variables
+    settings = state.settings
+
+    ta_year = allocate(state.dimensions, ("x", "y"))
+    a_year = allocate(state.dimensions, ("x", "y"))
+
+    # calculate annual average air temperature and annual average amplitude of air temperature
+    ta_year = update(
+        ta_year,
+        at[2:-2, 2:-2],
+        npx.mean(vs.TA[settings.nitt-364:]),
+    )
+    a_year = update(
+        a_year,
+        at[2:-2, 2:-2],
+        2 * npx.mean(npx.abs(vs.TA[npx.newaxis, npx.newaxis, settings.nitt-364:] - ta_year[2:-2, 2:-2, npx.newaxis]), axis=-1),
+    )
 
     vs.temp_soil = update(
         vs.temp_soil,
@@ -456,7 +482,10 @@ def calculate_nitrogen_cycle(state):
     vs = state.variables
     settings = state.settings
 
-    vs.update(calc_soil_temperature_kernel(state))
+    if vs.itt + 364 < settings.nitt:
+        vs.update(calc_soil_temperature_kernel1(state))
+    else:
+        vs.update(calc_soil_temperature_kernel2(state))
     vs.update(calc_nitrogen_cycle_kernel(state))
     if settings.enable_groundwater:
         vs.update(calc_nitrogen_cycle_gw_kernel(state))
