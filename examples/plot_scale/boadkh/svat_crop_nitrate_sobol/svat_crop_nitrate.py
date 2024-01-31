@@ -387,13 +387,15 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 30)
             # exponential distribution of mineral soil nitrogen
             # mineral soil nitrogen is decreasing with increasing age
-            p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
-            p_dec1 = sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))
-            p_dec2 = npx.sum(p_dec1)
-            p_dec3 = p_dec1 / p_dec2
-            p_dec = update(p_dec, at[:, :, :vs.taup1, :], p_dec3[npx.newaxis, npx.newaxis, npx.newaxis, :])
-            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
-            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
+            # p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
+            # p_dec1 = sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))
+            # p_dec2 = npx.sum(p_dec1)
+            # p_dec3 = p_dec1 / p_dec2
+            # p_dec = update(p_dec, at[:, :, :vs.taup1, :], p_dec3[npx.newaxis, npx.newaxis, npx.newaxis, :])
+            # vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
+            # vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
+            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], (100 / settings.ages) * settings.dx * settings.dy * 100)
+            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], (100 / settings.ages) * settings.dx * settings.dy * 100)
             vs.msa_rz = update(
                 vs.msa_rz,
                 at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :vs.taup1, :],
@@ -603,6 +605,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
         @roger_routine
         def set_forcing(self, state):
             vs = state.variables
+            settings = state.settings
 
             vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], vs.PREC_DIST_DAILY[2:-2, 2:-2, vs.itt])
             vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], vs.INF_MAT_RZ[2:-2, 2:-2, vs.itt])
@@ -623,13 +626,20 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             vs.year = update(vs.year, at[1], vs.YEAR[vs.itt])
             vs.z_root = update(vs.z_root, at[2:-2, 2:-2, vs.tau], vs.Z_ROOT[2:-2, 2:-2, vs.itt])
 
-            # apply nitrogen fertilizer
+            # set main crop type
             if vs.itt <= 1:
-                crop_type = set_main_crop_kernel(state)
-                vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type[2:-2, 2:-2])
+                if vs.itt + 364 < settings.nitt:
+                    crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]), axis=-1)
+                else:
+                    crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]), axis=-1)
+                vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type)
             if vs.year[vs.tau] > vs.year[vs.taum1]:
-                crop_type = set_main_crop_kernel(state)
-                vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type[2:-2, 2:-2])
+                if vs.itt + 364 < settings.nitt:
+                    crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]), axis=-1)
+                else:
+                    crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]), axis=-1)
+                vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type)
+            # apply nitrogen fertilizer
             if vs.itt <= 1:
                 vs.update(set_fertilizer_kernel(state))
             if vs.year[vs.tau] > vs.year[vs.taum1]:
@@ -778,29 +788,6 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             C_in=vs.C_in,
             Nmin_rz=vs.Nmin_rz,
         )
-    
-    @roger_kernel
-    def set_main_crop_kernel(state):
-        """Calculates soil temperature."""
-        vs = state.variables
-        settings = state.settings
-
-        crop_type = allocate(state.dimensions, ("x", "y"))
-
-        if vs.itt + 364 < settings.nitt:
-            crop_type = update(
-                crop_type,
-                at[2:-2, 2:-2],
-                npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]), axis=-1),
-            )
-        else:
-            crop_type = update(
-                crop_type,
-                at[2:-2, 2:-2],
-                npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]), axis=-1),
-            )
-
-        return crop_type
 
 
     model = SVATCROPNITRATESetup()

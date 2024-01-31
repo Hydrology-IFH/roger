@@ -414,13 +414,15 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 30)
             # exponential distribution of mineral soil nitrogen
             # mineral soil nitrogen is decreasing with increasing age
-            p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
-            p_dec1 = sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))
-            p_dec2 = npx.sum(p_dec1)
-            p_dec3 = p_dec1 / p_dec2
-            p_dec = update(p_dec, at[:, :, :vs.taup1, :], p_dec3[npx.newaxis, npx.newaxis, npx.newaxis, :])
-            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
-            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
+            # p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
+            # p_dec1 = sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))
+            # p_dec2 = npx.sum(p_dec1)
+            # p_dec3 = p_dec1 / p_dec2
+            # p_dec = update(p_dec, at[:, :, :vs.taup1, :], p_dec3[npx.newaxis, npx.newaxis, npx.newaxis, :])
+            # vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
+            # vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
+            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], (100 / settings.ages) * settings.dx * settings.dy * 100)
+            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], (100 / settings.ages) * settings.dx * settings.dy * 100)
             vs.msa_rz = update(
                 vs.msa_rz,
                 at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :vs.taup1, :],
@@ -598,6 +600,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         @roger_routine
         def set_forcing(self, state):
             vs = state.variables
+            settings = state.settings
 
             vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], vs.PREC_DIST_DAILY[2:-2, 2:-2, vs.itt])
             vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], vs.INF_MAT_RZ[2:-2, 2:-2, vs.itt])
@@ -615,13 +618,20 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
             vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[vs.itt])
 
-            # apply nitrogen fertilizer
+            # set main crop type
             if vs.itt <= 1:
-                crop_type = set_main_crop_kernel(state)
-                vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type[2:-2, 2:-2])
+                if vs.itt + 364 < settings.nitt:
+                    crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]), axis=-1)
+                else:
+                    crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]), axis=-1)
+                vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type)
             if vs.year[vs.tau] > vs.year[vs.taum1]:
-                crop_type = set_main_crop_kernel(state)
-                vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type[2:-2, 2:-2])
+                if vs.itt + 364 < settings.nitt:
+                    crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]), axis=-1)
+                else:
+                    crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]), axis=-1)
+                vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type)
+            # apply nitrogen fertilizer
             if vs.itt <= 1:
                 vs.update(set_fertilizer_kernel(state))
             if vs.year[vs.tau] > vs.year[vs.taum1]:
@@ -771,60 +781,6 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             Nmin_rz=vs.Nmin_rz,
         )
     
-
-    @roger_kernel
-    def set_main_crop_kernel(state):
-        """Calculates soil temperature."""
-        vs = state.variables
-        settings = state.settings
-
-        crop_type = allocate(state.dimensions, ("x", "y"))
-
-        # calculate annual average air temperature and annual average amplitude of air temperature
-        if vs.itt + 364 < settings.nitt:
-            crop_type = update(
-                crop_type,
-                at[2:-2, 2:-2],
-                npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]), axis=-1),
-            )
-        else:
-            crop_type = update(
-                crop_type,
-                at[2:-2, 2:-2],
-                npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]), axis=-1),
-            )
-
-        return crop_type
-
-
-    # @roger_kernel
-    # def apply_fertilizer_kernel(state):
-    #     vs = state.variables
-    #     settings = state.settings
-
-    #     # apply nitrogen fertilizer
-    #     fert_demand = (80 * settings.dx * settings.dy * 100 - vs.Nmin_s[2:-2, 2:-2, vs.tau]) * vs.fert_weight[2:-2, 2:-2]
-    #     settings.cum_inf_for_N_input = 50
-    #     vs.doy_dist = update(vs.doy_dist, at[2:-2, 2:-2], vs.DOY[vs.itt])
-    #     vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_dist[2:-2, 2:-2] == 90), fert_demand * settings.dx * settings.dy * 100, 0))
-    #     vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_dist[2:-2, 2:-2] == 280), fert_demand * settings.dx * settings.dy * 100, 0))
-    #     inf = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2]
-    #     vs.inf_in_tracer = update_add(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.Nmin_in[2:-2, 2:-2] > 0), inf, 0))
-    #     inf_ratio = npx.where((inf/settings.cum_inf_for_N_input) < 1, inf/settings.cum_inf_for_N_input, 1)
-    #     vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.Nmin_in[2:-2, 2:-2] * inf_ratio * 0.3, 0))
-    #     vs.C_in = update(vs.C_in, at[2:-2, 2:-2], npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.M_in[2:-2, 2:-2]/inf, 0))
-    #     vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], -vs.Nmin_in[2:-2, 2:-2] * inf_ratio)
-    #     vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.Nmin_in[2:-2, 2:-2] < 0), 0, vs.Nmin_in[2:-2, 2:-2]))
-    #     vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.inf_in_tracer[2:-2, 2:-2] > settings.cum_inf_for_N_input), 0, vs.inf_in_tracer[2:-2, 2:-2]))
-
-    #     return KernelOutput(
-    #         doy_dist=vs.doy_dist,
-    #         Nmin_in=vs.Nmin_in,
-    #         inf_in_tracer=vs.inf_in_tracer,
-    #         M_in=vs.M_in,
-    #         C_in=vs.C_in,
-    #     )
-
 
     model = SVATCROPNITRATESetup()
     model.setup()
