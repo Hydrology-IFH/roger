@@ -46,7 +46,7 @@ def main(tmp_dir):
         base_path = Path(__file__).parent
 
     # directory of results
-    base_path_output = base_path.parent / "output" / "svat_crop_monte_carlo_reference"
+    base_path_output = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo_reference"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
     # directory of figures

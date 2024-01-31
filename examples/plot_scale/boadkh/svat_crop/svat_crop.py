@@ -36,36 +36,6 @@ def main(location, crop_rotation_scenario, tmp_dir):
 
         _base_path = Path(__file__).parent
         _input_dir = _base_path.parent / "input" / f"{location}"
-        if location == "freiburg":
-            _elevation = 236
-        elif location == "singen":
-            _elevation = 445
-        elif location == "azenweiler":
-            _elevation = 712
-        elif location == "unterraderach":
-            _elevation = 461
-        elif location == "muellheim":
-            _elevation = 275
-        elif location == "ihringen":
-            _elevation = 193
-        elif location == "altheim":
-            _elevation = 534
-        elif location == "kirchen":
-            _elevation = 594
-        elif location == "maehringen":
-            _elevation = 593
-        elif location == "heidelsheim":
-            _elevation = 130
-        elif location == "elsenz":
-            _elevation = 226
-        elif location == "zaberfeld":
-            _elevation = 249
-        elif location == "kupferzell":
-            _elevation = 355
-        elif location == "stachenhausen":
-            _elevation = 385
-        elif location == "oehringen":
-            _elevation = 276
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
