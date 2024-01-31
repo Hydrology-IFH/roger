@@ -470,7 +470,7 @@ def calculate_nitrogen_cycle(state):
     if vs.itt + 364 < settings.nitt:
         # calculate annual average air temperature and annual average amplitude of air temperature
         ta_year = npx.mean(vs.TA[vs.itt:vs.itt+364])
-        a_year = 2 * npx.mean(npx.abs(vs.TA[npx.newaxis, npx.newaxis, vs.itt:vs.itt+364] - ta_year[2:-2, 2:-2, npx.newaxis]), axis=-1)
+        a_year = 2 * npx.mean(npx.abs(vs.TA[npx.newaxis, npx.newaxis, vs.itt:vs.itt+364] - ta_year), axis=-1)
         vs.update(calc_soil_temperature_kernel1(state, ta_year, a_year))
     else:
         vs.update(calc_soil_temperature_kernel2(state))
