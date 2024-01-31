@@ -421,13 +421,15 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 30)
             # exponential distribution of mineral soil nitrogen
             # mineral soil nitrogen is decreasing with increasing age
-            p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
-            p_dec1 = sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))
-            p_dec2 = npx.sum(p_dec1)
-            p_dec3 = p_dec1 / p_dec2
-            p_dec = update(p_dec, at[:, :, :vs.taup1, :], p_dec3[npx.newaxis, npx.newaxis, npx.newaxis, :])
-            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
-            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
+            # p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
+            # p_dec1 = sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))
+            # p_dec2 = npx.sum(p_dec1)
+            # p_dec3 = p_dec1 / p_dec2
+            # p_dec = update(p_dec, at[:, :, :vs.taup1, :], p_dec3[npx.newaxis, npx.newaxis, npx.newaxis, :])
+            # vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
+            # vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
+            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], (100 / settings.ages) * settings.dx * settings.dy * 100)
+            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], (100 / settings.ages) * settings.dx * settings.dy * 100)
             vs.msa_rz = update(
                 vs.msa_rz,
                 at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :vs.taup1, :],
