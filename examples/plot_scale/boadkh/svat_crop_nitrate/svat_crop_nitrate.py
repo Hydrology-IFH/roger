@@ -631,13 +631,13 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
                     crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]), axis=-1)
                 else:
                     crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]), axis=-1)
-                vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type[2:-2, 2:-2])
+                vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type)
             if vs.year[vs.tau] > vs.year[vs.taum1]:
                 if vs.itt + 364 < settings.nitt:
                     crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]), axis=-1)
                 else:
                     crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]), axis=-1)
-                vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type[2:-2, 2:-2])
+                vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type)
             if vs.itt <= 1:
                 vs.update(set_fertilizer_kernel(state))
             if vs.year[vs.tau] > vs.year[vs.taum1]:
