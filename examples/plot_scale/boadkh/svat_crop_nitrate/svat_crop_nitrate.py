@@ -625,7 +625,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
             vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[vs.itt])
 
-            # apply nitrogen fertilizer
+            # set main crop type
             if vs.itt <= 1:
                 if vs.itt + 364 < settings.nitt:
                     crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]), axis=-1)
@@ -638,6 +638,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
                 else:
                     crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]), axis=-1)
                 vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type)
+            # apply nitrogen fertilizer
             if vs.itt <= 1:
                 vs.update(set_fertilizer_kernel(state))
             if vs.year[vs.tau] > vs.year[vs.taum1]:
