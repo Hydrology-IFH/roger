@@ -12,8 +12,8 @@ def calc_soil_temperature_kernel1(state, ta_year, a_year):
     vs.temp_soil = update(
         vs.temp_soil,
         at[2:-2, 2:-2, vs.tau],
-        ta_year[2:-2, 2:-2]
-        + a_year[2:-2, 2:-2]
+        ta_year
+        + a_year
         * npx.sin(
             (2 * settings.pi) * (vs.doy[1]/365)
             - (2 * settings.pi) * (vs.phi_soil_temp[2:-2, 2:-2]/365)/2
