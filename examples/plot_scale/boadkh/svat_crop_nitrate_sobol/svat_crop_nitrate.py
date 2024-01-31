@@ -787,7 +787,6 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
 
         crop_type = allocate(state.dimensions, ("x", "y"))
 
-        # calculate annual average air temperature and annual average amplitude of air temperature
         if vs.itt + 364 < settings.nitt:
             crop_type = update(
                 crop_type,
