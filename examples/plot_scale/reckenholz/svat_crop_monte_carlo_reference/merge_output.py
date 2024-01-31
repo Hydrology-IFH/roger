@@ -17,8 +17,8 @@ def main():
 
     # merge model output into single file
     for lys_experiment in lys_experiments:
-        path = str(base_path.parent / "output" / "svat_crop_monte_carlo_reference" / f"SVATCROP_{lys_experiment}.*.nc")
-        output_hm_file = base_path.parent / "output" / "svat_crop_monte_carlo_reference" / f"SVATCROP_{lys_experiment}.nc"
+        path = str(Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo_reference" / f"SVATCROP_{lys_experiment}.*.nc")
+        output_hm_file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo_reference" / f"SVATCROP_{lys_experiment}.nc"
         if not os.path.exists(output_hm_file):
             diag_files = glob.glob(path)
             with h5netcdf.File(output_hm_file, "w", decode_vlen_strings=False) as f:

@@ -251,7 +251,7 @@ def calc_n_fixation(state, kfix):
     # nitrogen fixation of yellow mustard and clover
     lu_id = vs.LU_ID[2:-2, 2:-2, vs.itt]
     mask = npx.isin(lu_id, npx.array([580, 581, 583, 584, 586, 587]))
-    nfix = update(nfix, at[2:-2, 2:-2], npx.where(mask, nfix, 0))
+    nfix = update(nfix, at[2:-2, 2:-2], npx.where(mask, nfix[2:-2, 2:-2], 0))
 
     return nfix
 

@@ -140,11 +140,12 @@ def main(tmp_dir):
         df_lys_obs.loc[:, "perc"] = ds_obs["PERC"].isel(x=0, y=0).values
         df_lys_obs.loc[:, "theta"] = onp.nanmean(ds_obs["THETA"].isel(x=0, y=0).values.T, axis=-1)
         df_lys_obs.loc[:, "weight"] = ds_obs["WEIGHT"].isel(x=0, y=0).values
+        df_lys_obs.loc[:, "perc_pet_ratio"] = df_lys_obs.loc[:, "perc"] / (df_lys_obs.loc[:, "perc"] + df_lys_obs.loc[:, "pet"])
         file = base_path_figs / f"{lys_experiment}_fluxes_weight.csv"
         df_lys_obs.to_csv(file, header=True, index=True, sep=";")
         dict_obs[lys_experiment] = df_lys_obs
         # data with bad quality flags have been removed
-        df_lys_obs_nonan = df_lys_obs.loc[:, ["ta", "prec", "prec_corr", "pet", "perc", "theta", "weight"]].dropna().copy()
+        df_lys_obs_nonan = df_lys_obs.loc[:, ["ta", "prec", "prec_corr", "pet", "perc", "theta", "weight", "perc_pet_ratio"]].dropna().copy()
         df_lys_obs_nonan.loc[:, "pet + perc"] = df_lys_obs_nonan.loc[:, "pet"] + df_lys_obs_nonan.loc[:, "perc"]
         df_lys_obs_nonan.loc[:, "dS_flux"] = (
             df_lys_obs_nonan.loc[:, "prec"] - df_lys_obs_nonan.loc[:, "pet"] - df_lys_obs_nonan.loc[:, "perc"]
@@ -381,261 +382,357 @@ def main(tmp_dir):
         plt.close(fig=fig)
         plt.close("all")
 
-    for var_obs in ["perc", "pet", "prec"]:
-        fig, axs = plt.subplots(1, 1, figsize=(6, 2))
-        df = pd.DataFrame(index=pd.date_range(start="2010-01-01", end="2017-12-31", freq="D"))
-        df1 = dict_obs["lys8"].loc[:, f"{var_obs}"].to_frame()
-        df1.columns = ["lys8"]
-        df2 = dict_obs["lys3"].loc[:, f"{var_obs}"].to_frame()
-        df2.columns = ["lys3"]
-        df3 = dict_obs["lys2"].loc[:, f"{var_obs}"].to_frame()
-        df3.columns = ["lys2"]
-        df = df.join([df1, df2, df3]).dropna()
-        axs.plot(
-            df.index,
-            df.loc[:, "lys8"].cumsum(),
-            "-",
-            color="#d7b5d8",
-            lw=0.7,
-            label=f"{fert_lys['lys8']}",
-        )
-        axs.plot(
-            df.index,
-            df.loc[:, "lys3"].cumsum(),
-            "-",
-            color="#df65b0",
-            lw=1,
-            label=f"{fert_lys['lys3']}",
-        )
-        axs.plot(
-            df.index,
-            df.loc[:, "lys2"].cumsum(),
-            "-",
-            color="#ce1256",
-            lw=1.3,
-            label=f"{fert_lys['lys2']}",
-        )
-
-        axs.tick_params(axis="x", rotation=45)
-        axs.set_ylabel(f"{_y_labels_cumulated[var_obs]}")
-        axs.set_xlabel("Time [year]")
-        axs.legend(frameon=False, loc="upper left", fontsize=8)
-        axs.set_xlim(df_lys_obs_nonan.loc[:, :].index[0], df_lys_obs_nonan.loc[:, :].index[-1])
-        fig.tight_layout()
-        file = base_path_figs / f"{var_obs}_cumulated.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig=fig)
-
-    for var_obs in ["theta", "weight"]:
-        fig, axs = plt.subplots(1, 1, figsize=(6, 2))
-        df = pd.DataFrame(index=pd.date_range(start="2010-01-01", end="2017-12-31", freq="D"))
-        df1 = dict_obs["lys8"].loc[:, f"{var_obs}"].to_frame()
-        df1.columns = ["lys8"]
-        df2 = dict_obs["lys3"].loc[:, f"{var_obs}"].to_frame()
-        df2.columns = ["lys3"]
-        df3 = dict_obs["lys2"].loc[:, f"{var_obs}"].to_frame()
-        df3.columns = ["lys2"]
-        df = df.join([df1, df2, df3]).dropna()
-        axs.plot(
-            df.index,
-            df.loc[:, "lys8"],
-            "-",
-            color="#d7b5d8",
-            lw=0.7,
-            label=f"{fert_lys['lys8']}",
-        )
-        axs.plot(
-            df.index,
-            df.loc[:, "lys3"],
-            "-",
-            color="#df65b0",
-            lw=1,
-            label=f"{fert_lys['lys3']}",
-        )
-        axs.plot(
-            df.index,
-            df.loc[:, "lys2"],
-            "-",
-            color="#ce1256",
-            lw=1.3,
-            label=f"{fert_lys['lys2']}",
-        )
-
-        axs.tick_params(axis="x", rotation=45)
-        axs.set_ylabel(f"{_y_labels_daily[var_obs]}")
-        axs.set_xlabel("Time [year]")
-        axs.legend(frameon=False, loc="lower left", fontsize=8, ncol=3)
-        axs.set_xlim(df_lys_obs_nonan.loc[:, :].index[0], df_lys_obs_nonan.loc[:, :].index[-1])
-        fig.tight_layout()
-        file = base_path_figs / f"{var_obs}.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig=fig)
-
-    for var_obs in ["prec", "pet"]:
-        years = onp.arange(2010, 2018).tolist()
-        fig, axes = plt.subplots(4, 2, figsize=(6, 6), sharey=True)
+        fig, axes = plt.subplots(4, 2, figsize=(6, 6))
+        df = df_lys_obs_nonan.copy()
+        cond = df.loc[:, "perc_pet_ratio"] < 0.5
+        df.loc[cond, "weight"] = onp.nan
+        df.loc[cond, "perc"] = onp.nan
         axs = axes.flatten()
         for i, year in enumerate(years):
             axs[i].plot(
-                dict_obs["lys8"].loc[f"{year}", :].index,
-                dict_obs["lys8"].loc[f"{year}", f"{var_obs}"].cumsum(),
+                df.loc[f"{year}", :].index[1:],
+                df.loc[f"{year}", "weight"].values[1:] - df.loc[f"{year}", "weight"].values[:-1],
                 "-",
-                color="#d7b5d8",
-                lw=0.7,
-                label=f"{fert_lys['lys8']}",
-            )
-            axs[i].plot(
-                dict_obs["lys3"].loc[f"{year}", :].index,
-                dict_obs["lys3"].loc[f"{year}", f"{var_obs}"].cumsum(),
-                "-",
-                color="#df65b0",
+                color="#034e7b",
                 lw=1,
-                label=f"{fert_lys['lys3']}",
+                label=r"dS",
             )
             axs[i].plot(
-                dict_obs["lys2"].loc[f"{year}", :].index,
-                dict_obs["lys2"].loc[f"{year}", f"{var_obs}"].cumsum(),
+                df.loc[f"{year}", :].index,
+                -df.loc[f"{year}", "perc"],
                 "-",
-                color="#ce1256",
-                lw=1.3,
-                label=f"{fert_lys['lys2']}",
+                color="#74a9cf",
+                lw=1,
+                label=r"PERC",
             )
             axs[i].set_xlim(
                 df_lys_obs_nonan.loc[f"{year}", :].index[0],
                 df_lys_obs_nonan.loc[f"{year}", :].index[-1],
             )
+
             axs[i].tick_params(axis="x", labelrotation=90)
             axs[i].xaxis.set_major_formatter(mdates.DateFormatter("%m"))
-            axs[i].set_title(f"{year}: {crops_lys['lys8'][year]} ")
-
-        axes[0, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
-        axes[1, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
-        axes[2, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
-        axes[3, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
+            axs[i].set_title(f"{year}: {crops_lys[lys_experiment][year]} ({fert_lys[lys_experiment]})")
+        axes[0, 0].set_ylabel(r"[mm/day]")
+        axes[1, 0].set_ylabel(r"[mm/day]")
+        axes[2, 0].set_ylabel(r"[mm/day]")
+        axes[3, 0].set_ylabel(r"[mm/day]")
         axes[-1, -1].set_xlabel("Time [month]")
         axes[-1, 0].set_xlabel("Time [month]")
         lines, labels = axes[-1, 1].get_legend_handles_labels()
-        fig.legend(lines, labels, loc="upper left", fontsize=8, frameon=False, bbox_to_anchor=(0.1, 0.96))
+        fig.legend(lines[:2], labels[:2], loc="upper left", fontsize=8, frameon=False, bbox_to_anchor=(0.1, 0.96))
+        fig.legend(lines[2:], labels[2:], loc="upper left", fontsize=8, frameon=False, bbox_to_anchor=(0.1, 0.715))
         fig.tight_layout()
-        file = base_path_figs / f"{var_obs}_cumulated_annually.png"
+        file = base_path_figs / f"{lys_experiment}_dS_perc.png"
         fig.savefig(file, dpi=300)
         plt.close(fig=fig)
 
-    for var_obs in ["perc"]:
-        years = onp.arange(2010, 2018).tolist()
-        df = pd.DataFrame(index=pd.date_range(start="2010-01-01", end="2017-12-31", freq="D"))
-        df1 = dict_obs["lys8"].loc[:, f"{var_obs}"].to_frame()
-        df1.columns = ["lys8"]
-        df2 = dict_obs["lys3"].loc[:, f"{var_obs}"].to_frame()
-        df2.columns = ["lys3"]
-        df3 = dict_obs["lys2"].loc[:, f"{var_obs}"].to_frame()
-        df3.columns = ["lys2"]
-        df = df.join([df1, df2, df3]).dropna()
-        fig, axes = plt.subplots(4, 2, figsize=(6, 6), sharey=True)
+
+        fig, axes = plt.subplots(4, 2, figsize=(6, 6))
+        df = df_lys_obs_nonan.copy()
+        df.loc[:, "dS"] = onp.nan
+        df.loc[df.index[1]:, "dS"] = df.loc[:, "weight"].values[1:] - df.loc[:, "weight"].values[:-1]
+        cond = (df.loc[:, "perc_pet_ratio"] < 0.5) | (df.loc[:, "dS"] > df.loc[:, "prec"])
+        df.loc[cond, "dS"] = onp.nan
+        df.loc[cond, "perc"] = onp.nan
         axs = axes.flatten()
         for i, year in enumerate(years):
             axs[i].plot(
                 df.loc[f"{year}", :].index,
-                df.loc[f"{year}", "lys8"].cumsum(),
+                df.loc[f"{year}", "dS"].values,
                 "-",
-                color="#d7b5d8",
-                lw=0.7,
-                label=f"{fert_lys['lys8']}",
-            )
-            axs[i].plot(
-                df.loc[f"{year}", :].index,
-                df.loc[f"{year}", "lys3"].cumsum(),
-                "-",
-                color="#df65b0",
+                color="#034e7b",
                 lw=1,
-                label=f"{fert_lys['lys3']}",
+                label=r"dS",
             )
             axs[i].plot(
                 df.loc[f"{year}", :].index,
-                df.loc[f"{year}", "lys2"].cumsum(),
+                -df.loc[f"{year}", "perc"].values,
                 "-",
-                color="#ce1256",
-                lw=1.3,
-                label=f"{fert_lys['lys2']}",
+                color="#74a9cf",
+                lw=1,
+                label=r"PERC",
             )
             axs[i].set_xlim(
                 df_lys_obs_nonan.loc[f"{year}", :].index[0],
                 df_lys_obs_nonan.loc[f"{year}", :].index[-1],
             )
+
             axs[i].tick_params(axis="x", labelrotation=90)
             axs[i].xaxis.set_major_formatter(mdates.DateFormatter("%m"))
-            axs[i].set_title(f"{year}: {crops_lys[lys_experiment][year]} ")
-
-        axes[0, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
-        axes[1, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
-        axes[2, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
-        axes[3, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
+            axs[i].set_title(f"{year}: {crops_lys[lys_experiment][year]} ({fert_lys[lys_experiment]})")
+        axes[0, 0].set_ylabel(r"[mm/day]")
+        axes[1, 0].set_ylabel(r"[mm/day]")
+        axes[2, 0].set_ylabel(r"[mm/day]")
+        axes[3, 0].set_ylabel(r"[mm/day]")
         axes[-1, -1].set_xlabel("Time [month]")
         axes[-1, 0].set_xlabel("Time [month]")
         lines, labels = axes[-1, 1].get_legend_handles_labels()
-        fig.legend(lines, labels, loc="upper left", fontsize=8, frameon=False, bbox_to_anchor=(0.1, 0.96))
+        fig.legend(lines[:2], labels[:2], loc="upper left", fontsize=8, frameon=False, bbox_to_anchor=(0.1, 0.96))
+        fig.legend(lines[2:], labels[2:], loc="upper left", fontsize=8, frameon=False, bbox_to_anchor=(0.1, 0.715))
         fig.tight_layout()
-        file = base_path_figs / f"{var_obs}_cumulated_annually.png"
+        file = base_path_figs / f"{lys_experiment}_dSneg_perc.png"
         fig.savefig(file, dpi=300)
         plt.close(fig=fig)
 
-    for var_obs in ["theta", "weight"]:
-        years = onp.arange(2010, 2018).tolist()
-        df = pd.DataFrame(index=pd.date_range(start="2010-01-01", end="2017-12-31", freq="D"))
-        df1 = dict_obs["lys8"].loc[:, f"{var_obs}"].to_frame()
-        df1.columns = ["lys8"]
-        df2 = dict_obs["lys3"].loc[:, f"{var_obs}"].to_frame()
-        df2.columns = ["lys3"]
-        df3 = dict_obs["lys2"].loc[:, f"{var_obs}"].to_frame()
-        df3.columns = ["lys2"]
-        df = df.join([df1, df2, df3]).dropna()
-        fig, axes = plt.subplots(4, 2, figsize=(6, 6), sharey=True)
-        axs = axes.flatten()
-        for i, year in enumerate(years):
-            axs[i].plot(
-                df.loc[f"{year}", :].index,
-                df.loc[f"{year}", "lys8"],
+
+    for lys_experiment in lys_experiments:
+        for var_obs in ["perc", "pet", "prec"]:
+            fig, axs = plt.subplots(1, 1, figsize=(6, 2))
+            df = pd.DataFrame(index=pd.date_range(start="2010-01-01", end="2017-12-31", freq="D"))
+            df1 = dict_obs["lys8"].loc[:, f"{var_obs}"].to_frame()
+            df1.columns = ["lys8"]
+            df2 = dict_obs["lys3"].loc[:, f"{var_obs}"].to_frame()
+            df2.columns = ["lys3"]
+            df3 = dict_obs["lys2"].loc[:, f"{var_obs}"].to_frame()
+            df3.columns = ["lys2"]
+            df = df.join([df1, df2, df3]).dropna()
+            axs.plot(
+                df.index,
+                df.loc[:, "lys8"].cumsum(),
                 "-",
                 color="#d7b5d8",
                 lw=0.7,
                 label=f"{fert_lys['lys8']}",
             )
-            axs[i].plot(
-                df.loc[f"{year}", :].index,
-                df.loc[f"{year}", "lys3"],
+            axs.plot(
+                df.index,
+                df.loc[:, "lys3"].cumsum(),
                 "-",
                 color="#df65b0",
                 lw=1,
                 label=f"{fert_lys['lys3']}",
             )
-            axs[i].plot(
-                df.loc[f"{year}", :].index,
-                df.loc[f"{year}", "lys2"],
+            axs.plot(
+                df.index,
+                df.loc[:, "lys2"].cumsum(),
                 "-",
                 color="#ce1256",
                 lw=1.3,
                 label=f"{fert_lys['lys2']}",
             )
-            axs[i].set_xlim(
-                df_lys_obs_nonan.loc[f"{year}", :].index[0],
-                df_lys_obs_nonan.loc[f"{year}", :].index[-1],
-            )
-            axs[i].tick_params(axis="x", labelrotation=90)
-            axs[i].xaxis.set_major_formatter(mdates.DateFormatter("%m"))
-            axs[i].set_title(f"{year}: {crops_lys[lys_experiment][year]} ")
 
-        axes[0, 0].set_ylabel(f"{_y_labels_daily[var_obs]}")
-        axes[1, 0].set_ylabel(f"{_y_labels_daily[var_obs]}")
-        axes[2, 0].set_ylabel(f"{_y_labels_daily[var_obs]}")
-        axes[3, 0].set_ylabel(f"{_y_labels_daily[var_obs]}")
-        axes[-1, -1].set_xlabel("Time [month]")
-        axes[-1, 0].set_xlabel("Time [month]")
-        lines, labels = axes[-1, 1].get_legend_handles_labels()
-        fig.legend(lines, labels, loc="upper left", fontsize=8, frameon=False, bbox_to_anchor=(0.1, 0.96))
-        fig.tight_layout()
-        file = base_path_figs / f"{var_obs}_annually.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig=fig)
+            axs.tick_params(axis="x", rotation=45)
+            axs.set_ylabel(f"{_y_labels_cumulated[var_obs]}")
+            axs.set_xlabel("Time [year]")
+            axs.legend(frameon=False, loc="upper left", fontsize=8)
+            axs.set_xlim(df_lys_obs_nonan.loc[:, :].index[0], df_lys_obs_nonan.loc[:, :].index[-1])
+            fig.tight_layout()
+            file = base_path_figs / f"{var_obs}_cumulated.png"
+            fig.savefig(file, dpi=300)
+            plt.close(fig=fig)
+
+        for var_obs in ["theta", "weight"]:
+            fig, axs = plt.subplots(1, 1, figsize=(6, 2))
+            df = pd.DataFrame(index=pd.date_range(start="2010-01-01", end="2017-12-31", freq="D"))
+            df1 = dict_obs["lys8"].loc[:, f"{var_obs}"].to_frame()
+            df1.columns = ["lys8"]
+            df2 = dict_obs["lys3"].loc[:, f"{var_obs}"].to_frame()
+            df2.columns = ["lys3"]
+            df3 = dict_obs["lys2"].loc[:, f"{var_obs}"].to_frame()
+            df3.columns = ["lys2"]
+            df = df.join([df1, df2, df3]).dropna()
+            axs.plot(
+                df.index,
+                df.loc[:, "lys8"],
+                "-",
+                color="#d7b5d8",
+                lw=0.7,
+                label=f"{fert_lys['lys8']}",
+            )
+            axs.plot(
+                df.index,
+                df.loc[:, "lys3"],
+                "-",
+                color="#df65b0",
+                lw=1,
+                label=f"{fert_lys['lys3']}",
+            )
+            axs.plot(
+                df.index,
+                df.loc[:, "lys2"],
+                "-",
+                color="#ce1256",
+                lw=1.3,
+                label=f"{fert_lys['lys2']}",
+            )
+
+            axs.tick_params(axis="x", rotation=45)
+            axs.set_ylabel(f"{_y_labels_daily[var_obs]}")
+            axs.set_xlabel("Time [year]")
+            axs.legend(frameon=False, loc="lower left", fontsize=8, ncol=3)
+            axs.set_xlim(df_lys_obs_nonan.loc[:, :].index[0], df_lys_obs_nonan.loc[:, :].index[-1])
+            fig.tight_layout()
+            file = base_path_figs / f"{var_obs}.png"
+            fig.savefig(file, dpi=300)
+            plt.close(fig=fig)
+
+        for var_obs in ["prec", "pet"]:
+            years = onp.arange(2010, 2018).tolist()
+            fig, axes = plt.subplots(4, 2, figsize=(6, 6), sharey=True)
+            axs = axes.flatten()
+            for i, year in enumerate(years):
+                axs[i].plot(
+                    dict_obs["lys8"].loc[f"{year}", :].index,
+                    dict_obs["lys8"].loc[f"{year}", f"{var_obs}"].cumsum(),
+                    "-",
+                    color="#d7b5d8",
+                    lw=0.7,
+                    label=f"{fert_lys['lys8']}",
+                )
+                axs[i].plot(
+                    dict_obs["lys3"].loc[f"{year}", :].index,
+                    dict_obs["lys3"].loc[f"{year}", f"{var_obs}"].cumsum(),
+                    "-",
+                    color="#df65b0",
+                    lw=1,
+                    label=f"{fert_lys['lys3']}",
+                )
+                axs[i].plot(
+                    dict_obs["lys2"].loc[f"{year}", :].index,
+                    dict_obs["lys2"].loc[f"{year}", f"{var_obs}"].cumsum(),
+                    "-",
+                    color="#ce1256",
+                    lw=1.3,
+                    label=f"{fert_lys['lys2']}",
+                )
+                axs[i].set_xlim(
+                    df_lys_obs_nonan.loc[f"{year}", :].index[0],
+                    df_lys_obs_nonan.loc[f"{year}", :].index[-1],
+                )
+                axs[i].tick_params(axis="x", labelrotation=90)
+                axs[i].xaxis.set_major_formatter(mdates.DateFormatter("%m"))
+                axs[i].set_title(f"{year}: {crops_lys['lys8'][year]} ")
+
+            axes[0, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
+            axes[1, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
+            axes[2, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
+            axes[3, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
+            axes[-1, -1].set_xlabel("Time [month]")
+            axes[-1, 0].set_xlabel("Time [month]")
+            lines, labels = axes[-1, 1].get_legend_handles_labels()
+            fig.legend(lines, labels, loc="upper left", fontsize=8, frameon=False, bbox_to_anchor=(0.1, 0.96))
+            fig.tight_layout()
+            file = base_path_figs / f"{var_obs}_cumulated_annually.png"
+            fig.savefig(file, dpi=300)
+            plt.close(fig=fig)
+
+        for var_obs in ["perc"]:
+            years = onp.arange(2010, 2018).tolist()
+            df = pd.DataFrame(index=pd.date_range(start="2010-01-01", end="2017-12-31", freq="D"))
+            df1 = dict_obs["lys8"].loc[:, f"{var_obs}"].to_frame()
+            df1.columns = ["lys8"]
+            df2 = dict_obs["lys3"].loc[:, f"{var_obs}"].to_frame()
+            df2.columns = ["lys3"]
+            df3 = dict_obs["lys2"].loc[:, f"{var_obs}"].to_frame()
+            df3.columns = ["lys2"]
+            df = df.join([df1, df2, df3]).dropna()
+            fig, axes = plt.subplots(4, 2, figsize=(6, 6), sharey=True)
+            axs = axes.flatten()
+            for i, year in enumerate(years):
+                axs[i].plot(
+                    df.loc[f"{year}", :].index,
+                    df.loc[f"{year}", "lys8"].cumsum(),
+                    "-",
+                    color="#d7b5d8",
+                    lw=0.7,
+                    label=f"{fert_lys['lys8']}",
+                )
+                axs[i].plot(
+                    df.loc[f"{year}", :].index,
+                    df.loc[f"{year}", "lys3"].cumsum(),
+                    "-",
+                    color="#df65b0",
+                    lw=1,
+                    label=f"{fert_lys['lys3']}",
+                )
+                axs[i].plot(
+                    df.loc[f"{year}", :].index,
+                    df.loc[f"{year}", "lys2"].cumsum(),
+                    "-",
+                    color="#ce1256",
+                    lw=1.3,
+                    label=f"{fert_lys['lys2']}",
+                )
+                axs[i].set_xlim(
+                    df_lys_obs_nonan.loc[f"{year}", :].index[0],
+                    df_lys_obs_nonan.loc[f"{year}", :].index[-1],
+                )
+                axs[i].tick_params(axis="x", labelrotation=90)
+                axs[i].xaxis.set_major_formatter(mdates.DateFormatter("%m"))
+                axs[i].set_title(f"{year}: {crops_lys[lys_experiment][year]} ")
+
+            axes[0, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
+            axes[1, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
+            axes[2, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
+            axes[3, 0].set_ylabel(f"{_y_labels_cumulated[var_obs]}")
+            axes[-1, -1].set_xlabel("Time [month]")
+            axes[-1, 0].set_xlabel("Time [month]")
+            lines, labels = axes[-1, 1].get_legend_handles_labels()
+            fig.legend(lines, labels, loc="upper left", fontsize=8, frameon=False, bbox_to_anchor=(0.1, 0.96))
+            fig.tight_layout()
+            file = base_path_figs / f"{var_obs}_cumulated_annually.png"
+            fig.savefig(file, dpi=300)
+            plt.close(fig=fig)
+
+        for var_obs in ["theta", "weight"]:
+            years = onp.arange(2010, 2018).tolist()
+            df = pd.DataFrame(index=pd.date_range(start="2010-01-01", end="2017-12-31", freq="D"))
+            df1 = dict_obs["lys8"].loc[:, f"{var_obs}"].to_frame()
+            df1.columns = ["lys8"]
+            df2 = dict_obs["lys3"].loc[:, f"{var_obs}"].to_frame()
+            df2.columns = ["lys3"]
+            df3 = dict_obs["lys2"].loc[:, f"{var_obs}"].to_frame()
+            df3.columns = ["lys2"]
+            df = df.join([df1, df2, df3]).dropna()
+            fig, axes = plt.subplots(4, 2, figsize=(6, 6), sharey=True)
+            axs = axes.flatten()
+            for i, year in enumerate(years):
+                axs[i].plot(
+                    df.loc[f"{year}", :].index,
+                    df.loc[f"{year}", "lys8"],
+                    "-",
+                    color="#d7b5d8",
+                    lw=0.7,
+                    label=f"{fert_lys['lys8']}",
+                )
+                axs[i].plot(
+                    df.loc[f"{year}", :].index,
+                    df.loc[f"{year}", "lys3"],
+                    "-",
+                    color="#df65b0",
+                    lw=1,
+                    label=f"{fert_lys['lys3']}",
+                )
+                axs[i].plot(
+                    df.loc[f"{year}", :].index,
+                    df.loc[f"{year}", "lys2"],
+                    "-",
+                    color="#ce1256",
+                    lw=1.3,
+                    label=f"{fert_lys['lys2']}",
+                )
+                axs[i].set_xlim(
+                    df_lys_obs_nonan.loc[f"{year}", :].index[0],
+                    df_lys_obs_nonan.loc[f"{year}", :].index[-1],
+                )
+                axs[i].tick_params(axis="x", labelrotation=90)
+                axs[i].xaxis.set_major_formatter(mdates.DateFormatter("%m"))
+                axs[i].set_title(f"{year}: {crops_lys[lys_experiment][year]} ")
+
+            axes[0, 0].set_ylabel(f"{_y_labels_daily[var_obs]}")
+            axes[1, 0].set_ylabel(f"{_y_labels_daily[var_obs]}")
+            axes[2, 0].set_ylabel(f"{_y_labels_daily[var_obs]}")
+            axes[3, 0].set_ylabel(f"{_y_labels_daily[var_obs]}")
+            axes[-1, -1].set_xlabel("Time [month]")
+            axes[-1, 0].set_xlabel("Time [month]")
+            lines, labels = axes[-1, 1].get_legend_handles_labels()
+            fig.legend(lines, labels, loc="upper left", fontsize=8, frameon=False, bbox_to_anchor=(0.1, 0.96))
+            fig.tight_layout()
+            file = base_path_figs / f"{var_obs}_annually.png"
+            fig.savefig(file, dpi=300)
+            plt.close(fig=fig)
+
     return
 
 

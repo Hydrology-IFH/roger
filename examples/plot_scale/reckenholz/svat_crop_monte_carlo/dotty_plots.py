@@ -19,7 +19,7 @@ def main(tmp_dir):
         base_path = Path(__file__).parent
 
     # directory of results
-    base_path_output = base_path.parent / "output" / "svat_crop_monte_carlo"
+    base_path_output = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
     # directory of figures
@@ -117,6 +117,48 @@ def main(tmp_dir):
         fig.tight_layout()
         file = base_path_figs / f"dotty_plots_mp_crops_{lys_experiment}.png"
         fig.savefig(file, dpi=250)
+
+        df_params = df_params_metrics.loc[:, ["c_basal_crop_coeff", "c_pet", "zroot_to_zsoil_max"]]
+        nrow = len(df_metrics.columns)
+        ncol = len(df_params.columns)
+        fig, ax = plt.subplots(nrow, ncol, sharey="row", figsize=(6, 4.5))
+        for i, metric_var in enumerate(df_metrics.columns):
+            for j, param in enumerate(df_params.columns):
+                y = df_metrics.iloc[:, i]
+                x = df_params.iloc[:, j]
+                ax[i, j].scatter(x, y, color="grey", alpha=0.2, s=4)
+                ax[i, j].set_xlabel("")
+                ax[i, j].set_ylabel("")
+                if metric_var in ["KGE_q_ss"]:
+                    ax[i, j].set_ylim((0.0, 0.5))
+                elif metric_var in ["r_theta"]:
+                    ax[i, j].set_ylim((0.5, 0.8))
+                elif metric_var in ["E_multi"]:
+                    ax[i, j].set_ylim((0.4, 0.6))
+
+                # best parameter set for individual evaluation metric at specific storage conditions
+                df_params_metrics_sc1 = df_params_metrics.copy()
+                df_params_metrics_sc1 = df_params_metrics_sc1.sort_values(by=[df_metrics.columns[i]], ascending=False)
+                idx_best_sc1 = df_params_metrics_sc1.loc[: df_params_metrics_sc1.index[99], "id"].values.tolist()
+                for idx_best_sc in idx_best_sc1:
+                    y_best_sc = df_metrics.iloc[idx_best_sc, i]
+                    x_best_sc = df_params.iloc[idx_best_sc, j]
+                    ax[i, j].scatter(x_best_sc, y_best_sc, s=2, color="blue", alpha=0.8)
+                if metric_var in ["KGE_q_ss", "theta_r"]:
+                    # best parameter sets for multi-objective criteria
+                    ax[i, j].scatter(x[:100], y[:100], s=2, color="red", alpha=1)
+        for j in range(ncol):
+            xlabel = labs._LABS[df_params.columns[j]]
+            ax[-1, j].set_xlabel(xlabel)
+
+        ax[0, 0].set_ylabel("$KGE_{PERC}$ [-]")
+        ax[1, 0].set_ylabel(r"$r_{\theta}$ [-]")
+        ax[2, 0].set_ylabel("$E_{multi}$\n [-]")
+
+        fig.tight_layout()
+        file = base_path_figs / f"dotty_plots_mp_crops_{lys_experiment}.png"
+        fig.savefig(file, dpi=250)
+
     return
 
 
