@@ -628,15 +628,15 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             # apply nitrogen fertilizer
             if vs.itt <= 1:
                 if vs.itt + 364 < settings.nitt:
-                    crop_type = set_main_crop_kernel1(state)
+                    crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]), axis=-1)
                 else:
-                    crop_type = set_main_crop_kernel2(state)
+                    crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]), axis=-1)
                 vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type[2:-2, 2:-2])
             if vs.year[vs.tau] > vs.year[vs.taum1]:
                 if vs.itt + 364 < settings.nitt:
-                    crop_type = set_main_crop_kernel1(state)
+                    crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]), axis=-1)
                 else:
-                    crop_type = set_main_crop_kernel2(state)
+                    crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]), axis=-1)
                 vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type[2:-2, 2:-2])
             if vs.itt <= 1:
                 vs.update(set_fertilizer_kernel(state))
@@ -786,39 +786,6 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             C_in=vs.C_in,
             Nmin_rz=vs.Nmin_rz,
         )
-    
-    @roger_kernel
-    def set_main_crop_kernel1(state):
-        """Calculates soil temperature."""
-        vs = state.variables
-        settings = state.settings
-
-        crop_type = allocate(state.dimensions, ("x", "y"))
-
-        crop_type = update(
-            crop_type,
-            at[2:-2, 2:-2],
-            npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]), axis=-1),
-        )
-
-        return crop_type
-    
-    @roger_kernel
-    def set_main_crop_kernel2(state):
-        """Calculates soil temperature."""
-        vs = state.variables
-        settings = state.settings
-
-        crop_type = allocate(state.dimensions, ("x", "y"))
-
-        crop_type = update(
-            crop_type,
-            at[2:-2, 2:-2],
-            npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]), axis=-1),
-        )
-
-        return crop_type
-
 
     model = SVATCROPNITRATESetup()
     model.setup()
