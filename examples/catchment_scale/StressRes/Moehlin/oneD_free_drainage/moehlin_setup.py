@@ -149,6 +149,10 @@ def main(temp_dir):
                 vs.sealing,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc("vers", self._base_path, "parameters.nc")/100) # convert percentage to fraction
+            vs.sealing = update(
+                vs.sealing,
+                at[2:-2, 2:-2],
+                npx.where(npx.isnan(vs.sealing[2:-2, 2:-2]), 0, vs.sealing[2:-2, 2:-2]))
             # total surface depression storage (mm)
             vs.S_dep_tot = update(
                 vs.S_dep_tot,

@@ -5,34 +5,19 @@ complete-mixing:
   alpha_q:
   - 0.2
   - 1
-  km_denit_rz:
+  km_denit:
   - 1
   - 20
-  km_denit_ss:
+  dmax_denit:
+  - 1
+  - 100
+  km_nit:
   - 1
   - 20
-  dmax_denit_rz:
+  dmax_nit:
   - 1
   - 100
-  dmax_denit_ss:
-  - 1
-  - 100
-  km_nit_rz:
-  - 1
-  - 20
-  km_nit_ss:
-  - 1
-  - 20
-  dmax_nit_rz:
-  - 1
-  - 100
-  dmax_nit_ss:
-  - 1
-  - 100
-  kmin_rz:
-  - 1
-  - 100
-  kmin_ss:
+  kmin:
   - 1
   - 100
 
@@ -44,34 +29,19 @@ advection-dispersion-power:
   alpha_q:
   - 0.2
   - 1
-  km_denit_rz:
+  km_denit:
   - 1
   - 20
-  km_denit_ss:
+  dmax_denit:
+  - 1
+  - 100
+  km_nit:
   - 1
   - 20
-  dmax_denit_rz:
+  dmax_nit:
   - 1
   - 100
-  dmax_denit_ss:
-  - 1
-  - 100
-  km_nit_rz:
-  - 1
-  - 20
-  km_nit_ss:
-  - 1
-  - 20
-  dmax_nit_rz:
-  - 1
-  - 100
-  dmax_nit_ss:
-  - 1
-  - 100
-  kmin_rz:
-  - 1
-  - 100
-  kmin_ss:
+  kmin:
   - 1
   - 100
   # SAS parameter of transpiration
@@ -94,34 +64,19 @@ time-variant_advection-dispersion-power:
   alpha_q:
   - 0.2
   - 1
-  km_denit_rz:
+  km_denit:
   - 1
   - 20
-  km_denit_ss:
+  dmax_denit:
+  - 1
+  - 100
+  km_nit:
   - 1
   - 20
-  dmax_denit_rz:
+  dmax_nit:
   - 1
   - 100
-  dmax_denit_ss:
-  - 1
-  - 100
-  km_nit_rz:
-  - 1
-  - 20
-  km_nit_ss:
-  - 1
-  - 20
-  dmax_nit_rz:
-  - 1
-  - 100
-  dmax_nit_ss:
-  - 1
-  - 100
-  kmin_rz:
-  - 1
-  - 100
-  kmin_ss:
+  kmin:
   - 1
   - 100
   # SAS parameter of transpiration

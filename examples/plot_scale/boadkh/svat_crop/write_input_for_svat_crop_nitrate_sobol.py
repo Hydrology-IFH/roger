@@ -41,11 +41,11 @@ def main():
                             "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                             "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
                             "winter-wheat_winter-rape_yellow-mustard"]
-    crop_rotation_scenarios = ["summer-wheat_winter-wheat_corn"]
+    crop_rotation_scenarios = ["winter-wheat_corn"]
     csv_file = base_path.parent / "clust-id_shp-id_clust-flag.csv"
     df = pd.read_csv(csv_file, sep=";", skiprows=0)
     df.loc[:, "clust-id_shp-id_clust-flag"] = df.loc[:, "CLUST_ID"].astype(str) + "_" + df.loc[:, "SHP_ID"].astype(str) + "_" + df.loc[:, "CLUST_flag"].astype(str)
-    ids = df.loc[:, "clust-id_shp-id_clust-flag"].values.astype(str).tolist()
+    ids = df.loc[:, "clust-id_shp-id_clust-flag"].values.astype(str).tolist()[:1]
 
     # write model output of a single grid cell into a single file
     for location in locations:

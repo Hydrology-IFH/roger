@@ -822,10 +822,10 @@ def sanity_check(state):
         )
         check2 = global_and(
             npx.all(
-                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]) , 0,  vs.S_fp_rz[2:-2, 2:-2]) > -settings.atol)
-                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]) , 0,  vs.S_lp_rz[2:-2, 2:-2]) > -settings.atol)
-                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]) , 0,  vs.S_fp_ss[2:-2, 2:-2]) > -settings.atol)
-                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]) , 0,  vs.S_lp_ss[2:-2, 2:-2]) > -settings.atol)
+                (npx.where(npx.isnan(vs.S_fp_rz[2:-2, 2:-2]), 0,  vs.S_fp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_rz[2:-2, 2:-2]), 0,  vs.S_lp_rz[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_fp_ss[2:-2, 2:-2]), 0,  vs.S_fp_ss[2:-2, 2:-2]) > -settings.atol)
+                & (npx.where(npx.isnan(vs.S_lp_ss[2:-2, 2:-2]), 0,  vs.S_lp_ss[2:-2, 2:-2]) > -settings.atol)
             )
         )
         check3 = global_and(
