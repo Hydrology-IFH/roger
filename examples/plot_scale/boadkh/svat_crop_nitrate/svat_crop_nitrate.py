@@ -73,7 +73,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             settings.nitt_forc = settings.nitt
             settings.ages = 1000
             settings.nages = settings.ages + 1
-            settings.runlen_warmup = 1 * 365 * 24 * 60 * 60
+            settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
             settings.runlen = self._get_runlen(
                 self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
             )
@@ -417,8 +417,8 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             )
 
             # initial nitrate concentration (in mg/l)
-            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], 30)
-            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 30)
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], 5)
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 5)
             # exponential distribution of mineral soil nitrogen
             # mineral soil nitrogen is decreasing with increasing age
             # p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))

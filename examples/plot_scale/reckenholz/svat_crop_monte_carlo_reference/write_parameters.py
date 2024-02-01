@@ -15,6 +15,7 @@ _UNITS = {
     "c_canopy_growth": "-",
     "c_root_growth": "-",
     "c_basal_crop_coeff": "-",
+    "c_pet": "-",
     "zroot_to_zsoil_max": "-",
 }
 
@@ -53,14 +54,13 @@ def main(nsamples):
     df_params.loc[:, "theta_ac"] = 0.1062
     df_params.loc[:, "theta_ufc"] = 0.1247
     df_params.loc[:, "theta_pwp"] = 0.1869
-    df_params.loc[:, "zroot_to_zsoil_max"] = 0.7
 
-    df_params = df_params.loc[:, ["z_soil", "dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "c_canopy_growth", "c_root_growth", "c_basal_crop_coeff", "zroot_to_zsoil_max"]]
+    df_params = df_params.loc[:, ["z_soil", "dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "c_canopy_growth", "c_root_growth", "c_basal_crop_coeff", "c_pet", "zroot_to_zsoil_max"]]
 
     # write parameters to csv
     df_params.columns = [
-        ["[mm]", "[1/m2]", "[mm]", "[-]", "[-]", "[-]", "[mm/hour]", "[mm/hour]", "[-]", "[-]", "[-]", "[-]"],
-        ["z_soil", "dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "c_canopy_growth", "c_root_growth", "c_basal_crop_coeff", "zroot_to_zsoil_max"],
+        ["[mm]", "[1/m2]", "[mm]", "[-]", "[-]", "[-]", "[mm/hour]", "[mm/hour]", "[-]", "[-]", "[-]", "[-]", "[-]"],
+        ["z_soil", "dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "c_canopy_growth", "c_root_growth", "c_basal_crop_coeff", "c_pet", "zroot_to_zsoil_max"],
     ]
     df_params.to_csv(base_path / "parameters.csv", index=False, sep=";")
     return
