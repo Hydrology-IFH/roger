@@ -270,7 +270,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 1], 10)
 
             # denitrification parameters
-            _c = 0.1
+            _c = 1
             vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_denit", self._base_path, "parameters.nc"))
             vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], _c * self._read_var_from_nc("km_denit", self._base_path, "parameters.nc"))
             vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit", self._base_path, "parameters.nc"))
