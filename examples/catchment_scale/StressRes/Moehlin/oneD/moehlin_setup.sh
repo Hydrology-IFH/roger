@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=24:00:00
+#SBATCH --time=72:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
@@ -15,7 +15,7 @@ eval "$(conda shell.bash hook)"
 conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/StressRes/Moehlin/oneD
   
-python moehlin_setup.py -b jax -td "${TMPDIR}"
+python moehlin_setup.py -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/StressRes/Moehlin/oneD/output"
 mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/StressRes/Moehlin/oneD/output
