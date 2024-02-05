@@ -162,7 +162,7 @@ def main():
                 subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
     locations = ["freiburg"]
-    crop_rotation_scenarios = ["winter-wheat_corn"]
+    crop_rotation_scenarios = ["winter-wheat_corn", "winter-wheat_corn_yellow-mustard",]
     fertilization_intensities = ["low", "medium", "high"]
 
     # --- jobs to calculate sensitivities of nitrate concentrations and water ages --------------------------------------------

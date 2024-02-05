@@ -23,7 +23,7 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-ft", "--fertilization-intensity", type=click.Choice(["low", "medium", "high"]), default="medium")
 @click.option("-id", "--id", type=str, default="5-8_2090295_1")
 @click.option("-x", "--row", type=int, default=0)
-@click.option("-td", "--tmp-dir", type=str, default=None)
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
 @roger_base_cli
 def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -41,6 +41,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             _input_dir = Path(tmp_dir)
         else:
             _input_dir = _base_path.parent / "output" / "svat_crop_nitrate"
+        _input_dir = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "svat_crop"
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -53,18 +54,18 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables["Time"]
                 return len(onp.array(var_obj))
+            
+        def _get_nx(self, path_dir, file):
+            nc_file = path_dir / file
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables["x"]
+                return len(onp.array(var_obj))
 
         def _get_runlen(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables["Time"]
                 return len(onp.array(var_obj)) * 60 * 60 * 24
-            
-        def _get_nx(self, path_dir, file):
-            csv_file = path_dir / file
-            df = pd.read_csv(csv_file, sep=";", skiprows=1)
-            var_obj = df.shape[0]
-            return int(var_obj)
 
         @roger_routine
         def set_settings(self, state):
@@ -73,7 +74,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             settings.sas_solver = "deterministic"
             settings.sas_solver_substeps = 6
 
-            settings.nx, settings.ny = self._get_nx(self._base_path, "parameters.csv"), 1
+            settings.nx, settings.ny = self._get_nx(self._base_path, "parameters.nc"), 1
             settings.nitt = self._get_nitt(
                 self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
             )
@@ -81,6 +82,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             settings.ages = 1000
             settings.nages = settings.ages + 1
             settings.runlen_warmup = 1 * 365 * 24 * 60 * 60
+            settings.runlen_warmup = 5 * 24 * 60 * 60
             settings.runlen = self._get_runlen(
                 self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
             )
@@ -183,6 +185,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 "DOY",
                 "LU_ID",
                 "Z_ROOT",
+                "c_fert",
             ],
         )
         def set_parameters_setup(self, state):
@@ -277,7 +280,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 1], 10)
 
             # denitrification parameters
-            _c = 0.1
+            _c = 0.05
             vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_denit", self._base_path, "parameters.nc"))
             vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], _c * self._read_var_from_nc("km_denit", self._base_path, "parameters.nc"))
             vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit", self._base_path, "parameters.nc"))
@@ -330,6 +333,8 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                     "z_root", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
+
+            vs.c_fert = update(vs.c_fert, at[2:-2, 2:-2], self._read_var_from_nc("c_fert", self._base_path, "parameters.nc"))
 
         @roger_routine
         def set_parameters(self, state):
@@ -420,19 +425,11 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             )
 
             # initial nitrate concentration (in mg/l)
-            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], 30)
-            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 30)
-            # exponential distribution of mineral soil nitrogen
-            # mineral soil nitrogen is decreasing with increasing age
-            # p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
-            # p_dec1 = sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))
-            # p_dec2 = npx.sum(p_dec1)
-            # p_dec3 = p_dec1 / p_dec2
-            # p_dec = update(p_dec, at[:, :, :vs.taup1, :], p_dec3[npx.newaxis, npx.newaxis, npx.newaxis, :])
-            # vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
-            # vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
-            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], (100 / settings.ages) * settings.dx * settings.dy * 100)
-            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], (100 / settings.ages) * settings.dx * settings.dy * 100)
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], 10)
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 10)
+            # initial mineral soil nitrogen
+            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], (50 / settings.ages) * settings.dx * settings.dy * 100)
+            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], (50 / settings.ages) * settings.dx * settings.dy * 100)
             vs.msa_rz = update(
                 vs.msa_rz,
                 at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :vs.taup1, :],
@@ -789,7 +786,6 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             N_fert3=vs.N_fert3,
         )
 
-
     @roger_kernel
     def apply_fertilizer_kernel(state):
         vs = state.variables
@@ -799,22 +795,26 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert1[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
-        # nitrogen deposition (10 kg N/ha/yr)
-        vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], (10/365) * settings.dx * settings.dy * 100)              
+            
         inf = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2]
         vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.doy_dist[2:-2, 2:-2] == vs.doy_fert1[2:-2, 2:-2]) | (vs.doy_dist[2:-2, 2:-2] == vs.doy_fert2[2:-2, 2:-2]) | (vs.doy_dist[2:-2, 2:-2] == vs.doy_fert3[2:-2, 2:-2]), 0, vs.inf_in_tracer[2:-2, 2:-2]))
         vs.inf_in_tracer = update_add(vs.inf_in_tracer, at[2:-2, 2:-2], inf)
         inf_ratio = npx.where((inf/settings.cum_inf_for_N_input) < 1, inf/settings.cum_inf_for_N_input, 1)
         # dissolved nitrogen input
-        vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.Nmin_in[2:-2, 2:-2] * inf_ratio * 0.3, 0))
+        vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.Nmin_in[2:-2, 2:-2] * inf_ratio * vs.c_fert[2:-2, 2:-2], 0))
+        # nitrogen deposition (10 kg N/ha/yr)
+        Ndep = (10/365) * settings.dx * settings.dy * 100  
+        vs.M_in = update_add(vs.M_in, at[2:-2, 2:-2], npx.where(inf > 0, Ndep * vs.c_fert[2:-2, 2:-2], 0))
+        vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], npx.where(inf > 0, Ndep, 0))
         vs.C_in = update(vs.C_in, at[2:-2, 2:-2], npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.M_in[2:-2, 2:-2]/inf, 0))
         # undissolved nitrogen input
         vs.Nmin_rz = update_add(
             vs.Nmin_rz,
             at[2:-2, 2:-2, vs.tau, 0],
-            npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.Nmin_in[2:-2, 2:-2] * inf_ratio * 0.7, 0),
+            npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.Nmin_in[2:-2, 2:-2] * inf_ratio * (1 - vs.c_fert[2:-2, 2:-2]), 0),
         )
         vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], -vs.Nmin_in[2:-2, 2:-2] * inf_ratio)
+        vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], -npx.where(inf > 0, Ndep, 0))
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.Nmin_in[2:-2, 2:-2] < 0), 0, vs.Nmin_in[2:-2, 2:-2]))
         vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.inf_in_tracer[2:-2, 2:-2] > settings.cum_inf_for_N_input), 0, vs.inf_in_tracer[2:-2, 2:-2]))
 

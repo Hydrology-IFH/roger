@@ -9,7 +9,7 @@ import click
 
 @click.command("main")
 def main():
-    base_path = Path(__file__).parent
+    base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh")
 
     # identifiers for simulations
     locations = [
@@ -40,9 +40,8 @@ def main():
                             "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
                             "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                             "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
-                            "winter-wheat_winter-rape_yellow-mustard"]
-    crop_rotation_scenarios = ["winter-wheat_corn"]
-    csv_file = base_path.parent / "clust-id_shp-id_clust-flag.csv"
+                            "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]
+    csv_file = base_path / "clust-id_shp-id_clust-flag.csv"
     df = pd.read_csv(csv_file, sep=";", skiprows=0)
     df.loc[:, "clust-id_shp-id_clust-flag"] = df.loc[:, "CLUST_ID"].astype(str) + "_" + df.loc[:, "SHP_ID"].astype(str) + "_" + df.loc[:, "CLUST_flag"].astype(str)
     ids = df.loc[:, "clust-id_shp-id_clust-flag"].values.astype(str).tolist()[:1]
@@ -51,9 +50,9 @@ def main():
     for location in locations:
         for crop_rotation_scenario in crop_rotation_scenarios:
             crop_rotation_scenario1 = crop_rotation_scenario.replace("-", " ").replace("_", ", ")
-            output_file = base_path.parent / "output" / "svat_crop" / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+            output_file = base_path / "output" / "svat_crop" / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
             for i, id in enumerate(ids):
-                output_id_file = base_path.parent / "output" / "svat_crop" / f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
+                output_id_file = base_path / "output" / "svat_crop" / f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
                 if not os.path.exists(output_id_file):
                     with h5netcdf.File(output_id_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(

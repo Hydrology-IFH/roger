@@ -19,4 +19,4 @@ python moehlin_setup.py -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/StressRes/Moehlin/oneD_free_drainage/output"
 mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/StressRes/Moehlin/oneD_free_drainage/output
-mv "${TMPDIR}"/ONED_Moehlin.*.nc /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/StressRes/Moehlin/oneD_free_drainage/output
+mv "${TMPDIR}"/ONED_Moehlin_free_drainage.*.nc /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/StressRes/Moehlin/oneD_free_drainage/output
