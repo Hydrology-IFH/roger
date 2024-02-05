@@ -2532,6 +2532,16 @@ VARIABLES = {
         initial=0,
         active=lambda settings: settings.enable_nitrate,
     ),
+    "c_fert": Variable(
+        "ratio to dissolve mineral nitrogen fertilizer",
+        CATCH_GRID,
+        "-",
+        "ratio to dissolve mineral nitrogen fertilizer",
+        write_to_restart=True,
+        time_dependent=False,
+        initial=0.3,
+        active=lambda settings: settings.enable_nitrate,
+    ),
     "mr_rz": Variable(
         "mass removal from solute mass StorAge of root zone",
         CATCH_GRID + AGES,

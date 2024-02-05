@@ -101,36 +101,83 @@ def calc_denit_soil(state, msa, km, Dmax, sa, S_sat):
         * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # calculate denitrification rate
-    mr = allocate(state.dimensions, ("x", "y", "ages"))
-    mr = update(
-        mr,
-        at[2:-2, 2:-2, :],
-        ((Dmax[2:-2, 2:-2, npx.newaxis]/settings.ages) * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100
-        * (msa[2:-2, 2:-2, vs.tau, :] / ((km[2:-2, 2:-2, npx.newaxis]/settings.ages) * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100 + msa[2:-2, 2:-2, vs.tau, :])))
-        * soil_temp_coeff[2:-2, 2:-2, npx.newaxis]
-        * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    ms = allocate(state.dimensions, ("x", "y"))
+    mra = allocate(state.dimensions, ("x", "y", "ages"))
+    msa_m1 = allocate(state.dimensions, ("x", "y", "ages"))
+    ms_cuml = allocate(state.dimensions, ("x", "y", "ages"))
+    ms = update(
+        ms,
+        at[2:-2, 2:-2],
+        npx.sum(msa[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2]
     )
-    # no denitrification if storage is lower than 70 % of pore volume
-    mr = update(
-        mr,
+    msa_m1 = update(
+        msa_m1,
         at[2:-2, 2:-2, :],
+        msa[2:-2, 2:-2, vs.tau, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis]
+    )
+    ms_cuml = update(
+        ms_cuml,
+        at[2:-2, 2:-2, :],
+        npx.cumsum(msa[2:-2, 2:-2, vs.tau, ::-1], axis=-1)[:, :, ::-1] * vs.maskCatch[2:-2, 2:-2, npx.newaxis]
+    )
+
+    # calculate denitrification rate
+    mr_pot = allocate(state.dimensions, ("x", "y"))
+    mr_pot = update(
+        mr_pot,
+        at[2:-2, 2:-2],
+        (Dmax[2:-2, 2:-2] * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100
+        * (ms[2:-2, 2:-2] / (km[2:-2, 2:-2] * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100 + ms[2:-2, 2:-2])))
+        * soil_temp_coeff[2:-2, 2:-2]
+        * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # no denitrification if storage is lower than 70 % of pore volume
+    mr_pot = update(
+        mr_pot,
+        at[2:-2, 2:-2],
         npx.where(
-            S[2:-2, 2:-2, npx.newaxis] >= 0.7 * S_sat[2:-2, 2:-2, npx.newaxis],
-            mr[2:-2, 2:-2, :],
+            S[2:-2, 2:-2] >= 0.7 * S_sat[2:-2, 2:-2],
+            mr_pot[2:-2, 2:-2],
             0,
         )
-        * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        * vs.maskCatch[2:-2, 2:-2],
     )
-    # limit denitrification to available solute mass
-    mr = update(
-        mr,
+
+    # mr_pot = update(
+    #     mr_pot,
+    #     at[2:-2, 2:-2],
+    #     (S[2:-2, 2:-2] / S_sat[2:-2, 2:-2]) * mr_pot[2:-2, 2:-2]
+    #     * vs.maskCatch[2:-2, 2:-2],
+    # )
+
+    msa = update(
+        msa,
+        at[2:-2, 2:-2, vs.tau, :],
+        npx.where(ms_cuml[2:-2, 2:-2, :] < mr_pot[2:-2, 2:-2, npx.newaxis], 0, msa[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    msa = update_add(
+        msa,
+        at[2:-2, 2:-2, vs.tau, -1],
+        -npx.where(msa[2:-2, 2:-2, vs.tau, -1] >= mr_pot[2:-2, 2:-2], mr_pot[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    mra = update(
+        mra,
         at[2:-2, 2:-2, :],
-        npx.where(mr[2:-2, 2:-2, :] > msa[2:-2, 2:-2, vs.tau, :], msa[2:-2, 2:-2, vs.tau, :], mr[2:-2, 2:-2, :])
+        (msa_m1[2:-2, 2:-2, :] - msa[2:-2, 2:-2, vs.tau, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    # limit denitrification to available solute mass
+    mra = update(
+        mra,
+        at[2:-2, 2:-2, :],
+        npx.where(mra[2:-2, 2:-2, :] < 0, 0, mra[2:-2, 2:-2, :])
         * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
-    return mr
+    return mra
 
 
 @roger_kernel
@@ -170,32 +217,60 @@ def calc_nit_soil(state, Nmin, knit, Dnit, sa, S_sat):
     )
 
     # calculate nitrification rate
+    ma_pot = allocate(state.dimensions, ("x", "y"))
     ma = allocate(state.dimensions, ("x", "y", "ages"))
-    ma = update(
-        ma,
-        at[2:-2, 2:-2, :],
-        ((Dnit[2:-2, 2:-2, npx.newaxis]/settings.ages) * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100
-        * (Nmin[2:-2, 2:-2, vs.tau, :] / ((knit[2:-2, 2:-2, npx.newaxis]/settings.ages) * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100 + Nmin[2:-2, 2:-2, vs.tau, :])))
-        * soil_temp_coeff[2:-2, 2:-2, npx.newaxis]
-        * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    ma_pot = update(
+        ma_pot,
+        at[2:-2, 2:-2],
+        (Dnit[2:-2, 2:-2] * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100
+        * (npx.sum(Nmin[2:-2, 2:-2, vs.tau, :], axis=-1) / (knit[2:-2, 2:-2] * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100 + npx.sum(Nmin[2:-2, 2:-2, vs.tau, :], axis=-1))))
+        * soil_temp_coeff[2:-2, 2:-2]
+        * vs.maskCatch[2:-2, 2:-2],
     )
+
     # no nitrification if storage is greater than 70 % of pore volume
-    ma = update(
-        ma,
-        at[2:-2, 2:-2, :],
+    ma_pot = update(
+        ma_pot,
+        at[2:-2, 2:-2],
         npx.where(
-            S[2:-2, 2:-2, npx.newaxis] < 0.7 * S_sat[2:-2, 2:-2, npx.newaxis],
-            ma[2:-2, 2:-2, :],
+            S[2:-2, 2:-2] < 0.7 * S_sat[2:-2, 2:-2],
+            ma_pot[2:-2, 2:-2],
             0,
         )
-        * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        * vs.maskCatch[2:-2, 2:-2],
     )
-    # limit denitrification to available solute mass
+
+    # ma_pot = update(
+    #     ma_pot,
+    #     at[2:-2, 2:-2],
+    #     (1 - (S[2:-2, 2:-2] / S_sat[2:-2, 2:-2])) * ma_pot[2:-2, 2:-2]
+    #     * vs.maskCatch[2:-2, 2:-2],
+    # )
+
+    # limit nitrification to available mineral nitrogen
+    ma_pot = update(
+        ma_pot,
+        at[2:-2, 2:-2],
+        npx.where(ma_pot[2:-2, 2:-2] > npx.sum(Nmin[2:-2, 2:-2, vs.tau, :], axis=-1), npx.sum(Nmin[2:-2, 2:-2, vs.tau, :], axis=-1), ma_pot[2:-2, 2:-2])
+        * vs.maskCatch[2:-2, 2:-2],
+    )
+
     ma = update(
         ma,
         at[2:-2, 2:-2, :],
-        npx.where(ma[2:-2, 2:-2, :] > Nmin[2:-2, 2:-2, vs.tau, :], Nmin[2:-2, 2:-2, vs.tau, :], ma[2:-2, 2:-2, :])
-        * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        (sa[2:-2, 2:-2, vs.tau, :]/S[2:-2, 2:-2, npx.newaxis] * ma_pot[2:-2, 2:-2, npx.newaxis]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    ma = update(
+        ma,
+        at[2:-2, 2:-2, :],
+        npx.where(ma[2:-2, 2:-2, :] > Nmin[2:-2, 2:-2, vs.tau, :], Nmin[2:-2, 2:-2, vs.tau, :], ma[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    ma = update(
+        ma,
+        at[2:-2, 2:-2, :],
+        npx.where(ma[2:-2, 2:-2, :] < 0, 0, ma[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     return ma
@@ -338,8 +413,8 @@ def calc_nitrogen_cycle_kernel(state):
 
     vs.msa_rz = update_add(
         vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, 0],
-        npx.sum(vs.ma_rz[2:-2, 2:-2, :], axis=-1),
+        at[2:-2, 2:-2, vs.tau, :],
+        vs.ma_rz[2:-2, 2:-2, :],
     )
 
     vs.ma_ss = update(
@@ -359,8 +434,8 @@ def calc_nitrogen_cycle_kernel(state):
 
     vs.msa_ss = update_add(
         vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, 0],
-        npx.sum(vs.ma_ss[2:-2, 2:-2, :], axis=-1),
+        at[2:-2, 2:-2, vs.tau, :],
+        vs.ma_ss[2:-2, 2:-2, :],
     )
 
     vs.mr_rz = update(
