@@ -72,7 +72,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             settings = state.settings
             settings.identifier = f"SVATCROPNITRATE_{id}_{location}_{crop_rotation_scenario}"
             settings.sas_solver = "deterministic"
-            settings.sas_solver_substeps = 6
+            settings.sas_solver_substeps = 8
 
             settings.nx, settings.ny = self._get_nx(self._base_path, "parameters.nc"), 1
             settings.nitt = self._get_nitt(
@@ -81,8 +81,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             settings.nitt_forc = settings.nitt
             settings.ages = 1000
             settings.nages = settings.ages + 1
-            settings.runlen_warmup = 1 * 365 * 24 * 60 * 60
-            settings.runlen_warmup = 5 * 24 * 60 * 60
+            settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
             settings.runlen = self._get_runlen(
                 self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
             )
