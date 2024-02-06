@@ -62,7 +62,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}"
+            settings.identifier = f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert"
             settings.sas_solver = "deterministic"
             settings.sas_solver_substeps = 8
 
