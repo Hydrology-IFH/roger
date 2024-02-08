@@ -61,9 +61,9 @@ locations = ["freiburg", "lahr", "muellheim",
              "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
              "ehingen-kirchen", "merklingen", "hayingen",
              "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
-locations = [
-    "freiburg",
-]
+# locations = [
+#     "freiburg",
+# ]
 crop_rotation_scenarios = ["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
                             "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
                             "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
@@ -83,13 +83,12 @@ file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "link_shp_clust
 df_link_bk50_cluster_cropland = pd.read_hdf(file)
 
 # prepare shapefiles for each location and crop rotation scenario
-for location in locations:
-    for crop_rotation_scenario in crop_rotation_scenarios:
-        new_file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/svat_crop") / f"{location}_{crop_rotation_scenario}.gpkg"
-        if not os.path.exists(new_file):
-            file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW.gpkg"
-            gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"], mask=gdf_buffer)
-            gdf.to_file(new_file, layer=f"{location}_{crop_rotation_scenario}", driver="GPKG")
+for crop_rotation_scenario in crop_rotation_scenarios:
+    new_file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/svat_crop") / f"surface_runoff_ground_cover_{crop_rotation_scenario}.gpkg"
+    if not os.path.exists(new_file):
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW.gpkg"
+        gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"], mask=gdf_buffer)
+        gdf.to_file(new_file, driver="GPKG")
 
 # load model parameters
 csv_file = base_path / "parameters.csv"
@@ -123,7 +122,7 @@ for location in locations:
 vars_sim = ["ground_cover", "q_hof"]
 for location in locations:
     for crop_rotation_scenario in crop_rotation_scenarios:
-        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/svat_crop") / f"{location}_{crop_rotation_scenario}.gpkg"
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/svat_crop") / f"surface_runoff_ground_cover_{crop_rotation_scenario}.gpkg"
         gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"], mask=gdf_buffer[gdf_buffer.stationsna==location],)
         gdf['stationsna'] = location
         gdf['stationsna'] = gdf['stationsna'].astype('str')
