@@ -1,5 +1,3 @@
-Name: Hayingen (ID: 2072)							
-Lat: 48.2738   ,Lon: 9.4745							
 YYYY	MM	DD	hh	mm	TA	TA_min	TA_max
 2013	1	1	0	0	1.9	-3.0	5.1
 2013	1	2	0	0	0.4	-3.9	3.9
