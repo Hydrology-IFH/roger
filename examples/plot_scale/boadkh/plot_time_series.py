@@ -47,9 +47,9 @@ def nanmeanweighted(y, w, axis=None):
 
 base_path = Path(__file__).parent
 # directory of results
-base_path_results = base_path / "output"
-if not os.path.exists(base_path_results):
-    os.mkdir(base_path_results)
+base_path_output = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output"
+if not os.path.exists(base_path_output):
+    os.mkdir(base_path_output)
 # directory of figures
 base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
@@ -58,19 +58,19 @@ if not os.path.exists(base_path_figs):
 # identifiers for simulations
 locations = [
     "freiburg",
-    "altheim",
-    "maehringen",
-    "heidelsheim",
-    "kupferzell",
 ]
 crop_rotation_scenarios = ["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
-                           "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
-                           "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
-                           "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
-                           "winter-wheat_winter-grain-pea_winter-rape"]
+                            "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
+                            "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
+                            "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
+                            "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
+                            "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
+                            "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
+                            "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]
 
 _lab_unit1 = {
     "q_ss": "PERC [mm/day]",
+    "q_hof": "$Q_{HOF}$ [mm/day]",
     "transp": "TRANSP [mm/day]",
     "evap_soil": "$EVAP_{soil}$ [mm/day]",
     "theta": r"$\theta$ [-]",
@@ -89,29 +89,20 @@ _lab_unit1 = {
     "theta_ufc": r"$\theta_{ufc}$ [-]",
     "theta_pwp": r"$\theta_{pwp}$ [-]",
     "ks": "$k_s$ [mm/day]",
+    "ground_cover": "GC [-]",
 }
 
 _lab_unit2 = {
     "q_ss": "PERC [mm]",
+    "q_hof": "$Q_{HOF}$ [mm]",
     "transp": "TRANSP [mm]",
     "evap_soil": "$EVAP_{soil}$ [mm]",
+    "ground_cover": "GC [-]",
 }
 
 # load model parameters
 csv_file = base_path / "parameters.csv"
 df_params = pd.read_csv(csv_file, sep=";", skiprows=1)
-cond_soil_depth_300 = df_params.loc[:, "z_soil"].values == 300
-cond_soil_depth_600 = df_params.loc[:, "z_soil"].values == 600
-cond_soil_depth_900 = df_params.loc[:, "z_soil"].values == 900
-cond_soil_depth = onp.copy(cond_soil_depth_300)
-cond_soil_depth[:] = True
-soil_depths = ["all", "shallow", "medium", "deep"]
-_soil_depths = {
-    "all": cond_soil_depth,
-    "shallow": cond_soil_depth_300,
-    "medium": cond_soil_depth_600,
-    "deep": cond_soil_depth_900,
-}
 
 # load simulated fluxes and states
 dict_fluxes_states = {}
@@ -120,7 +111,7 @@ for location in locations:
     for crop_rotation_scenario in crop_rotation_scenarios:
         dict_fluxes_states[location][crop_rotation_scenario] = {}
         output_hm_file = (
-            base_path_results
+            base_path_output
             / "svat_crop"
             / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
         )
@@ -137,14 +128,14 @@ for location in locations:
         dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
 
 
-vars_sim = ["theta"]
+vars_sim = ["theta", "ground_cover", "q_hof"]
 for var_sim in vars_sim:
     fig, axes = plt.subplots(figsize=(6, 1.5))
     for i, location in enumerate(locations):
         for j, crop_rotation_scenario in enumerate(crop_rotation_scenarios):
             fig, axes = plt.subplots(figsize=(6, 2))
             ds = dict_fluxes_states[location][crop_rotation_scenario]
-            sim_vals =  ds[var_sim].isel(y=0).values
+            sim_vals = ds[var_sim].isel(y=0).values
             sim_vals_avg = onp.nanmean(sim_vals, axis=0)
             sim_vals_5 = onp.nanquantile(sim_vals, 0.05, axis=0)
             sim_vals_50 = onp.nanmedian(sim_vals, axis=0)
@@ -159,7 +150,6 @@ for var_sim in vars_sim:
             df.iloc[0, :] = onp.nan
             df.iloc[-1, :] = onp.nan
 
-
             axes.plot(df.index, df["avg"], ls="--", color="red", lw=1)
             axes.plot(df.index, df["p50"], ls="-", color="red", lw=1)
             axes.fill_between(
@@ -170,7 +160,7 @@ for var_sim in vars_sim:
             axes.set_ylabel("%s" % (labs._Y_LABS_DAILY[var_sim]))
             fig.autofmt_xdate()
             fig.tight_layout()
-            file = base_path_figs / f"theta_{location}_{crop_rotation_scenario}.png"
+            file = base_path_figs / f"{var_sim}_{location}_{crop_rotation_scenario}.png"
             fig.savefig(file, dpi=300)
             plt.close("all")
 

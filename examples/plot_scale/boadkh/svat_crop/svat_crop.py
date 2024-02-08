@@ -205,7 +205,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path, "parameters.nc"))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
-            # root growth rate icnreases with soil depth
+            # root growth rate increases with soil depth
             vs.root_growth_scale = update(
                 vs.root_growth_scale,
                 at[2:-2, 2:-2],

@@ -8,7 +8,7 @@ import roger
 
 base_path = Path(__file__).parent
 # directory of results
-base_path_output = base_path / "output"
+base_path_output = Path("/Volumes/LaCie/roger/examples/catchment_scale/StressRes/Moehlin") / "output" / "oneD_free_drainage"
 if not os.path.exists(base_path_output):
     os.mkdir(base_path_output)
 # directory of figures
@@ -17,9 +17,9 @@ if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
 # merge model output into single file
-path = str(base_path_output / "2000_2023" / "ONED_Moehlin.*.nc")
+path = str(base_path_output / "ONED_Moehlin_free_drainage.*.nc")
 diag_files = glob.glob(path)
-states_hm_file = base_path_output / "2000_2023" / "ONED_Moehlin.nc"
+states_hm_file = base_path_output / "ONED_Moehlin_free_drainage.nc"
 if not os.path.exists(states_hm_file):
     with h5netcdf.File(states_hm_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
