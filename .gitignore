@@ -171,6 +171,8 @@ examples/plot_scale/freiburg_altheim_kupferzell/rename_output.py
 *_new/
 *_old/
 *_debug*/
+*.gpkg
+*.shp
 
 
 # Slides or Word
