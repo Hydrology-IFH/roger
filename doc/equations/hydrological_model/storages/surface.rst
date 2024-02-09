@@ -129,6 +129,7 @@ Short description of land use (lu_id)
 - `585`: winter clover (continued winter)
 - `586`: yellow mustard (after wheat)
 - `587`: yellow mustard (after corn)
+- `588`: yellow mustard (summer)
 - `598`: no crop
 - `599`: bare
 - `6`: vineyard
