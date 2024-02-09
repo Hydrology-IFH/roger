@@ -81,7 +81,7 @@ crop_rotation_scenarios = ["winter-wheat_clover",
                            "winter-wheat_sugar-beet_corn_yellow-mustard",
                            "summer-wheat_winter-wheat_corn_yellow-mustard", 
                            "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]
-crop_rotation_scenarios = ["winter-wheat_corn"]
+# crop_rotation_scenarios = ["winter-wheat_corn"]
 
 # load buffers for assigning the simulations to the meteorological stations
 file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "buffer30km_NBiomasseBW_assigment.gpkg"
