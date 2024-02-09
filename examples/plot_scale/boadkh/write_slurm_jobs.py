@@ -15,7 +15,6 @@ def main():
                  "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
                  "ehingen-kirchen", "merklingen", "hayingen",
                  "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
-    locations = ["freiburg"]
     crop_rotation_scenarios = ["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
                                "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
                                "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
