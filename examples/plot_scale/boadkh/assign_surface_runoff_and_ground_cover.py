@@ -61,9 +61,9 @@ locations = ["freiburg", "lahr", "muellheim",
              "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
              "ehingen-kirchen", "merklingen", "hayingen",
              "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
-# locations = [
-#     "freiburg",
-# ]
+locations = [
+    "freiburg",
+]
 
 crop_rotation_scenarios = ["winter-wheat_clover",
                            "winter-wheat_corn",

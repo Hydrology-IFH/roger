@@ -6,9 +6,9 @@
 #SBATCH --mem=16000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
-#SBATCH --job-name=svat_crop_nitrate_5-8_2090295_1_freiburg_winter-wheat_corn_high_Nfert
-#SBATCH --output=svat_crop_nitrate_5-8_2090295_1_freiburg_winter-wheat_corn_high_Nfert.out
-#SBATCH --error=svat_crop_nitrate_5-8_2090295_1_freiburg_winter-wheat_corn_high_Nfert_err.out
+#SBATCH --job-name=svat_crop_nitrate_5-8_2090295_1_freiburg_winter-wheat_corn_yellow-mustard_medium_Nfert
+#SBATCH --output=svat_crop_nitrate_5-8_2090295_1_freiburg_winter-wheat_corn_yellow-mustard_medium_Nfert.out
+#SBATCH --error=svat_crop_nitrate_5-8_2090295_1_freiburg_winter-wheat_corn_yellow-mustard_medium_Nfert_err.out
 #SBATCH --export=ALL
  
 # load module dependencies
@@ -25,17 +25,17 @@ cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh/svat_crop_nitrate_s
 # Copy fluxes and states from global workspace to local SSD
 echo "Copy fluxes and states from global workspace to local SSD"
 # Compares hashes
-checksum_gws=$(shasum -a 256 /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh/output/svat_crop/SVATCROP_5-8_2090295_1_freiburg_winter-wheat_corn.nc | cut -f 1 -d " ")
+checksum_gws=$(shasum -a 256 /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh/output/svat_crop/SVATCROP_5-8_2090295_1_freiburg_winter-wheat_corn_yellow-mustard.nc | cut -f 1 -d " ")
 checksum_ssd=0a
-cp /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh/output/svat_crop/SVATCROP_5-8_2090295_1_freiburg_winter-wheat_corn.nc "${TMPDIR}"
+cp /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh/output/svat_crop/SVATCROP_5-8_2090295_1_freiburg_winter-wheat_corn_yellow-mustard.nc "${TMPDIR}"
 # Wait for termination of moving files
 while [ "${checksum_gws}" != "${checksum_ssd}" ]; do
 sleep 10
-checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVATCROP_5-8_2090295_1_freiburg_winter-wheat_corn.nc | cut -f 1 -d " ")
+checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVATCROP_5-8_2090295_1_freiburg_winter-wheat_corn_yellow-mustard.nc | cut -f 1 -d " ")
 done
 echo "Copying was successful"
  
-python svat_crop_nitrate.py -b jax -d cpu --float-type float64 --row 0 --id 5-8_2090295_1 --location freiburg --crop-rotation-scenario winter-wheat_corn --fertilization-intensity high -td "${TMPDIR}"
+python svat_crop_nitrate.py -b jax -d cpu --float-type float64 --row 0 --id 5-8_2090295_1 --location freiburg --crop-rotation-scenario winter-wheat_corn_yellow-mustard --fertilization-intensity medium -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh/output/svat_crop_nitrate"
 mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh/output/svat_crop_nitrate
