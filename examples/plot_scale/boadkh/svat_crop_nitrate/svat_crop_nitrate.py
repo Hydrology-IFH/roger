@@ -46,8 +46,8 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         #     _input_dir = Path(tmp_dir)
         # else:
         #     _input_dir = _base_path.parent / "output" / "svat_crop"
-        _input_dir = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "svat_crop"
-        # _input_dir = _base_path.parent / "output" / "svat_crop"
+        # _input_dir = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "svat_crop"
+        _input_dir = _base_path.parent / "output" / "svat_crop"
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
