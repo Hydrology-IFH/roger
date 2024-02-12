@@ -13,14 +13,22 @@ from roger.cli.roger_run_base import roger_base_cli
                                                "ehingen-kirchen", "merklingen", "hayingen", 
                                                "kupferzell", "oehringen", "vellberg-kleinaltdorf"]), 
                                                default="hayingen")
-@click.option("--crop-rotation-scenario", type=click.Choice(["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
-                                                             "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
-                                                             "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
-                                                             "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
-                                                             "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
-                                                             "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
-                                                             "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
-                                                             "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]), default="winter-wheat_corn")
+@click.option("--crop-rotation-scenario", type=click.Choice(["winter-wheat_clover",
+                                                             "winter-wheat_silage-corn",
+                                                             "winter-wheat_winter-rape",
+                                                             "summer-wheat_winter-wheat", 
+                                                             "summer-wheat_clover_winter-wheat",
+                                                             "winter-wheat_clover_silage-corn",
+                                                             "winter-wheat_sugar-beet_silage-corn",
+                                                             "summer-wheat_winter-wheat_silage-corn",
+                                                             "summer-wheat_winter-wheat_winter-rape", 
+                                                             "winter-wheat_winter-rape",
+                                                             "winter-wheat_winter-grain-pea_winter-rape", 
+                                                             "winter-wheat_silage-corn_yellow-mustard", 
+                                                             "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
+                                                             "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
+                                                             "summer-wheat_winter-wheat_silage-corn_yellow-mustard", 
+                                                             "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]), default="winter-wheat_silage-corn")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_crop")
 @roger_base_cli
 def main(location, crop_rotation_scenario, tmp_dir):

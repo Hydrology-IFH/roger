@@ -32,7 +32,7 @@ _VALS = {
     "c2_q_ss": 1.5,
     "km_denit": [2.5, 9],
     "km_nit": [0.75, 2.7],
-    "kmin": [10, 200],
+    "kmin": [10, 30],
     "kfix": 100,
     "dmax_denit": [10, 40],
     "dmax_nit": [33, 12],
@@ -74,7 +74,7 @@ def main():
     df_params.loc[:, "dmax_denit"] = _VALS["dmax_denit"][0] + (_VALS["dmax_denit"][1] - _VALS["dmax_denit"][0]) * c_clay
     df_params.loc[:, "km_nit"] = _VALS["km_nit"][0] + (_VALS["km_nit"][1] - _VALS["km_nit"][0]) * (1 - c_clay) * c_soil_fertility
     df_params.loc[:, "dmax_nit"] = _VALS["dmax_nit"][0] + (_VALS["dmax_nit"][1] - _VALS["dmax_nit"][0]) * (1 - c_clay) * c_soil_fertility
-    df_params.loc[:, "kmin"] = _VALS["kmin"][0] + (_VALS["kmin"][1] - _VALS["kmin"][0]) * c_clay * c_soil_fertility
+    df_params.loc[:, "kmin"] = _VALS["kmin"][0] + (_VALS["kmin"][1] - _VALS["kmin"][0]) * c_soil_fertility
     df_params.loc[:, "kfix"] = _VALS["kfix"] * c_soil_fertility
 
     df_params.loc[:, "clay"] = df_clay.loc[:, "clay"].values.astype(float)

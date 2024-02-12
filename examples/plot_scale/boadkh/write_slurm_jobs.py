@@ -16,12 +16,12 @@ def main():
                  "ehingen-kirchen", "merklingen", "hayingen",
                  "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
     crop_rotation_scenarios = ["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
-                               "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
-                               "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
-                               "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
+                               "summer-wheat_winter-wheat_silage-corn", "summer-wheat_winter-wheat_winter-rape", 
+                               "winter-wheat_clover", "winter-wheat_clover_silage-corn", "winter-wheat_silage-corn", 
+                               "winter-wheat_sugar-beet_silage-corn", "winter-wheat_winter-rape",
                                "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
-                               "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
-                               "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
+                               "summer-wheat_winter-wheat_silage-corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
+                               "winter-wheat_silage-corn_yellow-mustard", "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
                                "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]
     fertilization_intensities = ["low", "medium", "high"]
 
@@ -107,6 +107,11 @@ def main():
     #             subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
     # --- jobs to calculate nitrate concentrations and water ages --------------------------------------------
+            
+    crop_rotation_scenarios = ["summer-wheat_winter-wheat", 
+                               "summer-wheat_winter-wheat_silage-corn",
+                               "winter-wheat_silage-corn", 
+                               "winter-wheat_sugar-beet_silage-corn"]
     for location in locations:
         for crop_rotation_scenario in crop_rotation_scenarios:
             for fertilization_intensity in fertilization_intensities:
