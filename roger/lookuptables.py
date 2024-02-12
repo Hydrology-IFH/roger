@@ -49,8 +49,7 @@ ARR_GCM[:, 0] = ARR_ILU[:, 0]
 ARR_GCM[:, 1] = onp.max(ARR_GC[:, 1:], axis=1)
 
 SUMMER_CROPS = onp.array(
-    [
-        501,
+    [   501,
         502,
         503,
         504,
