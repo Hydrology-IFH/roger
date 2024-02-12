@@ -46,8 +46,8 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         #     _input_dir = Path(tmp_dir)
         # else:
         #     _input_dir = _base_path.parent / "output" / "svat_crop"
-        # _input_dir = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "svat_crop"
-        _input_dir = _base_path.parent / "output" / "svat_crop"
+        _input_dir = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "svat_crop"
+        # _input_dir = _base_path.parent / "output" / "svat_crop"
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -760,7 +760,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             N_fert2=vs.N_fert2,
             N_fert3=vs.N_fert3,
             doy_fert1_org=vs.doy_fert1_org,
-            N_fert3_org=vs.N_fert3_org,
+            N_fert1_org=vs.N_fert1_org,
         )
 
     @roger_kernel
