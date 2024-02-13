@@ -772,9 +772,9 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         _c2 = 1 - _c1
 
         # apply mineral nitrogen fertilizer
-        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert1[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
-        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
-        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
+        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert1[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
+        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
+        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
            
         inf = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2]
         vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.doy_dist[2:-2, 2:-2] == vs.doy_fert1[2:-2, 2:-2]) | (vs.doy_dist[2:-2, 2:-2] == vs.doy_fert2[2:-2, 2:-2]) | (vs.doy_dist[2:-2, 2:-2] == vs.doy_fert3[2:-2, 2:-2]), 0, vs.inf_in_tracer[2:-2, 2:-2]))
