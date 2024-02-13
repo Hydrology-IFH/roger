@@ -23,10 +23,8 @@ def main():
                                "summer-wheat_winter-wheat_silage-corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                "winter-wheat_silage-corn_yellow-mustard", "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
                                "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]
-    crop_rotation_scenarios = ["winter-wheat_clover_silage-corn" ]
     fertilization_intensities = ["low", "medium", "high"]
 
-    
     csv_file = base_path / "clust-id_shp-id_clust-flag.csv"
     df = pd.read_csv(csv_file, sep=";", skiprows=0)
     df.loc[:, "clust-id_shp-id_clust-flag"] = df.loc[:, "CLUST_ID"].astype(str) + "_" + df.loc[:, "SHP_ID"].astype(str) + "_" + df.loc[:, "CLUST_flag"].astype(str)
