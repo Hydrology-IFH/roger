@@ -23,6 +23,8 @@ def main():
                                "summer-wheat_winter-wheat_silage-corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                "winter-wheat_silage-corn_yellow-mustard", "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
                                "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]
+    crop_rotation_scenarios = ["summer-wheat_clover_winter-wheat", 
+                               "winter-wheat_clover", "winter-wheat_clover_silage-corn" ]
     fertilization_intensities = ["low", "medium", "high"]
 
     
@@ -166,7 +168,7 @@ def main():
                 subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
     locations = ["freiburg"]
-    crop_rotation_scenarios = ["winter-wheat_corn", "winter-wheat_corn_yellow-mustard",]
+    crop_rotation_scenarios = ["winter-wheat_corn"]
     fertilization_intensities = ["low", "medium", "high"]
 
     # --- jobs to calculate sensitivities of nitrate concentrations and water ages --------------------------------------------
