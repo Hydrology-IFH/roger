@@ -23,8 +23,7 @@ def main():
                                "summer-wheat_winter-wheat_silage-corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                "winter-wheat_silage-corn_yellow-mustard", "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
                                "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]
-    crop_rotation_scenarios = ["summer-wheat_clover_winter-wheat", 
-                               "winter-wheat_clover", "winter-wheat_clover_silage-corn" ]
+    crop_rotation_scenarios = ["winter-wheat_clover_silage-corn" ]
     fertilization_intensities = ["low", "medium", "high"]
 
     
