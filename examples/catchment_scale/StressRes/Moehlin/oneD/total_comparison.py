@@ -108,53 +108,33 @@ ds_params = xr.open_dataset(params_hm_file, engine="h5netcdf")
 dem = ds_params["dgm"].values
 mask = onp.isfinite(dem)
 
+
 # variables to be aggregated
 vars_sim = ["aet", "q_ss", "q_sub", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc"]
 
-# merge model output into single file
-states_agg_file = base_path_output / "ONED_Moehlin_annual_avg.nc"
-if not os.path.exists(states_agg_file):
-    with h5netcdf.File(states_agg_file, "w", decode_vlen_strings=False) as f:
-        f.attrs.update(
-            date_created=datetime.datetime.today().isoformat(),
-            title="Averageg annual sums of RoGeR simulations for the Moehlin catchment, Germany (2013-2022)",
-            institution="University of Freiburg, Chair of Hydrology",
-            references="",
-            comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-            model_structure="1D model with capillary rise",
-            roger_version=f"{roger.__version__}",
-        )
-        # collect dimensions
-        # set dimensions with a dictionary
-        dict_dim = {
-            "x": config['nx'],
-            "y": config['ny'],
-        }
-        if not f.dimensions:
-            f.dimensions = dict_dim
-            v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
-            v.attrs["long_name"] = "x"
-            v.attrs["units"] = "m"
-            v[:] = onp.arange(dict_dim["x"]) * 25
-            v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
-            v.attrs["long_name"] = "y"
-            v.attrs["units"] = "m"
-            v[:] = onp.arange(dict_dim["y"]) * 25
 
-        # load hydrological simulations
-        states_hm_file = base_path_output / "ONED_Moehlin_annual.nc"
-        ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf")
+# load hydrological simulations
+states_hm_file = base_path_output / "ONED_Moehlin_annual_avg.nc"
+ds_sim1 = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
-        # assign date
-        days = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-        date = num2date(
-            days,
-            units=f"days since {ds_sim['Time'].attrs['time_origin']}",
-            calendar="standard",
-            only_use_cftime_datetimes=False,
-        )
-        for var_sim in vars_sim:
-            v = f.create_variable(var_sim, ("x", "y"), float, compression="gzip", compression_opts=1)
-            vals = onp.mean(ds_sim[var_sim].values, axis=-1)
-            v[:, :, :] = onp.where(mask, vals, onp.nan)
-            v.attrs.update(long_name=var_sim, units="mm/year")
+# assign date
+days = (ds_sim1['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+date = num2date(
+    days,
+    units=f"days since {ds_sim1['Time'].attrs['time_origin']}",
+    calendar="standard",
+    only_use_cftime_datetimes=False,
+)
+
+# load hydrological simulations
+states_hm_file = base_path_output / "RoGeR_WBM_1D" / "ONED_Moehlin_annual_avg.nc"
+ds_sim2 = xr.open_dataset(states_hm_file, engine="h5netcdf")
+
+# assign date
+days = (ds_sim2['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+date = num2date(
+    days,
+    units=f"days since {ds_sim2['Time'].attrs['time_origin']}",
+    calendar="standard",
+    only_use_cftime_datetimes=False,
+)

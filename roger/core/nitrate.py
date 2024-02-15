@@ -240,13 +240,6 @@ def calc_nit_soil(state, Nmin, knit, Dnit, sa, S_sat):
         * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # ma_pot = update(
-    #     ma_pot,
-    #     at[2:-2, 2:-2],
-    #     (1 - (S[2:-2, 2:-2] / S_sat[2:-2, 2:-2])) * ma_pot[2:-2, 2:-2]
-    #     * vs.maskCatch[2:-2, 2:-2],
-    # )
-
     # limit nitrification to available mineral nitrogen
     ma_pot = update(
         ma_pot,
@@ -357,9 +350,9 @@ def calc_n_fixation(state, kfix):
         kfix[2:-2, 2:-2] * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100 * soil_temp_coeff[2:-2, 2:-2] * (vs.z_root[2:-2, 2:-2, vs.tau]/(settings.zroot_to_zsoil_max * vs.z_soil[2:-2, 2:-2])) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # nitrogen fixation of yellow mustard and clover
+    # nitrogen fixation of yellow mustard, clover, soy bean and grain pea
     lu_id = vs.LU_ID[2:-2, 2:-2, vs.itt]
-    mask = npx.isin(lu_id, npx.array([580, 581, 583, 584, 586, 587, 588]))
+    mask = npx.isin(lu_id, npx.array([541, 577, 578, 580, 581, 583, 584, 586, 587, 588]))
     nfix = update(nfix, at[2:-2, 2:-2], npx.where(mask, nfix[2:-2, 2:-2], 0))
 
     return nfix

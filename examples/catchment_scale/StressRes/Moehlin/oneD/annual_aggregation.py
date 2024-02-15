@@ -35,44 +35,6 @@ sns.plotting_context(
     },
 )
 
-def xr_annual_avg(ds, var):
-    """
-    weight by days in each month
-    """
-    # Determine the month length
-    month_length = ds.Time.dt.days_in_month
-
-    # Calculate the weights
-    wgts = month_length.groupby("Time.year") / month_length.groupby("Time.year").sum()
-
-    # Make sure the weights in each year add up to 1
-    onp.testing.assert_allclose(wgts.groupby("Time.year").sum(xr.ALL_DIMS), 1.0)
-
-    # Subset our dataset for our variable
-    obs = ds[var]
-
-    # Setup our masking for nan values
-    cond = obs.isnull()
-    ones = xr.where(cond, 0.0, 1.0)
-
-    # Calculate the numerator
-    obs_sum = (obs * wgts).resample(Time="AS").sum(dim="Time")
-
-    # Calculate the denominator
-    ones_out = (ones * wgts).resample(Time="AS").sum(dim="Time")
-
-    # Return the weighted average
-    darr = obs_sum / ones_out
-    vals = onp.where(darr.values == -9999, onp.nan, darr.values)
-
-    return vals
-
-
-cell_width = 25
-ny = 404
-nx = 356
-grid_extent = (0, nx*cell_width, 0, ny*cell_width)
-
 base_path = Path(__file__).parent
 # directory of figures
 base_path_figs = base_path / "figures"
@@ -94,6 +56,7 @@ with open(file_config, "r") as file:
 params_hm_file = base_path / "parameters.nc"
 ds_params = xr.open_dataset(params_hm_file, engine="h5netcdf")
 dem = ds_params["dgm"].values
+mask = onp.isfinite(dem)
 
 # years to be aggregated
 years = onp.arange(2013, 2023, dtype=int)
@@ -106,7 +69,7 @@ if not os.path.exists(states_agg_file):
     with h5netcdf.File(states_agg_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
-            title="Annual sums of RoGeR simulations for the Moehlin catchment, Germany",
+            title="Annual sums of RoGeR simulations for the Moehlin catchment, Germany (2013-2022)",
             institution="University of Freiburg, Chair of Hydrology",
             references="",
             comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
@@ -136,8 +99,6 @@ if not os.path.exists(states_agg_file):
         # load hydrological simulations
         states_hm_file = base_path_output / f"{config['identifier']}.nc"
         ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf")
-        mask_file = base_path / "mask.nc"
-        mask = onp.isfinite(dem)
 
         # assign date
         days = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
@@ -150,30 +111,30 @@ if not os.path.exists(states_agg_file):
         ds_sim = ds_sim.assign_coords(Time=("Time", date))
         for var_sim in vars_sim:
             v = f.create_variable(var_sim, ("x", "y", "Year"), float, compression="gzip", compression_opts=1)
-            vals = ds_sim[var_sim].sel(Time=slice('2013', '2022')).resample(Time='AS').sum()
-            v[:, :, :] = vals
+            vals = ds_sim[var_sim].sel(Time=slice('2013', '2022')).resample(Time='YS').sum()
+            v[:, :, :] = onp.where(mask[:, :, onp.newaxis], vals, onp.nan)
             v.attrs.update(long_name=var_sim, units="mm/year")
 
         v = f.create_variable("inf", ("x", "y", "Year"), float, compression="gzip", compression_opts=1)
-        vals1 = ds_sim["inf_mat_rz"].sel(Time=slice('2013', '2022')).resample(Time='AS').sum()
-        vals2 = ds_sim["inf_mp_rz"].sel(Time=slice('2013', '2022')).resample(Time='AS').sum()
-        vals3 = ds_sim["inf_sc_rz"].sel(Time=slice('2013', '2022')).resample(Time='AS').sum()
-        vals4 = ds_sim["inf_ss"].sel(Time=slice('2013', '2022')).resample(Time='AS').sum()
-        v[:, :, :] = vals1 + vals2 + vals3 + vals4
+        vals1 = ds_sim["inf_mat_rz"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum()
+        vals2 = ds_sim["inf_mp_rz"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum()
+        vals3 = ds_sim["inf_sc_rz"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum()
+        vals4 = ds_sim["inf_ss"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum()
+        v[:, :, :] = onp.where(mask[:, :, onp.newaxis], vals1 + vals2 + vals3 + vals4, onp.nan)
         v.attrs.update(long_name="inf", units="mm/year")
 
         v = f.create_variable("inf_mat", ("x", "y", "Year"), float, compression="gzip", compression_opts=1)
-        vals1 = ds_sim["inf_mat_rz"].sel(Time=slice('2013', '2022')).resample(Time='AS').sum()
-        v[:, :, :] = vals1
+        vals1 = ds_sim["inf_mat_rz"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum()
+        v[:, :, :] = onp.where(mask[:, :, onp.newaxis], vals1, onp.nan)
         v.attrs.update(long_name="inf_mat", units="mm/year")
 
         v = f.create_variable("inf_mp", ("x", "y", "Year"), float, compression="gzip", compression_opts=1)
-        vals1 = ds_sim["inf_mp_rz"].sel(Time=slice('2013', '2022')).resample(Time='AS').sum()
-        vals2 = ds_sim["inf_ss"].sel(Time=slice('2013', '2022')).resample(Time='AS').sum()
-        v[:, :, :] = vals1 + vals2
+        vals1 = ds_sim["inf_mp_rz"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum()
+        vals2 = ds_sim["inf_ss"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum()
+        v[:, :, :] = onp.where(mask[:, :, onp.newaxis], vals1 + vals2, onp.nan)
         v.attrs.update(long_name="inf_mp", units="mm/year")
 
         v = f.create_variable("inf_sc", ("x", "y", "Year"), float, compression="gzip", compression_opts=1)
-        vals1 = ds_sim["inf_sc_rz"].sel(Time=slice('2013', '2022')).resample(Time='AS').sum()
-        v[:, :, :] = vals1
+        vals1 = ds_sim["inf_sc_rz"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum()
+        v[:, :, :] = onp.where(mask[:, :, onp.newaxis], vals1, onp.nan)
         v.attrs.update(long_name="inf_sc", units="mm/year")
