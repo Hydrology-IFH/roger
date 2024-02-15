@@ -12,22 +12,30 @@ from roger.cli.roger_run_base import roger_base_cli
                                                "ehingen-kirchen", "merklingen", "hayingen", 
                                                "kupferzell", "oehringen", "vellberg-kleinaltdorf"]), 
                                                default="freiburg")
-@click.option("--crop-rotation-scenario", type=click.Choice(["winter-wheat_clover",
-                                                             "winter-wheat_silage-corn",
-                                                             "winter-wheat_winter-rape",
+@click.option("--crop-rotation-scenario", type=click.Choice(["summer-wheat_clover_winter-wheat", 
                                                              "summer-wheat_winter-wheat", 
-                                                             "summer-wheat_clover_winter-wheat",
-                                                             "winter-wheat_clover_silage-corn",
-                                                             "winter-wheat_sugar-beet_silage-corn",
-                                                             "summer-wheat_winter-wheat_silage-corn",
+                                                             "summer-wheat_winter-wheat_silage-corn", 
                                                              "summer-wheat_winter-wheat_winter-rape", 
-                                                             "winter-wheat_winter-rape",
+                                                             "winter-wheat_clover", 
+                                                             "winter-wheat_clover_silage-corn", 
+                                                             "winter-wheat_silage-corn", 
+                                                             "winter-wheat_sugar-beet_silage-corn", 
+                                                             "winter-wheat_winter-rape", 
+                                                             "winter-wheat_soybean_winter-rape",
                                                              "winter-wheat_winter-grain-pea_winter-rape", 
-                                                             "winter-wheat_silage-corn_yellow-mustard", 
-                                                             "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
-                                                             "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
+                                                             "sugar-beet_winter-wheat_winter-barley", 
+                                                             "grain-corn_winter-wheat_winter-rape", 
+                                                             "grain-corn_winter-wheat_winter-barley",
+                                                             "grain-corn_winter-wheat_clover",
+                                                             "summer-wheat_winter-wheat_yellow-mustard", 
                                                              "summer-wheat_winter-wheat_silage-corn_yellow-mustard", 
-                                                             "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]), default="winter-wheat_silage-corn")
+                                                             "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
+                                                             "winter-wheat_silage-corn_yellow-mustard", 
+                                                             "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
+                                                             "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
+                                                             "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
+                                                             "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
+                                                             "grain-corn_winter-wheat_winter-barley_yellow-mustard"]), default="winter-wheat_silage-corn")
 @click.option("-ft", "--fertilization-intensity", type=click.Choice(["low", "medium", "high"]), default="medium")
 @click.option("-id", "--id", type=str, default="5-8_2090295_1")
 @click.option("--row", type=int, default=0)
@@ -759,11 +767,6 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 at[2:-2, 2:-2],
                 npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 1], vs.doy_fert1[2:-2, 2:-2]),
             )
-            vs.doy_fert1_org = update(
-                vs.doy_fert1_org,
-                at[2:-2, 2:-2],
-                npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 7], vs.doy_fert1_org[2:-2, 2:-2]),
-            )
             vs.doy_fert2 = update(
                 vs.doy_fert2,
                 at[2:-2, 2:-2],
@@ -773,6 +776,21 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 vs.doy_fert3,
                 at[2:-2, 2:-2],
                 npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 3], vs.doy_fert3[2:-2, 2:-2]),
+            )
+            vs.doy_fert1_org = update(
+                vs.doy_fert1_org,
+                at[2:-2, 2:-2],
+                npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 7], vs.doy_fert1_org[2:-2, 2:-2]),
+            )
+            vs.doy_fert2_org = update(
+                vs.doy_fert2_org,
+                at[2:-2, 2:-2],
+                npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 8], vs.doy_fert2_org[2:-2, 2:-2]),
+            )
+            vs.doy_fert3_org = update(
+                vs.doy_fert3_org,
+                at[2:-2, 2:-2],
+                npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 9], vs.doy_fert3_org[2:-2, 2:-2]),
             )
             vs.N_fert1 = update(
                 vs.N_fert1,
@@ -792,7 +810,17 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             vs.N_fert1_org = update(
                 vs.N_fert1_org,
                 at[2:-2, 2:-2],
-                npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 8], vs.N_fert1_org[2:-2, 2:-2]),
+                npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 10], vs.N_fert1_org[2:-2, 2:-2]),
+            )
+            vs.N_fert2_org = update(
+                vs.N_fert2_org,
+                at[2:-2, 2:-2],
+                npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 11], vs.N_fert2_org[2:-2, 2:-2]),
+            )
+            vs.N_fert3_org = update(
+                vs.N_fert3_org,
+                at[2:-2, 2:-2],
+                npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 12], vs.N_fert3_org[2:-2, 2:-2]),
             )
 
         return KernelOutput(
@@ -803,7 +831,11 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             N_fert2=vs.N_fert2,
             N_fert3=vs.N_fert3,
             doy_fert1_org=vs.doy_fert1_org,
+            doy_fert2_org=vs.doy_fert2_org,
+            doy_fert3_org=vs.doy_fert3_org,
             N_fert1_org=vs.N_fert1_org,
+            N_fert2_org=vs.N_fert2_org,
+            N_fert3_org=vs.N_fert3_org,
         )
 
     @roger_kernel
@@ -847,6 +879,16 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             at[2:-2, 2:-2, vs.tau, 0],
             npx.where((vs.doy_fert1_org[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert1_org[2:-2, 2:-2] * settings.dx * settings.dy * 100, 0),
         )
+        vs.Nmin_rz = update_add(
+            vs.Nmin_rz,
+            at[2:-2, 2:-2, vs.tau, 0],
+            npx.where((vs.doy_fert2_org[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert2_org[2:-2, 2:-2] * settings.dx * settings.dy * 100, 0),
+        )
+        vs.Nmin_rz = update_add(
+            vs.Nmin_rz,
+            at[2:-2, 2:-2, vs.tau, 0],
+            npx.where((vs.doy_fert3_org[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert3_org[2:-2, 2:-2] * settings.dx * settings.dy * 100, 0),
+        )
 
         return KernelOutput(
             Nmin_in=vs.Nmin_in,
@@ -855,6 +897,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             C_in=vs.C_in,
             Nmin_rz=vs.Nmin_rz,
         )
+
 
     model = SVATCROPNITRATESetup()
     model.setup()
