@@ -58,6 +58,11 @@ _dict_ffid = {"winter-wheat_clover": "1_0",
               "grain-corn_winter-wheat_winter-barley_yellow-mustard": "13_1", 
 }
 
+_dict_var_names = {"q_hof": "Qsur",
+                   "ground_cover": "GC",
+                   "M_q_ss": "NO3PERC"
+}
+
 
 def nanmeanweighted(y, w, axis=None):
     w1 = w / onp.nansum(w, axis=axis)
@@ -198,9 +203,9 @@ for location in locations:
         gdf['agr_region'] = 'oberrhein'
         gdf['agr_region'] = gdf['agr_region'].astype('str')
         for var_sim in vars_sim:
-            gdf[f'{var_sim}'] = None  # initialize field, float, two decimals
-            gdf[f'{var_sim}'] = gdf[f'{var_sim}'].astype('float64')
-            gdf[f'{var_sim}'] = gdf[f'{var_sim}'].round(decimals=2)
+            gdf[f'{_dict_var_names[var_sim]}_avg'] = None  # initialize field, float, two decimals
+            gdf[f'{_dict_var_names[var_sim]}_avg'] = gdf[f'{_dict_var_names[var_sim]}_avg'].astype('float64')
+            gdf[f'{_dict_var_names[var_sim]}_avg'] = gdf[f'{_dict_var_names[var_sim]}_avg'].round(decimals=2)
             ds = dict_fluxes_states[location][crop_rotation_scenario]
             sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
             df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T)
@@ -220,5 +225,5 @@ for location in locations:
                 shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
                 cond2 = gdf["SHP_ID"].isin(shp_ids)
                 if cond2.any():
-                    gdf.loc[cond2, f'{var_sim}'] = val
+                    gdf.loc[cond2, f'{_dict_var_names[var_sim]}_avg'] = val
         gdf.to_file(file, layer=f"{location}_{crop_rotation_scenario}", driver="GPKG")
