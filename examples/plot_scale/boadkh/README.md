@@ -60,11 +60,12 @@ The name of the folder contains the considered crop combinations. Each folder co
 - `merge_output.py`: Merges model output into a single file
 
 ---
-## Attribute tables
-
-Qsur_avg: Averaged annual sums of surface runoff for the period 2013-2022 (in mm/year)
-GC_avg: Averaged annual ground cover for the period 2013-2022 (-)
-NO3PERC_avg_low_Nfert: Averaged annual sums of nitrate leaching using low nitrogen fertilization intensity for the period 2013-2022 (in mm/year)
-NO3PERC_avg_medium_Nfert: Averaged annual sums of nitrate leaching using medium nitrogen fertilization intensity for the period 2013-2022 (in mm/year)
-NO3PERC_avg_high_Nfert: Averaged annual sums of nitrate leaching using high nitrogen fertilization intensity for the period 2013-2022 (in mm/year)
+## Columns of the attribute table
+- fid: Identifier of the polygon
+- SHP_ID: Identifier of the polygon
+- Qsur_avg: Averaged annual sums of surface runoff for the period 2013-2022 (in mm/year)
+- GC_avg: Averaged annual ground cover for the period 2013-2022 (-)
+- NO3PERC_lowNfert_avg: Averaged annual sums of nitrate leaching using low nitrogen fertilization intensity for the period 2013-2022 (in kg N/ha/year)
+- NO3PERC_mediumNfert_avg: Averaged annual sums of nitrate leaching using medium nitrogen fertilization intensity for the period 2013-2022 (in kg N/ha/year)
+- NO3PERC_highNfert_avg: Averaged annual sums of nitrate leaching using high nitrogen fertilization intensity for the period 2013-2022 (in kg N/ha/year)
 

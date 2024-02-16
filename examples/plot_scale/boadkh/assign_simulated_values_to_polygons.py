@@ -117,7 +117,6 @@ crop_rotation_scenarios = ["winter-wheat_clover",
                            "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
                            "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
 
-# crop_rotation_scenarios = ["winter-wheat_silage-corn"]
 fertilization_intensities = ["low", "medium", "high"]
 
 # # load buffers for assigning the simulations to the meteorological stations
@@ -187,14 +186,14 @@ for location in locations:
                 only_use_cftime_datetimes=False,
             )
             ds_nitrate = ds_nitrate.assign_coords(Time=("Time", date))
-            dict_nitrate[location][crop_rotation_scenario][fertilization_intensity] = ds_nitrate
+            dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] = ds_nitrate
 
 # aggregate ground cover to average annual mean
 # and aggregate surface runoff to average annual sum
 vars_sim = ["ground_cover", "q_hof"]
-for location in locations:
-    for crop_rotation_scenario in crop_rotation_scenarios:
-        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/svat_crop") / f"{crop_rotation_scenario}.gpkg"
+for crop_rotation_scenario in crop_rotation_scenarios:
+    for location in locations:
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output") / f"{crop_rotation_scenario}.gpkg"
         # gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"], mask=gdf_buffer[gdf_buffer.stationsna==location])
         gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
         gdf['stationsna'] = location
@@ -226,4 +225,34 @@ for location in locations:
                 cond2 = gdf["SHP_ID"].isin(shp_ids)
                 if cond2.any():
                     gdf.loc[cond2, f'{_dict_var_names[var_sim]}_avg'] = val
-        gdf.to_file(file, layer=f"{location}_{crop_rotation_scenario}", driver="GPKG")
+    gdf.to_file(file, layer=f"{location}_{crop_rotation_scenario}", driver="GPKG")
+
+# and aggregate nitrate leaching to average annual sum
+vars_sim = ["M_q_ss"]
+for crop_rotation_scenario in crop_rotation_scenarios:
+    for location in locations:
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output") / f"{crop_rotation_scenario}.gpkg"
+        # gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"], mask=gdf_buffer[gdf_buffer.stationsna==location])
+        gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
+        for var_sim in vars_sim:
+            for fertilization_intensity in fertilization_intensities:
+                gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'] = None  # initialize field, float, two decimals
+                gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'] = gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'].astype('float64')
+                gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'] = gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'].round(decimals=2)
+                ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
+                sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
+                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T)
+                # calculate annual sum
+                df_ann = df.resample("YE").sum() * 0.01  # convert from mg/m2 to kg/ha
+                # calculate average
+                df_ann_avg = df_ann.mean(axis=0).to_frame()
+                # assign aggregated values to polygons
+                for clust_id in clust_ids:
+                    cond1 = (df_params["CLUST_ID"] == clust_id) & (df_params["CLUST_flag"] == 1)
+                    val = df_ann_avg.loc[cond1, :].values[0][0]
+                    cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
+                    shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
+                    cond2 = gdf["SHP_ID"].isin(shp_ids)
+                    if cond2.any():
+                        gdf.loc[cond2, f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'] = val
+    gdf.to_file(file, layer=f"{location}_{crop_rotation_scenario}", driver="GPKG")
