@@ -8,41 +8,57 @@ import numpy as onp
 base_path = Path(__file__).parent
 
 # identifiers for simulations
+locations = ["freiburg", "lahr", "muellheim", 
+             "stockach", "gottmadingen", "weingarten",
+             "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
+             "ehingen-kirchen", "merklingen", "hayingen",
+             "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
 locations = [
-    "singen",
-    "azenweiler",
-    "unterraderach",
-    "muellheim",
     "freiburg",
-    "ihringen",
-    "altheim",
-    "kirchen",
-    "maehringen",
-    "heidelsheim",
-    "elsenz",
-    "zaberfeld",
-    "kupferzell",
-    "stachenhausen",
-    "oehringen",
 ]
-crop_rotation_scenarios = ["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", "summer-wheat_winter-wheat_corn", 
-                           "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", "winter-wheat_clover",
-                           "winter-wheat_clover_corn", "winter-wheat_corn", "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape"]
+
+crop_rotation_scenarios = ["winter-wheat_clover",
+                           "winter-wheat_silage-corn",
+                           "summer-wheat_winter-wheat",
+                           "summer-wheat_clover_winter-wheat",
+                           "winter-wheat_clover_silage-corn",
+                           "winter-wheat_sugar-beet_silage-corn",
+                           "summer-wheat_winter-wheat_silage-corn",
+                           "summer-wheat_winter-wheat_winter-rape",
+                           "winter-wheat_winter-rape",
+                           "winter-wheat_soybean_winter-rape",
+                           "sugar-beet_winter-wheat_winter-barley", 
+                           "grain-corn_winter-wheat_winter-rape", 
+                           "grain-corn_winter-wheat_winter-barley",
+                           "grain-corn_winter-wheat_clover",
+                           "winter-wheat_silage-corn_yellow-mustard",
+                           "summer-wheat_winter-wheat_yellow-mustard",
+                           "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
+                           "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
+                           "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
+                           "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
+                           "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
+                           "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
+
+# crop_rotation_scenarios = ["winter-wheat_silage-corn"]
+fertilization_intensities = ["low", "medium", "high"]
+
 
 # merge model output into single file
 for location in locations:
     for crop_rotation_scenario in crop_rotation_scenarios:
+        for fertilization_intensity in fertilization_intensities:
                 path = str(
                     base_path.parent
                     / "output"
                     / "svat_crop_nitrate"
-                    / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}.*.nc"
+                    / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.*.nc"
                 )
                 output_tm_file = (
                     base_path.parent
                     / "output"
                     / "svat_crop_nitrate"
-                    / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}.nc"
+                    / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.nc"
                 )
                 if not os.path.exists(output_tm_file):
                     diag_files = glob.glob(path)
