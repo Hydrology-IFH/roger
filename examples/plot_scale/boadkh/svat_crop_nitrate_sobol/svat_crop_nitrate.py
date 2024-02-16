@@ -670,9 +670,6 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], vs.S_SS[2:-2, 2:-2, vs.itt])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
             vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[vs.itt])
-            vs.doy = update(vs.doy, at[1], vs.DOY[vs.itt])
-            vs.year = update(vs.year, at[1], vs.YEAR[vs.itt])
-            vs.z_root = update(vs.z_root, at[2:-2, 2:-2, vs.tau], vs.Z_ROOT[2:-2, 2:-2, vs.itt])
 
             # set main crop type
             if vs.itt <= 1:
@@ -680,18 +677,162 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                     crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]), axis=-1)
                 else:
                     crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]), axis=-1)
+                crop_type = npx.where(crop_type == 582, 581, crop_type)
+                crop_type = npx.where(crop_type == 585, 584, crop_type)
                 vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type)
             if vs.year[vs.tau] > vs.year[vs.taum1]:
                 if vs.itt + 364 < settings.nitt:
                     crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, vs.itt:vs.itt+364]), axis=-1)
                 else:
                     crop_type = npx.nanmax(npx.where(vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]==599, npx.nan, vs.LU_ID[2:-2, 2:-2, settings.nitt-364:]), axis=-1)
+                crop_type = npx.where(crop_type == 582, 581, crop_type)
+                crop_type = npx.where(crop_type == 585, 584, crop_type)
                 vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], crop_type)
             # apply nitrogen fertilizer
             if vs.itt <= 1:
-                vs.update(set_fertilizer_kernel(state))
+                # set fertilization
+                if fertilization_intensity == "low":
+                    lut_fert = vs.lut_fert1
+                elif fertilization_intensity == "medium":
+                    lut_fert = vs.lut_fert2
+                elif fertilization_intensity == "high":
+                    lut_fert = vs.lut_fert3
+
+                for i in range(500, 600):
+                    mask = vs.lu_id == i 
+                    row_no = _get_row_no(vs.lut_fert1[:, 0], i)
+                    vs.doy_fert1 = update(
+                        vs.doy_fert1,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 1], vs.doy_fert1[2:-2, 2:-2]),
+                    )
+                    vs.doy_fert2 = update(
+                        vs.doy_fert2,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 2], vs.doy_fert2[2:-2, 2:-2]),
+                    )
+                    vs.doy_fert3 = update(
+                        vs.doy_fert3,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 3], vs.doy_fert3[2:-2, 2:-2]),
+                    )
+                    vs.doy_fert1_org = update(
+                        vs.doy_fert1_org,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 7], vs.doy_fert1_org[2:-2, 2:-2]),
+                    )
+                    vs.doy_fert2_org = update(
+                        vs.doy_fert2_org,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 8], vs.doy_fert2_org[2:-2, 2:-2]),
+                    )
+                    vs.doy_fert3_org = update(
+                        vs.doy_fert3_org,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 9], vs.doy_fert3_org[2:-2, 2:-2]),
+                    )
+                    vs.N_fert1 = update(
+                        vs.N_fert1,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 4], vs.N_fert1[2:-2, 2:-2]),
+                    )
+                    vs.N_fert2 = update(
+                        vs.N_fert2,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 5], vs.N_fert2[2:-2, 2:-2]),
+                    )
+                    vs.N_fert3 = update(
+                        vs.N_fert3,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 6], vs.N_fert3[2:-2, 2:-2]),
+                    )
+                    vs.N_fert1_org = update(
+                        vs.N_fert1_org,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 10], vs.N_fert1_org[2:-2, 2:-2]),
+                    )
+                    vs.N_fert2_org = update(
+                        vs.N_fert2_org,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 11], vs.N_fert2_org[2:-2, 2:-2]),
+                    )
+                    vs.N_fert3_org = update(
+                        vs.N_fert3_org,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 12], vs.N_fert3_org[2:-2, 2:-2]),
+                    )
             if vs.year[vs.tau] > vs.year[vs.taum1]:
-                vs.update(set_fertilizer_kernel(state))
+                # set fertilization
+                if fertilization_intensity == "low":
+                    lut_fert = vs.lut_fert1
+                elif fertilization_intensity == "medium":
+                    lut_fert = vs.lut_fert2
+                elif fertilization_intensity == "high":
+                    lut_fert = vs.lut_fert3
+
+                for i in range(500, 600):
+                    mask = vs.lu_id == i 
+                    row_no = _get_row_no(vs.lut_fert1[:, 0], i)
+                    vs.doy_fert1 = update(
+                        vs.doy_fert1,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 1], vs.doy_fert1[2:-2, 2:-2]),
+                    )
+                    vs.doy_fert2 = update(
+                        vs.doy_fert2,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 2], vs.doy_fert2[2:-2, 2:-2]),
+                    )
+                    vs.doy_fert3 = update(
+                        vs.doy_fert3,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 3], vs.doy_fert3[2:-2, 2:-2]),
+                    )
+                    vs.doy_fert1_org = update(
+                        vs.doy_fert1_org,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 7], vs.doy_fert1_org[2:-2, 2:-2]),
+                    )
+                    vs.doy_fert2_org = update(
+                        vs.doy_fert2_org,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 8], vs.doy_fert2_org[2:-2, 2:-2]),
+                    )
+                    vs.doy_fert3_org = update(
+                        vs.doy_fert3_org,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 9], vs.doy_fert3_org[2:-2, 2:-2]),
+                    )
+                    vs.N_fert1 = update(
+                        vs.N_fert1,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 4], vs.N_fert1[2:-2, 2:-2]),
+                    )
+                    vs.N_fert2 = update(
+                        vs.N_fert2,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 5], vs.N_fert2[2:-2, 2:-2]),
+                    )
+                    vs.N_fert3 = update(
+                        vs.N_fert3,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 6], vs.N_fert3[2:-2, 2:-2]),
+                    )
+                    vs.N_fert1_org = update(
+                        vs.N_fert1_org,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 10], vs.N_fert1_org[2:-2, 2:-2]),
+                    )
+                    vs.N_fert2_org = update(
+                        vs.N_fert2_org,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 11], vs.N_fert2_org[2:-2, 2:-2]),
+                    )
+                    vs.N_fert3_org = update(
+                        vs.N_fert3_org,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 12], vs.N_fert3_org[2:-2, 2:-2]),
+                    )
             vs.update(apply_fertilizer_kernel(state))
 
         @roger_routine
