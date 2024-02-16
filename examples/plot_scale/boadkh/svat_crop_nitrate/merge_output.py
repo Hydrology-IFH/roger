@@ -30,14 +30,28 @@ def main():
         "hayingen",
         "vellberg-kleinaltdorf",
     ]
-    crop_rotation_scenarios = ["summer-wheat_clover_winter-wheat", "summer-wheat_winter-wheat", 
-                                "summer-wheat_winter-wheat_corn", "summer-wheat_winter-wheat_winter-rape", 
-                                "winter-wheat_clover", "winter-wheat_clover_corn", "winter-wheat_corn", 
-                                "winter-wheat_sugar-beet_corn", "winter-wheat_winter-rape",
-                                "winter-wheat_winter-grain-pea_winter-rape", "summer-wheat_winter-wheat_yellow-mustard", 
-                                "summer-wheat_winter-wheat_corn_yellow-mustard", "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
-                                "winter-wheat_corn_yellow-mustard", "winter-wheat_sugar-beet_corn_yellow-mustard",
-                                "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]
+    crop_rotation_scenarios = ["winter-wheat_clover",
+                               "winter-wheat_silage-corn",
+                               "summer-wheat_winter-wheat",
+                               "summer-wheat_clover_winter-wheat",
+                               "winter-wheat_clover_silage-corn",
+                               "winter-wheat_sugar-beet_silage-corn",
+                               "summer-wheat_winter-wheat_silage-corn",
+                               "summer-wheat_winter-wheat_winter-rape",
+                               "winter-wheat_winter-rape",
+                               "winter-wheat_soybean_winter-rape",
+                               "sugar-beet_winter-wheat_winter-barley", 
+                               "grain-corn_winter-wheat_winter-rape", 
+                               "grain-corn_winter-wheat_winter-barley",
+                               "grain-corn_winter-wheat_clover",
+                               "winter-wheat_silage-corn_yellow-mustard",
+                               "summer-wheat_winter-wheat_yellow-mustard",
+                               "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
+                               "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
+                               "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
+                               "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
+                               "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
+                               "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
 
     # merge model output into single file
     for location in locations:

@@ -34,6 +34,30 @@ sns.plotting_context(
     },
 )
 
+_dict_ffid = {"winter-wheat_clover": "1_0",
+              "winter-wheat_silage-corn": "2_0",
+              "summer-wheat_winter-wheat": "3_0",
+              "summer-wheat_clover_winter-wheat": "4_0",
+              "winter-wheat_clover_silage-corn": "5_0",
+              "winter-wheat_sugar-beet_silage-corn": "6_0",
+              "summer-wheat_winter-wheat_silage-corn": "7_0",
+              "summer-wheat_winter-wheat_winter-rape": "8_0",
+              "winter-wheat_winter-rape": "9_0",
+              "winter-wheat_soybean_winter-rape": "10_0",
+              "sugar-beet_winter-wheat_winter-barley": "11_0", 
+              "grain-corn_winter-wheat_winter-rape": "12_0", 
+              "grain-corn_winter-wheat_winter-barley": "13_0",
+              "grain-corn_winter-wheat_clover": "14_0",
+              "winter-wheat_silage-corn_yellow-mustard": "2_1",
+              "summer-wheat_winter-wheat_yellow-mustard": "3_1",
+              "winter-wheat_sugar-beet_silage-corn_yellow-mustard": "6_1",
+              "summer-wheat_winter-wheat_silage-corn_yellow-mustard": "7_1",
+              "summer-wheat_winter-wheat_winter-rape_yellow-mustard": "8_1",
+              "sugar-beet_winter-wheat_winter-barley_yellow-mustard": "11_1", 
+              "grain-corn_winter-wheat_winter-rape_yellow-mustard": "12_1", 
+              "grain-corn_winter-wheat_winter-barley_yellow-mustard": "13_1", 
+}
+
 
 def nanmeanweighted(y, w, axis=None):
     w1 = w / onp.nansum(w, axis=axis)
@@ -67,25 +91,33 @@ locations = [
 
 crop_rotation_scenarios = ["winter-wheat_clover",
                            "winter-wheat_silage-corn",
-                           "winter-wheat_winter-rape",
-                           "summer-wheat_winter-wheat", 
+                           "summer-wheat_winter-wheat",
                            "summer-wheat_clover_winter-wheat",
                            "winter-wheat_clover_silage-corn",
                            "winter-wheat_sugar-beet_silage-corn",
                            "summer-wheat_winter-wheat_silage-corn",
-                           "summer-wheat_winter-wheat_winter-rape", 
+                           "summer-wheat_winter-wheat_winter-rape",
                            "winter-wheat_winter-rape",
-                           "winter-wheat_winter-grain-pea_winter-rape", 
-                           "winter-wheat_silage-corn_yellow-mustard", 
-                           "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
+                           "winter-wheat_soybean_winter-rape",
+                           "sugar-beet_winter-wheat_winter-barley", 
+                           "grain-corn_winter-wheat_winter-rape", 
+                           "grain-corn_winter-wheat_winter-barley",
+                           "grain-corn_winter-wheat_clover",
+                           "winter-wheat_silage-corn_yellow-mustard",
+                           "summer-wheat_winter-wheat_yellow-mustard",
                            "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
-                           "summer-wheat_winter-wheat_silage-corn_yellow-mustard", 
-                           "summer-wheat_winter-wheat_winter-rape_yellow-mustard"]
-# crop_rotation_scenarios = ["winter-wheat_silage-corn"]
+                           "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
+                           "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
+                           "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
+                           "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
+                           "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
 
-# load buffers for assigning the simulations to the meteorological stations
-file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "buffer30km_NBiomasseBW_assigment.gpkg"
-gdf_buffer = gpd.read_file(file, include_fields=["fid", "station_id", "stationsna", "agr_region"])
+# crop_rotation_scenarios = ["winter-wheat_silage-corn"]
+fertilization_intensities = ["low", "medium", "high"]
+
+# # load buffers for assigning the simulations to the meteorological stations
+# file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "buffer30km_NBiomasseBW_assignment.gpkg"
+# gdf_buffer = gpd.read_file(file, include_fields=["fid", "station_id", "stationsna", "agr_region"])
 
 # load linkage between BK50 and cropland clusters
 file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "link_shp_clust_acker.h5"
@@ -93,10 +125,10 @@ df_link_bk50_cluster_cropland = pd.read_hdf(file)
 
 # prepare shapefiles for each location and crop rotation scenario
 for crop_rotation_scenario in crop_rotation_scenarios:
-    new_file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/svat_crop") / f"surface_runoff_ground_cover_{crop_rotation_scenario}.gpkg"
+    new_file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/svat_crop") / f"{crop_rotation_scenario}.gpkg"
     if not os.path.exists(new_file):
-        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW.gpkg"
-        gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"], mask=gdf_buffer)
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
+        gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
         gdf.to_file(new_file, driver="GPKG")
 
 # load model parameters
@@ -127,15 +159,43 @@ for location in locations:
         ds_fluxes_states = ds_fluxes_states.assign_coords(Time=("Time", date))
         dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
 
+# load nitrogen loads and concentrations
+dict_nitrate = {}
+for location in locations:
+    dict_nitrate[location] = {}
+    for crop_rotation_scenario in crop_rotation_scenarios:
+        dict_nitrate[location][crop_rotation_scenario] = {}
+        for fertilization_intensity in fertilization_intensities:
+            dict_nitrate[location][crop_rotation_scenario][fertilization_intensity] = {}
+            output_nitrate_file = (
+                base_path_output
+                / "svat_crop_nitrate"
+                / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.nc"
+            )
+            ds_nitrate = xr.open_dataset(output_nitrate_file, engine="h5netcdf")
+            # assign date
+            days = ds_nitrate["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+            date = num2date(
+                days,
+                units=f"days since {ds_nitrate['Time'].attrs['time_origin']}",
+                calendar="standard",
+                only_use_cftime_datetimes=False,
+            )
+            ds_nitrate = ds_nitrate.assign_coords(Time=("Time", date))
+            dict_nitrate[location][crop_rotation_scenario][fertilization_intensity] = ds_nitrate
+
 # aggregate ground cover to average annual mean
+# and aggregate surface runoff to average annual sum
 vars_sim = ["ground_cover", "q_hof"]
 for location in locations:
     for crop_rotation_scenario in crop_rotation_scenarios:
-        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/svat_crop") / f"surface_runoff_ground_cover_{crop_rotation_scenario}.gpkg"
-        gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"], mask=gdf_buffer[gdf_buffer.stationsna==location],)
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/svat_crop") / f"{crop_rotation_scenario}.gpkg"
+        # gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"], mask=gdf_buffer[gdf_buffer.stationsna==location])
+        gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
         gdf['stationsna'] = location
         gdf['stationsna'] = gdf['stationsna'].astype('str')
-        gdf['agr_region'] = gdf_buffer[gdf_buffer.stationsna==location].agr_region.values[0]
+        # gdf['agr_region'] = gdf_buffer[gdf_buffer.stationsna==location].agr_region.values[0]
+        gdf['agr_region'] = 'oberrhein'
         gdf['agr_region'] = gdf['agr_region'].astype('str')
         for var_sim in vars_sim:
             gdf[f'{var_sim}'] = None  # initialize field, float, two decimals
