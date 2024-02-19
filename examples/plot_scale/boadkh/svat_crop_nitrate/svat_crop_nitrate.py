@@ -852,7 +852,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         vs = state.variables
         settings = state.settings
 
-        _c1 = 0.7
+        _c1 = 0.3
         _c2 = 1 - _c1
 
         # apply mineral nitrogen fertilizer
