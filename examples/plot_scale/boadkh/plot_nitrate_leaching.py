@@ -113,11 +113,11 @@ _lab_unit_daily = {
     "theta_pwp": r"$\theta_{pwp}$ [-]",
     "ks": "$k_s$ [mm/day]",
     "ground_cover": "GC [-]",
-    "M_q_ss": "$NO_3$${}_{PERC}$ [kg $NO_3$-N/day/ha]",
+    "M_q_ss": "PERC-$NO_3$\n [kg $NO_3$-N/day/ha]",
 }
 
 _lab_unit_annual = {
-    "M_q_ss": "$NO_3$${}_{PERC}$ [kg $NO_3$-N/year/ha]",
+    "M_q_ss": "PERC-$NO_3$\n  [kg $NO_3$-N/year/ha]",
 }
 
 _lab_unit2 = {
@@ -126,7 +126,7 @@ _lab_unit2 = {
     "transp": "TRANSP [mm]",
     "evap_soil": "$EVAP_{soil}$ [mm]",
     "ground_cover": "GC [-]",
-    "M_q_ss": "$NO_3$${}_{PERC}$ [kg $NO_3$-N]"
+    "M_q_ss": "PERC-$NO_3$ [kg $NO_3$-N]"
 }
 
 # load model parameters

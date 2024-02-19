@@ -394,22 +394,55 @@ def calc_denit_gw(state, msa, k):
 def calc_nitrogen_cycle_kernel(state):
     vs = state.variables
 
+    nfix = allocate(state.dimensions, ("x", "y"))
+    nfix = update(
+        nfix,
+        at[2:-2, 2:-2],
+        calc_n_fixation(state, vs.kfix_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.nfix_s = update(
+        vs.nfix_s,
+        at[2:-2, 2:-2],
+        nfix[2:-2, 2:-2],
+    )   
+
+    min_rz = allocate(state.dimensions, ("x", "y"))
+    min_rz = update(
+        min_rz,
+        at[2:-2, 2:-2],
+        calc_min_soil(state, vs.kmin_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    min_ss = allocate(state.dimensions, ("x", "y"))
+    min_ss = update(
+        min_ss,
+        at[2:-2, 2:-2],
+        calc_min_soil(state, vs.kmin_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.min_s = update(
+        vs.min_s,
+        at[2:-2, 2:-2],
+        min_rz[2:-2, 2:-2] + min_ss[2:-2, 2:-2],
+    )  
+
     vs.Nmin_rz = update_add(
         vs.Nmin_rz,
         at[2:-2, 2:-2, vs.tau, 0],
-        calc_n_fixation(state, vs.kfix_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        nfix[2:-2, 2:-2],
     )
 
     vs.Nmin_rz = update_add(
         vs.Nmin_rz,
         at[2:-2, 2:-2, vs.tau, 0],
-        calc_min_soil(state, vs.kmin_rz)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        min_rz[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.Nmin_ss = update_add(
         vs.Nmin_ss,
         at[2:-2, 2:-2, vs.tau, 0],
-        calc_min_soil(state, vs.kmin_ss)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        min_ss[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.ma_rz = update(
@@ -528,6 +561,8 @@ def calc_nitrogen_cycle_kernel(state):
         Nmin_s=vs.Nmin_s,
         nit_s=vs.nit_s,
         denit_s=vs.denit_s,
+        min_s=vs.min_s,
+        nfix_s=vs.nfix_s,
     )
 
 
