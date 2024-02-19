@@ -982,10 +982,14 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
         vs = state.variables
         settings = state.settings
 
-        _c1 = 0.7
+        _c1 = 0.3
         _c2 = 1 - _c1
 
         # apply mineral nitrogen fertilizer
+        vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], 0)
+        vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert1[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nfert_min[2:-2, 2:-2]))
+        vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nfert_min[2:-2, 2:-2]))
+        vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nfert_min[2:-2, 2:-2]))
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert1[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
@@ -1013,21 +1017,19 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
         vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.inf_in_tracer[2:-2, 2:-2] > settings.cum_inf_for_N_input), 0, vs.inf_in_tracer[2:-2, 2:-2]))
 
         # apply organic nitrogen fertilizer
+        vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], 0)
+        vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert1[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nfert_org[2:-2, 2:-2]))
+        vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nfert_org[2:-2, 2:-2]))
+        vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nfert_org[2:-2, 2:-2]))
         vs.Nmin_rz = update_add(
             vs.Nmin_rz,
             at[2:-2, 2:-2, vs.tau, 0],
-            npx.where((vs.doy_fert1_org[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert1_org[2:-2, 2:-2] * settings.dx * settings.dy * 100, 0),
+            vs.N_fert_org[2:-2, 2:-2]
         )
-        vs.Nmin_rz = update_add(
-            vs.Nmin_rz,
-            at[2:-2, 2:-2, vs.tau, 0],
-            npx.where((vs.doy_fert2_org[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert2_org[2:-2, 2:-2] * settings.dx * settings.dy * 100, 0),
-        )
-        vs.Nmin_rz = update_add(
-            vs.Nmin_rz,
-            at[2:-2, 2:-2, vs.tau, 0],
-            npx.where((vs.doy_fert3_org[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert3_org[2:-2, 2:-2] * settings.dx * settings.dy * 100, 0),
-        )
+
+        # summarize total nitrogen fertilizer
+        vs.Nfert = update(vs.Nfert, at[2:-2, 2:-2], 0)
+        vs.Nfert = update(vs.Nfert, at[2:-2, 2:-2], vs.Nfert_org[2:-2, 2:-2] + vs.Nfert_min[2:-2, 2:-2])
 
         return KernelOutput(
             Nmin_in=vs.Nmin_in,
@@ -1035,6 +1037,9 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             M_in=vs.M_in,
             C_in=vs.C_in,
             Nmin_rz=vs.Nmin_rz,
+            Nfert_min=vs.Nfert_min,
+            Nfert_org=vs.Nfert_org,
+            Nfert=vs.Nfert,
         )
 
 

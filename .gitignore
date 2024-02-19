@@ -173,6 +173,7 @@ examples/plot_scale/freiburg_altheim_kupferzell/rename_output.py
 *_debug*/
 *.gpkg
 *.shp
+open_jobs.txt
 
 
 # Slides or Word

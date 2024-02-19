@@ -91,12 +91,11 @@ crop_rotation_scenarios = ["winter-wheat_clover",
 fertilization_intensities = ["low", "medium", "high"]
 
 
-_lab_unit1 = {
-    "M_q_ss": "$NO_3$${}_{PERC}$ [kg $NO_3$-N/day/ha]",
-}
-
-_lab_unit2 = {
-    "M_q_ss": "$NO_3$${}_{PERC}$ [kg $NO_3$-N]"
+_lab_unit_annual = {
+    "M_in": "FERT-$NO_3$\n [kg $NO_3$-N/year/ha]",
+    "M_transp": "TRANSP-$NO_3$\n [kg $NO_3$-N/year/ha]",
+    "M_s": "SOIL-$NO_3$\n [kg $NO_3$-N/ha]",
+    "M_q_ss": "PERC-$NO_3$\n [kg $NO_3$-N/year/ha]",
 }
 
 # load model parameters
@@ -133,56 +132,100 @@ for location in locations:
             dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] = ds_nitrate
 
 
+# plot annual nitrate-nitrogen balance
+vars_sim = ["M_in", "M_transp", "M_s", "M_q_ss"]
 for crop_rotation_scenario in crop_rotation_scenarios:
     for location in locations:
         for fertilization_intensity in fertilization_intensities:
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            for var_sim in vars_sim:
-                sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01
+            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
+            fig, axes = plt.subplots(4, 1, figsize=(6, 6)) 
+            for i, var_sim in enumerate(vars_sim):
+                sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
                 cond1 = (df_params["CLUST_flag"] == 1)
                 df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-                vals = df.values.T * 0.01
-                fig, ax = plt.subplots(1, 1, figsize=(6, 2))
-                median_vals = onp.median(vals, axis=0)
-                min_vals = onp.min(vals, axis=0)
-                max_vals = onp.max(vals, axis=0)
-                p5_vals = onp.nanquantile(vals, 0.05, axis=0)
-                p25_vals = onp.nanquantile(vals, 0.25, axis=0)
-                p75_vals = onp.nanquantile(vals, 0.75, axis=0)
-                p95_vals = onp.nanquantile(vals, 0.95, axis=0)
-                ax.fill_between(
-                    df.index,
-                    min_vals,
-                    max_vals,
-                    edgecolor='grey',
-                    facecolor='grey',
-                    alpha=0.33,
-                    label="Min-Max interval",
-                )
-                ax.fill_between(
-                    df.index,
-                    p5_vals,
-                    p95_vals,
-                    edgecolor='grey',
-                    facecolor='grey',
-                    alpha=0.66,
-                    label="95% interval",
-                )
-                ax.fill_between(
-                    df.index,
-                    p25_vals,
-                    p75_vals,
-                    edgecolor='grey',
-                    facecolor='grey',
-                    alpha=1,
-                    label="75% interval",
-                )
-                ax.plot(df.index, median_vals, color="black", label="Median", linewidth=1)
-                ax.legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
-                ax.set_xlabel("Time [Year]")
-                ax.set_ylabel(_lab_unit1[var_sim])
-                ax.set_xlim(df.index[0], df.index[-1])
+                if var_sim in ["M_s"]:
+                    # calculate annual sum
+                    df_ann = df.resample("YE").sum().iloc[:-1, :]
+                    df_ann.loc[:, "year"] = df_ann.index.year
+                    df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
+                    df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
+                else:
+                    # calculate annual average
+                    df_ann = df.resample("YE").mean().iloc[:-1, :]
+                    df_ann.loc[:, "year"] = df_ann.index.year
+                    df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
+                    df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
+    
+                sns.boxplot(data=df_ann_long, x="year", y="vals", ax=axes[i], color="red", whis=(5, 95), showfliers=False)
+                axes[i].set_xlabel("Time [Year]")
+                axes[i].set_ylabel(_lab_unit_annual[var_sim])
+                axes[i].set_ylim(0, )
                 fig.tight_layout()
-                file = base_path_figs / f"trace_{var_sim}_{location}_{crop_rotation_scenario}.png"
+                file = base_path_figs / f"boxplot_{var_sim}_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.png"
                 fig.savefig(file, dpi=250)
                 plt.close(fig)
+
+# plot annual nitrate-nitrogen balance
+vars_sim = ["M_in", "M_transp", "M_s", "M_q_ss"]
+for crop_rotation_scenario in crop_rotation_scenarios:
+    for location in locations:
+        fig, axes = plt.subplots(4, 1, figsize=(6, 6)) 
+        for i, var_sim in enumerate(vars_sim):
+            ll_df = []
+            for fertilization_intensity in fertilization_intensities:
+                ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
+                sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
+                cond1 = (df_params["CLUST_flag"] == 1)
+                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+                if var_sim in ["M_s"]:
+                    # calculate annual sum
+                    df_ann = df.resample("YE").sum().iloc[:-1, :]
+                    df_ann.loc[:, "year"] = df_ann.index.year
+                    df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
+                    df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
+                else:
+                    # calculate annual average
+                    df_ann = df.resample("YE").mean().iloc[:-1, :]
+                    df_ann.loc[:, "year"] = df_ann.index.year
+                    df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
+                    df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
+    
+            sns.boxplot(data=df_ann_long, x="year", y="vals", ax=axes[i], color="red", whis=(5, 95), showfliers=False)
+            axes[i].set_xlabel("Time [Year]")
+            axes[i].set_ylabel(_lab_unit_annual[var_sim])
+            axes[i].set_ylim(0, )
+        fig.tight_layout()
+        file = base_path_figs / f"boxplot_{var_sim}_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.png"
+        fig.savefig(file, dpi=250)
+        plt.close(fig)
+
+
+vars_sim = ["M_q_ss"]
+for crop_rotation_scenario in crop_rotation_scenarios:
+    for location in locations:
+        for var_sim in vars_sim:
+            ll_df = []
+            for fertilization_intensity in fertilization_intensities:
+                ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+                sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
+                cond1 = (df_params["CLUST_flag"] == 1)
+                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+                # calculate annual sum
+                df_ann = df.resample("YE").sum().iloc[:-1, :]
+                df_ann.loc[:, "year"] = df_ann.index.year
+                df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
+                df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
+                ll_df.append(df_ann_long)
+
+        df_ann_long = pd.concat(ll_df)
+    
+        fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+        sns.boxplot(data=df_ann_long, x="year", y="vals", hue="Nfert", ax=ax, whis=(5, 95), palette="magma_r", showfliers=False)
+        ax.set_xlabel("Time [Year]")
+        ax.set_ylabel(_lab_unit_annual[var_sim])
+        ax.set_ylim(0, )
+        plt.legend(title="N-Fertilization intensity", frameon=False)
+        fig.tight_layout()
+        file = base_path_figs / f"boxplot_{var_sim}_{location}_{crop_rotation_scenario}.png"
+        fig.savefig(file, dpi=250)
+        plt.close(fig)
