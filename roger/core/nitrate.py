@@ -228,12 +228,12 @@ def calc_nit_soil(state, Nmin, knit, Dnit, sa, S_sat):
         * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # no nitrification if storage is greater than 70 % of pore volume
+    # no nitrification if storage is greater than 90 % of pore volume
     ma_pot = update(
         ma_pot,
         at[2:-2, 2:-2],
         npx.where(
-            S[2:-2, 2:-2] < 0.7 * S_sat[2:-2, 2:-2],
+            S[2:-2, 2:-2] < 0.9 * S_sat[2:-2, 2:-2],
             ma_pot[2:-2, 2:-2],
             0,
         )
