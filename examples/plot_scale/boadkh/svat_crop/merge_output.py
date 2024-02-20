@@ -7,6 +7,7 @@ import numpy as onp
 from cftime import num2date
 import pandas as pd
 import click
+import roger
 
 
 @click.command("main")
@@ -62,6 +63,7 @@ def main():
                             references="",
                             comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
                             model_structure="SVAT model with free drainage and crop phenology",
+                            roger_version=f"{roger.__version__}",
                         )
                         # collect dimensions
                         for dfs in diag_files:

@@ -5,6 +5,7 @@ import h5netcdf
 import datetime
 import numpy as onp
 import click
+import roger
 
 
 @click.command("main")
@@ -22,29 +23,28 @@ def main():
     ]
 
     crop_rotation_scenarios = ["winter-wheat_clover",
-                            "winter-wheat_silage-corn",
-                            "summer-wheat_winter-wheat",
-                            "summer-wheat_clover_winter-wheat",
-                            "winter-wheat_clover_silage-corn",
-                            "winter-wheat_sugar-beet_silage-corn",
-                            "summer-wheat_winter-wheat_silage-corn",
-                            "summer-wheat_winter-wheat_winter-rape",
-                            "winter-wheat_winter-rape",
-                            "winter-wheat_soybean_winter-rape",
-                            "sugar-beet_winter-wheat_winter-barley", 
-                            "grain-corn_winter-wheat_winter-rape", 
-                            "grain-corn_winter-wheat_winter-barley",
-                            "grain-corn_winter-wheat_clover",
-                            "winter-wheat_silage-corn_yellow-mustard",
-                            "summer-wheat_winter-wheat_yellow-mustard",
-                            "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
-                            "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
-                            "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
-                            "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
-                            "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                            "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
+                               "winter-wheat_silage-corn",
+                               "summer-wheat_winter-wheat",
+                               "summer-wheat_clover_winter-wheat",
+                               "winter-wheat_clover_silage-corn",
+                               "winter-wheat_sugar-beet_silage-corn",
+                               "summer-wheat_winter-wheat_silage-corn",
+                               "summer-wheat_winter-wheat_winter-rape",
+                               "winter-wheat_winter-rape",
+                               "winter-wheat_soybean_winter-rape",
+                               "sugar-beet_winter-wheat_winter-barley", 
+                               "grain-corn_winter-wheat_winter-rape", 
+                               "grain-corn_winter-wheat_winter-barley",
+                               "grain-corn_winter-wheat_clover",
+                               "winter-wheat_silage-corn_yellow-mustard",
+                               "summer-wheat_winter-wheat_yellow-mustard",
+                               "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
+                               "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
+                               "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
+                               "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
+                               "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
+                               "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
 
-    # crop_rotation_scenarios = ["winter-wheat_silage-corn"]
     fertilization_intensities = ["low", "medium", "high"]
 
     # merge model output into single file
@@ -67,13 +67,15 @@ def main():
                 if diag_files:
                     if not os.path.exists(output_tm_file):
                         with h5netcdf.File(output_tm_file, "w", decode_vlen_strings=False) as f:
+                            crop_rotation_scenario1 = crop_rotation_scenario.replace("_", ", ")
                             f.attrs.update(
                                 date_created=datetime.datetime.today().isoformat(),
-                                title=f"RoGeR nitrate transport simulations at {location}",
+                                title=f"RoGeR nitrate transport simulations at {location} with crop rotation scenario {crop_rotation_scenario1} and {fertilization_intensity} fertilization intensity",
                                 institution="University of Freiburg, Chair of Hydrology",
                                 references="",
                                 comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
                                 model_structure="SVAT model with free drainage, crop phenology and time-variant power law distribution as SAS function with advective-dispersive parameters",
+                                roger_version=f"{roger.__version__}",
                             )
                             # collect dimensions
                             for dfs in diag_files:
