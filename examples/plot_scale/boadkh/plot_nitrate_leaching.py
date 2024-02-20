@@ -3,10 +3,9 @@ from pathlib import Path
 import xarray as xr
 from cftime import num2date
 import pandas as pd
+import geopandas as gpd
 import numpy as onp
-import roger.tools.labels as labs
 import matplotlib as mpl
-import matplotlib.dates as mdates
 import seaborn as sns
 
 mpl.use("agg")
@@ -55,6 +54,30 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
+_dict_ffid = {"winter-wheat_clover": "1_0",
+              "winter-wheat_silage-corn": "2_0",
+              "summer-wheat_winter-wheat": "3_0",
+              "summer-wheat_clover_winter-wheat": "4_0",
+              "winter-wheat_clover_silage-corn": "5_0",
+              "winter-wheat_sugar-beet_silage-corn": "6_0",
+              "summer-wheat_winter-wheat_silage-corn": "7_0",
+              "summer-wheat_winter-wheat_winter-rape": "8_0",
+              "winter-wheat_winter-rape": "9_0",
+              "winter-wheat_soybean_winter-rape": "10_0",
+              "sugar-beet_winter-wheat_winter-barley": "11_0", 
+              "grain-corn_winter-wheat_winter-rape": "12_0", 
+              "grain-corn_winter-wheat_winter-barley": "13_0",
+              "grain-corn_winter-wheat_clover": "14_0",
+              "winter-wheat_silage-corn_yellow-mustard": "2_1",
+              "summer-wheat_winter-wheat_yellow-mustard": "3_1",
+              "winter-wheat_sugar-beet_silage-corn_yellow-mustard": "6_1",
+              "summer-wheat_winter-wheat_silage-corn_yellow-mustard": "7_1",
+              "summer-wheat_winter-wheat_winter-rape_yellow-mustard": "8_1",
+              "sugar-beet_winter-wheat_winter-barley_yellow-mustard": "11_1", 
+              "grain-corn_winter-wheat_winter-rape_yellow-mustard": "12_1", 
+              "grain-corn_winter-wheat_winter-barley_yellow-mustard": "13_1", 
+}
+
 # identifiers for simulations
 locations = ["freiburg", "lahr", "muellheim", 
              "stockach", "gottmadingen", "weingarten",
@@ -92,27 +115,6 @@ fertilization_intensities = ["low", "medium", "high"]
 
 
 _lab_unit_daily = {
-    "q_ss": "PERC [mm/day]",
-    "q_hof": "$Q_{HOF}$ [mm/day]",
-    "transp": "TRANSP [mm/day]",
-    "evap_soil": "$EVAP_{soil}$ [mm/day]",
-    "theta": r"$\theta$ [-]",
-    "tt10_transp": "$TT_{10-TRANSP}$ [days]",
-    "tt50_transp": "$TT_{50-TRANSP}$ [days]",
-    "tt90_transp": "$TT_{90-TRANSP}$ [days]",
-    "tt10_q_ss": "$TT_{10-PERC}$ [days]",
-    "tt50_q_ss": "$TT_{50-PERC}$ [days]",
-    "tt90_q_ss": "$TT_{90-PERC}$ [days]",
-    "rt10_s": "$RT_{10}$ [days]",
-    "rt50_s": "$RT_{50}$ [days]",
-    "rt90_s": "$RT_{90}$ [days]",
-    "M_transp": "$M_{TRANSP}$ [mg]",
-    "M_q_ss": "$M_{PERC}$ [mg]",
-    "theta_ac": r"$\theta_{ac}$ [-]",
-    "theta_ufc": r"$\theta_{ufc}$ [-]",
-    "theta_pwp": r"$\theta_{pwp}$ [-]",
-    "ks": "$k_s$ [mm/day]",
-    "ground_cover": "GC [-]",
     "M_q_ss": "PERC-$NO_3$\n [kg $NO_3$-N/day/ha]",
 }
 
@@ -120,12 +122,7 @@ _lab_unit_annual = {
     "M_q_ss": "PERC-$NO_3$\n  [kg $NO_3$-N/year/ha]",
 }
 
-_lab_unit2 = {
-    "q_ss": "PERC [mm]",
-    "q_hof": "$Q_{HOF}$ [mm]",
-    "transp": "TRANSP [mm]",
-    "evap_soil": "$EVAP_{soil}$ [mm]",
-    "ground_cover": "GC [-]",
+_lab_unit_total = {
     "M_q_ss": "PERC-$NO_3$ [kg $NO_3$-N]"
 }
 
@@ -134,86 +131,17 @@ csv_file = base_path / "parameters.csv"
 df_params = pd.read_csv(csv_file, sep=";", skiprows=1)
 clust_ids = pd.unique(df_params["CLUST_ID"].values).tolist()
 
-# # load simulated fluxes and states
-# dict_fluxes_states = {}
-# for location in locations:
-#     dict_fluxes_states[location] = {}
-#     for crop_rotation_scenario in crop_rotation_scenarios:
-#         dict_fluxes_states[location][crop_rotation_scenario] = {}
-#         output_hm_file = (
-#             base_path_output
-#             / "svat_crop"
-#             / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-#         )
-#         ds_fluxes_states = xr.open_dataset(output_hm_file, engine="h5netcdf")
-#         # assign date
-#         days = ds_fluxes_states["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
-#         date = num2date(
-#             days,
-#             units=f"days since {ds_fluxes_states['Time'].attrs['time_origin']}",
-#             calendar="standard",
-#             only_use_cftime_datetimes=False,
-#         )
-#         ds_fluxes_states = ds_fluxes_states.assign_coords(Time=("Time", date))
-#         dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
+# # load linkage between BK50 and cropland clusters
+# file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "link_shp_clust_acker.h5"
+# df_link_bk50_cluster_cropland = pd.read_hdf(file)
 
+# # load BK50 shapefile for Freiburg
+# file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
+# gdf_bk50 = gpd.read_file(file, include_fields=["SHP_ID", "area"]).loc[:, ["SHP_ID", "area"]]
 
-# vars_sim = ["ground_cover", "q_hof"]
-# for crop_rotation_scenario in crop_rotation_scenarios:
-#     for location in locations:
-#         for var_sim in vars_sim:
-#             ds = dict_fluxes_states[location][crop_rotation_scenario]
-#             sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
-#             cond1 = (df_params["CLUST_flag"] == 1)
-#             df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-#             vals = df.values.T
-#             fig, ax = plt.subplots(1, 1, figsize=(6, 2))
-#             median_vals = onp.median(vals, axis=0)
-#             min_vals = onp.min(vals, axis=0)
-#             max_vals = onp.max(vals, axis=0)
-#             p5_vals = onp.nanquantile(vals, 0.05, axis=0)
-#             p25_vals = onp.nanquantile(vals, 0.25, axis=0)
-#             p75_vals = onp.nanquantile(vals, 0.75, axis=0)
-#             p95_vals = onp.nanquantile(vals, 0.95, axis=0)
-#             ax.fill_between(
-#                 df.index,
-#                 min_vals,
-#                 max_vals,
-#                 edgecolor='grey',
-#                 facecolor='grey',
-#                 alpha=0.33,
-#                 label="Min-Max interval",
-#             )
-#             ax.fill_between(
-#                 df.index,
-#                 p5_vals,
-#                 p95_vals,
-#                 edgecolor='grey',
-#                 facecolor='grey',
-#                 alpha=0.66,
-#                 label="95% interval",
-#             )
-#             ax.fill_between(
-#                 df.index,
-#                 p25_vals,
-#                 p75_vals,
-#                 edgecolor='grey',
-#                 facecolor='grey',
-#                 alpha=1,
-#                 label="75% interval",
-#             )
-#             ax.plot(df.index, median_vals, color="black", label="Median", linewidth=1)
-#             ax.legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
-#             ax.set_xlabel("Time [Year]")
-#             ax.set_ylabel(_lab_unit_daily[var_sim])
-#             ax.set_xlim(df.index[0], df.index[-1])
-#             fig.tight_layout()
-#             file = base_path_figs / f"trace_{var_sim}_{location}_{crop_rotation_scenario}.png"
-#             fig.savefig(file, dpi=250)
-#             plt.close(fig)
-
-
-crop_rotation_scenarios = ["winter-wheat_winter-rape"]
+# # get unique cluster ids for cropland
+# cond = onp.isin(df_link_bk50_cluster_cropland.index.values, gdf_bk50["SHP_ID"].values)
+# clust_ids = onp.unique(df_link_bk50_cluster_cropland.loc[cond, "CLUST_ID"].values).astype(str)
 
 # load nitrogen loads and concentrations
 dict_nitrate = {}
@@ -240,6 +168,7 @@ for location in locations:
             ds_nitrate = ds_nitrate.assign_coords(Time=("Time", date))
             dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] = ds_nitrate
 
+# # plot daily values
 # vars_sim = ["M_q_ss"]
 # for crop_rotation_scenario in crop_rotation_scenarios:
 #     for location in locations:
@@ -295,59 +224,90 @@ for location in locations:
 #                 fig.savefig(file, dpi=250)
 #                 plt.close(fig)
 
-# plot annual sums
-vars_sim = ["M_q_ss"]
-for crop_rotation_scenario in crop_rotation_scenarios:
-    for location in locations:
-        for fertilization_intensity in fertilization_intensities:
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            for var_sim in vars_sim:
-                sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
-                cond1 = (df_params["CLUST_flag"] == 1)
-                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-                # calculate annual sum
-                df_ann = df.resample("YE").sum().iloc[:-1, :]
-                df_ann.loc[:, "year"] = df_ann.index.year
-                df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
-                df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
+# # plot annual sums
+# vars_sim = ["M_q_ss"]
+# for crop_rotation_scenario in crop_rotation_scenarios:
+#     for location in locations:
+#         for fertilization_intensity in fertilization_intensities:
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             for var_sim in vars_sim:
+#                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
+#                 cond1 = (df_params["CLUST_flag"] == 1)
+#                 df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+#                 # calculate annual sum
+#                 df_ann = df.resample("YE").sum().iloc[:-1, :]
+#                 df_ann.loc[:, "year"] = df_ann.index.year
+#                 df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
+#                 df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
     
-                fig, ax = plt.subplots(1, 1, figsize=(6, 2))
-                sns.boxplot(data=df_ann_long, x="year", y="vals", ax=ax, color="red", whis=(5, 95), showfliers=False)
-                ax.set_xlabel("Time [Year]")
-                ax.set_ylabel(_lab_unit_annual[var_sim])
-                ax.set_ylim(0, )
-                fig.tight_layout()
-                file = base_path_figs / f"boxplot_{var_sim}_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.png"
-                fig.savefig(file, dpi=250)
-                plt.close(fig)
+#                 fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+#                 sns.boxplot(data=df_ann_long, x="year", y="vals", ax=ax, color="red", whis=(5, 95), showfliers=False)
+#                 ax.set_xlabel("Time [Year]")
+#                 ax.set_ylabel(_lab_unit_annual[var_sim])
+#                 ax.set_ylim(0, )
+#                 fig.tight_layout()
+#                 file = base_path_figs / f"boxplot_{var_sim}_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.png"
+#                 fig.savefig(file, dpi=250)
+#                 plt.close(fig)
 
+# vars_sim = ["M_q_ss"]
+# for crop_rotation_scenario in crop_rotation_scenarios:
+#     for location in locations:
+#         for var_sim in vars_sim:
+#             ll_df = []
+#             for fertilization_intensity in fertilization_intensities:
+#                 ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
+#                 cond1 = (df_params["CLUST_flag"] == 1)
+#                 df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+#                 # calculate annual sum
+#                 df_ann = df.resample("YE").sum().iloc[:-1, :]
+#                 df_ann.loc[:, "year"] = df_ann.index.year
+#                 df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
+#                 df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
+#                 ll_df.append(df_ann_long)
+
+#         df_ann_long = pd.concat(ll_df)
+    
+#         fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+#         sns.boxplot(data=df_ann_long, x="year", y="vals", hue="Nfert", ax=ax, whis=(5, 95), palette="magma_r", showfliers=False)
+#         ax.set_xlabel("Time [Year]")
+#         ax.set_ylabel(_lab_unit_annual[var_sim])
+#         ax.set_ylim(0, )
+#         plt.legend(title="N-Fertilization intensity", frameon=False)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_{var_sim}_{location}_{crop_rotation_scenario}.png"
+#         fig.savefig(file, dpi=250)
+#         plt.close(fig)
+
+# plot average annual sum
+colors = sns.color_palette("magma_r", n_colors=len(fertilization_intensities))
 vars_sim = ["M_q_ss"]
-for crop_rotation_scenario in crop_rotation_scenarios:
+for var_sim in vars_sim:
     for location in locations:
-        for var_sim in vars_sim:
+        fig, axes = plt.subplots(3, 1, figsize=(6, 6), sharex=True, sharey=True)
+        for i, fertilization_intensity in enumerate(fertilization_intensities):
             ll_df = []
-            for fertilization_intensity in fertilization_intensities:
+            for crop_rotation_scenario in crop_rotation_scenarios:
                 ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
                 cond1 = (df_params["CLUST_flag"] == 1)
                 df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
                 # calculate annual sum
-                df_ann = df.resample("YE").sum().iloc[:-1, :]
-                df_ann.loc[:, "year"] = df_ann.index.year
-                df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
-                df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
-                ll_df.append(df_ann_long)
-
-        df_ann_long = pd.concat(ll_df)
-    
-        fig, ax = plt.subplots(1, 1, figsize=(6, 2))
-        sns.boxplot(data=df_ann_long, x="year", y="vals", hue="Nfert", ax=ax, whis=(5, 95), palette="magma_r", showfliers=False)
-        ax.set_xlabel("Time [Year]")
-        ax.set_ylabel(_lab_unit_annual[var_sim])
-        ax.set_ylim(0, )
-        plt.legend(title="N-Fertilization intensity", frameon=False)
+                df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+                df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+                ll_df.append(df_ann_avg)
+            df_ann_avg = pd.concat(ll_df)
+            df_ann_avg_long = df_ann_avg.melt(id_vars="crop_rotation", value_name="vals").loc[:, ["crop_rotation", "vals"]]        
+            sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", ax=axes[i], whis=(5, 95), showfliers=False, color=colors[i])
+            axes[i].set_xlabel("")
+            axes[i].set_ylabel(_lab_unit_total[var_sim])
+            axes[i].set_ylim(0, 50)
+        axes[-1].set_xlabel("Crop rotation")
+        plt.xticks(rotation=33)
         fig.tight_layout()
-        file = base_path_figs / f"boxplot_{var_sim}_{location}_{crop_rotation_scenario}.png"
+        file = base_path_figs / f"boxplot_{var_sim}_{location}.png"
         fig.savefig(file, dpi=250)
         plt.close(fig)
+
 
