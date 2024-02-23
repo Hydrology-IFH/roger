@@ -861,7 +861,7 @@ def calc_transpiration_transport_iso_kernel(state):
 @roger_kernel
 def calc_transpiration_transport_anion_kernel(state):
     """
-    Calculates chloride/bromide/nitrate transport of transpiration
+    Calculates chloride/bromide transport of transpiration
     """
     vs = state.variables
 

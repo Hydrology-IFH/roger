@@ -1,14 +1,10 @@
 import os
 from pathlib import Path
 import xarray as xr
-from cftime import num2date
-import datetime
 import numpy as onp
 import yaml
 import matplotlib as mpl
 import seaborn as sns
-import h5netcdf
-import roger
 
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -39,45 +35,30 @@ _lab_unit_ann = {
     "theta": r"$\theta$ [-]",
     "prec": r"PRECIP [mm/year]",
     "aet": r"AET [mm/year]",
+    "pet": r"PET [mm/year]",
     "q_ss": r"PERC [mm/year]",
     "q_sub": r"$Q_{sub}$ [mm/year]",
     "cpr_ss": r"$CPR$ [mm/year]",
     "inf": r"$INF_{MP}$ [mm/year]",
     "inf_mat": r"$INF_{MAT}$ [mm/year]",
     "inf_mp": r"$INF_{MP}$ [mm/year]",
+    "inf_sc": r"$INF_{SC}$ [mm/year]",
 }
 
-def xr_annual_avg(ds, var):
-    """
-    weight by days in each month
-    """
-    # Determine the month length
-    month_length = ds.Time.dt.days_in_month
-
-    # Calculate the weights
-    wgts = month_length.groupby("Time.year") / month_length.groupby("Time.year").sum()
-
-    # Make sure the weights in each year add up to 1
-    onp.testing.assert_allclose(wgts.groupby("Time.year").sum(xr.ALL_DIMS), 1.0)
-
-    # Subset our dataset for our variable
-    obs = ds[var]
-
-    # Setup our masking for nan values
-    cond = obs.isnull()
-    ones = xr.where(cond, 0.0, 1.0)
-
-    # Calculate the numerator
-    obs_sum = (obs * wgts).resample(Time="AS").sum(dim="Time")
-
-    # Calculate the denominator
-    ones_out = (ones * wgts).resample(Time="AS").sum(dim="Time")
-
-    # Return the weighted average
-    darr = obs_sum / ones_out
-    vals = onp.where(darr.values == -9999, onp.nan, darr.values)
-
-    return vals
+_dict_vars = {"aet": "ET",
+              "pet": "ET pot",
+              "prec": "N",
+              "inf": "Inf Gesamt",
+              "inf_mat": "Inf Mtrx",
+              "inf_mp": "Inf MP",
+              "inf_sc": "Inf TR",
+              "q_ss": "TP",
+              "q_sub": "ZA Gesamt",
+              "q_hof": "OA HOF",
+              "q_sof": "OA SOF",
+              "q_sur": "OA Gesamt",
+              "cpr_ss": "kap.A.",
+              }
 
 
 cell_width = 25
@@ -108,33 +89,76 @@ ds_params = xr.open_dataset(params_hm_file, engine="h5netcdf")
 dem = ds_params["dgm"].values
 mask = onp.isfinite(dem)
 
-
-# variables to be aggregated
-vars_sim = ["aet", "q_ss", "q_sub", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc"]
-
+# variables for model comparison
+vars_sim = ["aet", "pet", "q_ss", "q_sub", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc"]
+vars_sim = ["aet", "pet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc"]
 
 # load hydrological simulations
-states_hm_file = base_path_output / "ONED_Moehlin_annual_avg.nc"
+states_hm_file = base_path_output / "ONED_Moehlin_total.nc"
 ds_sim1 = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
-# assign date
-days = (ds_sim1['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-date = num2date(
-    days,
-    units=f"days since {ds_sim1['Time'].attrs['time_origin']}",
-    calendar="standard",
-    only_use_cftime_datetimes=False,
-)
-
-# load hydrological simulations
-states_hm_file = base_path_output / "RoGeR_WBM_1D" / "ONED_Moehlin_annual_avg.nc"
+states_hm_file = base_path_output / "RoGeR_WBM_1D" / "total.nc"
 ds_sim2 = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
-# assign date
-days = (ds_sim2['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-date = num2date(
-    days,
-    units=f"days since {ds_sim2['Time'].attrs['time_origin']}",
-    calendar="standard",
-    only_use_cftime_datetimes=False,
-)
+
+for var_sim in vars_sim:
+    mask = (ds_sim1[var_sim].values <= 0)
+    vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
+    fig, ax = plt.subplots(figsize=(6,5))
+    im = ax.imshow(vals1, extent=grid_extent, cmap='viridis_r', zorder=2, aspect='equal')
+    plt.colorbar(im, ax=ax, shrink=0.7, label="[mm/year]")
+    plt.xlabel('Distance in x-direction [m]')
+    plt.ylabel('Distance in y-direction [m]')
+    plt.grid(zorder=-1)
+    plt.tight_layout()
+    file = base_path_figs / f"{var_sim}_average_annual_sum.png"
+    fig.savefig(file, dpi=300)
+    plt.close(fig)
+
+for var_sim in vars_sim:
+    mask = (ds_sim1[var_sim].values <= 0)
+    vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
+    fig, ax = plt.subplots(figsize=(6,5))
+    im = ax.imshow(vals2, extent=grid_extent, cmap='viridis_r', zorder=2, aspect='equal')
+    plt.colorbar(im, ax=ax, shrink=0.7, label="[mm/year]")
+    plt.xlabel('Distance in x-direction [m]')
+    plt.ylabel('Distance in y-direction [m]')
+    plt.grid(zorder=-1)
+    plt.tight_layout()
+    file = base_path_figs / f"{var_sim}_average_annual_sum_roger_legacy.png"
+    fig.savefig(file, dpi=300)
+    plt.close(fig)
+
+# plot absolute difference
+for var_sim in vars_sim:
+    mask = (ds_sim1[var_sim].values <= 0)
+    vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
+    vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
+    diff_vals = vals1 - vals2
+    fig, ax = plt.subplots(figsize=(6,5))
+    im = ax.imshow(diff_vals, extent=grid_extent, cmap='viridis_r', zorder=2, aspect='equal')
+    plt.colorbar(im, ax=ax, shrink=0.7, label="[mm]")
+    plt.xlabel('Distance in x-direction [m]')
+    plt.ylabel('Distance in y-direction [m]')
+    plt.grid(zorder=-1)
+    plt.tight_layout()
+    file = base_path_figs / f"{var_sim}_absolute_difference.png"
+    fig.savefig(file, dpi=300)
+    plt.close(fig)
+
+# plot relative difference
+for var_sim in vars_sim:
+    mask = (ds_sim1[var_sim].values <= 0)
+    vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
+    vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
+    diff_vals = (vals1 - vals2) / vals2
+    fig, ax = plt.subplots(figsize=(6,5))
+    im = ax.imshow(diff_vals, extent=grid_extent, cmap='viridis_r', zorder=2, aspect='equal')
+    plt.colorbar(im, ax=ax, shrink=0.7, label="[-]")
+    plt.xlabel('Distance in x-direction [m]')
+    plt.ylabel('Distance in y-direction [m]')
+    plt.grid(zorder=-1)
+    plt.tight_layout()
+    file = base_path_figs / f"{var_sim}_relative_difference.png"
+    fig.savefig(file, dpi=300)
+    plt.close(fig)

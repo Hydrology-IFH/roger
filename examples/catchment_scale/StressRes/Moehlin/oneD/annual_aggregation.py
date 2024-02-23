@@ -69,7 +69,7 @@ if not os.path.exists(states_agg_file):
     with h5netcdf.File(states_agg_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
-            title="Annual sums of RoGeR simulations for the Moehlin catchment, Germany (2013-2022)",
+            title="Annual sums/means of RoGeR simulations for the Moehlin catchment, Germany (2013-2022)",
             institution="University of Freiburg, Chair of Hydrology",
             references="",
             comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",

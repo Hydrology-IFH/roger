@@ -16,6 +16,7 @@ _UNITS = {
     "km_nit": "kg N/ha/year",
     "kmin": "kg N/ha/year",
     "kfix": "kg N/ha/year",
+    "kngl": "kg N/ha/year",
     "dmax_denit": "kg N/ha/year",
     "dmax_nit": "kg N/ha/year",
     "phi_soil_temp": "day of year",
@@ -31,11 +32,12 @@ _VALS = {
     "c2_q_rz": 1.5,
     "c2_q_ss": 1.5,
     "km_denit": [2.5, 9],
-    "km_nit": [0.75, 2.7],
+    "km_nit": [2.5, 12],
     "kmin": [10, 30],
-    "kfix": 100,
+    "kfix": 40,
+    "kngl": 75,
     "dmax_denit": [10, 40],
-    "dmax_nit": [33, 12],
+    "dmax_nit": [10, 60],
     "phi_soil_temp": 91,
 }
 
@@ -76,17 +78,18 @@ def main():
     df_params.loc[:, "dmax_nit"] = _VALS["dmax_nit"][0] + (_VALS["dmax_nit"][1] - _VALS["dmax_nit"][0]) * (1 - c_clay) * c_soil_fertility
     df_params.loc[:, "kmin"] = _VALS["kmin"][0] + (_VALS["kmin"][1] - _VALS["kmin"][0]) * c_soil_fertility
     df_params.loc[:, "kfix"] = _VALS["kfix"] * c_soil_fertility
+    df_params.loc[:, "kngl"] = _VALS["kngl"] * (1 - c_clay)
 
     df_params.loc[:, "clay"] = df_clay.loc[:, "clay"].values.astype(float)
     df_params.loc[:, "soil_fertility"] = df_soil_fertility.loc[:, "soil_fertility"].values.astype(float)
     df_params.loc[:, "z_soil"] = df_zsoil.loc[:, "z_soil"].values.astype(float)
 
-    param_names = ["alpha_transp", "alpha_q", "c2_transp", "c2_q_rz", "c2_q_ss", "km_denit", "km_nit", "kmin", "kfix", "dmax_denit", "dmax_nit", "phi_soil_temp", "clay", "soil_fertility", "z_soil"]
+    param_names = ["alpha_transp", "alpha_q", "c2_transp", "c2_q_rz", "c2_q_ss", "km_denit", "km_nit", "kmin", "kfix", "kngl", "dmax_denit", "dmax_nit", "phi_soil_temp", "clay", "soil_fertility", "z_soil"]
     df_params = df_params.loc[:, param_names]
 
     # write parameters to csv
     df_params.columns = [
-        ["[-]", "[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[day of year]", "[-]", "", "[mm]"], 
+        ["[-]", "[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[day of year]", "[-]", "", "[mm]"], 
         param_names,
     ]
     df_params.to_csv(base_path / "parameters.csv", index=False, sep=";")
