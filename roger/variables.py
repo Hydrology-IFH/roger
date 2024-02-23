@@ -72,6 +72,7 @@ LUT_MLMS_GRID = ("n_slope", "n_params9")
 LUT_RDLU_GRID = ("n_lu", "n_params7")
 LUT_CROPS_GRID = ("n_crop_types", "n_crop_params")
 LUT_FERT_GRID = ("n_crop_types", "n_params13")
+LUT_NUP_GRID = ("n_crop_types", "n_params3")
 LUT_GCM_GRID = ("n_lu", "n_params2")
 TIMESTEPS = ("timesteps",)
 TIMESTEPS_DAY = ("timesteps_day",)
@@ -115,6 +116,7 @@ DIM_TO_SHAPE_VAR = {
     "n_sealing": 101,
     "n_slope": 10000,
     "n_params2": 2,
+    "n_params3": 3,
     "n_params7": 7,
     "n_params9": 9,
     "n_params13": 13,
@@ -2082,6 +2084,14 @@ VARIABLES = {
         time_dependent=True,
         active=lambda settings: settings.enable_nitrate,
     ),
+    "ngas_s": Variable(
+        "gaseous loss of ammonium",
+        CATCH_GRID,
+        "mg/dt",
+        "gaseous loss of ammonium",
+        time_dependent=True,
+        active=lambda settings: settings.enable_nitrate,
+    ),
     "ma_s": Variable(
         "mass input to solute mass StorAge of soil",
         CATCH_GRID + AGES,
@@ -2565,11 +2575,40 @@ VARIABLES = {
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
+    "kngl_rz": Variable(
+        "constant gaseous loss rate of ammonium",
+        CATCH_GRID,
+        "kg N ha-1 year-1",
+        "constant gaseous loss rate of ammonium",
+        write_to_restart=True,
+        time_dependent=False,
+        active=lambda settings: settings.enable_nitrate,
+    ),
     "kfix_rz": Variable(
         "constant nitrogen fixation rate",
         CATCH_GRID,
         "kg N ha-1 year-1",
         "constant nitrogen fixation rate",
+        write_to_restart=True,
+        time_dependent=False,
+        initial=0,
+        active=lambda settings: settings.enable_nitrate,
+    ),
+    "nup": Variable(
+        "potential nitrogen uptake rate by plants",
+        CATCH_GRID,
+        "kg N ha-1 day-1",
+        "potential nitrogen uptake rate by plants",
+        write_to_restart=True,
+        time_dependent=False,
+        initial=0,
+        active=lambda settings: settings.enable_nitrate,
+    ),
+    "nh4_up": Variable(
+        "nitrogen uptake rate by plants",
+        CATCH_GRID,
+        "mg N day-1",
+        "nitrogen uptake rate by plants",
         write_to_restart=True,
         time_dependent=False,
         initial=0,
@@ -5334,10 +5373,10 @@ VARIABLES = {
         active=lambda settings: settings.enable_offline_transport & settings.enable_nitrate,
     ),
     "Nmin_in": Variable(
-        "mineral nitrogen fertilizer",
+        "undissolved mineral nitrogen fertilizer",
         CATCH_GRID,
         "mg",
-        "mineral nitrogen fertilizer",
+        "undissolved mineral nitrogen fertilizer",
         write_to_restart=False,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport & settings.enable_nitrate,
@@ -5980,6 +6019,15 @@ VARIABLES = {
         LUT_FERT_GRID,
         "",
         "Look-up-table of nitrogen fertilization",
+        write_to_restart=False,
+        time_dependent=False,
+        active=lambda settings: settings.enable_crop_phenology & settings.enable_nitrate,
+    ),
+    "lut_nup": Variable(
+        "Look-up-table of nitrogen uptake by crops",
+        LUT_NUP_GRID,
+        "",
+        "Look-up-table of nitrogen uptake by crops",
         write_to_restart=False,
         time_dependent=False,
         active=lambda settings: settings.enable_crop_phenology & settings.enable_nitrate,

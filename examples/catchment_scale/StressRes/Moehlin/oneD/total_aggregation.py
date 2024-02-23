@@ -35,56 +35,6 @@ sns.plotting_context(
     },
 )
 
-_lab_unit_ann = {
-    "theta": r"$\theta$ [-]",
-    "prec": r"PRECIP [mm/year]",
-    "aet": r"AET [mm/year]",
-    "q_ss": r"PERC [mm/year]",
-    "q_sub": r"$Q_{sub}$ [mm/year]",
-    "cpr_ss": r"$CPR$ [mm/year]",
-    "inf": r"$INF_{MP}$ [mm/year]",
-    "inf_mat": r"$INF_{MAT}$ [mm/year]",
-    "inf_mp": r"$INF_{MP}$ [mm/year]",
-}
-
-def xr_annual_avg(ds, var):
-    """
-    weight by days in each month
-    """
-    # Determine the month length
-    month_length = ds.Time.dt.days_in_month
-
-    # Calculate the weights
-    wgts = month_length.groupby("Time.year") / month_length.groupby("Time.year").sum()
-
-    # Make sure the weights in each year add up to 1
-    onp.testing.assert_allclose(wgts.groupby("Time.year").sum(xr.ALL_DIMS), 1.0)
-
-    # Subset our dataset for our variable
-    obs = ds[var]
-
-    # Setup our masking for nan values
-    cond = obs.isnull()
-    ones = xr.where(cond, 0.0, 1.0)
-
-    # Calculate the numerator
-    obs_sum = (obs * wgts).resample(Time="AS").sum(dim="Time")
-
-    # Calculate the denominator
-    ones_out = (ones * wgts).resample(Time="AS").sum(dim="Time")
-
-    # Return the weighted average
-    darr = obs_sum / ones_out
-    vals = onp.where(darr.values == -9999, onp.nan, darr.values)
-
-    return vals
-
-
-cell_width = 25
-ny = 404
-nx = 356
-grid_extent = (0, nx*cell_width, 0, ny*cell_width)
-
 base_path = Path(__file__).parent
 # directory of figures
 base_path_figs = base_path / "figures"
@@ -108,16 +58,18 @@ ds_params = xr.open_dataset(params_hm_file, engine="h5netcdf")
 dem = ds_params["dgm"].values
 mask = onp.isfinite(dem)
 
+# years to be aggregated
+years = onp.arange(2013, 2023, dtype=int)
 # variables to be aggregated
-vars_sim = ["aet", "q_ss", "q_sub", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc"]
+vars_sim = ["aet", "pet", "q_ss", "q_sub", "cpr_ss"]
 
 # merge model output into single file
-states_agg_file = base_path_output / "ONED_Moehlin_annual_avg.nc"
+states_agg_file = base_path_output / "ONED_Moehlin_total.nc"
 if not os.path.exists(states_agg_file):
     with h5netcdf.File(states_agg_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
-            title="Averageg annual sums of RoGeR simulations for the Moehlin catchment, Germany (2013-2022)",
+            title="Average of annual sums/means of RoGeR simulations for the Moehlin catchment, Germany (2013-2022)",
             institution="University of Freiburg, Chair of Hydrology",
             references="",
             comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
@@ -129,6 +81,7 @@ if not os.path.exists(states_agg_file):
         dict_dim = {
             "x": config['nx'],
             "y": config['ny'],
+            "Year": len(years),
         }
         if not f.dimensions:
             f.dimensions = dict_dim
@@ -140,9 +93,11 @@ if not os.path.exists(states_agg_file):
             v.attrs["long_name"] = "y"
             v.attrs["units"] = "m"
             v[:] = onp.arange(dict_dim["y"]) * 25
+            v = f.create_variable("Year", ("Year",), int, compression="gzip", compression_opts=1)
+            v[:] = years
 
         # load hydrological simulations
-        states_hm_file = base_path_output / "ONED_Moehlin_annual.nc"
+        states_hm_file = base_path_output / f"{config['identifier']}.nc"
         ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
         # assign date
@@ -153,8 +108,33 @@ if not os.path.exists(states_agg_file):
             calendar="standard",
             only_use_cftime_datetimes=False,
         )
+        ds_sim = ds_sim.assign_coords(Time=("Time", date))
         for var_sim in vars_sim:
             v = f.create_variable(var_sim, ("x", "y"), float, compression="gzip", compression_opts=1)
-            vals = onp.mean(ds_sim[var_sim].values, axis=-1)
-            v[:, :, :] = onp.where(mask, vals, onp.nan)
+            vals = ds_sim[var_sim].sel(Time=slice('2013', '2022')).resample(Time='YS').sum().mean(axis=-1)
+            v[:, :] = onp.where(mask, vals, onp.nan)
             v.attrs.update(long_name=var_sim, units="mm/year")
+
+        v = f.create_variable("inf", ("x", "y"), float, compression="gzip", compression_opts=1)
+        vals1 = ds_sim["inf_mat_rz"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum().mean(axis=-1)
+        vals2 = ds_sim["inf_mp_rz"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum().mean(axis=-1)
+        vals3 = ds_sim["inf_sc_rz"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum().mean(axis=-1)
+        vals4 = ds_sim["inf_ss"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum().mean(axis=-1)
+        v[:, :] = onp.where(mask, vals1 + vals2 + vals3 + vals4, onp.nan)
+        v.attrs.update(long_name="inf", units="mm/year")
+
+        v = f.create_variable("inf_mat", ("x", "y"), float, compression="gzip", compression_opts=1)
+        vals1 = ds_sim["inf_mat_rz"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum().mean(axis=-1)
+        v[:, :] = onp.where(mask, vals1, onp.nan)
+        v.attrs.update(long_name="inf_mat", units="mm/year")
+
+        v = f.create_variable("inf_mp", ("x", "y"), float, compression="gzip", compression_opts=1)
+        vals1 = ds_sim["inf_mp_rz"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum().mean(axis=-1)
+        vals2 = ds_sim["inf_ss"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum().mean(axis=-1)
+        v[:, :] = onp.where(mask, vals1 + vals2, onp.nan)
+        v.attrs.update(long_name="inf_mp", units="mm/year")
+
+        v = f.create_variable("inf_sc", ("x", "y"), float, compression="gzip", compression_opts=1)
+        vals1 = ds_sim["inf_sc_rz"].sel(Time=slice('2013', '2022')).resample(Time='YS').sum().mean(axis=-1)
+        v[:, :] = onp.where(mask, vals1, onp.nan)
+        v.attrs.update(long_name="inf_sc", units="mm/year")

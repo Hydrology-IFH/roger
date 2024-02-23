@@ -229,31 +229,24 @@ def calc_nit_soil(state, Nmin, knit, Dnit, sa, S_sat):
     )
 
     # no nitrification if storage is greater than 90 % of pore volume
-    ma_pot = update(
-        ma_pot,
-        at[2:-2, 2:-2],
-        npx.where(
-            S[2:-2, 2:-2] < 0.9 * S_sat[2:-2, 2:-2],
-            ma_pot[2:-2, 2:-2],
-            0,
-        )
-        * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    # limit nitrification to available mineral nitrogen
-    ma_pot = update(
-        ma_pot,
-        at[2:-2, 2:-2],
-        npx.where(ma_pot[2:-2, 2:-2] > npx.sum(Nmin[2:-2, 2:-2, vs.tau, :], axis=-1), npx.sum(Nmin[2:-2, 2:-2, vs.tau, :], axis=-1), ma_pot[2:-2, 2:-2])
-        * vs.maskCatch[2:-2, 2:-2],
-    )
+    # ma_pot = update(
+    #     ma_pot,
+    #     at[2:-2, 2:-2],
+    #     npx.where(
+    #         S[2:-2, 2:-2] < 0.9 * S_sat[2:-2, 2:-2],
+    #         ma_pot[2:-2, 2:-2],
+    #         0,
+    #     )
+    #     * vs.maskCatch[2:-2, 2:-2],
+    # )
 
     ma = update(
         ma,
         at[2:-2, 2:-2, :],
-        (sa[2:-2, 2:-2, vs.tau, :]/S[2:-2, 2:-2, npx.newaxis] * ma_pot[2:-2, 2:-2, npx.newaxis]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        npx.where(npx.sum(Nmin[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] > 0, ((Nmin[2:-2, 2:-2, vs.tau, :]/npx.sum(Nmin[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]) * ma_pot[2:-2, 2:-2, npx.newaxis]), ma[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
+    # limit nitrification to available mineral nitrogen
     ma = update(
         ma,
         at[2:-2, 2:-2, :],
@@ -359,6 +352,125 @@ def calc_n_fixation(state, kfix):
 
 
 @roger_kernel
+def calc_gaseous_loss(state, Nmin, kngl, sa, S_sat):
+    """Calculates gaseous loss of ammonium."""
+    vs = state.variables
+    settings = state.settings
+
+    S = allocate(state.dimensions, ("x", "y"))
+    S = update(
+        S,
+        at[2:-2, 2:-2],
+        npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # soil temperature coefficient
+    soil_temp_coeff = allocate(state.dimensions, ("x", "y"))
+    soil_temp_coeff = update(
+        soil_temp_coeff,
+        at[2:-2, 2:-2],
+        npx.where(
+            ((vs.temp_soil[2:-2, 2:-2, vs.tau] >= 5) & (vs.temp_soil[2:-2, 2:-2, vs.tau] <= 30)),
+            vs.temp_soil[2:-2, 2:-2, vs.tau] / (30 - 5),
+            0,
+        )
+        * vs.maskCatch[2:-2, 2:-2],
+    )
+    soil_temp_coeff = update(
+        soil_temp_coeff,
+        at[2:-2, 2:-2],
+        npx.where(
+            (vs.temp_soil[2:-2, 2:-2, vs.tau] > 30),
+            1,
+            soil_temp_coeff[2:-2, 2:-2],
+        )
+        * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # calculate gaseous loss rate
+    mr_pot = allocate(state.dimensions, ("x", "y"))
+    mr = allocate(state.dimensions, ("x", "y", "ages"))
+    mr_pot = update(
+        mr_pot,
+        at[2:-2, 2:-2],
+        (kngl[2:-2, 2:-2] * (vs.dt / (365 * 24)) * settings.dx * settings.dy * 100)
+        * soil_temp_coeff[2:-2, 2:-2]
+        * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    # # no gaseous loss if storage is greater than 90 % of pore volume
+    # mr_pot = update(
+    #     mr_pot,
+    #     at[2:-2, 2:-2],
+    #     npx.where(
+    #         S[2:-2, 2:-2] < 0.9 * S_sat[2:-2, 2:-2],
+    #         mr_pot[2:-2, 2:-2],
+    #         0,
+    #     )
+    #     * vs.maskCatch[2:-2, 2:-2],
+    # )
+
+    mr = update(
+        mr,
+        at[2:-2, 2:-2, :],
+        npx.where(npx.sum(Nmin[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] > 0, ((Nmin[2:-2, 2:-2, vs.tau, :]/npx.sum(Nmin[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]) * mr_pot[2:-2, 2:-2, npx.newaxis]), mr[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    # limit gaseous loss to available mineral nitrogen
+    mr = update(
+        mr,
+        at[2:-2, 2:-2, :],
+        npx.where(mr[2:-2, 2:-2, :] > Nmin[2:-2, 2:-2, vs.tau, :], Nmin[2:-2, 2:-2, vs.tau, :], mr[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    mr = update(
+        mr,
+        at[2:-2, 2:-2, :],
+        npx.where(mr[2:-2, 2:-2, :] < 0, 0, mr[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    return mr
+
+
+@roger_kernel
+def calc_ammonium_uptake(state):
+    """Calculates gaseous loss of ammonium."""
+    vs = state.variables
+    settings = state.settings
+
+    # calculate ammonium uptake rate
+    mr_pot = allocate(state.dimensions, ("x", "y"))
+    mr = allocate(state.dimensions, ("x", "y", "ages"))
+    mr_pot = update(
+        mr_pot,
+        at[2:-2, 2:-2],
+        npx.where(vs.transp[2:-2, 2:-2] > 0, (vs.nup[2:-2, 2:-2] * 0.5) * (vs.z_root[2:-2, 2:-2, vs.tau]/(vs.z_soil[2:-2, 2:-2] * settings.zroot_to_zsoil_max)), 0)
+        * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    mr = update(
+        mr,
+        at[2:-2, 2:-2, :],
+        npx.where(npx.sum(vs.Nmin_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] > 0, ((vs.Nmin_rz[2:-2, 2:-2, vs.tau, :]/npx.sum(vs.Nmin_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]) * mr_pot[2:-2, 2:-2, npx.newaxis]), mr[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    # limit ammonium uptake to available mineral nitrogen
+    mr = update(
+        mr,
+        at[2:-2, 2:-2, :],
+        npx.where(mr[2:-2, 2:-2, :] > vs.Nmin_rz[2:-2, 2:-2, vs.tau, :], vs.Nmin_rz[2:-2, 2:-2, vs.tau, :], mr[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    mr = update(
+        mr,
+        at[2:-2, 2:-2, :],
+        npx.where(mr[2:-2, 2:-2, :] < 0, 0, mr[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    return mr
+
+
+@roger_kernel
 def calc_denit_gw(state, msa, k):
     """Calculates groundwater dentrification rate."""
     vs = state.variables
@@ -458,6 +570,40 @@ def calc_nitrogen_cycle_kernel(state):
         vs.Nmin_rz,
         at[2:-2, 2:-2, vs.tau, :],
         -vs.ma_rz[2:-2, 2:-2, :],
+    )
+
+    ngl = calc_gaseous_loss(state, vs.Nmin_rz, vs.kngl_rz, vs.sa_rz, vs.S_sat_rz)
+    vs.ngas_s = update(
+        vs.ngas_s,
+        at[2:-2, 2:-2],
+        npx.sum(ngl[
+            2:-2, 2:-2, :
+        ], axis=-1),
+    ) 
+
+    vs.Nmin_rz = update_add(
+        vs.Nmin_rz,
+        at[2:-2, 2:-2, vs.tau, :],
+        -ngl[
+            2:-2, 2:-2, :
+        ]
+        * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    nup = calc_ammonium_uptake(state)
+    vs.Nmin_rz = update_add(
+        vs.Nmin_rz,
+        at[2:-2, 2:-2, vs.tau, :],
+        -nup[
+            2:-2, 2:-2, :
+        ]
+        * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+    )
+
+    vs.nh4_up = update(
+        vs.nh4_up,
+        at[2:-2, 2:-2],
+        npx.sum(nup[2:-2, 2:-2, :], axis=-1) * vs.maskCatch[2:-2, 2:-2],
     )
 
     vs.msa_rz = update_add(
@@ -562,7 +708,9 @@ def calc_nitrogen_cycle_kernel(state):
         nit_s=vs.nit_s,
         denit_s=vs.denit_s,
         min_s=vs.min_s,
+        ngas_s=vs.ngas_s,
         nfix_s=vs.nfix_s,
+        nh4_up=vs.nh4_up,
     )
 
 

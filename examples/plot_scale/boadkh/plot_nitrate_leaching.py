@@ -54,6 +54,7 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
+# identifiers for crop rotation scenarios
 _dict_ffid = {"winter-wheat_clover": "1_0",
               "winter-wheat_silage-corn": "2_0",
               "summer-wheat_winter-wheat": "3_0",
@@ -112,7 +113,6 @@ crop_rotation_scenarios = ["winter-wheat_clover",
                            "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
 
 fertilization_intensities = ["low", "medium", "high"]
-
 
 _lab_unit_daily = {
     "M_q_ss": "PERC-$NO_3$\n [kg $NO_3$-N/day/ha]",
@@ -306,7 +306,7 @@ for var_sim in vars_sim:
         axes[-1].set_xlabel("Crop rotation")
         plt.xticks(rotation=33)
         fig.tight_layout()
-        file = base_path_figs / f"boxplot_{var_sim}_{location}.png"
+        file = base_path_figs / f"boxplot_annual_average_{var_sim}_{location}.png"
         fig.savefig(file, dpi=250)
         plt.close(fig)
 

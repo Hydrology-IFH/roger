@@ -55,6 +55,31 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
+# identifiers for crop rotation scenarios
+_dict_ffid = {"winter-wheat_clover": "1_0",
+              "winter-wheat_silage-corn": "2_0",
+              "summer-wheat_winter-wheat": "3_0",
+              "summer-wheat_clover_winter-wheat": "4_0",
+              "winter-wheat_clover_silage-corn": "5_0",
+              "winter-wheat_sugar-beet_silage-corn": "6_0",
+              "summer-wheat_winter-wheat_silage-corn": "7_0",
+              "summer-wheat_winter-wheat_winter-rape": "8_0",
+              "winter-wheat_winter-rape": "9_0",
+              "winter-wheat_soybean_winter-rape": "10_0",
+              "sugar-beet_winter-wheat_winter-barley": "11_0", 
+              "grain-corn_winter-wheat_winter-rape": "12_0", 
+              "grain-corn_winter-wheat_winter-barley": "13_0",
+              "grain-corn_winter-wheat_clover": "14_0",
+              "winter-wheat_silage-corn_yellow-mustard": "2_1",
+              "summer-wheat_winter-wheat_yellow-mustard": "3_1",
+              "winter-wheat_sugar-beet_silage-corn_yellow-mustard": "6_1",
+              "summer-wheat_winter-wheat_silage-corn_yellow-mustard": "7_1",
+              "summer-wheat_winter-wheat_winter-rape_yellow-mustard": "8_1",
+              "sugar-beet_winter-wheat_winter-barley_yellow-mustard": "11_1", 
+              "grain-corn_winter-wheat_winter-rape_yellow-mustard": "12_1", 
+              "grain-corn_winter-wheat_winter-barley_yellow-mustard": "13_1", 
+}
+
 # identifiers for simulations
 locations = ["freiburg", "lahr", "muellheim", 
              "stockach", "gottmadingen", "weingarten",
@@ -88,29 +113,18 @@ crop_rotation_scenarios = ["winter-wheat_clover",
                            "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
                            "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
 
-
 _lab_unit_daily = {
-    "q_ss": "PERC [mm/day]",
     "q_hof": "$Q_{HOF}$ [mm/day]",
-    "transp": "TRANSP [mm/day]",
-    "evap_soil": "$EVAP_{soil}$ [mm/day]",
-    "theta": r"$\theta$ [-]",
-    "theta_ac": r"$\theta_{ac}$ [-]",
-    "theta_ufc": r"$\theta_{ufc}$ [-]",
-    "theta_pwp": r"$\theta_{pwp}$ [-]",
-    "ks": "$k_s$ [mm/day]",
     "ground_cover": "GC [-]",
 }
 
 _lab_unit_annual = {
-    "M_q_ss": "PERC-$NO_3$\n  [kg $NO_3$-N/year/ha]",
+    "q_hof": "$Q_{HOF}$ [mm/year]",
+    "ground_cover": "GC [-]",
 }
 
-_lab_unit2 = {
-    "q_ss": "PERC [mm]",
+_lab_unit_total = {
     "q_hof": "$Q_{HOF}$ [mm]",
-    "transp": "TRANSP [mm]",
-    "evap_soil": "$EVAP_{soil}$ [mm]",
     "ground_cover": "GC [-]",
 }
 
@@ -197,6 +211,35 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             fig.savefig(file, dpi=250)
             plt.close(fig)
 
-
-
-
+# plot average annual sums/means
+vars_sim = ["q_hof", "ground_cover"]
+for var_sim in vars_sim:
+    for location in locations:
+        fig, axes = plt.subplots(1, 1, figsize=(6, 2), sharex=True, sharey=True)
+        ll_df = []
+        for crop_rotation_scenario in crop_rotation_scenarios:
+            ds = dict_fluxes_states[location][crop_rotation_scenario]
+            sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
+            cond1 = (df_params["CLUST_flag"] == 1)
+            df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+            if var_sim in ["q_hof"]:
+                # calculate average of annual sums
+                df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+                df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+                color = "grey"
+            else:
+                # calculate average of annual means
+                df_ann_avg = df.resample("YE").mean().iloc[:-1, :].mean(axis=0).to_frame()
+                df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+                color = "green"
+            ll_df.append(df_ann_avg)
+        df_ann_avg = pd.concat(ll_df)
+        df_ann_avg_long = df_ann_avg.melt(id_vars="crop_rotation", value_name="vals").loc[:, ["crop_rotation", "vals"]]        
+        sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", ax=axes, whis=(5, 95), showfliers=False, color=color)
+        axes.set_ylabel(_lab_unit_total[var_sim])
+        axes.set_xlabel("Crop rotation")
+        plt.xticks(rotation=33)
+        fig.tight_layout()
+        file = base_path_figs / f"boxplot_annual_average_{var_sim}_{location}.png"
+        fig.savefig(file, dpi=250)
+        plt.close(fig)
