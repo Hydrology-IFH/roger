@@ -302,7 +302,7 @@ for var_sim in vars_sim:
             sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", ax=axes[i], whis=(5, 95), showfliers=False, color=colors[i])
             axes[i].set_xlabel("")
             axes[i].set_ylabel(_lab_unit_total[var_sim])
-            axes[i].set_ylim(0, 50)
+            axes[i].set_ylim(0, 80)
         axes[-1].set_xlabel("Crop rotation")
         plt.xticks(rotation=33)
         fig.tight_layout()
