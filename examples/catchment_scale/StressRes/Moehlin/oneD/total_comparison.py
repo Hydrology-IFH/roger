@@ -90,8 +90,8 @@ dem = ds_params["dgm"].values
 mask = onp.isfinite(dem)
 
 # variables for model comparison
-vars_sim = ["aet", "pet", "q_ss", "q_sub", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc"]
-vars_sim = ["aet", "pet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc"]
+# vars_sim = ["prec", "pet", "aet", "q_ss", "q_sub", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc"]
+vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc"]
 
 # load hydrological simulations
 states_hm_file = base_path_output / "ONED_Moehlin_total.nc"
@@ -136,7 +136,7 @@ for var_sim in vars_sim:
     vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
     diff_vals = vals1 - vals2
     fig, ax = plt.subplots(figsize=(6,5))
-    im = ax.imshow(diff_vals, extent=grid_extent, cmap='viridis_r', zorder=2, aspect='equal')
+    im = ax.imshow(diff_vals, extent=grid_extent, cmap='PuOr', zorder=2, aspect='equal', vmin=-500, vmax=500)
     plt.colorbar(im, ax=ax, shrink=0.7, label="[mm]")
     plt.xlabel('Distance in x-direction [m]')
     plt.ylabel('Distance in y-direction [m]')
@@ -153,7 +153,7 @@ for var_sim in vars_sim:
     vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
     diff_vals = (vals1 - vals2) / vals2
     fig, ax = plt.subplots(figsize=(6,5))
-    im = ax.imshow(diff_vals, extent=grid_extent, cmap='viridis_r', zorder=2, aspect='equal')
+    im = ax.imshow(diff_vals, extent=grid_extent, cmap='PuOr', zorder=2, aspect='equal', vmin=-1, vmax=1)
     plt.colorbar(im, ax=ax, shrink=0.7, label="[-]")
     plt.xlabel('Distance in x-direction [m]')
     plt.ylabel('Distance in y-direction [m]')
