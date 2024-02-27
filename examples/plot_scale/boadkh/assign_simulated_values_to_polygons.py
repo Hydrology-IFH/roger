@@ -84,6 +84,30 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
+_dict_ffid = {"winter-wheat_clover": "1_0",
+              "winter-wheat_silage-corn": "2_0",
+              "summer-wheat_winter-wheat": "3_0",
+              "summer-wheat_clover_winter-wheat": "4_0",
+              "winter-wheat_clover_silage-corn": "5_0",
+              "winter-wheat_sugar-beet_silage-corn": "6_0",
+              "summer-wheat_winter-wheat_silage-corn": "7_0",
+              "summer-wheat_winter-wheat_winter-rape": "8_0",
+              "winter-wheat_winter-rape": "9_0",
+              "winter-wheat_soybean_winter-rape": "10_0",
+              "sugar-beet_winter-wheat_winter-barley": "11_0", 
+              "grain-corn_winter-wheat_winter-rape": "12_0", 
+              "grain-corn_winter-wheat_winter-barley": "13_0",
+              "grain-corn_winter-wheat_clover": "14_0",
+              "winter-wheat_silage-corn_yellow-mustard": "2_1",
+              "summer-wheat_winter-wheat_yellow-mustard": "3_1",
+              "winter-wheat_sugar-beet_silage-corn_yellow-mustard": "6_1",
+              "summer-wheat_winter-wheat_silage-corn_yellow-mustard": "7_1",
+              "summer-wheat_winter-wheat_winter-rape_yellow-mustard": "8_1",
+              "sugar-beet_winter-wheat_winter-barley_yellow-mustard": "11_1", 
+              "grain-corn_winter-wheat_winter-rape_yellow-mustard": "12_1", 
+              "grain-corn_winter-wheat_winter-barley_yellow-mustard": "13_1", 
+}
+
 # identifiers for simulations
 locations = ["freiburg", "lahr", "muellheim", 
              "stockach", "gottmadingen", "weingarten",
@@ -129,7 +153,7 @@ df_link_bk50_cluster_cropland = pd.read_hdf(file)
 
 # prepare shapefiles for each location and crop rotation scenario
 for crop_rotation_scenario in crop_rotation_scenarios:
-    new_file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/svat_crop") / f"{crop_rotation_scenario}.gpkg"
+    new_file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output") / f"FFID_{_dict_ffid[crop_rotation_scenario]}.gpkg"
     if not os.path.exists(new_file):
         file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
         gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
@@ -163,37 +187,37 @@ for location in locations:
         ds_fluxes_states = ds_fluxes_states.assign_coords(Time=("Time", date))
         dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
 
-# load nitrogen loads and concentrations
-dict_nitrate = {}
-for location in locations:
-    dict_nitrate[location] = {}
-    for crop_rotation_scenario in crop_rotation_scenarios:
-        dict_nitrate[location][crop_rotation_scenario] = {}
-        for fertilization_intensity in fertilization_intensities:
-            dict_nitrate[location][crop_rotation_scenario][fertilization_intensity] = {}
-            output_nitrate_file = (
-                base_path_output
-                / "svat_crop_nitrate"
-                / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.nc"
-            )
-            ds_nitrate = xr.open_dataset(output_nitrate_file, engine="h5netcdf")
-            # assign date
-            days = ds_nitrate["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
-            date = num2date(
-                days,
-                units=f"days since {ds_nitrate['Time'].attrs['time_origin']}",
-                calendar="standard",
-                only_use_cftime_datetimes=False,
-            )
-            ds_nitrate = ds_nitrate.assign_coords(Time=("Time", date))
-            dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] = ds_nitrate
+# # load nitrogen loads and concentrations
+# dict_nitrate = {}
+# for location in locations:
+#     dict_nitrate[location] = {}
+#     for crop_rotation_scenario in crop_rotation_scenarios:
+#         dict_nitrate[location][crop_rotation_scenario] = {}
+#         for fertilization_intensity in fertilization_intensities:
+#             dict_nitrate[location][crop_rotation_scenario][fertilization_intensity] = {}
+#             output_nitrate_file = (
+#                 base_path_output
+#                 / "svat_crop_nitrate"
+#                 / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.nc"
+#             )
+#             ds_nitrate = xr.open_dataset(output_nitrate_file, engine="h5netcdf")
+#             # assign date
+#             days = ds_nitrate["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+#             date = num2date(
+#                 days,
+#                 units=f"days since {ds_nitrate['Time'].attrs['time_origin']}",
+#                 calendar="standard",
+#                 only_use_cftime_datetimes=False,
+#             )
+#             ds_nitrate = ds_nitrate.assign_coords(Time=("Time", date))
+#             dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] = ds_nitrate
 
 # aggregate ground cover to average annual mean
 # and aggregate surface runoff to average annual sum
 vars_sim = ["ground_cover", "q_hof"]
 for crop_rotation_scenario in crop_rotation_scenarios:
     for location in locations:
-        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output") / f"{crop_rotation_scenario}.gpkg"
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output") / f"FFID_{_dict_ffid[crop_rotation_scenario]}.gpkg"
         # gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"], mask=gdf_buffer[gdf_buffer.stationsna==location])
         gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
         gdf['stationsna'] = location
@@ -227,32 +251,32 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                     gdf.loc[cond2, f'{_dict_var_names[var_sim]}_avg'] = val
     gdf.to_file(file, layer=f"{location}_{crop_rotation_scenario}", driver="GPKG")
 
-# and aggregate nitrate leaching to average annual sum
-vars_sim = ["M_q_ss"]
-for crop_rotation_scenario in crop_rotation_scenarios:
-    for location in locations:
-        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output") / f"{crop_rotation_scenario}.gpkg"
-        # gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"], mask=gdf_buffer[gdf_buffer.stationsna==location])
-        gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
-        for var_sim in vars_sim:
-            for fertilization_intensity in fertilization_intensities:
-                gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'] = None  # initialize field, float, two decimals
-                gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'] = gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'].astype('float64')
-                gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'] = gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'].round(decimals=2)
-                ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
-                sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
-                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T)
-                # calculate annual sum
-                df_ann = df.resample("YE").sum() * 0.01  # convert from mg/m2 to kg/ha
-                # calculate average
-                df_ann_avg = df_ann.mean(axis=0).to_frame()
-                # assign aggregated values to polygons
-                for clust_id in clust_ids:
-                    cond1 = (df_params["CLUST_ID"] == clust_id) & (df_params["CLUST_flag"] == 1)
-                    val = df_ann_avg.loc[cond1, :].values[0][0]
-                    cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
-                    shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
-                    cond2 = gdf["SHP_ID"].isin(shp_ids)
-                    if cond2.any():
-                        gdf.loc[cond2, f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'] = val
-    gdf.to_file(file, layer=f"{location}_{crop_rotation_scenario}", driver="GPKG")
+# # and aggregate nitrate leaching to average annual sum
+# vars_sim = ["M_q_ss"]
+# for crop_rotation_scenario in crop_rotation_scenarios:
+#     for location in locations:
+#         file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output") / f"FFID_{_dict_ffid[crop_rotation_scenario]}.gpkg"
+#         # gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"], mask=gdf_buffer[gdf_buffer.stationsna==location])
+#         gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
+#         for var_sim in vars_sim:
+#             for fertilization_intensity in fertilization_intensities:
+#                 gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'] = None  # initialize field, float, two decimals
+#                 gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'] = gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'].astype('float64')
+#                 gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'] = gdf[f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'].round(decimals=2)
+#                 ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
+#                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
+#                 df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T)
+#                 # calculate annual sum
+#                 df_ann = df.resample("YE").sum() * 0.01  # convert from mg/m2 to kg/ha
+#                 # calculate average
+#                 df_ann_avg = df_ann.mean(axis=0).to_frame()
+#                 # assign aggregated values to polygons
+#                 for clust_id in clust_ids:
+#                     cond1 = (df_params["CLUST_ID"] == clust_id) & (df_params["CLUST_flag"] == 1)
+#                     val = df_ann_avg.loc[cond1, :].values[0][0]
+#                     cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
+#                     shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
+#                     cond2 = gdf["SHP_ID"].isin(shp_ids)
+#                     if cond2.any():
+#                         gdf.loc[cond2, f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'] = val
+#     gdf.to_file(file, driver="GPKG")

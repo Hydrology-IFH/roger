@@ -5,6 +5,8 @@ import numpy as onp
 import yaml
 import matplotlib as mpl
 import seaborn as sns
+import pandas as pd
+from cftime import num2date
 
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -89,9 +91,10 @@ ds_params = xr.open_dataset(params_hm_file, engine="h5netcdf")
 dem = ds_params["dgm"].values
 mask = onp.isfinite(dem)
 
-# variables for model comparison
-# vars_sim = ["prec", "pet", "aet", "q_ss", "q_sub", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc"]
-vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc"]
+# make discrete colormaps
+cmap1 = mpl.colormaps.get_cmap('viridis_r').resampled(15)
+cmap2 = mpl.colormaps.get_cmap('PuOr').resampled(10)
+cmap3 = mpl.colormaps.get_cmap('PuOr').resampled(8)
 
 # load hydrological simulations
 states_hm_file = base_path_output / "ONED_Moehlin_total.nc"
@@ -100,65 +103,113 @@ ds_sim1 = xr.open_dataset(states_hm_file, engine="h5netcdf")
 states_hm_file = base_path_output / "RoGeR_WBM_1D" / "total.nc"
 ds_sim2 = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
+cmap4 = mpl.colormaps.get_cmap('viridis_r').resampled(3)
+vals1 = onp.where(mask, ds_params['lanu'].values, onp.nan)
+vals2 = onp.where((vals1 < 10) | (vals1 > 13), onp.nan, vals1)
+fig, ax = plt.subplots(figsize=(6,5))
+im = ax.imshow(vals2, extent=grid_extent, cmap=cmap4, zorder=2, aspect='equal')
+plt.colorbar(im, ax=ax, shrink=0.7, label="")
+plt.xlabel('Distance in x-direction [m]')
+plt.ylabel('Distance in y-direction [m]')
+plt.grid(zorder=-1)
+plt.tight_layout()
+file = base_path_figs / "forest.png"
+fig.savefig(file, dpi=300)
+plt.close(fig)
 
-for var_sim in vars_sim:
-    mask = (ds_sim1[var_sim].values <= 0)
-    vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
-    fig, ax = plt.subplots(figsize=(6,5))
-    im = ax.imshow(vals1, extent=grid_extent, cmap='viridis_r', zorder=2, aspect='equal')
-    plt.colorbar(im, ax=ax, shrink=0.7, label="[mm/year]")
-    plt.xlabel('Distance in x-direction [m]')
-    plt.ylabel('Distance in y-direction [m]')
-    plt.grid(zorder=-1)
-    plt.tight_layout()
-    file = base_path_figs / f"{var_sim}_average_annual_sum.png"
-    fig.savefig(file, dpi=300)
-    plt.close(fig)
+# vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc", "q_hof", "q_ss", "q_sub"]
+# for var_sim in vars_sim:
+#     mask = (ds_sim1[var_sim].values <= 0)
+#     vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
+#     fig, ax = plt.subplots(figsize=(6,5))
+#     im = ax.imshow(vals1, extent=grid_extent, cmap=cmap1, zorder=2, aspect='equal', vmin=0, vmax=1500)
+#     plt.colorbar(im, ax=ax, shrink=0.7, label="[mm/year]")
+#     plt.xlabel('Distance in x-direction [m]')
+#     plt.ylabel('Distance in y-direction [m]')
+#     plt.grid(zorder=-1)
+#     plt.tight_layout()
+#     file = base_path_figs / f"{var_sim}_average_annual_sum.png"
+#     fig.savefig(file, dpi=300)
+#     plt.close(fig)
 
-for var_sim in vars_sim:
-    mask = (ds_sim1[var_sim].values <= 0)
-    vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
-    fig, ax = plt.subplots(figsize=(6,5))
-    im = ax.imshow(vals2, extent=grid_extent, cmap='viridis_r', zorder=2, aspect='equal')
-    plt.colorbar(im, ax=ax, shrink=0.7, label="[mm/year]")
-    plt.xlabel('Distance in x-direction [m]')
-    plt.ylabel('Distance in y-direction [m]')
-    plt.grid(zorder=-1)
-    plt.tight_layout()
-    file = base_path_figs / f"{var_sim}_average_annual_sum_roger_legacy.png"
-    fig.savefig(file, dpi=300)
-    plt.close(fig)
+# vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc", "q_hof", "q_ss", "q_sub", "q_sof"]
+# for var_sim in vars_sim:
+#     mask = (ds_sim2[_dict_vars[var_sim]].values <= 0)
+#     vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
+#     fig, ax = plt.subplots(figsize=(6,5))
+#     im = ax.imshow(vals2, extent=grid_extent, cmap=cmap1, zorder=2, aspect='equal', vmin=0, vmax=1500)
+#     plt.colorbar(im, ax=ax, shrink=0.7, label="[mm/year]")
+#     plt.xlabel('Distance in x-direction [m]')
+#     plt.ylabel('Distance in y-direction [m]')
+#     plt.grid(zorder=-1)
+#     plt.tight_layout()
+#     file = base_path_figs / f"{var_sim}_average_annual_sum_roger_legacy.png"
+#     fig.savefig(file, dpi=300)
+#     plt.close(fig)
 
-# plot absolute difference
-for var_sim in vars_sim:
-    mask = (ds_sim1[var_sim].values <= 0)
-    vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
-    vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
-    diff_vals = vals1 - vals2
-    fig, ax = plt.subplots(figsize=(6,5))
-    im = ax.imshow(diff_vals, extent=grid_extent, cmap='PuOr', zorder=2, aspect='equal', vmin=-500, vmax=500)
-    plt.colorbar(im, ax=ax, shrink=0.7, label="[mm]")
-    plt.xlabel('Distance in x-direction [m]')
-    plt.ylabel('Distance in y-direction [m]')
-    plt.grid(zorder=-1)
-    plt.tight_layout()
-    file = base_path_figs / f"{var_sim}_absolute_difference.png"
-    fig.savefig(file, dpi=300)
-    plt.close(fig)
+# vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc"]
+# # plot absolute difference
+# for var_sim in vars_sim:
+#     mask = (ds_sim1[var_sim].values <= 0)
+#     vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
+#     vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
+#     diff_vals = vals1 - vals2
+#     fig, ax = plt.subplots(figsize=(6,5))
+#     im = ax.imshow(diff_vals, extent=grid_extent, cmap=cmap2, zorder=2, aspect='equal', vmin=-500, vmax=500)
+#     plt.colorbar(im, ax=ax, shrink=0.7, label="[mm]")
+#     plt.xlabel('Distance in x-direction [m]')
+#     plt.ylabel('Distance in y-direction [m]')
+#     plt.grid(zorder=-1)
+#     plt.tight_layout()
+#     file = base_path_figs / f"{var_sim}_absolute_difference.png"
+#     fig.savefig(file, dpi=300)
+#     plt.close(fig)
 
-# plot relative difference
-for var_sim in vars_sim:
-    mask = (ds_sim1[var_sim].values <= 0)
-    vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
-    vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
-    diff_vals = (vals1 - vals2) / vals2
-    fig, ax = plt.subplots(figsize=(6,5))
-    im = ax.imshow(diff_vals, extent=grid_extent, cmap='PuOr', zorder=2, aspect='equal', vmin=-1, vmax=1)
-    plt.colorbar(im, ax=ax, shrink=0.7, label="[-]")
-    plt.xlabel('Distance in x-direction [m]')
-    plt.ylabel('Distance in y-direction [m]')
-    plt.grid(zorder=-1)
-    plt.tight_layout()
-    file = base_path_figs / f"{var_sim}_relative_difference.png"
-    fig.savefig(file, dpi=300)
-    plt.close(fig)
+# # plot relative difference
+# for var_sim in vars_sim:
+#     mask = (ds_sim1[var_sim].values <= 0)
+#     vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
+#     vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
+#     diff_vals = (vals1 - vals2) / vals2
+#     fig, ax = plt.subplots(figsize=(6,5))
+#     im = ax.imshow(diff_vals, extent=grid_extent, cmap=cmap3, zorder=2, aspect='equal', vmin=-0.8, vmax=0.8)
+#     plt.colorbar(im, ax=ax, shrink=0.7, label="[-]")
+#     plt.xlabel('Distance in x-direction [m]')
+#     plt.ylabel('Distance in y-direction [m]')
+#     plt.grid(zorder=-1)
+#     plt.tight_layout()
+#     file = base_path_figs / f"{var_sim}_relative_difference.png"
+#     fig.savefig(file, dpi=300)
+#     plt.close(fig)
+    
+x1 = 200
+y1 = 200
+pet_weight = ds_params["F_et"].isel(x=x1, y=y1).values/100
+file = base_path / "input" / "PET.txt"
+df_pet = pd.read_csv(
+    file,
+    sep=r"\s+",
+    skiprows=0,
+    header=0,
+    parse_dates=[[0, 1, 2, 3, 4]],
+    index_col=0,
+    na_values=-9999,
+)
+df_pet.index = pd.to_datetime(df_pet.index, format="%Y %m %d %H %M")
+df_pet.index = df_pet.index.rename("Index")
+
+print(onp.sum(df_pet["PET"].values) * pet_weight)
+
+states_hm_file = base_path_output / "ONED_Moehlin.nc"
+ds_sim3 = xr.open_dataset(states_hm_file, engine="h5netcdf")
+days = (ds_sim3['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+date = num2date(
+    days,
+    units=f"days since {ds_sim3['Time'].attrs['time_origin']}",
+    calendar="standard",
+    only_use_cftime_datetimes=False,
+)
+ds_sim3 = ds_sim3.assign_coords(Time=("Time", date))
+vals = ds_sim3["pet"].isel(x=x1, y=y1).values
+
+print(onp.sum(vals))
