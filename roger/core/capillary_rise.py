@@ -37,7 +37,7 @@ def calc_cpr_rz(state):
             + (vs.n_salv[2:-2, 2:-2] - 1)
             * npx.power((z[2:-2, 2:-2]) / (-vs.ha[2:-2, 2:-2] * 10.2), -vs.n_salv[2:-2, 2:-2])
         )
-        * vs.dt
+        * vs.dt * vs.ks[2:-2, 2:-2]
         * vs.maskCatch[2:-2, 2:-2],
     )
     vs.cpr_rz = update(
@@ -192,7 +192,7 @@ def calc_cpr_ss(state):
         z = update(
             z,
             at[2:-2, 2:-2],
-            (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 - vs.z_root[2:-2, 2:-2, vs.tau]) * vs.maskCatch[2:-2, 2:-2],
+            (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 - vs.z_soil[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.cpr_ss = update(
             vs.cpr_ss,
@@ -207,7 +207,7 @@ def calc_cpr_ss(state):
                 + (vs.n_salv[2:-2, 2:-2] - 1)
                 * npx.power((z[2:-2, 2:-2]) / (-vs.ha[2:-2, 2:-2] * 10.2), -vs.n_salv[2:-2, 2:-2])
             )
-            * vs.dt
+            * vs.dt * vs.ks[2:-2, 2:-2]
             * vs.maskCatch[2:-2, 2:-2],
         )
         vs.cpr_ss = update(
@@ -234,7 +234,7 @@ def calc_cpr_ss(state):
         )
 
         # reducing capillary rise if large pores of subsoil contain water
-        mask2 = (vs.z_sat[:, :, vs.tau] > 0) & (vs.cpr_ss > vs.S_lp_ss)
+        mask2 = (vs.cpr_ss > vs.S_lp_ss)
         vs.cpr_ss = update(
             vs.cpr_ss,
             at[2:-2, 2:-2],

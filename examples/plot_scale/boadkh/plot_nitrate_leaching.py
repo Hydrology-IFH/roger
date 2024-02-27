@@ -116,14 +116,17 @@ fertilization_intensities = ["low", "medium", "high"]
 
 _lab_unit_daily = {
     "M_q_ss": "PERC-$NO_3$\n [kg $NO_3$-N/day/ha]",
+    "C_q_ss": "PERC-$NO_3$\n [mg/l]"
 }
 
 _lab_unit_annual = {
     "M_q_ss": "PERC-$NO_3$\n  [kg $NO_3$-N/year/ha]",
+    "C_q_ss": "PERC-$NO_3$\n [mg/l]"
 }
 
 _lab_unit_total = {
-    "M_q_ss": "PERC-$NO_3$ [kg $NO_3$-N]"
+    "M_q_ss": "PERC-$NO_3$\n [kg $NO_3$-N]",
+    "C_q_ss": "PERC-$NO_3$\n [mg/l]"
 }
 
 # load model parameters
@@ -142,6 +145,29 @@ clust_ids = pd.unique(df_params["CLUST_ID"].values).tolist()
 # # get unique cluster ids for cropland
 # cond = onp.isin(df_link_bk50_cluster_cropland.index.values, gdf_bk50["SHP_ID"].values)
 # clust_ids = onp.unique(df_link_bk50_cluster_cropland.loc[cond, "CLUST_ID"].values).astype(str)
+
+# load simulated fluxes and states
+dict_fluxes_states = {}
+for location in locations:
+    dict_fluxes_states[location] = {}
+    for crop_rotation_scenario in crop_rotation_scenarios:
+        dict_fluxes_states[location][crop_rotation_scenario] = {}
+        output_hm_file = (
+            base_path_output
+            / "svat_crop"
+            / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+        )
+        ds_fluxes_states = xr.open_dataset(output_hm_file, engine="h5netcdf")
+        # assign date
+        days = ds_fluxes_states["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+        date = num2date(
+            days,
+            units=f"days since {ds_fluxes_states['Time'].attrs['time_origin']}",
+            calendar="standard",
+            only_use_cftime_datetimes=False,
+        )
+        ds_fluxes_states = ds_fluxes_states.assign_coords(Time=("Time", date))
+        dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
 
 # load nitrogen loads and concentrations
 dict_nitrate = {}
@@ -282,27 +308,42 @@ for location in locations:
 
 # plot average annual sum
 colors = sns.color_palette("magma_r", n_colors=len(fertilization_intensities))
-vars_sim = ["M_q_ss"]
+vars_sim = ["M_q_ss", "C_q_ss"]
 for var_sim in vars_sim:
     for location in locations:
         fig, axes = plt.subplots(3, 1, figsize=(6, 6), sharex=True, sharey=True)
         for i, fertilization_intensity in enumerate(fertilization_intensities):
             ll_df = []
             for crop_rotation_scenario in crop_rotation_scenarios:
-                ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-                sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
-                cond1 = (df_params["CLUST_flag"] == 1)
-                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-                # calculate annual sum
-                df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
-                df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
-                ll_df.append(df_ann_avg)
+                if var_sim == "M_q_ss":
+                    ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+                    sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
+                    cond1 = (df_params["CLUST_flag"] == 1)
+                    df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+                    # calculate annual sum
+                    df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+                    df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+                    ll_df.append(df_ann_avg)
+                    ylim = (0, 80)
+                elif var_sim == "C_q_ss":
+                    ds = dict_fluxes_states[location][crop_rotation_scenario]
+                    sim_vals1 = ds["q_ss"].isel(y=0).values
+                    ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+                    sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:]
+                    sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
+                    cond1 = (df_params["CLUST_flag"] == 1)
+                    df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+                    # calculate annual mean
+                    df_ann_avg = df.resample("YE").mean().iloc[:-1, :].mean(axis=0).to_frame()
+                    df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+                    ll_df.append(df_ann_avg)
+                    ylim = (0, 120)
             df_ann_avg = pd.concat(ll_df)
             df_ann_avg_long = df_ann_avg.melt(id_vars="crop_rotation", value_name="vals").loc[:, ["crop_rotation", "vals"]]        
             sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", ax=axes[i], whis=(5, 95), showfliers=False, color=colors[i])
             axes[i].set_xlabel("")
-            axes[i].set_ylabel(_lab_unit_total[var_sim])
-            axes[i].set_ylim(0, 80)
+            axes[i].set_ylabel(_lab_unit_annual[var_sim])
+            axes[i].set_ylim(ylim)
         axes[-1].set_xlabel("Crop rotation")
         plt.xticks(rotation=33)
         fig.tight_layout()

@@ -162,7 +162,7 @@ def main(temp_dir):
             vs.z_soil = update(
                 vs.z_soil,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("GRUND", self._base_path, "parameters.nc"),
+                self._read_var_from_nc("GRUND", self._base_path, "parameters.nc") * 10,  # convert cm to mm
             )
             # groundwater table depth (m)
             vs.z_gw = update(

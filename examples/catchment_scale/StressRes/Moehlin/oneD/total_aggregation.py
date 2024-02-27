@@ -61,7 +61,7 @@ mask = onp.isfinite(dem)
 # years to be aggregated
 years = onp.arange(2013, 2023, dtype=int)
 # variables to be aggregated
-vars_sim = ["prec", "aet", "pet", "q_ss", "q_sub", "cpr_ss"]
+vars_sim = ["prec", "aet", "pet", "q_ss", "q_sub", "cpr_ss", "q_hof"]
 
 # merge model output into single file
 states_agg_file = base_path_output / "ONED_Moehlin_total.nc"
