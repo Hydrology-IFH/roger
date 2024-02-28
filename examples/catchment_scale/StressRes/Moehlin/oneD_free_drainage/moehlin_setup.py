@@ -110,7 +110,14 @@ def main(temp_dir):
             # macropore flow velocities
             vs.lut_mlms = update(vs.lut_mlms, at[:, :], lut.ARR_MLMS)
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "maskCatch",
+                "slope",
+                "slope_per",
+            ],
+        )
         def set_topography(self, state):
             vs = state.variables
 
@@ -134,7 +141,27 @@ def main(temp_dir):
                 self._read_var_from_nc("slope", self._base_path, "parameters.nc"),
             )
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "lu_id",
+                "sealing",
+                "S_dep_tot",
+                "z_soil",
+                "dmpv",
+                "dmph",
+                "lmpv",
+                "theta_ac",
+                "theta_ufc",
+                "theta_pwp",
+                "ks",
+                "kf",
+                "z_gw",
+                "prec_weight",
+                "ta_offset",
+                "pet_weight",
+            ],
+        )
         def set_parameters_setup(self, state):
             vs = state.variables
 
