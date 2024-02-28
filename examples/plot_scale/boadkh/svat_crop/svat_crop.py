@@ -235,6 +235,11 @@ def main(location, crop_rotation_scenario, tmp_dir):
                 at[2:-2, 2:-2],
                 npx.where(vs.z_soil[2:-2, 2:-2] >= 900, 0.7, vs.root_growth_scale[2:-2, 2:-2]),
             )
+            vs.root_growth_scale = update(
+                vs.root_growth_scale,
+                at[2:-2, 2:-2],
+                npx.where(vs.z_soil[2:-2, 2:-2] >= 1200, 0.9, vs.root_growth_scale[2:-2, 2:-2]),
+            )
             # canopy growth rate icnreases with soil depth
             vs.canopy_growth_scale = update(
                 vs.canopy_growth_scale,
@@ -250,6 +255,11 @@ def main(location, crop_rotation_scenario, tmp_dir):
                 vs.canopy_growth_scale,
                 at[2:-2, 2:-2],
                 npx.where(vs.z_soil[2:-2, 2:-2] >= 900, 0.9, vs.canopy_growth_scale[2:-2, 2:-2]),
+            )
+            vs.canopy_growth_scale = update(
+                vs.canopy_growth_scale,
+                at[2:-2, 2:-2],
+                npx.where(vs.z_soil[2:-2, 2:-2] >= 1200, 1, vs.canopy_growth_scale[2:-2, 2:-2]),
             )
 
         @roger_routine
