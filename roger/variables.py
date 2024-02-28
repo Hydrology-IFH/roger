@@ -119,6 +119,7 @@ DIM_TO_SHAPE_VAR = {
     "n_params3": 3,
     "n_params7": 7,
     "n_params9": 9,
+    "n_params12": 12,
     "n_params13": 13,
     "n_flowdir": "nflowdirs",
 }

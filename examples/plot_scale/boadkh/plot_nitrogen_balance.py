@@ -141,7 +141,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             fig, axes = plt.subplots(4, 1, figsize=(6, 6)) 
             for i, var_sim in enumerate(vars_sim):
                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
-                cond1 = (df_params["CLUST_flag"] == 1)
+                cond1 = (df_params["CLUST_flag"] == 2)
                 df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
                 if var_sim in ["M_s"]:
                     # calculate annual sum
@@ -175,7 +175,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             for fertilization_intensity in fertilization_intensities:
                 ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
-                cond1 = (df_params["CLUST_flag"] == 1)
+                cond1 = (df_params["CLUST_flag"] == 2)
                 df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
                 if var_sim in ["M_s"]:
                     # calculate annual sum
@@ -208,7 +208,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             for fertilization_intensity in fertilization_intensities:
                 ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
-                cond1 = (df_params["CLUST_flag"] == 1)
+                cond1 = (df_params["CLUST_flag"] == 2)
                 df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
                 # calculate annual sum
                 df_ann = df.resample("YE").sum().iloc[:-1, :]

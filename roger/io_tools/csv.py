@@ -42,11 +42,10 @@ def read_meteo(path_to_dir: Path):
         sep=r"\s+",
         skiprows=0,
         header=0,
-        parse_dates=[[0, 1, 2, 3, 4]],
-        index_col=0,
         na_values=-9999,
     )
-    df_PREC.index = pd.to_datetime(df_PREC.index, format="%Y %m %d %H %M")
+    df_PREC.index = [pd.to_datetime(f"{df_PREC.iloc[i, 0]} {df_PREC.iloc[i, 1]} {df_PREC.iloc[i, 2]} {df_PREC.iloc[i, 3]} {df_PREC.iloc[i, 4]}", format="%Y %m %d %H %M") for i in range(len(df_PREC.index))]
+    df_PREC = df_PREC.loc[:, ["PREC"]]
     df_PREC.index = df_PREC.index.rename("Index")
 
     if os.path.exists(PET_path):
@@ -55,12 +54,12 @@ def read_meteo(path_to_dir: Path):
             sep=r"\s+",
             skiprows=0,
             header=0,
-            parse_dates=[[0, 1, 2, 3, 4]],
-            index_col=0,
             na_values=-9999,
         )
-        df_pet.index = pd.to_datetime(df_pet.index, format="%Y %m %d %H %M")
+        df_pet.index = [pd.to_datetime(f"{df_pet.iloc[i, 0]} {df_pet.iloc[i, 1]} {df_pet.iloc[i, 2]} {df_pet.iloc[i, 3]} {df_pet.iloc[i, 4]}", format="%Y %m %d %H %M") for i in range(len(df_pet.index))]
+        df_pet = df_pet.loc[:, ["PET"]]
         df_pet.index = df_pet.index.rename("Index")
+
     else:
         df_pet = None
 
@@ -70,11 +69,10 @@ def read_meteo(path_to_dir: Path):
             sep=r"\s+",
             skiprows=0,
             header=0,
-            parse_dates=[[0, 1, 2, 3, 4]],
-            index_col=0,
             na_values=-9999,
         )
-        df_rs.index = pd.to_datetime(df_rs.index, format="%Y %m %d %H %M")
+        df_rs.index = [pd.to_datetime(f"{df_rs.iloc[i, 0]} {df_rs.iloc[i, 1]} {df_rs.iloc[i, 2]} {df_rs.iloc[i, 3]} {df_rs.iloc[i, 4]}", format="%Y %m %d %H %M") for i in range(len(df_rs.index))]
+        df_rs = df_rs.loc[:, ["RS"]]
         df_rs.index = df_rs.index.rename("Index")
     else:
         df_rs = None
@@ -84,11 +82,10 @@ def read_meteo(path_to_dir: Path):
         sep=r"\s+",
         skiprows=0,
         header=0,
-        parse_dates=[[0, 1, 2, 3, 4]],
-        index_col=0,
         na_values=-9999,
     )
-    df_ta.index = pd.to_datetime(df_ta.index, format="%Y %m %d %H %M")
+    df_ta.index = [pd.to_datetime(f"{df_ta.iloc[i, 0]} {df_ta.iloc[i, 1]} {df_ta.iloc[i, 2]} {df_ta.iloc[i, 3]} {df_ta.iloc[i, 4]}", format="%Y %m %d %H %M") for i in range(len(df_ta.index))]
+    df_ta = df_ta.loc[:, ["TA"]]
     df_ta.index = df_ta.index.rename("Index")
 
     # reset index of precipitation time series
@@ -97,7 +94,7 @@ def read_meteo(path_to_dir: Path):
     new_prec_ind = pd.date_range(
         start=datetime(prec_ind[0].year, prec_ind[0].month, prec_ind[0].day, 0, 0),
         end=datetime(prec_ind[-1].year, prec_ind[-1].month, prec_ind[-1].day, 23, 50),
-        freq="10T",
+        freq="10min",
     )
     prec_10mins = pd.DataFrame(index=new_prec_ind)
     prec_10mins["PREC"] = 0.

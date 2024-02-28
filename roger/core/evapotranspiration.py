@@ -388,6 +388,13 @@ def calc_transp(state):
         vs.pet_res[2:-2, 2:-2] * vs.transp_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
+    # potential transpiration of trees
+    vs.ptransp = update(
+        vs.ptransp,
+        at[2:-2, 2:-2],
+        npx.where(npx.isin(vs.lu_id[2:-2, 2:-2], npx.array([10, 11, 12, 15, 16, 17])), vs.pet[2:-2, 2:-2] * vs.transp_coeff[2:-2, 2:-2], vs.ptransp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     # residual transpiration
     vs.ptransp_res = update(
         vs.ptransp_res,
