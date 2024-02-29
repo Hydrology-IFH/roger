@@ -31,7 +31,7 @@ _VALS = {
     "c2_transp": 0.6,
     "c2_q_rz": 1.5,
     "c2_q_ss": 1.5,
-    "km_denit": [2.5, 9],
+    "km_denit": [2.5, 18.7],
     "km_nit": [2.5, 12],
     "kmin": [10, 30],
     "kfix": 40,
@@ -72,7 +72,7 @@ def main():
     df_params.loc[:, "c2_q_rz"] = _VALS["c2_q_rz"]
     df_params.loc[:, "c2_q_ss"] = _VALS["c2_q_ss"]
     df_params.loc[:, "phi_soil_temp"] = _VALS["phi_soil_temp"]
-    df_params.loc[:, "km_denit"] = _VALS["km_denit"][0] + (_VALS["km_nit"][1] - _VALS["km_nit"][0]) * c_clay 
+    df_params.loc[:, "km_denit"] = _VALS["km_denit"][0] + (_VALS["km_denit"][1] - _VALS["km_denit"][0]) * (1 - c_clay) 
     df_params.loc[:, "dmax_denit"] = _VALS["dmax_denit"][0] + (_VALS["dmax_denit"][1] - _VALS["dmax_denit"][0]) * c_clay
     df_params.loc[:, "km_nit"] = _VALS["km_nit"][0] + (_VALS["km_nit"][1] - _VALS["km_nit"][0]) * (1 - c_clay) * c_soil_fertility
     df_params.loc[:, "dmax_nit"] = _VALS["dmax_nit"][0] + (_VALS["dmax_nit"][1] - _VALS["dmax_nit"][0]) * (1 - c_clay) * c_soil_fertility

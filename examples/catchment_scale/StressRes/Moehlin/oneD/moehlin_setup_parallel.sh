@@ -22,7 +22,7 @@ eval "$(conda shell.bash hook)"
 conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/StressRes/Moehlin/oneD
   
-mpirun --bind-to core --map-by core -report-bindings python moehlin_setup.py -b jax -d cpu -n 4 1 --float-type float64  -td "${TMPDIR}"
+mpirun --bind-to core --map-by core -report-bindings python moehlin_setup.py -b numpy -d cpu -n 4 1 --float-type float64  -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/StressRes/Moehlin/oneD/output"
 mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/StressRes/Moehlin/oneD/output

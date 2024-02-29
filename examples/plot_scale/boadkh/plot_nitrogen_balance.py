@@ -92,9 +92,16 @@ fertilization_intensities = ["low", "medium", "high"]
 
 
 _lab_unit_annual = {
+    "Nfert": "FERT-$N$\n [kg N/year/ha]",
+    "nh4_up": "TRANSP-$N$\n [kg N/year/ha]",
+    "nit_s": "NIT\n [kg N/year/ha]",
+    "denit_s": "DENIT\n [kg N/year/ha]",
+    "min_s": "MIN\n [kg N/year/ha]",
+    "nfix_s": "NFIX\n [kg N/year/ha]",
     "M_in": "FERT-$NO_3$\n [kg $NO_3$-N/year/ha]",
     "M_transp": "TRANSP-$NO_3$\n [kg $NO_3$-N/year/ha]",
     "M_s": "SOIL-$NO_3$\n [kg $NO_3$-N/ha]",
+    "Nmin_s": "SOIL-$NMIN$\n [kg $N/ha]",
     "M_q_ss": "PERC-$NO_3$\n [kg $NO_3$-N/year/ha]",
 }
 
@@ -133,7 +140,7 @@ for location in locations:
 
 
 # plot annual nitrate-nitrogen balance
-vars_sim = ["M_in", "M_transp", "M_s", "M_q_ss"]
+vars_sim = ["Nfert", "M_transp", "M_s", "M_q_ss"]
 for crop_rotation_scenario in crop_rotation_scenarios:
     for location in locations:
         for fertilization_intensity in fertilization_intensities:
@@ -216,7 +223,6 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                 df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
                 df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
                 ll_df.append(df_ann_long)
-
         df_ann_long = pd.concat(ll_df)
     
         fig, ax = plt.subplots(1, 1, figsize=(6, 2))
