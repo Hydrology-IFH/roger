@@ -43,7 +43,8 @@ def main():
                                "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
                                "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                               "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
+                               "grain-corn_winter-wheat_winter-barley_yellow-mustard",
+                               "yellow-mustard"]
 
     fertilization_intensities = ["low", "medium", "high"]
 

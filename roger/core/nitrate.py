@@ -144,13 +144,6 @@ def calc_denit_soil(state, msa, km, Dmax, sa, S_sat):
         * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # mr_pot = update(
-    #     mr_pot,
-    #     at[2:-2, 2:-2],
-    #     (S[2:-2, 2:-2] / S_sat[2:-2, 2:-2]) * mr_pot[2:-2, 2:-2]
-    #     * vs.maskCatch[2:-2, 2:-2],
-    # )
-
     msa = update(
         msa,
         at[2:-2, 2:-2, vs.tau, :],
@@ -229,16 +222,16 @@ def calc_nit_soil(state, Nmin, knit, Dnit, sa, S_sat):
     )
 
     # no nitrification if storage is greater than 90 % of pore volume
-    # ma_pot = update(
-    #     ma_pot,
-    #     at[2:-2, 2:-2],
-    #     npx.where(
-    #         S[2:-2, 2:-2] < 0.9 * S_sat[2:-2, 2:-2],
-    #         ma_pot[2:-2, 2:-2],
-    #         0,
-    #     )
-    #     * vs.maskCatch[2:-2, 2:-2],
-    # )
+    ma_pot = update(
+        ma_pot,
+        at[2:-2, 2:-2],
+        npx.where(
+            S[2:-2, 2:-2] < 0.9 * S_sat[2:-2, 2:-2],
+            ma_pot[2:-2, 2:-2],
+            0,
+        )
+        * vs.maskCatch[2:-2, 2:-2],
+    )
 
     ma = update(
         ma,
@@ -398,17 +391,17 @@ def calc_gaseous_loss(state, Nmin, kngl, sa, S_sat):
         * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # # no gaseous loss if storage is greater than 90 % of pore volume
-    # mr_pot = update(
-    #     mr_pot,
-    #     at[2:-2, 2:-2],
-    #     npx.where(
-    #         S[2:-2, 2:-2] < 0.9 * S_sat[2:-2, 2:-2],
-    #         mr_pot[2:-2, 2:-2],
-    #         0,
-    #     )
-    #     * vs.maskCatch[2:-2, 2:-2],
-    # )
+    # no gaseous loss if storage is greater than 90 % of pore volume
+    mr_pot = update(
+        mr_pot,
+        at[2:-2, 2:-2],
+        npx.where(
+            S[2:-2, 2:-2] < 0.9 * S_sat[2:-2, 2:-2],
+            mr_pot[2:-2, 2:-2],
+            0,
+        )
+        * vs.maskCatch[2:-2, 2:-2],
+    )
 
     mr = update(
         mr,
