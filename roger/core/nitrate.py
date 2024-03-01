@@ -427,7 +427,7 @@ def calc_gaseous_loss(state, Nmin, kngl, sa, S_sat):
 
 @roger_kernel
 def calc_ammonium_uptake(state):
-    """Calculates gaseous loss of ammonium."""
+    """Calculates ammonium uptake by plants."""
     vs = state.variables
     settings = state.settings
 
