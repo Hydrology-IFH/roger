@@ -217,4 +217,5 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                     cond2 = gdf["SHP_ID"].isin(shp_ids)
                     if cond2.any():
                         gdf.loc[cond2, f'{_dict_var_names[var_sim]}_{fertilization_intensity}Nfert_avg'] = val
+    gdf = gdf.to_crs("EPSG:25832")
     gdf.to_file(file, driver="GPKG")
