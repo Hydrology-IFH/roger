@@ -8,7 +8,7 @@ import click
 def main():
     base_path = Path(__file__).parent
     base_path_bwuc = "/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh"
-    base_path_ws = Path("/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh/output")
+    base_path_ws = Path("/pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh")
 
     locations = ["freiburg", "lahr", "muellheim", 
                  "stockach", "gottmadingen", "weingarten",
@@ -52,11 +52,11 @@ def main():
             output_path_ws = base_path_ws / "svat_crop"
             lines = []
             lines.append("#!/bin/bash\n")
-            lines.append("#SBATCH --time=2:00:00\n")
+            lines.append("#SBATCH --time=8:00:00\n")
             lines.append("#SBATCH --nodes=1\n")
             lines.append("#SBATCH --ntasks=1\n")
             lines.append("#SBATCH --cpus-per-task=1\n")
-            lines.append("#SBATCH --mem=4000\n")
+            lines.append("#SBATCH --mem=8000\n")
             lines.append("#SBATCH --mail-type=FAIL\n")
             lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
             lines.append(f"#SBATCH --job-name={script_name}\n")
@@ -128,11 +128,11 @@ def main():
                 output_path_ws = base_path_ws / "svat_crop_nitrate"
                 lines = []
                 lines.append("#!/bin/bash\n")
-                lines.append("#SBATCH --time=4:00:00\n")
+                lines.append("#SBATCH --time=16:00:00\n")
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=1\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")
-                lines.append("#SBATCH --mem=4000\n")
+                lines.append("#SBATCH --mem=12000\n")
                 lines.append("#SBATCH --mail-type=FAIL\n")
                 lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
                 lines.append(f"#SBATCH --job-name={script_name}\n")
