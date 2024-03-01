@@ -85,7 +85,7 @@ def read_meteo(path_to_dir: Path):
         na_values=-9999,
     )
     df_ta.index = [pd.to_datetime(f"{df_ta.iloc[i, 0]} {df_ta.iloc[i, 1]} {df_ta.iloc[i, 2]} {df_ta.iloc[i, 3]} {df_ta.iloc[i, 4]}", format="%Y %m %d %H %M") for i in range(len(df_ta.index))]
-    df_ta = df_ta.loc[:, ["TA"]]
+    df_ta = df_ta.loc[:, "TA":]
     df_ta.index = df_ta.index.rename("Index")
 
     # reset index of precipitation time series
@@ -164,7 +164,7 @@ def write_meteo_csv_from_dwd(path_to_dir: Path):
     new_prec_ind = pd.date_range(
         start=datetime(prec_ind[0].year, prec_ind[0].month, prec_ind[0].day, 0, 0),
         end=datetime(prec_ind[-1].year, prec_ind[-1].month, prec_ind[-1].day, 23, 50),
-        freq="10T",
+        freq="10min",
     )
     prec_10mins = pd.DataFrame(index=new_prec_ind)
     prec_10mins["PREC"] = 0
