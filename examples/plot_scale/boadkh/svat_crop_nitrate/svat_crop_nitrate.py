@@ -47,12 +47,12 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         """A SVAT-CROP transport model for nitrate."""
 
         _base_path = Path(__file__).parent
-        if tmp_dir:
-            # read fluxes and states from local SSD on cluster node
-            _input_dir = Path(tmp_dir)
-        else:
-            _input_dir = _base_path.parent / "output" / "svat_crop"
-        # _input_dir = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "svat_crop"
+        # if tmp_dir:
+        #     # read fluxes and states from local SSD on cluster node
+        #     _input_dir = Path(tmp_dir)
+        # else:
+        #     _input_dir = _base_path.parent / "output" / "svat_crop"
+        _input_dir = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "svat_crop"
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -818,7 +818,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["rate"].output_variables = ["M_in", "M_q_ss", "M_transp", "ndep_s", "nit_s", "denit_s", "min_s", "nfix_s", "Nfert", "Nfert_min", "Nfert_org", "nh4_up"]
+            diagnostics["rate"].output_variables = ["M_in", "M_q_ss", "M_transp", "ndep_s", "nit_s", "denit_s", "min_s", "nfix_s", "ngas_s", "Nfert", "Nfert_min", "Nfert_org", "nh4_up"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
@@ -872,13 +872,15 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         vs = state.variables
         settings = state.settings
 
-        _c1 = 0.3
+        _c1 = 0.5
 
-        # apply mineral nitrogen fertilizer
+        # apply mineral nitrogen fertilizer (contains 50% NH4 and 50% NO3)
         vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], 0)
         vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert1[2:-2, 2:-2] * settings.dx * settings.dy * 100) - ((vs.kmin_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100) - ((vs.kfix_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100), vs.Nfert_min[2:-2, 2:-2]))
         vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100) - ((vs.kmin_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100) - ((vs.kfix_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100), vs.Nfert_min[2:-2, 2:-2]))
-        vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nfert_min[2:-2, 2:-2]))
+        vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nfert_min[2:-2, 2:-2]))
+        vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where(vs.Nfert_min[2:-2, 2:-2] < 0, 0, vs.Nfert_min[2:-2, 2:-2]))
+
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert1[2:-2, 2:-2] * settings.dx * settings.dy * 100) - ((vs.kmin_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100) - ((vs.kfix_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100) - ((vs.kmin_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100) - ((vs.kfix_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
@@ -912,11 +914,13 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.Nmin_in[2:-2, 2:-2] < 0), 0, vs.Nmin_in[2:-2, 2:-2]))
         vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.inf_in_tracer[2:-2, 2:-2] > settings.cum_inf_for_N_input), 0, vs.inf_in_tracer[2:-2, 2:-2]))
 
-        # apply organic nitrogen fertilizer
+        # apply organic nitrogen fertilizer (contains 48% NH4)
         vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], 0)
-        vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], npx.where((vs.doy_fert1_org[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert1_org[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nfert_org[2:-2, 2:-2]))
-        vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], npx.where((vs.doy_fert2_org[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert2_org[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nfert_org[2:-2, 2:-2]))
-        vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], npx.where((vs.doy_fert3_org[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert3_org[2:-2, 2:-2] * settings.dx * settings.dy * 100) - (vs.kmin_rz[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nfert_org[2:-2, 2:-2]))
+        vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], npx.where((vs.doy_fert1_org[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert1_org[2:-2, 2:-2] * 0.48 * settings.dx * settings.dy * 100) - ((vs.kmin_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100) - ((vs.kfix_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100), vs.Nfert_org[2:-2, 2:-2]))
+        vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], npx.where((vs.doy_fert2_org[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert2_org[2:-2, 2:-2] * 0.48 * settings.dx * settings.dy * 100) - ((vs.kmin_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100) - ((vs.kfix_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100), vs.Nfert_org[2:-2, 2:-2]))
+        vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], npx.where((vs.doy_fert3_org[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert3_org[2:-2, 2:-2] * 0.48 * settings.dx * settings.dy * 100), vs.Nfert_org[2:-2, 2:-2]))
+        vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], npx.where(vs.Nfert_org[2:-2, 2:-2] < 0, 0, vs.Nfert_org[2:-2, 2:-2]))        
+
         vs.Nmin_rz = update_add(
             vs.Nmin_rz,
             at[2:-2, 2:-2, vs.tau, 0],
