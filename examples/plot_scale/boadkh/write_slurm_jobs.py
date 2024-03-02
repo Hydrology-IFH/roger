@@ -52,11 +52,11 @@ def main():
             output_path_ws = base_path_ws / "output" / "svat_crop"
             lines = []
             lines.append("#!/bin/bash\n")
-            lines.append("#SBATCH --time=8:00:00\n")
+            lines.append("#SBATCH --time=6:00:00\n")
             lines.append("#SBATCH --nodes=1\n")
             lines.append("#SBATCH --ntasks=1\n")
             lines.append("#SBATCH --cpus-per-task=1\n")
-            lines.append("#SBATCH --mem=8000\n")
+            lines.append("#SBATCH --mem=1000\n")
             lines.append("#SBATCH --mail-type=FAIL\n")
             lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
             lines.append(f"#SBATCH --job-name={script_name}\n")
@@ -128,11 +128,11 @@ def main():
                 output_path_ws = base_path_ws / "output" / "svat_crop_nitrate"
                 lines = []
                 lines.append("#!/bin/bash\n")
-                lines.append("#SBATCH --time=16:00:00\n")
+                lines.append("#SBATCH --time=24:00:00\n")
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=1\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")
-                lines.append("#SBATCH --mem=12000\n")
+                lines.append("#SBATCH --mem=4000\n")
                 lines.append("#SBATCH --mail-type=FAIL\n")
                 lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
                 lines.append(f"#SBATCH --job-name={script_name}\n")
