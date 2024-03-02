@@ -49,7 +49,7 @@ def main():
     for location in locations:
         for crop_rotation_scenario in crop_rotation_scenarios:
             script_name = f"svat_crop_{location}_{crop_rotation_scenario}"
-            output_path_ws = base_path_ws / "svat_crop"
+            output_path_ws = base_path_ws / "output" / "svat_crop"
             lines = []
             lines.append("#!/bin/bash\n")
             lines.append("#SBATCH --time=8:00:00\n")
@@ -125,7 +125,7 @@ def main():
         for crop_rotation_scenario in crop_rotation_scenarios:
             for fertilization_intensity in fertilization_intensities:
                 script_name = f"svat_crop_nitrate_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert"
-                output_path_ws = base_path_ws / "svat_crop_nitrate"
+                output_path_ws = base_path_ws / "output" / "svat_crop_nitrate"
                 lines = []
                 lines.append("#!/bin/bash\n")
                 lines.append("#SBATCH --time=16:00:00\n")
