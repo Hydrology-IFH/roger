@@ -15,7 +15,7 @@ eval "$(conda shell.bash hook)"
 conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/StressRes/Moehlin/oneD
   
-python moehlin_setup.py -b jax -d cpu --float-type float64 -td "${TMPDIR}"
+python moehlin_setup.py -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/catchment_scale/StressRes/Moehlin/output/oneD"
 mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/catchment_scale/StressRes/Moehlin/output/oneD
