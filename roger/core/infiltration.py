@@ -93,7 +93,7 @@ def calc_inf_mat(state):
     vs.inf_mat_pot = update(
         vs.inf_mat_pot,
         at[2:-2, 2:-2],
-        0,
+        vs.ks[2:-2, 2:-2] * vs.dt,
     )
     vs.inf_mat_pot = update(
         vs.inf_mat_pot,

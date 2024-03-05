@@ -803,7 +803,7 @@ def calc_potential_percolation_rz(state):
                     * npx.power((z[2:-2, 2:-2]) / (-vs.ha[2:-2, 2:-2] * 10.2), -vs.n_salv[2:-2, 2:-2])
                 )
             )
-            * vs.dt * vs.ks[2:-2, 2:-2],
+            * vs.dt * vs.ks[2:-2, 2:-2] * (-1),
             perc_pot[2:-2, 2:-2],
         )
         * vs.maskCatch[2:-2, 2:-2],
