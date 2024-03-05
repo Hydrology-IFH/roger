@@ -210,6 +210,7 @@ def calc_cpr_ss(state):
             * vs.dt * vs.ks[2:-2, 2:-2]
             * vs.maskCatch[2:-2, 2:-2],
         )
+        print(vs.cpr_ss[2, 2])
         vs.cpr_ss = update(
             vs.cpr_ss,
             at[2:-2, 2:-2],
@@ -305,6 +306,10 @@ def calc_cpr_ss(state):
             at[2:-2, 2:-2],
             npx.where(mask3[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
+
+        print(vs.cpr_ss[2, 2])
+        print(vs.S_fp_rz[2, 2], vs.S_ufc_rz[2, 2], vs.S_lp_rz[2, 2], vs.S_ac_rz[2, 2])
+        print(vs.S_fp_ss[2, 2], vs.S_ufc_ss[2, 2], vs.S_lp_ss[2, 2], vs.S_ac_ss[2, 2])
 
     return KernelOutput(cpr_ss=vs.cpr_ss, S_fp_ss=vs.S_fp_ss, S_lp_ss=vs.S_lp_ss)
 

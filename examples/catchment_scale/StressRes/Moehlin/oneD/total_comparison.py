@@ -96,9 +96,9 @@ cmap1 = mpl.colormaps.get_cmap('viridis_r').resampled(15)
 cmap2 = mpl.colormaps.get_cmap('PuOr').resampled(10)
 cmap3 = mpl.colormaps.get_cmap('PuOr').resampled(8)
 
-# # load hydrological simulations
-# states_hm_file = base_path_output / "ONED_Moehlin_total.nc"
-# ds_sim1 = xr.open_dataset(states_hm_file, engine="h5netcdf")
+# load hydrological simulations
+states_hm_file = base_path_output / "ONED_Moehlin_total.nc"
+ds_sim1 = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
 states_hm_file = base_path_output / "RoGeR_WBM_1D" / "total.nc"
 ds_sim2 = xr.open_dataset(states_hm_file, engine="h5netcdf")
@@ -117,20 +117,20 @@ file = base_path_figs / "forest.png"
 fig.savefig(file, dpi=300)
 plt.close(fig)
 
-# vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc", "q_hof", "q_ss", "q_sub"]
-# for var_sim in vars_sim:
-#     mask = (ds_sim1[var_sim].values <= 0)
-#     vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
-#     fig, ax = plt.subplots(figsize=(6,5))
-#     im = ax.imshow(vals1, extent=grid_extent, cmap=cmap1, zorder=2, aspect='equal', vmin=0, vmax=1500)
-#     plt.colorbar(im, ax=ax, shrink=0.7, label="[mm/year]")
-#     plt.xlabel('Distance in x-direction [m]')
-#     plt.ylabel('Distance in y-direction [m]')
-#     plt.grid(zorder=-1)
-#     plt.tight_layout()
-#     file = base_path_figs / f"{var_sim}_average_annual_sum.png"
-#     fig.savefig(file, dpi=300)
-#     plt.close(fig)
+vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc", "q_hof", "q_ss", "q_sub"]
+for var_sim in vars_sim:
+    mask = (ds_sim1[var_sim].values <= 0)
+    vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
+    fig, ax = plt.subplots(figsize=(6,5))
+    im = ax.imshow(vals1, extent=grid_extent, cmap=cmap1, zorder=2, aspect='equal', vmin=0, vmax=1500)
+    plt.colorbar(im, ax=ax, shrink=0.7, label="[mm/year]")
+    plt.xlabel('Distance in x-direction [m]')
+    plt.ylabel('Distance in y-direction [m]')
+    plt.grid(zorder=-1)
+    plt.tight_layout()
+    file = base_path_figs / f"{var_sim}_average_annual_sum.png"
+    fig.savefig(file, dpi=300)
+    plt.close(fig)
 
 # vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc", "q_hof", "q_ss", "q_sub", "q_sof"]
 # for var_sim in vars_sim:
@@ -147,40 +147,40 @@ plt.close(fig)
 #     fig.savefig(file, dpi=300)
 #     plt.close(fig)
 
-# vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc"]
-# # plot absolute difference
-# for var_sim in vars_sim:
-#     mask = (ds_sim1[var_sim].values <= 0)
-#     vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
-#     vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
-#     diff_vals = vals1 - vals2
-#     fig, ax = plt.subplots(figsize=(6,5))
-#     im = ax.imshow(diff_vals, extent=grid_extent, cmap=cmap2, zorder=2, aspect='equal', vmin=-500, vmax=500)
-#     plt.colorbar(im, ax=ax, shrink=0.7, label="[mm]")
-#     plt.xlabel('Distance in x-direction [m]')
-#     plt.ylabel('Distance in y-direction [m]')
-#     plt.grid(zorder=-1)
-#     plt.tight_layout()
-#     file = base_path_figs / f"{var_sim}_absolute_difference.png"
-#     fig.savefig(file, dpi=300)
-#     plt.close(fig)
+vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc"]
+# plot absolute difference
+for var_sim in vars_sim:
+    mask = (ds_sim1[var_sim].values <= 0)
+    vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
+    vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
+    diff_vals = vals1 - vals2
+    fig, ax = plt.subplots(figsize=(6,5))
+    im = ax.imshow(diff_vals, extent=grid_extent, cmap=cmap2, zorder=2, aspect='equal', vmin=-500, vmax=500)
+    plt.colorbar(im, ax=ax, shrink=0.7, label="[mm]")
+    plt.xlabel('Distance in x-direction [m]')
+    plt.ylabel('Distance in y-direction [m]')
+    plt.grid(zorder=-1)
+    plt.tight_layout()
+    file = base_path_figs / f"{var_sim}_absolute_difference.png"
+    fig.savefig(file, dpi=300)
+    plt.close(fig)
 
-# # plot relative difference
-# for var_sim in vars_sim:
-#     mask = (ds_sim1[var_sim].values <= 0)
-#     vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
-#     vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
-#     diff_vals = (vals1 - vals2) / vals2
-#     fig, ax = plt.subplots(figsize=(6,5))
-#     im = ax.imshow(diff_vals, extent=grid_extent, cmap=cmap3, zorder=2, aspect='equal', vmin=-0.8, vmax=0.8)
-#     plt.colorbar(im, ax=ax, shrink=0.7, label="[-]")
-#     plt.xlabel('Distance in x-direction [m]')
-#     plt.ylabel('Distance in y-direction [m]')
-#     plt.grid(zorder=-1)
-#     plt.tight_layout()
-#     file = base_path_figs / f"{var_sim}_relative_difference.png"
-#     fig.savefig(file, dpi=300)
-#     plt.close(fig)
+# plot relative difference
+for var_sim in vars_sim:
+    mask = (ds_sim1[var_sim].values <= 0)
+    vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
+    vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
+    diff_vals = (vals1 - vals2) / vals2
+    fig, ax = plt.subplots(figsize=(6,5))
+    im = ax.imshow(diff_vals, extent=grid_extent, cmap=cmap3, zorder=2, aspect='equal', vmin=-0.8, vmax=0.8)
+    plt.colorbar(im, ax=ax, shrink=0.7, label="[-]")
+    plt.xlabel('Distance in x-direction [m]')
+    plt.ylabel('Distance in y-direction [m]')
+    plt.grid(zorder=-1)
+    plt.tight_layout()
+    file = base_path_figs / f"{var_sim}_relative_difference.png"
+    fig.savefig(file, dpi=300)
+    plt.close(fig)
     
 x1 = 200
 y1 = 200

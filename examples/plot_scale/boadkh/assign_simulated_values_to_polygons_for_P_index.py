@@ -151,14 +151,6 @@ fertilization_intensities = ["low", "medium", "high"]
 file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "link_shp_clust_acker.h5"
 df_link_bk50_cluster_cropland = pd.read_hdf(file)
 
-# prepare shapefiles for each location and crop rotation scenario
-for crop_rotation_scenario in crop_rotation_scenarios:
-    new_file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_P_index") / f"FFID_{_dict_ffid[crop_rotation_scenario]}.gpkg"
-    if not os.path.exists(new_file):
-        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
-        gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
-        gdf.to_file(new_file, driver="GPKG")
-
 # load model parameters
 csv_file = base_path / "parameters.csv"
 df_params = pd.read_csv(csv_file, sep=";", skiprows=1)
@@ -192,8 +184,7 @@ for location in locations:
 vars_sim = ["ground_cover", "q_hof"]
 for crop_rotation_scenario in crop_rotation_scenarios:
     for location in locations:
-        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_P_index") / f"FFID_{_dict_ffid[crop_rotation_scenario]}.gpkg"
-        # gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"], mask=gdf_buffer[gdf_buffer.stationsna==location])
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
         gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
         gdf['stationsna'] = location
         gdf['stationsna'] = gdf['stationsna'].astype('str')
@@ -224,4 +215,6 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                 cond2 = gdf["SHP_ID"].isin(shp_ids)
                 if cond2.any():
                     gdf.loc[cond2, f'{_dict_var_names[var_sim]}_avg'] = val
-    gdf.to_file(file, layer=f"{location}_{crop_rotation_scenario}", driver="GPKG")
+    gdf = gdf.to_crs("EPSG:25832")
+    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_freiburg_for_P_index") / "surface_runoff_and_ground_cover.gpkg"
+    gdf.to_file(file, layer=f"FFID_{_dict_ffid[crop_rotation_scenario]}", driver="GPKG")
