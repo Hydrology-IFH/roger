@@ -196,7 +196,7 @@ def main(temp_dir):
             vs.z_gw = update(
                 vs.z_gw,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("gwfa_gew", self._base_path, "parameters.nc")[:, :, npx.newaxis]
+                self._read_var_from_nc("gwfa_gew", self._base_path, "parameters.nc")[:, :, npx.newaxis]/100  # convert cm to m
             )
             # density of vertical macropores (1/m2)
             vs.dmpv = update(
@@ -208,7 +208,7 @@ def main(temp_dir):
             vs.lmpv = update(
                 vs.lmpv,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("MPL_V", self._base_path, "parameters.nc"),
+                self._read_var_from_nc("MPL_V", self._base_path, "parameters.nc") * 10,
             )
             # density of horizontal macropores (1/m2)
             vs.dmph = update(
