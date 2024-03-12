@@ -11,25 +11,25 @@ import seaborn as sns
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-mpl.rcParams["font.size"] = 8
-mpl.rcParams["axes.titlesize"] = 8
-mpl.rcParams["axes.labelsize"] = 9
-mpl.rcParams["xtick.labelsize"] = 8
-mpl.rcParams["ytick.labelsize"] = 8
-mpl.rcParams["legend.fontsize"] = 8
-mpl.rcParams["legend.title_fontsize"] = 9
+mpl.rcParams["font.size"] = 9
+mpl.rcParams["axes.titlesize"] = 9
+mpl.rcParams["axes.labelsize"] = 10
+mpl.rcParams["xtick.labelsize"] = 9
+mpl.rcParams["ytick.labelsize"] = 9
+mpl.rcParams["legend.fontsize"] = 9
+mpl.rcParams["legend.title_fontsize"] = 10
 sns.set_style("ticks")
 sns.plotting_context(
     "paper",
     font_scale=1,
     rc={
-        "font.size": 8.0,
-        "axes.labelsize": 9.0,
-        "axes.titlesize": 8.0,
-        "xtick.labelsize": 8.0,
-        "ytick.labelsize": 8.0,
-        "legend.fontsize": 8.0,
-        "legend.title_fontsize": 9.0,
+        "font.size": 9.0,
+        "axes.labelsize": 10.0,
+        "axes.titlesize": 9.0,
+        "xtick.labelsize": 9.0,
+        "ytick.labelsize": 9.0,
+        "legend.fontsize": 9.0,
+        "legend.title_fontsize": 10.0,
     },
 )
 
@@ -111,7 +111,7 @@ if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
 # directory of output
-base_path_output = base_path / "output" / "2000_2023"
+base_path_output = Path("/Volumes/LaCie/roger/examples/catchment_scale/StressRes/Moehlin") / "output" / "oneD"
 if not os.path.exists(base_path_output):
     os.mkdir(base_path_output)
 
@@ -124,51 +124,107 @@ with open(file_config, "r") as file:
 # load RoGeR model parameters
 params_hm_file = base_path / "parameters.nc"
 ds_params = xr.open_dataset(params_hm_file, engine="h5netcdf")
+dem = ds_params["dgm"].values
+mask = onp.isfinite(dem)
 
 # plot elevation
 dem = ds_params["dgm"].values
 fig, ax = plt.subplots(figsize=(6,5))
 fig.patch.set_alpha(0)
 plt.imshow(dem, extent=grid_extent, cmap='terrain', zorder=1, aspect='equal')
-plt.colorbar(label='Elevation [m]', shrink=0.8)
+# plt.colorbar(label='Elevation [m]', shrink=0.8)
+# plt.grid(zorder=0)
+# plt.xlabel('Distance in x-direction [m]')
+# plt.ylabel('Distance in y-direction [m]')
+plt.colorbar(label='Höhe [m ü. NN]', shrink=0.8)
 plt.grid(zorder=0)
-plt.xlabel('Distance in x-direction [m]')
-plt.ylabel('Distance in y-direction [m]')
+plt.xlabel('Distanz in x-Richtung [m]')
+plt.ylabel('Distanz in y-Richtung [m]')
 plt.tight_layout()
 file = base_path_figs / "elevation.png"
 fig.savefig(file, dpi=300)
 plt.close(fig)
 
-# load hydrological simulations
-states_hm_file = base_path_output / f"{config['identifier']}.nc"
-ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf")
-mask_file = base_path / "mask.nc"
-mask = onp.isfinite(dem)
+# plot soil depth
+soil_depth = ds_params["GRUND"].values/100
+fig, ax = plt.subplots(figsize=(6,5))
+fig.patch.set_alpha(0)
+plt.imshow(soil_depth, extent=grid_extent, cmap='Oranges', zorder=1, aspect='equal')
+# plt.colorbar(label='Soil depth [m]', shrink=0.8)
+# plt.grid(zorder=0)
+# plt.xlabel('Distance in x-direction [m]')
+# plt.ylabel('Distance in y-direction [m]')
+plt.colorbar(label='Bodenmächtigkeit [m]', shrink=0.8)
+plt.grid(zorder=0)
+plt.xlabel('Distanz in x-Richtung [m]')
+plt.ylabel('Distanz in y-Richtung [m]')
+plt.tight_layout()
+file = base_path_figs / "soil_depth.png"
+fig.savefig(file, dpi=300)
+plt.close(fig)
 
-# assign date
-days = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-date = num2date(
-    days,
-    units=f"days since {ds_sim['Time'].attrs['time_origin']}",
-    calendar="standard",
-    only_use_cftime_datetimes=False,
-)
-ds_sim = ds_sim.assign_coords(Time=("Time", date))
+# plot groundwater level
+dem = ds_params["gwfa_gew"].values/100
+fig, ax = plt.subplots(figsize=(6,5))
+fig.patch.set_alpha(0)
+plt.imshow(dem, extent=grid_extent, cmap='Oranges', zorder=1, aspect='equal', vmin=0, vmax=10)
+# plt.colorbar(label='Groundwater level [m]', shrink=0.8)
+# plt.grid(zorder=0)
+# plt.xlabel('Distance in x-direction [m]')
+# plt.ylabel('Distance in y-direction [m]')
+plt.colorbar(label='GW-Flurabstand [m]', shrink=0.8)
+plt.grid(zorder=0)
+plt.xlabel('Distanz in x-Richtung [m]')
+plt.ylabel('Distanz in y-Richtung [m]')
+plt.tight_layout()
+file = base_path_figs / "gw_level.png"
+fig.savefig(file, dpi=300)
+plt.close(fig)
 
-vars_sim = ["theta"]
-for var_sim in vars_sim:
-    vals1 = onp.where(mask, onp.mean(ds_sim[var_sim].values, axis=-1), onp.nan)
-    vals = onp.where(vals1 < 0, onp.nan, vals1)
-    fig, ax = plt.subplots(figsize=(6,5))
-    im = ax.imshow(vals, extent=grid_extent, cmap='viridis_r', zorder=2, aspect='equal')
-    plt.colorbar(im, ax=ax, shrink=0.7, label=_lab_unit_sum[var_sim])
-    plt.xlabel('Distance in x-direction [m]')
-    plt.ylabel('Distance in y-direction [m]')
-    plt.grid(zorder=-1)
-    plt.tight_layout()
-    file = base_path_figs / f"{var_sim}_avg.png"
-    fig.savefig(file, dpi=300)
-    plt.close(fig)
+cmap4 = mpl.colormaps.get_cmap('viridis_r').resampled(3)
+vals1 = onp.where(mask, ds_params['lanu'].values, onp.nan)
+vals2 = onp.where((vals1 < 10) | (vals1 > 13), onp.nan, vals1)
+fig, ax = plt.subplots(figsize=(6,5))
+im = ax.imshow(vals2, extent=grid_extent, cmap=cmap4, zorder=2, aspect='equal')
+plt.colorbar(im, ax=ax, shrink=0.7, label="")
+plt.xlabel('Distance in x-direction [m]')
+plt.ylabel('Distance in y-direction [m]')
+plt.grid(zorder=-1)
+plt.tight_layout()
+file = base_path_figs / "forest.png"
+fig.savefig(file, dpi=300)
+plt.close(fig)
+
+# # load hydrological simulations
+# states_hm_file = base_path_output / f"{config['identifier']}.nc"
+# ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf")
+# mask_file = base_path / "mask.nc"
+# mask = onp.isfinite(dem)
+
+# # assign date
+# days = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
+# date = num2date(
+#     days,
+#     units=f"days since {ds_sim['Time'].attrs['time_origin']}",
+#     calendar="standard",
+#     only_use_cftime_datetimes=False,
+# )
+# ds_sim = ds_sim.assign_coords(Time=("Time", date))
+
+# vars_sim = ["theta"]
+# for var_sim in vars_sim:
+#     vals1 = onp.where(mask, onp.mean(ds_sim[var_sim].values, axis=-1), onp.nan)
+#     vals = onp.where(vals1 < 0, onp.nan, vals1)
+#     fig, ax = plt.subplots(figsize=(6,5))
+#     im = ax.imshow(vals, extent=grid_extent, cmap='viridis_r', zorder=2, aspect='equal')
+#     plt.colorbar(im, ax=ax, shrink=0.7, label=_lab_unit_sum[var_sim])
+#     plt.xlabel('Distance in x-direction [m]')
+#     plt.ylabel('Distance in y-direction [m]')
+#     plt.grid(zorder=-1)
+#     plt.tight_layout()
+#     file = base_path_figs / f"{var_sim}_avg.png"
+#     fig.savefig(file, dpi=300)
+#     plt.close(fig)
 
 # vars_sim = ["prec", "aet", "transp", "evap_soil", "inf_mp", "q_ss", "q_sub"]
 # for var_sim in vars_sim:
@@ -190,28 +246,28 @@ for var_sim in vars_sim:
 #     plt.close(fig)
 
 
-x1 = 200
-y1 = 200
-vars_sim = ["prec", "aet", "transp", "evap_soil", "inf_mp", "q_ss", "q_sub"]
-for var_sim in vars_sim:
-    if var_sim == "inf_mp":
-        vals = ds_sim["inf_mp_rz"].isel(x=x1, y=y1).values + ds_sim["inf_ss"].isel(x=x1, y=y1).values
-    else:
-        vals = ds_sim[var_sim].isel(x=x1, y=y1).values
-    fig, ax = plt.subplots(figsize=(6,2))
-    ax.plot(date, vals, color="black")
-    ax.set_ylabel(_lab_unit_daily[var_sim])
-    ax.set_xlabel('Time')
-    plt.tight_layout()
-    file = base_path_figs / f"{var_sim}_{x1}_{y1}.png"
-    fig.savefig(file, dpi=300)
-    plt.close(fig)
+# x1 = 200
+# y1 = 200
+# vars_sim = ["prec", "aet", "transp", "evap_soil", "inf_mp", "q_ss", "q_sub"]
+# for var_sim in vars_sim:
+#     if var_sim == "inf_mp":
+#         vals = ds_sim["inf_mp_rz"].isel(x=x1, y=y1).values + ds_sim["inf_ss"].isel(x=x1, y=y1).values
+#     else:
+#         vals = ds_sim[var_sim].isel(x=x1, y=y1).values
+#     fig, ax = plt.subplots(figsize=(6,2))
+#     ax.plot(date, vals, color="black")
+#     ax.set_ylabel(_lab_unit_daily[var_sim])
+#     ax.set_xlabel('Time')
+#     plt.tight_layout()
+#     file = base_path_figs / f"{var_sim}_{x1}_{y1}.png"
+#     fig.savefig(file, dpi=300)
+#     plt.close(fig)
 
-    fig, ax = plt.subplots(figsize=(6,2))
-    ax.plot(date, onp.cumsum(vals), color="black")
-    ax.set_ylabel(_lab_unit_sum[var_sim])
-    ax.set_xlabel('Time')
-    plt.tight_layout()
-    file = base_path_figs / f"{var_sim}_{x1}_{y1}_cumulated.png"
-    fig.savefig(file, dpi=300)
-    plt.close(fig)
+#     fig, ax = plt.subplots(figsize=(6,2))
+#     ax.plot(date, onp.cumsum(vals), color="black")
+#     ax.set_ylabel(_lab_unit_sum[var_sim])
+#     ax.set_xlabel('Time')
+#     plt.tight_layout()
+#     file = base_path_figs / f"{var_sim}_{x1}_{y1}_cumulated.png"
+#     fig.savefig(file, dpi=300)
+#     plt.close(fig)

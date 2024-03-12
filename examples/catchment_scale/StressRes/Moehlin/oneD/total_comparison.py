@@ -103,20 +103,6 @@ ds_sim1 = xr.open_dataset(states_hm_file, engine="h5netcdf")
 states_hm_file = base_path_output / "RoGeR_WBM_1D" / "total.nc"
 ds_sim2 = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
-cmap4 = mpl.colormaps.get_cmap('viridis_r').resampled(3)
-vals1 = onp.where(mask, ds_params['lanu'].values, onp.nan)
-vals2 = onp.where((vals1 < 10) | (vals1 > 13), onp.nan, vals1)
-fig, ax = plt.subplots(figsize=(6,5))
-im = ax.imshow(vals2, extent=grid_extent, cmap=cmap4, zorder=2, aspect='equal')
-plt.colorbar(im, ax=ax, shrink=0.7, label="")
-plt.xlabel('Distance in x-direction [m]')
-plt.ylabel('Distance in y-direction [m]')
-plt.grid(zorder=-1)
-plt.tight_layout()
-file = base_path_figs / "forest.png"
-fig.savefig(file, dpi=300)
-plt.close(fig)
-
 vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc", "q_hof", "q_ss", "q_sub"]
 for var_sim in vars_sim:
     mask = (ds_sim1[var_sim].values <= 0)

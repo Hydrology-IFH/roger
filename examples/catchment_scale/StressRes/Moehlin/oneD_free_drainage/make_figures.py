@@ -111,7 +111,7 @@ if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
 # directory of output
-base_path_output = base_path / "output" / "2000_2023"
+base_path_output = Path("/Volumes/LaCie/roger/examples/catchment_scale/StressRes/Moehlin") / "output" / "oneD_free_drainage"
 if not os.path.exists(base_path_output):
     os.mkdir(base_path_output)
 
@@ -120,98 +120,26 @@ file_config = base_path / "config.yml"
 with open(file_config, "r") as file:
     config = yaml.safe_load(file)
 
-
 # load RoGeR model parameters
 params_hm_file = base_path / "parameters.nc"
 ds_params = xr.open_dataset(params_hm_file, engine="h5netcdf")
 
-# plot elevation
-dem = ds_params["dgm"].values
-fig, ax = plt.subplots(figsize=(6,5))
-fig.patch.set_alpha(0)
-plt.imshow(dem, extent=grid_extent, cmap='terrain', zorder=1, aspect='equal')
-plt.colorbar(label='Elevation [m]', shrink=0.8)
-plt.grid(zorder=0)
-plt.xlabel('Distance in x-direction [m]')
-plt.ylabel('Distance in y-direction [m]')
-plt.tight_layout()
-file = base_path_figs / "elevation.png"
-fig.savefig(file, dpi=300)
-plt.close(fig)
-
 # load hydrological simulations
-states_hm_file = base_path_output / f"{config['identifier']}.nc"
-ds_sim = xr.open_dataset(states_hm_file, engine="h5netcdf")
-mask_file = base_path / "mask.nc"
-mask = onp.isfinite(dem)
+states_hm_file = base_path_output / "ONED_Moehlin_free_drainage_total.nc"
+ds_sim1 = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
-# assign date
-days = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-date = num2date(
-    days,
-    units=f"days since {ds_sim['Time'].attrs['time_origin']}",
-    calendar="standard",
-    only_use_cftime_datetimes=False,
-)
-ds_sim = ds_sim.assign_coords(Time=("Time", date))
-
-vars_sim = ["theta"]
+cmap1 = mpl.colormaps.get_cmap('viridis_r').resampled(15)
+vars_sim = ["prec", "pet", "aet", "inf", "inf_mat", "inf_mp", "inf_sc", "q_hof", "q_ss", "q_sub"]
 for var_sim in vars_sim:
-    vals1 = onp.where(mask, onp.mean(ds_sim[var_sim].values, axis=-1), onp.nan)
-    vals = onp.where(vals1 < 0, onp.nan, vals1)
+    mask = (ds_sim1[var_sim].values <= 0)
+    vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
     fig, ax = plt.subplots(figsize=(6,5))
-    im = ax.imshow(vals, extent=grid_extent, cmap='viridis_r', zorder=2, aspect='equal')
-    plt.colorbar(im, ax=ax, shrink=0.7, label=_lab_unit_sum[var_sim])
+    im = ax.imshow(vals1, extent=grid_extent, cmap=cmap1, zorder=2, aspect='equal', vmin=0, vmax=1500)
+    plt.colorbar(im, ax=ax, shrink=0.7, label="[mm/year]")
     plt.xlabel('Distance in x-direction [m]')
     plt.ylabel('Distance in y-direction [m]')
     plt.grid(zorder=-1)
     plt.tight_layout()
-    file = base_path_figs / f"{var_sim}_avg.png"
-    fig.savefig(file, dpi=300)
-    plt.close(fig)
-
-# vars_sim = ["prec", "aet", "transp", "evap_soil", "inf_mp", "q_ss", "q_sub"]
-# for var_sim in vars_sim:
-#     if var_sim == "inf_mp":
-#         darr = ds_sim["inf_mp_rz"].resample(Time="AS").sum(dim="Time") + ds_sim["inf_ss"].resample(Time="AS").sum(dim="Time")
-#     else:
-#         darr = ds_sim[var_sim].resample(Time="AS").sum(dim="Time")
-#     vals1 = onp.where(darr.values < 0, onp.nan, darr.values)
-#     vals = onp.mean(vals1[:, :, 1:-1], axis=-1)
-#     fig, ax = plt.subplots(figsize=(6,5))
-#     im = ax.imshow(vals, extent=grid_extent, cmap='viridis_r', zorder=2, aspect='equal')
-#     plt.colorbar(im, ax=ax, shrink=0.7, label=_lab_unit_ann[var_sim])
-#     plt.xlabel('Distance in x-direction [m]')
-#     plt.ylabel('Distance in y-direction [m]')
-#     plt.grid(zorder=-1)
-#     plt.tight_layout()
-#     file = base_path_figs / f"{var_sim}_annual_sum_avg.png"
-#     fig.savefig(file, dpi=300)
-#     plt.close(fig)
-
-
-x1 = 200
-y1 = 200
-vars_sim = ["prec", "aet", "transp", "evap_soil", "inf_mp", "q_ss", "q_sub"]
-for var_sim in vars_sim:
-    if var_sim == "inf_mp":
-        vals = ds_sim["inf_mp_rz"].isel(x=x1, y=y1).values + ds_sim["inf_ss"].isel(x=x1, y=y1).values
-    else:
-        vals = ds_sim[var_sim].isel(x=x1, y=y1).values
-    fig, ax = plt.subplots(figsize=(6,2))
-    ax.plot(date, vals, color="black")
-    ax.set_ylabel(_lab_unit_daily[var_sim])
-    ax.set_xlabel('Time')
-    plt.tight_layout()
-    file = base_path_figs / f"{var_sim}_{x1}_{y1}.png"
-    fig.savefig(file, dpi=300)
-    plt.close(fig)
-
-    fig, ax = plt.subplots(figsize=(6,2))
-    ax.plot(date, onp.cumsum(vals), color="black")
-    ax.set_ylabel(_lab_unit_sum[var_sim])
-    ax.set_xlabel('Time')
-    plt.tight_layout()
-    file = base_path_figs / f"{var_sim}_{x1}_{y1}_cumulated.png"
+    file = base_path_figs / f"{var_sim}_average_annual_sum.png"
     fig.savefig(file, dpi=300)
     plt.close(fig)

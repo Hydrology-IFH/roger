@@ -8,7 +8,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
-@click.option("-ms", "--meteo-station", type=click.Choice(["breitnau", "ihringen"]), default="breitnau")
+@click.option("-ms", "--meteo-station", type=click.Choice(["breitnau", "ihringen"]), default="ihringen")
 @roger_base_cli
 def main(tmp_dir, meteo_station):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
