@@ -184,7 +184,7 @@ def calc_cpr_ss(state):
     z = allocate(state.dimensions, ("x", "y"))
 
     # subsoil is saturated
-    mask1 = vs.z_sat[:, :, vs.tau] > 0
+    mask1 = (vs.z_sat[:, :, vs.tau] > 0) & (vs.z_gw[:, :, vs.tau] * 1000 < vs.z_soil[:, :])
     mask2 = vs.z_gw[:, :, vs.tau] * 1000 < vs.z_soil[:, :]
     # capillary rise from groundwater table towards subsoil
     if settings.enable_groundwater_boundary | settings.enable_groundwater:
@@ -192,7 +192,7 @@ def calc_cpr_ss(state):
         z = update(
             z,
             at[2:-2, 2:-2],
-            (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 - vs.z_soil[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+            (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 - vs.z_soil[2:-2, 2:-2]) + ((vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])/2) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.cpr_ss = update(
             vs.cpr_ss,
@@ -210,7 +210,6 @@ def calc_cpr_ss(state):
             * vs.dt * vs.ks[2:-2, 2:-2]
             * vs.maskCatch[2:-2, 2:-2],
         )
-        print(vs.cpr_ss[2, 2])
         vs.cpr_ss = update(
             vs.cpr_ss,
             at[2:-2, 2:-2],
@@ -235,11 +234,11 @@ def calc_cpr_ss(state):
         )
 
         # reducing capillary rise if large pores of subsoil contain water
-        mask2 = (vs.cpr_ss > vs.S_lp_ss)
+        mask3 = (vs.cpr_ss > vs.S_lp_ss)
         vs.cpr_ss = update(
             vs.cpr_ss,
             at[2:-2, 2:-2],
-            npx.where(mask2[2:-2, 2:-2], vs.cpr_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2], vs.cpr_ss[2:-2, 2:-2])
+            npx.where(mask3[2:-2, 2:-2], vs.cpr_ss[2:-2, 2:-2] - vs.S_lp_ss[2:-2, 2:-2], vs.cpr_ss[2:-2, 2:-2])
             * vs.maskCatch[2:-2, 2:-2],
         )
 
@@ -306,10 +305,6 @@ def calc_cpr_ss(state):
             at[2:-2, 2:-2],
             npx.where(mask3[2:-2, 2:-2], vs.S_ufc_ss[2:-2, 2:-2], vs.S_fp_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
-
-        print(vs.cpr_ss[2, 2])
-        print(vs.S_fp_rz[2, 2], vs.S_ufc_rz[2, 2], vs.S_lp_rz[2, 2], vs.S_ac_rz[2, 2])
-        print(vs.S_fp_ss[2, 2], vs.S_ufc_ss[2, 2], vs.S_lp_ss[2, 2], vs.S_ac_ss[2, 2])
 
     return KernelOutput(cpr_ss=vs.cpr_ss, S_fp_ss=vs.S_fp_ss, S_lp_ss=vs.S_lp_ss)
 

@@ -130,7 +130,7 @@ def main(temp_dir):
             )
             # surface slope (-)
             vs.slope = update(
-                vs.slope_per,
+                vs.slope,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc("slope", self._base_path, "parameters.nc")/100,
             )
