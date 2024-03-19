@@ -94,7 +94,7 @@ mask = onp.isfinite(dem)
 # make discrete colormaps
 cmap1 = mpl.colormaps.get_cmap('viridis_r').resampled(15)
 cmap2 = mpl.colormaps.get_cmap('PuOr').resampled(10)
-cmap3 = mpl.colormaps.get_cmap('PuOr').resampled(8)
+cmap3 = mpl.colormaps.get_cmap('PuOr').resampled(6)
 
 # load hydrological simulations
 states_hm_file = base_path_output / "ONED_Moehlin_total.nc"
@@ -103,20 +103,95 @@ ds_sim1 = xr.open_dataset(states_hm_file, engine="h5netcdf")
 states_hm_file = base_path_output / "RoGeR_WBM_1D" / "total.nc"
 ds_sim2 = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
-vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc", "q_hof", "q_ss", "q_sub"]
-for var_sim in vars_sim:
-    mask = (ds_sim1[var_sim].values <= 0)
-    vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
-    fig, ax = plt.subplots(figsize=(6,5))
-    im = ax.imshow(vals1, extent=grid_extent, cmap=cmap1, zorder=2, aspect='equal', vmin=0, vmax=1500)
-    plt.colorbar(im, ax=ax, shrink=0.7, label="[mm/year]")
-    plt.xlabel('Distance in x-direction [m]')
-    plt.ylabel('Distance in y-direction [m]')
-    plt.grid(zorder=-1)
-    plt.tight_layout()
-    file = base_path_figs / f"{var_sim}_average_annual_sum.png"
-    fig.savefig(file, dpi=300)
-    plt.close(fig)
+# xx = onp.empty((nx, ny))
+# xx[:, :] = onp.arange(0, nx)[:, onp.newaxis]
+# vals1 = onp.where(mask, xx, onp.nan)
+# fig, ax = plt.subplots(figsize=(6,5))
+# im = ax.imshow(vals1, extent=grid_extent, cmap="magma", zorder=2, aspect='equal')
+# plt.colorbar(im, ax=ax, shrink=0.7, label="")
+# plt.xlabel('Distance in x-direction [m]')
+# plt.ylabel('Distance in y-direction [m]')
+# plt.grid(zorder=-1)
+# plt.tight_layout()
+# file = base_path_figs / "xx.png"
+# fig.savefig(file, dpi=300)
+# plt.close(fig)
+
+# yy = onp.empty((nx, ny))
+# yy[:, :] = onp.arange(0, ny)[onp.newaxis, :]
+# vals1 = onp.where(mask, yy, onp.nan)
+# fig, ax = plt.subplots(figsize=(6,5))
+# im = ax.imshow(vals1, extent=grid_extent, cmap="magma", zorder=2, aspect='equal')
+# plt.colorbar(im, ax=ax, shrink=0.7, label="")
+# plt.xlabel('Distance in x-direction [m]')
+# plt.ylabel('Distance in y-direction [m]')
+# plt.grid(zorder=-1)
+# plt.tight_layout()
+# file = base_path_figs / "yy.png"
+# fig.savefig(file, dpi=300)
+# plt.close(fig)
+
+mask = (ds_sim1["q_ss"].values >= 0) & (ds_sim1["q_ss"].values <= 50)
+valsxy = onp.where(mask)
+df_debug = pd.DataFrame()
+df_debug.loc[:, "x"] = valsxy[0]
+df_debug.loc[:, "y"] = valsxy[1]
+df_debug.loc[:, "PRECIP"] = ds_sim1["prec"].values[mask].flatten()
+df_debug.loc[:, "PET"] = ds_sim1["pet"].values[mask].flatten()
+df_debug.loc[:, "AET"] = ds_sim1["aet"].values[mask].flatten()
+df_debug.loc[:, "INF"] = ds_sim1["inf"].values[mask].flatten()
+df_debug.loc[:, "Qhof"] = ds_sim1["q_hof"].values[mask].flatten()
+df_debug.loc[:, "Qsub"] = ds_sim1["q_sub"].values[mask].flatten()
+df_debug.loc[:, "PERC"] = ds_sim1["q_ss"].values[mask].flatten()
+df_debug.loc[:, "lu_id"] = ds_params["lanu"].values[mask].flatten()
+df_debug.to_csv(base_path_figs / "perc_debug.csv", sep=";", index=False)
+
+mask = (ds_sim2["TP"].values >= 600)
+valsxy = onp.where(mask)
+df_debug = pd.DataFrame()
+df_debug.loc[:, "x"] = valsxy[0]
+df_debug.loc[:, "y"] = valsxy[1]
+df_debug.loc[:, "PRECIP"] = ds_sim1["prec"].values[mask].flatten()
+df_debug.loc[:, "PET"] = ds_sim1["pet"].values[mask].flatten()
+df_debug.loc[:, "AET"] = ds_sim1["aet"].values[mask].flatten()
+df_debug.loc[:, "INF"] = ds_sim1["inf"].values[mask].flatten()
+df_debug.loc[:, "Qhof"] = ds_sim1["q_hof"].values[mask].flatten()
+df_debug.loc[:, "Qsub"] = ds_sim1["q_sub"].values[mask].flatten()
+df_debug.loc[:, "PERC"] = ds_sim1["q_ss"].values[mask].flatten()
+df_debug.loc[:, "PERC_legacy"] = ds_sim2["TP"].values[mask].flatten()
+df_debug.loc[:, "lu_id"] = ds_params["lanu"].values[mask].flatten()
+df_debug.to_csv(base_path_figs / "perc_debug1.csv", sep=";", index=False)
+
+mask = (ds_params["gwfa_gew"].values <= 100)
+valsxy = onp.where(mask)
+df_debug = pd.DataFrame()
+df_debug.loc[:, "x"] = valsxy[0]
+df_debug.loc[:, "y"] = valsxy[1]
+df_debug.loc[:, "PRECIP"] = ds_sim1["prec"].values[mask].flatten()
+df_debug.loc[:, "PET"] = ds_sim1["pet"].values[mask].flatten()
+df_debug.loc[:, "AET"] = ds_sim1["aet"].values[mask].flatten()
+df_debug.loc[:, "INF"] = ds_sim1["inf"].values[mask].flatten()
+df_debug.loc[:, "Qhof"] = ds_sim1["q_hof"].values[mask].flatten()
+df_debug.loc[:, "Qsub"] = ds_sim1["q_sub"].values[mask].flatten()
+df_debug.loc[:, "PERC"] = ds_sim1["q_ss"].values[mask].flatten()
+df_debug.loc[:, "CPR"] = ds_sim1["cpr_ss"].values[mask].flatten()
+df_debug.loc[:, "lu_id"] = ds_params["lanu"].values[mask].flatten()
+df_debug.to_csv(base_path_figs / "cpr_debug.csv", sep=";", index=False)
+
+# vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc", "q_hof", "q_ss", "q_sub"]
+# for var_sim in vars_sim:
+#     mask = (ds_sim1[var_sim].values <= 0)
+#     vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
+#     fig, ax = plt.subplots(figsize=(6,5))
+#     im = ax.imshow(vals1, extent=grid_extent, cmap=cmap1, zorder=2, aspect='equal', vmin=0, vmax=1500)
+#     plt.colorbar(im, ax=ax, shrink=0.7, label="[mm/year]")
+#     plt.xlabel('Distance in x-direction [m]')
+#     plt.ylabel('Distance in y-direction [m]')
+#     plt.grid(zorder=-1)
+#     plt.tight_layout()
+#     file = base_path_figs / f"{var_sim}_average_annual_sum.png"
+#     fig.savefig(file, dpi=300)
+#     plt.close(fig)
 
 # vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc", "q_hof", "q_ss", "q_sub", "q_sof"]
 # for var_sim in vars_sim:
@@ -141,7 +216,7 @@ for var_sim in vars_sim:
     vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
     diff_vals = vals1 - vals2
     fig, ax = plt.subplots(figsize=(6,5))
-    im = ax.imshow(diff_vals, extent=grid_extent, cmap=cmap2, zorder=2, aspect='equal', vmin=-500, vmax=500)
+    im = ax.imshow(diff_vals, extent=grid_extent, cmap=cmap3, zorder=2, aspect='equal', vmin=-300, vmax=300)
     plt.colorbar(im, ax=ax, shrink=0.7, label="[mm]")
     plt.xlabel('Distance in x-direction [m]')
     plt.ylabel('Distance in y-direction [m]')
@@ -158,7 +233,7 @@ for var_sim in vars_sim:
     vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
     diff_vals = (vals1 - vals2) / vals2
     fig, ax = plt.subplots(figsize=(6,5))
-    im = ax.imshow(diff_vals, extent=grid_extent, cmap=cmap3, zorder=2, aspect='equal', vmin=-0.8, vmax=0.8)
+    im = ax.imshow(diff_vals, extent=grid_extent, cmap=cmap3, zorder=2, aspect='equal', vmin=-0.3, vmax=0.3)
     plt.colorbar(im, ax=ax, shrink=0.7, label="[-]")
     plt.xlabel('Distance in x-direction [m]')
     plt.ylabel('Distance in y-direction [m]')
@@ -168,25 +243,25 @@ for var_sim in vars_sim:
     fig.savefig(file, dpi=300)
     plt.close(fig)
     
-x1 = 200
-y1 = 200
-pet_weight = ds_params["F_et"].isel(x=x1, y=y1).values/100
-file = base_path / "input" / "PET.txt"
-df_pet = pd.read_csv(
-    file,
-    sep=r"\s+",
-    skiprows=0,
-    header=0,
-    na_values=-9999,
-)
-df_pet.index = [pd.to_datetime(f"{df_pet.iloc[i, 0]} {df_pet.iloc[i, 1]} {df_pet.iloc[i, 2]} {df_pet.iloc[i, 3]} {df_pet.iloc[i, 4]}", format="%Y %m %d %H %M") for i in range(len(df_pet.index))]
-df_pet = df_pet.loc[:, ["PET"]]
-df_pet.index = df_pet.index.rename("Index")
-df_pet_weighted = df_pet * pet_weight
-df_pet_ann_avg = df_pet.resample("YE").sum().mean()
-df_pet_weight_ann_avg = df_pet_weighted.resample("YE").sum().mean()
+# x1 = 200
+# y1 = 200
+# pet_weight = ds_params["F_et"].isel(x=x1, y=y1).values/100
+# file = base_path / "input" / "PET.txt"
+# df_pet = pd.read_csv(
+#     file,
+#     sep=r"\s+",
+#     skiprows=0,
+#     header=0,
+#     na_values=-9999,
+# )
+# df_pet.index = [pd.to_datetime(f"{df_pet.iloc[i, 0]} {df_pet.iloc[i, 1]} {df_pet.iloc[i, 2]} {df_pet.iloc[i, 3]} {df_pet.iloc[i, 4]}", format="%Y %m %d %H %M") for i in range(len(df_pet.index))]
+# df_pet = df_pet.loc[:, ["PET"]]
+# df_pet.index = df_pet.index.rename("Index")
+# df_pet_weighted = df_pet * pet_weight
+# df_pet_ann_avg = df_pet.resample("YE").sum().mean()
+# df_pet_weight_ann_avg = df_pet_weighted.resample("YE").sum().mean()
 
-df_pet.iloc[0, :]
+# df_pet.iloc[0, :]
 
 
 # print(onp.sum(df_pet["PET"].values) * pet_weight)
@@ -207,15 +282,15 @@ df_pet.iloc[0, :]
 # df_pet_roger_ann_avg = df_pet_roger.resample("YE").sum().mean()
 
 # print(onp.sum(vals))
-pet_roger_legacy_ann_avg = ds_sim2["ET pot"].isel(x=x1, y=y1).values
-ds_sim2["ET pot"].isel(x=x1, y=y1).values
+# pet_roger_legacy_ann_avg = ds_sim2["ET pot"].isel(x=x1, y=y1).values
+# ds_sim2["ET pot"].isel(x=x1, y=y1).values
 
-print(f"PET (DWD): {df_pet_ann_avg.values[0]}")
-print(f"weighted PET (DWD): {df_pet_weight_ann_avg.values[0]}")
-# print(f"PET (roger): {df_pet_roger_ann_avg.values[0]}")
-print(f"PET (RoGeR_WBM_1D): {pet_roger_legacy_ann_avg}")
-print(f"PET weight: {pet_weight}")
+# print(f"PET (DWD): {df_pet_ann_avg.values[0]}")
+# print(f"weighted PET (DWD): {df_pet_weight_ann_avg.values[0]}")
+# # print(f"PET (roger): {df_pet_roger_ann_avg.values[0]}")
+# print(f"PET (RoGeR_WBM_1D): {pet_roger_legacy_ann_avg}")
+# print(f"PET weight: {pet_weight}")
 
-pet_weight_max = onp.nanmax(ds_params["F_et"].values/100)
-print(f"max. PET weight: {pet_weight_max}")
-print(f"{ds_params['lanu'].isel(x=x1, y=y1).values}")
+# pet_weight_max = onp.nanmax(ds_params["F_et"].values/100)
+# print(f"max. PET weight: {pet_weight_max}")
+# print(f"{ds_params['lanu'].isel(x=x1, y=y1).values}")

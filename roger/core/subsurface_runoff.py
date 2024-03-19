@@ -258,7 +258,7 @@ def calc_potential_lateral_subsurface_runoff(state):
     vs.q_sub_mat_pot = update(
         vs.q_sub_mat_pot,
         at[2:-2, 2:-2],
-        ((vs.ks[2:-2, 2:-2] * vs.slope[2:-2, 2:-2] * vs.z_sat[2:-2, 2:-2, vs.tau] * vs.dt) * 1e-6)
+        ((vs.ks[2:-2, 2:-2] * vs.slope[2:-2, 2:-2] * vs.z_sat[2:-2, 2:-2, vs.tau] * vs.dt) * 1e-9)
         * vs.maskCatch[2:-2, 2:-2],
     )
 
@@ -269,7 +269,7 @@ def calc_potential_lateral_subsurface_runoff(state):
         at[2:-2, 2:-2],
         (
             (
-                vs.z_sat_layer_1[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_1[2:-2, 2:-2]
+                  vs.z_sat_layer_1[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_1[2:-2, 2:-2]
                 + vs.z_sat_layer_2[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_2[2:-2, 2:-2]
                 + vs.z_sat_layer_3[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_3[2:-2, 2:-2]
                 + vs.z_sat_layer_4[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_4[2:-2, 2:-2]
@@ -974,17 +974,14 @@ def calc_potential_percolation_ss(state):
     z = update(
         z,
         at[2:-2, 2:-2],
-        vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 - vs.z_soil[2:-2, 2:-2],
+        (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 - vs.z_soil[2:-2, 2:-2]) + ((vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])/2) * vs.maskCatch[2:-2, 2:-2],
     )
     perc_pot = update(
         perc_pot,
         at[2:-2, 2:-2],
         npx.where(
-            (vs.z_gw[2:-2, 2:-2, vs.tau] > 10) & (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 > vs.z_soil[2:-2, 2:-2]),
+            (vs.z_gw[2:-2, 2:-2, vs.tau] > 10) & (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 > vs.z_soil[2:-2, 2:-2]) & (vs.z_sat[2:-2, 2:-2, vs.tau] > 0),
             npx.fmin(npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, vs.ks[2:-2, 2:-2] * vs.dt), vs.k_ss[2:-2, 2:-2, vs.tau] * vs.dt),
-            npx.where(
-                vs.z_sat[2:-2, 2:-2, vs.tau] > 0,
-                npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, vs.ks[2:-2, 2:-2] * vs.dt),
                 npx.fmin(
                     vs.kf[2:-2, 2:-2] * vs.dt,
                     (
@@ -995,9 +992,31 @@ def calc_potential_percolation_ss(state):
                         )
                     )
                     * vs.dt * vs.ks[2:-2, 2:-2],
-                ),
-            ),
-        )
+                )
+            )
+        * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    perc_pot = update(
+        perc_pot,
+        at[2:-2, 2:-2],
+        npx.where(
+            (vs.z_gw[2:-2, 2:-2, vs.tau] <= 10) & (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 > vs.z_soil[2:-2, 2:-2]) & (vs.z_sat[2:-2, 2:-2, vs.tau] > 0),
+            npx.fmin(npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, vs.ks[2:-2, 2:-2] * vs.dt), vs.k_ss[2:-2, 2:-2, vs.tau] * vs.dt),
+                npx.fmin(
+                    vs.kf[2:-2, 2:-2] * vs.dt,
+                    (
+                        npx.power((z[2:-2, 2:-2]) / (-vs.ha[2:-2, 2:-2] * 10.2), -vs.n_salv[2:-2, 2:-2])
+                        - npx.power(-vs.h_ss[2:-2, 2:-2, vs.tau] / -vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2])
+                    )
+                    / (
+                        1
+                        + npx.power(-vs.h_ss[2:-2, 2:-2, vs.tau] / -vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2])
+                        + (vs.n_salv[2:-2, 2:-2] - 1)
+                        * npx.power((z[2:-2, 2:-2]) / (-vs.ha[2:-2, 2:-2] * 10.2), -vs.n_salv[2:-2, 2:-2])
+                    ) * vs.dt * vs.ks[2:-2, 2:-2] * (-1),
+                )
+            )
         * vs.maskCatch[2:-2, 2:-2],
     )
 
@@ -1030,12 +1049,7 @@ def calc_potential_percolation_ss(state):
     z = update(
         z,
         at[2:-2, 2:-2],
-        npx.where(
-            vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 < vs.z_soil[2:-2, 2:-2],
-            0,
-            vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 - vs.z_soil[2:-2, 2:-2],
-        )
-        * vs.maskCatch[2:-2, 2:-2],
+        (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 - vs.z_soil[2:-2, 2:-2]) + ((vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])/2) * vs.maskCatch[2:-2, 2:-2],
     )
     cpr_pot = update(
         cpr_pot,
@@ -1051,18 +1065,18 @@ def calc_potential_percolation_ss(state):
                 + (vs.n_salv[2:-2, 2:-2] - 1)
                 * npx.power((z[2:-2, 2:-2]) / (-vs.ha[2:-2, 2:-2] * 10.2), -vs.n_salv[2:-2, 2:-2])
             )
-        )
+        ) * vs.dt * vs.ks[2:-2, 2:-2]
         * vs.maskCatch[2:-2, 2:-2],
     )
     cpr_pot = update(
         cpr_pot,
         at[2:-2, 2:-2],
-        npx.where(z[2:-2, 2:-2] > 0, 0, cpr_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        npx.where((perc_pot[2:-2, 2:-2] > 0) & (vs.z_soil[2:-2, 2:-2] < vs.z_gw[2:-2, 2:-2, vs.tau] * 1000), 0, cpr_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
     vs.q_pot_ss = update(
         vs.q_pot_ss,
         at[2:-2, 2:-2],
-        npx.where((cpr_pot[2:-2, 2:-2] > 0) & (z[2:-2, 2:-2] > 0), 0, vs.q_pot_ss[2:-2, 2:-2])
+        npx.where((cpr_pot[2:-2, 2:-2] > 0), 0, vs.q_pot_ss[2:-2, 2:-2])
         * vs.maskCatch[2:-2, 2:-2],
     )
 
