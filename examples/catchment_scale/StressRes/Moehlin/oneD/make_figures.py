@@ -196,6 +196,24 @@ file = base_path_figs / "soil_depth.png"
 fig.savefig(file, dpi=300)
 plt.close(fig)
 
+# plot slope
+slope = ds_params["slope"].values
+fig, ax = plt.subplots(figsize=(6,5))
+fig.patch.set_alpha(0)
+plt.imshow(slope, extent=grid_extent, cmap='Oranges', zorder=1, aspect='equal', vmin=0, vmax=45)
+# plt.colorbar(label='Soil depth [m]', shrink=0.8)
+# plt.grid(zorder=0)
+# plt.xlabel('Distance in x-direction [m]')
+# plt.ylabel('Distance in y-direction [m]')
+plt.colorbar(label='Hangneigung [%]', shrink=0.8)
+plt.grid(zorder=0)
+plt.xlabel('Distanz in x-Richtung [m]')
+plt.ylabel('Distanz in y-Richtung [m]')
+plt.tight_layout()
+file = base_path_figs / "slope.png"
+fig.savefig(file, dpi=300)
+plt.close(fig)
+
 # plot groundwater level
 dem = ds_params["gwfa_gew"].values/100
 fig, ax = plt.subplots(figsize=(6,5))
@@ -234,30 +252,36 @@ file = base_path_figs / "land_use.png"
 fig.savefig(file, dpi=300)
 plt.close(fig)
 
+states_hm_file = base_path_output / "ONED_Moehlin_total.nc"
+ds_sim1 = xr.open_dataset(states_hm_file, engine="h5netcdf")
+
 states_hm_file = base_path_output / "RoGeR_WBM_1D" / "total.nc"
 ds_sim2 = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
-cmap1 = mpl.colormaps.get_cmap('viridis_r').resampled(10)
+cmap1 = mpl.colormaps.get_cmap('viridis_r').resampled(6)
 vars_sim = ["cpr_ss", "q_ss"]
 for var_sim in vars_sim:
-    mask = (ds_sim2[_dict_vars[var_sim]].values <= 0)
-    vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
+    # mask = (ds_sim2[_dict_vars[var_sim]].values <= 0)
+    # vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
+    mask = (ds_sim1[var_sim].values <= 0)
+    vals2 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
     fig, ax = plt.subplots(figsize=(6,5))
-    im = ax.imshow(vals2, extent=grid_extent, cmap=cmap1, zorder=2, aspect='equal', vmin=0, vmax=1000)
+    im = ax.imshow(vals2, extent=grid_extent, cmap=cmap1, zorder=2, aspect='equal', vmin=0, vmax=600)
     plt.colorbar(im, ax=ax, shrink=0.7, label="[mm/Jahr]")
     plt.xlabel('Distanz in x-Richtung [m]')
     plt.ylabel('Distanz in y-Richtung [m]')
     plt.grid(zorder=-1)
     plt.tight_layout()
-    file = base_path_figs / f"{var_sim}_average_annual_sum_roger_legacy.png"
+    file = base_path_figs / f"{var_sim}_average_annual_sum.png"
     fig.savefig(file, dpi=300)
     plt.close(fig)
 
-
 vars_sim = ["cpr_ss", "q_ss"]
 for var_sim in vars_sim:
-    mask = (ds_sim2[_dict_vars[var_sim]].values <= 0)
-    vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
+    # mask = (ds_sim2[_dict_vars[var_sim]].values <= 0)
+    # vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
+    mask = (ds_sim1[var_sim].values <= 0)
+    vals2 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
     ll_df = []
     df = pd.DataFrame(vals2[mask_forest])
     df["x"] = "Wald"
@@ -284,7 +308,7 @@ for var_sim in vars_sim:
     axes.set_ylabel("[mm/Jahr]")
     axes.set_xlabel("")
     axes.legend().set_visible(False)
-    axes.set_ylim(0, 700)
+    axes.set_ylim(0, 800)
     plt.xticks(rotation=33)
     plt.tight_layout()
     file = base_path_figs / f"{var_sim}_per_land_use.png"
