@@ -1073,6 +1073,14 @@ def calc_potential_percolation_ss(state):
         at[2:-2, 2:-2],
         npx.where((perc_pot[2:-2, 2:-2] > 0) & (vs.z_soil[2:-2, 2:-2] < vs.z_gw[2:-2, 2:-2, vs.tau] * 1000), 0, cpr_pot[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
+    mask3 = (vs.z_gw[:, :, vs.tau] * 1000 - vs.z_soil[:, :] > 10000)
+    cpr_pot = update(
+        cpr_pot,
+        at[2:-2, 2:-2],
+        npx.where(mask3[2:-2, 2:-2], 0, cpr_pot[2:-2, 2:-2])
+        * vs.maskCatch[2:-2, 2:-2],
+    )
+
     vs.q_pot_ss = update(
         vs.q_pot_ss,
         at[2:-2, 2:-2],

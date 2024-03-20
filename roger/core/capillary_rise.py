@@ -242,6 +242,15 @@ def calc_cpr_ss(state):
             * vs.maskCatch[2:-2, 2:-2],
         )
 
+        # no capillary rise if groundwater table is below 10 m
+        mask4 = (vs.z_gw[:, :, vs.tau] * 1000 - vs.z_soil[:, :] > 10000)
+        vs.cpr_ss = update(
+            vs.cpr_ss,
+            at[2:-2, 2:-2],
+            npx.where(mask4[2:-2, 2:-2], 0, vs.cpr_ss[2:-2, 2:-2])
+            * vs.maskCatch[2:-2, 2:-2],
+        )
+
         # groundwater table rises into subsoil
         zgw_soil = allocate(state.dimensions, ("x", "y"))
         gw_rise = allocate(state.dimensions, ("x", "y"))

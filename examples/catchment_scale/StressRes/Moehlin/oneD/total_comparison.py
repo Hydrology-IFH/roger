@@ -154,12 +154,22 @@ df_debug.loc[:, "y"] = valsxy[1]
 df_debug.loc[:, "PRECIP"] = ds_sim1["prec"].values[mask].flatten()
 df_debug.loc[:, "PET"] = ds_sim1["pet"].values[mask].flatten()
 df_debug.loc[:, "AET"] = ds_sim1["aet"].values[mask].flatten()
+df_debug.loc[:, "AET_legacy"] = ds_sim2["ET"].values[mask].flatten()
 df_debug.loc[:, "INF"] = ds_sim1["inf"].values[mask].flatten()
+df_debug.loc[:, "INF_legacy"] = ds_sim2["Inf Gesamt"].values[mask].flatten()
 df_debug.loc[:, "Qhof"] = ds_sim1["q_hof"].values[mask].flatten()
 df_debug.loc[:, "Qsub"] = ds_sim1["q_sub"].values[mask].flatten()
+df_debug.loc[:, "Qsub_legacy"] = ds_sim2["ZA Gesamt"].values[mask].flatten()
 df_debug.loc[:, "PERC"] = ds_sim1["q_ss"].values[mask].flatten()
 df_debug.loc[:, "PERC_legacy"] = ds_sim2["TP"].values[mask].flatten()
+df_debug.loc[:, "CPR"] = ds_sim1["cpr_ss"].values[mask].flatten()
+df_debug.loc[:, "CPR_legacy"] = ds_sim2["kap.A."].values[mask].flatten()
 df_debug.loc[:, "lu_id"] = ds_params["lanu"].values[mask].flatten()
+df_debug.loc[:, "z_soil"] = ds_params["GRUND"].values[mask].flatten()*10
+df_debug.loc[:, "z_gw"] = ds_params["gwfa_gew"].values[mask].flatten()*1000
+df_debug.loc[:, "ks"] = ds_params["KS"].values[mask].flatten()
+df_debug.loc[:, "kf"] = ds_params["TP"].values[mask].flatten()
+df_debug.loc[:, "slope"] = ds_params["slope"].values[mask].flatten()
 df_debug.to_csv(base_path_figs / "perc_debug1.csv", sep=";", index=False)
 
 mask = (ds_params["gwfa_gew"].values <= 100)
@@ -178,20 +188,20 @@ df_debug.loc[:, "CPR"] = ds_sim1["cpr_ss"].values[mask].flatten()
 df_debug.loc[:, "lu_id"] = ds_params["lanu"].values[mask].flatten()
 df_debug.to_csv(base_path_figs / "cpr_debug.csv", sep=";", index=False)
 
-# vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc", "q_hof", "q_ss", "q_sub"]
-# for var_sim in vars_sim:
-#     mask = (ds_sim1[var_sim].values <= 0)
-#     vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
-#     fig, ax = plt.subplots(figsize=(6,5))
-#     im = ax.imshow(vals1, extent=grid_extent, cmap=cmap1, zorder=2, aspect='equal', vmin=0, vmax=1500)
-#     plt.colorbar(im, ax=ax, shrink=0.7, label="[mm/year]")
-#     plt.xlabel('Distance in x-direction [m]')
-#     plt.ylabel('Distance in y-direction [m]')
-#     plt.grid(zorder=-1)
-#     plt.tight_layout()
-#     file = base_path_figs / f"{var_sim}_average_annual_sum.png"
-#     fig.savefig(file, dpi=300)
-#     plt.close(fig)
+vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc", "q_hof", "q_ss", "q_sub"]
+for var_sim in vars_sim:
+    mask = (ds_sim1[var_sim].values <= 0)
+    vals1 = onp.where(mask, onp.nan, ds_sim1[var_sim].values)
+    fig, ax = plt.subplots(figsize=(6,5))
+    im = ax.imshow(vals1, extent=grid_extent, cmap=cmap1, zorder=2, aspect='equal', vmin=0, vmax=1500)
+    plt.colorbar(im, ax=ax, shrink=0.7, label="[mm/year]")
+    plt.xlabel('Distance in x-direction [m]')
+    plt.ylabel('Distance in y-direction [m]')
+    plt.grid(zorder=-1)
+    plt.tight_layout()
+    file = base_path_figs / f"{var_sim}_average_annual_sum.png"
+    fig.savefig(file, dpi=300)
+    plt.close(fig)
 
 # vars_sim = ["prec", "pet", "aet", "cpr_ss", "inf", "inf_mat", "inf_mp", "inf_sc", "q_hof", "q_ss", "q_sub", "q_sof"]
 # for var_sim in vars_sim:
