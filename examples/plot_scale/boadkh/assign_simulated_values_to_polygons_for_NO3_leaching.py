@@ -126,6 +126,17 @@ _dict_crop_id = {"winter-wheat": 115,
                  "winter-barley": 131,
                 }
 
+_dict_lu_id = {"winter-wheat": [557],
+               "clover": [583, 584, 585],
+               "silage-corn": [539],
+               "summer-wheat": [543],
+               "sugar-beet": [563],
+               "winter-rape": [559],
+               "soybean": [541],
+               "grain-corn": [525],
+               "winter-barley": [556],
+                }
+
 _dict_crop_periods = {"winter-wheat_clover": {"winter-wheat": [557], "clover": [583, 584, 585]},
                       "winter-wheat_silage-corn": {"winter-wheat": [557], "silage-corn": [539]},
                       "summer-wheat_winter-wheat": {"winter-wheat": [557], "summer-wheat": [543]},
@@ -142,7 +153,7 @@ _dict_crop_periods = {"winter-wheat_clover": {"winter-wheat": [557], "clover": [
                       "grain-corn_winter-wheat_clover": {"grain-corn": [525], "winter-wheat": [557], "clover": [583, 584, 585]},
                       "winter-wheat_silage-corn_yellow-mustard": {"winter-wheat": [557], "silage-corn": [539]},
                       "summer-wheat_winter-wheat_yellow-mustard": {"winter-wheat": [557], "summer-wheat": [543]},
-                      "winter-wheat_sugar-beet_silage-corn_yellow-mustard": {"winter-wheat": [557], "silage-corn": [539], "clover": [583, 584, 585]},
+                      "winter-wheat_sugar-beet_silage-corn_yellow-mustard": {"winter-wheat": [557], "silage-corn": [539], "sugar-beet": [563]},
                       "summer-wheat_winter-wheat_silage-corn_yellow-mustard": {"winter-wheat": [557], "summer-wheat": [543], "silage-corn": [539]},
                       "summer-wheat_winter-wheat_winter-rape_yellow-mustard": {"winter-wheat": [557], "summer-wheat": [543], "winter-rape": [559]},
                       "sugar-beet_winter-wheat_winter-barley_yellow-mustard": {"winter-wheat": [557], "winter-barley": [556], "sugar-beet": [563]},  
@@ -247,74 +258,75 @@ for location in locations:
         dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
 
 # aggregate nitrate leaching, surface runoff and percolation to annual average values
-vars_sim = ["M_q_ss", "C_q_ss", "q_ss", "q_hof"]
+vars_sim = ["q_hof", "q_ss", "M_q_ss", "C_q_ss"]
 ll_df = []
+ll_df_crop_periods = []
 for crop_rotation_scenario in crop_rotation_scenarios:
-    # extract the values for the entire crop rotation
-    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
-    gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
-    gdf['FFID'] = None
-    gdf['FFID'] = _dict_ffid[crop_rotation_scenario]
-    gdf['CID'] = None
-    gdf['CID'] = 0
-    for location in locations:
-        for var_sim in vars_sim:
-            if var_sim in ["M_q_ss", "C_q_ss"]:
-                for fertilization_intensity in fertilization_intensities:
-                    gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = None  # initialize field, float, two decimals
-                    gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'].astype('float64')
-                    gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'].round(decimals=2)
-                    ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
-                    if var_sim == "M_q_ss":
-                        sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
-                        df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T)
-                        # calculate annual sum
-                        df_ann = df.resample("YE").sum() * 0.01  # convert from mg/m2 to kg/ha
-                        # calculate average
-                        df_avg = df_ann.mean(axis=0).to_frame()
-                    elif var_sim == "C_q_ss":
-                        ds = dict_fluxes_states[location][crop_rotation_scenario]
-                        sim_vals1 = ds["q_ss"].isel(y=0).values
-                        ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-                        sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:] * 4.427  # convert nitrate-nitrogen to nitrate
-                        sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)  # weighted average
-                        cond1 = (df_params["CLUST_flag"] == 2)
-                        df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-                        # calculate annual mean
-                        df_avg = df.sum(axis=0).to_frame()
-                        df_avg.loc[:, "location"] = location
-                    # assign aggregated values to polygons
-                    for clust_id in clust_ids:
-                        cond1 = (df_params["CLUST_ID"] == clust_id) & (df_params["CLUST_flag"] == 2)
-                        val = df_avg.loc[cond1, :].values[0][0]
-                        cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
-                        shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
-                        cond2 = gdf["SHP_ID"].isin(shp_ids)
-                        if cond2.any():
-                            gdf.loc[cond2, f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = val
-                    gdf = gdf.copy()
-            elif var_sim in ["q_ss", "q_hof"]:
-                gdf[f'{_dict_var_names[var_sim]}'] = None  # initialize field, float, two decimals
-                gdf[f'{_dict_var_names[var_sim]}'] = gdf[f'{_dict_var_names[var_sim]}'].astype('float64')
-                gdf[f'{_dict_var_names[var_sim]}'] = gdf[f'{_dict_var_names[var_sim]}'].round(decimals=2)
-                ds = dict_fluxes_states[location][crop_rotation_scenario]
-                sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
-                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T)
-                # calculate annual sum
-                df_ann = df.resample("YE").sum()
-                # calculate average
-                df_avg = df_ann.mean(axis=0).to_frame()
-                # assign aggregated values to polygons
-                for clust_id in clust_ids:
-                    cond1 = (df_params["CLUST_ID"] == clust_id) & (df_params["CLUST_flag"] == 2)
-                    val = df_avg.loc[cond1, :].values[0][0]
-                    cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
-                    shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
-                    cond2 = gdf["SHP_ID"].isin(shp_ids)
-                    if cond2.any():
-                        gdf.loc[cond2, f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = val
-                gdf = gdf.copy()
-    ll_df.append(gdf)
+    # # extract the values for the entire crop rotation
+    # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
+    # gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
+    # gdf['FFID'] = None
+    # gdf['FFID'] = _dict_ffid[crop_rotation_scenario]
+    # gdf['CID'] = None
+    # gdf['CID'] = int(0)
+    # for location in locations:
+    #     for var_sim in vars_sim:
+    #         if var_sim in ["M_q_ss", "C_q_ss"]:
+    #             for fertilization_intensity in fertilization_intensities:
+    #                 gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = None  # initialize field, float, two decimals
+    #                 gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'].astype('float64')
+    #                 gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'].round(decimals=2)
+    #                 ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
+    #                 if var_sim == "M_q_ss":
+    #                     sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
+    #                     df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T)
+    #                     # calculate annual sum
+    #                     df_ann = df.resample("YE").sum() * 0.01  # convert from mg/m2 to kg/ha
+    #                     # calculate average
+    #                     df_avg = df_ann.mean(axis=0).to_frame()
+    #                 elif var_sim == "C_q_ss":
+    #                     ds = dict_fluxes_states[location][crop_rotation_scenario]
+    #                     sim_vals1 = ds["q_ss"].isel(y=0).values
+    #                     ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+    #                     sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:] * 4.427  # convert nitrate-nitrogen to nitrate
+    #                     sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)  # weighted average
+    #                     cond1 = (df_params["CLUST_flag"] == 2)
+    #                     df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+    #                     # calculate annual mean
+    #                     df_avg = df.sum(axis=0).to_frame()
+    #                     df_avg.loc[:, "location"] = location
+    #                 # assign aggregated values to polygons
+    #                 for clust_id in clust_ids:
+    #                     cond1 = (df_params["CLUST_ID"] == clust_id) & (df_params["CLUST_flag"] == 2)
+    #                     val = df_avg.loc[cond1, :].values[0][0]
+    #                     cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
+    #                     shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
+    #                     cond2 = gdf["SHP_ID"].isin(shp_ids)
+    #                     if cond2.any():
+    #                         gdf.loc[cond2, f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = val
+    #                 gdf = gdf.copy()
+    #         elif var_sim in ["q_ss", "q_hof"]:
+    #             gdf[f'{_dict_var_names[var_sim]}'] = None  # initialize field, float, two decimals
+    #             gdf[f'{_dict_var_names[var_sim]}'] = gdf[f'{_dict_var_names[var_sim]}'].astype('float64')
+    #             gdf[f'{_dict_var_names[var_sim]}'] = gdf[f'{_dict_var_names[var_sim]}'].round(decimals=2)
+    #             ds = dict_fluxes_states[location][crop_rotation_scenario]
+    #             sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
+    #             df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T)
+    #             # calculate annual sum
+    #             df_ann = df.resample("YE").sum()
+    #             # calculate average
+    #             df_avg = df_ann.mean(axis=0).to_frame()
+    #             # assign aggregated values to polygons
+    #             for clust_id in clust_ids:
+    #                 cond1 = (df_params["CLUST_ID"] == clust_id) & (df_params["CLUST_flag"] == 2)
+    #                 val = df_avg.loc[cond1, :].values[0][0]
+    #                 cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
+    #                 shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
+    #                 cond2 = gdf["SHP_ID"].isin(shp_ids)
+    #                 if cond2.any():
+    #                     gdf.loc[cond2, f'{_dict_var_names[var_sim]}'] = val
+    #             gdf = gdf.copy()
+    # ll_df.append(gdf)
 
     # extract the values for the single crop periods within the crop rotation
     crop_ids = _dict_crop_periods[crop_rotation_scenario]
@@ -324,7 +336,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
         gdf['FFID'] = None
         gdf['FFID'] = f'{_dict_ffid[crop_rotation_scenario]}'
         gdf['CID'] = None
-        gdf['CID'] = f'{_dict_crop_id[crop_id]}'
+        gdf['CID'] = int(f'{_dict_crop_id[crop_id]}')
         for location in locations:
             ds = dict_fluxes_states[location][crop_rotation_scenario]
             lu_id = ds["lu_id"].isel(x=0, y=0).values
@@ -333,11 +345,15 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             cond = onp.isin(df_lu_id.values, onp.array([586, 587, 599])).flatten()
             df_lu_id.loc[cond, "lu_id"] = onp.nan
             df_lu_id = df_lu_id.bfill()
+            df_lu_id.loc[:, 'mask'] = onp.isin(df_lu_id.loc[:, "lu_id"].values, _dict_lu_id[crop_id]).flatten()
+            df_lu_id['new'] = df_lu_id['mask'].gt(df_lu_id['mask'].shift(fill_value=False))
+            df_lu_id['crop_period'] = (df_lu_id.new + 0).cumsum() * df_lu_id['mask']
+            df_lu_id['day'] = 1
             df_lu_id.replace(onp.nan, 0, inplace=True)
-            # if crop_id == "winter-wheat" and crop_rotation_scenario == "summer-wheat_winter-wheat":
-            print(crop_rotation_scenario, crop_id)
-            df_lu_id = df_lu_id.astype({"lu_id": int})
-            cond_crop = onp.isin(df_lu_id.values, _dict_crop_periods[crop_rotation_scenario][crop_id]).flatten()
+            df_lu_id['crop_period'] = df_lu_id['crop_period'].replace(0, onp.nan)
+            df_lu_id = df_lu_id.drop(columns=['mask', 'new'])
+            df_lu_id = df_lu_id.astype({"lu_id": int, "crop_period": float, "day": float})
+            cond_crop = onp.isin(df_lu_id.loc[:, "lu_id"].values, _dict_crop_periods[crop_rotation_scenario][crop_id]).flatten()
             for var_sim in vars_sim:
                 if var_sim in ["M_q_ss", "C_q_ss"]:
                     for fertilization_intensity in fertilization_intensities:
@@ -348,25 +364,22 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                         if var_sim == "M_q_ss":
                             sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
                             df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T)
+                            df.loc[:, 'crop_period'] = df_lu_id.loc[:, 'crop_period'].values
                             df = df.loc[cond_crop, :]
-                            df_weights = pd.DataFrame(index=df.index)
-                            df_weights["weights"] = 1/365
-                            df_weights_ann = df_weights.resample("YE").sum()
-                            # calculate annual sum
-                            df_ann = df.resample("YE").sum() * df_weights_ann.values * 0.01  # convert from mg/m2 to kg/ha
-                            df_ann.replace(0, onp.nan, inplace=True)
-                            df_ann.dropna(axis=0, how="all", inplace=True)
+                            # calculate sum per crop period
+                            weight = 365/df_lu_id.groupby("crop_period").sum()["day"].values
+                            weight = onp.where(weight > 1, 1, weight)
+                            df_cp = df.groupby("crop_period").sum() * weight[:, onp.newaxis] * 0.01  # convert from mg/m2 to kg/ha                            
                             # calculate average
-                            df_avg = df_ann.sum(axis=0).to_frame() / len(df_ann.index)
+                            df_avg = df_cp.mean(axis=0).to_frame()
                         elif var_sim == "C_q_ss":
                             ds = dict_fluxes_states[location][crop_rotation_scenario]
-                            sim_vals1 = ds["q_ss"].isel(y=0).values
+                            sim_vals1 = ds["q_ss"].isel(y=0).values[:, cond_crop]
                             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-                            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:] * 4.427  # convert nitrate-nitrogen to nitrate
+                            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:][:, cond_crop] * 4.427  # convert nitrate-nitrogen to nitrate
                             sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)  # weighted average
                             cond1 = (df_params["CLUST_flag"] == 2)
-                            df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-                            df = df.loc[cond_crop, :]
+                            df = pd.DataFrame(data=sim_vals.T).loc[:, cond1]
                             # calculate annual mean
                             df_avg = df.sum(axis=0).to_frame()
                         # assign aggregated values to polygons
@@ -386,15 +399,20 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                     ds = dict_fluxes_states[location][crop_rotation_scenario]
                     sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
                     df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T)
+                    df.loc[:, 'crop_period'] = df_lu_id.loc[:, 'crop_period'].values[1:]
                     df = df.loc[cond_crop[1:], :]
-                    df_weights = pd.DataFrame(index=df.index)
-                    df_weights["weights"] = 1/365
-                    df_weights_ann = df_weights.resample("YE").sum()
-                    # calculate annual sum
-                    df_ann = df.resample("YE").sum() * df_weights_ann.values
-                    df_ann.dropna(axis=0, how="all", inplace=True)
+                    # calculate sum per crop period
+                    weight = 365/df_lu_id.groupby("crop_period").sum()["day"].values
+                    weight = onp.where(weight > 1, 1, weight)
+                    df_cp = df.groupby("crop_period").sum() * weight[:, onp.newaxis]                          
                     # calculate average
-                    df_avg = df_ann.sum(axis=0).to_frame() / len(df_ann.index)
+                    df_avg = df_cp.mean(axis=0).to_frame()
+                    if var_sim == "q_hof":
+                        df_crop_periods = pd.DataFrame(index=[f"{crop_rotation_scenario}_{crop_id}"], columns=["crop_rotation", "crop", "period_in_days"])
+                        df_crop_periods.iloc[0, 0] = crop_rotation_scenario
+                        df_crop_periods.iloc[0, 1] = crop_id
+                        df_crop_periods.iloc[0, 2] = df_lu_id.groupby("crop_period").sum().mean()["day"]
+                        ll_df_crop_periods.append(df_crop_periods)
                     # assign aggregated values to polygons
                     for clust_id in clust_ids:
                         cond1 = (df_params["CLUST_ID"] == clust_id) & (df_params["CLUST_flag"] == 2)
@@ -403,9 +421,9 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                         shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
                         cond2 = gdf["SHP_ID"].isin(shp_ids)
                         if cond2.any():
-                            gdf.loc[cond2, f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = val
+                            gdf.loc[cond2, f'{_dict_var_names[var_sim]}'] = val
                     gdf = gdf.copy()
-    ll_df.append(gdf)
+        ll_df.append(gdf)
 
 gdf = pd.concat(ll_df, axis=0)
 gdf = gdf.to_crs("EPSG:25832")
@@ -415,4 +433,11 @@ file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_freibur
 gdf.to_file(file)
 file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_freiburg_for_nitrate_leaching") / "nitrate_leaching.csv"
 df = pd.DataFrame(gdf)
-df.to_csv(file, sep=";", index=False)
+df.loc[:, 'FFID':].to_csv(file, sep=";", index=False)
+
+cid = onp.unique(df.loc[:, 'CID'].values)
+print(cid)
+
+df_crop_periods = pd.concat(ll_df_crop_periods, axis=0)
+file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_freiburg_for_nitrate_leaching") / "crop_periods.csv"
+df_crop_periods.to_csv(file, sep=";", index=False)
