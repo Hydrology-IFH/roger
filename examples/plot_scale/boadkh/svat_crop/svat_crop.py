@@ -35,7 +35,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
                                                              "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
                                                              "grain-corn_winter-wheat_winter-barley_yellow-mustard",
-                                                             "yellow-mustard"]), default="summer-wheat_winter-wheat")
+                                                             "yellow-mustard"]), default="summer-wheat_winter-wheat_silage-corn")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_crop")
 @roger_base_cli
 def main(location, crop_rotation_scenario, tmp_dir):

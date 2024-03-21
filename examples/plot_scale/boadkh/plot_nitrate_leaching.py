@@ -101,6 +101,61 @@ _dict_ffid = {"winter-wheat_clover": "1_0",
               "grain-corn_winter-wheat_winter-barley_yellow-mustard": "13_1", 
 }
 
+_ffids_mustard = ["2_0", "3_0", "6_0", "7_0", "8_0", "11_0", "12_0", "13_0",
+                  "2_1", "3_1", "6_1", "7_1", "8_1", "11_1", "12_1", "13_1"]
+
+_ffids_no_mustard = ["2_0", "3_0", "6_0", "7_0", "8_0", "11_0", "12_0", "13_0"]
+
+_ffids_with_mustard = ["2_1", "3_1", "6_1", "7_1", "8_1", "11_1", "12_1", "13_1"]
+
+_dict_ffid = {"winter-wheat_clover": "1_0",
+              "winter-wheat_silage-corn": "2_0",
+              "summer-wheat_winter-wheat": "3_0",
+              "summer-wheat_clover_winter-wheat": "4_0",
+              "winter-wheat_clover_silage-corn": "5_0",
+              "winter-wheat_sugar-beet_silage-corn": "6_0",
+              "summer-wheat_winter-wheat_silage-corn": "7_0",
+              "summer-wheat_winter-wheat_winter-rape": "8_0",
+              "winter-wheat_winter-rape": "9_0",
+              "winter-wheat_soybean_winter-rape": "10_0",
+              "sugar-beet_winter-wheat_winter-barley": "11_0", 
+              "grain-corn_winter-wheat_winter-rape": "12_0", 
+              "grain-corn_winter-wheat_winter-barley": "13_0",
+              "grain-corn_winter-wheat_clover": "14_0",
+              "winter-wheat_silage-corn_yellow-mustard": "2_1",
+              "summer-wheat_winter-wheat_yellow-mustard": "3_1",
+              "winter-wheat_sugar-beet_silage-corn_yellow-mustard": "6_1",
+              "summer-wheat_winter-wheat_silage-corn_yellow-mustard": "7_1",
+              "summer-wheat_winter-wheat_winter-rape_yellow-mustard": "8_1",
+              "sugar-beet_winter-wheat_winter-barley_yellow-mustard": "11_1", 
+              "grain-corn_winter-wheat_winter-rape_yellow-mustard": "12_1", 
+              "grain-corn_winter-wheat_winter-barley_yellow-mustard": "13_1", 
+}
+
+_dict_ffid = {"winter-wheat_clover": "1_0",
+              "winter-wheat_silage-corn": "2_0",
+              "summer-wheat_winter-wheat": "3_0",
+              "summer-wheat_clover_winter-wheat": "4_0",
+              "winter-wheat_clover_silage-corn": "5_0",
+              "winter-wheat_sugar-beet_silage-corn": "6_0",
+              "summer-wheat_winter-wheat_silage-corn": "7_0",
+              "summer-wheat_winter-wheat_winter-rape": "8_0",
+              "winter-wheat_winter-rape": "9_0",
+              "winter-wheat_soybean_winter-rape": "10_0",
+              "sugar-beet_winter-wheat_winter-barley": "11_0", 
+              "grain-corn_winter-wheat_winter-rape": "12_0", 
+              "grain-corn_winter-wheat_winter-barley": "13_0",
+              "grain-corn_winter-wheat_clover": "14_0",
+              "winter-wheat_silage-corn_yellow-mustard": "2_1",
+              "summer-wheat_winter-wheat_yellow-mustard": "3_1",
+              "winter-wheat_sugar-beet_silage-corn_yellow-mustard": "6_1",
+              "summer-wheat_winter-wheat_silage-corn_yellow-mustard": "7_1",
+              "summer-wheat_winter-wheat_winter-rape_yellow-mustard": "8_1",
+              "sugar-beet_winter-wheat_winter-barley_yellow-mustard": "11_1", 
+              "grain-corn_winter-wheat_winter-rape_yellow-mustard": "12_1", 
+              "grain-corn_winter-wheat_winter-barley_yellow-mustard": "13_1", 
+}
+
 _dict_intercropping_effects = {'low Nfert & no intercropping': 1.0,
                                'low Nfert & intercropping': 1.01,
                                'medium Nfert & no intercropping': 2.0,
@@ -108,6 +163,29 @@ _dict_intercropping_effects = {'low Nfert & no intercropping': 1.0,
                                'high Nfert & no intercropping': 3,
                                'high Nfert & intercropping': 3.01
                                }
+
+_dict_var_names = {"q_hof": "Qs",
+                   "ground_cover": "GC",
+                   "M_q_ss": "MPERC",
+                   "C_q_ss": "CPERC",
+                   "q_ss": "PERC",
+}
+
+_dict_fert = {"low": 1,
+              "medium": 2,
+              "high": 3,
+}
+
+_dict_crop_id_rev = {115: "winter wheat",
+                     425: "clover",
+                     411: "silage corn",
+                     116: "summer wheat",
+                     603: "sugar beet",
+                     311: "winter rape",
+                     330: "soybean",
+                     171: "grain corn",
+                     131: "winter barley",
+                    }
 
 # identifiers for simulations
 locations = ["freiburg", "lahr", "muellheim", 
@@ -186,7 +264,9 @@ _lab_unit_daily = {
 
 _lab_unit_annual = {
     "M_q_ss": "PERC-$NO_3$-N\n [kg N/year/ha]",
-    "C_q_ss": "PERC-$NO_3$\n [mg/l]"
+    "C_q_ss": "PERC-$NO_3$\n [mg/l]",
+    "q_ss": "PERC\n [mm/year]",
+    "q_hof": "$Q_{sur}$\n [mm/year]",
 }
 
 _lab_unit_total = {
@@ -211,53 +291,53 @@ clust_ids = pd.unique(df_params["CLUST_ID"].values).tolist()
 # cond = onp.isin(df_link_bk50_cluster_cropland.index.values, gdf_bk50["SHP_ID"].values)
 # clust_ids = onp.unique(df_link_bk50_cluster_cropland.loc[cond, "CLUST_ID"].values).astype(str)
 
-# load simulated fluxes and states
-dict_fluxes_states = {}
-for location in locations:
-    dict_fluxes_states[location] = {}
-    for crop_rotation_scenario in crop_rotation_scenarios:
-        dict_fluxes_states[location][crop_rotation_scenario] = {}
-        output_hm_file = (
-            base_path_output
-            / "svat_crop"
-            / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-        )
-        ds_fluxes_states = xr.open_dataset(output_hm_file, engine="h5netcdf")
-        # assign date
-        days = ds_fluxes_states["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
-        date = num2date(
-            days,
-            units=f"days since {ds_fluxes_states['Time'].attrs['time_origin']}",
-            calendar="standard",
-            only_use_cftime_datetimes=False,
-        )
-        ds_fluxes_states = ds_fluxes_states.assign_coords(Time=("Time", date))
-        dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
+# # load simulated fluxes and states
+# dict_fluxes_states = {}
+# for location in locations:
+#     dict_fluxes_states[location] = {}
+#     for crop_rotation_scenario in crop_rotation_scenarios:
+#         dict_fluxes_states[location][crop_rotation_scenario] = {}
+#         output_hm_file = (
+#             base_path_output
+#             / "svat_crop"
+#             / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+#         )
+#         ds_fluxes_states = xr.open_dataset(output_hm_file, engine="h5netcdf")
+#         # assign date
+#         days = ds_fluxes_states["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+#         date = num2date(
+#             days,
+#             units=f"days since {ds_fluxes_states['Time'].attrs['time_origin']}",
+#             calendar="standard",
+#             only_use_cftime_datetimes=False,
+#         )
+#         ds_fluxes_states = ds_fluxes_states.assign_coords(Time=("Time", date))
+#         dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
 
-# load nitrogen loads and concentrations
-dict_nitrate = {}
-for location in locations:
-    dict_nitrate[location] = {}
-    for crop_rotation_scenario in crop_rotation_scenarios:
-        dict_nitrate[location][crop_rotation_scenario] = {}
-        for fertilization_intensity in fertilization_intensities:
-            dict_nitrate[location][crop_rotation_scenario][fertilization_intensity] = {}
-            output_nitrate_file = (
-                base_path_output
-                / "svat_crop_nitrate"
-                / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.nc"
-            )
-            ds_nitrate = xr.open_dataset(output_nitrate_file, engine="h5netcdf")
-            # assign date
-            days = ds_nitrate["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
-            date = num2date(
-                days,
-                units=f"days since {ds_nitrate['Time'].attrs['time_origin']}",
-                calendar="standard",
-                only_use_cftime_datetimes=False,
-            )
-            ds_nitrate = ds_nitrate.assign_coords(Time=("Time", date))
-            dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] = ds_nitrate
+# # load nitrogen loads and concentrations
+# dict_nitrate = {}
+# for location in locations:
+#     dict_nitrate[location] = {}
+#     for crop_rotation_scenario in crop_rotation_scenarios:
+#         dict_nitrate[location][crop_rotation_scenario] = {}
+#         for fertilization_intensity in fertilization_intensities:
+#             dict_nitrate[location][crop_rotation_scenario][fertilization_intensity] = {}
+#             output_nitrate_file = (
+#                 base_path_output
+#                 / "svat_crop_nitrate"
+#                 / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.nc"
+#             )
+#             ds_nitrate = xr.open_dataset(output_nitrate_file, engine="h5netcdf")
+#             # assign date
+#             days = ds_nitrate["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+#             date = num2date(
+#                 days,
+#                 units=f"days since {ds_nitrate['Time'].attrs['time_origin']}",
+#                 calendar="standard",
+#                 only_use_cftime_datetimes=False,
+#             )
+#             ds_nitrate = ds_nitrate.assign_coords(Time=("Time", date))
+#             dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] = ds_nitrate
 
 # # plot daily values
 # vars_sim = ["M_q_ss"]
@@ -693,61 +773,172 @@ for location in locations:
 #         plt.close(fig)
 
 
-# scatter plot
-ll_df = []
-for fertilization_intensity in fertilization_intensities:
-    for location in locations:
-        for crop_rotation_scenario in crop_rotation_scenarios:
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            sim_vals = ds["M_q_ss"].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
-            cond1 = (df_params["CLUST_flag"] == 2)
-            df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-            # calculate annual sum
-            df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+# # scatter plot
+# ll_df = []
+# for fertilization_intensity in fertilization_intensities:
+#     for location in locations:
+#         for crop_rotation_scenario in crop_rotation_scenarios:
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             sim_vals = ds["M_q_ss"].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
+#             cond1 = (df_params["CLUST_flag"] == 2)
+#             df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+#             # calculate annual sum
+#             df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
 
-            ds = dict_fluxes_states[location][crop_rotation_scenario]
-            sim_vals1 = ds["q_ss"].isel(y=0).values
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:] * 4.427  # convert nitrate-nitrogen to nitrate
-            sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)
-            cond1 = (df_params["CLUST_flag"] == 2)
-            df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-            # calculate annual mean
-            df_avg = df.sum(axis=0).to_frame()
-            df_ann_avg.loc[:, "C_q_ss"] = df_avg.values
-            df_ann_avg.columns = ["M_q_ss", "C_q_ss"]
+#             ds = dict_fluxes_states[location][crop_rotation_scenario]
+#             sim_vals1 = ds["q_ss"].isel(y=0).values
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:] * 4.427  # convert nitrate-nitrogen to nitrate
+#             sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)
+#             cond1 = (df_params["CLUST_flag"] == 2)
+#             df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+#             # calculate annual mean
+#             df_avg = df.sum(axis=0).to_frame()
+#             df_ann_avg.loc[:, "C_q_ss"] = df_avg.values
+#             df_ann_avg.columns = ["M_q_ss", "C_q_ss"]
 
-            cond1 = (df_params["CLUST_flag"] == 2)
-            df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals1.T).loc[:, cond1]
-            # calculate annual sum
-            df_ann_avg_perc = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
-            df_ann_avg.loc[:, "q_ss"] = df_ann_avg_perc.values
+#             cond1 = (df_params["CLUST_flag"] == 2)
+#             df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals1.T).loc[:, cond1]
+#             # calculate annual sum
+#             df_ann_avg_perc = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+#             df_ann_avg.loc[:, "q_ss"] = df_ann_avg_perc.values
 
-            df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
-            ll_df.append(df_ann_avg)
+#             df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+#             ll_df.append(df_ann_avg)
 
-df_avg = pd.concat(ll_df)
-fig, axes = plt.subplots(1, 1, figsize=(3, 3))
-sns.scatterplot(df_avg, x="M_q_ss", y="C_q_ss", hue="fertilization_intensity", s=10, palette="RdPu", ax=axes)
-axes.set_ylabel("PERC-$NO_3$ [mg/l]")
-axes.set_xlabel("PERC-$NO_3$-N [kg N/year/ha]")
-axes.legend().set_visible(False)
-axes.set_ylim(0,)
-axes.set_xlim(0,)
+# df_avg = pd.concat(ll_df)
+# fig, axes = plt.subplots(1, 1, figsize=(3, 3))
+# sns.scatterplot(df_avg, x="M_q_ss", y="C_q_ss", hue="fertilization_intensity", s=10, palette="RdPu", ax=axes)
+# axes.set_ylabel("PERC-$NO_3$ [mg/l]")
+# axes.set_xlabel("PERC-$NO_3$-N [kg N/year/ha]")
+# axes.legend().set_visible(False)
+# axes.set_ylim(0,)
+# axes.set_xlim(0,)
+# fig.tight_layout()
+# file = base_path_figs / "scatter_nitrate.png"
+# fig.savefig(file, dpi=250)
+# plt.close(fig)
+
+# fig, axes = plt.subplots(1, 1, figsize=(3, 3))
+# sns.scatterplot(df_avg, x="q_ss", y="C_q_ss", hue="fertilization_intensity", s=10, palette="RdPu", ax=axes)
+# axes.set_ylabel("PERC-$NO_3$ [mg/l]")
+# axes.set_xlabel("PERC [mm/year]")
+# axes.legend().set_visible(False)
+# axes.set_ylim(0,)
+# axes.set_xlim(0,)
+# fig.tight_layout()
+# file = base_path_figs / "scatter_nitrate_perc.png"
+# fig.savefig(file, dpi=250)
+# plt.close(fig)
+
+_dict_crop_id = {"winter-wheat": 115,
+                 "clover": 425,
+                 "silage-corn": 411,
+                 "summer-wheat": 116,
+                 "sugar-beet": 603,
+                 "winter-rape": 311,
+                 "soybean": 330,
+                 "grain-corn": 171,
+                 "winter-barley": 131,
+                }
+
+file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_freiburg_for_nitrate_leaching") / "nitrate_leaching.csv"
+df = pd.read_csv(file, sep=";")
+
+vars_sim = ["q_hof", "q_ss", "C_q_ss", "M_q_ss"]
+fig, axes = plt.subplots(4, 1, figsize=(6, 6), sharex=True, sharey=False)
+for i, var_sim in enumerate(vars_sim):
+    if var_sim in ["M_q_ss", "C_q_ss"]:
+        ll_df = []
+        for fertilization_intensity in fertilization_intensities:
+            df1 = pd.DataFrame()
+            cond = (df["CID"] > 0)
+            df1.loc[:, 'vals'] = df.loc[cond, f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}']
+            df1.loc[:, 'fertilization_intensity'] = fertilization_intensity
+            df1.loc[:, 'FFID'] = df.loc[cond, 'FFID']
+            df1.loc[:, 'CID'] = df.loc[cond, 'CID']
+            ll_df.append(df1)
+        data = pd.concat(ll_df, ignore_index=True)
+        if var_sim == "C_q_ss":
+            axes[i].axhline(y=50, color='red', linestyle='--', lw=2)
+            axes[i].axhline(y=37.5, color='orange', linestyle='--', lw=2)
+        sns.boxplot(data=data, x="CID", y="vals", hue="fertilization_intensity", ax=axes[i], whis=(5, 95), showfliers=False, palette="PuRd", order=[115, 131, 311, 411, 171, 116, 603])
+        axes[i].legend().set_visible(False)
+        axes[i].set_xlabel("")
+        axes[i].set_ylabel(_lab_unit_annual[var_sim])
+        axes[i].set_ylim(0, )
+    else:
+        data = pd.DataFrame()
+        cond = (df["CID"] > 0)
+        data.loc[:, 'vals'] = df.loc[cond, f'{_dict_var_names[var_sim]}']
+        data.loc[:, 'FFID'] = df.loc[cond, 'FFID']
+        data.loc[:, 'CID'] = df.loc[cond, 'CID']
+        sns.boxplot(data=data, x="CID", y="vals", ax=axes[i], whis=(5, 95), showfliers=False, order=[115, 131, 311, 411, 171, 116, 603])
+        axes[i].legend().set_visible(False)
+        axes[i].set_xlabel("")
+        axes[i].set_ylabel(_lab_unit_annual[var_sim])
+        axes[i].set_ylim(0, )
+axes[-1].set_xlabel("Crop type")
+xticklabels1 = axes[-1].get_xticklabels()
+xticklabels = [f"{_dict_crop_id_rev[int(x.get_text())]}" for x in xticklabels1]
+axes[-1].set_xticklabels(xticklabels)
+plt.xticks(rotation=33)
 fig.tight_layout()
-file = base_path_figs / "scatter_nitrate.png"
-fig.savefig(file, dpi=250)
+file = base_path_figs / f"_for_crop_types.png"
+fig.savefig(file, dpi=300)
 plt.close(fig)
 
-fig, axes = plt.subplots(1, 1, figsize=(3, 3))
-sns.scatterplot(df_avg, x="q_ss", y="C_q_ss", hue="fertilization_intensity", s=10, palette="RdPu", ax=axes)
-axes.set_ylabel("PERC-$NO_3$ [mg/l]")
-axes.set_xlabel("PERC [mm/year]")
-axes.legend().set_visible(False)
-axes.set_ylim(0,)
-axes.set_xlim(0,)
-fig.tight_layout()
-file = base_path_figs / "scatter_nitrate_perc.png"
-fig.savefig(file, dpi=250)
-plt.close(fig)
 
+vars_sim = ["q_hof", "q_ss", "C_q_ss", "M_q_ss"]
+fig, axes = plt.subplots(4, 1, figsize=(6, 6), sharex=True, sharey=False)
+for i, var_sim in enumerate(vars_sim):
+    if var_sim in ["M_q_ss", "C_q_ss"]:
+        ll_df = []
+        for fertilization_intensity in fertilization_intensities:
+            df1 = pd.DataFrame()
+            cond = (df["CID"] > 0)
+            df1.loc[:, 'vals'] = df.loc[cond, f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}']
+            df1.loc[:, 'fertilization_intensity'] = fertilization_intensity
+            df1.loc[:, 'FFID'] = df.loc[cond, 'FFID']
+            df1.loc[:, 'CID'] = df.loc[cond, 'CID']
+            cond1 = onp.isin(df1["FFID"].values, _ffids_mustard).flatten()
+            df2 = df1.loc[cond1, :].copy()
+            cond2 = onp.isin(df2["FFID"].values, _ffids_with_mustard).flatten()
+            df2.loc[:, 'mustard'] = '_0'
+            df2.loc[cond2, 'mustard'] = '_1'
+            df2.loc[:, 'fertilization_intensity_mustard'] = df2.loc[:, 'fertilization_intensity'] + df2.loc[:, 'mustard']
+            ll_df.append(df2)
+        data = pd.concat(ll_df, ignore_index=True)
+        if var_sim == "C_q_ss":
+            axes[i].axhline(y=50, color='red', linestyle='--', lw=2)
+            axes[i].axhline(y=37.5, color='orange', linestyle='--', lw=2)
+        sns.boxplot(data=data, x="CID", y="vals", hue="fertilization_intensity_mustard", ax=axes[i], whis=(5, 95), showfliers=False, palette="PuRd", order=[115, 131, 311, 411, 171, 116, 603])
+        axes[i].legend().set_visible(False)
+        axes[i].set_xlabel("")
+        axes[i].set_ylabel(_lab_unit_annual[var_sim])
+        axes[i].set_ylim(0, )
+    else:
+        data = pd.DataFrame()
+        cond = (df["CID"] > 0)
+        df1.loc[:, 'vals'] = df.loc[cond, f'{_dict_var_names[var_sim]}']
+        df1.loc[:, 'FFID'] = df.loc[cond, 'FFID']
+        df1.loc[:, 'CID'] = df.loc[cond, 'CID']
+        cond1 = onp.isin(df1["FFID"].values, _ffids_mustard).flatten()
+        data = df1.loc[cond1, :].copy()
+        cond2 = onp.isin(data["FFID"].values, _ffids_with_mustard).flatten()
+        data.loc[:, 'mustard'] = 0
+        data.loc[cond2, 'mustard'] = 1
+        sns.boxplot(data=data, x="CID", y="vals", hue="mustard", ax=axes[i], whis=(5, 95), showfliers=False, palette="BuGn", order=[115, 131, 311, 411, 171, 116, 603])
+        axes[i].legend().set_visible(False)
+        axes[i].set_xlabel("")
+        axes[i].set_ylabel(_lab_unit_annual[var_sim])
+        axes[i].set_ylim(0, )
+axes[-1].set_xlabel("Crop type")
+xticklabels1 = axes[-1].get_xticklabels()
+xticklabels = [f"{_dict_crop_id_rev[int(x.get_text())]}" for x in xticklabels1]
+axes[-1].set_xticklabels(xticklabels)
+plt.xticks(rotation=33)
+fig.tight_layout()
+file = base_path_figs / f"_for_crop_types_mustard.png"
+fig.savefig(file, dpi=300)
+plt.close(fig)
