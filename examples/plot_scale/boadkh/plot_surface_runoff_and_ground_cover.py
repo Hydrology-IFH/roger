@@ -172,59 +172,59 @@ for location in locations:
         dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
 
 
-# vars_sim = ["ground_cover", "q_hof"]
-# for crop_rotation_scenario in crop_rotation_scenarios:
-#     for location in locations:
-#         for var_sim in vars_sim:
-#             ds = dict_fluxes_states[location][crop_rotation_scenario]
-#             sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
-#             cond1 = (df_params["CLUST_flag"] == 1)
-#             df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-#             vals = df.values.T
-#             fig, ax = plt.subplots(1, 1, figsize=(6, 2))
-#             median_vals = onp.median(vals, axis=0)
-#             min_vals = onp.min(vals, axis=0)
-#             max_vals = onp.max(vals, axis=0)
-#             p5_vals = onp.nanquantile(vals, 0.05, axis=0)
-#             p25_vals = onp.nanquantile(vals, 0.25, axis=0)
-#             p75_vals = onp.nanquantile(vals, 0.75, axis=0)
-#             p95_vals = onp.nanquantile(vals, 0.95, axis=0)
-#             ax.fill_between(
-#                 df.index,
-#                 min_vals,
-#                 max_vals,
-#                 edgecolor='grey',
-#                 facecolor='grey',
-#                 alpha=0.33,
-#                 label="Min-Max interval",
-#             )
-#             ax.fill_between(
-#                 df.index,
-#                 p5_vals,
-#                 p95_vals,
-#                 edgecolor='grey',
-#                 facecolor='grey',
-#                 alpha=0.66,
-#                 label="95% interval",
-#             )
-#             ax.fill_between(
-#                 df.index,
-#                 p25_vals,
-#                 p75_vals,
-#                 edgecolor='grey',
-#                 facecolor='grey',
-#                 alpha=1,
-#                 label="75% interval",
-#             )
-#             ax.plot(df.index, median_vals, color="black", label="Median", linewidth=1)
-#             ax.legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
-#             ax.set_xlabel("Time [Year]")
-#             ax.set_ylabel(_lab_unit_daily[var_sim])
-#             ax.set_xlim(df.index[0], df.index[-1])
-#             fig.tight_layout()
-#             file = base_path_figs / f"trace_{var_sim}_{location}_{crop_rotation_scenario}.png"
-#             fig.savefig(file, dpi=250)
-#             plt.close(fig)
+vars_sim = ["ground_cover", "q_hof"]
+for crop_rotation_scenario in crop_rotation_scenarios:
+    for location in locations:
+        for var_sim in vars_sim:
+            ds = dict_fluxes_states[location][crop_rotation_scenario]
+            sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
+            cond1 = (df_params["CLUST_flag"] == 2)
+            df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+            vals = df.values.T
+            fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+            median_vals = onp.median(vals, axis=0)
+            min_vals = onp.min(vals, axis=0)
+            max_vals = onp.max(vals, axis=0)
+            p5_vals = onp.nanquantile(vals, 0.05, axis=0)
+            p25_vals = onp.nanquantile(vals, 0.25, axis=0)
+            p75_vals = onp.nanquantile(vals, 0.75, axis=0)
+            p95_vals = onp.nanquantile(vals, 0.95, axis=0)
+            ax.fill_between(
+                df.index,
+                min_vals,
+                max_vals,
+                edgecolor='grey',
+                facecolor='grey',
+                alpha=0.33,
+                label="Min-Max interval",
+            )
+            ax.fill_between(
+                df.index,
+                p5_vals,
+                p95_vals,
+                edgecolor='grey',
+                facecolor='grey',
+                alpha=0.66,
+                label="95% interval",
+            )
+            ax.fill_between(
+                df.index,
+                p25_vals,
+                p75_vals,
+                edgecolor='grey',
+                facecolor='grey',
+                alpha=1,
+                label="75% interval",
+            )
+            ax.plot(df.index, median_vals, color="black", label="Median", linewidth=1)
+            ax.legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
+            ax.set_xlabel("Time [Year]")
+            ax.set_ylabel(_lab_unit_daily[var_sim])
+            ax.set_xlim(df.index[0], df.index[-1])
+            fig.tight_layout()
+            file = base_path_figs / f"trace_{var_sim}_{location}_{crop_rotation_scenario}.png"
+            fig.savefig(file, dpi=250)
+            plt.close(fig)
 
 # plot average annual sums/means
 vars_sim = ["q_hof", "q_ss", "transp", "evap_soil", "aet", "ground_cover", "theta"]
@@ -235,7 +235,7 @@ for var_sim in vars_sim:
         for crop_rotation_scenario in crop_rotation_scenarios:
             ds = dict_fluxes_states[location][crop_rotation_scenario]
             sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
-            cond1 = (df_params["CLUST_flag"] == 1)
+            cond1 = (df_params["CLUST_flag"] == 2)
             df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
             if var_sim in ["q_hof", "q_ss", "transp", "evap_soil", "aet"]:
                 # calculate average of annual sums
@@ -268,7 +268,7 @@ for var_sim in vars_sim:
 #             fig, axes = plt.subplots(1, 1, figsize=(6, 2), sharex=True, sharey=True)
 #             ds = dict_fluxes_states[location][crop_rotation_scenario]
 #             sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
-#             cond1 = (df_params["CLUST_flag"] == 1)
+#             cond1 = (df_params["CLUST_flag"] == 2)
 #             df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
 #             if var_sim in ["q_hof", "q_ss", "transp", "evap_soil", "aet"]:
 #                 # calculate average of annual sums
@@ -300,7 +300,7 @@ for var_sim in vars_sim:
 #         for crop_rotation_scenario in crop_rotation_scenarios:
 #             ds = dict_fluxes_states[location][crop_rotation_scenario]
 #             sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
-#             cond1 = (df_params["CLUST_flag"] == 1)
+#             cond1 = (df_params["CLUST_flag"] == 2)
 #             df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
 #             # calculate average of annual sums
 #             df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
