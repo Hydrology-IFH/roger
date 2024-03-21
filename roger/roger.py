@@ -300,7 +300,6 @@ class RogerSetup(metaclass=abc.ABCMeta):
                 self.set_initial_conditions(self.state)
                 surface.calculate_initial_conditions(self.state)
                 soil.calculate_initial_conditions(self.state)
-                soil.calculate_soil(self.state)
 
             self.set_diagnostics(self.state)
             diagnostics.initialize(self.state)
