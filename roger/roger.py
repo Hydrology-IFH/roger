@@ -243,7 +243,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
     def setup(self):
         from roger import diagnostics, restart
-        from roger.core import surface, soil, subsoil, root_zone
+        from roger.core import surface, soil
 
         setup_funcs = (
             self.set_parameters_setup,
@@ -300,8 +300,6 @@ class RogerSetup(metaclass=abc.ABCMeta):
                 self.set_initial_conditions(self.state)
                 surface.calculate_initial_conditions(self.state)
                 soil.calculate_initial_conditions(self.state)
-                root_zone.calculate_root_zone(self.state)
-                subsoil.calculate_subsoil(self.state)
                 soil.calculate_soil(self.state)
 
             self.set_diagnostics(self.state)

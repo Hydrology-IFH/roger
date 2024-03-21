@@ -813,12 +813,30 @@ def calc_initial_conditions_root_zone_kernel(state):
         * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
+    vs.theta_rz = update(
+        vs.theta_rz,
+        at[2:-2, 2:-2, vs.tau], ((vs.S_fp_rz[2:-2, 2:-2] + vs.S_lp_rz[2:-2, 2:-2])/vs.z_root[2:-2, 2:-2, vs.tau] + vs.theta_pwp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.k_rz = update(
+        vs.k_rz,
+        at[2:-2, 2:-2, vs.tau], (vs.ks[2:-2, 2:-2]/(1 + (vs.theta_rz[2:-2, 2:-2, vs.tau]/vs.theta_sat[2:-2, 2:-2])**(-vs.m_bc[2:-2, 2:-2]))) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.h_rz = update(
+        vs.h_rz,
+        at[2:-2, 2:-2, vs.tau], (vs.ha[2:-2, 2:-2]/((vs.theta_rz[2:-2, 2:-2, vs.tau]/vs.theta_sat[2:-2, 2:-2])**(1/vs.lambda_bc[2:-2, 2:-2]))) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     return KernelOutput(
         theta_fp_rz=vs.theta_fp_rz,
         theta_lp_rz=vs.theta_lp_rz,
         S_fp_rz=vs.S_fp_rz,
         S_lp_rz=vs.S_lp_rz,
         S_rz=vs.S_rz,
+        theta_rz=vs.theta_rz,
+        k_rz=vs.k_rz,
+        h_rz=vs.h_rz,
     )
 
 
@@ -889,12 +907,30 @@ def calc_initial_conditions_subsoil_kernel(state):
         * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
+    vs.theta_ss = update(
+        vs.theta_ss,
+        at[2:-2, 2:-2, vs.tau], ((vs.S_fp_ss[2:-2, 2:-2] + vs.S_lp_ss[2:-2, 2:-2])/(vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau]) + vs.theta_pwp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.k_ss = update(
+        vs.k_ss,
+        at[2:-2, 2:-2, vs.tau], (vs.ks[2:-2, 2:-2]/(1 + (vs.theta_ss[2:-2, 2:-2, vs.tau]/vs.theta_sat[2:-2, 2:-2])**(-vs.m_bc[2:-2, 2:-2]))) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.h_ss = update(
+        vs.h_ss,
+        at[2:-2, 2:-2, vs.tau], (vs.ha[2:-2, 2:-2]/((vs.theta_ss[2:-2, 2:-2, vs.tau]/vs.theta_sat[2:-2, 2:-2])**(1/vs.lambda_bc[2:-2, 2:-2]))) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     return KernelOutput(
         theta_fp_ss=vs.theta_fp_ss,
         theta_lp_ss=vs.theta_lp_ss,
         S_fp_ss=vs.S_fp_ss,
         S_lp_ss=vs.S_lp_ss,
         S_ss=vs.S_ss,
+        theta_ss=vs.theta_ss,
+        k_ss=vs.k_ss,
+        h_ss=vs.h_ss,
     )
 
 
