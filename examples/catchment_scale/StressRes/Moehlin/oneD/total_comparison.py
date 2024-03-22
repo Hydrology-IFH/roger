@@ -75,7 +75,7 @@ if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
 # directory of output
-base_path_output = Path("/Volumes/LaCie/roger/examples/catchment_scale/StressRes/Moehlin") / "output" / "oneD"
+base_path_output = Path("/Volumes/LaCie/roger/examples/catchment_scale/StressRes/Moehlin") / "output" / "oneD" / "polygons"
 if not os.path.exists(base_path_output):
     os.mkdir(base_path_output)
 

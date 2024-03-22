@@ -8,7 +8,7 @@ import roger
 
 base_path = Path(__file__).parent
 # directory of results
-base_path_output = Path("/Volumes/LaCie/roger/examples/catchment_scale/StressRes/Moehlin") / "output" / "oneD"
+base_path_output = Path("/Volumes/LaCie/roger/examples/catchment_scale/StressRes/Moehlin") / "output" / "oneD" / "polygons"
 if not os.path.exists(base_path_output):
     os.mkdir(base_path_output)
 # directory of figures
