@@ -24,7 +24,7 @@ if not os.path.exists(states_tm_file):
     with h5netcdf.File(states_tm_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
-            title="RoGeR simulations with power law distribution function as SAS function of a rectangular grassland",
+            title="RoGeR simulations for the Eberbachle catchment with power law distribution function as SAS function",
             institution="University of Freiburg, Chair of Hydrology",
             references="",
             comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
