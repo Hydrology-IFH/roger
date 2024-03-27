@@ -254,35 +254,31 @@ def calc_potential_lateral_subsurface_runoff(state):
     settings = state.settings
 
     # calculate potential matrix subsurface runoff with darcy (in mm/dt)
-    # convert mm3 to mm (1e-9)
+    # convert mm3 to liter (1e-6)
     vs.q_sub_mat_pot = update(
         vs.q_sub_mat_pot,
         at[2:-2, 2:-2],
-        ((vs.ks[2:-2, 2:-2] * vs.slope[2:-2, 2:-2] * vs.z_sat[2:-2, 2:-2, vs.tau] * vs.dt) * 1e-9 * (1 / (settings.dx * settings.dy)))
+        ((vs.ks[2:-2, 2:-2] * vs.slope[2:-2, 2:-2] * vs.z_sat[2:-2, 2:-2, vs.tau] * settings.dx * 1000 * vs.dt) * 1e-6 * (1 / (settings.dx * settings.dy)))
         * vs.maskCatch[2:-2, 2:-2],
     )
 
     # total potential macropore subsurface runoff (in mm/dt)
-    # convert mm3 to mm (1e-9)
+    # convert mm3 to liter (1e-6)
     vs.q_sub_mp_pot = update(
         vs.q_sub_mp_pot,
         at[2:-2, 2:-2],
         (
             (
-                  vs.z_sat_layer_1[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_1[2:-2, 2:-2]
-                + vs.z_sat_layer_2[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_2[2:-2, 2:-2]
-                + vs.z_sat_layer_3[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_3[2:-2, 2:-2]
-                + vs.z_sat_layer_4[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_4[2:-2, 2:-2]
-                + vs.z_sat_layer_5[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_5[2:-2, 2:-2]
-                + vs.z_sat_layer_6[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_6[2:-2, 2:-2]
-                + vs.z_sat_layer_7[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_7[2:-2, 2:-2]
-                + vs.z_sat_layer_8[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_8[2:-2, 2:-2]
+                  vs.z_sat_layer_1[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_1[2:-2, 2:-2] * vs.dt * settings.dx * 1000 * vs.dmph[2:-2, 2:-2] * 1e-6 * settings.r_mp**2 * settings.pi * 1e-6 
+                + vs.z_sat_layer_2[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_2[2:-2, 2:-2] * vs.dt * settings.dx * 1000 * vs.dmph[2:-2, 2:-2] * 1e-6 * settings.r_mp**2 * settings.pi * 1e-6 
+                + vs.z_sat_layer_3[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_3[2:-2, 2:-2] * vs.dt * settings.dx * 1000 * vs.dmph[2:-2, 2:-2] * 1e-6 * settings.r_mp**2 * settings.pi * 1e-6 
+                + vs.z_sat_layer_4[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_4[2:-2, 2:-2] * vs.dt * settings.dx * 1000 * vs.dmph[2:-2, 2:-2] * 1e-6 * settings.r_mp**2 * settings.pi * 1e-6 
+                + vs.z_sat_layer_5[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_5[2:-2, 2:-2] * vs.dt * settings.dx * 1000 * vs.dmph[2:-2, 2:-2] * 1e-6 * settings.r_mp**2 * settings.pi * 1e-6 
+                + vs.z_sat_layer_6[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_6[2:-2, 2:-2] * vs.dt * settings.dx * 1000 * vs.dmph[2:-2, 2:-2] * 1e-6 * settings.r_mp**2 * settings.pi * 1e-6 
+                + vs.z_sat_layer_7[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_7[2:-2, 2:-2] * vs.dt * settings.dx * 1000 * vs.dmph[2:-2, 2:-2] * 1e-6 * settings.r_mp**2 * settings.pi * 1e-6 
+                + vs.z_sat_layer_8[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_8[2:-2, 2:-2] * vs.dt * settings.dx * 1000 * vs.dmph[2:-2, 2:-2] * 1e-6 * settings.r_mp**2 * settings.pi * 1e-6 
             )
-            * vs.dt
-            * vs.dmph[2:-2, 2:-2]
-            * settings.r_mp**2
-            * settings.pi
-            * 1e-9 * (1 / (settings.dx * settings.dy))
+            * (1 / (settings.dx * settings.dy))
         )
         * vs.maskCatch[2:-2, 2:-2],
     )
