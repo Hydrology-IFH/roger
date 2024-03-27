@@ -21,7 +21,7 @@ def main():
                  "ehingen-kirchen", "merklingen", "hayingen",
                  "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
     locations = [
-        "freiburg"
+        "freiburg", "lahr", "muellheim"
     ]
     crop_rotation_scenarios = ["winter-wheat_clover",
                                "winter-wheat_silage-corn",

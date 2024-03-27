@@ -5,6 +5,7 @@ from cftime import num2date
 import pandas as pd
 import geopandas as gpd
 import numpy as onp
+from matplotlib.patches import Patch
 import matplotlib as mpl
 import seaborn as sns
 
@@ -164,7 +165,7 @@ _dict_intercropping_effects = {'low Nfert & no intercropping': 1.0,
                                'high Nfert & intercropping': 3.01
                                }
 
-_dict_var_names = {"q_hof": "Qs",
+_dict_var_names = {"q_hof": "QSUR",
                    "ground_cover": "GC",
                    "M_q_ss": "MPERC",
                    "C_q_ss": "CPERC",
@@ -831,6 +832,30 @@ clust_ids = pd.unique(df_params["CLUST_ID"].values).tolist()
 # fig.savefig(file, dpi=250)
 # plt.close(fig)
 
+legend_elements_mustard = [Patch(facecolor='#e5f5f9', edgecolor='k',
+                           label='no intercropping'),
+                           Patch(facecolor='#2ca25f', edgecolor='k',
+                                 label='intercropping'),
+                           Patch(facecolor='#f1eef6', edgecolor='k',
+                                 label='low'),
+                           Patch(facecolor='#d4b9da', edgecolor='k',
+                                 label='low'),
+                           Patch(facecolor='#c994c7', edgecolor='k',
+                                 label='medium'),
+                           Patch(facecolor='#df65b0', edgecolor='k',
+                                 label='medium'),
+                           Patch(facecolor='#dd1c77', edgecolor='k',
+                                 label='high'),
+                           Patch(facecolor='#980043', edgecolor='k',
+                                 label='high')]
+
+legend_elements= [Patch(facecolor='#e7e1ef', edgecolor='k',
+                          label='low'),
+                  Patch(facecolor='#c994c7', edgecolor='k',
+                          label='medium'),
+                  Patch(facecolor='#dd1c77', edgecolor='k',
+                        label='high')]
+
 _dict_crop_id = {"winter-wheat": 115,
                  "clover": 425,
                  "silage-corn": 411,
@@ -878,13 +903,16 @@ for i, var_sim in enumerate(vars_sim):
         axes[i].set_xlabel("")
         axes[i].set_ylabel(_lab_unit_annual[var_sim])
         axes[i].set_ylim(0, )
-axes[-1].set_xlabel("Crop type")
+axes[-1].set_xlabel("")
 xticklabels1 = axes[-1].get_xticklabels()
 xticklabels = [f"{_dict_crop_id_rev[int(x.get_text())]}" for x in xticklabels1]
 axes[-1].set_xticklabels(xticklabels)
 plt.xticks(rotation=33)
+fig.legend(handles=legend_elements, loc='upper center', ncol=4, frameon=False, title="Fertilization intensity")
+plt.xticks(rotation=33)
 fig.tight_layout()
-file = base_path_figs / f"_for_crop_types.png"
+fig.subplots_adjust(top=0.9)
+file = base_path_figs / f"leaching_for_crop_types.png"
 fig.savefig(file, dpi=300)
 plt.close(fig)
 
@@ -926,19 +954,21 @@ for i, var_sim in enumerate(vars_sim):
         cond1 = onp.isin(df1["FFID"].values, _ffids_mustard).flatten()
         data = df1.loc[cond1, :].copy()
         cond2 = onp.isin(data["FFID"].values, _ffids_with_mustard).flatten()
-        data.loc[:, 'mustard'] = 0
-        data.loc[cond2, 'mustard'] = 1
+        data.loc[:, 'mustard'] = 'no intercropping'
+        data.loc[cond2, 'mustard'] = 'intercropping'
         sns.boxplot(data=data, x="CID", y="vals", hue="mustard", ax=axes[i], whis=(5, 95), showfliers=False, palette="BuGn", order=[115, 131, 311, 411, 171, 116, 603])
         axes[i].legend().set_visible(False)
         axes[i].set_xlabel("")
         axes[i].set_ylabel(_lab_unit_annual[var_sim])
         axes[i].set_ylim(0, )
-axes[-1].set_xlabel("Crop type")
+axes[-1].set_xlabel("")
 xticklabels1 = axes[-1].get_xticklabels()
 xticklabels = [f"{_dict_crop_id_rev[int(x.get_text())]}" for x in xticklabels1]
 axes[-1].set_xticklabels(xticklabels)
+fig.legend(handles=legend_elements_mustard, loc='upper center', ncol=4, frameon=False, title="                           Fertilization intensity")
 plt.xticks(rotation=33)
 fig.tight_layout()
-file = base_path_figs / f"_for_crop_types_mustard.png"
+fig.subplots_adjust(top=0.88)
+file = base_path_figs / f"leaching_for_crop_types_mustard.png"
 fig.savefig(file, dpi=300)
 plt.close(fig)

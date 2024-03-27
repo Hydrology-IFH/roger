@@ -7,7 +7,7 @@ import click
 def main():
     base_path = Path(__file__).parent
     base_path_bwuc = "/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell"
-    base_path_ws = Path("/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/freiburg_altheim_kupferzell/output")
+    base_path_ws = Path("/pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/freiburg_altheim_kupferzell/output")
 
     locations = ["freiburg", "altheim", "kupferzell"]
     land_cover_scenarios = ["corn", "corn_catch_crop", "crop_rotation"]
