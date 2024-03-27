@@ -13,10 +13,10 @@
  
 eval "$(conda shell.bash hook)"
 conda activate roger
-cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_crop_monte_carlo_reference
+cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_crop_monte_carlo
  
 python svat_crop.py -b numpy -d cpu --lys-experiment lys2_bromide -td "${TMPDIR}"
 # Move output from local SSD to global workspace
-echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo_reference"
-mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo_reference
-mv "${TMPDIR}"/SVATCROP_*.nc /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo_reference
+echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo"
+mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo
+mv "${TMPDIR}"/SVATCROP_*.nc /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo
