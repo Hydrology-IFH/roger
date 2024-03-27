@@ -110,7 +110,7 @@ DIM_TO_SHAPE_VAR = {
     "cr": "ncr",
     "events_ff": "nevent_ff",
     "n_sas_params": "nsas",
-    "n_crop_types": 89,
+    "n_crop_types": 91,
     "n_crop_params": 24,
     "n_lu": 25,
     "n_sealing": 101,

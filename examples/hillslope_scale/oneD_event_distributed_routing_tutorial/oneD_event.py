@@ -289,7 +289,7 @@ def main(tmp_dir):
             vs.ta_offset = update(
                 vs.ta_offset,
                 at[2:-2, 2:-2],
-                1,
+                0,
             )
             # strickler_coefficient
             vs.k_st = update(
@@ -478,7 +478,7 @@ def main(tmp_dir):
             vs.prec = update(
                 vs.prec, at[2:-2, 2:-2, vs.tau], vs.PREC[npx.newaxis, npx.newaxis, vs.itt] * vs.prec_weight[2:-2, 2:-2]
             )
-            vs.ta = update(vs.ta, at[2:-2, 2:-2], vs.TA[npx.newaxis, npx.newaxis, vs.itt] * vs.ta_offset[2:-2, 2:-2])
+            vs.ta = update(vs.ta, at[2:-2, 2:-2, vs.tau], vs.TA[npx.newaxis, npx.newaxis, vs.itt] + vs.ta_offset[2:-2, 2:-2])
             vs.event_id = update(vs.event_id, at[vs.tau], 1)
 
         @roger_routine

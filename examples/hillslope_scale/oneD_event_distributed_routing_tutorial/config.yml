@@ -27,6 +27,7 @@ OUTPUT_RATE:
 - "dS"  # change of storage volume (mm/10 mins)
 - "q_sur_out" # lateral surface outflow (mm/10 mins)
 - "q_sub_out"  # lateral subsurface outflow (mm/10 mins)
+- "prec"
 
 # simulated hydrologic storages
 OUTPUT_COLLECT:
