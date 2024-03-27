@@ -254,11 +254,11 @@ def calc_potential_lateral_subsurface_runoff(state):
     settings = state.settings
 
     # calculate potential matrix subsurface runoff with darcy (in mm/dt)
-    # convert mm3 to mm (1e-6)
+    # convert mm3 to mm (1e-9)
     vs.q_sub_mat_pot = update(
         vs.q_sub_mat_pot,
         at[2:-2, 2:-2],
-        ((vs.ks[2:-2, 2:-2] * vs.slope[2:-2, 2:-2] * vs.z_sat[2:-2, 2:-2, vs.tau] * vs.dt) * 1e-9)
+        ((vs.ks[2:-2, 2:-2] * vs.slope[2:-2, 2:-2] * vs.z_sat[2:-2, 2:-2, vs.tau] * vs.dt) * 1e-12)
         * vs.maskCatch[2:-2, 2:-2],
     )
 
@@ -282,7 +282,7 @@ def calc_potential_lateral_subsurface_runoff(state):
             * vs.dmph[2:-2, 2:-2]
             * settings.r_mp**2
             * settings.pi
-            * 1e-9
+            * 1e-12
         )
         * vs.maskCatch[2:-2, 2:-2],
     )

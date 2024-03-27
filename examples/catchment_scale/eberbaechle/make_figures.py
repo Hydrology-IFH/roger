@@ -35,6 +35,28 @@ sns.plotting_context(
     },
 )
 
+mpl.rcParams["font.size"] = 10
+mpl.rcParams["axes.titlesize"] = 10
+mpl.rcParams["axes.labelsize"] = 11
+mpl.rcParams["xtick.labelsize"] = 10
+mpl.rcParams["ytick.labelsize"] = 10
+mpl.rcParams["legend.fontsize"] = 10
+mpl.rcParams["legend.title_fontsize"] = 11
+sns.set_style("ticks")
+sns.plotting_context(
+    "paper",
+    font_scale=1,
+    rc={
+        "font.size": 10.0,
+        "axes.labelsize": 11.0,
+        "axes.titlesize": 10.0,
+        "xtick.labelsize": 10.0,
+        "ytick.labelsize": 10.0,
+        "legend.fontsize": 10.0,
+        "legend.title_fontsize": 11.0,
+    },
+)
+
 nrows = 53
 ncols = 80
 x1 = 12
@@ -1549,7 +1571,7 @@ mask = (ds_params_hm["prec_weight"].values >= 0)
 fig, ax = plt.subplots(figsize=(6,4))
 fig.patch.set_alpha(0)
 plt.imshow(onp.where(mask, ds_params_hm["prec_weight"].values * prec_avg, onp.nan), extent=grid_extent, cmap='viridis_r', zorder=1)
-plt.colorbar(label='Precipitation\n [mm/year]', shrink=0.5)
+plt.colorbar(label='Precipitation\n [mm/year]', shrink=0.7)
 plt.grid(zorder=0)
 plt.xlabel('Distance in x-direction [m]')
 plt.ylabel('Distance in y-direction [m]')
@@ -1559,8 +1581,8 @@ fig.savefig(file, dpi=300)
 
 fig, ax = plt.subplots(figsize=(6,4))
 fig.patch.set_alpha(0)
-plt.imshow(onp.where(mask, ds_params_hm["pet_weight"].values * pet_avg, onp.nan), extent=grid_extent, cmap='viridis_r', zorder=1)
-plt.colorbar(label='Potential evapotranspiration\n [mm/year]', shrink=0.5)
+plt.imshow(onp.where(mask, ds_params_hm["pet_weight"].values * pet_avg, onp.nan), extent=grid_extent, cmap='viridis', zorder=1)
+plt.colorbar(label='Potential evapotranspiration\n [mm/year]', shrink=0.7)
 plt.grid(zorder=0)
 plt.xlabel('Distance in x-direction [m]')
 plt.ylabel('Distance in y-direction [m]')
@@ -1570,8 +1592,8 @@ fig.savefig(file, dpi=300)
 
 fig, ax = plt.subplots(figsize=(6,4))
 fig.patch.set_alpha(0)
-plt.imshow(onp.where(mask, ds_params_hm["ta_offset"].values + ta_avg, onp.nan), extent=grid_extent, cmap='viridis_r', zorder=1)
-plt.colorbar(label='Air temperature\n [°C]', shrink=0.5)
+plt.imshow(onp.where(mask, ds_params_hm["ta_offset"].values + ta_avg, onp.nan), extent=grid_extent, cmap='viridis', zorder=1)
+plt.colorbar(label='Air temperature\n [°C]', shrink=0.7)
 plt.grid(zorder=0)
 plt.xlabel('Distance in x-direction [m]')
 plt.ylabel('Distance in y-direction [m]')
