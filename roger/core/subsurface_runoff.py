@@ -258,7 +258,7 @@ def calc_potential_lateral_subsurface_runoff(state):
     vs.q_sub_mat_pot = update(
         vs.q_sub_mat_pot,
         at[2:-2, 2:-2],
-        ((vs.ks[2:-2, 2:-2] * vs.slope[2:-2, 2:-2] * vs.z_sat[2:-2, 2:-2, vs.tau] * vs.dt) * 1e-12)
+        ((vs.ks[2:-2, 2:-2] * vs.slope[2:-2, 2:-2] * vs.z_sat[2:-2, 2:-2, vs.tau] * vs.dt) * 1e-9 * (1 / (settings.dx * settings.dy)))
         * vs.maskCatch[2:-2, 2:-2],
     )
 
@@ -282,7 +282,7 @@ def calc_potential_lateral_subsurface_runoff(state):
             * vs.dmph[2:-2, 2:-2]
             * settings.r_mp**2
             * settings.pi
-            * 1e-12
+            * 1e-9 * (1 / (settings.dx * settings.dy))
         )
         * vs.maskCatch[2:-2, 2:-2],
     )
