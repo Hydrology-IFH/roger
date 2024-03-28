@@ -680,6 +680,15 @@ def calc_canopy_cover(state):
         ),
     )
 
+    # harvesting of miscanthus
+    mask_miscanthus = vs.crop_type == 590
+    mask21 = mask_summer & (vs.doy[vs.tau] > vs.doy_end)
+    vs.ccc = update(
+        vs.ccc,
+        at[2:-2, 2:-2, vs.tau, :],
+        npx.where(mask21[2:-2, 2:-2, :], 0, vs.ccc[2:-2, 2:-2, vs.tau, :]),
+    )
+
     # bare
     vs.ccc = update(
         vs.ccc,

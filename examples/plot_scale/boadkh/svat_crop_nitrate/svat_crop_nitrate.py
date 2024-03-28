@@ -32,7 +32,8 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                                              "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
                                                              "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                                                             "grain-corn_winter-wheat_winter-barley_yellow-mustard"]), default="winter-wheat_sugar-beet_silage-corn_yellow-mustard")
+                                                             "grain-corn_winter-wheat_winter-barley_yellow-mustard",
+                                                             "miscanthus"]), default="winter-wheat_sugar-beet_silage-corn_yellow-mustard")
 @click.option("-ft", "--fertilization-intensity", type=click.Choice(["low", "medium", "high"]), default="medium")
 @click.option("-td", "--tmp-dir", type=str, default=Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "svat_crop_nitrate")
 @roger_base_cli
