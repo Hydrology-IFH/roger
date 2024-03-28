@@ -13,7 +13,7 @@
  
 eval "$(conda shell.bash hook)"
 conda activate roger
-cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_crop_monte_carlo
+cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_crop_monte_carlo_reference
  
 python svat_crop.py -b numpy -d cpu --lys-experiment lys9 -td "${TMPDIR}"
 # Move output from local SSD to global workspace
