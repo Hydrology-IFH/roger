@@ -9,7 +9,7 @@ def main():
     base_path_bwuc = "/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_crop_monte_carlo_reference"
     output_path_ws = Path("/pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo_reference")
 
-    lysimeters = ['lys1', 'lys2', 'lys3', 'lys4', 'lys8', 'lys9', 'lys2_bromide',
+    lysimeters = ['lys2', 'lys3', 'lys4', 'lys8', 'lys9', 'lys2_bromide',
                 'lys8_bromide', 'lys9_bromide']
     for lys in lysimeters:
         script_name = f'svat_crop_{lys}_ref_mc'
