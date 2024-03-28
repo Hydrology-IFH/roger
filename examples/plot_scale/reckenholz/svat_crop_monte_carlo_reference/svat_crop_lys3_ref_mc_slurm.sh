@@ -6,9 +6,9 @@
 #SBATCH --mem=8000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
-#SBATCH --job-name=svat_crop_lys3_mc
-#SBATCH --output=svat_crop_lys3_mc.out
-#SBATCH --error=svat_crop_lys3_mc_err.out
+#SBATCH --job-name=svat_crop_lys3_ref_mc
+#SBATCH --output=svat_crop_lys3_ref_mc.out
+#SBATCH --error=svat_crop_lys3_ref_mc_err.out
 #SBATCH --export=ALL
  
 eval "$(conda shell.bash hook)"
