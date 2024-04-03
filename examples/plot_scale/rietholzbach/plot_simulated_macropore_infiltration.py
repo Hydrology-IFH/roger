@@ -163,10 +163,13 @@ def main(tmp_dir):
     axes.plot(xpred, res.intercept + res.slope * xpred, "black")
     rlab = r"$R^2$: %s" % (f"{res.rvalue**2:.2f}")
     axes.text(
-        0.12, 0.93, rlab, fontsize=9, horizontalalignment="center", verticalalignment="center", transform=axes.transAxes
+        0.87, 0.93, rlab, fontsize=9, horizontalalignment="center", verticalalignment="center", transform=axes.transAxes
     )
     axes.set_ylim(
         0,
+    )
+    axes.set_xlim(
+        0, 75
     )
     axes.set_ylabel(r"$INF_{mp}$ [%]")
     axes.set_xlabel(r"$k_s$ [mm $h^{-1}$]")

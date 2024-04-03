@@ -5,7 +5,7 @@ import h5netcdf
 import datetime
 import numpy as onp
 
-base_path = Path(__file__).parent
+base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/freiburg_altheim_kupferzell")
 
 # identifiers for simulations
 locations = ["freiburg", "altheim", "kupferzell"]
@@ -18,18 +18,8 @@ for location in locations:
     for land_cover_scenario in land_cover_scenarios:
         for climate_scenario in climate_scenarios:
             for period in periods:
-                path = str(
-                    base_path.parent
-                    / "output"
-                    / "svat_transport"
-                    / f"SVATTRANSPORT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.*.nc"
-                )
-                output_tm_file = (
-                    base_path.parent
-                    / "output"
-                    / "svat_transport"
-                    / f"SVATTRANSPORT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
-                )
+                path = str(base_path / "output" / "svat_transport" / f"SVATTRANSPORT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.*.nc")
+                output_tm_file = base_path / "output" / "svat_transport" / f"SVATTRANSPORT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
                 if not os.path.exists(output_tm_file):
                     diag_files = glob.glob(path)
                     with h5netcdf.File(output_tm_file, "w", decode_vlen_strings=False) as f:
@@ -166,18 +156,8 @@ for location in locations:
 for location in locations:
     for climate_scenario in climate_scenarios:
         for period in periods:
-            path = str(
-                base_path.parent
-                / "output"
-                / "svat_transport"
-                / f"SVATTRANSPORT_{location}_grass_{climate_scenario}_{period}.*.nc"
-            )
-            output_tm_file = (
-                base_path.parent
-                / "output"
-                / "svat_transport"
-                / f"SVATTRANSPORT_{location}_grass_{climate_scenario}_{period}.nc"
-            )
+            path = str(base_path / "output" / "svat_transport" / f"SVATTRANSPORT_{location}_grass_{climate_scenario}_{period}.*.nc")
+            output_tm_file = base_path / "output" / "svat_transport" / f"SVATTRANSPORT_{location}_grass_{climate_scenario}_{period}.nc"
             if not os.path.exists(output_tm_file):
                 diag_files = glob.glob(path)
                 with h5netcdf.File(output_tm_file, "w", decode_vlen_strings=False) as f:
