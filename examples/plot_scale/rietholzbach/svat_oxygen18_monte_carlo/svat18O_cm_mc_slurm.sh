@@ -15,7 +15,7 @@ eval "$(conda shell.bash hook)"
 conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo
  
-python svat_oxygen18.py -b jax -d cpu -ns 100 -tms complete-mixing -td "${TMPDIR}"
+python svat_oxygen18.py -b jax -d cpu -ns 100 --float-type float64 -tms complete-mixing -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo/output"
 mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo/output
