@@ -24,6 +24,6 @@ cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18
  
 mpirun --bind-to core --map-by core -report-bindings python svat_oxygen18.py -b jax -d cpu -n 25 1 --float-type float64 -ns 10000 -tms time-variant_advection-dispersion-power -td "${TMPDIR}"
 # Move output from local SSD to global workspace
-echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo/output"
-mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo/output
-mv "${TMPDIR}"/SVATTRANSPORT_*.nc /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo/output
+echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo/output"
+mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo/output
+mv "${TMPDIR}"/SVATTRANSPORT_*.nc /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo/output

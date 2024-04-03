@@ -7,6 +7,7 @@ import click
 @click.command("main")
 def main(job_type):
     base_path = Path(__file__).parent
+    base_path_ws = Path("/pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/rietholzbach")
     base_path_bwuc = "/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach"
 
     transport_models_abrev = {
@@ -31,7 +32,7 @@ def main(job_type):
             tm1 = transport_models_abrev[tm]
             tms = tm.replace(" ", "_")
             script_name = f"svat18O_{tm1}_mc"
-            output_path_ws = Path(base_path_bwuc) / "svat_oxygen18_monte_carlo" / "output"
+            output_path_ws = base_path_ws / "svat_oxygen18_monte_carlo" / "output"
             lines = []
             lines.append("#!/bin/bash\n")
             lines.append("#SBATCH --time=12:00:00\n")
