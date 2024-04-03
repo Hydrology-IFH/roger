@@ -263,6 +263,8 @@ ll_df = []
 ll_df_crop_periods = []
 for crop_rotation_scenario in crop_rotation_scenarios:
     # extract the values for the entire crop rotation
+    # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW_for_assignment.gpkg"
+    # gdf1 = gpd.read_file(file)
     file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
     gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
     gdf['FFID'] = None
@@ -270,9 +272,16 @@ for crop_rotation_scenario in crop_rotation_scenarios:
     gdf['CID'] = None
     gdf['CID'] = int(0)
     for location in locations:
+        # mask = (gdf['stationsna'] == location)
+        # gdf = gdf1.loc[mask, :]
+        # gdf['FFID'] = None
+        # gdf['FFID'] = f'{_dict_ffid[crop_rotation_scenario]}'
+        # gdf['CID'] = None
+        # gdf['CID'] = int(f'{_dict_crop_id[crop_id]}')
         for var_sim in vars_sim:
             if var_sim in ["M_q_ss", "C_q_ss"]:
                 for fertilization_intensity in fertilization_intensities:
+
                     gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = None  # initialize field, float, two decimals
                     gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'].astype('float64')
                     gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'].round(decimals=2)
@@ -331,6 +340,8 @@ for crop_rotation_scenario in crop_rotation_scenarios:
     # extract the values for the single crop periods within the crop rotation
     crop_ids = _dict_crop_periods[crop_rotation_scenario]
     for crop_id in crop_ids:
+        # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW_for_assignment.gpkg"
+        # gdf1 = gpd.read_file(file)
         file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
         gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
         gdf['FFID'] = None
@@ -338,6 +349,12 @@ for crop_rotation_scenario in crop_rotation_scenarios:
         gdf['CID'] = None
         gdf['CID'] = int(f'{_dict_crop_id[crop_id]}')
         for location in locations:
+            # mask = (gdf['stationsna'] == location)
+            # gdf = gdf1.loc[mask, :]
+            # gdf['FFID'] = None
+            # gdf['FFID'] = f'{_dict_ffid[crop_rotation_scenario]}'
+            # gdf['CID'] = None
+            # gdf['CID'] = int(f'{_dict_crop_id[crop_id]}')
             ds = dict_fluxes_states[location][crop_rotation_scenario]
             lu_id = ds["lu_id"].isel(x=0, y=0).values
             df_lu_id = pd.DataFrame(index=ds["Time"].values, data=lu_id)

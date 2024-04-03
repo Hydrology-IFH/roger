@@ -43,14 +43,14 @@ def main(tmp_dir):
     if tmp_dir:
         base_path = Path(tmp_dir)
     else:
-        base_path = Path(__file__).parent
+        base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
     # directory of results
-    base_path_output = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo_reference"
+    base_path_output = base_path / "output" / "svat_crop_monte_carlo_reference"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
     # directory of figures
-    base_path_figs = base_path.parent / "figures" / "svat_crop_monte_carlo_reference"
+    base_path_figs = Path(__file__).parent.parent / "figures" / "svat_crop_monte_carlo_reference"
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 

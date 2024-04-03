@@ -10,15 +10,15 @@ import roger
 
 @click.command("main")
 def main():
-    base_path = Path(__file__).parent
+    base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
     # identifiers for simulations
     lys_experiments = ["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
 
     # merge model output into single file
     for lys_experiment in lys_experiments:
-        path = str(base_path.parent / "output" / "svat_monte_carlo" / f"SVAT_{lys_experiment}.*.nc")
-        output_hm_file = base_path.parent / "output" / "svat_monte_carlo" / f"SVAT_{lys_experiment}.nc"
+        path = str(base_path / "output" / "svat_monte_carlo" / f"SVAT_{lys_experiment}.*.nc")
+        output_hm_file = base_path / "output" / "svat_monte_carlo" / f"SVAT_{lys_experiment}.nc"
         if not os.path.exists(output_hm_file):
             diag_files = glob.glob(path)
             with h5netcdf.File(output_hm_file, "w", decode_vlen_strings=False) as f:
