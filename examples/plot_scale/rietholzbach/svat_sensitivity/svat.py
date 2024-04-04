@@ -11,7 +11,7 @@ from roger.cli.roger_run_base import roger_base_cli
     type=click.Choice(
         ["complete-mixing", "piston", "advection-dispersion-power", "time-variant_advection-dispersion-power"]
     ),
-    default="piston",
+    default="advection-dispersion-power",
 )
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli

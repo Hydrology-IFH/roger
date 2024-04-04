@@ -59,7 +59,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
 
             settings.nx, settings.ny = 1, 1
             settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
-            settings.ages = 1500
+            settings.ages = 1000
             settings.nages = settings.ages + 1
             settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
             settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
