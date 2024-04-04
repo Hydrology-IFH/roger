@@ -73,8 +73,8 @@ def main(tmp_dir):
         df_params_metrics = pd.read_csv(csv_file, sep=";", skiprows=1)
         # calculate metrics
         if lys_experiment in ["lys2", "lys3", "lys4", "lys8", "lys9"]:
-            vars_sim = ["q_ss", "theta", "S"]
-            vars_obs = ["PERC", "THETA", "WEIGHT"]
+            vars_sim = ["q_ss", "theta"]
+            vars_obs = ["PERC", "THETA"]
         else:
             vars_sim = ["q_ss"]
             vars_obs = ["PERC"]

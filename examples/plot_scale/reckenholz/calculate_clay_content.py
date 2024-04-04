@@ -1,9 +1,12 @@
     
+from pathlib import Path
 import numpy as np
+import pandas as pd
 
-theta_pwp = 0.1869
-theta_fc = 0.1869 + 0.1247
-theta_sat = 0.1869 + 0.1247 + 0.1062
+
+theta_pwp = 0.189
+theta_fc = 0.189 + 0.1247
+theta_sat = 0.189 + 0.1247 + 0.1062
 
 # calculate pore-size distribution index
 lambda_bc = (
@@ -19,6 +22,5 @@ theta_6 = ((ha / (-(10**6))) ** lambda_bc * theta_sat)
 
 # calculate clay content
 clay = (0.71 * (theta_6 - 0.01) / 0.3)
-clay = np.where(clay < 0.01, 0.01, clay)
 
-print("Clay content: ", clay, " [-]")
+print(clay)

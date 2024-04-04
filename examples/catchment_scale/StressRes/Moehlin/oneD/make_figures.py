@@ -138,7 +138,7 @@ with open(file_config, "r") as file:
 
 
 # load RoGeR model parameters
-params_hm_file = base_path / "parameters.nc"
+params_hm_file = base_path / "parameters_25_polygons.nc"
 ds_params = xr.open_dataset(params_hm_file, engine="h5netcdf")
 dem = ds_params["dgm"].values
 lu_id = ds_params["lanu"].values
