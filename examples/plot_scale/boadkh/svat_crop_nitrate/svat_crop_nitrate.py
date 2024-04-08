@@ -87,7 +87,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             settings.nitt_forc = settings.nitt
             settings.ages = 1000
             settings.nages = settings.ages + 1
-            settings.runlen_warmup = 60 * 24 * 60 * 60
+            settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
             settings.runlen = self._get_runlen(
                 self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
             )

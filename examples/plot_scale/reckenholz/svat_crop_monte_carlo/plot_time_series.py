@@ -94,7 +94,7 @@ def main(tmp_dir):
     for lys_experiment in lys_experiments:
         # load parameters and metrics
         df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
-        idx_best = df_params_metrics["KGE_q_ss"].idxmax()
+        idx_best = df_params_metrics["KGE_q_ss_all"].idxmax()
         # load simulation
         sim_hm_file = base_path_output / f"SVATCROP_{lys_experiment}.nc"
         ds_sim_hm = xr.open_dataset(sim_hm_file, engine="h5netcdf")
@@ -194,9 +194,9 @@ def main(tmp_dir):
         # load parameters and metrics
         df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
         for year in [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017]:
-            df_params_metrics.loc[:, f"RBS_r_{year}"] = 0.5 * df_params_metrics.loc[:, f"RBS_q_ss_{year}"].abs() + 0.5 * (1 - df_params_metrics.loc[:, f"r_q_ss_{year}"])
-        df_params_metrics.loc[:, "RBS_r"] = 0.5 * df_params_metrics.loc[:, "RBS_q_ss_2011":"RBS_q_ss_2017"].abs().mean(axis=1) + 0.5 * (1 - df_params_metrics.loc[:, "r_q_ss_2011":"r_q_ss_2017"].mean(axis=1))
-        idx_best = df_params_metrics["KGE_q_ss"].idxmax()
+            df_params_metrics.loc[:, f"RBS_r_{year}"] = 0.5 * df_params_metrics.loc[:, f"RBS_q_ss_all_{year}"].abs() + 0.5 * (1 - df_params_metrics.loc[:, f"r_q_ss_all_{year}"])
+        df_params_metrics.loc[:, "RBS_r"] = 0.5 * df_params_metrics.loc[:, "RBS_q_ss_all_2011":"RBS_q_ss_all_2017"].abs().mean(axis=1) + 0.5 * (1 - df_params_metrics.loc[:, "r_q_ss_all_2011":"r_q_ss_all_2017"].mean(axis=1))
+        idx_best = df_params_metrics["KGE_q_ss_all"].idxmax()
         # load simulation
         sim_hm_file = base_path_output / f"SVATCROP_{lys_experiment}.nc"
         ds_sim_hm = xr.open_dataset(sim_hm_file, engine="h5netcdf")
@@ -249,8 +249,8 @@ def main(tmp_dir):
                 axs[i].set_xlabel('')
                 if var_sim == "q_ss":
                     axs[i].set_ylim(0)
-                    metric_total = onp.round(df_params_metrics.loc[idx_best, "KGE_q_ss"], 2)
-                    metric_year = onp.round(df_params_metrics.loc[idx_best, f"KGE_q_ss_{year}"], 2)
+                    metric_total = onp.round(df_params_metrics.loc[idx_best, "KGE_q_ss_all"], 2)
+                    metric_year = onp.round(df_params_metrics.loc[idx_best, f"KGE_q_ss_all_{year}"], 2)
                     axs[i].text(0.9,
                                 1.11,
                                 f"KGE: {metric_year} ({metric_total})",
@@ -308,8 +308,8 @@ def main(tmp_dir):
                             transform=axs[i].transAxes)
                 axs[i].xaxis.set_major_formatter(mpl.dates.DateFormatter('%d-%m'))
                 axs[i].set_ylim(0)
-                metric_total = onp.round(df_params_metrics.loc[idx_best, "KGE_q_ss"], 2)
-                metric_year = onp.round(df_params_metrics.loc[idx_best, f"KGE_q_ss_{year}"], 2)
+                metric_total = onp.round(df_params_metrics.loc[idx_best, "KGE_q_ss_all"], 2)
+                metric_year = onp.round(df_params_metrics.loc[idx_best, f"KGE_q_ss_all_{year}"], 2)
                 axs[i].text(0.9,
                             1.11,
                             f"KGE: {metric_year} ({metric_total})",
@@ -317,8 +317,8 @@ def main(tmp_dir):
                             horizontalalignment="center",
                             verticalalignment="center",
                             transform=axs[i].transAxes)
-                rbs = onp.round(df_params_metrics.loc[idx_best, f"RBS_q_ss"], 2)
-                rbs_year = onp.round(df_params_metrics.loc[idx_best, f"RBS_q_ss_{year}"], 2)
+                rbs = onp.round(df_params_metrics.loc[idx_best, f"RBS_q_ss_all"], 2)
+                rbs_year = onp.round(df_params_metrics.loc[idx_best, f"RBS_q_ss_all_{year}"], 2)
                 axs[i].text(0.02,
                             0.85,
                             f"RBS: {rbs_year} ({rbs})",

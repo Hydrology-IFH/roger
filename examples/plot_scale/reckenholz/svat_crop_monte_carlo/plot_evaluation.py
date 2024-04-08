@@ -97,13 +97,20 @@ def main(tmp_dir):
         ncol = len(lys_experiments)
         fig, ax = plt.subplots(nrow, ncol, sharey=True, sharex=True, figsize=(6, 6))
         for jj, year in enumerate(years):
-            metric_year = f"{metric}_{year}"
             for ii, lys_experiment in enumerate(lys_experiments):
                 df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
-                df_params_metrics = df_params_metrics.sort_values(by=["KGE_q_ss"], ascending=False)
-                df = df_params_metrics.loc[:, [metric_year]]
+                df_params_metrics = df_params_metrics.sort_values(by=[f"{metric}_all"], ascending=False)
+                df = df_params_metrics.loc[:, [f"{metric}_all_{year}"]]
                 df = df.iloc[:100, :]
-                g = sns.kdeplot(data=df, x=metric_year, ax=ax[jj, ii], fill=True, color="red", alpha=1.0)
+                g = sns.kdeplot(data=df, x=f"{metric}_all_{year}", ax=ax[jj, ii], fill=True, color="grey", alpha=0.5)
+                df_params_metrics = df_params_metrics.sort_values(by=[f"{metric}_perc_dom"], ascending=False)
+                df = df_params_metrics.loc[:, [f"{metric}_perc_dom_{year}"]]
+                df = df.iloc[:100, :]
+                g = sns.kdeplot(data=df, x=f"{metric}_perc_dom_{year}", ax=ax[jj, ii], fill=True, color="blue", alpha=1.0)
+                df_params_metrics = df_params_metrics.sort_values(by=[f"{metric}_pet_dom"], ascending=False)
+                df = df_params_metrics.loc[:, [f"{metric}_pet_dom_{year}"]]
+                df = df.iloc[:100, :]
+                g = sns.kdeplot(data=df, x=f"{metric}_pet_dom_{year}", ax=ax[jj, ii], fill=True, color="green", alpha=1.0)
                 ax[jj, ii].set_xlabel("")
                 ax[jj, ii].set_ylabel("")
                 ax[jj, ii].set_title("")
@@ -111,18 +118,18 @@ def main(tmp_dir):
                 ax[jj, 0].set_ylabel("%s\n%s" % (year, crops_lys2_lys3_lys8[year]))
                 ax[jj, ii].set_xlim(-1, 0.8)
 
-        if metric == "KGE_q_ss":
+        if metric in ["KGE_q_ss"]:
             ax[-1, 0].set_xlabel("$KGE_{PERC}$ [-]")
             ax[-1, 1].set_xlabel("$KGE_{PERC}$ [-]")
             ax[-1, 2].set_xlabel("$KGE_{PERC}$ [-]")
-        elif metric == "r_theta":
+        elif metric in ["r_theta"]:
             ax[-1, 0].set_xlabel("$r_{\theta}$ [-]")
             ax[-1, 1].set_xlabel("$r_{\theta}$ [-]")
             ax[-1, 2].set_xlabel("$r_{\theta}$ [-]")
 
         fig.tight_layout()
         file = base_path_figs / f"kde_years_{metric}_lys2_lys3_lys8.png"
-        fig.savefig(file, dpi=250)
+        fig.savefig(file, dpi=300)
 
 
     metrics = ["KGE_q_ss"]
@@ -137,10 +144,18 @@ def main(tmp_dir):
             metric_year = f"{metric}_{year}"
             for ii, lys_experiment in enumerate(lys_experiments):
                 df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
-                df_params_metrics = df_params_metrics.sort_values(by=["KGE_q_ss"], ascending=False)
-                df = df_params_metrics.loc[:, [metric_year]]
+                df_params_metrics = df_params_metrics.sort_values(by=[f"{metric}_all"], ascending=False)
+                df = df_params_metrics.loc[:, [f"{metric}_all_{year}"]]
                 df = df.iloc[:100, :]
-                g = sns.kdeplot(data=df, x=metric_year, ax=ax[jj, ii], fill=True, color="red", alpha=1.0)
+                g = sns.kdeplot(data=df, x=f"{metric}_all_{year}", ax=ax[jj, ii], fill=True, color="grey", alpha=0.5)
+                df_params_metrics = df_params_metrics.sort_values(by=[f"{metric}_perc_dom"], ascending=False)
+                df = df_params_metrics.loc[:, [f"{metric}_perc_dom_{year}"]]
+                df = df.iloc[:100, :]
+                g = sns.kdeplot(data=df, x=f"{metric}_perc_dom_{year}", ax=ax[jj, ii], fill=True, color="blue", alpha=1.0)
+                df_params_metrics = df_params_metrics.sort_values(by=[f"{metric}_pet_dom"], ascending=False)
+                df = df_params_metrics.loc[:, [f"{metric}_pet_dom_{year}"]]
+                df = df.iloc[:100, :]
+                g = sns.kdeplot(data=df, x=f"{metric}_pet_dom_{year}", ax=ax[jj, ii], fill=True, color="green", alpha=1.0)
                 ax[jj, ii].set_xlabel("")
                 ax[jj, ii].set_ylabel("")
                 ax[jj, ii].set_title("")
@@ -148,16 +163,16 @@ def main(tmp_dir):
                 ax[jj, 0].set_ylabel("%s\n%s" % (year, crops_lys4_lys9[year]))
                 ax[jj, ii].set_xlim(-1, 0.8)
 
-        if metric == "KGE_q_ss":
+        if metric in ["KGE_q_ss"]:
             ax[-1, 0].set_xlabel("$KGE_{PERC}$ [-]")
             ax[-1, 1].set_xlabel("$KGE_{PERC}$ [-]")
-        elif metric == "r_theta":
+        elif metric in ["r_theta"]:
             ax[-1, 0].set_xlabel("$r_{\theta}$ [-]")
             ax[-1, 1].set_xlabel("$r_{\theta}$ [-]")
 
         fig.tight_layout()
         file = base_path_figs / f"kde_years_{metric}_lys4_lys9.png"
-        fig.savefig(file, dpi=250)
+        fig.savefig(file, dpi=300)
     return
 
 

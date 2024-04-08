@@ -169,7 +169,7 @@ def main(lys_experiment, tmp_dir):
             )
 
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 0])
-            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_csv("z_soil", self._base_path, "parameters.csv"))
+            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1350)
             vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_csv("dmpv", self._base_path, "parameters.csv"))
             vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_csv("lmpv", self._base_path, "parameters.csv"))
             vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_csv("theta_ac", self._base_path, "parameters.csv"))
