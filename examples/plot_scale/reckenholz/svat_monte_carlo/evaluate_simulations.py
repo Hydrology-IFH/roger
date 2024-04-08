@@ -325,6 +325,8 @@ def main(tmp_dir):
                                 key_phi = "phi_" + var_sim + cond1
                                 df_params_metrics.loc[nrow, key_phi] = de.calc_phi(brel_mean, b_slope)
 
+                df_params_metrics = df_params_metrics.copy()
+
         # Calculate multi-objective metric
         if "r_S" in df_params_metrics.columns:
             df_params_metrics.loc[:, "E_multi"] = (
