@@ -201,7 +201,7 @@ def main(lys_experiment, tmp_dir):
             if base_path:
                 diagnostics["rate"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["S_rz", "S_ss",
+            diagnostics["collect"].output_variables = ["S_rz", "S_ss", "S_s", "S",
                                                        "S_pwp_rz", "S_fc_rz",
                                                        "S_sat_rz", "S_pwp_ss",
                                                        "S_fc_ss", "S_sat_ss",
