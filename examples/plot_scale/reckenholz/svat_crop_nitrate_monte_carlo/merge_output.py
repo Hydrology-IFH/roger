@@ -21,13 +21,13 @@ def main():
                 base_path.parent
                 / "output"
                 / "svat_crop_nitrate_monte_carlo"
-                / f"SVATCROPN_{tm_structure}_{lys_experiment}.*.nc"
+                / f"SVATCROPNITRATE_{tm_structure}_{lys_experiment}.*.nc"
             )
             output_tm_file = (
                 base_path.parent
                 / "output"
                 / "svat_crop_nitrate_monte_carlo"
-                / f"SVATCROPN_{tm_structure}_{lys_experiment}.nc"
+                / f"SVATCROPNITRATE_{tm_structure}_{lys_experiment}.nc"
             )
             if not os.path.exists(output_tm_file):
                 diag_files = glob.glob(path)
