@@ -6,6 +6,7 @@ import numpy as onp
 import matplotlib.pyplot as plt
 import yaml
 import click
+import copy
 import imageio
 import matplotlib as mpl
 import seaborn as sns
@@ -41,7 +42,7 @@ grid_extent = (0, nx*cell_width, 0, ny*cell_width)
 def main():
     base_path = Path(__file__).parent
     # directory of output
-    base_path_output = base_path / "output" / "2000_2023"
+    base_path_output = Path("/Volumes/LaCie/roger/examples/catchment_scale/StressRes/Moehlin") / "output" / "oneD_free_drainage"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
     # directory of figures
@@ -72,60 +73,60 @@ def main():
     )
     ds_sim = ds_sim.assign_coords(date=("Time", days_sim))
 
-    # # make GIF for precipitation, soil water content and percolation
-    # frames = []
-    # for t in range(len(days_sim)-365, len(days_sim)):
-    #     fig, axes = plt.subplots(3, 1, figsize=(6, 5))
-    #     axes[0].imshow(onp.where(mask, ds_sim['prec'].isel(Time=t).values, onp.nan), origin="lower", cmap='viridis_r', vmin=0, vmax=20, extent=grid_extent)
-    #     axes[0].grid(zorder=0)
-    #     axes[0].set_xlabel('')
-    #     axes[0].set_ylabel('')
-    #     cmap = copy.copy(mpl.colormaps.get_cmap('viridis_r'))
-    #     norm = mpl.colors.Normalize(vmin=0, vmax=20)
-    #     axl1 = fig.add_axes([0.61, 0.68, 0.02, 0.2])
-    #     cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
-    #                                     orientation='vertical',
-    #                                     ticks=[0, 10, 20])
-    #     cb1.ax.set_yticklabels(['0', '10', '20'])
-    #     cb1.set_label('[mm/day]\nPrecipitation')
+    # make GIF for precipitation, soil water content and percolation
+    frames = []
+    for t in range(len(days_sim)-365, len(days_sim)):
+        fig, axes = plt.subplots(3, 1, figsize=(6, 5))
+        axes[0].imshow(onp.where(mask, ds_sim['prec'].isel(Time=t).values, onp.nan), origin="lower", cmap='viridis_r', vmin=0, vmax=20, extent=grid_extent)
+        axes[0].grid(zorder=0)
+        axes[0].set_xlabel('')
+        axes[0].set_ylabel('')
+        cmap = copy.copy(mpl.colormaps.get_cmap('viridis_r'))
+        norm = mpl.colors.Normalize(vmin=0, vmax=20)
+        axl1 = fig.add_axes([0.61, 0.68, 0.02, 0.2])
+        cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
+                                        orientation='vertical',
+                                        ticks=[0, 10, 20])
+        cb1.ax.set_yticklabels(['0', '10', '20'])
+        cb1.set_label('[mm/day]\nPrecipitation')
 
-    #     axes[1].imshow(onp.where(mask, ds_sim['theta'].isel(Time=t).values, onp.nan), origin="lower", cmap='viridis_r', vmin=0.15, vmax=0.35, extent=grid_extent)
-    #     axes[1].grid(zorder=0)
-    #     axes[1].set_xlabel('')
-    #     axes[1].set_ylabel('Distance in y-direction [m]')
-    #     cmap = copy.copy(mpl.colormaps.get_cmap('viridis_r'))
-    #     norm = mpl.colors.Normalize(vmin=0.15, vmax=0.35)
-    #     axl1 = fig.add_axes([0.61, 0.4, 0.02, 0.2])
-    #     cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
-    #                                     orientation='vertical',
-    #                                     ticks=[0.15, 0.25, 0.35])
-    #     cb1.ax.set_yticklabels(['<0.15', '0.25', '>0.35'])
-    #     cb1.set_label('[-]\nSoil water content')
+        axes[1].imshow(onp.where(mask, ds_sim['theta'].isel(Time=t).values, onp.nan), origin="lower", cmap='viridis_r', vmin=0.15, vmax=0.35, extent=grid_extent)
+        axes[1].grid(zorder=0)
+        axes[1].set_xlabel('')
+        axes[1].set_ylabel('Distance in y-direction [m]')
+        cmap = copy.copy(mpl.colormaps.get_cmap('viridis_r'))
+        norm = mpl.colors.Normalize(vmin=0.15, vmax=0.35)
+        axl1 = fig.add_axes([0.61, 0.4, 0.02, 0.2])
+        cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
+                                        orientation='vertical',
+                                        ticks=[0.15, 0.25, 0.35])
+        cb1.ax.set_yticklabels(['<0.15', '0.25', '>0.35'])
+        cb1.set_label('[-]\nSoil water content')
 
-    #     axes[2].imshow(onp.where(mask, ds_sim['q_ss'].isel(Time=t).values, onp.nan), origin="lower", cmap='viridis_r', vmin=0, vmax=5, extent=grid_extent)
-    #     axes[2].grid(zorder=0)
-    #     axes[2].set_xlabel('Distance in x-direction [m]')
-    #     axes[2].set_ylabel('')
-    #     cmap = copy.copy(mpl.colormaps.get_cmap('viridis_r'))
-    #     norm = mpl.colors.Normalize(vmin=0, vmax=5)
-    #     axl1 = fig.add_axes([0.61, 0.12, 0.02, 0.2])
-    #     cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
-    #                                     orientation='vertical',
-    #                                     ticks=[0, 2.5, 5])
-    #     cb1.ax.set_yticklabels(['0', '2.5', '>5'])
-    #     cb1.set_label('[mm/day]\nPercolation')
-    #     fig.suptitle(f't = {t}d', fontsize=9)
-    #     fig.subplots_adjust(wspace=0, hspace=0.2, left=0.2, right=0.8, bottom=0.1, top=0.9)
-    #     file = base_path_figs / f"t{t}.png"
-    #     fig.savefig(file, dpi=250)
-    #     plt.close('all')
-    #     img = imageio.v2.imread(file)
-    #     frames.append(img)
+        axes[2].imshow(onp.where(mask, ds_sim['q_ss'].isel(Time=t).values, onp.nan), origin="lower", cmap='viridis_r', vmin=0, vmax=5, extent=grid_extent)
+        axes[2].grid(zorder=0)
+        axes[2].set_xlabel('Distance in x-direction [m]')
+        axes[2].set_ylabel('')
+        cmap = copy.copy(mpl.colormaps.get_cmap('viridis_r'))
+        norm = mpl.colors.Normalize(vmin=0, vmax=5)
+        axl1 = fig.add_axes([0.61, 0.12, 0.02, 0.2])
+        cb1 = mpl.colorbar.ColorbarBase(axl1, cmap=cmap, norm=norm,
+                                        orientation='vertical',
+                                        ticks=[0, 2.5, 5])
+        cb1.ax.set_yticklabels(['0', '2.5', '>5'])
+        cb1.set_label('[mm/day]\nPercolation')
+        fig.suptitle(f't = {t}d', fontsize=9)
+        fig.subplots_adjust(wspace=0, hspace=0.2, left=0.2, right=0.8, bottom=0.1, top=0.9)
+        file = base_path_figs / f"t{t}.png"
+        fig.savefig(file, dpi=250)
+        plt.close('all')
+        img = imageio.v2.imread(file)
+        frames.append(img)
         
-    # file = base_path_figs / "prec_theta_perc.gif"
-    # imageio.mimsave(file,
-    #                 frames,
-    #                 fps = 2)
+    file = base_path_figs / "prec_theta_perc.gif"
+    imageio.mimsave(file,
+                    frames,
+                    fps = 2)
     
     # make GIF for percolation
     frames = []
