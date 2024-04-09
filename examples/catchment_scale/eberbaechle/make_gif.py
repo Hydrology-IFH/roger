@@ -60,7 +60,7 @@ params_hm_file = base_path / "svat_distributed" / "parameters.nc"
 ds_params_hm = xr.open_dataset(params_hm_file, engine="h5netcdf")
 
 # load transport simulations
-states_tm_file = base_path / "svat_oxygen18_distributed" / "output" / "SVAT18O.average.nc"
+states_tm_file = base_path / "svat_oxygen18_distributed" / "output" / "SVAT18O.nc"
 ds_tm = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
 # assign date
 days_tm = ds_tm["Time"].values
@@ -121,7 +121,7 @@ for t in range(1, 1097):
     cb1.ax.set_xticklabels(["0", "10", ">20"])
     cb1.set_label("PERC [mm/day]")
 
-    axes[2, 0].imshow(ds_tm["ttavg_transp"].isel(Time=t).values, extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=1, vmax=200)
+    axes[2, 0].imshow(ds_tm["ttavg_transp"].isel(Time=t).values.T, extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=1, vmax=200)
     axes[2, 0].grid(zorder=0)
     axes[2, 0].set_xlabel("[m]")
     axes[2, 0].set_ylabel("[m]")
@@ -133,7 +133,7 @@ for t in range(1, 1097):
     cb2.ax.invert_yaxis()
     cb2.set_label(r"$\overline{TT}_{TRANSP}$ [days]")
 
-    axes[2, 1].imshow(ds_tm["rtavg_s"].isel(Time=t).values, extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=1, vmax=200)
+    axes[2, 1].imshow(ds_tm["rtavg_s"].isel(Time=t).values.T, extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=1, vmax=200)
     axes[2, 1].grid(zorder=0)
     axes[2, 1].set_xlabel("[m]")
     axes[2, 1].set_yticklabels([])
@@ -145,7 +145,7 @@ for t in range(1, 1097):
     cb2.ax.invert_yaxis()
     cb2.set_label(r"$\overline{RT}_{\theta}$ [days]")
 
-    axes[2, 2].imshow(ds_tm["ttavg_q_ss"].isel(Time=t).values, extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=1, vmax=200)
+    axes[2, 2].imshow(ds_tm["ttavg_q_ss"].isel(Time=t).values.T, extent=(0, 80*25, 0, 53*25), cmap="viridis_r", vmin=1, vmax=200)
     axes[2, 2].grid(zorder=0)
     axes[2, 2].set_xlabel("[m]")
     axes[2, 2].set_yticklabels([])
@@ -168,6 +168,6 @@ for t in range(1, 1097):
     images_data.append(data)
 
 file = base_path_figs / "fluxes_theta_and_tt_rt.gif"
-imageio.mimwrite(file, images_data, format='.gif', fps=15)
+imageio.mimwrite(file, images_data, format='.gif', fps=10)
 
 plt.close("all")
