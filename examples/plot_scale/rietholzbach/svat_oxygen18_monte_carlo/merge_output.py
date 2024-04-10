@@ -17,16 +17,13 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
     if tmp_dir:
         base_path = Path(tmp_dir)
     else:
-        base_path = Path(__file__).parent
+        # base_path = Path(__file__).parent
+        base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo/")
 
     # directory of results
     base_path_output = base_path / "output"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
-    # directory of figures
-    base_path_figs = base_path / "figures"
-    if not os.path.exists(base_path_figs):
-        os.mkdir(base_path_figs)
 
     # merge results into single file
     transport_model_structures = [
@@ -38,6 +35,12 @@ def main(nsamples, split_size, sas_solver, tmp_dir):
         "advection-dispersion-power",
         "time-variant_advection-dispersion-power",
         "older-preference-power",
+    ]
+    transport_model_structures = [
+        "complete-mixing",
+        "piston",
+        "advection-dispersion-power",
+        "time-variant_advection-dispersion-power",
     ]
     for transport_model_structure in transport_model_structures:
         tms = transport_model_structure.replace("_", " ")

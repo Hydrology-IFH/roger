@@ -8,6 +8,8 @@ import numpy as onp
 import matplotlib as mpl
 import seaborn as sns
 import h5py
+import warnings
+warnings.filterwarnings('ignore')
 
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -325,6 +327,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                 df_ann = df.resample("YE").sum()
                 # calculate average
                 df_avg = df_ann.mean(axis=0).to_frame()
+
                 # assign aggregated values to polygons
                 for clust_id in clust_ids:
                     cond1 = (df_params["CLUST_ID"] == clust_id) & (df_params["CLUST_flag"] == 2)
