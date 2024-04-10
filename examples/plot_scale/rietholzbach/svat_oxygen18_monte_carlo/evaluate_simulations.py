@@ -30,15 +30,13 @@ def main(sas_solver, tmp_dir):
     if tmp_dir:
         base_path = Path(tmp_dir)
     else:
-        base_path = Path(__file__).parent
+        # base_path = Path(__file__).parent
+        base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/rietholzbach/svat_oxygen18_monte_carlo/")
+
     # directory of results
     base_path_output = base_path / "output"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
-    # directory of figures
-    base_path_figs = base_path / "figures"
-    if not os.path.exists(base_path_figs):
-        os.mkdir(base_path_figs)
 
     transport_model_structures = [
         "complete-mixing",
@@ -50,13 +48,19 @@ def main(sas_solver, tmp_dir):
         "advection-dispersion-kumaraswamy",
         "time-variant_advection-dispersion-kumaraswamy",
     ]
+    transport_model_structures = [
+        "complete-mixing",
+        "piston",
+        "advection-dispersion-power",
+        "time-variant_advection-dispersion-power",
+    ]
     for transport_model_structure in transport_model_structures:
         tms = transport_model_structure.replace("_", " ")
         # load hydrologic simulation
         if tms in ["complete-mixing", "piston"]:
-            states_hm_file = base_path.parent / "svat_monte_carlo" / "output" / f"states_hm100.nc"
+            states_hm_file = Path(__file__).parent.parent / "svat_monte_carlo" / "output" / f"states_hm100.nc"
         else:
-            states_hm_file = base_path.parent / "svat_monte_carlo" / "output" / "states_hm100_bootstrap.nc"
+            states_hm_file = Path(__file__).parent.parent / "svat_monte_carlo" / "output" / "states_hm100_bootstrap.nc"
         ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
         days_sim_hm = ds_sim_hm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
         date_sim_hm = num2date(
@@ -68,7 +72,7 @@ def main(sas_solver, tmp_dir):
         ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
 
         # load observations (measured data)
-        path_obs = base_path.parent / "observations" / "rietholzbach_lysimeter.nc"
+        path_obs = Path(__file__).parent.parent / "observations" / "rietholzbach_lysimeter.nc"
         ds_obs = xr.open_dataset(path_obs, engine="h5netcdf")
         days_obs = ds_obs["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
         date_obs = num2date(
@@ -97,7 +101,7 @@ def main(sas_solver, tmp_dir):
         df_thetap.loc[cond2, "sc"] = 2  # normal
         df_thetap.loc[cond3, "sc"] = 3  # wet
 
-        file = base_path_figs / f"params_metrics_{transport_model_structure}.txt"
+        file = base_path_output / f"params_metrics_{transport_model_structure}.txt"
         if not os.path.exists(file):
             click.echo(f"Calculate metrics for {tms} ...")
 
@@ -214,11 +218,11 @@ def main(sas_solver, tmp_dir):
                 C_iso_q_ss = ds_sim_tm["C_iso_q_ss"].isel(x=nrow, y=0).values
                 df_perc_18O_sim["d18O_perc_sim"] = onp.where(C_iso_q_ss < -20, onp.nan, C_iso_q_ss)
                 df_perc_18O_sim = df_perc_18O_sim.join(sample_no)
-                df_perc_18O_sim.loc[:, "sample_no"] = df_perc_18O_sim.loc[:, "sample_no"].bfill(limit=14)
+                df_perc_18O_sim.loc[:, "sample_no"] = df_perc_18O_sim.loc[:, "sample_no"].infer_objects(copy=False).bfill(limit=14)
                 perc_sum = df_perc_18O_sim.groupby(["sample_no"]).sum().loc[:, "perc_sim"]
                 sample_no["perc_sum"] = perc_sum.values
                 df_perc_18O_sim = df_perc_18O_sim.join(sample_no["perc_sum"])
-                df_perc_18O_sim.loc[:, "perc_sum"] = df_perc_18O_sim.loc[:, "perc_sum"].bfill(limit=14)
+                df_perc_18O_sim.loc[:, "perc_sum"] = df_perc_18O_sim.loc[:, "perc_sum"].infer_objects(copy=False).bfill(limit=14)
                 df_perc_18O_sim["weight"] = df_perc_18O_sim["perc_sim"] / df_perc_18O_sim["perc_sum"]
                 df_perc_18O_sim["d18O_weight"] = df_perc_18O_sim["d18O_perc_sim"] * df_perc_18O_sim["weight"]
                 d18O_sample = df_perc_18O_sim.groupby(["sample_no"]).sum().loc[:, "d18O_weight"]
@@ -228,7 +232,7 @@ def main(sas_solver, tmp_dir):
                 df_perc_18O_sim.loc[cond, "d18O_sample"] = onp.NaN
                 d18O_perc_bs[nrow, 0, :] = df_perc_18O_sim.loc[:, "d18O_sample"].values
                 # calculate observed oxygen-18 bulk sample
-                df_perc_18O_obs.loc[:, "d18O_perc_bs"] = df_perc_18O_obs["d18O_perc_obs"].bfill(limit=14)
+                df_perc_18O_obs.loc[:, "d18O_perc_bs"] = df_perc_18O_obs["d18O_perc_obs"].infer_objects(copy=False).bfill(limit=14)
                 df_perc_18O_obs.loc[:, "d18O_perc_mass"] = df_perc_18O_obs["perc_obs"].values * delta_to_conc(
                     df_perc_18O_obs["d18O_perc_bs"].values
                 )
@@ -238,10 +242,10 @@ def main(sas_solver, tmp_dir):
                 )
                 sample_no["perc_obs_sum"] = perc_sample_sum_obs.values
                 df_perc_18O_sim = df_perc_18O_sim.join(sample_no["perc_obs_sum"])
-                df_perc_18O_sim.loc[:, "perc_obs_sum"] = df_perc_18O_sim.loc[:, "perc_obs_sum"].bfill(limit=14)
-                df_perc_18O_sim.loc[:, "d18O_perc_bs"] = df_perc_18O_sim.loc[:, "d18O_sample"].bfill(limit=14).values
+                df_perc_18O_sim.loc[:, "perc_obs_sum"] = df_perc_18O_sim.loc[:, "perc_obs_sum"].infer_objects(copy=False).bfill(limit=14)
+                df_perc_18O_sim.loc[:, "d18O_perc_bs"] = df_perc_18O_sim.loc[:, "d18O_sample"].infer_objects(copy=False).bfill(limit=14).values
                 df_perc_18O_sim.loc[:, "d18O_perc_mass"] = df_perc_18O_sim["perc_sim"].values * delta_to_conc(
-                    df_perc_18O_sim.loc[:, "d18O_sample"].bfill(limit=14).values
+                    df_perc_18O_sim.loc[:, "d18O_sample"].infer_objects(copy=False).bfill(limit=14).values
                 )
 
                 # join observations on simulations
@@ -527,9 +531,9 @@ def main(sas_solver, tmp_dir):
 
         # write states of best hydrologic simulation corresponding to best transport simulation
         if tms in ["complete-mixing", "piston"]:
-            states_hm_file = base_path.parent / "svat_monte_carlo" / "output" / "states_hm100.nc"
+            states_hm_file = Path(__file__).parent.parent / "svat_monte_carlo" / "output" / "states_hm100.nc"
         else:
-            states_hm_file = base_path.parent / "svat_monte_carlo" / "output" / "states_hm100_bootstrap.nc"
+            states_hm_file = Path(__file__).parent.parent / "svat_monte_carlo" / "output" / "states_hm100_bootstrap.nc"
         ds_hm_for_tm_mc = xr.open_dataset(states_hm_file, engine="h5netcdf")
         ds_hm_best = ds_hm_for_tm_mc.loc[dict(x=idx_best)]
         ds_hm_best.attrs["title"] = f"Best hydrologic simulation corresponding to best {tms} oxygen-18 simulation"
