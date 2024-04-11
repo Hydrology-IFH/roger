@@ -6,5 +6,4 @@ FILES="$PWD/svat_crop_eppingen-elsenz_*.sh"
 for f in $FILES
 do
   sbatch --partition=single $f
-  sleep 10
 done

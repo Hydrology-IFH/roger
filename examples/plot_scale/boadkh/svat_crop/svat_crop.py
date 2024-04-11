@@ -12,7 +12,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                "eppingen-elsenz", "bruchsal-heidelsheim", "bretten", 
                                                "ehingen-kirchen", "merklingen", "hayingen", 
                                                "kupferzell", "oehringen", "vellberg-kleinaltdorf"]), 
-                                               default="freiburg")
+                                               default="bretten")
 @click.option("--crop-rotation-scenario", type=click.Choice(["winter-wheat_clover",
                                                              "winter-wheat_silage-corn",
                                                              "summer-wheat_winter-wheat",
