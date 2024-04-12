@@ -7,22 +7,13 @@ import numpy as onp
 import click
 
 
-@click.option(
-    "-tms",
-    "--transport-model-structure",
-    type=click.Choice(
-        ["complete-mixing", "piston", "advection-dispersion-power", "time-variant_advection-dispersion-power"]
-    ),
-    default="advection-dispersion-power",
-)
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @click.command("main")
-def main(tmp_dir, transport_model_structure):
+def main(tmp_dir):
     if tmp_dir:
         base_path = Path(tmp_dir)
     else:
         base_path = Path(__file__).parent
-    tms = transport_model_structure.replace("_", " ")
     # directory of results
     base_path_output = base_path / "output"
     if not os.path.exists(base_path_output):
@@ -36,6 +27,7 @@ def main(tmp_dir, transport_model_structure):
         "advection-dispersion-power",
         "time-variant_advection-dispersion-power",
     ]:
+        tms = transport_model_structure.replace("_", " ")
         states_tm_file = base_path / "output" / f"states_{transport_model_structure}_bromide_benchmark.nc"
         if not os.path.exists(states_tm_file):
             for year in years:

@@ -165,6 +165,9 @@ _TICKLABS = {
     "k2_transp": r"$k_{2-transp}$",
     "k2_q_rz": r"$k_{2-perc_{rz}}$",
     "k2_q_ss": r"$k_{2-perc_{ss}}$",
+    "c_basal_crop_coeff": r"$c_{basal-crop}$",
+    "c_pet": r"$c_{PET}$",
+    "zroot_to_zsoil_max": r"$c_{max-root-depth}$",
 }
 
 _Y_LABS_CUM = {
@@ -324,6 +327,9 @@ _LABS = {
     "crop_scale": r"$scale_{crop}$ [-]",
     "c_canopy_growth": r"$c_{canopy-growth}$ [-]",
     "c_root_growth": r"$c_{root-growth}$ [-]",
+    "c_basal_crop_coeff": r"$c_{basal-crop}$ [-]",
+    "c_pet": r"$c_{PET}$ [-]",
+    "zroot_to_zsoil_max": r"$c_{max-root-depth}$ [-]",
 }
 
 # long names of variables used for netcdf
