@@ -81,6 +81,8 @@ def calc_t_grow(state):
     mask_winter_catch = npx.isin(vs.crop_type, lut.WINTER_CATCH_CROPS)
     mask_my_init_winter = npx.isin(vs.crop_type, lut.WINTER_MULTI_YEAR_CROPS_INIT)
     mask_my_cont_summer = npx.isin(vs.crop_type, lut.SUMMER_MULTI_YEAR_CROPS_CONT)
+    mask_my_init_summer = npx.isin(vs.crop_type, lut.SUMMER_MULTI_YEAR_CROPS_INIT)
+    mask_my_cont_winter = npx.isin(vs.crop_type, lut.WINTER_MULTI_YEAR_CROPS_CONT)
 
     mask1 = mask_summer & (vs.doy[vs.tau] < vs.doy_start)
     mask2 = mask_summer & (vs.doy[vs.tau] >= vs.doy_start) & (vs.doy[vs.tau] <= vs.doy_end)
@@ -152,6 +154,44 @@ def calc_t_grow(state):
         vs.t_grow_cc,
         at[2:-2, 2:-2, vs.tau, 1],
         vs.gdd[2:-2, 2:-2, 1] * vs.k_stress_transp_crop[2:-2, 2:-2, 1] * mask12[2:-2, 2:-2],
+    )
+
+    mask13 = mask_my_init_summer & (vs.doy[vs.tau] >= vs.doy_start) & (vs.doy[vs.tau] <= vs.doy_end)
+    vs.t_grow_cc = update_add(
+        vs.t_grow_cc,
+        at[2:-2, 2:-2, vs.tau, :],
+        vs.gdd[2:-2, 2:-2, :] * vs.k_stress_transp_crop[2:-2, 2:-2, :] * mask13[2:-2, 2:-2, :],
+    )
+
+    mask131 = mask_my_init_summer[:, :, 1] & mask_my_cont_winter[:, :, 2] & (vs.doy[vs.tau] == vs.doy_end[:, :, 1])
+    vs.t_grow_cc = update(
+        vs.t_grow_cc,
+        at[2:-2, 2:-2, vs.tau, 2],
+        npx.where(mask131[2:-2, 2:-2], vs.t_grow_cc[2:-2, 2:-2, vs.tau, 1], vs.t_grow_cc[2:-2, 2:-2, vs.tau, 2]),
+    )
+
+    # cutting of grass
+    mask_grass = vs.crop_type == 573
+    mask21 = mask_grass[:, :, 1] & ((vs.doy[vs.tau] == 167) | (vs.doy[vs.tau] == 223))
+    vs.t_grow_cc = update(
+        vs.t_grow_cc,
+        at[2:-2, 2:-2, vs.tau, 1],
+        npx.where(mask21[2:-2, 2:-2], 0, vs.t_grow_cc[2:-2, 2:-2, vs.tau, 1]),
+    )
+
+    mask22 = mask_grass[:, :, 1] & (vs.doy[vs.tau] >= vs.doy_start[:, :, 1]) & (vs.doy[vs.tau] <= vs.doy_end[:, :, 1])
+    vs.t_grow_cc = update_add(
+        vs.t_grow_cc,
+        at[2:-2, 2:-2, vs.tau, 1],
+        vs.gdd[2:-2, 2:-2, 1] * vs.k_stress_transp_crop[2:-2, 2:-2, 1] * mask22[2:-2, 2:-2],
+    )
+
+    mask_miscanthus = vs.crop_type == 591
+    mask23 = mask_miscanthus[:, :, 1] & (vs.doy[vs.tau] >= vs.doy_start[:, :, 1]) & (vs.doy[vs.tau] <= vs.doy_end[:, :, 1])
+    vs.t_grow_cc = update_add(
+        vs.t_grow_cc,
+        at[2:-2, 2:-2, vs.tau, 1],
+        vs.gdd[2:-2, 2:-2, 1] * vs.k_stress_transp_crop[2:-2, 2:-2, 1] * mask23[2:-2, 2:-2],
     )
 
     mask1 = mask_summer & (vs.doy[vs.tau] < vs.doy_start)
@@ -227,6 +267,13 @@ def calc_t_grow(state):
         vs.gdd[2:-2, 2:-2, 1] * vs.k_stress_root_growth[2:-2, 2:-2, 1] * mask12[2:-2, 2:-2],
     )
 
+    mask13 = mask_my_init_summer & (vs.doy[vs.tau] >= vs.doy_start) & (vs.doy[vs.tau] <= vs.doy_end)
+    vs.t_grow_root = update_add(
+        vs.t_grow_root,
+        at[2:-2, 2:-2, vs.tau, :],
+        vs.gdd[2:-2, 2:-2, :] * vs.k_stress_root_growth[2:-2, 2:-2, :] * mask13[2:-2, 2:-2, :],
+    )
+
     return KernelOutput(t_grow_cc=vs.t_grow_cc, t_grow_root=vs.t_grow_root)
 
 
@@ -276,9 +323,10 @@ def calc_canopy_cover(state):
     mask_summer = npx.isin(vs.crop_type, lut.SUMMER_CROPS)
     mask_winter = npx.isin(vs.crop_type, lut.WINTER_CROPS)
     mask_winter_catch = npx.isin(vs.crop_type, lut.WINTER_CATCH_CROPS)
-    mask_growing_summer = npx.isin(vs.crop_type, npx.array([571, 580], dtype=int))
+    mask_growing_summer = npx.isin(vs.crop_type, npx.array([571, 580, 589], dtype=int))
     mask_growing_winter = npx.isin(vs.crop_type, npx.array([572, 583], dtype=int))
     mask_cont_summer = npx.isin(vs.crop_type, lut.SUMMER_MULTI_YEAR_CROPS_CONT)
+    mask_cont_summer_grow = npx.isin(vs.crop_type, lut.SUMMER_MULTI_YEAR_CROPS_CONT_GROW)
     mask_cont_winter = npx.isin(vs.crop_type, lut.WINTER_MULTI_YEAR_CROPS_CONT)
     mask_bare = vs.crop_type == 599
 
@@ -658,6 +706,39 @@ def calc_canopy_cover(state):
         ),
     )
 
+    # growth after cutting
+    vs.ccc = update(
+        vs.ccc,
+        at[2:-2, 2:-2, vs.tau, 1],
+        npx.where(
+            mask_cont_winter[2:-2, 2:-2, 0] & mask_cont_summer_grow[2:-2, 2:-2, 1] & (vs.doy[vs.tau] == vs.doy_end[2:-2, 2:-2, 0]),
+            0,
+            vs.ccc[2:-2, 2:-2, vs.tau, 1]
+        ),
+    )
+    mask22 = mask_cont_summer_grow & (vs.doy[vs.tau] > vs.doy_start) & (vs.doy[vs.tau] <= vs.doy_end)
+    vs.ccc = update(
+        vs.ccc,
+        at[2:-2, 2:-2, vs.tau, :],
+        npx.where(
+            mask22[2:-2, 2:-2, :],
+            npx.where(
+                vs.ccc_min[2:-2, 2:-2, :]
+                * npx.exp(vs.ccc_growth_rate[2:-2, 2:-2, :] * vs.t_grow_cc[2:-2, 2:-2, vs.tau, :])
+                <= vs.ccc_max[2:-2, 2:-2, :] / 2,
+                vs.ccc_min[2:-2, 2:-2, :]
+                * npx.exp(vs.ccc_growth_rate[2:-2, 2:-2, :] * vs.t_grow_cc[2:-2, 2:-2, vs.tau, :]),
+                vs.ccc_max[2:-2, 2:-2, :]
+                - (vs.ccc_max[2:-2, 2:-2, :] / 2 - vs.ccc_min[2:-2, 2:-2, :])
+                * npx.exp(
+                    -vs.ccc_growth_rate[2:-2, 2:-2, :]
+                    * (vs.t_grow_cc[2:-2, 2:-2, vs.tau, :] - vs.t_half_mid[2:-2, 2:-2, :])
+                ),
+            ),
+            vs.ccc[2:-2, 2:-2, vs.tau, :],
+        ),
+    )
+
     # multi-year crop stops in winter
     vs.ccc = update(
         vs.ccc,
@@ -682,11 +763,18 @@ def calc_canopy_cover(state):
 
     # harvesting of miscanthus
     mask_miscanthus = vs.crop_type == 590
-    mask21 = mask_summer & (vs.doy[vs.tau] > vs.doy_end)
+    mask23 = mask_miscanthus & (vs.doy[vs.tau] == 90)
+    vs.ccc = update(
+        vs.ccc,
+        at[2:-2, 2:-2, vs.tau, 0],
+        npx.where(mask23[2:-2, 2:-2, 0], 0, vs.ccc[2:-2, 2:-2, vs.tau, 0]),
+    )
+
+    mask24 = mask_summer & (vs.doy[vs.tau] > vs.doy_end)
     vs.ccc = update(
         vs.ccc,
         at[2:-2, 2:-2, vs.tau, :],
-        npx.where(mask21[2:-2, 2:-2, :], 0, vs.ccc[2:-2, 2:-2, vs.tau, :]),
+        npx.where(mask24[2:-2, 2:-2, :], 0, vs.ccc[2:-2, 2:-2, vs.tau, :]),
     )
 
     # bare
@@ -846,9 +934,10 @@ def calc_root_growth(state):
     mask_summer = npx.isin(vs.crop_type, lut.SUMMER_CROPS)
     mask_winter = npx.isin(vs.crop_type, lut.WINTER_CROPS)
     mask_winter_catch = npx.isin(vs.crop_type, lut.WINTER_CATCH_CROPS)
-    mask_growing_summer = npx.isin(vs.crop_type, npx.array([571, 580], dtype=int))
+    mask_growing_summer = npx.isin(vs.crop_type, npx.array([571, 580, 589], dtype=int))
     mask_growing_winter = npx.isin(vs.crop_type, npx.array([572, 583], dtype=int))
     mask_cont_summer = npx.isin(vs.crop_type, lut.SUMMER_MULTI_YEAR_CROPS_CONT)
+    mask_cont_summer_grow = npx.isin(vs.crop_type, lut.SUMMER_MULTI_YEAR_CROPS_CONT_GROW)
     mask_cont_winter = npx.isin(vs.crop_type, lut.WINTER_MULTI_YEAR_CROPS_CONT)
     mask_bare = vs.crop_type == 599
 
@@ -1040,6 +1129,16 @@ def calc_root_growth(state):
         at[2:-2, 2:-2, vs.tau, 1],
         npx.where(
             mask_cont_winter[2:-2, 2:-2, 0] & mask_cont_summer[2:-2, 2:-2, 1] & (vs.doy[vs.tau] == vs.doy_end[2:-2, 2:-2, 0]),
+            vs.z_root_crop[2:-2, 2:-2, vs.tau, 0],
+            vs.z_root_crop[2:-2, 2:-2, vs.tau, 1]
+        ),
+    )
+
+    vs.z_root_crop = update(
+        vs.z_root_crop,
+        at[2:-2, 2:-2, vs.tau, 1],
+        npx.where(
+            mask_cont_winter[2:-2, 2:-2, 0] & mask_cont_summer_grow[2:-2, 2:-2, 1] & (vs.doy[vs.tau] == vs.doy_end[2:-2, 2:-2, 0]),
             vs.z_root_crop[2:-2, 2:-2, vs.tau, 0],
             vs.z_root_crop[2:-2, 2:-2, vs.tau, 1]
         ),
