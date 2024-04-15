@@ -33,7 +33,9 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                                              "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
                                                              "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                                                             "grain-corn_winter-wheat_winter-barley_yellow-mustard"]), default="winter-wheat_silage-corn")
+                                                             "grain-corn_winter-wheat_winter-barley_yellow-mustard",
+                                                             "miscanthus",
+                                                             "bare-grass"]), default="miscanthus")
 @click.option("-ft", "--fertilization-intensity", type=click.Choice(["low", "medium", "high"]), default="medium")
 @click.option("-id", "--id", type=str, default="5-8_2090295_1")
 @click.option("--row", type=int, default=0)

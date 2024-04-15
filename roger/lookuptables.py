@@ -124,7 +124,8 @@ MULTI_YEAR_CROPS_CONT = onp.array([573, 574, 581, 582, 584, 585], dtype=onp.int3
 WINTER_MULTI_YEAR_CROPS_INIT = onp.array([572, 583], dtype=onp.int32)
 WINTER_MULTI_YEAR_CROPS_CONT = onp.array([574, 581, 585, 590], dtype=onp.int32)
 SUMMER_MULTI_YEAR_CROPS_INIT = onp.array([571, 580, 589], dtype=onp.int32)
-SUMMER_MULTI_YEAR_CROPS_CONT = onp.array([573, 582, 584], dtype=onp.int32)
+SUMMER_MULTI_YEAR_CROPS_CONT = onp.array([582, 584], dtype=onp.int32)
+SUMMER_MULTI_YEAR_CROPS_CONT_GROW = onp.array([573, 591], dtype=onp.int32)
 WINTER_CROPS_FERT = onp.array([556, 557, 558, 559, 560, 564, 579, 580, 582, 584], dtype=onp.int32)
 
 dict_crops = {
