@@ -47,9 +47,9 @@ def nanmeanweighted(y, w, axis=None):
 
 base_path = Path(__file__).parent
 # directory of results
-base_path_results = base_path / "output"
-if not os.path.exists(base_path_results):
-    os.mkdir(base_path_results)
+base_path_output = Path("/Volumes/LaCie/roger/examples/plot_scale/freiburg_altheim_kupferzell") / "output"
+if not os.path.exists(base_path_output):
+    os.mkdir(base_path_output)
 # directory of figures
 base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
@@ -170,7 +170,7 @@ for location in locations:
             for climate_scenario in climate_scenarios:
                 try:
                     output_hm_file = (
-                        base_path_results
+                        base_path_output
                         / "svat"
                         / f"SVAT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
                     )
@@ -213,7 +213,7 @@ for location in locations:
             dict_conc_ages[location][land_cover_scenario][period] = {}
             for climate_scenario in climate_scenarios:
                 output_tm_file = (
-                    base_path_results
+                    base_path_output
                     / "svat_transport"
                     / f"SVATTRANSPORT_{location}_{land_cover_scenario}_{climate_scenario}_{period}.nc"
                 )

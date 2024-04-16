@@ -3432,6 +3432,13 @@ VARIABLES = {
         initial=1.0,
         active=lambda settings: not settings.enable_offline_transport,
     ),
+    "EVENTS": Variable(
+        "event number",
+        TIME_FORCING,
+        "",
+        "event number",
+        active=lambda settings: not settings.enable_offline_transport & settings.enable_film_flow,
+    ),
     "soil_fertility": Variable(
         "soil fertility class",
         CATCH_GRID,

@@ -70,6 +70,8 @@ _dict_ffid = {"winter-wheat_clover": "1_0",
               "grain-corn_winter-wheat_winter-rape": "12_0", 
               "grain-corn_winter-wheat_winter-barley": "13_0",
               "grain-corn_winter-wheat_clover": "14_0",
+              "miscanthus": "15_0",
+              "bare-grass": "16_0",
               "winter-wheat_silage-corn_yellow-mustard": "2_1",
               "summer-wheat_winter-wheat_yellow-mustard": "3_1",
               "winter-wheat_sugar-beet_silage-corn_yellow-mustard": "6_1",
@@ -111,7 +113,9 @@ crop_rotation_scenarios = ["winter-wheat_clover",
                            "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                            "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
                            "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                           "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
+                           "grain-corn_winter-wheat_winter-barley_yellow-mustard",
+                           "miscanthus",
+                           "bare-grass"]
 
 _lab_unit_daily = {
     "q_hof": "$Q_{HOF}$ [mm/day]",

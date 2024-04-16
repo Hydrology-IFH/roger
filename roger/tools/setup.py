@@ -474,6 +474,8 @@ def write_forcing(
     uniform=True,
     enable_crop_phenology=False,
     enable_groundwater_boundary=False,
+    enable_film_flow=False,
+    end_event=21600,
     prec_correction=None,
     float_type="float32",
 ):
@@ -498,6 +500,12 @@ def write_forcing(
 
     enable_groundwater_boundary : bool, optional
         if True groundwater head is required
+
+    enable_film_flow : bool, optional
+        if True number of events is provided
+
+    end_event : int, optional
+        seconds with no precipitation after which an event is considered to be finished
 
     prec_correction : str, optional
         if True precipitation is corrected according to Richter (1995)
@@ -540,6 +548,25 @@ def write_forcing(
                 horizontal_shielding=prec_correction,
             )
             df_meteo["PREC"] = prec_corr
+
+        if enable_film_flow:
+            df_meteo["EVENTS"] = 0
+            break_counter = len(df_meteo.index)
+            event_counter = 1
+            for i in range(0, len(df_meteo.index)):
+                if (df_meteo["PREC"].values[i] > 0) & (df_meteo["TA"].values[i] > 0):
+                    df_meteo.loc[df_meteo.index[i], "EVENTS"] = event_counter
+                    break_counter = 0
+                elif (df_meteo["PREC"].values[i] <= 0) & (df_meteo["TA"].values[i] > 0) & (break_counter <= end_event / (60 * 10)):
+                    df_meteo.loc[df_meteo.index[i], "EVENTS"] = event_counter
+                    break_counter = break_counter + 1
+                elif (df_meteo["PREC"].values[i] <= 0) & (df_meteo["TA"].values[i] <= 0) & (break_counter <= end_event / (60 * 10)):
+                    df_meteo.loc[df_meteo.index[i], "EVENTS"] = event_counter
+                    break_counter = break_counter + 1
+                if break_counter == end_event / (60 * 10):
+                    event_counter = event_counter + 1
+                if break_counter > end_event / (60 * 10):
+                    df_meteo.loc[df_meteo.index[i], "EVENTS"] = 0
 
         nc_file = input_dir / "forcing.nc"
         with h5netcdf.File(nc_file, "w", decode_vlen_strings=False) as f:
@@ -621,6 +648,12 @@ def write_forcing(
                 v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
                 v.attrs["long_name"] = "maximum air temperature"
                 v.attrs["units"] = "degC"
+            if enable_film_flow:
+                v = f.create_variable("EVENTS", ("x", "y", "Time"), int)
+                arr = df_meteo["EVENTS"].values
+                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+                v.attrs["long_name"] = "event number"
+                v.attrs["units"] = ""
 
             if enable_groundwater_boundary:
                 zgw_path = input_dir / "ZGW.txt"

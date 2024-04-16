@@ -1,4 +1,5 @@
 from roger import roger_kernel, roger_routine, KernelOutput
+from roger.core.utilities import _get_first_row_no, _get_last_row_no
 from roger.core.operators import numpy as npx, update, at
 from roger.variables import allocate
 
@@ -6,8 +7,19 @@ from roger.variables import allocate
 @roger_routine
 def adaptive_time_stepping(state):
     vs = state.variables
+    settings = state.settings
 
     vs.update(adaptive_time_stepping_kernel(state))
+
+    if settings.enable_film_flow:
+        cond_event = (vs.EVENTS == vs.event_id_counter) & (vs.EVENTS > 0)
+        t1 = _get_first_row_no(cond_event, vs.event_id[vs.tau])[0]
+        t2 = _get_last_row_no(cond_event, vs.event_id[vs.tau])[0]
+        prec_event = vs.PREC[t1:t2]
+        
+        vs.rain_event = update(vs.rain_event, at[2:-2, 2:-2, t1:t2], prec_event[npx.newaxis, npx.newaxis, :])
+        vs.rain_event_csum = update(vs.rain_event_csum, at[2:-2, 2:-2, t1:t2], npx.cumsum(prec_event, axis=-1))
+        vs.rain_event_sum = update(vs.rain_event_sum, at[2:-2, 2:-2], npx.sum(prec_event, axis=-1))
 
 
 @roger_kernel

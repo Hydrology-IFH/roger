@@ -712,7 +712,7 @@ def calc_canopy_cover(state):
         at[2:-2, 2:-2, vs.tau, 1],
         npx.where(
             mask_cont_winter[2:-2, 2:-2, 0] & mask_cont_summer_grow[2:-2, 2:-2, 1] & (vs.doy[vs.tau] == vs.doy_end[2:-2, 2:-2, 0]),
-            0,
+            0.3,
             vs.ccc[2:-2, 2:-2, vs.tau, 1]
         ),
     )
@@ -738,6 +738,10 @@ def calc_canopy_cover(state):
             vs.ccc[2:-2, 2:-2, vs.tau, :],
         ),
     )
+
+    vs.ccc = update(
+        vs.ccc,
+        at[2:-2, 2:-2, vs.tau, 1], npx.where(mask22[2:-2, 2:-2, 1] & (vs.ccc[2:-2, 2:-2, vs.tau, 1] <= 0.3), 0.3, vs.ccc[2:-2, 2:-2, vs.tau, 1]))
 
     # multi-year crop stops in winter
     vs.ccc = update(
@@ -767,7 +771,7 @@ def calc_canopy_cover(state):
     vs.ccc = update(
         vs.ccc,
         at[2:-2, 2:-2, vs.tau, 0],
-        npx.where(mask23[2:-2, 2:-2, 0], 0, vs.ccc[2:-2, 2:-2, vs.tau, 0]),
+        npx.where(mask23[2:-2, 2:-2, 0], 0.3, vs.ccc[2:-2, 2:-2, vs.tau, 0]),
     )
 
     mask24 = mask_summer & (vs.doy[vs.tau] > vs.doy_end)
