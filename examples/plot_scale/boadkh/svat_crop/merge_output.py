@@ -20,9 +20,7 @@ def main():
                  "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
                  "ehingen-kirchen", "merklingen", "hayingen",
                  "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
-    locations = [
-        "freiburg", "lahr", "muellheim"
-    ]
+    locations = ["freiburg"]
     crop_rotation_scenarios = ["winter-wheat_clover",
                                "winter-wheat_silage-corn",
                                "summer-wheat_winter-wheat",
@@ -44,8 +42,9 @@ def main():
                                "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                                "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
                                "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                               "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
-
+                               "grain-corn_winter-wheat_winter-barley_yellow-mustard",
+                               "miscanthus",
+                               "bare-grass"]
     # merge model output into single file
     for location in locations:
         for crop_rotation_scenario in crop_rotation_scenarios:

@@ -48,7 +48,7 @@ def nanmeanweighted(y, w, axis=None):
 
 base_path = Path(__file__).parent
 # directory of results
-base_path_output = base_path / "output"
+base_path_output = Path("/Volumes/LaCie/roger/examples/plot_scale/freiburg_altheim_kupferzell") / "output"
 if not os.path.exists(base_path_output):
     os.mkdir(base_path_output)
 # directory of figures
