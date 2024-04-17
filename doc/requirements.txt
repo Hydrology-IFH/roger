@@ -7,3 +7,4 @@ matplotlib==3.8.4
 ipython==8.22.2
 sphinx-rtd-theme==2.0.0
 seaborn==0.13.2
+pickleshare==0.7.5
