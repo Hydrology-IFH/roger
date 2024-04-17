@@ -30,16 +30,16 @@ jobs:
       CONDA_DLL_SEARCH_MODIFICATION_ENABLE: "1"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Cache conda
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/conda_pkgs_dir
           key:
             ${{ runner.os }}-conda-${{hashFiles('conda-environment.yml') }}
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           miniconda-version: "latest"
           activate-environment: roger
