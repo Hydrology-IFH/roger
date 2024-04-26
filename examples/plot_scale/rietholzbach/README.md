@@ -1,6 +1,6 @@
 # Modelling oxygen-18 transport and bromide transport with Roger at Rietholzbach lysimeter site
 
-All results have been generated with Roger version 3.0.3.
+All results have been generated with Roger version 3.0.5.
 
 Workflow:
 1. Run the Monte-Carlo simulations following the instructions in `svat_monte_carlo/`

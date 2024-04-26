@@ -8,9 +8,9 @@ import roger
 
 base_path = Path(__file__).parent
 # directory of results
-base_path_results = base_path / "results"
-if not os.path.exists(base_path_results):
-    os.mkdir(base_path_results)
+base_path_output = base_path / "output"
+if not os.path.exists(base_path_output):
+    os.mkdir(base_path_output)
 # directory of figures
 base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
@@ -19,7 +19,7 @@ if not os.path.exists(base_path_figs):
 # merge model output into single file
 path = str(base_path / "SVAT.*.nc")
 diag_files = glob.glob(path)
-states_hm_file = base_path / "states_hm.nc"
+states_hm_file = base_path / "SVAT.nc"
 if not os.path.exists(states_hm_file):
     with h5netcdf.File(states_hm_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(

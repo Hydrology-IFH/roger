@@ -227,7 +227,7 @@ class SVATSetup(RogerSetup):
             vs.ta_day = update(
                 vs.ta_day,
                 at[:, :, :],
-                vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.ta_weight[:, :, npx.newaxis],
+                vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] + vs.ta_offset[:, :, npx.newaxis],
             )
             vs.pet_day = update(
                 vs.pet_day,
