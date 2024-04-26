@@ -48,7 +48,7 @@ Germany (2019-2022), click for better
 quality)
 </p>
 
-Roger provides
+RoGeR provides
 
 -   grid-based **1D models**
 -   **offline solute transport** with several **StorAge selection (SAS) functions**
@@ -64,7 +64,7 @@ Roger provides
 
 ## Basic usage
 
-To run Roger, you need to set up a model --- i.e., specify which settings
+To run RoGeR, you need to set up a model --- i.e., specify which settings
 and model domain you want to use. This is done by subclassing the
 `RogerSetup` base class in a *setup script* that is written in Python. A good
 place to start is the
@@ -77,14 +77,14 @@ After setting up your model, all you need to do is call the model setup:
 python svat.py
 ```
 
-For more information on using Roger, have a look at [our
+For more information on using RoGeR, have a look at [our
 documentation](http://roger.readthedocs.io).
 
 ## Contributing
 
-Contributions to Roger are always welcome, no matter if you spotted an
+Contributions to RoGeR are always welcome, no matter if you spotted an
 inaccuracy in [the documentation](https://roger.readthedocs.io), wrote a
-new setup, fixed a bug, or even extended Roger\' core mechanics. There
+new setup, fixed a bug, or even extended RoGeR\' core mechanics. There
 are 2 ways to contribute:
 
 1.  If you want to report a bug or request a missing feature, please
@@ -136,4 +136,4 @@ groundwater-related processes
 
 ## License
 This software can be distributed freely under the MIT license. Please read the LICENSE for further information.
-© 2022, Robin Schwemmle (<robin.schwemmle@hydrology.uni-freiburg.de>)
+© 2024, Robin Schwemmle (<robin.schwemmle@hydrology.uni-freiburg.de>)

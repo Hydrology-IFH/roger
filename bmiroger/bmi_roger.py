@@ -132,7 +132,7 @@ class BmiRoger(Bmi):
         from roger import restart
 
         if self._model.state.variables.time <= 0:
-            self._model._ensure_warmup_done()
+            self._model._ensure_setup_done()
 
             if not self._model.state.settings.warmup_done:
                 time_length, time_unit = time.format_time(self._model.state.settings.runlen_warmup)
@@ -180,7 +180,7 @@ class BmiRoger(Bmi):
         from roger import restart
 
         if self._model.state.variables.time <= 0:
-            self._model._ensure_warmup_done()
+            self._model._ensure_setup_done()
 
             if not self._model.state.settings.warmup_done:
                 time_length, time_unit = time.format_time(self._model.state.settings.runlen_warmup)

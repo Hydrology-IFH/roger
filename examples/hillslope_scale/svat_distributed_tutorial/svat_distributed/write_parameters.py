@@ -3,6 +3,7 @@ import h5netcdf
 import datetime
 import yaml
 import numpy as onp
+import pandas as pd
 import click
 import roger
 
@@ -26,6 +27,12 @@ def main(nrows, ncols):
     file_param_bounds = base_path / "param_bounds.yml"
     with open(file_param_bounds, "r") as file:
         bounds = yaml.safe_load(file)
+
+    # write parameters to csv
+    df_params = pd.DataFrame(index=range(nrows * ncols))
+    df_params.loc[:, "lu_id"] = 8
+    df_params.loc[:, "sealing"] = 0
+    df_params.loc[:, "kf"] = 2500
 
     # write parameters to netcdf
     RNG = onp.random.default_rng(42)
@@ -66,6 +73,32 @@ def main(nrows, ncols):
             v = f.create_variable(param, ("x", "y"), float, compression="gzip", compression_opts=1)
             v[:, :] = values
             v.attrs.update(units=_UNITS[param])
+            df_params.loc[:, param] = values.flatten()
+
+    df_params = df_params.loc[
+        :,
+        [
+            "lu_id",
+            "sealing",
+            "z_soil",
+            "dmpv",
+            "lmpv",
+            "theta_ac",
+            "theta_ufc",
+            "theta_pwp",
+            "ks",
+            "kf",
+        ],
+    ]
+
+    # write parameters to csv
+    df_params.columns = [
+        ["", "[-]", "[mm]", "[1/m2]", "[mm]", "[-]", "[-]", "[-]", "[mm/hour]", "[mm/hour]"],
+        ["lu_id", "sealing", "z_soil", "dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf"],
+    ]
+    df_params.to_csv(base_path / "parameters.csv", index=False, sep=";")
+
+
     return
 
 
