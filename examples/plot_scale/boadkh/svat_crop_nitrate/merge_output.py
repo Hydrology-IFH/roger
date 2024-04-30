@@ -197,7 +197,7 @@ def main():
                                                 long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"]
                                         )
                 else:
-                    print(f"sbatch --partition=single svat_crop_nitrate_{location}_{crop_rotation_scenario}_slurm.sh")
+                    print(f"sbatch --partition=single svat_crop_nitrate_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert_slurm.sh")
     return
 
 
