@@ -15,7 +15,6 @@ def main():
                  "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
                  "ehingen-kirchen", "merklingen", "hayingen",
                  "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
-    locations = ["freiburg"]
     crop_rotation_scenarios = ["winter-wheat_clover",
                                "winter-wheat_silage-corn",
                                "summer-wheat_winter-wheat",
@@ -130,7 +129,7 @@ def main():
                 output_path_ws = base_path_ws / "output" / "svat_crop_nitrate"
                 lines = []
                 lines.append("#!/bin/bash\n")
-                lines.append("#SBATCH --time=20:00:00\n")
+                lines.append("#SBATCH --time=24:00:00\n")
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=1\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")
