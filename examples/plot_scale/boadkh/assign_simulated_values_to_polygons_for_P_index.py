@@ -7,7 +7,6 @@ import geopandas as gpd
 import numpy as onp
 import matplotlib as mpl
 import seaborn as sns
-import h5py
 
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -48,6 +47,8 @@ _dict_ffid = {"winter-wheat_clover": "1_0",
               "grain-corn_winter-wheat_winter-rape": "12_0", 
               "grain-corn_winter-wheat_winter-barley": "13_0",
               "grain-corn_winter-wheat_clover": "14_0",
+              "miscanthus": "15_0",
+              "bare-grass": "16_0",
               "winter-wheat_silage-corn_yellow-mustard": "2_1",
               "summer-wheat_winter-wheat_yellow-mustard": "3_1",
               "winter-wheat_sugar-beet_silage-corn_yellow-mustard": "6_1",
@@ -60,7 +61,6 @@ _dict_ffid = {"winter-wheat_clover": "1_0",
 
 _dict_var_names = {"q_hof": "Qsur",
                    "ground_cover": "GC",
-                   "M_q_ss": "NO3PERC"
 }
 
 
@@ -84,39 +84,12 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
-_dict_ffid = {"winter-wheat_clover": "1_0",
-              "winter-wheat_silage-corn": "2_0",
-              "summer-wheat_winter-wheat": "3_0",
-              "summer-wheat_clover_winter-wheat": "4_0",
-              "winter-wheat_clover_silage-corn": "5_0",
-              "winter-wheat_sugar-beet_silage-corn": "6_0",
-              "summer-wheat_winter-wheat_silage-corn": "7_0",
-              "summer-wheat_winter-wheat_winter-rape": "8_0",
-              "winter-wheat_winter-rape": "9_0",
-              "winter-wheat_soybean_winter-rape": "10_0",
-              "sugar-beet_winter-wheat_winter-barley": "11_0", 
-              "grain-corn_winter-wheat_winter-rape": "12_0", 
-              "grain-corn_winter-wheat_winter-barley": "13_0",
-              "grain-corn_winter-wheat_clover": "14_0",
-              "winter-wheat_silage-corn_yellow-mustard": "2_1",
-              "summer-wheat_winter-wheat_yellow-mustard": "3_1",
-              "winter-wheat_sugar-beet_silage-corn_yellow-mustard": "6_1",
-              "summer-wheat_winter-wheat_silage-corn_yellow-mustard": "7_1",
-              "summer-wheat_winter-wheat_winter-rape_yellow-mustard": "8_1",
-              "sugar-beet_winter-wheat_winter-barley_yellow-mustard": "11_1", 
-              "grain-corn_winter-wheat_winter-rape_yellow-mustard": "12_1", 
-              "grain-corn_winter-wheat_winter-barley_yellow-mustard": "13_1", 
-}
-
 # identifiers for simulations
 locations = ["freiburg", "lahr", "muellheim", 
              "stockach", "gottmadingen", "weingarten",
              "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
              "ehingen-kirchen", "merklingen", "hayingen",
              "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
-locations = [
-    "freiburg",
-]
 
 crop_rotation_scenarios = ["winter-wheat_clover",
                            "winter-wheat_silage-corn",
@@ -139,9 +112,9 @@ crop_rotation_scenarios = ["winter-wheat_clover",
                            "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                            "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
                            "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                           "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
-
-fertilization_intensities = ["low", "medium", "high"]
+                           "grain-corn_winter-wheat_winter-barley_yellow-mustard",
+                           "miscanthus",
+                           "bare-grass"]
 
 # # load buffers for assigning the simulations to the meteorological stations
 # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "buffer30km_NBiomasseBW_assignment.gpkg"
@@ -181,16 +154,24 @@ for location in locations:
 
 # aggregate ground cover to average annual mean
 # and aggregate surface runoff to average annual sum
+ll_df = []
 vars_sim = ["ground_cover", "q_hof"]
 for crop_rotation_scenario in crop_rotation_scenarios:
     for location in locations:
-        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
-        gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
-        gdf['stationsna'] = location
-        gdf['stationsna'] = gdf['stationsna'].astype('str')
-        # gdf['agr_region'] = gdf_buffer[gdf_buffer.stationsna==location].agr_region.values[0]
-        gdf['agr_region'] = 'oberrhein'
-        gdf['agr_region'] = gdf['agr_region'].astype('str')
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW_for_assignment.gpkg"
+        gdf1 = gpd.read_file(file)
+        mask = (gdf1['stationsna'] == location)
+        gdf = gdf1.loc[mask, :]
+        gdf['FFID'] = None
+        gdf['FFID'] = f'{_dict_ffid[crop_rotation_scenario]}'
+        # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
+        # gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
+        # gdf['stationsna'] = location
+        # gdf['stationsna'] = gdf['stationsna'].astype('str')
+        # # gdf['agr_region'] = gdf_buffer[gdf_buffer.stationsna==location].agr_region.values[0]
+        # gdf['agr_region'] = 'oberrhein'
+        # gdf['agr_region'] = gdf['agr_region'].astype('str')
+
         for var_sim in vars_sim:
             gdf[f'{_dict_var_names[var_sim]}_avg'] = None  # initialize field, float, two decimals
             gdf[f'{_dict_var_names[var_sim]}_avg'] = gdf[f'{_dict_var_names[var_sim]}_avg'].astype('float64')
@@ -215,6 +196,9 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                 cond2 = gdf["SHP_ID"].isin(shp_ids)
                 if cond2.any():
                     gdf.loc[cond2, f'{_dict_var_names[var_sim]}_avg'] = val
+            gdf = gdf.copy()
+        ll_df.append(gdf)
     gdf = gdf.to_crs("EPSG:25832")
-    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_freiburg_for_P_index") / "surface_runoff_and_ground_cover.gpkg"
+    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_P_index") / "surface_runoff_and_ground_cover.gpkg"
+    # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_freiburg_for_P_index") / "surface_runoff_and_ground_cover.gpkg"
     gdf.to_file(file, layer=f"FFID_{_dict_ffid[crop_rotation_scenario]}", driver="GPKG")
