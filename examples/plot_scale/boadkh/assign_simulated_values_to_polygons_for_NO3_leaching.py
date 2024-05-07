@@ -50,6 +50,8 @@ _dict_ffid = {"winter-wheat_clover": "1_0",
               "grain-corn_winter-wheat_winter-rape": "12_0", 
               "grain-corn_winter-wheat_winter-barley": "13_0",
               "grain-corn_winter-wheat_clover": "14_0",
+              "miscanthus": "15_0",
+              "bare-grass": "16_0",
               "winter-wheat_silage-corn_yellow-mustard": "2_1",
               "summer-wheat_winter-wheat_yellow-mustard": "3_1",
               "winter-wheat_sugar-beet_silage-corn_yellow-mustard": "6_1",
@@ -93,30 +95,6 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
-_dict_ffid = {"winter-wheat_clover": "1_0",
-              "winter-wheat_silage-corn": "2_0",
-              "summer-wheat_winter-wheat": "3_0",
-              "summer-wheat_clover_winter-wheat": "4_0",
-              "winter-wheat_clover_silage-corn": "5_0",
-              "winter-wheat_sugar-beet_silage-corn": "6_0",
-              "summer-wheat_winter-wheat_silage-corn": "7_0",
-              "summer-wheat_winter-wheat_winter-rape": "8_0",
-              "winter-wheat_winter-rape": "9_0",
-              "winter-wheat_soybean_winter-rape": "10_0",
-              "sugar-beet_winter-wheat_winter-barley": "11_0", 
-              "grain-corn_winter-wheat_winter-rape": "12_0", 
-              "grain-corn_winter-wheat_winter-barley": "13_0",
-              "grain-corn_winter-wheat_clover": "14_0",
-              "winter-wheat_silage-corn_yellow-mustard": "2_1",
-              "summer-wheat_winter-wheat_yellow-mustard": "3_1",
-              "winter-wheat_sugar-beet_silage-corn_yellow-mustard": "6_1",
-              "summer-wheat_winter-wheat_silage-corn_yellow-mustard": "7_1",
-              "summer-wheat_winter-wheat_winter-rape_yellow-mustard": "8_1",
-              "sugar-beet_winter-wheat_winter-barley_yellow-mustard": "11_1", 
-              "grain-corn_winter-wheat_winter-rape_yellow-mustard": "12_1", 
-              "grain-corn_winter-wheat_winter-barley_yellow-mustard": "13_1", 
-}
-
 _dict_crop_id = {"winter-wheat": 115,
                  "clover": 425,
                  "silage-corn": 411,
@@ -126,6 +104,8 @@ _dict_crop_id = {"winter-wheat": 115,
                  "soybean": 330,
                  "grain-corn": 171,
                  "winter-barley": 131,
+                 "grass": 591,
+                 "miscanthus": 852,
                 }
 
 _dict_lu_id = {"winter-wheat": [557],
@@ -137,6 +117,9 @@ _dict_lu_id = {"winter-wheat": [557],
                "soybean": [541],
                "grain-corn": [525],
                "winter-barley": [556],
+               "miscanthus": [589, 590, 591],
+               "grass": [571, 573, 574],
+               "bare": [599],
                 }
 
 _dict_crop_periods = {"winter-wheat_clover": {"winter-wheat": [557], "clover": [583, 584, 585]},
@@ -153,6 +136,8 @@ _dict_crop_periods = {"winter-wheat_clover": {"winter-wheat": [557], "clover": [
                       "grain-corn_winter-wheat_winter-rape": {"grain-corn": [525], "winter-wheat": [557], "winter-rape": [559]},
                       "grain-corn_winter-wheat_winter-barley": {"grain-corn": [525], "winter-wheat": [557], "winter-barley": [556]},
                       "grain-corn_winter-wheat_clover": {"grain-corn": [525], "winter-wheat": [557], "clover": [583, 584, 585]},
+                      "miscanthus": {"miscanthus": [589, 590, 591]},
+                      "bare-grass": {"grass": [599, 571, 573, 574]},
                       "winter-wheat_silage-corn_yellow-mustard": {"winter-wheat": [557], "silage-corn": [539]},
                       "summer-wheat_winter-wheat_yellow-mustard": {"winter-wheat": [557], "summer-wheat": [543]},
                       "winter-wheat_sugar-beet_silage-corn_yellow-mustard": {"winter-wheat": [557], "silage-corn": [539], "sugar-beet": [563]},
@@ -194,7 +179,9 @@ crop_rotation_scenarios = ["winter-wheat_clover",
                            "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
                            "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
                            "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                           "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
+                           "grain-corn_winter-wheat_winter-barley_yellow-mustard",
+                           "miscanthus",
+                           "bare-grass"]
 
 fertilization_intensities = ["low", "medium", "high"]
 
@@ -274,7 +261,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
     gdf['CID'] = None
     gdf['CID'] = int(0)
     for location in locations:
-        # mask = (gdf['stationsna'] == location)
+        # mask = (gdf1['stationsna'] == location)
         # gdf = gdf1.loc[mask, :]
         # gdf['FFID'] = None
         # gdf['FFID'] = f'{_dict_ffid[crop_rotation_scenario]}'

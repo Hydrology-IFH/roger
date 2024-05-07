@@ -88,9 +88,12 @@ locations = ["freiburg", "lahr", "muellheim",
              "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
              "ehingen-kirchen", "merklingen", "hayingen",
              "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
-locations = [
-    "freiburg",
-]
+
+locations = ["freiburg", "muellheim", 
+             "stockach", "gottmadingen", "weingarten",
+             "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
+             "ehingen-kirchen", "merklingen", "hayingen",
+             "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
 
 crop_rotation_scenarios = ["winter-wheat_clover",
                            "winter-wheat_silage-corn",
@@ -227,7 +230,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             ax.set_xlim(df.index[0], df.index[-1])
             fig.tight_layout()
             file = base_path_figs / f"trace_{var_sim}_{location}_{crop_rotation_scenario}.png"
-            fig.savefig(file, dpi=250)
+            fig.savefig(file, dpi=300)
             plt.close(fig)
 
 # plot average annual sums/means
@@ -260,7 +263,7 @@ for var_sim in vars_sim:
         plt.xticks(rotation=33)
         fig.tight_layout()
         file = base_path_figs / f"boxplot_annual_average_{var_sim}_{location}.png"
-        fig.savefig(file, dpi=250)
+        fig.savefig(file, dpi=300)
         plt.close(fig)
 
 
@@ -294,7 +297,7 @@ for var_sim in vars_sim:
 #             plt.xticks(rotation=33)
 #             fig.tight_layout()
 #             file = base_path_figs / f"boxplot_annual_{var_sim}_{location}_{crop_rotation_scenario}.png"
-#             fig.savefig(file, dpi=250)
+#             fig.savefig(file, dpi=300)
 #             plt.close(fig)
 
 

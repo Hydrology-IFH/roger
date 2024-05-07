@@ -12,7 +12,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                "eppingen-elsenz", "bruchsal-heidelsheim", "bretten", 
                                                "ehingen-kirchen", "merklingen", "hayingen", 
                                                "kupferzell", "oehringen", "vellberg-kleinaltdorf"]), 
-                                               default="freiburg")
+                                               default="lahr")
 @click.option("--crop-rotation-scenario", type=click.Choice(["winter-wheat_clover",
                                                              "winter-wheat_silage-corn",
                                                              "summer-wheat_winter-wheat",
@@ -37,7 +37,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "grain-corn_winter-wheat_winter-barley_yellow-mustard",
                                                              "yellow-mustard",
                                                              "miscanthus",
-                                                             "bare-grass"]), default="miscanthus")
+                                                             "bare-grass"]), default="bare-grass")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_crop")
 @roger_base_cli
 def main(location, crop_rotation_scenario, tmp_dir):
