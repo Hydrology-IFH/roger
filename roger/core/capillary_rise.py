@@ -225,6 +225,12 @@ def calc_cpr_ss(state):
             at[2:-2, 2:-2],
             npx.where(vs.cpr_ss[2:-2, 2:-2] < 0, 0, vs.cpr_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
         )
+        # limit uplift to available fine pore storage in subsoil
+        vs.cpr_ss = update(
+            vs.cpr_ss,
+            at[2:-2, 2:-2],
+            npx.where(vs.cpr_ss[2:-2, 2:-2] > (vs.S_ufc_ss[2:-2, 2:-2] - vs.S_fp_ss[2:-2, 2:-2]), vs.S_ufc_ss[2:-2, 2:-2] - vs.S_fp_ss[2:-2, 2:-2], vs.cpr_ss[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        )
 
         # no capillary rise if subsoil is saturated
         vs.cpr_ss = update(

@@ -154,9 +154,10 @@ for location in locations:
 
 # aggregate ground cover to average annual mean
 # and aggregate surface runoff to average annual sum
-ll_df = []
+ll_dfff = []
 vars_sim = ["ground_cover", "q_hof"]
 for crop_rotation_scenario in crop_rotation_scenarios:
+    ll_df = []
     for location in locations:
         file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW_for_assignment.gpkg"
         gdf1 = gpd.read_file(file)
@@ -197,8 +198,13 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                 if cond2.any():
                     gdf.loc[cond2, f'{_dict_var_names[var_sim]}_avg'] = val
             gdf = gdf.copy()
+        gdf = gdf.to_crs("EPSG:25832")
         ll_df.append(gdf)
-    gdf = gdf.to_crs("EPSG:25832")
-    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_P_index") / "surface_runoff_and_ground_cover.gpkg"
-    # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_freiburg_for_P_index") / "surface_runoff_and_ground_cover.gpkg"
-    gdf.to_file(file, layer=f"FFID_{_dict_ffid[crop_rotation_scenario]}", driver="GPKG")
+    gdf_ffid = pd.concat(ll_df)
+    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_P_index") / f"FFID_{_dict_ffid[crop_rotation_scenario]}.gpkg"
+    gdf_ffid.to_file(file, layer="", driver="GPKG")
+    ll_dfff.append(gdf_ffid)
+
+for gdfff in ll_dfff:
+    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_freiburg_for_P_index") / "surface_runoff_and_ground_cover.gpkg"
+    gdfff.to_file(file, layer=f"FFID_{_dict_ffid[crop_rotation_scenario]}", driver="GPKG")
