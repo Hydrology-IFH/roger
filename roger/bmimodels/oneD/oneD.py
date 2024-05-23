@@ -30,7 +30,7 @@ class ONEDSetup(RogerSetup):
 
     def _read_var_from_csv(self, var, path_dir, file):
         csv_file = path_dir / file
-        infile = pd.read_csv(csv_file, sep=";", skiprows=1)
+        infile = pd.read_csv(csv_file, sep=";", skiprows=1, na_values=['', -9999, -9999.0])
         var_obj = infile.loc[:, var]
         return npx.array(var_obj)[:, npx.newaxis]
 
@@ -100,7 +100,16 @@ class ONEDSetup(RogerSetup):
 
     @roger_routine
     def set_topography(self, state):
-        pass
+        vs = state.variables
+        settings = state.settings
+
+        # catchment mask (bool)
+        z_soil = self._read_var_from_csv("z_soil", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny)
+        vs.maskCatch = update(
+            vs.maskCatch,
+            at[2:-2, 2:-2],
+            onp.isfinite(z_soil),
+        )
 
     @roger_routine
     def set_parameters_setup(self, state):
@@ -167,6 +176,11 @@ class ONEDSetup(RogerSetup):
             vs.kf,
             at[2:-2, 2:-2],
             self._read_var_from_csv("kf", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+        )
+        vs.ta_offset = update(
+            vs.ta_offset,
+            at[2:-2, 2:-2],
+            self._read_var_from_csv("ta_offset", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
         )
         vs.pet_weight = update(
             vs.pet_weight,
