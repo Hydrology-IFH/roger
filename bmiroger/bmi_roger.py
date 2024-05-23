@@ -9,9 +9,15 @@ from pathlib import Path
 from typing import Tuple
 from bmipy import Bmi
 from roger import signals, logger, progress, time
+from roger import runtime_settings
 
-import numpy as np
 import yaml
+
+if runtime_settings.backend == "jax":
+    import jax
+    import numpy as np
+else:
+    import numpy as np
 
 
 class BmiRoger(Bmi):
@@ -481,7 +487,7 @@ class BmiRoger(Bmi):
         """
         return self._model.dt
 
-    def get_value(self, name: str, dest: np.ndarray) -> np.ndarray:
+    def get_value(self, name: str, dest):
         """Get a copy of values of the given variable.
 
         This is a getter for the model, used to access the model's
@@ -500,10 +506,25 @@ class BmiRoger(Bmi):
         ndarray
             The same numpy array that was passed as an input buffer.
         """
-        dest[:] = self.get_value_ptr(name)[2:-2, 2:-2, ...].flatten()
+
+        if runtime_settings.backend == "jax":
+            val = self.get_value_ptr(name).at[2:-2, 2:-2, ...].get()
+            if val.shape[-1] == 2:
+                arr = np.asarray(self.get_value_ptr(name).at[2:-2, 2:-2, 1].get())
+                dest[:] = arr.flatten()
+            else:
+                arr = np.asarray(self.get_value_ptr(name).at[2:-2, 2:-2, ...].get())
+                dest[:] = arr.flatten()
+        else:
+            val = self.get_value_ptr(name)[2:-2, 2:-2, ...].flatten()
+            if val.shape[-1] == 2:
+                dest[:] = self.get_value_ptr(name)[2:-2, 2:-2, 1].flatten()
+            else:
+                dest[:] = self.get_value_ptr(name)[2:-2, 2:-2, ...].flatten()
+            
         return dest
 
-    def get_value_ptr(self, name: str) -> np.ndarray:
+    def get_value_ptr(self, name: str):
         """Get a reference to values of the given variable.
 
         This is a getter for the model, used to access the model's
@@ -528,7 +549,8 @@ class BmiRoger(Bmi):
             arr = self._model.state.diagnostics["maximum"].variables.get(f"{name}")
         else:
             arr = self._model.state.variables.get(f"{name}")
-        arr.setflags(write=1)
+        if runtime_settings.backend == "numpy":
+            arr.setflags(write=1)
         return arr
 
     def get_value_at_indices(self, name: str, dest: np.ndarray, inds: np.ndarray) -> np.ndarray:
@@ -551,7 +573,7 @@ class BmiRoger(Bmi):
         dest[:] = self.get_value_ptr(name)[2:-2, 2:-2, ...].take(inds)
         return dest
 
-    def set_value(self, name: str, src: np.ndarray) -> None:
+    def set_value(self, name: str, src) -> None:
         """Specify a new value for a model variable.
 
         This is the setter for the model, used to change the model's
@@ -566,13 +588,21 @@ class BmiRoger(Bmi):
         src : array_like
             The new value for the specified variable.
         """
-        val = self.get_value_ptr(name)[2:-2, 2:-2, ...]
-        if val.shape[-1] == 2:
-            val[..., 1] = src.reshape((val.shape[0], val.shape[1]))
-        else:
-            val[:] = src.reshape(val.shape)
+        if runtime_settings.backend == "jax":
+            val = self.get_value_ptr(name).at[2:-2, 2:-2, ...].get()
+            if val.shape[-1] == 2:
+                val.at[..., 1].set(src.reshape((val.shape[0], val.shape[1])))
+            else:
+                val.at[:].set(src.reshape(val.shape))
 
-    def set_value_at_indices(self, name: str, inds: np.ndarray, src: np.ndarray) -> None:
+        else:
+            val = self.get_value_ptr(name)[2:-2, 2:-2, ...]
+            if val.shape[-1] == 2:
+                val[..., 1] = src.reshape((val.shape[0], val.shape[1]))
+            else:
+                val[:] = src.reshape(val.shape)
+
+    def set_value_at_indices(self, name: str, inds, src) -> None:
         """Specify a new value for a model variable at particular indices.
 
         Parameters
@@ -584,8 +614,12 @@ class BmiRoger(Bmi):
         src : array_like
             The new value for the specified variable.
         """
-        val = self.get_value_ptr(name)
-        val.flat[inds] = src
+        if runtime_settings.backend == "jax":
+            val = self.get_value_ptr(name).at[2:-2, 2:-2, ...].get()
+            val.at[inds].set(src)
+        else:
+            val = self.get_value_ptr(name)
+            val.flat[inds] = src
 
     # Grid information
     def get_grid_rank(self, name: str) -> int:

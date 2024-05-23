@@ -122,8 +122,7 @@ Duration of macropore infiltration :math:`t_{mp}` (:math:`y_{mp}=r_{mp}` at time
 .. math::
   t_{mp}=\frac{\Delta \theta}{k_s \cdot \Psi_s \cdot r_{mp}} \cdot(\frac{y_{mp}^3}{3}-\frac{y_{mp}^2 r}{2}-\frac{r_{mp}^3}{6})
 
-where :math:`r_{mp}` is the radius of the macropore (mm; :math:`r_{mp}`=2.5). Macropore
-infiltration stops if :math:`z_{wf}` is greater than :math:`l_{mpv}`.
+where :math:`r_{mp}` is the radius of the macropore (mm; :math:`r_{mp}`=2.5). Macropore infiltration stops if :math:`z_{wf}` is greater than :math:`l_{mpv}`.
 
 
 
