@@ -1,2 +1,2 @@
-xarray==2023.1.0
-salib==1.4.7
+xarray==2024.5.0
+salib==1.5.0
