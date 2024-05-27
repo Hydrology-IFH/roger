@@ -49,6 +49,8 @@ jobs:
       - name: Install test dependencies
         run: |
           pip install pytest
+          python -m ensurepip --upgrade
+          python -m pip install --upgrade setuptools
 
       - name: List
         run: |
