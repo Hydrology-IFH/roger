@@ -197,8 +197,6 @@ def main():
     #                 lines.append("#SBATCH --export=ALL\n")
     #                 lines.append(" \n")
     #                 lines.append("# load module dependencies\n")
-    #                 lines.append("module load devel/cuda/10.2\n")
-    #                 lines.append("module load devel/cudnn/10.2\n")
     #                 lines.append("module load lib/hdf5/1.14.4-gnu-13.3-openmpi-5.0\n")
     #                 lines.append("# prevent memory issues for Open MPI 4.1.x\n")
     #                 lines.append('export OMPI_MCA_btl="self,smcuda,vader,tcp"\n')
