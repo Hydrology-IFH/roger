@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --time=24:00:00
+#SBATCH --time=12:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=20
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=180000
+#SBATCH --mem=80000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat18O_pi_sa
@@ -14,7 +14,7 @@
 # load module dependencies
 module load devel/cuda/10.2
 module load devel/cudnn/10.2
-module load lib/hdf5/1.12.2-gnu-12.1-openmpi-4.1
+module load lib/hdf5/1.14.4-gnu-13.3-openmpi-5.0
 # prevent memory issues for Open MPI 4.1.x
 export OMPI_MCA_btl="self,smcuda,vader,tcp"
 export OMP_NUM_THREADS=1
