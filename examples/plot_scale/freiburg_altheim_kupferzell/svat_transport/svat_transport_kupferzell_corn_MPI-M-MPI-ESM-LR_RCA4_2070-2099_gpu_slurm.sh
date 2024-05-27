@@ -12,8 +12,6 @@
 #SBATCH --export=ALL
  
 # load module dependencies
-module load devel/cudnn/10.2
-module load devel/cuda/12.0
 module load lib/hdf5/1.14.4-gnu-13.3-openmpi-5.0
 # prevent memory issues for Open MPI 4.1.x
 export OMPI_MCA_btl="self,smcuda,vader,tcp"
