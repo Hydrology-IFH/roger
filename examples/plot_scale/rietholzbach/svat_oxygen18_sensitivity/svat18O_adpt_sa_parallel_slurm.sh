@@ -13,8 +13,6 @@
  
 # load module dependencies
 module load lib/hdf5/1.14.4-gnu-13.3-openmpi-5.0
-# prevent memory issues for Open MPI 4.1.x
-export OMPI_MCA_btl="self,smcuda,vader,tcp"
 export OMP_NUM_THREADS=1
 eval "$(conda shell.bash hook)"
 conda activate roger-mpi
