@@ -18,3 +18,6 @@ dependencies:
     - matplotlib
     - seaborn
     - cftime
+    - bmipy
+    - pip:
+        - jax
