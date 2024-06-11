@@ -92,6 +92,7 @@ def set_log_all_processes(val):
 
 DEVICES = ("cpu", "gpu", "tpu")
 FLOAT_TYPES = ("float64", "float32")
+INT_TYPES = ("int64", "int32")
 
 
 # settings
@@ -103,6 +104,7 @@ AVAILABLE_SETTINGS = {
     "backend": RuntimeSetting(parse_choice(BACKENDS), "numpy"),
     "device": RuntimeSetting(parse_choice(DEVICES), "cpu"),
     "float_type": RuntimeSetting(parse_choice(FLOAT_TYPES), "float32"),
+    "int_type": RuntimeSetting(parse_choice(INT_TYPES), "int32"),
     "petsc_options": RuntimeSetting(str, ""),
     "monitor_water_balance": RuntimeSetting(parse_bool, False),
     "monitor_tracer_balance": RuntimeSetting(parse_bool, False),
@@ -144,7 +146,14 @@ class RuntimeSettings:
 
     def update(self, **kwargs):
         for key, val in kwargs.items():
-            setattr(self, key, val)
+            if key == "float_type":
+                setattr(self, key, val)
+                if val == "float64":
+                    setattr(self, "int_type", "int64")
+                elif val == "float32":
+                    setattr(self, "int_type", "int32")
+            else:
+                setattr(self, key, val)
 
         return self
 

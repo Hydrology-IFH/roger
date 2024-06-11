@@ -147,7 +147,7 @@ def main():
     file = base_path_figs / "perc.gif"
     imageio.mimsave(file,
                     frames,
-                    fps = 2)
+                    fps = 1)
 
     return
 

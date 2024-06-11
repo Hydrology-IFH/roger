@@ -509,15 +509,15 @@ class BmiRoger(Bmi):
 
         if runtime_settings.backend == "jax":
             val = self.get_value_ptr(name).at[2:-2, 2:-2, ...].get()
-            if val.shape[-1] == 2:
+            if len(val.shape) == 3:
                 arr = np.asarray(self.get_value_ptr(name).at[2:-2, 2:-2, 1].get())
                 dest[:] = arr.flatten()
             else:
                 arr = np.asarray(self.get_value_ptr(name).at[2:-2, 2:-2, ...].get())
                 dest[:] = arr.flatten()
         else:
-            val = self.get_value_ptr(name)[2:-2, 2:-2, ...].flatten()
-            if val.shape[-1] == 2:
+            val = self.get_value_ptr(name)[2:-2, 2:-2, ...]
+            if len(val.shape) == 3:
                 dest[:] = self.get_value_ptr(name)[2:-2, 2:-2, 1].flatten()
             else:
                 dest[:] = self.get_value_ptr(name)[2:-2, 2:-2, ...].flatten()
@@ -573,7 +573,7 @@ class BmiRoger(Bmi):
         dest[:] = self.get_value_ptr(name)[2:-2, 2:-2, ...].take(inds)
         return dest
 
-    def set_value(self, name: str, src) -> None:
+    def set_value(self, name: str, src):
         """Specify a new value for a model variable.
 
         This is the setter for the model, used to change the model's
@@ -589,18 +589,20 @@ class BmiRoger(Bmi):
             The new value for the specified variable.
         """
         if runtime_settings.backend == "jax":
-            val = self.get_value_ptr(name).at[2:-2, 2:-2, ...].get()
-            if val.shape[-1] == 2:
-                val.at[..., 1].set(src.reshape((val.shape[0], val.shape[1])))
+            shape = self.get_value_ptr(name).at[2:-2, 2:-2, ...].get().shape
+            if len(shape) == 3:
+                val = self._model.state.variables.get(f"{name}").at[2:-2, 2:-2, 1].set(src.reshape((shape[0], shape[1])))
             else:
-                val.at[:].set(src.reshape(val.shape))
+                val = self._model.state.variables.get(f"{name}").at[2:-2, 2:-2].set.set(src.reshape(shape))
 
         else:
             val = self.get_value_ptr(name)[2:-2, 2:-2, ...]
-            if val.shape[-1] == 2:
+            if len(val.shape) == 3:
                 val[..., 1] = src.reshape((val.shape[0], val.shape[1]))
             else:
                 val[:] = src.reshape(val.shape)
+
+        return val
 
     def set_value_at_indices(self, name: str, inds, src) -> None:
         """Specify a new value for a model variable at particular indices.
