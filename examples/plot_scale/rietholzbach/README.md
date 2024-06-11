@@ -1,4 +1,4 @@
-# Modelling oxygen-18 transport and bromide transport with Roger at Rietholzbach lysimeter site
+# Modelling oxygen-18 transport and bromide transport with RoGeR at the Rietholzbach lysimeter site
 
 All results have been generated with Roger version 3.0.5.
 

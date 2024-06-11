@@ -2,7 +2,7 @@ from pathlib import Path
 import h5netcdf
 import pandas as pd
 
-from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
+from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput, runtime_settings
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, at
 from roger.core.surface import calc_parameters_surface_kernel
@@ -13,13 +13,15 @@ import numpy as onp
 class ONEDSetup(RogerSetup):
     """A ONED model."""
 
-    def __init__(self, base_path=Path()):
+    def __init__(self, base_path=Path(), enable_groundwater_boundary=False):
         super().__init__()
         self._base_path = base_path
         self._input_dir = base_path / "input"
         self._output_dir = base_path / "output"
         self._file_config = base_path / "config.yml"
         self._config = None
+        self.enable_groundwater_boundary=enable_groundwater_boundary
+
 
     # custom helper functions
     def _read_var_from_nc(self, var, path_dir, file):
@@ -73,6 +75,7 @@ class ONEDSetup(RogerSetup):
         settings.enable_groundwater_boundary = False
         settings.enable_lateral_flow = True
         settings.enable_adaptive_time_stepping = True
+        settings.enable_groundwater_boundary = self.enable_groundwater_boundary
 
     @roger_routine
     def set_grid(self, state):

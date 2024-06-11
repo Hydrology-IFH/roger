@@ -165,13 +165,6 @@ for crop_rotation_scenario in crop_rotation_scenarios:
         gdf = gdf1.loc[mask, :]
         gdf['FFID'] = None
         gdf['FFID'] = f'{_dict_ffid[crop_rotation_scenario]}'
-        # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
-        # gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
-        # gdf['stationsna'] = location
-        # gdf['stationsna'] = gdf['stationsna'].astype('str')
-        # # gdf['agr_region'] = gdf_buffer[gdf_buffer.stationsna==location].agr_region.values[0]
-        # gdf['agr_region'] = 'oberrhein'
-        # gdf['agr_region'] = gdf['agr_region'].astype('str')
 
         for var_sim in vars_sim:
             gdf[f'{_dict_var_names[var_sim]}_avg'] = None  # initialize field, float, two decimals
@@ -206,5 +199,5 @@ for crop_rotation_scenario in crop_rotation_scenarios:
     ll_dfff.append(gdf_ffid)
 
 for gdfff in ll_dfff:
-    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_freiburg_for_P_index") / "surface_runoff_and_ground_cover.gpkg"
+    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_P_index") / "surface_runoff_and_ground_cover.gpkg"
     gdfff.to_file(file, layer=f"FFID_{_dict_ffid[crop_rotation_scenario]}", driver="GPKG")

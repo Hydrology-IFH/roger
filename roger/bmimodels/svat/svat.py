@@ -2,7 +2,7 @@ from pathlib import Path
 import h5netcdf
 import pandas as pd
 
-from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
+from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput, runtime_settings
 from roger.variables import allocate
 from roger.core.operators import numpy as npx, update, at
 from roger.core.surface import calc_parameters_surface_kernel
@@ -33,7 +33,11 @@ class SVATSetup(RogerSetup):
         csv_file = path_dir / file
         infile = pd.read_csv(csv_file, sep=";", skiprows=1, na_values=['', -9999, -9999.0])
         var_obj = infile.loc[:, var]
-        return npx.array(var_obj)[:, npx.newaxis]
+        if var == "lu_id":
+            vals = npx.array(var_obj, dtype=runtime_settings.int_type)[:, npx.newaxis]
+        else:
+            vals = npx.array(var_obj)[:, npx.newaxis]
+        return vals
 
     def _get_runlen(self, path_dir, file):
         nc_file = path_dir / file

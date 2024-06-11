@@ -154,9 +154,6 @@ locations = ["freiburg", "lahr", "muellheim",
              "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
              "ehingen-kirchen", "merklingen", "hayingen",
              "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
-locations = [
-    "freiburg",
-]
 
 crop_rotation_scenarios = ["winter-wheat_clover",
                            "winter-wheat_silage-corn",
@@ -250,27 +247,32 @@ for location in locations:
 vars_sim = ["q_hof", "q_ss", "M_q_ss", "C_q_ss"]
 ll_df = []
 ll_df_crop_periods = []
+nn = len(locations) * len(crop_rotation_scenarios) * len(vars_sim)
+counter = 0
 for crop_rotation_scenario in crop_rotation_scenarios:
-    # extract the values for the entire crop rotation
-    # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW_for_assignment.gpkg"
-    # gdf1 = gpd.read_file(file)
-    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
-    gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
-    gdf['FFID'] = None
-    gdf['FFID'] = _dict_ffid[crop_rotation_scenario]
-    gdf['CID'] = None
-    gdf['CID'] = int(0)
     for location in locations:
-        # mask = (gdf1['stationsna'] == location)
-        # gdf = gdf1.loc[mask, :]
-        # gdf['FFID'] = None
-        # gdf['FFID'] = f'{_dict_ffid[crop_rotation_scenario]}'
-        # gdf['CID'] = None
-        # gdf['CID'] = int(f'{_dict_crop_id[crop_id]}')
         for var_sim in vars_sim:
             if var_sim in ["M_q_ss", "C_q_ss"]:
                 for fertilization_intensity in fertilization_intensities:
-
+                    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW_for_assignment.gpkg"
+                    gdf1 = gpd.read_file(file)
+                    mask = (gdf1['stationsna'] == location)
+                    gdf = gdf1.loc[mask, :]
+                    gdf['FFID'] = None
+                    gdf['FFID'] = _dict_ffid[crop_rotation_scenario]
+                    gdf['CID'] = None
+                    gdf['CID'] = int(0)
+                    gdf['region'] = None
+                    if location in ["freiburg", "lahr", "muellheim"]:
+                        gdf['region'] = "upper rhine valley"
+                    elif location in ["stockach", "gottmadingen", "weingarten"]:
+                        gdf['region'] = "lake constance"
+                    elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+                        gdf['region'] = "kraichgau"
+                    elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+                        gdf['region'] = "alb-danube"
+                    elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+                        gdf['region'] = "hohenlohe"
                     gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = None  # initialize field, float, two decimals
                     gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'].astype('float64')
                     gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'].round(decimals=2)
@@ -303,7 +305,28 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                         if cond2.any():
                             gdf.loc[cond2, f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = val
                     gdf = gdf.copy()
+                    gdf = gdf.to_crs("EPSG:25832")
+                    ll_df.append(gdf)
             elif var_sim in ["q_ss", "q_hof"]:
+                file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW_for_assignment.gpkg"
+                gdf1 = gpd.read_file(file)
+                mask = (gdf1['stationsna'] == location)
+                gdf = gdf1.loc[mask, :]
+                gdf['FFID'] = None
+                gdf['FFID'] = _dict_ffid[crop_rotation_scenario]
+                gdf['CID'] = None
+                gdf['CID'] = int(0)
+                gdf['region'] = None
+                if location in ["freiburg", "lahr", "muellheim"]:
+                    gdf['region'] = "upper rhine valley"
+                elif location in ["stockach", "gottmadingen", "weingarten"]:
+                    gdf['region'] = "lake constance"
+                elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+                    gdf['region'] = "kraichgau"
+                elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+                    gdf['region'] = "alb-danube"
+                elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+                    gdf['region'] = "hohenlohe"
                 gdf[f'{_dict_var_names[var_sim]}'] = None  # initialize field, float, two decimals
                 gdf[f'{_dict_var_names[var_sim]}'] = gdf[f'{_dict_var_names[var_sim]}'].astype('float64')
                 gdf[f'{_dict_var_names[var_sim]}'] = gdf[f'{_dict_var_names[var_sim]}'].round(decimals=2)
@@ -325,26 +348,26 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                     if cond2.any():
                         gdf.loc[cond2, f'{_dict_var_names[var_sim]}'] = val
                 gdf = gdf.copy()
-    ll_df.append(gdf)
+                gdf = gdf.to_crs("EPSG:25832")
+                ll_df.append(gdf)
 
+                gdf = pd.concat(ll_df, axis=0)
+                gdf = gdf.to_crs("EPSG:25832")
+                file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_nitrate_leaching") / "nitrate_leaching.gpkg"
+                gdf.to_file(file, driver="GPKG")
+                # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_nitrate_leaching") / "nitrate_leaching.shp"
+                # gdf.to_file(file)
+                # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_nitrate_leaching") / "nitrate_leaching.csv"
+                # df = pd.DataFrame(gdf)
+                # df.loc[:, 'FFID':].to_csv(file, sep=";", index=False)
+            counter += 1
+            print(f"{counter}/{nn}")
+
+    
     # extract the values for the single crop periods within the crop rotation
     crop_ids = _dict_crop_periods[crop_rotation_scenario]
     for crop_id in crop_ids:
-        # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW_for_assignment.gpkg"
-        # gdf1 = gpd.read_file(file)
-        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
-        gdf = gpd.read_file(file, include_fields=["fid", "SHP_ID"])
-        gdf['FFID'] = None
-        gdf['FFID'] = f'{_dict_ffid[crop_rotation_scenario]}'
-        gdf['CID'] = None
-        gdf['CID'] = int(f'{_dict_crop_id[crop_id]}')
         for location in locations:
-            # mask = (gdf['stationsna'] == location)
-            # gdf = gdf1.loc[mask, :]
-            # gdf['FFID'] = None
-            # gdf['FFID'] = f'{_dict_ffid[crop_rotation_scenario]}'
-            # gdf['CID'] = None
-            # gdf['CID'] = int(f'{_dict_crop_id[crop_id]}')
             ds = dict_fluxes_states[location][crop_rotation_scenario]
             lu_id = ds["lu_id"].isel(x=0, y=0).values
             df_lu_id = pd.DataFrame(index=ds["Time"].values, data=lu_id)
@@ -364,6 +387,25 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             for var_sim in vars_sim:
                 if var_sim in ["M_q_ss", "C_q_ss"]:
                     for fertilization_intensity in fertilization_intensities:
+                        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW_for_assignment.gpkg"
+                        gdf1 = gpd.read_file(file)
+                        mask = (gdf1['stationsna'] == location)
+                        gdf = gdf1.loc[mask, :]
+                        gdf['FFID'] = None
+                        gdf['FFID'] = f'{_dict_ffid[crop_rotation_scenario]}'
+                        gdf['CID'] = None
+                        gdf['CID'] = int(f'{_dict_crop_id[crop_id]}')
+                        gdf['region'] = None
+                        if location in ["freiburg", "lahr", "muellheim"]:
+                            gdf['region'] = "upper rhine valley"
+                        elif location in ["stockach", "gottmadingen", "weingarten"]:
+                            gdf['region'] = "lake constance"
+                        elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+                            gdf['region'] = "kraichgau"
+                        elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+                            gdf['region'] = "alb-danube"
+                        elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+                            gdf['region'] = "hohenlohe"
                         gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = None  # initialize field, float, two decimals
                         gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'].astype('float64')
                         gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = gdf[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'].round(decimals=2)
@@ -399,7 +441,28 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                             if cond2.any():
                                 gdf.loc[cond2, f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = val
                         gdf = gdf.copy()
+                        gdf = gdf.to_crs("EPSG:25832")
+                        ll_df.append(gdf)
                 elif var_sim in ["q_ss", "q_hof"]:
+                    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW_for_assignment.gpkg"
+                    gdf1 = gpd.read_file(file)
+                    mask = (gdf1['stationsna'] == location)
+                    gdf = gdf1.loc[mask, :]
+                    gdf['FFID'] = None
+                    gdf['FFID'] = f'{_dict_ffid[crop_rotation_scenario]}'
+                    gdf['CID'] = None
+                    gdf['CID'] = int(f'{_dict_crop_id[crop_id]}')
+                    gdf['region'] = None
+                    if location in ["freiburg", "lahr", "muellheim"]:
+                        gdf['region'] = "upper rhine valley"
+                    elif location in ["stockach", "gottmadingen", "weingarten"]:
+                        gdf['region'] = "lake constance"
+                    elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+                        gdf['region'] = "kraichgau"
+                    elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+                        gdf['region'] = "alb-danube"
+                    elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+                        gdf['region'] = "hohenlohe"
                     gdf[f'{_dict_var_names[var_sim]}'] = None  # initialize field, float, two decimals
                     gdf[f'{_dict_var_names[var_sim]}'] = gdf[f'{_dict_var_names[var_sim]}'].astype('float64')
                     gdf[f'{_dict_var_names[var_sim]}'] = gdf[f'{_dict_var_names[var_sim]}'].round(decimals=2)
@@ -430,21 +493,24 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                         if cond2.any():
                             gdf.loc[cond2, f'{_dict_var_names[var_sim]}'] = val
                     gdf = gdf.copy()
-        ll_df.append(gdf)
+                    gdf = gdf.to_crs("EPSG:25832")
+                    ll_df.append(gdf)
 
-gdf = pd.concat(ll_df, axis=0)
-gdf = gdf.to_crs("EPSG:25832")
-# file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_freiburg_for_nitrate_leaching") / "nitrate_leaching.gpkg"
-# gdf.to_file(file, driver="GPKG")
-file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_freiburg_for_nitrate_leaching") / "nitrate_leaching.shp"
-gdf.to_file(file)
-file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_freiburg_for_nitrate_leaching") / "nitrate_leaching.csv"
-df = pd.DataFrame(gdf)
-df.loc[:, 'FFID':].to_csv(file, sep=";", index=False)
+                    gdf = pd.concat(ll_df, axis=0)
+                    gdf = gdf.to_crs("EPSG:25832")
+                    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_nitrate_leaching") / "nitrate_leaching.gpkg"
+                    gdf.to_file(file, driver="GPKG")
+                    # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_nitrate_leaching") / "nitrate_leaching.shp"
+                    # gdf.to_file(file)
+                    # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_nitrate_leaching") / "nitrate_leaching.csv"
+                    # df = pd.DataFrame(gdf)
+                    # df.loc[:, 'FFID':].to_csv(file, sep=";", index=False)
 
-cid = onp.unique(df.loc[:, 'CID'].values)
-print(cid)
+    print(f"Finalized {crop_rotation_scenario}")
+
+# cid = onp.unique(df.loc[:, 'CID'].values)
+# print(cid)
 
 df_crop_periods = pd.concat(ll_df_crop_periods, axis=0)
-file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_freiburg_for_nitrate_leaching") / "crop_periods.csv"
+file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_nitrate_leaching") / "crop_periods.csv"
 df_crop_periods.to_csv(file, sep=";", index=False)
