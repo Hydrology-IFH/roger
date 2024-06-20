@@ -7,7 +7,7 @@ import geopandas as gpd
 import numpy as onp
 import matplotlib as mpl
 import seaborn as sns
-import h5py
+import click
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -74,27 +74,6 @@ _dict_fert = {"low": 1,
               "high": 3,
 }
 
-
-def nanmeanweighted(y, w, axis=None):
-    w1 = w / onp.nansum(w, axis=axis)
-    w2 = onp.where(onp.isnan(w), 0, w1)
-    w3 = onp.where(onp.isnan(y), 0, w2)
-    y1 = onp.where(onp.isnan(y), 0, y)
-    wavg = onp.sum(y1 * w3, axis=axis) / onp.sum(w3, axis=axis)
-
-    return wavg
-
-
-base_path = Path(__file__).parent
-# directory of results
-base_path_output = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output"
-if not os.path.exists(base_path_output):
-    os.mkdir(base_path_output)
-# directory of figures
-base_path_figs = base_path / "figures"
-if not os.path.exists(base_path_figs):
-    os.mkdir(base_path_figs)
-
 _dict_crop_id = {"winter-wheat": 115,
                  "clover": 425,
                  "silage-corn": 411,
@@ -148,13 +127,6 @@ _dict_crop_periods = {"winter-wheat_clover": {"winter-wheat": [557], "clover": [
                       "grain-corn_winter-wheat_winter-barley_yellow-mustard": {"grain-corn": [525], "winter-wheat": [557], "winter-barley": [556]}, 
 }
 
-# identifiers for simulations
-locations = ["freiburg", "lahr", "muellheim", 
-             "stockach", "gottmadingen", "weingarten",
-             "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
-             "ehingen-kirchen", "merklingen", "hayingen",
-             "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
-
 crop_rotation_scenarios = ["winter-wheat_clover",
                            "winter-wheat_silage-corn",
                            "summer-wheat_winter-wheat",
@@ -182,22 +154,48 @@ crop_rotation_scenarios = ["winter-wheat_clover",
 
 fertilization_intensities = ["low", "medium", "high"]
 
-# # load buffers for assigning the simulations to the meteorological stations
-# file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "buffer30km_NBiomasseBW_assignment.gpkg"
-# gdf_buffer = gpd.read_file(file, include_fields=["fid", "station_id", "stationsna", "agr_region"])
 
-# load linkage between BK50 and cropland clusters
-file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "link_shp_clust_acker.h5"
-df_link_bk50_cluster_cropland = pd.read_hdf(file)
+def nanmeanweighted(y, w, axis=None):
+    w1 = w / onp.nansum(w, axis=axis)
+    w2 = onp.where(onp.isnan(w), 0, w1)
+    w3 = onp.where(onp.isnan(y), 0, w2)
+    y1 = onp.where(onp.isnan(y), 0, y)
+    wavg = onp.sum(y1 * w3, axis=axis) / onp.sum(w3, axis=axis)
 
-# load model parameters
-csv_file = base_path / "parameters.csv"
-df_params = pd.read_csv(csv_file, sep=";", skiprows=1)
-clust_ids = pd.unique(df_params["CLUST_ID"].values).tolist()
+    return wavg
 
-# load nitrogen loads and concentrations
-dict_nitrate = {}
-for location in locations:
+@click.option("-l", "--location", type=click.Choice(["freiburg", "lahr", "muellheim", 
+                                                     "stockach", "gottmadingen", "weingarten",
+                                                     "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
+                                                     "ehingen-kirchen", "merklingen", "hayingen",
+                                                     "kupferzell", "oehringen", "vellberg-kleinaltdorf"]), 
+                                                     default=str, help="Location of the meteorological station.")
+@click.command("main")
+def main(location):
+    base_path = Path(__file__).parent
+    # directory of results
+    base_path_output = base_path / "output"
+    if not os.path.exists(base_path_output):
+        os.mkdir(base_path_output)
+    # directory of figures
+    base_path_figs = base_path / "figures"
+    if not os.path.exists(base_path_figs):
+        os.mkdir(base_path_figs)
+
+    # load linkage between BK50 and cropland clusters
+    file = base_path_output / "link_shp_clust_acker.h5"
+    # file = base_path_output / "link_shp_clust_acker.h5"
+    df_link_bk50_cluster_cropland = pd.read_hdf(file)
+
+    # load model parameters
+    csv_file = base_path / "parameters.csv"
+    df_params = pd.read_csv(csv_file, sep=";", skiprows=1)
+    cond = (df_params["CLUST_flag"] == 2)
+    df_params = df_params.loc[cond, :]
+    clust_ids = pd.unique(df_params["CLUST_ID"].values).tolist()
+
+    # load nitrogen loads and concentrations
+    dict_nitrate = {}
     dict_nitrate[location] = {}
     for crop_rotation_scenario in crop_rotation_scenarios:
         dict_nitrate[location][crop_rotation_scenario] = {}
@@ -220,9 +218,8 @@ for location in locations:
             ds_nitrate = ds_nitrate.assign_coords(Time=("Time", date))
             dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] = ds_nitrate
 
-# load simulated fluxes and states
-dict_fluxes_states = {}
-for location in locations:
+    # load simulated fluxes and states
+    dict_fluxes_states = {}
     dict_fluxes_states[location] = {}
     for crop_rotation_scenario in crop_rotation_scenarios:
         dict_fluxes_states[location][crop_rotation_scenario] = {}
@@ -243,18 +240,16 @@ for location in locations:
         ds_fluxes_states = ds_fluxes_states.assign_coords(Time=("Time", date))
         dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
 
-# aggregate nitrate leaching, surface runoff and percolation to annual average values
-vars_sim = ["q_hof", "q_ss", "M_q_ss", "C_q_ss"]
-ll_df = []
-ll_df_crop_periods = []
-nn = len(locations) * len(crop_rotation_scenarios) * len(vars_sim)
-counter = 0
-for crop_rotation_scenario in crop_rotation_scenarios:
-    for location in locations:
+    # aggregate nitrate leaching, surface runoff and percolation to annual average values
+    vars_sim = ["q_hof", "q_ss", "M_q_ss", "C_q_ss"]
+    ll_df = []
+    ll_df_crop_periods = []
+    for crop_rotation_scenario in crop_rotation_scenarios:
+        print(f"{crop_rotation_scenario}")
         for var_sim in vars_sim:
             if var_sim in ["M_q_ss", "C_q_ss"]:
                 for fertilization_intensity in fertilization_intensities:
-                    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW_for_assignment.gpkg"
+                    file = base_path_output / "BK50_NBiomasseBW_for_assignment.gpkg"
                     gdf1 = gpd.read_file(file)
                     mask = (gdf1['stationsna'] == location)
                     gdf = gdf1.loc[mask, :]
@@ -308,7 +303,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                     gdf = gdf.to_crs("EPSG:25832")
                     ll_df.append(gdf)
             elif var_sim in ["q_ss", "q_hof"]:
-                file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW_for_assignment.gpkg"
+                file = base_path_output / "BK50_NBiomasseBW_for_assignment.gpkg"
                 gdf1 = gpd.read_file(file)
                 mask = (gdf1['stationsna'] == location)
                 gdf = gdf1.loc[mask, :]
@@ -353,21 +348,12 @@ for crop_rotation_scenario in crop_rotation_scenarios:
 
                 gdf = pd.concat(ll_df, axis=0)
                 gdf = gdf.to_crs("EPSG:25832")
-                file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_nitrate_leaching") / "nitrate_leaching.gpkg"
+                file = base_path_output / f"nitrate_leaching_{location}.gpkg"
                 gdf.to_file(file, driver="GPKG")
-                # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_nitrate_leaching") / "nitrate_leaching.shp"
-                # gdf.to_file(file)
-                # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_nitrate_leaching") / "nitrate_leaching.csv"
-                # df = pd.DataFrame(gdf)
-                # df.loc[:, 'FFID':].to_csv(file, sep=";", index=False)
-            counter += 1
-            print(f"{counter}/{nn}")
 
-    
-    # extract the values for the single crop periods within the crop rotation
-    crop_ids = _dict_crop_periods[crop_rotation_scenario]
-    for crop_id in crop_ids:
-        for location in locations:
+        # extract the values for the single crop periods within the crop rotation
+        crop_ids = _dict_crop_periods[crop_rotation_scenario]
+        for crop_id in crop_ids:
             ds = dict_fluxes_states[location][crop_rotation_scenario]
             lu_id = ds["lu_id"].isel(x=0, y=0).values
             df_lu_id = pd.DataFrame(index=ds["Time"].values, data=lu_id)
@@ -387,7 +373,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             for var_sim in vars_sim:
                 if var_sim in ["M_q_ss", "C_q_ss"]:
                     for fertilization_intensity in fertilization_intensities:
-                        file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW_for_assignment.gpkg"
+                        file = base_path_output / "BK50_NBiomasseBW_for_assignment.gpkg"
                         gdf1 = gpd.read_file(file)
                         mask = (gdf1['stationsna'] == location)
                         gdf = gdf1.loc[mask, :]
@@ -444,7 +430,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                         gdf = gdf.to_crs("EPSG:25832")
                         ll_df.append(gdf)
                 elif var_sim in ["q_ss", "q_hof"]:
-                    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_NBiomasseBW_for_assignment.gpkg"
+                    file = base_path_output / "BK50_NBiomasseBW_for_assignment.gpkg"
                     gdf1 = gpd.read_file(file)
                     mask = (gdf1['stationsna'] == location)
                     gdf = gdf1.loc[mask, :]
@@ -498,19 +484,10 @@ for crop_rotation_scenario in crop_rotation_scenarios:
 
                     gdf = pd.concat(ll_df, axis=0)
                     gdf = gdf.to_crs("EPSG:25832")
-                    file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_nitrate_leaching") / "nitrate_leaching.gpkg"
+                    file = base_path_output / "data_for_nitrate_leaching" / f"nitrate_leaching_{location}.gpkg"
                     gdf.to_file(file, driver="GPKG")
-                    # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_nitrate_leaching") / "nitrate_leaching.shp"
-                    # gdf.to_file(file)
-                    # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_nitrate_leaching") / "nitrate_leaching.csv"
-                    # df = pd.DataFrame(gdf)
-                    # df.loc[:, 'FFID':].to_csv(file, sep=";", index=False)
+        print(f"Finalized {crop_rotation_scenario}")
 
-    print(f"Finalized {crop_rotation_scenario}")
 
-# cid = onp.unique(df.loc[:, 'CID'].values)
-# print(cid)
-
-df_crop_periods = pd.concat(ll_df_crop_periods, axis=0)
-file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_for_nitrate_leaching") / "crop_periods.csv"
-df_crop_periods.to_csv(file, sep=";", index=False)
+if __name__ == "__main__":
+    main()
