@@ -3,7 +3,7 @@
 #SBATCH --nodes=4
 #SBATCH --ntasks-per-node=8
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=240000
+#SBATCH --mem=256000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat18O_adpt_sa
