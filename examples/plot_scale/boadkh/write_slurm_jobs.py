@@ -237,7 +237,7 @@ def main():
 
     # --- jobs to write shapefiles --------------------------------------------------------
     for location in locations:
-        script_name = f"write_shapfiles_{location}"
+        script_name = f"write_shapefiles_{location}"
         output_path_ws = base_path_ws / "output"
         lines = []
         lines.append("#!/bin/bash\n")

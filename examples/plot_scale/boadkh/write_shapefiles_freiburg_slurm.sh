@@ -6,9 +6,9 @@
 #SBATCH --mem=32000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
-#SBATCH --job-name=write_shapfiles_freiburg
-#SBATCH --output=write_shapfiles_freiburg.out
-#SBATCH --error=write_shapfiles_freiburg_err.out
+#SBATCH --job-name=write_shapefiles_freiburg
+#SBATCH --output=write_shapefiles_freiburg.out
+#SBATCH --error=write_shapefiles_freiburg_err.out
 #SBATCH --export=ALL
  
 eval "$(conda shell.bash hook)"

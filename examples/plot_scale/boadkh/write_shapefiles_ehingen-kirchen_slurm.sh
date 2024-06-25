@@ -6,17 +6,17 @@
 #SBATCH --mem=32000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
-#SBATCH --job-name=write_shapfiles_hayingen
-#SBATCH --output=write_shapfiles_hayingen.out
-#SBATCH --error=write_shapfiles_hayingen_err.out
+#SBATCH --job-name=write_shapefiles_ehingen-kirchen
+#SBATCH --output=write_shapefiles_ehingen-kirchen.out
+#SBATCH --error=write_shapefiles_ehingen-kirchen_err.out
 #SBATCH --export=ALL
  
 eval "$(conda shell.bash hook)"
 conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh
  
-python assign_simulated_values_to_polygons_for_NO3_leaching.py --location hayingen -td "${TMPDIR}"
+python assign_simulated_values_to_polygons_for_NO3_leaching.py --location ehingen-kirchen -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh/output"
 mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh/output
-mv "${TMPDIR}"/nitrate_leaching_hayingen.gpkg /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh/output
+mv "${TMPDIR}"/nitrate_leaching_ehingen-kirchen.gpkg /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh/output
