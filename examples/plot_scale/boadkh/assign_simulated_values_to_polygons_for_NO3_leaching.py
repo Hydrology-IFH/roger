@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 import xarray as xr
 from cftime import num2date
@@ -170,17 +169,12 @@ def nanmeanweighted(y, w, axis=None):
                                                      "ehingen-kirchen", "merklingen", "hayingen",
                                                      "kupferzell", "oehringen", "vellberg-kleinaltdorf"]), 
                                                      default=str, help="Location of the meteorological station.")
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
 @click.command("main")
-def main(location):
+def main(location, tmp_dir):
     base_path = Path(__file__).parent
     # directory of results
-    base_path_output = base_path / "output"
-    if not os.path.exists(base_path_output):
-        os.mkdir(base_path_output)
-    # directory of figures
-    base_path_figs = base_path / "figures"
-    if not os.path.exists(base_path_figs):
-        os.mkdir(base_path_figs)
+    base_path_output = Path("/pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh") / "output"
 
     # load linkage between BK50 and cropland clusters
     file = base_path_output / "link_shp_clust_acker.h5"
@@ -241,6 +235,8 @@ def main(location):
         dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
 
     # aggregate nitrate leaching, surface runoff and percolation to annual average values
+    file = base_path_output / "BK50_NBiomasseBW_for_assignment.gpkg"
+    gdf1 = gpd.read_file(file)
     vars_sim = ["q_hof", "q_ss", "M_q_ss", "C_q_ss"]
     ll_df = []
     ll_df_crop_periods = []
@@ -249,8 +245,6 @@ def main(location):
         for var_sim in vars_sim:
             if var_sim in ["M_q_ss", "C_q_ss"]:
                 for fertilization_intensity in fertilization_intensities:
-                    file = base_path_output / "BK50_NBiomasseBW_for_assignment.gpkg"
-                    gdf1 = gpd.read_file(file)
                     mask = (gdf1['stationsna'] == location)
                     gdf = gdf1.loc[mask, :]
                     gdf['FFID'] = None
@@ -303,8 +297,6 @@ def main(location):
                     gdf = gdf.to_crs("EPSG:25832")
                     ll_df.append(gdf)
             elif var_sim in ["q_ss", "q_hof"]:
-                file = base_path_output / "BK50_NBiomasseBW_for_assignment.gpkg"
-                gdf1 = gpd.read_file(file)
                 mask = (gdf1['stationsna'] == location)
                 gdf = gdf1.loc[mask, :]
                 gdf['FFID'] = None
@@ -348,7 +340,7 @@ def main(location):
 
                 gdf = pd.concat(ll_df, axis=0)
                 gdf = gdf.to_crs("EPSG:25832")
-                file = base_path_output / f"nitrate_leaching_{location}.gpkg"
+                file = tmp_dir / f"nitrate_leaching_{location}.gpkg"
                 gdf.to_file(file, driver="GPKG")
 
         # extract the values for the single crop periods within the crop rotation
@@ -373,8 +365,6 @@ def main(location):
             for var_sim in vars_sim:
                 if var_sim in ["M_q_ss", "C_q_ss"]:
                     for fertilization_intensity in fertilization_intensities:
-                        file = base_path_output / "BK50_NBiomasseBW_for_assignment.gpkg"
-                        gdf1 = gpd.read_file(file)
                         mask = (gdf1['stationsna'] == location)
                         gdf = gdf1.loc[mask, :]
                         gdf['FFID'] = None
@@ -430,8 +420,6 @@ def main(location):
                         gdf = gdf.to_crs("EPSG:25832")
                         ll_df.append(gdf)
                 elif var_sim in ["q_ss", "q_hof"]:
-                    file = base_path_output / "BK50_NBiomasseBW_for_assignment.gpkg"
-                    gdf1 = gpd.read_file(file)
                     mask = (gdf1['stationsna'] == location)
                     gdf = gdf1.loc[mask, :]
                     gdf['FFID'] = None
@@ -484,7 +472,7 @@ def main(location):
 
                     gdf = pd.concat(ll_df, axis=0)
                     gdf = gdf.to_crs("EPSG:25832")
-                    file = base_path_output / "data_for_nitrate_leaching" / f"nitrate_leaching_{location}.gpkg"
+                    file = tmp_dir / f"nitrate_leaching_{location}.gpkg"
                     gdf.to_file(file, driver="GPKG")
         print(f"Finalized {crop_rotation_scenario}")
 

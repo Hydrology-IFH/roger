@@ -199,3 +199,4 @@ build.sh
 meta.yaml
 
 # local development
+write_shapefiles_jobs.sh

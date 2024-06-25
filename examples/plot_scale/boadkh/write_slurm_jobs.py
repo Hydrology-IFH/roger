@@ -234,6 +234,43 @@ def main():
     #                 file.writelines(lines)
     #                 file.close()
     #                 subprocess.Popen(f"chmod +x {file_path}", shell=True)
+
+    # --- jobs to write shapefiles --------------------------------------------------------
+    for location in locations:
+        script_name = f"write_shapfiles_{location}"
+        output_path_ws = base_path_ws / "output"
+        lines = []
+        lines.append("#!/bin/bash\n")
+        lines.append("#SBATCH --time=72:00:00\n")
+        lines.append("#SBATCH --nodes=1\n")
+        lines.append("#SBATCH --ntasks=1\n")
+        lines.append("#SBATCH --cpus-per-task=1\n")
+        lines.append("#SBATCH --mem=32000\n")
+        lines.append("#SBATCH --mail-type=FAIL\n")
+        lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
+        lines.append(f"#SBATCH --job-name={script_name}\n")
+        lines.append(f"#SBATCH --output={script_name}.out\n")
+        lines.append(f"#SBATCH --error={script_name}_err.out\n")
+        lines.append("#SBATCH --export=ALL\n")
+        lines.append(" \n")
+        lines.append('eval "$(conda shell.bash hook)"\n')
+        lines.append("conda activate roger\n")
+        lines.append(f"cd {base_path_bwuc}\n")
+        lines.append(" \n")
+        lines.append(
+            'python assign_simulated_values_to_polygons_for_NO3_leaching.py --location %s -td "${TMPDIR}"\n'
+            % (location)
+        )
+        lines.append("# Move output from local SSD to global workspace\n")
+        lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
+        lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
+        lines.append('mv "${TMPDIR}"/nitrate_leaching_%s.gpkg %s\n' % (location, output_path_ws.as_posix()))
+        file_path = base_path / f"{script_name}_slurm.sh"
+        file = open(file_path, "w")
+        file.writelines(lines)
+        file.close()
+        subprocess.Popen(f"chmod +x {file_path}", shell=True)
+
     return
 
 
