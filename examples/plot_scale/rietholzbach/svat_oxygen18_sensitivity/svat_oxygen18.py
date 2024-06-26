@@ -9,7 +9,7 @@ from roger.cli.roger_run_base import roger_base_cli
     "-tms",
     "--transport-model-structure",
     type=click.Choice(
-        ["complete-mixing", "piston", "advection-dispersion-power", "time-variant_advection-dispersion-power"]
+        ["complete-mixing", "piston", "advection-dispersion-power", "time-variant_advection-dispersion-power", "time-variant_advection-dispersion-power_1", "time-variant_advection-dispersion-power_2"]
     ),
     default="advection-dispersion-power",
 )
@@ -64,7 +64,10 @@ def main(transport_model_structure, sas_solver, nsamples, tmp_dir):
             if settings.sas_solver in ["RK4", "Euler"]:
                 settings.h = 1 / settings.sas_solver_substeps
 
-            settings.nx, settings.ny = nsamples, 1
+            if transport_model_structure in ["complete-mixing", "piston", "advection-dispersion-power", "time-variant_advection-dispersion-power"]:
+                settings.nx, settings.ny = nsamples, 1
+            else:
+                settings.nx, settings.ny = int(nsamples/2), 1
             settings.nitt = self._get_nitt(self._input_dir, "forcing_tracer.nc")
             settings.ages = 1500
             settings.nages = settings.ages + 1
@@ -140,33 +143,40 @@ def main(transport_model_structure, sas_solver, nsamples, tmp_dir):
             vs = state.variables
             settings = state.settings
 
+            if transport_model_structure in ["complete-mixing", "piston", "advection-dispersion-power", "time-variant_advection-dispersion-power"]:
+                x1, x2 = 0, nsamples
+            elif transport_model_structure == "time-variant_advection-dispersion-power_1":
+                x1, x2 = 0, int(nsamples/2)
+            elif transport_model_structure == "time-variant_advection-dispersion-power_2":
+                x1, x2 = int(nsamples/2), nsamples
+
             vs.S_pwp_rz = update(
                 vs.S_pwp_rz,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
                     "S_pwp_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, 0],
+                )[x1:x2, :, 0],
             )
             vs.S_pwp_ss = update(
                 vs.S_pwp_ss,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
                     "S_pwp_ss", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, 0],
+                )[x1:x2, :, 0],
             )
             vs.S_sat_rz = update(
                 vs.S_sat_rz,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
                     "S_sat_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, 0],
+                )[x1:x2, :, 0],
             )
             vs.S_sat_ss = update(
                 vs.S_sat_ss,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
                     "S_sat_ss", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, 0],
+                )[x1:x2, :, 0],
             )
 
             if settings.tm_structure == "complete-mixing":
@@ -272,6 +282,122 @@ def main(transport_model_structure, sas_solver, nsamples, tmp_dir):
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], vs.S_pwp_ss[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2])
 
+            elif settings.tm_structure == "time-variant advection-dispersion-power_1":
+                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 6)
+                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 0.2)
+                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 6)
+                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 0.2)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 62)
+                vs.sas_params_transp = update(
+                    vs.sas_params_transp,
+                    at[2:-2, 2:-2, 3],
+                    self._read_var_from_nc(
+                        "c1_transp", self._base_path, "params_saltelli.nc", group=settings.tm_structure
+                    )[x1:x2, :],
+                )
+                vs.sas_params_transp = update(
+                    vs.sas_params_transp,
+                    at[2:-2, 2:-2, 4],
+                    self._read_var_from_nc(
+                        "c2_transp", self._base_path, "params_saltelli.nc", group=settings.tm_structure
+                    )[x1:x2, :],
+                )
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 61)
+                vs.sas_params_q_rz = update(
+                    vs.sas_params_q_rz,
+                    at[2:-2, 2:-2, 3],
+                    self._read_var_from_nc(
+                        "c1_q_rz", self._base_path, "params_saltelli.nc", group=settings.tm_structure
+                    )[x1:x2, :],
+                )
+                vs.sas_params_q_rz = update(
+                    vs.sas_params_q_rz,
+                    at[2:-2, 2:-2, 4],
+                    self._read_var_from_nc(
+                        "c2_q_rz", self._base_path, "params_saltelli.nc", group=settings.tm_structure
+                    )[x1:x2, :],
+                )
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 61)
+                vs.sas_params_q_ss = update(
+                    vs.sas_params_q_ss,
+                    at[2:-2, 2:-2, 3],
+                    self._read_var_from_nc(
+                        "c1_q_rz", self._base_path, "params_saltelli.nc", group=settings.tm_structure
+                    )[x1:x2, :],
+                )
+                vs.sas_params_q_ss = update(
+                    vs.sas_params_q_ss,
+                    at[2:-2, 2:-2, 4],
+                    self._read_var_from_nc(
+                        "c2_q_rz", self._base_path, "params_saltelli.nc", group=settings.tm_structure
+                    )[x1:x2, :],
+                )
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], vs.S_pwp_ss[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2])
+
+            elif settings.tm_structure == "time-variant advection-dispersion-power_2":
+                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 6)
+                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 0.2)
+                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 6)
+                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 0.2)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 62)
+                vs.sas_params_transp = update(
+                    vs.sas_params_transp,
+                    at[2:-2, 2:-2, 3],
+                    self._read_var_from_nc(
+                        "c1_transp", self._base_path, "params_saltelli.nc", group=settings.tm_structure
+                    )[x1:x2, :],
+                )
+                vs.sas_params_transp = update(
+                    vs.sas_params_transp,
+                    at[2:-2, 2:-2, 4],
+                    self._read_var_from_nc(
+                        "c2_transp", self._base_path, "params_saltelli.nc", group=settings.tm_structure
+                    )[x1:x2, :],
+                )
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 61)
+                vs.sas_params_q_rz = update(
+                    vs.sas_params_q_rz,
+                    at[2:-2, 2:-2, 3],
+                    self._read_var_from_nc(
+                        "c1_q_rz", self._base_path, "params_saltelli.nc", group=settings.tm_structure
+                    )[x1:x2, :],
+                )
+                vs.sas_params_q_rz = update(
+                    vs.sas_params_q_rz,
+                    at[2:-2, 2:-2, 4],
+                    self._read_var_from_nc(
+                        "c2_q_rz", self._base_path, "params_saltelli.nc", group=settings.tm_structure
+                    )[x1:x2, :],
+                )
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 61)
+                vs.sas_params_q_ss = update(
+                    vs.sas_params_q_ss,
+                    at[2:-2, 2:-2, 3],
+                    self._read_var_from_nc(
+                        "c1_q_rz", self._base_path, "params_saltelli.nc", group=settings.tm_structure
+                    )[x1:x2, :],
+                )
+                vs.sas_params_q_ss = update(
+                    vs.sas_params_q_ss,
+                    at[2:-2, 2:-2, 4],
+                    self._read_var_from_nc(
+                        "c2_q_rz", self._base_path, "params_saltelli.nc", group=settings.tm_structure
+                    )[x1:x2, :],
+                )
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], vs.S_pwp_ss[2:-2, 2:-2])
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2])
+
+            
+
         @roger_routine
         def set_parameters(self, state):
             pass
@@ -283,26 +409,33 @@ def main(transport_model_structure, sas_solver, nsamples, tmp_dir):
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
+            if transport_model_structure in ["complete-mixing", "piston", "advection-dispersion-power", "time-variant_advection-dispersion-power"]:
+                x1, x2 = 0, nsamples
+            elif transport_model_structure == "time-variant_advection-dispersion-power_1":
+                x1, x2 = 0, int(nsamples/2)
+            elif transport_model_structure == "time-variant_advection-dispersion-power_2":
+                x1, x2 = int(nsamples/2), nsamples
+
             vs.S_snow = update(
                 vs.S_snow,
                 at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc(
                     "S_snow", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, vs.itt, npx.newaxis],
+                )[x1:x2, :, vs.itt, npx.newaxis],
             )
             vs.S_rz = update(
                 vs.S_rz,
                 at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc(
                     "S_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, vs.itt, npx.newaxis],
+                )[x1:x2, :, vs.itt, npx.newaxis],
             )
             vs.S_ss = update(
                 vs.S_ss,
                 at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc(
                     "S_ss", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, vs.itt, npx.newaxis],
+                )[x1:x2, :, vs.itt, npx.newaxis],
             )
             vs.S_s = update(
                 vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1]
@@ -485,85 +618,92 @@ def main(transport_model_structure, sas_solver, nsamples, tmp_dir):
             vs = state.variables
             settings = state.settings
 
+            if transport_model_structure in ["complete-mixing", "piston", "advection-dispersion-power", "time-variant_advection-dispersion-power"]:
+                x1, x2 = 0, nsamples
+            elif transport_model_structure == "time-variant_advection-dispersion-power_1":
+                x1, x2 = 0, int(nsamples/2)
+            elif transport_model_structure == "time-variant_advection-dispersion-power_2":
+                x1, x2 = int(nsamples/2), nsamples
+
             vs.PREC_DIST_DAILY = update(
                 vs.PREC_DIST_DAILY,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "prec", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, :],
+                )[x1:x2, :, :],
             )
             vs.INF_MAT_RZ = update(
                 vs.INF_MAT_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "inf_mat_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, :],
+                )[x1:x2, :, :],
             )
             vs.INF_PF_RZ = update(
                 vs.INF_PF_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "inf_mp_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, :]
+                )[x1:x2, :, :]
                 + self._read_var_from_nc(
                     "inf_sc_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, :],
+                )[x1:x2, :, :],
             )
             vs.INF_PF_SS = update(
                 vs.INF_PF_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "inf_ss", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, :],
+                )[x1:x2, :, :],
             )
             vs.TRANSP = update(
                 vs.TRANSP,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "transp", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, :],
+                )[x1:x2, :, :],
             )
             vs.EVAP_SOIL = update(
                 vs.EVAP_SOIL,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "evap_soil", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, :],
+                )[x1:x2, :, :],
             )
             vs.CPR_RZ = update(
                 vs.CPR_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "cpr_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, :],
+                )[x1:x2, :, :],
             )
             vs.Q_RZ = update(
                 vs.Q_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "q_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, :],
+                )[x1:x2, :, :],
             )
             vs.Q_SS = update(
                 vs.Q_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "q_ss", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, :],
+                )[x1:x2, :, :],
             )
             vs.S_RZ = update(
                 vs.S_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "S_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, :],
+                )[x1:x2, :, :],
             )
             vs.S_SS = update(
                 vs.S_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "S_ss", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, :],
+                )[x1:x2, :, :],
             )
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
             vs.S_SNOW = update(
@@ -571,7 +711,7 @@ def main(transport_model_structure, sas_solver, nsamples, tmp_dir):
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "S_snow", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
-                )[:, :, :],
+                )[x1:x2, :, :],
             )
 
             if settings.enable_oxygen18:
