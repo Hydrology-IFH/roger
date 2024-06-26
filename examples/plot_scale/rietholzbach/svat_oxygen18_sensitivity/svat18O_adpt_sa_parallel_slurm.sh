@@ -1,18 +1,18 @@
 #!/bin/bash
 #SBATCH --time=12:00:00
-#SBATCH --nodes=4
-#SBATCH --ntasks-per-node=8
+#SBATCH --nodes=1
+#SBATCH --ntasks=32
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=7000mb
+#SBATCH --mem=240000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
-#SBATCH --job-name=svat18O_adpt_sa
-#SBATCH --output=svat18O_adpt_sa.out
-#SBATCH --error=svat18O_adpt_sa_err.out
+#SBATCH --job-name=svat18O_adp_sa
+#SBATCH --output=svat18O_adp_sa.out
+#SBATCH --error=svat18O_adp_sa_err.out
 #SBATCH --export=ALL
  
 # load module dependencies
-module load lib/hdf5/1.14.4-gnu-13.3-openmpi-5.0
+module load lib/hdf5/1.14.4-gnu-13.3-openmpi-4.1
 # prevent memory issues for Open MPI 4.1.x
 export OMPI_MCA_btl="self,smcuda,vader,tcp"
 export OMP_NUM_THREADS=1
