@@ -168,14 +168,14 @@ def nanmeanweighted(y, w, axis=None):
                                                      "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
                                                      "ehingen-kirchen", "merklingen", "hayingen",
                                                      "kupferzell", "oehringen", "vellberg-kleinaltdorf"]), 
-                                                     default=str, help="Location of the meteorological station.")
+                                                     default="freiburg", help="Location of the meteorological station.")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
 @click.command("main")
 def main(location, tmp_dir):
     base_path = Path(__file__).parent
     # directory of results
     base_path_output = Path("/pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh") / "output"
-
+    
     # load linkage between BK50 and cropland clusters
     file = base_path_output / "link_shp_clust_acker.h5"
     # file = base_path_output / "link_shp_clust_acker.h5"
@@ -341,7 +341,7 @@ def main(location, tmp_dir):
 
                 gdf = pd.concat(ll_df, axis=0)
                 gdf = gdf.to_crs("EPSG:25832")
-                file = tmp_dir / f"nitrate_leaching_{location}.gpkg"
+                file = Path(tmp_dir) / f"nitrate_leaching_{location}.gpkg"
                 gdf.to_file(file, driver="GPKG")
 
         # extract the values for the single crop periods within the crop rotation
@@ -473,7 +473,7 @@ def main(location, tmp_dir):
 
                     gdf = pd.concat(ll_df, axis=0)
                     gdf = gdf.to_crs("EPSG:25832")
-                    file = tmp_dir / f"nitrate_leaching_{location}.gpkg"
+                    file = Path(tmp_dir) / f"nitrate_leaching_{location}.gpkg"
                     gdf.to_file(file, driver="GPKG")
         print(f"Finalized {crop_rotation_scenario}")
 
