@@ -235,7 +235,7 @@ def main(location, tmp_dir):
         dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
 
     # aggregate nitrate leaching, surface runoff and percolation to annual average values
-    file = tmp_dir / "BK50_NBiomasseBW_for_assignment.gpkg"
+    file = base_path_output / "BK50_NBiomasseBW_for_assignment.gpkg"
     gdf1 = gpd.read_file(file)
     vars_sim = ["q_hof", "q_ss", "M_q_ss", "C_q_ss"]
     ll_df = []

@@ -2,9 +2,9 @@ click==8.1.7
 entrypoints==0.4
 ipython==8.24.0
 matplotlib==3.8.4
-netCDF4==1.6.5
+netCDF4==1.7.0
 pickleshare==0.7.5
 seaborn==0.13.2
 Sphinx==7.3.7
 sphinx-rtd-theme==2.0.0
-xarray==2024.5.0
+xarray==2024.6.0
