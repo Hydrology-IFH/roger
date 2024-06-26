@@ -187,6 +187,7 @@ def main(location, tmp_dir):
     cond = (df_params["CLUST_flag"] == 2)
     df_params = df_params.loc[cond, :]
     clust_ids = pd.unique(df_params["CLUST_ID"].values).tolist()
+    df_params = pd.read_csv(csv_file, sep=";", skiprows=1)
 
     # load nitrogen loads and concentrations
     dict_nitrate = {}
@@ -287,7 +288,7 @@ def main(location, tmp_dir):
                     # assign aggregated values to polygons
                     for clust_id in clust_ids:
                         cond1 = (df_params["CLUST_ID"] == clust_id) & (df_params["CLUST_flag"] == 2)
-                        val = df_avg.loc[cond1, :].values[0]
+                        val = df_avg.loc[cond1, :].values[0][0]
                         cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
                         shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
                         cond2 = gdf["SHP_ID"].isin(shp_ids)
@@ -328,7 +329,7 @@ def main(location, tmp_dir):
                 # assign aggregated values to polygons
                 for clust_id in clust_ids:
                     cond1 = (df_params["CLUST_ID"] == clust_id) & (df_params["CLUST_flag"] == 2)
-                    val = df_avg.loc[cond1, :].values[0]
+                    val = df_avg.loc[cond1, :].values[0][0]
                     cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
                     shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
                     cond2 = gdf["SHP_ID"].isin(shp_ids)
@@ -410,7 +411,7 @@ def main(location, tmp_dir):
                         # assign aggregated values to polygons
                         for clust_id in clust_ids:
                             cond1 = (df_params["CLUST_ID"] == clust_id) & (df_params["CLUST_flag"] == 2)
-                            val = df_avg.loc[cond1, :].values[0]
+                            val = df_avg.loc[cond1, :].values[0][0]
                             cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
                             shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
                             cond2 = gdf["SHP_ID"].isin(shp_ids)
@@ -460,7 +461,7 @@ def main(location, tmp_dir):
                     # assign aggregated values to polygons
                     for clust_id in clust_ids:
                         cond1 = (df_params["CLUST_ID"] == clust_id) & (df_params["CLUST_flag"] == 2)
-                        val = df_avg.loc[cond1, :].values[0]
+                        val = df_avg.loc[cond1, :].values[0][0]
                         cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
                         shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
                         cond2 = gdf["SHP_ID"].isin(shp_ids)
