@@ -2,6 +2,8 @@
 
 cd ~/roger/examples/plot_scale/boadkh
 
+sbatch --partition=single write_shapefiles_freiburg_slurm.sh
+sbatch --partition=single write_shapefiles_muellheim_slurm.sh
 sbatch --partition=single write_shapefiles_lahr_slurm.sh
 sbatch --partition=single write_shapefiles_stockach_slurm.sh
 sbatch --partition=single write_shapefiles_gottmadingen_slurm.sh

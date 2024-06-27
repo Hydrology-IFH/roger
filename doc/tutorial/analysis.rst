@@ -33,6 +33,7 @@ Load and plot fluxes
 In order to load our first output file and display its content execute the following two commands:
 
 .. ipython:: python
+    :okexcept:
 
     ds_rate = xr.open_dataset(OUTPUT_FILES["rate"])
     ds_rate

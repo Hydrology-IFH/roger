@@ -1,6 +1,7 @@
 # debugging
 debug_snippets.py
 *_debug*
+conda-environment-doc.yml
 
 # binary files
 *.nc

@@ -339,11 +339,6 @@ def main(location, tmp_dir):
                 gdf = gdf.to_crs("EPSG:25832")
                 ll_df.append(gdf)
 
-                gdf = pd.concat(ll_df, axis=0)
-                gdf = gdf.to_crs("EPSG:25832")
-                file = Path(tmp_dir) / f"nitrate_leaching_{location}.gpkg"
-                gdf.to_file(file, driver="GPKG")
-
         # extract the values for the single crop periods within the crop rotation
         crop_ids = _dict_crop_periods[crop_rotation_scenario]
         for crop_id in crop_ids:
@@ -471,10 +466,10 @@ def main(location, tmp_dir):
                     gdf = gdf.to_crs("EPSG:25832")
                     ll_df.append(gdf)
 
-                    gdf = pd.concat(ll_df, axis=0)
-                    gdf = gdf.to_crs("EPSG:25832")
-                    file = Path(tmp_dir) / f"nitrate_leaching_{location}.gpkg"
-                    gdf.to_file(file, driver="GPKG")
+        gdf = pd.concat(ll_df, axis=0)
+        gdf = gdf.to_crs("EPSG:25832")
+        file = Path(tmp_dir) / f"nitrate_leaching_{location}.gpkg"
+        gdf.to_file(file, driver="GPKG")
         print(f"Finalized {crop_rotation_scenario}")
 
 
