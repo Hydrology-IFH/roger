@@ -54,9 +54,11 @@ df_nup.fillna(0, inplace=True)
 ARR_NUP = df_nup.iloc[:, :-1].values
 
 ARR_GC = onp.zeros((25, 13), dtype=onp.float64)
-list0 = ARR_ILU[:, 0].tolist()  # required to build the docs
+# print(ARR_ILU[:, 0].tolist())  
+# required to build the docs
+list0 = [0.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 20.0, 98.0, 31.0, 32.0, 33.0, 40.0, 41.0, 50.0, 1001.0, 1002.0, 1003.0, 1004.0, 1005.0]
 arr0 = onp.array(list0)
-# list1 = ARR_ILU[:, 1:].tolist()
+# print(ARR_ILU[:, 1:].tolist())
 # required to build the docs
 list1 = [[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 
          [0.1, 0.1, 0.1, 0.1, 0.6, 1.0, 0.9, 0.6, 0.3, 0.0, 0.0, 0.0], 
