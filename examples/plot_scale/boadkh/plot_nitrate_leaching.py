@@ -685,7 +685,7 @@ sns.boxplot(data=df_ann_avg_long, x="location", y="vals", hue="fertilization_int
 axes.legend().set_visible(False)
 axes.set_xlabel("")
 axes.set_ylabel("PERC-$NO_3$/$N_{fert}$ [%]")
-axes.set_ylim(0, )
+axes.set_ylim(0, 50)
 axes.set_xlabel("Location")
 plt.xticks(rotation=45)
 fig.tight_layout()
@@ -700,7 +700,7 @@ sns.boxplot(data=df_ann_avg_long, x="region", y="vals", hue="fertilization_inten
 axes.legend().set_visible(False)
 axes.set_xlabel("")
 axes.set_ylabel("PERC-$NO_3$/$N_{fert}$ [%]")
-axes.set_ylim(0, )
+axes.set_ylim(0, 50)
 axes.set_xlabel("")
 plt.xticks(rotation=33)
 fig.tight_layout()
@@ -722,7 +722,6 @@ fig.tight_layout()
 file = base_path_figs / "boxplot_annual_average_nitrogen_efficiency_crop_rotations.png"
 fig.savefig(file, dpi=300)
 plt.close(fig)
-
 
 
 # plot average annual sum considering crop rotations with and without mustard
