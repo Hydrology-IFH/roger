@@ -291,6 +291,7 @@ file = base_path / "figures" / "boxplot_parameters_cluster1.png"
 fig.savefig(file, dpi=300)
 plt.close(fig)
 
+ll_params = ['z_soil', 'dmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'lmpv', 'ks', 'clay', 'soil_fertility']
 fig, axs = plt.subplots(2, 5, figsize=(6, 4))
 for i, param in enumerate(ll_params):
     cond = (df_params["CLUST_flag"] == 2)
@@ -304,5 +305,21 @@ for i, param in enumerate(ll_params):
 axs[-1, -1].set_axis_off()
 fig.tight_layout()
 file = base_path / "figures" / "boxplot_parameters_cluster2.png"
+fig.savefig(file, dpi=300)
+plt.close(fig)
+
+ll_params = ['z_soil', 'dmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'lmpv', 'ks', 'clay', 'soil_fertility']
+fig, axs = plt.subplots(2, 5, figsize=(6, 4), sharex=True)
+for i, param in enumerate(ll_params):
+    cond = (df_params["CLUST_flag"] == 2)
+    df = df_params.loc[cond, param].to_frame()
+    df_long = pd.melt(df, value_vars=df.columns)
+    axes = axs.flatten()[i]
+    sns.histplot(data=df_long, y="value", ax=axes, color="grey")
+    axes.set_xlabel("Count")
+    axes.set_ylabel(_LABS_UNIT[param])
+axs[-1, -1].set_axis_off()
+fig.tight_layout()
+file = base_path / "figures" / "histplot_parameters_cluster2.png"
 fig.savefig(file, dpi=300)
 plt.close(fig)
