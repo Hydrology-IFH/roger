@@ -655,7 +655,7 @@ for location in locations:
         for fertilization_intensity in fertilization_intensities:
             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
             sim_vals1 = ds["M_q_ss"].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
-            sim_vals2 = ds["N_fert"].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
+            sim_vals2 = ds["Nfert"].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
             cond1 = (df_params["CLUST_flag"] == 2)
             df1 = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals1.T).loc[:, cond1]
             df2 = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals2.T).loc[:, cond1]

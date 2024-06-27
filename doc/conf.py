@@ -177,7 +177,7 @@ texinfo_documents = [
 # -- Options for autodoc --------------------------------------------------
 autodoc_member_order = "bysource"
 autodoc_default_options = {"show-inheritance": None}
-autodoc_mock_imports = ["loguru", "numpy", "h5netcdf", "scipy"]
+autodoc_mock_imports = ["loguru", "numpy", "h5netcdf", "scipy", "pandas", "seaborn"]
 
 # -- Options for intersphinx ----------------------------------------------
 intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
