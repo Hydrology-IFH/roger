@@ -242,7 +242,7 @@ def main(location, tmp_dir):
     ll_df = []
     ll_df_crop_periods = []
     for crop_rotation_scenario in crop_rotation_scenarios:
-        print(f"{crop_rotation_scenario}")
+        click.echo(f"{crop_rotation_scenario}")
         for var_sim in vars_sim:
             if var_sim in ["M_q_ss", "C_q_ss"]:
                 for fertilization_intensity in fertilization_intensities:
@@ -466,7 +466,7 @@ def main(location, tmp_dir):
                     gdf = gdf.to_crs("EPSG:25832")
                     ll_df.append(gdf)
 
-        print(f"Finalized {crop_rotation_scenario}")
+        click.echo(f"Finalized {crop_rotation_scenario}")
 
     gdf = pd.concat(ll_df, axis=0)
     gdf = gdf.to_crs("EPSG:25832")
