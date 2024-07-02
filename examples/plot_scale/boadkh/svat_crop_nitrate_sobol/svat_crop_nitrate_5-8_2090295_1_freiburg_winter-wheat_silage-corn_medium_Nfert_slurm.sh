@@ -29,7 +29,7 @@ checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVATCROP_5-8_2090295_1_freiburg_winter-
 done
 echo "Copying was successful"
  
-python svat_crop_nitrate.py -b jax -d cpu --float-type float64 --row 0 --id 5-8_2090295_1 --location freiburg --crop-rotation-scenario winter-wheat_silage-corn --fertilization-intensity medium -td "${TMPDIR}"
+python svat_crop_nitrate_.py -b jax -d cpu --float-type float64 --row 0 --id 5-8_2090295_1 --location freiburg --crop-rotation-scenario winter-wheat_silage-corn --fertilization-intensity medium -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop_nitrate"
 mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop_nitrate
