@@ -17,6 +17,6 @@ cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh
  
 python assign_simulated_values_to_polygons_for_NO3_leaching.py --location muellheim -td "${TMPDIR}"
 # Move output from local SSD to global workspace
-echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh/output"
-mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh/output
-mv "${TMPDIR}"/nitrate_leaching_muellheim.gpkg /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh/output
+echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/output"
+mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/output
+mv "${TMPDIR}"/nitrate_leaching_muellheim.gpkg /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/output

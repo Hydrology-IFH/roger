@@ -69,7 +69,7 @@ def nanmeanweighted(y, w, axis=None):
     return wavg
 
 def repeat_by_areashare(values, area_share):
-    ll = [np.repeat(val, int(np.riund(area_share[i], 0)))for i, val in enumerate(values)]
+    ll = [np.repeat(val, int(np.round(area_share[i], 0)))for i, val in enumerate(values)]
     return np.concatenate(ll)
 
 
@@ -558,7 +558,7 @@ for location in locations:
 #         axes.legend().set_visible(False)
 #         axes.set_xlabel("")
 #         axes.set_ylabel(_lab_unit_annual[var_sim])
-#         axes.set_ylim(0, )
+#         axes.set_ylim(0, 80)
 #         axes.set_xlabel("")
 #         plt.xticks(rotation=33)
 #         fig.tight_layout()
@@ -573,7 +573,7 @@ for location in locations:
 #         axes.legend().set_visible(False)
 #         axes.set_xlabel("")
 #         axes.set_ylabel(_lab_unit_annual[var_sim])
-#         axes.set_ylim(0, )
+#         axes.set_ylim(0, 120)
 #         axes.set_xlabel("")
 #         plt.xticks(rotation=33)
 #         fig.tight_layout()
@@ -598,7 +598,7 @@ for var_sim in vars_sim:
                         cond = (df_areas["location"] == location)
                         df_area_share = df_areas.loc[cond, :]
                         data = df_params.loc[cond1, "CLUST_ID"].to_frame()
-                        data.loc[:, "area_share"] = 0
+                        data.loc[:, "area_share"] = 0.0
                         for clust_id in clust_ids:
                             cond1 = (df_area_share["clust_id"] == clust_id)
                             if cond1.any():
@@ -620,7 +620,7 @@ for var_sim in vars_sim:
                         elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
                             df_ann_avg.loc[:, 'region'] = "Hohenlohe"
                         ll_df.append(df_ann_avg)
-                        ylim = (0, )
+                        ylim = (0, 80)
                     elif var_sim == "C_q_ss":
                         ds = dict_fluxes_states[location][crop_rotation_scenario]
                         sim_vals1 = ds["q_ss"].isel(y=0).values
@@ -634,7 +634,7 @@ for var_sim in vars_sim:
                         cond = (df_areas["location"] == location)
                         df_area_share = df_areas.loc[cond, :]
                         data = df_params.loc[cond1, "CLUST_ID"].to_frame()
-                        data.loc[:, "area_share"] = 0
+                        data.loc[:, "area_share"] = 0.0
                         for clust_id in clust_ids:
                             cond1 = (df_area_share["clust_id"] == clust_id)
                             if cond1.any():
@@ -656,7 +656,7 @@ for var_sim in vars_sim:
                         elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
                             df_avg.loc[:, 'region'] = "Hohenlohe"
                         ll_df.append(df_avg)
-                        ylim = (0, )
+                        ylim = (0, 120)
         df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
         df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
         fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
@@ -679,7 +679,7 @@ for var_sim in vars_sim:
         axes.legend().set_visible(False)
         axes.set_xlabel("")
         axes.set_ylabel(_lab_unit_annual[var_sim])
-        axes.set_ylim(0, )
+        axes.set_ylim(ylim)
         axes.set_xlabel("")
         plt.xticks(rotation=33)
         fig.tight_layout()
@@ -791,7 +791,7 @@ for var_sim in vars_sim:
                 cond = (df_areas["location"] == location)
                 df_area_share = df_areas.loc[cond, :]
                 data = df_params.loc[cond1, "CLUST_ID"].to_frame()
-                data.loc[:, "area_share"] = 0
+                data.loc[:, "area_share"] = 0.0
                 for clust_id in clust_ids:
                     cond1 = (df_area_share["clust_id"] == clust_id)
                     if cond1.any():
@@ -953,8 +953,9 @@ for location in locations:
             df1_ann_avg = df1.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
             cond = (df_areas["location"] == location)
             df_area_share = df_areas.loc[cond, :]
+            cond1 = (df_params["CLUST_flag"] == 2)
             data = df_params.loc[cond1, "CLUST_ID"].to_frame()
-            data.loc[:, "area_share"] = 0
+            data.loc[:, "area_share"] = 0.0
             for clust_id in clust_ids:
                 cond1 = (df_area_share["clust_id"] == clust_id)
                 if cond1.any():
@@ -964,8 +965,9 @@ for location in locations:
             df2_ann_avg = df2.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
             cond = (df_areas["location"] == location)
             df_area_share = df_areas.loc[cond, :]
+            cond1 = (df_params["CLUST_flag"] == 2)
             data = df_params.loc[cond1, "CLUST_ID"].to_frame()
-            data.loc[:, "area_share"] = 0
+            data.loc[:, "area_share"] = 0.0
             for clust_id in clust_ids:
                 cond1 = (df_area_share["clust_id"] == clust_id)
                 if cond1.any():
