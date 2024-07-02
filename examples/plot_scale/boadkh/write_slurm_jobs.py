@@ -43,6 +43,8 @@ def main():
 
     csv_file = base_path / "clust-id_shp-id_clust-flag.csv"
     df = pd.read_csv(csv_file, sep=";", skiprows=0)
+    cond1 = (df["CLUST_flag"] == 2)
+    df = df.loc[cond1, :]
     df.loc[:, "clust-id_shp-id_clust-flag"] = df.loc[:, "CLUST_ID"].astype(str) + "_" + df.loc[:, "SHP_ID"].astype(str) + "_" + df.loc[:, "CLUST_flag"].astype(str)
     ids = df.loc[:, "clust-id_shp-id_clust-flag"].values.astype(str).tolist()[:1]
 

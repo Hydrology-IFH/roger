@@ -93,14 +93,14 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
 
             settings.nx, settings.ny = self._get_nx(self._base_path, "parameters.nc"), 1
             settings.nitt = self._get_nitt(
-                self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
+                self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
             )
             settings.nitt_forc = settings.nitt
             settings.ages = 1000
             settings.nages = settings.ages + 1
             settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
             settings.runlen = self._get_runlen(
-                self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
+                self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
             )
 
             settings.dx = 1
@@ -212,58 +212,58 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 vs.S_PWP_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_pwp_rz", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "S_pwp_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.S_SAT_RZ = update(
                 vs.S_SAT_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_sat_rz", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "S_sat_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.S_PWP_SS = update(
                 vs.S_PWP_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_pwp_ss", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "S_pwp_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.S_SAT_SS = update(
                 vs.S_SAT_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_sat_ss", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "S_sat_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
 
             vs.S_pwp_rz = update(
                 vs.S_pwp_rz,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_pwp_rz", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "S_pwp_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, 0],
             )
             vs.S_pwp_ss = update(
                 vs.S_pwp_ss,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_pwp_ss", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "S_pwp_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, 0],
             )
             vs.S_sat_rz = update(
                 vs.S_sat_rz,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_sat_rz", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                )[:, :, 0],
+                    "S_sat_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, 0],
             )
             vs.S_sat_ss = update(
                 vs.S_sat_ss,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_sat_ss", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                )[:, :, 0],
+                    "S_sat_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, 0],
             )
 
             # partition coefficients
@@ -325,29 +325,29 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 vs.YEAR,
                 at[:],
                 self._read_var_from_nc(
-                    "year", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
+                    "year", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.DOY = update(
                 vs.DOY,
                 at[:],
                 self._read_var_from_nc(
-                    "doy", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
+                    "doy", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.LU_ID = update(
                 vs.LU_ID,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "lu_id", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "lu_id", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.Z_ROOT = update(
                 vs.Z_ROOT,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "z_root", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "z_root", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
 
             vs.c_fert = update(vs.c_fert, at[2:-2, 2:-2], self._read_var_from_nc("c_fert", self._base_path, "parameters.nc"))
@@ -379,15 +379,15 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 vs.S_rz,
                 at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc(
-                    "S_rz", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                )[:, :, vs.itt, npx.newaxis],
+                    "S_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, vs.itt, npx.newaxis],
             )
             vs.S_ss = update(
                 vs.S_ss,
                 at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc(
-                    "S_ss", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                )[:, :, vs.itt, npx.newaxis],
+                    "S_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, vs.itt, npx.newaxis],
             )
             vs.S_s = update(
                 vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1]
@@ -512,8 +512,8 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 vs.PREC_DIST_DAILY,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "prec", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "prec", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.INF_MAT_RZ = update(
                 vs.INF_MAT_RZ,
@@ -521,8 +521,8 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 self._read_var_from_nc(
                     "inf_mat_rz",
                     self._input_dir,
-                    f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc",
-                ),
+                    f"SVATCROP_{location}_{crop_rotation_scenario}.nc",
+                )[row, :, :],
             )
             vs.INF_PF_RZ = update(
                 vs.INF_PF_RZ,
@@ -530,27 +530,27 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 self._read_var_from_nc(
                     "inf_mp_rz",
                     self._input_dir,
-                    f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc",
-                )
+                    f"SVATCROP_{location}_{crop_rotation_scenario}.nc",
+                )[row, :, :]
                 + self._read_var_from_nc(
                     "inf_sc_rz",
                     self._input_dir,
-                    f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc",
-                ),
+                    f"SVATCROP_{location}_{crop_rotation_scenario}.nc",
+                )[row, :, :],
             )
             vs.INF_PF_SS = update(
                 vs.INF_PF_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "inf_ss", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "inf_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.TRANSP = update(
                 vs.TRANSP,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "transp", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "transp", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.EVAP_SOIL = update(
                 vs.EVAP_SOIL,
@@ -558,78 +558,78 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 self._read_var_from_nc(
                     "evap_soil",
                     self._input_dir,
-                    f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc",
-                ),
+                    f"SVATCROP_{location}_{crop_rotation_scenario}.nc",
+                )[row, :, :],
             )
             vs.CPR_RZ = update(
                 vs.CPR_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "cpr_rz", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "cpr_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.Q_RZ = update(
                 vs.Q_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "q_rz", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "q_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.Q_SS = update(
                 vs.Q_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "q_ss", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "q_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.RE_RG = update(
                 vs.RE_RG,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "re_rg", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "re_rg", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.RE_RL = update(
                 vs.RE_RL,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "re_rl", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "re_rl", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.S_RZ = update(
                 vs.S_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_rz", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "S_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.S_SS = update(
                 vs.S_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_ss", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "S_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
             vs.TA = update(
                 vs.TA,
                 at[:],
                 self._read_var_from_nc(
-                    "ta", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
+                    "ta", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 )[0, 0, :],
             )
             vs.YEAR = update(
                 vs.YEAR,
                 at[:],
                 self._read_var_from_nc(
-                    "year", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
+                    "year", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.DOY = update(
                 vs.DOY,
                 at[:],
                 self._read_var_from_nc(
-                    "doy", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
+                    "doy", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.ta_year = update(
@@ -641,15 +641,15 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 vs.LU_ID,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "lu_id", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "lu_id", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
             vs.Z_ROOT = update(
                 vs.Z_ROOT,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "z_root", self._input_dir, f"SVATCROP_{id}_{location}_{crop_rotation_scenario}.nc"
-                ),
+                    "z_root", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                )[row, :, :],
             )
 
         @roger_routine
