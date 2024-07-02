@@ -35,6 +35,6 @@ echo "Copying was successful"
  
 python svat_crop_nitrate.py -b jax -d cpu --float-type float64 --row 0 --id 5-8_2090295_1 --location freiburg --crop-rotation-scenario winter-wheat_clover_silage-corn --fertilization-intensity medium -td "${TMPDIR}"
 # Move output from local SSD to global workspace
-echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh/svat_crop_nitrate"
-mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh/svat_crop_nitrate
-mv "${TMPDIR}"/SVATCROPNITRATE_*.nc /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh/svat_crop_nitrate
+echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol"
+mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol
+mv "${TMPDIR}"/SVATCROPNITRATE_*.nc /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol
