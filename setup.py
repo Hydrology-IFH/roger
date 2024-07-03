@@ -50,7 +50,7 @@ CONSOLE_SCRIPTS = [
     "roger-create-mask = roger.cli.roger_create_mask:cli",
 ]
 
-PACKAGE_DATA = ["setups/*/*.png", "setups/*/*.csv", "setups/*/*.nc", "setups/*/*.txt"]
+PACKAGE_DATA = ["setups/*/*.png", "setups/*/*.csv", "setups/*/*.nc", "setups/*/*.txt", "look_up_tables/*.csv"]
 
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
