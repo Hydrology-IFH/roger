@@ -1,14 +1,14 @@
 #!/bin/bash
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=32
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=240000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
-#SBATCH --job-name=svat18O_adp_sa
-#SBATCH --output=svat18O_adp_sa.out
-#SBATCH --error=svat18O_adp_sa_err.out
+#SBATCH --job-name=svat18O_adpt_sa
+#SBATCH --output=svat18O_adtp_sa.out
+#SBATCH --error=svat18O_adpt_sa_err.out
 #SBATCH --export=ALL
  
 # load module dependencies
