@@ -248,7 +248,7 @@ def main():
                 lines.append("# Copy fluxes and states from global workspace to local SSD\n")
                 lines.append('echo "Copy fluxes and states from global workspace to local SSD"\n')
                 lines.append("# Compares hashes\n")
-                file_nc = "SVATCROP_%s_%s_%s.nc" % (id, location, crop_rotation_scenario)
+                file_nc = "SVATCROP_%s_%s.nc" % (location, crop_rotation_scenario)
                 lines.append(
                     f'checksum_gws=$(shasum -a 256 {output_path_ws.parent.as_posix()}/svat_crop/{file_nc} | cut -f 1 -d " ")\n'
                 )

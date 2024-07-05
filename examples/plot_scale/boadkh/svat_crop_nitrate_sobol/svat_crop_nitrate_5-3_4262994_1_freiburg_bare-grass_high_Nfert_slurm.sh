@@ -23,13 +23,13 @@ cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh/svat_crop_nitrate_s
 # Copy fluxes and states from global workspace to local SSD
 echo "Copy fluxes and states from global workspace to local SSD"
 # Compares hashes
-checksum_gws=$(shasum -a 256 /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop/SVATCROP_5-3_4262994_1_freiburg_bare-grass.nc | cut -f 1 -d " ")
+checksum_gws=$(shasum -a 256 /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop/SVATCROP_freiburg_bare-grass.nc | cut -f 1 -d " ")
 checksum_ssd=0a
-cp /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop/SVATCROP_5-3_4262994_1_freiburg_bare-grass.nc "${TMPDIR}"
+cp /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop/SVATCROP_freiburg_bare-grass.nc "${TMPDIR}"
 # Wait for termination of moving files
 while [ "${checksum_gws}" != "${checksum_ssd}" ]; do
 sleep 10
-checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVATCROP_5-3_4262994_1_freiburg_bare-grass.nc | cut -f 1 -d " ")
+checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVATCROP_freiburg_bare-grass.nc | cut -f 1 -d " ")
 done
 echo "Copying was successful"
  
