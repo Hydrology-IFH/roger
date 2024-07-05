@@ -254,14 +254,14 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
                     "S_sat_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                )[:, :, 0],
+                )[row, :, 0],
             )
             vs.S_sat_ss = update(
                 vs.S_sat_ss,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
                     "S_sat_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                )[:, :, 0],
+                )[row, :, 0],
             )
 
             # partition coefficients

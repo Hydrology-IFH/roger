@@ -168,17 +168,16 @@ def nanmeanweighted(y, w, axis=None):
                                                      "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
                                                      "ehingen-kirchen", "merklingen", "hayingen",
                                                      "kupferzell", "oehringen", "vellberg-kleinaltdorf"]), 
-                                                     default="freiburg", help="Location of the meteorological station.")
-@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
+                                                     default="muellheim", help="Location of the meteorological station.")
+@click.option("-td", "--tmp-dir", type=str, default=Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output")
 @click.command("main")
 def main(location, tmp_dir):
     base_path = Path(__file__).parent
     # directory of results
-    base_path_output = Path("/pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh") / "output"
+    base_path_output = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output"
     
     # load linkage between BK50 and cropland clusters
     file = base_path_output / "link_shp_clust_acker.h5"
-    # file = base_path_output / "link_shp_clust_acker.h5"
     df_link_bk50_cluster_cropland = pd.read_hdf(file)
 
     # load model parameters
@@ -244,8 +243,10 @@ def main(location, tmp_dir):
     for crop_rotation_scenario in crop_rotation_scenarios:
         click.echo(f"{crop_rotation_scenario}")
         for var_sim in vars_sim:
+            click.echo(f"{var_sim}")
             if var_sim in ["M_q_ss", "C_q_ss"]:
                 for fertilization_intensity in fertilization_intensities:
+                    click.echo(f"{fertilization_intensity}")
                     mask = (gdf1['stationsna'] == location)
                     gdf = gdf1.loc[mask, :]
                     gdf['FFID'] = None
@@ -339,28 +340,29 @@ def main(location, tmp_dir):
                 gdf = gdf.to_crs("EPSG:25832")
                 ll_df.append(gdf)
 
-        # extract the values for the single crop periods within the crop rotation
-        crop_ids = _dict_crop_periods[crop_rotation_scenario]
-        for crop_id in crop_ids:
-            ds = dict_fluxes_states[location][crop_rotation_scenario]
-            lu_id = ds["lu_id"].isel(x=0, y=0).values
-            df_lu_id = pd.DataFrame(index=ds["Time"].values, data=lu_id)
-            df_lu_id.columns = ["lu_id"]
-            cond = onp.isin(df_lu_id.values, onp.array([586, 587, 599])).flatten()
-            df_lu_id.loc[cond, "lu_id"] = onp.nan
-            df_lu_id = df_lu_id.bfill()
-            df_lu_id.loc[:, 'mask'] = onp.isin(df_lu_id.loc[:, "lu_id"].values, _dict_lu_id[crop_id]).flatten()
-            df_lu_id['new'] = df_lu_id['mask'].gt(df_lu_id['mask'].shift(fill_value=False))
-            df_lu_id['crop_period'] = (df_lu_id.new + 0).cumsum() * df_lu_id['mask']
-            df_lu_id['day'] = 1
-            df_lu_id.replace(onp.nan, 0, inplace=True)
-            df_lu_id['crop_period'] = df_lu_id['crop_period'].replace(0, onp.nan)
-            df_lu_id = df_lu_id.drop(columns=['mask', 'new'])
-            df_lu_id = df_lu_id.astype({"lu_id": int, "crop_period": float, "day": float})
-            cond_crop = onp.isin(df_lu_id.loc[:, "lu_id"].values, _dict_crop_periods[crop_rotation_scenario][crop_id]).flatten()
-            for var_sim in vars_sim:
+            # extract the values for the single crop periods within the crop rotation
+            crop_ids = _dict_crop_periods[crop_rotation_scenario]
+            click.echo(f"{crop_ids}")
+            for crop_id in crop_ids:
+                ds = dict_fluxes_states[location][crop_rotation_scenario]
+                lu_id = ds["lu_id"].isel(x=0, y=0).values
+                df_lu_id = pd.DataFrame(index=ds["Time"].values, data=lu_id)
+                df_lu_id.columns = ["lu_id"]
+                cond = onp.isin(df_lu_id.values, onp.array([586, 587, 599])).flatten()
+                df_lu_id.loc[cond, "lu_id"] = onp.nan
+                df_lu_id = df_lu_id.bfill()
+                df_lu_id.loc[:, 'mask'] = onp.isin(df_lu_id.loc[:, "lu_id"].values, _dict_lu_id[crop_id]).flatten()
+                df_lu_id['new'] = df_lu_id['mask'].gt(df_lu_id['mask'].shift(fill_value=False))
+                df_lu_id['crop_period'] = (df_lu_id.new + 0).cumsum() * df_lu_id['mask']
+                df_lu_id['day'] = 1
+                df_lu_id.replace(onp.nan, 0, inplace=True)
+                df_lu_id['crop_period'] = df_lu_id['crop_period'].replace(0, onp.nan)
+                df_lu_id = df_lu_id.drop(columns=['mask', 'new'])
+                df_lu_id = df_lu_id.astype({"lu_id": int, "crop_period": float, "day": float})
+                cond_crop = onp.isin(df_lu_id.loc[:, "lu_id"].values, _dict_crop_periods[crop_rotation_scenario][crop_id]).flatten()
                 if var_sim in ["M_q_ss", "C_q_ss"]:
                     for fertilization_intensity in fertilization_intensities:
+                        click.echo(f"{crop_id}: {var_sim} {fertilization_intensity}")
                         mask = (gdf1['stationsna'] == location)
                         gdf = gdf1.loc[mask, :]
                         gdf['FFID'] = None
@@ -416,6 +418,7 @@ def main(location, tmp_dir):
                         gdf = gdf.to_crs("EPSG:25832")
                         ll_df.append(gdf)
                 elif var_sim in ["q_ss", "q_hof"]:
+                    click.echo(f"{crop_id}: {var_sim}")
                     mask = (gdf1['stationsna'] == location)
                     gdf = gdf1.loc[mask, :]
                     gdf['FFID'] = None

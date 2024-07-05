@@ -349,7 +349,6 @@ for station_id in station_ids:
         )
         data = pd.read_csv(file, sep=",", index_col=2)
         data.index = pd.to_datetime(data.index, format="%Y-%m-%d")
-        data = data.loc["1985":"2100", :]
         cond = data["Var"].values == "tasmax"
         data_ta_max = data.loc[cond, "Center"]
         cond = data["Var"].values == "tasmin"
@@ -615,63 +614,63 @@ for station, station_id in zip(stations, station_ids):
             fig.savefig(file, dpi=300)
             plt.close(fig=fig)
 
-# --- write input data to .txt -------------------------------------
-stations = ["freiburg", "kupferzell", "altheim"]
-for station, station_id in zip(stations, station_ids):
-    for cm in ["MPI-M-MPI-ESM-LR_RCA4", "CCCma-CanESM2_CCLM4-8-17"]:
-        for period in ["1985-2014", "2030-2059", "2070-2099"]:
-            data_precip = dict_bc_precip_10mins[station_id][cm][period]
-            data_meteo = dict_bc_meteo_daily[station_id][cm][period]
-            data_ta = data_meteo.loc[:, ["TA", "TA_min", "TA_max"]]
-            data_rs = data_meteo.loc[:, ["RS"]]
+# # --- write input data to .txt -------------------------------------
+# stations = ["freiburg", "kupferzell", "altheim"]
+# for station, station_id in zip(stations, station_ids):
+#     for cm in ["MPI-M-MPI-ESM-LR_RCA4", "CCCma-CanESM2_CCLM4-8-17"]:
+#         for period in ["1985-2014", "2030-2059", "2070-2099"]:
+#             data_precip = dict_bc_precip_10mins[station_id][cm][period]
+#             data_meteo = dict_bc_meteo_daily[station_id][cm][period]
+#             data_ta = data_meteo.loc[:, ["TA", "TA_min", "TA_max"]]
+#             data_rs = data_meteo.loc[:, ["RS"]]
 
-            path_dir = base_path / "input" / station / cm / period
-            if not os.path.exists(path_dir):
-                os.mkdir(path_dir)
+#             path_dir = base_path / "input" / station / cm / period
+#             if not os.path.exists(path_dir):
+#                 os.mkdir(path_dir)
 
-            idx_10mins = pd.date_range(start=str(data_precip.index[0]), end=str(data_precip.index[-1]), freq="10T")
-            idx_daily = pd.date_range(start=str(data_ta.index[0]), end=str(data_ta.index[-1]), freq="d")
-            df_PREC = pd.DataFrame(index=idx_10mins, columns=["YYYY", "MM", "DD", "hh", "mm", "PREC"])
-            df_PREC["YYYY"] = data_precip.index.year.values
-            df_PREC["MM"] = data_precip.index.month.values
-            df_PREC["DD"] = data_precip.index.day.values
-            df_PREC["hh"] = data_precip.index.hour.values
-            df_PREC["mm"] = data_precip.index.minute.values
-            df_PREC["PREC"] = data_precip["PREC"].values
-            path_txt = path_dir / "PREC.txt"
-            df_PREC.to_csv(path_txt, header=True, index=False, sep="\t")
-            nas = np.sum(np.isnan(data_precip["PREC"].values))
-            print(f"{station}-{cm}-{period}-PREC: {nas}")
+#             idx_10mins = pd.date_range(start=str(data_precip.index[0]), end=str(data_precip.index[-1]), freq="10T")
+#             idx_daily = pd.date_range(start=str(data_ta.index[0]), end=str(data_ta.index[-1]), freq="d")
+#             df_PREC = pd.DataFrame(index=idx_10mins, columns=["YYYY", "MM", "DD", "hh", "mm", "PREC"])
+#             df_PREC["YYYY"] = data_precip.index.year.values
+#             df_PREC["MM"] = data_precip.index.month.values
+#             df_PREC["DD"] = data_precip.index.day.values
+#             df_PREC["hh"] = data_precip.index.hour.values
+#             df_PREC["mm"] = data_precip.index.minute.values
+#             df_PREC["PREC"] = data_precip["PREC"].values
+#             path_txt = path_dir / "PREC.txt"
+#             df_PREC.to_csv(path_txt, header=True, index=False, sep="\t")
+#             nas = np.sum(np.isnan(data_precip["PREC"].values))
+#             print(f"{station}-{cm}-{period}-PREC: {nas}")
 
-            df_TA = pd.DataFrame(index=idx_daily, columns=["YYYY", "MM", "DD", "hh", "mm"])
-            df_TA["YYYY"] = data_ta.index.year.values
-            df_TA["MM"] = data_ta.index.month.values
-            df_TA["DD"] = data_ta.index.day.values
-            df_TA["hh"] = data_ta.index.hour.values
-            df_TA["mm"] = data_ta.index.minute.values
-            df_TA["TA"] = data_ta["TA"].values
-            df_TA["TA_min"] = data_ta["TA_min"].values
-            df_TA["TA_max"] = data_ta["TA_max"].values
-            path_txt = path_dir / "TA.txt"
-            df_TA.to_csv(path_txt, header=True, index=False, sep="\t")
-            nas = np.sum(np.isnan(data_ta["TA"].values))
-            print(f"{station}-{cm}-{period}-TA: {nas} NaN values")
-            nas = np.sum(np.isnan(data_ta["TA_min"].values))
-            print(f"{station}-{cm}-{period}-TA_min: {nas} NaN values")
-            nas = np.sum(np.isnan(data_ta["TA_max"].values))
-            print(f"{station}-{cm}-{period}-TA_max: {nas} NaN values")
+#             df_TA = pd.DataFrame(index=idx_daily, columns=["YYYY", "MM", "DD", "hh", "mm"])
+#             df_TA["YYYY"] = data_ta.index.year.values
+#             df_TA["MM"] = data_ta.index.month.values
+#             df_TA["DD"] = data_ta.index.day.values
+#             df_TA["hh"] = data_ta.index.hour.values
+#             df_TA["mm"] = data_ta.index.minute.values
+#             df_TA["TA"] = data_ta["TA"].values
+#             df_TA["TA_min"] = data_ta["TA_min"].values
+#             df_TA["TA_max"] = data_ta["TA_max"].values
+#             path_txt = path_dir / "TA.txt"
+#             df_TA.to_csv(path_txt, header=True, index=False, sep="\t")
+#             nas = np.sum(np.isnan(data_ta["TA"].values))
+#             print(f"{station}-{cm}-{period}-TA: {nas} NaN values")
+#             nas = np.sum(np.isnan(data_ta["TA_min"].values))
+#             print(f"{station}-{cm}-{period}-TA_min: {nas} NaN values")
+#             nas = np.sum(np.isnan(data_ta["TA_max"].values))
+#             print(f"{station}-{cm}-{period}-TA_max: {nas} NaN values")
 
-            df_RS = pd.DataFrame(index=idx_daily, columns=["YYYY", "MM", "DD", "hh", "mm"])
-            df_RS["YYYY"] = data_rs.index.year.values
-            df_RS["MM"] = data_rs.index.month.values
-            df_RS["DD"] = data_rs.index.day.values
-            df_RS["hh"] = data_rs.index.hour.values
-            df_RS["mm"] = data_rs.index.minute.values
-            df_RS["RS"] = data_rs["RS"].values * 0.0864  # convert watt (i.e. J/s) to MJ/day
-            path_txt = path_dir / "RS.txt"
-            df_RS.to_csv(path_txt, header=True, index=False, sep="\t")
-            nas = np.sum(np.isnan(data_rs["RS"].values))
-            print(f"{station}-{cm}-{period}-RS: {nas} NaN values")
+#             df_RS = pd.DataFrame(index=idx_daily, columns=["YYYY", "MM", "DD", "hh", "mm"])
+#             df_RS["YYYY"] = data_rs.index.year.values
+#             df_RS["MM"] = data_rs.index.month.values
+#             df_RS["DD"] = data_rs.index.day.values
+#             df_RS["hh"] = data_rs.index.hour.values
+#             df_RS["mm"] = data_rs.index.minute.values
+#             df_RS["RS"] = data_rs["RS"].values * 0.0864  # convert watt (i.e. J/s) to MJ/day
+#             path_txt = path_dir / "RS.txt"
+#             df_RS.to_csv(path_txt, header=True, index=False, sep="\t")
+#             nas = np.sum(np.isnan(data_rs["RS"].values))
+#             print(f"{station}-{cm}-{period}-RS: {nas} NaN values")
 
 # calculate total deltas
 dict_deltas_climate = {}
@@ -806,308 +805,701 @@ file = base_path / "figures" / "delta_changes_climate.pkl"
 with open(file, "wb") as handle:
     pickle.dump(dict_deltas_climate, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-# plot delta changes of precipitation and temperature
-fig, axs = plt.subplots(1, 3, figsize=(6, 1.8), sharex=True, sharey=True)
-for i, station_id in enumerate(station_ids):
-    for cm in cms:
-        dta_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_nf"] * 100
-        dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
-        axs[i].scatter(dta_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
-    for cm in cms:
-        dta_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_ff"] * 100
-        dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
-        axs[i].scatter(dta_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-    axs[i].set_ylabel("")
-    axs[i].set_xlabel(r"$\overline{\Delta}$ TA [%]")
-axs[0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
-axs[0].text(
-    0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0].transAxes
-)
-axs[1].text(
-    0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1].transAxes
-)
-axs[2].text(
-    0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2].transAxes
-)
-lines, labels = axs[-1].get_legend_handles_labels()
-fig.legend(
-    lines[:7],
-    labels[:7],
-    loc="upper right",
-    fontsize=6,
-    frameon=False,
-    bbox_to_anchor=(1.0, 1.01),
-)
-fig.legend(
-    lines[7:],
-    labels[7:],
-    loc="upper right",
-    fontsize=6,
-    frameon=False,
-    bbox_to_anchor=(1.0, 0.53),
-)
-fig.subplots_adjust(left=0.08, right=0.72, bottom=0.2)
-file = base_path_figs / f"projected_annual_dprec_and_dta_avg.png"
-fig.savefig(file, dpi=300)
-file = base_path_figs / f"projected_annual_dprec_and_dta_avg.pdf"
-fig.savefig(file, dpi=300)
-plt.close(fig=fig)
+# # plot delta changes of precipitation and temperature
+# fig, axs = plt.subplots(1, 3, figsize=(6, 1.8), sharex=True, sharey=True)
+# for i, station_id in enumerate(station_ids):
+#     for cm in cms:
+#         dta_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_nf"] * 100
+#         dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
+#         axs[i].scatter(dta_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#     for cm in cms:
+#         dta_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_ff"] * 100
+#         dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
+#         axs[i].scatter(dta_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+#     axs[i].set_ylabel("")
+#     axs[i].set_xlabel(r"$\overline{\Delta}$ TA [%]")
+# axs[0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+# axs[0].text(
+#     0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0].transAxes
+# )
+# axs[1].text(
+#     0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1].transAxes
+# )
+# axs[2].text(
+#     0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2].transAxes
+# )
+# lines, labels = axs[-1].get_legend_handles_labels()
+# fig.legend(
+#     lines[:7],
+#     labels[:7],
+#     loc="upper right",
+#     fontsize=6,
+#     frameon=False,
+#     bbox_to_anchor=(1.0, 1.01),
+# )
+# fig.legend(
+#     lines[7:],
+#     labels[7:],
+#     loc="upper right",
+#     fontsize=6,
+#     frameon=False,
+#     bbox_to_anchor=(1.0, 0.53),
+# )
+# fig.subplots_adjust(left=0.08, right=0.72, bottom=0.2)
+# file = base_path_figs / f"projected_annual_dprec_and_dta_avg.png"
+# fig.savefig(file, dpi=300)
+# file = base_path_figs / f"projected_annual_dprec_and_dta_avg.pdf"
+# fig.savefig(file, dpi=300)
+# plt.close(fig=fig)
 
-fig, axs = plt.subplots(2, 3, figsize=(6, 4), sharex="row", sharey="row")
-for i, station_id in enumerate(station_ids):
-    for cm in cms:
-        dta_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_nf"] * 100
-        dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
-        axs[0, i].scatter(dta_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
-        dta_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dIPR_nf"] * 100
-        dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
-        axs[1, i].scatter(dta_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
-    for cm in cms:
-        dta_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_ff"] * 100
-        dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
-        axs[0, i].scatter(dta_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-        dta_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dIPR_ff"] * 100
-        dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
-        axs[1, i].scatter(dta_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-    axs[0, i].set_ylabel("")
-    axs[0, i].set_xlabel(r"$\overline{\Delta}$ TA [%]")
-    axs[1, i].set_xlabel(r"$\Delta$$IPR$ TA [%]")
-axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
-axs[1, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
-axs[0, 0].text(
-    0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
-)
-axs[0, 1].text(
-    0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
-)
-axs[0, 2].text(
-    0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
-)
-axs[1, 0].text(
-    0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
-)
-axs[1, 1].text(
-    0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
-)
-axs[1, 2].text(
-    0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
-)
-lines, labels = axs[0, 0].get_legend_handles_labels()
-fig.legend(
-    lines[:7],
-    labels[:7],
-    loc="upper right",
-    fontsize=6,
-    frameon=False,
-    bbox_to_anchor=(1.0, 0.9),
-    title="2030-2059",
-)
-fig.legend(
-    lines[7:],
-    labels[7:],
-    loc="upper right",
-    fontsize=6,
-    frameon=False,
-    bbox_to_anchor=(1.0, 0.64),
-    title="2070-2099",
-)
-fig.subplots_adjust(left=0.08, right=0.72, bottom=0.15, wspace=0.1, hspace=0.35)
-file = base_path_figs / f"projected_annual_dprec_and_dta.png"
-fig.savefig(file, dpi=300)
-file = base_path_figs / f"projected_annual_dprec_and_dta.pdf"
-fig.savefig(file, dpi=300)
-plt.close(fig=fig)
+# fig, axs = plt.subplots(2, 3, figsize=(6, 4), sharex="row", sharey="row")
+# for i, station_id in enumerate(station_ids):
+#     for cm in cms:
+#         dta_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_nf"] * 100
+#         dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
+#         axs[0, i].scatter(dta_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#         dta_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dIPR_nf"] * 100
+#         dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
+#         axs[1, i].scatter(dta_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#     for cm in cms:
+#         dta_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_ff"] * 100
+#         dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
+#         axs[0, i].scatter(dta_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+#         dta_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dIPR_ff"] * 100
+#         dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
+#         axs[1, i].scatter(dta_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+#     axs[0, i].set_ylabel("")
+#     axs[0, i].set_xlabel(r"$\overline{\Delta}$ TA [%]")
+#     axs[1, i].set_xlabel(r"$\Delta$$IPR$ TA [%]")
+# axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+# axs[1, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
+# axs[0, 0].text(
+#     0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
+# )
+# axs[0, 1].text(
+#     0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
+# )
+# axs[0, 2].text(
+#     0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
+# )
+# axs[1, 0].text(
+#     0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
+# )
+# axs[1, 1].text(
+#     0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
+# )
+# axs[1, 2].text(
+#     0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
+# )
+# lines, labels = axs[0, 0].get_legend_handles_labels()
+# fig.legend(
+#     lines[:7],
+#     labels[:7],
+#     loc="upper right",
+#     fontsize=6,
+#     frameon=False,
+#     bbox_to_anchor=(1.0, 0.9),
+#     title="2030-2059",
+# )
+# fig.legend(
+#     lines[7:],
+#     labels[7:],
+#     loc="upper right",
+#     fontsize=6,
+#     frameon=False,
+#     bbox_to_anchor=(1.0, 0.64),
+#     title="2070-2099",
+# )
+# fig.subplots_adjust(left=0.08, right=0.72, bottom=0.15, wspace=0.1, hspace=0.35)
+# file = base_path_figs / f"projected_annual_dprec_and_dta.png"
+# fig.savefig(file, dpi=300)
+# file = base_path_figs / f"projected_annual_dprec_and_dta.pdf"
+# fig.savefig(file, dpi=300)
+# plt.close(fig=fig)
 
-# plot delta changes of precipitation and potential evapotranspiration
-fig, axs = plt.subplots(2, 3, figsize=(6, 4), sharex="row", sharey="row")
-for i, station_id in enumerate(station_ids):
-    for cm in cms:
-        dpet_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_nf"] * 100
-        dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
-        axs[0, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
-        dpet_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_nf"] * 100
-        dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
-        axs[1, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
-    for cm in cms:
-        dpet_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_ff"] * 100
-        dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
-        axs[0, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-        dpet_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_ff"] * 100
-        dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
-        axs[1, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-    axs[0, i].set_ylabel("")
-    axs[0, i].set_xlabel(r"$\overline{\Delta}$ PET [%]")
-    axs[1, i].set_xlabel(r"$\Delta$$IPR$ PET [%]")
-axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
-axs[1, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
-axs[0, 0].text(
-    0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
-)
-axs[0, 1].text(
-    0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
-)
-axs[0, 2].text(
-    0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
-)
-axs[1, 0].text(
-    0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
-)
-axs[1, 1].text(
-    0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
-)
-axs[1, 2].text(
-    0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
-)
-lines, labels = axs[0, 0].get_legend_handles_labels()
-fig.legend(
-    lines[:7],
-    labels[:7],
-    loc="upper right",
-    fontsize=6,
-    frameon=False,
-    bbox_to_anchor=(1.0, 0.9),
-    title="2030-2059",
-)
-fig.legend(
-    lines[7:],
-    labels[7:],
-    loc="upper right",
-    fontsize=6,
-    frameon=False,
-    bbox_to_anchor=(1.0, 0.64),
-    title="2070-2099",
-)
-fig.subplots_adjust(left=0.08, right=0.72, bottom=0.15, wspace=0.1, hspace=0.4)
-file = base_path_figs / f"projected_annual_dprec_and_dpet.png"
-fig.savefig(file, dpi=300)
-file = base_path_figs / f"projected_annual_dprec_and_dpet.pdf"
-fig.savefig(file, dpi=300)
-plt.close(fig=fig)
+# # plot delta changes of precipitation and potential evapotranspiration
+# fig, axs = plt.subplots(2, 3, figsize=(6, 4), sharex="row", sharey="row")
+# for i, station_id in enumerate(station_ids):
+#     for cm in cms:
+#         dpet_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_nf"] * 100
+#         dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
+#         axs[0, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#         dpet_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_nf"] * 100
+#         dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
+#         axs[1, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#     for cm in cms:
+#         dpet_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_ff"] * 100
+#         dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
+#         axs[0, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+#         dpet_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_ff"] * 100
+#         dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
+#         axs[1, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+#     axs[0, i].set_ylabel("")
+#     axs[0, i].set_xlabel(r"$\overline{\Delta}$ PET [%]")
+#     axs[1, i].set_xlabel(r"$\Delta$$IPR$ PET [%]")
+# axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+# axs[1, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
+# axs[0, 0].text(
+#     0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
+# )
+# axs[0, 1].text(
+#     0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
+# )
+# axs[0, 2].text(
+#     0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
+# )
+# axs[1, 0].text(
+#     0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
+# )
+# axs[1, 1].text(
+#     0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
+# )
+# axs[1, 2].text(
+#     0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
+# )
+# lines, labels = axs[0, 0].get_legend_handles_labels()
+# fig.legend(
+#     lines[:7],
+#     labels[:7],
+#     loc="upper right",
+#     fontsize=6,
+#     frameon=False,
+#     bbox_to_anchor=(1.0, 0.9),
+#     title="2030-2059",
+# )
+# fig.legend(
+#     lines[7:],
+#     labels[7:],
+#     loc="upper right",
+#     fontsize=6,
+#     frameon=False,
+#     bbox_to_anchor=(1.0, 0.64),
+#     title="2070-2099",
+# )
+# fig.subplots_adjust(left=0.08, right=0.72, bottom=0.15, wspace=0.1, hspace=0.4)
+# file = base_path_figs / f"projected_annual_dprec_and_dpet.png"
+# fig.savefig(file, dpi=300)
+# file = base_path_figs / f"projected_annual_dprec_and_dpet.pdf"
+# fig.savefig(file, dpi=300)
+# plt.close(fig=fig)
 
-for j, seas in enumerate(["winter", "spring", "summer", "autumn"]):
-    fig, axs = plt.subplots(2, 3, figsize=(6, 4), sharex=True, sharey=True)
-    for i, station_id in enumerate(station_ids):
-        for cm in cms:
-            dpet_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_nf"] * 100
-            dprec_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_nf"] * 100
-            axs[0, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
-            dpet_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_nf"] * 100
-            dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
-            axs[1, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
-        for cm in cms:
-            dpet_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_ff"] * 100
-            dprec_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_ff"] * 100
-            axs[0, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-            dpet_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_ff"] * 100
-            dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
-            axs[1, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-        axs[0, i].set_ylabel("")
-        axs[1, i].set_ylabel("")
-        axs[0, i].set_xlabel(r"$\overline{\Delta}$ PET [%]")
-        axs[1, i].set_xlabel(r"$\Delta$$IPR$ PET [%]")
-    axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
-    axs[1, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
-    axs[0, 0].text(
-        0.9,
-        0.9,
-        "(a)",
-        fontsize=9,
-        verticalalignment="center",
-        horizontalalignment="center",
-        transform=axs[0, 0].transAxes,
-    )
-    axs[0, 1].text(
-        0.9,
-        0.9,
-        "(b)",
-        fontsize=9,
-        verticalalignment="center",
-        horizontalalignment="center",
-        transform=axs[0, 1].transAxes,
-    )
-    axs[0, 2].text(
-        0.9,
-        0.9,
-        "(c)",
-        fontsize=9,
-        verticalalignment="center",
-        horizontalalignment="center",
-        transform=axs[0, 2].transAxes,
-    )
-    axs[1, 0].text(
-        0.9,
-        0.9,
-        "(d)",
-        fontsize=9,
-        verticalalignment="center",
-        horizontalalignment="center",
-        transform=axs[1, 0].transAxes,
-    )
-    axs[1, 1].text(
-        0.9,
-        0.9,
-        "(e)",
-        fontsize=9,
-        verticalalignment="center",
-        horizontalalignment="center",
-        transform=axs[1, 1].transAxes,
-    )
-    axs[1, 2].text(
-        0.9,
-        0.9,
-        "(f)",
-        fontsize=9,
-        verticalalignment="center",
-        horizontalalignment="center",
-        transform=axs[1, 2].transAxes,
-    )
-    lines, labels = axs[0, 0].get_legend_handles_labels()
-    fig.legend(
-        lines[:7],
-        labels[:7],
-        loc="upper right",
-        fontsize=6,
-        frameon=False,
-        bbox_to_anchor=(1.0, 0.9),
-        title="2030-2059",
-    )
-    fig.legend(
-        lines[7:],
-        labels[7:],
-        loc="upper right",
-        fontsize=6,
-        frameon=False,
-        bbox_to_anchor=(1.0, 0.64),
-        title="2070-2099",
-    )
-    fig.subplots_adjust(left=0.08, right=0.72, bottom=0.15, wspace=0.1, hspace=0.25)
-    file = base_path_figs / f"projected_{seas}_dprec_and_dpet.png"
-    fig.savefig(file, dpi=300)
-    file = base_path_figs / f"projected_{seas}_dprec_and_dpet.pdf"
-    fig.savefig(file, dpi=300)
-    plt.close(fig=fig)
+# for j, seas in enumerate(["winter", "spring", "summer", "autumn"]):
+#     fig, axs = plt.subplots(2, 3, figsize=(6, 4), sharex=True, sharey=True)
+#     for i, station_id in enumerate(station_ids):
+#         for cm in cms:
+#             dpet_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_nf"] * 100
+#             dprec_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_nf"] * 100
+#             axs[0, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#             dpet_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_nf"] * 100
+#             dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
+#             axs[1, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#         for cm in cms:
+#             dpet_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_ff"] * 100
+#             dprec_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_ff"] * 100
+#             axs[0, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+#             dpet_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_ff"] * 100
+#             dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
+#             axs[1, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+#         axs[0, i].set_ylabel("")
+#         axs[1, i].set_ylabel("")
+#         axs[0, i].set_xlabel(r"$\overline{\Delta}$ PET [%]")
+#         axs[1, i].set_xlabel(r"$\Delta$$IPR$ PET [%]")
+#     axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+#     axs[1, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
+#     axs[0, 0].text(
+#         0.9,
+#         0.9,
+#         "(a)",
+#         fontsize=9,
+#         verticalalignment="center",
+#         horizontalalignment="center",
+#         transform=axs[0, 0].transAxes,
+#     )
+#     axs[0, 1].text(
+#         0.9,
+#         0.9,
+#         "(b)",
+#         fontsize=9,
+#         verticalalignment="center",
+#         horizontalalignment="center",
+#         transform=axs[0, 1].transAxes,
+#     )
+#     axs[0, 2].text(
+#         0.9,
+#         0.9,
+#         "(c)",
+#         fontsize=9,
+#         verticalalignment="center",
+#         horizontalalignment="center",
+#         transform=axs[0, 2].transAxes,
+#     )
+#     axs[1, 0].text(
+#         0.9,
+#         0.9,
+#         "(d)",
+#         fontsize=9,
+#         verticalalignment="center",
+#         horizontalalignment="center",
+#         transform=axs[1, 0].transAxes,
+#     )
+#     axs[1, 1].text(
+#         0.9,
+#         0.9,
+#         "(e)",
+#         fontsize=9,
+#         verticalalignment="center",
+#         horizontalalignment="center",
+#         transform=axs[1, 1].transAxes,
+#     )
+#     axs[1, 2].text(
+#         0.9,
+#         0.9,
+#         "(f)",
+#         fontsize=9,
+#         verticalalignment="center",
+#         horizontalalignment="center",
+#         transform=axs[1, 2].transAxes,
+#     )
+#     lines, labels = axs[0, 0].get_legend_handles_labels()
+#     fig.legend(
+#         lines[:7],
+#         labels[:7],
+#         loc="upper right",
+#         fontsize=6,
+#         frameon=False,
+#         bbox_to_anchor=(1.0, 0.9),
+#         title="2030-2059",
+#     )
+#     fig.legend(
+#         lines[7:],
+#         labels[7:],
+#         loc="upper right",
+#         fontsize=6,
+#         frameon=False,
+#         bbox_to_anchor=(1.0, 0.64),
+#         title="2070-2099",
+#     )
+#     fig.subplots_adjust(left=0.08, right=0.72, bottom=0.15, wspace=0.1, hspace=0.25)
+#     file = base_path_figs / f"projected_{seas}_dprec_and_dpet.png"
+#     fig.savefig(file, dpi=300)
+#     file = base_path_figs / f"projected_{seas}_dprec_and_dpet.pdf"
+#     fig.savefig(file, dpi=300)
+#     plt.close(fig=fig)
+
+# fig, axs = plt.subplots(5, 3, figsize=(6, 6), sharex=True, sharey=True)
+# for i, station_id in enumerate(station_ids):
+#     for cm in cms:
+#         dpet_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_nf"] * 100
+#         dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
+#         axs[0, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#     for cm in cms:
+#         dpet_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_ff"] * 100
+#         dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
+#         axs[0, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+#     axs[0, i].set_ylabel("")
+# axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+# axs[0, 0].text(
+#     0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
+# )
+# axs[0, 1].text(
+#     0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
+# )
+# axs[0, 2].text(
+#     0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
+# )
+# lines, labels = axs[0, 0].get_legend_handles_labels()
+# fig.legend(
+#     lines[:7],
+#     labels[:7],
+#     loc="upper right",
+#     fontsize=6,
+#     frameon=False,
+#     bbox_to_anchor=(1.0, 0.88),
+#     title="2030-2059",
+# )
+# fig.legend(
+#     lines[7:],
+#     labels[7:],
+#     loc="upper right",
+#     fontsize=6,
+#     frameon=False,
+#     bbox_to_anchor=(1.0, 0.7),
+#     title="2070-2099",
+# )
+
+# for i, station_id in enumerate(station_ids):
+#     for j, seas in enumerate(["winter", "spring", "summer", "autumn"]):
+#         j = j + 1
+#         for cm in cms:
+#             dpet_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_nf"] * 100
+#             dprec_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_nf"] * 100
+#             axs[j, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#         for cm in cms:
+#             dpet_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_ff"] * 100
+#             dprec_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_ff"] * 100
+#             axs[j, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+#         axs[j, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+#     axs[-1, i].set_ylabel(r"$\overline{\Delta}$ PET [%]")
+# axs[1, 0].text(
+#     0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
+# )
+# axs[1, 1].text(
+#     0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
+# )
+# axs[1, 2].text(
+#     0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
+# )
+# axs[2, 0].text(
+#     0.9, 0.9, "(g)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 0].transAxes
+# )
+# axs[2, 1].text(
+#     0.9, 0.9, "(h)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 1].transAxes
+# )
+# axs[2, 2].text(
+#     0.9, 0.9, "(i)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 2].transAxes
+# )
+# axs[3, 0].text(
+#     0.9, 0.9, "(j)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 0].transAxes
+# )
+# axs[3, 1].text(
+#     0.9, 0.9, "(k)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 1].transAxes
+# )
+# axs[3, 2].text(
+#     0.9, 0.9, "(l)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 2].transAxes
+# )
+# axs[4, 0].text(
+#     0.9, 0.9, "(m)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 0].transAxes
+# )
+# axs[4, 1].text(
+#     0.9, 0.9, "(n)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 1].transAxes
+# )
+# axs[4, 2].text(
+#     0.9, 0.9, "(o)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 2].transAxes
+# )
+
+# fig.subplots_adjust(left=0.08, right=0.72, bottom=0.2, wspace=0.1, hspace=0.1)
+# file = base_path_figs / f"projected_annual_seasonal_dprec_and_dpet_avg.png"
+# fig.savefig(file, dpi=300)
+# file = base_path_figs / f"projected_annual_seasonal_dprec_and_dpet_avg.pdf"
+# fig.savefig(file, dpi=300)
+# plt.close(fig=fig)
+
+# fig, axs = plt.subplots(3, 3, figsize=(6, 5), sharex=True, sharey=True)
+# for i, station_id in enumerate(station_ids):
+#     for cm in cms:
+#         dpet_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_nf"] * 100
+#         dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
+#         axs[0, i].scatter(dta_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#     for cm in cms:
+#         dpet_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_ff"] * 100
+#         dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
+#         axs[0, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+#     axs[0, i].set_ylabel("")
+# axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+# axs[0, 0].text(
+#     0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
+# )
+# axs[0, 1].text(
+#     0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
+# )
+# axs[0, 2].text(
+#     0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
+# )
+# lines, labels = axs[0, 0].get_legend_handles_labels()
+# fig.legend(
+#     lines[:7],
+#     labels[:7],
+#     loc="upper right",
+#     fontsize=6,
+#     frameon=False,
+#     bbox_to_anchor=(1.0, 0.88),
+#     title="2030-2059",
+# )
+# fig.legend(
+#     lines[7:],
+#     labels[7:],
+#     loc="upper right",
+#     fontsize=6,
+#     frameon=False,
+#     bbox_to_anchor=(1.0, 0.68),
+#     title="2070-2099",
+# )
+
+# for i, station_id in enumerate(station_ids):
+#     for j, seas in enumerate(["winter", "summer"]):
+#         j = j + 1
+#         for cm in cms:
+#             dpet_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_nf"] * 100
+#             dprec_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_nf"] * 100
+#             axs[j, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#         for cm in cms:
+#             dpet_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_ff"] * 100
+#             dprec_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_ff"] * 100
+#             axs[j, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+#         axs[j, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
+#     axs[-1, i].set_xlabel(r"$\overline{\Delta}$ PET [%]")
+# axs[1, 0].text(
+#     0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
+# )
+# axs[1, 1].text(
+#     0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
+# )
+# axs[1, 2].text(
+#     0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
+# )
+# axs[2, 0].text(
+#     0.9, 0.9, "(g)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 0].transAxes
+# )
+# axs[2, 1].text(
+#     0.9, 0.9, "(h)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 1].transAxes
+# )
+# axs[2, 2].text(
+#     0.9, 0.9, "(i)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 2].transAxes
+# )
+
+# fig.subplots_adjust(left=0.08, right=0.72, bottom=0.2, wspace=0.1, hspace=0.1)
+# file = base_path_figs / f"projected_annual_winter_summer_dprec_and_dpet_avg.png"
+# fig.savefig(file, dpi=300)
+# file = base_path_figs / f"projected_annual_winter_summer_dprec_and_dpet_avg.pdf"
+# fig.savefig(file, dpi=300)
+# plt.close(fig=fig)
+
+# fig, axs = plt.subplots(5, 3, figsize=(6, 6), sharex=True, sharey=True)
+# for i, station_id in enumerate(station_ids):
+#     for cm in cms:
+#         dpet_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_nf"] * 100
+#         dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
+#         axs[0, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#     for cm in cms:
+#         dpet_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_ff"] * 100
+#         dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
+#         axs[0, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+#     axs[0, i].set_ylabel("")
+# axs[0, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
+# axs[0, 0].text(
+#     0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
+# )
+# axs[0, 1].text(
+#     0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
+# )
+# axs[0, 2].text(
+#     0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
+# )
+# lines, labels = axs[0, 0].get_legend_handles_labels()
+# fig.legend(
+#     lines[:7],
+#     labels[:7],
+#     loc="upper right",
+#     fontsize=6,
+#     frameon=False,
+#     bbox_to_anchor=(1.0, 0.88),
+#     title="2030-2059",
+# )
+# fig.legend(
+#     lines[7:],
+#     labels[7:],
+#     loc="upper right",
+#     fontsize=6,
+#     frameon=False,
+#     bbox_to_anchor=(1.0, 0.7),
+#     title="2070-2099",
+# )
+
+# for i, station_id in enumerate(station_ids):
+#     for j, seas in enumerate(["winter", "spring", "summer", "autumn"]):
+#         j = j + 1
+#         for cm in cms:
+#             dpet_ipr_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dIPR_nf"] * 100
+#             dprec_ipr_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dIPR_nf"] * 100
+#             axs[j, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#         for cm in cms:
+#             dpet_ipr_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dIPR_ff"] * 100
+#             dprec_ipr_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dIPR_ff"] * 100
+#             axs[j, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+#         axs[j, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
+#     axs[-1, i].set_xlabel(r"$\Delta$$IPR$ PET [%]")
+# axs[1, 0].text(
+#     0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
+# )
+# axs[1, 1].text(
+#     0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
+# )
+# axs[1, 2].text(
+#     0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
+# )
+# axs[2, 0].text(
+#     0.9, 0.9, "(g)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 0].transAxes
+# )
+# axs[2, 1].text(
+#     0.9, 0.9, "(h)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 1].transAxes
+# )
+# axs[2, 2].text(
+#     0.9, 0.9, "(i)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 2].transAxes
+# )
+# axs[3, 0].text(
+#     0.9, 0.9, "(j)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 0].transAxes
+# )
+# axs[3, 1].text(
+#     0.9, 0.9, "(k)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 1].transAxes
+# )
+# axs[3, 2].text(
+#     0.9, 0.9, "(l)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 2].transAxes
+# )
+# axs[4, 0].text(
+#     0.9, 0.9, "(m)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 0].transAxes
+# )
+# axs[4, 1].text(
+#     0.9, 0.9, "(n)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 1].transAxes
+# )
+# axs[4, 2].text(
+#     0.9, 0.9, "(o)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 2].transAxes
+# )
+
+# fig.subplots_adjust(left=0.08, right=0.72, bottom=0.2, wspace=0.1, hspace=0.1)
+# file = base_path_figs / f"projected_annual_seasonal_dprec_and_dpet_ipr.png"
+# fig.savefig(file, dpi=300)
+# file = base_path_figs / f"projected_annual_seasonal_dprec_and_dpet_ipr.pdf"
+# fig.savefig(file, dpi=300)
+# plt.close(fig=fig)
+
+# fig, axs = plt.subplots(3, 3, figsize=(6, 5), sharex=True, sharey=True)
+# for i, station_id in enumerate(station_ids):
+#     for cm in cms:
+#         dpet_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_nf"] * 100
+#         dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
+#         axs[0, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#     for cm in cms:
+#         dpet_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_ff"] * 100
+#         dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
+#         axs[0, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+# axs[0, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
+# axs[0, 0].text(
+#     0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
+# )
+# axs[0, 1].text(
+#     0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
+# )
+# axs[0, 2].text(
+#     0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
+# )
+# lines, labels = axs[0, 0].get_legend_handles_labels()
+# fig.legend(
+#     lines[:7],
+#     labels[:7],
+#     loc="upper right",
+#     fontsize=6,
+#     frameon=False,
+#     bbox_to_anchor=(1.0, 0.88),
+#     title="2030-2059",
+# )
+# fig.legend(
+#     lines[7:],
+#     labels[7:],
+#     loc="upper right",
+#     fontsize=6,
+#     frameon=False,
+#     bbox_to_anchor=(1.0, 0.68),
+#     title="2070-2099",
+# )
+
+# for i, station_id in enumerate(station_ids):
+#     for j, seas in enumerate(["winter", "summer"]):
+#         j = j + 1
+#         for cm in cms:
+#             dpet_ipr_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dIPR_nf"] * 100
+#             dprec_ipr_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dIPR_nf"] * 100
+#             axs[j, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+#         for cm in cms:
+#             dpet_ipr_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dIPR_ff"] * 100
+#             dprec_ipr_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dIPR_ff"] * 100
+#             axs[j, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
+#         axs[j, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
+#     axs[-1, i].set_xlabel(r"$\Delta$$IPR$ PET [%]")
+# axs[1, 0].text(
+#     0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
+# )
+# axs[1, 1].text(
+#     0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
+# )
+# axs[1, 2].text(
+#     0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
+# )
+# axs[2, 0].text(
+#     0.9, 0.9, "(g)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 0].transAxes
+# )
+# axs[2, 1].text(
+#     0.9, 0.9, "(h)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 1].transAxes
+# )
+# axs[2, 2].text(
+#     0.9, 0.9, "(i)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 2].transAxes
+# )
+
+# fig.subplots_adjust(left=0.08, right=0.72, bottom=0.15, wspace=0.1, hspace=0.1)
+# file = base_path_figs / f"projected_annual_winter_summer_dprec_and_dpet_ipr.png"
+# fig.savefig(file, dpi=300)
+# file = base_path_figs / f"projected_annual_winter_summer_dprec_and_dpet_ipr.pdf"
+# fig.savefig(file, dpi=300)
+# plt.close(fig=fig)
+
 
 fig, axs = plt.subplots(5, 3, figsize=(6, 6), sharex=True, sharey=True)
-for i, station_id in enumerate(station_ids):
+station_id = 1443
+for cm in cms:
+    dta_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_nf"] * 100
+    dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
+    axs[0, 0].scatter(dta_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+    dta_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_nf"] * 100
+    dpet_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_nf"] * 100
+    axs[0, 1].scatter(dta_avg_nf, dpet_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+    dpet_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_nf"] * 100
+    dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
+    axs[0, 2].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+for cm in cms:
+    dta_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_ff"] * 100
+    dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
+    axs[0, 0].scatter(dta_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=6, marker="*")
+    axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PRECIP [%]")
+    dta_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["ta"].loc[0, "dAvg_ff"] * 100
+    dpet_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_ff"] * 100
+    axs[0, 1].scatter(dta_avg_ff, dpet_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=6, marker="*")
+    axs[0, 1].set_ylabel(r"$\overline{\Delta}$ PET [%]")
+    dpet_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_ff"] * 100
+    dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
+    axs[0, 2].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=6, marker="*")
+    axs[0, 2].set_ylabel(r"$\overline{\Delta}$ PRECIP [%]")
+    axs[0, 2].text(1.07, 0.5, "all seasons", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes, rotation=270)
+for i, seas in enumerate(["winter", "spring", "summer", "autumn"]):
+    i = i + 1
     for cm in cms:
-        dpet_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_nf"] * 100
-        dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
-        axs[0, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
+        dta_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["ta"].loc[seas, "dAvg_nf"] * 100
+        dprec_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_nf"] * 100
+        axs[i, 0].scatter(dta_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=6, marker="^")
+        dta_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["ta"].loc[seas, "dAvg_nf"] * 100
+        dpet_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_nf"] * 100
+        axs[i, 1].scatter(dta_avg_nf, dpet_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=6, marker="^")
+        dpet_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_nf"] * 100
+        dprec_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_nf"] * 100
+        axs[i, 2].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=6, marker="^")
     for cm in cms:
-        dpet_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_ff"] * 100
-        dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
-        axs[0, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-    axs[0, i].set_ylabel("")
-axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
-axs[0, 0].text(
-    0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
-)
-axs[0, 1].text(
-    0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
-)
-axs[0, 2].text(
-    0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
-)
+        dta_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["ta"].loc[seas, "dAvg_ff"] * 100
+        dprec_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_ff"] * 100
+        axs[i, 0].scatter(dta_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=6, marker="*")
+        axs[i, 0].set_ylabel(r"$\overline{\Delta}$ PRECIP [%]")
+        dta_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["ta"].loc[seas, "dAvg_ff"] * 100
+        dpet_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_ff"] * 100
+        axs[i, 1].scatter(dta_avg_ff, dpet_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=6, marker="*")
+        axs[i, 1].set_ylabel(r"$\overline{\Delta}$ PET [%]")
+        dpet_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_ff"] * 100
+        dprec_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_ff"] * 100
+        axs[i, 2].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=6, marker="*")
+        axs[i, 2].set_ylabel(r"$\overline{\Delta}$ PRECIP [%]")
+        axs[i, 2].text(1.07, 0.5, seas, fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[i, 2].transAxes, rotation=270)
+
+axs[-1, 0].set_xlabel(r'$\overline{\Delta}$ TA [%]')
+axs[-1, 1].set_xlabel(r'$\overline{\Delta}$ TA [%]')
+axs[-1, 2].set_xlabel(r'$\overline{\Delta}$ PET [%]')
+
+
 lines, labels = axs[0, 0].get_legend_handles_labels()
 fig.legend(
     lines[:7],
@@ -1115,7 +1507,7 @@ fig.legend(
     loc="upper right",
     fontsize=6,
     frameon=False,
-    bbox_to_anchor=(1.0, 0.88),
+    bbox_to_anchor=(1.01, 0.97),
     title="2030-2059",
 )
 fig.legend(
@@ -1124,320 +1516,13 @@ fig.legend(
     loc="upper right",
     fontsize=6,
     frameon=False,
-    bbox_to_anchor=(1.0, 0.7),
+    bbox_to_anchor=(1.01, 0.79),
     title="2070-2099",
 )
-
-for i, station_id in enumerate(station_ids):
-    for j, seas in enumerate(["winter", "spring", "summer", "autumn"]):
-        j = j + 1
-        for cm in cms:
-            dpet_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_nf"] * 100
-            dprec_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_nf"] * 100
-            axs[j, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
-        for cm in cms:
-            dpet_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_ff"] * 100
-            dprec_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_ff"] * 100
-            axs[j, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-        axs[j, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
-    axs[-1, i].set_ylabel(r"$\overline{\Delta}$ PET [%]")
-axs[1, 0].text(
-    0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
-)
-axs[1, 1].text(
-    0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
-)
-axs[1, 2].text(
-    0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
-)
-axs[2, 0].text(
-    0.9, 0.9, "(g)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 0].transAxes
-)
-axs[2, 1].text(
-    0.9, 0.9, "(h)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 1].transAxes
-)
-axs[2, 2].text(
-    0.9, 0.9, "(i)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 2].transAxes
-)
-axs[3, 0].text(
-    0.9, 0.9, "(j)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 0].transAxes
-)
-axs[3, 1].text(
-    0.9, 0.9, "(k)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 1].transAxes
-)
-axs[3, 2].text(
-    0.9, 0.9, "(l)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 2].transAxes
-)
-axs[4, 0].text(
-    0.9, 0.9, "(m)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 0].transAxes
-)
-axs[4, 1].text(
-    0.9, 0.9, "(n)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 1].transAxes
-)
-axs[4, 2].text(
-    0.9, 0.9, "(o)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 2].transAxes
-)
-
-fig.subplots_adjust(left=0.08, right=0.72, bottom=0.2, wspace=0.1, hspace=0.1)
-file = base_path_figs / f"projected_annual_seasonal_dprec_and_dpet_avg.png"
+fig.subplots_adjust(left=0.08, right=0.72, top=0.95, bottom=0.1, wspace=0.3, hspace=0.25)
+file = base_path_figs / "projected_deltas_freiburg.png"
 fig.savefig(file, dpi=300)
-file = base_path_figs / f"projected_annual_seasonal_dprec_and_dpet_avg.pdf"
+file = base_path_figs / "projected_deltas_freiburg.pdf"
 fig.savefig(file, dpi=300)
 plt.close(fig=fig)
 
-fig, axs = plt.subplots(3, 3, figsize=(6, 5), sharex=True, sharey=True)
-for i, station_id in enumerate(station_ids):
-    for cm in cms:
-        dpet_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_nf"] * 100
-        dprec_avg_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_nf"] * 100
-        axs[0, i].scatter(dta_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
-    for cm in cms:
-        dpet_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dAvg_ff"] * 100
-        dprec_avg_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dAvg_ff"] * 100
-        axs[0, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-    axs[0, i].set_ylabel("")
-axs[0, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
-axs[0, 0].text(
-    0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
-)
-axs[0, 1].text(
-    0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
-)
-axs[0, 2].text(
-    0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
-)
-lines, labels = axs[0, 0].get_legend_handles_labels()
-fig.legend(
-    lines[:7],
-    labels[:7],
-    loc="upper right",
-    fontsize=6,
-    frameon=False,
-    bbox_to_anchor=(1.0, 0.88),
-    title="2030-2059",
-)
-fig.legend(
-    lines[7:],
-    labels[7:],
-    loc="upper right",
-    fontsize=6,
-    frameon=False,
-    bbox_to_anchor=(1.0, 0.68),
-    title="2070-2099",
-)
-
-for i, station_id in enumerate(station_ids):
-    for j, seas in enumerate(["winter", "summer"]):
-        j = j + 1
-        for cm in cms:
-            dpet_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_nf"] * 100
-            dprec_avg_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_nf"] * 100
-            axs[j, i].scatter(dpet_avg_nf, dprec_avg_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
-        for cm in cms:
-            dpet_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dAvg_ff"] * 100
-            dprec_avg_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dAvg_ff"] * 100
-            axs[j, i].scatter(dpet_avg_ff, dprec_avg_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-        axs[j, 0].set_ylabel(r"$\overline{\Delta}$ PREC [%]")
-    axs[-1, i].set_xlabel(r"$\overline{\Delta}$ PET [%]")
-axs[1, 0].text(
-    0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
-)
-axs[1, 1].text(
-    0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
-)
-axs[1, 2].text(
-    0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
-)
-axs[2, 0].text(
-    0.9, 0.9, "(g)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 0].transAxes
-)
-axs[2, 1].text(
-    0.9, 0.9, "(h)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 1].transAxes
-)
-axs[2, 2].text(
-    0.9, 0.9, "(i)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 2].transAxes
-)
-
-fig.subplots_adjust(left=0.08, right=0.72, bottom=0.2, wspace=0.1, hspace=0.1)
-file = base_path_figs / f"projected_annual_winter_summer_dprec_and_dpet_avg.png"
-fig.savefig(file, dpi=300)
-file = base_path_figs / f"projected_annual_winter_summer_dprec_and_dpet_avg.pdf"
-fig.savefig(file, dpi=300)
-plt.close(fig=fig)
-
-fig, axs = plt.subplots(5, 3, figsize=(6, 6), sharex=True, sharey=True)
-for i, station_id in enumerate(station_ids):
-    for cm in cms:
-        dpet_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_nf"] * 100
-        dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
-        axs[0, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
-    for cm in cms:
-        dpet_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_ff"] * 100
-        dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
-        axs[0, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-    axs[0, i].set_ylabel("")
-axs[0, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
-axs[0, 0].text(
-    0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
-)
-axs[0, 1].text(
-    0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
-)
-axs[0, 2].text(
-    0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
-)
-lines, labels = axs[0, 0].get_legend_handles_labels()
-fig.legend(
-    lines[:7],
-    labels[:7],
-    loc="upper right",
-    fontsize=6,
-    frameon=False,
-    bbox_to_anchor=(1.0, 0.88),
-    title="2030-2059",
-)
-fig.legend(
-    lines[7:],
-    labels[7:],
-    loc="upper right",
-    fontsize=6,
-    frameon=False,
-    bbox_to_anchor=(1.0, 0.7),
-    title="2070-2099",
-)
-
-for i, station_id in enumerate(station_ids):
-    for j, seas in enumerate(["winter", "spring", "summer", "autumn"]):
-        j = j + 1
-        for cm in cms:
-            dpet_ipr_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dIPR_nf"] * 100
-            dprec_ipr_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dIPR_nf"] * 100
-            axs[j, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
-        for cm in cms:
-            dpet_ipr_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dIPR_ff"] * 100
-            dprec_ipr_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dIPR_ff"] * 100
-            axs[j, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-        axs[j, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
-    axs[-1, i].set_xlabel(r"$\Delta$$IPR$ PET [%]")
-axs[1, 0].text(
-    0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
-)
-axs[1, 1].text(
-    0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
-)
-axs[1, 2].text(
-    0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
-)
-axs[2, 0].text(
-    0.9, 0.9, "(g)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 0].transAxes
-)
-axs[2, 1].text(
-    0.9, 0.9, "(h)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 1].transAxes
-)
-axs[2, 2].text(
-    0.9, 0.9, "(i)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 2].transAxes
-)
-axs[3, 0].text(
-    0.9, 0.9, "(j)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 0].transAxes
-)
-axs[3, 1].text(
-    0.9, 0.9, "(k)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 1].transAxes
-)
-axs[3, 2].text(
-    0.9, 0.9, "(l)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[3, 2].transAxes
-)
-axs[4, 0].text(
-    0.9, 0.9, "(m)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 0].transAxes
-)
-axs[4, 1].text(
-    0.9, 0.9, "(n)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 1].transAxes
-)
-axs[4, 2].text(
-    0.9, 0.9, "(o)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[4, 2].transAxes
-)
-
-fig.subplots_adjust(left=0.08, right=0.72, bottom=0.2, wspace=0.1, hspace=0.1)
-file = base_path_figs / f"projected_annual_seasonal_dprec_and_dpet_ipr.png"
-fig.savefig(file, dpi=300)
-file = base_path_figs / f"projected_annual_seasonal_dprec_and_dpet_ipr.pdf"
-fig.savefig(file, dpi=300)
-plt.close(fig=fig)
-
-fig, axs = plt.subplots(3, 3, figsize=(6, 5), sharex=True, sharey=True)
-for i, station_id in enumerate(station_ids):
-    for cm in cms:
-        dpet_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_nf"] * 100
-        dprec_ipr_nf = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_nf"] * 100
-        axs[0, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
-    for cm in cms:
-        dpet_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["pet"].loc[0, "dIPR_ff"] * 100
-        dprec_ipr_ff = dict_deltas_climate[station_label1[station_id]][cm]["prec"].loc[0, "dIPR_ff"] * 100
-        axs[0, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-axs[0, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
-axs[0, 0].text(
-    0.9, 0.9, "(a)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 0].transAxes
-)
-axs[0, 1].text(
-    0.9, 0.9, "(b)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 1].transAxes
-)
-axs[0, 2].text(
-    0.9, 0.9, "(c)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[0, 2].transAxes
-)
-lines, labels = axs[0, 0].get_legend_handles_labels()
-fig.legend(
-    lines[:7],
-    labels[:7],
-    loc="upper right",
-    fontsize=6,
-    frameon=False,
-    bbox_to_anchor=(1.0, 0.88),
-    title="2030-2059",
-)
-fig.legend(
-    lines[7:],
-    labels[7:],
-    loc="upper right",
-    fontsize=6,
-    frameon=False,
-    bbox_to_anchor=(1.0, 0.68),
-    title="2070-2099",
-)
-
-for i, station_id in enumerate(station_ids):
-    for j, seas in enumerate(["winter", "summer"]):
-        j = j + 1
-        for cm in cms:
-            dpet_ipr_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dIPR_nf"] * 100
-            dprec_ipr_nf = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dIPR_nf"] * 100
-            axs[j, i].scatter(dpet_ipr_nf, dprec_ipr_nf, label=label[cm], color=color[f"{cm}_future"], s=4, marker="^")
-        for cm in cms:
-            dpet_ipr_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["pet"].loc[seas, "dIPR_ff"] * 100
-            dprec_ipr_ff = dict_deltas_climate_seas[station_label1[station_id]][cm]["prec"].loc[seas, "dIPR_ff"] * 100
-            axs[j, i].scatter(dpet_ipr_ff, dprec_ipr_ff, label=label[cm], color=color[f"{cm}_future"], s=8, marker="*")
-        axs[j, 0].set_ylabel(r"$\Delta$$IPR$ PREC [%]")
-    axs[-1, i].set_xlabel(r"$\Delta$$IPR$ PET [%]")
-axs[1, 0].text(
-    0.9, 0.9, "(d)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 0].transAxes
-)
-axs[1, 1].text(
-    0.9, 0.9, "(e)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 1].transAxes
-)
-axs[1, 2].text(
-    0.9, 0.9, "(f)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[1, 2].transAxes
-)
-axs[2, 0].text(
-    0.9, 0.9, "(g)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 0].transAxes
-)
-axs[2, 1].text(
-    0.9, 0.9, "(h)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 1].transAxes
-)
-axs[2, 2].text(
-    0.9, 0.9, "(i)", fontsize=9, verticalalignment="center", horizontalalignment="center", transform=axs[2, 2].transAxes
-)
-
-fig.subplots_adjust(left=0.08, right=0.72, bottom=0.15, wspace=0.1, hspace=0.1)
-file = base_path_figs / f"projected_annual_winter_summer_dprec_and_dpet_ipr.png"
-fig.savefig(file, dpi=300)
-file = base_path_figs / f"projected_annual_winter_summer_dprec_and_dpet_ipr.pdf"
-fig.savefig(file, dpi=300)
-plt.close(fig=fig)
