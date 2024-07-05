@@ -1026,7 +1026,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
         vs.Nmin_rz = update_add(
             vs.Nmin_rz,
             at[2:-2, 2:-2, vs.tau, 0],
-            vs.N_fert_org[2:-2, 2:-2]
+            vs.Nfert_org[2:-2, 2:-2]
         )
 
         # summarize total nitrogen fertilizer
