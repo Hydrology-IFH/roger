@@ -36,31 +36,33 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "miscanthus",
                                                              "bare-grass"]), default="miscanthus")
 @click.option("-ft", "--fertilization-intensity", type=click.Choice(["low", "medium", "high"]), default="medium")
-@click.option("-td", "--tmp-dir", type=str, default=Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "svat_crop_nitrate")
+# @click.option("-td", "--tmp-dir", type=str, default=Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "svat_crop_nitrate")
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_crop_nitrate")
 @roger_base_cli
 def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, update_add, at, scipy_stats as sstx
+    from roger.core.operators import numpy as npx, update, update_add, at
     import roger.lookuptables as lut
     from roger.core.utilities import _get_row_no
+    from roger import runtime_settings as rs
 
     class SVATCROPNITRATESetup(RogerSetup):
         """A SVAT-CROP transport model for nitrate."""
 
         _base_path = Path(__file__).parent
-        if tmp_dir:
-            # read fluxes and states from local SSD on cluster node
-            _input_dir = Path(tmp_dir)
-        else:
-            _input_dir = _base_path.parent / "output" / "svat_crop"
-        # _input_dir = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "svat_crop"
+        # if tmp_dir:
+        #     # read fluxes and states from local SSD on cluster node
+        #     _input_dir = Path(tmp_dir)
+        # else:
+        #     _input_dir = _base_path.parent / "output" / "svat_crop"
+        _input_dir = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "svat_crop"
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables[var]
-                return npx.array(var_obj, dtype=npx.float64)
+                return npx.array(var_obj, dtype=rs.float_type)
 
         def _get_nitt(self, path_dir, file):
             nc_file = path_dir / file
@@ -326,21 +328,21 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
                 at[:],
                 self._read_var_from_nc(
                     "year", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                ),
+                ).astype('int32'),
             )
             vs.DOY = update(
                 vs.DOY,
                 at[:],
                 self._read_var_from_nc(
                     "doy", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                ),
+                ).astype('int32'),
             )
             vs.LU_ID = update(
                 vs.LU_ID,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "lu_id", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                ),
+                ).astype('int32'),
             )
             vs.Z_ROOT = update(
                 vs.Z_ROOT,

@@ -64,7 +64,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables[var]
-                return npx.array(var_obj, dtype=npx.float32)
+                return npx.array(var_obj, dtype=npx.float64)
 
         def _get_nitt(self, path_dir, file):
             nc_file = path_dir / file
@@ -326,21 +326,21 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 at[:],
                 self._read_var_from_nc(
                     "year", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                ),
+                ).astype("int32"),
             )
             vs.DOY = update(
                 vs.DOY,
                 at[:],
                 self._read_var_from_nc(
                     "doy", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                ),
+                ).astype("int32"),
             )
             vs.LU_ID = update(
                 vs.LU_ID,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "lu_id", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                )[row, :, :],
+                ).astype("int32")[row, :, :],
             )
             vs.Z_ROOT = update(
                 vs.Z_ROOT,
@@ -623,14 +623,14 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 at[:],
                 self._read_var_from_nc(
                     "year", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                ),
+                ).astype("int32"),
             )
             vs.DOY = update(
                 vs.DOY,
                 at[:],
                 self._read_var_from_nc(
                     "doy", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                ),
+                ).astype("int32"),
             )
             vs.ta_year = update(
                 vs.ta_year,
@@ -642,7 +642,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "lu_id", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                )[row, :, :],
+                ).astype("int32")[row, :, :],
             )
             vs.Z_ROOT = update(
                 vs.Z_ROOT,
