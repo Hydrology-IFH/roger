@@ -527,7 +527,7 @@ VARIABLES = {
     "lu_id": Variable(
         "Land_use",
         CATCH_GRID,
-        "m",
+        "",
         "Land use",
         dtype=runtime_settings.int_type,
         time_dependent=False,
@@ -536,7 +536,7 @@ VARIABLES = {
     "LU_ID": Variable(
         "Land_use",
         CATCH_GRID + TIME,
-        "m",
+        "",
         "Land use",
         dtype=runtime_settings.int_type,
         time_dependent=False,

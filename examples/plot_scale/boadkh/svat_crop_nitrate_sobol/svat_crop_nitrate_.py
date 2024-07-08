@@ -44,7 +44,7 @@ from roger.cli.roger_run_base import roger_base_cli
 def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, update_add, at, scipy_stats as sstx
+    from roger.core.operators import numpy as npx, update, update_add, at
     import roger.lookuptables as lut
     from roger.core.utilities import _get_row_no
 
@@ -62,7 +62,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables[var]
-                return npx.array(var_obj, dtype=npx.float32)
+                return npx.array(var_obj, dtype=npx.float64)
 
         def _get_nitt(self, path_dir, file):
             nc_file = path_dir / file
@@ -96,7 +96,8 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             settings.nitt_forc = settings.nitt
             settings.ages = 1000
             settings.nages = settings.ages + 1
-            settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
+            # settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
+            settings.runlen_warmup = 15 * 24 * 60 * 60
             settings.runlen = self._get_runlen(
                 self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
             )
@@ -324,21 +325,21 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 at[:],
                 self._read_var_from_nc(
                     "year", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                ),
+                ).astype("int32"),
             )
             vs.DOY = update(
                 vs.DOY,
                 at[:],
                 self._read_var_from_nc(
                     "doy", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                ),
+                ).astype("int32"),
             )
             vs.LU_ID = update(
                 vs.LU_ID,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "lu_id", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                )[row, :, :],
+                ).astype("int32")[row, :, :],
             )
             vs.Z_ROOT = update(
                 vs.Z_ROOT,
@@ -439,11 +440,11 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             )
 
             # initial nitrate concentration (in mg/l)
-            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], 10)
-            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 10)
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], 10.)
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 10.)
             # initial mineral soil nitrogen
-            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], (50 / settings.ages) * settings.dx * settings.dy * 100)
-            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], (50 / settings.ages) * settings.dx * settings.dy * 100)
+            vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], (50. / settings.ages) * settings.dx * settings.dy * 100.)
+            vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], (50. / settings.ages) * settings.dx * settings.dy * 100.)
             vs.msa_rz = update(
                 vs.msa_rz,
                 at[2:-2, 2:-2, :vs.taup1, :], vs.C_rz[2:-2, 2:-2, :vs.taup1, npx.newaxis] * vs.sa_rz[2:-2, 2:-2, :vs.taup1, :],
@@ -621,14 +622,14 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 at[:],
                 self._read_var_from_nc(
                     "year", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                ),
+                ).astype("int32"),
             )
             vs.DOY = update(
                 vs.DOY,
                 at[:],
                 self._read_var_from_nc(
                     "doy", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                ),
+                ).astype("int32"),
             )
             vs.ta_year = update(
                 vs.ta_year,
@@ -640,7 +641,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
                     "lu_id", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-                )[row, :, :],
+                ).astype("int32")[row, :, :],
             )
             vs.Z_ROOT = update(
                 vs.Z_ROOT,
