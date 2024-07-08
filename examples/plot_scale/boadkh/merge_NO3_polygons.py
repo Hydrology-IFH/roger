@@ -6,7 +6,8 @@ import click
 @click.command("main")
 def main():
     # directory of results
-    base_path_output = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "data_for_nitrate_leaching"
+    # base_path_output = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "data_for_nitrate_leaching"
+    base_path_output = Path(__file__).parent / "output" / "data_for_nitrate_leaching"
     locations = ["freiburg", "lahr", "muellheim", 
                  "stockach", "gottmadingen", "weingarten",
                  "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
