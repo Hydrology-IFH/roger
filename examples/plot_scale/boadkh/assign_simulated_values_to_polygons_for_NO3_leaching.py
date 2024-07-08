@@ -175,7 +175,7 @@ def main(location, tmp_dir):
     base_path = Path(__file__).parent
     # directory of results
     base_path_output = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output"
-    base_path_output = Path(__file__) / "output"
+    base_path_output = Path(__file__).parent / "output"
 
     
     # load linkage between BK50 and cropland clusters
