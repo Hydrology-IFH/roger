@@ -206,7 +206,7 @@ def main(lys_experiment, tmp_dir):
                                                        "S_sat_rz", "S_pwp_ss",
                                                        "S_fc_ss", "S_sat_ss",
                                                        "theta_rz", "theta_ss", "theta",
-                                                       "S_snow"]
+                                                       "S_snow", "ta"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
