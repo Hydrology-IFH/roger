@@ -666,6 +666,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
                     )
                     # set fertilization rate
                     row_no = _get_row_no(vs.lut_fert1[:, 0], i)
+                    print(lut_fert[row_no, 1].dtype)
                     vs.doy_fert1 = update(
                         vs.doy_fert1,
                         at[2:-2, 2:-2],

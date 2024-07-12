@@ -5,6 +5,8 @@ import h5netcdf
 import datetime
 import numpy as onp
 import click
+import pandas as pd
+from cftime import num2date
 import roger
 
 
@@ -42,6 +44,7 @@ def main():
                                 "Time": len(df.variables["Time"]),
                             }
                             time = onp.array(df.variables.get("Time"))
+                            time_origin = df.variables['Time'].attrs['time_origin']
                 for dfs in diag_files:
                     with h5netcdf.File(dfs, "r", decode_vlen_strings=False) as df:
                         if not f.dimensions:
@@ -76,6 +79,27 @@ def main():
                                 vals = onp.array(var_obj)
                                 v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
                                 v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
+
+                # add year and day of year for nitrate transport model
+                dates1 = num2date(
+                    time,
+                    units=f"days since {time_origin}",
+                    calendar="standard",
+                    only_use_cftime_datetimes=False,
+                )
+                dates = pd.to_datetime(dates1)
+                vals = onp.array(dates.year)
+                v = f.create_variable(
+                    "year", ("Time",), float, compression="gzip", compression_opts=1
+                )
+                v[:] = onp.array(dates.year)
+                v.attrs.update(long_name="Year", units="")
+                vals = onp.array(dates.year)
+                v = f.create_variable(
+                    "doy", ("Time",), float, compression="gzip", compression_opts=1
+                )
+                v[:] = onp.array(dates.day_of_year)
+                v.attrs.update(long_name="Day of year", units="")
     return
 
 

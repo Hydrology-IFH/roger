@@ -23,7 +23,7 @@ _UNITS = {
     "c_fert": "-",
 }
 
-@click.option("-ns", "--nsamples", type=int, default=2**9)
+@click.option("-ns", "--nsamples", type=int, default=2**8)
 @click.command("main")
 def main(nsamples):
     base_path = Path(__file__).parent

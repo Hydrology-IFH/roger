@@ -5638,6 +5638,15 @@ VARIABLES = {
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
+    "irr_demand": Variable(
+        "irrigation demand",
+        CATCH_GRID,
+        "mm/dt",
+        "irrigation demand",
+        time_dependent=True,
+        write_to_restart=False,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
+    ),
     "c_int": Variable(
         "scale parameter of interception storage",
         CATCH_GRID,

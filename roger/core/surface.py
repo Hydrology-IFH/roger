@@ -75,8 +75,6 @@ def calc_topo_kernel(state):
 def calc_parameters_surface_kernel(state):
     vs = state.variables
 
-    print(vs.lu_id.dtype)
-
     # land use dependent upper interception storage
     S_int_top_tot = allocate(state.dimensions, ("x", "y"))
     trees_cond = allocate(state.dimensions, ("x", "y"), dtype=bool, fill=False)

@@ -145,10 +145,6 @@ def plot_obs_sim(df, y_lab="", ls_obs="line", x_lab="Time", ylim=None):
     y_lab : str
         label of y-axis
 
-    fmt_x : str, optional
-        Format of x-axis. Default is numerical ('num'). Alternatively, date
-        format can be used ('date').
-
     ls_obs : str, optional
         linestyle of observations
 
