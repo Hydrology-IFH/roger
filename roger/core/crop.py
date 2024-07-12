@@ -1,9 +1,46 @@
 from roger import roger_kernel, roger_routine, KernelOutput
 from roger.variables import allocate
-from roger.core.operators import numpy as npx, update, update_add, at
+from roger.core.operators import numpy as npx, update, update_add, at, for_loop
 import roger.lookuptables as lut
 from roger.core.utilities import _get_row_no
 from roger.core import transport
+
+
+@roger_kernel
+def calc_irrigation_demand(state):
+    """
+    Calculates crop irrigation demand
+    """
+    vs = state.variables
+
+    # calculate the fine pore deficit
+    fine_pore_deficit = allocate(state.dimensions, ("x", "y"))
+    fine_pore_deficit = update(
+        fine_pore_deficit,
+        at[2:-2, 2:-2],
+        vs.theta_fc[2:-2, 2:-2, vs.tau] - vs.theta[2:-2, 2:-2, vs.tau],
+    )
+    fine_pore_deficit = update(
+        fine_pore_deficit,
+        at[2:-2, 2:-2],
+        npx.where(fine_pore_deficit[2:-2, 2:-2] < 0, 0, fine_pore_deficit[2:-2, 2:-2]),
+    )
+
+    vs.irr_demand = update(
+        vs.irr_demand,
+        at[2:-2, 2:-2],
+        fine_pore_deficit[2:-2, 2:-2] * vs.z_root[2:-2, 2:-2, vs.tau],
+    )
+
+    # irrigation demand for crops only
+    mask = (vs.lu_id) < 500 & (vs.lu_id > 600)
+    vs.irr_demand = update(
+        vs.irr_demand,
+        at[2:-2, 2:-2],
+        npx.where(mask, 0, vs.irr_demand[2:-2, 2:-2]),
+    )
+
+    return KernelOutput(irr_demand=vs.irr_demand)
 
 
 @roger_kernel
@@ -1990,6 +2027,7 @@ def calculate_crop_phenology(state):
             vs.update(update_k_stress_transp(state))
             vs.update(update_basal_transp_coeff(state))
             vs.update(update_basal_evap_coeff(state))
+            vs.update(calc_irrigation_demand(state))
 
         if vs.event_id[vs.tau] == 0:
             vs.update(update_lu_id(state))
@@ -2011,14 +2049,25 @@ def update_alpha_transp(state):
     """
     vs = state.variables
 
-    for i in range(500, 600):
-        mask = vs.lu_id == i
+    # land use dependent upper interception storage
+    alpha_transp = allocate(state.dimensions, ("x", "y"))
+
+    def loop_body_alpha_transp(i, alpha_transp):
+        mask = (vs.lu_id == i)
         row_no = _get_row_no(vs.lut_crops[:, 0], i)
-        vs.alpha_transp = update(
-            vs.alpha_transp,
-            at[2:-2, 2:-2, :],
-            npx.where(mask[2:-2, 2:-2], vs.lut_crop_scale[2:-2, 2:-2, row_no], vs.alpha_transp[2:-2, 2:-2, :]),
+        alpha_transp = update(
+            alpha_transp,
+            at[2:-2, 2:-2],
+            npx.where(mask[2:-2, 2:-2], vs.lut_crop_scale[2:-2, 2:-2, row_no], alpha_transp[2:-2, 2:-2]),
         )
+
+        return alpha_transp
+    
+    alpha_transp = for_loop(500, 600, loop_body_alpha_transp, alpha_transp)
+
+    vs.alpha_transp = update(
+        vs.alpha_transp, at[2:-2, 2:-2], alpha_transp[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2]
+    )
 
     return KernelOutput(alpha_transp=vs.alpha_transp)
 

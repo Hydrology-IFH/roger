@@ -473,10 +473,10 @@ def main(location, tmp_dir):
 
         click.echo(f"Finalized {crop_rotation_scenario}")
 
-    gdf = pd.concat(ll_df, axis=0)
-    gdf = gdf.to_crs("EPSG:25832")
-    file = Path(tmp_dir) / f"nitrate_leaching_{location}.gpkg"
-    gdf.to_file(file, driver="GPKG")
+        gdf = pd.concat(ll_df, axis=0)
+        gdf = gdf.to_crs("EPSG:25832")
+        file = Path(tmp_dir) / f"nitrate_leaching_{location}.gpkg"
+        gdf.to_file(file, driver="GPKG")
 
 
 if __name__ == "__main__":

@@ -12,8 +12,10 @@ from roger.cli.roger_run_base import roger_base_cli
 def main(lys_experiment, transport_model_structure, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, update_add, at, where
+    from roger.core.operators import numpy as npx, update, update_add, at
+    import roger.lookuptables as lut
     from roger.tools.setup import write_forcing_tracer
+    from roger import runtime_settings as rs
 
     class SVATCROPNITRATESetup(RogerSetup):
         """A SVAT transport model for nitrate
@@ -23,14 +25,14 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             # read fluxes and states from local SSD on cluster node
             _input_dir1 = Path(tmp_dir)
         else:
-            _input_dir1 = _base_path.parent / "output" / "svat_crop_monte_carlo"
+            _input_dir1 = _base_path.parent / "output" / "svat_crop"
         _input_dir2 = _base_path.parent / "input" / f"{lys_experiment}"
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables[var]
-                return npx.array(var_obj, dtype=npx.float32)
+                return npx.array(var_obj, dtype=rs.float_type)
 
         def _get_nitt(self, path_dir, file):
             nc_file = path_dir / file
@@ -57,19 +59,20 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             settings.sas_solver = "determinsitic"
             settings.sas_solver_substeps = 8
 
-            settings.nx, settings.ny = 1, 1
-            settings.nitt = self._get_nitt(self._input_dir, 'forcing_tracer.nc')
+            settings.nx, settings.ny = 3, 1
+            settings.nitt = self._get_nitt(self._input_dir2, 'forcing_tracer.nc')
+            settings.nitt_forc = settings.nitt
             settings.ages = 1000
             settings.nages = settings.ages + 1
             settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
-            settings.runlen = self._get_runlen(self._input_dir, 'forcing_tracer.nc')
+            settings.runlen = self._get_runlen(self._input_dir2, 'forcing_tracer.nc')
 
             settings.dx = 1
             settings.dy = 1
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0
-            settings.time_origin = self._get_time_origin(self._input_dir, 'forcing_tracer.nc')
+            settings.time_origin = self._get_time_origin(self._input_dir2, 'forcing_tracer.nc')
 
             settings.enable_crop_phenology = True
             settings.enable_crop_rotation = True
@@ -106,9 +109,16 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
             vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "lut_nup",
+            ],
+        )
         def set_look_up_tables(self, state):
-            pass
+            vs = state.variables
+
+            vs.lut_nup = update(vs.lut_nup, at[:, :], lut.ARR_NUP)
 
         @roger_routine
         def set_topography(self, state):
@@ -145,6 +155,8 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
                 "kmin_rz",
                 "kmin_ss",
                 "kfix_rz",
+                "kngl_rz",
+                "kdep",
                 "z_soil",
                 "phi_soil_temp",
                 "damp_soil_temp",
@@ -168,18 +180,26 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._input_dir1, f'SVATCROP_{lys_experiment}.nc')[:, :, 0])
             vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._input_dir1, f'SVATCROP_{lys_experiment}.nc')[:, :, 0])
 
-            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], 0.55)
-            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], 0.7)
-            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], 4)
-            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], 0.001)
-            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], 25)
-            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], 0.1)
-            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], 5)
-            vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], 0.1)
-            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], 30)
-            vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], 0.1)
-            vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], 40)
-            vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], 0.1)
+            # partition coefficients
+            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], self._read_var_from_nc("alpha_transp", self._base_path, "parameters.nc"))
+            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], self._read_var_from_nc("alpha_q", self._base_path, "parameters.nc"))
+            # denitrification parameters
+            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_denit", self._base_path, "parameters.nc"))
+            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("km_denit", self._base_path, "parameters.nc"))
+            # nitrification parameters
+            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit", self._base_path, "parameters.nc"))
+            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit", self._base_path, "parameters.nc"))
+            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_nit", self._base_path, "parameters.nc"))
+            vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], self._read_var_from_nc("km_nit", self._base_path, "parameters.nc"))
+            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_nit", self._base_path, "parameters.nc"))
+            vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], self._read_var_from_nc("dmax_nit", self._base_path, "parameters.nc"))
+            vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], self._read_var_from_nc("kmin", self._base_path, "parameters.nc"))
+            vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], self._read_var_from_nc("kmin", self._base_path, "parameters.nc"))
+            # gaseous loss parameters
+            vs.kngl_rz = update(vs.kngl_rz, at[2:-2, 2:-2], self._read_var_from_nc("kngl", self._base_path, "parameters.nc"))
+            # nitrogen deposition parameters
+            vs.kdep = update(vs.kdep, at[2:-2, 2:-2], 10)
+
 
             if settings.tm_structure == "complete-mixing":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 1)
@@ -211,17 +231,17 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 0.25)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 62)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 0.3)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 1.2)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 0.6)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 61)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1.5)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 3.5)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 1.5)
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 61)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 2)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 2)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1.5)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 1.5)
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], vs.S_pwp_ss[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2])
                 vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 6)
@@ -233,37 +253,37 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             vs.z_soil = update(
                 vs.z_soil, at[2:-2, 2:-2], self._read_var_from_nc("z_soil", self._base_path, "parameters.nc")
             )
-            vs.phi_soil_temp = update(vs.phi_soil_temp, at[2:-2, 2:-2],self._read_var_from_nc("phi_soil_temp", self._base_path, "parameters.nc"))
+            vs.phi_soil_temp = update(vs.phi_soil_temp, at[2:-2, 2:-2], self._read_var_from_nc("phi_soil_temp", self._base_path, "parameters.nc"))
             # dampening depth of soil temperature depends on clay content
-            clay = self._read_var_from_nc("clay", self._base_path, "parameters.nc")
+            clay = self._read_var_from_nc("clay", self._base_path, "parameters.nc")[0, 0]
             vs.damp_soil_temp = update(vs.damp_soil_temp, at[2:-2, 2:-2], 12 + 4 * (1 - (clay / settings.clay_max)))
 
             vs.YEAR = update(
                 vs.YEAR,
                 at[:],
                 self._read_var_from_nc(
-                    "year", self._input_dir, f'SVATCROP_{lys_experiment}.nc'
+                    "year", self._input_dir1, f'SVATCROP_{lys_experiment}.nc'
                 ),
             )
             vs.DOY = update(
                 vs.DOY,
                 at[:],
                 self._read_var_from_nc(
-                    "doy", self._input_dir, f'SVATCROP_{lys_experiment}.nc'
+                    "doy", self._input_dir1, f'SVATCROP_{lys_experiment}.nc'
                 ),
             )
             vs.LU_ID = update(
                 vs.LU_ID,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "lu_id", self._input_dir, f'SVATCROP_{lys_experiment}.nc'
+                    "lu_id", self._input_dir1, f'SVATCROP_{lys_experiment}.nc'
                 ),
             )
             vs.Z_ROOT = update(
                 vs.Z_ROOT,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "z_root", self._input_dir, f'SVATCROP_{lys_experiment}.nc'
+                    "z_root", self._input_dir1, f'SVATCROP_{lys_experiment}.nc'
                 ),
             )
 
@@ -341,17 +361,9 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             )
 
             # initial nitrate concentration (in mg/l)
-            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], 5)
-            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 5)
-            # exponential distribution of mineral soil nitrogen
-            # mineral soil nitrogen is decreasing with increasing age
-            # p_dec = allocate(state.dimensions, ("x", "y", 2, "ages"))
-            # p_dec1 = sstx.expon.pdf(npx.linspace(sstx.expon.ppf(0.001), sstx.expon.ppf(0.999), settings.ages))
-            # p_dec2 = npx.sum(p_dec1)
-            # p_dec3 = p_dec1 / p_dec2
-            # p_dec = update(p_dec, at[:, :, :vs.taup1, :], p_dec3[npx.newaxis, npx.newaxis, npx.newaxis, :])
-            # vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
-            # vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], 100 * p_dec[2:-2, 2:-2, :, :] * settings.dx * settings.dy * 100)
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], 5.)
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 5.)
+
             vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], (100 / settings.ages) * settings.dx * settings.dy * 100)
             vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], (100 / settings.ages) * settings.dx * settings.dy * 100)
             vs.msa_rz = update(
@@ -432,7 +444,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
                 vs.TA,
                 at[:],
                 self._read_var_from_nc(
-                    "ta", self._input_dir, f'SVATCROP_{lys_experiment}.nc'
+                    "ta", self._input_dir1, f'SVATCROP_{lys_experiment}.nc'
                 )[0, 0, :],
             )
             vs.ta_year = update(
@@ -469,7 +481,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
 
 
         @roger_routine
-        def set_diagnostics(self, state, base_path=tmp_dir):
+        def set_diagnostics(self, state, base_path=Path(__file__).parent.parent / "output" / "svat_crop_nitrate"):
             diagnostics = state.diagnostics
 
             diagnostics["rate"].output_variables = ["M_in", "M_q_ss", "M_transp"]
@@ -491,6 +503,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
                 "rt50_s",
                 "rt90_s",
                 "rtavg_s",
+                "C_q_ss"
             ]
             diagnostics["average"].output_frequency = 24 * 60 * 60
             diagnostics["average"].sampling_frequency = 1
@@ -519,47 +532,72 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
     def apply_fertilizer_kernel(state):
         vs = state.variables
         settings = state.settings
-
-        _c1 = 0.3
-        _c2 = 1 - _c1
-
-        # apply nitrogen fertilizer
-        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert1[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
-        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
-        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100, vs.Nmin_in[2:-2, 2:-2]))
             
+        _c1 = 0.5
+
+        # apply mineral nitrogen fertilizer (contains 50% NH4 and 50% NO3)
+        vs.Nfert_min = update_add(vs.Nfert_min, at[2:-2, 2:-2], vs.NMIN_IN[2:-2, 2:-2, vs.itt])
+        vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where(vs.Nfert_min[2:-2, 2:-2] < 0, 0, vs.Nfert_min[2:-2, 2:-2]))
+
+        vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], vs.NMIN_IN[2:-2, 2:-2, vs.itt])
+        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where(vs.Nmin_in[2:-2, 2:-2] < 0, 0, vs.Nmin_in[2:-2, 2:-2]))
+
         inf = vs.inf_mat_rz[2:-2, 2:-2] + vs.inf_pf_rz[2:-2, 2:-2] + vs.inf_pf_ss[2:-2, 2:-2]
         vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.doy_dist[2:-2, 2:-2] == vs.doy_fert1[2:-2, 2:-2]) | (vs.doy_dist[2:-2, 2:-2] == vs.doy_fert2[2:-2, 2:-2]) | (vs.doy_dist[2:-2, 2:-2] == vs.doy_fert3[2:-2, 2:-2]), 0, vs.inf_in_tracer[2:-2, 2:-2]))
         vs.inf_in_tracer = update_add(vs.inf_in_tracer, at[2:-2, 2:-2], inf)
         inf_ratio = npx.where((inf/settings.cum_inf_for_N_input) < 1, inf/settings.cum_inf_for_N_input, 1)
-        # dissolved nitrogen input
+        # dissolved nitrogen input as nitrate
         vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.Nmin_in[2:-2, 2:-2] * inf_ratio * _c1, 0))
-        # nitrogen deposition (10 kg N/ha/yr)
-        Ndep = (10/365) * settings.dx * settings.dy * 100  
-        vs.M_in = update_add(vs.M_in, at[2:-2, 2:-2], npx.where(inf > 0, Ndep * _c1, 0))
-        vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], npx.where(inf > 0, Ndep, 0))
+        vs.ndep_s = update(vs.ndep_s, at[2:-2, 2:-2], 0)
+        # wet nitrate deposition
+        vs.M_in = update_add(vs.M_in, at[2:-2, 2:-2], npx.where(inf > 0, vs.kdep[2:-2, 2:-2] * 0.5, 0))
+        vs.ndep_s = update_add(vs.ndep_s, at[2:-2, 2:-2], npx.where(inf > 0, vs.kdep[2:-2, 2:-2] * 0.5, 0))  
         vs.C_in = update(vs.C_in, at[2:-2, 2:-2], npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.M_in[2:-2, 2:-2]/inf, 0))
-        # undissolved nitrogen input
+        # undissolved nitrogen input as ammonium
         vs.Nmin_rz = update_add(
             vs.Nmin_rz,
             at[2:-2, 2:-2, vs.tau, 0],
-            npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.Nmin_in[2:-2, 2:-2] * inf_ratio * _c2, 0),
+            vs.Nfert_min[2:-2, 2:-2],
         )
+        # dry ammonium deposition
+        vs.Nmin_rz = update_add(
+            vs.Nmin_rz,
+            at[2:-2, 2:-2, vs.tau, 0],
+            vs.kdep[2:-2, 2:-2] * 0.5,
+        )
+        vs.ndep_s = update_add(vs.ndep_s, at[2:-2, 2:-2], vs.kdep[2:-2, 2:-2] * 0.5)  
         vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], -vs.Nmin_in[2:-2, 2:-2] * inf_ratio)
-        vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], -npx.where(inf > 0, Ndep, 0))
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.Nmin_in[2:-2, 2:-2] < 0), 0, vs.Nmin_in[2:-2, 2:-2]))
         vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.inf_in_tracer[2:-2, 2:-2] > settings.cum_inf_for_N_input), 0, vs.inf_in_tracer[2:-2, 2:-2]))
 
+        # apply organic nitrogen fertilizer (contains 48% NH4)
+        vs.Nfert_org = update_add(vs.Nfert_org , at[2:-2, 2:-2], vs.NORG_IN[2:-2, 2:-2, vs.itt])
+        vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], npx.where(vs.Nfert_org[2:-2, 2:-2] < 0, 0, vs.Nfert_org[2:-2, 2:-2]))        
+
+        vs.Nmin_rz = update_add(
+            vs.Nmin_rz,
+            at[2:-2, 2:-2, vs.tau, 0],
+            vs.Nfert_org[2:-2, 2:-2]
+        )
+
+        # summarize total nitrogen fertilizer
+        vs.Nfert = update(vs.Nfert, at[2:-2, 2:-2], 0)
+        vs.Nfert = update(vs.Nfert, at[2:-2, 2:-2], vs.Nfert_org[2:-2, 2:-2] + vs.Nfert_min[2:-2, 2:-2] + vs.ndep_s[2:-2, 2:-2])
+
         return KernelOutput(
+            ndep_s=vs.ndep_s,
             Nmin_in=vs.Nmin_in,
             inf_in_tracer=vs.inf_in_tracer,
             M_in=vs.M_in,
             C_in=vs.C_in,
             Nmin_rz=vs.Nmin_rz,
+            Nfert_min=vs.Nfert_min,
+            Nfert_org=vs.Nfert_org,
+            Nfert=vs.Nfert,
         )
 
     model = SVATCROPNITRATESetup()
-    write_forcing_tracer(model._input_dir, 'NO3')
+    write_forcing_tracer(model._input_dir2, 'NO3')
     model.setup()
     model.warmup()
     model.run()
