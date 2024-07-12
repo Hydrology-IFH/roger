@@ -38,7 +38,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables['Time']
-                return len(onp.array(var_obj)) + 1
+                return len(onp.array(var_obj))
 
         def _get_runlen(self, path_dir, file):
             nc_file = path_dir / file
@@ -56,7 +56,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
         def set_settings(self, state):
             settings = state.settings
             settings.identifier = f"SVATCROPNITRATE_{transport_model_structure}_{lys_experiment}"
-            settings.sas_solver = "determinsitic"
+            settings.sas_solver = "deterministic"
             settings.sas_solver_substeps = 8
 
             settings.nx, settings.ny = 3, 1

@@ -38,7 +38,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables['Time']
-                return len(onp.array(var_obj)) + 1
+                return len(onp.array(var_obj))
 
         def _get_runlen(self, path_dir, file):
             nc_file = path_dir / file
@@ -56,16 +56,18 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
         def set_settings(self, state):
             settings = state.settings
             settings.identifier = f"SVATCROPNITRATE_{transport_model_structure}_{lys_experiment}"
-            settings.sas_solver = "determinsitic"
+            settings.sas_solver = "deterministic"
             settings.sas_solver_substeps = 8
 
             settings.nx, settings.ny = 3, 1
-            settings.nitt = self._get_nitt(self._input_dir2, 'forcing_tracer.nc')
+            settings.nitt = self._get_nitt(
+                self._input_dir1, f"SVATCROP_{lys_experiment}.nc"
+            )
             settings.nitt_forc = settings.nitt
             settings.ages = 1000
             settings.nages = settings.ages + 1
             settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
-            settings.runlen = self._get_runlen(self._input_dir2, 'forcing_tracer.nc')
+            settings.runlen = self._get_runlen(self._input_dir1, f"SVATCROP_{lys_experiment}.nc")
 
             settings.dx = 1
             settings.dy = 1
@@ -479,7 +481,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
 
 
         @roger_routine
-        def set_diagnostics(self, state, base_path=Path(__file__).parent.parent / "output" / "svat_crop_nitrate"):
+        def set_diagnostics(self, state, base_path=Path(__file__).parent.parent / "output" / "svat_crop_nitrate_reference"):
             diagnostics = state.diagnostics
 
             diagnostics["rate"].output_variables = ["M_in", "M_q_ss", "M_transp"]

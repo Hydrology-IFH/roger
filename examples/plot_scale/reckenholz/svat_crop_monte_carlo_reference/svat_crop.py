@@ -269,7 +269,7 @@ def main(lys_experiment, tmp_dir):
                                                        "S_fc_ss", "S_sat_ss",
                                                        "theta",
                                                        "z_root", "ground_cover", "lu_id", 
-                                                       "transp_coeff", "basal_transp_coeff", "k_stress_transp"]
+                                                       "transp_coeff", "basal_transp_coeff", "k_stress_transp", "ta"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:

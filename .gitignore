@@ -1,5 +1,9 @@
 # debugging
 debug_snippets.py
+roger/look_up_tables/add_name_of_crop_types.py
+roger/look_up_tables/_crop_parameters.csv
+roger/look_up_tables/_crop_parameters.xlsx
+roger/look_up_tables/README.md
 *_debug*
 conda-environment-doc.yml
 

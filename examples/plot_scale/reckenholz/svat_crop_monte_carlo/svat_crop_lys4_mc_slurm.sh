@@ -17,6 +17,6 @@ cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_crop_monte
  
 python svat_crop.py -b numpy -d cpu --lys-experiment lys4 -td "${TMPDIR}"
 # Move output from local SSD to global workspace
-echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo"
-mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo
-mv "${TMPDIR}"/SVATCROP_*.nc /pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo
+echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo"
+mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo
+mv "${TMPDIR}"/SVATCROP_*.nc /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo

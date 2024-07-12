@@ -55,7 +55,7 @@ def main(lys_experiment, transport_model_structure, sas_solver, tmp_dir):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables['Time']
-                return len(onp.array(var_obj)) + 1
+                return len(onp.array(var_obj))
 
         def _get_runlen(self, path_dir, file):
             nc_file = path_dir / file
