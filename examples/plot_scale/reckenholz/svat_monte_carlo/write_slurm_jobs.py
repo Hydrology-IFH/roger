@@ -7,7 +7,7 @@ import click
 def main():
     base_path = Path(__file__).parent
     base_path_bwuc = "/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_monte_carlo"
-    output_path_ws = Path("/pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/reckenholz/output/svat_monte_carlo")
+    output_path_ws = Path("/pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/reckenholz/output/svat_monte_carlo")
 
     lysimeters = ['lys1', 'lys2', 'lys3', 'lys4', 'lys8', 'lys9', 'lys2_bromide',
                 'lys8_bromide', 'lys9_bromide']
