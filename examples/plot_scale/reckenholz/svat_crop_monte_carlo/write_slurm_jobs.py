@@ -6,13 +6,13 @@ import click
 @click.command("main")
 def main():
     base_path = Path(__file__).parent
-    base_path_bwuc = "/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_crop_monte_carlo_reference"
-    output_path_ws = Path("/pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo_reference")
+    base_path_bwuc = "/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_crop_monte_carlo"
+    output_path_ws = Path("/pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/reckenholz/output/svat_crop_monte_carlo")
 
     lysimeters = ['lys2', 'lys3', 'lys4', 'lys8', 'lys9', 'lys2_bromide',
                 'lys8_bromide', 'lys9_bromide']
     for lys in lysimeters:
-        script_name = f'svat_crop_{lys}_ref_mc'
+        script_name = f'svat_crop_{lys}_mc'
         lines = []
         lines.append("#!/bin/bash\n")
         lines.append("#SBATCH --time=4:00:00\n")
