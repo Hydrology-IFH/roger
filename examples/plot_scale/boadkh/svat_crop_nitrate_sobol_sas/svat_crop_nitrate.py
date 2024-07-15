@@ -296,21 +296,20 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 1], 10)
 
             # denitrification parameters
-            _c = 0.05
-            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_denit", self._base_path, "parameters.nc"))
-            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], _c * self._read_var_from_nc("km_denit", self._base_path, "parameters.nc"))
-            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit", self._base_path, "parameters.nc"))
-            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], _c * self._read_var_from_nc("dmax_denit", self._base_path, "parameters.nc"))
+            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_denit", self._base_path, "_parameters.nc")[row, 0])
+            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("km_denit", self._base_path, "_parameters.nc")[row, 0])
+            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit", self._base_path, "_parameters.nc")[row, 0])
+            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit", self._base_path, "_parameters.nc")[row, 0])
             # nitrification parameters
-            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_nit", self._base_path, "parameters.nc"))
-            vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], _c * self._read_var_from_nc("km_nit", self._base_path, "parameters.nc"))
-            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_nit", self._base_path, "parameters.nc"))
-            vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], _c * self._read_var_from_nc("dmax_nit", self._base_path, "parameters.nc"))
+            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_nit", self._base_path, "_parameters.nc")[row, 0])
+            vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], 0)
+            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_nit", self._base_path, "_parameters.nc")[row, 0])
+            vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], 0)
             # soil nitrogen mineralization parameters
-            vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], self._read_var_from_nc("kmin", self._base_path, "parameters.nc"))
-            vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], _c * self._read_var_from_nc("kmin", self._base_path, "parameters.nc"))
+            vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], self._read_var_from_nc("kmin", self._base_path, "_parameters.nc")[row, 0])
+            vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], self._read_var_from_nc("kmin", self._base_path, "_parameters.nc")[row, 0])
             # soil nitrogen fixation parameters
-            vs.kfix_rz = update(vs.kmin_rz, at[2:-2, 2:-2], self._read_var_from_nc("kfix", self._base_path, "parameters.nc"))
+            vs.kfix_rz = update(vs.kmin_rz, at[2:-2, 2:-2], self._read_var_from_nc("kfix", self._base_path, "_parameters.nc")[row, 0])
 
             # soil temperature parameters
             vs.z_soil = update(
@@ -841,7 +840,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["rate"].output_variables = ["M_q_ss", "M_transp"]
+            diagnostics["rate"].output_variables = ["M_in", "M_q_ss", "M_transp", "ndep_s", "nit_s", "denit_s", "min_s", "nfix_s", "ngas_s", "Nfert", "Nfert_min", "Nfert_org", "nh4_up"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
@@ -860,13 +859,14 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 "rt50_s",
                 "rt90_s",
                 "rtavg_s",
+                "C_q_ss",
             ]
             diagnostics["average"].output_frequency = 24 * 60 * 60
             diagnostics["average"].sampling_frequency = 1
             if base_path:
                 diagnostics["average"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["M_s", "Nmin_s"]
+            diagnostics["collect"].output_variables = ["M_s", "Nmin_s", "C_s"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:

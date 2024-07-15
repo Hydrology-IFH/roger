@@ -6,9 +6,9 @@
 #SBATCH --mem=90000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
-#SBATCH --job-name=svat_crop_nitrate_5-3_4262994_1_freiburg_winter-wheat_silage-corn_yellow-mustard_medium_Nfert
-#SBATCH --output=svat_crop_nitrate_5-3_4262994_1_freiburg_winter-wheat_silage-corn_yellow-mustard_medium_Nfert.out
-#SBATCH --error=svat_crop_nitrate_5-3_4262994_1_freiburg_winter-wheat_silage-corn_yellow-mustard_medium_Nfert_err.out
+#SBATCH --job-name=svat_crop_nitrate_5-3_4262994_1_freiburg_winter-wheat_silage-corn_yellow-mustard_low_Nfert_N
+#SBATCH --output=svat_crop_nitrate_5-3_4262994_1_freiburg_winter-wheat_silage-corn_yellow-mustard_low_Nfert_N.out
+#SBATCH --error=svat_crop_nitrate_5-3_4262994_1_freiburg_winter-wheat_silage-corn_yellow-mustard_low_Nfert_N_err.out
 #SBATCH --export=ALL
  
 # load module dependencies
@@ -33,8 +33,8 @@ checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVATCROP_freiburg_winter-wheat_silage-c
 done
 echo "Copying was successful"
  
-python svat_crop_nitrate_.py -b jax -d cpu --float-type float64 --row 36 --id 5-3_4262994_1 --location freiburg --crop-rotation-scenario winter-wheat_silage-corn_yellow-mustard --fertilization-intensity medium -td "${TMPDIR}"
+python svat_crop_nitrate.py -b jax -d cpu --float-type float64 --row 36 --id 5-3_4262994_1 --location freiburg --crop-rotation-scenario winter-wheat_silage-corn_yellow-mustard --fertilization-intensity low -td "${TMPDIR}"
 # Move output from local SSD to global workspace
-echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol"
-mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol
-mv "${TMPDIR}"/SVATCROPNITRATE_*.nc /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol
+echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol_nitrogen"
+mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol_nitrogen
+mv "${TMPDIR}"/SVATCROPNITRATE_*.nc /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol_nitrogen
