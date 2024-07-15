@@ -11,24 +11,20 @@ import click
 _UNITS = {
     "alpha_transp": "-",
     "alpha_q": "-",
-    "km_denit": "kg N/ha/year",
-    "km_nit": "kg N/ha/year",
-    "kmin": "kg N/ha/year",
-    "kfix": "kg N/ha/year",
-    "dmax_denit": "kg N/ha/year",
-    "dmax_nit": "kg N/ha/year",
-    "phi_soil_temp": "day of year",
+    "c2_transp": "-",
+    "c2_q_rz": "-",
+    "c2_q_ss": "-",
     "clay": "-",
     "z_soil": "mm",
-    "c_fert": "-",
 }
 
-@click.option("-ns", "--nsamples", type=int, default=2**8)
+@click.option("-ns", "--nsamples", type=int, default=2**5)
 @click.command("main")
 def main(nsamples):
     base_path = Path(__file__).parent
+
     # load parameter boundaries
-    file_param_bounds = base_path / "param_bounds_.yml"
+    file_param_bounds = base_path / "param_bounds.yml"
     with open(file_param_bounds, "r") as file:
         dict_bounds = yaml.safe_load(file)
         list_names = [key for key in dict_bounds.keys()]
@@ -49,13 +45,12 @@ def main(nsamples):
         # write parameters to dataframe
         df_params.loc[:, param] = values.flatten()
 
-
-    param_names = ["alpha_transp", "alpha_q", "km_denit", "km_nit", "kmin", "dmax_denit", "dmax_nit", "kfix", "c_fert"]
+    param_names = ["alpha_transp", "alpha_q", "c2_transp", "c2_q_rz", "c2_q_ss"]
     df_params = df_params.loc[:, param_names]
 
     # write parameters to csv
     df_params.columns = [
-        ["[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[-]"],
+        ["[-]", "[-]", "[-]", "[-]", "[-]"],
         param_names,
     ]
     df_params.to_csv(base_path / "parameters.csv", index=False, sep=";")
@@ -65,7 +60,7 @@ def main(nsamples):
     with h5netcdf.File(params_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
         date_created=datetime.datetime.today().isoformat(),
-        title="RoGeR SAS and nitrate parameters for Baden-Wuerttemberg, Germany",
+        title="RoGeR SAS for Baden-Wuerttemberg, Germany",
         institution="University of Freiburg, Chair of Hydrology",
         references="",
         comment="",
