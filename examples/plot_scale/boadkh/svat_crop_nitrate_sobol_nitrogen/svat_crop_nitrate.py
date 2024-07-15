@@ -39,7 +39,7 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-ft", "--fertilization-intensity", type=click.Choice(["low", "medium", "high"]), default="medium")
 @click.option("-id", "--id", type=str, default="5-8_2090295_1")
 @click.option("--row", type=int, default=0)
-@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
+@click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
 def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
