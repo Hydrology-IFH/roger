@@ -196,7 +196,6 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 "DOY",
                 "LU_ID",
                 "Z_ROOT",
-                "c_fert",
             ],
         )
         def set_parameters_setup(self, state):
@@ -351,8 +350,6 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                     "z_root", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                 )[row, :, :],
             )
-
-            vs.c_fert = update(vs.c_fert, at[2:-2, 2:-2], self._read_var_from_nc("c_fert", self._base_path, "parameters.nc"))
 
         @roger_routine
         def set_parameters(self, state):

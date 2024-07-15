@@ -143,15 +143,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
             vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
 
-        @roger_routine(
-            dist_safe=False,
-            local_variables=[
-                "lut_fert1",
-                "lut_fert2",
-                "lut_fert3",
-                "lut_nup",
-            ],
-        )
+        @roger_routine
         def set_look_up_tables(self, state):
             vs = state.variables
 
