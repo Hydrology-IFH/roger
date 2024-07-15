@@ -113,7 +113,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             settings.enable_crop_rotation = True
             settings.enable_offline_transport = True
             settings.enable_nitrate = True
-            settings.enable_age_statistics = True
+            settings.enable_age_statistics = False
 
         @roger_routine(
             dist_safe=False,
