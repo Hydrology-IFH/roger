@@ -264,7 +264,7 @@ def main():
                 lines.append('echo "Copying was successful"\n')
                 lines.append(" \n")
                 lines.append(
-                    'python svat_crop_nitrate.py -b jax -d cpu -n 8 1 --float-type float64 --row %s --id %s --location %s --crop-rotation-scenario %s --fertilization-intensity %s -td "${TMPDIR}"\n'
+                    'mpirun --bind-to core --map-by core -report-bindings python svat_crop_nitrate.py -b jax -d cpu -n 8 1 --float-type float64 --row %s --id %s --location %s --crop-rotation-scenario %s --fertilization-intensity %s -td "${TMPDIR}"\n'
                     % (x, id, location, crop_rotation_scenario, fertilization_intensity)
                 )
                 lines.append("# Move output from local SSD to global workspace\n")
@@ -325,7 +325,7 @@ def main():
                 lines.append('echo "Copying was successful"\n')
                 lines.append(" \n")
                 lines.append(
-                    'python svat_crop_nitrate.py -b jax -d cpu -n 32 1 --float-type float64 --row %s --id %s --location %s --crop-rotation-scenario %s --fertilization-intensity %s -td "${TMPDIR}"\n'
+                    'mpirun --bind-to core --map-by core -report-bindings python svat_crop_nitrate.py -b jax -d cpu -n 32 1 --float-type float64 --row %s --id %s --location %s --crop-rotation-scenario %s --fertilization-intensity %s -td "${TMPDIR}"\n'
                     % (x, id, location, crop_rotation_scenario, fertilization_intensity)
                 )
                 lines.append("# Move output from local SSD to global workspace\n")
