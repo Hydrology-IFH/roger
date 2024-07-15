@@ -19,9 +19,9 @@ dmax_denit:
 dmax_nit:
 - 10.0
 - 50.0
-kfix:
+kngl:
 - 10.0
 - 100.0
-c_fert:
-- 0.1
-- 0.7
+kdep:
+- 0.0
+- 30.0

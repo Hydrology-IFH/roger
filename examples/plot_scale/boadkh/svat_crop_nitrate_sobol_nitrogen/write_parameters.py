@@ -14,16 +14,16 @@ _UNITS = {
     "km_denit": "kg N/ha/year",
     "km_nit": "kg N/ha/year",
     "kmin": "kg N/ha/year",
-    "kfix": "kg N/ha/year",
+    "kngl": "kg N/ha/year",
+    "kdep": "kg N/ha/year",
     "dmax_denit": "kg N/ha/year",
     "dmax_nit": "kg N/ha/year",
     "phi_soil_temp": "day of year",
     "clay": "-",
     "z_soil": "mm",
-    "c_fert": "-",
 }
 
-@click.option("-ns", "--nsamples", type=int, default=2**8)
+@click.option("-ns", "--nsamples", type=int, default=2**9)
 @click.command("main")
 def main(nsamples):
     base_path = Path(__file__).parent
@@ -50,12 +50,12 @@ def main(nsamples):
         df_params.loc[:, param] = values.flatten()
 
 
-    param_names = ["alpha_transp", "alpha_q", "km_denit", "km_nit", "kmin", "dmax_denit", "dmax_nit", "kfix", "c_fert"]
+    param_names = ["alpha_transp", "alpha_q", "km_denit", "km_nit", "kmin", "dmax_denit", "dmax_nit", "kngl"]
     df_params = df_params.loc[:, param_names]
 
     # write parameters to csv
     df_params.columns = [
-        ["[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[-]"],
+        ["[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]"],
         param_names,
     ]
     df_params.to_csv(base_path / "parameters.csv", index=False, sep=";")

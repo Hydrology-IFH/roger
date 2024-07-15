@@ -18,6 +18,7 @@ def main(lys_experiment, transport_model_structure, sas_solver, tmp_dir):
     from roger.tools.setup import write_forcing_tracer
     import roger.lookuptables as lut
     from roger.core.crop import update_alpha_transp
+    from roger.core.utilities import _get_row_no
     from roger import runtime_settings as rs
 
     class SVATCROPNITRATESetup(RogerSetup):
@@ -129,6 +130,7 @@ def main(lys_experiment, transport_model_structure, sas_solver, tmp_dir):
         @roger_routine(
             dist_safe=False,
             local_variables=[
+                "lut_nup",
                 "lut_crops",
                 "lut_crop_scale",
             ],
@@ -136,6 +138,7 @@ def main(lys_experiment, transport_model_structure, sas_solver, tmp_dir):
         def set_look_up_tables(self, state):
             vs = state.variables
 
+            vs.lut_nup = update(vs.lut_nup, at[:, :], lut.ARR_NUP)
             vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
             # scale partition coefficient of crop solute uptake
             for i in range(vs.lut_crop_scale.shape[-1]):
@@ -453,6 +456,7 @@ def main(lys_experiment, transport_model_structure, sas_solver, tmp_dir):
         @roger_routine
         def set_forcing(self, state):
             vs = state.variables
+            settings = state.settings
 
             vs.prec = update(vs.prec, at[2:-2, 2:-2, vs.tau], vs.PREC_DIST_DAILY[2:-2, 2:-2, vs.itt])
             vs.inf_mat_rz = update(vs.inf_mat_rz, at[2:-2, 2:-2], vs.INF_MAT_RZ[2:-2, 2:-2, vs.itt])
@@ -468,6 +472,39 @@ def main(lys_experiment, transport_model_structure, sas_solver, tmp_dir):
             vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, vs.tau], vs.S_RZ[2:-2, 2:-2, vs.itt])
             vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], vs.S_SS[2:-2, 2:-2, vs.itt])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
+
+            # set main crop type
+            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], vs.LU_ID[2:-2, 2:-2, vs.itt])
+            if vs.itt == 0:
+                for i in range(500, 600):
+                    mask = vs.LU_ID[2:-2, 2:-2, vs.itt] == i 
+                    row_no = _get_row_no(vs.lut_nup[:, 0], i)
+                    # set nitrogen uptake rate
+                    vs.nup = update(
+                        vs.nup,
+                        at[2:-2, 2:-2],
+                        npx.where(mask[2:-2, 2:-2], vs.lut_nup[row_no, 2] * settings.dx * settings.dy * 100, vs.nup[2:-2, 2:-2]),
+                    )
+            else:
+                if (vs.LU_ID[2:-2, 2:-2, vs.itt-1] != vs.LU_ID[2:-2, 2:-2, vs.itt]).any():
+                    # nitrogen fixation of yellow mustard, clover, soy bean and grain pea
+                    mask = npx.isin(vs.LU_ID[2:-2, 2:-2, vs.itt], npx.array([541, 577, 578, 580, 581, 583, 584, 586, 587, 588]))
+                    vs.kfix_rz = update(vs.kfix_rz, at[2:-2, 2:-2], 0)
+                    vs.kfix_rz = update(vs.kfix_rz, at[2:-2, 2:-2], npx.where(mask, 40 * (vs.soil_fertility[2:-2, 2:-2]/3.5), vs.kfix_rz[2:-2, 2:-2]))
+                    if vs.itt > 90:
+                        # set nitrogen fixation to reduce fertilization if yellow mustard, clover, soy bean and grain pea is used for intercropping
+                        mask = npx.any(npx.isin(vs.LU_ID[2:-2, 2:-2, vs.itt-90:vs.itt], npx.array([541, 577, 578, 580, 581, 583, 584, 586, 587, 588])), axis=-1)
+                        vs.kfix_rz = update(vs.kfix_rz, at[2:-2, 2:-2], 0)
+                        vs.kfix_rz = update(vs.kfix_rz, at[2:-2, 2:-2], npx.where(mask, 40 * (vs.soil_fertility[2:-2, 2:-2]/3.5), vs.kfix_rz[2:-2, 2:-2]))
+                    for i in range(500, 600):
+                        mask = vs.LU_ID[:, :, vs.itt] == i 
+                        row_no = _get_row_no(vs.lut_nup[:, 0], i)
+                        # set nitrogen uptake rate
+                        vs.nup = update(
+                            vs.nup,
+                            at[2:-2, 2:-2],
+                            npx.where(mask[2:-2, 2:-2], vs.lut_nup[row_no, 2] * settings.dx * settings.dy * 100, vs.nup[2:-2, 2:-2]),
+                        )
 
             # apply nitrogen fertilizer
             vs.update(apply_fertilizer_kernel(state))

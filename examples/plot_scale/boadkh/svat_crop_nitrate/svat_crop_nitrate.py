@@ -662,7 +662,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
                     vs.nup = update(
                         vs.nup,
                         at[2:-2, 2:-2],
-                        npx.where(mask[2:-2, 2:-2], vs.lut_nup[row_no, 2], vs.nup[2:-2, 2:-2] * settings.dx * settings.dy * 100),
+                        npx.where(mask[2:-2, 2:-2], vs.lut_nup[row_no, 2] * settings.dx * settings.dy * 100, vs.nup[2:-2, 2:-2]),
                     )
                     # set fertilization rate
                     row_no = _get_row_no(vs.lut_fert1[:, 0], i)
