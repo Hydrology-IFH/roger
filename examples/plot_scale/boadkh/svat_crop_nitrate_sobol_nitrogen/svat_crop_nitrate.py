@@ -149,6 +149,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
                 "lut_fert1",
                 "lut_fert2",
                 "lut_fert3",
+                "lut_nup",
             ],
         )
         def set_look_up_tables(self, state):
@@ -157,6 +158,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             vs.lut_fert1 = update(vs.lut_fert1, at[:, :], lut.ARR_FERT1)
             vs.lut_fert2 = update(vs.lut_fert2, at[:, :], lut.ARR_FERT2)
             vs.lut_fert3 = update(vs.lut_fert3, at[:, :], lut.ARR_FERT3)
+            vs.lut_nup = update(vs.lut_nup, at[:, :], lut.ARR_NUP)
 
         @roger_routine
         def set_topography(self, state):
