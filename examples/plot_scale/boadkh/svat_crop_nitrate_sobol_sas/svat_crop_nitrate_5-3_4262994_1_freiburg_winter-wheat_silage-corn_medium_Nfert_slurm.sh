@@ -18,7 +18,7 @@ export OMPI_MCA_btl="self,smcuda,vader,tcp"
 export OMP_NUM_THREADS=1
 eval "$(conda shell.bash hook)"
 conda activate roger-mpi
-cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol
+cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol_sas
  
 # Copy fluxes and states from global workspace to local SSD
 echo "Copy fluxes and states from global workspace to local SSD"
