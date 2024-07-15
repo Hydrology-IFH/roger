@@ -5,7 +5,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-lys", "--lys-experiment", type=click.Choice(["lys2", "lys3", "lys4", "lys8", "lys9"]), default="lys2")
+@click.option("-lys", "--lys-experiment", type=click.Choice(["lys2", "lys3", "lys4", "lys8", "lys9"]), default="lys3")
 @click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'advection-dispersion-power', 'time-variant_advection-dispersion-power']), default='complete-mixing')
 @click.option("-td", "--tmp-dir", type=str, default=None)
 @roger_base_cli
@@ -39,7 +39,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables['Time']
-                return len(onp.array(var_obj))
+                return len(onp.array(var_obj)) + 1
 
         def _get_runlen(self, path_dir, file):
             nc_file = path_dir / file
@@ -158,6 +158,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
                 "kfix_rz",
                 "kngl_rz",
                 "kdep",
+                "soil_fertility",
                 "z_soil",
                 "phi_soil_temp",
                 "damp_soil_temp",
@@ -198,6 +199,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], self._read_var_from_nc("kmin", self._base_path, "parameters.nc"))
             # gaseous loss parameters
             vs.kngl_rz = update(vs.kngl_rz, at[2:-2, 2:-2], self._read_var_from_nc("kngl", self._base_path, "parameters.nc"))
+            vs.soil_fertility = update(vs.soil_fertility, at[2:-2, 2:-2], 3)
             # nitrogen deposition parameters
             vs.kdep = update(vs.kdep, at[2:-2, 2:-2], 10)
 
