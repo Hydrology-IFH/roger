@@ -13,7 +13,7 @@ def main():
     base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
     # identifiers for simulations
-    lys_experiments = ["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]
+    lys_experiments = ["lys2", "lys3", "lys8"]
 
     # merge model output into single file
     for lys_experiment in lys_experiments:
