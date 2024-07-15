@@ -37,7 +37,7 @@ def calc_irrigation_demand(state):
     vs.irr_demand = update(
         vs.irr_demand,
         at[2:-2, 2:-2],
-        npx.where(mask, 0, vs.irr_demand[2:-2, 2:-2]),
+        npx.where(mask[2:-2, 2:-2], 0, vs.irr_demand[2:-2, 2:-2]),
     )
 
     # increase irrigation demand by 10% to account for evaporation and interception losses
@@ -48,11 +48,11 @@ def calc_irrigation_demand(state):
     )
 
     # constrain irrigation demand to 30 mm/day 
-    mask = (vs.irr_demand[2:-2, 2:-2] > 30)
+    mask = (vs.irr_demand > 30)
     vs.irr_demand = update(
         vs.irr_demand,
         at[2:-2, 2:-2],
-        npx.where(mask, 30, vs.irr_demand[2:-2, 2:-2]),
+        npx.where(mask[2:-2, 2:-2], 30, vs.irr_demand[2:-2, 2:-2]),
     )
 
     return KernelOutput(irr_demand=vs.irr_demand)
