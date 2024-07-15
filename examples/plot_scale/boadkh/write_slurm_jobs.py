@@ -214,6 +214,8 @@ def main():
 
     # --- jobs to calculate sensitivities of nitrate concentrations and water ages --------------------------------------------
     locations = ["freiburg"]
+    crop_rotation_scenarios = ["winter-wheat_silage-corn",
+                               "winter-wheat_silage-corn_yellow-mustard"]
     for location in locations:
         for crop_rotation_scenario in crop_rotation_scenarios:
             for fertilization_intensity in fertilization_intensities:
@@ -221,14 +223,14 @@ def main():
                 x = 36
                 id = ids[36]
                 script_name = f"svat_crop_nitrate_{id}_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert"
-                output_path_ws = base_path_ws / "svat_crop_nitrate"
+                output_path_ws = base_path_ws / "svat_crop_nitrate_sobol"
                 lines = []
                 lines.append("#!/bin/bash\n")
-                lines.append("#SBATCH --time=24:00:00\n")
+                lines.append("#SBATCH --time=48:00:00\n")
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=32\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")
-                lines.append("#SBATCH --mem=180000\n")
+                lines.append("#SBATCH --mem=90000\n")
                 lines.append("#SBATCH --mail-type=FAIL\n")
                 lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
                 lines.append(f"#SBATCH --job-name={script_name}\n")

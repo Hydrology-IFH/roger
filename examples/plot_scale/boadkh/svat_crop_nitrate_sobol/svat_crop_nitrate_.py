@@ -840,32 +840,21 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["rate"].output_variables = ["M_q_ss", "M_transp"]
+            diagnostics["rate"].output_variables = ["M_in", "M_q_ss", "M_transp", "ndep_s", "nit_s", "denit_s", "min_s", "nfix_s", "ngas_s", "Nfert", "Nfert_min", "Nfert_org", "nh4_up"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
                 diagnostics["rate"].base_output_path = base_path
 
             diagnostics["average"].output_variables = [
-                "tt10_q_ss",
-                "tt50_q_ss",
-                "tt90_q_ss",
-                "ttavg_q_ss",
-                "tt10_transp",
-                "tt50_transp",
-                "tt90_transp",
-                "ttavg_transp",
-                "rt10_s",
-                "rt50_s",
-                "rt90_s",
-                "rtavg_s",
+                "C_q_ss"
             ]
             diagnostics["average"].output_frequency = 24 * 60 * 60
             diagnostics["average"].sampling_frequency = 1
             if base_path:
                 diagnostics["average"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["M_s", "Nmin_s"]
+            diagnostics["collect"].output_variables = ["M_s", "Nmin_s", "C_s"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
