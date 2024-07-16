@@ -291,7 +291,7 @@ def main():
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=32\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")
-                lines.append("#SBATCH --mem=180000\n")
+                lines.append("#SBATCH --mem=512000\n")
                 lines.append("#SBATCH --mail-type=FAIL\n")
                 lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
                 lines.append(f"#SBATCH --job-name={script_name}_N\n")
