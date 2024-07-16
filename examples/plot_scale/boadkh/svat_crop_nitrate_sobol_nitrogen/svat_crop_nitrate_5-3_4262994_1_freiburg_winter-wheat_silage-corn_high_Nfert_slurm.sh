@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=32
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=180000
+#SBATCH --mem=512000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_crop_nitrate_5-3_4262994_1_freiburg_winter-wheat_silage-corn_high_Nfert_N
