@@ -50,12 +50,12 @@ def main(nsamples):
         df_params.loc[:, param] = values.flatten()
 
 
-    param_names = ["alpha_transp", "alpha_q", "km_denit", "km_nit", "kmin", "dmax_denit", "dmax_nit", "kngl"]
+    param_names = ["alpha_transp", "alpha_q", "km_denit", "km_nit", "kmin", "dmax_denit", "dmax_nit", "kngl", "kdep"]
     df_params = df_params.loc[:, param_names]
 
     # write parameters to csv
     df_params.columns = [
-        ["[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]"],
+        ["[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]"],
         param_names,
     ]
     df_params.to_csv(base_path / "parameters.csv", index=False, sep=";")
