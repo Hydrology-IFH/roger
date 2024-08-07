@@ -849,7 +849,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             if base_path:
                 diagnostics["average"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["M_s", "Nmin_s", "C_s"]
+            diagnostics["collect"].output_variables = ["M_s", "Nmin_s", "C_s", "C_q_ss"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
