@@ -97,9 +97,10 @@ def main(location, crop_rotation_scenario, fertilization_intensity, id, row, tmp
             settings.ages = 1000
             settings.nages = settings.ages + 1
             settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
-            settings.runlen = self._get_runlen(
-                self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-            )
+            # settings.runlen = self._get_runlen(
+            #     self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+            # )
+            settings.runlen = 10 * 365 * 24 * 60 * 60
 
             settings.dx = 1
             settings.dy = 1

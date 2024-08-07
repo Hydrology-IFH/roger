@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --time=48:00:00
+#SBATCH --time=12:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=32
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=512000
+#SBATCH --mem=260000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_crop_nitrate_5-3_4262994_1_freiburg_winter-wheat_silage-corn_yellow-mustard_low_Nfert_N
