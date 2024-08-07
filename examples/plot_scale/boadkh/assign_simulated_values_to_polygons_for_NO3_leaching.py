@@ -223,6 +223,9 @@ def main(tmp_dir):
         mask = (gdf1['stationsna'] == location)
         gdf = gdf1.loc[mask, :]
         gdf['OID'] = None
+        gdf['MID'] = None
+        gdf['MID'] = _dict_locations[location]
+        gdf['SID'] = None
         # gdf['CLUST_ID'] = None
         for clust_id in clust_ids:
             cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
@@ -230,6 +233,7 @@ def main(tmp_dir):
             cond2 = gdf["SHP_ID"].isin(shp_ids)
             if cond2.any():
                 id1 = df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0]
+                gdf.loc[cond2, 'SID'] = int(f"{id1}")
                 gdf.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{id1}")
                 # gdf.loc[cond2, 'CLUST_ID'] = clust_id
 
@@ -239,7 +243,7 @@ def main(tmp_dir):
 
     gdf = pd.concat(ll_dfs, axis=0)
     gdf = gdf.drop(columns=["SHP_ID", "area"])
-    gdf = gdf[["OID", "stationsna", "agr_region", "geometry"]]
+    gdf = gdf[["OID", "MID", "SID", "stationsna", "agr_region", "geometry"]]
     gdf = gdf.to_crs("EPSG:25832")
     file = Path(tmp_dir) / "nitrate_leaching_geometries.gpkg"
     gdf.to_file(file, driver="GPKG")
@@ -320,6 +324,9 @@ def main(tmp_dir):
                         elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
                             df_values['agr_region'] = "hohenlohe"
                         df_values['OID'] = None
+                        df_values['MID'] = None
+                        df_values['MID'] = _dict_locations[location]
+                        df_values['SID'] = None
                         df_values['FFID'] = None
                         df_values['FFID'] = _dict_ffid[crop_rotation_scenario]
                         df_values['CID'] = None
@@ -350,8 +357,10 @@ def main(tmp_dir):
                             val = df_avg.loc[cond1, :].values[0][0]
                             cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
                             if cond.any():
+                                cond2 = (df_values["CLUST_ID"] == clust_id)
                                 id1 = df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0]
-                                df_values['OID'] = int(f"{_dict_locations[location]}{id1}")
+                                df_values.loc[cond2, 'SID'] = int(f"{id1}")
+                                df_values.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{id1}")
                                 cond3 = (df_values['OID'] == int(f"{_dict_locations[location]}{id1}"))
                                 df_values.loc[cond3, f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = onp.round(val, 2)
                         df_values1 = df_values.copy()
@@ -372,6 +381,9 @@ def main(tmp_dir):
                     elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
                         df_values['agr_region'] = "hohenlohe"
                     df_values['OID'] = None
+                    df_values['MID'] = None
+                    df_values['MID'] = _dict_locations[location]
+                    df_values['SID'] = None
                     df_values['FFID'] = None
                     df_values['FFID'] = _dict_ffid[crop_rotation_scenario]
                     df_values['CID'] = None
@@ -391,8 +403,10 @@ def main(tmp_dir):
                         val = df_avg.loc[cond1, :].values[0][0]
                         cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
                         if cond.any():
+                            cond2 = (df_values["CLUST_ID"] == clust_id)
                             id1 = df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0]
-                            df_values['OID'] = int(f"{_dict_locations[location]}{id1}")
+                            df_values.loc[cond2, 'SID'] = int(f"{id1}")
+                            df_values.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{id1}")
                             cond3 = (df_values['OID'] == int(f"{_dict_locations[location]}{id1}"))
                             df_values.loc[cond3, f'{_dict_var_names[var_sim]}'] = onp.round(val, 2)
                     df_values1 = df_values.copy()
@@ -436,6 +450,9 @@ def main(tmp_dir):
                             elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
                                 df_values['agr_region'] = "hohenlohe"
                             df_values['OID'] = None
+                            df_values['MID'] = None
+                            df_values['MID'] = _dict_locations[location]
+                            df_values['SID'] = None
                             df_values['FFID'] = None
                             df_values['FFID'] = _dict_ffid[crop_rotation_scenario]
                             df_values['CID'] = None
@@ -469,8 +486,10 @@ def main(tmp_dir):
                                 val = df_avg.loc[cond1, :].values[0][0]
                                 cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
                                 if cond.any():
+                                    cond2 = (df_values["CLUST_ID"] == clust_id)
                                     id1 = df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0]
-                                    df_values['OID'] = int(f"{_dict_locations[location]}{id1}")
+                                    df_values.loc[cond2, 'SID'] = int(f"{id1}")
+                                    df_values.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{id1}")
                                     cond3 = (df_values['OID'] == int(f"{_dict_locations[location]}{id1}"))
                                     df_values.loc[cond3, f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = onp.round(val, 2)
                             df_values1 = df_values.copy()
@@ -492,6 +511,9 @@ def main(tmp_dir):
                         elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
                             df_values['agr_region'] = "hohenlohe"
                         df_values['OID'] = None
+                        df_values['MID'] = None
+                        df_values['MID'] = _dict_locations[location]
+                        df_values['SID'] = None
                         df_values['FFID'] = None
                         df_values['FFID'] = _dict_ffid[crop_rotation_scenario]
                         df_values['CID'] = None
@@ -514,8 +536,10 @@ def main(tmp_dir):
                             val = df_avg.loc[cond1, :].values[0][0]
                             cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
                             if cond.any():
+                                cond2 = (df_values["CLUST_ID"] == clust_id)
                                 id1 = df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0]
-                                df_values['OID'] = int(f"{_dict_locations[location]}{id1}")
+                                df_values.loc[cond2, 'SID'] = int(f"{id1}")
+                                df_values.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{id1}")
                                 cond3 = (df_values['OID'] == int(f"{_dict_locations[location]}{id1}"))
                                 df_values.loc[cond3, f'{_dict_var_names[var_sim]}'] = onp.round(val, 2)
                         df_values1 = df_values.copy()
@@ -527,7 +551,7 @@ def main(tmp_dir):
 
     df = pd.concat(ll_df, axis=0)
     df = df.drop(columns=["SHP_ID", "ID"])
-    df = df[["OID", "CLUST_ID", "agr_region", "stationsna", "FFID", "CID", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]]
+    df = df[["OID", "MID", "SID", "CLUST_ID", "agr_region", "stationsna", "FFID", "CID", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]]
 
     df = df.fillna(-9999)
     file = Path(tmp_dir) / "nitrate_leaching_values.csv"
