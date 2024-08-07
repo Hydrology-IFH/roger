@@ -1,6 +1,7 @@
 import os
 import filecmp
 import fnmatch
+__requires__ = ["CherryPy < 3"]
 import pkg_resources
 
 from click.testing import CliRunner
