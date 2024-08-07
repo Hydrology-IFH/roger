@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=32
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=200000
+#SBATCH --mem=240000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat18O_adpt_sa
@@ -22,6 +22,6 @@ cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18
  
 mpirun --bind-to core --map-by core -report-bindings python svat_oxygen18.py -b jax -d cpu -n 32 1 --float-type float64 -ns 16384 -tms time-variant_advection-dispersion-power -td "${TMPDIR}"
 # Move output from local SSD to global workspace
-echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity/output"
-mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity/output
-mv "${TMPDIR}"/SVATTRANSPORT_*.nc /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity/output
+echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity/output"
+mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity/output
+mv "${TMPDIR}"/SVATTRANSPORT_*.nc /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity/output
