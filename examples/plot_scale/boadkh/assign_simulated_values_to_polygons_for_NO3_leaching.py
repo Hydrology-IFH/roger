@@ -334,17 +334,17 @@ def main(tmp_dir):
                         df_values[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = None
                         ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
                         if var_sim == "M_q_ss":
-                            sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
-                            df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T)
+                            sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1]
+                            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T)
                             # calculate annual sum
                             df_ann = df.resample("YE").sum() * 0.01  # convert from mg/m2 to kg/ha
                             # calculate average
                             df_avg = df_ann.mean(axis=0).to_frame()
                         elif var_sim == "C_q_ss":
                             ds = dict_fluxes_states[location][crop_rotation_scenario]
-                            sim_vals1 = ds["q_ss"].isel(y=0).values
+                            sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
                             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-                            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:] * 4.427  # convert nitrate-nitrogen to nitrate
+                            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
                             sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)  # weighted average
                             cond1 = (df_params["CLUST_flag"] == 1)
                             df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
@@ -432,7 +432,7 @@ def main(tmp_dir):
                     df_lu_id['crop_period'] = df_lu_id['crop_period'].replace(0, onp.nan)
                     df_lu_id = df_lu_id.drop(columns=['mask', 'new'])
                     df_lu_id = df_lu_id.astype({"lu_id": int, "crop_period": float, "day": float})
-                    cond_crop = onp.isin(df_lu_id.loc[:, "lu_id"].values, _dict_crop_periods[crop_rotation_scenario][crop_id]).flatten()
+                    cond_crop = onp.isin(df_lu_id.loc[:, "lu_id"].values[:, 1:], _dict_crop_periods[crop_rotation_scenario][crop_id]).flatten()
                     if var_sim in ["M_q_ss", "C_q_ss"]:
                         for fertilization_intensity in fertilization_intensities:
                             click.echo(f"{crop_id}: {var_sim} {fertilization_intensity}")
@@ -460,8 +460,8 @@ def main(tmp_dir):
                             df_values[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = None  # initialize field, float, two decimals
                             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
                             if var_sim == "M_q_ss":
-                                sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
-                                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T)
+                                sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1]
+                                df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T)
                                 df.loc[:, 'crop_period'] = df_lu_id.loc[:, 'crop_period'].values
                                 df = df.loc[cond_crop, :]
                                 # calculate sum per crop period
@@ -472,9 +472,9 @@ def main(tmp_dir):
                                 df_avg = df_cp.mean(axis=0).to_frame()
                             elif var_sim == "C_q_ss":
                                 ds = dict_fluxes_states[location][crop_rotation_scenario]
-                                sim_vals1 = ds["q_ss"].isel(y=0).values[:, cond_crop]
+                                sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:][:, cond_crop]
                                 ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-                                sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:][:, cond_crop] * 4.427  # convert nitrate-nitrogen to nitrate
+                                sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1][:, cond_crop] * 4.427  # convert nitrate-nitrogen to nitrate
                                 sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)  # weighted average
                                 cond1 = (df_params["CLUST_flag"] == 1)
                                 df = pd.DataFrame(data=sim_vals.T).loc[:, cond1]

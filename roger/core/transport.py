@@ -2012,31 +2012,31 @@ def svat_transport_model_rk4(state):
     elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         vs.C_inf_mat_rz = update(
             vs.C_inf_mat_rz,
-            at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] * settings.h > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_inf_pf_rz = update(
             vs.C_inf_pf_rz,
-            at[2:-2, 2:-2], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.inf_pf_rz[2:-2, 2:-2] * settings.h > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_inf_pf_ss = update(
             vs.C_inf_pf_ss,
-            at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] * settings.h > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_transp = update(
             vs.C_transp,
-            at[2:-2, 2:-2], npx.where(vs.transp > 0, npx.sum(vs.mtt_transp, axis=2) / vs.transp, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.transp > 0, npx.sum(vs.mtt_transp, axis=2) / (vs.transp * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_q_rz = update(
             vs.C_q_rz,
-            at[2:-2, 2:-2], npx.where(vs.q_rz > 0, npx.sum(vs.mtt_q_rz, axis=2) / vs.q_rz, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.q_rz > 0, npx.sum(vs.mtt_q_rz, axis=2) / (vs.q_rz * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_cpr_rz = update(
             vs.C_cpr_rz,
-            at[2:-2, 2:-2], npx.where(vs.cpr_rz > 0, npx.sum(vs.mtt_cpr_rz, axis=2) / vs.cpr_rz, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.cpr_rz > 0, npx.sum(vs.mtt_cpr_rz, axis=2) / (vs.cpr_rz * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_q_ss = update(
             vs.C_q_ss,
-            at[2:-2, 2:-2], npx.where(vs.q_ss > 0, npx.sum(vs.mtt_q_ss, axis=2) / vs.q_ss, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.q_ss > 0, npx.sum(vs.mtt_q_ss, axis=2) / (vs.q_ss * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
     return KernelOutput(tt_evap_soil=vs.tt_evap_soil, tt_transp=vs.tt_transp, tt_q_rz=vs.tt_q_rz, tt_cpr_rz=vs.tt_cpr_rz, tt_q_ss=vs.tt_q_ss,
@@ -2379,31 +2379,31 @@ def svat_transport_model_euler(state):
     elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         vs.C_inf_mat_rz = update(
             vs.C_inf_mat_rz,
-            at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] * settings.h > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_inf_pf_rz = update(
             vs.C_inf_pf_rz,
-            at[2:-2, 2:-2], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.inf_pf_rz[2:-2, 2:-2] * settings.h > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_inf_pf_ss = update(
             vs.C_inf_pf_ss,
-            at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] * settings.h > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_transp = update(
             vs.C_transp,
-            at[2:-2, 2:-2], npx.where(vs.transp > 0, npx.sum(vs.mtt_transp, axis=2) / vs.transp, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.transp > 0, npx.sum(vs.mtt_transp, axis=2) / (vs.transp * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_q_rz = update(
             vs.C_q_rz,
-            at[2:-2, 2:-2], npx.where(vs.q_rz > 0, npx.sum(vs.mtt_q_rz, axis=2) / vs.q_rz, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.q_rz > 0, npx.sum(vs.mtt_q_rz, axis=2) / (vs.q_rz * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_cpr_rz = update(
             vs.C_cpr_rz,
-            at[2:-2, 2:-2], npx.where(vs.cpr_rz > 0, npx.sum(vs.mtt_cpr_rz, axis=2) / vs.cpr_rz, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.cpr_rz > 0, npx.sum(vs.mtt_cpr_rz, axis=2) / (vs.cpr_rz * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_q_ss = update(
             vs.C_q_ss,
-            at[2:-2, 2:-2], npx.where(vs.q_ss > 0, npx.sum(vs.mtt_q_ss, axis=2) / vs.q_ss, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.q_ss > 0, npx.sum(vs.mtt_q_ss, axis=2) / (vs.q_ss * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
     return KernelOutput(tt_evap_soil=vs.tt_evap_soil, tt_transp=vs.tt_transp, tt_q_rz=vs.tt_q_rz, tt_cpr_rz=vs.tt_cpr_rz, tt_q_ss=vs.tt_q_ss,
@@ -2724,31 +2724,31 @@ def svat_lbc_transport_model_euler(state):
     elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         vs.C_inf_mat_rz = update(
             vs.C_inf_mat_rz,
-            at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] * settings.h > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_inf_pf_rz = update(
             vs.C_inf_pf_rz,
-            at[2:-2, 2:-2], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.inf_pf_rz[2:-2, 2:-2] * settings.h > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_inf_pf_ss = update(
             vs.C_inf_pf_ss,
-            at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] * settings.h > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_transp = update(
             vs.C_transp,
-            at[2:-2, 2:-2], npx.where(vs.transp > 0, npx.sum(vs.mtt_transp, axis=2) / vs.transp, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.transp > 0, npx.sum(vs.mtt_transp, axis=2) / (vs.transp * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_q_rz = update(
             vs.C_q_rz,
-            at[2:-2, 2:-2], npx.where(vs.q_rz > 0, npx.sum(vs.mtt_q_rz, axis=2) / vs.q_rz, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.q_rz > 0, npx.sum(vs.mtt_q_rz, axis=2) / (vs.q_rz * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_cpr_rz = update(
             vs.C_cpr_rz,
-            at[2:-2, 2:-2], npx.where(vs.cpr_rz > 0, npx.sum(vs.mtt_cpr_rz, axis=2) / vs.cpr_rz, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.cpr_rz > 0, npx.sum(vs.mtt_cpr_rz, axis=2) / (vs.cpr_rz * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_q_ss = update(
             vs.C_q_ss,
-            at[2:-2, 2:-2], npx.where(vs.q_ss > 0, npx.sum(vs.mtt_q_ss, axis=2) / vs.q_ss, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.q_ss > 0, npx.sum(vs.mtt_q_ss, axis=2) / (vs.q_ss * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
     return KernelOutput(tt_evap_soil=vs.tt_evap_soil, tt_transp=vs.tt_transp, tt_q_rz=vs.tt_q_rz, tt_cpr_rz=vs.tt_cpr_rz, tt_q_ss=vs.tt_q_ss,
@@ -3090,39 +3090,39 @@ def svat_crop_transport_model_euler(state):
     elif settings.enable_bromide or settings.enable_chloride or settings.enable_nitrate or settings.enable_virtualtracer:
         vs.C_inf_mat_rz = update(
             vs.C_inf_mat_rz,
-            at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.inf_mat_rz[2:-2, 2:-2] * settings.h > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_inf_pf_rz = update(
             vs.C_inf_pf_rz,
-            at[2:-2, 2:-2], npx.where(vs.inf_pf_rz[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.inf_pf_rz[2:-2, 2:-2] * settings.h > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_inf_pf_ss = update(
             vs.C_inf_pf_ss,
-            at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.inf_pf_ss[2:-2, 2:-2] * settings.h > 0, vs.C_in[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_transp = update(
             vs.C_transp,
-            at[2:-2, 2:-2], npx.where(vs.transp > 0, npx.sum(vs.mtt_transp, axis=2) / vs.transp, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.transp > 0, npx.sum(vs.mtt_transp, axis=2) / (vs.transp * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_q_rz = update(
             vs.C_q_rz,
-            at[2:-2, 2:-2], npx.where(vs.q_rz > 0, npx.sum(vs.mtt_q_rz, axis=2) / vs.q_rz, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.q_rz > 0, npx.sum(vs.mtt_q_rz, axis=2) / (vs.q_rz * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_cpr_rz = update(
             vs.C_cpr_rz,
-            at[2:-2, 2:-2], npx.where(vs.cpr_rz > 0, npx.sum(vs.mtt_cpr_rz, axis=2) / vs.cpr_rz, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.cpr_rz > 0, npx.sum(vs.mtt_cpr_rz, axis=2) / (vs.cpr_rz * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_q_ss = update(
             vs.C_q_ss,
-            at[2:-2, 2:-2], npx.where(vs.q_ss > 0, npx.sum(vs.mtt_q_ss, axis=2) / vs.q_ss, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.q_ss > 0, npx.sum(vs.mtt_q_ss, axis=2) / (vs.q_ss * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_re_rg = update(
             vs.C_re_rg,
-            at[2:-2, 2:-2], npx.where(vs.re_rg > 0, npx.sum(vs.mtt_re_rg, axis=2) / vs.re_rg, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.re_rg > 0, npx.sum(vs.mtt_re_rg, axis=2) / (vs.re_rg * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
         vs.C_re_rl = update(
             vs.C_re_rl,
-            at[2:-2, 2:-2], npx.where(vs.re_rl > 0, npx.sum(vs.mtt_re_rl, axis=2) / vs.re_rl, 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+            at[2:-2, 2:-2], npx.where(vs.re_rl > 0, npx.sum(vs.mtt_re_rl, axis=2) / (vs.re_rl * settings.h), 0)[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
         )
 
     return KernelOutput(tt_evap_soil=vs.tt_evap_soil, tt_transp=vs.tt_transp, tt_q_rz=vs.tt_q_rz, tt_cpr_rz=vs.tt_cpr_rz, tt_q_ss=vs.tt_q_ss, tt_re_rg=vs.tt_re_rg, tt_re_rl=vs.tt_re_rl,
