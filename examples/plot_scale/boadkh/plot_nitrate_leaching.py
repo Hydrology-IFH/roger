@@ -447,7 +447,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
             sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
             cond1 = (df_params["CLUST_flag"] == 1)
-            df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
             df = df.loc["2014-01-01":"2022-12-31", :]
             vals = df.values.T
             median_vals = onp.nanmedian(vals, axis=0)
@@ -529,7 +529,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
             sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
             sim_vals = onp.where(sim_vals1 > 0.1, sim_vals2/sim_vals1, onp.nan)
-            df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T)
+            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T)
             df = df.loc["2014-01-01":"2022-12-31", :]
             df = df.iloc[:, maxcol].to_frame()
             avg = onp.nanmean(df.values)
@@ -750,7 +750,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                 df.index,
                 min_vals,
                 max_vals,
-                edgecolor='grey',
+                edgecolor=None,
                 facecolor='grey',
                 alpha=0.33,
                 label="Min-Max interval",
@@ -979,7 +979,7 @@ for var_sim in vars_sim:
                         sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
                         sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)
                         cond1 = (df_params["CLUST_flag"] == 1)
-                        df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+                        df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
                         # calculate annual mean
                         df_avg = df.sum(axis=0).to_frame()
                         df_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
