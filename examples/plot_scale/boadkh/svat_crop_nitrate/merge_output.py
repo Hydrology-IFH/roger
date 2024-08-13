@@ -79,6 +79,7 @@ def main():
                             )
                             # collect dimensions
                             for dfs in diag_files:
+                                print(f"Processing {dfs}")
                                 with h5netcdf.File(dfs, "r", decode_vlen_strings=False) as df:
                                     f.attrs.update(roger_version=df.attrs["roger_version"])
                                     # set dimensions with a dictionary
