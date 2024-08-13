@@ -131,7 +131,7 @@ def main():
                                     for var_sim in list(df.variables.keys()):
                                         _file = base_path / "output" / "svat_crop_nitrate" / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.collect.nc"
                                         if dfs == _file and var_sim == "C_q_ss":
-                                            pass
+                                            print(f"Skipping {var_sim} in {dfs}")
                                         else:
                                             var_obj = df.variables.get(var_sim)
                                             if (
