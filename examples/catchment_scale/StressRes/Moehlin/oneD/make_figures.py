@@ -252,14 +252,14 @@ file = base_path_figs / "land_use.png"
 fig.savefig(file, dpi=300)
 plt.close(fig)
 
-states_hm_file = base_path_output / "ONED_Moehlin_total.nc"
+states_hm_file = base_path_output / "raster" / "ONED_Moehlin_total.nc"
 ds_sim1 = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
-states_hm_file = base_path_output / "RoGeR_WBM_1D" / "total.nc"
-ds_sim2 = xr.open_dataset(states_hm_file, engine="h5netcdf")
+# states_hm_file = base_path_output / "RoGeR_WBM_1D" / "total.nc"
+# ds_sim2 = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
 cmap1 = mpl.colormaps.get_cmap('viridis_r').resampled(6)
-vars_sim = ["cpr_ss", "q_ss"]
+vars_sim = ["cpr_ss", "q_ss", "q_sub"]
 for var_sim in vars_sim:
     # mask = (ds_sim2[_dict_vars[var_sim]].values <= 0)
     # vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
@@ -276,7 +276,7 @@ for var_sim in vars_sim:
     fig.savefig(file, dpi=300)
     plt.close(fig)
 
-vars_sim = ["cpr_ss", "q_ss"]
+vars_sim = ["cpr_ss", "q_ss", "q_sub"]
 for var_sim in vars_sim:
     # mask = (ds_sim2[_dict_vars[var_sim]].values <= 0)
     # vals2 = onp.where(mask, onp.nan, ds_sim2[_dict_vars[var_sim]].values)
