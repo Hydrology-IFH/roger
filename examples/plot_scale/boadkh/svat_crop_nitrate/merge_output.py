@@ -79,7 +79,6 @@ def main():
                             )
                             # collect dimensions
                             for dfs in diag_files:
-                                print(f"Processing {dfs}")
                                 with h5netcdf.File(dfs, "r", decode_vlen_strings=False) as df:
                                     f.attrs.update(roger_version=df.attrs["roger_version"])
                                     # set dimensions with a dictionary
@@ -131,8 +130,8 @@ def main():
                                         v[:] = time
                                     for var_sim in list(df.variables.keys()):
                                         _file = base_path / "output" / "svat_crop_nitrate" / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.collect.nc"
-                                        if dfs == _file and var_sim == "C_q_ss":
-                                            print(f"Skipping {var_sim} in {dfs}")
+                                        if str(dfs) == str(_file) and var_sim == "C_q_ss":
+                                            pass
                                         else:
                                             var_obj = df.variables.get(var_sim)
                                             if (
