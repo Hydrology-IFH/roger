@@ -252,7 +252,11 @@ _lab_unit_total = {
 locations = ["freiburg"]
 vars_sim = ["C_q_ss"]
 crop_rotation_scenarios = ["winter-wheat_silage-corn"]
-fertilization_intensities = ["medium"]
+fertilization_intensities = ["high"]
+
+# load model parameters
+csv_file = base_path / "parameters.csv"
+df_params = pd.read_csv(csv_file, sep=";", skiprows=1)
 
 # load simulated fluxes and states
 dict_fluxes_states = {}
@@ -308,12 +312,11 @@ for crop_rotation_scenario in crop_rotation_scenarios:
         for fertilization_intensity in fertilization_intensities:
             for var_sim in vars_sim:
                 ds = dict_fluxes_states[location][crop_rotation_scenario]
-                sim_vals1 = ds["q_ss"].isel(y=0, x=36).values
+                sim_vals1 = ds["q_ss"].isel(y=0, x=36).values[1:]
                 ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-                sim_vals2 = ds["M_q_ss"].isel(y=0, x=36).values[1:] * 4.427  # convert nitrate-nitrogen to nitrate
-                sim_vals = onp.where(sim_vals1 > 0.1, sim_vals2/sim_vals1, onp.nan)
-                sim_vals = onp.where(sim_vals > 1000, onp.nan, sim_vals)                  
-                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals)
+                sim_vals2 = ds["M_q_ss"].isel(y=0, x=36).values[1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+                sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
+                df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals)
                 df = df.loc["2014-01-01":"2023-12-31"]
                 fig, ax = plt.subplots(1, 1, figsize=(6, 2))
                 ax.plot(df.index, df.values, color="black", linewidth=1)
@@ -327,18 +330,68 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                 fig.savefig(file, dpi=300)
                 plt.close(fig)
 
+
+for crop_rotation_scenario in crop_rotation_scenarios:
+    for location in locations:
+        for fertilization_intensity in fertilization_intensities:
+            for var_sim in vars_sim:
+                ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+                sim_vals = ds["C_q_ss"].isel(y=0, x=36).values[1:] * 4.427  # convert nitrate-nitrogen to nitrate
+                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals)
+                df = df.loc["2014-01-01":"2023-12-31"]
+                fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+                ax.plot(df.index, df.values, color="black", linewidth=1)
+                ax.set_xlabel("Time [Year]")
+                ax.set_ylabel(_lab_unit_daily[var_sim])
+                ax.set_xlim(df.index[0], df.index[-1])
+                ax.set_ylim(0, )
+                plt.xticks(rotation=33)
+                fig.tight_layout()
+                file = base_path_figs / f"trace_{var_sim}_{location}_{crop_rotation_scenario}__.png"
+                fig.savefig(file, dpi=300)
+                plt.close(fig)
+
+for crop_rotation_scenario in crop_rotation_scenarios:
+    for location in locations:
+        for fertilization_intensity in fertilization_intensities:
+            for var_sim in vars_sim:
+                fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
+                ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+                sim_vals = ds["C_q_ss"].isel(y=0, x=36).values[1:] * 4.427  # convert nitrate-nitrogen to nitrate
+                # sim_vals = onp.where(sim_vals > 200, onp.nan, sim_vals)                  
+                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals)
+                df = df.loc["2016-01-01":"2017-12-31"]
+                ax[1].plot(df.index, df.values, color="#c994c7", linewidth=1)
+                ax[1].set_xlabel("Time [Year]")
+                ax[1].set_ylabel(_lab_unit_daily[var_sim])
+                ax[1].set_xlim(df.index[0], df.index[-1])
+                ax[1].set_ylim(0, )
+                ds = dict_fluxes_states[location][crop_rotation_scenario]
+                sim_vals = ds["q_ss"].isel(y=0, x=36).values[1:]               
+                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals)
+                df = df.loc["2016-01-01":"2017-12-31"]
+                ax[0].plot(df.index, df.values, color="#9ecae1", linewidth=1)
+                ax[0].set_ylabel(_lab_unit_daily["q_ss"])
+                ax[0].set_xlim(df.index[0], df.index[-1])
+                ax[0].set_ylim(0, )
+                plt.xticks(rotation=33)
+                fig.tight_layout()
+                file = base_path_figs / f"trace_perc_nitrate_{location}_{crop_rotation_scenario}_2016_2017_.png"
+                fig.savefig(file, dpi=300)
+                plt.close(fig)
+
 for crop_rotation_scenario in crop_rotation_scenarios:
     for location in locations:
         for fertilization_intensity in fertilization_intensities:
             for var_sim in vars_sim:
                 fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
                 ds = dict_fluxes_states[location][crop_rotation_scenario]
-                sim_vals1 = ds["q_ss"].isel(y=0, x=36).values
+                sim_vals1 = ds["q_ss"].isel(y=0, x=36).values[1:]
                 ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-                sim_vals2 = ds["M_q_ss"].isel(y=0, x=36).values[1:] * 4.427  # convert nitrate-nitrogen to nitrate
+                sim_vals2 = ds["M_q_ss"].isel(y=0, x=36).values[1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
                 sim_vals = onp.where(sim_vals1 > 0.1, sim_vals2/sim_vals1, onp.nan)
                 # sim_vals = onp.where(sim_vals > 200, onp.nan, sim_vals)                  
-                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals)
+                df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals)
                 df = df.loc["2016-01-01":"2017-12-31"]
                 ax[1].plot(df.index, df.values, color="#c994c7", linewidth=1)
                 ax[1].set_xlabel("Time [Year]")
@@ -358,3 +411,54 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                 file = base_path_figs / f"trace_perc_nitrate_{location}_{crop_rotation_scenario}_2016_2017.png"
                 fig.savefig(file, dpi=300)
                 plt.close(fig)
+
+
+colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))
+for crop_rotation_scenario in crop_rotation_scenarios:
+    for location in locations:
+        for i, fertilization_intensity in enumerate(fertilization_intensities):
+            ds = dict_fluxes_states[location][crop_rotation_scenario]
+            sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+            sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
+            cond1 = (df_params["CLUST_flag"] == 1)
+            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+            df = df.loc["2014-01-01":"2022-12-31", :]
+            vals = df.values.T
+            idx = np.argmax(np.nanmax(vals, axis=1))
+
+            fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
+            color = "blue"
+            ds = dict_fluxes_states[location][crop_rotation_scenario]
+            sim_vals = ds["q_ss"].isel(y=0).values
+            cond1 = (df_params["CLUST_flag"] == 1)
+            df = pd.DataFrame(index=ds["Time"].values, data=sim_vals.T).loc[:, cond1]
+            df = df.loc["2014-01-01":"2022-12-31", :]
+            vals = df.values.T[idx, :]
+            ax[0].plot(df.index, vals, color=color, label="Median", linewidth=1)
+            ax[0].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.7, 1.3))
+            ax[0].set_ylabel('PERC [mm/day]')
+            ax[0].set_xlim(df.index[0], df.index[-1])
+            ax[0].set_ylim(0, 1)
+
+            color = colors[i]
+            ds = dict_fluxes_states[location][crop_rotation_scenario]
+            sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+            sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
+            cond1 = (df_params["CLUST_flag"] == 1)
+            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+            df = df.loc["2014-01-01":"2022-12-31", :]
+            vals = df.values.T[idx, :]
+            ax[1].plot(df.index, vals, color=color, label="Median", linewidth=1)
+            ax[1].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.7, 1.3))
+            ax[1].set_xlabel("Time [Year]")
+            ax[1].set_ylabel(_lab_unit_daily["C_q_ss"])
+            ax[1].set_xlim(df.index[0], df.index[-1])
+            ax[1].set_ylim(0, 1000)
+            fig.tight_layout()
+            file = base_path_figs / f"trace_perc_flux_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensity}_{idx}.png"
+            fig.savefig(file, dpi=300)
+            plt.close(fig)

@@ -325,1177 +325,1174 @@ for location in locations:
 # with open(file, 'wb') as handle:
 #     pickle.dump(dict_nitrate, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-# plot daily values
-colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))
-for crop_rotation_scenario in crop_rotation_scenarios:
-    for location in locations:
-        for i, fertilization_intensity in enumerate(fertilization_intensities):
-            fig, ax = plt.subplots(1, 1, figsize=(6, 2))
-            color = colors[i]
-            ds = dict_fluxes_states[location][crop_rotation_scenario]
-            sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
-            sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
-            sim_vals = onp.where(sim_vals > 300, onp.nan, sim_vals)
-            cond1 = (df_params["CLUST_flag"] == 1)
-            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-            df = df.loc["2014-01-01":"2022-12-31", :]
-            vals = df.values.T
-            median_vals = onp.nanmedian(vals, axis=0)
-            min_vals = onp.nanmin(vals, axis=0)
-            max_vals = onp.nanmax(vals, axis=0)
-            p5_vals = onp.nanquantile(vals, 0.05, axis=0)
-            p25_vals = onp.nanquantile(vals, 0.25, axis=0)
-            p75_vals = onp.nanquantile(vals, 0.75, axis=0)
-            p95_vals = onp.nanquantile(vals, 0.95, axis=0)
-            ax.fill_between(
-                df.index,
-                min_vals,
-                max_vals,
-                edgecolor=None,
-                facecolor=color,
-                alpha=0.33,
-                label="Min-Max interval",
-            )
-            # ax.fill_between(
-            #     df.index,
-            #     p5_vals,
-            #     p95_vals,
-            #     edgecolor=color,
-            #     facecolor=color,
-            #     alpha=0.66,
-            #     label="95% interval",
-            # )
-            # ax.fill_between(
-            #     df.index,
-            #     p25_vals,
-            #     p75_vals,
-            #     edgecolor=color,
-            #     facecolor=color,
-            #     alpha=1,
-            #     label="75% interval",
-            # )
-            ax.plot(df.index, median_vals, color=color, label="Median", linewidth=1)
-            ax.legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.7, 1.3))
-            ax.set_xlabel("Time [Year]")
-            ax.set_ylabel(_lab_unit_daily["C_q_ss"])
-            ax.set_xlim(df.index[0], df.index[-1])
-            ax.set_ylim(0, )
-            fig.tight_layout()
-            file = base_path_figs / f"trace_perc_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensity}.png"
-            fig.savefig(file, dpi=300)
-            plt.close(fig)
+# # plot daily values
+# colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))
+# for crop_rotation_scenario in crop_rotation_scenarios:
+#     for location in locations:
+#         for i, fertilization_intensity in enumerate(fertilization_intensities):
+#             fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+#             color = colors[i]
+#             ds = dict_fluxes_states[location][crop_rotation_scenario]
+#             sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+#             sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
+#             cond1 = (df_params["CLUST_flag"] == 1)
+#             df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#             df = df.loc["2014-01-01":"2022-12-31", :]
+#             vals = df.values.T
+#             median_vals = onp.nanmedian(vals, axis=0)
+#             min_vals = onp.nanmin(vals, axis=0)
+#             max_vals = onp.nanmax(vals, axis=0)
+#             p5_vals = onp.nanquantile(vals, 0.05, axis=0)
+#             p25_vals = onp.nanquantile(vals, 0.25, axis=0)
+#             p75_vals = onp.nanquantile(vals, 0.75, axis=0)
+#             p95_vals = onp.nanquantile(vals, 0.95, axis=0)
+#             ax.fill_between(
+#                 df.index,
+#                 min_vals,
+#                 max_vals,
+#                 edgecolor=None,
+#                 facecolor=color,
+#                 alpha=0.33,
+#                 label="Min-Max interval",
+#             )
+#             # ax.fill_between(
+#             #     df.index,
+#             #     p5_vals,
+#             #     p95_vals,
+#             #     edgecolor=color,
+#             #     facecolor=color,
+#             #     alpha=0.66,
+#             #     label="95% interval",
+#             # )
+#             # ax.fill_between(
+#             #     df.index,
+#             #     p25_vals,
+#             #     p75_vals,
+#             #     edgecolor=color,
+#             #     facecolor=color,
+#             #     alpha=1,
+#             #     label="75% interval",
+#             # )
+#             ax.plot(df.index, median_vals, color=color, label="Median", linewidth=1)
+#             ax.legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.7, 1.3))
+#             ax.set_xlabel("Time [Year]")
+#             ax.set_ylabel(_lab_unit_daily["C_q_ss"])
+#             ax.set_xlim(df.index[0], df.index[-1])
+#             ax.set_ylim(0, 300)
+#             fig.tight_layout()
+#             file = base_path_figs / f"trace_perc_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensity}.png"
+#             fig.savefig(file, dpi=300)
+#             plt.close(fig)
 
 
-colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))
-for crop_rotation_scenario in crop_rotation_scenarios:
-    for location in locations:
-        for i, fertilization_intensity in enumerate(fertilization_intensities):
-            fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
-            color = "blue"
-            ds = dict_fluxes_states[location][crop_rotation_scenario]
-            sim_vals = ds["q_ss"].isel(y=0).values
-            cond1 = (df_params["CLUST_flag"] == 1)
-            df = pd.DataFrame(index=ds["Time"].values, data=sim_vals.T).loc[:, cond1]
-            df = df.loc["2014-01-01":"2022-12-31", :]
-            vals = df.values.T
-            median_vals = onp.nanmedian(vals, axis=0)
-            min_vals = onp.nanmin(vals, axis=0)
-            max_vals = onp.nanmax(vals, axis=0)
-            p5_vals = onp.nanquantile(vals, 0.05, axis=0)
-            p25_vals = onp.nanquantile(vals, 0.25, axis=0)
-            p75_vals = onp.nanquantile(vals, 0.75, axis=0)
-            p95_vals = onp.nanquantile(vals, 0.95, axis=0)
-            ax[0].fill_between(
-                df.index,
-                min_vals,
-                max_vals,
-                edgecolor=color,
-                facecolor=color,
-                alpha=0.33,
-                label="Min-Max interval",
-            )
-            # ax[0].fill_between(
-            #     df.index,
-            #     p5_vals,
-            #     p95_vals,
-            #     edgecolor=color,
-            #     facecolor=color,
-            #     alpha=0.66,
-            #     label="95% interval",
-            # )
-            # ax[0].fill_between(
-            #     df.index,
-            #     p25_vals,
-            #     p75_vals,
-            #     edgecolor=color,
-            #     facecolor=color,
-            #     alpha=1,
-            #     label="75% interval",
-            # )
-            ax[0].plot(df.index, median_vals, color=color, label="Median", linewidth=1)
-            ax[0].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.7, 1.3))
-            ax[0].set_ylabel('PERC [mm/day]')
-            ax[0].set_xlim(df.index[0], df.index[-1])
-            ax[0].set_ylim(0, )
+# colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))
+# for crop_rotation_scenario in crop_rotation_scenarios:
+#     for location in locations:
+#         for i, fertilization_intensity in enumerate(fertilization_intensities):
+#             fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
+#             color = "blue"
+#             ds = dict_fluxes_states[location][crop_rotation_scenario]
+#             sim_vals = ds["q_ss"].isel(y=0).values
+#             cond1 = (df_params["CLUST_flag"] == 1)
+#             df = pd.DataFrame(index=ds["Time"].values, data=sim_vals.T).loc[:, cond1]
+#             df = df.loc["2014-01-01":"2022-12-31", :]
+#             vals = df.values.T
+#             median_vals = onp.nanmedian(vals, axis=0)
+#             min_vals = onp.nanmin(vals, axis=0)
+#             max_vals = onp.nanmax(vals, axis=0)
+#             p5_vals = onp.nanquantile(vals, 0.05, axis=0)
+#             p25_vals = onp.nanquantile(vals, 0.25, axis=0)
+#             p75_vals = onp.nanquantile(vals, 0.75, axis=0)
+#             p95_vals = onp.nanquantile(vals, 0.95, axis=0)
+#             ax[0].fill_between(
+#                 df.index,
+#                 min_vals,
+#                 max_vals,
+#                 edgecolor=color,
+#                 facecolor=color,
+#                 alpha=0.33,
+#                 label="Min-Max interval",
+#             )
+#             # ax[0].fill_between(
+#             #     df.index,
+#             #     p5_vals,
+#             #     p95_vals,
+#             #     edgecolor=color,
+#             #     facecolor=color,
+#             #     alpha=0.66,
+#             #     label="95% interval",
+#             # )
+#             # ax[0].fill_between(
+#             #     df.index,
+#             #     p25_vals,
+#             #     p75_vals,
+#             #     edgecolor=color,
+#             #     facecolor=color,
+#             #     alpha=1,
+#             #     label="75% interval",
+#             # )
+#             ax[0].plot(df.index, median_vals, color=color, label="Median", linewidth=1)
+#             ax[0].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.7, 1.3))
+#             ax[0].set_ylabel('PERC [mm/day]')
+#             ax[0].set_xlim(df.index[0], df.index[-1])
+#             ax[0].set_ylim(0, )
 
-            color = colors[i]
-            ds = dict_fluxes_states[location][crop_rotation_scenario]
-            sim_vals1 = ds["q_ss"].isel(y=0).values[1:]
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
-            sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
-            cond1 = (df_params["CLUST_flag"] == 1)
-            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-            df = df.loc["2014-01-01":"2022-12-31", :]
-            vals = df.values.T
-            median_vals = onp.nanmedian(vals, axis=0)
-            min_vals = onp.nanmin(vals, axis=0)
-            max_vals = onp.nanmax(vals, axis=0)
-            p5_vals = onp.nanquantile(vals, 0.05, axis=0)
-            p25_vals = onp.nanquantile(vals, 0.25, axis=0)
-            p75_vals = onp.nanquantile(vals, 0.75, axis=0)
-            p95_vals = onp.nanquantile(vals, 0.95, axis=0)
-            ax[1].fill_between(
-                df.index,
-                min_vals,
-                max_vals,
-                edgecolor=None,
-                facecolor=color,
-                alpha=0.33,
-                label="Min-Max interval",
-            )
-            # ax[1].fill_between(
-            #     df.index,
-            #     p5_vals,
-            #     p95_vals,
-            #     edgecolor=color,
-            #     facecolor=color,
-            #     alpha=0.66,
-            #     label="95% interval",
-            # )
-            # ax[1].fill_between(
-            #     df.index,
-            #     p25_vals,
-            #     p75_vals,
-            #     edgecolor=color,
-            #     facecolor=color,
-            #     alpha=1,
-            #     label="75% interval",
-            # )
-            ax[1].plot(df.index, median_vals, color=color, label="Median", linewidth=1)
-            ax[1].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.7, 1.3))
-            ax[1].set_xlabel("Time [Year]")
-            ax[1].set_ylabel(_lab_unit_daily["C_q_ss"])
-            ax[1].set_xlim(df.index[0], df.index[-1])
-            ax[1].set_ylim(0, )
-            fig.tight_layout()
-            file = base_path_figs / f"trace_perc_flux_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensity}.png"
-            fig.savefig(file, dpi=300)
-            plt.close(fig)
+#             color = colors[i]
+#             ds = dict_fluxes_states[location][crop_rotation_scenario]
+#             sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+#             sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
+#             cond1 = (df_params["CLUST_flag"] == 1)
+#             df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#             df = df.loc["2014-01-01":"2022-12-31", :]
+#             vals = df.values.T
+#             median_vals = onp.nanmedian(vals, axis=0)
+#             min_vals = onp.nanmin(vals, axis=0)
+#             max_vals = onp.nanmax(vals, axis=0)
+#             p5_vals = onp.nanquantile(vals, 0.05, axis=0)
+#             p25_vals = onp.nanquantile(vals, 0.25, axis=0)
+#             p75_vals = onp.nanquantile(vals, 0.75, axis=0)
+#             p95_vals = onp.nanquantile(vals, 0.95, axis=0)
+#             ax[1].fill_between(
+#                 df.index,
+#                 min_vals,
+#                 max_vals,
+#                 edgecolor=None,
+#                 facecolor=color,
+#                 alpha=0.33,
+#                 label="Min-Max interval",
+#             )
+#             # ax[1].fill_between(
+#             #     df.index,
+#             #     p5_vals,
+#             #     p95_vals,
+#             #     edgecolor=color,
+#             #     facecolor=color,
+#             #     alpha=0.66,
+#             #     label="95% interval",
+#             # )
+#             # ax[1].fill_between(
+#             #     df.index,
+#             #     p25_vals,
+#             #     p75_vals,
+#             #     edgecolor=color,
+#             #     facecolor=color,
+#             #     alpha=1,
+#             #     label="75% interval",
+#             # )
+#             ax[1].plot(df.index, median_vals, color=color, label="Median", linewidth=1)
+#             ax[1].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.7, 1.3))
+#             ax[1].set_xlabel("Time [Year]")
+#             ax[1].set_ylabel(_lab_unit_daily["C_q_ss"])
+#             ax[1].set_xlim(df.index[0], df.index[-1])
+#             ax[1].set_ylim(0, 300)
+#             fig.tight_layout()
+#             file = base_path_figs / f"trace_perc_flux_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensity}.png"
+#             fig.savefig(file, dpi=300)
+#             plt.close(fig)
 
-colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))
-for crop_rotation_scenario in crop_rotation_scenarios:
-    for location in locations:
-        for i, fertilization_intensity in enumerate(fertilization_intensities):
-            ds = dict_fluxes_states[location][crop_rotation_scenario]
-            sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
-            sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
-            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T)
-            df = df.loc["2014-01-01":"2022-12-31", :]
-            maxcol = np.argmax(np.nanmax(df.values, axis=0))
+# colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))
+# for crop_rotation_scenario in crop_rotation_scenarios:
+#     for location in locations:
+#         for i, fertilization_intensity in enumerate(fertilization_intensities):
+#             ds = dict_fluxes_states[location][crop_rotation_scenario]
+#             sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+#             sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
+#             df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T)
+#             df = df.loc["2014-01-01":"2022-12-31", :]
+#             maxcol = np.argmax(np.nanmax(df.values, axis=0))
 
-            fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
-            color = "blue"
-            ds = dict_fluxes_states[location][crop_rotation_scenario]
-            sim_vals = ds["q_ss"].isel(y=0).values
-            df = pd.DataFrame(index=ds["Time"].values, data=sim_vals.T)
-            df = df.loc["2014-01-01":"2022-12-31", :]
-            df = df.iloc[:, maxcol].to_frame()
-            ax[0].plot(df.index, df.values, color=color, linewidth=1)
-            ax[0].set_ylabel('PERC [mm/day]')
-            ax[0].set_xlim(df.index[0], df.index[-1])
-            ax[0].set_ylim(0, )
+#             fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
+#             color = "blue"
+#             ds = dict_fluxes_states[location][crop_rotation_scenario]
+#             sim_vals = ds["q_ss"].isel(y=0).values
+#             df = pd.DataFrame(index=ds["Time"].values, data=sim_vals.T)
+#             df = df.loc["2014-01-01":"2022-12-31", :]
+#             df = df.iloc[:, maxcol].to_frame()
+#             ax[0].plot(df.index, df.values, color=color, linewidth=1)
+#             ax[0].set_ylabel('PERC [mm/day]')
+#             ax[0].set_xlim(df.index[0], df.index[-1])
+#             ax[0].set_ylim(0, )
 
-            color = colors[i]
-            ds = dict_fluxes_states[location][crop_rotation_scenario]
-            sim_vals1 = ds["q_ss"].isel(y=0).values[1:]
-            df_perc = pd.DataFrame(index=ds["Time"].values, data=sim_vals.T)
-            df_perc = df_perc.loc["2014-01-01":"2022-12-31", :]
-            df_perc = df_perc.iloc[:, maxcol].to_frame()
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
-            sim_vals = onp.where(sim_vals1 > 0.1, sim_vals2/sim_vals1, onp.nan)
-            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T)
-            df = df.loc["2014-01-01":"2022-12-31", :]
-            df = df.iloc[:, maxcol].to_frame()
-            avg = onp.nanmean(df.values)
-            avg_weighted = onp.nansum(onp.where(df_perc.values > 0.01, df.values * (df_perc.values/onp.sum(df_perc.values)), 0))
-            ax[1].plot(df.index, df.values, color=color, linewidth=1)
-            ax[1].axhline(avg, color="black", linestyle="--")
-            ax[1].axhline(avg_weighted, color=color, linestyle="-")
-            ax[1].set_xlabel("Time [Year]")
-            ax[1].set_ylabel(_lab_unit_daily["C_q_ss"])
-            ax[1].set_xlim(df.index[0], df.index[-1])
-            ax[1].set_ylim(0, )
-            fig.tight_layout()
-            file = base_path_figs / f"trace_perc_flux_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensity}_{maxcol}.png"
-            fig.savefig(file, dpi=300)
-            plt.close(fig)
+#             color = colors[i]
+#             ds = dict_fluxes_states[location][crop_rotation_scenario]
+#             sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+#             df_perc = pd.DataFrame(index=ds["Time"].values, data=sim_vals.T)
+#             df_perc = df_perc.loc["2014-01-01":"2022-12-31", :]
+#             df_perc = df_perc.iloc[:, maxcol].to_frame()
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+#             sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
+#             df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T)
+#             df = df.loc["2014-01-01":"2022-12-31", :]
+#             df = df.iloc[:, maxcol].to_frame()
+#             avg = onp.nanmean(df.values)
+#             avg_weighted = onp.nansum(onp.where(df_perc.values > 0.01, df.values * (df_perc.values/onp.sum(df_perc.values)), 0))
+#             ax[1].plot(df.index, df.values, color=color, linewidth=1)
+#             ax[1].axhline(avg, color="black", linestyle="--")
+#             ax[1].axhline(avg_weighted, color=color, linestyle="-")
+#             ax[1].set_xlabel("Time [Year]")
+#             ax[1].set_ylabel(_lab_unit_daily["C_q_ss"])
+#             ax[1].set_xlim(df.index[0], df.index[-1])
+#             ax[1].set_ylim(0, 1000)
+#             fig.tight_layout()
+#             file = base_path_figs / f"trace_perc_flux_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensity}_{maxcol}.png"
+#             fig.savefig(file, dpi=300)
+#             plt.close(fig)
 
-colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))
-for crop_rotation_scenario in crop_rotation_scenarios:
-    for i, fertilization_intensity in enumerate(fertilization_intensities):
-        fig, ax = plt.subplots(1, 1, figsize=(6, 2))
-        ll_dfs = []
-        color = colors[i]
-        for location in locations:
-            ds = dict_fluxes_states[location][crop_rotation_scenario]
-            sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
-            sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
-            sim_vals = onp.where(sim_vals > 200, onp.nan, sim_vals)
-            cond1 = (df_params["CLUST_flag"] == 1)
-            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-            df = df.loc["2014-01-01":"2022-12-31", :]
-            ll_dfs.append(df)
-        df = pd.concat(ll_dfs, axis=1)
-        vals = df.values.T
-        fig, ax = plt.subplots(1, 1, figsize=(6, 2))
-        median_vals = onp.nanmedian(vals, axis=0)
-        min_vals = onp.nanmin(vals, axis=0)
-        max_vals = onp.nanmax(vals, axis=0)
-        p5_vals = onp.nanquantile(vals, 0.05, axis=0)
-        p25_vals = onp.nanquantile(vals, 0.25, axis=0)
-        p75_vals = onp.nanquantile(vals, 0.75, axis=0)
-        p95_vals = onp.nanquantile(vals, 0.95, axis=0)
-        ax.fill_between(
-            df.index,
-            min_vals,
-            max_vals,
-            edgecolor=None,
-            facecolor=color,
-            alpha=0.33,
-            label="Min-Max interval",
-        )
-        # ax.fill_between(
-        #     df.index,
-        #     p5_vals,
-        #     p95_vals,
-        #     edgecolor=color,
-        #     facecolor=color,
-        #     alpha=0.66,
-        #     label="95% interval",
-        # )
-        # ax.fill_between(
-        #     df.index,
-        #     p25_vals,
-        #     p75_vals,
-        #     edgecolor=color,
-        #     facecolor=color,
-        #     alpha=1,
-        #     label="75% interval",
-        # )
-        ax.plot(df.index, median_vals, color=color, label="Median", linewidth=1)
-        ax.legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
-        ax.set_xlabel("Time [Year]")
-        ax.set_ylabel(_lab_unit_daily["C_q_ss"])
-        ax.set_xlim(df.index[0], df.index[-1])
-        ax.set_ylim(0, )
-        fig.tight_layout()
-        file = base_path_figs / f"trace_perc_nitrate_conc_{crop_rotation_scenario}_{fertilization_intensity}.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
+# colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))
+# for crop_rotation_scenario in crop_rotation_scenarios:
+#     for i, fertilization_intensity in enumerate(fertilization_intensities):
+#         fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+#         ll_dfs = []
+#         color = colors[i]
+#         for location in locations:
+#             ds = dict_fluxes_states[location][crop_rotation_scenario]
+#             sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+#             sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
+#             cond1 = (df_params["CLUST_flag"] == 1)
+#             df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#             df = df.loc["2014-01-01":"2022-12-31", :]
+#             ll_dfs.append(df)
+#         df = pd.concat(ll_dfs, axis=1)
+#         vals = df.values.T
+#         fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+#         median_vals = onp.nanmedian(vals, axis=0)
+#         min_vals = onp.nanmin(vals, axis=0)
+#         max_vals = onp.nanmax(vals, axis=0)
+#         p5_vals = onp.nanquantile(vals, 0.05, axis=0)
+#         p25_vals = onp.nanquantile(vals, 0.25, axis=0)
+#         p75_vals = onp.nanquantile(vals, 0.75, axis=0)
+#         p95_vals = onp.nanquantile(vals, 0.95, axis=0)
+#         ax.fill_between(
+#             df.index,
+#             min_vals,
+#             max_vals,
+#             edgecolor=None,
+#             facecolor=color,
+#             alpha=0.33,
+#             label="Min-Max interval",
+#         )
+#         # ax.fill_between(
+#         #     df.index,
+#         #     p5_vals,
+#         #     p95_vals,
+#         #     edgecolor=color,
+#         #     facecolor=color,
+#         #     alpha=0.66,
+#         #     label="95% interval",
+#         # )
+#         # ax.fill_between(
+#         #     df.index,
+#         #     p25_vals,
+#         #     p75_vals,
+#         #     edgecolor=color,
+#         #     facecolor=color,
+#         #     alpha=1,
+#         #     label="75% interval",
+#         # )
+#         ax.plot(df.index, median_vals, color=color, label="Median", linewidth=1)
+#         ax.legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.7, 1.3))
+#         ax.set_xlabel("Time [Year]")
+#         ax.set_ylabel(_lab_unit_daily["C_q_ss"])
+#         ax.set_xlim(df.index[0], df.index[-1])
+#         ax.set_ylim(0, )
+#         fig.tight_layout()
+#         file = base_path_figs / f"trace_perc_nitrate_conc_{crop_rotation_scenario}_{fertilization_intensity}.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
-colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))
-for crop_rotation_scenario in crop_rotation_scenarios:
-    fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
-    ll_dfs_flux = []
-    for location in locations:
-        ds = dict_fluxes_states[location][crop_rotation_scenario]
-        sim_vals = ds["q_ss"].isel(y=0).values[:, 1:]
-        cond1 = (df_params["CLUST_flag"] == 1)
-        df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-        ll_dfs_flux.append(df)
-        df = df.loc["2014-01-01":"2022-12-31", :]
-    df = pd.concat(ll_dfs_flux, axis=1)
-    vals = df.values.T
-    fig, ax = plt.subplots(1, 1, figsize=(6, 2))
-    median_vals = onp.nanmedian(vals, axis=0)
-    min_vals = onp.nanmin(vals, axis=0)
-    max_vals = onp.nanmax(vals, axis=0)
-    p5_vals = onp.nanquantile(vals, 0.05, axis=0)
-    p25_vals = onp.nanquantile(vals, 0.25, axis=0)
-    p75_vals = onp.nanquantile(vals, 0.75, axis=0)
-    p95_vals = onp.nanquantile(vals, 0.95, axis=0)
-    ax[0].fill_between(
-        df.index,
-        min_vals,
-        max_vals,
-        edgecolor=None,
-        facecolor=color,
-        alpha=0.33,
-        label="Min-Max interval",
-    )
-    # ax[0].fill_between(
-    #     df.index,
-    #     p5_vals,
-    #     p95_vals,
-    #     edgecolor=color,
-    #     facecolor=color,
-    #     alpha=0.66,
-    #     label="95% interval",
-    # )
-    # ax[0].fill_between(
-    #     df.index,
-    #     p25_vals,
-    #     p75_vals,
-    #     edgecolor=color,
-    #     facecolor=color,
-    #     alpha=1,
-    #     label="75% interval",
-    # )
-    ax[0].plot(df.index, median_vals, color=color, label="Median", linewidth=1)
-    ax[0].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
-    ax[0].set_ylabel('PERC [mm/day]')
-    ax[0].set_xlim(df.index[0], df.index[-1])
-    ax[0].set_ylim(0, )
+# colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))
+# for crop_rotation_scenario in crop_rotation_scenarios:
+#     color = "blue"
+#     fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
+#     ll_dfs_flux = []
+#     for location in locations:
+#         ds = dict_fluxes_states[location][crop_rotation_scenario]
+#         sim_vals = ds["q_ss"].isel(y=0).values[:, 1:]
+#         cond1 = (df_params["CLUST_flag"] == 1)
+#         df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+#         ll_dfs_flux.append(df)
+#         df = df.loc["2014-01-01":"2022-12-31", :]
+#     df = pd.concat(ll_dfs_flux, axis=1)
+#     vals = df.values.T
+#     median_vals = onp.nanmedian(vals, axis=0)
+#     min_vals = onp.nanmin(vals, axis=0)
+#     max_vals = onp.nanmax(vals, axis=0)
+#     p5_vals = onp.nanquantile(vals, 0.05, axis=0)
+#     p25_vals = onp.nanquantile(vals, 0.25, axis=0)
+#     p75_vals = onp.nanquantile(vals, 0.75, axis=0)
+#     p95_vals = onp.nanquantile(vals, 0.95, axis=0)
+#     ax[0].fill_between(
+#         df.index,
+#         min_vals,
+#         max_vals,
+#         edgecolor=None,
+#         facecolor=color,
+#         alpha=0.33,
+#         label="Min-Max interval",
+#     )
+#     # ax[0].fill_between(
+#     #     df.index,
+#     #     p5_vals,
+#     #     p95_vals,
+#     #     edgecolor=color,
+#     #     facecolor=color,
+#     #     alpha=0.66,
+#     #     label="95% interval",
+#     # )
+#     # ax[0].fill_between(
+#     #     df.index,
+#     #     p25_vals,
+#     #     p75_vals,
+#     #     edgecolor=color,
+#     #     facecolor=color,
+#     #     alpha=1,
+#     #     label="75% interval",
+#     # )
+#     ax[0].plot(df.index, median_vals, color=color, label="Median", linewidth=1)
+#     ax[0].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
+#     ax[0].set_ylabel('PERC [mm/day]')
+#     ax[0].set_xlim(df.index[0], df.index[-1])
+#     ax[0].set_ylim(0, )
 
-    ll_dfs_conc = []
-    for i, fertilization_intensity in enumerate(fertilization_intensities):
-        for location in locations:
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            ds = dict_fluxes_states[location][crop_rotation_scenario]
-            sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
-            sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
-            cond1 = (df_params["CLUST_flag"] == 1)
-            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-            df = df.loc["2014-01-01":"2022-12-31", :]
-            ll_dfs_conc.append(df)
-        df = pd.concat(ll_dfs_conc, axis=1)
-        vals = df.values.T
-        fig, ax = plt.subplots(1, 1, figsize=(6, 2))
-        median_vals = onp.nanmedian(vals, axis=0)
-        min_vals = onp.nanmin(vals, axis=0)
-        max_vals = onp.nanmax(vals, axis=0)
-        p5_vals = onp.nanquantile(vals, 0.05, axis=0)
-        p25_vals = onp.nanquantile(vals, 0.25, axis=0)
-        p75_vals = onp.nanquantile(vals, 0.75, axis=0)
-        p95_vals = onp.nanquantile(vals, 0.95, axis=0)
-        ax[1].fill_between(
-            df.index,
-            min_vals,
-            max_vals,
-            edgecolor=None,
-            facecolor=color,
-            alpha=0.33,
-            label="Min-Max interval",
-        )
-        # ax[1].fill_between(
-        #     df.index,
-        #     p5_vals,
-        #     p95_vals,
-        #     edgecolor=color,
-        #     facecolor=color,
-        #     alpha=0.66,
-        #     label="95% interval",
-        # )
-        # ax[1].fill_between(
-        #     df.index,
-        #     p25_vals,
-        #     p75_vals,
-        #     edgecolor=color,
-        #     facecolor=color,
-        #     alpha=1,
-        #     label="75% interval",
-        # )
-        ax[1].plot(df.index, median_vals, color=color, label="Median", linewidth=1)
-        ax[1].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
-        ax[1].set_xlabel("Time [Year]")
-        ax[1].set_ylabel(_lab_unit_daily["C_q_ss"])
-        ax[1].set_xlim(df.index[0], df.index[-1])
-        ax[1].set_ylim(0, )
-        fig.tight_layout()
-        file = base_path_figs / f"trace_perc_flux_nitrate_conc_{location}_{crop_rotation_scenario}.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
+#     ll_dfs_conc = []
+#     for i, fertilization_intensity in enumerate(fertilization_intensities):
+#         for location in locations:
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             ds = dict_fluxes_states[location][crop_rotation_scenario]
+#             sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+#             sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
+#             cond1 = (df_params["CLUST_flag"] == 1)
+#             df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#             df = df.loc["2014-01-01":"2022-12-31", :]
+#             ll_dfs_conc.append(df)
+#         df = pd.concat(ll_dfs_conc, axis=1)
+#         vals = df.values.T
+#         median_vals = onp.nanmedian(vals, axis=0)
+#         min_vals = onp.nanmin(vals, axis=0)
+#         max_vals = onp.nanmax(vals, axis=0)
+#         p5_vals = onp.nanquantile(vals, 0.05, axis=0)
+#         p25_vals = onp.nanquantile(vals, 0.25, axis=0)
+#         p75_vals = onp.nanquantile(vals, 0.75, axis=0)
+#         p95_vals = onp.nanquantile(vals, 0.95, axis=0)
+#         ax[1].fill_between(
+#             df.index,
+#             min_vals,
+#             max_vals,
+#             edgecolor=None,
+#             facecolor=color,
+#             alpha=0.33,
+#             label="Min-Max interval",
+#         )
+#         # ax[1].fill_between(
+#         #     df.index,
+#         #     p5_vals,
+#         #     p95_vals,
+#         #     edgecolor=color,
+#         #     facecolor=color,
+#         #     alpha=0.66,
+#         #     label="95% interval",
+#         # )
+#         # ax[1].fill_between(
+#         #     df.index,
+#         #     p25_vals,
+#         #     p75_vals,
+#         #     edgecolor=color,
+#         #     facecolor=color,
+#         #     alpha=1,
+#         #     label="75% interval",
+#         # )
+#         ax[1].plot(df.index, median_vals, color=color, label="Median", linewidth=1)
+#         ax[1].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
+#         ax[1].set_xlabel("Time [Year]")
+#         ax[1].set_ylabel(_lab_unit_daily["C_q_ss"])
+#         ax[1].set_xlim(df.index[0], df.index[-1])
+#         ax[1].set_ylim(0, 300)
+#         fig.tight_layout()
+#         file = base_path_figs / f"trace_perc_flux_nitrate_conc_{location}_{crop_rotation_scenario}.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
-for crop_rotation_scenario in crop_rotation_scenarios:
-    for location in locations:
-        for fertilization_intensity in fertilization_intensities:
-            ds = dict_fluxes_states[location][crop_rotation_scenario]
-            sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
-            sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
-            cond1 = (df_params["CLUST_flag"] == 1)
-            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-            df = df.loc["2014-01-01":"2022-12-31", :]
-            vals = df.values.T
-            fig, ax = plt.subplots(1, 1, figsize=(6, 2))
-            median_vals = onp.nanmedian(vals, axis=0)
-            min_vals = onp.nanmin(vals, axis=0)
-            max_vals = onp.nanmax(vals, axis=0)
-            p5_vals = onp.nanquantile(vals, 0.05, axis=0)
-            p25_vals = onp.nanquantile(vals, 0.25, axis=0)
-            p75_vals = onp.nanquantile(vals, 0.75, axis=0)
-            p95_vals = onp.nanquantile(vals, 0.95, axis=0)
-            ax.fill_between(
-                df.index,
-                min_vals,
-                max_vals,
-                edgecolor=None,
-                facecolor='grey',
-                alpha=0.33,
-                label="Min-Max interval",
-            )
-            # ax.fill_between(
-            #     df.index,
-            #     p5_vals,
-            #     p95_vals,
-            #     edgecolor='grey',
-            #     facecolor='grey',
-            #     alpha=0.66,
-            #     label="95% interval",
-            # )
-            # ax.fill_between(
-            #     df.index,
-            #     p25_vals,
-            #     p75_vals,
-            #     edgecolor='grey',
-            #     facecolor='grey',
-            #     alpha=1,
-            #     label="75% interval",
-            # )
-            ax.plot(df.index, median_vals, color="black", label="Median", linewidth=1)
-            ax.legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
-            ax.set_xlabel("Time [Year]")
-            ax.set_ylabel(_lab_unit_daily["C_q_ss"])
-            ax.set_xlim(df.index[0], df.index[-1])
-            fig.tight_layout()
-            file = base_path_figs / f"trace_perc_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensities}.png"
-            fig.savefig(file, dpi=300)
-            plt.close(fig)
+# for crop_rotation_scenario in crop_rotation_scenarios:
+#     for location in locations:
+#         for fertilization_intensity in fertilization_intensities:
+#             ds = dict_fluxes_states[location][crop_rotation_scenario]
+#             sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+#             sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
+#             cond1 = (df_params["CLUST_flag"] == 1)
+#             df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#             df = df.loc["2014-01-01":"2022-12-31", :]
+#             vals = df.values.T
+#             fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+#             median_vals = onp.nanmedian(vals, axis=0)
+#             min_vals = onp.nanmin(vals, axis=0)
+#             max_vals = onp.nanmax(vals, axis=0)
+#             p5_vals = onp.nanquantile(vals, 0.05, axis=0)
+#             p25_vals = onp.nanquantile(vals, 0.25, axis=0)
+#             p75_vals = onp.nanquantile(vals, 0.75, axis=0)
+#             p95_vals = onp.nanquantile(vals, 0.95, axis=0)
+#             ax.fill_between(
+#                 df.index,
+#                 min_vals,
+#                 max_vals,
+#                 edgecolor=None,
+#                 facecolor='grey',
+#                 alpha=0.33,
+#                 label="Min-Max interval",
+#             )
+#             # ax.fill_between(
+#             #     df.index,
+#             #     p5_vals,
+#             #     p95_vals,
+#             #     edgecolor='grey',
+#             #     facecolor='grey',
+#             #     alpha=0.66,
+#             #     label="95% interval",
+#             # )
+#             # ax.fill_between(
+#             #     df.index,
+#             #     p25_vals,
+#             #     p75_vals,
+#             #     edgecolor='grey',
+#             #     facecolor='grey',
+#             #     alpha=1,
+#             #     label="75% interval",
+#             # )
+#             ax.plot(df.index, median_vals, color="black", label="Median", linewidth=1)
+#             ax.legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
+#             ax.set_xlabel("Time [Year]")
+#             ax.set_ylabel(_lab_unit_daily["C_q_ss"])
+#             ax.set_xlim(df.index[0], df.index[-1])
+#             ax.set_ylim(0, 300)
+#             fig.tight_layout()
+#             file = base_path_figs / f"trace_perc_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensities}.png"
+#             fig.savefig(file, dpi=300)
+#             plt.close(fig)
 
-# plot daily values
-vars_sim = ["M_q_ss"]
-for crop_rotation_scenario in crop_rotation_scenarios:
-    for location in locations:
-        for fertilization_intensity in fertilization_intensities:
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            for var_sim in vars_sim:
-                sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1] * 0.01
-                cond1 = (df_params["CLUST_flag"] == 1)
-                df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-                df = df.loc["2014-01-01":"2022-12-31", :]
-                vals = df.values.T
-                fig, ax = plt.subplots(1, 1, figsize=(6, 2))
-                median_vals = onp.nanmedian(vals, axis=0)
-                min_vals = onp.nanmin(vals, axis=0)
-                max_vals = onp.nanmax(vals, axis=0)
-                p5_vals = onp.nanquantile(vals, 0.05, axis=0)
-                p25_vals = onp.nanquantile(vals, 0.25, axis=0)
-                p75_vals = onp.nanquantile(vals, 0.75, axis=0)
-                p95_vals = onp.nanquantile(vals, 0.95, axis=0)
-                ax.fill_between(
-                    df.index,
-                    min_vals,
-                    max_vals,
-                    edgecolor=None,
-                    facecolor='grey',
-                    alpha=0.33,
-                    label="Min-Max interval",
-                )
-                # ax.fill_between(
-                #     df.index,
-                #     p5_vals,
-                #     p95_vals,
-                #     edgecolor='grey',
-                #     facecolor='grey',
-                #     alpha=0.66,
-                #     label="95% interval",
-                # )
-                # ax.fill_between(
-                #     df.index,
-                #     p25_vals,
-                #     p75_vals,
-                #     edgecolor='grey',
-                #     facecolor='grey',
-                #     alpha=1,
-                #     label="75% interval",
-                # )
-                ax.plot(df.index, median_vals, color="black", label="Median", linewidth=1)
-                ax.legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
-                ax.set_xlabel("Time [Year]")
-                ax.set_ylabel(_lab_unit_daily[var_sim])
-                ax.set_xlim(df.index[0], df.index[-1])
-                fig.tight_layout()
-                file = base_path_figs / f"trace_{var_sim}_{location}_{crop_rotation_scenario}.png"
-                fig.savefig(file, dpi=300)
-                plt.close(fig)
+# # plot daily values
+# vars_sim = ["M_q_ss"]
+# for crop_rotation_scenario in crop_rotation_scenarios:
+#     for location in locations:
+#         for fertilization_intensity in fertilization_intensities:
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             for var_sim in vars_sim:
+#                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1] * 0.01
+#                 cond1 = (df_params["CLUST_flag"] == 1)
+#                 df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#                 df = df.loc["2014-01-01":"2022-12-31", :]
+#                 vals = df.values.T
+#                 fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+#                 median_vals = onp.nanmedian(vals, axis=0)
+#                 min_vals = onp.nanmin(vals, axis=0)
+#                 max_vals = onp.nanmax(vals, axis=0)
+#                 p5_vals = onp.nanquantile(vals, 0.05, axis=0)
+#                 p25_vals = onp.nanquantile(vals, 0.25, axis=0)
+#                 p75_vals = onp.nanquantile(vals, 0.75, axis=0)
+#                 p95_vals = onp.nanquantile(vals, 0.95, axis=0)
+#                 ax.fill_between(
+#                     df.index,
+#                     min_vals,
+#                     max_vals,
+#                     edgecolor=None,
+#                     facecolor='grey',
+#                     alpha=0.33,
+#                     label="Min-Max interval",
+#                 )
+#                 # ax.fill_between(
+#                 #     df.index,
+#                 #     p5_vals,
+#                 #     p95_vals,
+#                 #     edgecolor='grey',
+#                 #     facecolor='grey',
+#                 #     alpha=0.66,
+#                 #     label="95% interval",
+#                 # )
+#                 # ax.fill_between(
+#                 #     df.index,
+#                 #     p25_vals,
+#                 #     p75_vals,
+#                 #     edgecolor='grey',
+#                 #     facecolor='grey',
+#                 #     alpha=1,
+#                 #     label="75% interval",
+#                 # )
+#                 ax.plot(df.index, median_vals, color="black", label="Median", linewidth=1)
+#                 ax.legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
+#                 ax.set_xlabel("Time [Year]")
+#                 ax.set_ylabel(_lab_unit_daily[var_sim])
+#                 ax.set_xlim(df.index[0], df.index[-1])
+#                 fig.tight_layout()
+#                 file = base_path_figs / f"trace_{var_sim}_{location}_{crop_rotation_scenario}.png"
+#                 fig.savefig(file, dpi=300)
+#                 plt.close(fig)
 
-# plot annual sums
-vars_sim = ["M_q_ss"]
-for crop_rotation_scenario in crop_rotation_scenarios:
-    for location in locations:
-        for fertilization_intensity in fertilization_intensities:
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            for var_sim in vars_sim:
-                sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
-                cond1 = (df_params["CLUST_flag"] == 1)
-                df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-                # calculate annual sum
-                df_ann = df.resample("YE").sum().iloc[:-1, :]
-                df_ann.loc[:, "year"] = df_ann.index.year
-                df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
-                df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
+# # plot annual sums
+# vars_sim = ["M_q_ss"]
+# for crop_rotation_scenario in crop_rotation_scenarios:
+#     for location in locations:
+#         for fertilization_intensity in fertilization_intensities:
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             for var_sim in vars_sim:
+#                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
+#                 cond1 = (df_params["CLUST_flag"] == 1)
+#                 df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#                 # calculate annual sum
+#                 df_ann = df.resample("YE").sum().iloc[:-1, :]
+#                 df_ann.loc[:, "year"] = df_ann.index.year
+#                 df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
+#                 df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
     
-                fig, ax = plt.subplots(1, 1, figsize=(6, 2))
-                sns.boxplot(data=df_ann_long, x="year", y="vals", ax=ax, color="red", whis=(5, 95), showfliers=False)
-                ax.set_xlabel("Time [Year]")
-                ax.set_ylabel(_lab_unit_annual[var_sim])
-                ax.set_ylim(0, )
-                fig.tight_layout()
-                file = base_path_figs / f"boxplot_{var_sim}_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.png"
-                fig.savefig(file, dpi=300)
-                plt.close(fig)
+#                 fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+#                 sns.boxplot(data=df_ann_long, x="year", y="vals", ax=ax, color="red", whis=(5, 95), showfliers=False)
+#                 ax.set_xlabel("Time [Year]")
+#                 ax.set_ylabel(_lab_unit_annual[var_sim])
+#                 ax.set_ylim(0, )
+#                 fig.tight_layout()
+#                 file = base_path_figs / f"boxplot_{var_sim}_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.png"
+#                 fig.savefig(file, dpi=300)
+#                 plt.close(fig)
 
-vars_sim = ["M_q_ss"]
-for crop_rotation_scenario in crop_rotation_scenarios:
-    for location in locations:
-        for var_sim in vars_sim:
-            ll_df = []
-            for fertilization_intensity in fertilization_intensities:
-                ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-                sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
-                cond1 = (df_params["CLUST_flag"] == 1)
-                df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-                # calculate annual sum
-                df_ann = df.resample("YE").sum().iloc[:-1, :]
-                df_ann.loc[:, "year"] = df_ann.index.year
-                df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
-                df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
-                ll_df.append(df_ann_long)
+# vars_sim = ["M_q_ss"]
+# for crop_rotation_scenario in crop_rotation_scenarios:
+#     for location in locations:
+#         for var_sim in vars_sim:
+#             ll_df = []
+#             for fertilization_intensity in fertilization_intensities:
+#                 ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
+#                 cond1 = (df_params["CLUST_flag"] == 1)
+#                 df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#                 # calculate annual sum
+#                 df_ann = df.resample("YE").sum().iloc[:-1, :]
+#                 df_ann.loc[:, "year"] = df_ann.index.year
+#                 df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
+#                 df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
+#                 ll_df.append(df_ann_long)
 
-        df_ann_long = pd.concat(ll_df)
+#         df_ann_long = pd.concat(ll_df)
     
-        fig, ax = plt.subplots(1, 1, figsize=(6, 2))
-        sns.boxplot(data=df_ann_long, x="year", y="vals", hue="Nfert", ax=ax, whis=(5, 95), palette="RdPu", showfliers=False)
-        ax.set_xlabel("Time [Year]")
-        ax.set_ylabel(_lab_unit_annual[var_sim])
-        ax.set_ylim(0, )
-        plt.legend(title="N-Fertilization intensity", frameon=False)
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_{var_sim}_{location}_{crop_rotation_scenario}.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
+#         fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+#         sns.boxplot(data=df_ann_long, x="year", y="vals", hue="Nfert", ax=ax, whis=(5, 95), palette="RdPu", showfliers=False)
+#         ax.set_xlabel("Time [Year]")
+#         ax.set_ylabel(_lab_unit_annual[var_sim])
+#         ax.set_ylim(0, )
+#         plt.legend(title="N-Fertilization intensity", frameon=False)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_{var_sim}_{location}_{crop_rotation_scenario}.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
-# plot average annual sum for each location
-colors = sns.color_palette("RdPu_r", n_colors=len(fertilization_intensities))
-vars_sim = ["M_q_ss", "C_q_ss"]
-for var_sim in vars_sim:
-    for location in locations:
-        fig, axes = plt.subplots(3, 1, figsize=(6, 6), sharex=True, sharey=True)
-        for i, fertilization_intensity in enumerate(fertilization_intensities[::-1]):
-            ll_df = []
-            for crop_rotation_scenario in crop_rotation_scenarios:
-                if var_sim == "M_q_ss":
-                    ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-                    sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
-                    cond1 = (df_params["CLUST_flag"] == 1)
-                    df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-                    # calculate annual sum
-                    df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
-                    df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
-                    ll_df.append(df_ann_avg)
-                    ylim = (0, 80)
-                elif var_sim == "C_q_ss":
-                    ds = dict_fluxes_states[location][crop_rotation_scenario]
-                    sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
-                    ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-                    sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
-                    sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)
-                    cond1 = (df_params["CLUST_flag"] == 1)
-                    df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-                    # calculate annual mean
-                    df_avg = df.sum(axis=0).to_frame()
-                    df_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
-                    ll_df.append(df_avg)
-                    ylim = (0, 150)
-            df_ann_avg = pd.concat(ll_df)
-            df_ann_avg_long = df_ann_avg.melt(id_vars="crop_rotation", value_name="vals").loc[:, ["crop_rotation", "vals"]]        
-            if var_sim == "C_q_ss":
-                axes[i].axhline(y=50, color='r', linestyle='--', lw=2)            
-            sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", ax=axes[i], whis=(5, 95), showfliers=False, color=colors[i])
-            axes[i].set_xlabel("")
-            axes[i].set_ylabel(_lab_unit_annual[var_sim])
-            axes[i].set_ylim(ylim)
-        axes[-1].set_xlabel("Crop rotation")
-        plt.xticks(rotation=90)
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_annual_average_{var_sim}_{location}.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
+# # plot average annual sum for each location
+# colors = sns.color_palette("RdPu_r", n_colors=len(fertilization_intensities))
+# vars_sim = ["M_q_ss", "C_q_ss"]
+# for var_sim in vars_sim:
+#     for location in locations:
+#         fig, axes = plt.subplots(3, 1, figsize=(6, 6), sharex=True, sharey=True)
+#         for i, fertilization_intensity in enumerate(fertilization_intensities[::-1]):
+#             ll_df = []
+#             for crop_rotation_scenario in crop_rotation_scenarios:
+#                 if var_sim == "M_q_ss":
+#                     ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#                     sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
+#                     cond1 = (df_params["CLUST_flag"] == 1)
+#                     df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#                     # calculate annual sum
+#                     df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+#                     df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+#                     ll_df.append(df_ann_avg)
+#                     ylim = (0, 80)
+#                 elif var_sim == "C_q_ss":
+#                     ds = dict_fluxes_states[location][crop_rotation_scenario]
+#                     sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+#                     ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#                     sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+#                     sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)
+#                     cond1 = (df_params["CLUST_flag"] == 1)
+#                     df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#                     # calculate annual mean
+#                     df_avg = df.sum(axis=0).to_frame()
+#                     df_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+#                     ll_df.append(df_avg)
+#                     ylim = (0, 150)
+#             df_ann_avg = pd.concat(ll_df)
+#             df_ann_avg_long = df_ann_avg.melt(id_vars="crop_rotation", value_name="vals").loc[:, ["crop_rotation", "vals"]]        
+#             if var_sim == "C_q_ss":
+#                 axes[i].axhline(y=50, color='r', linestyle='--', lw=2)            
+#             sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", ax=axes[i], whis=(5, 95), showfliers=False, color=colors[i])
+#             axes[i].set_xlabel("")
+#             axes[i].set_ylabel(_lab_unit_annual[var_sim])
+#             axes[i].set_ylim(ylim)
+#         axes[-1].set_xlabel("Crop rotation")
+#         plt.xticks(rotation=90)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_annual_average_{var_sim}_{location}.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
-# plot average annual sum
-vars_sim = ["M_q_ss", "C_q_ss"]
-for var_sim in vars_sim:
-        ll_df = []
-        for location in locations:
-            for crop_rotation_scenario in crop_rotation_scenarios:
-                for fertilization_intensity in fertilization_intensities:
-                    if var_sim == "M_q_ss":
-                        ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-                        sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
-                        cond1 = (df_params["CLUST_flag"] == 1)
-                        df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-                        # calculate annual sum
-                        df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
-                        df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
-                        df_ann_avg.loc[:, "location"] = _dict_location[location]
-                        df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
-                        if location in ["freiburg", "lahr", "muellheim"]:
-                            df_ann_avg.loc[:, 'region'] = "Upper Rhine valley"
-                        elif location in ["stockach", "gottmadingen", "weingarten"]:
-                            df_ann_avg.loc[:, 'region'] = "Lake Constance"
-                        elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
-                            df_ann_avg.loc[:, 'region'] = "Kraichgau"
-                        elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
-                            df_ann_avg.loc[:, 'region'] = "Alb-Danube"
-                        elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
-                            df_ann_avg.loc[:, 'region'] = "Hohenlohe"
-                        ll_df.append(df_ann_avg)
-                        ylim = (0, )
-                    elif var_sim == "C_q_ss":
-                        ds = dict_fluxes_states[location][crop_rotation_scenario]
-                        sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
-                        ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-                        sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
-                        sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)
-                        cond1 = (df_params["CLUST_flag"] == 1)
-                        df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-                        # calculate annual mean
-                        df_avg = df.sum(axis=0).to_frame()
-                        df_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
-                        df_avg.loc[:, "location"] = _dict_location[location]
-                        df_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
-                        if location in ["freiburg", "lahr", "muellheim"]:
-                            df_avg.loc[:, 'region'] = "Upper Rhine valley"
-                        elif location in ["stockach", "gottmadingen", "weingarten"]:
-                            df_avg.loc[:, 'region'] = "Lake Constance"
-                        elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
-                            df_avg.loc[:, 'region'] = "Kraichgau"
-                        elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
-                            df_avg.loc[:, 'region'] = "Alb-Danube"
-                        elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
-                            df_avg.loc[:, 'region'] = "Hohenlohe"
-                        ll_df.append(df_avg)
-                        ylim = (0, )
-        df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
-        df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
-        sns.boxplot(data=df_ann_avg_long, x="location", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-        axes.legend().set_visible(False)
-        axes.set_xlabel("")
-        axes.set_ylabel(_lab_unit_annual[var_sim])
-        axes.set_ylim(0, )
-        axes.set_xlabel("Location")
-        plt.xticks(rotation=45)
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_annual_average_{var_sim}_locations.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
+# # plot average annual sum
+# vars_sim = ["M_q_ss", "C_q_ss"]
+# for var_sim in vars_sim:
+#         ll_df = []
+#         for location in locations:
+#             for crop_rotation_scenario in crop_rotation_scenarios:
+#                 for fertilization_intensity in fertilization_intensities:
+#                     if var_sim == "M_q_ss":
+#                         ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#                         sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
+#                         cond1 = (df_params["CLUST_flag"] == 1)
+#                         df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#                         # calculate annual sum
+#                         df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+#                         df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+#                         df_ann_avg.loc[:, "location"] = _dict_location[location]
+#                         df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+#                         if location in ["freiburg", "lahr", "muellheim"]:
+#                             df_ann_avg.loc[:, 'region'] = "Upper Rhine valley"
+#                         elif location in ["stockach", "gottmadingen", "weingarten"]:
+#                             df_ann_avg.loc[:, 'region'] = "Lake Constance"
+#                         elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+#                             df_ann_avg.loc[:, 'region'] = "Kraichgau"
+#                         elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+#                             df_ann_avg.loc[:, 'region'] = "Alb-Danube"
+#                         elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+#                             df_ann_avg.loc[:, 'region'] = "Hohenlohe"
+#                         ll_df.append(df_ann_avg)
+#                         ylim = (0, )
+#                     elif var_sim == "C_q_ss":
+#                         ds = dict_fluxes_states[location][crop_rotation_scenario]
+#                         sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+#                         ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#                         sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+#                         sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)
+#                         cond1 = (df_params["CLUST_flag"] == 1)
+#                         df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#                         # calculate annual mean
+#                         df_avg = df.sum(axis=0).to_frame()
+#                         df_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+#                         df_avg.loc[:, "location"] = _dict_location[location]
+#                         df_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+#                         if location in ["freiburg", "lahr", "muellheim"]:
+#                             df_avg.loc[:, 'region'] = "Upper Rhine valley"
+#                         elif location in ["stockach", "gottmadingen", "weingarten"]:
+#                             df_avg.loc[:, 'region'] = "Lake Constance"
+#                         elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+#                             df_avg.loc[:, 'region'] = "Kraichgau"
+#                         elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+#                             df_avg.loc[:, 'region'] = "Alb-Danube"
+#                         elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+#                             df_avg.loc[:, 'region'] = "Hohenlohe"
+#                         ll_df.append(df_avg)
+#                         ylim = (0, )
+#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
+#         df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
+#         fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+#         sns.boxplot(data=df_ann_avg_long, x="location", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+#         axes.legend().set_visible(False)
+#         axes.set_xlabel("")
+#         axes.set_ylabel(_lab_unit_annual[var_sim])
+#         axes.set_ylim(0, )
+#         axes.set_xlabel("Location")
+#         plt.xticks(rotation=45)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_annual_average_{var_sim}_locations.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
-        df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
-        df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
-        sns.boxplot(data=df_ann_avg_long, x="region", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-        axes.legend().set_visible(False)
-        axes.set_xlabel("")
-        axes.set_ylabel(_lab_unit_annual[var_sim])
-        axes.set_ylim(0, 80)
-        axes.set_xlabel("")
-        plt.xticks(rotation=33)
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_annual_average_{var_sim}_regions.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
+#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
+#         df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
+#         fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+#         sns.boxplot(data=df_ann_avg_long, x="region", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+#         axes.legend().set_visible(False)
+#         axes.set_xlabel("")
+#         axes.set_ylabel(_lab_unit_annual[var_sim])
+#         axes.set_ylim(0, )
+#         axes.set_xlabel("")
+#         plt.xticks(rotation=33)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_annual_average_{var_sim}_regions.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
-        df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
-        df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
-        sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-        axes.legend().set_visible(False)
-        axes.set_xlabel("")
-        axes.set_ylabel(_lab_unit_annual[var_sim])
-        axes.set_ylim(0, 120)
-        axes.set_xlabel("")
-        plt.xticks(rotation=33)
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_annual_average_{var_sim}_crop_rotations.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
+#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
+#         df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
+#         fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+#         sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+#         axes.legend().set_visible(False)
+#         axes.set_xlabel("")
+#         axes.set_ylabel(_lab_unit_annual[var_sim])
+#         axes.set_ylim(0, )
+#         axes.set_xlabel("")
+#         plt.xticks(rotation=33)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_annual_average_{var_sim}_crop_rotations.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
-# plot weighted average annual sum
-vars_sim = ["M_q_ss", "C_q_ss"]
-for var_sim in vars_sim:
-        ll_df = []
-        for location in locations:
-            for crop_rotation_scenario in crop_rotation_scenarios:
-                for fertilization_intensity in fertilization_intensities:
-                    if var_sim == "M_q_ss":
-                        ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-                        sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
-                        cond1 = (df_params["CLUST_flag"] == 1)
-                        df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-                        # calculate annual sum
-                        df_ann_avg1 = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
-                        cond = (df_areas["location"] == location)
-                        df_area_share = df_areas.loc[cond, :]
-                        data = df_params.loc[cond1, "CLUST_ID"].to_frame()
-                        data.loc[:, "area_share"] = 0.0
-                        for clust_id in clust_ids:
-                            cond1 = (df_area_share["clust_id"] == clust_id)
-                            if cond1.any():
-                                cond2 = (data["CLUST_ID"] == clust_id)
-                                data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
-                        data = repeat_by_areashare(df_ann_avg1.values, data["area_share"].values)
-                        df_ann_avg = pd.DataFrame(data=data)
-                        df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
-                        df_ann_avg.loc[:, "location"] = _dict_location[location]
-                        df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
-                        if location in ["freiburg", "lahr", "muellheim"]:
-                            df_ann_avg.loc[:, 'region'] = "Upper Rhine valley"
-                        elif location in ["stockach", "gottmadingen", "weingarten"]:
-                            df_ann_avg.loc[:, 'region'] = "Lake Constance"
-                        elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
-                            df_ann_avg.loc[:, 'region'] = "Kraichgau"
-                        elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
-                            df_ann_avg.loc[:, 'region'] = "Alb-Danube"
-                        elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
-                            df_ann_avg.loc[:, 'region'] = "Hohenlohe"
-                        ll_df.append(df_ann_avg)
-                        ylim = (0, 80)
-                    elif var_sim == "C_q_ss":
-                        ds = dict_fluxes_states[location][crop_rotation_scenario]
-                        sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
-                        ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-                        sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
-                        sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)
-                        cond1 = (df_params["CLUST_flag"] == 1)
-                        df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-                        # calculate annual mean
-                        df_avg1 = df.sum(axis=0).to_frame()
-                        cond = (df_areas["location"] == location)
-                        df_area_share = df_areas.loc[cond, :]
-                        data = df_params.loc[cond1, "CLUST_ID"].to_frame()
-                        data.loc[:, "area_share"] = 0.0
-                        for clust_id in clust_ids:
-                            cond1 = (df_area_share["clust_id"] == clust_id)
-                            if cond1.any():
-                                cond2 = (data["CLUST_ID"] == clust_id)
-                                data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
-                        data = repeat_by_areashare(df_avg1.values, data["area_share"].values)
-                        df_avg = pd.DataFrame(data=data)
-                        df_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
-                        df_avg.loc[:, "location"] = _dict_location[location]
-                        df_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
-                        if location in ["freiburg", "lahr", "muellheim"]:
-                            df_avg.loc[:, 'region'] = "Upper Rhine valley"
-                        elif location in ["stockach", "gottmadingen", "weingarten"]:
-                            df_avg.loc[:, 'region'] = "Lake Constance"
-                        elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
-                            df_avg.loc[:, 'region'] = "Kraichgau"
-                        elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
-                            df_avg.loc[:, 'region'] = "Alb-Danube"
-                        elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
-                            df_avg.loc[:, 'region'] = "Hohenlohe"
-                        ll_df.append(df_avg)
-                        ylim = (0, 120)
-        df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
-        df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
-        sns.boxplot(data=df_ann_avg_long, x="location", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-        axes.legend().set_visible(False)
-        axes.set_xlabel("")
-        axes.set_ylabel(_lab_unit_annual[var_sim])
-        axes.set_ylim(0, )
-        axes.set_xlabel("Location")
-        plt.xticks(rotation=45)
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_annual_average_{var_sim}_locations_weighted.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
+# # plot weighted average annual sum
+# vars_sim = ["M_q_ss", "C_q_ss"]
+# for var_sim in vars_sim:
+#         ll_df = []
+#         for location in locations:
+#             for crop_rotation_scenario in crop_rotation_scenarios:
+#                 for fertilization_intensity in fertilization_intensities:
+#                     if var_sim == "M_q_ss":
+#                         ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#                         sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
+#                         cond1 = (df_params["CLUST_flag"] == 1)
+#                         df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#                         # calculate annual sum
+#                         df_ann_avg1 = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+#                         cond = (df_areas["location"] == location)
+#                         df_area_share = df_areas.loc[cond, :]
+#                         data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+#                         data.loc[:, "area_share"] = 0.0
+#                         for clust_id in clust_ids:
+#                             cond1 = (df_area_share["clust_id"] == clust_id)
+#                             if cond1.any():
+#                                 cond2 = (data["CLUST_ID"] == clust_id)
+#                                 data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+#                         data = repeat_by_areashare(df_ann_avg1.values, data["area_share"].values)
+#                         df_ann_avg = pd.DataFrame(data=data)
+#                         df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+#                         df_ann_avg.loc[:, "location"] = _dict_location[location]
+#                         df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+#                         if location in ["freiburg", "lahr", "muellheim"]:
+#                             df_ann_avg.loc[:, 'region'] = "Upper Rhine valley"
+#                         elif location in ["stockach", "gottmadingen", "weingarten"]:
+#                             df_ann_avg.loc[:, 'region'] = "Lake Constance"
+#                         elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+#                             df_ann_avg.loc[:, 'region'] = "Kraichgau"
+#                         elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+#                             df_ann_avg.loc[:, 'region'] = "Alb-Danube"
+#                         elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+#                             df_ann_avg.loc[:, 'region'] = "Hohenlohe"
+#                         ll_df.append(df_ann_avg)
+#                         ylim = (0, 80)
+#                     elif var_sim == "C_q_ss":
+#                         ds = dict_fluxes_states[location][crop_rotation_scenario]
+#                         sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+#                         ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#                         sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+#                         sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)
+#                         cond1 = (df_params["CLUST_flag"] == 1)
+#                         df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#                         # calculate annual mean
+#                         df_avg1 = df.sum(axis=0).to_frame()
+#                         cond = (df_areas["location"] == location)
+#                         df_area_share = df_areas.loc[cond, :]
+#                         data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+#                         data.loc[:, "area_share"] = 0.0
+#                         for clust_id in clust_ids:
+#                             cond1 = (df_area_share["clust_id"] == clust_id)
+#                             if cond1.any():
+#                                 cond2 = (data["CLUST_ID"] == clust_id)
+#                                 data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+#                         data = repeat_by_areashare(df_avg1.values, data["area_share"].values)
+#                         df_avg = pd.DataFrame(data=data)
+#                         df_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+#                         df_avg.loc[:, "location"] = _dict_location[location]
+#                         df_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+#                         if location in ["freiburg", "lahr", "muellheim"]:
+#                             df_avg.loc[:, 'region'] = "Upper Rhine valley"
+#                         elif location in ["stockach", "gottmadingen", "weingarten"]:
+#                             df_avg.loc[:, 'region'] = "Lake Constance"
+#                         elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+#                             df_avg.loc[:, 'region'] = "Kraichgau"
+#                         elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+#                             df_avg.loc[:, 'region'] = "Alb-Danube"
+#                         elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+#                             df_avg.loc[:, 'region'] = "Hohenlohe"
+#                         ll_df.append(df_avg)
+#                         ylim = (0, 120)
+#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
+#         df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
+#         fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+#         sns.boxplot(data=df_ann_avg_long, x="location", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+#         axes.legend().set_visible(False)
+#         axes.set_xlabel("")
+#         axes.set_ylabel(_lab_unit_annual[var_sim])
+#         axes.set_ylim(0, )
+#         axes.set_xlabel("Location")
+#         plt.xticks(rotation=45)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_annual_average_{var_sim}_locations_weighted.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
-        df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
-        df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
-        sns.boxplot(data=df_ann_avg_long, x="region", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-        axes.legend().set_visible(False)
-        axes.set_xlabel("")
-        axes.set_ylabel(_lab_unit_annual[var_sim])
-        axes.set_ylim(ylim)
-        axes.set_xlabel("")
-        plt.xticks(rotation=33)
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_annual_average_{var_sim}_regions_weighted.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
+#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
+#         df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
+#         fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+#         sns.boxplot(data=df_ann_avg_long, x="region", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+#         axes.legend().set_visible(False)
+#         axes.set_xlabel("")
+#         axes.set_ylabel(_lab_unit_annual[var_sim])
+#         axes.set_ylim(ylim)
+#         axes.set_xlabel("")
+#         plt.xticks(rotation=33)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_annual_average_{var_sim}_regions_weighted.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
-        df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
-        df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
-        sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-        axes.legend().set_visible(False)
-        axes.set_xlabel("")
-        axes.set_ylabel(_lab_unit_annual[var_sim])
-        axes.set_ylim(0, )
-        axes.set_xlabel("")
-        plt.xticks(rotation=33)
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_annual_average_{var_sim}_crop_rotations_weighted.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
-
-
-# plot average annual sum
-vars_sim = ["q_ss", "q_hof"]
-for var_sim in vars_sim:
-        ll_df = []
-        for location in locations:
-            for crop_rotation_scenario in crop_rotation_scenarios:
-                ds = dict_fluxes_states[location][crop_rotation_scenario]
-                sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
-                cond1 = (df_params["CLUST_flag"] == 1)
-                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-                # calculate annual sum
-                df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
-                df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
-                df_ann_avg.loc[:, "location"] = _dict_location[location]
-                df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
-                if location in ["freiburg", "lahr", "muellheim"]:
-                    df_ann_avg.loc[:, 'region'] = "Upper Rhine valley"
-                elif location in ["stockach", "gottmadingen", "weingarten"]:
-                    df_ann_avg.loc[:, 'region'] = "Lake Constance"
-                elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
-                    df_ann_avg.loc[:, 'region'] = "Kraichgau"
-                elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
-                    df_ann_avg.loc[:, 'region'] = "Alb-Danube"
-                elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
-                    df_ann_avg.loc[:, 'region'] = "Hohenlohe"
-                ll_df.append(df_ann_avg)
-                ylim = (0, )
-        df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
-        df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
-        sns.boxplot(data=df_ann_avg_long, x="location", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-        axes.legend().set_visible(False)
-        axes.set_xlabel("")
-        axes.set_ylabel(_lab_unit_annual[var_sim])
-        axes.set_ylim(0, )
-        axes.set_xlabel("Location")
-        plt.xticks(rotation=45)
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_annual_average_{var_sim}_locations.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
-
-        df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
-        df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
-        sns.boxplot(data=df_ann_avg_long, x="region", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-        axes.legend().set_visible(False)
-        axes.set_xlabel("")
-        axes.set_ylabel(_lab_unit_annual[var_sim])
-        axes.set_ylim(0, )
-        axes.set_xlabel("")
-        plt.xticks(rotation=33)
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_annual_average_{var_sim}_regions.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
-
-        df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
-        df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
-        sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-        axes.legend().set_visible(False)
-        axes.set_xlabel("")
-        axes.set_ylabel(_lab_unit_annual[var_sim])
-        axes.set_ylim(0, )
-        axes.set_xlabel("")
-        plt.xticks(rotation=33)
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_annual_average_{var_sim}_crop_rotations.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
+#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
+#         df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
+#         fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+#         sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+#         axes.legend().set_visible(False)
+#         axes.set_xlabel("")
+#         axes.set_ylabel(_lab_unit_annual[var_sim])
+#         axes.set_ylim(0, )
+#         axes.set_xlabel("")
+#         plt.xticks(rotation=33)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_annual_average_{var_sim}_crop_rotations_weighted.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
 
-# plot weighted average annual sum
-vars_sim = ["q_ss", "q_hof"]
-for var_sim in vars_sim:
-        ll_df = []
-        for location in locations:
-            for crop_rotation_scenario in crop_rotation_scenarios:
-                ds = dict_fluxes_states[location][crop_rotation_scenario]
-                sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
-                cond1 = (df_params["CLUST_flag"] == 1)
-                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-                # calculate annual sum
-                df_ann_avg1 = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
-                cond = (df_areas["location"] == location)
-                df_area_share = df_areas.loc[cond, :]
-                data = df_params.loc[cond1, "CLUST_ID"].to_frame()
-                data.loc[:, "area_share"] = 0.0
-                for clust_id in clust_ids:
-                    cond1 = (df_area_share["clust_id"] == clust_id)
-                    if cond1.any():
-                        cond2 = (data["CLUST_ID"] == clust_id)
-                        data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
-                data = repeat_by_areashare(df_ann_avg1.values, data["area_share"].values)
-                df_ann_avg = pd.DataFrame(data=data)
-                df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
-                df_ann_avg.loc[:, "location"] = _dict_location[location]
-                df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
-                if location in ["freiburg", "lahr", "muellheim"]:
-                    df_ann_avg.loc[:, 'region'] = "Upper Rhine valley"
-                elif location in ["stockach", "gottmadingen", "weingarten"]:
-                    df_ann_avg.loc[:, 'region'] = "Lake Constance"
-                elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
-                    df_ann_avg.loc[:, 'region'] = "Kraichgau"
-                elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
-                    df_ann_avg.loc[:, 'region'] = "Alb-Danube"
-                elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
-                    df_ann_avg.loc[:, 'region'] = "Hohenlohe"
-                ll_df.append(df_ann_avg)
-                ylim = (0, )
-        df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
-        df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
-        sns.boxplot(data=df_ann_avg_long, x="location", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-        axes.legend().set_visible(False)
-        axes.set_xlabel("")
-        axes.set_ylabel(_lab_unit_annual[var_sim])
-        axes.set_ylim(0, )
-        axes.set_xlabel("Location")
-        plt.xticks(rotation=45)
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_annual_average_{var_sim}_locations_weighted.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
+# # plot average annual sum
+# vars_sim = ["q_ss", "q_hof"]
+# for var_sim in vars_sim:
+#         ll_df = []
+#         for location in locations:
+#             for crop_rotation_scenario in crop_rotation_scenarios:
+#                 ds = dict_fluxes_states[location][crop_rotation_scenario]
+#                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
+#                 cond1 = (df_params["CLUST_flag"] == 1)
+#                 df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+#                 # calculate annual sum
+#                 df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+#                 df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+#                 df_ann_avg.loc[:, "location"] = _dict_location[location]
+#                 df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+#                 if location in ["freiburg", "lahr", "muellheim"]:
+#                     df_ann_avg.loc[:, 'region'] = "Upper Rhine valley"
+#                 elif location in ["stockach", "gottmadingen", "weingarten"]:
+#                     df_ann_avg.loc[:, 'region'] = "Lake Constance"
+#                 elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+#                     df_ann_avg.loc[:, 'region'] = "Kraichgau"
+#                 elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+#                     df_ann_avg.loc[:, 'region'] = "Alb-Danube"
+#                 elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+#                     df_ann_avg.loc[:, 'region'] = "Hohenlohe"
+#                 ll_df.append(df_ann_avg)
+#                 ylim = (0, )
+#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
+#         df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
+#         fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+#         sns.boxplot(data=df_ann_avg_long, x="location", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+#         axes.legend().set_visible(False)
+#         axes.set_xlabel("")
+#         axes.set_ylabel(_lab_unit_annual[var_sim])
+#         axes.set_ylim(0, )
+#         axes.set_xlabel("Location")
+#         plt.xticks(rotation=45)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_annual_average_{var_sim}_locations.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
-        df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
-        df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
-        sns.boxplot(data=df_ann_avg_long, x="region", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-        axes.legend().set_visible(False)
-        axes.set_xlabel("")
-        axes.set_ylabel(_lab_unit_annual[var_sim])
-        axes.set_ylim(0, )
-        axes.set_xlabel("")
-        plt.xticks(rotation=33)
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_annual_average_{var_sim}_regions_weighted.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
+#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
+#         df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
+#         fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+#         sns.boxplot(data=df_ann_avg_long, x="region", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+#         axes.legend().set_visible(False)
+#         axes.set_xlabel("")
+#         axes.set_ylabel(_lab_unit_annual[var_sim])
+#         axes.set_ylim(0, )
+#         axes.set_xlabel("")
+#         plt.xticks(rotation=33)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_annual_average_{var_sim}_regions.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
-        df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
-        df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
-        sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-        axes.legend().set_visible(False)
-        axes.set_xlabel("")
-        axes.set_ylabel(_lab_unit_annual[var_sim])
-        axes.set_ylim(0, )
-        axes.set_xlabel("")
-        plt.xticks(rotation=33)
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_annual_average_{var_sim}_crop_rotations_weighted.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
+#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
+#         df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
+#         fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+#         sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+#         axes.legend().set_visible(False)
+#         axes.set_xlabel("")
+#         axes.set_ylabel(_lab_unit_annual[var_sim])
+#         axes.set_ylim(0, )
+#         axes.set_xlabel("")
+#         plt.xticks(rotation=33)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_annual_average_{var_sim}_crop_rotations.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
 
-# plot nitrogen efficiency
-ll_df = []
-for location in locations:
-    for crop_rotation_scenario in crop_rotation_scenarios:
-        for fertilization_intensity in fertilization_intensities:
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            sim_vals1 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
-            sim_vals2 = ds["Nfert"].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
-            cond1 = (df_params["CLUST_flag"] == 1)
-            df1 = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals1.T).loc[:, cond1]
-            df2 = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals2.T).loc[:, cond1]
-            # calculate annual sum
-            df1_ann_avg = df1.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
-            df2_ann_avg = df2.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
-            df_ann_avg = (df1_ann_avg / df2_ann_avg) * 100
-            df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
-            df_ann_avg.loc[:, "location"] = _dict_location[location]
-            df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
-            if location in ["freiburg", "lahr", "muellheim"]:
-                df_ann_avg.loc[:, 'region'] = "Upper Rhine valley"
-            elif location in ["stockach", "gottmadingen", "weingarten"]:
-                df_ann_avg.loc[:, 'region'] = "Lake Constance"
-            elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
-                df_ann_avg.loc[:, 'region'] = "Kraichgau"
-            elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
-                df_ann_avg.loc[:, 'region'] = "Alb-Danube"
-            elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
-                df_ann_avg.loc[:, 'region'] = "Hohenlohe"
-            ll_df.append(df_ann_avg)
-            ylim = (0, )
-df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
-df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
-fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
-sns.boxplot(data=df_ann_avg_long, x="location", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-axes.legend().set_visible(False)
-axes.set_xlabel("")
-axes.set_ylabel("PERC-$NO_3$/$N_{fert}$ [%]")
-axes.set_ylim(0, 50)
-axes.set_xlabel("Location")
-plt.xticks(rotation=45)
-fig.tight_layout()
-file = base_path_figs / "boxplot_annual_average_nitrogen_efficiency_locations.png"
-fig.savefig(file, dpi=300)
-plt.close(fig)
+# # plot weighted average annual sum
+# vars_sim = ["q_ss", "q_hof"]
+# for var_sim in vars_sim:
+#         ll_df = []
+#         for location in locations:
+#             for crop_rotation_scenario in crop_rotation_scenarios:
+#                 ds = dict_fluxes_states[location][crop_rotation_scenario]
+#                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
+#                 cond1 = (df_params["CLUST_flag"] == 1)
+#                 df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+#                 # calculate annual sum
+#                 df_ann_avg1 = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+#                 cond = (df_areas["location"] == location)
+#                 df_area_share = df_areas.loc[cond, :]
+#                 data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+#                 data.loc[:, "area_share"] = 0.0
+#                 for clust_id in clust_ids:
+#                     cond1 = (df_area_share["clust_id"] == clust_id)
+#                     if cond1.any():
+#                         cond2 = (data["CLUST_ID"] == clust_id)
+#                         data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+#                 data = repeat_by_areashare(df_ann_avg1.values, data["area_share"].values)
+#                 df_ann_avg = pd.DataFrame(data=data)
+#                 df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+#                 df_ann_avg.loc[:, "location"] = _dict_location[location]
+#                 df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+#                 if location in ["freiburg", "lahr", "muellheim"]:
+#                     df_ann_avg.loc[:, 'region'] = "Upper Rhine valley"
+#                 elif location in ["stockach", "gottmadingen", "weingarten"]:
+#                     df_ann_avg.loc[:, 'region'] = "Lake Constance"
+#                 elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+#                     df_ann_avg.loc[:, 'region'] = "Kraichgau"
+#                 elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+#                     df_ann_avg.loc[:, 'region'] = "Alb-Danube"
+#                 elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+#                     df_ann_avg.loc[:, 'region'] = "Hohenlohe"
+#                 ll_df.append(df_ann_avg)
+#                 ylim = (0, )
+#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
+#         df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
+#         fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+#         sns.boxplot(data=df_ann_avg_long, x="location", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+#         axes.legend().set_visible(False)
+#         axes.set_xlabel("")
+#         axes.set_ylabel(_lab_unit_annual[var_sim])
+#         axes.set_ylim(0, )
+#         axes.set_xlabel("Location")
+#         plt.xticks(rotation=45)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_annual_average_{var_sim}_locations_weighted.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
-df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
-df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
-fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
-sns.boxplot(data=df_ann_avg_long, x="region", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-axes.legend().set_visible(False)
-axes.set_xlabel("")
-axes.set_ylabel("PERC-$NO_3$/$N_{fert}$ [%]")
-axes.set_ylim(0, 50)
-axes.set_xlabel("")
-plt.xticks(rotation=33)
-fig.tight_layout()
-file = base_path_figs / "boxplot_annual_average_nitrogen_efficiency_regions.png"
-fig.savefig(file, dpi=300)
-plt.close(fig)
+#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
+#         df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
+#         fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+#         sns.boxplot(data=df_ann_avg_long, x="region", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+#         axes.legend().set_visible(False)
+#         axes.set_xlabel("")
+#         axes.set_ylabel(_lab_unit_annual[var_sim])
+#         axes.set_ylim(0, )
+#         axes.set_xlabel("")
+#         plt.xticks(rotation=33)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_annual_average_{var_sim}_regions_weighted.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
-df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
-df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
-fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
-sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-axes.legend().set_visible(False)
-axes.set_xlabel("")
-axes.set_ylabel("PERC-$NO_3$/$N_{fert}$ [%]")
-axes.set_ylim(0, )
-axes.set_xlabel("")
-plt.xticks(rotation=33)
-fig.tight_layout()
-file = base_path_figs / "boxplot_annual_average_nitrogen_efficiency_crop_rotations.png"
-fig.savefig(file, dpi=300)
-plt.close(fig)
+#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
+#         df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
+#         fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+#         sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+#         axes.legend().set_visible(False)
+#         axes.set_xlabel("")
+#         axes.set_ylabel(_lab_unit_annual[var_sim])
+#         axes.set_ylim(0, )
+#         axes.set_xlabel("")
+#         plt.xticks(rotation=33)
+#         fig.tight_layout()
+#         file = base_path_figs / f"boxplot_annual_average_{var_sim}_crop_rotations_weighted.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
 
 
-# plot weighted nitrogen efficiency
-ll_df = []
-for location in locations:
-    for crop_rotation_scenario in crop_rotation_scenarios:
-        for fertilization_intensity in fertilization_intensities:
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            sim_vals1 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
-            sim_vals2 = ds["Nfert"].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
-            cond1 = (df_params["CLUST_flag"] == 1)
-            df1 = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals1.T).loc[:, cond1]
-            df2 = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals2.T).loc[:, cond1]
-            # calculate annual sum
-            df1_ann_avg = df1.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
-            df2_ann_avg = df2.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
-            df1_ann_avg = df1.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
-            cond = (df_areas["location"] == location)
-            df_area_share = df_areas.loc[cond, :]
-            cond1 = (df_params["CLUST_flag"] == 1)
-            data = df_params.loc[cond1, "CLUST_ID"].to_frame()
-            data.loc[:, "area_share"] = 0.0
-            for clust_id in clust_ids:
-                cond1 = (df_area_share["clust_id"] == clust_id)
-                if cond1.any():
-                    cond2 = (data["CLUST_ID"] == clust_id)
-                    data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
-            data1 = repeat_by_areashare(df1_ann_avg.values, data["area_share"].values)
-            df2_ann_avg = df2.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
-            cond = (df_areas["location"] == location)
-            df_area_share = df_areas.loc[cond, :]
-            cond1 = (df_params["CLUST_flag"] == 1)
-            data = df_params.loc[cond1, "CLUST_ID"].to_frame()
-            data.loc[:, "area_share"] = 0.0
-            for clust_id in clust_ids:
-                cond1 = (df_area_share["clust_id"] == clust_id)
-                if cond1.any():
-                    cond2 = (data["CLUST_ID"] == clust_id)
-                    data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
-            data2 = repeat_by_areashare(df2_ann_avg.values, data["area_share"].values)
-            df_ann_avg = pd.DataFrame(data=(data1 / data2) * 100)
-            df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
-            df_ann_avg.loc[:, "location"] = _dict_location[location]
-            df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
-            if location in ["freiburg", "lahr", "muellheim"]:
-                df_ann_avg.loc[:, 'region'] = "Upper Rhine valley"
-            elif location in ["stockach", "gottmadingen", "weingarten"]:
-                df_ann_avg.loc[:, 'region'] = "Lake Constance"
-            elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
-                df_ann_avg.loc[:, 'region'] = "Kraichgau"
-            elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
-                df_ann_avg.loc[:, 'region'] = "Alb-Danube"
-            elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
-                df_ann_avg.loc[:, 'region'] = "Hohenlohe"
-            ll_df.append(df_ann_avg)
-            ylim = (0, )
-df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
-df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
-fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
-sns.boxplot(data=df_ann_avg_long, x="location", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-axes.legend().set_visible(False)
-axes.set_xlabel("")
-axes.set_ylabel("PERC-$NO_3$/$N_{fert}$ [%]")
-axes.set_ylim(0, 50)
-axes.set_xlabel("Location")
-plt.xticks(rotation=45)
-fig.tight_layout()
-file = base_path_figs / "boxplot_annual_average_nitrogen_efficiency_locations_weighted.png"
-fig.savefig(file, dpi=300)
-plt.close(fig)
+# # plot nitrogen efficiency
+# ll_df = []
+# for location in locations:
+#     for crop_rotation_scenario in crop_rotation_scenarios:
+#         for fertilization_intensity in fertilization_intensities:
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             sim_vals1 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
+#             sim_vals2 = ds["Nfert"].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
+#             cond1 = (df_params["CLUST_flag"] == 1)
+#             df1 = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals1.T).loc[:, cond1]
+#             df2 = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals2.T).loc[:, cond1]
+#             # calculate annual sum
+#             df1_ann_avg = df1.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+#             df2_ann_avg = df2.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+#             df_ann_avg = (df1_ann_avg / df2_ann_avg) * 100
+#             df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+#             df_ann_avg.loc[:, "location"] = _dict_location[location]
+#             df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+#             if location in ["freiburg", "lahr", "muellheim"]:
+#                 df_ann_avg.loc[:, 'region'] = "Upper Rhine valley"
+#             elif location in ["stockach", "gottmadingen", "weingarten"]:
+#                 df_ann_avg.loc[:, 'region'] = "Lake Constance"
+#             elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+#                 df_ann_avg.loc[:, 'region'] = "Kraichgau"
+#             elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+#                 df_ann_avg.loc[:, 'region'] = "Alb-Danube"
+#             elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+#                 df_ann_avg.loc[:, 'region'] = "Hohenlohe"
+#             ll_df.append(df_ann_avg)
+#             ylim = (0, )
+# df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
+# df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
+# fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+# sns.boxplot(data=df_ann_avg_long, x="location", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+# axes.legend().set_visible(False)
+# axes.set_xlabel("")
+# axes.set_ylabel("PERC-$NO_3$/$N_{fert}$ [%]")
+# axes.set_ylim(0, 50)
+# axes.set_xlabel("Location")
+# plt.xticks(rotation=45)
+# fig.tight_layout()
+# file = base_path_figs / "boxplot_annual_average_nitrogen_efficiency_locations.png"
+# fig.savefig(file, dpi=300)
+# plt.close(fig)
 
-df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
-df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
-fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
-sns.boxplot(data=df_ann_avg_long, x="region", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-axes.legend().set_visible(False)
-axes.set_xlabel("")
-axes.set_ylabel("PERC-$NO_3$/$N_{fert}$ [%]")
-axes.set_ylim(0, 50)
-axes.set_xlabel("")
-plt.xticks(rotation=33)
-fig.tight_layout()
-file = base_path_figs / "boxplot_annual_average_nitrogen_efficiency_regions_weighted.png"
-fig.savefig(file, dpi=300)
-plt.close(fig)
+# df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
+# df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
+# fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+# sns.boxplot(data=df_ann_avg_long, x="region", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+# axes.legend().set_visible(False)
+# axes.set_xlabel("")
+# axes.set_ylabel("PERC-$NO_3$/$N_{fert}$ [%]")
+# axes.set_ylim(0, 50)
+# axes.set_xlabel("")
+# plt.xticks(rotation=33)
+# fig.tight_layout()
+# file = base_path_figs / "boxplot_annual_average_nitrogen_efficiency_regions.png"
+# fig.savefig(file, dpi=300)
+# plt.close(fig)
 
-df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
-df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
-fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
-sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
-axes.legend().set_visible(False)
-axes.set_xlabel("")
-axes.set_ylabel("PERC-$NO_3$/$N_{fert}$ [%]")
-axes.set_ylim(0, )
-axes.set_xlabel("")
-plt.xticks(rotation=33)
-fig.tight_layout()
-file = base_path_figs / "boxplot_annual_average_nitrogen_efficiency_crop_rotations_weighted.png"
-fig.savefig(file, dpi=300)
-plt.close(fig)
+# df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
+# df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
+# fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+# sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+# axes.legend().set_visible(False)
+# axes.set_xlabel("")
+# axes.set_ylabel("PERC-$NO_3$/$N_{fert}$ [%]")
+# axes.set_ylim(0, )
+# axes.set_xlabel("")
+# plt.xticks(rotation=33)
+# fig.tight_layout()
+# file = base_path_figs / "boxplot_annual_average_nitrogen_efficiency_crop_rotations.png"
+# fig.savefig(file, dpi=300)
+# plt.close(fig)
 
+
+# # plot weighted nitrogen efficiency
+# ll_df = []
+# for location in locations:
+#     for crop_rotation_scenario in crop_rotation_scenarios:
+#         for fertilization_intensity in fertilization_intensities:
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             sim_vals1 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
+#             sim_vals2 = ds["Nfert"].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
+#             cond1 = (df_params["CLUST_flag"] == 1)
+#             df1 = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals1.T).loc[:, cond1]
+#             df2 = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals2.T).loc[:, cond1]
+#             # calculate annual sum
+#             df1_ann_avg = df1.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+#             df2_ann_avg = df2.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+#             df1_ann_avg = df1.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+#             cond = (df_areas["location"] == location)
+#             df_area_share = df_areas.loc[cond, :]
+#             cond1 = (df_params["CLUST_flag"] == 1)
+#             data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+#             data.loc[:, "area_share"] = 0.0
+#             for clust_id in clust_ids:
+#                 cond1 = (df_area_share["clust_id"] == clust_id)
+#                 if cond1.any():
+#                     cond2 = (data["CLUST_ID"] == clust_id)
+#                     data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+#             data1 = repeat_by_areashare(df1_ann_avg.values, data["area_share"].values)
+#             df2_ann_avg = df2.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+#             cond = (df_areas["location"] == location)
+#             df_area_share = df_areas.loc[cond, :]
+#             cond1 = (df_params["CLUST_flag"] == 1)
+#             data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+#             data.loc[:, "area_share"] = 0.0
+#             for clust_id in clust_ids:
+#                 cond1 = (df_area_share["clust_id"] == clust_id)
+#                 if cond1.any():
+#                     cond2 = (data["CLUST_ID"] == clust_id)
+#                     data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+#             data2 = repeat_by_areashare(df2_ann_avg.values, data["area_share"].values)
+#             df_ann_avg = pd.DataFrame(data=(data1 / data2) * 100)
+#             df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+#             df_ann_avg.loc[:, "location"] = _dict_location[location]
+#             df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+#             if location in ["freiburg", "lahr", "muellheim"]:
+#                 df_ann_avg.loc[:, 'region'] = "Upper Rhine valley"
+#             elif location in ["stockach", "gottmadingen", "weingarten"]:
+#                 df_ann_avg.loc[:, 'region'] = "Lake Constance"
+#             elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+#                 df_ann_avg.loc[:, 'region'] = "Kraichgau"
+#             elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+#                 df_ann_avg.loc[:, 'region'] = "Alb-Danube"
+#             elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+#                 df_ann_avg.loc[:, 'region'] = "Hohenlohe"
+#             ll_df.append(df_ann_avg)
+#             ylim = (0, )
+# df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
+# df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
+# fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+# sns.boxplot(data=df_ann_avg_long, x="location", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+# axes.legend().set_visible(False)
+# axes.set_xlabel("")
+# axes.set_ylabel("PERC-$NO_3$/$N_{fert}$ [%]")
+# axes.set_ylim(0, 50)
+# axes.set_xlabel("Location")
+# plt.xticks(rotation=45)
+# fig.tight_layout()
+# file = base_path_figs / "boxplot_annual_average_nitrogen_efficiency_locations_weighted.png"
+# fig.savefig(file, dpi=300)
+# plt.close(fig)
+
+# df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
+# df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
+# fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+# sns.boxplot(data=df_ann_avg_long, x="region", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+# axes.legend().set_visible(False)
+# axes.set_xlabel("")
+# axes.set_ylabel("PERC-$NO_3$/$N_{fert}$ [%]")
+# axes.set_ylim(0, 50)
+# axes.set_xlabel("")
+# plt.xticks(rotation=33)
+# fig.tight_layout()
+# file = base_path_figs / "boxplot_annual_average_nitrogen_efficiency_regions_weighted.png"
+# fig.savefig(file, dpi=300)
+# plt.close(fig)
+
+# df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
+# df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
+# fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+# sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", hue="fertilization_intensity", ax=axes, whis=(5, 95), showfliers=False, palette="PuRd")
+# axes.legend().set_visible(False)
+# axes.set_xlabel("")
+# axes.set_ylabel("PERC-$NO_3$/$N_{fert}$ [%]")
+# axes.set_ylim(0, )
+# axes.set_xlabel("")
+# plt.xticks(rotation=33)
+# fig.tight_layout()
+# file = base_path_figs / "boxplot_annual_average_nitrogen_efficiency_crop_rotations_weighted.png"
+# fig.savefig(file, dpi=300)
+# plt.close(fig)
 
 
 # plot average annual sum considering crop rotations with and without mustard
@@ -1532,7 +1529,7 @@ for var_sim in vars_sim:
                         ylim = (0, 70)
                     elif var_sim == "C_q_ss":
                         ds = dict_fluxes_states[location][crop_rotation_scenario]
-                        sim_vals1 = ds["q_ss"].isel(y=0).values
+                        sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
                         ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
                         sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
                         sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)

@@ -129,7 +129,7 @@ def main():
                 output_path_ws = base_path_ws / "output" / "svat_crop_nitrate"
                 lines = []
                 lines.append("#!/bin/bash\n")
-                lines.append("#SBATCH --time=32:00:00\n")
+                lines.append("#SBATCH --time=72:00:00\n")
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=1\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")
@@ -162,7 +162,7 @@ def main():
                 lines.append('echo "Copying was successful"\n')
                 lines.append(" \n")
                 lines.append(
-                    'python svat_crop_nitrate.py -b jax -d cpu --float-type float64 --location %s --crop-rotation-scenario %s --fertilization-intensity %s -td "${TMPDIR}"\n'
+                    'python svat_crop_nitrate.py -d cpu --float-type float64 --location %s --crop-rotation-scenario %s --fertilization-intensity %s -td "${TMPDIR}"\n'
                     % (location, crop_rotation_scenario, fertilization_intensity)
                 )
                 lines.append("# Move output from local SSD to global workspace\n")
