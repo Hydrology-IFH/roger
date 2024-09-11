@@ -159,7 +159,7 @@ class SVATCROPSetup(RogerSetup):
         vs.ks = update(vs.ks, at[2:-2, 2:-2], 5)
         vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
-        vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], 564)
+        vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], 599)
         vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], 539)
         vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], 564)
 
@@ -197,9 +197,20 @@ class SVATCROPSetup(RogerSetup):
     def set_boundary_conditions(self, state):
         pass
 
-    @roger_routine
+    @roger_routine(
+        dist_safe=False,
+        local_variables=[
+            "PREC",
+            "TA",
+            "PET",
+        ],
+    )
     def set_forcing_setup(self, state):
-        pass
+        vs = state.variables
+
+        vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, "forcing.nc")[0, 0, :])
+        vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, "forcing.nc")[0, 0, :])
+        vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[0, 0, :])
 
     @roger_routine(
         dist_safe=False,
@@ -221,15 +232,30 @@ class SVATCROPSetup(RogerSetup):
     def set_forcing(self, state):
         vs = state.variables
 
-        condt = (vs.time % (24 * 60 * 60) == 0)
+        condt = vs.time % (24 * 60 * 60) == 0
         if condt:
             vs.itt_day = 0
-            vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, 'forcing.nc')[vs.itt_forc])
-            vs.month = update(vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, 'forcing.nc')[vs.itt_forc])
-            vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, 'forcing.nc')[vs.itt_forc])
-            vs.prec_day = update(vs.prec_day, at[2:-2, 2:-2, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
-            vs.ta_day = update(vs.ta_day, at[2:-2, 2:-2, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
-            vs.pet_day = update(vs.pet_day, at[2:-2, 2:-2, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc')[:, :, vs.itt_forc:vs.itt_forc+6*24])
+            vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, "forcing.nc")[vs.itt_forc])
+            vs.month = update(
+                vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, "forcing.nc")[vs.itt_forc]
+            )
+            vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")[vs.itt_forc])
+            vs.prec_day = update(
+                vs.prec_day,
+                at[:, :, :],
+                vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                * vs.prec_weight[:, :, npx.newaxis],
+            )
+            vs.ta_day = update(
+                vs.ta_day,
+                at[:, :, :],
+                vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] + vs.ta_offset[:, :, npx.newaxis],
+            )
+            vs.pet_day = update(
+                vs.pet_day,
+                at[:, :, :],
+                vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.pet_weight[:, :, npx.newaxis],
+            )
             vs.itt_forc = vs.itt_forc + 6 * 24
 
         if (vs.year[1] != vs.year[0]) & (vs.itt > 1):

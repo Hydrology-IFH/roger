@@ -139,11 +139,6 @@ class ONEDSetup(RogerSetup):
             self._read_var_from_csv("slope", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
         )
         vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
-        vs.z_soil = update(
-            vs.z_soil,
-            at[2:-2, 2:-2],
-            self._read_var_from_csv("z_soil", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
-        )
         vs.dmph = update(
             vs.dmph,
             at[2:-2, 2:-2],
