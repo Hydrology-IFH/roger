@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=72:00:00
+#SBATCH --time=32:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
@@ -28,7 +28,7 @@ checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVATCROP_stockach_sugar-beet_winter-whe
 done
 echo "Copying was successful"
  
-python svat_crop_nitrate.py -d cpu --float-type float64 --location stockach --crop-rotation-scenario sugar-beet_winter-wheat_winter-barley_yellow-mustard --fertilization-intensity medium -td "${TMPDIR}"
+python svat_crop_nitrate.py -b jax -d cpu --float-type float64 --location stockach --crop-rotation-scenario sugar-beet_winter-wheat_winter-barley_yellow-mustard --fertilization-intensity medium -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/output/svat_crop_nitrate"
 mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/output/svat_crop_nitrate

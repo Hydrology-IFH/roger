@@ -161,11 +161,6 @@ def calc_root_zone_transport_iso_kernel(state):
         vs.sa_rz,
         at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] < 1e-8, 0, vs.sa_rz[2:-2, 2:-2, vs.tau, :]),
     )
-    vs.msa_rz = update(
-        vs.msa_rz,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]),
-    )
-
     vs.csa_rz = update(
         vs.csa_rz,
         at[2:-2, 2:-2, vs.tau, :], transport.conc_to_delta(state, vs.msa_rz[2:-2, 2:-2, vs.tau, :]),
@@ -203,6 +198,11 @@ def calc_root_zone_transport_anion_kernel(state):
         at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_rz, vs.sa_rz)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
     )
 
+    vs.msa_rz = update(
+        vs.msa_rz,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :]),
+    )
+
     vs.csa_rz = update(
         vs.csa_rz,
         at[2:-2, 2:-2, :, :], npx.where(vs.sa_rz[2:-2, 2:-2, :, :] > 0, vs.msa_rz[2:-2, 2:-2, :, :] / vs.sa_rz[2:-2, 2:-2, :, :], 0) * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
@@ -218,7 +218,7 @@ def calc_root_zone_transport_anion_kernel(state):
         at[2:-2, 2:-2, vs.tau], npx.where(npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1) > 0, vs.M_rz[2:-2, 2:-2, vs.tau] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1), 0),
     )
 
-    return KernelOutput(SA_rz=vs.SA_rz, C_rz=vs.C_rz, M_rz=vs.M_rz, csa_rz=vs.csa_rz)
+    return KernelOutput(SA_rz=vs.SA_rz, C_rz=vs.C_rz, M_rz=vs.M_rz, csa_rz=vs.csa_rz, msa_rz=vs.msa_rz)
 
 
 @roger_routine
