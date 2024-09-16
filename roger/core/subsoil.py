@@ -193,14 +193,15 @@ def calc_subsoil_transport_anion_kernel(state):
         vs.sa_ss,
         at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] < 1e-8, 0, vs.sa_ss[2:-2, 2:-2, vs.tau, :]),
     )
-    vs.msa_ss = update(
-        vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :]),
-    )
 
     vs.SA_ss = update(
         vs.SA_ss,
         at[2:-2, 2:-2, :, :], transport.calc_SA(state, vs.SA_ss, vs.sa_ss)[2:-2, 2:-2, :, :] * vs.maskCatch[2:-2, 2:-2, npx.newaxis, npx.newaxis],
+    )
+
+    vs.msa_ss = update(
+        vs.msa_ss,
+        at[2:-2, 2:-2, vs.tau, :], npx.where(vs.sa_ss[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_ss[2:-2, 2:-2, vs.tau, :]),
     )
 
     vs.csa_ss = update(
@@ -218,7 +219,7 @@ def calc_subsoil_transport_anion_kernel(state):
         at[2:-2, 2:-2, vs.tau], npx.where(npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1) > 0, vs.M_ss[2:-2, 2:-2, vs.tau] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1), 0),
     )
 
-    return KernelOutput(SA_ss=vs.SA_ss, csa_ss=vs.csa_ss, C_ss=vs.C_ss, M_ss=vs.M_ss)
+    return KernelOutput(SA_ss=vs.SA_ss, csa_ss=vs.csa_ss, C_ss=vs.C_ss, M_ss=vs.M_ss, msa_ss=vs.msa_ss)
 
 
 @roger_routine

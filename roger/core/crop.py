@@ -2503,7 +2503,7 @@ def calc_redistribution_root_loss_transport_iso_kernel(state):
 
     # update isotope StorAge
     vs.msa_rz = update(
-        vs.msa_ss,
+        vs.msa_rz,
         at[2:-2, 2:-2, vs.tau, :],
         npx.where(vs.sa_rz[2:-2, 2:-2, vs.tau, :] <= 0, 0, vs.msa_rz[2:-2, 2:-2, vs.tau, :])
         * vs.maskCatch[2:-2, 2:-2, npx.newaxis],

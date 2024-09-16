@@ -133,6 +133,11 @@ class ONEDSetup(RogerSetup):
             at[2:-2, 2:-2],
             self._read_var_from_csv("sealing", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
         )
+        vs.z_soil = update(
+            vs.z_soil,
+            at[2:-2, 2:-2],
+            self._read_var_from_csv("z_soil", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+        )
         vs.slope = update(
             vs.slope,
             at[2:-2, 2:-2],
