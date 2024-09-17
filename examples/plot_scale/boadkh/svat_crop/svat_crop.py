@@ -303,7 +303,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
 
         @roger_routine(
             dist_safe=False,
-            local_variables=["PREC", "TA", "TA_MIN", "TA_MAX", "PET", "RS"],
+            local_variables=["PREC", "TA", "TA_MIN", "TA_MAX", "PET"],
         )
         def set_forcing_setup(self, state):
             vs = state.variables
