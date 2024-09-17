@@ -61,6 +61,8 @@ class SVATCROPSetup(RogerSetup):
         settings.nx, settings.ny = 1, 1
         # length of simulation (in seconds)
         settings.runlen = self._get_runlen(self._input_dir, 'forcing.nc')
+        # number of time steps in meteorological data
+        settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, "forcing.nc"))
 
         # spatial discretization (in meters)
         settings.dx = 1
@@ -199,70 +201,71 @@ class SVATCROPSetup(RogerSetup):
 
     @roger_routine(
         dist_safe=False,
-        local_variables=[
-            "PREC",
-            "TA",
-            "PET",
-        ],
+        local_variables=["PREC", "TA", "TA_MIN", "TA_MAX", "PET"],
     )
     def set_forcing_setup(self, state):
         vs = state.variables
 
         vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, "forcing.nc")[0, 0, :])
         vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, "forcing.nc")[0, 0, :])
+        vs.TA_MIN = update(
+            vs.TA_MIN, at[:], self._read_var_from_nc("TA_min", self._input_dir, "forcing.nc")[0, 0, :]
+        )
+        vs.TA_MAX = update(
+            vs.TA_MAX, at[:], self._read_var_from_nc("TA_max", self._input_dir, "forcing.nc")[0, 0, :]
+        )
         vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[0, 0, :])
 
-    @roger_routine(
-        dist_safe=False,
-        local_variables=[
-            "time",
-            "itt_day",
-            "itt_forc",
-            "prec_day",
-            "ta_day",
-            "pet_day",
-            "year",
-            "month",
-            "doy",
-            "itt",
-            "itt_cr",
-            "crop_type",
-        ],
-    )
+    @roger_routine
     def set_forcing(self, state):
         vs = state.variables
 
         condt = vs.time % (24 * 60 * 60) == 0
         if condt:
             vs.itt_day = 0
-            vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, "forcing.nc")[vs.itt_forc])
+            vs.year = update(
+                vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, "forcing.nc")[vs.itt_forc]
+            )
             vs.month = update(
                 vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, "forcing.nc")[vs.itt_forc]
             )
-            vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")[vs.itt_forc])
+            vs.doy = update(
+                vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")[vs.itt_forc]
+            )
             vs.prec_day = update(
-                vs.prec_day,
-                at[:, :, :],
-                vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
-                * vs.prec_weight[:, :, npx.newaxis],
+                vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
             )
             vs.ta_day = update(
-                vs.ta_day,
-                at[:, :, :],
-                vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] + vs.ta_offset[:, :, npx.newaxis],
+                vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+            )
+            vs.ta_min = update(
+                vs.ta_min,
+                at[:, :],
+                npx.min(vs.TA_MIN[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24], axis=-1),
+            )
+            vs.ta_max = update(
+                vs.ta_max,
+                at[:, :],
+                npx.max(vs.TA_MAX[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24], axis=-1),
             )
             vs.pet_day = update(
-                vs.pet_day,
-                at[:, :, :],
-                vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.pet_weight[:, :, npx.newaxis],
+                vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
             )
             vs.itt_forc = vs.itt_forc + 6 * 24
 
         if (vs.year[1] != vs.year[0]) & (vs.itt > 1):
             vs.itt_cr = vs.itt_cr + 2
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], 564)
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 1], 539)
-            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 2], 564)
+            vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], 599)
+            vs.crop_type = update(
+                vs.crop_type,
+                at[2:-2, 2:-2, 1],
+                539,
+            )
+            vs.crop_type = update(
+                vs.crop_type,
+                at[2:-2, 2:-2, 2],
+                599,
+            )
 
     @roger_routine
     def set_diagnostics(self, state):
