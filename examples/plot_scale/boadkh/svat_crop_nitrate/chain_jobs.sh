@@ -1,5 +1,5 @@
 #!/bin/bash
-sleep 32h
+# use the following to run in background: nohup ./chain_jobs.sh &
 sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-barley_low_Nfert_slurm.sh
 sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-barley_high_Nfert_slurm.sh
 sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_clover_low_Nfert_slurm.sh
