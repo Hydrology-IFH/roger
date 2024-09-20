@@ -1,14 +1,14 @@
 #!/bin/bash
-#SBATCH --time=32:00:00
+#SBATCH --time=72:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
-#SBATCH --job-name=svat_crop_nitrate_freiburg_winter-wheat_silage-corn_high_Nfert
-#SBATCH --output=svat_crop_nitrate_freiburg_winter-wheat_silage-corn_high_Nfert.out
-#SBATCH --error=svat_crop_nitrate_freiburg_winter-wheat_silage-corn_high_Nfert_err.out
+#SBATCH --job-name=svat_crop_nitrate_freiburg_winter-wheat_silage-corn_high_Nfert_numpy
+#SBATCH --output=svat_crop_nitrate_freiburg_winter-wheat_silage-corn_high_Nfert_numpy.out
+#SBATCH --error=svat_crop_nitrate_freiburg_winter-wheat_silage-corn_high_Nfert_numpy_err.out
 #SBATCH --export=ALL
  
 eval "$(conda shell.bash hook)"
@@ -28,7 +28,7 @@ checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVATCROP_freiburg_winter-wheat_silage-c
 done
 echo "Copying was successful"
  
-python svat_crop_nitrate.py -b jax -d cpu --float-type float64 --location freiburg --crop-rotation-scenario winter-wheat_silage-corn --fertilization-intensity high -td "${TMPDIR}"
+python svat_crop_nitrate_numpy.py -d cpu --float-type float64 --location freiburg --crop-rotation-scenario winter-wheat_silage-corn --fertilization-intensity high -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/output/svat_crop_nitrate"
 mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/output/svat_crop_nitrate
