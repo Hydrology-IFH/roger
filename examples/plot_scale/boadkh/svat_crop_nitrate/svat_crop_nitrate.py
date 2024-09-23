@@ -883,7 +883,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], 0)
         vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert1[2:-2, 2:-2] * settings.dx * settings.dy * 100) - ((vs.kmin_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100) - ((vs.kfix_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100), vs.Nfert_min[2:-2, 2:-2]))
         vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100) - ((vs.kmin_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100) - ((vs.kfix_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100), vs.Nfert_min[2:-2, 2:-2]))
-        vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nfert_min[2:-2, 2:-2]))
+        vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nfert_min[2:-2, 2:-2]))
         vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where(vs.Nfert_min[2:-2, 2:-2] < 0, 0, vs.Nfert_min[2:-2, 2:-2]))
 
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert1[2:-2, 2:-2] * settings.dx * settings.dy * 100) - ((vs.kmin_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100) - ((vs.kfix_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))

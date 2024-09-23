@@ -494,7 +494,7 @@ colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))
 # crop_rotation_scenario = "winter-wheat_silage-corn"
 # location = "lahr"
 # fertilization_intensity = "high"
-# for x in range(1, 60):
+# for x in range(1, 80):
 #     fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
 #     color = "blue"
 #     ds = dict_fluxes_states[location][crop_rotation_scenario]
@@ -534,7 +534,7 @@ i = 2
 crop_rotation_scenario = "winter-wheat_silage-corn"
 location = "lahr"
 fertilization_intensity = "high"
-for x in range(1, 60):
+for x in range(1, 80):
     fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
     color = "blue"
     ds = dict_fluxes_states[location][crop_rotation_scenario]
@@ -574,7 +574,7 @@ i = 2
 crop_rotation_scenario = "winter-wheat_silage-corn"
 location = "lahr"
 fertilization_intensity = "high"
-for x in range(1, 60):
+for x in range(1, 80):
     fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
     color = "blue"
     ds = dict_fluxes_states[location][crop_rotation_scenario]

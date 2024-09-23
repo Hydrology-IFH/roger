@@ -412,7 +412,7 @@ def main(tmp_dir):
                             sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
                             sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)  # weighted average
                             cond1 = (df_params["CLUST_flag"] == 1)
-                            df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+                            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
                             # calculate annual mean
                             df_avg = df.sum(axis=0).to_frame()
                             df_avg.loc[:, "location"] = location
@@ -485,8 +485,8 @@ def main(tmp_dir):
                 click.echo(f"{crop_ids}")
                 for crop_id in crop_ids:
                     ds = dict_fluxes_states[location][crop_rotation_scenario]
-                    lu_id = ds["lu_id"].isel(x=0, y=0).values
-                    df_lu_id = pd.DataFrame(index=ds["Time"].values, data=lu_id)
+                    lu_id = ds["lu_id"].isel(x=0, y=0).values[1:]
+                    df_lu_id = pd.DataFrame(index=ds["Time"].values[1:], data=lu_id)
                     df_lu_id.columns = ["lu_id"]
                     cond = onp.isin(df_lu_id.values, onp.array([586, 587, 599])).flatten()
                     df_lu_id.loc[cond, "lu_id"] = onp.nan
@@ -499,7 +499,7 @@ def main(tmp_dir):
                     df_lu_id['crop_period'] = df_lu_id['crop_period'].replace(0, onp.nan)
                     df_lu_id = df_lu_id.drop(columns=['mask', 'new'])
                     df_lu_id = df_lu_id.astype({"lu_id": int, "crop_period": float, "day": float})
-                    cond_crop = onp.isin(df_lu_id.loc[:, "lu_id"].values[:, 1:], _dict_crop_periods[crop_rotation_scenario][crop_id]).flatten()
+                    cond_crop = onp.isin(df_lu_id.loc[:, "lu_id"].values, _dict_crop_periods[crop_rotation_scenario][crop_id]).flatten()
                     if var_sim in ["M_q_ss", "C_q_ss"]:
                         for fertilization_intensity in fertilization_intensities:
                             click.echo(f"{crop_id}: {var_sim} {fertilization_intensity}")
@@ -593,8 +593,8 @@ def main(tmp_dir):
                         ds = dict_fluxes_states[location][crop_rotation_scenario]
                         sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
                         df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T)
-                        df.loc[:, 'crop_period'] = df_lu_id.loc[:, 'crop_period'].values[1:]
-                        df = df.loc[cond_crop[1:], :]
+                        df.loc[:, 'crop_period'] = df_lu_id.loc[:, 'crop_period'].values
+                        df = df.loc[cond_crop, :]
                         # calculate sum per crop period
                         weight = 365/df_lu_id.groupby("crop_period").sum()["day"].values
                         weight = onp.where(weight > 1, 1, weight)
