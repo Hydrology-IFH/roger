@@ -94,6 +94,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             settings.runlen = self._get_runlen(
                 self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
             )
+            settings.runlen = 10 * 365 * 24 * 60 * 60
 
             settings.dx = 1
             settings.dy = 1

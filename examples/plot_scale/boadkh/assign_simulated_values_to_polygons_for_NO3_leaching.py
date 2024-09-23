@@ -61,6 +61,32 @@ _dict_ffid = {"winter-wheat_clover": "1_0",
               "grain-corn_winter-wheat_winter-barley_yellow-mustard": "13_1", 
 }
 
+_dict_ffid1 = {"winter-wheat_clover": 310,
+              "winter-wheat_silage-corn": 311,
+              "summer-wheat_winter-wheat": 312,
+              "summer-wheat_clover_winter-wheat": 313,
+              "winter-wheat_clover_silage-corn": 314,
+              "winter-wheat_sugar-beet_silage-corn": 315,
+              "summer-wheat_winter-wheat_silage-corn": 316,
+              "summer-wheat_winter-wheat_winter-rape": 317,
+              "winter-wheat_winter-rape": 318,
+              "winter-wheat_soybean_winter-rape": 319,
+              "sugar-beet_winter-wheat_winter-barley": 320, 
+              "grain-corn_winter-wheat_winter-rape": 321, 
+              "grain-corn_winter-wheat_winter-barley": 322,
+              "grain-corn_winter-wheat_clover": 323,
+              "miscanthus": 324,
+              "bare-grass": 325,
+              "winter-wheat_silage-corn_yellow-mustard": 351,
+              "summer-wheat_winter-wheat_yellow-mustard": 352,
+              "winter-wheat_sugar-beet_silage-corn_yellow-mustard": 353,
+              "summer-wheat_winter-wheat_silage-corn_yellow-mustard": 354,
+              "summer-wheat_winter-wheat_winter-rape_yellow-mustard": 355,
+              "sugar-beet_winter-wheat_winter-barley_yellow-mustard": 356, 
+              "grain-corn_winter-wheat_winter-rape_yellow-mustard": 357, 
+              "grain-corn_winter-wheat_winter-barley_yellow-mustard": 358, 
+}
+
 _dict_var_names = {"q_hof": "QSUR",
                    "ground_cover": "GC",
                    "M_q_ss": "MPERC",
@@ -85,6 +111,42 @@ _dict_crop_id = {"winter-wheat": 115,
                  "grass": 591,
                  "miscanthus": 852,
                 }
+
+_dict_crop_id1 = {"winter-wheat": 411,
+                 "clover": 412,
+                 "silage-corn": 413,
+                 "summer-wheat": 414,
+                 "sugar-beet": 415,
+                 "winter-rape": 416,
+                 "soybean": 417,
+                 "grain-corn": 418,
+                 "winter-barley": 419,
+                 "grass": 420,
+                 "miscanthus": 421,
+                }
+
+
+_dict_clust_id = {51: 210,
+                  52: 211,
+                  53: 212,
+                  54: 213,
+                  55: 214,
+                  56: 215,
+                  57: 216,
+                  58: 217,
+                  59: 218,
+                  510: 219,
+                  511: 220,
+                  512: 221,
+                  513: 222,
+                  514: 223,
+                  515: 224,
+                  516: 225,
+                  517: 226,
+                  518: 227,
+                  519: 228,
+                  520: 229,
+}
 
 _dict_lu_id = {"winter-wheat": [557],
                "clover": [583, 584, 585],
@@ -126,21 +188,21 @@ _dict_crop_periods = {"winter-wheat_clover": {"winter-wheat": [557], "clover": [
                       "grain-corn_winter-wheat_winter-barley_yellow-mustard": {"grain-corn": [525], "winter-wheat": [557], "winter-barley": [556]}, 
 }
 
-_dict_locations = {"freiburg": 1,
-                   "lahr": 2,
-                   "muellheim": 3,
-                   "stockach": 4,
-                   "gottmadingen": 5,
-                   "weingarten": 6,
-                   "eppingen-elsenz": 7,
-                   "bruchsal-heidelsheim": 8,
-                   "bretten": 9,
-                   "ehingen-kirchen": 10,
-                   "merklingen": 11,
-                   "hayingen": 12,
-                   "kupferzell": 13,
-                   "oehringen": 14,
-                   "vellberg-kleinaltdorf": 15,
+_dict_locations = {"freiburg": 111,
+                   "lahr": 112,
+                   "muellheim": 113,
+                   "stockach": 114,
+                   "gottmadingen": 115,
+                   "weingarten": 116,
+                   "eppingen-elsenz": 117,
+                   "bruchsal-heidelsheim": 118,
+                   "bretten": 119,
+                   "ehingen-kirchen": 120,
+                   "merklingen": 121,
+                   "hayingen": 122,
+                   "kupferzell": 123,
+                   "oehringen": 124,
+                   "vellberg-kleinaltdorf": 125,
 }
 
 locations = ["freiburg", "lahr", "muellheim", 
@@ -175,6 +237,10 @@ crop_rotation_scenarios = ["winter-wheat_clover",
                            "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
 
 fertilization_intensities = ["low", "medium", "high"]
+
+_dict_fertilization_intensities = {"low": 501, 
+                                   "medium": 502, 
+                                   "high": 503}
 
 
 def nanmeanweighted(y, w, axis=None):
@@ -215,40 +281,37 @@ def main(tmp_dir):
     df_values_ = df_values.copy()
     df_params = pd.read_csv(csv_file, sep=";", skiprows=1)
 
-    # write geometries
-    file = base_path_output / "BK50_NBiomasseBW_for_assignment.gpkg"
-    gdf1 = gpd.read_file(file)
-    ll_dfs = []
-    for location in locations:
-        mask = (gdf1['stationsna'] == location)
-        gdf = gdf1.loc[mask, :]
-        gdf['OID'] = None
-        gdf['MID'] = None
-        gdf['MID'] = _dict_locations[location]
-        gdf['SID'] = None
-        # gdf['CLUST_ID'] = None
-        for clust_id in clust_ids:
-            cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
-            shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
-            cond2 = gdf["SHP_ID"].isin(shp_ids)
-            if cond2.any():
-                id1 = df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0]
-                gdf.loc[cond2, 'SID'] = int(f"{id1}")
-                gdf.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{id1}")
-                # gdf.loc[cond2, 'CLUST_ID'] = clust_id
-
-        gdf = gdf.copy()
-        gdf = gdf.to_crs("EPSG:25832")
-        ll_dfs.append(gdf)
-
-    gdf = pd.concat(ll_dfs, axis=0)
-    gdf = gdf.drop(columns=["SHP_ID", "area"])
-    gdf = gdf[["OID", "MID", "SID", "stationsna", "agr_region", "geometry"]]
-    gdf = gdf.to_crs("EPSG:25832")
-    file = Path(tmp_dir) / "nitrate_leaching_geometries.gpkg"
-    gdf.to_file(file, driver="GPKG")
-    file = Path(tmp_dir) / "nitrate_leaching_geometries.shp"
-    gdf.to_file(file)
+    # # write geometries
+    # file = base_path_output / "BK50_NBiomasseBW_for_assignment.gpkg"
+    # gdf1 = gpd.read_file(file)
+    # ll_dfs = []
+    # for location in locations:
+    #     mask = (gdf1['stationsna'] == location)
+    #     gdf = gdf1.loc[mask, :]
+    #     gdf['OID'] = None
+    #     gdf['MID'] = None
+    #     gdf['MID'] = _dict_locations[location]
+    #     gdf['SID'] = None
+    #     for clust_id in clust_ids:
+    #         cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
+    #         shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
+    #         cond2 = gdf["SHP_ID"].isin(shp_ids)
+    #         if cond2.any():
+    #             id1 = int(df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0])
+    #             gdf.loc[cond2, 'SID'] = int(f"{_dict_clust_id[id1]}")
+    #             gdf.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{_dict_clust_id[id1]}")
+    #     gdf = gdf.copy()
+    #     gdf = gdf.to_crs("EPSG:25832")
+    #     ll_dfs.append(gdf)
+    
+    # gdf = pd.concat(ll_dfs, axis=0)
+    # gdf = gdf.drop(columns=["SHP_ID", "area"])
+    # gdf = gdf[["OID", "MID", "SID", "stationsna", "agr_region", "geometry"]]
+    # gdf = gdf.to_crs("EPSG:25832")
+    # file = Path(tmp_dir) / "nitrate_leaching_geometries.gpkg"
+    # gdf.to_file(file, driver="GPKG")
+    # file = Path(tmp_dir) / "nitrate_leaching_geometries.shp"
+    # gdf.to_file(file)
 
     # load nitrogen loads and concentrations
     dict_nitrate = {}
@@ -327,10 +390,12 @@ def main(tmp_dir):
                         df_values['MID'] = None
                         df_values['MID'] = _dict_locations[location]
                         df_values['SID'] = None
+                        df_values['FIID'] = None
+                        df_values['FIID'] = _dict_fertilization_intensities[fertilization_intensity]
                         df_values['FFID'] = None
-                        df_values['FFID'] = _dict_ffid[crop_rotation_scenario]
+                        df_values['FFID'] = _dict_ffid1[crop_rotation_scenario]
                         df_values['CID'] = None
-                        df_values['CID'] = int(0)
+                        df_values['CID'] = 400
                         df_values[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = None
                         ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
                         if var_sim == "M_q_ss":
@@ -358,11 +423,11 @@ def main(tmp_dir):
                             cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
                             if cond.any():
                                 cond2 = (df_values["CLUST_ID"] == clust_id)
-                                id1 = df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0]
+                                id1 = int(df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0])
                                 df_values.loc[cond2, 'SID'] = int(f"{id1}")
-                                df_values.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{id1}")
-                                cond3 = (df_values['OID'] == int(f"{_dict_locations[location]}{id1}"))
-                                df_values.loc[cond3, f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = onp.round(val, 2)
+                                df_values.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{_dict_clust_id[id1]}")
+                                cond3 = (df_values['OID'] == int(f"{_dict_locations[location]}{_dict_clust_id[id1]}"))
+                                df_values.loc[cond3, f'{_dict_var_names[var_sim]}'] = onp.round(val, 2)
                         df_values1 = df_values.copy()
                         df_values1 = df_values1.dropna()
                         ll_df.append(df_values1)
@@ -384,10 +449,12 @@ def main(tmp_dir):
                     df_values['MID'] = None
                     df_values['MID'] = _dict_locations[location]
                     df_values['SID'] = None
+                    df_values['FIID'] = None
+                    df_values['FIID'] = 500
                     df_values['FFID'] = None
-                    df_values['FFID'] = _dict_ffid[crop_rotation_scenario]
+                    df_values['FFID'] = _dict_ffid1[crop_rotation_scenario]
                     df_values['CID'] = None
-                    df_values['CID'] = int(0)
+                    df_values['CID'] = 400
                     df_values[f'{_dict_var_names[var_sim]}'] = None  # initialize field, float, two decimals
                     ds = dict_fluxes_states[location][crop_rotation_scenario]
                     sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
@@ -404,10 +471,10 @@ def main(tmp_dir):
                         cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
                         if cond.any():
                             cond2 = (df_values["CLUST_ID"] == clust_id)
-                            id1 = df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0]
+                            id1 = int(df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0])
                             df_values.loc[cond2, 'SID'] = int(f"{id1}")
-                            df_values.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{id1}")
-                            cond3 = (df_values['OID'] == int(f"{_dict_locations[location]}{id1}"))
+                            df_values.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{_dict_clust_id[id1]}")
+                            cond3 = (df_values['OID'] == int(f"{_dict_locations[location]}{_dict_clust_id[id1]}"))
                             df_values.loc[cond3, f'{_dict_var_names[var_sim]}'] = onp.round(val, 2)
                     df_values1 = df_values.copy()
                     df_values1 = df_values1.dropna()
@@ -453,10 +520,12 @@ def main(tmp_dir):
                             df_values['MID'] = None
                             df_values['MID'] = _dict_locations[location]
                             df_values['SID'] = None
+                            df_values['FIID'] = None
+                            df_values['FIID'] = _dict_fertilization_intensities[fertilization_intensity]
                             df_values['FFID'] = None
-                            df_values['FFID'] = _dict_ffid[crop_rotation_scenario]
+                            df_values['FFID'] = _dict_ffid1[crop_rotation_scenario]
                             df_values['CID'] = None
-                            df_values['CID'] = int(f'{_dict_crop_id[crop_id]}')
+                            df_values['CID'] = int(f'{_dict_crop_id1[crop_id]}')
                             df_values[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = None  # initialize field, float, two decimals
                             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
                             if var_sim == "M_q_ss":
@@ -487,11 +556,11 @@ def main(tmp_dir):
                                 cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
                                 if cond.any():
                                     cond2 = (df_values["CLUST_ID"] == clust_id)
-                                    id1 = df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0]
+                                    id1 = int(df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0])
                                     df_values.loc[cond2, 'SID'] = int(f"{id1}")
-                                    df_values.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{id1}")
-                                    cond3 = (df_values['OID'] == int(f"{_dict_locations[location]}{id1}"))
-                                    df_values.loc[cond3, f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = onp.round(val, 2)
+                                    df_values.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{_dict_clust_id[id1]}")
+                                    cond3 = (df_values['OID'] == int(f"{_dict_locations[location]}{_dict_clust_id[id1]}"))
+                                    df_values.loc[cond3, f'{_dict_var_names[var_sim]}'] = onp.round(val, 2)
                             df_values1 = df_values.copy()
                             df_values1 = df_values1.dropna()
                             ll_df.append(df_values1)
@@ -514,10 +583,12 @@ def main(tmp_dir):
                         df_values['MID'] = None
                         df_values['MID'] = _dict_locations[location]
                         df_values['SID'] = None
+                        df_values['FIID'] = None
+                        df_values['FIID'] = 500
                         df_values['FFID'] = None
-                        df_values['FFID'] = _dict_ffid[crop_rotation_scenario]
+                        df_values['FFID'] = _dict_ffid1[crop_rotation_scenario]
                         df_values['CID'] = None
-                        df_values['CID'] = int(f'{_dict_crop_id[crop_id]}')
+                        df_values['CID'] = int(f'{_dict_crop_id1[crop_id]}')
                         df_values[f'{_dict_var_names[var_sim]}'] = None  # initialize field, float, two decimals
                         ds = dict_fluxes_states[location][crop_rotation_scenario]
                         sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
@@ -537,10 +608,10 @@ def main(tmp_dir):
                             cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
                             if cond.any():
                                 cond2 = (df_values["CLUST_ID"] == clust_id)
-                                id1 = df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0]
+                                id1 = int(df_values.loc[df_values["CLUST_ID"] == clust_id, "ID"].values[0])
                                 df_values.loc[cond2, 'SID'] = int(f"{id1}")
-                                df_values.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{id1}")
-                                cond3 = (df_values['OID'] == int(f"{_dict_locations[location]}{id1}"))
+                                df_values.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{_dict_clust_id[id1]}")
+                                cond3 = (df_values['OID'] == int(f"{_dict_locations[location]}{_dict_clust_id[id1]}"))
                                 df_values.loc[cond3, f'{_dict_var_names[var_sim]}'] = onp.round(val, 2)
                         df_values1 = df_values.copy()
                         df_values1 = df_values1.dropna()
@@ -551,7 +622,7 @@ def main(tmp_dir):
 
     df = pd.concat(ll_df, axis=0)
     df = df.drop(columns=["SHP_ID", "ID"])
-    df = df[["OID", "MID", "SID", "CLUST_ID", "agr_region", "stationsna", "FFID", "CID", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]]
+    df = df[["OID", "MID", "SID", "agr_region", "stationsna", "FIID", "FFID", "CID", "QSUR", "PERC", "MPERC", "CPERC"]]
 
     df = df.fillna(-9999)
     file = Path(tmp_dir) / "nitrate_leaching_values.csv"
