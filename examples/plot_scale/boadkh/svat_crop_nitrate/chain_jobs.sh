@@ -1047,7 +1047,6 @@ sbatch --partition single svat_crop_nitrate_lahr_grain-corn_winter-wheat_winter-
 sbatch --partition single svat_crop_nitrate_lahr_grain-corn_winter-wheat_winter-rape_yellow-mustard_medium_Nfert_slurm.sh
 sbatch --partition single svat_crop_nitrate_lahr_miscanthus_high_Nfert_slurm.sh
 sbatch --partition single svat_crop_nitrate_lahr_miscanthus_low_Nfert_slurm.sh
-sleep 32h
 sbatch --partition single svat_crop_nitrate_lahr_miscanthus_medium_Nfert_slurm.sh
 sbatch --partition single svat_crop_nitrate_lahr_sugar-beet_winter-wheat_winter-barley_high_Nfert_slurm.sh
 sbatch --partition single svat_crop_nitrate_lahr_sugar-beet_winter-wheat_winter-barley_low_Nfert_slurm.sh
