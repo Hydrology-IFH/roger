@@ -727,10 +727,10 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
                         at[2:-2, 2:-2],
                         npx.where(mask[2:-2, 2:-2], lut_fert[row_no, 12], vs.N_fert3_org[2:-2, 2:-2]),
                     )
-            else:
-                if (vs.LU_ID[2:-2, 2:-2, vs.itt-1] != vs.LU_ID[2:-2, 2:-2, vs.itt]).any():
+            elif vs.itt < settings.nitt - 31:
+                if (vs.LU_ID[2:-2, 2:-2, vs.itt+30] != vs.LU_ID[2:-2, 2:-2, vs.itt+31]).any():
                     # nitrogen fixation of yellow mustard, clover, soy bean and grain pea
-                    mask = npx.isin(vs.LU_ID[2:-2, 2:-2, vs.itt], npx.array([541, 577, 578, 580, 581, 583, 584, 586, 587, 588]))
+                    mask = npx.isin(vs.LU_ID[2:-2, 2:-2, vs.itt+31], npx.array([541, 577, 578, 580, 581, 583, 584, 586, 587, 588]))
                     vs.kfix_rz = update(vs.kfix_rz, at[2:-2, 2:-2], 0)
                     vs.kfix_rz = update(vs.kfix_rz, at[2:-2, 2:-2], npx.where(mask, 40 * (vs.soil_fertility[2:-2, 2:-2]/3.5), vs.kfix_rz[2:-2, 2:-2]))
                     if vs.itt > 90:
@@ -746,7 +746,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
                     elif fertilization_intensity == "high":
                         lut_fert = vs.lut_fert3
                     for i in range(500, 600):
-                        mask = vs.LU_ID[:, :, vs.itt] == i 
+                        mask = vs.LU_ID[:, :, vs.itt+31] == i 
                         row_no = _get_row_no(vs.lut_nup[:, 0], i)
                         # set nitrogen uptake rate
                         vs.nup = update(
