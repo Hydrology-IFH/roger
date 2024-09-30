@@ -38,7 +38,7 @@ def main(job_type):
         file = open(file_path, "w")
         file.writelines(lines)
         file.close()
-        subprocess.Popen(f"chmod +x {script_name}_moab.sh", shell=True)
+        subprocess.Popen(f"chmod +x {file_path}.sh", shell=True)
 
     return
 

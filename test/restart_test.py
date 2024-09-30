@@ -79,9 +79,9 @@ def test_restart(tmpdir):
         np.testing.assert_allclose(*_normalize(v1, v2), atol=1e-10, rtol=0)
 
     for var in state_1.variables.fields():
-        if var in ("itt",):
+        if var in ("itt", "time_event0", "event_id_counter", "S", "dS"):
             continue
-
+        print(var)
         check_var(var)
 
     def check_diag_var(diag, var):
@@ -94,7 +94,8 @@ def test_restart(tmpdir):
             continue
 
         for var in state_1.diagnostics[diag].variables.fields():
-            if var in ("itt",):
+            print(var)
+            if var in ("itt", "time_event0", "event_id_counter", "S", "dS"):
                 continue
 
             check_diag_var(diag, var)

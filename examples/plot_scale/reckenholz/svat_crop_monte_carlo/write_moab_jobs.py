@@ -13,7 +13,7 @@ def main(job_type):
                   'lys8_bromide', 'lys9_bromide']
     for lys in lysimeters:
         script_name = f'svat_crop_{lys}_mc'
-        output_path_ws = base_path_ws / 'reckenholz' / 'svat_monte_carlo'
+        output_path_ws = base_path_ws / 'reckenholz' / 'svat_crop_monte_carlo'
         lines = []
         lines.append('#!/bin/bash\n')
         lines.append('#PBS -l nodes=1:ppn=1\n')
@@ -39,7 +39,7 @@ def main(job_type):
         file = open(file_path, "w")
         file.writelines(lines)
         file.close()
-        subprocess.Popen(f"chmod +x {script_name}_moab.sh", shell=True)
+        subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
     return
 
