@@ -134,10 +134,7 @@ class SVATSetup(RogerSetup):
     def set_boundary_conditions(self, state):
         pass
 
-    @roger_routine(
-        dist_safe=False,
-        local_variables=["PREC", "TA", "PET"],
-    )
+    @roger_routine
     def set_forcing_setup(self, state):
         vs = state.variables
 
@@ -162,13 +159,13 @@ class SVATSetup(RogerSetup):
                 vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")[vs.itt_forc]
             )
             vs.prec_day = update(
-                vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24]
             )
             vs.ta_day = update(
-                vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24]
             )
             vs.pet_day = update(
-                vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24]
             )
             vs.itt_forc = vs.itt_forc + 6 * 24
 

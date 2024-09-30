@@ -869,12 +869,14 @@ VARIABLES = {
         TIME_FORCING,
         "degC",
         "air temperature",
+        write_to_restart=True,
     ),
     "TA_MIN": Variable(
         "daily minimum air temperature",
         TIME_FORCING,
         "degC",
         "daily minimum air temperature",
+        write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "TA_MAX": Variable(
@@ -882,6 +884,7 @@ VARIABLES = {
         TIME_FORCING,
         "degC",
         "daily maximum air temperature",
+        write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "ta": Variable(
@@ -3408,6 +3411,7 @@ VARIABLES = {
         TIME_FORCING,
         "mm/10 minutes",
         "precipitation (uniform)",
+        write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport,
     ),
     "PREC_DIST_DAILY": Variable(
@@ -3972,6 +3976,7 @@ VARIABLES = {
         TIME_FORCING,
         "MJ/m2",
         "solar radiation",
+        write_to_restart=True,
     ),
     "rs": Variable(
         "solar radiation",
@@ -4007,6 +4012,7 @@ VARIABLES = {
         TIME_FORCING,
         "mm/dt",
         "potential evapotranspiration",
+        write_to_restart=True,
     ),
     "pet": Variable(
         "potential evapotranspiration",

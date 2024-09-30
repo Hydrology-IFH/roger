@@ -8,6 +8,7 @@ import h5netcdf
 from cftime import date2num
 
 onp.random.seed(42)
+pd.set_option('future.no_silent_downcasting', True)
 
 
 def sin_func(t, amp, phase, off):
@@ -36,7 +37,7 @@ def make_toy_forcing(
         prec = onp.zeros((n_prec))
         prec[12 : 12 + n_prec_rnd] = prec_rnd
         prec[int(n_prec / 2) : int(n_prec / 2) + n_prec_rnd] = prec_rnd
-        idx_prec = pd.date_range(start="1/1/2018", periods=ndays * 24 * 6, freq="10T")
+        idx_prec = pd.date_range(start="1/1/2018", periods=ndays * 24 * 6, freq="10min")
         # generate random air temperature
         idx_ta_pet = pd.date_range(start="1/1/2018", periods=ndays, freq="D")
         ta = rng.uniform(15, 20, ndays)
@@ -51,7 +52,7 @@ def make_toy_forcing(
         prec = onp.zeros((n_prec))
         prec[12 : 12 + n_prec_rnd] = prec_rnd
         prec[int(n_prec / 2) : int(n_prec / 2) + n_prec_rnd] = prec_rnd
-        idx_prec = pd.date_range(start="1/1/2018", periods=ndays * 24 * 6, freq="10T")
+        idx_prec = pd.date_range(start="1/1/2018", periods=ndays * 24 * 6, freq="10min")
         # generate random air temperature
         idx_ta_pet = pd.date_range(start="1/1/2018", periods=ndays, freq="D")
         ta = rng.uniform(-3, -1, ndays)
@@ -66,7 +67,7 @@ def make_toy_forcing(
         prec = onp.zeros((n_prec))
         prec[12 : 12 + n_prec_rnd] = prec_rnd
         prec[int(n_prec / 2) : int(n_prec / 2) + n_prec_rnd] = prec_rnd
-        idx_prec = pd.date_range(start="1/1/2018", periods=ndays * 24 * 6, freq="10T")
+        idx_prec = pd.date_range(start="1/1/2018", periods=ndays * 24 * 6, freq="10min")
         # generate random air temperature
         idx_ta_pet = pd.date_range(start="1/1/2018", periods=ndays, freq="D")
         ta = rng.uniform(0, 3, ndays)
@@ -81,7 +82,7 @@ def make_toy_forcing(
         prec = onp.zeros((n_prec))
         prec[12 : 12 + n_prec_rnd] = prec_rnd
         prec[int(n_prec / 2) : int(n_prec / 2) + n_prec_rnd] = prec_rnd
-        idx_prec = pd.date_range(start="1/1/2018", periods=ndays * 24 * 6, freq="10T")
+        idx_prec = pd.date_range(start="1/1/2018", periods=ndays * 24 * 6, freq="10min")
         # generate random air temperature
         idx_ta_pet = pd.date_range(start="1/1/2018", periods=ndays, freq="D")
         ta = rng.uniform(15, 20, ndays)
@@ -107,7 +108,7 @@ def make_toy_forcing(
                 prec[i:ii] = rng.poisson(lam, ii - i) * 0.5
             else:
                 prec[i:ii] = rng.poisson(lam, ii - i) * rng.uniform(0.01, 0.1, ii - i)
-        idx_prec = pd.date_range(start="1/1/2018", periods=ndays * 24 * 6, freq="10T")
+        idx_prec = pd.date_range(start="1/1/2018", periods=ndays * 24 * 6, freq="10min")
         # generate random air temperature
         idx_ta_pet = pd.date_range(start="1/1/2018", periods=ndays, freq="D")
         ta_init = -5
@@ -129,7 +130,7 @@ def make_toy_forcing(
     elif event_type == "norain":
         # generate random rainfall
         prec = onp.zeros((ndays * 24 * 6))
-        idx_prec = pd.date_range(start="1/1/2018", periods=ndays * 24 * 6, freq="10T")
+        idx_prec = pd.date_range(start="1/1/2018", periods=ndays * 24 * 6, freq="10min")
         # generate random air temperature
         idx_ta_pet = pd.date_range(start="1/1/2018", periods=ndays, freq="D")
         ta = rng.uniform(15, 20, ndays)
