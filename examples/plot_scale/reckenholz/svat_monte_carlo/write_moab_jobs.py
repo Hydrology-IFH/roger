@@ -9,7 +9,8 @@ def main(job_type):
     base_path = Path(__file__).parent
     base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_monte_carlo'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
-    lysimeters = ['lys1', 'lys2', 'lys3', 'lys4', 'lys8', 'lys9']
+    lysimeters = ['lys1', 'lys2', 'lys3', 'lys4', 'lys8', 'lys9', 'lys2_bromide',
+                  'lys8_bromide', 'lys9_bromide']
     for lys in lysimeters:
         script_name = f'svat_{lys}_mc'
         output_path_ws = base_path_ws / 'reckenholz' / 'svat_monte_carlo'
@@ -38,7 +39,7 @@ def main(job_type):
         file = open(file_path, "w")
         file.writelines(lines)
         file.close()
-        subprocess.Popen(f"chmod +x {file_path}.sh", shell=True)
+        subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
     return
 
