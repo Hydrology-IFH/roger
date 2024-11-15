@@ -27,7 +27,7 @@ _UNITS = {
 
 _VALS = {
     "alpha_transp": 0.55,
-    "alpha_q": 0.7,
+    "alpha_q": 0.55,
     "c2_transp": 0.6,
     "c2_q_rz": 1.5,
     "c2_q_ss": 1.5,

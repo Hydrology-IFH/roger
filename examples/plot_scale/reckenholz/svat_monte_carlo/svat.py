@@ -7,7 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-lys", "--lys-experiment", type=click.Choice(["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys2")
-@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_monte_carlo")
 @roger_base_cli
 def main(lys_experiment, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -124,7 +124,7 @@ def main(lys_experiment, tmp_dir):
         def set_parameters_setup(self, state):
             vs = state.variables
 
-            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 8)
+            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 5)
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1350)
             vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_csv("dmpv", self._base_path,  "parameters.csv"))
             vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_csv("lmpv", self._base_path,  "parameters.csv"))

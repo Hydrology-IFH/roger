@@ -22,14 +22,11 @@ _UNITS = {
     "soil_fertility": "",
     "z_soil": "mm",
     "k_transp": "-",
-    "k_q_rz": "-",
-    "k_q_ss": "-",
+    "k_q": "-",
     "c1_transp": "-",
     "c2_transp": "-",
-    "c1_q_rz": "-",
-    "c2_q_rz": "-",
-    "c1_q_ss": "-",
-    "c2_q_ss": "-",
+    "c1_q": "-",
+    "c2_q": "-",
 }
 @click.option("-ns", "--nsamples", type=int, default=3)
 @click.command("main")

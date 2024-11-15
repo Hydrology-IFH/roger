@@ -151,8 +151,6 @@ def main(lys_experiment, tmp_dir):
                 "root_growth_scale",
                 "canopy_growth_scale",
                 "basal_crop_coeff_scale",
-                "pet_weight",
-                "zroot_to_zsoil_max"
             ],
         )
         def set_parameters_setup(self, state):
@@ -177,11 +175,9 @@ def main(lys_experiment, tmp_dir):
             vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_csv("theta_pwp", self._base_path, "parameters.csv"))
             vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_csv("ks", self._base_path, "parameters.csv"))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
-            vs.root_growth_scale = update(vs.root_growth_scale, at[2:-2, 2:-2], self._read_var_from_csv("c_root_growth", self._base_path, "parameters.csv"))
-            vs.canopy_growth_scale = update(vs.canopy_growth_scale, at[2:-2, 2:-2], self._read_var_from_csv("c_canopy_growth", self._base_path, "parameters.csv"))
-            vs.basal_crop_coeff_scale = update(vs.basal_crop_coeff_scale, at[2:-2, 2:-2], self._read_var_from_csv("c_basal_crop_coeff", self._base_path, "parameters.csv"))
-            vs.pet_weight = update(vs.pet_weight, at[2:-2, 2:-2], self._read_var_from_csv("c_pet", self._base_path, "parameters.csv"))
-            vs.zroot_to_zsoil_max = update(vs.zroot_to_zsoil_max, at[2:-2, 2:-2], self._read_var_from_csv("zroot_to_zsoil_max", self._base_path, "parameters.csv"))
+            vs.root_growth_scale = update(vs.root_growth_scale, at[2:-2, 2:-2], self._read_var_from_csv("c_root", self._base_path, "parameters.csv"))
+            vs.canopy_growth_scale = update(vs.canopy_growth_scale, at[2:-2, 2:-2], self._read_var_from_csv("c_canopy", self._base_path, "parameters.csv"))
+            vs.basal_crop_coeff_scale = update(vs.basal_crop_coeff_scale, at[2:-2, 2:-2], self._read_var_from_csv("c_canopy", self._base_path, "parameters.csv"))
 
 
         @roger_routine
@@ -245,7 +241,7 @@ def main(lys_experiment, tmp_dir):
                 vs.ta_day = update(vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
                 vs.ta_min = update(vs.ta_min, at[:, :], npx.min(vs.TA_MIN[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24], axis=-1))
                 vs.ta_max = update(vs.ta_max, at[:, :], npx.max(vs.TA_MAX[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24], axis=-1))
-                vs.pet_day = update(vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24]) * vs.pet_weight[:, :, npx.newaxis]
+                vs.pet_day = update(vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
             if (vs.year[1] != vs.year[0]) & (vs.itt > 1):
