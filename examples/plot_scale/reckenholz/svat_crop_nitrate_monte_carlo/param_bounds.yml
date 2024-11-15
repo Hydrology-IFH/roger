@@ -49,13 +49,9 @@ advection-dispersion-power:
   - 0.2
   - 1
   # SAS parameter of percolation from root zone
-  k_q_rz:
+  k_q:
   - 1
-  - 5
-  # SAS parameter of percolation from subsoil
-  k_q_ss:
-  - 1
-  - 5
+  - 3
 
 time-variant_advection-dispersion-power:
   alpha_transp:
@@ -87,16 +83,9 @@ time-variant_advection-dispersion-power:
   - 0.1
   - 2
   # SAS parameter of percolation from root zone
-  c1_q_rz:
+  c1_q:
   - 1
   - 2
-  c2_q_rz:
+  c2_q:
   - 0.1
   - 3
-  # SAS parameter of percolation from subsoil
-  c1_q_ss:
-  - 1
-  - 2
-  c2_q_ss:
-  - 0.1
-  - 5

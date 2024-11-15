@@ -12,11 +12,8 @@ _UNITS = {
     "frac_lp": "-",
     "theta_pwp": "-",
     "ks": "mm/hour",
-    "c_canopy_growth": "-",
-    "c_root_growth": "-",
-    "c_basal_crop_coeff": "-",
-    "c_pet": "-",
-    "zroot_to_zsoil_max": "-",
+    "c_canopy": "-",
+    "c_root": "-",
 }
 
 def calculate_clay_content(theta_sat, theta_fc, theta_pwp):
@@ -77,12 +74,12 @@ def main(nsamples):
     theta_sat = df_params["theta_pwp"].values.astype(onp.float64) + df_params["theta_ufc"].values.astype(onp.float64) + df_params["theta_ac"].values.astype(onp.float64)
     df_params.loc[:, "clay"] = calculate_clay_content(theta_sat, theta_fc, theta_pwp)
 
-    df_params = df_params.loc[:, ["dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "c_canopy_growth", "c_root_growth", "c_basal_crop_coeff", "c_pet", "zroot_to_zsoil_max", "clay"]]
+    df_params = df_params.loc[:, ["dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "c_canopy", "c_root", "clay"]]
 
     # write parameters to csv
     df_params.columns = [
-        ["[1/m2]", "[mm]", "[-]", "[-]", "[-]", "[mm/hour]", "[mm/hour]", "[-]", "[-]", "[-]", "[-]", "[-]", "[-]"],
-        ["dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "c_canopy_growth", "c_root_growth", "c_basal_crop_coeff", "c_pet", "zroot_to_zsoil_max", "clay"],
+        ["[1/m2]", "[mm]", "[-]", "[-]", "[-]", "[mm/hour]", "[mm/hour]", "[-]", "[-]", "[-]",],
+        ["dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "c_canopy", "c_root", "clay"],
     ]
     df_params.to_csv(base_path / "parameters.csv", index=False, sep=";")
     return

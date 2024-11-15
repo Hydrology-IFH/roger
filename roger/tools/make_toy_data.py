@@ -364,7 +364,7 @@ def make_toy_forcing_event(
         v.attrs["long_name"] = "Air temperature"
         v.attrs["units"] = "degC"
         v = f.create_variable("dt", ("Time",), int)
-        time_steps = onp.around(onp.diff(df_meteo["hh"].values) * 60 * 60, 1)
+        time_steps = onp.around(onp.diff(df_meteo["hh"].values.astype(float)) * 60. * 60., decimals=1)
         v[:-1] = time_steps.astype(int)
         v[-1] = time_steps[-1].astype(int)
         v.attrs["long_name"] = "time step"

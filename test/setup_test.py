@@ -100,9 +100,7 @@ def test_setup_svat_bromide(float_type):
 
     from roger.models.svat_bromide import SVATTRANSPORTSetup
     from roger.tools.make_toy_data import make_toy_forcing_tracer
-    from make_data_for_svat_transport import make_data
 
-    make_data(float_type)
     sim = SVATTRANSPORTSetup()
     sim._base_path = Path(__file__).parent
     sim._input_dir = Path(__file__).parent / "input"
@@ -127,9 +125,7 @@ def test_setup_svat_oxygen18(float_type):
 
     from roger.models.svat_oxygen18 import SVATTRANSPORTSetup
     from roger.tools.make_toy_data import make_toy_forcing_tracer
-    from make_data_for_svat_transport import make_data
 
-    make_data(float_type)
     sim = SVATTRANSPORTSetup()
     make_toy_forcing_tracer(sim._base_path, tracer="d18O", ndays=10,
                             float_type=float_type)

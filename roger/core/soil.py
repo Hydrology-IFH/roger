@@ -1151,26 +1151,26 @@ def rescale_sa_soil_kernel(state):
     """
     vs = state.variables
 
-    vs.sa_rz = update_multiply(
+    vs.sa_rz = update(
         vs.sa_rz,
         at[2:-2, 2:-2, 0, :],
-        vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        vs.S_rz_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]),
     )
-    vs.sa_ss = update_multiply(
+    vs.sa_ss = update(
         vs.sa_ss,
         at[2:-2, 2:-2, 0, :],
-        vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        vs.S_ss_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]),
     )
 
-    vs.sa_rz = update_multiply(
+    vs.sa_rz = update(
         vs.sa_rz,
         at[2:-2, 2:-2, 1, :],
-        vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        vs.S_rz_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]),
     )
-    vs.sa_ss = update_multiply(
+    vs.sa_ss = update(
         vs.sa_ss,
         at[2:-2, 2:-2, 1, :],
-        vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        vs.S_ss_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis])
     )
 
     vs.SA_rz = update(
@@ -1229,25 +1229,25 @@ def rescale_sa_msa_iso_soil_kernel(state):
     """
     vs = state.variables
 
-    vs.sa_rz = update_multiply(
+    vs.sa_rz = update(
         vs.sa_rz,
         at[2:-2, 2:-2, 0, :],
-        vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        vs.S_rz_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]),
     )
-    vs.sa_ss = update_multiply(
+    vs.sa_ss = update(
         vs.sa_ss,
         at[2:-2, 2:-2, 0, :],
-        vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        vs.S_ss_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]),
     )
-    vs.sa_rz = update_multiply(
+    vs.sa_rz = update(
         vs.sa_rz,
         at[2:-2, 2:-2, 1, :],
-        vs.S_rz_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        vs.S_rz_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]),
     )
-    vs.sa_ss = update_multiply(
+    vs.sa_ss = update(
         vs.sa_ss,
         at[2:-2, 2:-2, 1, :],
-        vs.S_ss_init[2:-2, 2:-2, npx.newaxis] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        vs.S_ss_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis])
     )
     vs.SA_rz = update(
         vs.SA_rz,
@@ -1425,18 +1425,25 @@ def rescale_sa_msa_anion_soil_kernel(state):
             at[2:-2, 2:-2, :, :],
             0,
         )
-
-        vs.sa_rz = update_multiply(
+        vs.sa_rz = update(
             vs.sa_rz,
             at[2:-2, 2:-2, 0, :],
-            vs.S_rz_init[2:-2, 2:-2, npx.newaxis]
-            / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+            vs.S_rz_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]),
         )
-        vs.sa_ss = update_multiply(
+        vs.sa_ss = update(
             vs.sa_ss,
             at[2:-2, 2:-2, 0, :],
-            vs.S_ss_init[2:-2, 2:-2, npx.newaxis]
-            / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+            vs.S_ss_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]),
+        )
+        vs.sa_rz = update(
+            vs.sa_rz,
+            at[2:-2, 2:-2, 1, :],
+            vs.S_rz_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]),
+        )
+        vs.sa_ss = update(
+            vs.sa_ss,
+            at[2:-2, 2:-2, 1, :],
+            vs.S_ss_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]),
         )
         vs.SA_rz = update(
             vs.SA_rz,
@@ -1487,17 +1494,25 @@ def rescale_sa_msa_anion_soil_kernel(state):
             vs.S_ss_init[2:-2, 2:-2, npx.newaxis]
             / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
         )
-        vs.sa_rz = update_multiply(
+        vs.sa_rz = update(
             vs.sa_rz,
             at[2:-2, 2:-2, 0, :],
-            vs.S_rz_init[2:-2, 2:-2, npx.newaxis]
-            / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+            vs.S_rz_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]),
         )
-        vs.sa_ss = update_multiply(
+        vs.sa_ss = update(
             vs.sa_ss,
             at[2:-2, 2:-2, 0, :],
-            vs.S_ss_init[2:-2, 2:-2, npx.newaxis]
-            / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+            vs.S_ss_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]),
+        )
+        vs.sa_rz = update(
+            vs.sa_rz,
+            at[2:-2, 2:-2, 1, :],
+            vs.S_rz_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_rz[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]),
+        )
+        vs.sa_ss = update(
+            vs.sa_ss,
+            at[2:-2, 2:-2, 1, :],
+            vs.S_ss_init[2:-2, 2:-2, npx.newaxis] * (vs.sa_ss[2:-2, 2:-2, vs.tau, :] / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]),
         )
         vs.SA_rz = update(
             vs.SA_rz,

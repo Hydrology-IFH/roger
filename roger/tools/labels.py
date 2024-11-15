@@ -167,6 +167,8 @@ _TICKLABS = {
     "k2_q_ss": r"$k_{2-perc_{ss}}$",
     "c_basal_crop_coeff": r"$c_{basal-crop}$",
     "c_pet": r"$c_{PET}$",
+    "c_canopy": r"$c_{canopy}$",
+    "c_root": r"$c_{root}$",
     "zroot_to_zsoil_max": r"$c_{max-root-depth}$",
 }
 
@@ -327,6 +329,8 @@ _LABS = {
     "crop_scale": r"$scale_{crop}$ [-]",
     "c_canopy_growth": r"$c_{canopy-growth}$ [-]",
     "c_root_growth": r"$c_{root-growth}$ [-]",
+    "c_canopy": r"$c_{canopy}$ [-]",
+    "c_root": r"$c_{root}$ [-]",
     "c_basal_crop_coeff": r"$c_{basal-crop}$ [-]",
     "c_pet": r"$c_{PET}$ [-]",
     "zroot_to_zsoil_max": r"$c_{max-root-depth}$ [-]",

@@ -7,7 +7,7 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-lys", "--lys-experiment", type=click.Choice(["lys1", "lys2", "lys3", "lys4", "lys8", "lys9", "lys2_bromide", "lys8_bromide", "lys9_bromide"]), default="lys8")
-@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent)
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_crop")
 @roger_base_cli
 def main(lys_experiment, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -145,6 +145,8 @@ def main(lys_experiment, tmp_dir):
                 "z_root_crop",
                 "root_growth_scale",
                 "canopy_growth_scale",
+                "basal_crop_coeff_scale",
+                "pet_weight",
             ],
         )
         def set_parameters_setup(self, state):
@@ -162,15 +164,17 @@ def main(lys_experiment, tmp_dir):
 
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 0])
             vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], 1350)
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 25)
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], 50)
             vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], 300)
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.1062)
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.1247)
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], 0.0962)
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], 0.1047)
             vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], 0.1869)
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], 1.02)
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], 5.02)
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
             vs.root_growth_scale = update(vs.root_growth_scale, at[2:-2, 2:-2], 1)
             vs.canopy_growth_scale = update(vs.canopy_growth_scale, at[2:-2, 2:-2], 1)
+            vs.basal_crop_coeff_scale = update(vs.basal_crop_coeff_scale, at[2:-2, 2:-2], 1.5)
+            vs.pet_weight = update(vs.pet_weight, at[2:-2, 2:-2], 1.4)
 
         @roger_routine
         def set_parameters(self, state):
@@ -233,7 +237,7 @@ def main(lys_experiment, tmp_dir):
                 vs.ta_day = update(vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
                 vs.ta_min = update(vs.ta_min, at[:, :], npx.min(vs.TA_MIN[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24], axis=-1))
                 vs.ta_max = update(vs.ta_max, at[:, :], npx.max(vs.TA_MAX[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24], axis=-1))
-                vs.pet_day = update(vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24])
+                vs.pet_day = update(vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc+6*24] * vs.pet_weight[:, :, npx.newaxis])
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
             if (vs.year[1] != vs.year[0]) & (vs.itt > 1):

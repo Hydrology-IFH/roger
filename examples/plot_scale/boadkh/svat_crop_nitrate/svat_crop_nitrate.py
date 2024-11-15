@@ -51,12 +51,13 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         """A SVAT-CROP transport model for nitrate."""
 
         _base_path = Path(__file__).parent
-        if tmp_dir:
-            # read fluxes and states from local SSD on cluster node
-            _input_dir = Path(tmp_dir)
-        else:
-            _input_dir = _base_path.parent / "output" / "svat_crop"
+        # if tmp_dir:
+        #     # read fluxes and states from local SSD on cluster node
+        #     _input_dir = Path(tmp_dir)
+        # else:
+        #     _input_dir = _base_path.parent / "output" / "svat_crop"
         # _input_dir = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output" / "svat_crop"
+        _input_dir = _base_path.parent / "output" / "svat_crop"
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -289,7 +290,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 6)
             vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 1], 0.5)
             vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 6)
-            vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 1], 10)
+            vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 1], 3)
 
             # denitrification parameters
             vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_denit", self._base_path, "parameters.nc"))
@@ -445,8 +446,8 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             )
 
             # initial nitrate concentration (in mg/l)
-            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], 10)
-            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 10)
+            vs.C_rz = update(vs.C_rz, at[2:-2, 2:-2, :vs.taup1], 5.)
+            vs.C_ss = update(vs.C_ss, at[2:-2, 2:-2, :vs.taup1], 5.)
             # initial mineral soil nitrogen
             vs.Nmin_rz = update(vs.Nmin_rz, at[2:-2, 2:-2, :vs.taup1, :], (100 / settings.ages) * settings.dx * settings.dy * 100)
             vs.Nmin_ss = update(vs.Nmin_ss, at[2:-2, 2:-2, :vs.taup1, :], (0 / settings.ages) * settings.dx * settings.dy * 100)
@@ -666,7 +667,6 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
                     )
                     # set fertilization rate
                     row_no = _get_row_no(vs.lut_fert1[:, 0], i)
-                    print(lut_fert[row_no, 1].dtype)
                     vs.doy_fert1 = update(
                         vs.doy_fert1,
                         at[2:-2, 2:-2],

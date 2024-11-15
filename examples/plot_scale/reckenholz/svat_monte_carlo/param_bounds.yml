@@ -5,7 +5,7 @@ dmpv:
 # total length of vertical macropores (mm)
 lmpv:
 - 10
-- 600
+- 1200
 # effective porosity of soil (-)
 theta_eff:
 - 0.15
@@ -21,4 +21,4 @@ theta_pwp:
 # saturated hydraulic conductivity (mm/h)
 ks:
 - 0.1
-- 40
+- 20

@@ -10,26 +10,28 @@ import roger
 
 @click.command("main")
 def main():
-    # base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh")
-    base_path = Path("/pfs/work7/workspace/scratch/fr_rs1092-workspace/roger/examples/plot_scale/boadkh")
+    base_path = Path(__file__).parent
     lys_experiments = ["lys8", "lys3", "lys2"]
-    tm_structures = ['complete-mixing', 'advection-dispersion',
-                    'time-variant_advection-dispersion']
+    tm_structures = ['complete-mixing', 'advection-dispersion-power',
+                     'time-variant_advection-dispersion-power']
+
+    lys_experiments = ["lys3"]
+    tm_structures = ['advection-dispersion-power']
 
     # merge model output into single file
     for lys_experiment in lys_experiments:
         for tm_structure in tm_structures:
                 path = str(
-                    base_path
+                    base_path.parent
                     / "output"
-                    / "svat_crop_nitrate"
-                    / f"SVATCROPNITRATE_{lys_experiment}_{tm_structure}.*.nc"
+                    / "svat_crop_nitrate_reference"
+                    / f"SVATCROPNITRATE_{tm_structure}_{lys_experiment}.*.nc"
                 )
                 output_tm_file = (
-                    base_path
+                    base_path.parent
                     / "output"
-                    / "svat_crop_nitrate"
-                    / f"SVATCROPNITRATE_{lys_experiment}_{tm_structure}.*.nc"
+                    / "svat_crop_nitrate_reference"
+                    / f"SVATCROPNITRATE_{tm_structure}_{lys_experiment}.nc"
                 )
                 diag_files = glob.glob(path)
                 if diag_files:

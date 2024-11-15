@@ -12,12 +12,28 @@ _UNITS = {
     "frac_lp": "-",
     "theta_pwp": "-",
     "ks": "mm/hour",
-    "c_canopy_growth": "-",
-    "c_root_growth": "-",
-    "c_basal_crop_coeff": "-",
-    "c_pet": "-",
-    "zroot_to_zsoil_max": "-",
+    "c_canopy": "-",
+    "c_root": "-",
 }
+
+def calculate_clay_content(theta_sat, theta_fc, theta_pwp):
+    # calculate pore-size distribution index
+    lambda_bc = (
+                onp.log(theta_fc / theta_sat)
+                - onp.log(theta_pwp/ theta_sat)
+            ) / (onp.log(15850) - onp.log(63))
+
+    # calculate bubbling pressure
+    ha = ((theta_pwp / theta_sat) ** (1.0 / lambda_bc) * (-15850))
+
+    # calculate soil water content at pF = 6
+    theta_6 = ((ha / (-(10**6))) ** lambda_bc * theta_sat)
+
+    # calculate clay content
+    clay = (0.71 * (theta_6 - 0.01) / 0.3)
+    clay = onp.where(clay < 0.01, 0.01, clay)
+
+    return clay
 
 @click.option("-ns", "--nsamples", type=int, default=10000)
 @click.command("main")
@@ -48,19 +64,22 @@ def main(nsamples):
         df_params.loc[:, param] = values.flatten()
 
     # set constant parameters
-    df_params.loc[:, "z_soil"] = 1350
+    # df_params.loc[:, "z_soil"] = 1350
     df_params.loc[:, "kf"] = 2500
-    df_params.loc[:, "ks"] = 1.02
-    df_params.loc[:, "theta_ac"] = 0.1062
-    df_params.loc[:, "theta_ufc"] = 0.1247
-    df_params.loc[:, "theta_pwp"] = 0.1869
+    # set air capacity and usable field capacity
+    df_params.loc[:, "theta_ac"] = df_params.loc[:, "frac_lp"] * df_params.loc[:, "theta_eff"]
+    df_params.loc[:, "theta_ufc"] = (1 - df_params.loc[:, "frac_lp"]) * df_params.loc[:, "theta_eff"]
+    theta_pwp = df_params["theta_pwp"].values.astype(onp.float64)
+    theta_fc = df_params["theta_pwp"].values.astype(onp.float64) + df_params["theta_ufc"].values.astype(onp.float64)
+    theta_sat = df_params["theta_pwp"].values.astype(onp.float64) + df_params["theta_ufc"].values.astype(onp.float64) + df_params["theta_ac"].values.astype(onp.float64)
+    df_params.loc[:, "clay"] = calculate_clay_content(theta_sat, theta_fc, theta_pwp)
 
-    df_params = df_params.loc[:, ["z_soil", "dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "c_canopy_growth", "c_root_growth", "c_basal_crop_coeff", "c_pet", "zroot_to_zsoil_max"]]
+    df_params = df_params.loc[:, ["dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "c_canopy", "c_root", "clay"]]
 
     # write parameters to csv
     df_params.columns = [
-        ["[mm]", "[1/m2]", "[mm]", "[-]", "[-]", "[-]", "[mm/hour]", "[mm/hour]", "[-]", "[-]", "[-]", "[-]", "[-]"],
-        ["z_soil", "dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "c_canopy_growth", "c_root_growth", "c_basal_crop_coeff", "c_pet", "zroot_to_zsoil_max"],
+        ["[1/m2]", "[mm]", "[-]", "[-]", "[-]", "[mm/hour]", "[mm/hour]", "[-]", "[-]", "[-]"],
+        ["dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "c_canopy", "c_root", "clay"],
     ]
     df_params.to_csv(base_path / "parameters.csv", index=False, sep=";")
     return
