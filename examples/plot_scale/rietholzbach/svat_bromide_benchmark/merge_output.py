@@ -28,15 +28,15 @@ def main(tmp_dir):
         "time-variant_advection-dispersion-power",
     ]:
         tms = transport_model_structure.replace("_", " ")
-        states_tm_file = base_path / "output" / f"states_{transport_model_structure}_bromide_benchmark.nc"
-        if not os.path.exists(states_tm_file):
+        tm_file= base_path / "output" / f"SVATBROMIDE_{transport_model_structure}_bromide_benchmark.nc"
+        if not os.path.exists(tm_file):
             for year in years:
                 path = str(
-                    base_path / "output" / f"SVATTRANSPORT_{transport_model_structure}_{year}_deterministic.*.nc"
+                    base_path / "output" / f"SVATBROMIDE_{transport_model_structure}_{year}_deterministic.*.nc"
                 )
                 diag_files = glob.glob(path)
-                with h5netcdf.File(states_tm_file, "a", decode_vlen_strings=False) as f:
-                    click.echo(f"Merge output files of {tms}-{year} into {states_tm_file.as_posix()}")
+                with h5netcdf.File(tm_file, "a", decode_vlen_strings=False) as f:
+                    click.echo(f"Merge output files of {tms}-{year} into {tm_file.as_posix()}")
                     if f"{year}" not in list(f.groups.keys()):
                         f.create_group(f"{year}")
                     f.attrs.update(

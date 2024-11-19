@@ -76,7 +76,7 @@ def main(tmp_dir):
     ]
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        states_hm_si_file = base_path_output / f"states_hm_saltelli_for_{tms}.nc"
+        states_hm_si_file = base_path_output / f"SVAT_for_{tms}.nc"
         if not os.path.exists(states_hm_si_file):
             click.echo(f"Merge output files into {states_hm_si_file.as_posix()}")
             path = str(base_path_output / f"SVAT_for_{tms}.*.nc")

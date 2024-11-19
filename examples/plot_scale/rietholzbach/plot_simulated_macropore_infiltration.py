@@ -66,8 +66,8 @@ def main(tmp_dir):
     df_obs.loc[:, "d18O_perc"] = ds_obs["d18O_PERC"].isel(x=0, y=0).values
 
     # load best monte carlo simulations
-    states_hm1_file = base_path / "svat_monte_carlo" / "output" / "states_hm1.nc"
-    ds_sim_hm1 = xr.open_dataset(states_hm1_file, engine="h5netcdf")
+    hm1_file = base_path / "svat_monte_carlo" / "output" / "SVAT_best1.nc"
+    ds_sim_hm1 = xr.open_dataset(hm1_file, engine="h5netcdf")
     # assign date
     days_sim_hm1 = ds_sim_hm1["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     date_sim_hm1 = num2date(
@@ -78,8 +78,8 @@ def main(tmp_dir):
     )
     ds_sim_hm1 = ds_sim_hm1.assign_coords(Time=("Time", date_sim_hm1))
     # load best 10 monte carlo simulations
-    states_hm10_file = base_path / "svat_monte_carlo" / "output" / "states_hm10.nc"
-    ds_sim_hm10 = xr.open_dataset(states_hm10_file, engine="h5netcdf")
+    hm10_file = base_path / "svat_monte_carlo" / "output" / "SVAT_best0.nc"
+    ds_sim_hm10 = xr.open_dataset(hm10_file, engine="h5netcdf")
     # assign date
     days_sim_hm10 = ds_sim_hm10["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     date_sim_hm10 = num2date(
@@ -91,8 +91,8 @@ def main(tmp_dir):
     ds_sim_hm10 = ds_sim_hm10.assign_coords(Time=("Time", date_sim_hm10))
 
     # load best 100 monte carlo simulations
-    states_hm100_file = base_path / "svat_monte_carlo" / "output" / "states_hm100.nc"
-    ds_sim_hm100 = xr.open_dataset(states_hm100_file, engine="h5netcdf")
+    hm100_file = base_path / "svat_monte_carlo" / "output" / "SVAT_best100.nc"
+    ds_sim_hm100 = xr.open_dataset(hm100_file, engine="h5netcdf")
     # assign date
     days_sim_hm100 = ds_sim_hm100["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     date_sim_hm100 = num2date(

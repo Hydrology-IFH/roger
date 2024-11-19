@@ -82,8 +82,8 @@ def main(tmp_dir):
     df_obs_br = pd.read_csv(path_obs_br, skiprows=1, sep=";", na_values="")
 
     # load best monte carlo simulations
-    states_hm1_file = base_path / "svat_monte_carlo" / "output" / "states_hm1.nc"
-    ds_sim_hm1 = xr.open_dataset(states_hm1_file, engine="h5netcdf")
+    hm1_file = base_path / "svat_monte_carlo" / "output" / "SVAT_best1.nc"
+    ds_sim_hm1 = xr.open_dataset(hm1_file, engine="h5netcdf")
     # assign date
     days_sim_hm1 = ds_sim_hm1["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     date_sim_hm1 = num2date(
@@ -94,8 +94,8 @@ def main(tmp_dir):
     )
     ds_sim_hm1 = ds_sim_hm1.assign_coords(Time=("Time", date_sim_hm1))
     # load best 10 monte carlo simulations
-    states_hm10_file = base_path / "svat_monte_carlo" / "output" / "states_hm10.nc"
-    ds_sim_hm10 = xr.open_dataset(states_hm10_file, engine="h5netcdf")
+    hm10_file = base_path / "svat_monte_carlo" / "output" / "SVAT_best10.nc"
+    ds_sim_hm10 = xr.open_dataset(hm10_file, engine="h5netcdf")
     # assign date
     days_sim_hm10 = ds_sim_hm10["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     date_sim_hm10 = num2date(
@@ -107,8 +107,8 @@ def main(tmp_dir):
     ds_sim_hm10 = ds_sim_hm10.assign_coords(Time=("Time", date_sim_hm10))
 
     # load best 100 monte carlo simulations
-    states_hm100_file = base_path / "svat_monte_carlo" / "output" / "states_hm100.nc"
-    ds_sim_hm100 = xr.open_dataset(states_hm100_file, engine="h5netcdf")
+    hm100_file = base_path / "svat_monte_carlo" / "output" / "SVAT_best100.nc"
+    ds_sim_hm100 = xr.open_dataset(hm100_file, engine="h5netcdf")
     # assign date
     days_sim_hm100 = ds_sim_hm100["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     date_sim_hm100 = num2date(
@@ -119,10 +119,10 @@ def main(tmp_dir):
     )
     ds_sim_hm100 = ds_sim_hm100.assign_coords(Time=("Time", date_sim_hm100))
 
-    states_hm_for_tm_file = (
-        base_path / "svat_oxygen18_monte_carlo" / "output" / "states_hm_best_for_advection-dispersion-power.nc"
+    hm_for_tm_file = (
+        base_path / "svat_oxygen18_monte_carlo" / "output" / "SVAT_best_for_advection-dispersion-power.nc"
     )
-    ds_sim_hm_for_tm = xr.open_dataset(states_hm_for_tm_file, engine="h5netcdf")
+    ds_sim_hm_for_tm = xr.open_dataset(hm_for_tm_file, engine="h5netcdf")
     # assign date
     days_sim_hm_for_tm = ds_sim_hm_for_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     date_sim_hm_for_tm = num2date(
@@ -141,8 +141,8 @@ def main(tmp_dir):
 
     # load HYDRUS-1D benchmarks
     # oxygen-18 simulations
-    states_hydrus_file = base_path / "hydrus_benchmark" / "states_hydrus_18O.nc"
-    ds_hydrus_18O = xr.open_dataset(states_hydrus_file, engine="h5netcdf")
+    hydrus_file = base_path / "hydrus_benchmark" / "hydrus_18O.nc"
+    ds_hydrus_18O = xr.open_dataset(hydrus_file, engine="h5netcdf")
     hours_hydrus_18O = ds_hydrus_18O["Time"].values / onp.timedelta64(60 * 60, "s")
     date_hydrus_18O = num2date(
         hours_hydrus_18O,
@@ -153,8 +153,8 @@ def main(tmp_dir):
     ds_hydrus_18O = ds_hydrus_18O.assign_coords(Time=("Time", date_hydrus_18O))
 
     # travel time simulations
-    states_hydrus_file = base_path / "hydrus_benchmark" / "states_hydrus_tt.nc"
-    ds_hydrus_tt = xr.open_dataset(states_hydrus_file, engine="h5netcdf", decode_times=False)
+    hydrus_file = base_path / "hydrus_benchmark" / "hydrus_tt.nc"
+    ds_hydrus_tt = xr.open_dataset(hydrus_file, engine="h5netcdf", decode_times=False)
     days_hydrus_tt = ds_hydrus_tt["Time"].values / 24
     date_hydrus_tt = num2date(
         days_hydrus_tt,
@@ -397,8 +397,8 @@ def main(tmp_dir):
             alpha=0.7,
         )
     axes[2, 0].plot(
-        dict_obs_sim["PERC"].loc["1997-01-07":"1999", :].index,
-        dict_obs_sim["PERC"].loc["1997-01-07":"1999", "obs"].cumsum(),
+        dict_obs_sim100["PERC"].loc["1997-01-07":"1999", :].index,
+        dict_obs_sim100["PERC"].loc["1997-01-07":"1999", "obs"].cumsum(),
         lw=1,
         color="blue",
         ls="-",
@@ -435,8 +435,8 @@ def main(tmp_dir):
             alpha=0.7,
         )
     axes[2, 1].plot(
-        dict_obs_sim["PERC"].loc["2006":, :].index,
-        dict_obs_sim["PERC"].loc["2006":, "obs"].cumsum(),
+        dict_obs_sim100["PERC"].loc["2006":, :].index,
+        dict_obs_sim100["PERC"].loc["2006":, "obs"].cumsum(),
         lw=1,
         color="blue",
         ls="-",
@@ -461,12 +461,35 @@ def main(tmp_dir):
     axes[2, 1].xaxis.set_major_formatter(mdates.DateFormatter("%y-%m"))
     axes[2, 1].tick_params(axis="x", rotation=33)
     fig.tight_layout()
-    file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}_for_talk.png"
+    file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_for_talk.png"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
-    file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_{metric_for_opt}_for_talk.pdf"
+    file = f"prec_et_dS_perc_obs_sim_cumulated_best_100_optimized_with_for_talk.pdf"
     path = base_path_figs / file
     fig.savefig(path, dpi=300)
+
+    # load metrics of transport simulations
+    dict_params_metrics_tm_mc = {}
+    for tm_structure in [
+        "complete-mixing",
+        "piston",
+        "advection-dispersion-power",
+        "time-variant advection-dispersion-power",
+        "preferential-power",
+        "older-preference-power",
+        "advection-dispersion-kumaraswamy",
+        "time-variant advection-dispersion-kumaraswamy",
+    ]:
+        tms = tm_structure.replace(" ", "_")
+        file = (
+            base_path
+            / "svat_oxygen18_monte_carlo"
+            / "output"
+            / f"params_metrics_{tms}.txt"
+        )
+        df_params_metrics = pd.read_csv(file, sep="\t")
+        dict_params_metrics_tm_mc[tm_structure] = {}
+        dict_params_metrics_tm_mc[tm_structure]["params_metrics"] = df_params_metrics
 
     # simulated oxygen-18 in percolation
     fig, ax = plt.subplots(3, 1, sharex=True, figsize=(6, 4))
@@ -481,8 +504,8 @@ def main(tmp_dir):
         idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
         tms = tm_structure.replace(" ", "_")
         # load transport simulation
-        states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "output" / f"states_{tms}_monte_carlo.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+        tm_file = base_path / "svat_oxygen18_monte_carlo" / "output" / f"{tms}_monte_carlo.nc"
+        ds_sim_tm = xr.open_dataset(tm_file, engine="h5netcdf")
         days_sim_tm = ds_sim_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
         date_sim_tm = num2date(
             days_sim_tm,
@@ -508,7 +531,7 @@ def main(tmp_dir):
         ax.flatten()[i + 1].set_xlim(ds_sim_tm["Time"].values[0], ds_sim_tm["Time"].values[-1])
     ax[-1].set_xlabel("Time [year]")
     fig.tight_layout()
-    file = base_path_figs / f"d18O_perc_sim_obs_tm_structures_optimized_with_{metric_for_opt}.png"
+    file = base_path_figs / "d18O_perc_sim_obs_tm_structures.png"
     fig.savefig(file, dpi=300)
 
     # virtual bromide experiment
@@ -528,10 +551,10 @@ def main(tmp_dir):
                 "time-variant advection-dispersion-power",
             ]:
                 df_sim_br_conc = pd.DataFrame(index=df_obs_br.index)
-                states_br_file = (
-                    base_path / "svat_bromide_benchmark" / "output" / f"states_{tms}_bromide_benchmark_stgallen.nc"
+                br_file = (
+                    base_path / "svat_bromide_benchmark" / "output" / f"{tms}_bromide_benchmark_stgallen.nc"
                 )
-                with xr.open_dataset(states_br_file, engine="h5netcdf", decode_times=False, group=f"1991") as ds:
+                with xr.open_dataset(br_file, engine="h5netcdf", decode_times=False, group=f"1991") as ds:
                     sim_vals = ds["C_q_ss_mmol_bs"].isel(x=0, y=0).values[315:716]
                     sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
                     df_sim_br_conc.loc[:, f"1991"] = sim_vals
@@ -547,8 +570,8 @@ def main(tmp_dir):
             df_sim_br_conc = pd.DataFrame(index=df_obs_br.index)
             df_sim_br_mass = pd.DataFrame(index=df_obs_br.index)
             for year in years:
-                states_br_file = base_path / "svat_bromide_benchmark" / "output" / f"states_{tms}_bromide_benchmark.nc"
-                with xr.open_dataset(states_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
+                br_file = base_path / "svat_bromide_benchmark" / "output" / f"{tms}_bromide_benchmark.nc"
+                with xr.open_dataset(br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
                     x = onp.where(
                         (onp.round(ds["alpha_transp"].isel(Time=0).values, 1) == alpha)
                         & (onp.round(ds["alpha_q"].isel(Time=0).values, 1) == alpha)
@@ -583,8 +606,8 @@ def main(tmp_dir):
             axes.flatten()[i].set_ylabel("%s\nBr [mmol/l]" % (_LABS_TM[tm_structure]))
         df_sim_br = pd.DataFrame(index=df_obs_br.index)
         for year in years:
-            states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
-            with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
+            hydrus_br_file = base_path / "hydrus_benchmark" / "hydrus_bromide.nc"
+            with xr.open_dataset(hydrus_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
                 df_sim_br = pd.DataFrame(index=df_obs_br.index)
                 df_sim_br.loc[:, f"{year}"] = ds["Br_perc_mmol"].values
             axes.flatten()[-1].plot(
@@ -617,8 +640,8 @@ def main(tmp_dir):
     fig, axes = plt.subplots(2, 3, sharey=True, figsize=(4, 3))
     for i, tm_structure in enumerate(tm_structures1):
         tms = tm_structure.replace(" ", "_")
-        states_tm_file = base_path / "svat_oxygen18" / "output" / f"states_{tms}.nc"
-        with xr.open_dataset(states_tm_file, engine="h5netcdf") as ds_sim_tm:
+        tm_file = base_path / "svat_oxygen18" / "output" / f"{tms}.nc"
+        with xr.open_dataset(tm_file, engine="h5netcdf") as ds_sim_tm:
             days_sim_tm = ds_sim_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
             date_sim_tm = num2date(
                 days_sim_tm,

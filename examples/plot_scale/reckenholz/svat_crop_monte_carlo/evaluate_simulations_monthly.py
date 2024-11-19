@@ -124,8 +124,9 @@ def main(tmp_dir):
                             df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
                         else:
                             if var_sim == "S":
-                                obs_vals = df_eval.loc[:, "obs"].values.astype(float)
-                                sim_vals = df_eval.loc[:, "sim"].values.astype(float)
+                                df_eval_monthly = df_eval.resample("ME").mean()
+                                obs_vals = df_eval_monthly.loc[:, "obs"].values.astype(float)
+                                sim_vals = df_eval_monthly.loc[:, "sim"].values.astype(float)
                             else:
                                 df_eval_monthly = df_eval.resample("ME").sum()
                                 obs_vals = df_eval_monthly.loc[:, "obs"].values.astype(float)
@@ -144,8 +145,9 @@ def main(tmp_dir):
                             df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals, sim_vals)
                             for year1, year2 in zip([2011, 2016, 2011, 2011], [2015, 2017, 2017, 2015]):
                                 if var_sim == "S":
-                                    obs_vals_year = df_eval.loc[f'{year1}':f'{year2}', "obs"].values.astype(float)
-                                    sim_vals_year = df_eval.loc[f'{year1}':f'{year2}', "sim"].values.astype(float)
+                                    df_eval_monthly = df_eval.resample("ME").mean()
+                                    obs_vals_year = df_eval_monthly.loc[f'{year1}':f'{year2}', "obs"].values.astype(float)
+                                    sim_vals_year = df_eval_monthly.loc[f'{year1}':f'{year2}', "sim"].values.astype(float)
                                 else:
                                     df_eval_monthly = df_eval.resample("ME").sum()
                                     obs_vals_year = df_eval_monthly.loc[f'{year1}':f'{year2}', "obs"].values.astype(float)

@@ -105,7 +105,7 @@ def main(tmp_dir):
     }
 
     metrics = ["KGE_q_ss"]
-    years = [2011, 2012, 2013, 2014, 2015, 2016]
+    years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
     lys_experiments = ["lys8", "lys3", "lys2"]
 
     for metric in metrics:
@@ -114,7 +114,7 @@ def main(tmp_dir):
         fig, ax = plt.subplots(nrow, ncol, sharey=True, sharex=True, figsize=(6, 6))
         for jj, year in enumerate(years):
             for ii, lys_experiment in enumerate(lys_experiments):
-                df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+                df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
                 df_params_metrics = df_params_metrics.sort_values(by=[f"{metric}_perc_pet"], ascending=False)
                 df = df_params_metrics.loc[:, [f"{metric}_perc_pet_{year}"]]
                 df = df.iloc[:100, :]
@@ -148,7 +148,7 @@ def main(tmp_dir):
         fig.savefig(file, dpi=300)
 
     metrics = ["KGE_q_ss"]
-    years = [2011, 2012, 2013, 2014, 2015, 2016]
+    years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
     lys_experiments = ["lys8", "lys3", "lys2"]
 
     for metric in metrics:
@@ -157,7 +157,7 @@ def main(tmp_dir):
         fig, ax = plt.subplots(nrow, ncol, sharey=True, sharex=True, figsize=(6, 6))
         for jj, year in enumerate(years):
             for ii, lys_experiment in enumerate(lys_experiments):
-                df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+                df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
                 df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2017"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
                 df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
                 # write .txt-file
@@ -204,7 +204,7 @@ def main(tmp_dir):
         ncol = len(lys_experiments)
         fig, ax = plt.subplots(nrow, ncol, sharey=True, sharex=True, figsize=(6, 2))
         for ii, lys_experiment in enumerate(lys_experiments):
-            df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+            df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
             df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2017"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
             df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
             df = df_params_metrics.loc[:, [f"{metric}_perc_pet"]]
@@ -240,7 +240,7 @@ def main(tmp_dir):
 
 
     # metrics = ["KGE_q_ss"]
-    # years = [2011, 2012, 2013, 2014, 2015, 2016]
+    # years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
     # lys_experiments = ["lys4", "lys9"]
 
     # for metric in metrics:
@@ -250,7 +250,7 @@ def main(tmp_dir):
     #     for jj, year in enumerate(years):
     #         metric_year = f"{metric}_{year}"
     #         for ii, lys_experiment in enumerate(lys_experiments):
-    #             df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+    #             df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
     #             df_params_metrics = df_params_metrics.sort_values(by=[f"{metric}_perc_pet"], ascending=False)
     #             df = df_params_metrics.loc[:, [f"{metric}_perc_pet_{year}"]]
     #             df = df.iloc[:100, :]
@@ -288,7 +288,7 @@ def main(tmp_dir):
     params = ["theta_ac", "theta_ufc", "theta_pwp", "ks"]
     ll_df = []
     for lys_experiment in lys_experiments:
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
         df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2017"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         df_params_metrics_100 = df_params_metrics.iloc[:100, :]
@@ -316,7 +316,7 @@ def main(tmp_dir):
     params = ["dmpv", "lmpv", "c_canopy", "c_root"]
     ll_df = []
     for lys_experiment in lys_experiments:
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
         df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2017"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         df_params_metrics_100 = df_params_metrics.iloc[:100, :]
@@ -340,15 +340,15 @@ def main(tmp_dir):
     fig.savefig(file, dpi=300)
 
 
-    fig, ax = plt.subplots(6, 4, figsize=(6, 6), sharey='col')
+    fig, ax = plt.subplots(7, 4, figsize=(6, 6), sharey='col')
     colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
     lys_experiments = ["lys8", "lys3", "lys2"]
     params = ["theta_ac", "theta_ufc", "theta_pwp", "ks"]
-    years = [2011, 2012, 2013, 2014, 2015, 2016]
+    years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
     for j, year in enumerate(years):
         ll_df = []
         for lys_experiment in lys_experiments:
-            df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+            df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
             df_params_metrics[f"E_multi_{year}"] = 0.7 * df_params_metrics[f"KGE_q_ss_perc_pet_{year}"] + 0.3 * (1 - ((1 - df_params_metrics[f"r_S_perc_pet_{year}"])**2 + (1 - df_params_metrics[f"KGE_alpha_S_perc_pet_{year}"])**2)**(0.5))
             df_params_metrics = df_params_metrics.sort_values(by=[f"E_multi_{year}"], ascending=False)
             df_params_metrics_100 = df_params_metrics.iloc[:100, :]
@@ -372,7 +372,7 @@ def main(tmp_dir):
     fig.savefig(file, dpi=300)
 
 
-    fig, ax = plt.subplots(6, 4, figsize=(6, 6), sharey='col')
+    fig, ax = plt.subplots(7, 4, figsize=(6, 6), sharey='col')
     colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
     lys_experiments = ["lys8", "lys3", "lys2"]
     params = ["dmpv", "lmpv", "c_canopy", "c_root"]
@@ -380,7 +380,7 @@ def main(tmp_dir):
     for j, year in enumerate(years):
         ll_df = []
         for lys_experiment in lys_experiments:
-            df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+            df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
             df_params_metrics[f"E_multi_{year}"] = 0.7 * df_params_metrics[f"KGE_q_ss_perc_pet_{year}"] + 0.3 * (1 - ((1 - df_params_metrics[f"r_S_perc_pet_{year}"])**2 + (1 - df_params_metrics[f"KGE_alpha_S_perc_pet_{year}"])**2)**(0.5))
             df_params_metrics = df_params_metrics.sort_values(by=[f"E_multi_{year}"], ascending=False)
             df_params_metrics_100 = df_params_metrics.iloc[:100, :]
@@ -410,7 +410,7 @@ def main(tmp_dir):
     params = ["theta_ac", "theta_ufc", "theta_pwp", "ks"]
     ll_df = []
     for lys_experiment in lys_experiments:
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
         df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2017"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         df_params_metrics_100 = df_params_metrics.iloc[:100, :]
@@ -419,7 +419,7 @@ def main(tmp_dir):
         df_params["year"] = ""
         ll_df.append(df_params)
         for year in years:
-            df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+            df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
             df_params_metrics[f"E_multi_{year}"] = 0.7 * df_params_metrics[f"KGE_q_ss_perc_pet_{year}"] + 0.3 * (1 - ((1 - df_params_metrics[f"r_S_perc_pet_{year}"])**2 + (1 - df_params_metrics[f"KGE_alpha_S_perc_pet_{year}"])**2)**(0.5))
             df_params_metrics = df_params_metrics.sort_values(by=[f"E_multi_{year}"], ascending=False)
             df_params_metrics_100 = df_params_metrics.iloc[:100, :]
@@ -450,7 +450,7 @@ def main(tmp_dir):
     params = ["dmpv", "lmpv", "c_canopy", "c_root"]
     ll_df = []
     for lys_experiment in lys_experiments:
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
         df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2017"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics[f"KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         df_params_metrics_100 = df_params_metrics.iloc[:100, :]
@@ -459,7 +459,7 @@ def main(tmp_dir):
         df_params["year"] = ""
         ll_df.append(df_params)
         for year in years:
-            df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+            df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
             df_params_metrics[f"E_multi_{year}"] = 0.7 * df_params_metrics[f"KGE_q_ss_perc_pet_{year}"] + 0.3 * (1 - ((1 - df_params_metrics[f"r_S_perc_pet_{year}"])**2 + (1 - df_params_metrics[f"KGE_alpha_S_perc_pet_{year}"])**2)**(0.5))
             df_params_metrics = df_params_metrics.sort_values(by=[f"E_multi_{year}"], ascending=False)
             df_params_metrics_100 = df_params_metrics.iloc[:100, :]
@@ -491,7 +491,7 @@ def main(tmp_dir):
     params = ["theta_ac", "theta_ufc", "theta_pwp", "ks"]
     ll_df = []
     for lys_experiment in lys_experiments:
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
         df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2015"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2015"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         df_params_metrics_100 = df_params_metrics.iloc[:100, :]
@@ -500,7 +500,7 @@ def main(tmp_dir):
         df_params["year"] = ""
         ll_df.append(df_params)
         for year in years:
-            df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+            df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
             df_params_metrics[f"E_multi_{year}"] = 0.7 * df_params_metrics[f"KGE_q_ss_perc_pet_{year}"] + 0.3 * (1 - ((1 - df_params_metrics[f"r_S_perc_pet_{year}"])**2 + (1 - df_params_metrics[f"KGE_alpha_S_perc_pet_{year}"])**2)**(0.5))
             df_params_metrics = df_params_metrics.sort_values(by=[f"E_multi_{year}"], ascending=False)
             df_params_metrics_100 = df_params_metrics.iloc[:100, :]
@@ -532,7 +532,7 @@ def main(tmp_dir):
     params = ["dmpv", "lmpv", "c_canopy", "c_root"]
     ll_df = []
     for lys_experiment in lys_experiments:
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
         df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2015"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2015"])**2 + (1 - df_params_metrics[f"KGE_alpha_S_perc_pet_2011-2015"])**2)**(0.5))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         df_params_metrics_100 = df_params_metrics.iloc[:100, :]
@@ -541,7 +541,7 @@ def main(tmp_dir):
         df_params["year"] = ""
         ll_df.append(df_params)
         for year in years:
-            df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+            df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
             df_params_metrics[f"E_multi_{year}"] = 0.7 * df_params_metrics[f"KGE_q_ss_perc_pet_{year}"] + 0.3 * (1 - ((1 - df_params_metrics[f"r_S_perc_pet_{year}"])**2 + (1 - df_params_metrics[f"KGE_alpha_S_perc_pet_{year}"])**2)**(0.5))
             df_params_metrics = df_params_metrics.sort_values(by=[f"E_multi_{year}"], ascending=False)
             df_params_metrics_100 = df_params_metrics.iloc[:100, :]
@@ -572,7 +572,7 @@ def main(tmp_dir):
     years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
     ll_df = []
     for lys_experiment in lys_experiments:
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
         df_params_metrics["E_dS"] = (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
         df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2017"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
@@ -616,14 +616,65 @@ def main(tmp_dir):
 
     colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
     lys_experiments = ["lys8", "lys3", "lys2"]
+    years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
     ll_df = []
     for lys_experiment in lys_experiments:
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
+        df_params_metrics["E_dS"] = (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
+        df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2017"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
+        df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
+        df_params_metrics_100 = df_params_metrics.iloc[:100, :]
+        metrics = ["KGE_q_ss_perc_pet_2011-2017", "E_dS", "E_multi"]
+        df_metrics = df_params_metrics_100.loc[:, metrics]
+        df_metrics.columns = ["KGE_perc", "E_dS", "E_multi"]
+        df_metrics["lys"] = lys_experiment
+        df_metrics["year"] = ""
+        ll_df.append(df_metrics)
+        for year in years:
+            df_params_metrics[f"E_dS_{year}"] = (1 - ((1 - df_params_metrics[f"r_S_perc_pet_{year}"])**2 + (1 - df_params_metrics[f"KGE_alpha_S_perc_pet_{year}"])**2)**(0.5))
+            df_params_metrics[f"E_multi_{year}"] = 0.7 * df_params_metrics[f"KGE_q_ss_perc_pet_{year}"] + 0.3 * (1 - ((1 - df_params_metrics[f"r_S_perc_pet_{year}"])**2 + (1 - df_params_metrics[f"KGE_alpha_S_perc_pet_{year}"])**2)**(0.5))
+            metrics = [f"KGE_q_ss_perc_pet_{year}", f"E_dS_{year}", f"E_multi_{year}"]
+            df_params_metrics = df_params_metrics.sort_values(by=[f"E_multi_{year}"], ascending=False)
+            df_params_metrics_100 = df_params_metrics.iloc[:100, :]
+            df_metrics = df_params_metrics_100.loc[:, metrics]
+            df_metrics.columns = ["KGE_perc", "E_dS", "E_multi"]
+            df_metrics["lys"] = lys_experiment
+            df_metrics["year"] = f"{year}"
+            ll_df.append(df_metrics)
+    df = pd.concat(ll_df)
+    df_long = pd.melt(df, value_vars=["KGE_perc", "E_dS", "E_multi"], id_vars=["lys", "year"])
+
+    metrics = ["KGE_perc", "E_dS", "E_multi"]
+    fig, ax = plt.subplots(3, 1, figsize=(3, 5), sharex=True)
+    for i, var in enumerate(metrics):
+        data = df_long.loc[df_long["variable"] == var, :]
+        g = sns.boxplot(data=data, x="year", y="value", hue="lys", ax=ax[i], palette=colors, showfliers=False)
+        ax[i].set_xlabel("")
+    ax[0].set_ylabel("$KGE_{PERC}$ [-]")
+    ax[1].set_ylabel("$E_{dS}$ [-]")
+    ax[2].set_ylabel("$E_{multi}$ [-]")
+    ax[0].legend_.remove()
+    ax[1].legend_.remove()
+    handels,labels = g.get_legend_handles_labels()
+    labels = [fert_lys2_lys3_lys8[lys] for lys in lys_experiments]
+    g.legend(handels, labels, frameon=False, title="")     
+    fig.tight_layout()
+    file = base_path_figs / "boxplot_metrics_lys2_lys3_lys8_Emulti_2011-2017_.png"
+    fig.savefig(file, dpi=300)
+
+
+
+    colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
+    lys_experiments = ["lys8", "lys3", "lys2"]
+    years = [2011, 2012, 2013, 2014, 2015]
+    ll_df = []
+    for lys_experiment in lys_experiments:
+        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
         df_params_metrics["E_dS"] = (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2015"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2015"])**2)**(0.5))
         df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2015"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2015"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2015"])**2)**(0.5))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         df_params_metrics_100 = df_params_metrics.iloc[:100, :]
-        metrics = ["KGE_q_ss_perc_pet_2011-2017", "E_dS", "E_multi"]
+        metrics = ["KGE_q_ss_perc_pet_2011-2015", "E_dS", "E_multi"]
         df_metrics = df_params_metrics_100.loc[:, metrics]
         df_metrics.columns = ["KGE_perc", "E_dS", "E_multi"]
         df_metrics["lys"] = lys_experiment
@@ -658,6 +709,55 @@ def main(tmp_dir):
     fig.tight_layout()
     file = base_path_figs / "boxplot_metrics_lys2_lys3_lys8_Emulti_2011-2015.png"
     fig.savefig(file, dpi=300)
+
+    colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
+    lys_experiments = ["lys8", "lys3", "lys2"]
+    years = [2011, 2012, 2013, 2014, 2015]
+    ll_df = []
+    for lys_experiment in lys_experiments:
+        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
+        df_params_metrics["E_dS"] = (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2015"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2015"])**2)**(0.5))
+        df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2015"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2015"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2015"])**2)**(0.5))
+        df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
+        df_params_metrics_100 = df_params_metrics.iloc[:100, :]
+        metrics = ["KGE_q_ss_perc_pet_2011-2015", "E_dS", "E_multi"]
+        df_metrics = df_params_metrics_100.loc[:, metrics]
+        df_metrics.columns = ["KGE_perc", "E_dS", "E_multi"]
+        df_metrics["lys"] = lys_experiment
+        df_metrics["year"] = ""
+        ll_df.append(df_metrics)
+        for year in years:
+            df_params_metrics[f"E_dS_{year}"] = (1 - ((1 - df_params_metrics[f"r_S_perc_pet_{year}"])**2 + (1 - df_params_metrics[f"KGE_alpha_S_perc_pet_{year}"])**2)**(0.5))
+            df_params_metrics[f"E_multi_{year}"] = 0.7 * df_params_metrics[f"KGE_q_ss_perc_pet_{year}"] + 0.3 * (1 - ((1 - df_params_metrics[f"r_S_perc_pet_{year}"])**2 + (1 - df_params_metrics[f"KGE_alpha_S_perc_pet_{year}"])**2)**(0.5))
+            metrics = [f"KGE_q_ss_perc_pet_{year}", f"E_dS_{year}", f"E_multi_{year}"]
+            df_params_metrics = df_params_metrics.sort_values(by=[f"E_multi_{year}"], ascending=False)
+            df_params_metrics_100 = df_params_metrics.iloc[:100, :]
+            df_metrics = df_params_metrics_100.loc[:, metrics]
+            df_metrics.columns = ["KGE_perc", "E_dS", "E_multi"]
+            df_metrics["lys"] = lys_experiment
+            df_metrics["year"] = f"{year}"
+            ll_df.append(df_metrics)
+    df = pd.concat(ll_df)
+    df_long = pd.melt(df, value_vars=["KGE_perc", "E_dS", "E_multi"], id_vars=["lys", "year"])
+
+    metrics = ["KGE_perc", "E_dS", "E_multi"]
+    fig, ax = plt.subplots(3, 1, figsize=(3, 5), sharex=True)
+    for i, var in enumerate(metrics):
+        data = df_long.loc[df_long["variable"] == var, :]
+        g = sns.boxplot(data=data, x="year", y="value", hue="lys", ax=ax[i], palette=colors, showfliers=False)
+        ax[i].set_xlabel("")
+    ax[0].set_ylabel("$KGE_{PERC}$ [-]")
+    ax[1].set_ylabel("$E_{dS}$ [-]")
+    ax[2].set_ylabel("$E_{multi}$ [-]")
+    ax[0].legend_.remove()
+    ax[1].legend_.remove()
+    handels,labels = g.get_legend_handles_labels()
+    labels = [fert_lys2_lys3_lys8[lys] for lys in lys_experiments]
+    g.legend(handels, labels, frameon=False, title="")     
+    fig.tight_layout()
+    file = base_path_figs / "boxplot_metrics_lys2_lys3_lys8_Emulti_2011-2015_.png"
+    fig.savefig(file, dpi=300)
+
 
 
     return

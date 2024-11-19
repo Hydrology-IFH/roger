@@ -26,8 +26,8 @@ def main(tmp_dir):
         os.mkdir(base_path_figs)
 
     # load simulation
-    states_hm_mc_file = base_path / "output" / "SVAT.nc"
-    ds_sim = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
+    hm_mc_file = base_path / "output" / "SVAT.nc"
+    ds_sim = xr.open_dataset(hm_mc_file, engine="h5netcdf")
     # assign date
     days_sim = ds_sim["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     date_sim = num2date(
@@ -108,7 +108,8 @@ def main(tmp_dir):
 
                     if var_sim in ["dS"]:
                         df_eval.loc["2000-01":"2000-06", :] = onp.nan
-                        df_eval = df_eval.dropna()
+                        df_eval_daily = df_eval.dropna()
+                        df_eval = df_eval_daily.resample("3D").mean()
                         obs_vals = df_eval.loc[:, "obs"].values.astype(float)
                         sim_vals = df_eval.loc[:, "sim"].values.astype(float)
                         # add offset since diagnostic efficiency requires positive values
@@ -185,7 +186,8 @@ def main(tmp_dir):
                     else:
                         # skip first seven days for warmup
                         df_eval.loc[:"1997-01-07", :] = onp.nan
-                        df_eval = df_eval.dropna()
+                        df_eval_daily = df_eval.dropna()
+                        df_eval = df_eval_daily.resample("3D").sum()
                         obs_vals = df_eval.loc[:, "obs"].values.astype(float)
                         sim_vals = df_eval.loc[:, "sim"].values.astype(float)
                         key_kge = "KGE_" + var_sim + f"{sc1}"
@@ -364,7 +366,7 @@ def main(tmp_dir):
             )
 
         # write .txt-file
-        file = base_path_figs / "params_metrics.txt"
+        file = base_path_figs / "params_metrics_3days.txt"
         df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
     return
 

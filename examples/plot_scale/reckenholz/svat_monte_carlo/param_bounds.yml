@@ -9,7 +9,7 @@ lmpv:
 # effective porosity of soil (-)
 theta_eff:
 - 0.15
-- 0.35
+- 0.30
 # fraction of large pores (-)
 frac_lp:
 - 0.1
@@ -20,5 +20,5 @@ theta_pwp:
 - 0.3
 # saturated hydraulic conductivity (mm/h)
 ks:
-- 0.1
+- 1
 - 20

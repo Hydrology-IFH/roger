@@ -58,9 +58,9 @@ Monte Carlo simulations with hydrologic model used for parameter estimation
 - `param_bounds.yml`: contains parameter boundaries for Monte Carlo sampling
 - `svat_mc.sh`: job script to run Monte Carlo simulations
 - `svat_mc_gpu.sh`: job script to run Monte Carlo simulations on GPU
-- `output/states_hm_mc.mc`: Monte Carlo simulations of hydrologic fluxes
-- `output/states_hm1.mc`: States of best simulated hydrologic fluxes
-- `output/states_hm100.mc`: States of best 100 simulated hydrologic fluxes
+- `output/SVAT.nc`: Monte Carlo simulations of hydrologic fluxes
+- `output/SVAT_best1.nc`: Fluxes and storages of best simulation
+- `output/SVAT_best100.nc`: Fluxes and storages of best 100 simulation
 - `merge_output.py`: Merges the model output into a single file
 - `evaluate_simulations.py`: Calculates metrics for each simulation
 
@@ -69,7 +69,7 @@ Workflow:
 2. Run `merge_output.py`
 3. Run `evaluate_simulations.py`
 
-### svat_sensitivity
+### svat_sobol
 Saltelli simulations with hydrologic model used for sensitvity analysis
 - `input/`: Contains precipitation data (`PREC.txt`; 10 minutes time steps), air temperature data (`TA.txt`; daily time steps) and potential evapotranspiration data (`PET.txt`; daily time steps).
 - `sample_params.py`: Samples parameter sets using Saltelli's extension of the Sobol' sequence
@@ -77,7 +77,7 @@ Saltelli simulations with hydrologic model used for sensitvity analysis
 - `params_saltelli.nc`: Sampled hydrologic model parameters and transport model parameters
 - `svat_sa_for_*.sh`: job script to run simulated hydrologic fluxes required by transport model structures
 - `svat_sa_for_*_gpu.sh`: job script to run simulated hydrologic fluxes on GPU required by transport model structures
-- `output/states_hm_sa_for_*.nc`: simulated hydrologic fluxes for corresponding transport model structure
+- `output/SVAT_for_*.nc`: simulated hydrologic fluxes for corresponding transport model structure
 - `merge_output.py`: Merges the model output into a single file
 - `evaluate_simulations.py`: Calculates metrics for each simulation
 
@@ -94,8 +94,8 @@ In order to solve the transport with StorAge selection (SAS) functions, three sc
 
 ### svat_oxygen18
 Single run of oxygen 18 transport model. Requires simulated hydrologic fluxes and transport model parameters.
-- `input/`: contains data for oxygen-18 in precipitation data (`d18O.txt`; daily time steps) and hydrological fluxes and storages (`states_hm.nc`; daily time steps).
-- `oxygen18_deterministic_svat_*_gpu.sh`: job script to run Monte Carlo simulations on GPU with the provided sas solver and provided transport model structure (e.g. adp=advection-dispersio-power).
+- `input/`: contains data for oxygen-18 in precipitation data (`d18O.txt`; daily time steps) and hydrological fluxes and storages (`SVAT.nc`; daily time steps).
+- `svat18O_*_gpu.sh`: job script to run Monte Carlo simulations on GPU with the provided sas solver and provided transport model structure (e.g. adp=advection-dispersio-power).
 - `output/`: contains model output
 
 Workflow:
@@ -105,14 +105,14 @@ Workflow:
 
 ### svat_oxygen18_monte_carlo
 Monte Carlo simulations with oxygen-18 transport models used for parameter estimation. Requires simulated hydrologic fluxes.
-- `input/`: contains data for oxygen-18 in precipitation data (`d18O.txt`; daily time steps) and hydrological fluxes and storages (`states_hm100_bootstrap.nc`; daily time steps).
+- `input/`: contains data for oxygen-18 in precipitation data (`d18O.txt`; daily time steps) and hydrological fluxes and storages (`SVAT_best100_bootstrap.nc`; daily time steps).
 - `param_bounds.yml`: contains parameter boundaries for Monte Carlo sampling
-- `oxygen18_deterministic_svat_*_mc_*_gpu.sh`: job script to run Monte Carlo simulations on GPU with the provided sas solver and provided transport model structure (e.g. adp=advection-dispersion-power).
+- `svat18O_*_mc_*_gpu.sh`: job script to run Monte Carlo simulations on GPU with the provided sas solver and provided transport model structure (e.g. adp=advection-dispersion-power).
 - `bootstrap.py`: Bootstrap best 10 or 100 simulated hydrologic fluxes based on size of Monte Carlo samples (e.g. 1000)
-- `input/states_hm10_bootstrap.nc`: Bootstrapped samples of best 10 simulated hydrologic fluxes
-- `input/states_hm100_bootstrap.nc`: Bootstrapped samples of best 100 simulated hydrologic fluxes
-- `output/states_*_mc.nc`: Monte Carlo transport simulations with provided transport model structure
-- `states_hm_best_for_*.nc`: Hydrologic simulation corresponding to best transport simulation
+- `input/SVAT_best10_bootstrap.nc`: Bootstrapped samples of best 10 simulated hydrologic fluxes
+- `input/SVAT_best100_bootstrap.nc`: Bootstrapped samples of best 100 simulated hydrologic fluxes
+- `output/SVATOXYGEN18_*_monte_carlo.nc`: Monte Carlo transport simulations with provided transport model structure
+- `SVAT_best_for_*.nc`: Hydrologic simulation corresponding to best transport simulation
 - `merge_output.py`: Merges the model output into a single file
 - `evaluate_simulations.py`: Calculates metrics for each simulation
 
@@ -121,11 +121,11 @@ Workflow:
 2. Run `merge_output.py`
 3. Run `evaluate_simulations.py` for the considered transport model structures using the command line arguments (`--transport-model-structures`)
 
-### svat_oxygen18_sensitivity
+### svat_oxygen18_sobol
 Saltelli simulations with oxygen-18 transport model used for sensitvity analysis. Requires simulated hydrologic fluxes.
-- `input/`: contains data for oxygen-18 in precipitation data (`d18O.txt`; daily time steps) and hydrological fluxes and storages (`states_hm_saltelli_for_*.nc`; daily time steps; *=[transport model structures](##Abbreviations-of-transport-model-structures)).
-- `oxygen18_*_*_sa_gpu.sh`: job script to run Saltelli simulations on GPU with the provided sas solver and provided transport model structure (e.g. adp=advection-dispersion-power)
-- `output/states_*_sa.nc`: Saltelli transport simulations with provided transport model structure
+- `input/`: contains data for oxygen-18 in precipitation data (`d18O.txt`; daily time steps) and hydrological fluxes and storages (`SVAT_for_*.nc`; daily time steps; *=[transport model structures](##Abbreviations-of-transport-model-structures)).
+- `svat18O_*_*_sa_gpu.sh`: job script to run Saltelli simulations on GPU with the provided sas solver and provided transport model structure (e.g. adp=advection-dispersion-power)
+- `output/SVATOXYGEN18_*_saltelli.nc`: Saltelli transport simulations with provided transport model structure
 - `param_bounds.yml`: contains parameter boundaries for Saltelli sampling
 - `sample_params.py`: Generates parameters (`params_saltelli.nc`) for Saltelli simulations used for sensitivity analysis
 - `params_saltelli.nc`: Sampled hydrologic model parameters and transport model parameters
@@ -134,13 +134,13 @@ Saltelli simulations with oxygen-18 transport model used for sensitvity analysis
 
 Workflow:
 1. Run `sample_params.py`
-2. Run `oxygen18_determistic_svat_*_sa_*_*_gpu.sh` for the considered transport model structures (*; see [transport model structures](##Abbreviations-of-transport-model-structures)) and split number (i.e. we split the run in 1000 simulations since the 10000 simulations does not fit in the GPU memory of the NVIDIA K80)
+2. Run `svat18O_*_sa_*_*_gpu.sh` for the considered transport model structures (*; see [transport model structures](##Abbreviations-of-transport-model-structures)) and split number (i.e. we split the run in 1000 simulations since the 10000 simulations does not fit in the GPU memory of the NVIDIA K80)
 3. Run `merge_output.py`
 4. Run `evaluate_simulations.py` for the considered transport model structures using the command line arguments (`--transport-model-structures`)
 
 ### svat_bromide_benchmark
 Virtual bromide experiments with bromide transport model. Requires simulated hydrologic fluxes and transport model parameters.
-- `bromide_*_*.sh`: job script to run simulations with the provided sas solver and provided transport model structure (e.g. ad=advection-dispersion)
+- `svatbromide_*_*.sh`: job script to run simulations with the provided sas solver and provided transport model structure (e.g. ad=advection-dispersion)
 - `merge_output.py`: Merges the model output into a single file
 - `evaluate_simulations.py`: Calculates metrics for each simulation
 

@@ -32,12 +32,12 @@ def main(tmp_dir):
     # merge model output into a single file
     for tm in transport_models:
         tms = tm.replace(" ", "_")
-        path = str(base_path_output / f"SVATTRANSPORT_{tms}_deterministic.*.nc")
+        path = str(base_path_output / f"SVATOXYGEN18_{tms}_deterministic.*.nc")
         diag_files = glob.glob(path)
-        states_tm_file = base_path_output / f"states_{tms}.nc"
-        if not os.path.exists(states_tm_file):
-            click.echo(f"Merge output files of {tm} into {states_tm_file.as_posix()}")
-            with h5netcdf.File(states_tm_file, "w", decode_vlen_strings=False) as f:
+        tm_file = base_path_output / f"{tms}.nc"
+        if not os.path.exists(tm_file):
+            click.echo(f"Merge output files of {tm} into {tm_file.as_posix()}")
+            with h5netcdf.File(tm_file, "w", decode_vlen_strings=False) as f:
                 f.attrs.update(
                     date_created=datetime.datetime.today().isoformat(),
                     title=f"RoGeR {tm} transport model results at Rietholzbach lysimeter site",

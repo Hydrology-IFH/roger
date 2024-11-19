@@ -87,8 +87,8 @@ def main(tmp_dir):
     df_obs_br = pd.read_csv(path_obs_br, skiprows=1, sep=";", na_values="")
 
     # load best monte carlo simulations
-    states_hm1_file = base_path / "svat_monte_carlo" / "output" / "states_hm1.nc"
-    ds_sim_hm1 = xr.open_dataset(states_hm1_file, engine="h5netcdf")
+    hm1_file = base_path / "svat_monte_carlo" / "output" / "hm1.nc"
+    ds_sim_hm1 = xr.open_dataset(hm1_file, engine="h5netcdf")
     # assign date
     days_sim_hm1 = ds_sim_hm1["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     date_sim_hm1 = num2date(
@@ -99,8 +99,8 @@ def main(tmp_dir):
     )
     ds_sim_hm1 = ds_sim_hm1.assign_coords(Time=("Time", date_sim_hm1))
     # load best 10 monte carlo simulations
-    states_hm10_file = base_path / "svat_monte_carlo" / "output" / "states_hm10.nc"
-    ds_sim_hm10 = xr.open_dataset(states_hm10_file, engine="h5netcdf")
+    hm10_file = base_path / "svat_monte_carlo" / "output" / "hm10.nc"
+    ds_sim_hm10 = xr.open_dataset(hm10_file, engine="h5netcdf")
     # assign date
     days_sim_hm10 = ds_sim_hm10["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     date_sim_hm10 = num2date(
@@ -112,8 +112,8 @@ def main(tmp_dir):
     ds_sim_hm10 = ds_sim_hm10.assign_coords(Time=("Time", date_sim_hm10))
 
     # load best 100 monte carlo simulations
-    states_hm100_file = base_path / "svat_monte_carlo" / "output" / "states_hm100.nc"
-    ds_sim_hm100 = xr.open_dataset(states_hm100_file, engine="h5netcdf")
+    hm100_file = base_path / "svat_monte_carlo" / "output" / "hm100.nc"
+    ds_sim_hm100 = xr.open_dataset(hm100_file, engine="h5netcdf")
     # assign date
     days_sim_hm100 = ds_sim_hm100["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     date_sim_hm100 = num2date(
@@ -124,13 +124,13 @@ def main(tmp_dir):
     )
     ds_sim_hm100 = ds_sim_hm100.assign_coords(Time=("Time", date_sim_hm100))
 
-    # states_hm_for_tm_file = (
+    # hm_for_tm_file = (
     #     base_path
     #     / "svat_oxygen18_monte_carlo"
     #     / "output"
-    #     / "states_hm_best_for_advection-dispersion-power.nc"
+    #     / "hm_best_for_advection-dispersion-power.nc"
     # )
-    # ds_sim_hm_for_tm = xr.open_dataset(states_hm_for_tm_file, engine="h5netcdf")
+    # ds_sim_hm_for_tm = xr.open_dataset(hm_for_tm_file, engine="h5netcdf")
     # # assign date
     # days_sim_hm_for_tm = ds_sim_hm_for_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     # date_sim_hm_for_tm = num2date(
@@ -143,8 +143,8 @@ def main(tmp_dir):
 
     # load HYDRUS-1D benchmarks
     # oxygen-18 simulations
-    states_hydrus_file = base_path / "hydrus_benchmark" / "states_hydrus_18O.nc"
-    ds_hydrus_18O = xr.open_dataset(states_hydrus_file, engine="h5netcdf")
+    hydrus_file = base_path / "hydrus_benchmark" / "hydrus_18O.nc"
+    ds_hydrus_18O = xr.open_dataset(hydrus_file, engine="h5netcdf")
     hours_hydrus_18O = ds_hydrus_18O["Time"].values / onp.timedelta64(60 * 60, "s")
     date_hydrus_18O = num2date(
         hours_hydrus_18O,
@@ -2329,13 +2329,13 @@ def main(tmp_dir):
     #     idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
     #     tms = tm_structure.replace(" ", "_")
     #     # load transport simulation
-    #     states_tm_file = (
+    #     tm_file = (
     #         base_path
     #         / "svat_oxygen18_monte_carlo"
     #         / "output"
-    #         / f"states_{tms}_monte_carlo.nc"
+    #         / f"SVATOXYGEN18_{tms}_monte_carlo.nc"
     #     )
-    #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    #     ds_sim_tm = xr.open_dataset(tm_file, engine="h5netcdf")
     #     days_sim_tm = ds_sim_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     #     date_sim_tm = num2date(
     #         days_sim_tm,
@@ -2382,13 +2382,13 @@ def main(tmp_dir):
     #         idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
     #         tms = tm_structure.replace(" ", "_")
     #         # load transport simulation
-    #         states_tm_file = (
+    #         tm_file = (
     #             base_path
     #             / "svat_oxygen18_monte_carlo"
     #             / "output"
-    #             / f"states_{tms}_monte_carlo.nc"
+    #             / f"SVATOXYGEN18_{tms}_monte_carlo.nc"
     #         )
-    #         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    #         ds_sim_tm = xr.open_dataset(tm_file, engine="h5netcdf")
     #         days_sim_tm = ds_sim_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     #         date_sim_tm = num2date(
     #             days_sim_tm,
@@ -2443,13 +2443,13 @@ def main(tmp_dir):
     #     idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
     #     tms = tm_structure.replace(" ", "_")
     #     # load transport simulation
-    #     states_tm_file = (
+    #     tm_file = (
     #         base_path
     #         / "svat_oxygen18_monte_carlo"
     #         / "output"
-    #         / f"states_{tms}_monte_carlo.nc"
+    #         / f"SVATOXYGEN18_{tms}_monte_carlo.nc"
     #     )
-    #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    #     ds_sim_tm = xr.open_dataset(tm_file, engine="h5netcdf")
     #     days_sim_tm = ds_sim_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     #     date_sim_tm = num2date(
     #         days_sim_tm,
@@ -2488,13 +2488,13 @@ def main(tmp_dir):
     #     idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_C_iso_q_ss"].idxmax()
     #     tms = tm_structure.replace(" ", "_")
     #     # load transport simulation
-    #     states_tm_file = (
+    #     tm_file = (
     #         base_path
     #         / "svat_oxygen18_monte_carlo"
     #         / "output"
-    #         / f"states_{tms}_monte_carlo.nc"
+    #         / f"SVATOXYGEN18_{tms}_monte_carlo.nc"
     #     )
-    #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    #     ds_sim_tm = xr.open_dataset(tm_file, engine="h5netcdf")
     #     days_sim_tm = ds_sim_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     #     date_sim_tm = num2date(
     #         days_sim_tm,
@@ -2524,13 +2524,13 @@ def main(tmp_dir):
     # for i, tm_structure in enumerate(tm_structures):
     #     tms = tm_structure.replace(" ", "_")
     #     # load transport simulation
-    #     states_tm_file = (
+    #     tm_file = (
     #         base_path
     #         / "svat_oxygen18_monte_carlo"
     #         / "output"
-    #         / f"states_{tms}_monte_carlo.nc"
+    #         / f"SVATOXYGEN18_{tms}_monte_carlo.nc"
     #     )
-    #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    #     ds_sim_tm = xr.open_dataset(tm_file, engine="h5netcdf")
     #     days_sim_tm = ds_sim_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     #     date_sim_tm = num2date(
     #         days_sim_tm,
@@ -2572,13 +2572,13 @@ def main(tmp_dir):
     # for i, tm_structure in enumerate(tm_structures_extra):
     #     tms = tm_structure.replace(" ", "_")
     #     # load transport simulation
-    #     states_tm_file = (
+    #     tm_file = (
     #         base_path
     #         / "svat_oxygen18_monte_carlo"
     #         / "output"
-    #         / f"states_{tms}_monte_carlo.nc"
+    #         / f"SVATOXYGEN18_{tms}_monte_carlo.nc"
     #     )
-    #     ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+    #     ds_sim_tm = xr.open_dataset(tm_file, engine="h5netcdf")
     #     days_sim_tm = ds_sim_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     #     date_sim_tm = num2date(
     #         days_sim_tm,

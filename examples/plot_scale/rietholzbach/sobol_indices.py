@@ -115,13 +115,13 @@ def main(tmp_dir):
     dict_params_metrics_tm_sa = {}
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        file = base_path / "svat_oxygen18_sensitivity" / "figures" / f"params_metrics_{tms}.txt"
+        file = base_path / "svat_oxygen18_sobol" / "figures" / f"params_metrics_{tms}.txt"
         df_params_metrics = pd.read_csv(file, sep="\t")
         dict_params_metrics_tm_sa[tm_structure] = {}
         dict_params_metrics_tm_sa[tm_structure]["params_metrics"] = df_params_metrics
 
     # sampled parameter space
-    file_path = base_path / "svat_oxygen18_sensitivity" / "param_bounds.yml"
+    file_path = base_path / "svat_oxygen18_sobol" / "param_bounds.yml"
     with open(file_path, "r") as file:
         bounds = yaml.safe_load(file)
 

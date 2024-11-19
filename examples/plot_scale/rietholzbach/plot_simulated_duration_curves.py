@@ -94,8 +94,8 @@ def main(tmp_dir):
 
     # load HYDRUS-1D benchmarks
     # oxygen-18 simulations
-    states_hydrus_file = base_path / "hydrus_benchmark" / "states_hydrus_18O.nc"
-    ds_hydrus_18O = xr.open_dataset(states_hydrus_file, engine="h5netcdf")
+    ydrus_file = base_path / "hydrus_benchmark" / "hydrus_18O.nc"
+    ds_hydrus_18O = xr.open_dataset(hydrus_file, engine="h5netcdf")
     hours_hydrus_18O = ds_hydrus_18O["Time"].values / onp.timedelta64(60 * 60, "s")
     date_hydrus_18O = num2date(
         hours_hydrus_18O,
@@ -129,8 +129,8 @@ def main(tmp_dir):
         idx_best = dict_params_metrics_tm_mc[tm_structure]["params_metrics"]["KGE_M_iso_q_ss"].idxmax()
         tms = tm_structure.replace(" ", "_")
         # load transport simulation
-        states_tm_file = base_path / "svat_oxygen18_monte_carlo" / "output" / f"states_{tms}_monte_carlo.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+        tm_file = base_path / "svat_oxygen18_monte_carlo" / "output" / f"SVATOXYGEN18_{tms}_monte_carlo.nc"
+        ds_sim_tm = xr.open_dataset(tm_file, engine="h5netcdf")
         days_sim_tm = ds_sim_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
         date_sim_tm = num2date(
             days_sim_tm,

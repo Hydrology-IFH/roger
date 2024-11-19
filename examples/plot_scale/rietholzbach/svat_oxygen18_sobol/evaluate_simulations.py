@@ -78,13 +78,13 @@ def main(transport_model_structure, tmp_dir):
     click.echo(f"Calculate metrics for {tms} ...")
 
     # load hydrologic simulations
-    states_hm_file = (
+    sim_hm_file = (
         Path(__file__).parent.parent
         / "svat_sensitivity"
         / "output"
-        / f"states_hm_saltelli_for_{transport_model_structure}.nc"
+        / f"SVAT_for_{transport_model_structure}.nc"
     )
-    ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
+    ds_sim_hm = xr.open_dataset(sim_hm_file, engine="h5netcdf")
     # assign date
     days_sim_hm = ds_sim_hm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     date_sim_hm = num2date(
@@ -96,8 +96,8 @@ def main(transport_model_structure, tmp_dir):
     ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
 
     # load transport simulations
-    states_tm_file = base_path_output / f"states_{transport_model_structure}_saltelli.nc"
-    ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
+    sim_tm_file = base_path_output / f"SVATOXYGEN18_{transport_model_structure}_saltelli.nc"
+    ds_sim_tm = xr.open_dataset(sim_tm_file, engine="h5netcdf", decode_times=False)
     # assign date
     date_sim_tm = num2date(
         ds_sim_tm["Time"].values,
@@ -379,8 +379,8 @@ def main(transport_model_structure, tmp_dir):
     # write simulated bulk sample to output file
     ds_sim_tm = ds_sim_tm.load()
     ds_sim_tm = ds_sim_tm.close()
-    states_tm_file = base_path_output / f"states_{transport_model_structure}_saltelli.nc"
-    with h5netcdf.File(states_tm_file, "a", decode_vlen_strings=False) as f:
+    sim_tm_file = base_path_output / f"SVAT_{transport_model_structure}_saltelli.nc"
+    with h5netcdf.File(sim_tm_file, "a", decode_vlen_strings=False) as f:
         try:
             v = f.create_variable("d18O_perc_bs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1)
             v.attrs.update(long_name="bulk sample of d18O in percolation", units="permil")

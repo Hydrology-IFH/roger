@@ -35,11 +35,11 @@ def main(tmp_dir):
     file = base_path_figs / "params_metrics_1.txt"
     df_params_metrics.iloc[idx_best1, :].to_frame().to_csv(file, header=True, index=False, sep="\t")
 
-    # write states of best simulation
+    # write file of best simulation
     click.echo("Write best simulation ...")
-    states_hm_mc_file = base_path / "output" / "states_hm_monte_carlo.nc"
-    states_hm_file = base_path / "output" / "states_hm1.nc"
-    with h5netcdf.File(states_hm_file, "w", decode_vlen_strings=False) as f:
+    hm_mc_file = base_path / "output" / "SVAT.nc"
+    hm_file = base_path / "output" / "SVAT_best1.nc"
+    with h5netcdf.File(hm_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title="RoGeR best Monte Carlo simulation at Rietholzbach Lysimeter site",
@@ -48,7 +48,7 @@ def main(tmp_dir):
             comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
             model_structure="SVAT model with free drainage",
         )
-        with h5netcdf.File(states_hm_mc_file, "r", decode_vlen_strings=False) as df:
+        with h5netcdf.File(hm_mc_file, "r", decode_vlen_strings=False) as df:
             f.attrs.update(roger_version=df.attrs["roger_version"])
             # set dimensions with a dictionary
             dict_dim = {"x": 1, "y": 1, "Time": len(df.variables["Time"])}
@@ -88,10 +88,10 @@ def main(tmp_dir):
     # write .txt-file
     file = base_path_figs / "params_metrics_10.txt"
     df_params_metrics10.iloc[:10, :].to_csv(file, header=True, index=False, sep="\t")
-    # write states of best model run
-    states_hm_mc_file = base_path / "output" / "states_hm_monte_carlo.nc"
-    states_hm_file = base_path / "output" / "states_hm10.nc"
-    with h5netcdf.File(states_hm_file, "w", decode_vlen_strings=False) as f:
+    # write file of best model run
+    hm_mc_file = base_path / "output" / "SVAT.nc"
+    hm_file = base_path / "output" / "SVAT_best10.nc"
+    with h5netcdf.File(hm_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title="RoGeR best 10 Monte Carlo simulations at Rietholzbach lysimeter site",
@@ -100,7 +100,7 @@ def main(tmp_dir):
             comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
             model_structure="SVAT model with free drainage",
         )
-        with h5netcdf.File(states_hm_mc_file, "r", decode_vlen_strings=False) as df:
+        with h5netcdf.File(hm_mc_file, "r", decode_vlen_strings=False) as df:
             f.attrs.update(roger_version=df.attrs["roger_version"])
             # set dimensions with a dictionary
             dict_dim = {"x": len(idx_best10), "y": 1, "Time": len(df.variables["Time"])}
@@ -144,10 +144,10 @@ def main(tmp_dir):
     # write .txt-file
     file = base_path_figs / "params_metrics_100.txt"
     df_params_metrics100.iloc[:100, :].to_csv(file, header=True, index=False, sep="\t")
-    # write states of best model run
-    states_hm_mc_file = base_path / "output" / "states_hm_monte_carlo.nc"
-    states_hm_file = base_path / "output" / "states_hm100.nc"
-    with h5netcdf.File(states_hm_file, "w", decode_vlen_strings=False) as f:
+    # write file of best model run
+    hm_mc_file = base_path / "output" / "SVAT.nc"
+    hm_file = base_path / "output" / "SVAT_best100.nc"
+    with h5netcdf.File(hm_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title="RoGeR best 100 Monte Carlo simulations at Rietholzbach lysimeter site",
@@ -156,7 +156,7 @@ def main(tmp_dir):
             comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
             model_structure="SVAT model with free drainage",
         )
-        with h5netcdf.File(states_hm_mc_file, "r", decode_vlen_strings=False) as df:
+        with h5netcdf.File(hm_mc_file, "r", decode_vlen_strings=False) as df:
             f.attrs.update(roger_version=df.attrs["roger_version"])
             # set dimensions with a dictionary
             dict_dim = {"x": len(idx_best100), "y": 1, "Time": len(df.variables["Time"])}

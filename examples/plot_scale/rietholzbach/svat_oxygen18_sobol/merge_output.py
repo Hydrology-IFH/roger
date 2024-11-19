@@ -48,12 +48,12 @@ def main(transport_model_structure, sas_solver, tmp_dir):
     ]
     for transport_model_structure in transport_model_structures:
         tms = transport_model_structure.replace("_", " ")
-        path = str(base_path / "output" / f"SVATTRANSPORT_{transport_model_structure}_{sas_solver}.*.nc")
+        path = str(base_path / "output" / f"SVATOXYGEN18_{transport_model_structure}_{sas_solver}.*.nc")
         diag_files = glob.glob(path)
-        states_tm_file = base_path / "output" / f"states_{transport_model_structure}_saltelli.nc"
-        if not os.path.exists(states_tm_file):
-            click.echo(f"Merge output files of {tms} into {states_tm_file.as_posix()}")
-            with h5netcdf.File(states_tm_file, "w", decode_vlen_strings=False) as f:
+        sim_tm_file = base_path / "output" / f"SVATOXYGEN18_{transport_model_structure}_saltelli.nc"
+        if not os.path.exists(sim_tm_file):
+            click.echo(f"Merge output files of {tms} into {sim_tm_file.as_posix()}")
+            with h5netcdf.File(sim_tm_file, "w", decode_vlen_strings=False) as f:
                 f.attrs.update(
                     date_created=datetime.datetime.today().isoformat(),
                     title=f"RoGeR {tms} transport model Saltelli simulations at Rietholzbach lysimeter site",

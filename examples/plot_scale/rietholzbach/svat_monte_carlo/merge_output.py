@@ -20,12 +20,12 @@ def main(tmp_dir):
         os.mkdir(base_path_output)
 
     # merge model output into single file
-    states_hm_mc_file = base_path / "output" / "states_hm_monte_carlo.nc"
-    if not os.path.exists(states_hm_mc_file):
-        click.echo(f"Merge output files into {states_hm_mc_file.as_posix()}")
+    hm_mc_file = base_path / "output" / "SVAT.nc"
+    if not os.path.exists(hm_mc_file):
+        click.echo(f"Merge output files into {hm_mc_file.as_posix()}")
         path = str(base_path / "output" / "SVAT.*.nc")
         diag_files = glob.glob(path)
-        with h5netcdf.File(states_hm_mc_file, "w", decode_vlen_strings=False) as f:
+        with h5netcdf.File(hm_mc_file, "w", decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
                 title="RoGeR Monte Carlo simulations at Rietholzbach Lysimeter site",
