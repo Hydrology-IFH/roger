@@ -24,4 +24,4 @@ mpirun --bind-to core --map-by core -report-bindings python svat_oxygen18.py -b 
 # Move output from local SSD to global workspace
 echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity/output"
 mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity/output
-mv "${TMPDIR}"/SVATTRANSPORT_*.nc /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity/output
+mv "${TMPDIR}"/SVATOXYGEN18_*.nc /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity/output

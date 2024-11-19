@@ -13,7 +13,7 @@ def main():
     base_path = Path(__file__).parent
 
     # identifiers for simulations
-    lys_experiments = ["lys3"]
+    lys_experiments = ["lys2", "lys8"]
 
     # merge model output into single file
     for lys_experiment in lys_experiments:

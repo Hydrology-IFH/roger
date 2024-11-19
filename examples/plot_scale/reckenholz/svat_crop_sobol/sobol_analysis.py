@@ -60,13 +60,13 @@ def main(tmp_dir):
     lys_experiments = ["lys3"]
     for lys_experiment in lys_experiments:
         # write .txt-file
-        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz/output") / "svat_crop_sobol" / f"params_eff_{lys_experiment}.txt"
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz/output") / "svat_crop_sobol" / f"params_eff_{lys_experiment}_weekly.txt"
         df_params_metrics = pd.read_csv(file, sep="\t")
         df_params_metrics['theta_eff'] = df_params_metrics['theta_ac'] + df_params_metrics['theta_ufc']
         df_params_metrics['frac_lp'] = df_params_metrics['theta_ac'] / df_params_metrics['theta_eff']
 
-        df_params_metrics["E_dS"] = (1 - ((1 - df_params_metrics["r_S_perc_pet"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet"])**2)**(0.5))
-        df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet"])**2)**(0.5))
+        df_params_metrics["E_dS"] = (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2015"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2015"])**2)**(0.5))
+        df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2015"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2015"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2015"])**2)**(0.5))
 
 
         # perform sensitivity analysis

@@ -36,7 +36,7 @@ def main(tmp_dir):
         os.mkdir(base_path_figs)
 
     # load simulation
-    states_hm_mc_file = base_path / "output" / "states_hm_monte_carlo.nc"
+    states_hm_mc_file = base_path / "output" / "SVAT.nc"
     ds_sim = xr.open_dataset(states_hm_mc_file, engine="h5netcdf")
     # assign date
     days_sim = ds_sim["Time"].values / onp.timedelta64(24 * 60 * 60, "s")

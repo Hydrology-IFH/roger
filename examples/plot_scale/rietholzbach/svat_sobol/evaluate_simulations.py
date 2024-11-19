@@ -69,7 +69,7 @@ def main(tmp_dir):
     ]
     for tm_structure in tm_structures:
         tms = tm_structure.replace(" ", "_")
-        states_hm_si_file = base_path_output / f"states_hm_saltelli_for_{tms}.nc"
+        states_hm_si_file = base_path_output / f"SVAT_for_{tms}.nc"
         ds_sim = xr.open_dataset(states_hm_si_file, engine="h5netcdf")
 
         # load observations (measured data)

@@ -9,8 +9,8 @@ base_path = Path(__file__).parent
 # merge model output into single file
 path = str(base_path / "output" / "SVAT.*.nc")
 diag_files = glob.glob(path)
-states_hm_file = base_path / "output" / "states_hm.nc"
-with h5netcdf.File(states_hm_file, "w", decode_vlen_strings=False) as f:
+hm_file = base_path / "output" / "SVAT.nc"
+with h5netcdf.File(hm_file, "w", decode_vlen_strings=False) as f:
     f.attrs.update(
         date_created=datetime.datetime.today().isoformat(),
         title="RoGeR simulation at Rietholzbach Lysimeter site",

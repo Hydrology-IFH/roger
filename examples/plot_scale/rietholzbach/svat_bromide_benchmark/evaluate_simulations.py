@@ -73,8 +73,8 @@ def main(tmp_dir, transport_model_structure):
     cmap = cm.get_cmap("Reds")
     norm = Normalize(vmin=onp.min(years), vmax=onp.max(years))
     # load hydrologic simulation
-    states_hm_file = base_path / f"states_hm_best_for_{transport_model_structure}.nc"
-    ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
+    hm_file = base_path / f"SVAT_best_for_{transport_model_structure}.nc"
+    ds_sim_hm = xr.open_dataset(hm_file, engine="h5netcdf")
     # assign date
     days_sim_hm = ds_sim_hm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
     date_sim_hm = num2date(
@@ -94,7 +94,7 @@ def main(tmp_dir, transport_model_structure):
         fig, axes = plt.subplots(1, 1, figsize=(6, 2))
         for year in years:
             # load simulation
-            states_tm_file = base_path_output / f"states_{transport_model_structure}_bromide_benchmark.nc"
+            tm_file= base_path_output / f"SVATBROMIDE_{transport_model_structure}_bromide_benchmark.nc"
             ds_sim_tm = xr.open_dataset(states_tm_file, group=f"{year}", engine="h5netcdf")
             # assign date
             days_sim_tm = ds_sim_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
@@ -171,7 +171,7 @@ def main(tmp_dir, transport_model_structure):
             ds_sim_tm = ds_sim_tm.load()  # required to release file lock
             ds_sim_tm = ds_sim_tm.close()
             del ds_sim_tm
-            states_tm_file = base_path_output / f"states_{transport_model_structure}_bromide_benchmark.nc"
+            tm_file= base_path_output / f"states_{transport_model_structure}_bromide_benchmark.nc"
             with h5netcdf.File(states_tm_file, "a", decode_vlen_strings=False) as f:
                 try:
                     v = f.groups[f"{year}"].create_variable(

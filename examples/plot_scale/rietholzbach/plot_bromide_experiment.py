@@ -114,10 +114,10 @@ def main(tmp_dir):
                     "time-variant advection-dispersion-power",
                 ]:
                     df_sim_br_conc = pd.DataFrame(index=df_obs_br.index)
-                    states_br_file = (
-                        base_path / "svat_bromide_benchmark" / "output" / f"states_{tms}_bromide_benchmark_stgallen.nc"
+                    br_file = (
+                        base_path / "svat_bromide_benchmark" / "output" / f"SVATBROMIDE_{tms}_bromide_benchmark_stgallen.nc"
                     )
-                    with xr.open_dataset(states_br_file, engine="h5netcdf", decode_times=False, group=f"1991") as ds:
+                    with xr.open_dataset(br_file, engine="h5netcdf", decode_times=False, group=f"1991") as ds:
                         sim_vals = ds["C_q_ss_mmol_bs"].isel(x=0, y=0).values[315:716]
                         sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
                         df_sim_br_conc.loc[:, f"1991"] = sim_vals
@@ -133,8 +133,8 @@ def main(tmp_dir):
             df_sim_br_conc = pd.DataFrame(index=df_obs_br.index)
             df_sim_br_mass = pd.DataFrame(index=df_obs_br.index)
             for year in years:
-                states_br_file = base_path / "svat_bromide_benchmark" / "output" / f"states_{tms}_bromide_benchmark.nc"
-                with xr.open_dataset(states_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
+                br_file = base_path / "svat_bromide_benchmark" / "output" / f"SVATBROMIDE_{tms}_bromide_benchmark.nc"
+                with xr.open_dataset(br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
                     x = onp.where(
                         (onp.round(ds["alpha_transp"].isel(Time=0).values, 1) == alpha)
                         & (onp.round(ds["alpha_q"].isel(Time=0).values, 1) == alpha)
@@ -169,8 +169,8 @@ def main(tmp_dir):
             axes.flatten()[i].set_ylabel("%s\nBr [mmol/l]" % (_LABS_TM[tm_structure]))
         df_sim_br = pd.DataFrame(index=df_obs_br.index)
         for year in years:
-            states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
-            with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
+            hydrus_br_file = base_path / "hydrus_benchmark" / "hydrus_bromide.nc"
+            with xr.open_dataset(hydrus_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
                 df_sim_br = pd.DataFrame(index=df_obs_br.index)
                 df_sim_br.loc[:, f"{year}"] = ds["Br_perc_mmol"].values
             axes.flatten()[-1].plot(
@@ -224,10 +224,10 @@ def main(tmp_dir):
                     "time-variant advection-dispersion-power",
                 ]:
                     df_sim_br_conc = pd.DataFrame(index=df_obs_br.index)
-                    states_br_file = (
-                        base_path / "svat_bromide_benchmark" / "output" / f"states_{tms}_bromide_benchmark_stgallen.nc"
+                    br_file = (
+                        base_path / "svat_bromide_benchmark" / "output" / f"SVATBROMIDE_{tms}_bromide_benchmark_stgallen.nc"
                     )
-                    with xr.open_dataset(states_br_file, engine="h5netcdf", decode_times=False, group=f"1991") as ds:
+                    with xr.open_dataset(br_file, engine="h5netcdf", decode_times=False, group=f"1991") as ds:
                         sim_vals = ds["C_q_ss_mmol_bs"].isel(x=0, y=0).values[315:716]
                         sim_vals = onp.where(sim_vals < 0, onp.nan, sim_vals)
                         df_sim_br_conc.loc[:, f"1991"] = sim_vals
@@ -243,8 +243,8 @@ def main(tmp_dir):
             df_sim_br_conc = pd.DataFrame(index=df_obs_br.index)
             df_sim_br_mass = pd.DataFrame(index=df_obs_br.index)
             for year in years:
-                states_br_file = base_path / "svat_bromide_benchmark" / "output" / f"states_{tms}_bromide_benchmark.nc"
-                with xr.open_dataset(states_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
+                br_file = base_path / "svat_bromide_benchmark" / "output" / f"SVATBROMIDE_{tms}_bromide_benchmark.nc"
+                with xr.open_dataset(br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
                     x = onp.where(
                         (onp.round(ds["alpha_transp"].isel(Time=0).values, 1) == alpha)
                         & (onp.round(ds["alpha_q"].isel(Time=0).values, 1) == alpha)
@@ -269,8 +269,8 @@ def main(tmp_dir):
             axes.flatten()[i].set_ylabel("%s\nBr [mmol/l]" % (_LABS_TM[tm_structure]))
         df_sim_br = pd.DataFrame(index=df_obs_br.index)
         for year in years:
-            states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
-            with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
+            hydrus_br_file = base_path / "hydrus_benchmark" / "hydrus_bromide.nc"
+            with xr.open_dataset(hydrus_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
                 df_sim_br = pd.DataFrame(index=df_obs_br.index)
                 df_sim_br.loc[:, f"{year}"] = ds["Br_perc_mmol"].values
             axes.flatten()[-1].plot(
@@ -309,8 +309,8 @@ def main(tmp_dir):
     norm = mpl.colors.Normalize(vmin=0, vmax=100)
     fig, axes = plt.subplots(5, 2, figsize=(6, 10))
     for i, year in enumerate(years):
-        states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
-        with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
+        hydrus_br_file = base_path / "hydrus_benchmark" / "hydrus_bromide.nc"
+        with xr.open_dataset(hydrus_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
             sns.heatmap(
                 ds["Br_soil"].values,
                 xticklabels=100,
@@ -347,8 +347,8 @@ def main(tmp_dir):
     norm = mpl.colors.Normalize(vmin=0, vmax=100)
     fig, axes = plt.subplots(5, 2, figsize=(6, 10))
     for i, year in enumerate(years):
-        states_hydrus_br_file = base_path / "hydrus_benchmark" / "states_hydrus_bromide.nc"
-        with xr.open_dataset(states_hydrus_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
+        hydrus_br_file = base_path / "hydrus_benchmark" / "hydrus_bromide.nc"
+        with xr.open_dataset(hydrus_br_file, engine="h5netcdf", decode_times=False, group=f"{year}") as ds:
             sns.heatmap(
                 ds["Br_soil"].values * ds["swc"].values * 20,
                 xticklabels=100,

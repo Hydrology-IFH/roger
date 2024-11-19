@@ -21,14 +21,14 @@ def main(tmp_dir, resample_size, nruns):
     idx_boot = onp.arange(resample_size)
     onp.random.shuffle(idx_boot)
     idx_boot = idx_boot.tolist()
-    states_hm1_file = base_path.parent / "svat_monte_carlo" / "output" / f"states_hm{nruns}.nc"
-    with h5netcdf.File(states_hm1_file, "r", decode_vlen_strings=False) as df:
+    best_sim_file = base_path.parent / "svat_monte_carlo" / "output" / f"SVAT_best{nruns}.nc"
+    with h5netcdf.File(best_sim_file, "r", decode_vlen_strings=False) as df:
         n_repeat = int(resample_size / df.dims["x"].size)
     if n_repeat <= 1:
         n_repeat = 1
-    # write states of best model run
-    states_hmb_file = base_path.parent / "svat_monte_carlo" / "output" / f"states_hm{nruns}_bootstrap.nc"
-    with h5netcdf.File(states_hmb_file, "w", decode_vlen_strings=False) as f:
+    # write simulations of best model run
+    bootstrap_file = base_path.parent / "svat_monte_carlo" / "output" / f"SVAT_best{nruns}_bootstrap.nc"
+    with h5netcdf.File(bootstrap_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title=f"RoGeR best {nruns} hydrologic monte carlo simulations (bootstrapped) optimized with {metric_name} at Rietholzbach lysimeter site",
@@ -38,7 +38,7 @@ def main(tmp_dir, resample_size, nruns):
             model_structure="SVAT model with free drainage",
             roger_version=f"{roger.__version__}",
         )
-        with h5netcdf.File(states_hm1_file, "r", decode_vlen_strings=False) as df:
+        with h5netcdf.File(best_sim_file, "r", decode_vlen_strings=False) as df:
             # set dimensions with a dictionary
             dict_dim = {"x": resample_size, "y": 1, "Time": len(df.variables["Time"])}
             if not f.dimensions:

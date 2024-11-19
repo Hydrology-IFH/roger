@@ -39,7 +39,7 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
         _year = int(year)
         _tm_structure = transport_model_structure.replace("_", " ")
         _input_dir = _base_path / "input" / str(year)
-        _states_hm_file = f"states_hm_best_for_{transport_model_structure}.nc"
+        _sim_hm_file = f"SVAT_best_for_{transport_model_structure}.nc"
 
         def _set_input_dir(self, path):
             if os.path.exists(path):
@@ -125,7 +125,7 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"SVATTRANSPORT_{transport_model_structure}_{year}_{sas_solver}"
+            settings.identifier = f"SVATBROMIDE_{transport_model_structure}_{year}_{sas_solver}"
             settings.sas_solver = sas_solver
             settings.sas_solver_substeps = 6
             if settings.sas_solver in ["RK4", "Euler"]:
@@ -199,22 +199,22 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
             vs.S_pwp_rz = update(
                 vs.S_pwp_rz,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("S_pwp_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, 0],
+                self._read_var_from_nc("S_pwp_rz", self._input_dir, self._sim_hm_file)[npx.newaxis, :, 0],
             )
             vs.S_pwp_ss = update(
                 vs.S_pwp_ss,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("S_pwp_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, 0],
+                self._read_var_from_nc("S_pwp_ss", self._input_dir, self._sim_hm_file)[npx.newaxis, :, 0],
             )
             vs.S_sat_rz = update(
                 vs.S_sat_rz,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("S_sat_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, 0],
+                self._read_var_from_nc("S_sat_rz", self._input_dir, self._sim_hm_file)[npx.newaxis, :, 0],
             )
             vs.S_sat_ss = update(
                 vs.S_sat_ss,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("S_sat_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, 0],
+                self._read_var_from_nc("S_sat_ss", self._input_dir, self._sim_hm_file)[npx.newaxis, :, 0],
             )
 
             alpha = npx.linspace(0.1, 1, num=10).tolist()
@@ -285,22 +285,22 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
             vs.S_rz = update(
                 vs.S_rz,
                 at[2:-2, 2:-2, 0],
-                self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt],
+                self._read_var_from_nc("S_rz", self._input_dir, self._sim_hm_file)[npx.newaxis, :, vs.itt],
             )
             vs.S_ss = update(
                 vs.S_ss,
                 at[2:-2, 2:-2, 0],
-                self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt],
+                self._read_var_from_nc("S_ss", self._input_dir, self._sim_hm_file)[npx.newaxis, :, vs.itt],
             )
             vs.S_rz = update(
                 vs.S_rz,
                 at[2:-2, 2:-2, 1],
-                self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt],
+                self._read_var_from_nc("S_rz", self._input_dir, self._sim_hm_file)[npx.newaxis, :, vs.itt],
             )
             vs.S_ss = update(
                 vs.S_ss,
                 at[2:-2, 2:-2, 1],
-                self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file)[npx.newaxis, :, vs.itt],
+                self._read_var_from_nc("S_ss", self._input_dir, self._sim_hm_file)[npx.newaxis, :, vs.itt],
             )
             vs.S_s = update(
                 vs.S_s, at[2:-2, 2:-2, : vs.taup1], vs.S_rz[2:-2, 2:-2, : vs.taup1] + vs.S_ss[2:-2, 2:-2, : vs.taup1]
@@ -385,51 +385,51 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
             vs.PREC_DIST_DAILY = update(
                 vs.PREC_DIST_DAILY,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("prec", self._input_dir, self._states_hm_file),
+                self._read_var_from_nc("prec", self._input_dir, self._sim_hm_file),
             )
             vs.INF_MAT_RZ = update(
                 vs.INF_MAT_RZ,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("inf_mat_rz", self._input_dir, self._states_hm_file),
+                self._read_var_from_nc("inf_mat_rz", self._input_dir, self._sim_hm_file),
             )
             vs.INF_PF_RZ = update(
                 vs.INF_PF_RZ,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("inf_mp_rz", self._input_dir, self._states_hm_file)
-                + self._read_var_from_nc("inf_sc_rz", self._input_dir, self._states_hm_file),
+                self._read_var_from_nc("inf_mp_rz", self._input_dir, self._sim_hm_file)
+                + self._read_var_from_nc("inf_sc_rz", self._input_dir, self._sim_hm_file),
             )
             vs.INF_PF_SS = update(
-                vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._input_dir, self._states_hm_file)
+                vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._input_dir, self._sim_hm_file)
             )
             vs.TRANSP = update(
-                vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._input_dir, self._states_hm_file)
+                vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._input_dir, self._sim_hm_file)
             )
             vs.EVAP_SOIL = update(
                 vs.EVAP_SOIL,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("evap_soil", self._input_dir, self._states_hm_file),
+                self._read_var_from_nc("evap_soil", self._input_dir, self._sim_hm_file),
             )
             vs.CPR_RZ = update(
-                vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._input_dir, self._states_hm_file)
+                vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._input_dir, self._sim_hm_file)
             )
             vs.Q_RZ = update(
-                vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._input_dir, self._states_hm_file)
+                vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._input_dir, self._sim_hm_file)
             )
             vs.Q_SS = update(
-                vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._input_dir, self._states_hm_file)
+                vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._input_dir, self._sim_hm_file)
             )
             vs.S_RZ = update(
-                vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._input_dir, self._states_hm_file)
+                vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._input_dir, self._sim_hm_file)
             )
             vs.S_SS = update(
-                vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._input_dir, self._states_hm_file)
+                vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._input_dir, self._sim_hm_file)
             )
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
             TA = allocate(state.dimensions, ("x", "y", "t"))
             TA = update(
                 TA,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("ta", self._input_dir, self._states_hm_file)[npx.newaxis, :, :],
+                self._read_var_from_nc("ta", self._input_dir, self._sim_hm_file)[npx.newaxis, :, :],
             )
 
             vs.M_IN = update(
@@ -533,7 +533,7 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
     path_txt = model._input_dir / "Br.txt"
     df_Br.to_csv(path_txt, header=True, index=False, sep="\t")
     write_forcing_tracer(model._input_dir, "Br")
-    nc_file = model._base_path / model._states_hm_file
+    nc_file = model._base_path / model._sim_hm_file
     with xr.open_dataset(nc_file, engine="h5netcdf") as ds:
         days = ds["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
         date = num2date(
@@ -552,7 +552,7 @@ def main(year, transport_model_structure, sas_solver, tmp_dir):
         ds_year = ds_year.assign_coords(Time=("Time", days_year))
         ds_year.Time.attrs["units"] = "days"
         ds_year.Time.attrs["time_origin"] = f"{int(year) - 1}-12-31"
-        nc_file_year = model._base_path / "input" / str(year) / model._states_hm_file
+        nc_file_year = model._base_path / "input" / str(year) / model._sim_hm_file
         ds_year.to_netcdf(nc_file_year, engine="h5netcdf")
         ds_year = ds_year.load()
         ds_year = ds_year.close()

@@ -1,14 +1,14 @@
 #!/bin/bash
 #SBATCH --time=12:00:00
 #SBATCH --nodes=1
-#SBATCH --ntasks=20
+#SBATCH --ntasks=32
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=80000
+#SBATCH --mem=100000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
-#SBATCH --job-name=svat18O_pi_sa
-#SBATCH --output=svat18O_pi_sa.out
-#SBATCH --error=svat18O_pi_sa_err.out
+#SBATCH --job-name=svat18O_adp_sa
+#SBATCH --output=svat18O_adp_sa.out
+#SBATCH --error=svat18O_adp_sa_err.out
 #SBATCH --export=ALL
  
 # load module dependencies
@@ -20,8 +20,8 @@ eval "$(conda shell.bash hook)"
 conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity
  
-mpirun --bind-to core --map-by core -report-bindings python svat_oxygen18.py -b jax -d cpu -n 20 1 --float-type float64 -ns 10240 -tms piston -td "${TMPDIR}"
+mpirun --bind-to core --map-by core -report-bindings python svat_oxygen18.py -b jax -d cpu -n 32 1 --float-type float64 -ns 13312 -tms advection-dispersion-power -td "${TMPDIR}"
 # Move output from local SSD to global workspace
 echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity/output"
 mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity/output
-mv "${TMPDIR}"/SVATTRANSPORT_*.nc /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity/output
+mv "${TMPDIR}"/SVATOXYGEN18_*.nc /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/rietholzbach/svat_oxygen18_sensitivity/output

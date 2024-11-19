@@ -42,9 +42,9 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
         _input_dir = _base_path / "input"
         _tmp_dir = Path(tmp_dir)
         if transport_model_structure in ["complete-mixing", "piston"]:
-            _states_hm_file = "states_hm100.nc"
+            _sim_file = "SVAT_best100.nc"
         else:
-            _states_hm_file = f"states_hm100_bootstrap.nc"
+            _sim_file = f"SVAT_best100_bootstrap.nc"
         # load parameter boundaries
         _file_params = _base_path / "param_bounds.yml"
         if transport_model_structure in ["complete-mixing", "piston"]:
@@ -74,7 +74,7 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            identifier = f"SVATTRANSPORT_{transport_model_structure}_{sas_solver}"
+            identifier = f"SVATOXYGEN18_{transport_model_structure}_{sas_solver}"
             settings.identifier = identifier
             settings.sas_solver = sas_solver
             settings.sas_solver_substeps = 6
@@ -159,22 +159,22 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             vs.S_pwp_rz = update(
                 vs.S_pwp_rz,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("S_pwp_rz", self._base_path / "input", self._states_hm_file)[:, :, 0],
+                self._read_var_from_nc("S_pwp_rz", self._base_path / "input", self._sim_file)[:, :, 0],
             )
             vs.S_pwp_ss = update(
                 vs.S_pwp_ss,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("S_pwp_ss", self._base_path / "input", self._states_hm_file)[:, :, 0],
+                self._read_var_from_nc("S_pwp_ss", self._base_path / "input", self._sim_file)[:, :, 0],
             )
             vs.S_sat_rz = update(
                 vs.S_sat_rz,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("S_sat_rz", self._base_path / "input", self._states_hm_file)[:, :, 0],
+                self._read_var_from_nc("S_sat_rz", self._base_path / "input", self._sim_file)[:, :, 0],
             )
             vs.S_sat_ss = update(
                 vs.S_sat_ss,
                 at[2:-2, 2:-2],
-                self._read_var_from_nc("S_sat_ss", self._base_path / "input", self._states_hm_file)[:, :, 0],
+                self._read_var_from_nc("S_sat_ss", self._base_path / "input", self._sim_file)[:, :, 0],
             )
 
             if settings.tm_structure == "complete-mixing":
@@ -525,21 +525,21 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             vs.S_snow = update(
                 vs.S_snow,
                 at[2:-2, 2:-2, :vs.taup1],
-                self._read_var_from_nc("S_snow", self._base_path / "input", self._states_hm_file)[
+                self._read_var_from_nc("S_snow", self._base_path / "input", self._sim_file)[
                     :, :, vs.itt, npx.newaxis
                 ],
             )
             vs.S_rz = update(
                 vs.S_rz,
                 at[2:-2, 2:-2, :vs.taup1],
-                self._read_var_from_nc("S_rz", self._base_path / "input", self._states_hm_file)[
+                self._read_var_from_nc("S_rz", self._base_path / "input", self._sim_file)[
                     :, :, vs.itt, npx.newaxis
                 ],
             )
             vs.S_ss = update(
                 vs.S_ss,
                 at[2:-2, 2:-2, :vs.taup1],
-                self._read_var_from_nc("S_ss", self._base_path / "input", self._states_hm_file)[
+                self._read_var_from_nc("S_ss", self._base_path / "input", self._sim_file)[
                     :, :, vs.itt, npx.newaxis
                 ],
             )
@@ -728,64 +728,64 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             vs.PREC_DIST_DAILY = update(
                 vs.PREC_DIST_DAILY,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("prec", self._base_path / "input", self._states_hm_file),
+                self._read_var_from_nc("prec", self._base_path / "input", self._sim_file),
             )
             vs.INF_MAT_RZ = update(
                 vs.INF_MAT_RZ,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("inf_mat_rz", self._base_path / "input", self._states_hm_file),
+                self._read_var_from_nc("inf_mat_rz", self._base_path / "input", self._sim_file),
             )
             vs.INF_PF_RZ = update(
                 vs.INF_PF_RZ,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("inf_mp_rz", self._base_path / "input", self._states_hm_file)
-                + self._read_var_from_nc("inf_sc_rz", self._base_path / "input", self._states_hm_file),
+                self._read_var_from_nc("inf_mp_rz", self._base_path / "input", self._sim_file)
+                + self._read_var_from_nc("inf_sc_rz", self._base_path / "input", self._sim_file),
             )
             vs.INF_PF_SS = update(
                 vs.INF_PF_SS,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("inf_ss", self._base_path / "input", self._states_hm_file),
+                self._read_var_from_nc("inf_ss", self._base_path / "input", self._sim_file),
             )
             vs.TRANSP = update(
                 vs.TRANSP,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("transp", self._base_path / "input", self._states_hm_file),
+                self._read_var_from_nc("transp", self._base_path / "input", self._sim_file),
             )
             vs.EVAP_SOIL = update(
                 vs.EVAP_SOIL,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("evap_soil", self._base_path / "input", self._states_hm_file),
+                self._read_var_from_nc("evap_soil", self._base_path / "input", self._sim_file),
             )
             vs.CPR_RZ = update(
                 vs.CPR_RZ,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("cpr_rz", self._base_path / "input", self._states_hm_file),
+                self._read_var_from_nc("cpr_rz", self._base_path / "input", self._sim_file),
             )
             vs.Q_RZ = update(
                 vs.Q_RZ,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("q_rz", self._base_path / "input", self._states_hm_file),
+                self._read_var_from_nc("q_rz", self._base_path / "input", self._sim_file),
             )
             vs.Q_SS = update(
                 vs.Q_SS,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("q_ss", self._base_path / "input", self._states_hm_file),
+                self._read_var_from_nc("q_ss", self._base_path / "input", self._sim_file),
             )
             vs.S_RZ = update(
                 vs.S_RZ,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("S_rz", self._base_path / "input", self._states_hm_file),
+                self._read_var_from_nc("S_rz", self._base_path / "input", self._sim_file),
             )
             vs.S_SS = update(
                 vs.S_SS,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("S_ss", self._base_path / "input", self._states_hm_file),
+                self._read_var_from_nc("S_ss", self._base_path / "input", self._sim_file),
             )
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
             vs.S_SNOW = update(
                 vs.S_SNOW,
                 at[2:-2, 2:-2, :],
-                self._read_var_from_nc("S_snow", self._base_path / "input", self._states_hm_file),
+                self._read_var_from_nc("S_snow", self._base_path / "input", self._sim_file),
             )
 
             if settings.enable_oxygen18:

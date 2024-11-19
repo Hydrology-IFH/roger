@@ -29,7 +29,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         _base_path = Path(__file__).parent
         _tm_structure = transport_model_structure.replace("_", " ")
         _input_dir = _base_path / "input"
-        _states_hm_file = f"states_hm_best_for_{transport_model_structure}.nc"
+        _states_hm_file = f"SVAT_best_for_{transport_model_structure}.nc"
         if tmp_dir:
             _tmp_dir = tmp_dir / "output"
         else:
@@ -56,7 +56,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"SVATTRANSPORT_{transport_model_structure}_{sas_solver}"
+            settings.identifier = f"SVATOXYGEN18_{transport_model_structure}_{sas_solver}"
             settings.sas_solver = sas_solver
             settings.sas_solver_substeps = 6
             if settings.sas_solver in ["RK4", "Euler"]:

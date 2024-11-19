@@ -58,7 +58,7 @@ def main(transport_model_structure, sas_solver, nsamples, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"SVATTRANSPORT_{transport_model_structure}_{sas_solver}"
+            settings.identifier = f"SVATOXYGEN18_{transport_model_structure}_{sas_solver}"
             settings.sas_solver = sas_solver
             settings.sas_solver_substeps = 6
             if settings.sas_solver in ["RK4", "Euler"]:
@@ -154,28 +154,28 @@ def main(transport_model_structure, sas_solver, nsamples, tmp_dir):
                 vs.S_pwp_rz,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_pwp_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "S_pwp_rz", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, 0],
             )
             vs.S_pwp_ss = update(
                 vs.S_pwp_ss,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_pwp_ss", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "S_pwp_ss", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, 0],
             )
             vs.S_sat_rz = update(
                 vs.S_sat_rz,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_sat_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "S_sat_rz", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, 0],
             )
             vs.S_sat_ss = update(
                 vs.S_sat_ss,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_sat_ss", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "S_sat_ss", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, 0],
             )
 
@@ -420,21 +420,21 @@ def main(transport_model_structure, sas_solver, nsamples, tmp_dir):
                 vs.S_snow,
                 at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc(
-                    "S_snow", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "S_snow", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, vs.itt, npx.newaxis],
             )
             vs.S_rz = update(
                 vs.S_rz,
                 at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc(
-                    "S_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "S_rz", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, vs.itt, npx.newaxis],
             )
             vs.S_ss = update(
                 vs.S_ss,
                 at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc(
-                    "S_ss", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "S_ss", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, vs.itt, npx.newaxis],
             )
             vs.S_s = update(
@@ -629,80 +629,80 @@ def main(transport_model_structure, sas_solver, nsamples, tmp_dir):
                 vs.PREC_DIST_DAILY,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "prec", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "prec", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, :],
             )
             vs.INF_MAT_RZ = update(
                 vs.INF_MAT_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "inf_mat_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "inf_mat_rz", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, :],
             )
             vs.INF_PF_RZ = update(
                 vs.INF_PF_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "inf_mp_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "inf_mp_rz", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, :]
                 + self._read_var_from_nc(
-                    "inf_sc_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "inf_sc_rz", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, :],
             )
             vs.INF_PF_SS = update(
                 vs.INF_PF_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "inf_ss", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "inf_ss", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, :],
             )
             vs.TRANSP = update(
                 vs.TRANSP,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "transp", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "transp", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, :],
             )
             vs.EVAP_SOIL = update(
                 vs.EVAP_SOIL,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "evap_soil", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "evap_soil", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, :],
             )
             vs.CPR_RZ = update(
                 vs.CPR_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "cpr_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "cpr_rz", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, :],
             )
             vs.Q_RZ = update(
                 vs.Q_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "q_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "q_rz", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, :],
             )
             vs.Q_SS = update(
                 vs.Q_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "q_ss", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "q_ss", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, :],
             )
             vs.S_RZ = update(
                 vs.S_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_rz", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "S_rz", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, :],
             )
             vs.S_SS = update(
                 vs.S_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_ss", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "S_ss", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, :],
             )
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
@@ -710,7 +710,7 @@ def main(transport_model_structure, sas_solver, nsamples, tmp_dir):
                 vs.S_SNOW,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_snow", self._base_path / "input", f"states_hm_saltelli_for_{transport_model_structure}.nc"
+                    "S_snow", self._base_path / "input", f"SVAT_for_{transport_model_structure}.nc"
                 )[x1:x2, :, :],
             )
 

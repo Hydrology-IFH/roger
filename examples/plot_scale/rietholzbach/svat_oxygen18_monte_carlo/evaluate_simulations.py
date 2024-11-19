@@ -58,10 +58,10 @@ def main(sas_solver, tmp_dir):
         tms = transport_model_structure.replace("_", " ")
         # load hydrologic simulation
         if tms in ["complete-mixing", "piston"]:
-            states_hm_file = Path(__file__).parent.parent / "svat_monte_carlo" / "output" / f"states_hm100.nc"
+            sim_hm_file = Path(__file__).parent.parent / "svat_monte_carlo" / "output" / f"SVAT_best100.nc"
         else:
-            states_hm_file = Path(__file__).parent.parent / "svat_monte_carlo" / "output" / "states_hm100_bootstrap.nc"
-        ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
+            sim_hm_file = Path(__file__).parent.parent / "svat_monte_carlo" / "output" / "SVAT_best100_bootstrap.nc"
+        ds_sim_hm = xr.open_dataset(sim_hm_file, engine="h5netcdf")
         days_sim_hm = ds_sim_hm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
         date_sim_hm = num2date(
             days_sim_hm,
@@ -106,8 +106,8 @@ def main(sas_solver, tmp_dir):
             click.echo(f"Calculate metrics for {tms} ...")
 
             # load transport simulation
-            states_tm_file = base_path_output / f"states_{transport_model_structure}_monte_carlo.nc"
-            ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+            sim_tm_file = base_path_output / f"SVATOXYGEN18_{transport_model_structure}_monte_carlo.nc"
+            ds_sim_tm = xr.open_dataset(sim_tm_file, engine="h5netcdf")
             days_sim_tm = ds_sim_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
             date_sim_tm = num2date(
                 days_sim_tm,
@@ -360,8 +360,8 @@ def main(sas_solver, tmp_dir):
             # write simulated bulk sample to output file
             ds_sim_tm = ds_sim_tm.load()
             ds_sim_tm = ds_sim_tm.close()
-            states_tm_file = base_path_output / f"states_{transport_model_structure}_monte_carlo.nc"
-            with h5netcdf.File(states_tm_file, "a", decode_vlen_strings=False) as f:
+            sim_tm_file = base_path_output / f"SVATOXYGEN18_{transport_model_structure}_monte_carlo.nc"
+            with h5netcdf.File(sim_tm_file, "a", decode_vlen_strings=False) as f:
                 try:
                     v = f.create_variable(
                         "d18O_perc_bs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1
@@ -375,8 +375,8 @@ def main(sas_solver, tmp_dir):
         # write SAS parameters of best model run
         click.echo(f"Write SAS params of best {tms} simulation ...")
         idx_best = df_params_metrics["KGE_C_iso_q_ss"].idxmax()
-        states_tm_file = base_path_output / f"states_{transport_model_structure}_monte_carlo.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
+        sim_tm_file = base_path_output / f"SVATOXYGEN18_{transport_model_structure}_monte_carlo.nc"
+        ds_sim_tm = xr.open_dataset(sim_tm_file, engine="h5netcdf")
         params_tm_file = base_path_output / f"sas_params_{transport_model_structure}.nc"
         with h5netcdf.File(params_tm_file, "w", decode_vlen_strings=False) as f:
             f.attrs.update(
@@ -430,11 +430,11 @@ def main(sas_solver, tmp_dir):
         ds_sim_tm = ds_sim_tm.load()
         ds_sim_tm = ds_sim_tm.close()
 
-        # write states of best transport simulation
-        click.echo(f"Write states of best {tms} simulation ...")
-        states_tm_mc_file = base_path_output / f"states_{transport_model_structure}_monte_carlo.nc"
-        states_tm_file = base_path_output / f"states_best_{transport_model_structure}.nc"
-        with h5netcdf.File(states_tm_file, "w", decode_vlen_strings=False) as f:
+        # write file of best transport simulation
+        click.echo(f"Write file of best {tms} simulation ...")
+        sim_tm_mc_file = base_path_output / f"SVATOXYGEN18_{transport_model_structure}_monte_carlo.nc"
+        sim_tm_file = base_path_output / f"SVATOXYGEN18_{transport_model_structure}_best1.nc"
+        with h5netcdf.File(sim_tm_file, "w", decode_vlen_strings=False) as f:
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
                 title="RoGeR best transport model Monte Carlo simulations at Rietholzbach lysimeter site",
@@ -445,7 +445,7 @@ def main(sas_solver, tmp_dir):
                 sas_solver=f"{sas_solver}",
             )
             # collect dimensions
-            with h5netcdf.File(states_tm_mc_file, "r", decode_vlen_strings=False) as df:
+            with h5netcdf.File(sim_tm_mc_file, "r", decode_vlen_strings=False) as df:
                 f.attrs.update(roger_version=df.attrs["roger_version"])
                 # set dimensions with a dictionary
                 dict_dim = {
@@ -526,15 +526,15 @@ def main(sas_solver, tmp_dir):
                         v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
                         del var_obj, vals
 
-        # write hydrologic states corresponding to best transport simulation
-        click.echo(f"Write states of best hydrologic simulation corresponding to {tms} ...")
+        # write hydrologic file corresponding to best transport simulation
+        click.echo(f"Write file of best hydrologic simulation corresponding to {tms} ...")
 
-        # write states of best hydrologic simulation corresponding to best transport simulation
+        # write file of best hydrologic simulation corresponding to best transport simulation
         if tms in ["complete-mixing", "piston"]:
-            states_hm_file = Path(__file__).parent.parent / "svat_monte_carlo" / "output" / "states_hm100.nc"
+            sim_hm_file = Path(__file__).parent.parent / "svat_monte_carlo" / "output" / "SVAT_best100.nc"
         else:
-            states_hm_file = Path(__file__).parent.parent / "svat_monte_carlo" / "output" / "states_hm100_bootstrap.nc"
-        ds_hm_for_tm_mc = xr.open_dataset(states_hm_file, engine="h5netcdf")
+            sim_hm_file = Path(__file__).parent.parent / "svat_monte_carlo" / "output" / "SVAT_best100_bootstrap.nc"
+        ds_hm_for_tm_mc = xr.open_dataset(sim_hm_file, engine="h5netcdf")
         ds_hm_best = ds_hm_for_tm_mc.loc[dict(x=idx_best)]
         ds_hm_best.attrs["title"] = f"Best hydrologic simulation corresponding to best {tms} oxygen-18 simulation"
         days = ds_hm_best["Time"].values / onp.timedelta64(24 * 60 * 60, "s")

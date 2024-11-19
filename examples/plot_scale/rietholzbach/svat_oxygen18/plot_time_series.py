@@ -83,8 +83,8 @@ def main(tmp_dir):
         tms = tm.replace(" ", "_")
 
         # load hydrologic simulation
-        states_hm_file = base_path / "input" / f"states_hm_best_for_{tms}.nc"
-        ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
+        hm_file = base_path / "input" / f"SVAT_best_for_{tms}.nc"
+        ds_sim_hm = xr.open_dataset(hm_file, engine="h5netcdf")
         days_sim_hm = ds_sim_hm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
         time_origin = ds_sim_hm["Time"].attrs["time_origin"]
         date_sim_hm = num2date(
@@ -96,8 +96,8 @@ def main(tmp_dir):
         ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
         ds_sim_hm.Time.attrs["time_origin"] = time_origin
         # load transport simulation
-        states_tm_file = base_path_output / f"states_{tms}.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
+        tm_file = base_path_output / f"{tms}.nc"
+        ds_sim_tm = xr.open_dataset(tm_file, engine="h5netcdf", decode_times=False)
         date_sim_tm = num2date(
             ds_sim_tm["Time"].values,
             units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}",
@@ -399,8 +399,8 @@ def main(tmp_dir):
         ds_sim_tm = ds_sim_tm.load()  # required to release file lock
         ds_sim_tm = ds_sim_tm.close()
         del ds_sim_tm
-        states_tm_file = base_path_output / f"states_{tms}.nc"
-        with h5netcdf.File(states_tm_file, "a", decode_vlen_strings=False) as f:
+        tm_file = base_path_output / f"{tms}.nc"
+        with h5netcdf.File(tm_file, "a", decode_vlen_strings=False) as f:
             try:
                 v = f.create_variable("d18O_perc_bs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1)
                 v[:, :, :] = d18O_perc_bs

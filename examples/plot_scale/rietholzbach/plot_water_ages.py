@@ -79,8 +79,8 @@ def main(tmp_dir):
 
     # load HYDRUS-1D benchmarks
     # travel time simulations
-    states_hydrus_file = base_path / "hydrus_benchmark" / "states_hydrus_tt.nc"
-    ds_hydrus_tt = xr.open_dataset(states_hydrus_file, engine="h5netcdf", decode_times=False)
+    hydrus_file = base_path / "hydrus_benchmark" / "hydrus_tt.nc"
+    ds_hydrus_tt = xr.open_dataset(hydrus_file, engine="h5netcdf", decode_times=False)
     days_hydrus_tt = ds_hydrus_tt["Time"].values / 24
     date_hydrus_tt = num2date(
         days_hydrus_tt,
@@ -119,8 +119,8 @@ def main(tmp_dir):
     fig, axes = plt.subplots(2, 5, sharey=True, figsize=(6, 3))
     for i, tm_structure in enumerate(tm_structures):
         tms = tm_structure.replace(" ", "_")
-        states_tm_file = base_path / "svat_oxygen18" / "output" / f"states_{tms}.nc"
-        with xr.open_dataset(states_tm_file, engine="h5netcdf") as ds_sim_tm:
+        tm_file = base_path / "svat_oxygen18" / "output" / f"SVATOXYGEN18_{tms}.nc"
+        with xr.open_dataset(tm_file, engine="h5netcdf") as ds_sim_tm:
             days_sim_tm = ds_sim_tm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
             date_sim_tm = num2date(
                 days_sim_tm,
@@ -228,8 +228,8 @@ def main(tmp_dir):
     for i, tm_structure in enumerate(tm_structures):
         tms = tm_structure.replace(" ", "_")
         # load transport simulation
-        states_tm_file = base_path / "svat_oxygen18" / "output" / f"states_{tms}.nc"
-        ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
+        tm_file = base_path / "svat_oxygen18" / "output" / f"SVATOXYGEN18_{tms}.nc"
+        ds_sim_tm = xr.open_dataset(tm_file, engine="h5netcdf", decode_times=False)
         for j, age_metric in enumerate(["ttavg_transp", "ttavg_q_ss"]):
             df_age.iloc[j, i] = onp.nanmean(ds_sim_tm[age_metric].values)
 

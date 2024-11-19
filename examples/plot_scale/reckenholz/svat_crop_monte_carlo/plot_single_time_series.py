@@ -93,7 +93,7 @@ def main(tmp_dir):
     lys_experiments = ["lys2", "lys3", "lys8"]
     for lys_experiment in lys_experiments:
         # load parameters and metrics
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
         df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2017"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
         # df_params_metrics["E_multi"] = df_params_metrics["KGE_q_ss_perc_pet_2011-2017"]
         idx_best = df_params_metrics["E_multi"].idxmax()
@@ -333,8 +333,6 @@ def main(tmp_dir):
             plt.close("all")
 
 
-
-
         # compare best simulation with observations
         vars_obs = ["PERC", "THETA"]
         vars_sim = ["q_ss", "theta"]
@@ -370,7 +368,7 @@ def main(tmp_dir):
     lys_experiments = ["lys2", "lys3", "lys8"]
     for lys_experiment in lys_experiments:
         # load parameters and metrics
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}.txt", sep="\t")
+        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
         df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2017"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
         # df_params_metrics["E_multi"] = df_params_metrics["KGE_q_ss_perc_pet_2011-2017"]
         for year in [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017]:
