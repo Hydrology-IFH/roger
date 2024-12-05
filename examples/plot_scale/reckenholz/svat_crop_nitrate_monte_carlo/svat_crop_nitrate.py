@@ -26,7 +26,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             # read fluxes and states from local SSD on cluster node
             _input_dir1 = Path(tmp_dir)
         else:
-            _input_dir1 = _base_path.parent / "output" / "svat_crop"
+            _input_dir1 = _base_path.parent / "output" / "svat_crop_monte_carlo"
         _input_dir2 = _base_path.parent / "input" / f"{lys_experiment}"
 
         def _read_var_from_nc(self, var, path_dir, file):

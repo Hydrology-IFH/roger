@@ -72,7 +72,7 @@ def main(tmp_dir):
     # DataFrame with sampled model parameters and the corresponding metrics
     nx = ds_sim.dims["x"]  # number of rows
     ny = ds_sim.dims["y"]  # number of columns
-    file = base_path_figs / "params_metrics.txt"
+    file = base_path_figs / "params_metrics_weekly.txt"
     if not os.path.exists(file):
         click.echo("Calculate metrics ...")
         df_params_metrics = pd.DataFrame(index=range(nx * ny))
@@ -108,8 +108,8 @@ def main(tmp_dir):
 
                     if var_sim in ["dS"]:
                         df_eval.loc["2000-01":"2000-06", :] = onp.nan
-                        df_eval_daily = df_eval.dropna()
-                        df_eval = df_eval_daily.resample("W").mean()
+                        df_eval_weekly = df_eval.resample("W").mean()
+                        df_eval = df_eval_weekly.dropna()
                         obs_vals = df_eval.loc[:, "obs"].values.astype(float)
                         sim_vals = df_eval.loc[:, "sim"].values.astype(float)
                         # add offset since diagnostic efficiency requires positive values
@@ -186,8 +186,8 @@ def main(tmp_dir):
                     else:
                         # skip first seven days for warmup
                         df_eval.loc[:"1997-01-07", :] = onp.nan
-                        df_eval_daily = df_eval.dropna()
-                        df_eval = df_eval_daily.resample("W").sum()
+                        df_eval_weekly = df_eval.resample("W").sum()
+                        df_eval = df_eval_weekly.dropna()
                         obs_vals = df_eval.loc[:, "obs"].values.astype(float)
                         sim_vals = df_eval.loc[:, "sim"].values.astype(float)
                         key_kge = "KGE_" + var_sim + f"{sc1}"
