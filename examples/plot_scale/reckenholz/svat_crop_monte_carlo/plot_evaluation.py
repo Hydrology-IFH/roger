@@ -118,7 +118,7 @@ def main(tmp_dir):
                 df_params_metrics = df_params_metrics.sort_values(by=[f"{metric}_perc_pet"], ascending=False)
                 df = df_params_metrics.loc[:, [f"{metric}_perc_pet_{year}"]]
                 df = df.iloc[:100, :]
-                g = sns.kdeplot(data=df, x=f"{metric}_all_{year}", ax=ax[jj, ii], fill=True, color="black", alpha=0.5)
+                # g = sns.kdeplot(data=df, x=f"{metric}_all_{year}", ax=ax[jj, ii], fill=True, color="black", alpha=0.5)
                 g = sns.kdeplot(data=df, x=f"{metric}_perc_pet_{year}", ax=ax[jj, ii], fill=True, color="grey", alpha=0.5)
                 df_params_metrics = df_params_metrics.sort_values(by=[f"{metric}_perc_pet"], ascending=False)
                 df = df_params_metrics.loc[:, [f"{metric}_perc_dom_{year}"]]
@@ -167,7 +167,7 @@ def main(tmp_dir):
                 df_params_metrics1.iloc[:100, :].to_csv(file, header=True, index=False, sep="\t")
                 df = df_params_metrics.loc[:, [f"{metric}_perc_pet_{year}"]]
                 df = df.iloc[:100, :]
-                g = sns.kdeplot(data=df, x=f"{metric}_all_{year}", ax=ax[jj, ii], fill=True, color="black", alpha=0.5)
+                # g = sns.kdeplot(data=df, x=f"{metric}_all_{year}", ax=ax[jj, ii], fill=True, color="black", alpha=0.5)
                 g = sns.kdeplot(data=df, x=f"{metric}_perc_pet_{year}", ax=ax[jj, ii], fill=True, color="grey", alpha=0.5)
                 df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
                 df = df_params_metrics.loc[:, [f"{metric}_perc_dom_{year}"]]
@@ -759,9 +759,6 @@ def main(tmp_dir):
     fig.tight_layout()
     file = base_path_figs / "boxplot_metrics_lys2_lys3_lys8_Emulti_2011-2015_.png"
     fig.savefig(file, dpi=300)
-
-
-
     return
 
 

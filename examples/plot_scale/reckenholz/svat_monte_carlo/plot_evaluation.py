@@ -60,11 +60,11 @@ def main(tmp_dir):
         base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
     # directory of results
-    base_path_output = base_path / "output" / "svat_crop_monte_carlo_reference"
+    base_path_output = base_path / "output" / "svat_monte_carlo"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
     # directory of figures
-    base_path_figs = Path(__file__).parent.parent / "figures" / "svat_crop_monte_carlo_reference"
+    base_path_figs = Path(__file__).parent.parent / "figures" / "svat_monte_carlo"
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
@@ -162,7 +162,7 @@ def main(tmp_dir):
                 df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2017"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
                 df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
                 # write .txt-file
-                df_params_metrics1 = df_params_metrics.loc[:, ["dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "c_canopy", "c_root", "KGE_q_ss_perc_dom", "r_S_all", "KGE_alpha_S_all", "E_multi", "KGE_q_ss_perc_pet_2011-2017", "KGE_q_ss_pet_dom"]]
+                df_params_metrics1 = df_params_metrics.loc[:, ["dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "KGE_q_ss_perc_dom", "r_S_all", "KGE_alpha_S_all", "E_multi", "KGE_q_ss_perc_pet_2011-2017", "KGE_q_ss_pet_dom"]]
                 file = base_path_figs / f"params_eff100_{lys_experiment}.txt"
                 df_params_metrics1.iloc[:100, :].to_csv(file, header=True, index=False, sep="\t")
                 df = df_params_metrics.loc[:, [f"{metric}_perc_pet_{year}"]]
@@ -315,7 +315,7 @@ def main(tmp_dir):
 
     colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
     lys_experiments = ["lys8", "lys3", "lys2"]
-    params = ["dmpv", "lmpv", "c_canopy", "c_root"]
+    params = ["dmpv", "lmpv"]
     ll_df = []
     for lys_experiment in lys_experiments:
         df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
@@ -377,7 +377,7 @@ def main(tmp_dir):
     fig, ax = plt.subplots(7, 4, figsize=(6, 6), sharey='col')
     colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
     lys_experiments = ["lys8", "lys3", "lys2"]
-    params = ["dmpv", "lmpv", "c_canopy", "c_root"]
+    params = ["dmpv", "lmpv"]
     years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
     for j, year in enumerate(years):
         ll_df = []
@@ -449,7 +449,7 @@ def main(tmp_dir):
 
     colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
     lys_experiments = ["lys8", "lys3", "lys2"]
-    params = ["dmpv", "lmpv", "c_canopy", "c_root"]
+    params = ["dmpv", "lmpv"]
     ll_df = []
     for lys_experiment in lys_experiments:
         df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
@@ -531,7 +531,7 @@ def main(tmp_dir):
     colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
     lys_experiments = ["lys8", "lys3", "lys2"]
     years = [2011, 2012, 2013, 2014, 2015]
-    params = ["dmpv", "lmpv", "c_canopy", "c_root"]
+    params = ["dmpv", "lmpv"]
     ll_df = []
     for lys_experiment in lys_experiments:
         df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_weekly.txt", sep="\t")
