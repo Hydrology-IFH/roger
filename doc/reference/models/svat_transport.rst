@@ -1,5 +1,5 @@
-SVAT transport model(s)
-=======================
+SVAT solute transport model(s) using StorAge Selection Function (SAS) functions
+===============================================================================
 
-.. autoclass:: roger.models.svat_bromide.SVATTRANSPORTSetup
-.. autoclass:: roger.models.svat_oxygen18.SVATTRANSPORTSetup
+.. autoclass:: roger.models.svat_bromide.SVATBROMIDESetup
+.. autoclass:: roger.models.svat_oxygen18.SVATOXYGEN18Setup
