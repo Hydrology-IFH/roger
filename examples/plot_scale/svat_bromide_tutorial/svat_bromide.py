@@ -14,7 +14,7 @@ def main(tmp_dir):
     from roger.core.operators import numpy as npx, update, at, where
     from roger.tools.setup import write_forcing_tracer
 
-    class SVATTRANSPORTSetup(RogerSetup):
+    class SVATBROMIDESetup(RogerSetup):
         """A SVAT bromide transport model.
         """
         # custom attributes required by helper functions
@@ -408,7 +408,7 @@ def main(tmp_dir):
             pass
 
     # initializes the model structure
-    model = SVATTRANSPORTSetup()
+    model = SVATBROMIDESetup()
     # writes the forcing data to netcdf
     write_forcing_tracer(model._input_dir, 'Br')
     # runs the model setup

@@ -15,7 +15,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
     from roger.core.operators import numpy as npx, update, at
     from roger.core.transport import delta_to_conc, conc_to_delta
 
-    class SVATTRANSPORTSetup(RogerSetup):
+    class SVATOXYGEN18Setup(RogerSetup):
         """A SVAT oxygen18 transport model.
         """
         # custom attributes required by helper functions
@@ -459,7 +459,7 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             )
 
     # initializes the model structure
-    model = SVATTRANSPORTSetup()
+    model = SVATOXYGEN18Setup()
     # runs the model setup
     model.setup()
     # runs the model warmup

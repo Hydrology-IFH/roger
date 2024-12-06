@@ -1,6 +1,7 @@
 from pathlib import Path
 import pytest
 import shutil
+from make_data_for_svat_transport import make_fluxes_and_storages
 
 BASE_PATH = Path(__file__).parent
 
@@ -98,15 +99,16 @@ def test_setup_svat_bromide(float_type):
     object.__setattr__(runtime_settings, "force_overwrite", True)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
-    from roger.models.svat_bromide import SVATTRANSPORTSetup
+    from roger.models.svat_bromide import SVATBROMIDESetup
     from roger.tools.make_toy_data import make_toy_forcing_tracer
 
-    sim = SVATTRANSPORTSetup()
+    make_fluxes_and_storages(float_type)
+    sim = SVATBROMIDESetup()
     sim._base_path = Path(__file__).parent
     sim._input_dir = Path(__file__).parent / "input"
     make_toy_forcing_tracer(sim._base_path, tracer="Br", ndays=10,
                             float_type=float_type)
-    shutil.move(BASE_PATH / "states_hm.nc", sim._base_path / "input" / "states_hm.nc")
+    shutil.move(BASE_PATH / "SVAT.nc", sim._base_path / "input" / "SVAT.nc")
     sim.setup()
     sim.warmup()
     sim.run()
@@ -123,13 +125,14 @@ def test_setup_svat_oxygen18(float_type):
     object.__setattr__(runtime_settings, "force_overwrite", True)
     object.__setattr__(runtime_settings, "float_type", float_type)
 
-    from roger.models.svat_oxygen18 import SVATTRANSPORTSetup
+    from roger.models.svat_oxygen18 import SVATOXYGEN18Setup
     from roger.tools.make_toy_data import make_toy_forcing_tracer
 
-    sim = SVATTRANSPORTSetup()
+    make_fluxes_and_storages(float_type)
+    sim = SVATOXYGEN18Setup()
     make_toy_forcing_tracer(sim._base_path, tracer="d18O", ndays=10,
                             float_type=float_type)
-    shutil.move(BASE_PATH / "states_hm.nc", sim._base_path / "states_hm.nc")
+    shutil.move(BASE_PATH / "SVAT.nc", sim._base_path / "SVAT.nc")
     sim.setup()
     sim.warmup()
     sim.run()

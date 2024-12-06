@@ -46,7 +46,7 @@ def main(job_type, sas_solver):
                 lines.append("# Copy fluxes and states from global workspace to local SSD\n")
                 lines.append('echo "Copy fluxes and states from global workspace to local SSD"\n')
                 lines.append("# Compares hashes\n")
-                file_nc = "SVATCROP_%s_bootsrap.nc" % (lys)
+                file_nc = "SVATCROP_%s_bootstrap.nc" % (lys)
                 lines.append(
                     f'checksum_gws=$(shasum -a 256 {output_path_ws.as_posix()}/{file_nc} | cut -f 1 -d " ")\n'
                 )
@@ -96,7 +96,7 @@ def main(job_type, sas_solver):
                 lines.append("# Copy fluxes and states from global workspace to local SSD\n")
                 lines.append('echo "Copy fluxes and states from global workspace to local SSD"\n')
                 lines.append("# Compares hashes\n")
-                file_nc = "SVATCROP_%s_bootsrap.nc" % (lys)
+                file_nc = "SVATCROP_%s_bootstrap.nc" % (lys)
                 lines.append(
                     f'checksum_gws=$(shasum -a 256 {output_path_ws.parent.as_posix()}/{file_nc} | cut -f 1 -d " ")\n'
                 )

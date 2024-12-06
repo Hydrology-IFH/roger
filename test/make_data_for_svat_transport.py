@@ -6,7 +6,7 @@ import glob
 import h5netcdf
 
 
-def make_data(float_type):
+def make_fluxes_and_storages(float_type):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
@@ -512,8 +512,8 @@ def make_data(float_type):
     # merge model output into single file
     path = str(sim._base_path / "SVAT.*.nc")
     diag_files = glob.glob(path)
-    states_hm_file = sim._base_path / "states_hm.nc"
-    with h5netcdf.File(states_hm_file, 'w', decode_vlen_strings=False) as f:
+    SVAT_file = sim._base_path / "SVAT.nc"
+    with h5netcdf.File(SVAT_file, 'w', decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
             title='Test data for SVAT transport models',
