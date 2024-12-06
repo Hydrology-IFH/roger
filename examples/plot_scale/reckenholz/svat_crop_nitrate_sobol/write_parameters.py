@@ -40,14 +40,9 @@ def main(nsamples):
     # load parameter boundaries
     file_param_bounds = base_path / "param_bounds.yml"
     with open(file_param_bounds, "r") as file:
-        dict_bounds = yaml.safe_load(file)
-        list_names = [key for key in dict_bounds.keys()]
-        list_param_bounds = [dict_bounds[key] for key in dict_bounds.keys()]
-        bounds = {'names': list_names, 'bounds': list_param_bounds}
+        bounds = yaml.safe_load(file)
 
-    # generate salteilli parameter samples
-    nsamples = nsamples
-    bounds["outputs"] = ["Y"]
+    # generate parameter samples using a Sobol' sequence
     sp = ProblemSpec(bounds)
     params = sp.sample_sobol(nsamples, calc_second_order=False).samples
     nrows = params.shape[0]
@@ -69,11 +64,11 @@ def main(nsamples):
     df_params.loc[:, "kfix"] = 40.
     df_params.loc[:, "kngl"] = 75. * (1 - c_clay)
 
-    param_names = ["alpha_transp", "alpha_q", "k_transp", "k_q_rz", "k_q_ss", "km_denit", "km_nit", "kmin", "kfix", "kngl", "dmax_denit", "dmax_nit", "phi_soil_temp", "clay", "soil_fertility", "z_soil"]
+    param_names = ["alpha_transp", "alpha_q", "k_transp", "k_q", "km_denit", "km_nit", "kmin", "kfix", "kngl", "dmax_denit", "dmax_nit", "phi_soil_temp", "clay", "soil_fertility", "z_soil"]
     df_params = df_params.loc[:, param_names]
 
     df_params.columns = [
-        ["[-]", "[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[day of year]", "[-]", "", "[mm]"], 
+        ["[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[day of year]", "[-]", "", "[mm]"], 
         param_names,
     ]
 
