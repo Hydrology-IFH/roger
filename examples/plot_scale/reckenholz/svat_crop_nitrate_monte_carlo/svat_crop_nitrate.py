@@ -81,7 +81,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0
-            settings.time_origin = self._get_time_origin(self._input_dir2, 'forcing_tracer.nc')
+            settings.time_origin = "2009-12-31 00:00:00"
 
             settings.enable_crop_phenology = True
             settings.enable_crop_rotation = True
