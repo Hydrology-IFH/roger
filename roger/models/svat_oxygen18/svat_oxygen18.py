@@ -7,7 +7,7 @@ from roger.core.operators import numpy as npx, update, at, for_loop
 from roger.core.transport import delta_to_conc, conc_to_delta
 
 
-class SVATTRANSPORTSetup(RogerSetup):
+class SVATOXYGEN18Setup(RogerSetup):
     """A SVAT oxygen-18 transport model."""
 
     # custom attributes required by helper functions
@@ -182,22 +182,22 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs.S_pwp_rz = update(
             vs.S_pwp_rz,
             at[2:-2, 2:-2],
-            self._read_var_from_nc("S_pwp_rz", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("S_pwp_rz", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
         vs.S_pwp_ss = update(
             vs.S_pwp_ss,
             at[2:-2, 2:-2],
-            self._read_var_from_nc("S_pwp_ss", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("S_pwp_ss", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
         vs.S_sat_rz = update(
             vs.S_sat_rz,
             at[2:-2, 2:-2],
-            self._read_var_from_nc("S_sat_rz", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("S_sat_rz", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
         vs.S_sat_ss = update(
             vs.S_sat_ss,
             at[2:-2, 2:-2],
-            self._read_var_from_nc("S_sat_ss", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("S_sat_ss", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
 
         # SAS parameterization
@@ -226,17 +226,17 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs.S_snow = update(
             vs.S_snow,
             at[2:-2, 2:-2, : vs.taup1],
-            self._read_var_from_nc("S_snow", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("S_snow", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
         vs.S_rz = update(
             vs.S_rz,
             at[2:-2, 2:-2, : vs.taup1],
-            self._read_var_from_nc("S_rz", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("S_rz", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
         vs.S_ss = update(
             vs.S_ss,
             at[2:-2, 2:-2, : vs.taup1],
-            self._read_var_from_nc("S_ss", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("S_ss", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
         vs.S_s = update(
             vs.S_s, at[2:-2, 2:-2, : vs.taup1], vs.S_rz[2:-2, 2:-2, : vs.taup1] + vs.S_ss[2:-2, 2:-2, : vs.taup1]
@@ -442,62 +442,62 @@ class SVATTRANSPORTSetup(RogerSetup):
         vs = state.variables
 
         vs.ta = update(
-            vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("ta", self._base_path, "states_hm.nc")[:, :, vs.itt]
+            vs.ta, at[2:-2, 2:-2], self._read_var_from_nc("ta", self._base_path, "SVAT.nc")[:, :, vs.itt]
         )
         vs.prec = update(
             vs.prec,
             at[2:-2, 2:-2, vs.tau],
-            self._read_var_from_nc("prec", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("prec", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
         vs.inf_mat_rz = update(
             vs.inf_mat_rz,
             at[2:-2, 2:-2],
-            self._read_var_from_nc("inf_mat_rz", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("inf_mat_rz", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
         vs.inf_pf_rz = update(
             vs.inf_pf_rz,
             at[2:-2, 2:-2],
-            self._read_var_from_nc("inf_mp_rz", self._base_path, "states_hm.nc")[:, :, vs.itt]
-            + self._read_var_from_nc("inf_sc_rz", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("inf_mp_rz", self._base_path, "SVAT.nc")[:, :, vs.itt]
+            + self._read_var_from_nc("inf_sc_rz", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
         vs.inf_pf_ss = update(
             vs.inf_pf_ss,
             at[2:-2, 2:-2],
-            self._read_var_from_nc("inf_ss", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("inf_ss", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
         vs.transp = update(
-            vs.transp, at[2:-2, 2:-2], self._read_var_from_nc("transp", self._base_path, "states_hm.nc")[:, :, vs.itt]
+            vs.transp, at[2:-2, 2:-2], self._read_var_from_nc("transp", self._base_path, "SVAT.nc")[:, :, vs.itt]
         )
         vs.evap_soil = update(
             vs.evap_soil,
             at[2:-2, 2:-2],
-            self._read_var_from_nc("evap_soil", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("evap_soil", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
         vs.cpr_rz = update(
-            vs.cpr_rz, at[2:-2, 2:-2], self._read_var_from_nc("cpr_rz", self._base_path, "states_hm.nc")[:, :, vs.itt]
+            vs.cpr_rz, at[2:-2, 2:-2], self._read_var_from_nc("cpr_rz", self._base_path, "SVAT.nc")[:, :, vs.itt]
         )
         vs.q_rz = update(
-            vs.q_rz, at[2:-2, 2:-2], self._read_var_from_nc("q_rz", self._base_path, "states_hm.nc")[:, :, vs.itt]
+            vs.q_rz, at[2:-2, 2:-2], self._read_var_from_nc("q_rz", self._base_path, "SVAT.nc")[:, :, vs.itt]
         )
         vs.q_ss = update(
-            vs.q_ss, at[2:-2, 2:-2], self._read_var_from_nc("q_ss", self._base_path, "states_hm.nc")[:, :, vs.itt]
+            vs.q_ss, at[2:-2, 2:-2], self._read_var_from_nc("q_ss", self._base_path, "SVAT.nc")[:, :, vs.itt]
         )
 
         vs.S_rz = update(
             vs.S_rz,
             at[2:-2, 2:-2, vs.tau],
-            self._read_var_from_nc("S_rz", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("S_rz", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
         vs.S_ss = update(
             vs.S_ss,
             at[2:-2, 2:-2, vs.tau],
-            self._read_var_from_nc("S_ss", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("S_ss", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
         vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
         vs.S_snow = update(
             vs.S_snow,
             at[2:-2, 2:-2, vs.tau],
-            self._read_var_from_nc("S_snow", self._base_path, "states_hm.nc")[:, :, vs.itt],
+            self._read_var_from_nc("S_snow", self._base_path, "SVAT.nc")[:, :, vs.itt],
         )
 
         vs.C_in = update(vs.C_in, at[2:-2, 2:-2], vs.C_IN[2:-2, 2:-2, vs.itt])
