@@ -8,7 +8,7 @@
  
 # load module dependencies
 module load lib/hdf5/1.12.0-openmpi-4.1-gnu-9.2
-export OMPI_MCA_btl="self,smcuda,vader,tcp
+export OMPI_MCA_btl="self,smcuda,vader,tcp"
 export OMP_NUM_THREADS=1
 eval "$(conda shell.bash hook)"
 conda activate roger-mpi
