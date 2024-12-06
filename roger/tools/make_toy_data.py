@@ -371,7 +371,7 @@ def make_toy_forcing_event(
         v.attrs["units"] = "seconds"
         v = f.create_variable("Time", ("Time",), float_type)
         v.attrs["units"] = "hours"
-        v[:] = df_meteo["hh"].values
+        v[:] = df_meteo["hh"].astype(float_type).values
         v = f.create_variable("x", ("x",), int)
         v.attrs["long_name"] = "Zonal coordinate"
         v.attrs["units"] = "meters"
