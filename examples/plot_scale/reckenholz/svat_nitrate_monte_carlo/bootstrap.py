@@ -3,8 +3,8 @@ import os
 import datetime
 import h5netcdf
 from cftime import num2date
-import pandas as pd
 import numpy as onp
+import pandas as pd
 import click
 import roger
 
@@ -20,7 +20,7 @@ def main(tmp_dir, resample_size, nruns):
         base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
     # directory of results
-    base_path_output = base_path / "output" / "svat_crop_monte_carlo"
+    base_path_output = base_path / "output" / "svat_monte_carlo"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
 
@@ -32,13 +32,13 @@ def main(tmp_dir, resample_size, nruns):
     idx_boot = idx_boot.tolist()
     lys_experiments = ["lys2", "lys3", "lys8"]
     for lys_experiment in lys_experiments:
-        output_file = base_path_output / f"SVATCROP_{lys_experiment}_best_{nruns}_simulations.nc"
+        output_file = base_path_output / f"SVAT_{lys_experiment}_best_{nruns}_simulations.nc"
         with h5netcdf.File(output_file, 'r', decode_vlen_strings=False) as df:
             n_repeat = int(resample_size / df.dims["x"].size)
         if n_repeat <= 1:
             n_repeat = 1
         # write states of best model run
-        bootstrap_file = base_path_output / f"SVATCROP_{lys_experiment}_bootstrap.nc"
+        bootstrap_file = base_path_output / f"SVAT_{lys_experiment}_bootstrap.nc"
         with h5netcdf.File(bootstrap_file, 'w', decode_vlen_strings=False) as f:
             f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),

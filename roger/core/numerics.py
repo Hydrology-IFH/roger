@@ -673,8 +673,8 @@ def calc_dC_num_error(state):
                     * npx.where(npx.isnan(vs.C_transp[2:-2, 2:-2]), 0, vs.C_transp[2:-2, 2:-2])
                     - npx.sum(vs.q_ss[2:-2, 2:-2, npx.newaxis] * vs.tt_q_ss[2:-2, 2:-2, :], axis=2)
                     * npx.where(npx.isnan(vs.C_q_ss[2:-2, 2:-2]), 0, vs.C_q_ss[2:-2, 2:-2])
-                    - npx.sum(vs.mr_s[2:-2, 2:-2, :])
-                    + npx.sum(vs.ma_s[2:-2, 2:-2, :])
+                    - npx.sum(vs.mr_s[2:-2, 2:-2, :], axis=2)
+                    + npx.sum(vs.ma_s[2:-2, 2:-2, :], axis=2)
                 )
                 * settings.h
             ),
@@ -1315,7 +1315,7 @@ def sanity_check(state):
         and not settings.enable_routing_1D
         and not settings.enable_routing_2D
         and not settings.enable_groundwater_boundary
-        and not settings.enable_crop_phenology
+        and settings.enable_crop_phenology
         and settings.enable_nitrate
     ):
         check1 = global_and(

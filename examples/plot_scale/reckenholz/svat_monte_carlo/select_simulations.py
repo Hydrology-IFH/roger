@@ -51,7 +51,7 @@ def main(tmp_dir):
         ds_sim = ds_sim.assign_coords(date=("Time", date_sim))
 
         # load .txt-file
-        file = base_path_output / f"params_eff_{lys_experiment}.txt"
+        file = base_path_output / f"params_eff_{lys_experiment}_weekly.txt"
         df_params_metrics = pd.read_csv(file, sep="\t")
 
         # calculate multi-objective efficiency
@@ -80,6 +80,8 @@ def main(tmp_dir):
             with h5netcdf.File(path_sim, "r", decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
                 dict_dim = {"x": 1, "y": 1, "Time": len(df.variables["Time"])}
+                time = onp.array(df.variables.get("Time"))
+                time_origin = df.variables['Time'].attrs['time_origin']
                 if not f.dimensions:
                     f.dimensions = dict_dim
                     v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
@@ -108,6 +110,27 @@ def main(tmp_dir):
                         vals = onp.array(var_obj)
                         v[:, :] = vals[idx_best, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
+            # add year and day of year for nitrate transport model
+            dates1 = num2date(
+                time,
+                units=f"days since {time_origin}",
+                calendar="standard",
+                only_use_cftime_datetimes=False,
+            )
+            dates = pd.to_datetime(dates1)
+            vals = onp.array(dates.year)
+            v = f.create_variable(
+                "year", ("Time",), float, compression="gzip", compression_opts=1
+            )
+            v[:] = onp.array(dates.year)
+            v.attrs.update(long_name="Year", units="")
+            vals = onp.array(dates.year)
+            v = f.create_variable(
+                "doy", ("Time",), float, compression="gzip", compression_opts=1
+            )
+            v[:] = onp.array(dates.day_of_year)
+            v.attrs.update(long_name="Day of year", units="")
+
 
         # select best 100 model runs
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
@@ -132,6 +155,8 @@ def main(tmp_dir):
             with h5netcdf.File(path_sim, "r", decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
                 dict_dim = {"x": 100, "y": 1, "Time": len(df.variables["Time"])}
+                time = onp.array(df.variables.get("Time"))
+                time_origin = df.variables['Time'].attrs['time_origin']
                 if not f.dimensions:
                     f.dimensions = dict_dim
                     v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
@@ -162,6 +187,27 @@ def main(tmp_dir):
                         for i, x in enumerate(idx_best100):
                             v[i, :, :] = vals[x, :, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
+            # add year and day of year for nitrate transport model
+            dates1 = num2date(
+                time,
+                units=f"days since {time_origin}",
+                calendar="standard",
+                only_use_cftime_datetimes=False,
+            )
+            dates = pd.to_datetime(dates1)
+            vals = onp.array(dates.year)
+            v = f.create_variable(
+                "year", ("Time",), float, compression="gzip", compression_opts=1
+            )
+            v[:] = onp.array(dates.year)
+            v.attrs.update(long_name="Year", units="")
+            vals = onp.array(dates.year)
+            v = f.create_variable(
+                "doy", ("Time",), float, compression="gzip", compression_opts=1
+            )
+            v[:] = onp.array(dates.day_of_year)
+            v.attrs.update(long_name="Day of year", units="")
+
     return
 
 
