@@ -66,8 +66,6 @@ def main(tmp_dir):
         path_sim = base_path_output / f"SVATCROP_{lys_experiment}.nc"
         path_sim_1 = base_path_output / f"SVATCROP_{lys_experiment}_best_simulation.nc"
         with h5netcdf.File(path_sim_1, "a", decode_vlen_strings=False) as f:
-            if lys_experiment not in list(f.keys()):
-                f.create_group(lys_experiment)
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
                 title="RoGeR best Monte Carlo simulation at Reckenholz Lysimeter site",
@@ -80,6 +78,8 @@ def main(tmp_dir):
             with h5netcdf.File(path_sim, "r", decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
                 dict_dim = {"x": 1, "y": 1, "Time": len(df.variables["Time"])}
+                time = onp.array(df.variables.get("Time"))
+                time_origin = df.variables['Time'].attrs['time_origin']
                 if not f.dimensions:
                     f.dimensions = dict_dim
                     v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
@@ -109,6 +109,28 @@ def main(tmp_dir):
                         v[:, :] = vals[idx_best, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
 
+            # add year and day of year for nitrate transport model
+            dates1 = num2date(
+                time,
+                units=f"days since {time_origin}",
+                calendar="standard",
+                only_use_cftime_datetimes=False,
+            )
+            dates = pd.to_datetime(dates1)
+            vals = onp.array(dates.year)
+            v = f.create_variable(
+                "year", ("Time",), float, compression="gzip", compression_opts=1
+            )
+            v[:] = onp.array(dates.year)
+            v.attrs.update(long_name="Year", units="")
+            vals = onp.array(dates.year)
+            v = f.create_variable(
+                "doy", ("Time",), float, compression="gzip", compression_opts=1
+            )
+            v[:] = onp.array(dates.day_of_year)
+            v.attrs.update(long_name="Day of year", units="")
+
+
         # select best 100 model runs
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
@@ -118,8 +140,6 @@ def main(tmp_dir):
         path_sim = base_path_output / f"SVATCROP_{lys_experiment}.nc"
         path_sim_100 = base_path_output / f"SVATCROP_{lys_experiment}_best_100_simulations.nc"
         with h5netcdf.File(path_sim_100, "a", decode_vlen_strings=False) as f:
-            if lys_experiment not in list(f.keys()):
-                f.create_group(lys_experiment)
             f.attrs.update(
                 date_created=datetime.datetime.today().isoformat(),
                 title=f"RoGeR best 100 Monte Carlo simulations at Reckenholz Lysimeter ({lys_experiment})",
@@ -132,6 +152,8 @@ def main(tmp_dir):
             with h5netcdf.File(path_sim, "r", decode_vlen_strings=False) as df:
                 # set dimensions with a dictionary
                 dict_dim = {"x": 100, "y": 1, "Time": len(df.variables["Time"])}
+                time = onp.array(df.variables.get("Time"))
+                time_origin = df.variables['Time'].attrs['time_origin']
                 if not f.dimensions:
                     f.dimensions = dict_dim
                     v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
@@ -162,6 +184,26 @@ def main(tmp_dir):
                         for i, x in enumerate(idx_best100):
                             v[i, :, :] = vals[x, :, :]
                         v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
+            # add year and day of year for nitrate transport model
+            dates1 = num2date(
+                time,
+                units=f"days since {time_origin}",
+                calendar="standard",
+                only_use_cftime_datetimes=False,
+            )
+            dates = pd.to_datetime(dates1)
+            vals = onp.array(dates.year)
+            v = f.create_variable(
+                "year", ("Time",), float, compression="gzip", compression_opts=1
+            )
+            v[:] = onp.array(dates.year)
+            v.attrs.update(long_name="Year", units="")
+            vals = onp.array(dates.year)
+            v = f.create_variable(
+                "doy", ("Time",), float, compression="gzip", compression_opts=1
+            )
+            v[:] = onp.array(dates.day_of_year)
+            v.attrs.update(long_name="Day of year", units="")
     return
 
 

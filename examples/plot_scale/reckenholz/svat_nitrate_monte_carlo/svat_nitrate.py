@@ -6,8 +6,8 @@ from roger.cli.roger_run_base import roger_base_cli
 
 
 @click.option("-lys", "--lys-experiment", type=click.Choice(["lys2", "lys3", "lys4", "lys8", "lys9"]), default="lys3")
-@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'advection-dispersion-power', 'time-variant_advection-dispersion-power']), default='complete-mixing')
-@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_nitrate")
+@click.option("-tms", "--transport-model-structure", type=click.Choice(['complete-mixing', 'advection-dispersion-power', 'time-variant_advection-dispersion-power']), default='advection-dispersion-power')
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_nitrate_monte_carlo")
 @roger_base_cli
 def main(lys_experiment, transport_model_structure, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -17,16 +17,15 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
     from roger.tools.setup import write_forcing_tracer
     from roger import runtime_settings as rs
 
-    class SVATNITRATESetup(RogerSetup):
+    class SVATCROPNITRATESetup(RogerSetup):
         """A SVAT transport model for nitrate
         """
         _base_path = Path(__file__).parent
-        # if tmp_dir:
-        #     # read fluxes and states from local SSD on cluster node
-        #     _input_dir1 = Path(tmp_dir)
-        # else:
-        #     _input_dir1 = _base_path.parent / "output" / "svat"
-        _input_dir1 = _base_path.parent / "output" / "svat"
+        if tmp_dir:
+            # read fluxes and states from local SSD on cluster node
+            _input_dir1 = Path(tmp_dir)
+        else:
+            _input_dir1 = _base_path.parent / "output" / "svat"
         _input_dir2 = _base_path.parent / "input" / f"{lys_experiment}"
 
         def _read_var_from_nc(self, var, path_dir, file):
@@ -34,6 +33,12 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables[var]
                 return npx.array(var_obj, dtype=rs.float_type)
+            
+        def _get_nsamples(self, path_dir, file):
+            nc_file = path_dir / file
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables['x']
+                return len(onp.array(var_obj))
 
         def _get_nitt(self, path_dir, file):
             nc_file = path_dir / file
@@ -60,15 +65,15 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             settings.sas_solver = "deterministic"
             settings.sas_solver_substeps = 6
 
-            settings.nx, settings.ny = 3, 1
+            settings.nx, settings.ny = self._get_nsamples(self._input_dir1, f"SVAT_{lys_experiment}_bootstrap.nc"), 1
             settings.nitt = self._get_nitt(
-                self._input_dir1, f"SVAT_{lys_experiment}.nc"
+                self._input_dir1, f"SVAT_{lys_experiment}_bootstrap.nc"
             )
             settings.nitt_forc = settings.nitt
             settings.ages = 1000
             settings.nages = settings.ages + 1
             settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
-            settings.runlen = self._get_runlen(self._input_dir1, f"SVAT_{lys_experiment}.nc") - 24 * 60 * 60
+            settings.runlen = self._get_runlen(self._input_dir1, f"SVAT_{lys_experiment}_bootstrap.nc") - 24 * 60 * 60
 
             settings.dx = 1
             settings.dy = 1
@@ -110,9 +115,16 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
             vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "lut_nup",
+            ],
+        )
         def set_look_up_tables(self, state):
-            pass
+            vs = state.variables
+
+            vs.lut_nup = update(vs.lut_nup, at[:, :], lut.ARR_NUP)
 
         @roger_routine
         def set_topography(self, state):
@@ -149,37 +161,39 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
                 "damp_soil_temp",
                 "YEAR",
                 "DOY",
+                "LU_ID",
             ],
         )
         def set_parameters_setup(self, state):
             vs = state.variables
             settings = state.settings
 
-            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._input_dir1, f'SVAT_{lys_experiment}.nc')[:, :, 0])
-            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._input_dir1, f'SVAT_{lys_experiment}.nc')[:, :, 0])
-            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._input_dir1, f'SVAT_{lys_experiment}.nc')[:, :, 0])
-            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._input_dir1, f'SVAT_{lys_experiment}.nc')[:, :, 0])
+            vs.S_pwp_rz = update(vs.S_pwp_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_rz", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc')[:, :, 0])
+            vs.S_pwp_ss = update(vs.S_pwp_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_pwp_ss", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc')[:, :, 0])
+            vs.S_sat_rz = update(vs.S_sat_rz, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_rz", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc')[:, :, 0])
+            vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc')[:, :, 0])
 
             # partition coefficients
-            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], self._read_var_from_nc("alpha_transp", self._base_path, "parameters.nc"))
-            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], self._read_var_from_nc("alpha_q", self._base_path, "parameters.nc"))
+            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], self._read_var_from_nc("alpha_transp", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
+            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], self._read_var_from_nc("alpha_q", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
             # denitrification parameters
-            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_denit", self._base_path, "parameters.nc"))
-            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("km_denit", self._base_path, "parameters.nc"))
-            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit", self._base_path, "parameters.nc"))
-            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit", self._base_path, "parameters.nc"))
+            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_denit", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
+            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("km_denit", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
             # nitrification parameters
-            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_nit", self._base_path, "parameters.nc"))
+            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
+            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
+            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_nit", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
             vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], 0)
-            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_nit", self._base_path, "parameters.nc"))
+            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_nit", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
             vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], 0)
-            vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], self._read_var_from_nc("kmin", self._base_path, "parameters.nc"))
+            vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], self._read_var_from_nc("kmin", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
             vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], 0)
             # gaseous loss parameters
-            vs.kngl_rz = update(vs.kngl_rz, at[2:-2, 2:-2], self._read_var_from_nc("kngl", self._base_path, "parameters.nc"))
-            # # nitrogen deposition parameters
+            vs.kngl_rz = update(vs.kngl_rz, at[2:-2, 2:-2], 40)
+            # nitrogen deposition parameters
             vs.kdep = update(vs.kdep, at[2:-2, 2:-2], 5)
 
+            # SAS parameters
             if settings.tm_structure == "complete-mixing":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 1)
@@ -188,60 +202,60 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 1)
             elif settings.tm_structure == "advection-dispersion-power":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 0.5)
+                vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 0.25)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 0.5)
+                vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 0.25)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], 0.8)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], self._read_var_from_nc("k_transp", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], 1.2)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._read_var_from_nc("k_q", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 6)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], 1.2)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._read_var_from_nc("k_q", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
             elif settings.tm_structure == "time-variant_advection-dispersion-power":
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 6)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 0.25)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 0], 6)
                 vs.sas_params_cpr_rz = update(vs.sas_params_cpr_rz, at[2:-2, 2:-2, 1], 0.25)
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 0], 62)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 0.3)
-                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 0.6)
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], self._read_var_from_nc("c1_transp", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], self._read_var_from_nc("c2_transp", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 0], 61)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], 1.5)
-                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], 1.5)
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], self._read_var_from_nc("c1_q", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], self._read_var_from_nc("c2_q", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 5], vs.S_pwp_rz[2:-2, 2:-2])
                 vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 6], vs.S_sat_rz[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 0], 61)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], 1.5)
-                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], 1.5)
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], self._read_var_from_nc("c1_q", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], self._read_var_from_nc("c2_q", self._base_path, f"parameters_for_{transport_model_structure}.nc"))
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 5], vs.S_pwp_ss[2:-2, 2:-2])
                 vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 6], vs.S_sat_ss[2:-2, 2:-2])
 
+
             # soil temperature parameters
             vs.z_soil = update(
-                vs.z_soil, at[2:-2, 2:-2], self._read_var_from_nc("z_soil", self._base_path, "parameters.nc")
+                vs.z_soil, at[2:-2, 2:-2], 1350
             )
-            vs.phi_soil_temp = update(vs.phi_soil_temp, at[2:-2, 2:-2], self._read_var_from_nc("phi_soil_temp", self._base_path, "parameters.nc"))
+            vs.phi_soil_temp = update(vs.phi_soil_temp, at[2:-2, 2:-2], 91)
             # dampening depth of soil temperature depends on clay content
-            clay = self._read_var_from_nc("clay", self._base_path, "parameters.nc")[0, 0]
+            clay = self._read_var_from_nc("clay", self._base_path, f"parameters_for_{transport_model_structure}.nc")[0, 0]
             vs.damp_soil_temp = update(vs.damp_soil_temp, at[2:-2, 2:-2], 12 + 4 * (1 - (clay / settings.clay_max)))
 
             vs.YEAR = update(
                 vs.YEAR,
                 at[:],
                 self._read_var_from_nc(
-                    "year", self._input_dir1, f'SVAT_{lys_experiment}.nc'
+                    "year", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc'
                 ),
             )
             vs.DOY = update(
                 vs.DOY,
                 at[:],
                 self._read_var_from_nc(
-                    "doy", self._input_dir1, f'SVAT_{lys_experiment}.nc'
+                    "doy", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc'
                 ),
             )
-
 
         @roger_routine
         def set_parameters(self, state):
@@ -265,8 +279,8 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
         def set_initial_conditions_setup(self, state):
             vs = state.variables
 
-            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._input_dir1, f'SVAT_{lys_experiment}.nc')[:, :, vs.itt, npx.newaxis])
-            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._input_dir1, f'SVAT_{lys_experiment}.nc')[:, :, vs.itt, npx.newaxis])
+            vs.S_rz = update(vs.S_rz, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_rz", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc')[:, :, vs.itt, npx.newaxis])
+            vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, :vs.taup1], self._read_var_from_nc("S_ss", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc')[:, :, vs.itt, npx.newaxis])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, :vs.taup1], vs.S_rz[2:-2, 2:-2, :vs.taup1] + vs.S_ss[2:-2, 2:-2, :vs.taup1])
             vs.S_rz_init = update(vs.S_rz_init, at[2:-2, 2:-2], vs.S_rz[2:-2, 2:-2, 0])
             vs.S_ss_init = update(vs.S_ss_init, at[2:-2, 2:-2], vs.S_ss[2:-2, 2:-2, 0])
@@ -370,23 +384,23 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             vs = state.variables
             settings = state.settings
 
-            vs.PREC_DIST_DAILY = update(vs.PREC_DIST_DAILY, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._input_dir1, f'SVAT_{lys_experiment}.nc'))
-            vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", self._input_dir1, f'SVAT_{lys_experiment}.nc'))
-            vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", self._input_dir1, f'SVAT_{lys_experiment}.nc') + self._read_var_from_nc("inf_sc_rz", self._input_dir1, f'SVAT_{lys_experiment}.nc'))
-            vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._input_dir1, f'SVAT_{lys_experiment}.nc'))
-            vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._input_dir1, f'SVAT_{lys_experiment}.nc'))
-            vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", self._input_dir1, f'SVAT_{lys_experiment}.nc'))
-            vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._input_dir1, f'SVAT_{lys_experiment}.nc'))
-            vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._input_dir1, f'SVAT_{lys_experiment}.nc'))
-            vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._input_dir1, f'SVAT_{lys_experiment}.nc'))
-            vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._input_dir1, f'SVAT_{lys_experiment}.nc'))
-            vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._input_dir1, f'SVAT_{lys_experiment}.nc'))
+            vs.PREC_DIST_DAILY = update(vs.PREC_DIST_DAILY, at[2:-2, 2:-2, :], self._read_var_from_nc("prec", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc'))
+            vs.INF_MAT_RZ = update(vs.INF_MAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mat_rz", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc'))
+            vs.INF_PF_RZ = update(vs.INF_PF_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_mp_rz", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc') + self._read_var_from_nc("inf_sc_rz", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc'))
+            vs.INF_PF_SS = update(vs.INF_PF_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("inf_ss", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc'))
+            vs.TRANSP = update(vs.TRANSP, at[2:-2, 2:-2, :], self._read_var_from_nc("transp", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc'))
+            vs.EVAP_SOIL = update(vs.EVAP_SOIL, at[2:-2, 2:-2, :], self._read_var_from_nc("evap_soil", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc'))
+            vs.CPR_RZ = update(vs.CPR_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("cpr_rz", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc'))
+            vs.Q_RZ = update(vs.Q_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("q_rz", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc'))
+            vs.Q_SS = update(vs.Q_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("q_ss", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc'))
+            vs.S_RZ = update(vs.S_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_rz", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc'))
+            vs.S_SS = update(vs.S_SS, at[2:-2, 2:-2, :], self._read_var_from_nc("S_ss", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc'))
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
             vs.TA = update(
                 vs.TA,
                 at[:],
                 self._read_var_from_nc(
-                    "ta", self._input_dir1, f'SVAT_{lys_experiment}.nc'
+                    "ta", self._input_dir1, f'SVAT_{lys_experiment}_bootstrap.nc'
                 )[0, 0, :],
             )
             vs.ta_year = update(
@@ -417,9 +431,8 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             vs.S_ss = update(vs.S_ss, at[2:-2, 2:-2, vs.tau], vs.S_SS[2:-2, 2:-2, vs.itt])
             vs.S_s = update(vs.S_s, at[2:-2, 2:-2, vs.tau], vs.S_rz[2:-2, 2:-2, vs.tau] + vs.S_ss[2:-2, 2:-2, vs.tau])
 
-            # set standard crop type
+            # set main crop type
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], 5)
-            # set nitrogen uptake rate
             vs.nup = update(
                 vs.nup,
                 at[2:-2, 2:-2],
@@ -441,30 +454,14 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
                 diagnostics["rate"].base_output_path = base_path
 
             diagnostics["average"].output_variables = [
-                "tt10_q_ss",
-                "tt50_q_ss",
-                "tt90_q_ss",
-                "ttavg_q_ss",
-                "tt10_transp",
-                "tt50_transp",
-                "tt90_transp",
-                "ttavg_transp",
-                "rt10_s",
-                "rt50_s",
-                "rt90_s",
-                "rtavg_s",
                 "C_q_ss", 
-                "TT_q_ss",
-                "TT_q_rz",
-                "TT_transp",
-
             ]
             diagnostics["average"].output_frequency = 24 * 60 * 60
             diagnostics["average"].sampling_frequency = 1
             if base_path:
                 diagnostics["average"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["M_s", "Nmin_s", "temp_soil"]
+            diagnostics["collect"].output_variables = ["M_s", "Nmin_s", "C_s"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:
@@ -554,7 +551,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             Nfert=vs.Nfert,
         )
 
-    model = SVATNITRATESetup()
+    model = SVATCROPNITRATESetup()
     write_forcing_tracer(model._input_dir2, 'NO3')
     model.setup()
     model.warmup()

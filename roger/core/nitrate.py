@@ -188,6 +188,7 @@ def calc_nit_soil(state, Nmin, knit, Dnit, sa, S_sat):
 
     # soil temperature coefficient
     soil_temp_coeff = allocate(state.dimensions, ("x", "y"))
+
     soil_temp_coeff = update(
         soil_temp_coeff,
         at[2:-2, 2:-2],
@@ -236,7 +237,7 @@ def calc_nit_soil(state, Nmin, knit, Dnit, sa, S_sat):
     ma = update(
         ma,
         at[2:-2, 2:-2, :],
-        npx.where(npx.sum(Nmin[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] > 0, ((Nmin[2:-2, 2:-2, vs.tau, :]/npx.sum(Nmin[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]) * ma_pot[2:-2, 2:-2, npx.newaxis]), ma[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
+        npx.where(npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis] > 0, ((sa[2:-2, 2:-2, vs.tau, :]/npx.sum(sa[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis]) * ma_pot[2:-2, 2:-2, npx.newaxis]), ma[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 
     # limit nitrification to available mineral nitrogen
@@ -245,6 +246,7 @@ def calc_nit_soil(state, Nmin, knit, Dnit, sa, S_sat):
         at[2:-2, 2:-2, :],
         npx.where(ma[2:-2, 2:-2, :] > Nmin[2:-2, 2:-2, vs.tau, :], Nmin[2:-2, 2:-2, vs.tau, :], ma[2:-2, 2:-2, :]) * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
+
 
     ma = update(
         ma,
@@ -498,6 +500,9 @@ def calc_denit_gw(state, msa, k):
 @roger_kernel
 def calc_nitrogen_cycle_kernel(state):
     vs = state.variables
+
+    # if vs.itt >= 53:
+    #     print("itt", vs.itt)
 
     nfix = allocate(state.dimensions, ("x", "y"))
     nfix = update(

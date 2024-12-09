@@ -1,0 +1,41 @@
+names:
+   - "alpha_transp"
+   - "alpha_q"
+   - "km_denit"
+   - "dmax_denit"
+   - "km_nit"
+   - "dmax_nit"
+   - "kmin"
+   - "k_transp"
+   - "k_q"
+
+bounds:
+
+-
+  - 0.2
+  - 1
+-
+  - 0.2
+  - 1
+-
+  - 1
+  - 20
+-
+  - 1
+  - 100
+-
+  - 1
+  - 20
+-
+  - 1
+  - 100
+-
+  - 1
+  - 100
+-
+  - 0.3
+  - 0.99
+-
+  - 1.01
+  - 3
+

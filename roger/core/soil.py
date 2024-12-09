@@ -1494,6 +1494,18 @@ def rescale_sa_msa_anion_soil_kernel(state):
             vs.S_ss_init[2:-2, 2:-2, npx.newaxis]
             / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
         )
+        vs.msa_rz = update_multiply(
+            vs.msa_rz,
+            at[2:-2, 2:-2, 1, :],
+            vs.S_rz_init[2:-2, 2:-2, npx.newaxis]
+            / npx.sum(vs.sa_rz[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
+        vs.msa_ss = update_multiply(
+            vs.msa_ss,
+            at[2:-2, 2:-2, 1, :],
+            vs.S_ss_init[2:-2, 2:-2, npx.newaxis]
+            / npx.sum(vs.sa_ss[2:-2, 2:-2, vs.tau, :], axis=-1)[:, :, npx.newaxis],
+        )
         vs.sa_rz = update(
             vs.sa_rz,
             at[2:-2, 2:-2, 0, :],

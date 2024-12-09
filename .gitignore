@@ -147,11 +147,9 @@ examples/*/*/hydrus_benchmark/*.txt
 examples/*/*/hydrus_benchmark/*.py
 input_examples/
 examples/plot_scale/reckenholz/svat_bromide
-examples/plot_scale/reckenholz/svat_nitrate
 examples/plot_scale/reckenholz/svat_crop_bromide
 examples/plot_scale/reckenholz/svat_crop_bromide_sobol
 examples/plot_scale/reckenholz/svat_crop_bromide_monte_carlo
-examples/plot_scale/reckenholz/svat_nitrate_monte_carlo
 examples/plot_scale/reckenholz/input
 examples/plot_scale/reckenholz/output
 examples/plot_scale/reckenholz/observations
