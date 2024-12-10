@@ -22,9 +22,9 @@ def main(job_type, sas_solver):
                 output_path_ws = base_path_ws / 'reckenholz' / 'svat_crop_nitrate_sobol'
                 lines = []
                 lines.append('#!/bin/bash\n')
-                lines.append('#PBS -l nodes=1:ppn=20\n')
-                lines.append('#PBS -l walltime=24:00:00\n')
-                lines.append('#PBS -l pmem=6000mb\n')
+                lines.append('#PBS -l nodes=1:ppn=16\n')
+                lines.append('#PBS -l walltime=48:00:00\n')
+                lines.append('#PBS -l pmem=8000mb\n')
                 lines.append(f'#PBS -N {script_name}\n')
                 lines.append('#PBS -m bea\n')
                 lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
@@ -53,7 +53,7 @@ def main(job_type, sas_solver):
                 lines.append("done\n")
                 lines.append('echo "Copying was successful"\n')
                 lines.append('# adapt command to your available scheduler / MPI implementation\n')
-                lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_crop_nitrate.py -b jax -d cpu -n 20 1 -lys %s -td "${TMPDIR}"\n' % (lys))
+                lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_crop_nitrate.py -b jax -d cpu -n 16 1 -lys %s -td "${TMPDIR}"\n' % (lys))
                 lines.append('# Write output to temporary SSD of computing node\n')
                 lines.append('echo "Write output to $TMPDIR"\n')
                 lines.append('# Move output from temporary SSD to workspace\n')
