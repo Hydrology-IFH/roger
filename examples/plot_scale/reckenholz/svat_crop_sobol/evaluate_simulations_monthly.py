@@ -107,7 +107,13 @@ def main(tmp_dir):
                         df_eval.loc[~cond_pet, :] = onp.nan
                     elif cond1 == "_perc_pet":
                         df_eval.loc[~cond_perc_pet, :] = onp.nan
-                    df_eval = df_eval.dropna()
+                    if var_sim in ["S", "theta"]:
+                        df_eval_monthly = df_eval.resample("ME").mean()
+                    else:
+                        df_eval_monthly = df_eval.resample("ME").sum()
+                    df_eval = df_eval_monthly.dropna()
+                    obs_vals = df_eval.loc[:, "obs"].values.astype(float)
+                    sim_vals = df_eval.loc[:, "sim"].values.astype(float)
                     # number of data points
                     N_obs = len(df_eval.index)
                     df_params_metrics.loc[nrow, f"N_{var_obs}"] = N_obs
@@ -123,14 +129,6 @@ def main(tmp_dir):
                             key_r = "r_" + var_sim + cond1
                             df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
                         else:
-                            if var_sim == "S":
-                                df_eval_monthly = df_eval.resample("ME").mean()
-                                obs_vals = df_eval_monthly.loc[:, "obs"].values.astype(float)
-                                sim_vals = df_eval_monthly.loc[:, "sim"].values.astype(float)
-                            else:
-                                df_eval_monthly = df_eval.resample("ME").sum()
-                                obs_vals = df_eval_monthly.loc[:, "obs"].values.astype(float)
-                                sim_vals = df_eval_monthly.loc[:, "sim"].values.astype(float)
                             key_kge = "KGE_" + var_sim + cond1
                             df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
                             key_kge_alpha = "KGE_alpha_" + var_sim + cond1

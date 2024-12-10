@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=20
-#PBS -l walltime=48:00:00
+#PBS -l walltime=24:00:00
 #PBS -l pmem=6000mb
 #PBS -N svat_crop_nitrate_adp_lys2_sa
 #PBS -m bea

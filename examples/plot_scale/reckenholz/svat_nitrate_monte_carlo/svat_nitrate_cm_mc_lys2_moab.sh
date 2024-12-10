@@ -2,7 +2,7 @@
 #PBS -l nodes=1:ppn=25
 #PBS -l walltime=12:00:00
 #PBS -l pmem=4000mb
-#PBS -N svat_nitrate_ad_mc_lys8
+#PBS -N svat_nitrate_cm_mc_lys2
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  
@@ -16,18 +16,18 @@ cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_nitrate_mo
 # Copy fluxes and states from global workspace to local SSD
 echo "Copy fluxes and states from global workspace to local SSD"
 # Compares hashes
-checksum_gws=$(shasum -a 256 /beegfs/work/workspace/ws/fr_rs1092-workspace-0/reckenholz/svat_nitrate_monte_carlo/SVAT_lys8_bootstrap.nc | cut -f 1 -d " ")
+checksum_gws=$(shasum -a 256 /beegfs/work/workspace/ws/fr_rs1092-workspace-0/reckenholz/svat_nitrate_monte_carlo/SVAT_lys2_bootstrap.nc | cut -f 1 -d " ")
 checksum_ssd=0a
-cp /beegfs/work/workspace/ws/fr_rs1092-workspace-0/reckenholz/svat_nitrate_monte_carlo/SVAT_lys8_bootstrap.nc "${TMPDIR}"
+cp /beegfs/work/workspace/ws/fr_rs1092-workspace-0/reckenholz/svat_nitrate_monte_carlo/SVAT_lys2_bootstrap.nc "${TMPDIR}"
 # Wait for termination of moving files
 while [ "${checksum_gws}" != "${checksum_ssd}" ]; do
 sleep 60
-checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVAT_lys8_bootstrap.nc | cut -f 1 -d " ")
+checksum_ssd=$(shasum -a 256 "${TMPDIR}"/SVAT_lys2_bootstrap.nc | cut -f 1 -d " ")
 done
 echo "Copying was successful"
  
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python svat_nitrate.py -b jax -d cpu -n 25 1 -lys lys8 -tms advection-dispersion-power -td "${TMPDIR}"
+mpirun --bind-to core --map-by core -report-bindings python svat_nitrate.py -b jax -d cpu -n 25 1 -lys lys2 -tms complete-mixing -td "${TMPDIR}"
 # Write output to temporary SSD of computing node
 echo "Write output to $TMPDIR"
 # Move output from temporary SSD to workspace

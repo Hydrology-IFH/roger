@@ -526,7 +526,7 @@ def main(lys_experiment, tmp_dir):
             if base_path:
                 diagnostics["average"].base_output_path = base_path
 
-            diagnostics["collect"].output_variables = ["M_s", "Nmin_s", "temp_soil", "inf_in_tracer", "C_s"]
+            diagnostics["collect"].output_variables = ["M_s", "Nmin_s", "temp_soil", "C_s"]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
             if base_path:

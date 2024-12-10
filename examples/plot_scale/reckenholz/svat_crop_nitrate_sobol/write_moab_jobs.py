@@ -23,7 +23,7 @@ def main(job_type, sas_solver):
                 lines = []
                 lines.append('#!/bin/bash\n')
                 lines.append('#PBS -l nodes=1:ppn=20\n')
-                lines.append('#PBS -l walltime=48:00:00\n')
+                lines.append('#PBS -l walltime=24:00:00\n')
                 lines.append('#PBS -l pmem=6000mb\n')
                 lines.append(f'#PBS -N {script_name}\n')
                 lines.append('#PBS -m bea\n')

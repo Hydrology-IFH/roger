@@ -10,21 +10,24 @@ import roger
 
 @click.command("main")
 def main():
-    base_path = Path(__file__).parent
+    # base_path = Path(__file__).parent
+    base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
     # merge model output into single file
-    lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9"]
+    lys_experiments = ["lys2", "lys3", "lys8"]
+    lys_experiments = ["lys3"]
     tm_structures = ["complete-mixing", "advection-dispersion-power", "time-variant_advection-dispersion-power"]
+    tm_structures = ["advection-dispersion-power"]
     for lys_experiment in lys_experiments:
         for tm_structure in tm_structures:
             path = str(
-                base_path.parent
+                base_path
                 / "output"
                 / "svat_crop_nitrate_monte_carlo"
                 / f"SVATCROPNITRATE_{tm_structure}_{lys_experiment}.*.nc"
             )
             output_tm_file = (
-                base_path.parent
+                base_path
                 / "output"
                 / "svat_crop_nitrate_monte_carlo"
                 / f"SVATCROPNITRATE_{tm_structure}_{lys_experiment}.nc"

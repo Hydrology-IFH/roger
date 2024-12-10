@@ -20,7 +20,6 @@ def main(job_type, sas_solver):
     lysimeters = ['lys2', 'lys3', 'lys8']
     transport_models = ['complete-mixing', 'advection-dispersion-power',
                         'time-variant_advection-dispersion-power']
-    transport_models = ['advection-dispersion-power']
     for lys in lysimeters:
         for tm in transport_models:
             if job_type == 'single-node':
@@ -31,7 +30,7 @@ def main(job_type, sas_solver):
                 lines = []
                 lines.append('#!/bin/bash\n')
                 lines.append('#PBS -l nodes=1:ppn=25\n')
-                lines.append('#PBS -l walltime=48:00:00\n')
+                lines.append('#PBS -l walltime=12:00:00\n')
                 lines.append('#PBS -l pmem=4000mb\n')
                 lines.append(f'#PBS -N {script_name}\n')
                 lines.append('#PBS -m bea\n')

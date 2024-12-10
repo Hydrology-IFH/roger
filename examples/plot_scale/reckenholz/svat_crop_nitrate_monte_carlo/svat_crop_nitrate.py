@@ -529,7 +529,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
 
-            diagnostics["rate"].output_variables = ["M_in", "M_q_ss", "M_transp"]
+            diagnostics["rate"].output_variables = ["M_in", "M_q_ss", "M_transp", "Nfert", "Nfert_min", "Nfert_org", "nh4_up"]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
             if base_path:
