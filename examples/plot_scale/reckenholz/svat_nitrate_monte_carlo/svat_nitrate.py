@@ -115,16 +115,9 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             vs.x = update(vs.x, at[3:-2], npx.cumsum(dx[3:-2]))
             vs.y = update(vs.y, at[3:-2], npx.cumsum(dy[3:-2]))
 
-        @roger_routine(
-            dist_safe=False,
-            local_variables=[
-                "lut_nup",
-            ],
-        )
+        @roger_routine
         def set_look_up_tables(self, state):
-            vs = state.variables
-
-            vs.lut_nup = update(vs.lut_nup, at[:, :], lut.ARR_NUP)
+            pass
 
         @roger_routine
         def set_topography(self, state):
