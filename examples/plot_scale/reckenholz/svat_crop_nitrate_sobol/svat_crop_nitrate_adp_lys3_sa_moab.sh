@@ -17,9 +17,9 @@ cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_crop_nitra
 # Copy fluxes and states from global workspace to local SSD
 echo "Copy fluxes and states from global workspace to local SSD"
 # Compares hashes
-checksum_gws=$(shasum -a 256 /beegfs/work/workspace/ws/fr_rs1092-workspace-0/reckenholz/reckenholz/svat_crop_nitrate_sobol/SVATCROP_lys3.nc | cut -f 1 -d " ")
+checksum_gws=$(shasum -a 256 /beegfs/work/workspace/ws/fr_rs1092-workspace-0/reckenholz/svat_crop_nitrate_sobol/SVATCROP_lys3.nc | cut -f 1 -d " ")
 checksum_ssd=0a
-cp /beegfs/work/workspace/ws/fr_rs1092-workspace-0/reckenholz/reckenholz/svat_crop_nitrate_sobol/SVATCROP_lys3.nc "${TMPDIR}"
+cp /beegfs/work/workspace/ws/fr_rs1092-workspace-0/reckenholz/svat_crop_nitrate_sobol/SVATCROP_lys3.nc "${TMPDIR}"
 # Wait for termination of moving files
 while [ "${checksum_gws}" != "${checksum_ssd}" ]; do
 sleep 10
