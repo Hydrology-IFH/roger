@@ -2,7 +2,7 @@
 #PBS -l nodes=1:ppn=25
 #PBS -l walltime=12:00:00
 #PBS -l pmem=4000mb
-#PBS -N svat_nitrate_ad_mc_lys8
+#PBS -N svat_nitrate_adt_mc_lys8
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
  
@@ -27,7 +27,7 @@ done
 echo "Copying was successful"
  
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python svat_nitrate.py -b jax -d cpu -n 25 1 -lys lys8 -tms advection-dispersion-power -td "${TMPDIR}"
+mpirun --bind-to core --map-by core -report-bindings python svat_nitrate.py -b jax -d cpu -n 25 1 -lys lys8 -tms time-variant_advection-dispersion-power -td "${TMPDIR}"
 # Write output to temporary SSD of computing node
 echo "Write output to $TMPDIR"
 # Move output from temporary SSD to workspace

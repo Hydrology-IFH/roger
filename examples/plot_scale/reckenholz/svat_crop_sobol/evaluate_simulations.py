@@ -24,7 +24,7 @@ def main(tmp_dir):
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
 
-    lys_experiments = ["lys2", "lys8"]
+    lys_experiments = ["lys2", "lys3", "lys8"]
     for lys_experiment in lys_experiments:
         # directory of results
         base_path_output = base_path / "output" / "svat_crop_sobol"
