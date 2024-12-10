@@ -42,10 +42,10 @@ def main(job_type, sas_solver):
                 lines.append("# Compares hashes\n")
                 file_nc = "SVATCROP_%s.nc" % (lys)
                 lines.append(
-                    f'checksum_gws=$(shasum -a 256 {output_path_ws.parent.as_posix()}/reckenholz/svat_crop_nitrate_sobol/{file_nc} | cut -f 1 -d " ")\n'
+                    f'checksum_gws=$(shasum -a 256 {output_path_ws.parent.as_posix()}/svat_crop_nitrate_sobol/{file_nc} | cut -f 1 -d " ")\n'
                 )
                 lines.append("checksum_ssd=0a\n")
-                lines.append('cp %s/reckenholz/svat_crop_nitrate_sobol/%s "${TMPDIR}"\n' % (output_path_ws.parent.as_posix(), file_nc))
+                lines.append('cp %s/svat_crop_nitrate_sobol/%s "${TMPDIR}"\n' % (output_path_ws.parent.as_posix(), file_nc))
                 lines.append("# Wait for termination of moving files\n")
                 lines.append('while [ "${checksum_gws}" != "${checksum_ssd}" ]; do\n')
                 lines.append("sleep 10\n")
