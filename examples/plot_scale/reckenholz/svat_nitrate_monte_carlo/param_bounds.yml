@@ -1,7 +1,7 @@
 complete-mixing:
   alpha_transp:
   - 0.2
-  - 1
+  - 1.5
   alpha_q:
   - 0.2
   - 1
