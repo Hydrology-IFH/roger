@@ -3384,7 +3384,7 @@ VARIABLES = {
     "M_q_gw": Variable(
         "solute mass of lateral groundwater flow",
         CATCH_GRID,
-        "-",
+        "mg/dt",
         "solute mass of lateral groundwater flow",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport & settings.enable_groundwater,
@@ -3869,7 +3869,7 @@ VARIABLES = {
     "M_inf_mat_rz": Variable(
         "solute mass of matrix infiltration into root zone",
         CATCH_GRID,
-        "mg",
+        "mg/dt",
         "solute mass of matrix infiltration into root zone",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport,
@@ -3910,7 +3910,7 @@ VARIABLES = {
     "M_inf_pf_rz": Variable(
         "solute mass of preferential infiltration into root zone",
         CATCH_GRID,
-        "mg",
+        "mg/dt",
         "solute mass of preferential infiltration into root zone",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport,
@@ -3951,7 +3951,7 @@ VARIABLES = {
     "M_inf_pf_ss": Variable(
         "solute mass of preferential infiltration into subsoil",
         CATCH_GRID,
-        "mg",
+        "mg/dt",
         "solute mass of preferential infiltration into subsoil",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport,
@@ -4181,7 +4181,7 @@ VARIABLES = {
     "M_transp": Variable(
         "solute mass of transpiration",
         CATCH_GRID,
-        "mg",
+        "mg/dt",
         "solute mass of transpiration",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport,
@@ -4303,7 +4303,7 @@ VARIABLES = {
     "M_evap_soil": Variable(
         "solute mass of soil evaporation",
         CATCH_GRID,
-        "mg",
+        "mg/dt",
         "solute mass of soil evaporation",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport,
@@ -4457,7 +4457,7 @@ VARIABLES = {
     "M_re_rl": Variable(
         "solute mass of redistribution after root loss",
         CATCH_GRID,
-        "mg",
+        "mg/dt",
         "solute mass of redistribution after root loss",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport,
@@ -4523,7 +4523,7 @@ VARIABLES = {
     "M_q_rz": Variable(
         "solute mass of root zone percolation",
         CATCH_GRID,
-        "mg",
+        "mg/dt",
         "solute mass of root zone percolation",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport,
@@ -4597,7 +4597,7 @@ VARIABLES = {
     "M_q_ss": Variable(
         "solute mass of subsoil percolation",
         CATCH_GRID,
-        "mg",
+        "mg/dt",
         "solute mass of subsoil percolation",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport,
@@ -4764,7 +4764,7 @@ VARIABLES = {
     "M_re_rg": Variable(
         "solute mass of redistribution after root growth",
         CATCH_GRID,
-        "mg",
+        "mg/dt",
         "solute mass of redistribution after root growth",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport,
@@ -4838,7 +4838,7 @@ VARIABLES = {
     "M_cpr_rz": Variable(
         "solute mass of capillary rise from subsoil into root zone",
         CATCH_GRID,
-        "mg",
+        "mg/dt",
         "solute mass of capillary rise from subsoil into root zone",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport,
@@ -4912,7 +4912,7 @@ VARIABLES = {
     "M_cpr_ss": Variable(
         "solute mass of capillary rise from groundwater into subsoil",
         CATCH_GRID,
-        "mg",
+        "mg/dt",
         "solute mass of capillary rise from groundwater into subsoil",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport,
@@ -5158,7 +5158,7 @@ VARIABLES = {
     "M_q_sub_rz": Variable(
         "solute mass of lateral subsurface runoff in root zone",
         CATCH_GRID,
-        "mg",
+        "mg/dt",
         "solute mass of lateral subsurface runoff in root zone",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport & settings.enable_lateral_flow,
@@ -5215,7 +5215,7 @@ VARIABLES = {
     "M_q_sub_ss": Variable(
         "solute mass of lateral subsurface runoff in subsoil",
         CATCH_GRID,
-        "mg",
+        "mg/dt",
         "solute mass of lateral subsurface runoff in subsoil",
         time_dependent=True,
         active=lambda settings: settings.enable_offline_transport & settings.enable_lateral_flow,
@@ -5363,7 +5363,7 @@ VARIABLES = {
     "M_IN": Variable(
         "solute mass of input",
         CATCH_GRID + TIME,
-        "mg",
+        "mg/dt",
         "solute mass of input",
         write_to_restart=True,
         time_dependent=False,
@@ -5379,7 +5379,7 @@ VARIABLES = {
     "M_in": Variable(
         "solute mass of input",
         CATCH_GRID,
-        "mg",
+        "mg/dt",
         "solute mass of input",
         write_to_restart=False,
         time_dependent=False,

@@ -51,7 +51,7 @@ def main(tmp_dir):
         ds_sim = ds_sim.assign_coords(date=("Time", date_sim))
 
         # load .txt-file
-        file = base_path_output / f"params_eff_{lys_experiment}.txt"
+        file = base_path_output / f"params_eff_{lys_experiment}_weekly.txt"
         df_params_metrics = pd.read_csv(file, sep="\t")
 
         # calculate multi-objective efficiency
@@ -134,7 +134,7 @@ def main(tmp_dir):
         # select best 100 model runs
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
-        idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
+        idx_best100 = df_params_metrics.loc[:df_params_metrics.index[99], "id"].values.tolist()
 
         # write states of best model run
         path_sim = base_path_output / f"SVATCROP_{lys_experiment}.nc"
