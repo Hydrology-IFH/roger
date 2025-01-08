@@ -84,7 +84,6 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
 
             settings.enable_offline_transport = True
             settings.enable_nitrate = True
-            settings.enable_age_statistics = True
             settings.tm_structure = transport_model_structure
 
         @roger_routine(
