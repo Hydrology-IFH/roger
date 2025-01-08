@@ -142,7 +142,11 @@ def main():
                                                 var_sim, ("x", "y", "Time"), float, compression="gzip", compression_opts=1
                                             )
                                             vals = onp.array(var_obj)
-                                            v[:, :, :] = vals.swapaxes(0, 2)
+                                            try:
+                                                v[:, :, :] = vals.swapaxes(0, 2)
+                                            except TypeError:
+                                                print(f"sbatch --partition=single svat_crop_nitrate_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert_slurm.sh")
+                                                v[:, :, :-1] = vals.swapaxes(0, 2)
                                             v.attrs.update(
                                                 long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"]
                                             )
