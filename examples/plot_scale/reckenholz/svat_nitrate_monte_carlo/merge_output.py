@@ -10,24 +10,24 @@ import roger
 
 @click.command("main")
 def main():
-    base_path = Path(__file__).parent
+    base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
     # merge model output into single file
-    lys_experiments = ["lys2", "lys3", "lys4", "lys8", "lys9"]
+    lys_experiments = ["lys2", "lys3", "lys8"]
     tm_structures = ["complete-mixing", "advection-dispersion-power", "time-variant_advection-dispersion-power"]
     for lys_experiment in lys_experiments:
         for tm_structure in tm_structures:
             path = str(
-                base_path.parent
+                base_path
                 / "output"
-                / "svat_crop_nitrate_monte_carlo"
-                / f"SVATCROPNITRATE_{tm_structure}_{lys_experiment}.*.nc"
+                / "svat_nitrate_monte_carlo"
+                / f"SVATNITRATE_{tm_structure}_{lys_experiment}.*.nc"
             )
             output_tm_file = (
-                base_path.parent
+                base_path
                 / "output"
-                / "svat_crop_nitrate_monte_carlo"
-                / f"SVATCROPNITRATE_{tm_structure}_{lys_experiment}.nc"
+                / "svat_nitrate_monte_carlo"
+                / f"SVATNITRATE_{tm_structure}_{lys_experiment}.nc"
             )
             if not os.path.exists(output_tm_file):
                 diag_files = glob.glob(path)
@@ -38,7 +38,7 @@ def main():
                         institution="University of Freiburg, Chair of Hydrology",
                         references="",
                         comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-                        model_structure="SVAT-CROP model with free drainage",
+                        model_structure="SVAT model with free drainage",
                         roger_version=f"{roger.__version__}",
                     )
                     # collect dimensions

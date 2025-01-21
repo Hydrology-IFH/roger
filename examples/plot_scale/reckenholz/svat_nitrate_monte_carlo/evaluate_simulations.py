@@ -45,7 +45,7 @@ for lys_experiment in lys_experiments:
         ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
 
         # DataFrame with sampled model parameters and the corresponding metrics
-        csv_file = Path(__file__).parent / f"parameters_for_{tm_structure}.csv"
+        csv_file = Path(__file__).parent / f"parameters_for_{tm_structure}_{lys_experiment}.csv"
         df_params_metrics = pd.read_csv(csv_file, sep=";", skiprows=1)
 
         # compare observations and simulations

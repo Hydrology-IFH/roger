@@ -131,82 +131,82 @@ def main():
                                         v[:] = time
                                     for var_sim in list(df.variables.keys()):
                                         _file = base_path / "output" / "svat_crop_nitrate" / f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.collect.nc"
-                                        if str(dfs) == str(_file) and var_sim == "C_q_ss":
-                                            pass
-                                        else:
-                                            var_obj = df.variables.get(var_sim)
-                                            if (
-                                                var_sim not in list(dict_dim.keys())
-                                                and ("Time", "y", "x") == var_obj.dimensions
-                                            ):
-                                                v = f.create_variable(
-                                                    var_sim, ("x", "y", "Time"), float, compression="gzip", compression_opts=1
-                                                )
-                                                vals = onp.array(var_obj)
-                                                try:
-                                                    v[:, :, :] = vals.swapaxes(0, 2)
-                                                except TypeError:
-                                                    print(f"sbatch --partition=single svat_crop_nitrate_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert_slurm.sh")
-                                                    v[:, :, :-1] = vals.swapaxes(0, 2)
-                                                v.attrs.update(
-                                                    long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"]
-                                                )
-                                            elif (
-                                                var_sim not in list(dict_dim.keys())
-                                                and ("Time", "n_sas_params", "y", "x") == var_obj.dimensions
-                                            ):
-                                                v = f.create_variable(
-                                                    var_sim,
-                                                    ("x", "y", "n_sas_params"),
-                                                    float,
-                                                    compression="gzip",
-                                                    compression_opts=1,
-                                                )
-                                                vals = onp.array(var_obj)
-                                                vals = vals.swapaxes(0, 3)
-                                                vals = vals.swapaxes(1, 2)
-                                                v[:, :, :] = vals[:, :, :, 0]
-                                                v.attrs.update(
-                                                    long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"]
-                                                )
-                                            elif (
-                                                var_sim not in list(dict_dim.keys())
-                                                and ("Time", "ages", "y", "x") == var_obj.dimensions
-                                            ):
-                                                v = f.create_variable(
-                                                    var_sim,
-                                                    ("x", "y", "Time", "ages"),
-                                                    float,
-                                                    compression="gzip",
-                                                    compression_opts=1,
-                                                )
-                                                vals = onp.array(var_obj)
-                                                vals = vals.swapaxes(0, 3)
-                                                vals = vals.swapaxes(1, 2)
-                                                vals = vals.swapaxes(2, 3)
-                                                v[:, :, :, :] = vals
-                                                v.attrs.update(
-                                                    long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"]
-                                                )
-                                            elif (
-                                                var_sim not in list(dict_dim.keys())
-                                                and ("Time", "nages", "y", "x") == var_obj.dimensions
-                                            ):
-                                                v = f.create_variable(
-                                                    var_sim,
-                                                    ("x", "y", "Time", "nages"),
-                                                    float,
-                                                    compression="gzip",
-                                                    compression_opts=1,
-                                                )
-                                                vals = onp.array(var_obj)
-                                                vals = vals.swapaxes(0, 3)
-                                                vals = vals.swapaxes(1, 2)
-                                                vals = vals.swapaxes(2, 3)
-                                                v[:, :, :, :] = vals
-                                                v.attrs.update(
-                                                    long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"]
-                                        )
+                                        # if str(dfs) == str(_file) and var_sim == "C_q_ss":
+                                        #     pass
+                                        # else:
+                                        var_obj = df.variables.get(var_sim)
+                                        if (
+                                            var_sim not in list(dict_dim.keys())
+                                            and ("Time", "y", "x") == var_obj.dimensions
+                                        ):
+                                            v = f.create_variable(
+                                                var_sim, ("x", "y", "Time"), float, compression="gzip", compression_opts=1
+                                            )
+                                            vals = onp.array(var_obj)
+                                            try:
+                                                v[:, :, :] = vals.swapaxes(0, 2)
+                                            except TypeError:
+                                                print(f"sbatch --partition=single svat_crop_nitrate_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert_slurm.sh")
+                                                v[:, :, :-1] = vals.swapaxes(0, 2)
+                                            v.attrs.update(
+                                                long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"]
+                                            )
+                                        elif (
+                                            var_sim not in list(dict_dim.keys())
+                                            and ("Time", "n_sas_params", "y", "x") == var_obj.dimensions
+                                        ):
+                                            v = f.create_variable(
+                                                var_sim,
+                                                ("x", "y", "n_sas_params"),
+                                                float,
+                                                compression="gzip",
+                                                compression_opts=1,
+                                            )
+                                            vals = onp.array(var_obj)
+                                            vals = vals.swapaxes(0, 3)
+                                            vals = vals.swapaxes(1, 2)
+                                            v[:, :, :] = vals[:, :, :, 0]
+                                            v.attrs.update(
+                                                long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"]
+                                            )
+                                        elif (
+                                            var_sim not in list(dict_dim.keys())
+                                            and ("Time", "ages", "y", "x") == var_obj.dimensions
+                                        ):
+                                            v = f.create_variable(
+                                                var_sim,
+                                                ("x", "y", "Time", "ages"),
+                                                float,
+                                                compression="gzip",
+                                                compression_opts=1,
+                                            )
+                                            vals = onp.array(var_obj)
+                                            vals = vals.swapaxes(0, 3)
+                                            vals = vals.swapaxes(1, 2)
+                                            vals = vals.swapaxes(2, 3)
+                                            v[:, :, :, :] = vals
+                                            v.attrs.update(
+                                                long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"]
+                                            )
+                                        elif (
+                                            var_sim not in list(dict_dim.keys())
+                                            and ("Time", "nages", "y", "x") == var_obj.dimensions
+                                        ):
+                                            v = f.create_variable(
+                                                var_sim,
+                                                ("x", "y", "Time", "nages"),
+                                                float,
+                                                compression="gzip",
+                                                compression_opts=1,
+                                            )
+                                            vals = onp.array(var_obj)
+                                            vals = vals.swapaxes(0, 3)
+                                            vals = vals.swapaxes(1, 2)
+                                            vals = vals.swapaxes(2, 3)
+                                            v[:, :, :, :] = vals
+                                            v.attrs.update(
+                                                long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"]
+                                    )
                     else:
                         print(f"sbatch --partition=single svat_crop_nitrate_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert_slurm.sh")
     return

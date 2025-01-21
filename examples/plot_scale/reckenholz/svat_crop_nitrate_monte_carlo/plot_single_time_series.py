@@ -100,11 +100,13 @@ def main(tmp_dir):
     for lys_experiment in lys_experiments:
         # load parameters and metrics
         df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_advection-dispersion-power.txt", sep="\t")
-        df_params_metrics["E_multi"] = df_params_metrics["KGE_NO3_perc_mass_bs"]
+        df_params_metrics["E_multi"] = df_params_metrics["KGE_NO3_perc_bs"]
         df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
-        idx_best = idx_best100[0]        
+        idx_best = idx_best100[0]
+        print(idx_best)
+        # idx_best = 7252        
 
         # load observations (measured data)
         path_obs = Path(__file__).parent.parent / "observations" / "reckenholz_lysimeter.nc"
@@ -139,12 +141,18 @@ def main(tmp_dir):
                 df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
                 df_obs.loc[:, "obs"] = obs_vals
                 sim_vals = ds_sim_tm[var_sim].isel(y=0).values[idx_best, :]
+                if var_sim == "C_q_ss_bs":
+                    sim_vals1 = ds_sim_tm["C_q_ss"].isel(y=0).values[idx_best, :]
+                elif var_sim == "M_q_ss_bs":
+                    sim_vals1 = ds_sim_tm["M_q_ss"].isel(y=0).values[idx_best, :]
+
                 # join observations on simulations
                 df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
                 df_eval = df_eval.loc[f"{year}-01-01":f"{year}-12-31", :]
                 cond_na = df_eval.loc[:, "obs"].isna()
                 df_eval.loc[cond_na, :] = onp.nan
                 # plot observed and simulated time series
+                axs[i].plot(date_sim_tm, sim_vals1, color="red", zorder=3)
                 axs[i].scatter(df_eval.index, df_eval["sim"], color="red", s=5, zorder=1)
                 axs[i].scatter(df_eval.index, df_eval["obs"], color="blue", s=5, zorder=2)
                 axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
