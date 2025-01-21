@@ -52,6 +52,7 @@ def main(nsamples):
         soil_fertility = 3
         clay = df_params_best100["clay"].values.astype(onp.float64)
         c_clay = clay / (0.4 - 0.02)
+        c_clay[c_clay > 1] = 0.95
         phi_soil_temp = 91
 
         for transport_model_structure in ['complete-mixing', 'advection-dispersion-power', 'time-variant_advection-dispersion-power']:

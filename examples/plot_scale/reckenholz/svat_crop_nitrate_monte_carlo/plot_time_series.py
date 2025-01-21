@@ -104,7 +104,6 @@ def main(tmp_dir):
         df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         idx_best100 = df_params_metrics.loc[: df_params_metrics.index[9], "id"].values.tolist()
-        idx_best = idx_best100[0]        
 
         # load observations (measured data)
         path_obs = Path(__file__).parent.parent / "observations" / "reckenholz_lysimeter.nc"
