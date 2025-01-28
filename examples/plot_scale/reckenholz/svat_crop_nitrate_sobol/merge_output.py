@@ -13,7 +13,7 @@ def main():
     base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
     # merge model output into single file
-    lys_experiments = ["lys2", "lys3", "lys8"]
+    lys_experiments = ["lys3"]
     tm_structures = ['advection-dispersion-power']
     for lys_experiment in lys_experiments:
         for tm_structure in tm_structures:

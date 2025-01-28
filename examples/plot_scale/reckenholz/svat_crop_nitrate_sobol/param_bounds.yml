@@ -19,11 +19,11 @@ names:
 
 bounds:
 -
-  - 10  # lower bound
-  - 300  # upper bound
+  - 10.0  # lower bound
+  - 300.0  # upper bound
 -
-  - 15
-  - 1200
+  - 15.0
+  - 1200.0
 -
   - 0.15
   - 0.35
@@ -50,7 +50,7 @@ bounds:
   - 5.0
 -
   - 0.1
-  - 1.0
+  - 1.5
 -
   - 0.1
   - 1.0

@@ -64,6 +64,7 @@ def main(tmp_dir):
     file_path = base_path / "param_bounds.yml"
     with open(file_path, "r") as file:
         bounds = yaml.safe_load(file)
+        bounds["num_vars"] = len(bounds["names"])
 
     # directory of results
     base_path_output = base_path.parent / "output"
@@ -78,31 +79,31 @@ def main(tmp_dir):
     lys_experiments = ["lys3"]
     for lys_experiment in lys_experiments:
         # write .txt-file
-        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz/output") / "svat_crop_nitrate_sobol" / f"params_eff_{lys_experiment}.txt"
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz/output") / "svat_crop_nitrate_sobol" / f"params_metrics_{lys_experiment}_advection-dispersion-power.txt"
         df_params_metrics = pd.read_csv(file, sep="\t")
 
         # perform sensitivity analysis
-        df_params = df_params_metrics.loc[:, bounds["names"]]
-        df_eff = df_params_metrics.loc[:, ["KGE_NO3_perc_bs", "KGE_NO3_perc_mass_bs", "MAE_N_uptake"]]
+        df_metrics = df_params_metrics.loc[:, ["KGE_NO3_perc_bs", "KGE_NO3_perc_mass_bs", "MAE_N_uptake"]]
         dict_si = {}
-        for name in df_eff.columns:
-            Y = df_eff[name].values
+        for name in df_metrics.columns:
+            Y = df_metrics[name].values
+            Y = onp.where(onp.isnan(Y), onp.nanmean(Y), Y)
             Si = sobol.analyze(bounds, Y, calc_second_order=False)
             Si_filter = {k: Si[k] for k in ["ST", "ST_conf", "S1", "S1_conf"]}
-            dict_si[name] = pd.DataFrame(Si_filter, index=bounds["names"])
+            dict_si[name] = pd.DataFrame(Si_filter, index=bounds["names"]).loc[:'c_canopy', :]
 
         # plot sobol indices
         _LABS = {"KGE_NO3_perc_bs": r"percolation (KGE$_{conc}$)",
                  "KGE_NO3_perc_mass_bs": r"percolation (KGE$_{mass}$)",
                  "MAE_N_uptake": "N-uptake (MAE)",
                 }
-        ncol = len(df_eff.columns)
-        xaxis_labels = [_XLABS[k].split(" ")[0] for k in bounds["names"]]
+        ncol = len(df_metrics.columns)
+        xaxis_labels = [_XLABS[k].split(" ")[0] for k in bounds["names"][:8]]
         cmap = plt.get_cmap("Greys")
         norm = Normalize(vmin=0, vmax=2)
         colors = cmap(norm([0.5, 1.5]))
-        fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(14, 5))
-        for i, name in enumerate(df_eff.columns):
+        fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(6, 3))
+        for i, name in enumerate(df_metrics.columns):
             indices = dict_si[name][["S1", "ST"]]
             err = dict_si[name][["S1_conf", "ST_conf"]]
             indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
@@ -114,8 +115,318 @@ def main(tmp_dir):
         ax[-3].legend().set_visible(False)
         ax[0].set_ylabel("Sobol index [-]")
         fig.tight_layout()
-        file = base_path_figs / "sobol_indices.png"
+        file = base_path_figs / "sobol_indices_soil_hyd_KGE_MAE.png"
         fig.savefig(file, dpi=300)
+
+        df_metrics = df_params_metrics.loc[:, ["KGE_NO3_perc_bs", "KGE_NO3_perc_mass_bs", "MAE_N_uptake"]]
+        dict_si = {}
+        for name in df_metrics.columns:
+            Y = df_metrics[name].values
+            Y = onp.where(onp.isnan(Y), onp.nanmean(Y), Y)
+            Si = sobol.analyze(bounds, Y, calc_second_order=False)
+            Si_filter = {k: Si[k] for k in ["ST", "ST_conf", "S1", "S1_conf"]}
+            dict_si[name] = pd.DataFrame(Si_filter, index=bounds["names"]).loc['k_transp':, :]
+
+        # plot sobol indices
+        _LABS = {"KGE_NO3_perc_bs": r"percolation (KGE$_{conc}$)",
+                 "KGE_NO3_perc_mass_bs": r"percolation (KGE$_{mass}$)",
+                 "MAE_N_uptake": "N-uptake (MAE)",
+                }
+        ncol = len(df_metrics.columns)
+        xaxis_labels = [_XLABS[k].split(" ")[0] for k in bounds["names"][8:]]
+        cmap = plt.get_cmap("Greys")
+        norm = Normalize(vmin=0, vmax=2)
+        colors = cmap(norm([0.5, 1.5]))
+        fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(6, 3))
+        for i, name in enumerate(df_metrics.columns):
+            indices = dict_si[name][["S1", "ST"]]
+            err = dict_si[name][["S1_conf", "ST_conf"]]
+            indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
+            ax[i].set_xticklabels(xaxis_labels)
+            ax[i].set_title(_LABS[name])
+            ax[i].legend(["First-order", "Total"], frameon=False)
+        ax[-1].legend().set_visible(False)
+        ax[-2].legend().set_visible(False)
+        ax[-3].legend().set_visible(False)
+        ax[0].set_ylabel("Sobol index [-]")
+        fig.tight_layout()
+        file = base_path_figs / "sobol_indices_transport_KGE_MAE.png"
+        fig.savefig(file, dpi=300)
+
+        df_metrics = df_params_metrics.loc[:, ["C_s_daily_avg", "C_q_ss_daily_avg"]]
+        dict_si = {}
+        for name in df_metrics.columns:
+            Y = df_metrics[name].values
+            Y = onp.where(onp.isnan(Y), onp.nanmean(Y), Y)
+            Si = sobol.analyze(bounds, Y, calc_second_order=False)
+            Si_filter = {k: Si[k] for k in ["ST", "ST_conf", "S1", "S1_conf"]}
+            dict_si[name] = pd.DataFrame(Si_filter, index=bounds["names"]).loc[:'c_canopy', :]
+
+        # plot sobol indices
+        _LABS = {"C_s_daily_avg": r"Avg. soil conc.",
+                 "C_q_ss_daily_avg": r"Avg. conc. of N leaching",
+                }
+        ncol = len(df_metrics.columns)
+        xaxis_labels = [_XLABS[k].split(" ")[0] for k in bounds["names"][:8]]
+        cmap = plt.get_cmap("Greys")
+        norm = Normalize(vmin=0, vmax=2)
+        colors = cmap(norm([0.5, 1.5]))
+        fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(6, 3))
+        for i, name in enumerate(df_metrics.columns):
+            indices = dict_si[name][["S1", "ST"]]
+            err = dict_si[name][["S1_conf", "ST_conf"]]
+            indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
+            ax[i].set_xticklabels(xaxis_labels)
+            ax[i].set_title(_LABS[name])
+            ax[i].legend(["First-order", "Total"], frameon=False)
+        ax[-1].legend().set_visible(False)
+        ax[-2].legend().set_visible(False)
+        ax[0].set_ylabel("Sobol index [-]")
+        fig.tight_layout()
+        file = base_path_figs / "sobol_indices_soil_hyd_avg_conc.png"
+        fig.savefig(file, dpi=300)
+
+        df_metrics = df_params_metrics.loc[:, ["C_s_daily_avg", "C_q_ss_daily_avg"]]
+        dict_si = {}
+        for name in df_metrics.columns:
+            Y = df_metrics[name].values
+            Y = onp.where(onp.isnan(Y), onp.nanmean(Y), Y)
+            Si = sobol.analyze(bounds, Y, calc_second_order=False)
+            Si_filter = {k: Si[k] for k in ["ST", "ST_conf", "S1", "S1_conf"]}
+            dict_si[name] = pd.DataFrame(Si_filter, index=bounds["names"]).loc['k_transp':, :]
+
+        # plot sobol indices
+        _LABS = {"C_s_daily_avg": r"Avg. soil conc.",
+                 "C_q_ss_daily_avg": r"Avg. conc. of N leaching",
+                }
+        ncol = len(df_metrics.columns)
+        xaxis_labels = [_XLABS[k].split(" ")[0] for k in bounds["names"][8:]]
+        cmap = plt.get_cmap("Greys")
+        norm = Normalize(vmin=0, vmax=2)
+        colors = cmap(norm([0.5, 1.5]))
+        fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(6, 3))
+        for i, name in enumerate(df_metrics.columns):
+            indices = dict_si[name][["S1", "ST"]]
+            err = dict_si[name][["S1_conf", "ST_conf"]]
+            indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
+            ax[i].set_xticklabels(xaxis_labels)
+            ax[i].set_title(_LABS[name])
+            ax[i].legend(["First-order", "Total"], frameon=False)
+        ax[-1].legend().set_visible(False)
+        ax[-2].legend().set_visible(False)
+        ax[0].set_ylabel("Sobol index [-]")
+        fig.tight_layout()
+        file = base_path_figs / "sobol_indices_transport_avg_conc.png"
+        fig.savefig(file, dpi=300)
+
+
+        df_metrics = df_params_metrics.loc[:, ["M_transp_annual_sum", "M_q_ss_annual_sum"]]
+        dict_si = {}
+        for name in df_metrics.columns:
+            Y = df_metrics[name].values
+            Y = onp.where(onp.isnan(Y), onp.nanmean(Y), Y)
+            Si = sobol.analyze(bounds, Y, calc_second_order=False)
+            Si_filter = {k: Si[k] for k in ["ST", "ST_conf", "S1", "S1_conf"]}
+            dict_si[name] = pd.DataFrame(Si_filter, index=bounds["names"]).loc[:'c_canopy', :]
+
+        # plot sobol indices
+        _LABS = {"M_transp_annual_sum": r"Avg. N Uptake",
+                 "M_q_ss_annual_sum": r"Avg. N leaching",
+                }
+        ncol = len(df_metrics.columns)
+        xaxis_labels = [_XLABS[k].split(" ")[0] for k in bounds["names"][:8]]
+        cmap = plt.get_cmap("Greys")
+        norm = Normalize(vmin=0, vmax=2)
+        colors = cmap(norm([0.5, 1.5]))
+        fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(6, 3))
+        for i, name in enumerate(df_metrics.columns):
+            indices = dict_si[name][["S1", "ST"]]
+            err = dict_si[name][["S1_conf", "ST_conf"]]
+            indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
+            ax[i].set_xticklabels(xaxis_labels)
+            ax[i].set_title(_LABS[name])
+            ax[i].legend(["First-order", "Total"], frameon=False)
+        ax[-1].legend().set_visible(False)
+        ax[-2].legend().set_visible(False)
+        ax[0].set_ylabel("Sobol index [-]")
+        fig.tight_layout()
+        file = base_path_figs / "sobol_indices_soil_hyd_avg_loads.png"
+        fig.savefig(file, dpi=300)
+
+
+        df_metrics = df_params_metrics.loc[:, ["M_transp_annual_sum", "M_q_ss_annual_sum"]]
+        dict_si = {}
+        for name in df_metrics.columns:
+            Y = df_metrics[name].values
+            Y = onp.where(onp.isnan(Y), onp.nanmean(Y), Y)
+            Si = sobol.analyze(bounds, Y, calc_second_order=False)
+            Si_filter = {k: Si[k] for k in ["ST", "ST_conf", "S1", "S1_conf"]}
+            dict_si[name] = pd.DataFrame(Si_filter, index=bounds["names"]).loc['k_transp':, :]
+
+        # plot sobol indices
+        _LABS = {"M_transp_annual_sum": r"Avg. N Uptake",
+                 "M_q_ss_annual_sum": r"Avg. N leaching",
+                }
+        ncol = len(df_metrics.columns)
+        xaxis_labels = [_XLABS[k].split(" ")[0] for k in bounds["names"][8:]]
+        cmap = plt.get_cmap("Greys")
+        norm = Normalize(vmin=0, vmax=2)
+        colors = cmap(norm([0.5, 1.5]))
+        fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(6, 3))
+        for i, name in enumerate(df_metrics.columns):
+            indices = dict_si[name][["S1", "ST"]]
+            err = dict_si[name][["S1_conf", "ST_conf"]]
+            indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
+            ax[i].set_xticklabels(xaxis_labels)
+            ax[i].set_title(_LABS[name])
+            ax[i].legend(["First-order", "Total"], frameon=False)
+        ax[-1].legend().set_visible(False)
+        ax[-2].legend().set_visible(False)
+        ax[0].set_ylabel("Sobol index [-]")
+        fig.tight_layout()
+        file = base_path_figs / "sobol_indices_transport_avg_loads.png"
+        fig.savefig(file, dpi=300)
+
+
+        df_metrics = df_params_metrics.loc[:, ["min_s_annual_sum", "nit_s_annual_sum", "denit_s_annual_sum"]]
+        dict_si = {}
+        for name in df_metrics.columns:
+            Y = df_metrics[name].values
+            Y = onp.where(onp.isnan(Y), onp.nanmean(Y), Y)
+            Si = sobol.analyze(bounds, Y, calc_second_order=False)
+            Si_filter = {k: Si[k] for k in ["ST", "ST_conf", "S1", "S1_conf"]}
+            dict_si[name] = pd.DataFrame(Si_filter, index=bounds["names"]).loc[:'c_canopy', :]
+
+        # plot sobol indices
+        _LABS = {"min_s_annual_sum": r"Avg. soil N minerilization",
+                 "nit_s_annual_sum": r"Avg. nitrification",
+                 "denit_s_annual_sum": r"Avg. denitrification",
+                }
+        ncol = len(df_metrics.columns)
+        xaxis_labels = [_XLABS[k].split(" ")[0] for k in bounds["names"][:8]]
+        cmap = plt.get_cmap("Greys")
+        norm = Normalize(vmin=0, vmax=2)
+        colors = cmap(norm([0.5, 1.5]))
+        fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(6, 5))
+        for i, name in enumerate(df_metrics.columns):
+            indices = dict_si[name][["S1", "ST"]]
+            err = dict_si[name][["S1_conf", "ST_conf"]]
+            indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
+            ax[i].set_xticklabels(xaxis_labels)
+            ax[i].set_title(_LABS[name])
+            ax[i].legend(["First-order", "Total"], frameon=False)
+        ax[-1].legend().set_visible(False)
+        ax[-2].legend().set_visible(False)
+        ax[-3].legend().set_visible(False)
+        ax[0].set_ylabel("Sobol index [-]")
+        fig.tight_layout()
+        file = base_path_figs / "sobol_indices_soil_hyd_avg_loads_soilN_cycle.png"
+        fig.savefig(file, dpi=300)
+
+
+        df_metrics = df_params_metrics.loc[:, ["min_s_annual_sum", "nit_s_annual_sum", "denit_s_annual_sum"]]
+        dict_si = {}
+        for name in df_metrics.columns:
+            Y = df_metrics[name].values
+            Y = onp.where(onp.isnan(Y), onp.nanmean(Y), Y)
+            Si = sobol.analyze(bounds, Y, calc_second_order=False)
+            Si_filter = {k: Si[k] for k in ["ST", "ST_conf", "S1", "S1_conf"]}
+            dict_si[name] = pd.DataFrame(Si_filter, index=bounds["names"]).loc[:'k_transp', :]
+
+        # plot sobol indices
+        _LABS = {"min_s_annual_sum": r"Avg. soil N minerilization",
+                 "nit_s_annual_sum": r"Avg. nitrification",
+                 "denit_s_annual_sum": r"Avg. denitrification",
+                }
+        ncol = len(df_metrics.columns)
+        xaxis_labels = [_XLABS[k].split(" ")[0] for k in bounds["names"][8:]]
+        cmap = plt.get_cmap("Greys")
+        norm = Normalize(vmin=0, vmax=2)
+        colors = cmap(norm([0.5, 1.5]))
+        fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(6, 5))
+        for i, name in enumerate(df_metrics.columns):
+            indices = dict_si[name][["S1", "ST"]]
+            err = dict_si[name][["S1_conf", "ST_conf"]]
+            indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
+            ax[i].set_xticklabels(xaxis_labels)
+            ax[i].set_title(_LABS[name])
+            ax[i].legend(["First-order", "Total"], frameon=False)
+        ax[-1].legend().set_visible(False)
+        ax[-2].legend().set_visible(False)
+        ax[-3].legend().set_visible(False)
+        ax[0].set_ylabel("Sobol index [-]")
+        fig.tight_layout()
+        file = base_path_figs / "sobol_indices_transport_avg_loads_soilN_cycle.png"
+        fig.savefig(file, dpi=300)
+
+        # df_metrics = df_params_metrics.loc[:, ["rt50_s_daily_avg", "tt50_transp_daily_avg", "tt50_q_ss_annual_avg"]]
+        # dict_si = {}
+        # for name in df_metrics.columns:
+        #     Y = df_metrics[name].values
+        #     Si = sobol.analyze(bounds, Y, calc_second_order=False)
+        #     Si_filter = {k: Si[k] for k in ["ST", "ST_conf", "S1", "S1_conf"]}
+        #     dict_si[name] = pd.DataFrame(Si_filter, index=bounds["names"][:8])
+
+        # # plot sobol indices
+        # _LABS = {"rt50_s_daily_avg": r"Median soil residence time",
+        #          "tt50_transp_daily_avg": r"Median transpiration travel time",
+        #          "tt50_q_ss_annual_avg": r"Median leaching travel time",
+        #         }
+        # ncol = len(df_metrics.columns)
+        # xaxis_labels = [_XLABS[k].split(" ")[0] for k in bounds["names"][:8]]
+        # cmap = plt.get_cmap("Greys")
+        # norm = Normalize(vmin=0, vmax=2)
+        # colors = cmap(norm([0.5, 1.5]))
+        # fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(6, 5))
+        # for i, name in enumerate(df_metrics.columns):
+        #     indices = dict_si[name][["S1", "ST"]]
+        #     err = dict_si[name][["S1_conf", "ST_conf"]]
+        #     indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
+        #     ax[i].set_xticklabels(xaxis_labels)
+        #     ax[i].set_title(_LABS[name])
+        #     ax[i].legend(["First-order", "Total"], frameon=False)
+        # ax[-1].legend().set_visible(False)
+        # ax[-2].legend().set_visible(False)
+        # ax[-3].legend().set_visible(False)
+        # ax[0].set_ylabel("Sobol index [-]")
+        # fig.tight_layout()
+        # file = base_path_figs / "sobol_indices_soil_hyd_median_water_ages.png"
+        # fig.savefig(file, dpi=300)
+
+
+        # df_metrics = df_params_metrics.loc[:, ["rt50_s_daily_avg", "tt50_transp_daily_avg", "tt50_q_ss_annual_avg"]]
+        # dict_si = {}
+        # for name in df_metrics.columns:
+        #     Y = df_metrics[name].values
+        #     Si = sobol.analyze(bounds, Y, calc_second_order=False)
+        #     Si_filter = {k: Si[k] for k in ["ST", "ST_conf", "S1", "S1_conf"]}
+        #     dict_si[name] = pd.DataFrame(Si_filter, index=bounds["names"][8:])
+
+        # # plot sobol indices
+        # _LABS = {"rt50_s_daily_avg": r"Median soil residence time",
+        #          "tt50_transp_daily_avg": r"Median transpiration travel time",
+        #          "tt50_q_ss_annual_avg": r"Median leaching travel time",
+        #         }
+        # ncol = len(df_metrics.columns)
+        # xaxis_labels = [_XLABS[k].split(" ")[0] for k in bounds["names"][8:]]
+        # cmap = plt.get_cmap("Greys")
+        # norm = Normalize(vmin=0, vmax=2)
+        # colors = cmap(norm([0.5, 1.5]))
+        # fig, ax = plt.subplots(1, ncol, sharey=True, figsize=(6, 5))
+        # for i, name in enumerate(df_metrics.columns):
+        #     indices = dict_si[name][["S1", "ST"]]
+        #     err = dict_si[name][["S1_conf", "ST_conf"]]
+        #     indices.plot.bar(yerr=err.values.T, ax=ax[i], color=colors)
+        #     ax[i].set_xticklabels(xaxis_labels)
+        #     ax[i].set_title(_LABS[name])
+        #     ax[i].legend(["First-order", "Total"], frameon=False)
+        # ax[-1].legend().set_visible(False)
+        # ax[-2].legend().set_visible(False)
+        # ax[-3].legend().set_visible(False)
+        # ax[0].set_ylabel("Sobol index [-]")
+        # fig.tight_layout()
+        # file = base_path_figs / "sobol_indices_transport_median_water_ages.png"
+        # fig.savefig(file, dpi=300)
     return
 
 
