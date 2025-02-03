@@ -93,6 +93,7 @@ def main(tmp_dir):
     _Y_LABS_DAILY = {
         "C_q_ss_bs": r"${NO_3^-N}$ [mg/l]",
         "M_q_ss_bs": r"${NO_3^-N}$ [mg]",
+        "q_ss_bs": r"PERC [mm]",
     }
 
 
@@ -152,7 +153,8 @@ def main(tmp_dir):
                 cond_na = df_eval.loc[:, "obs"].isna()
                 df_eval.loc[cond_na, :] = onp.nan
                 # plot observed and simulated time series
-                axs[i].plot(date_sim_tm, sim_vals1, color="red", zorder=3)
+                if var_sim == "C_q_ss_bs":
+                    axs[i].plot(date_sim_tm, sim_vals1, color="red", zorder=3)
                 axs[i].scatter(df_eval.index, df_eval["sim"], color="red", s=5, zorder=1)
                 axs[i].scatter(df_eval.index, df_eval["obs"], color="blue", s=5, zorder=2)
                 axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
@@ -166,6 +168,40 @@ def main(tmp_dir):
             path_fig = base_path_figs / file_str
             fig.savefig(path_fig, dpi=300)
             plt.close("all")
+
+        years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
+        vars_obs = ["q_ss_bs_obs"]
+        vars_sim = ["q_ss_bs"]
+        for var_obs, var_sim in zip(vars_obs, vars_sim):
+            fig, axs = plt.subplots(7, 1, sharey=False, sharex=False, figsize=(6, 6))
+            for i, year in enumerate(years):
+                obs_vals = ds_sim_tm[var_obs].isel(x=0, y=0).values
+                df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
+                df_obs.loc[:, "obs"] = obs_vals[1:]
+                sim_vals = ds_sim_tm[var_sim].isel(y=0).values[idx_best, :]
+
+                # join observations on simulations
+                df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
+                df_eval = df_eval.loc[f"{year}-01-01":f"{year}-12-31", :]
+                cond_na = df_eval.loc[:, "obs"].isna()
+                df_eval.loc[cond_na, :] = onp.nan
+                # plot observed and simulated time series
+                if var_sim == "C_q_ss_bs":
+                    axs[i].plot(date_sim_tm, sim_vals1, color="red", zorder=3)
+                axs[i].scatter(df_eval.index, df_eval["sim"], color="red", s=5, zorder=1)
+                axs[i].scatter(df_eval.index, df_eval["obs"], color="blue", s=5, zorder=2)
+                axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
+                axs[i].set_ylabel('')
+                axs[i].set_xlabel('')
+            axs[1].set_ylabel(_Y_LABS_DAILY[var_sim])
+            axs[-2].set_ylabel(_Y_LABS_DAILY[var_sim])
+            axs[-1].set_xlabel('Time [day-month]')
+            fig.tight_layout()
+            file_str = "%s_%s_%s_%s_best.pdf" % (var_sim, lys_experiment, years[0], years[-1])
+            path_fig = base_path_figs / file_str
+            fig.savefig(path_fig, dpi=300)
+            plt.close("all")
+
 
         years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
         vars_obs = ["NO3_PERC_MASS"]

@@ -41,9 +41,13 @@ for lys_experiment in lys_experiments:
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf", decode_times=False)
 
         # assign date
-        days_sim_tm = (ds_sim_tm['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-        date_sim_tm = num2date(days_sim_tm, units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}", calendar='standard', only_use_cftime_datetimes=False)
-        ds_sim_tm = ds_sim_tm.assign_coords(date=("Time", date_sim_tm))
+        date_sim_tm = num2date(
+            ds_sim_tm["Time"].values,
+            units=f"days since {ds_sim_tm['Time'].attrs['time_origin']}",
+            calendar="standard",
+            only_use_cftime_datetimes=False,
+        )
+        ds_sim_tm = ds_sim_tm.assign_coords(Time=("Time", date_sim_tm))
 
         # DataFrame with sampled model parameters and the corresponding metrics
         csv_file = Path(__file__).parent / "parameters.csv"
@@ -53,7 +57,7 @@ for lys_experiment in lys_experiments:
 
         # compare observations and simulations
         nx = len(df_params_metrics.index)
-        idx = ds_sim_tm.date.values  # time index
+        idx = ds_sim_tm.Time.values  # time index
         df_idx_bs = pd.DataFrame(index=date_obs, columns=['sol'])
         df_idx_bs.loc[:, 'sol'] = ds_obs['NO3_PERC'].isel(x=0, y=0).values
         idx_bs = df_idx_bs['sol'].dropna().index
@@ -67,7 +71,7 @@ for lys_experiment in lys_experiments:
                 sample_no = pd.DataFrame(index=idx_bs, columns=['sample_no'])
                 sample_no['sample_no'] = range(len(sample_no.index))
                 df_perc_NO3_sim = pd.DataFrame(index=idx, columns=['perc', 'NO3_mass'])
-                df_perc_NO3_sim['perc'] = ds_sim_hm['q_ss'].isel(x=0, y=0).values
+                df_perc_NO3_sim['perc'] = ds_sim_hm['q_ss'].isel(x=nrow, y=0).values
                 df_perc_NO3_sim['NO3_mass'] = ds_sim_tm['M_q_ss'].isel(x=nrow, y=0).values
                 df_perc_NO3_sim = df_perc_NO3_sim.join(sample_no)
                 df_perc_NO3_sim.loc[:, 'sample_no'] = df_perc_NO3_sim.loc[:, 'sample_no'].bfill(limit=14)

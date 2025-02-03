@@ -11,10 +11,11 @@ import roger.tools.evaluation as eval_utils
 base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
 # merge nitrate model output into single file
-lys_experiments = ["lys2", "lys3", "lys8"]
-lys_experiments = ["lys8"]
-tm_structures = ['complete-mixing', 'advection-dispersion-power',
-                 'time-variant_advection-dispersion-power']
+# lys_experiments = ["lys2", "lys3", "lys8"]
+# tm_structures = ['complete-mixing', 'advection-dispersion-power',
+#                  'time-variant_advection-dispersion-power']
+lys_experiments = ["lys3"]
+tm_structures = ['advection-dispersion-power']
 
 # lys_experiments = ["lys3"]
 # tm_structures = ['advection-dispersion-power']
@@ -62,6 +63,8 @@ for lys_experiment in lys_experiments:
         df_idx_bs = pd.DataFrame(index=date_obs, columns=['sol'])
         df_idx_bs.loc[:, 'sol'] = ds_obs['NO3_PERC'].isel(x=0, y=0).values
         idx_bs = df_idx_bs['sol'].dropna().index
+        perc_bs_sim = onp.zeros((nx, 1, len(idx)))
+        perc_bs_obs = onp.zeros((nx, 1, len(idx)))
         NO3_perc_bs = onp.zeros((nx, 1, len(idx)))
         NO3_perc_mass_bs = onp.zeros((nx, 1, len(idx)))
         for nrow in range(nx):
@@ -72,34 +75,53 @@ for lys_experiment in lys_experiments:
                 sample_no = pd.DataFrame(index=idx_bs, columns=['sample_no'])
                 sample_no['sample_no'] = range(len(sample_no.index))
                 df_perc_NO3_sim = pd.DataFrame(index=idx, columns=['perc', 'NO3_mass'])
-                df_perc_NO3_sim['perc'] = ds_sim_hm['q_ss'].isel(x=0, y=0).values
+                df_perc_NO3_sim['perc'] = ds_sim_hm['q_ss'].isel(x=nrow, y=0).values
+                df_perc_NO3_sim.loc[df_perc_NO3_sim.index[1]:, 'perc_obs'] = ds_obs['PERC'].isel(x=0, y=0).values
                 df_perc_NO3_sim['NO3_mass'] = ds_sim_tm['M_q_ss'].isel(x=nrow, y=0).values
                 df_perc_NO3_sim = df_perc_NO3_sim.join(sample_no)
                 df_perc_NO3_sim.loc[:, 'sample_no'] = df_perc_NO3_sim.loc[:, 'sample_no'].bfill(limit=14)
                 perc_sim_sum = df_perc_NO3_sim.groupby(['sample_no']).sum().loc[:, 'perc']
+                perc_obs_sum = df_perc_NO3_sim.groupby(['sample_no']).sum().loc[:, 'perc_obs']
                 NO3_sim_sum = df_perc_NO3_sim.groupby(['sample_no']).sum().loc[:, 'NO3_mass']
                 sample_no['perc_sim_sum'] = perc_sim_sum.values
+                sample_no['perc_obs_sum'] = perc_obs_sum.values
                 sample_no['NO3_mass_sum'] = NO3_sim_sum.values
                 sample_no['NO3_conc'] = sample_no['NO3_mass_sum'] / sample_no['perc_sim_sum']
                 df_perc_NO3_sim = df_perc_NO3_sim.join(sample_no['NO3_conc'])
                 df_perc_NO3_sim = df_perc_NO3_sim.join(sample_no['NO3_mass_sum'])
+                df_perc_NO3_sim = df_perc_NO3_sim.join(sample_no['perc_sim_sum'])
+                df_perc_NO3_sim = df_perc_NO3_sim.join(sample_no['perc_obs_sum'])
+                # volume of observed bulk samples
+                perc_bs_obs[nrow, 0, :] = df_perc_NO3_sim.loc[:, 'perc_obs_sum'].values.astype(float)
+                # volume of simulated bulk samples
+                perc_bs_sim[nrow, 0, :] = df_perc_NO3_sim.loc[:, 'perc_sim_sum'].values.astype(float)
                 # concentration of simulated bulk samples
                 NO3_perc_bs[nrow, 0, :] = df_perc_NO3_sim.loc[:, 'NO3_conc'].values.astype(float)
                 # mass of simulated bulk samples
                 NO3_perc_mass_bs[nrow, 0, :] = df_perc_NO3_sim.loc[:, 'NO3_mass_sum'].values.astype(float)
 
                 # calculate metrics
-                vars_sim = ['NO3_perc_bs', 'NO3_perc_mass_bs']
-                vars_obs = ['NO3_PERC', 'NO3_PERC_MASS']
+                vars_sim = ['NO3_perc_bs', 'NO3_perc_mass_bs', 'perc_bs_sim']
+                vars_obs = ['NO3_PERC', 'NO3_PERC_MASS', 'perc_bs_obs']
                 for var_sim, var_obs in zip(vars_sim, vars_obs):
                     # join observations on simulations
-                    obs_vals = ds_obs[var_obs].isel(x=0, y=0).values.astype(float)
                     if var_sim == 'NO3_perc_bs':
                         sim_vals = NO3_perc_bs[nrow, 0, :]
+                        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values.astype(float)
+                        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+                        df_obs.loc[:, 'obs'] = obs_vals
                     elif var_sim == 'NO3_perc_mass_bs':
                         sim_vals = NO3_perc_mass_bs[nrow, 0, :]
-                    df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-                    df_obs.loc[:, 'obs'] = obs_vals
+                        obs_vals = ds_obs[var_obs].isel(x=0, y=0).values.astype(float)
+                        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+                        df_obs.loc[:, 'obs'] = obs_vals
+                    elif var_sim == 'perc_bs_sim':
+                        sim_vals = perc_bs_sim[nrow, 0, :]
+                        sim_vals = onp.where(sim_vals == 0, onp.nan, sim_vals)
+                        obs_vals = perc_bs_obs[nrow, 0, 1:]
+                        obs_vals = onp.where(obs_vals == 0, onp.nan, obs_vals)
+                        df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+                        df_obs.loc[:, 'obs'] = obs_vals
                     df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
                     df_eval = df_eval.dropna()
                     obs_vals = df_eval.loc[:, 'obs'].values.astype(float)[1:]
@@ -112,21 +134,21 @@ for lys_experiment in lys_experiments:
                     df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
                     key_r = f'r_{var_sim}'
                     df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
-                    # for year in range(2011, 2018):
-                    #     obs_vals_year = df_eval.loc[f'{year}', "obs"].values.astype(float)
-                    #     sim_vals_year = df_eval.loc[f'{year}', "sim"].values.astype(float)
-                    #     key_kge = f'KGE_{var_sim}_{year}'
-                    #     df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-                    #     key_kge_alpha = "KGE_alpha_" + var_sim + f"_{year}"
-                    #     df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_year, sim_vals_year)
-                    #     key_kge_beta = "KGE_beta_" + var_sim + f"_{year}"
-                    #     df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_year, sim_vals_year)
-                    #     key_r = "r_" + var_sim + f"_{year}"
-                    #     df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
-                    #     key_mae = "MAE_" + var_sim + f"_{year}"
-                    #     df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
-                    #     key_rbs = "RBS_" + var_sim + f"_{year}"
-                    #     df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
+                    for year in range(2011, 2018):
+                        obs_vals_year = df_eval.loc[f'{year}', "obs"].values.astype(float)
+                        sim_vals_year = df_eval.loc[f'{year}', "sim"].values.astype(float)
+                        key_kge = f'KGE_{var_sim}_{year}'
+                        df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals_year, sim_vals_year)
+                        key_kge_alpha = "KGE_alpha_" + var_sim + f"_{year}"
+                        df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_year, sim_vals_year)
+                        key_kge_beta = "KGE_beta_" + var_sim + f"_{year}"
+                        df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_year, sim_vals_year)
+                        key_r = "r_" + var_sim + f"_{year}"
+                        df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
+                        key_mae = "MAE_" + var_sim + f"_{year}"
+                        df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
+                        key_rbs = "RBS_" + var_sim + f"_{year}"
+                        df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
 
                 sim_vals1 = ds_sim_tm['M_transp'].isel(x=nrow, y=0).values[1:]
                 sim_vals2 = ds_sim_tm['nh4_up'].isel(x=nrow, y=0).values[1:]
@@ -147,6 +169,7 @@ for lys_experiment in lys_experiments:
                 df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals, sim_vals)
                 key_rbs = f"RBS_{var_sim}"
                 df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals, sim_vals)
+                df_params_metrics = df_params_metrics.copy()
 
         # write to .txt
         file = base_path / "output" / "svat_crop_nitrate_monte_carlo" / f"params_metrics_{lys_experiment}_{tm_structure}.txt"
@@ -173,3 +196,17 @@ for lys_experiment in lys_experiments:
             except ValueError:
                 var_obj = f.variables.get("C_q_ss_bs")
                 var_obj[:, :, :] = NO3_perc_bs
+            try:
+                v = f.create_variable("q_ss_bs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1)
+                v[:, :, :] = perc_bs_sim
+                v.attrs.update(long_name="Volume of simulated bulk samples", units="mg/l")
+            except ValueError:
+                var_obj = f.variables.get("q_ss_bs")
+                var_obj[:, :, :] = perc_bs_sim
+            try:
+                v = f.create_variable("q_ss_bs_obs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1)
+                v[:, :, :] = perc_bs_obs
+                v.attrs.update(long_name="Volume of measured bulk samples", units="mg/l")
+            except ValueError:
+                var_obj = f.variables.get("q_ss_bs_obs")
+                var_obj[:, :, :] = perc_bs_obs
