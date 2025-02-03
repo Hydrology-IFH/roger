@@ -65,7 +65,7 @@ for lys_experiment in lys_experiments:
                 sample_no = pd.DataFrame(index=idx_bs, columns=['sample_no'])
                 sample_no['sample_no'] = range(len(sample_no.index))
                 df_perc_NO3_sim = pd.DataFrame(index=idx, columns=['perc', 'NO3_mass'])
-                df_perc_NO3_sim['perc'] = ds_sim_hm['q_ss'].isel(x=0, y=0).values
+                df_perc_NO3_sim['perc'] = ds_sim_hm['q_ss'].isel(x=nrow, y=0).values
                 df_perc_NO3_sim['NO3_mass'] = ds_sim_tm['M_q_ss'].isel(x=nrow, y=0).values
                 df_perc_NO3_sim = df_perc_NO3_sim.join(sample_no)
                 df_perc_NO3_sim.loc[:, 'sample_no'] = df_perc_NO3_sim.loc[:, 'sample_no'].bfill(limit=14)
