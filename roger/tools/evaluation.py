@@ -688,6 +688,28 @@ def calc_mae(obs, sim):
 
     return eff
 
+def calc_50ae(obs, sim):
+    """
+    Median absolute error (MAE)
+
+    Parameters
+    ----------
+    obs : (N,)array_like
+        observed time series
+
+    sim : (N,)array_like
+        simulated time series
+
+    Returns
+    ----------
+    eff : float
+        Mean absolute error (MAE)
+    """
+    abs_err = onp.abs(sim - obs)
+    eff = onp.median(abs_err)
+
+    return eff
+
 
 def calc_mre(obs, sim):
     """
