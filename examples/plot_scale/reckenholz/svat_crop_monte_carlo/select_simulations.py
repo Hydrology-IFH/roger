@@ -51,12 +51,12 @@ def main(tmp_dir):
         ds_sim = ds_sim.assign_coords(date=("Time", date_sim))
 
         # load .txt-file
-        file = base_path_output / f"params_eff_{lys_experiment}_weekly.txt"
+        file = base_path_output / f"params_eff_{lys_experiment}_bulk_samples.txt"
         df_params_metrics = pd.read_csv(file, sep="\t")
 
         # calculate multi-objective efficiency
-        df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2017"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
-
+        df_params_metrics["E_multi"] = df_params_metrics["KGE_q_ss"]
+        
         # select best model run
         idx_best = df_params_metrics["E_multi"].idxmax()
 

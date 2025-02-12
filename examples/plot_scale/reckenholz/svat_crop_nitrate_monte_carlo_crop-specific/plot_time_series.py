@@ -93,20 +93,17 @@ def main(tmp_dir):
     _Y_LABS_DAILY = {
         "C_q_ss_bs": r"${NO_3^-N}$ [mg/l]",
         "M_q_ss_bs": r"${NO_3^-N}$ [mg]",
-        "q_ss_bs": r"PERC [mm]",
     }
 
 
-    lys_experiments = ["lys2", "lys3", "lys8"]
+    lys_experiments = ["lys3"]
     for lys_experiment in lys_experiments:
         # load parameters and metrics
         df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_advection-dispersion-power.txt", sep="\t")
         df_params_metrics["E_multi"] = df_params_metrics["KGE_NO3_perc_mass_bs"]
         df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
-        idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
-        idx_best = idx_best100[0]
-        print(idx_best)
+        idx_best100 = df_params_metrics.loc[: df_params_metrics.index[9], "id"].values.tolist()
 
         # load observations (measured data)
         path_obs = Path(__file__).parent.parent / "observations" / "reckenholz_lysimeter.nc"
@@ -140,21 +137,18 @@ def main(tmp_dir):
                 obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
                 df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
                 df_obs.loc[:, "obs"] = obs_vals
-                sim_vals = ds_sim_tm[var_sim].isel(y=0).values[idx_best, :]
-                if var_sim == "C_q_ss_bs":
-                    sim_vals1 = ds_sim_tm["C_q_ss"].isel(y=0).values[idx_best, :]
-                elif var_sim == "M_q_ss_bs":
-                    sim_vals1 = ds_sim_tm["M_q_ss"].isel(y=0).values[idx_best, :]
-
+                sim_vals = ds_sim_tm[var_sim].isel(y=0).values[idx_best100, :].T
                 # join observations on simulations
                 df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
                 df_eval = df_eval.loc[f"{year}-01-01":f"{year}-12-31", :]
                 cond_na = df_eval.loc[:, "obs"].isna()
                 df_eval.loc[cond_na, :] = onp.nan
                 # plot observed and simulated time series
-                if var_sim == "C_q_ss_bs":
-                    axs[i].plot(date_sim_tm, sim_vals1, color="red", zorder=3)
-                axs[i].scatter(df_eval.index, df_eval["sim"], color="red", s=5, zorder=1)
+                sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+                sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+                sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+                axs[i].fill_between(df_eval.index, sim_vals_min, sim_vals_max, color="red", alpha=0.5, zorder=0)
+                axs[i].plot(df_eval.index, sim_vals_median, color="red", zorder=1)
                 axs[i].scatter(df_eval.index, df_eval["obs"], color="blue", s=5, zorder=2)
                 axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
                 axs[i].set_ylabel('')
@@ -163,44 +157,10 @@ def main(tmp_dir):
             axs[-2].set_ylabel(_Y_LABS_DAILY[var_sim])
             axs[-1].set_xlabel('Time [day-month]')
             fig.tight_layout()
-            file_str = "%s_%s_%s_%s_best.pdf" % (var_sim, lys_experiment, years[0], years[-1])
+            file_str = "%s_%s_%s_%s.pdf" % (var_sim, lys_experiment, years[0], years[-1])
             path_fig = base_path_figs / file_str
             fig.savefig(path_fig, dpi=300)
             plt.close("all")
-
-        years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
-        vars_obs = ["q_ss_bs_obs"]
-        vars_sim = ["q_ss_bs"]
-        for var_obs, var_sim in zip(vars_obs, vars_sim):
-            fig, axs = plt.subplots(7, 1, sharey=False, sharex=False, figsize=(6, 6))
-            for i, year in enumerate(years):
-                obs_vals = ds_sim_tm[var_obs].isel(x=0, y=0).values
-                df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
-                df_obs.loc[:, "obs"] = obs_vals[1:]
-                sim_vals = ds_sim_tm[var_sim].isel(y=0).values[idx_best, :]
-
-                # join observations on simulations
-                df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
-                df_eval = df_eval.loc[f"{year}-01-01":f"{year}-12-31", :]
-                cond_na = df_eval.loc[:, "obs"].isna()
-                df_eval.loc[cond_na, :] = onp.nan
-                # plot observed and simulated time series
-                if var_sim == "C_q_ss_bs":
-                    axs[i].plot(date_sim_tm, sim_vals1, color="red", zorder=3)
-                axs[i].scatter(df_eval.index, df_eval["sim"], color="red", s=5, zorder=1)
-                axs[i].scatter(df_eval.index, df_eval["obs"], color="blue", s=5, zorder=2)
-                axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
-                axs[i].set_ylabel('')
-                axs[i].set_xlabel('')
-            axs[1].set_ylabel(_Y_LABS_DAILY[var_sim])
-            axs[-2].set_ylabel(_Y_LABS_DAILY[var_sim])
-            axs[-1].set_xlabel('Time [day-month]')
-            fig.tight_layout()
-            file_str = "%s_%s_%s_%s_best.pdf" % (var_sim, lys_experiment, years[0], years[-1])
-            path_fig = base_path_figs / file_str
-            fig.savefig(path_fig, dpi=300)
-            plt.close("all")
-
 
         years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
         vars_obs = ["NO3_PERC_MASS"]
@@ -211,14 +171,18 @@ def main(tmp_dir):
                 obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
                 df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
                 df_obs.loc[:, "obs"] = obs_vals
-                sim_vals = ds_sim_tm[var_sim].isel(y=0).values[idx_best, :]
+                sim_vals = ds_sim_tm[var_sim].isel(y=0).values[idx_best100, :].T
                 # join observations on simulations
                 df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
                 df_eval = df_eval.loc[f"{year}-01-01":f"{year}-12-31", :]
                 cond_na = df_eval.loc[:, "obs"].isna()
                 df_eval.loc[cond_na, :] = onp.nan
                 # plot observed and simulated time series
-                axs[i].scatter(df_eval.index, df_eval["sim"].cumsum(), color="red", s=5, zorder=1)
+                sim_vals_min = onp.nanmin(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
+                sim_vals_max = onp.nanmax(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
+                sim_vals_median = onp.nanmedian(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
+                axs[i].fill_between(df_eval.index, sim_vals_min, sim_vals_max, color="red", alpha=0.5, zorder=0)
+                axs[i].plot(df_eval.index, sim_vals_median, color="red", zorder=1)
                 axs[i].scatter(df_eval.index, df_eval["obs"].cumsum(), color="blue", s=5, zorder=2)
                 axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
                 axs[i].set_ylabel('')
@@ -227,41 +191,10 @@ def main(tmp_dir):
             axs[-2].set_ylabel(_Y_LABS_DAILY[var_sim])
             axs[-1].set_xlabel('Time [day-month]')
             fig.tight_layout()
-            file_str = "%s_%s_%s_%s_cumulated_best.pdf" % (var_sim, lys_experiment, years[0], years[-1])
+            file_str = "%s_%s_%s_%s_cumulated.pdf" % (var_sim, lys_experiment, years[0], years[-1])
             path_fig = base_path_figs / file_str
             fig.savefig(path_fig, dpi=300)
             plt.close("all")
-
-        years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
-        vars_obs = ["Nfert_min"]
-        vars_sim = ["M_in"]
-        for var_obs, var_sim in zip(vars_obs, vars_sim):
-            fig, axs = plt.subplots(7, 1, sharey=False, sharex=False, figsize=(6, 6))
-            for i, year in enumerate(years):
-                obs_vals = ds_sim_tm[var_obs].isel(y=0).values[idx_best, :]
-                df_obs = pd.DataFrame(index=date_sim_tm, columns=["obs"])
-                df_obs.loc[:, "obs"] = obs_vals
-                sim_vals = ds_sim_tm[var_sim].isel(y=0).values[idx_best, :]
-                # join observations on simulations
-                df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
-                df_eval = df_eval.loc[f"{year}-01-01":f"{year}-12-31", :]
-                cond_na = df_eval.loc[:, "obs"].isna()
-                df_eval.loc[cond_na, :] = onp.nan
-                # plot observed and simulated time series
-                axs[i].plot(df_eval.index, df_eval["sim"].cumsum(), color="red", zorder=1)
-                axs[i].plot(df_eval.index, df_eval["obs"].cumsum(), color="purple", zorder=2)
-                axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
-                axs[i].set_ylabel('')
-                axs[i].set_xlabel('')
-            axs[1].set_ylabel("[mg]")
-            axs[-2].set_ylabel("[mg]")
-            axs[-1].set_xlabel('Time [day-month]')
-            fig.tight_layout()
-            file_str = "%s_%s_%s_%s_cumulated_best.pdf" % (var_sim, lys_experiment, years[0], years[-1])
-            path_fig = base_path_figs / file_str
-            fig.savefig(path_fig, dpi=300)
-            plt.close("all")
-
 
         vars_obs = ["NO3_PERC_MASS"]
         vars_sim = ["M_q_ss_bs"]
@@ -270,51 +203,27 @@ def main(tmp_dir):
             obs_vals = ds_obs[var_obs].isel(x=0, y=0).values
             df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
             df_obs.loc[:, "obs"] = obs_vals
-            sim_vals = ds_sim_tm[var_sim].isel(y=0).values[idx_best, :]
+            sim_vals = ds_sim_tm[var_sim].isel(y=0).values[idx_best100, :].T
             # join observations on simulations
             df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
             cond_na = df_eval.loc[:, "obs"].isna()
             df_eval.loc[cond_na, :] = onp.nan
-            df_eval = df_eval.loc["2011-01-01":, :]
             # plot observed and simulated time series
-            axs.scatter(df_eval.index, df_eval["sim"].cumsum(), color="red", s=5, zorder=1)
+            sim_vals_min = onp.nanmin(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
+            sim_vals_max = onp.nanmax(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
+            sim_vals_median = onp.nanmedian(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
+            axs.fill_between(df_eval.index, sim_vals_min, sim_vals_max, color="red", alpha=0.5, zorder=0)
+            axs.plot(df_eval.index, sim_vals_median, color="red", zorder=1)
             axs.scatter(df_eval.index, df_eval["obs"].cumsum(), color="blue", s=5, zorder=2)
             axs.set_xlim(df_eval.index[0], df_eval.index[-1])
             axs.set_ylim(0,)
             axs.set_ylabel(_Y_LABS_DAILY[var_sim])
             axs.set_xlabel('Time [day-month]')
             fig.tight_layout()
-            file_str = "%s_%s_cumulated_best.pdf" % (var_sim, lys_experiment)
+            file_str = "%s_%s_cumulated.pdf" % (var_sim, lys_experiment)
             path_fig = base_path_figs / file_str
             fig.savefig(path_fig, dpi=300)
             plt.close("all")
-
-        vars_obs = ["Nfert_min"]
-        vars_sim = ["M_in"]
-        for var_obs, var_sim in zip(vars_obs, vars_sim):
-            fig, axs = plt.subplots(1, 1, sharey=False, sharex=False, figsize=(6, 3))
-            obs_vals = ds_sim_tm[var_obs].isel(y=0).values[idx_best, :]
-            df_obs = pd.DataFrame(index=date_sim_tm, columns=["obs"])
-            df_obs.loc[:, "obs"] = obs_vals
-            sim_vals = ds_sim_tm[var_sim].isel(y=0).values[idx_best, :]
-            # join observations on simulations
-            df_eval = eval_utils.join_obs_on_sim(date_sim_tm, sim_vals, df_obs)
-            cond_na = df_eval.loc[:, "obs"].isna()
-            df_eval.loc[cond_na, :] = onp.nan
-            df_eval = df_eval.loc["2011-01-01":, :]
-            # plot observed and simulated time series
-            axs.plot(df_eval.index, df_eval["sim"].cumsum(), color="red", zorder=1)
-            axs.plot(df_eval.index, df_eval["obs"].cumsum(), color="purple", zorder=2)
-            axs.set_xlim(df_eval.index[0], df_eval.index[-1])
-            axs.set_ylim(0,)
-            axs.set_ylabel("[mg]")
-            axs.set_xlabel('Time [day-month]')
-            fig.tight_layout()
-            file_str = "%s_%s_cumulated_best.pdf" % (var_sim, lys_experiment)
-            path_fig = base_path_figs / file_str
-            fig.savefig(path_fig, dpi=300)
-            plt.close("all")
-
     return
 
 
