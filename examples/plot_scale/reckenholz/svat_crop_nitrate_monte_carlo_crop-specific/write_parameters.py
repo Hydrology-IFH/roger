@@ -35,18 +35,26 @@ def main(nsamples):
 
     lys_experiments = ["lys2", "lys3", "lys8"]
     for lys_experiment in lys_experiments:
-        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo" / f"params_eff_{lys_experiment}_bulk_samples.txt"
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo_crop-specific" / f"params_eff_{lys_experiment}_bulk_samples.txt"
         df_params_metrics = pd.read_csv(file, sep="\t")
 
         # calculate multi-objective efficiency
-        df_params_metrics["E_multi"] = df_params_metrics["KGE_q_ss"]
+        df_params_metrics["E_multi"] = df_params_metrics["KGE_q_ss_2011-2015"]
 
         # select best 100 model runs
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
         idx_best100 = df_params_metrics.loc[:df_params_metrics.index[99], "id"].values.tolist()
         df_params_metrics_best100 = df_params_metrics.loc[idx_best100, :]
-        df_params_best100 = df_params_metrics_best100.loc[:, ["dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "c_canopy", "c_root", "clay"]]
+        df_params_best100 = df_params_metrics_best100.loc[:, ["dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", 
+                                                              "c_canopy_sugarbeet", "c_root_sugarbeet", 
+                                                              "c_canopy_winter-wheat", "c_root_winter-wheat", 
+                                                              "c_canopy_winter-rape", "c_root_winter-rape",
+                                                              "c_canopy_winter-barley", "c_root_winter-barley",
+                                                              "c_canopy_winter-triticale", "c_root_winter-triticale",
+                                                              "c_canopy_silage-corn", "c_root_silage-corn",
+                                                              "c_canopy_green-manure", "c_root_green-manure",
+                                                              "clay"]]
 
         zsoil = 1350
         soil_fertility = 3
@@ -55,7 +63,7 @@ def main(nsamples):
         c_clay[c_clay > 1] = 0.95
         phi_soil_temp = 91
 
-        for transport_model_structure in ['advection-dispersion-power']:
+        for transport_model_structure in ['complete-mixing', 'advection-dispersion-power', 'time-variant_advection-dispersion-power']:
             # load parameter boundaries
             file_param_bounds = base_path / "param_bounds.yml"
             with open(file_param_bounds, "r") as file:
@@ -84,12 +92,27 @@ def main(nsamples):
             df_params.loc[:, "kngl"] = 75. * (1 - onp.repeat(c_clay, int(nsamples/100), axis=0).flatten())
 
             if transport_model_structure == 'complete-mixing':
-                param_names = ["alpha_transp", "alpha_q", "km_denit", "km_nit", "kmin", "kfix", "kngl", "dmax_denit", "dmax_nit", "phi_soil_temp", "clay", "soil_fertility", "z_soil"]
+                param_names = ["alpha_transp_sugarbeet", "alpha_q_sugarbeet", "km_denit_sugarbeet", "km_nit_sugarbeet", "kmin_sugarbeet", "dmax_denit_sugarbeet", "dmax_nit_sugarbeet",
+                               "alpha_transp_winter-wheat", "alpha_q_winter-wheat", "km_denit_winter-wheat", "km_nit_winter-wheat", "kmin_winter-wheat", "dmax_denit_winter-wheat", "dmax_nit_winter-wheat",
+                               "alpha_transp_winter-rape", "alpha_q_winter-rape", "km_denit_winter-rape", "km_nit_winter-rape", "kmin_winter-rape", "dmax_denit_winter-rape", "dmax_nit_winter-rape",
+                               "alpha_transp_winter-triticale", "alpha_q_winter-triticale", "km_denit_winter-triticale", "km_nit_winter-triticale", "kmin_winter-triticale", "dmax_denit_winter-triticale", "dmax_nit_winter-triticale",
+                               "alpha_transp_silage-corn", "alpha_q_silage-corn", "km_denit_silage-corn", "km_nit_silage-corn", "kmin_silage-corn", "dmax_denit_silage-corn", "dmax_nit_silage-corn",
+                               "alpha_transp_winter-barley", "alpha_q_winter-barley", "km_denit_winter-barley", "km_nit_winter-barley", "kmin_winter-barley", "dmax_denit_winter-barley", "dmax_nit_winter-barley",
+                               "alpha_transp_green-manure", "alpha_q_green-manure", "km_denit_green-manure", "km_nit_green-manure", "kmin_green-manure", "dmax_denit_green-manure", "dmax_nit_green-manure",
+                               "alpha_transp_bare", "alpha_q_bare", "km_denit_bare", "km_nit_bare", "kmin_bare", "dmax_denit_bare", "dmax_nit_bare",
+                               "kfix", "kngl", "phi_soil_temp", "clay", "soil_fertility", "z_soil"]
                 df_params = df_params.loc[:, param_names]
 
                 df_params.columns = [
-                    ["[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[day of year]", "[-]", "", "[mm]"], 
-                    param_names,
+                    ["[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]",
+                     "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", 
+                     "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", 
+                     "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", 
+                     "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", 
+                     "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]",  
+                     "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]",
+                     "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]",    
+                     "[kg N/ha/year]", "[kg N/ha/year]", "[day of year]", "[-]", "", "[mm]"],                     param_names,
                 ]
 
             elif transport_model_structure == 'advection-dispersion-power':
@@ -118,11 +141,27 @@ def main(nsamples):
                 ]
 
             elif transport_model_structure == 'time-variant_advection-dispersion-power':
-                param_names = ["alpha_transp", "alpha_q", "c1_transp", "c2_transp", "c1_q", "c2_q", "km_denit", "km_nit", "kmin", "kfix", "kngl", "dmax_denit", "dmax_nit", "phi_soil_temp", "clay", "soil_fertility", "z_soil"]
+                param_names = ["alpha_transp_sugarbeet", "alpha_q_sugarbeet", "c1_transp_sugarbeet", "c2_transp_sugarbeet", "c1_q_sugarbeet", "c2_q_sugarbeet", "km_denit_sugarbeet", "km_nit_sugarbeet", "kmin_sugarbeet", "dmax_denit_sugarbeet", "dmax_nit_sugarbeet",
+                               "alpha_transp_winter-wheat", "alpha_q_winter-wheat", "c1_transp_winter-wheat", "c2_transp_winter-wheat", "c1_q_winter-wheat", "c2_q_winter-wheat", "km_denit_winter-wheat", "km_nit_winter-wheat", "kmin_winter-wheat", "dmax_denit_winter-wheat", "dmax_nit_winter-wheat",
+                               "alpha_transp_winter-rape", "alpha_q_winter-rape", "c1_transp_winter-rape", "c2_transp_winter-rape", "c1_q_winter-rape", "c2_q_winter-rape", "km_denit_winter-rape", "km_nit_winter-rape", "kmin_winter-rape", "dmax_denit_winter-rape", "dmax_nit_winter-rape",
+                               "alpha_transp_winter-triticale", "alpha_q_winter-triticale", "c1_transp_winter-triticale", "c2_transp_winter-triticale", "c1_q_winter-triticale", "c2_q_winter-triticale", "km_denit_winter-triticale", "km_nit_winter-triticale", "kmin_winter-triticale", "dmax_denit_winter-triticale", "dmax_nit_winter-triticale",
+                               "alpha_transp_silage-corn", "alpha_q_silage-corn", "c1_transp_silage-corn", "c2_transp_silage-corn", "c1_q_silage-corn", "c2_q_silage-corn", "km_denit_silage-corn", "km_nit_silage-corn", "kmin_silage-corn", "dmax_denit_silage-corn", "dmax_nit_silage-corn",
+                               "alpha_transp_winter-barley", "alpha_q_winter-barley", "c1_transp_winter-barley", "c2_transp_winter-barley", "c1_q_winter-barley", "c2_q_winter-barley", "km_denit_winter-barley", "km_nit_winter-barley", "kmin_winter-barley", "dmax_denit_winter-barley", "dmax_nit_winter-barley",
+                               "alpha_transp_green-manure", "alpha_q_green-manure", "c1_transp_green-manure", "c2_transp_green-manure", "c1_q_green-manure", "c2_q_green-manure", "km_denit_green-manure", "km_nit_green-manure", "kmin_green-manure", "dmax_denit_green-manure", "dmax_nit_green-manure",
+                               "alpha_transp_bare", "alpha_q_bare", "c1_transp_bare", "c2_transp_bare", "c1_q_bare", "c2_q_bare", "km_denit_bare", "km_nit_bare", "kmin_bare", "dmax_denit_bare", "dmax_nit_bare",
+                               "kfix", "kngl", "phi_soil_temp", "clay", "soil_fertility", "z_soil"]
                 df_params = df_params.loc[:, param_names]
 
                 df_params.columns = [
-                    ["[-]", "[-]", "[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[day of year]", "[-]", "", "[mm]"], 
+                    ["[-]", "[-]", "[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]",
+                     "[-]", "[-]", "[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", 
+                     "[-]", "[-]", "[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", 
+                     "[-]", "[-]", "[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", 
+                     "[-]", "[-]", "[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", 
+                     "[-]", "[-]", "[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]",  
+                     "[-]", "[-]", "[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]",
+                     "[-]", "[-]", "[-]", "[-]", "[-]", "[-]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]", "[kg N/ha/year]",    
+                     "[kg N/ha/year]", "[kg N/ha/year]", "[day of year]", "[-]", "", "[mm]"], 
                     param_names,
                 ]
 
