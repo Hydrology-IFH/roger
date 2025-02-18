@@ -18,7 +18,7 @@ def main(job_type, sas_solver):
 
     tracer = 'nitrate'
     lysimeters = ['lys2', 'lys3', 'lys8']
-    transport_models = ['advection-dispersion-power']
+    transport_models = ['complete-mixing', 'advection-dispersion-power', 'time-variant_advection-dispersion-power']
     for lys in lysimeters:
         for tm in transport_models:
             if job_type == 'single-node':
