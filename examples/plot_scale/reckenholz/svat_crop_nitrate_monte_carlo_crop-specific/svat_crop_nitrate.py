@@ -35,6 +35,8 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
                        560: "winter-triticale",
                        539: "silage-corn",
                        556: "winter-barley",
+                       563: "green-manure",
+                       564: "green-manure",
                        599: "bare"
         }
 

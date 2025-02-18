@@ -5,6 +5,35 @@ from roger.core import transport
 
 
 @roger_kernel
+def calc_irrigation_demand(state):
+    """
+    Calculates irrigation demand
+    """
+    vs = state.variables
+
+    # calculate the fine pore deficit
+    fine_pore_deficit = allocate(state.dimensions, ("x", "y"))
+    fine_pore_deficit = update(
+        fine_pore_deficit,
+        at[2:-2, 2:-2],
+        vs.theta_fc[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau],
+    )
+    fine_pore_deficit = update(
+        fine_pore_deficit,
+        at[2:-2, 2:-2],
+        npx.where(fine_pore_deficit[2:-2, 2:-2] < 0, 0, fine_pore_deficit[2:-2, 2:-2]),
+    )
+
+    vs.irr_demand = update(
+        vs.irr_demand,
+        at[2:-2, 2:-2],
+        fine_pore_deficit[2:-2, 2:-2] * vs.z_root[2:-2, 2:-2, vs.tau],
+    )
+
+    return KernelOutput(irr_demand=vs.irr_demand)
+
+
+@roger_kernel
 def calc_k(state):
     """
     Calculates hydraulic conductivity of root zone
@@ -123,6 +152,7 @@ def calculate_root_zone(state):
     vs.update(calc_S(state))
     vs.update(calc_dS(state))
     vs.update(calc_theta(state))
+    vs.update(calc_irrigation_demand(state))
     vs.update(calc_k(state))
     vs.update(calc_h(state))
 

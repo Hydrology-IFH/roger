@@ -126,6 +126,10 @@ for lys_experiment in lys_experiments:
                     df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
                     key_r = f'r_{var_sim}'
                     df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+                    key_mae = "MAE_" + var_sim
+                    df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals, sim_vals)
+                    key_mae = "50AE_" + var_sim
+                    df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals, sim_vals)
                     for year in range(2011, 2018):
                         obs_vals_year = df_eval.loc[f'{year}', "obs"].values.astype(float)
                         sim_vals_year = df_eval.loc[f'{year}', "sim"].values.astype(float)
@@ -139,6 +143,8 @@ for lys_experiment in lys_experiments:
                         df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
                         key_mae = "MAE_" + var_sim + f"_{year}"
                         df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
+                        key_mae = "50AE_" + var_sim + f"_{year}"
+                        df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals_year, sim_vals_year)
                         key_rbs = "RBS_" + var_sim + f"_{year}"
                         df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
 
