@@ -86,8 +86,10 @@ NEVENTS_FF = ("events_ff",)
 CROPS = ("crops",)
 CR = ("cr",)
 N_SAS_PARAMS = ("n_sas_params",)
+N_STATIONS = ("n_stations",)
 N_CROP_TYPES = ("n_crop_types",)
 FLOWDIRS = ("n_flowdir",)
+N_STATIONS = ("n_stations",)
 
 # those are written to netCDF output by default
 BASE_DIMENSIONS = X + Y
@@ -120,6 +122,7 @@ DIM_TO_SHAPE_VAR = {
     "n_params7": 7,
     "n_params9": 9,
     "n_params13": 13,
+    "n_stations": "nstations",
     "n_flowdir": "nflowdirs",
 }
 
@@ -870,6 +873,15 @@ VARIABLES = {
         "degC",
         "air temperature",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_distributed_input,
+    ),
+    "TA_DIST": Variable(
+        "air temperature",
+        N_STATIONS + TIME_FORCING,
+        "degC",
+        "air temperature",
+        write_to_restart=True,
+        active=lambda settings: settings.enable_distributed_input,
     ),
     "TA_MIN": Variable(
         "daily minimum air temperature",
@@ -877,7 +889,15 @@ VARIABLES = {
         "degC",
         "daily minimum air temperature",
         write_to_restart=True,
-        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and not settings.enable_distributed_input and settings.enable_crop_phenology,
+    ),
+    "TA_MIN_DIST": Variable(
+        "daily minimum air temperature",
+        N_STATIONS + TIME_FORCING,
+        "degC",
+        "daily minimum air temperature",
+        write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_distributed_input and settings.enable_crop_phenology,
     ),
     "TA_MAX": Variable(
         "daily maximum air temperature",
@@ -885,7 +905,15 @@ VARIABLES = {
         "degC",
         "daily maximum air temperature",
         write_to_restart=True,
-        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport and not settings.enable_distributed_input and settings.enable_crop_phenology,
+    ),
+    "TA_MAX_DIST": Variable(
+        "daily maximum air temperature",
+        N_STATIONS + TIME_FORCING,
+        "degC",
+        "daily maximum air temperature",
+        write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_distributed_input and settings.enable_crop_phenology,
     ),
     "ta": Variable(
         "air temperature",
@@ -3412,7 +3440,15 @@ VARIABLES = {
         "mm/10 minutes",
         "precipitation (uniform)",
         write_to_restart=True,
-        active=lambda settings: not settings.enable_offline_transport,
+        active=lambda settings: not settings.enable_offline_transport and not settings.enable_distributed_input,
+    ),
+    "PREC_DIST": Variable(
+        "precipitation",
+        N_STATIONS + TIME_FORCING,
+        "mm/10 minutes",
+        "precipitation (distributed)",
+        write_to_restart=True,
+        active=lambda settings: settings.enable_distributed_input,
     ),
     "PREC_DIST_DAILY": Variable(
         "precipitation",
@@ -4013,6 +4049,15 @@ VARIABLES = {
         "mm/dt",
         "potential evapotranspiration",
         write_to_restart=True,
+        active=lambda settings: not settings.enable_distributed_input,
+    ),
+    "PET_DIST": Variable(
+        "potential evapotranspiration",
+        N_STATIONS + TIME_FORCING,
+        "mm/dt",
+        "potential evapotranspiration",
+        write_to_restart=True,
+        active=lambda settings: settings.enable_distributed_input,
     ),
     "pet": Variable(
         "potential evapotranspiration",
@@ -5651,7 +5696,7 @@ VARIABLES = {
         "irrigation demand",
         time_dependent=True,
         write_to_restart=False,
-        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
+        active=lambda settings: not settings.enable_offline_transport,
     ),
     "c_int": Variable(
         "scale parameter of interception storage",
@@ -6121,6 +6166,26 @@ VARIABLES = {
         write_to_restart=False,
         time_dependent=False,
         active=lambda settings: settings.enable_offline_transport,
+    ),
+    "station_ids": Variable(
+        "identifier of meteorological stations",
+        N_STATIONS,
+        "",
+        "identifier of meteorological stations",
+        write_to_restart=False,
+        time_dependent=False,
+        active=lambda settings: settings.enable_distributed_input,
+        dtype=runtime_settings.int_type,
+    ),
+    "station_id": Variable(
+        "identifier of meteorological stations",
+        CATCH_GRID,
+        "",
+        "identifier of meteorological stations",
+        write_to_restart=False,
+        time_dependent=False,
+        active=lambda settings: settings.enable_distributed_input,
+        dtype=runtime_settings.int_type,
     ),
 }
 

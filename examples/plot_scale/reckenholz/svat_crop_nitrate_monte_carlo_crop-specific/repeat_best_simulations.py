@@ -20,7 +20,7 @@ def main(tmp_dir, resample_size, nruns):
         base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
     # directory of results
-    base_path_output = base_path / "output" / "svat_crop_monte_carlo"
+    base_path_output = base_path / "output" / "svat_crop_monte_carlo_crop-specific"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
 

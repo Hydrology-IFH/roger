@@ -471,7 +471,6 @@ def write_forcing(
     input_dir,
     nrows=1,
     ncols=1,
-    uniform=True,
     enable_crop_phenology=False,
     enable_groundwater_boundary=False,
     enable_film_flow=False,
@@ -492,9 +491,6 @@ def write_forcing(
     ncols : int, optional
         number of columns
 
-    uniform : bool, optional
-        True if time series are used as input data
-
     enable_crop_phenology : bool, optional
         if True daily minimum and maximum is required
 
@@ -514,12 +510,216 @@ def write_forcing(
     if os.path.exists(input_path):
         logger.warning("Use available forcing.\n")
         return
+    
+    _lock = True
+    while _lock:
+        try:
+            df_PREC, df_PET, df_TA, df_RS = read_meteo(input_dir)
+            _lock = False
+            break
+        except BlockingIOError:
+            _lock = True
+            logger.debug("Wait for input files. Files might be used by some other process")
+            time.wait(10)
 
-    if uniform:
+    validate(df_PREC)
+    validate(df_TA)
+    if isinstance(df_PET, pd.DataFrame):
+        validate(df_PET)
+        df_meteo = df_PREC.join([df_TA, df_PET.loc[:, "PET"].to_frame()])
+        df_meteo = df_meteo.ffill()
+        # downscale daily PET to 10 minutes
+        df_meteo.loc[:, "PET"] = (df_meteo.loc[:, "PET"] / 24) / 6
+    elif isinstance(df_RS, pd.DataFrame):
+        validate(df_RS)
+        df_meteo = df_PREC.join([df_TA, df_RS.loc[:, "RS"].to_frame()])
+        df_meteo = df_meteo.ffill()
+
+    if prec_correction:
+        prec_corr = precipitation_correction(
+            df_meteo["PREC"].values,
+            df_meteo["TA"].values,
+            df_meteo.index.month,
+            horizontal_shielding=prec_correction,
+        )
+        df_meteo["PREC"] = prec_corr
+
+    if enable_film_flow:
+        df_meteo["EVENTS"] = 0
+        break_counter = len(df_meteo.index)
+        event_counter = 1
+        for i in range(0, len(df_meteo.index)):
+            if (df_meteo["PREC"].values[i] > 0) & (df_meteo["TA"].values[i] > 0):
+                df_meteo.loc[df_meteo.index[i], "EVENTS"] = event_counter
+                break_counter = 0
+            elif (df_meteo["PREC"].values[i] <= 0) & (df_meteo["TA"].values[i] > 0) & (break_counter <= end_event / (60 * 10)):
+                df_meteo.loc[df_meteo.index[i], "EVENTS"] = event_counter
+                break_counter = break_counter + 1
+            elif (df_meteo["PREC"].values[i] <= 0) & (df_meteo["TA"].values[i] <= 0) & (break_counter <= end_event / (60 * 10)):
+                df_meteo.loc[df_meteo.index[i], "EVENTS"] = event_counter
+                break_counter = break_counter + 1
+            if break_counter == end_event / (60 * 10):
+                event_counter = event_counter + 1
+            if break_counter > end_event / (60 * 10):
+                df_meteo.loc[df_meteo.index[i], "EVENTS"] = 0
+
+    nc_file = input_dir / "forcing.nc"
+    with h5netcdf.File(nc_file, "w", decode_vlen_strings=False) as f:
+        if enable_groundwater_boundary:
+            f.attrs.update(
+                date_created=datetime.datetime.today().isoformat(),
+                title="Meteorological forcing and groundwater level",
+                institution="University of Freiburg, Chair of Hydrology",
+                references="",
+                comment="",
+            )
+        else:
+            f.attrs.update(
+                date_created=datetime.datetime.today().isoformat(),
+                title="Meteorological forcing",
+                institution="University of Freiburg, Chair of Hydrology",
+                references="",
+                comment="",
+            )
+        # set dimensions with a dictionary
+        dict_dim = {"x": nrows, "y": ncols, "Time": len(df_meteo.index), "scalar": 1}
+        f.dimensions = dict_dim
+        v = f.create_variable("PREC", ("x", "y", "Time"), float_type)
+        arr = df_meteo["PREC"].astype(float_type).values
+        v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+        v.attrs["long_name"] = "Precipitation"
+        v.attrs["units"] = "mm/10 minutes"
+        v = f.create_variable("TA", ("x", "y", "Time"), float_type)
+        arr = df_meteo["TA"].astype(float_type).values
+        v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+        v.attrs["long_name"] = "Air temperature"
+        v.attrs["units"] = "degC"
+        if isinstance(df_PET, pd.DataFrame):
+            v = f.create_variable("PET", ("x", "y", "Time"), float_type)
+            arr = df_meteo["PET"].astype(float_type).values
+            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+            v.attrs["long_name"] = "Potential Evapotranspiration"
+            v.attrs["units"] = "mm/10 minutes"
+        if isinstance(df_RS, pd.DataFrame):
+            v = f.create_variable("RS", ("x", "y", "Time"), float_type)
+            arr = df_meteo["RS"].astype(float_type).values
+            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+            v.attrs["long_name"] = "Solar radiation"
+            v.attrs["units"] = "MJ/m2"
+        v = f.create_variable("dt", ("Time",), float_type)
+        v[:] = 10 * 60
+        v.attrs["long_name"] = "time step"
+        v.attrs["units"] = "seconds"
+        v = f.create_variable("YEAR", ("Time",), int)
+        v[:] = df_meteo.index.year.astype(int).values
+        v.attrs["units"] = "year"
+        v = f.create_variable("MONTH", ("Time",), int)
+        v[:] = df_meteo.index.month.astype(int).values
+        v.attrs["units"] = "month"
+        v = f.create_variable("DOY", ("Time",), int)
+        v[:] = df_meteo.index.dayofyear.astype(int).values
+        v.attrs["units"] = "day of year"
+        v = f.create_variable("Time", ("Time",), float_type)
+        time_origin = df_meteo.index[0] - timedelta(hours=1)
+        v.attrs["time_origin"] = f"{time_origin}"
+        v.attrs["units"] = "hours"
+        v[:] = date2num(df_meteo.index.tolist(), units=f"hours since {time_origin}", calendar="standard")
+        v = f.create_variable("x", ("x",), int)
+        v.attrs["long_name"] = "x"
+        v.attrs["units"] = ""
+        v[:] = onp.arange(nrows)
+        v = f.create_variable("y", ("y",), int)
+        v.attrs["long_name"] = "y"
+        v.attrs["units"] = ""
+        v[:] = onp.arange(ncols)
+        if enable_crop_phenology:
+            v = f.create_variable("TA_min", ("x", "y", "Time"), float_type)
+            arr = df_meteo["TA_min"].values
+            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+            v.attrs["long_name"] = "minimum air temperature"
+            v.attrs["units"] = "degC"
+            v = f.create_variable("TA_max", ("x", "y", "Time"), float_type)
+            arr = df_meteo["TA_max"].values
+            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+            v.attrs["long_name"] = "maximum air temperature"
+            v.attrs["units"] = "degC"
+        if enable_film_flow:
+            v = f.create_variable("EVENTS", ("x", "y", "Time"), int)
+            arr = df_meteo["EVENTS"].values
+            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+            v.attrs["long_name"] = "event number"
+            v.attrs["units"] = ""
+
+        if enable_groundwater_boundary:
+            zgw_path = input_dir / "ZGW.txt"
+            if not os.path.exists(zgw_path):
+                raise ValueError(zgw_path, "does not exist")
+            df_zgw_daily = pd.read_csv(
+                zgw_path,
+                sep=r"\s+",
+                skiprows=1,
+                header=0,
+                parse_dates=[[0, 1, 2, 3, 4]],
+                index_col=0,
+                na_values=-9999,
+                date_format="%Y %m %d %H %M",
+            )
+            df_zgw_daily.index = pd.to_datetime(df_zgw_daily.index, format="%Y %m %d %H %M")
+            df_zgw_daily.index = df_zgw_daily.index.rename("Index")
+            validate(df_zgw_daily)
+            df_zgw_10mins = pd.DataFrame(index=df_PREC.index)
+            df_zgw_10mins = df_zgw_10mins.join(df_zgw_daily)
+            df_zgw_10mins = df_zgw_10mins.ffill()
+            v = f.create_variable("Z_GW", ("x", "y", "Time"), float_type)
+            arr = df_zgw_10mins["Z_GW"].values
+            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
+            v.attrs["long_name"] = "Groundwater level"
+            v.attrs["units"] = "m"
+
+@roger_sync
+def write_forcing_distributed(
+    input_dir,
+    enable_crop_phenology=False,
+    enable_film_flow=False,
+    end_event=21600,
+    prec_correction=None,
+    float_type="float32",
+):
+    """Writes forcing data to NetCDF
+
+    Args
+    ----------
+    input_dir : Path
+        path to directory with input data
+
+    enable_crop_phenology : bool, optional
+        if True daily minimum and maximum is required
+
+    enable_film_flow : bool, optional
+        if True number of events is provided
+
+    end_event : int, optional
+        seconds with no precipitation after which an event is considered to be finished
+
+    prec_correction : str, optional
+        if True precipitation is corrected according to Richter (1995)
+    """
+    input_path = input_dir / "forcing.nc"
+    if os.path.exists(input_path):
+        logger.warning("Use available forcing.\n")
+        return
+    
+    station_ids = [int(item) for item in os.listdir(input_dir / "meteo_stations") if item != ".DS_Store"]
+    nstations = len(station_ids)
+    
+    pet_available = False
+    
+    ll_meteo = []
+    for i in station_ids:
         _lock = True
         while _lock:
             try:
-                df_PREC, df_PET, df_TA, df_RS = read_meteo(input_dir)
+                df_PREC, df_PET, df_TA, df_RS = read_meteo(input_dir / "meteo_stations" / f"{i}")
                 _lock = False
                 break
             except BlockingIOError:
@@ -530,6 +730,7 @@ def write_forcing(
         validate(df_PREC)
         validate(df_TA)
         if isinstance(df_PET, pd.DataFrame):
+            pet_available = True
             validate(df_PET)
             df_meteo = df_PREC.join([df_TA, df_PET.loc[:, "PET"].to_frame()])
             df_meteo = df_meteo.ffill()
@@ -548,135 +749,119 @@ def write_forcing(
                 horizontal_shielding=prec_correction,
             )
             df_meteo["PREC"] = prec_corr
+        ll_meteo.append(df_meteo)
 
-        if enable_film_flow:
-            df_meteo["EVENTS"] = 0
-            break_counter = len(df_meteo.index)
-            event_counter = 1
-            for i in range(0, len(df_meteo.index)):
-                if (df_meteo["PREC"].values[i] > 0) & (df_meteo["TA"].values[i] > 0):
-                    df_meteo.loc[df_meteo.index[i], "EVENTS"] = event_counter
-                    break_counter = 0
-                elif (df_meteo["PREC"].values[i] <= 0) & (df_meteo["TA"].values[i] > 0) & (break_counter <= end_event / (60 * 10)):
-                    df_meteo.loc[df_meteo.index[i], "EVENTS"] = event_counter
-                    break_counter = break_counter + 1
-                elif (df_meteo["PREC"].values[i] <= 0) & (df_meteo["TA"].values[i] <= 0) & (break_counter <= end_event / (60 * 10)):
-                    df_meteo.loc[df_meteo.index[i], "EVENTS"] = event_counter
-                    break_counter = break_counter + 1
-                if break_counter == end_event / (60 * 10):
-                    event_counter = event_counter + 1
-                if break_counter > end_event / (60 * 10):
-                    df_meteo.loc[df_meteo.index[i], "EVENTS"] = 0
+    nn = []
+    for i, ii in enumerate(station_ids):
+        df_meteo = ll_meteo[i]
+        n = len(df_meteo.index)
+        nn.append(n)
+    ntime = max(nn)
 
-        nc_file = input_dir / "forcing.nc"
-        with h5netcdf.File(nc_file, "w", decode_vlen_strings=False) as f:
-            if enable_groundwater_boundary:
-                f.attrs.update(
-                    date_created=datetime.datetime.today().isoformat(),
-                    title="Meteorological forcing and groundwater level",
-                    institution="University of Freiburg, Chair of Hydrology",
-                    references="",
-                    comment="",
-                )
-            else:
-                f.attrs.update(
-                    date_created=datetime.datetime.today().isoformat(),
-                    title="Meteorological forcing",
-                    institution="University of Freiburg, Chair of Hydrology",
-                    references="",
-                    comment="",
-                )
-            # set dimensions with a dictionary
-            dict_dim = {"x": nrows, "y": ncols, "Time": len(df_meteo.index), "scalar": 1}
-            f.dimensions = dict_dim
-            v = f.create_variable("PREC", ("x", "y", "Time"), float_type)
-            arr = df_meteo["PREC"].astype(float_type).values
-            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
-            v.attrs["long_name"] = "Precipitation"
+    ntime = max(nn)
+    precip = onp.zeros((nstations, ntime))
+    ta = onp.empty((nstations, ntime))
+    if enable_crop_phenology:
+        ta_min = onp.empty((nstations, ntime))
+        ta_max = onp.empty((nstations, ntime))
+    if pet_available:
+        pet = onp.zeros((nstations, ntime))
+    else:
+        rs = onp.zeros((nstations, ntime))
+
+    for i, ii in enumerate(station_ids):
+        precip[i, :] = ll_meteo[i]["PREC"].values
+        ta[i, :] = ll_meteo[i]["TA"].values
+        if enable_crop_phenology:
+            ta_min[i, :] = ll_meteo[i]["TA_min"].values
+            ta_max[i, :] = ll_meteo[i]["TA_max"].values
+        if pet_available:
+            pet[i, :] = ll_meteo[i]["PET"].values
+        else:
+            rs[i, :] = ll_meteo[i]["RS"].values
+
+    if enable_film_flow:
+        events = onp.zeros((nstations, ntime), dtype=int)
+        break_counter = ntime
+        event_counter = 1
+        for i in range(0, len(df_meteo.index)):
+            if ((precip[:, i] > 0) & (ta[:, i] > 0)).any():
+                events[:, :, i] = event_counter
+                break_counter = 0
+            elif ((precip[:, i] <= 0) & (ta[:, i]  > 0)).all() & (break_counter <= end_event / (60 * 10)):
+                events[:, i] = event_counter
+                break_counter = break_counter + 1
+            elif ((precip[:, i] <= 0) & (ta[:, i]  <= 0)).all() & (break_counter <= end_event / (60 * 10)):
+                events[:, i] = event_counter
+                break_counter = break_counter + 1
+            if break_counter == end_event / (60 * 10):
+                event_counter = event_counter + 1
+            if break_counter > end_event / (60 * 10):
+                events[:, i] = 0
+
+    nc_file = input_dir / "forcing.nc"
+    with h5netcdf.File(nc_file, "w", decode_vlen_strings=False) as f:
+        f.attrs.update(
+            date_created=datetime.datetime.today().isoformat(),
+            title="Meteorological forcing",
+            institution="University of Freiburg, Chair of Hydrology",
+            references="",
+            comment="",
+        )
+        # set dimensions with a dictionary
+        dict_dim = {"stations": nstations, "Time": ntime, "scalar": 1}
+        f.dimensions = dict_dim
+        v = f.create_variable("PREC", ("stations", "Time"), float_type)
+        v[:, :] = precip
+        v.attrs["long_name"] = "Precipitation"
+        v.attrs["units"] = "mm/10 minutes"
+        v = f.create_variable("TA", ("stations", "Time"), float_type)
+        v[:, :] = ta
+        v.attrs["long_name"] = "Air temperature"
+        v.attrs["units"] = "degC"
+        if pet_available:
+            v = f.create_variable("PET", ("stations", "Time"), float_type)
+            v[:, :] = pet
+            v.attrs["long_name"] = "Potential Evapotranspiration"
             v.attrs["units"] = "mm/10 minutes"
-            v = f.create_variable("TA", ("x", "y", "Time"), float_type)
-            arr = df_meteo["TA"].astype(float_type).values
-            v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
-            v.attrs["long_name"] = "Air temperature"
+        else:
+            v = f.create_variable("RS", ("stations", "Time"), float_type)
+            v[:, :] = rs
+            v.attrs["long_name"] = "Solar radiation"
+            v.attrs["units"] = "MJ/m2"
+        v = f.create_variable("dt", ("Time",), float_type)
+        v[:] = 10 * 60
+        v.attrs["long_name"] = "time step"
+        v.attrs["units"] = "seconds"
+        v = f.create_variable("YEAR", ("Time",), int)
+        v[:] = df_meteo.index.year.astype(int).values
+        v.attrs["units"] = "year"
+        v = f.create_variable("MONTH", ("Time",), int)
+        v[:] = df_meteo.index.month.astype(int).values
+        v.attrs["units"] = "month"
+        v = f.create_variable("DOY", ("Time",), int)
+        v[:] = df_meteo.index.dayofyear.astype(int).values
+        v.attrs["units"] = "day of year"
+        v = f.create_variable("Time", ("Time",), float_type)
+        time_origin = df_meteo.index[0] - timedelta(hours=1)
+        v.attrs["time_origin"] = f"{time_origin}"
+        v.attrs["units"] = "hours"
+        v[:] = date2num(df_meteo.index.tolist(), units=f"hours since {time_origin}", calendar="standard")
+        v = f.create_variable("stations", ("stations",), int)
+        v.attrs["long_name"] = "stations"
+        v.attrs["units"] = ""
+        v[:] = onp.arange(nstations)
+        if enable_crop_phenology:
+            v = f.create_variable("TA_min", ("stations", "Time"), float_type)
+            v[:, :] = ta_min
+            v.attrs["long_name"] = "minimum air temperature"
             v.attrs["units"] = "degC"
-            if isinstance(df_PET, pd.DataFrame):
-                v = f.create_variable("PET", ("x", "y", "Time"), float_type)
-                arr = df_meteo["PET"].astype(float_type).values
-                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
-                v.attrs["long_name"] = "Potential Evapotranspiration"
-                v.attrs["units"] = "mm/10 minutes"
-            if isinstance(df_RS, pd.DataFrame):
-                v = f.create_variable("RS", ("x", "y", "Time"), float_type)
-                arr = df_meteo["RS"].astype(float_type).values
-                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
-                v.attrs["long_name"] = "Solar radiation"
-                v.attrs["units"] = "MJ/m2"
-            v = f.create_variable("dt", ("Time",), float_type)
-            v[:] = 10 * 60
-            v.attrs["long_name"] = "time step"
-            v.attrs["units"] = "seconds"
-            v = f.create_variable("YEAR", ("Time",), int)
-            v[:] = df_meteo.index.year.astype(int).values
-            v.attrs["units"] = "year"
-            v = f.create_variable("MONTH", ("Time",), int)
-            v[:] = df_meteo.index.month.astype(int).values
-            v.attrs["units"] = "month"
-            v = f.create_variable("DOY", ("Time",), int)
-            v[:] = df_meteo.index.dayofyear.astype(int).values
-            v.attrs["units"] = "day of year"
-            v = f.create_variable("Time", ("Time",), float_type)
-            time_origin = df_meteo.index[0] - timedelta(hours=1)
-            v.attrs["time_origin"] = f"{time_origin}"
-            v.attrs["units"] = "hours"
-            v[:] = date2num(df_meteo.index.tolist(), units=f"hours since {time_origin}", calendar="standard")
-            v = f.create_variable("x", ("x",), int)
-            v.attrs["long_name"] = "x"
+            v = f.create_variable("TA_max", ("stations", "Time"), float_type)
+            v[:, :] = ta_max
+            v.attrs["long_name"] = "maximum air temperature"
+            v.attrs["units"] = "degC"
+        if enable_film_flow:
+            v = f.create_variable("EVENTS", ("stations", "Time"), int)
+            v[:, :] = events
+            v.attrs["long_name"] = "event number"
             v.attrs["units"] = ""
-            v[:] = onp.arange(nrows)
-            v = f.create_variable("y", ("y",), int)
-            v.attrs["long_name"] = "y"
-            v.attrs["units"] = ""
-            v[:] = onp.arange(ncols)
-            if enable_crop_phenology:
-                v = f.create_variable("TA_min", ("x", "y", "Time"), float_type)
-                arr = df_meteo["TA_min"].values
-                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
-                v.attrs["long_name"] = "minimum air temperature"
-                v.attrs["units"] = "degC"
-                v = f.create_variable("TA_max", ("x", "y", "Time"), float_type)
-                arr = df_meteo["TA_max"].values
-                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
-                v.attrs["long_name"] = "maximum air temperature"
-                v.attrs["units"] = "degC"
-            if enable_film_flow:
-                v = f.create_variable("EVENTS", ("x", "y", "Time"), int)
-                arr = df_meteo["EVENTS"].values
-                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
-                v.attrs["long_name"] = "event number"
-                v.attrs["units"] = ""
-
-            if enable_groundwater_boundary:
-                zgw_path = input_dir / "ZGW.txt"
-                if not os.path.exists(zgw_path):
-                    raise ValueError(zgw_path, "does not exist")
-                df_zgw_daily = pd.read_csv(
-                    zgw_path,
-                    sep=r"\s+",
-                    skiprows=1,
-                    header=0,
-                    parse_dates=[[0, 1, 2, 3, 4]],
-                    index_col=0,
-                    na_values=-9999,
-                    date_format="%Y %m %d %H %M",
-                )
-                df_zgw_daily.index = pd.to_datetime(df_zgw_daily.index, format="%Y %m %d %H %M")
-                df_zgw_daily.index = df_zgw_daily.index.rename("Index")
-                validate(df_zgw_daily)
-                df_zgw_10mins = pd.DataFrame(index=df_PREC.index)
-                df_zgw_10mins = df_zgw_10mins.join(df_zgw_daily)
-                df_zgw_10mins = df_zgw_10mins.ffill()
-                v = f.create_variable("Z_GW", ("x", "y", "Time"), float_type)
-                arr = df_zgw_10mins["Z_GW"].values
-                v[:, :, :] = arr[onp.newaxis, onp.newaxis, :]
-                v.attrs["long_name"] = "Groundwater level"
-                v.attrs["units"] = "m"

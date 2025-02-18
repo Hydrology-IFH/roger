@@ -11,8 +11,7 @@ import roger.tools.evaluation as eval_utils
 base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
 lys_experiments = ["lys2", "lys3", "lys8"]
-tm_structures = ['complete-mixing', 'advection-dispersion-power',
-                 'time-variant_advection-dispersion-power']
+tm_structures = ["complete-mixing", "time-variant_advection-dispersion-power"]
 
 for lys_experiment in lys_experiments:
     # load hydrologic simulation
@@ -153,7 +152,7 @@ for lys_experiment in lys_experiments:
                         df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
 
                 sim_vals1 = ds_sim_tm['M_transp'].isel(x=nrow, y=0).values[1:]
-                sim_vals2 = ds_sim_tm['nh4_up'].isel(x=nrow, y=0).values[1:]
+                sim_vals2 = ds_sim_tm['nh4_up'].isel(x=nrow, y=0).values[1:] * 0.
                 sim_vals = sim_vals1 + sim_vals2
                 df_sim = pd.DataFrame(index=date_sim_tm[1:], columns=['sim'])
                 df_sim.loc[:, 'sim'] = sim_vals * 0.01 # convert from mg/m2 to kg/ha

@@ -44,7 +44,7 @@ def read_meteo(path_to_dir: Path):
         header=0,
         na_values=-9999,
     )
-    df_PREC.index = [pd.to_datetime(f"{df_PREC.iloc[i, 0]} {df_PREC.iloc[i, 1]} {df_PREC.iloc[i, 2]} {df_PREC.iloc[i, 3]} {df_PREC.iloc[i, 4]}", format="%Y %m %d %H %M") for i in range(len(df_PREC.index))]
+    df_PREC.index = pd.to_datetime(dict(year=df_PREC.YYYY, month=df_PREC.MM, day=df_PREC.DD, hour=df_PREC.hh, minute=df_PREC.mm))
     df_PREC = df_PREC.loc[:, ["PREC"]]
     df_PREC.index = df_PREC.index.rename("Index")
 
@@ -56,7 +56,7 @@ def read_meteo(path_to_dir: Path):
             header=0,
             na_values=-9999,
         )
-        df_pet.index = [pd.to_datetime(f"{df_pet.iloc[i, 0]} {df_pet.iloc[i, 1]} {df_pet.iloc[i, 2]} {df_pet.iloc[i, 3]} {df_pet.iloc[i, 4]}", format="%Y %m %d %H %M") for i in range(len(df_pet.index))]
+        df_pet.index = pd.to_datetime(dict(year=df_pet.YYYY, month=df_pet.MM, day=df_pet.DD, hour=df_pet.hh, minute=df_pet.mm))
         df_pet = df_pet.loc[:, ["PET"]]
         df_pet.index = df_pet.index.rename("Index")
 
@@ -71,7 +71,7 @@ def read_meteo(path_to_dir: Path):
             header=0,
             na_values=-9999,
         )
-        df_rs.index = [pd.to_datetime(f"{df_rs.iloc[i, 0]} {df_rs.iloc[i, 1]} {df_rs.iloc[i, 2]} {df_rs.iloc[i, 3]} {df_rs.iloc[i, 4]}", format="%Y %m %d %H %M") for i in range(len(df_rs.index))]
+        df_rs.index = pd.to_datetime(dict(year=df_rs.YYYY, month=df_rs.MM, day=df_rs.DD, hour=df_rs.hh, minute=df_rs.mm))
         df_rs = df_rs.loc[:, ["RS"]]
         df_rs.index = df_rs.index.rename("Index")
     else:
@@ -84,7 +84,7 @@ def read_meteo(path_to_dir: Path):
         header=0,
         na_values=-9999,
     )
-    df_ta.index = [pd.to_datetime(f"{df_ta.iloc[i, 0]} {df_ta.iloc[i, 1]} {df_ta.iloc[i, 2]} {df_ta.iloc[i, 3]} {df_ta.iloc[i, 4]}", format="%Y %m %d %H %M") for i in range(len(df_ta.index))]
+    df_ta.index = pd.to_datetime(dict(year=df_ta.YYYY, month=df_ta.MM, day=df_ta.DD, hour=df_ta.hh, minute=df_ta.mm))
     df_ta = df_ta.loc[:, "TA":]
     df_ta.index = df_ta.index.rename("Index")
 

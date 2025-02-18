@@ -60,8 +60,8 @@ def main(tmp_dir):
                             2013: "winter rape",
                             2014: "winter triticale",
                             2015: "silage corn",
-                            2016: "winter barley",
-                            2017: "sugar beet"
+                            2016: "winter barley & green manure",
+                            2017: "green manure & winter wheat"
     }
 
     crops_lys4_lys9 = {2010: "winter wheat",

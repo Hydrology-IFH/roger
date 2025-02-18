@@ -44,6 +44,7 @@ SETTINGS = {
     "time_origin": Setting("1900-01-01 00:00:00", str, "time origin"),
     "AB_eps": Setting(0.1, float, "Deviation from Adam-Bashforth weighting"),
     "nsas": Setting(8, int, "Number of entries per grid cell containing SAS parameters"),
+    "nstations": Setting(2, int, "Number of meteorological stations used for forcing"),
     "nflowdirs": Setting(8, int, "Number of flow directions per grid cell"),
     # Physical constants
     "pi": Setting(PI, float, "Pi"),

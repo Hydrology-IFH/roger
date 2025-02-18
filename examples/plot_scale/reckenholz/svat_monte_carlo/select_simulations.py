@@ -55,7 +55,7 @@ def main(tmp_dir):
         df_params_metrics = pd.read_csv(file, sep="\t")
 
         # calculate multi-objective efficiency
-        df_params_metrics["E_multi"] = df_params_metrics["KGE_q_ss"]
+        df_params_metrics["E_multi"] = df_params_metrics["KGE_q_ss_2011-2015"]
 
         # select best model run
         idx_best = df_params_metrics["E_multi"].idxmax()

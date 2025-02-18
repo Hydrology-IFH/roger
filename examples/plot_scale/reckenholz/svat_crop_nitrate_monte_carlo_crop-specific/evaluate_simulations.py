@@ -16,7 +16,7 @@ tm_structures = ['complete-mixing', 'advection-dispersion-power',
 
 for lys_experiment in lys_experiments:
     # load hydrologic simulation
-    states_hm_file = base_path / "output" / "svat_crop_monte_carlo" / f"SVATCROP_{lys_experiment}_bootstrap.nc"
+    states_hm_file = base_path / "output" / "svat_crop_monte_carlo_crop-specific" / f"SVATCROP_{lys_experiment}_bootstrap.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
     # assign date

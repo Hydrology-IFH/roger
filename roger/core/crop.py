@@ -7,58 +7,6 @@ from roger.core import transport
 
 
 @roger_kernel
-def calc_irrigation_demand(state):
-    """
-    Calculates crop irrigation demand
-    """
-    vs = state.variables
-
-    # calculate the fine pore deficit
-    fine_pore_deficit = allocate(state.dimensions, ("x", "y"))
-    fine_pore_deficit = update(
-        fine_pore_deficit,
-        at[2:-2, 2:-2],
-        vs.theta_fc[2:-2, 2:-2] - vs.theta[2:-2, 2:-2, vs.tau],
-    )
-    fine_pore_deficit = update(
-        fine_pore_deficit,
-        at[2:-2, 2:-2],
-        npx.where(fine_pore_deficit[2:-2, 2:-2] < 0, 0, fine_pore_deficit[2:-2, 2:-2]),
-    )
-
-    vs.irr_demand = update(
-        vs.irr_demand,
-        at[2:-2, 2:-2],
-        fine_pore_deficit[2:-2, 2:-2] * vs.z_root[2:-2, 2:-2, vs.tau],
-    )
-
-    # irrigation demand for crops only
-    mask = (vs.lu_id) < 500 & (vs.lu_id > 600)
-    vs.irr_demand = update(
-        vs.irr_demand,
-        at[2:-2, 2:-2],
-        npx.where(mask[2:-2, 2:-2], 0, vs.irr_demand[2:-2, 2:-2]),
-    )
-
-    # increase irrigation demand by 10% to account for evaporation and interception losses
-    vs.irr_demand = update(
-        vs.irr_demand,
-        at[2:-2, 2:-2],
-        vs.irr_demand[2:-2, 2:-2] * 1.1,
-    )
-
-    # constrain irrigation demand to 30 mm/day 
-    mask = (vs.irr_demand > 30)
-    vs.irr_demand = update(
-        vs.irr_demand,
-        at[2:-2, 2:-2],
-        npx.where(mask[2:-2, 2:-2], 30, vs.irr_demand[2:-2, 2:-2]),
-    )
-
-    return KernelOutput(irr_demand=vs.irr_demand)
-
-
-@roger_kernel
 def calc_gdd(state):
     """Calculates growing degree days"""
     vs = state.variables
@@ -2042,7 +1990,6 @@ def calculate_crop_phenology(state):
             vs.update(update_k_stress_transp(state))
             vs.update(update_basal_transp_coeff(state))
             vs.update(update_basal_evap_coeff(state))
-            vs.update(calc_irrigation_demand(state))
 
         if vs.event_id[vs.tau] == 0:
             vs.update(update_lu_id(state))
