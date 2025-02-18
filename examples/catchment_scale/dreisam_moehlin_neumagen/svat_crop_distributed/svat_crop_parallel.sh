@@ -6,9 +6,9 @@
 #SBATCH --mem=24000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
-#SBATCH --job-name=svat
-#SBATCH --output=svat.out
-#SBATCH --error=svat_err.out
+#SBATCH --job-name=svat_crop
+#SBATCH --output=svat_crop.out
+#SBATCH --error=svat_crop_err.out
 #SBATCH --export=ALL
 
 # load module dependencies
@@ -18,10 +18,10 @@ export OMPI_MCA_btl="self,smcuda,vader,tcp"
 export OMP_NUM_THREADS=1
 eval "$(conda shell.bash hook)"
 conda activate roger-mpi
-cd /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/dreisam_moehlin_neumagen/svat_distributed
+cd /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/dreisam_moehlin_neumagen/svat_crop_distributed
   
 mpirun --bind-to core --map-by core -report-bindings python svat_crop.py -b numpy -d cpu -n 6 6 -td "${TMPDIR}"
 # Move output from local SSD to global workspace
-echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/dreisam_moehlin_neumagen/svat_distributed/output"
-mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/dreisam_moehlin_neumagen/svat_distributed/output
-mv "${TMPDIR}"/SVAT.*.nc /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/dreisam_moehlin_neumagen/svat_distributed/output
+echo "Move output to /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/dreisam_moehlin_neumagen/svat_crop_distributed/output"
+mkdir -p /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/dreisam_moehlin_neumagen/svat_crop_distributed/output
+mv "${TMPDIR}"/SVAT.*.nc /home/fr/fr_fr/fr_rs1092/roger/examples/catchment_scale/dreisam_moehlin_neumagen/svat_crop_distributed/output
