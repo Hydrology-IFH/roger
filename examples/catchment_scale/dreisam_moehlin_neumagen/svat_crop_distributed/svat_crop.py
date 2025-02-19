@@ -134,7 +134,17 @@ def main(tmp_dir):
             vs.x = update(vs.x, at[3:-2], settings.x_origin + npx.cumsum(dx[3:-2]))
             vs.y = update(vs.y, at[3:-2], settings.y_origin + npx.cumsum(dy[3:-2]))
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "lut_ilu",
+                "lut_gc",
+                "lut_gcm",
+                "lut_is",
+                "lut_rdlu",
+                "lut_crops",
+            ],
+        )
         def set_look_up_tables(self, state):
             vs = state.variables
 
@@ -148,8 +158,15 @@ def main(tmp_dir):
             vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
             # land use-dependent rooting depth
             vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
+            # crop-dependent parameters
+            vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "maskCatch",
+            ],
+        )
         def set_topography(self, state):
             vs = state.variables
 
@@ -162,10 +179,31 @@ def main(tmp_dir):
             )
 
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "lu_id",
+                "sealing",
+                "S_dep_tot",
+                "z_soil",
+                "z_gw",
+                "dmpv",
+                "lmpv",
+                "theta_ac",
+                "theta_ufc",
+                "theta_pwp",
+                "ks",
+                "kf",
+                "prec_weight",
+                "ta_offset",
+                "pet_weight",
+                "station_id",
+                "station_ids",
+                "crop_type",
+            ],
+        )
         def set_parameters_setup(self, state):
             vs = state.variables
-            settings = state.settings
 
             # land use ID (see README for description)
             vs.lu_id = update(
@@ -371,7 +409,19 @@ def main(tmp_dir):
         def set_boundary_conditions(self, state):
             pass
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "PREC_DIST",
+                "TA_DIST",
+                "TA_MIN_DIST",
+                "TA_MAX_DIST",
+                "PET_DIST",
+                "YEAR",
+                "MONTH",
+                "DOY",
+            ],
+        )
         def set_forcing_setup(self, state):
             vs = state.variables
 

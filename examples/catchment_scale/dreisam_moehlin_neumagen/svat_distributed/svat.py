@@ -127,7 +127,16 @@ def main(tmp_dir):
             vs.x = update(vs.x, at[3:-2], settings.x_origin + npx.cumsum(dx[3:-2]))
             vs.y = update(vs.y, at[3:-2], settings.y_origin + npx.cumsum(dy[3:-2]))
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "lut_ilu",
+                "lut_gc",
+                "lut_gcm",
+                "lut_is",
+                "lut_rdlu",
+            ],
+        )
         def set_look_up_tables(self, state):
             vs = state.variables
 
@@ -142,7 +151,12 @@ def main(tmp_dir):
             # land use-dependent rooting depth
             vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "maskCatch",
+            ],
+        )
         def set_topography(self, state):
             vs = state.variables
 
@@ -155,10 +169,30 @@ def main(tmp_dir):
             )
 
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "lu_id",
+                "sealing",
+                "S_dep_tot",
+                "z_soil",
+                "z_gw",
+                "dmpv",
+                "lmpv",
+                "theta_ac",
+                "theta_ufc",
+                "theta_pwp",
+                "ks",
+                "kf",
+                "prec_weight",
+                "ta_offset",
+                "pet_weight",
+                "station_id",
+                "station_ids"
+            ],
+        )
         def set_parameters_setup(self, state):
             vs = state.variables
-            settings = state.settings
 
             # land use ID (see README for description)
             vs.lu_id = update(
@@ -271,17 +305,6 @@ def main(tmp_dir):
                 at[2:-2, 2:-2],
                 npx.where(npx.isnan(vs.pet_weight)[2:-2, 2:-2], 1, vs.pet_weight[2:-2, 2:-2])
             )
-            # groundwater table depth (m)
-            vs.z_gw = update(
-                vs.z_gw,
-                at[2:-2, 2:-2, 0],
-                self._read_var_from_nc_xr("gwfa_gew", self._base_path, "parameters.nc")/100  # convert cm to m
-            )
-            vs.z_gw = update(
-                vs.z_gw,
-                at[2:-2, 2:-2, 0],
-                vs.z_gw[2:-2, 2:-2, 1]
-            )
             # identifier of meteorological station
             vs.station_id = update(
                 vs.station_id,
@@ -347,14 +370,22 @@ def main(tmp_dir):
         def set_boundary_conditions(self, state):
             pass
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "PREC_DIST",
+                "TA_DIST",
+                "PET_DIST",
+                "YEAR",
+                "MONTH",
+                "DOY",
+            ],
+        )
         def set_forcing_setup(self, state):
             vs = state.variables
 
             vs.PREC_DIST = update(vs.PREC_DIST, at[:, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
             vs.TA_DIST = update(vs.TA_DIST, at[:, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
-            # vs.TA_MIN_DIST = update(vs.TA_MIN_DIST, at[:, :], self._read_var_from_nc("TA_min", self._input_dir, 'forcing.nc'))
-            # vs.TA_MAX_DIST = update(vs.TA_MAX_DIST, at[:, :], self._read_var_from_nc("TA_max", self._input_dir, 'forcing.nc'))
             vs.PET_DIST = update(vs.PET_DIST, at[:, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc'))
             vs.YEAR = update(
                 vs.YEAR, at[:], self._read_var_from_nc("YEAR", self._input_dir, "forcing.nc")
@@ -374,8 +405,6 @@ def main(tmp_dir):
             if condt:
                 precip = allocate(state.dimensions, ("x", "y", "timesteps_day"))
                 ta = allocate(state.dimensions, ("x", "y", "timesteps_day"))
-                # ta_min = allocate(state.dimensions, ("x", "y", "timesteps_day"))
-                # ta_max = allocate(state.dimensions, ("x", "y", "timesteps_day"))
                 pet = allocate(state.dimensions, ("x", "y", "timesteps_day"))
                 for i, ii in enumerate(vs.station_ids):
                     mask = (vs.station_id == ii)
@@ -385,12 +414,6 @@ def main(tmp_dir):
                     _ta = allocate(state.dimensions, ("x", "y", "timesteps_day"))
                     _ta = update(_ta, at[:, :, :], vs.TA_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
                     ta = update(ta, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _ta, ta))
-                    # _ta_min = allocate(state.dimensions, ("x", "y", "timesteps_day"))
-                    # _ta_min = update(_ta_min, at[:, :, :], vs.TA_MIN_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
-                    # ta_min = update(ta_min, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _ta_min, ta_min))
-                    # _ta_max = allocate(state.dimensions, ("x", "y", "timesteps_day"))
-                    # _ta_max = update(_ta_max, at[:, :, :], vs.TA_MAX_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
-                    # ta_max = update(ta_max, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _ta_max, ta_max))
                     _pet = allocate(state.dimensions, ("x", "y", "timesteps_day"))
                     _pet = update(_pet, at[:, :, :], vs.PET_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
                     pet = update(pet, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _pet, pet))
