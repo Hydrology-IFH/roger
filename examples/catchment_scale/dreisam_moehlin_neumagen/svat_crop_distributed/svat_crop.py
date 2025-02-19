@@ -134,17 +134,7 @@ def main(tmp_dir):
             vs.x = update(vs.x, at[3:-2], settings.x_origin + npx.cumsum(dx[3:-2]))
             vs.y = update(vs.y, at[3:-2], settings.y_origin + npx.cumsum(dy[3:-2]))
 
-        @roger_routine(
-            dist_safe=False,
-            local_variables=[
-                "lut_ilu",
-                "lut_gc",
-                "lut_gcm",
-                "lut_is",
-                "lut_rdlu",
-                "lut_crops",
-            ],
-        )
+        @roger_routine
         def set_look_up_tables(self, state):
             vs = state.variables
 
