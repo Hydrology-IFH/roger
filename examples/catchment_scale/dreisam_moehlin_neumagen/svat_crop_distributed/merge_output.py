@@ -17,18 +17,18 @@ if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
 # merge model output into single file
-path = str(base_path_output / "SVAT.*.nc")
+path = str(base_path_output / "SVATCROP.*.nc")
 diag_files = glob.glob(path)
-states_hm_file = base_path_output / "SVAT.nc"
+states_hm_file = base_path_output / "SVATCROP.nc"
 if not os.path.exists(states_hm_file):
     with h5netcdf.File(states_hm_file, "w", decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
-            title="RoGeR simulations for the Eberbachle catchment",
+            title="RoGeR simulations for the Dreisam-Moehlin-Neumagen catchment",
             institution="University of Freiburg, Chair of Hydrology",
             references="",
             comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-            model_structure="SVAT model with free drainage",
+            model_structure="SVAT model with free drainage and explicit crop growth dynamics",
             roger_version=f"{roger.__version__}",
         )
         # collect dimensions
