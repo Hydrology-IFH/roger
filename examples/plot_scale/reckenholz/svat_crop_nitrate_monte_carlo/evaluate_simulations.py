@@ -11,7 +11,7 @@ import roger.tools.evaluation as eval_utils
 base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
 lys_experiments = ["lys2", "lys3", "lys8"]
-tm_structures = ["complete-mixing", "time-variant_advection-dispersion-power"]
+tm_structures = ["advection-dispersion-power"]
 
 for lys_experiment in lys_experiments:
     # load hydrologic simulation
@@ -133,23 +133,59 @@ for lys_experiment in lys_experiments:
                     df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals, sim_vals)
                     key_rbs = "RBS_" + var_sim
                     df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals, sim_vals)
-                    for year in range(2011, 2018):
-                        obs_vals_year = df_eval.loc[f'{year}', "obs"].values.astype(float)
-                        sim_vals_year = df_eval.loc[f'{year}', "sim"].values.astype(float)
-                        key_kge = f'KGE_{var_sim}_{year}'
-                        df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals_year, sim_vals_year)
-                        key_kge_alpha = "KGE_alpha_" + var_sim + f"_{year}"
-                        df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_year, sim_vals_year)
-                        key_kge_beta = "KGE_beta_" + var_sim + f"_{year}"
-                        df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_year, sim_vals_year)
-                        key_r = "r_" + var_sim + f"_{year}"
-                        df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
-                        key_mae = "MAE_" + var_sim + f"_{year}"
-                        df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
-                        key_mae = "50AE_" + var_sim + f"_{year}"
-                        df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals_year, sim_vals_year)
-                        key_rbs = "RBS_" + var_sim + f"_{year}"
-                        df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
+
+                    obs_vals_year = df_eval.loc['2011':'2015', "obs"].values.astype(float)
+                    sim_vals_year = df_eval.loc['2011':'2015', "sim"].values.astype(float)
+                    key_kge = f'KGE_{var_sim}_2011-2015'
+                    df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals_year, sim_vals_year)
+                    key_kge_alpha = "KGE_alpha_" + var_sim + "_2011-2015"
+                    df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_year, sim_vals_year)
+                    key_kge_beta = "KGE_beta_" + var_sim + "_2011-2015"
+                    df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_year, sim_vals_year)
+                    key_r = "r_" + var_sim + "_2011-2015"
+                    df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
+                    key_mae = "MAE_" + var_sim + "_2011-2015"
+                    df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
+                    key_mae = "50AE_" + var_sim + "_2011-2015"
+                    df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals_year, sim_vals_year)
+                    key_rbs = "RBS_" + var_sim + "_2011-2015"
+                    df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
+
+                    obs_vals_year = df_eval.loc['2016':'2017', "obs"].values.astype(float)
+                    sim_vals_year = df_eval.loc['2016':'2017', "sim"].values.astype(float)
+                    key_kge = f'KGE_{var_sim}_2016-2017'
+                    df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals_year, sim_vals_year)
+                    key_kge_alpha = "KGE_alpha_" + var_sim + "_2016-2017"
+                    df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_year, sim_vals_year)
+                    key_kge_beta = "KGE_beta_" + var_sim + "_2016-2017"
+                    df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_year, sim_vals_year)
+                    key_r = "r_" + var_sim + "_2016-2017"
+                    df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
+                    key_mae = "MAE_" + var_sim + "_2016-2017"
+                    df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
+                    key_mae = "50AE_" + var_sim + "_2016-2017"
+                    df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals_year, sim_vals_year)
+                    key_rbs = "RBS_" + var_sim + "_2016-2017"
+                    df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
+
+
+                    # for year in range(2011, 2018):
+                    #     obs_vals_year = df_eval.loc[f'{year}', "obs"].values.astype(float)
+                    #     sim_vals_year = df_eval.loc[f'{year}', "sim"].values.astype(float)
+                    #     key_kge = f'KGE_{var_sim}_{year}'
+                    #     df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals_year, sim_vals_year)
+                    #     key_kge_alpha = "KGE_alpha_" + var_sim + f"_{year}"
+                    #     df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_year, sim_vals_year)
+                    #     key_kge_beta = "KGE_beta_" + var_sim + f"_{year}"
+                    #     df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_year, sim_vals_year)
+                    #     key_r = "r_" + var_sim + f"_{year}"
+                    #     df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
+                    #     key_mae = "MAE_" + var_sim + f"_{year}"
+                    #     df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
+                    #     key_mae = "50AE_" + var_sim + f"_{year}"
+                    #     df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals_year, sim_vals_year)
+                    #     key_rbs = "RBS_" + var_sim + f"_{year}"
+                    #     df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
 
                 sim_vals1 = ds_sim_tm['M_transp'].isel(x=nrow, y=0).values[1:]
                 sim_vals2 = ds_sim_tm['nh4_up'].isel(x=nrow, y=0).values[1:] * 0.

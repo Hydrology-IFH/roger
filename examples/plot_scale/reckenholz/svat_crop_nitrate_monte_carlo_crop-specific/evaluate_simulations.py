@@ -11,8 +11,7 @@ import roger.tools.evaluation as eval_utils
 base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
 lys_experiments = ["lys2", "lys3", "lys8"]
-tm_structures = ['complete-mixing', 'advection-dispersion-power',
-                 'time-variant_advection-dispersion-power']
+tm_structures = ["advection-dispersion-power"]
 
 for lys_experiment in lys_experiments:
     # load hydrologic simulation
@@ -37,7 +36,7 @@ for lys_experiment in lys_experiments:
         tms = tm_structure.replace(" ", "_")
 
         # load transport simulation
-        states_tm_file = base_path / "output" / "svat_crop_nitrate_monte_carlo" / f"SVATCROPNITRATE_{tms}_{lys_experiment}.nc"
+        states_tm_file = base_path / "output" / "svat_crop_nitrate_monte_carlo_crop-specific" / f"SVATCROPNITRATE_{tms}_{lys_experiment}.nc"
         ds_sim_tm = xr.open_dataset(states_tm_file, engine="h5netcdf")
 
         # assign date

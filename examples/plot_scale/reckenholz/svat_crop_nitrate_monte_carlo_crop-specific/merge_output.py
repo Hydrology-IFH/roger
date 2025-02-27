@@ -23,13 +23,13 @@ def main():
             path = str(
                 base_path
                 / "output"
-                / "svat_crop_nitrate_monte_carlo"
+                / "svat_crop_nitrate_monte_carlo_crop-specific"
                 / f"SVATCROPNITRATE_{tm_structure}_{lys_experiment}.*.nc"
             )
             output_tm_file = (
                 base_path
                 / "output"
-                / "svat_crop_nitrate_monte_carlo"
+                / "svat_crop_nitrate_monte_carlo_crop-specific"
                 / f"SVATCROPNITRATE_{tm_structure}_{lys_experiment}.nc"
             )
             if not os.path.exists(output_tm_file):
