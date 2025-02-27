@@ -300,7 +300,35 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             )
 
 
-        @roger_routine
+        @roger_routine(
+            dist_safe=False,
+            local_variables=[
+                "S_pwp_rz",
+                "S_pwp_ss",
+                "S_sat_rz",
+                "S_sat_ss",
+                "sas_params_transp",
+                "sas_params_q_rz",
+                "sas_params_q_ss",
+                "doy",
+                "year",
+                "z_root",
+                "lu_id",
+                "alpha_transp",
+                "alpha_q",
+                "km_denit_rz",
+                "km_denit_ss",
+                "dmax_denit_rz",
+                "dmax_denit_ss",
+                "km_nit_rz",
+                "dmax_nit_rz",
+                "kmin_rz",
+                "DOY",
+                "YEAR",
+                "Z_ROOT",
+                "LU_ID"
+            ],
+        )
         def set_parameters(self, state):
             vs = state.variables
             settings = state.settings
@@ -340,11 +368,11 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
                     vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], self._read_var_from_nc(f"kmin_{crop}", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
 
                     # sas parameters
-                    if transport_model_structure == 'advection-dispersion-power':
+                    if settings.tm_structure == 'advection-dispersion-power':
                         vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], self._read_var_from_nc(f"k_transp_{crop}", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
                         vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], self._read_var_from_nc(f"k_q_{crop}", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
                         vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], self._read_var_from_nc(f"k_q_{crop}", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
-                    elif transport_model_structure == 'time-variant_advection-dispersion-power':
+                    elif settings.tm_structure == 'time-variant_advection-dispersion-power':
                         vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], self._read_var_from_nc(f"c1_transp_{crop}", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
                         vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], self._read_var_from_nc(f"c2_transp_{crop}", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
                         vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], self._read_var_from_nc(f"c1_q_{crop}", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))

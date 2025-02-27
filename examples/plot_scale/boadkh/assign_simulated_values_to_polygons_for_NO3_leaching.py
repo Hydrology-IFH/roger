@@ -386,7 +386,7 @@ def main(tmp_dir):
             df_values['MID'] = _dict_locations[location]
             df_values['SID'] = None
             df_values['FFID'] = None
-            df_values['FFID'] = _dict_ffid1[crop_rotation_scenario]
+            df_values['FFID'] = _dict_ffid[crop_rotation_scenario]
             df_values['CID'] = None
             df_values['CID'] = 400
             for var_sim in vars_sim:
@@ -474,9 +474,9 @@ def main(tmp_dir):
                 df_values['MID'] = _dict_locations[location]
                 df_values['SID'] = None
                 df_values['FFID'] = None
-                df_values['FFID'] = _dict_ffid1[crop_rotation_scenario]
+                df_values['FFID'] = _dict_ffid[crop_rotation_scenario]
                 df_values['CID'] = None
-                df_values['CID'] = int(f'{_dict_crop_id1[crop_id]}')
+                df_values['CID'] = int(f'{_dict_crop_id[crop_id]}')
 
                 ds = dict_fluxes_states[location][crop_rotation_scenario]
                 lu_id = ds["lu_id"].isel(x=0, y=0).values[1:]
