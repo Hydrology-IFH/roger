@@ -331,7 +331,8 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
                 "YEAR",
                 "Z_ROOT",
                 "LU_ID",
-                "itt"
+                "itt",
+                "tau"
             ],
         )
         def set_parameters(self, state):
