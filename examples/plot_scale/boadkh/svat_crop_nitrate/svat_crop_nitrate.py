@@ -935,7 +935,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
 
         # summarize total nitrogen fertilizer
         vs.Nfert = update(vs.Nfert, at[2:-2, 2:-2], 0)
-        vs.Nfert = update(vs.Nfert, at[2:-2, 2:-2], vs.Nfert_org[2:-2, 2:-2] + vs.Nfert_min[2:-2, 2:-2] + vs.ndep_s[2:-2, 2:-2])
+        vs.Nfert = update(vs.Nfert, at[2:-2, 2:-2], vs.Nfert_org[2:-2, 2:-2] + vs.Nfert_min[2:-2, 2:-2] + (vs.ndep_s[2:-2, 2:-2] * 2))
 
         return KernelOutput(
             ndep_s=vs.ndep_s,
