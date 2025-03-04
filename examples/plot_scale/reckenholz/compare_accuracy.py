@@ -153,7 +153,7 @@ def main(tmp_dir):
         axs[i].legend_.remove()
         axs[i].set_ylim(0.0, 0.9)
     fig.tight_layout()
-    file = base_path_figs / f"stripplot_KGE_nitrate_leaching_1.png"
+    file = base_path_figs / f"stripplot_KGE_nitrate_leaching_load_1.png"
     fig.savefig(file, dpi=300)
 
     lys_experiments = ["lys2", "lys3", "lys8"]
@@ -188,10 +188,114 @@ def main(tmp_dir):
         axs[i].legend_.remove()
         axs[i].set_ylim(0.0, 0.9)
     fig.tight_layout()
-    file = base_path_figs / f"stripplot_KGE_nitrate_leaching_2.png"
+    file = base_path_figs / f"stripplot_KGE_nitrate_leaching_load_2.png"
+    fig.savefig(file, dpi=300)
+
+    lys_experiments = ["lys2", "lys3", "lys8"]
+    ll_df = []
+    for lys_experiment in lys_experiments:
+        df_params_metrics = pd.read_csv(base_path / "output" / "svat_nitrate_monte_carlo" / f"params_metrics_{lys_experiment}_complete-mixing.txt", sep="\t")
+        df_params_metrics = df_params_metrics.sort_values(by=["KGE_NO3_perc_bs_2011-2015"], ascending=False)
+        df_params_metrics_100 = df_params_metrics.iloc[:100, :]
+        df_metrics = df_params_metrics_100.loc[:, "KGE_NO3_perc_mass_bs_2011-2015"].to_frame()
+        df_metrics.columns = ["KGE_NO3"]
+        df_metrics["lys"] = _lys[lys_experiment]
+        df_metrics["model"] = "non-explicit"
+        ll_df.append(df_metrics)
+        df_params_metrics = pd.read_csv(base_path / "output" / "svat_crop_nitrate_monte_carlo" / f"params_metrics_{lys_experiment}_advection-dispersion-power.txt", sep="\t")
+        df_params_metrics = df_params_metrics.sort_values(by=["KGE_NO3_perc_bs_2011-2015"], ascending=False)
+        df_params_metrics_100 = df_params_metrics.iloc[:100, :]
+        df_metrics = df_params_metrics_100.loc[:, "KGE_NO3_perc_mass_bs_2011-2015"].to_frame()
+        df_metrics.columns = ["KGE_NO3"]
+        df_metrics["lys"] = _lys[lys_experiment]
+        df_metrics["model"] = "explicit"
+        ll_df.append(df_metrics)
+    df = pd.concat(ll_df)
+    df_long = pd.melt(df, value_vars=["KGE_NO3"], id_vars=["lys", "model"])
+    colors = ["#bdbdbd", "#31a354"]
+    fig, axs = plt.subplots(3, 1, figsize=(2, 4))
+    for i, lys_experiment in enumerate(lys_experiments):
+        data = df_long.loc[df_long["lys"] == _lys[lys_experiment], :]
+        sns.stripplot(data=data, x="lys", y="value", hue="model", ax=axs[i], palette=colors, size=3)
+        axs[i].set_xlabel("")
+        axs[i].set_xticklabels([])
+        axs[i].set_ylabel("KGE [-]")
+        axs[i].legend_.remove()
+        axs[i].set_ylim(0.0, 0.9)
+    fig.tight_layout()
+    file = base_path_figs / f"stripplot_KGE_nitrate_leaching_load_sorted_by_KGE_conc_2.png"
     fig.savefig(file, dpi=300)
 
 
+    lys_experiments = ["lys2", "lys3", "lys8"]
+    ll_df = []
+    for lys_experiment in lys_experiments:
+        df_params_metrics = pd.read_csv(base_path / "output" / "svat_nitrate_monte_carlo" / f"params_metrics_{lys_experiment}_complete-mixing.txt", sep="\t")
+        df_params_metrics = df_params_metrics.sort_values(by=["KGE_NO3_perc_bs_2011-2015"], ascending=False)
+        df_params_metrics_100 = df_params_metrics.iloc[:100, :]
+        df_metrics = df_params_metrics_100.loc[:, "KGE_NO3_perc_bs_2011-2015"].to_frame()
+        df_metrics.columns = ["KGE_NO3"]
+        df_metrics["lys"] = _lys[lys_experiment]
+        df_metrics["model"] = "non-explicit"
+        ll_df.append(df_metrics)
+        df_params_metrics = pd.read_csv(base_path / "output" / "svat_crop_nitrate_monte_carlo" / f"params_metrics_{lys_experiment}_advection-dispersion-power.txt", sep="\t")
+        df_params_metrics = df_params_metrics.sort_values(by=["KGE_NO3_perc_bs_2011-2015"], ascending=False)
+        df_params_metrics_100 = df_params_metrics.iloc[:100, :]
+        df_metrics = df_params_metrics_100.loc[:, "KGE_NO3_perc_bs_2011-2015"].to_frame()
+        df_metrics.columns = ["KGE_NO3"]
+        df_metrics["lys"] = _lys[lys_experiment]
+        df_metrics["model"] = "explicit"
+        ll_df.append(df_metrics)
+    df = pd.concat(ll_df)
+    df_long = pd.melt(df, value_vars=["KGE_NO3"], id_vars=["lys", "model"])
+    colors = ["#bdbdbd", "#31a354"]
+    fig, axs = plt.subplots(3, 1, figsize=(2, 4))
+    for i, lys_experiment in enumerate(lys_experiments):
+        data = df_long.loc[df_long["lys"] == _lys[lys_experiment], :]
+        sns.stripplot(data=data, x="lys", y="value", hue="model", ax=axs[i], palette=colors, size=3)
+        axs[i].set_xlabel("")
+        axs[i].set_xticklabels([])
+        axs[i].set_ylabel("KGE [-]")
+        axs[i].legend_.remove()
+        axs[i].set_ylim(0.0, 0.9)
+    fig.tight_layout()
+    file = base_path_figs / f"stripplot_KGE_nitrate_leaching_conc_2.png"
+    fig.savefig(file, dpi=300)
+
+    lys_experiments = ["lys2", "lys3", "lys8"]
+    ll_df = []
+    for lys_experiment in lys_experiments:
+        df_params_metrics = pd.read_csv(base_path / "output" / "svat_nitrate_monte_carlo" / f"params_metrics_{lys_experiment}_complete-mixing.txt", sep="\t")
+        df_params_metrics = df_params_metrics.sort_values(by=["KGE_NO3_perc_mass_bs_2011-2015"], ascending=False)
+        df_params_metrics_100 = df_params_metrics.iloc[:100, :]
+        df_metrics = df_params_metrics_100.loc[:, "KGE_NO3_perc_bs_2011-2015"].to_frame()
+        df_metrics.columns = ["KGE_NO3"]
+        df_metrics["lys"] = _lys[lys_experiment]
+        df_metrics["model"] = "non-explicit"
+        ll_df.append(df_metrics)
+        df_params_metrics = pd.read_csv(base_path / "output" / "svat_crop_nitrate_monte_carlo" / f"params_metrics_{lys_experiment}_advection-dispersion-power.txt", sep="\t")
+        df_params_metrics = df_params_metrics.sort_values(by=["KGE_NO3_perc_mass_bs_2011-2015"], ascending=False)
+        df_params_metrics_100 = df_params_metrics.iloc[:100, :]
+        df_metrics = df_params_metrics_100.loc[:, "KGE_NO3_perc_bs_2011-2015"].to_frame()
+        df_metrics.columns = ["KGE_NO3"]
+        df_metrics["lys"] = _lys[lys_experiment]
+        df_metrics["model"] = "explicit"
+        ll_df.append(df_metrics)
+    df = pd.concat(ll_df)
+    df_long = pd.melt(df, value_vars=["KGE_NO3"], id_vars=["lys", "model"])
+    colors = ["#bdbdbd", "#31a354"]
+    fig, axs = plt.subplots(3, 1, figsize=(2, 4))
+    for i, lys_experiment in enumerate(lys_experiments):
+        data = df_long.loc[df_long["lys"] == _lys[lys_experiment], :]
+        sns.stripplot(data=data, x="lys", y="value", hue="model", ax=axs[i], palette=colors, size=3)
+        axs[i].set_xlabel("")
+        axs[i].set_xticklabels([])
+        axs[i].set_ylabel("KGE [-]")
+        axs[i].legend_.remove()
+        axs[i].set_ylim(0.0, 0.9)
+    fig.tight_layout()
+    file = base_path_figs / f"stripplot_KGE_nitrate_leaching_conc_sorted_by_KGE_load_2.png"
+    fig.savefig(file, dpi=300)
     return
 
 

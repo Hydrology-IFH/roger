@@ -404,6 +404,70 @@ def main(tmp_dir):
     for i, lys_experiment in enumerate(lys_experiments):
         # load parameters and metrics
         df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_complete-mixing.txt", sep="\t")
+        df_params_metrics["E_multi"] = df_params_metrics["KGE_NO3_perc_bs_2011-2015"]
+        df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
+        df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
+        idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
+        # load simulation
+        sim_hm_file = base_path_output / f"SVATNITRATE_complete-mixing_{lys_experiment}.nc"
+        ds_sim = xr.open_dataset(sim_hm_file, engine="h5netcdf")
+        # assign date
+        days_sim_hm = ds_sim["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+        date_sim_hm = num2date(
+            days_sim_hm,
+            units=f"days since {ds_sim['Time'].attrs['time_origin']}",
+            calendar="standard",
+            only_use_cftime_datetimes=False,
+        )
+        ds_sim = ds_sim.assign_coords(Time=("Time", date_sim_hm))
+
+        # load observations (measured data)
+        path_obs = Path(__file__).parent.parent / "observations" / "reckenholz_lysimeter.nc"
+        ds_obs = xr.open_dataset(path_obs, engine="h5netcdf", group=lys_experiment)
+        # assign date
+        days_obs = ds_obs["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+        date_obs = num2date(
+            days_obs,
+            units=f"days since {ds_obs['Time'].attrs['time_origin']}",
+            calendar="standard",
+            only_use_cftime_datetimes=False,
+        )
+        ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
+        obs_vals = ds_obs["NO3_PERC"].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
+        df_obs.loc[:, "obs"] = obs_vals
+        sim_vals = ds_sim["C_q_ss_bs"].isel(y=0).values[idx_best100, :].T
+        # join observations on simulations
+        df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
+        df_eval = df_eval.loc["2011-01-01":"2015-12-31", :]
+        df_eval = df_eval.dropna()
+        if lys_experiment == "lys2":
+            col = "#dd1c77"
+        elif lys_experiment == "lys3":
+            col = "#c994c7"
+        elif lys_experiment == "lys8":
+            col = "#e7e1ef"
+        # plot observed and simulated time series
+        for j in range(100):
+            sim_vals = df_eval.loc[:, f"sim{j}"].values.astype(onp.float64)
+            axs[i].plot(df_eval.index, sim_vals, color=col, zorder=1, marker=".")
+        axs[i].plot(df_eval.index, df_eval["obs"].cumsum(), color="blue", marker=".")
+        axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
+        axs[i].set_ylim(0,)
+        axs[i].set_ylabel('[mg/l]')
+        axs[i].set_xlabel('')
+    axs[-1].set_xlabel('Time [year-month]')
+    fig.tight_layout()
+    file_str = "comparison_nitrate_leaching_bulk_samples_cumulated_trace.png"
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=300)
+    plt.close("all")
+
+    lys_experiments = ["lys2", "lys3", "lys8"]
+    fig, axs = plt.subplots(3, 1, sharey=True, sharex=True, figsize=(6, 4))
+    for i, lys_experiment in enumerate(lys_experiments):
+        # load parameters and metrics
+        df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_complete-mixing.txt", sep="\t")
         df_params_metrics["E_multi"] = df_params_metrics["KGE_NO3_perc_mass_bs_2011-2015"]
         df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
@@ -458,7 +522,7 @@ def main(tmp_dir):
         axs[i].set_xlabel('')
     axs[-1].set_xlabel('Time [year-month]')
     fig.tight_layout()
-    file_str = "comparison_nitrate_leaching_conc_bulk_samples_trace.png"
+    file_str = "comparison_nitrate_leaching_conc_bulk_samples_trace_.png"
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=300)
     plt.close("all")
@@ -563,6 +627,138 @@ def main(tmp_dir):
             only_use_cftime_datetimes=False,
         )
         ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
+        obs_vals = ds_obs["NO3_PERC"].isel(x=0, y=0).values * 4.43
+        df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
+        df_obs.loc[:, "obs"] = obs_vals
+        sim_vals = ds_sim["C_q_ss_bs"].isel(y=0).values[idx_best100, :].T * 4.43
+        # join observations on simulations
+        df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
+        df_eval = df_eval.loc["2011-01-01":"2015-12-31", :]
+        df_eval = df_eval.dropna()
+        if lys_experiment == "lys2":
+            col = "#dd1c77"
+        elif lys_experiment == "lys3":
+            col = "#c994c7"
+        elif lys_experiment == "lys8":
+            col = "#e7e1ef"
+        # plot observed and simulated time series
+        sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+        sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+        sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+        axs[i].fill_between(df_eval.index, sim_vals_min, sim_vals_max, color=col, alpha=0.5, zorder=0)
+        axs[i].plot(df_eval.index, sim_vals_median, color=col, zorder=1, marker=".", lw=2)
+        axs[i].plot(df_eval.index, df_eval["obs"], color="blue", marker=".", lw=2)
+        axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
+        axs[i].set_ylim(0, 100)
+        axs[i].set_ylabel('[mg/l]')
+        axs[i].set_xlabel('')
+    axs[-1].set_xlabel('Time [year-month]')
+    fig.tight_layout()
+    file_str = "comparison_nitrate_leaching_conc_bulk_samples_.png"
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=300)
+    plt.close("all")
+
+    lys_experiments = ["lys2", "lys3", "lys8"]
+    fig, axs = plt.subplots(3, 1, sharey=True, sharex=True, figsize=(6, 4))
+    for i, lys_experiment in enumerate(lys_experiments):
+        # load parameters and metrics
+        df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_complete-mixing.txt", sep="\t")
+        df_params_metrics["E_multi"] = df_params_metrics["KGE_NO3_perc_bs_2011-2015"]
+        df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
+        df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
+        idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
+        # load simulation
+        sim_hm_file = base_path_output / f"SVATNITRATE_complete-mixing_{lys_experiment}.nc"
+        ds_sim = xr.open_dataset(sim_hm_file, engine="h5netcdf")
+        # assign date
+        days_sim_hm = ds_sim["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+        date_sim_hm = num2date(
+            days_sim_hm,
+            units=f"days since {ds_sim['Time'].attrs['time_origin']}",
+            calendar="standard",
+            only_use_cftime_datetimes=False,
+        )
+        ds_sim = ds_sim.assign_coords(Time=("Time", date_sim_hm))
+
+        # load observations (measured data)
+        path_obs = Path(__file__).parent.parent / "observations" / "reckenholz_lysimeter.nc"
+        ds_obs = xr.open_dataset(path_obs, engine="h5netcdf", group=lys_experiment)
+        # assign date
+        days_obs = ds_obs["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+        date_obs = num2date(
+            days_obs,
+            units=f"days since {ds_obs['Time'].attrs['time_origin']}",
+            calendar="standard",
+            only_use_cftime_datetimes=False,
+        )
+        ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
+        obs_vals = ds_obs["NO3_PERC"].isel(x=0, y=0).values * 4.43
+        df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
+        df_obs.loc[:, "obs"] = obs_vals
+        sim_vals = ds_sim["C_q_ss_bs"].isel(y=0).values[idx_best100, :].T * 4.43
+        # join observations on simulations
+        df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
+        df_eval = df_eval.loc["2011-01-01":"2015-12-31", :]
+        df_eval = df_eval.dropna()
+        if lys_experiment == "lys2":
+            col = "#dd1c77"
+        elif lys_experiment == "lys3":
+            col = "#c994c7"
+        elif lys_experiment == "lys8":
+            col = "#e7e1ef"
+        # plot observed and simulated time series
+        sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+        sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+        sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+        axs[i].fill_between(df_eval.index, sim_vals_min, sim_vals_max, color=col, alpha=0.5, zorder=0)
+        axs[i].plot(df_eval.index, sim_vals_median, color=col, zorder=1, marker=".", lw=2)
+        axs[i].plot(df_eval.index, df_eval["obs"], color="blue", marker=".", lw=2)
+        axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
+        axs[i].set_ylim(0, 100)
+        axs[i].set_ylabel('[mg/l]')
+        axs[i].set_xlabel('')
+    axs[-1].set_xlabel('Time [year-month]')
+    fig.tight_layout()
+    file_str = "comparison_nitrate_leaching_conc_bulk_samples.png"
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=300)
+    plt.close("all")
+
+    lys_experiments = ["lys2", "lys3", "lys8"]
+    fig, axs = plt.subplots(3, 1, sharey=True, sharex=True, figsize=(6, 4))
+    for i, lys_experiment in enumerate(lys_experiments):
+        # load parameters and metrics
+        df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_complete-mixing.txt", sep="\t")
+        df_params_metrics["E_multi"] = df_params_metrics["KGE_NO3_perc_mass_bs_2011-2015"]
+        df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
+        df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
+        idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
+        # load simulation
+        sim_hm_file = base_path_output / f"SVATNITRATE_complete-mixing_{lys_experiment}.nc"
+        ds_sim = xr.open_dataset(sim_hm_file, engine="h5netcdf")
+        # assign date
+        days_sim_hm = ds_sim["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+        date_sim_hm = num2date(
+            days_sim_hm,
+            units=f"days since {ds_sim['Time'].attrs['time_origin']}",
+            calendar="standard",
+            only_use_cftime_datetimes=False,
+        )
+        ds_sim = ds_sim.assign_coords(Time=("Time", date_sim_hm))
+
+        # load observations (measured data)
+        path_obs = Path(__file__).parent.parent / "observations" / "reckenholz_lysimeter.nc"
+        ds_obs = xr.open_dataset(path_obs, engine="h5netcdf", group=lys_experiment)
+        # assign date
+        days_obs = ds_obs["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+        date_obs = num2date(
+            days_obs,
+            units=f"days since {ds_obs['Time'].attrs['time_origin']}",
+            calendar="standard",
+            only_use_cftime_datetimes=False,
+        )
+        ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
         obs_vals = ds_obs["NO3_PERC_MASS"].isel(x=0, y=0).values
         df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
         df_obs.loc[:, "obs"] = obs_vals
@@ -591,6 +787,72 @@ def main(tmp_dir):
     axs[-1].set_xlabel('Time [year-month]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_load_bulk_samples_cumulated_2015.png"
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=300)
+    plt.close("all")
+
+    lys_experiments = ["lys2", "lys3", "lys8"]
+    fig, axs = plt.subplots(3, 1, sharey=True, sharex=True, figsize=(6, 4))
+    for i, lys_experiment in enumerate(lys_experiments):
+        # load parameters and metrics
+        df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_complete-mixing.txt", sep="\t")
+        df_params_metrics["E_multi"] = df_params_metrics["KGE_NO3_perc_bs_2011-2015"]
+        df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
+        df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
+        idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
+        # load simulation
+        sim_hm_file = base_path_output / f"SVATNITRATE_complete-mixing_{lys_experiment}.nc"
+        ds_sim = xr.open_dataset(sim_hm_file, engine="h5netcdf")
+        # assign date
+        days_sim_hm = ds_sim["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+        date_sim_hm = num2date(
+            days_sim_hm,
+            units=f"days since {ds_sim['Time'].attrs['time_origin']}",
+            calendar="standard",
+            only_use_cftime_datetimes=False,
+        )
+        ds_sim = ds_sim.assign_coords(Time=("Time", date_sim_hm))
+
+        # load observations (measured data)
+        path_obs = Path(__file__).parent.parent / "observations" / "reckenholz_lysimeter.nc"
+        ds_obs = xr.open_dataset(path_obs, engine="h5netcdf", group=lys_experiment)
+        # assign date
+        days_obs = ds_obs["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+        date_obs = num2date(
+            days_obs,
+            units=f"days since {ds_obs['Time'].attrs['time_origin']}",
+            calendar="standard",
+            only_use_cftime_datetimes=False,
+        )
+        ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
+        obs_vals = ds_obs["NO3_PERC"].isel(x=0, y=0).values * 4.43
+        df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
+        df_obs.loc[:, "obs"] = obs_vals
+        sim_vals = ds_sim["C_q_ss_bs"].isel(y=0).values[idx_best100, :].T * 4.43
+        # join observations on simulations
+        df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
+        df_eval = df_eval.loc["2015-01-01":"2015-12-31", :]
+        df_eval = df_eval.dropna()
+        if lys_experiment == "lys2":
+            col = "#dd1c77"
+        elif lys_experiment == "lys3":
+            col = "#c994c7"
+        elif lys_experiment == "lys8":
+            col = "#e7e1ef"
+        # plot observed and simulated time series
+        sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+        sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+        sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+        axs[i].fill_between(df_eval.index, sim_vals_min, sim_vals_max, color=col, alpha=0.5, zorder=0)
+        axs[i].plot(df_eval.index, sim_vals_median, color=col, zorder=1, marker=".", lw=2)
+        axs[i].plot(df_eval.index, df_eval["obs"], color="blue", marker=".", lw=2)
+        axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
+        axs[i].set_ylim(0, 100)
+        axs[i].set_ylabel('[mg/l]')
+        axs[i].set_xlabel('')
+    axs[-1].set_xlabel('Time [year-month]')
+    fig.tight_layout()
+    file_str = "comparison_nitrate_leaching_conc_bulk_samples_2015.png"
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=300)
     plt.close("all")

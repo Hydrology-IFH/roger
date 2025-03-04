@@ -1,7 +1,7 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=25
+#PBS -l nodes=2:ppn=20
 #PBS -l walltime=48:00:00
-#PBS -l pmem=5000mb
+#PBS -l pmem=4000mb
 #PBS -N svat_crop_nitrate_cm_mc-cs_lys2
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de
@@ -28,7 +28,7 @@ done
 echo "Copying was successful"
  
 # adapt command to your available scheduler / MPI implementation
-mpirun --bind-to core --map-by core -report-bindings python svat_crop_nitrate.py -b jax -d cpu -n 25 1 -lys lys2 -tms complete-mixing -td "${TMPDIR}"
+mpirun --bind-to core --map-by core -report-bindings python svat_crop_nitrate.py -b jax -d cpu -n 40 1 -lys lys2 -tms complete-mixing -td "${TMPDIR}"
 # Write output to temporary SSD of computing node
 echo "Write output to $TMPDIR"
 # Move output from temporary SSD to workspace

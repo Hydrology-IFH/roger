@@ -3,10 +3,9 @@ import subprocess
 import click
 
 
-@click.option("--job-type", type=click.Choice(['single-node', 'multi-node']), default='single-node')
-@click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
+@click.option("--job-type", type=click.Choice(['single-node', 'multi-node']), default='multi-node')
 @click.command("main")
-def main(job_type, sas_solver):
+def main(job_type):
 
 
     base_path = Path(__file__).parent
@@ -75,7 +74,7 @@ def main(job_type, sas_solver):
             elif job_type == 'multi-node':
                 tm1 = transport_models_abrev[tm]
                 tms = tm.replace(" ", "_")
-                script_name = f'{tracer}_{lys}_svat_crop_{tm1}_mc'
+                script_name = f'svat_crop_{tracer}_{tm1}_mc-cs_{lys}'
                 output_path_ws = base_path_ws / 'reckenholz' / 'svat_crop_nitrate_monte_carlo_crop-specific'
                 lines = []
                 lines.append('#!/bin/bash\n')
@@ -99,10 +98,10 @@ def main(job_type, sas_solver):
                 lines.append("# Compares hashes\n")
                 file_nc = "SVATCROP_%s_bootstrap.nc" % (lys)
                 lines.append(
-                    f'checksum_gws=$(shasum -a 256 {output_path_ws.parent.as_posix()}/{file_nc} | cut -f 1 -d " ")\n'
+                    f'checksum_gws=$(shasum -a 256 {output_path_ws.as_posix()}/{file_nc} | cut -f 1 -d " ")\n'
                 )
                 lines.append("checksum_ssd=0a\n")
-                lines.append('cp %s/%s "${TMPDIR}"\n' % (output_path_ws.parent.as_posix(), file_nc))
+                lines.append('cp %s/%s "${TMPDIR}"\n' % (output_path_ws.as_posix(), file_nc))
                 lines.append("# Wait for termination of moving files\n")
                 lines.append('while [ "${checksum_gws}" != "${checksum_ssd}" ]; do\n')
                 lines.append("sleep 60\n")
@@ -112,6 +111,12 @@ def main(job_type, sas_solver):
                 lines.append(" \n")
                 lines.append('# adapt command to your available scheduler / MPI implementation\n')
                 lines.append('mpirun --bind-to core --map-by core -report-bindings python svat_crop_nitrate.py -b jax -d cpu -n 40 1 -lys %s -tms %s -td "${TMPDIR}"\n' % (lys, tms))
+                lines.append('# Write output to temporary SSD of computing node\n')
+                lines.append('echo "Write output to $TMPDIR"\n')
+                lines.append('# Move output from temporary SSD to workspace\n')
+                lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
+                lines.append('mkdir -p %s\n' % (output_path_ws.as_posix()))
+                lines.append('mv "${TMPDIR}"/*.nc %s\n' % (output_path_ws.as_posix()))
                 file_path = base_path / f'{script_name}_moab.sh'
                 file = open(file_path, "w")
                 file.writelines(lines)
