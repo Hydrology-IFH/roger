@@ -46,42 +46,42 @@ def main():
     df.loc[:, "clust-id_shp-id_clust-flag"] = df.loc[:, "CLUST_ID"].astype(str) + "_" + df.loc[:, "SHP_ID"].astype(str) + "_" + df.loc[:, "CLUST_flag"].astype(str)
     ids = df.loc[:, "clust-id_shp-id_clust-flag"].values.astype(str).tolist()
 
-    # # --- jobs to calculate fluxes and states --------------------------------------------------------
-    # for location in locations:
-    #     for crop_rotation_scenario in crop_rotation_scenarios:
-    #         script_name = f"svat_crop_{location}_{crop_rotation_scenario}"
-    #         output_path_ws = base_path_ws / "output" / "svat_crop"
-    #         lines = []
-    #         lines.append("#!/bin/bash\n")
-    #         lines.append("#SBATCH --time=8:00:00\n")
-    #         lines.append("#SBATCH --nodes=1\n")
-    #         lines.append("#SBATCH --ntasks=1\n")
-    #         lines.append("#SBATCH --cpus-per-task=1\n")
-    #         lines.append("#SBATCH --mem=1000\n")
-    #         lines.append("#SBATCH --mail-type=FAIL\n")
-    #         lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
-    #         lines.append(f"#SBATCH --job-name={script_name}\n")
-    #         lines.append(f"#SBATCH --output={script_name}.out\n")
-    #         lines.append(f"#SBATCH --error={script_name}_err.out\n")
-    #         lines.append("#SBATCH --export=ALL\n")
-    #         lines.append(" \n")
-    #         lines.append('eval "$(conda shell.bash hook)"\n')
-    #         lines.append("conda activate roger\n")
-    #         lines.append(f"cd {base_path_bwuc}/svat_crop\n")
-    #         lines.append(" \n")
-    #         lines.append(
-    #             'python svat_crop.py -b numpy -d cpu --location %s --crop-rotation-scenario %s -td "${TMPDIR}"\n'
-    #             % (location, crop_rotation_scenario)
-    #         )
-    #         lines.append("# Move output from local SSD to global workspace\n")
-    #         lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
-    #         lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
-    #         lines.append('mv "${TMPDIR}"/SVATCROP_*.nc %s\n' % (output_path_ws.as_posix()))
-    #         file_path = base_path / "svat_crop" / f"{script_name}_slurm.sh"
-    #         file = open(file_path, "w")
-    #         file.writelines(lines)
-    #         file.close()
-    #         subprocess.Popen(f"chmod +x {file_path}", shell=True)
+    # --- jobs to calculate fluxes and states --------------------------------------------------------
+    for location in locations:
+        for crop_rotation_scenario in crop_rotation_scenarios:
+            script_name = f"svat_crop_{location}_{crop_rotation_scenario}"
+            output_path_ws = base_path_ws / "output" / "svat_crop"
+            lines = []
+            lines.append("#!/bin/bash\n")
+            lines.append("#SBATCH --time=6:00:00\n")
+            lines.append("#SBATCH --nodes=1\n")
+            lines.append("#SBATCH --ntasks=1\n")
+            lines.append("#SBATCH --cpus-per-task=1\n")
+            lines.append("#SBATCH --mem=1000\n")
+            lines.append("#SBATCH --mail-type=FAIL\n")
+            lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
+            lines.append(f"#SBATCH --job-name={script_name}\n")
+            lines.append(f"#SBATCH --output={script_name}.out\n")
+            lines.append(f"#SBATCH --error={script_name}_err.out\n")
+            lines.append("#SBATCH --export=ALL\n")
+            lines.append(" \n")
+            lines.append('eval "$(conda shell.bash hook)"\n')
+            lines.append("conda activate roger\n")
+            lines.append(f"cd {base_path_bwuc}/svat_crop\n")
+            lines.append(" \n")
+            lines.append(
+                'python svat_crop.py -b numpy -d cpu --location %s --crop-rotation-scenario %s -td "${TMPDIR}"\n'
+                % (location, crop_rotation_scenario)
+            )
+            lines.append("# Move output from local SSD to global workspace\n")
+            lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
+            lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
+            lines.append('mv "${TMPDIR}"/SVATCROP_*.nc %s\n' % (output_path_ws.as_posix()))
+            file_path = base_path / "svat_crop" / f"{script_name}_slurm.sh"
+            file = open(file_path, "w")
+            file.writelines(lines)
+            file.close()
+            subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
     # # --- jobs to calculate sensitivities of fluxes and states ---------------------------------------
     # for location in locations:
