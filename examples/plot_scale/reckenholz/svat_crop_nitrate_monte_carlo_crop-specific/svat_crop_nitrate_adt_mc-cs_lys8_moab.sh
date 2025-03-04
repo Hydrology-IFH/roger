@@ -1,7 +1,7 @@
 #!/bin/bash
-#PBS -l nodes=2:ppn=20
-#PBS -l walltime=48:00:00
-#PBS -l pmem=4000mb
+#PBS -l nodes=1:ppn=40
+#PBS -l walltime=72:00:00
+#PBS -l pmem=12000mb
 #PBS -N svat_crop_nitrate_adt_mc-cs_lys8
 #PBS -m bea
 #PBS -M robin.schwemmle@hydrology.uni-freiburg.de

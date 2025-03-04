@@ -885,9 +885,9 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nfert_min[2:-2, 2:-2]))
         vs.Nfert_min = update(vs.Nfert_min, at[2:-2, 2:-2], npx.where(vs.Nfert_min[2:-2, 2:-2] < 0, 0, vs.Nfert_min[2:-2, 2:-2]))
 
-        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert1[2:-2, 2:-2] * settings.dx * settings.dy * 100) - ((vs.kmin_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100) - ((vs.kfix_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
-        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert2[2:-2, 2:-2] * settings.dx * settings.dy * 100) - ((vs.kmin_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100) - ((vs.kfix_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
-        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert3[2:-2, 2:-2] * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
+        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert1[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert1[2:-2, 2:-2] * _c1 * settings.dx * settings.dy * 100) - ((vs.kmin_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100) - ((vs.kfix_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
+        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert2[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert2[2:-2, 2:-2] * _c1 * settings.dx * settings.dy * 100) - ((vs.kmin_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100) - ((vs.kfix_rz[2:-2, 2:-2]/2) * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
+        vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.doy_fert3[2:-2, 2:-2] == vs.DOY[vs.itt]), (vs.N_fert3[2:-2, 2:-2] * _c1 * settings.dx * settings.dy * 100), vs.Nmin_in[2:-2, 2:-2]))
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where(vs.Nmin_in[2:-2, 2:-2] < 0, 0, vs.Nmin_in[2:-2, 2:-2]))
 
         inf = allocate(state.dimensions, ("x", "y"))
@@ -897,7 +897,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         inf_ratio = allocate(state.dimensions, ("x", "y"))
         inf_ratio = update(inf_ratio, at[2:-2, 2:-2], npx.where((inf[2:-2, 2:-2]/settings.cum_inf_for_N_input) < 1, inf[2:-2, 2:-2]/settings.cum_inf_for_N_input, 1))
         # dissolved nitrogen input as nitrate
-        vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.Nmin_in[2:-2, 2:-2] * inf_ratio[2:-2, 2:-2] * _c1, 0))
+        vs.M_in = update(vs.M_in, at[2:-2, 2:-2], npx.where(vs.inf_in_tracer[2:-2, 2:-2] > 0, vs.Nmin_in[2:-2, 2:-2] * inf_ratio[2:-2, 2:-2], 0))
         vs.ndep_s = update(vs.ndep_s, at[2:-2, 2:-2], 0)
         # wet nitrate deposition
         vs.M_in = update_add(vs.M_in, at[2:-2, 2:-2], npx.where(inf[2:-2, 2:-2] > 0, vs.kdep[2:-2, 2:-2] * settings.dx * settings.dy * (100/365) * 0.5, 0))
@@ -907,7 +907,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
         vs.Nmin_rz = update_add(
             vs.Nmin_rz,
             at[2:-2, 2:-2, vs.tau, 0],
-            vs.Nfert_min[2:-2, 2:-2],
+            vs.Nfert_min[2:-2, 2:-2] * _c1,
         )
         # dry ammonium deposition
         vs.Nmin_rz = update_add(
@@ -916,7 +916,7 @@ def main(location, crop_rotation_scenario, fertilization_intensity, tmp_dir):
             vs.kdep[2:-2, 2:-2] * settings.dx * settings.dy * (100/365) * 0.5,
         )
         vs.ndep_s = update_add(vs.ndep_s, at[2:-2, 2:-2], vs.kdep[2:-2, 2:-2] * settings.dx * settings.dy * (100/365) * 0.5)  
-        vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], -vs.Nmin_in[2:-2, 2:-2] * inf_ratio[2:-2, 2:-2] * _c1)
+        vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], -vs.Nmin_in[2:-2, 2:-2] * inf_ratio[2:-2, 2:-2])
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.Nmin_in[2:-2, 2:-2] < 0), 0, vs.Nmin_in[2:-2, 2:-2]))
         vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.inf_in_tracer[2:-2, 2:-2] > settings.cum_inf_for_N_input), 0, vs.inf_in_tracer[2:-2, 2:-2]))
 

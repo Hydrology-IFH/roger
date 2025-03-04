@@ -458,7 +458,7 @@ def main(tmp_dir):
         axs[i].set_xlabel('')
     axs[-1].set_xlabel('Time [year-month]')
     fig.tight_layout()
-    file_str = "comparison_nitrate_leaching_bulk_samples_cumulated_trace.png"
+    file_str = "comparison_nitrate_leaching_conc_bulk_samples_trace.png"
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=300)
     plt.close("all")
