@@ -7,12 +7,10 @@ import pandas as pd
 import click
 from roger.cli.roger_run_base import roger_base_cli
 
-@click.option("--location", type=click.Choice(["freiburg", "lahr", "muellheim", 
-                                               "stockach", "gottmadingen", "weingarten", 
-                                               "eppingen-elsenz", "bruchsal-heidelsheim", "bretten", 
-                                               "ehingen-kirchen", "merklingen", "hayingen", 
-                                               "kupferzell", "oehringen", "vellberg-kleinaltdorf"]), 
-                                               default="lahr")
+@click.option("--irrigation-demand", type=click.Choice(["30-ufc",
+                                                        "45-ufc",
+                                                        "crop-specific",
+                                                        ]), default="bare-grass")
 @click.option("--crop-rotation-scenario", type=click.Choice(["winter-wheat_clover",
                                                              "winter-wheat_silage-corn",
                                                              "summer-wheat_winter-wheat",
@@ -38,9 +36,9 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "yellow-mustard",
                                                              "miscanthus",
                                                              "bare-grass"]), default="bare-grass")
-@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "svat_crop")
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "no_irrigation")
 @roger_base_cli
-def main(location, crop_rotation_scenario, tmp_dir):
+def main(irrigation_demand, crop_rotation_scenario, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
@@ -93,7 +91,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"SVATCROP_{location}_{crop_rotation_scenario}"
+            settings.identifier = f"SVATCROP_{crop_rotation_scenario}"
 
             settings.nx, settings.ny = 80, 1
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
@@ -104,13 +102,20 @@ def main(location, crop_rotation_scenario, tmp_dir):
 
             settings.x_origin = 0.0
             settings.y_origin = 0.0
-            settings.time_origin = "2012-12-31 00:00:00"
+            settings.time_origin = "1999-12-31 00:00:00"
 
             settings.enable_crop_water_stress = True
             settings.enable_crop_phenology = True
             settings.enable_crop_rotation = True
             settings.enable_macropore_lower_boundary_condition = False
             settings.enable_adaptive_time_stepping = True
+
+            if irrigation_demand == "30-ufc":
+                settings.fraction_ufc_of_irrigation = 0.3
+            elif irrigation_demand == "45-ufc":
+                settings.fraction_ufc_of_irrigation = 0.45
+            elif irrigation_demand == "crop-specific":
+                settings.enable_crop_specific_irrigation_demand = True
 
             if settings.enable_crop_rotation:
                 settings.ncrops = 3
@@ -222,48 +227,12 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path, "parameters.nc"))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
-            # root growth rate increases with soil depth
-            vs.root_growth_scale = update(
-                vs.root_growth_scale,
-                at[2:-2, 2:-2],
-                npx.where(vs.z_soil[2:-2, 2:-2] >= 300, 0.3, vs.root_growth_scale[2:-2, 2:-2]),
-            )
-            vs.root_growth_scale = update(
-                vs.root_growth_scale,
-                at[2:-2, 2:-2],
-                npx.where(vs.z_soil[2:-2, 2:-2] >= 600, 0.5, vs.root_growth_scale[2:-2, 2:-2]),
-            )
-            vs.root_growth_scale = update(
-                vs.root_growth_scale,
-                at[2:-2, 2:-2],
-                npx.where(vs.z_soil[2:-2, 2:-2] >= 900, 0.7, vs.root_growth_scale[2:-2, 2:-2]),
-            )
-            vs.root_growth_scale = update(
-                vs.root_growth_scale,
-                at[2:-2, 2:-2],
-                npx.where(vs.z_soil[2:-2, 2:-2] >= 1200, 0.9, vs.root_growth_scale[2:-2, 2:-2]),
-            )
-            # canopy growth rate icnreases with soil depth
-            vs.canopy_growth_scale = update(
-                vs.canopy_growth_scale,
-                at[2:-2, 2:-2],
-                npx.where(vs.z_soil[2:-2, 2:-2] >= 300, 0.7, vs.canopy_growth_scale[2:-2, 2:-2]),
-            )
-            vs.canopy_growth_scale = update(
-                vs.canopy_growth_scale,
-                at[2:-2, 2:-2],
-                npx.where(vs.z_soil[2:-2, 2:-2] >= 600, 0.8, vs.canopy_growth_scale[2:-2, 2:-2]),
-            )
-            vs.canopy_growth_scale = update(
-                vs.canopy_growth_scale,
-                at[2:-2, 2:-2],
-                npx.where(vs.z_soil[2:-2, 2:-2] >= 900, 0.9, vs.canopy_growth_scale[2:-2, 2:-2]),
-            )
-            vs.canopy_growth_scale = update(
-                vs.canopy_growth_scale,
-                at[2:-2, 2:-2],
-                npx.where(vs.z_soil[2:-2, 2:-2] >= 1200, 1, vs.canopy_growth_scale[2:-2, 2:-2]),
-            )
+            if irrigation_demand in ["30-ufc", "45-ufc"]:
+                vs.theta_irr = update(
+                    vs.theta_irr,
+                    at[2:-2, 2:-2],
+                    vs.theta_pwp[2:-2, 2:-2] + (vs.theta_ufc[2:-2, 2:-2] * vs.fraction_ufc_of_irrigation),
+                )
 
         @roger_routine
         def set_parameters(self, state):

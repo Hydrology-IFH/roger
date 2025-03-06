@@ -5698,6 +5698,15 @@ VARIABLES = {
         write_to_restart=False,
         active=lambda settings: not settings.enable_offline_transport,
     ),
+    "theta_irr": Variable(
+        "soil water content threshold when soil water defict starts",
+        CATCH_GRID,
+        "-",
+        "soil water content threshold when soil water defict starts",
+        time_dependent=False,
+        write_to_restart=False,
+        active=lambda settings: not settings.enable_offline_transport,
+    ),
     "c_int": Variable(
         "scale parameter of interception storage",
         CATCH_GRID,

@@ -932,7 +932,6 @@ def calc_root_growth(state):
     Calculates root growth of crops
     """
     vs = state.variables
-    settings = state.settings
 
     arr0 = allocate(state.dimensions, ("x", "y", "crops"))
     mask_summer = npx.isin(vs.crop_type, lut.SUMMER_CROPS)
@@ -1375,7 +1374,6 @@ def update_z_root(state):
     Updates root depth
     """
     vs = state.variables
-    settings = state.settings
 
     mask = vs.lu_id[:, :, npx.newaxis] == vs.crop_type
 
@@ -1742,6 +1740,7 @@ def set_crop_params(state):
     Recalculates parameters of root zone and subsoil after root growth/root loss.
     """
     vs = state.variables
+    settings = state.settings
 
     for i in range(500, 600):
         mask = vs.crop_type == i
@@ -1832,10 +1831,16 @@ def set_crop_params(state):
     vs.theta_water_stress_crop = update(
         vs.theta_water_stress_crop,
         at[2:-2, 2:-2, :],
-        vs.water_stress_coeff_crop[2:-2, 2:-2, :]
-        * (vs.theta_fc[2:-2, 2:-2, npx.newaxis] - vs.theta_pwp[2:-2, 2:-2, npx.newaxis])
+        (vs.water_stress_coeff_crop[2:-2, 2:-2, :] * vs.theta_ufc[2:-2, 2:-2, npx.newaxis])
         + vs.theta_pwp[2:-2, 2:-2, npx.newaxis],
     )
+
+    if settings.enable_crop_specific_irrigation_demand:
+        vs.theta_irr = update(
+            vs.theta_irr,
+            at[2:-2, 2:-2],
+            vs.theta_water_stress_crop[2:-2, 2:-2, 1],
+        )
 
     return KernelOutput(
         doy_start=vs.doy_start,
@@ -1853,6 +1858,7 @@ def set_crop_params(state):
         root_growth_rate=vs.root_growth_rate,
         water_stress_coeff_crop=vs.water_stress_coeff_crop,
         theta_water_stress_crop=vs.theta_water_stress_crop,
+        theta_irr=vs.theta_irr,
     )
 
 
