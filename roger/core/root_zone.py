@@ -16,7 +16,7 @@ def calc_irrigation_demand(state):
     fine_pore_deficit = update(
         fine_pore_deficit,
         at[2:-2, 2:-2],
-        vs.theta_fc[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau],
+        vs.theta_irr[2:-2, 2:-2] - vs.theta_rz[2:-2, 2:-2, vs.tau],
     )
     fine_pore_deficit = update(
         fine_pore_deficit,
