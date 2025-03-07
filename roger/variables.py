@@ -3507,6 +3507,13 @@ VARIABLES = {
         "mm/dt",
         "rainfall",
     ),
+    "irrig": Variable(
+        "irrigation",
+        CATCH_GRID,
+        "mm/dt",
+        "irrigation",
+        active=lambda settings: settings.enable_irrigation,
+    ),
     "rain_top": Variable(
         "rainfall",
         CATCH_GRID,
@@ -5701,6 +5708,15 @@ VARIABLES = {
     "theta_irr": Variable(
         "soil water content threshold when soil water defict starts",
         CATCH_GRID,
+        "-",
+        "soil water content threshold when soil water defict starts",
+        time_dependent=False,
+        write_to_restart=False,
+        active=lambda settings: not settings.enable_offline_transport,
+    ),
+    "theta_irr_crop": Variable(
+        "soil water content threshold when soil water defict starts",
+        CATCH_GRID + CROPS,
         "-",
         "soil water content threshold when soil water defict starts",
         time_dependent=False,

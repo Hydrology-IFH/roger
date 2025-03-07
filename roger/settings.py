@@ -88,6 +88,8 @@ SETTINGS = {
     "enable_crop_phenology": Setting(False, bool, "enable crop phenology"),
     "enable_crop_rotation": Setting(False, bool, "enable crop rotation"),
     "enable_crop_specific_irrigation_demand": Setting(False, bool, "enable crop specific irrigation demand"),
+    "enable_irrigation": Setting(False, bool, "enable crop irrigation"),
+    "enable_net_irrigation": Setting(False, bool, "enable net crop irrigation i.e. interception and evaporation losses are not considered"),
     "enable_crop_partitioning": Setting(False, bool, "enable crop specific solute uptake"),
     "enable_crop_water_stress": Setting(False, bool, "enable crop water stress"),
     "enable_offline_transport": Setting(False, bool, "enable offline transport"),
