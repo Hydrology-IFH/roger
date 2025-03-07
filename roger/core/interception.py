@@ -53,6 +53,15 @@ def calc_rain_int_top(state):
         at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], int_top_free[2:-2, 2:-2], vs.int_rain_top[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
+    if settings.enable_net_irrigation:
+        # interception losses of crops are ignored
+        mask = (vs.lu_id >= 500) & (vs.lu_id <= 598)
+        vs.int_rain_top = update(
+            vs.int_rain_top, 
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 0, vs.int_rain_top[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        )
+
+
     # Update top interception storage after rainfall
     vs.S_int_top = update_add(
         vs.S_int_top,
@@ -103,6 +112,14 @@ def calc_rain_int_ground(state):
         vs.int_rain_ground,
         at[2:-2, 2:-2], npx.where(mask2[2:-2, 2:-2], int_ground_free[2:-2, 2:-2], vs.int_rain_ground[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
+
+    if settings.enable_net_irrigation:
+        # interception losses of crops are ignored
+        mask = (vs.lu_id >= 500) & (vs.lu_id <= 598)
+        vs.int_rain_ground = update(
+            vs.int_rain_ground, 
+            at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 0, vs.int_rain_ground[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        )
 
     # Update top interception storage after rainfall
     vs.S_int_ground = update_add(

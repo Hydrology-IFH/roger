@@ -8,11 +8,11 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 @click.option("--irrigation-scenario", type=click.Choice(["35-ufc",
-                                                        "45-ufc",
-                                                        "50-ufc",
-                                                        "80-ufc",
-                                                        "crop-specific",
-                                                        ]), default="crop-specific")
+                                                          "45-ufc",
+                                                          "50-ufc",
+                                                          "80-ufc",
+                                                          "crop-specific",
+                                                          ]), default="crop-specific")
 @click.option("--crop-rotation-scenario", type=click.Choice(["winter-wheat_clover",
                                                              "winter-wheat_silage-corn",
                                                              "summer-wheat_winter-wheat",
@@ -38,7 +38,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "yellow-mustard",
                                                              "miscanthus",
                                                              "bare-grass"]), default="winter-wheat_silage-corn")
-@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "no_irrigation")
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "irrigation")
 @roger_base_cli
 def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
@@ -105,6 +105,8 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
             settings.y_origin = 0.0
             settings.time_origin = "1999-12-31 00:00:00"
 
+            settings.enable_irrigation = True
+            settings.enable_net_irrigation = True
             settings.enable_crop_water_stress = True
             settings.enable_crop_phenology = True
             settings.enable_crop_rotation = True
@@ -295,6 +297,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
         @roger_routine
         def set_forcing(self, state):
             vs = state.variables
+            settings = state.settings
 
             condt = vs.time % (24 * 60 * 60) == 0
             if condt:
@@ -328,6 +331,14 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                     vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
                 )
                 vs.itt_forc = vs.itt_forc + 6 * 24
+                if vs.itt_forc < (settings.nitt_forc - 3 * 6 * 24):
+                    # irrigate if sum of rainfall for the next 3 days is less than 1 mm
+                    sum_rainfall_next3days = npx.sum(vs.PREC[vs.itt_forc:vs.itt_forc + 3 * 6 * 24])
+                    if sum_rainfall_next3days <= 1:
+                        # irrigate 30 mm for 4 hours from 06:00 to 10:00
+                        vs.prec_day = update(
+                            vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], npx.where(vs.irr_demand[2:-2, 2:-2] > 0, 30 / (6 * 4), 0)[:, :, npx.newaxis]
+                        )
 
             if (vs.year[1] != vs.year[0]) & (vs.itt > 1):
                 vs.itt_cr = vs.itt_cr + 2
@@ -362,7 +373,8 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 "cpr_rz",
                 "re_rg",
                 "re_rl",
-                "q_hof"
+                "q_hof",
+                "irrig"
             ]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1

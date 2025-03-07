@@ -21,7 +21,7 @@ def calc_irrigation_demand(state):
     fine_pore_deficit = update(
         fine_pore_deficit,
         at[2:-2, 2:-2],
-        npx.where(fine_pore_deficit[2:-2, 2:-2] < 0, 0, fine_pore_deficit[2:-2, 2:-2]),
+        npx.where(fine_pore_deficit[2:-2, 2:-2] <= 0, 0, fine_pore_deficit[2:-2, 2:-2]),
     )
 
     vs.irr_demand = update(
