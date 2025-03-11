@@ -8,12 +8,6 @@ import click
 def main():
     base_path = Path(__file__).parent
 
-    irrigation_scenarios = ["35-ufc",
-                            "45-ufc",
-                            "50-ufc",
-                            "80-ufc",
-                            "crop-specific",
-                            ]
     crop_rotation_scenarios = ["winter-wheat_clover",
                                "winter-wheat_silage-corn",
                                "summer-wheat_winter-wheat",
@@ -46,11 +40,10 @@ def main():
     lines.append('eval "$(conda shell.bash hook)"\n')
     lines.append("conda activate roger\n")
     lines.append('python write_parameters_to_netcdf.py')
-    for irrigation_scenario in irrigation_scenarios:
-        for crop_rotation_scenario in crop_rotation_scenarios:
-            lines.append(
-                'python svat_crop.py -b numpy -d cpu --irrigation-scenario %s --crop-rotation-scenario %s\n' % (irrigation_scenario, crop_rotation_scenario)
-            )
+    for crop_rotation_scenario in crop_rotation_scenarios:
+        lines.append(
+            'python svat_crop.py -b numpy -d cpu --crop-rotation-scenario %s\n' % (crop_rotation_scenario)
+        )
     lines.append('python merge_output.py')
     lines.append('python simulations_to_csv.py')
     file = open(file_path, "w")

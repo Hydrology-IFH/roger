@@ -23,6 +23,9 @@ def main():
                             "80-ufc",
                             "crop-specific",
                             ]
+    irrigation_scenarios = ["35-ufc",
+                            "crop-specific",
+                            ]
     crop_rotation_scenarios = ["winter-wheat_clover",
                                "winter-wheat_silage-corn",
                                "summer-wheat_winter-wheat",
@@ -47,6 +50,9 @@ def main():
                                "grain-corn_winter-wheat_winter-barley_yellow-mustard",
                                "miscanthus",
                                "bare-grass"]
+    crop_rotation_scenarios = ["grain-corn_winter-wheat_winter-rape", 
+                               "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
+                               ]
     # merge model output into single file
     for irrigation_scenario in irrigation_scenarios:
         if os.path.exists(str(base_path / "output" / dir_name / irrigation_scenario)):
@@ -102,7 +108,7 @@ def main():
                                             v = f.create_variable(
                                                 var_sim, ("x", "y", "Time"), float, compression="gzip", compression_opts=1
                                             )
-                                            vals = onp.array(var_obj)
+                                            vals = onp.array(var_obj, dtype=float)
                                             v[:, :, :] = vals.swapaxes(0, 2)
                                             v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
                                         elif (
@@ -111,7 +117,7 @@ def main():
                                             v = f.create_variable(
                                                 var_sim, ("x", "y"), float, compression="gzip", compression_opts=1
                                             )
-                                            vals = onp.array(var_obj)
+                                            vals = onp.array(var_obj, dtype=float)
                                             v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
                                             v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
                             # add year and day of year for nitrate transport model

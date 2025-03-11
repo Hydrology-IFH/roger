@@ -152,7 +152,13 @@ def calculate_root_zone(state):
     vs.update(calc_S(state))
     vs.update(calc_dS(state))
     vs.update(calc_theta(state))
-    vs.update(calc_irrigation_demand(state))
+    if vs.month[vs.tau] in [4, 5, 6, 7, 8, 9]:
+        vs.update(calc_irrigation_demand(state))
+    else:
+        vs.irr_demand = update(
+            vs.irr_demand,
+            at[2:-2, 2:-2], 0,
+        )
     vs.update(calc_k(state))
     vs.update(calc_h(state))
 
