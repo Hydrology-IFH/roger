@@ -404,7 +404,6 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 "ta",
                 "irr_demand",
                 "theta_rz",
-                "irrig"
             ]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
