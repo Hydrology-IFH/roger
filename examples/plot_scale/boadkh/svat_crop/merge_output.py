@@ -98,7 +98,7 @@ def main():
                                         v = f.create_variable(
                                             var_sim, ("x", "y", "Time"), float, compression="gzip", compression_opts=1
                                         )
-                                        vals = onp.array(var_obj)
+                                        vals = onp.array(var_obj, dtype=float)
                                         v[:, :, :] = vals.swapaxes(0, 2)
                                         v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
                                     elif (
@@ -107,7 +107,7 @@ def main():
                                         v = f.create_variable(
                                             var_sim, ("x", "y"), float, compression="gzip", compression_opts=1
                                         )
-                                        vals = onp.array(var_obj)
+                                        vals = onp.array(var_obj, dtype=float)
                                         v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
                                         v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
                         # add year and day of year for nitrate transport model
@@ -118,13 +118,13 @@ def main():
                             only_use_cftime_datetimes=False,
                         )
                         dates = pd.to_datetime(dates1)
-                        vals = onp.array(dates.year)
+                        vals = onp.array(dates.year, dtype=float)
                         v = f.create_variable(
                             "year", ("Time",), float, compression="gzip", compression_opts=1
                         )
                         v[:] = onp.array(dates.year)
                         v.attrs.update(long_name="Year", units="")
-                        vals = onp.array(dates.year)
+                        vals = onp.array(dates.year, dtype=float)
                         v = f.create_variable(
                             "doy", ("Time",), float, compression="gzip", compression_opts=1
                         )

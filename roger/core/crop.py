@@ -274,17 +274,17 @@ def calc_t_grow(state):
         vs.gdd[2:-2, 2:-2, :] * vs.k_stress_root_growth[2:-2, 2:-2, :] * mask13[2:-2, 2:-2, :],
     )
 
-    # no crop growth if soil water content is greater than 80% of usable field capacity
+    # no crop growth if soil water content is greater than field capacity
     mask14 = (vs.theta_rz[:, :, vs.tau] > (vs.theta_ufc * 1.0) + vs.theta_pwp)
     vs.t_grow_cc = update(
         vs.t_grow_cc,
         at[2:-2, 2:-2, vs.tau, :],
-        npx.where(mask14[2:-2, 2:-2, npx.newaxis], 0, vs.t_grow_cc[2:-2, 2:-2, vs.tau, :]),
+        npx.where(mask14[2:-2, 2:-2, npx.newaxis], vs.t_grow_cc[2:-2, 2:-2, vs.taum1, :], vs.t_grow_cc[2:-2, 2:-2, vs.tau, :]),
     )
     vs.t_grow_root = update(
         vs.t_grow_root,
         at[2:-2, 2:-2, vs.tau, :],
-        npx.where(mask14[2:-2, 2:-2, npx.newaxis], 0, vs.t_grow_root[2:-2, 2:-2, vs.tau, :]),
+        npx.where(mask14[2:-2, 2:-2, npx.newaxis], vs.t_grow_cc[2:-2, 2:-2, vs.taum1, :], vs.t_grow_root[2:-2, 2:-2, vs.tau, :]),
     )
 
     return KernelOutput(t_grow_cc=vs.t_grow_cc, t_grow_root=vs.t_grow_root)
@@ -1248,22 +1248,6 @@ def update_lu_id(state):
 
     return KernelOutput(lu_id=vs.lu_id)
 
-
-@roger_kernel
-def calc_irrig(state):
-    """
-    Calculates irrigation
-    """
-    vs = state.variables
-
-    vs.irrig = update(
-        vs.irrig, at[2:-2, 2:-2], npx.where(vs.irr_demand[2:-2, 2:-2] > 0, 30, 0)
-    )
-
-    return KernelOutput(irrig=vs.irrig)
-
-
-
 @roger_kernel
 def update_theta_irr(state):
     """
@@ -2051,8 +2035,6 @@ def calculate_crop_phenology(state):
                 vs.update(calc_k_stress_root_growth(state))
             if settings.enable_crop_specific_irrigation_demand:
                 vs.update(update_theta_irr(state))
-            if settings.enable_irrigation:
-                vs.update(calc_irrig(state))
             vs.update(calc_gdd(state))
             vs.update(calc_t_grow(state))
             vs.update(calc_t_half_mid(state))

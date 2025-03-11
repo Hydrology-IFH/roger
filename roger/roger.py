@@ -331,11 +331,11 @@ class RogerSetup(metaclass=abc.ABCMeta):
             | self.state.settings.enable_virtualtracer
         ):
             logger.warning(
-                "IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require an post-evaluation of the accuracy of\n the numerical solution (e.g. calculate\n standard deviation of dS_num_error or dC_num_error).\n"
+                "IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require a post-evaluation of the accuracy of\n the numerical solution (e.g. calculate\n standard deviation of dS_num_error or dC_num_error).\n"
             )
         else:
             logger.warning(
-                "IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require an post-evaluation of the accuracy of\n the numerical solution (e.g. calculate\n standard deviation of dS_num_error).\n"
+                "IMPORTANT: Always check your logger output for warnings\n on diverging solutions. The occurence of warnings may\n require a post-evaluation of the accuracy of\n the numerical solution (e.g. calculate\n standard deviation of dS_num_error).\n"
             )
 
     @roger_routine

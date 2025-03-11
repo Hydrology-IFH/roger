@@ -7,12 +7,6 @@ import pandas as pd
 import click
 from roger.cli.roger_run_base import roger_base_cli
 
-@click.option("--irrigation-scenario", type=click.Choice(["35-ufc",
-                                                        "45-ufc",
-                                                        "50-ufc",
-                                                        "80-ufc",
-                                                        "crop-specific",
-                                                        ]), default="crop-specific")
 @click.option("--crop-rotation-scenario", type=click.Choice(["winter-wheat_clover",
                                                              "winter-wheat_silage-corn",
                                                              "summer-wheat_winter-wheat",
@@ -37,10 +31,10 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "grain-corn_winter-wheat_winter-barley_yellow-mustard",
                                                              "yellow-mustard",
                                                              "miscanthus",
-                                                             "bare-grass"]), default="winter-wheat_silage-corn")
+                                                             "bare-grass"]), default="grain-corn_winter-wheat_winter-rape_yellow-mustard")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "no_irrigation")
 @roger_base_cli
-def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
+def main(crop_rotation_scenario, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
@@ -48,7 +42,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
     from roger.tools.setup import write_forcing, write_crop_rotation
     import roger.lookuptables as lut
 
-    tmp_dir = Path(tmp_dir) / irrigation_scenario
+    tmp_dir = Path(tmp_dir)
 
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
@@ -110,17 +104,6 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
             settings.enable_crop_rotation = True
             settings.enable_macropore_lower_boundary_condition = False
             settings.enable_adaptive_time_stepping = True
-
-            if irrigation_scenario == "35-ufc":
-                settings.fraction_ufc_of_irrigation = 0.35
-            elif irrigation_scenario == "45-ufc":
-                settings.fraction_ufc_of_irrigation = 0.45
-            elif irrigation_scenario == "50-ufc":
-                settings.fraction_ufc_of_irrigation = 0.5
-            elif irrigation_scenario == "80-ufc":
-                settings.fraction_ufc_of_irrigation = 0.8
-            elif irrigation_scenario == "crop-specific":
-                settings.enable_crop_specific_irrigation_demand = True
 
             if settings.enable_crop_rotation:
                 settings.ncrops = 3
@@ -231,13 +214,6 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
             )
             vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path, "parameters.nc"))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
-
-            if irrigation_scenario in ["35-ufc", "45-ufc", "50-ufc", "80-ufc"]:
-                vs.theta_irr = update(
-                    vs.theta_irr,
-                    at[2:-2, 2:-2],
-                    vs.theta_pwp[2:-2, 2:-2] + (vs.theta_ufc[2:-2, 2:-2] * vs.fraction_ufc_of_irrigation),
-                )
 
         @roger_routine
         def set_parameters(self, state):
@@ -385,7 +361,6 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 "ground_cover",
                 "lu_id",
                 "ta",
-                "irr_demand",
                 "theta_rz",
             ]
             diagnostics["collect"].output_frequency = 24 * 60 * 60

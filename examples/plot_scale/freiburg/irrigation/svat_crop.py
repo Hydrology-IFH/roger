@@ -37,7 +37,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "grain-corn_winter-wheat_winter-barley_yellow-mustard",
                                                              "yellow-mustard",
                                                              "miscanthus",
-                                                             "bare-grass"]), default="winter-wheat_silage-corn")
+                                                             "bare-grass"]), default="grain-corn_winter-wheat_winter-rape")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "irrigation")
 @roger_base_cli
 def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
@@ -186,12 +186,12 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 "crop_type",
                 "z_root",
                 "z_root_crop",
-                "root_growth_scale",
-                "canopy_growth_scale",
+                "theta_irr",
             ],
         )
         def set_parameters_setup(self, state):
             vs = state.variables
+            settings = state.settings
 
             vs.crop_type = update(
                 vs.crop_type,
@@ -238,7 +238,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 vs.theta_irr = update(
                     vs.theta_irr,
                     at[2:-2, 2:-2],
-                    vs.theta_pwp[2:-2, 2:-2] + (vs.theta_ufc[2:-2, 2:-2] * vs.fraction_ufc_of_irrigation),
+                    vs.theta_pwp[2:-2, 2:-2] + (vs.theta_ufc[2:-2, 2:-2] * settings.fraction_ufc_of_irrigation),
                 )
 
         @roger_routine
@@ -299,6 +299,8 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
             vs = state.variables
             settings = state.settings
 
+            vs.irrig = update(vs.irrig, at[2:-2, 2:-2], 0)
+
             condt = vs.time % (24 * 60 * 60) == 0
             if condt:
                 vs.itt_day = 0
@@ -334,10 +336,14 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 if vs.itt_forc < (settings.nitt_forc - 3 * 6 * 24):
                     # irrigate if sum of rainfall for the next 3 days is less than 1 mm
                     sum_rainfall_next3days = npx.sum(vs.PREC[vs.itt_forc:vs.itt_forc + 3 * 6 * 24])
-                    if sum_rainfall_next3days <= 1:
+                    if sum_rainfall_next3days <= 1 and vs.month[1] in [4, 5, 6, 7, 8, 9] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
                         # irrigate 30 mm for 4 hours from 06:00 to 10:00
                         vs.prec_day = update(
                             vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], npx.where(vs.irr_demand[2:-2, 2:-2] > 0, 30 / (6 * 4), 0)[:, :, npx.newaxis]
+                        )
+
+                        vs.irrig = update(
+                            vs.irrig, at[2:-2, 2:-2], npx.where(vs.irr_demand[2:-2, 2:-2] > 0, 30, 0)
                         )
 
             if (vs.year[1] != vs.year[0]) & (vs.itt > 1):
@@ -374,7 +380,6 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 "re_rg",
                 "re_rl",
                 "q_hof",
-                "irrig"
             ]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
@@ -399,6 +404,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 "ta",
                 "irr_demand",
                 "theta_rz",
+                "irrig"
             ]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
@@ -406,7 +412,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 diagnostics["collect"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
-            diagnostics["maximum"].output_variables = ["dS_num_error", "dS_rz_num_error", "dS_ss_num_error"]
+            diagnostics["maximum"].output_variables = ["dS_num_error", "dS_rz_num_error", "dS_ss_num_error", "irrig"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1
             if base_path:
