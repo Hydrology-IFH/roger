@@ -56,7 +56,7 @@ def main():
                                "miscanthus",
                                "bare-grass"]
     crop_rotation_scenarios = ["grain-corn_winter-wheat_winter-rape", 
-                            #    "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
+                               "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
                                ]
     soil_types = ["sandy_soil", "silty_soil", "clayey_soil"]
     for irrigation_demand_scenario in irrigation_demand_scenarios:

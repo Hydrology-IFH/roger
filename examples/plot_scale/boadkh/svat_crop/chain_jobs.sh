@@ -1,54 +1,54 @@
 #!/bin/bash
 # use the following to run in background: nohup ./chain_jobs.sh &
-# sbatch --partition single svat_crop_bretten_bare-grass_slurm.sh
-# sbatch --partition single svat_crop_bretten_grain-corn_winter-wheat_clover_slurm.sh
-# sbatch --partition single svat_crop_bretten_grain-corn_winter-wheat_winter-barley_slurm.sh
-# sbatch --partition single svat_crop_bretten_grain-corn_winter-wheat_winter-barley_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bretten_grain-corn_winter-wheat_winter-rape_slurm.sh
-# sbatch --partition single svat_crop_bretten_grain-corn_winter-wheat_winter-rape_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bretten_miscanthus_slurm.sh
-# sbatch --partition single svat_crop_bretten_sugar-beet_winter-wheat_winter-barley_slurm.sh
-# sbatch --partition single svat_crop_bretten_sugar-beet_winter-wheat_winter-barley_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bretten_summer-wheat_clover_winter-wheat_slurm.sh
-# sbatch --partition single svat_crop_bretten_summer-wheat_winter-wheat_silage-corn_slurm.sh
-# sbatch --partition single svat_crop_bretten_summer-wheat_winter-wheat_silage-corn_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bretten_summer-wheat_winter-wheat_slurm.sh
-# sbatch --partition single svat_crop_bretten_summer-wheat_winter-wheat_winter-rape_slurm.sh
-# sbatch --partition single svat_crop_bretten_summer-wheat_winter-wheat_winter-rape_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bretten_summer-wheat_winter-wheat_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bretten_winter-wheat_clover_silage-corn_slurm.sh
-# sbatch --partition single svat_crop_bretten_winter-wheat_clover_slurm.sh
-# sbatch --partition single svat_crop_bretten_winter-wheat_silage-corn_slurm.sh
-# sbatch --partition single svat_crop_bretten_winter-wheat_silage-corn_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bretten_winter-wheat_soybean_winter-rape_slurm.sh
-# sbatch --partition single svat_crop_bretten_winter-wheat_sugar-beet_silage-corn_slurm.sh
-# sbatch --partition single svat_crop_bretten_winter-wheat_sugar-beet_silage-corn_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bretten_winter-wheat_winter-rape_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_bare-grass_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_grain-corn_winter-wheat_clover_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_grain-corn_winter-wheat_winter-barley_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_grain-corn_winter-wheat_winter-barley_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_grain-corn_winter-wheat_winter-rape_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_grain-corn_winter-wheat_winter-rape_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_miscanthus_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_sugar-beet_winter-wheat_winter-barley_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_sugar-beet_winter-wheat_winter-barley_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_summer-wheat_clover_winter-wheat_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_summer-wheat_winter-wheat_silage-corn_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_summer-wheat_winter-wheat_silage-corn_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_summer-wheat_winter-wheat_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_summer-wheat_winter-wheat_winter-rape_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_summer-wheat_winter-wheat_winter-rape_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_summer-wheat_winter-wheat_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_clover_silage-corn_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_clover_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_silage-corn_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_silage-corn_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_soybean_winter-rape_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_sugar-beet_silage-corn_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_sugar-beet_silage-corn_yellow-mustard_slurm.sh
-# sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_winter-rape_slurm.sh
-# sbatch --partition single svat_crop_ehingen-kirchen_bare-grass_slurm.sh
+sbatch --partition single svat_crop_bretten_bare-grass_slurm.sh
+sbatch --partition single svat_crop_bretten_grain-corn_winter-wheat_clover_slurm.sh
+sbatch --partition single svat_crop_bretten_grain-corn_winter-wheat_winter-barley_slurm.sh
+sbatch --partition single svat_crop_bretten_grain-corn_winter-wheat_winter-barley_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bretten_grain-corn_winter-wheat_winter-rape_slurm.sh
+sbatch --partition single svat_crop_bretten_grain-corn_winter-wheat_winter-rape_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bretten_miscanthus_slurm.sh
+sbatch --partition single svat_crop_bretten_sugar-beet_winter-wheat_winter-barley_slurm.sh
+sbatch --partition single svat_crop_bretten_sugar-beet_winter-wheat_winter-barley_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bretten_summer-wheat_clover_winter-wheat_slurm.sh
+sbatch --partition single svat_crop_bretten_summer-wheat_winter-wheat_silage-corn_slurm.sh
+sbatch --partition single svat_crop_bretten_summer-wheat_winter-wheat_silage-corn_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bretten_summer-wheat_winter-wheat_slurm.sh
+sbatch --partition single svat_crop_bretten_summer-wheat_winter-wheat_winter-rape_slurm.sh
+sbatch --partition single svat_crop_bretten_summer-wheat_winter-wheat_winter-rape_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bretten_summer-wheat_winter-wheat_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bretten_winter-wheat_clover_silage-corn_slurm.sh
+sbatch --partition single svat_crop_bretten_winter-wheat_clover_slurm.sh
+sbatch --partition single svat_crop_bretten_winter-wheat_silage-corn_slurm.sh
+sbatch --partition single svat_crop_bretten_winter-wheat_silage-corn_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bretten_winter-wheat_soybean_winter-rape_slurm.sh
+sbatch --partition single svat_crop_bretten_winter-wheat_sugar-beet_silage-corn_slurm.sh
+sbatch --partition single svat_crop_bretten_winter-wheat_sugar-beet_silage-corn_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bretten_winter-wheat_winter-rape_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_bare-grass_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_grain-corn_winter-wheat_clover_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_grain-corn_winter-wheat_winter-barley_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_grain-corn_winter-wheat_winter-barley_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_grain-corn_winter-wheat_winter-rape_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_grain-corn_winter-wheat_winter-rape_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_miscanthus_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_sugar-beet_winter-wheat_winter-barley_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_sugar-beet_winter-wheat_winter-barley_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_summer-wheat_clover_winter-wheat_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_summer-wheat_winter-wheat_silage-corn_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_summer-wheat_winter-wheat_silage-corn_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_summer-wheat_winter-wheat_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_summer-wheat_winter-wheat_winter-rape_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_summer-wheat_winter-wheat_winter-rape_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_summer-wheat_winter-wheat_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_clover_silage-corn_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_clover_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_silage-corn_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_silage-corn_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_soybean_winter-rape_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_sugar-beet_silage-corn_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_sugar-beet_silage-corn_yellow-mustard_slurm.sh
+sbatch --partition single svat_crop_bruchsal-heidelsheim_winter-wheat_winter-rape_slurm.sh
+sbatch --partition single svat_crop_ehingen-kirchen_bare-grass_slurm.sh
 sleep 6h
 sbatch --partition single svat_crop_ehingen-kirchen_grain-corn_winter-wheat_clover_slurm.sh
 sbatch --partition single svat_crop_ehingen-kirchen_grain-corn_winter-wheat_winter-barley_slurm.sh

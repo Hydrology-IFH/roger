@@ -215,6 +215,17 @@ def main(crop_rotation_scenario, tmp_dir):
             vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path, "parameters.nc"))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
+            vs.root_growth_scale = update(
+                vs.root_growth_scale,
+                at[2:-2, 2:-2],
+                0.8,
+            )
+            vs.canopy_growth_scale = update(
+                vs.canopy_growth_scale,
+                at[2:-2, 2:-2],
+                1.0,
+            )
+
         @roger_routine
         def set_parameters(self, state):
             vs = state.variables

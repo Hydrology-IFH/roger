@@ -38,8 +38,6 @@ def main():
                                "grain-corn_winter-wheat_winter-barley_yellow-mustard",
                                "miscanthus",
                                "bare-grass"]
-    crop_rotation_scenarios = ["grain-corn_winter-wheat_winter-rape", 
-                               "grain-corn_winter-wheat_winter-rape_yellow-mustard"]
 
     # --- jobs to calculate fluxes and states --------------------------------------------------------
     file_path = base_path / "run_roger.sh"

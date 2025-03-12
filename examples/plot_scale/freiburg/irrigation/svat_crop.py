@@ -187,6 +187,8 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 "z_root",
                 "z_root_crop",
                 "theta_irr",
+                "root_growth_scale",
+                "canopy_growth_scale",
             ],
         )
         def set_parameters_setup(self, state):
@@ -233,6 +235,17 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
             )
             vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path, "parameters.nc"))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
+
+            vs.root_growth_scale = update(
+                vs.root_growth_scale,
+                at[2:-2, 2:-2],
+                0.8,
+            )
+            vs.canopy_growth_scale = update(
+                vs.canopy_growth_scale,
+                at[2:-2, 2:-2],
+                1.0,
+            )
 
             if irrigation_scenario in ["35-ufc", "45-ufc", "50-ufc", "80-ufc"]:
                 vs.theta_irr = update(
@@ -341,10 +354,11 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                         vs.prec_day = update(
                             vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], npx.where(vs.irr_demand[2:-2, 2:-2] > 0, 30 / (6 * 4), 0)[:, :, npx.newaxis]
                         )
-
+                        mask_crops = vs.lu_id > 500 & vs.lu_id < 599
                         vs.irrig = update(
-                            vs.irrig, at[2:-2, 2:-2], npx.where(vs.irr_demand[2:-2, 2:-2] > 0, 30, 0)
+                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops, 30, 0)
                         )
+
 
             if (vs.year[1] != vs.year[0]) & (vs.itt > 1):
                 vs.itt_cr = vs.itt_cr + 2

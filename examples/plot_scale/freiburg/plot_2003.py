@@ -105,7 +105,7 @@ def main():
             fig, axs = plt.subplots(1, 1, figsize=(6, 2.5))
             soil_type = "silty_soil"
             data = dict_data["no_irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc["2003-03-01":"2003-07-30" , :]
-            axs.plot(data.index, data["canopy_cover"] * 0.75, color="red")
+            axs.plot(data.index, data["canopy_cover"], color="red")
             data = dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc["2003-04-01":"2003-07-30" , :]
             axs.plot(data.index, data["canopy_cover"], color="blue")
             axs.set_ylim(0, )
@@ -121,7 +121,7 @@ def main():
             fig, axs = plt.subplots(1, 1, figsize=(6, 2.5))
             soil_type = "silty_soil"
             data = dict_data["no_irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc["2003-03-01":"2003-07-30" , :]
-            axs.plot(data.index, (data["z_root"]/1000) * 0.75, color="red")
+            axs.plot(data.index, (data["z_root"]/1000), color="red")
             data = dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc["2003-04-01":"2003-07-30" , :]
             axs.plot(data.index, data["z_root"]/1000, color="blue")
             axs.set_ylim(0, )

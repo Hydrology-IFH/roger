@@ -5797,12 +5797,19 @@ VARIABLES = {
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "gdd": Variable(
-        "cumulated growing degree days",
+        "growing degree days at current timestep",
         CATCH_GRID + CROPS,
         "GDD",
-        "growing degree days",
+        "growing degree days at current timestep",
         write_to_restart=True,
         time_dependent=True,
+        active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
+    ),
+    "gdd_start": Variable(
+        "threshold of cumulated growing degree days",
+        CATCH_GRID + CROPS,
+        "GDD",
+        "threshold of cumulated growing degree days",
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "gdd_sum": Variable(

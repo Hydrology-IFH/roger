@@ -17,7 +17,8 @@ def main(tmp_dir):
     if tmp_dir:
         base_path = Path(tmp_dir)
     else:
-        base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
+        # base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
+        base_path = Path(__file__).parent.parent
 
     # directory of results
     base_path_output = base_path / "output"
