@@ -18,16 +18,13 @@ def main(tmp_dir):
     if tmp_dir:
         base_path = Path(tmp_dir)
     else:
-        base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
+        # base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
+        base_path = Path(__file__).parent.parent
 
     # directory of results
     base_path_output = base_path / "output"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
-    # directory of figures
-    base_path_figs = Path(__file__).parent.parent / "figures"
-    if not os.path.exists(base_path_figs):
-        os.mkdir(base_path_figs)
 
     lys_experiments = ["lys2", "lys3", "lys8"]
     for lys_experiment in lys_experiments:

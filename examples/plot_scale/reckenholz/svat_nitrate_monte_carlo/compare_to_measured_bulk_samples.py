@@ -154,7 +154,7 @@ def main(tmp_dir):
     #             axs[i].xaxis.set_major_formatter(mpl.dates.DateFormatter('%d-%m'))
     #         axs[1].set_ylabel(labs._Y_LABS_DAILY[var_sim])
     #         axs[-2].set_ylabel(labs._Y_LABS_DAILY[var_sim])
-    #         axs[-1].set_xlabel('Time [year-month]')
+    #         axs[-1].set_xlabel('[Jahr-Monat]')
     #         fig.tight_layout()
     #         file_str = "%s_%s_%s_%s.pdf" % (var_sim, lys_experiment, years[0], years[-1])
     #         path_fig = base_path_figs / file_str
@@ -198,7 +198,7 @@ def main(tmp_dir):
     #             axs[i].set_ylim(0)
     #         axs[1].set_ylabel(labs._Y_LABS_CUM[var_sim])
     #         axs[-2].set_ylabel(labs._Y_LABS_CUM[var_sim])
-    #         axs[-1].set_xlabel('Time [year-month]')
+    #         axs[-1].set_xlabel('[Jahr-Monat]')
     #         fig.tight_layout()
     #         file_str = "%s_%s_%s_%s_cumulated.pdf" % (var_sim, lys_experiment, years[0], years[-1])
     #         path_fig = base_path_figs / file_str
@@ -261,7 +261,7 @@ def main(tmp_dir):
         axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
         axs[i].set_ylabel('[mg/14 days]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('Time [year-month]')
+    axs[-1].set_xlabel('[Jahr-Monat]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_load_bulk_samples_trace.png"
     path_fig = base_path_figs / file_str
@@ -326,7 +326,7 @@ def main(tmp_dir):
         axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
         axs[i].set_ylabel('[mg/14 days]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('Time [year-month]')
+    axs[-1].set_xlabel('[Jahr-Monat]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_load_bulk_samples.png"
     path_fig = base_path_figs / file_str
@@ -391,7 +391,7 @@ def main(tmp_dir):
         axs[i].set_ylim(0,)
         axs[i].set_ylabel('[mg]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('Time [year-month]')
+    axs[-1].set_xlabel('[Jahr-Monat]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_load_bulk_samples_cumulated_trace.png"
     path_fig = base_path_figs / file_str
@@ -433,10 +433,10 @@ def main(tmp_dir):
             only_use_cftime_datetimes=False,
         )
         ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
-        obs_vals = ds_obs["NO3_PERC"].isel(x=0, y=0).values
+        obs_vals = ds_obs["NO3_PERC"].isel(x=0, y=0).values * 4.43
         df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
         df_obs.loc[:, "obs"] = obs_vals
-        sim_vals = ds_sim["C_q_ss_bs"].isel(y=0).values[idx_best100, :].T
+        sim_vals = ds_sim["C_q_ss_bs"].isel(y=0).values[idx_best100, :].T * 4.43
         # join observations on simulations
         df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
         df_eval = df_eval.loc["2011-01-01":"2015-12-31", :]
@@ -451,12 +451,12 @@ def main(tmp_dir):
         for j in range(100):
             sim_vals = df_eval.loc[:, f"sim{j}"].values.astype(onp.float64)
             axs[i].plot(df_eval.index, sim_vals, color=col, zorder=1, marker=".")
-        axs[i].plot(df_eval.index, df_eval["obs"].cumsum(), color="blue", marker=".")
+        axs[i].plot(df_eval.index, df_eval["obs"], color="blue", marker=".")
         axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
         axs[i].set_ylim(0,)
         axs[i].set_ylabel('[mg/l]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('Time [year-month]')
+    axs[-1].set_xlabel('[Jahr-Monat]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_conc_bulk_samples_trace.png"
     path_fig = base_path_figs / file_str
@@ -520,7 +520,7 @@ def main(tmp_dir):
         axs[i].set_ylim(0, 70)
         axs[i].set_ylabel('[mg/l]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('Time [year-month]')
+    axs[-1].set_xlabel('[Jahr-Monat]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_conc_bulk_samples_trace_.png"
     path_fig = base_path_figs / file_str
@@ -586,7 +586,7 @@ def main(tmp_dir):
         axs[i].set_ylim(0, 12000)
         axs[i].set_ylabel('[mg]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('Time [year-month]')
+    axs[-1].set_xlabel('[Jahr-Monat]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_load_bulk_samples_cumulated.png"
     path_fig = base_path_figs / file_str
@@ -652,7 +652,7 @@ def main(tmp_dir):
         axs[i].set_ylim(0, 100)
         axs[i].set_ylabel('[mg/l]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('Time [year-month]')
+    axs[-1].set_xlabel('[Jahr-Monat]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_conc_bulk_samples_.png"
     path_fig = base_path_figs / file_str
@@ -718,7 +718,7 @@ def main(tmp_dir):
         axs[i].set_ylim(0, 100)
         axs[i].set_ylabel('[mg/l]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('Time [year-month]')
+    axs[-1].set_xlabel('[Jahr-Monat]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_conc_bulk_samples.png"
     path_fig = base_path_figs / file_str
@@ -784,7 +784,7 @@ def main(tmp_dir):
         axs[i].set_ylim(0, 2500)
         axs[i].set_ylabel('[mg]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('Time [year-month]')
+    axs[-1].set_xlabel('[Jahr-Monat]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_load_bulk_samples_cumulated_2015.png"
     path_fig = base_path_figs / file_str
@@ -850,7 +850,7 @@ def main(tmp_dir):
         axs[i].set_ylim(0, 100)
         axs[i].set_ylabel('[mg/l]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('Time [year-month]')
+    axs[-1].set_xlabel('[Jahr-Monat]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_conc_bulk_samples_2015.png"
     path_fig = base_path_figs / file_str
