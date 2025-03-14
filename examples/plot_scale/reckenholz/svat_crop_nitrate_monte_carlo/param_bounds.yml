@@ -1,21 +1,21 @@
 complete-mixing:
   alpha_transp:
   - 0.2
-  - 1.5
+  - 5
   alpha_q:
-  - 0.2
-  - 1
+  - 0.01
+  - 0.8
   km_denit:
   - 1
   - 20
   dmax_denit:
-  - 1
+  - 10
   - 100
   km_nit:
   - 1
   - 20
   dmax_nit:
-  - 1
+  - 10
   - 100
   kmin:
   - 1
@@ -25,10 +25,10 @@ complete-mixing:
 advection-dispersion-power:
   alpha_transp:
   - 0.2
-  - 1.5
+  - 5
   alpha_q:
-  - 0.2
-  - 1
+  - 0.01
+  - 0.8
   km_denit:
   - 1
   - 20
@@ -51,26 +51,26 @@ advection-dispersion-power:
   # SAS parameter of percolation from root zone
   k_q:
   - 1
-  - 5
+  - 10
 
 time-variant_advection-dispersion-power:
   alpha_transp:
   - 0.2
-  - 1.5
+  - 5
   alpha_q:
-  - 0.2
-  - 1
+  - 0.01
+  - 0.8
   km_denit:
   - 1
   - 20
   dmax_denit:
-  - 1
+  - 10
   - 100
   km_nit:
   - 1
   - 20
   dmax_nit:
-  - 1
+  - 10
   - 100
   kmin:
   - 1

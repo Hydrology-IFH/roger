@@ -71,6 +71,12 @@ def main(crop_rotation_scenario, tmp_dir):
                 var_obj = infile.variables["Time"]
                 return len(onp.array(var_obj))
 
+        def _get_nx(self, path_dir, file):
+            nc_file = path_dir / file
+            with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
+                var_obj = infile.variables["x"]
+                return len(onp.array(var_obj))
+
         def _get_runlen(self, path_dir, file):
             nc_file = path_dir / file
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
@@ -88,7 +94,8 @@ def main(crop_rotation_scenario, tmp_dir):
             settings = state.settings
             settings.identifier = f"SVATCROP_{crop_rotation_scenario}"
 
-            settings.nx, settings.ny = 3, 1
+            settings.nx = self._get_nx(self._base_path.parent, "parameters.nc")
+            settings.ny = 1
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
             settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, "forcing.nc"))
 
@@ -195,24 +202,24 @@ def main(crop_rotation_scenario, tmp_dir):
 
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 0])
             vs.z_soil = update(
-                vs.z_soil, at[2:-2, 2:-2], self._read_var_from_nc("z_soil", self._base_path, "parameters.nc")
+                vs.z_soil, at[2:-2, 2:-2], self._read_var_from_nc("z_soil", self._base_path.parent, "parameters.nc")
             )
             vs.dmpv = update(
-                vs.dmpv, at[2:-2, 2:-2], self._read_var_from_nc("dmpv", self._base_path, "parameters.nc")
+                vs.dmpv, at[2:-2, 2:-2], self._read_var_from_nc("dmpv", self._base_path.parent, "parameters.nc")
             )
             vs.lmpv = update(
-                vs.lmpv, at[2:-2, 2:-2], self._read_var_from_nc("lmpv", self._base_path, "parameters.nc")
+                vs.lmpv, at[2:-2, 2:-2], self._read_var_from_nc("lmpv", self._base_path.parent, "parameters.nc")
             )
             vs.theta_ac = update(
-                vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_nc("theta_ac", self._base_path, "parameters.nc")
+                vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_nc("theta_ac", self._base_path.parent, "parameters.nc")
             )
             vs.theta_ufc = update(
-                vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_nc("theta_ufc", self._base_path, "parameters.nc")
+                vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_nc("theta_ufc", self._base_path.parent, "parameters.nc")
             )
             vs.theta_pwp = update(
-                vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_nc("theta_pwp", self._base_path, "parameters.nc")
+                vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_nc("theta_pwp", self._base_path.parent, "parameters.nc")
             )
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path, "parameters.nc"))
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path.parent, "parameters.nc"))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
 
             vs.root_growth_scale = update(

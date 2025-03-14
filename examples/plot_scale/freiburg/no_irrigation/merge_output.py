@@ -8,6 +8,7 @@ from cftime import num2date
 import pandas as pd
 import click
 import roger
+import yaml
 
 
 @click.command("main")
@@ -15,34 +16,12 @@ def main():
     base_path = Path(__file__).parent.parent
     dir_name = os.path.basename(str(Path(__file__).parent))
 
+    # load the configuration file
+    with open(base_path.parent / "config.yml", "r") as file:
+        config = yaml.safe_load(file)
+
     # identifiers of simulations
-    crop_rotation_scenarios = ["winter-wheat_clover",
-                               "winter-wheat_silage-corn",
-                               "summer-wheat_winter-wheat",
-                               "summer-wheat_clover_winter-wheat",
-                               "winter-wheat_clover_silage-corn",
-                               "winter-wheat_sugar-beet_silage-corn",
-                               "summer-wheat_winter-wheat_silage-corn",
-                               "summer-wheat_winter-wheat_winter-rape",
-                               "winter-wheat_winter-rape",
-                               "winter-wheat_soybean_winter-rape",
-                               "sugar-beet_winter-wheat_winter-barley", 
-                               "grain-corn_winter-wheat_winter-rape", 
-                               "grain-corn_winter-wheat_winter-barley",
-                               "grain-corn_winter-wheat_clover",
-                               "winter-wheat_silage-corn_yellow-mustard",
-                               "summer-wheat_winter-wheat_yellow-mustard",
-                               "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
-                               "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
-                               "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
-                               "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
-                               "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                               "grain-corn_winter-wheat_winter-barley_yellow-mustard",
-                               "miscanthus",
-                               "bare-grass"]
-    crop_rotation_scenarios = ["grain-corn_winter-wheat_winter-rape", 
-                               "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                               ]
+    crop_rotation_scenarios = config["crop_rotation_scenarios"]
     # merge model output into single file
     for crop_rotation_scenario in crop_rotation_scenarios:
         crop_rotation_scenario1 = crop_rotation_scenario.replace("-", " ").replace("_", ", ")

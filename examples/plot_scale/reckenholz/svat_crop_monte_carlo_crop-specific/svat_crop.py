@@ -198,7 +198,7 @@ def main(lys_experiment, tmp_dir):
             if (vs.month[vs.tau] != vs.month[vs.taum1]) & (vs.itt > 1):
                 vs.update(calc_parameters_surface_kernel(state))
 
-            crop_types = [563, 557, 559, 560, 539, 556, 563, 564] 
+            crop_types = [563, 557, 559, 560, 539, 556, 564] 
 
             for crop_type in crop_types:
                 if (vs.lu_id[2:-2, 2:-2] == crop_type).all():

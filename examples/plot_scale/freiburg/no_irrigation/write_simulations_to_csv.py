@@ -13,9 +13,9 @@ def main():
     dir_name = os.path.basename(str(Path(__file__).parent))
 
     # load the parameters
-    file = base_path / "parameters.csv"
+    file = base_path.parent / "parameters.csv"
     df_parameters = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
-    file = base_path / "crop_water_stress.csv"
+    file = base_path.parent / "crop_water_stress.csv"
     df_crop_water_stress = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
     df_crop_water_stress["crop_type"] = df_crop_water_stress.index
     df_crop_water_stress.index = df_crop_water_stress.loc[:, "lu_id"]
@@ -58,7 +58,7 @@ def main():
     crop_rotation_scenarios = ["grain-corn_winter-wheat_winter-rape", 
                                "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
                                ]
-    soil_types = ["sandy_soil", "silty_soil", "clayey_soil"]
+    soil_types = df_parameters.index.to_list()
     for irrigation_demand_scenario in irrigation_demand_scenarios:
         if irrigation_demand_scenario == "35-ufc":
             c_irr = 0.35

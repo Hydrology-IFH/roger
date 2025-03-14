@@ -28,5 +28,5 @@ c_root:
 - 1.3
 # scale parameter of crop canopy growth (-)
 c_canopy:
-- 0.8
-- 2.0
+- 1.1
+- 1.5

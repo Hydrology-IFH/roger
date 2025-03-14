@@ -1,15 +1,22 @@
 # Crop irrigation management at district level of Freiburg, Germany
 
+This modelling experiment investigates the impact of crop irrigation on groundwater recharge and nitrate leaching. The impact is systematically investigated using a combination of soil types, irrigation demand rules and crop rotation scenarios.
+
 - `figures/`: contains figures
-- `output/`: contains the simulations
+- `output/`: contains the simulations of RoGeR
 - `input/`: contains meteorological data (`PREC.txt`, `PET.txt`, `TA.txt`) of the DWD station Freiburg and the defined crop rotations (`crop_rotation_scenarios/`) from 2000 to 2024
+- `crop_water_stress.csv`: contains fraction of usable field capacity when crop water stress starts. IMPORTANT: Do not modify the file.
+- `parameters.csv`: contains the soil hydraulic parameters of RoGeR for three different soil types (z_soil: soil depth in mm; dmpv: density of vertical macropores in 1/$m^2$; lmpv: length of vertical macropores in mm; theta_ac: air capacity in -; theta_ufc: usable field capacity in -; theta_pwp: permanent wilting point in -; ks: saturated hydraulic conductivity in mm/h; kf: hydraulic conductivity of bedrock in mm/h; soil_fertility: soil fertility; clay: clay content in -)
+- `config.yml`: configuration file. Irrigation rules and crop rotation scenarios should be defined from the list below.
 
 Available soil types:
 - sandy soil type
 - silty soil type
 - clayey soil type
+- Further soil types can be added to `parameters.csv`
 
-Available irrigation rules:
+Available irrigation demand rules:
+- no_irrigation: No irrigation is applied
 - 30-ufc: Irrigation demand is calculated if soil water content is less than 30% of usable field capacity
 - 45-ufc: Irrigation demand is calculated if soil water content is less than 45% of usable field capacity
 - 50-ufc: Irrigation demand is calculated if soil water content is less than 50% of usable field capacity
@@ -50,24 +57,25 @@ No irrigation is applied i.e. irrigation demand is calculated without irrigation
 - `write_simulations_to_csv.py`: Writes simulations to *.csv-file
 - `write_job_script.py`: Writes shell script to generate the simulations for the available soil types, irrigation scenarios and crop roations
 - `run_roger.sh`: Runs the RoGeR model to generate the simulations
-- `parameters.csv`: contains the soil hydraulic paramters of RoGeR for three different soil types (z_soil: soil depth in mm; dmpv: density of vertical macropores in 1/$m^2$; lmpv: length of vertical macropores in mm; theta_ac: air capacity in -; theta_ufc: usable field capacity in -; theta_pwp: permanent wilting point in -; ks: saturated hydraulic conductivity in mm/h; kf: hydraulic conductivity of bedrock in mm/h; soil_fertility: soil fertility; clay: clay content in -)
 
 ### irrigation
-Irrigation is applied according to five irrigation rules
+30 mm per day are irrigated according to five irrigation demand rules.
 
 - `svat_crop.py`: Setup of the RoGeR model
 - `merge_output.py`: Merges the model output into a single *.nc-file
 - `write_simulations_to_csv.py`: Writes simulations to *.csv-file
 - `write_job_script.py`: Writes shell script to generate the simulations for the available soil types, irrigation scenarios and crop roations
 - `run_roger.sh`: Runs the RoGeR model to generate the simulations
-- `parameters.csv`: contains the soil hydraulic paramters of RoGeR for three different soil types (z_soil: soil depth in mm; dmpv: density of vertical macropores in 1/$m^2$; lmpv: length of vertical macropores in mm; theta_ac: air capacity in -; theta_ufc: usable field capacity in -; theta_pwp: permanent wilting point in -; ks: saturated hydraulic conductivity in mm/h; kf: hydraulic conductivity of bedrock in mm/h; soil_fertility: soil fertility; clay: clay content in -)
-- `write_parameters_to_netcdf.py`: Writes soil hydraulic paramters of RoGeR to *.nc-file
 
-### no_irrigation_nitrate
-Nitrate leaching is simulated without irrigation.
+### nitrate
+Nitrate leaching is simulated with irrigation and without irrigation.
 
-### irrigation_nitrate
-Nitrate leaching is simulated with irrigation.
+- `parameters_sas_nitrate.nc`: contains the SAS and nitrate parameters of RoGeR for three different soil types
+- `svat_crop_nitrate.py`: Setup of the RoGeR-SAS model to simulate the nitrate transport 
+- `merge_output.py`: Merges the model output into a single *.nc-file
+- `write_simulations_to_csv.py`: Writes simulations to *.csv-file
+- `write_job_script.py`: Writes shell script to generate the simulations for the available soil types, irrigation scenarios and crop roations
+- `run_roger.sh`: Runs the RoGeR model to generate the simulations
 
 ## Workflow
 ! Windows user may change from `/` to `\` in the provided *.sh-files. Please check beforehand. !
@@ -75,5 +83,9 @@ Nitrate leaching is simulated with irrigation.
 1. Install RoGeR and the required Python libraries using Anaconda
 2. After successfull installation activate the conda environment `roger`
 3. Open the terminal and move to the directory
-4. Run `./run_roger.sh`
-5. Simulations will be saved to the `output/` directory
+4. Define the model parameters in `parameters.csv`
+5. Run `python write_parameters_to_netcdf.py` to write `parameters.csv` to NetCDF format
+6. Run `./run_roger.sh`
+7. Simulations will be saved to the `output/` directory
+8. Run `./run_roger_nitrate.sh`
+9. Simulations will be saved to the `output/` directory

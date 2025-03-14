@@ -45,7 +45,7 @@ def main():
                             ]
     crop_rotation_scenarios = ["grain-corn_winter-wheat_winter-rape"
                                ]
-    soil_types = ["sandy_soil", "silty_soil", "clayey_soil"]
+    soil_types = ["sandy_soil_type", "silty_soil_type", "clayey_soil_type"]
     for irrigation_scenario in irrigation_scenarios:
         dict_data["no_irrigation"][irrigation_scenario] = {}
         for crop_rotation_scenario in crop_rotation_scenarios:
@@ -103,7 +103,7 @@ def main():
             # fig.savefig(file, dpi=300)
 
             fig, axs = plt.subplots(1, 1, figsize=(6, 2.5))
-            soil_type = "silty_soil"
+            soil_type = "silty_soil_type"
             data = dict_data["no_irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc["2003-03-01":"2003-07-30" , :]
             axs.plot(data.index, data["canopy_cover"], color="red")
             data = dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc["2003-04-01":"2003-07-30" , :]
@@ -119,7 +119,7 @@ def main():
             fig.savefig(file, dpi=300)
 
             fig, axs = plt.subplots(1, 1, figsize=(6, 2.5))
-            soil_type = "silty_soil"
+            soil_type = "silty_soil_type"
             data = dict_data["no_irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc["2003-03-01":"2003-07-30" , :]
             axs.plot(data.index, (data["z_root"]/1000), color="red")
             data = dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc["2003-04-01":"2003-07-30" , :]
@@ -137,7 +137,7 @@ def main():
             fig.savefig(file, dpi=300)
 
             fig, axs = plt.subplots(1, 1, figsize=(6, 2.5))
-            soil_type = "silty_soil"
+            soil_type = "silty_soil_type"
             data = dict_data["no_irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc["2003-03-01":"2003-07-30" , :]
             axs.plot(data.index, data["irrigation_demand"], color="red")
             axs.set_ylim(0, )
@@ -151,7 +151,7 @@ def main():
             fig.savefig(file, dpi=300)
 
             fig, axs = plt.subplots(1, 1, figsize=(6, 2.5))
-            soil_type = "silty_soil"
+            soil_type = "silty_soil_type"
             data = dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc["2003-03-01":"2003-07-30" , :]
             axs.plot(data.index, data["irrig"], color="blue")
             axs.set_ylim(0, )
